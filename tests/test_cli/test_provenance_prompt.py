@@ -48,7 +48,8 @@ class TestProvenancePromptFlag(unittest.TestCase):
         core_dir = concat / f"{self.method}_core" / self.label
         full_dir.mkdir(parents=True)
         core_dir.mkdir(parents=True)
-        # marker the repo-root guard (#672) requires; the scratch root
+        # marker the old repo-root guard (#672) required; kept since #1301
+        # narrowed the guard, so the scratch root
         # stands in for the repo by design in these tests
         (self.root / "src" / "data_sheets_schema").mkdir(parents=True, exist_ok=True)
 
@@ -163,7 +164,8 @@ class TestTheRequestIsRecordedNotJustTheFile(unittest.TestCase):
         concat = self.root / "data" / "d4d_concatenated"
         (concat / self.method / self.label).mkdir(parents=True)
         (concat / f"{self.method}_core" / self.label).mkdir(parents=True)
-        # marker the repo-root guard (#672) requires; the scratch root
+        # marker the old repo-root guard (#672) required; kept since #1301
+        # narrowed the guard, so the scratch root
         # stands in for the repo by design in these tests
         (self.root / "src" / "data_sheets_schema").mkdir(parents=True, exist_ok=True)
         body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})

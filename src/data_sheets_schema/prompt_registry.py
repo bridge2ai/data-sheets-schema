@@ -74,9 +74,10 @@ def body_sha256_of(path: Path) -> str | None:
     the whole-file hash stays the only check — which is correct, because for
     them every byte is sent.
     """
-    if not path or not Path(path).exists():
+    from data_sheets_schema.resources import resource_path
+    if not path or not resource_path(path).exists():
         return None
-    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    text = resource_path(path).read_text(encoding="utf-8", errors="replace")
     if "## Prompt body" not in text:
         return None
     body = text.split("## Prompt body", 1)[1].strip()
@@ -84,10 +85,11 @@ def body_sha256_of(path: Path) -> str | None:
 
 
 def sha256_of(path: Path) -> str | None:
-    if not path or not Path(path).exists():
+    from data_sheets_schema.resources import resource_path
+    if not path or not resource_path(path).exists():
         return None
     h = hashlib.sha256()
-    with Path(path).open("rb") as fh:
+    with resource_path(path).open("rb") as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
@@ -101,13 +103,8 @@ def normalise(path: str | Path) -> str:
     simpler and wrong — two files can share a name, and the pin would then
     vouch for the wrong one.
     """
-    p = Path(path)
-    if p.is_absolute():
-        try:
-            p = p.relative_to(Path.cwd())
-        except ValueError:
-            return p.as_posix()
-    return p.as_posix()
+    from data_sheets_schema.resources import repo_relative
+    return repo_relative(path)        # anchored to the checkout or install, then cwd (#1301)
 
 
 #: Parsed registries, keyed on (path, mtime_ns, size) — see `load` (#439).
@@ -135,7 +132,8 @@ def load(registry: Path = REGISTRY) -> dict[str, Any]:
     A copy is returned. Callers that mutated the result would otherwise be
     editing every later caller's view of the file.
     """
-    path = Path(registry)
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(registry)
     try:
         stat = path.stat()
     except OSError:
@@ -238,9 +236,12 @@ def prompt_files() -> list[Path]:
     from data_sheets_schema.api_runner import (COMPONENTS, CONDITION_PROMPTS,
                                                TUNED_PROMPT)
 
+    from data_sheets_schema.resources import resource_path
     files = set(CONDITION_PROMPTS.values()) | {TUNED_PROMPT}
-    if COMPONENTS.is_dir():
-        files |= {p for p in COMPONENTS.glob("*.md") if p.name != "README.md"}
+    components = resource_path(COMPONENTS)          # from any directory (#1480)
+    if components.is_dir():
+        # Keyed by the logical relative spelling, read where they are.
+        files |= {COMPONENTS / p.name for p in components.glob("*.md") if p.name != "README.md"}
     return sorted(files, key=lambda p: p.as_posix())
 
 
@@ -255,18 +256,20 @@ def check_disk(paths: list[Path] | None = None,
     return rows
 
 
-def _git(*args: str) -> str | None:
-    """Run a git command, or None if git cannot answer (not a repo, no git)."""
+def _git(*args: str, cwd: Path | None = None) -> str | None:
+    """Run a git command at `cwd` — the pinned file's directory, never the
+    working directory, which may be another repository (#1499) — or None if
+    git cannot answer (not a repo, no git)."""
     try:
         out = subprocess.run(["git", *args], capture_output=True, text=True,
-                             timeout=10)
+                             timeout=10, cwd=str(cwd) if cwd else None)
     except (OSError, subprocess.SubprocessError):
         return None
     return out.stdout if out.returncode == 0 else None
 
 
-def _head_commit() -> str | None:
-    out = _git("rev-parse", "HEAD")
+def _head_commit(at: Path | None = None) -> str | None:
+    out = _git("rev-parse", "HEAD", cwd=at)
     return (out or "").strip() or None
 
 
@@ -278,7 +281,8 @@ def _is_dirty(path: Path) -> bool:
     commit that hashes to something else, and produce the wrong answer for
     exactly the case the registry exists to catch (#438).
     """
-    out = _git("status", "--porcelain", "--", str(path))
+    p = Path(path)
+    out = _git("status", "--porcelain", "--", p.name, cwd=p.parent if p.parent != Path("") else None)
     return bool((out or "").strip())
 
 
@@ -297,7 +301,17 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     """
     if not reason or not reason.strip():
         raise ValueError("a pin needs a reason — see the docstring")
-    p = Path(path)
+    from data_sheets_schema.resources import resource_path
+    p = resource_path(path)
+    target = resource_path(registry)
+    if target != Path(registry):
+        # Resolution fell through to the checkout's or the installed
+        # registry: a shared canonical declaration is never an implicit
+        # write target from a directory that has none (#1484).
+        raise ValueError(
+            f"the registry {registry} is not in the working tree ({target} would be written); "
+            "run from the checkout root or name the registry explicitly")
+    registry = target
     sha = sha256_of(p)
     if sha is None:
         raise FileNotFoundError(f"{p} is not on disk; nothing to pin")
@@ -338,7 +352,7 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
                            "reason": prev.get("reason")})
     files[key] = {"sha256": sha, "body_sha256": body_sha256_of(p),
                   "bytes": p.stat().st_size,
-                  "pinned_on": today, "pinned_at_commit": _head_commit(),
+                  "pinned_on": today, "pinned_at_commit": _head_commit(p.parent),
                   "reason": reason.strip()}
     if superseded:
         files[key]["superseded"] = superseded

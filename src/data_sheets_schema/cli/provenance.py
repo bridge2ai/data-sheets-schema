@@ -139,7 +139,8 @@ def _CONDITIONS_FOR_RECORD() -> list[str]:
 
 
 def _require_repo_root_cwd(command: str) -> None:
-    """Refuse to record from anywhere but the repository root (#672 review).
+    """Refuse to record from a directory inside the checkout that is not its
+    root (#672 review; narrowed by #1301).
 
     #659's resolution fix turned an outside-the-root recorder from a loud
     FileNotFoundError into a quietly degraded record: playbook hashes
@@ -150,14 +151,22 @@ def _require_repo_root_cwd(command: str) -> None:
     cwd-relative constants this codebase runs on make "the repo root" the
     only cwd a record can honestly be written from.
     """
-    if not (Path("data/d4d_concatenated").is_dir()
-            and Path("src/data_sheets_schema").is_dir()):
-        raise click.ClickException(
-            f"{command} must run from the data-sheets-schema repository root: "
-            "the playbook hashes, manifest, schemas and output paths all "
-            "resolve relative to it, and a record written from elsewhere "
-            "would attest the wrong inputs or none. cd to the repo root and "
-            "re-run.")
+    # Since #1301 the playbooks, schemas and prompts resolve from any
+    # directory, and the record is written into the caller's own tree —
+    # which is right for a user of the installed package and wrong for a
+    # shell that wandered into a subdirectory of the checkout: that record
+    # would land under <subdir>/data/ where no check reads it. Refuse
+    # exactly that case.
+    from data_sheets_schema.resources import CHECKOUT_ROOT
+    cwd = Path.cwd().resolve()
+    if CHECKOUT_ROOT is not None:
+        root = CHECKOUT_ROOT.resolve()
+        if cwd != root and root in cwd.parents:
+            raise click.ClickException(
+                f"{command} must run from the data-sheets-schema repository root, "
+                f"not a directory inside it: output paths resolve relative to the "
+                f"working directory, and a record written from {cwd} would land "
+                "where no check reads it. cd to the repo root and re-run.")
 
 
 def _parse_phases(specs) -> list[dict]:

@@ -705,7 +705,8 @@ class RunSpec:
 
 
 def prompt_body(path: Path = GENERIC_PROMPT) -> str:
-    text = path.read_text(encoding="utf-8")
+    from data_sheets_schema.resources import resource_path
+    text = resource_path(path).read_text(encoding="utf-8")
     if "## Prompt body" not in text:
         raise ValueError(f"{path} has no '## Prompt body' section")
     return text.split("## Prompt body", 1)[1].strip()
@@ -887,7 +888,8 @@ def resolve_prompt(spec: RunSpec) -> str:
     body = re.sub(r"(?m)^(\s*#\s*Generated:).*$", rf"\1 {spec.run_date}", body)
 
     if spec.condition == "tuned":
-        comp = COMPONENTS / f"{spec.project}.md"
+        from data_sheets_schema.resources import resource_path
+        comp = resource_path(COMPONENTS / f"{spec.project}.md")
         block = comp.read_text(encoding="utf-8") if comp.exists() else ""
         body = body.replace(
             "# Mode: four-phase project agent, generic prompt",
@@ -2274,7 +2276,8 @@ def _enum_aliases() -> dict[str, dict[str, str]]:
     generation emits, because they are what the vocabulary is called elsewhere.
     """
     from data_sheets_schema.schema_cache import load_schema
-    schema = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+    from data_sheets_schema.resources import resource_path
+    schema = resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
     if not schema.exists():
         return {}
     doc = load_schema(schema) or {}                  # one parse per process (#1203)
@@ -2592,6 +2595,14 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
+def _validator_did_not_run(text: str) -> bool:
+    """A traceback, a missing module or a usage error is the validator failing
+    to start, not a finding about the record (#1506); handed to a repair
+    round as findings it would be repaired against."""
+    return any(marker in text for marker in ("Traceback (most recent call last)", "No module named",
+                                             "Usage: linkml-validate", "does not exist."))
+
+
 def _validator_lines(path: Path, schema: str,
                      cls: str) -> tuple[list[str] | None, str | None]:
     """(findings, failure): every validator finding, one per line.
@@ -2601,16 +2612,20 @@ def _validator_lines(path: Path, schema: str,
     record that could not be checked is not a record that passed, and a
     repair attempted against a broken validator would be flying blind.
     """
+    from data_sheets_schema.resources import linkml_validate, resource_path
     try:
         r = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
+            [*linkml_validate(), "-s", str(resource_path(schema)), "-C", cls,
              str(path)],
             capture_output=True, text=True, timeout=180)
     except Exception as exc:                           # noqa: BLE001
         return None, str(exc)
     if r.returncode == 0:
         return [], None
-    lines = [l for l in (r.stdout + r.stderr).strip().splitlines()
+    text = r.stdout + r.stderr
+    if _validator_did_not_run(text):
+        return None, f"linkml-validate did not run: {text.strip()[-300:]}"
+    lines = [l for l in text.strip().splitlines()
              if l.strip()]
     return lines, None
 

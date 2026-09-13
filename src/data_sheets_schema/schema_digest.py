@@ -43,10 +43,11 @@ def resolve_schema(path: Path) -> Path:
     the packaged copy sits beside this module, so resolve against it when the
     cwd-relative path does not exist.
     """
-    if path.exists():
-        return path
-    packaged = Path(__file__).resolve().parent / "schema" / path.name
-    return packaged if packaged.exists() else path
+    # `resource_path` reaches the package data itself; no second by-name
+    # fallback, so an authoritative absence is the same for every reader
+    # (#1483).
+    from data_sheets_schema.resources import resource_path
+    return resource_path(path)
 
 # Where each target class is actually defined. They are separate merged
 # artifacts; CoreDataset does not exist in the full schema.
@@ -684,7 +685,8 @@ def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
     """
     import yaml as _yaml
 
-    path = ledger or INVENTORY_LEDGER
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(ledger or INVENTORY_LEDGER)
     data = {}
     if path.exists():
         data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -698,13 +700,22 @@ def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
             added = True
     if not added:
         return False
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        "# digest -> slot inventory, appended as digests appear.\n"
-        "# Written by schema_digest.record_inventory; never edit an existing\n"
-        "# entry — it is the evidence that tells a slot a run omitted from a\n"
-        "# slot that did not yet exist (#580).\n"
-        + _yaml.safe_dump(data, sort_keys=True), encoding="utf-8")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            "# digest -> slot inventory, appended as digests appear.\n"
+            "# Written by schema_digest.record_inventory; never edit an existing\n"
+            "# entry — it is the evidence that tells a slot a run omitted from a\n"
+            "# slot that did not yet exist (#580).\n"
+            + _yaml.safe_dump(data, sort_keys=True), encoding="utf-8")
+    except OSError as exc:
+        # An installed package's ledger lives under site-packages (#1301),
+        # which may be read-only; the study's checkout is always writable.
+        # Said, not swallowed: the run continues, the entry is not recorded,
+        # and `slot_existed_at` for this digest answers None until it is.
+        import warnings
+        warnings.warn(f"digest inventory not recorded at {path}: {exc}", RuntimeWarning, stacklevel=2)
+        return False
     return True
 
 
@@ -713,7 +724,8 @@ def slot_existed_at(digest: str, class_name: str, slot: str,
     """Did `slot` exist in `class_name` at `digest`? None when unrecorded."""
     import yaml as _yaml
 
-    path = ledger or INVENTORY_LEDGER
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(ledger or INVENTORY_LEDGER)
     if not path.exists():
         return None
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}

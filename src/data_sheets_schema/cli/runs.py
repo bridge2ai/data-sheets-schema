@@ -60,8 +60,9 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
                    f"out={r['total_output_tokens']:,} "
                    f"~${r['approx_cost_usd']:.2f} timing={r['timing_basis']}")
     if do_validate:
+        from data_sheets_schema.resources import linkml_validate, resource_path
         res = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", str(SCHEMA_PATH),
+            [*linkml_validate(), "-s", str(resource_path(SCHEMA_PATH)),
              "-C", "RunTelemetryReport", str(out)],
             capture_output=True, text=True, timeout=180)
         if res.returncode != 0:
@@ -293,8 +294,9 @@ def trap_inventory_cmd(output, do_validate):
         click.echo(f"   {t['occurrence_count']:>4}x {t['error_class']:18} "
                    f"{t['slot_path']}")
     if do_validate:
+        from data_sheets_schema.resources import linkml_validate, resource_path
         res = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", str(SCHEMA_PATH),
+            [*linkml_validate(), "-s", str(resource_path(SCHEMA_PATH)),
              "-C", "TrapSlotInventoryReport", str(out)],
             capture_output=True, text=True, timeout=180)
         if res.returncode != 0:
@@ -1367,9 +1369,11 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
 
 def _validates_one(record: Path, schema: str, cls: str) -> bool:
     import subprocess
+
+    from data_sheets_schema.resources import linkml_validate, resource_path
     try:
         return subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
+            [*linkml_validate(), "-s", str(resource_path(schema)), "-C", cls,
              str(record)], capture_output=True, text=True,
             timeout=300).returncode == 0
     except Exception:                                   # noqa: BLE001

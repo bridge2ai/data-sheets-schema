@@ -176,7 +176,8 @@ def normalize(project, packages_dir):
         click.echo(f"No crate packages found under {root}", err=True)
         sys.exit(1)
 
-    sv = SchemaView(str(FULL_SCHEMA))
+    from data_sheets_schema.resources import resource_path
+    sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
     failures = 0
     for name in targets:
         click.echo(f"\n📦 {name}")
@@ -314,7 +315,8 @@ def map_cmd(project, packages_dir):
         click.echo(f"No crates with ro-crate-metadata.json under {root}", err=True)
         sys.exit(1)
 
-    sv = SchemaView(str(FULL_SCHEMA))
+    from data_sheets_schema.resources import resource_path
+    sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
     rows = load_mapping()
     click.echo(f"Mapping table: {len(rows)} rows")
     failures = 0

@@ -386,8 +386,9 @@ def reduce_metadata(metadata: dict, res: Result, threshold: int = 10) -> dict:
 # --------------------------------------------------------------------------
 
 def validate_d4d(path: Path) -> str:
+    from data_sheets_schema.resources import linkml_validate, resource_path
     proc = subprocess.run(
-        ["poetry", "run", "linkml-validate", "-s", str(FULL_SCHEMA),
+        [*linkml_validate(), "-s", str(resource_path(FULL_SCHEMA)),
          "-C", TARGET_CLASS, str(path)],
         capture_output=True, text=True,
     )

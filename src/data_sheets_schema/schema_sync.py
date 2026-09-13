@@ -129,8 +129,13 @@ def _source_state(source: Path) -> tuple:
 
 
 def _regenerate(source: Path, target: Path,
-                marker: bool, *, snapshot: tuple | None = None) -> tuple[bool, str | None]:
-    """Run the same generation the Makefile runs. (ok, why not)"""
+                marker: bool, *, snapshot: tuple | None = None,
+                name: str | None = None) -> tuple[bool, str | None]:
+    """Run the same generation the Makefile runs. (ok, why not)
+
+    `name` is the logical source spelling written as `source_file:` —
+    the repository-relative one the committed artifact carries — when
+    `source` is a resolved absolute read path (#1478)."""
     state, files = _source_snapshot(source) if snapshot is None else snapshot
     key = (state, marker)
     cached = _REBUILT.get(key)
@@ -194,7 +199,7 @@ def _regenerate(source: Path, target: Path,
     content = target.read_text(encoding="utf-8")
     source_line = re.search(r"(?ms)^source_file:.*?(?=^\S|\Z)", content)
     if source_line and yaml.safe_load(source_line.group()).get("source_file") == str(captured_source):
-        named = yaml.safe_dump({"source_file": str(source)}, sort_keys=False, allow_unicode=True)
+        named = yaml.safe_dump({"source_file": name or str(source)}, sort_keys=False, allow_unicode=True)
         content = content[:source_line.start()] + named + content[source_line.end():]
     target.write_text(("---\n" if marker else "") + content, encoding="utf-8")
     _REBUILT[key] = target.read_bytes()
@@ -254,6 +259,9 @@ def check_one(merged: Path, source: Path, class_name: str,
 
     out: dict[str, Any] = {"merged": str(merged), "source": str(source),
                            "class": class_name}
+    from data_sheets_schema.resources import resource_path
+    logical_source = str(source)          # what the artifact names (#1478)
+    merged, source = resource_path(merged), resource_path(source)   # from any directory (#1301)
     if not source.exists():
         return {**out, "status": UNCHECKED,
                 "reason": f"source schema {source} is not on disk"}
@@ -273,7 +281,8 @@ def check_one(merged: Path, source: Path, class_name: str,
             vocabulary = Path(tmp) / "vocabulary" / schema_digest.VOCABULARY_PIN.name
             vocabulary.parent.mkdir()
             vocabulary.write_bytes(vocabulary_bytes)
-            ok, why = _regenerate(source, rebuilt, marker, snapshot=source_snapshot)
+            ok, why = _regenerate(source, rebuilt, marker, snapshot=source_snapshot,
+                                  name=logical_source)
             if not ok:
                 return {**out, "status": UNCHECKED, "reason": why}
             same = rebuilt.read_bytes() == merged_bytes

@@ -233,6 +233,11 @@ gen-project: $(PYMODEL) $(SOURCE_SCHEMA_ALL)
 
 test: test-schema test-python test-examples
 
+# The release canary (#1301): builds the wheel, installs it into a fresh
+# virtual environment and generates from a directory that is no checkout.
+test-install:
+	D4D_INSTALL_TESTS=1 $(RUN) pytest tests/test_installed_wheel.py -q
+
 # Test the schema - use the full materialized version
 test-schema: $(SOURCE_SCHEMA_ALL)
 	$(RUN) gen-project ${GEN_PARGS} -d tmp $(SOURCE_SCHEMA_ALL)
