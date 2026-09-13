@@ -47,6 +47,7 @@ opening words — enough to find it in its section, never enough to answer.
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -106,7 +107,10 @@ class NoDiscriminatingChallenge(RuntimeError):
 
 
 def agent_path(name: str) -> Path:
-    path = AGENT_DIR / f"{name}.md"
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(Path(".claude/agents") / f"{name}.md")      # the wheel ships them (#1553)
+    # No second fallback: the resolver's answer is authoritative, and a
+    # checkout that lacks a definition lacks it (#1617, #1664).
     if not path.exists():
         raise FileNotFoundError(f"no agent definition at {path}")
     return path
@@ -143,9 +147,22 @@ def _usable(lines):
     return out
 
 
-def _git(*args) -> str:
+def _git(*args, cwd: Path | None = None) -> str:
+    from data_sheets_schema.resources import git_env, resource_root
+    root, kind = resource_root()
+    if kind != "checkout":
+        return ""
     return subprocess.run(["git", *args], capture_output=True, text=True,
-                          cwd=REPO).stdout
+                          cwd=cwd or root, env=git_env()).stdout
+
+
+
+def _history_root(path: Path) -> Path:
+    """The checkout whose git holds `path`'s history: the checkout the
+    definition was read from — the working directory's when it is one —
+    not the checkout the code was imported from (#1638)."""
+    from data_sheets_schema.resources import checkout_at
+    return checkout_at(path.resolve()) or REPO
 
 
 def _previous_text(name: str) -> str | None:
@@ -160,17 +177,39 @@ def _previous_text(name: str) -> str | None:
     moment anything else is committed, which left the mechanism inert for all
     twelve definitions.
     """
-    rel = str(agent_path(name).relative_to(REPO))
-    if _git("diff", "HEAD", "--name-only", "--", rel).strip():
-        blob = _git("show", f"HEAD:{rel}")
+    from data_sheets_schema.resources import repo_relative, resource_path, resource_root
+    root, kind = resource_root()
+    if kind != "checkout":
+        import json
+        try:
+            rows = json.loads(resource_path(".claude/agents/_preimages.json").read_text())
+            row = rows["agents"][name]
+            previous = row.get("previous_text")
+            if (rows.get("version") != 1 or row.get("current_sha256") != agent_digest(name)
+                    or not isinstance(previous, str) or not previous
+                    or hashlib.sha256(previous.encode()).hexdigest() != row.get("previous_sha256")):
+                return None
+            return previous
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            return None
+    current = agent_path(name)
+    if _history_root(current).resolve() != root.resolve():
+        return None
+    rel = repo_relative(current, cwd=False)
+    if current.resolve() != (root / rel).resolve():
+        # A staged resource outside the selected checkout has no established
+        # relationship to that checkout's version history.
+        return None
+    if _git("diff", "HEAD", "--name-only", "--", rel, cwd=root).strip():
+        blob = _git("show", f"HEAD:{rel}", cwd=root)
         return blob or None
-    commit = _git("log", "-n1", "--format=%H", "--", rel).strip()
+    commit = _git("log", "-n1", "--format=%H", "--", rel, cwd=root).strip()
     if not commit:
         return None
-    parent = _git("rev-parse", f"{commit}^").strip()
+    parent = _git("rev-parse", f"{commit}^", cwd=root).strip()
     if not parent:
         return None
-    return _git("show", f"{parent}:{rel}") or None
+    return _git("show", f"{parent}:{rel}", cwd=root) or None
 
 
 def sentences_by_section(body: str) -> list[tuple[str | None, str]]:

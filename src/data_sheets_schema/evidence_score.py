@@ -700,7 +700,7 @@ FITNESS_SYSTEM = (
 
 
 def slot_spec(slot: str, class_name: str = "Dataset",
-              schema_path: Path | None = None) -> str:
+              schema_path: Path | None = None, *, profile=None) -> str:
     """Render one slot's schema specification, for a fitness judge to read.
 
     Includes the range class's own obligations when the range is a class: a
@@ -711,7 +711,7 @@ def slot_spec(slot: str, class_name: str = "Dataset",
     from data_sheets_schema import schema_digest
 
     return _render_slot_spec(slot, schema_digest.build(class_name, schema_path),
-                             schema_digest.vocabularies())
+                             schema_digest.vocabularies(profile=profile))
 
 
 def _render_slot_spec(slot: str, digest, vocabulary: dict) -> str:
@@ -761,12 +761,16 @@ def _render_slot_spec(slot: str, digest, vocabulary: dict) -> str:
         lines.append(
             "A value of the wrong kind for its declared range is a form "
             "failure even when it reads well.")
-        # The registry vocabulary those attributes draw from (#538). Without
-        # it a judge cannot tell that a Cellosaurus cell line in
-        # `data_substrate` is the wrong *kind* of thing — it is a resolvable
-        # IRI, so every syntactic check passes it.
-        for attribute, names in sorted(nested.values_from.items()):
-            terms = schema_digest.render_values_from(names, vocabulary=vocabulary)
+        # The registry vocabulary those attributes draw from (#538), and the
+        # term sources the schema itself declares for them (#1440) — the
+        # same split the digest renders, so what the judge is told is what
+        # the model was told. Without it a judge cannot tell that a
+        # Cellosaurus cell line in `data_substrate` is the wrong *kind* of
+        # thing — it is a resolvable IRI, so every syntactic check passes it.
+        for attribute in sorted(set(nested.values_from) | set(nested.term_sources)):
+            terms = schema_digest.render_values_from(
+                nested.values_from.get(attribute, []), vocabulary=vocabulary,
+                term_sources=nested.term_sources.get(attribute))
             if terms:
                 lines.append(f"`{attribute}` must be drawn from {terms}")
     return "\n".join(lines)
@@ -779,11 +783,14 @@ class FitnessJudgement:
     reason: str = ""
 
 
-def slot_specification_snapshot(class_name: str = "Dataset", schema_path: Path | None = None) -> tuple:
-    """One captured inventory/vocabulary and both generation/complete-spec hashes."""
+def slot_specification_snapshot(class_name: str = "Dataset", schema_path: Path | None = None,
+                                *, profile=None) -> tuple:
+    """One captured inventory/vocabulary and both generation/complete-spec
+    hashes — under `profile`, else the ambient one; a judge of a record
+    passes the record's (`profiles.for_record`, #1462)."""
     from data_sheets_schema import schema_digest
     inventory = schema_digest.build(class_name, schema_path)
-    vocabulary = schema_digest.vocabularies()
+    vocabulary = schema_digest.vocabularies(profile=profile)
     schema = schema_digest.fingerprint(schema_digest.render(inventory, vocabulary=vocabulary))
     # Generation deliberately truncates some ranges; the fitness and subtype
     # judges see all of them. Key their full specifications separately (#1261).
@@ -807,11 +814,15 @@ class LLMSlotFitnessScorer:
     def __init__(self, client=None, model: str | None = None,
                  class_name: str = "Dataset", max_tokens: int = 8000,
                  log_path: Path | None = None, cache_path: Path | None = None,
-                 schema_path: Path | None = None):
+                 schema_path: Path | None = None, profile=None):
         self._client = client
         self._model = model
         self.class_name = class_name
         self.schema_path = schema_path
+        # The instrument the judged record was generated under (#1462);
+        # None means the ambient profile, right only for a fresh judgement
+        # in the same process as the generation.
+        self.profile = profile
         # Sized for the reasoning, not the answer — see LLMSlotScorer.
         self.max_tokens = max_tokens
         self.log_path = Path(log_path) if log_path else None
@@ -837,7 +848,7 @@ class LLMSlotFitnessScorer:
         return self._client, self._model
 
     def _snapshot(self) -> tuple:
-        return slot_specification_snapshot(self.class_name, self.schema_path)
+        return slot_specification_snapshot(self.class_name, self.schema_path, profile=self.profile)
 
     def _context(self, model: str, *, schema: str | None = None,
                  specification: str | None = None) -> "JudgementContext":

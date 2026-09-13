@@ -95,13 +95,19 @@ class Run:
     is_core: bool = False
     deterministic: bool = False
     legacy_revision: int | None = None
+    corpus_dir: Path | None = field(default=None, repr=False)
 
     @property
     def path(self) -> Path:
-        return CONCAT_DIR / self.method / self.label
+        return (self.corpus_dir or _corpus_dir(CONCAT_DIR)) / self.method / self.label
 
 
 _DEFAULT_CONCAT = CONCAT_DIR
+
+
+def _corpus_dir(path: Path) -> Path:
+    from data_sheets_schema.corpus import anchored
+    return anchored(path) if path == CONCAT_DIR else path
 
 
 def method_for_label(label: str, project: str | None = None,
@@ -128,6 +134,7 @@ def method_for_label(label: str, project: str | None = None,
         roots = [r for r in (globals()["CONCAT_DIR"], _pv.CONCAT_DIR) if r != _DEFAULT_CONCAT] or [_DEFAULT_CONCAT]
     else:
         roots = [concat_dir]
+    roots = [_corpus_dir(path) for path in roots]
     exact: dict[str, list[Path]] = {}
     prefix: dict[str, list[Path]] = {}
     for root in roots:
@@ -168,6 +175,7 @@ def method_for_label(label: str, project: str | None = None,
 
 def discover(concat_dir: Path = CONCAT_DIR) -> list[Run]:
     """Find every run directory on disk."""
+    concat_dir = _corpus_dir(concat_dir)
     runs: list[Run] = []
     for method_dir in sorted(p for p in concat_dir.iterdir() if p.is_dir()):
         method = method_dir.name
@@ -188,6 +196,7 @@ def discover(concat_dir: Path = CONCAT_DIR) -> list[Run]:
                         break
             runs.append(Run(
                 method=method,
+                corpus_dir=concat_dir,
                 label=label_dir.name,
                 arm=ARM_BY_METHOD.get(method, "unknown"),
                 config=m.group("config") if m else (
@@ -238,6 +247,7 @@ def slots(path: Path) -> set[str]:
 
 def record_path(method: str, label: str, project: str,
                 concat_dir: Path = CONCAT_DIR) -> Path | None:
+    concat_dir = _corpus_dir(concat_dir)
     core = method.endswith("_core")
     name = f"{project}_d4d_core.yaml" if core else f"{project}_d4d.yaml"
     p = concat_dir / method / label / name
@@ -252,6 +262,7 @@ def is_complete(method: str, label: str, project: str,
     that exists is not necessarily a finished one. Comparing mid-flight output
     silently measures an unfinished run.
     """
+    concat_dir = _corpus_dir(concat_dir)
     base = method[:-5] if method.endswith("_core") else method
     full = concat_dir / base / label / f"{project}_d4d.yaml"
     core = concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml"
@@ -310,9 +321,11 @@ def validation_status(method: str, label: str, project: str,
             # predating the sha256 unification hold md5, and refusing to read it
             # would turn every historical verdict unverifiable — the opposite of
             # what binding them to a hash was for.
-            ok = verify_entry(entry)
+            ok = verify_entry(entry, record=rec)
             if ok is False:
                 return STALE
+            if ok is None and entry.get("path") and (entry.get("sha256") or entry.get("md5")):
+                return UNVERIFIED
 
     # And a verdict is about a schema. Pinning only the artifacts let one
     # survive a schema change that would have failed it: the record was
@@ -436,6 +449,19 @@ class AmbiguousCanonical(RuntimeError):
     """A project carries a canonical mark under more than one configuration."""
 
 
+def _canonical_artifact_path(entry: dict | None, record: Path) -> str | None:
+    """Return a usable address; an unknown relative base is unavailable."""
+    from data_sheets_schema.provenance import artifact_root
+    value = (entry or {}).get("path")
+    if not value:
+        return None
+    path = Path(value)
+    if path.is_absolute():
+        return str(path)
+    owner = artifact_root(record)
+    return str(owner / path) if owner is not None else None
+
+
 def canonical_runs(concat_dir: Path | None = None,
                    config: str | None = None,
                    runtime: str | None = None) -> dict[str, dict]:
@@ -460,7 +486,7 @@ def canonical_runs(concat_dir: Path | None = None,
     # Resolved at call time, not bound as a default. A default argument freezes
     # CONCAT_DIR at import, which makes the corpus root unpatchable and the
     # function untestable against a fixture.
-    concat_dir = Path(concat_dir) if concat_dir is not None else CONCAT_DIR
+    concat_dir = _corpus_dir(Path(concat_dir) if concat_dir is not None else CONCAT_DIR)
     out: dict[str, dict] = {}
     seen: dict[str, list[str]] = {}
     for prov in sorted(concat_dir.rglob("*_provenance.yaml")):
@@ -488,8 +514,8 @@ def canonical_runs(concat_dir: Path | None = None,
             "method": run.get("method"),
             "criterion": (data["canonical"] or {}).get("criterion"),
             "candidates": len((data["canonical"] or {}).get("selected_from") or []),
-            "full": (outputs.get("full") or {}).get("path"),
-            "core": (outputs.get("core") or {}).get("path"),
+            "full": _canonical_artifact_path(outputs.get("full"), prov),
+            "core": _canonical_artifact_path(outputs.get("core"), prov),
             "provenance": str(prov),
         }
     # Refuse rather than pick. `select --execute` does not clear a previous
@@ -723,15 +749,17 @@ def check_provenance(method: str, label: str, project: str,
     # report was pinned before its closing rows were appended. The API path
     # cannot do this, because it writes provenance in-process after all phases.
     # Checking at the end of a run gives the agent path the same property.
+    from data_sheets_schema.provenance import record_path_for
+    owner_record = record if record is not None else record_path_for(project, method, label, concat_dir)
     drifted = [k for k, e in artifacts.items()
-               if isinstance(e, dict) and _verify(e) is False]
+               if isinstance(e, dict) and _verify(e, record=owner_record) is False]
     # Three outcomes, not two. `verify_entry` returns None when a file is absent
     # — unknowable is not mismatched, and conflating them would report a moved
     # file as tampering. But treating unknowable as *fine* inverts the gate: it
     # gave its strongest assurance exactly where there was least to go on, so a
     # run with no validation block, or whose artifacts were deleted, passed.
     unverifiable = [k for k, e in artifacts.items()
-                    if isinstance(e, dict) and _verify(e) is None]
+                    if isinstance(e, dict) and _verify(e, record=owner_record) is None]
     # No exemption for a caller-supplied path. The reasoning for one was that a
     # record written moments ago has no validation block yet — but `execute()`
     # writes its validation block before it calls this, so the exemption bought
@@ -806,9 +834,9 @@ def _prov(method: str, label: str, project: str,
     return data if isinstance(data, dict) else None
 
 
-def _verify(entry: dict) -> bool | None:
+def _verify(entry: dict, *, record: Path | None = None) -> bool | None:
     from data_sheets_schema.provenance import verify_entry
-    return verify_entry(entry)
+    return verify_entry(entry, record=record)
 
 
 def attestation(method: str, label: str, project: str,
@@ -1209,6 +1237,7 @@ def _prompt_files_drifted(record: dict) -> bool | None:
 
 BUNDLE_CURRENT, BUNDLE_DRIFTED = "current", "drifted"
 BUNDLE_ABSENT, BUNDLE_UNRECORDED = "absent", "unrecorded"
+BUNDLE_UNRESOLVED = "unresolved"
 
 
 def bundle_drift(method: str, label: str, project: str,
@@ -1229,7 +1258,7 @@ def bundle_drift(method: str, label: str, project: str,
     strips were correct. The defect is that the corpus absorbed a corpus-wide
     input change with no report.
 
-    Four outcomes, kept distinct because they license different actions:
+    Five outcomes, kept distinct because they license different actions:
 
     - ``current``    — the file still hashes to what the record pinned.
     - ``drifted``    — it does not. The record stays usable and stops being
@@ -1237,6 +1266,8 @@ def bundle_drift(method: str, label: str, project: str,
     - ``absent``     — the path no longer exists at all.
     - ``unrecorded`` — no ``bundle_md5``, so there is nothing to compare. A
       different claim from ``current`` and never counted as one.
+    - ``unresolved`` — a relative path has no known record owner; no caller
+      directory can establish whether its bytes match (#1750).
 
     Scope note. Callers iterating ``discover()`` see 158 runs against 162
     provenance records on disk. The four extra are the ``guarded-union``
@@ -1272,7 +1303,7 @@ def bundle_drift_detail(method: str, label: str, project: str,
     # it in, so it cannot outlive the invocation that built it.
     import hashlib
 
-    from data_sheets_schema.provenance import record_path_for
+    from data_sheets_schema.provenance import record_path_for, resolve_record_input
     path = record_path_for(project, method, label, concat_dir)
     if not path.exists():
         return BUNDLE_UNRECORDED, "no provenance record", None
@@ -1283,7 +1314,9 @@ def bundle_drift_detail(method: str, label: str, project: str,
     if not recorded or not declared:
         return BUNDLE_UNRECORDED, "no bundle hash recorded", declared
 
-    bundle = Path(declared)
+    bundle = resolve_record_input(Path(declared), path)
+    if bundle is None:
+        return BUNDLE_UNRESOLVED, f"cannot resolve {declared}: record owner is unknown", declared
     if not bundle.exists():
         return BUNDLE_ABSENT, f"{declared} does not exist", declared
 
@@ -1299,6 +1332,9 @@ def bundle_drift_detail(method: str, label: str, project: str,
 #: which reasons from condition *names*, this reads what the runs recorded.
 ARM_PROCEDURE_FIELDS = (
     ("schema digest", ("schema", "digest_md5")),
+    # Two arms under different profiles differ in the digest too, which a
+    # reader would look for in the schema; the profile names it (#1631).
+    ("profile", ("schema", "profile")),
     ("assembly digest", ("prompts", "assembly", "sha256")),
     # `run.condition` since #1094; a record that predates it reads its label
     # (`arm_facts` falls back to `condition_from_label`), which is where the
@@ -1353,13 +1389,13 @@ _NOT_ASSERTED = ("not sent", "not set", "not requested", "not applicable")
 def full_record_path(method: str, label: str, project: str,
                      concat_dir: Path = CONCAT_DIR) -> Path:
     """`{concat_dir}/{method}/{label}/{project}_d4d.yaml`."""
-    return concat_dir / method / label / f"{project}_d4d.yaml"
+    return _corpus_dir(concat_dir) / method / label / f"{project}_d4d.yaml"
 
 
 def core_record_path(method: str, label: str, project: str,
                      concat_dir: Path = CONCAT_DIR) -> Path:
     """`{concat_dir}/{method}_core/{label}/{project}_d4d_core.yaml`."""
-    return concat_dir / f"{method}_core" / label / f"{project}_d4d_core.yaml"
+    return _corpus_dir(concat_dir) / f"{method}_core" / label / f"{project}_d4d_core.yaml"
 
 
 def _same_value(said: str, recorded: Any) -> bool:
@@ -1458,7 +1494,7 @@ def arm_facts(label_prefix: str, method: str | None = None,
         except LookupError:
             method = "claudecode_agent"          # an absent arm reads as empty facts, as before
 
-    base = (concat_dir or CONCAT_DIR)
+    base = _corpus_dir(concat_dir or CONCAT_DIR)
     seen: dict[str, set] = {name: set() for name, _ in ARM_PROCEDURE_FIELDS}
     labels, projects = set(), set()
     for path in sorted(base.glob(f"{method}_core/{label_prefix}*/*_provenance.yaml")):
@@ -1658,7 +1694,7 @@ def report_claim_status(method: str, label: str, project: str,
     """
     import yaml as _yaml
 
-    from data_sheets_schema.provenance import _md5, record_path_for
+    from data_sheets_schema.provenance import record_path_for, verify_entry
     path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
     if not path.exists():
         return CLAIMS_UNRECORDED, 0
@@ -1671,8 +1707,7 @@ def report_claim_status(method: str, label: str, project: str,
     for entry in (block.get("artifacts") or {}).values():
         if not isinstance(entry, dict) or not entry.get("md5"):
             continue
-        f = Path(entry["path"])
-        if not f.exists() or _md5(f) != entry["md5"]:
+        if verify_entry(entry, record=path) is not True:
             # Distinct from `not_run`, as PAIR_STALE is: a checker that could
             # not run and a verdict about bytes that have changed are different
             # states, and the pair check already draws that line.
@@ -1715,12 +1750,11 @@ def pair_status(method: str, label: str, project: str,
     # A verdict about two files, re-checked against those files. Same reason
     # `validation_status` re-hashes: without this, editing either record leaves
     # the pair verdict asserting agreement about bytes that are gone.
-    from data_sheets_schema.provenance import _md5
+    from data_sheets_schema.provenance import verify_entry
     for entry in (block.get("artifacts") or {}).values():
         if not isinstance(entry, dict) or not entry.get("md5"):
             continue
-        f = Path(entry["path"])
-        if not f.exists() or _md5(f) != entry["md5"]:
+        if verify_entry(entry, record=path) is not True:
             return PAIR_STALE, errors
     return (PAIR_CONSISTENT if block.get("consistent") else PAIR_DIVERGENT,
             errors)
@@ -1771,7 +1805,8 @@ def playbook_drift(method: str, label: str, project: str,
         declared, recorded = entry.get("path"), entry.get(algorithm)
         if not declared or not recorded:
             continue
-        playbook = Path(declared)
+        from data_sheets_schema.resources import resource_path
+        playbook = resource_path(Path(declared))       # read from wherever it is (#1479)
         if not playbook.exists():
             # Distinguished from drift: a renamed or deleted playbook is a
             # different diagnosis from an edited one, and #431 was filed
@@ -2149,6 +2184,9 @@ def archive_runs(labels: list[str], *, reason: str,
     reconciliation report would leave a run `is_complete()` reports as unfinished
     forever.
     """
+    concat_dir = _corpus_dir(concat_dir)
+    from data_sheets_schema.corpus import anchored
+    attic = anchored(attic) if attic == ATTIC else attic
     wanted = set(projects or [])
 
     def _files_for(label_dir: Path) -> list[Path]:
@@ -2232,6 +2270,9 @@ def restore_runs(labels: list[str], *,
                  archive_name: str = "d4d_concatenated_archived",
                  dry_run: bool = True) -> dict:
     """Move archived records back into discovery — the exact inverse of archiving."""
+    concat_dir = _corpus_dir(concat_dir)
+    from data_sheets_schema.corpus import anchored
+    attic = anchored(attic) if attic == ATTIC else attic
     root = attic / archive_name
     wanted = set(projects or [])
     moved: list[tuple[Path, Path]] = []

@@ -76,6 +76,9 @@ def validate_result(result, rubric_name, project, method, contract):
         if item.get("applicable") is not rule["applicable"]:
             raise ValueError(f"{key}: applicability contradicts the declared context")
         _equal(item.get("max_score"), rule["max_score"], f"{key}.max_score")
+        # Retain the original item denominator alongside the applicability-
+        # adjusted API maximum, using the trusted contract rather than the judge.
+        item["fixed_max_score"] = rule["fixed_max_score"]
         if not rule["applicable"]:
             if item.get("score") is not None or not isinstance(item.get("na_reason"), str) or not item["na_reason"].strip():
                 raise ValueError(f"{key}: N/A requires null score and a reason")

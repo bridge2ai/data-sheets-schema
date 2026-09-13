@@ -24,8 +24,9 @@ The gap was in what this file permitted, not in what it produced.
 
 ## Task Overview
 
-Generate comprehensive D4D datasheets for all Bridge2AI projects using fresh
-project-agent contexts. The workflow is portable across Claude Code and
+Generate comprehensive D4D datasheets for every project the selected source
+manifest declares (`d4d download list-projects`), using fresh project-agent
+contexts. The workflow is portable across Claude Code and
 Codex/GPT; provider-specific execution details must not change the evidence
 boundary or output semantics.
 
@@ -33,24 +34,17 @@ boundary or output semantics.
 
 ### Concatenated Sources (for comprehensive D4Ds - RECOMMENDED)
 Location: data/preprocessed/concatenated/
-- AI_READI_preprocessed.txt (238K, 7 source files)
-- CHORUS_preprocessed.txt (35K, 4 source files)
-- CM4AI_preprocessed.txt (287K, 9 source files)
-- VOICE_preprocessed.txt (295K, 9 source files)
+- `{PROJECT}_preprocessed.txt`, one per declared project (`d4d utils status`
+  lists them with their sizes and source counts)
 
-The source inventory and document order are defined in
-`data/preprocessed/source_manifest.yaml`. Use the concatenated files to generate
-ONE comprehensive D4D per project.
+The source inventory and document order are defined in the selected source
+manifest (`data/preprocessed/source_manifest.yaml` by default). Use the
+concatenated files to generate ONE comprehensive D4D per project.
 
 ### Individual Sources (for per-document D4Ds)
 Location: data/preprocessed/individual/{PROJECT}/
 
-Example files:
-- AI_READI: `bmjopen-2024-097449_row2.txt`, `fairhub_dataset_2_row12.txt`, `gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt`
-- CHORUS: `reporter_nih_gov_project-details-10472824_row7.txt`, `bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt`, `chorus4ai_org_row11.txt`, `github_chorus_ai_overview_2025-11-14.txt`
-- CM4AI: `www_nature_com_articles-s41586-025-08878-3_row2.txt`, `cm4ai_org_data-releases_row11.txt`, `dataverse_10.18130_V3_B35XWX_row16.txt`, `dataverse_10.18130_V3_F3TD5R_row19.txt`, `dataverse_10.18130_V3_K7TGEM_row16.txt`
-- VOICE: `physionet_b2ai-voice_1.1_row17.txt`, `gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt`, `github_eipm_bridge2ai-docs_README_row22.txt`
-
+One `{source}_row{N}.txt` per source the manifest declares for the project.
 Use individual files to generate separate D4D per source document.
 
 ## Output Locations
@@ -89,7 +83,7 @@ Extract these key elements from source documents:
 
 ## Generation Process
 
-For each project (AI_READI, CM4AI, VOICE, CHORUS):
+For each declared project:
 
 1. **Launch one fresh agent per project.**
    - Claude Code: use a fresh Task/subagent context and pass the exact source,

@@ -144,7 +144,7 @@ class TestRenderCLI(unittest.TestCase):
 
         html = self.linkml_output_file.read_text(encoding="utf-8")
         self.assertIn("Sample Dataset", html)
-        self.assertIn("Generated using Bridge2AI Data Sheets Schema", html)
+        self.assertIn("Generated using Datasheets for Datasets", html)
         self.assertIn("LinkML HTML saved to", result.output)
 
     def test_render_evaluation_command_auto_detects_rubric10(self):

@@ -39,7 +39,8 @@ def load_yaml(path: Path) -> Any:
     (#1203). Raises `FileNotFoundError` like a read would; callers that
     tolerated a missing file before still test `path.exists()` first.
     """
-    p = Path(path)
+    from data_sheets_schema.resources import resource_path
+    p = resource_path(path)
     st = p.stat()
     return copy.deepcopy(_parsed(str(p.resolve()), st.st_mtime_ns, st.st_size))
 
@@ -73,7 +74,8 @@ def _digest(path: str, mtime_ns: int, size: int) -> str:
 
 def sha256_of(path: Path) -> str:
     """sha256 of the file, cached until it changes."""
-    p = Path(path)
+    from data_sheets_schema.resources import resource_path
+    p = resource_path(path)
     st = p.stat()
     return _digest(str(p.resolve()), st.st_mtime_ns, st.st_size)
 

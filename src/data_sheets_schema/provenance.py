@@ -35,6 +35,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema.registry import AUTO, manifest_declared_unused
+from data_sheets_schema.corpus import AUTO as SOURCE_MANIFEST_AUTO
 
 RECORD_VERSION = 1
 CONCAT_DIR = Path("data/d4d_concatenated")
@@ -88,7 +89,16 @@ HEADER_FIELDS = ("Generation Method", "Agent runtime", "Provider", "Model",
                  "Sources", "Phase 4 reconciliation")
 
 
+def _resource(path):
+    """A resource constant resolved for reading (#1301); anything else as is."""
+    if not path:
+        return path
+    from data_sheets_schema.resources import resource_path
+    return resource_path(path)
+
+
 def _md5(path: Path) -> str | None:
+    path = _resource(path)
     if not path or not path.exists():
         return None
     h = hashlib.md5()
@@ -99,6 +109,7 @@ def _md5(path: Path) -> str | None:
 
 
 def _sha256(path: Path) -> str | None:
+    path = _resource(path)
     if not path or not path.exists():
         return None
     h = hashlib.sha256()
@@ -115,6 +126,7 @@ def load_generation_config(path: Path = DETERMINISTIC_CONFIG) -> dict[str, Any]:
     paths disagree about the model or temperature they are different
     procedures, and the fingerprint should say so rather than paper over it.
     """
+    path = _resource(path)                  # shipped with the package (#1529)
     if not path.exists():
         return {}
     try:
@@ -229,15 +241,8 @@ def repo_relative(path: Path | str) -> str:
     function that normalises inconsistently is harder to reason about than one
     that does not normalise at all.
     """
-    p = Path(path)
-    try:
-        resolved = p.resolve()
-    except OSError:
-        return str(p)
-    try:
-        return str(resolved.relative_to(Path(__file__).resolve().parents[2]))
-    except (ValueError, OSError):
-        return str(resolved)
+    from data_sheets_schema.resources import repo_relative as _rr
+    return _rr(path, cwd=False)         # checkout, package data, install root; never cwd (#398, #1301)
 
 
 #: Runtimes that open the playbooks for themselves. The agentic path does,
@@ -281,9 +286,10 @@ def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS,
     out: list[dict[str, Any]] = []
     for p in paths:
         p = Path(p)
+        q = _resource(p)                    # read from wherever it is (#1301)
         out.append({"path": repo_relative(p), "sha256": _sha256(p),
-                    "bytes": p.stat().st_size if p.exists() else None,
-                    "exists": p.exists()})
+                    "bytes": q.stat().st_size if q.exists() else None,
+                    "exists": q.exists()})
     block: dict[str, Any] = {"hash_algorithm": PROMPT_HASH, "files": out}
     if consumed is not None:
         block["consumed"] = consumed
@@ -327,9 +333,10 @@ def prompt_facts(prompt_paths: list[Path] | None,
         out = []
         for p in prompt_paths:
             p = Path(p)
+            q = _resource(p)                # read from wherever it is (#1479)
             out.append({"path": repo_relative(p), "sha256": _sha256(p),
-                        "bytes": p.stat().st_size if p.exists() else None,
-                        "exists": p.exists()})
+                        "bytes": q.stat().st_size if q.exists() else None,
+                        "exists": q.exists()})
         facts = {"hash_algorithm": PROMPT_HASH, "files": out}
 
     if request_text is not None:
@@ -349,19 +356,31 @@ def prompt_facts(prompt_paths: list[Path] | None,
     return facts
 
 
-def _run(cmd: list[str], *, strip: bool = True) -> str | None:
+def _run_result(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> tuple[bool, str]:
+    """`(ok, output)`: `ok` only when the command ran and exited 0, so an
+    empty successful output and a failure are told apart (#1621)."""
     try:
         # Bytes, decoded with a reversible escape (#1045): a path git prints
         # verbatim under -z that is not UTF-8 must neither turn the whole
         # status into None (a dirty tree recorded as clean) nor collapse
         # into U+FFFD (two files recorded as one); and no newline
         # translation, so a `\r` in a name is kept.
-        r = subprocess.run(cmd, capture_output=True, timeout=15)
-        text = r.stdout.decode("utf-8", errors="backslashreplace")
-        out = text.strip() if strip else text
-        return out or None
+        env = None
+        if cmd and cmd[0] == "git":
+            from data_sheets_schema.resources import git_env
+            env = git_env()                  # never a borrowed GIT_DIR (#1684, #1728)
+        r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None, env=env)
     except Exception:
-        return None
+        return False, ""
+    text = r.stdout.decode("utf-8", errors="backslashreplace")
+    return r.returncode == 0, (text.strip() if strip else text)
+
+
+def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str | None:
+    """The output of a command that exited 0, else None — never the output
+    of one that failed (#1621)."""
+    ok, out = _run_result(cmd, strip=strip, cwd=cwd)
+    return out or None if ok else None
 
 
 _EFFORT_LADDER = ("minimal", "low", "medium", "high")
@@ -629,8 +648,162 @@ def software_facts() -> dict[str, Any]:
 DIRTY_PATHS_MAX = 50
 
 
+#: Only installer-owned metadata files, root-level `.pth` and byte-code
+#: caches are bookkeeping. Shipped wheel metadata is measured (#1748).
+_LEDGER = "data_sheets_schema/schema/digest_inventory.yaml"
+
+
+def _is_bookkeeping(name: str) -> bool:
+    parts = name.replace("\\", "/").split("/")
+    return ((len(parts) == 2 and parts[0].endswith(".dist-info")
+             and parts[1] in {"RECORD", "INSTALLER", "REQUESTED", "direct_url.json"})
+            or (len(parts) == 1 and parts[0].endswith(".pth"))
+            or "__pycache__" in parts[:-1])
+
+
+def _record_rows() -> list[tuple[str, str | None, str | None, "Path"]] | None:
+    """The wheel's RECORD, row by row: `(name, algorithm, value, path)`.
+    Read from the distribution's own RECORD text, not through
+    `importlib.metadata.files()`, which drops the rows whose files are
+    missing on Python 3.12+ — the one case a measurement of an install
+    must be able to report (#1727). None when there is no distribution or
+    no RECORD."""
+    import csv
+    from importlib.metadata import PackageNotFoundError, distribution
+    try:
+        dist = distribution("data-sheets-schema")
+    except PackageNotFoundError:
+        return None
+    text = dist.read_text("RECORD")
+    if not text:
+        return None
+    rows = []
+    for row in csv.reader(text.splitlines()):
+        if not row or not row[0]:
+            continue
+        name = row[0]
+        spec = row[1] if len(row) > 1 else ""
+        algo, _, value = spec.partition("=") if spec else (None, None, None)
+        rows.append((name, algo or None, value or None, Path(dist.locate_file(name))))
+    return rows
+
+
+def _installed_files_changed(rows=None) -> tuple[list[str], bool, list[str], bool]:
+    """`(changed, measured, unmeasured, ledger_changed)`: the installed files
+    whose bytes no longer match the wheel's RECORD or that are gone;
+    `measured` False when the RECORD cannot be read or a resource it lists
+    carries no usable hash, those listed under `unmeasured` (#1641, #1667,
+    #1723). The digest ledger a run appends to (#1537) is reported apart as
+    `ledger_changed`: a hash says it differs, not that earlier entries
+    survived, so it is neither counted clean nor called an append (#1716).
+    Exempt is only the installer's bookkeeping (#1717). Returned, never
+    stored on the function (#1720). The RECORD is read as rows, so a
+    deleted file is still seen (#1727)."""
+    import base64
+    if rows is None:
+        rows = _record_rows()
+    if not rows:
+        return [], False, [], False
+    changed: list[str] = []
+    unmeasured: list[str] = []
+    ledger_changed = False
+    seen = 0
+    for name, algo, value, path in rows:
+        bookkeeping = _is_bookkeeping(name)
+        is_ledger = name.replace("\\", "/").endswith(_LEDGER)
+        try:
+            data = Path(path).read_bytes()
+        except FileNotFoundError:
+            if not bookkeeping:
+                changed.append(name)         # gone, hashed or not
+            continue
+        except (OSError, ValueError):
+            changed.append(name)
+            continue
+        if not algo or not value:
+            if not bookkeeping:
+                unmeasured.append(name)      # a resource the RECORD does not attest — the ledger included
+            continue
+        try:
+            digest = hashlib.new(algo, data).digest()
+        except ValueError:
+            unmeasured.append(name)          # an algorithm this interpreter lacks (#1723)
+            continue
+        same = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") == value
+        if is_ledger:
+            ledger_changed = not same
+            continue
+        seen += 1
+        if not same:
+            changed.append(name)
+    return sorted(changed), seen > 0 and not unmeasured, sorted(unmeasured), ledger_changed
+
+
 def repo_facts() -> dict[str, Any]:
-    dirty = _run(["git", "status", "--porcelain", "-z"], strip=False)
+    """The repository the *resources* came from (#1550, #1588): the working
+    directory when it is a checkout of this project — a worktree or a
+    second clone, whose files `resource_path` reads first — else the
+    checkout this package is imported from, whatever the working directory.
+    A record made from a user's own repository used to attest that
+    repository's commit beside hashes of the checkout's playbooks and
+    schemas, and one made from a worktree with the primary's code attested
+    the primary's commit beside the worktree's bytes. From an installed
+    package there is no commit; the record names the install root and the
+    package version instead. Where git cannot answer at the resource root
+    the commit and the dirty state are recorded unknown, never clean
+    (#1591)."""
+    from data_sheets_schema.resources import resource_root
+    at, kind = resource_root()
+    if kind == "install":
+        from importlib.metadata import PackageNotFoundError, version
+        try:
+            pkg = version("data-sheets-schema")
+        except PackageNotFoundError:
+            pkg = None
+        changed, measured, unmeasured, ledger_changed = _installed_files_changed()
+        return {"commit": None, "commit_short": None, "branch": None,
+                **({"ledger_changed": True} if ledger_changed else {}),
+                "dirty": (bool(changed) if measured else None),
+                "dirty_file_count": (len(changed) if measured else None),
+                "dirty_paths": changed[:DIRTY_PATHS_MAX],
+                **({"dirty_paths_truncated": len(changed) - DIRTY_PATHS_MAX} if len(changed) > DIRTY_PATHS_MAX else {}),
+                **({"unmeasured_paths": unmeasured[:DIRTY_PATHS_MAX]} if unmeasured else {}),
+                "resource_root": str(at), "resource_kind": "install", "package_version": pkg,
+                "note": ("no checkout: the resources are the installed package's, so there is no commit to name; "
+                         + ("the installed files were compared with the wheel's RECORD hashes (#1641)" if measured
+                            else ("the wheel's RECORD lists resources it does not hash, so whether the installed files "
+                                  "changed is unknown, not clean (#1667)" if unmeasured
+                                  else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)"))
+                         + ("; the digest ledger differs from the shipped one — a run appends to it by design (#1537), and "
+                            "whether the shipped entries survived is not established (#1716)" if ledger_changed else ""))}
+    commit = _run(["git", "rev-parse", "HEAD"], cwd=at)
+    top = _run(["git", "rev-parse", "--show-toplevel"], cwd=at)
+    try:
+        same_tree = top is not None and Path(top).resolve() == Path(at).resolve()
+    except OSError:
+        same_tree = False
+    if commit is None or not same_tree:
+        # No repository there, or git answering for an *enclosing* one — an
+        # export placed inside another project's repository would otherwise
+        # be attested with that project's commit and called dirty because
+        # of itself (#1635): unknown, not clean (#1591).
+        why = (f"git answers for {top}, not the resource root" if commit is not None and top is not None
+               else "no repository there, or no git")
+        return {"commit": None, "commit_short": None, "branch": None, "dirty": None,
+                "dirty_file_count": None, "dirty_paths": [],
+                "resource_root": str(at), "resource_kind": "checkout",
+                "note": f"git could not answer for {at} ({why}): "
+                        "the commit and the dirty state are unknown, not clean"}
+    ok, dirty = _run_result(["git", "status", "--porcelain", "-z"], strip=False, cwd=at)
+    if not ok:
+        # The commit is known, the tree's state is not: unknown, not clean (#1621).
+        return {
+            "commit": commit,
+            "commit_short": _run(["git", "rev-parse", "--short", "HEAD"], cwd=at),
+            "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=at),
+            "resource_root": str(at), "resource_kind": "checkout",
+            "dirty": None, "dirty_file_count": None, "dirty_paths": [],
+            "note": f"git status failed at {at}: the dirty state is unknown, not clean"}
     # NUL-separated, unstripped (#1039): `_run`'s strip took the leading
     # status space off the first line and `aurelian` was recorded as
     # `urelian`; a path with a space survives -z where a line split does
@@ -652,9 +825,10 @@ def repo_facts() -> dict[str, Any]:
     # it names; one that lists `data/.run_locks/x.json`, `aurelian` can.
     paths = [ln[3:] for ln in lines if len(ln) > 3]
     return {
-        "commit": _run(["git", "rev-parse", "HEAD"]),
-        "commit_short": _run(["git", "rev-parse", "--short", "HEAD"]),
-        "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"]),
+        "commit": commit,
+        "commit_short": _run(["git", "rev-parse", "--short", "HEAD"], cwd=at),
+        "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=at),
+        "resource_root": str(at), "resource_kind": "checkout",
         "dirty": bool(dirty),
         "dirty_file_count": len(lines),
         "dirty_paths": paths[:DIRTY_PATHS_MAX],
@@ -794,14 +968,60 @@ def hash_file(path: Path, algorithm: str = HASH_ALGORITHM) -> str | None:
     return _sha256(path) if algorithm == "sha256" else _md5(path)
 
 
-def verify_entry(entry: dict[str, Any]) -> bool | None:
+def artifact_root(record: Path) -> Path | None:
+    """Resolve relative artifact pins from their record's tree, not an ambient one.
+
+    Conventional records carry a stable ``data/d4d_concatenated`` owner.
+    A caller-relative flat record retains caller paths. An absolute flat
+    record cannot establish the original base of a relative pin; its writer
+    must capture absolute artifact paths instead of guessing an ancestor.
+    """
+    record = Path(record)
+    absolute = record.absolute()
+    for parent in absolute.parents:
+        if parent.parts[-2:] == ("data", "d4d_concatenated"):
+            tail = absolute.relative_to(parent).parts
+            if (len(tail) == 3 and tail[0].endswith("_core")
+                    and tail[2].endswith("_provenance.yaml")):
+                return parent.parent.parent
+    return None if record.is_absolute() else Path.cwd()
+
+
+def resolve_record_input(path: Path, record: Path) -> Path | None:
+    """Resolve a recorded input without borrowing an unrelated caller base."""
+    path = Path(path)
+    if path.is_absolute():
+        return path
+    owner = artifact_root(record)
+    return owner / path if owner is not None else None
+
+
+def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool | None:
     """Does the file still hash to what the entry recorded? None if unknowable."""
     got = recorded_hash(entry)
     path = entry.get("path")
-    if not got or not path or not Path(path).exists():
+    if not got or not path:
+        return None
+    from data_sheets_schema.corpus import anchored
+    from data_sheets_schema.resources import is_resource, resource_path
+    if Path(path).is_absolute():
+        resolved = Path(path)
+    elif record is not None:
+        # A flat override can itself sit inside the conventional directory.
+        # Its non-corpus pin must not acquire the containing corpus's base.
+        owner = (artifact_root(record) if Path(path).parts[:2] == ("data", "d4d_concatenated")
+                 else None if Path(record).is_absolute() else Path.cwd())
+        if owner is None:
+            return None
+        resolved = owner / Path(path)
+    elif is_resource(path):
+        resolved = resource_path(path)
+    else:
+        resolved = anchored(Path(path))
+    if not resolved.exists():
         return None
     algo, value = got
-    return hash_file(Path(path), algo) == value
+    return hash_file(resolved, algo) == value
 
 
 def preservable_validation(path: Path,
@@ -851,7 +1071,7 @@ def preservable_validation(path: Path,
         # A verdict with nothing to re-hash cannot be shown still true.
         return None
     for entry in artifacts.values():
-        if not isinstance(entry, dict) or verify_entry(entry) is not True:
+        if not isinstance(entry, dict) or verify_entry(entry, record=path) is not True:
             return None
 
     # Same record, same bytes, different schema is a different question.
@@ -878,10 +1098,44 @@ RECORD_SCHEMA = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
 
 
 def record_schema_path() -> Path:
-    """`RECORD_SCHEMA` if it resolves from here, else the packaged copy."""
-    if RECORD_SCHEMA.exists():
-        return RECORD_SCHEMA
-    return Path(__file__).resolve().parent / "schema" / RECORD_SCHEMA.name
+    """`RECORD_SCHEMA` where it is read from (#1301)."""
+    # No second, by-name fallback: `resource_path` reaches the package data
+    # itself, and a working directory that carries the schema directory
+    # without the file is an absence every reader answers alike (#1483).
+    return _resource(RECORD_SCHEMA)
+
+
+def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
+    """A record whose effective profile names one instrument while its
+    `schema.digest_md5` is the *other* profile's current digest states an
+    instrument it did not consume (#1581). Only the current digests are
+    known here; an older digest of the same profile is not a finding."""
+    schema = data.get("schema") if isinstance(data, dict) else None
+    if not isinstance(schema, dict) or not schema.get("digest_md5"):
+        return None
+    stated = schema.get("profile")
+    from data_sheets_schema.profiles import for_record
+    effective = for_record(data).name if stated is None else stated
+    if not isinstance(effective, str) or not isinstance(schema["digest_md5"], str):
+        return None                        # a malformed value is the structural validator's finding (#1655)
+    try:
+        from data_sheets_schema import schema_digest
+        from data_sheets_schema.profiles import PROFILES
+        current = {name: schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=prof))
+                   for name, prof in PROFILES.items()}
+    except Exception as exc:                                   # noqa: BLE001 — no schema here: nothing to compare
+        from data_sheets_schema.profiles import MissingVocabulary
+        if isinstance(exc, MissingVocabulary):
+            return (f"the record's profile cannot be checked here: {exc}")   # a finding, not silence (#1729)
+        return None
+    if current.get(effective) == schema["digest_md5"]:
+        return None                        # its own current digest, whatever else renders the same bytes (#1609)
+    for name, md5 in current.items():
+        if name != effective and md5 == schema["digest_md5"]:
+            basis = f" (read as {effective!r})" if stated is None else ""
+            return (f"schema.profile is {stated!r}{basis} but schema.digest_md5 {md5[:12]}… is the "
+                    f"{name} profile's current digest")
+    return None
 
 
 def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
@@ -917,7 +1171,61 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
         report = validator.validate(data, "GenerationRecord")
     except Exception as exc:                                   # noqa: BLE001
         return [], f"the validator could not run against {schema}: {exc}"
-    return [str(r.message) for r in getattr(report, "results", [])], None
+    problems = [str(r.message) for r in getattr(report, "results", [])]
+    _pd = _profile_digest_disagreement(data)
+    if _pd:
+        problems.append(_pd)
+    _sp = _spec_profile_disagreement(data)
+    if _sp:
+        problems.append(_sp)
+    return problems, None
+
+
+def record_mapping_problem(data: Any) -> str | None:
+    """Report malformed mapping blocks before profile/audit readers use them."""
+    if not isinstance(data, dict):
+        return "record must be a mapping"
+    for path in ("run", "model", "schema", "inputs", "inputs.source_manifest",
+                 "inputs.chunks", "prompts", "prompts.request", "prompts.request.spec"):
+        node = data
+        for key in path.split("."):
+            node = node.get(key)
+            if node is None:
+                break
+        if node is not None and not isinstance(node, dict):
+            return f"{path} must be a mapping or null"
+    return None
+
+
+def profile_problems(data: dict[str, Any]) -> list[str]:
+    """The profile findings `check_record` appends (#1581, #1678), on their
+    own so a gate that does not run the structural validator can still
+    fail on them (#1699)."""
+    return [p for p in (_profile_digest_disagreement(data), _spec_profile_disagreement(data)) if p]
+
+
+def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
+    """Compare the stored spec's profile with the one record readers use.
+
+    A missing historical profile has the documented study fallback; an
+    explicit different profile identifies a different instrument (#1740).
+    """
+    schema = data.get("schema") if isinstance(data, dict) else None
+    prompts = data.get("prompts") if isinstance(data, dict) else None
+    request = prompts.get("request") if isinstance(prompts, dict) else None
+    spec = request.get("spec") if isinstance(request, dict) else None       # any shape short of a mapping is the validator's finding (#1700)
+    if not isinstance(spec, dict) or not isinstance(spec.get("profile"), str):
+        return None
+    if not isinstance(schema, dict):
+        schema = {}                        # no schema block, or null: the readers read the study's (#1709)
+    stated = schema.get("profile")
+    from data_sheets_schema.profiles import for_record
+    effective = for_record(data).name if stated is None else stated
+    if effective != spec["profile"]:
+        basis = f" (read as {effective!r})" if stated is None else ""
+        return (f"prompts.request.spec.profile is {spec['profile']!r} but schema.profile is "
+                f"{stated!r}{basis}; the gate and the readers would use different instruments")
+    return None
 
 
 _VALIDATORS: dict[tuple[str, str], Any] = {}
@@ -1211,8 +1519,9 @@ def companion_facts(project: str, method: str, label: str,
         "note": ("derived from records like this one, per label rather than "
                  "per run; `d4d runs telemetry` writes it")}
     for name, path, note in COMPANION_FILES:
-        out[name] = {"path": repo_relative(path), "present": path.exists(),
-                     "md5": _md5(path) if path.exists() else None,
+        q = _resource(path)
+        out[name] = {"path": repo_relative(path), "present": q.exists(),
+                     "md5": _md5(path) if q.exists() else None,
                      "note": note}
     return out
 
@@ -1247,6 +1556,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  prompt_request: str | None = None,
                  prompt_request_spec: dict[str, Any] | None = None,
                  schema_digest_md5: str | None = None,
+                 profile: Any = None,
                  reasoning_effort: str | None = None,
                  phases: list[dict[str, Any]] | None = None,
                  outputs: dict[str, Path] | None = None,
@@ -1256,6 +1566,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  condition_source_paths: list[str] | None = None,
                  condition_mismatch_allowed: bool = False,
                  manifest: Path | None | object = AUTO,
+                 selected_manifest: Path | None | object = AUTO,
                  chunk_manifest: Path | None = None,
                  manifest_basis: str | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
@@ -1277,6 +1588,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     #1395). ``chunk_manifest`` is the chunk manifest the run was given
     explicitly, when discovery beside the bundle is not how it found one
     (#1299).
+    ``selected_manifest`` keeps the run's selected corpus namespace separate
+    from consumed context: an arm may use that namespace for paths/chunk
+    names while declaring its manifest context unused. Omitted, it follows
+    ``manifest`` for compatibility with direct callers.
     """
     # Taken from the caller when it knows, reconstructed only when it does not.
     # A run with `--out-dir` writes flat into that directory, and rebuilding the
@@ -1284,13 +1599,35 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # were elsewhere or absent — the GitHub assistant's layout, and the same
     # class as the declared-bundle defect: a path assumed rather than derived
     # from the spec that already knew it (#604).
+    from data_sheets_schema.corpus import root, relative_to_root, manifest_override, AUTO as CORPUS_AUTO
+    from data_sheets_schema.registry import select_manifest
     base = method[:-5] if method.endswith("_core") else method
     outputs = outputs or {}
+    namespace = manifest if selected_manifest is AUTO else selected_manifest
+    automatic_namespace = namespace is AUTO
+    explicit_namespace = manifest_override() is not CORPUS_AUTO if automatic_namespace else True
+    if automatic_namespace:
+        namespace = select_manifest(project, input_bundle) if input_bundle is not None or explicit_namespace else None
+    owner = root(namespace)
+    if automatic_namespace and input_bundle is None and not explicit_namespace:
+        # Header-only reconstruction needs the discovered artifact address;
+        # an ancestor's manifest cannot establish where this run wrote.
+        core_address = outputs.get("core") or (
+            concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
+        owner = artifact_root(Path(core_address).absolute().with_name(
+            f"{project}_provenance.yaml")) or Path.cwd().resolve()
+    if concat_dir == CONCAT_DIR:
+        concat_dir = relative_to_root(concat_dir, owner)
     full = outputs.get("full") or concat_dir / base / label / f"{project}_d4d.yaml"
     core = outputs.get("core") or (
         concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
     report = outputs.get("report") or (
         concat_dir / f"{base}_core" / label / f"{project}_reconciliation.md")
+    # A flat record's absolute address does not encode its launch directory.
+    # Capture input addresses now, while their caller base is still known.
+    output_owner = artifact_root(Path(core).absolute().with_name(f"{project}_provenance.yaml"))
+    freeze_inputs = (owner != Path.cwd().resolve() or output_owner is None
+                     or output_owner.resolve() != Path.cwd().resolve())
 
     header = parse_header(full)
     unrecoverable: list[dict[str, str]] = []
@@ -1305,7 +1642,11 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     bundle = input_bundle
     if bundle is None:
         declared = header.get("Source bundle") or header.get("Source")
-        bundle = Path(declared) if declared else None
+        bundle = relative_to_root(Path(declared), owner) if declared else None
+    if bundle is not None and freeze_inputs:
+        bundle = Path(bundle).absolute()
+    if automatic_namespace and input_bundle is None:
+        namespace = select_manifest(project, bundle) if bundle is not None else None
 
     inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
                               "chunks": None,
@@ -1322,7 +1663,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         # bytes (#707) — only when one exists for exactly this md5; a manifest
         # of some other version of the bundle would attest the wrong file.
         from data_sheets_schema.chunking import chunks_input
-        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"], manifest=chunk_manifest)
+        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"], manifest=chunk_manifest,
+                                         source_manifest=SOURCE_MANIFEST_AUTO if namespace is AUTO else namespace)
+        if freeze_inputs and inputs["chunks"] is not None:
+            inputs["chunks"]["path"] = str(Path(inputs["chunks"]["path"]).absolute())
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
@@ -1347,7 +1691,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             manifest = None
             manifest_basis = manifest_basis or f"the output header declares the source manifest unused ({header_manifest})"
         elif header_manifest:
-            manifest = Path(header_manifest)
+            manifest = relative_to_root(Path(header_manifest), owner)
             manifest_basis = manifest_basis or "the output header declares this source manifest"
         else:
             manifest = select_manifest(project, bundle) if bundle is not None else None
@@ -1361,6 +1705,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "no source manifest was selected for this run")}
     else:
         manifest = Path(manifest)
+        if freeze_inputs:
+            manifest = manifest.absolute()
         try:
             manifest_md5 = _md5(manifest)
         except OSError:
@@ -1566,8 +1912,12 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         # inferred from the artifacts on disk, because a phase that ran and a
         # phase whose output happens to exist are different claims.
         "phase_log": phase_facts(phases or []),
+        # The digest md5 names the instrument; the profile and the basis of
+        # its selection say why it is that one (#1443) — two records made
+        # under different profiles differ only here and in the md5.
         "schema": schema_facts() | (
-            {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),
+            {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}) | (
+            {"profile": profile.name, "profile_basis": profile.basis} if profile else {}),
         "software": software_facts() if mode == "live" else {
             "note": "reconstructed; versions are today's, not the run's"},
         "repo": repo_facts(),
@@ -1598,6 +1948,9 @@ def _replicate_for(label: str) -> int | None:
 
 def record_path_for(project: str, method: str, label: str,
                     concat_dir: Path = CONCAT_DIR) -> Path:
+    if concat_dir == CONCAT_DIR:
+        from data_sheets_schema.corpus import anchored
+        concat_dir = anchored(concat_dir)
     base = method[:-5] if method.endswith("_core") else method
     return concat_dir / f"{base}_core" / label / f"{project}_provenance.yaml"
 
@@ -2030,7 +2383,7 @@ def referenced_playbooks(roots: tuple[Path, ...] = PLAYBOOK_ROOTS
     seen: set[str] = set()
     queue = [Path(r) for r in roots]
     while queue:
-        current = queue.pop()
+        current = _resource(queue.pop())        # (#1479)
         if not current.exists():
             continue
         try:

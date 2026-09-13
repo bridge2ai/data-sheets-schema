@@ -44,7 +44,8 @@ def derive_core_cmd(full_path, core_path, validate, phase4_complete):
     click.echo(json.dumps(facts))
     if validate:
         from data_sheets_schema.derive_core import CORE_SCHEMA_REL
-        r = subprocess.run(["linkml-validate", "-s", CORE_SCHEMA_REL,
+        from data_sheets_schema.resources import linkml_validate, resource_path
+        r = subprocess.run([*linkml_validate(), "-s", str(resource_path(CORE_SCHEMA_REL)),
                             "-C", "CoreDataset", str(core)],
                            capture_output=True, text=True)
         out = (r.stdout + r.stderr).strip()

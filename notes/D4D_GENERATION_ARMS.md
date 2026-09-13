@@ -511,8 +511,10 @@ documentation, no license, no IRB protocol.
 - Input: `data/preprocessed/concatenated/AI_READI_healthsheet_only.txt`
   (`d4d healthsheet bundle`), 56 KB, 14 sections, 84 questions, 81 answered
 - Method: `claudecode_agent_healthsheet`
-- Restricted in code to `AI_READI` via `GENERATION_ARMS[...]["projects"]`, since
-  no other GC has a healthsheet to run it on
+- Restricted to `AI_READI` by the study profile
+  (`profiles.BRIDGE2AI.arm_projects["healthsheet_only"]`, read through
+  `profiles.arm_projects_for`; the arm table itself carries no project list,
+  #1444), since no other dataset in the study has a healthsheet to run it on
 
 **What it measures:** the standalone sufficiency of one structured upstream
 source. That makes it the model-based counterpart to `deterministic_ours` —

@@ -57,13 +57,13 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     a run without a manifest records that it had none.
     """
     from data_sheets_schema.api_runner import RunSpec
-    from data_sheets_schema.registry import _concat_dir
+    from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR
     display, method, pattern, manifest_line = ARMS[arm]
     selected = select_manifest(project, bundle, manifest)      # one rule, everywhere (#1367 review)
     reg = load_registry(selected)
     resolved = (Path(bundle) if bundle else
-                reg.bundle(project) if reg.declares(project) and arm == "baseline" else
-                _concat_dir() / pattern.format(p=project))
+                reg.bundle(project) if arm == "baseline" else
+                reg.anchored(BUNDLE_DIR) / pattern.format(p=project))
     kw = {"manifest": selected,
           "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None}
     if runtime:
@@ -72,10 +72,13 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         kw["provider"] = provider
     if condition is None:                      # not chosen: the default applies and the record says so (#1094)
         condition, kw["condition_stated"] = "generic", False
-    return RunSpec(project=project, arm=display, method=method,
-                   bundle=resolved, label=label, condition=condition,
-                   manifest_line=manifest_line,
-                   out_dir=Path(out_dir) if out_dir else None, **kw)
+    try:
+        return RunSpec(project=project, arm=display, method=method,
+                       bundle=resolved, label=label, condition=condition,
+                       manifest_line=manifest_line,
+                       out_dir=Path(out_dir) if out_dir else None, **kw)
+    except ValueError as exc:                    # an unknown profile, from a manifest or the environment (#1630)
+        raise click.ClickException(str(exc))
 
 
 def _manifest_kw(manifest, chunk_manifest) -> dict:
@@ -200,9 +203,10 @@ def _plan_or_refuse(spec):
     """A plan that cannot be assembled is a refusal with a reason, not a
     traceback (#742): a receipt condition on a bundle with no chunk manifest."""
     from data_sheets_schema.api_runner import plan
+    from data_sheets_schema.profiles import MissingVocabulary
     try:
         return plan(spec)
-    except RuntimeError as exc:
+    except (RuntimeError, MissingVocabulary) as exc:           # a vocabulary the checkout lacks too (#1729)
         raise click.ClickException(str(exc))
 
 @click.group()
@@ -323,6 +327,7 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
     click.echo(f"   bundle   {p['bundle']}  ({p['bundle_bytes']:,} b)")
     click.echo(f"   prompts  {', '.join(Path(x).name for x in p['prompt_files'])}")
     click.echo(f"   digest   md5 {p['schema_digest_md5'][:12]}")
+    click.echo(f"   profile  {p['profile']}  ({p['profile_basis']})")
     for ph in p["phases"]:
         click.echo(f"     {ph['phase']:10} ~{ph['approx_input_tokens']:>8,} tok"
                    f"   cached blocks={ph['cached_blocks']}")
@@ -356,6 +361,8 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
 def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
@@ -438,6 +445,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     Each run resumes independently, so a sweep interrupted partway costs only
     the unfinished phases to complete rather than restarting.
     """
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
 
     requested = (AUTO if manifest is None

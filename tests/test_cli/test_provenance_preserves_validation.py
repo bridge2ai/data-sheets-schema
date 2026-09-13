@@ -52,8 +52,10 @@ class TestReRecordPreservesTheVerdict(unittest.TestCase):
         self.core_dir = concat / f"{self.method}_core" / self.label
         self.full_dir.mkdir(parents=True)
         self.core_dir.mkdir(parents=True)
-        # The recorder refuses any cwd that is not shaped like the repo root
-        # (#672): it needs both marker directories. The tests run in a scratch
+        # The recorder once refused any cwd that is not shaped like the repo
+        # root (#672); since #1301 it refuses only a directory *inside* the
+        # checkout that is not its root, and the marker below is kept so the
+        # fixture still reads as a tree of its own. The tests run in a scratch
         # root by design — they test verdict preservation, not cwd policy —
         # so the scratch root carries the markers.
         (self.root / 'src' / 'data_sheets_schema').mkdir(parents=True)
@@ -411,8 +413,10 @@ class PhaseVocabulary(unittest.TestCase):
 
     def test_record_writes_check_blocks_or_says_why_not(self):
         """#687: the recorder computes the four deterministic blocks inline.
-        In a scratch root the schemas are absent, so the honest outcome is the
-        fail-soft branch: the record stands and the reason is printed."""
+        Since #1301 the schemas resolve from any directory, so in a scratch
+        root the honest outcome is that the blocks are computed from the
+        packaged schemas; the fail-soft branch — the record stands and the
+        reason is printed — is exercised by making the computation fail."""
         import click.testing
         import yaml as _yaml
 
@@ -441,10 +445,31 @@ class PhaseVocabulary(unittest.TestCase):
             self.assertEqual(r.exit_code, 0, r.output)
             rec = _yaml.safe_load((core_dir / "TESTPROJ_provenance.yaml").read_text())
             self.assertEqual(rec["record_mode"], "live")
-            # In a scratch root the schemas are absent: the fail-soft branch
-            # must run, say so, and leave the record standing.
-            self.assertIn("deterministic checks not computed", r.output)
-            self.assertNotIn("form", rec)
+            # The schemas resolve from here (#1301): the blocks land, as this
+            # recorder's, without a checkout in the working directory.
+            self.assertNotIn("deterministic checks not computed", r.output)
+            self.assertIn("pair ok", r.output)
+            self.assertEqual(rec["form"]["recorded_by"], "d4d provenance record")
+
+            # The fail-soft branch (#687): a computation that fails leaves the
+            # record standing and says why.
+            from unittest import mock as _mock
+
+            from data_sheets_schema import backfill_checks as _bc
+            os.chdir(root)
+            try:
+                with _mock.patch.object(_bc, "compute", side_effect=RuntimeError("no checks today")):
+                    r1 = runner.invoke(prov_cli.provenance,
+                                       ["record", "--project", "TESTPROJ", "--method", method,
+                                        "--label", label, "--input-bundle", str(bundle),
+                                        "--phase", "generate_full"])
+            finally:
+                os.chdir(cwd)
+            self.assertEqual(r1.exit_code, 0, r1.output)
+            self.assertIn("deterministic checks not computed (no checks today)", r1.output)
+            rec1 = _yaml.safe_load((core_dir / "TESTPROJ_provenance.yaml").read_text())
+            self.assertEqual(rec1["record_mode"], "live")
+            self.assertNotIn("form", rec1)
 
             # The success path, pinned by substituting compute() (#701 F4):
             # the blocks land, marked as this recorder's, and validation

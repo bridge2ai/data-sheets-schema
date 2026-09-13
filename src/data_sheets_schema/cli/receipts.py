@@ -6,6 +6,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.corpus import anchored as _corpus_path
+
 @click.group()
 def receipts():
     """Coverage and claim receipts: what the agent says it read, checked."""
@@ -14,9 +16,9 @@ def receipts():
 def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
     from data_sheets_schema.provenance import CONCAT_DIR
     base = method[:-5] if method.endswith("_core") else method
-    core_dir = CONCAT_DIR / f"{base}_core" / label
+    core_dir = _corpus_path(CONCAT_DIR) / f"{base}_core" / label
     return {"core_dir": core_dir,
-            "full": CONCAT_DIR / base / label / f"{project}_d4d.yaml",
+            "full": _corpus_path(CONCAT_DIR) / base / label / f"{project}_d4d.yaml",
             "provenance": core_dir / f"{project}_provenance.yaml"}
 
 
@@ -44,6 +46,8 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     the run's procedure was to write one, which the provenance record says
     (`inputs.receipt_expected`).
     """
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d receipts check")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
     if not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
         raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")
@@ -57,7 +61,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     if p["provenance"].exists():
         record = yaml.safe_load(bc._split_header(p["provenance"].read_text(encoding="utf-8"))[1]) or {}
         inputs = record.get("inputs") or {}
-        bundle = bc.declared_bundle(record)
+        bundle = bc.declared_bundle(record, p["provenance"])
         md5, expected = inputs.get("bundle_md5"), bool(inputs.get("receipt_expected"))
         recovery = {"snapshot_record": record, "bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
                     "record_chunks": inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None}
@@ -83,7 +87,9 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     # on attestation must not say "unchecked" of a record the backfill checked.
     chunks = recovery.get("record_chunks") if isinstance(recovery.get("record_chunks"), dict) else None
     if chunks and chunks.get("path") and "manifest" not in recovery:
-        recovery["manifest"] = Path(chunks["path"])           # the manifest the run sent (#1367 review, must-fix 6)
+        from data_sheets_schema.provenance import resolve_record_input
+        recovery["manifest"] = resolve_record_input(Path(chunks["path"]), p["provenance"])
+        recovery["allow_manifest_discovery"] = False
     if chunk_manifest is not None:
         recovery["manifest"] = chunk_manifest
     block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)

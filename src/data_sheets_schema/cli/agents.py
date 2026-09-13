@@ -9,12 +9,24 @@ from data_sheets_schema.agent_pin import (AGENT_DIR,
 
 
 def _names():
-    return sorted(p.stem for p in AGENT_DIR.glob("*.md"))
+    from pathlib import Path
+    from data_sheets_schema.agentic_runtime import resource_names
+    # Project-local agents are allowed, but do not hide shipped D4D agents.
+    names = {Path(name).stem for name in resource_names(".claude/agents")}
+    names.update(path.stem for path in Path(".claude/agents").glob("*.md"))
+    return sorted(names)
 
 
 @click.group()
 def agents():
     """Agent definitions: their pins, and whether a subagent read them."""
+
+
+@agents.command("playbook")
+def playbook():
+    """Print the agentic playbook with executable installed resource paths."""
+    from data_sheets_schema.agentic_runtime import playbook_text
+    click.echo(playbook_text())
 
 
 @agents.command("preamble")

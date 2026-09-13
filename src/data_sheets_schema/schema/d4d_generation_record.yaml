@@ -567,6 +567,25 @@ classes:
           stands then — the same value whenever the schema did not move mid-run,
           and an unfalsifiable assumption when it did. Absent on records written
           before the digest was recorded.
+      profile:
+        description: >-
+          The profile the digest was rendered under (`bridge2ai`, `neutral`;
+          #1302, #1443). Absent on records written before profiles existed,
+          whose digest was the study's.
+      profile_basis:
+        description: >-
+          Why that profile — `environment`; `no manifest`;
+          `stated by the caller`; `manifest:<path>@<sha256[:12]>` or
+          `default manifest:<path>@<sha256[:12]>`, each with ` (undeclared)`
+          when the manifest declares no profile, or `<kind>:<path> (missing)`
+          when the path is not there; `rendered instruction`, with
+          ` (this process would select <name>: <basis>)` when the recorder's
+          own selection differs or ` (this process could not select one:
+          <error>)` when it could not select at all, for a profile the
+          launch instruction carried; `re-rendered to the recorded hash by
+          d4d provenance backfill-spec (#772)` on a reconstructed spec for a
+          record stating no profile (#1443, #1494, #1549, #1581, #1606,
+          #1607).
       full_md5:
       core_md5:
       full_sha256:

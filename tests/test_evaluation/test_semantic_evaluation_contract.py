@@ -58,10 +58,8 @@ def _schema(name):
 
 
 def _validator():
-    spec = importlib.util.spec_from_file_location("validate_evaluation_schema", VALIDATOR)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    from data_sheets_schema.evaluation import validate
+    return validate
 
 
 def _rubric20_maximum():

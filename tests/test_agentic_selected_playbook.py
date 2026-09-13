@@ -13,8 +13,9 @@ from data_sheets_schema.cli import cli
 from tests.test_generation_manifest_identity import external
 
 
-@pytest.fixture(params=["Claude Code", "Codex CLI"])
+@pytest.fixture(params=[(runtime, version) for runtime in ("Claude Code", "Codex CLI") for version in (5, 6)])
 def selected(external, monkeypatch, tmp_path, request):
+    runtime, version = request.param
     monkeypatch.setattr(socket.socket, "connect", lambda *a, **k: pytest.fail("network forbidden"))
     monkeypatch.setattr(api, "CONCAT_DIR", tmp_path / "outputs")
     data = yaml.safe_load(external.manifest.read_bytes())
@@ -26,15 +27,21 @@ def selected(external, monkeypatch, tmp_path, request):
         {**chunking.DEFAULT_RULE, "max_lines": 3, "version": "2-custom"})))
     # A usable default sidecar must never hide failure to select the custom map.
     external.chunk_manifest.unlink()
-    return replace(external, chunk_manifest=custom, runtime=request.param, condition="generic_v9",
-                   out_dir=None, method="external_agent", label="synthetic label")
+    return replace(external, chunk_manifest=custom, runtime=runtime, condition="generic_v9",
+                   out_dir=None, method="external_agent", label="synthetic label", render_version=version)
 
 
 def commands(spec):
     marker = "## Selected inputs for all four phases (renderer v4)"
     assert marker in spec.instruction
     text = spec.instruction.split(marker, 1)[1]
-    return [shlex.split(line)[3:] for line in text.splitlines() if line.startswith("poetry run d4d ")]
+    commands = []
+    for line in text.splitlines():
+        if line.startswith("poetry run d4d "):
+            commands.append(shlex.split(line)[3:])
+        elif spec.render_version >= 6 and line.startswith(shlex.quote(spec._agentic_toolchain["python"]) + " -m data_sheets_schema.cli "):
+            commands.append(shlex.split(line)[3:])
+    return commands
 
 
 def test_agentic_prescribed_checks_read_only_selected_inputs_and_current_records(selected):

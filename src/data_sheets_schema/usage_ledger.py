@@ -167,6 +167,102 @@ def pin_inputs(spec) -> None:
         _write(spec, data)
 
 
+def _comparable(identity: dict) -> dict:
+    """An identity without `profile_basis` inside its instruction spec: the
+    basis was never an input (#1626), and a pin written while it sat there
+    (#1581–#1626) must not refuse a resume whose inputs are the same (#1657)."""
+    if not isinstance(identity, dict):
+        return {}
+    out = dict(identity)
+    instr = out.get("instruction")
+    if isinstance(instr, dict) and isinstance(instr.get("spec"), dict) and "profile_basis" in instr["spec"]:
+        out["instruction"] = {**instr, "spec": {k: v for k, v in instr["spec"].items() if k != "profile_basis"}}
+    return out
+
+
+def _subset_differs(pinned, current) -> bool:
+    """Every key the pin carries must match, at every depth (#1677): a
+    nested mapping is compared key by key, so a spec that gained a key
+    after the pin was written is not a different spec."""
+    if isinstance(pinned, dict) and isinstance(current, dict):
+        return any(_subset_differs(v, current.get(k)) if k in current else True for k, v in pinned.items())
+    return pinned != current
+
+
+#: Evidence required for resume comparison: the bundle entry and the hash
+#: of the instruction sent. The earliest identities carried no instruction
+#: hash and cannot establish this comparison (#1698).
+#: `bundle` is an entry (`{path, sha256}`) or null where the spec had no
+#: bundle to hash; `instruction.sha256` is the hash itself.
+_REQUIRED_IN_A_PIN = (("bundle",), ("instruction", "sha256"))
+
+
+def _identity_differs(pinned: dict, current: dict) -> bool:
+    """Compare the input evidence a pin can attest.
+
+    Original file-entry fields and an instruction hash are required. Later
+    optional keys, including an omitted legacy profile, remain compatible;
+    present entries must be complete and every recorded value must match.
+    The descriptive profile basis is excluded from identity (#1657).
+    """
+    if not isinstance(pinned, dict) or not isinstance(current, dict):
+        return True
+    for path in _REQUIRED_IN_A_PIN:
+        # The keys must be there; a value recorded as null (a spec with no
+        # bundle to hash) is a recorded fact and is compared as one.
+        node = pinned
+        for key in path[:-1]:
+            node = node.get(key) if isinstance(node, dict) else None
+        if not isinstance(node, dict) or path[-1] not in node:
+            return True
+    # These file entries were all present in the original input identity
+    # (#1402). None records an unused input; a mapping records both its
+    # address and its observed hash, including an explicit missing-file null.
+    # Dropping a hash is not the compatibility case of a newly added key.
+    for name in ("bundle", "source_manifest", "chunks"):
+        if name not in pinned:
+            return True
+        entry = pinned[name]
+        if entry is not None and (not isinstance(entry, dict)
+                                  or not {"path", "sha256"} <= entry.keys()):
+            return True
+    # Only omission of the whole profile has a historical meaning (#1460).
+    # A partial profile cannot attest the instrument for a resumed phase.
+    if "profile" in pinned:
+        profile = pinned["profile"]
+        if (not isinstance(profile, dict) or not profile.get("name")
+                or not profile.get("digest_md5")):
+            return True
+    return _subset_differs(_comparable(pinned), _comparable(current))
+
+
+def pre_profile_pin(pinned) -> bool:
+    """A pin whose instruction predates the `--profile` line: its spec
+    carries no `profile`, whether or not the pin's top level does (the
+    #1460–#1581 window wrote the key beside an instruction that had not
+    yet changed, #1712) — the case whose instruction cannot render again
+    (#1628, #1677). A pin of any other shape is not one (#1701)."""
+    if not isinstance(pinned, dict):
+        return False
+    instr = pinned.get("instruction")
+    spec = instr.get("spec") if isinstance(instr, dict) else None
+    import re
+    digest = instr.get("sha256") if isinstance(instr, dict) else None
+    return (isinstance(digest, str) and re.fullmatch(r"[0-9a-fA-F]{64}", digest) is not None
+            and isinstance(spec, dict)
+            and {"condition", "bundle", "render_version"} <= spec.keys()
+            and "profile" not in spec)
+
+
+def identity_refusal(pinned: dict, where: str) -> str:
+    base = (f"generation input identity changed {where}; restore the recorded inputs or use "
+            "--no-resume for an explicit new generation")
+    if pre_profile_pin(pinned):
+        base += (" (a generation pinned before the instruction carried its profile hashed an "
+                 "instruction that no longer renders, and cannot be resumed; #1628, #1712)")
+    return base
+
+
 def require_resolved(spec) -> None:
     data = _read(spec)
     pending = data.get("pending_call")
@@ -176,9 +272,8 @@ def require_resolved(spec) -> None:
             "restore its usage before resuming, or explicitly start fresh to archive this generation")
 
     pinned = data.get("input_identity")
-    if pinned is not None and pinned != spec.input_identity():
-        raise UsageLedgerError("generation input identity changed (bundle, manifests or resolved instruction); "
-                               "restore the recorded inputs or use --no-resume for an explicit new generation")
+    if pinned is not None and _identity_differs(pinned, spec.input_identity()):
+        raise UsageLedgerError(identity_refusal(pinned, "(bundle, manifests or resolved instruction)"))
     _finish_reasoning_archive(spec, data)
     from data_sheets_schema.snapshot_store import finish_activation
     finish_activation(spec)
@@ -206,6 +301,10 @@ def cancel_call(spec, identifier: str) -> None:
 
 def prepare_usage(spec, *, resume: bool) -> str:
     """Establish the generation boundary before any call can be made (#1291)."""
+    if getattr(spec, "_replay_only", False):
+        # A replay spec carries no instrument; it must not open or continue
+        # a generation (#1568).
+        raise UsageLedgerError("a replay spec cannot prepare a usage generation")
     path = ledger_path(spec)
     if resume and path.exists():
         require_resolved(spec)

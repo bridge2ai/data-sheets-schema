@@ -35,20 +35,26 @@ def _record(tmp, passed=True, md5=None, with_field=False, algo="md5"):
 
 
 class TestTheGate(unittest.TestCase):
-    def _run(self, tmp, new_passed=True, new_md5="m1", execute=True, problems=(), schema=None):
-        from data_sheets_schema.cli import provenance as cli
-        block = {"passed": new_passed, "artifacts": {"full": {"md5": new_md5}, "core": {"md5": new_md5}},
-                 "duplicate_keys": {"full": [], "core": []}, "problems": list(problems)}
-        if schema is not None:
-            block["schema"] = dict(schema)
+    def _run(self, tmp, new_passed=True, new_md5=None, execute=True, problems=(), schema=None):
+        import hashlib
+        def fresh_block(spec, problems, recorded_by, prior=None):
+            artifacts = {}
+            for name, path in (("full", spec.full_path), ("core", spec.core_path)):
+                old = (prior or {}).get("artifacts", {}).get(name, {})
+                algorithms = [key for key in ("md5", "sha256") if old.get(key)] or ["md5"]
+                artifacts[name] = {"path": str(path), **{
+                    key: new_md5 if key == "md5" and new_md5 else hashlib.new(key, path.read_bytes()).hexdigest()
+                    for key in algorithms}}
+            block = {"passed": new_passed, "artifacts": artifacts,
+                     "duplicate_keys": {"full": [], "core": []}, "problems": list(problem_rows)}
+            if schema is not None:
+                block["schema"] = dict(schema)
+            return block
+        problem_rows = problems
         with mock.patch("data_sheets_schema.api_runner.validate_outputs", lambda spec: []), \
-             mock.patch("data_sheets_schema.api_runner.validation_block", lambda spec, problems, recorded_by, prior=None: dict(block)), \
+             mock.patch("data_sheets_schema.api_runner.validation_block", fresh_block), \
              mock.patch("data_sheets_schema.provenance.record_path_for",
-                        lambda project, method, label, concat_dir=None: Path(tmp) / "claudecode_api_core" / label / f"{project}_provenance.yaml"), \
-             mock.patch("data_sheets_schema.api_runner.RunSpec") as spec_cls:
-            spec = spec_cls.return_value
-            spec.full_path = Path(tmp) / "claudecode_api" / "L_rep1" / "P_d4d.yaml"
-            spec.core_path = Path(tmp) / "claudecode_api_core" / "L_rep1" / "P_d4d_core.yaml"
+                        lambda project, method, label, concat_dir=None: Path(tmp) / "claudecode_api_core" / label / f"{project}_provenance.yaml"):
             return cli._recheck_one("claudecode_api", "L_rep1", "P", execute=execute, gated=True)
 
     def test_an_unchanged_verdict_is_written_with_the_field_added(self):
@@ -115,10 +121,10 @@ class TestTheGate(unittest.TestCase):
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as tmp:
             path = _record(tmp)
-            runs = [SimpleNamespace(method="claudecode_api", label="L_rep1", projects=["P"]),
-                    SimpleNamespace(method="claudecode_api_core", label="L_rep1", projects=["P"])]
+            runs = [SimpleNamespace(method="claudecode_api", label="L_rep1", projects=["P"], path=Path(tmp) / "claudecode_api/L_rep1"),
+                    SimpleNamespace(method="claudecode_api_core", label="L_rep1", projects=["P"], path=Path(tmp) / "claudecode_api_core/L_rep1")]
             calls = []
-            def one(method, label, project, execute, gated):
+            def one(method, label, project, execute, gated, record_path=None):
                 calls.append(method); return "written"
             with mock.patch("data_sheets_schema.runs.discover", lambda: runs), \
                  mock.patch("data_sheets_schema.provenance.record_path_for",

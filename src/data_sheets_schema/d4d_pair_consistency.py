@@ -758,7 +758,8 @@ def pair_predates_current_schema(core_path: Path) -> bool:
     recorded = (data.get("schema") or {}).get("digest_md5")
     if not recorded:
         return False
-    live = schema_digest.fingerprint(schema_digest.digest_text(FULL_CLASS))
+    from data_sheets_schema.profiles import for_record
+    live = schema_digest.fingerprint(schema_digest.digest_text(FULL_CLASS, profile=for_record(data)))
     return recorded != live
 
 

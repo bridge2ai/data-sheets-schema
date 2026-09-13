@@ -1433,6 +1433,63 @@ hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
 the one annotated artifact. New evaluations use the strict exact-file check,
 whose exit status must be 0.
 
+## Profiles: the study's text and vocabularies (#628, #1302)
+
+What is Bridge2AI's and not the pipeline's lives in `profiles.py`: the
+pinned registry vocabularies the schema digest renders for `data_topic`
+and `data_substrate`, the four-project default of the agreement matrix,
+the AI-READI healthsheet input, and the project lists of the comparison
+arms. The **`bridge2ai`** profile carries them; the **`neutral`** profile
+carries none. The source manifest selects the profile with a top-level
+`profile:` key (the study's declares `bridge2ai`); a manifest without one,
+or a run that selected no manifest, is neutral; `D4D_PROFILE` overrides
+for one process. A profile is never inferred from a project name.
+
+The digest now renders the term sources the schema's description declares
+for a slot (`schema_digest.TERM_SOURCES`: GO, MeSH, EFO, NCIT for
+`Instance.data_topic`; a `d4d:termSources` slot annotation wins when a
+schema carries one) before any pinned list, so a source-supported GO,
+MeSH, EFO or NCIT identifier is in range whether or not the registry lists
+it; the neutral profile renders only that scope. **This changes the
+study's digest** — its md5 moves for every run made after it — and is
+registered as a condition boundary in the plan note; the schema files and
+every record are untouched. The table, not a schema annotation, because a
+merged-schema edit moves the schema hashes every checked report block
+attests (#1362). Test: `tests/test_profiles.py` asserts on the assembled
+full-phase request under both profiles.
+
+**A run resolves its profile once and says so** (#1438, #1443): `RunSpec`
+selects it from the manifest it selected — `profile:` key, else neutral;
+`D4D_PROFILE` overriding — and passes it to every digest it renders
+(`digest_text(…, profile=)`, the repair request, the pair-consistency
+ledger call) and to the record, whose `schema` block carries `profile` and
+`profile_basis` (`environment`; `no manifest`; `stated by the caller`;
+`manifest:<repo-relative path>@<sha256[:12]>` or `default manifest:…`, with
+` (undeclared)` when the manifest declares no profile, or `(missing)` when
+the path is not there; `rendered instruction`, with ` (this process would
+select …)` when the recorder's own selection differs or ` (this process
+could not select one: …)` when it could not; `re-rendered to the recorded
+hash by d4d provenance backfill-spec (#772)` on a reconstructed spec)
+beside `digest_md5`;
+`d4d api plan` prints them. The rendered `d4d provenance record` line
+carries `--profile <name>`, so the agentic recorder — another process,
+without the environment that selected it — records the instruction's
+profile and states what it would have selected itself (#1581); the basis
+is a record fact and not part of the resume identity (#1626). A generation
+pinned before profiles existed hashed an instruction that no longer
+renders and cannot be resumed (#1628). A caller
+that selected nothing gets the default manifest resolved *when asked*
+(#1439): the working directory's, else the checkout's — so a script run
+from `tests/` still sees the study's — else none. Both digests are in
+`digest_inventory.yaml` (`record_inventory(profile=)`, #1441), so
+`slot_existed_at` answers for a neutral run. The fitness judge's slot
+specification renders the same term-source scope the digest does (#1440;
+an evaluation-instrument change, dated in the plan note). The arm table
+(`GENERATION_ARMS`) carries no project lists: `profiles.arm_projects_for`
+is the study's scope for its comparison arms, and `agreement.default_projects()`
+/ `healthsheet.default_record()` read the active profile when called —
+empty and `None` under `neutral`, where a caller must name them (#1444).
+
 ## The manifest is the project registry (#621, #623, #624, #637, #1299)
 
 A dataset is whatever the selected source manifest declares under
@@ -1474,6 +1531,104 @@ gate still refuses a missing or stale manifest before any spend. The
 acceptance test is `tests/test_external_dataset_onboarding.py`: a dataset
 that exists only in a temporary manifest goes through preprocessing,
 concatenation, chunking, an offline plan and status with no Python edit.
+
+## Resources resolve from anywhere, and the wheel ships them (#1301, #673)
+
+The constants keep their repository-relative spelling — `Path("src/download/
+prompts/…")`, `.claude/commands/…`, `src/data_sheets_schema/schema/…` — because
+that is the form every record stores and every pin is keyed on, and the
+**readers resolve them when they read** (`data_sheets_schema.resources.
+resource_path`, the shape `schema_digest.resolve_schema` and
+`record_schema_path` already had): the working directory's copy when it is
+there or when the working directory carries that resource *directory* (a
+staged fixture that omits a prompt reads it as `missing`, never the
+checkout's copy; the test is any ancestor below the top-level component, so a
+user's own `src/` or `.claude/` does not count: authority is the nearest
+existing ancestor at depth three or deeper under `src/` — `src/download/prompts`,
+`src/data_sheets_schema/schema` — the same answer for a directory and its
+files, #1535; a project's own `.claude/commands/` cannot hide the playbooks an
+install ships, #1500); else the checkout's when the
+package is imported from one (`pyproject.toml` two levels up); else the
+installed copy — the wheel places the condition prompts and their pin
+registry, the playbooks and agent definitions the record hashes, and the
+rubric sources at the same relative paths under the installation root, and
+the schema files as package data — so `src`, `data`, `.claude` and `.github` are
+top-level entries of `site-packages` and `import src` resolves as a
+namespace package there, a stated cost of keeping one spelling in both
+places (#1504). Only `src/`, `.claude/`, `.github/`, `data/rubric/` and
+`project/` are resources; the corpus under `data/` is the caller's tree and a
+missing record never resolves to the checkout's. Not at import time: a
+constant resolved once takes the value of whichever directory the first
+importer was in, and a fixture test that ran later then wrote the real
+registry (the first form of this change did exactly that).
+
+The wrapped readers: `schema_cache.load_yaml`/`sha256_of`,
+`schema_snapshot.capture_schema` (so every `shared_view`),
+`schema_digest.resolve_schema` and the digest ledger (no by-name fallback
+after an authoritative absence, #1483), the prompt registry (`load`,
+`sha256_of`, `body_sha256_of`, `prompt_files`, `pin` — which refuses a
+registry that is not in the working tree, #1484 — and `normalise`),
+`provenance._md5/_sha256`, `prompt_facts`, the playbook and companion
+hashes and `referenced_playbooks`, `runs.playbook_drift`, `prompt_body`,
+the tuned component, `schema_sync.check_one` (which keeps the logical
+`source_file:` spelling in the rebuilt schema, #1478), `verifiable`, the
+`rocrate` and `derive` commands, and every `linkml-validate` subprocess,
+which runs `resources.linkml_validate()` — the console script beside the
+interpreter, else the module entry point through the interpreter, never a
+`PATH` search (#1486) — because `poetry run` needs a `pyproject.toml` in
+the working directory and failed from anywhere else. A spelling with `..` is never a resource and is never
+collapsed lexically — `.venv/../x` through a symlinked `.venv` is the file
+the filesystem says it is, in every reader (#1481, #1482, #1528, #1570) — and
+a resource directory classifies like its files (#1488). `repo_relative` anchors
+an absolute path to the checkout, the package data, then — for a resource
+only — the install root; the registry's key also falls back to the working
+directory as it always did, the record's never does (#398). `d4d provenance
+record` no longer requires the repository root: it refuses only a working
+directory *inside* the checkout but not at its root, where the record would
+land under `<subdir>/data/` unread (#672's case); from an installed package
+the record goes into the caller's tree. `linkml` is a runtime dependency
+(unconditionally — it was also listed in the `docs` extra, which made
+poetry emit it extra-only, #1476): the record contract is compiled with its
+generators and every record is validated with its validator. Commands that
+import checkout-only code through `setup_repo_imports` (`download`,
+`evaluate`, `render`, `rocrate`, `schema`, `utils`) still require a checkout
+and say so. `D4D_INSTALL_TESTS=1 pytest tests/test_installed_wheel.py`
+(marker `install`) builds the wheel, installs it into a fresh virtual
+environment and, from a directory with no checkout and no study tree,
+checks the metadata, runs the schema preflight, a fake-client generation
+through every phase, the derived core, the record write, its deterministic
+checks and `linkml-validate`, and `check_record` — the release canary, run
+(the deterministic model config under `.github/workflows/` ships too, and a
+record made where it is absent says the defaults applied rather than naming
+a file it did not read, #1529; on an install the digest ledger under
+`site-packages` is mutable package data, a stated design cost, #1537;
+the record's `repo` block names `resource_root` and `resource_kind` —
+the checkout git runs at, or the install root and package version — so
+a record made from a user's own repository no longer attests that
+repository's commit beside the checkout's hashes, #1550; that root is
+decided once (`resources.resource_root`): the working directory when it
+is a checkout of this project — a worktree or a second clone, whose files
+the readers take first — else the checkout the code is imported from, so
+a run from a worktree with the primary's code names the worktree's
+commit and keeps its files repository-relative, and the root guard
+refuses a subdirectory of any checkout, #1588; that checkout is
+authoritative for its absences too — a playbook or prompt it lacks is
+`exists: false`, never another checkout's — a file under another
+checkout keeps its absolute identity, an unreadable `pyproject.toml` is
+refused rather than read as no checkout, and the corpus (`chunking.anchored`,
+the default manifest, the healthsheet's Source line) anchors on the same
+root, #1617/#1618/#1619/#1640; git must answer for that root itself, not
+an enclosing repository, and a failed status query is unknown, not
+clean, #1621/#1635; an install compares its files with the wheel's
+RECORD, #1641; where git cannot answer
+there the commit and the dirty state are recorded unknown, not clean,
+#1591; `agent_pin`
+reads the shipped definitions and `chunking.anchored` follows the resource
+root (#1640), while `verifiable`'s record lookup and the `git show` bundle-bytes
+lookup still anchor on the code checkout and are checkout-only until the
+corpus root follows the manifest, #1523/#1553),
+by the publish workflow before `poetry build`, not a pull-request test; it
+fails, never skips, when the wheel does not install.
 
 ## One parse per file per process (#1203)
 

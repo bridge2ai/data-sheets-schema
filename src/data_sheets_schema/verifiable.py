@@ -69,10 +69,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
 
-# Resolved from this file, not the working directory. Running the CLI from a
-# subdirectory tried to open `tests/src/data_sheets_schema/schema/...`.
+# The corpus lookups below are anchored on the checkout (running the CLI
+# from a subdirectory tried to open `tests/src/...`); the schema is a
+# resource and resolves through `resources.resource_path` when read, so
+# an installed package finds its own copy (#1485).
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-FULL_SCHEMA = _REPO_ROOT / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 
 # Token kinds that must appear verbatim in a source document if they are real.
 # Deliberately narrow: each is a string a human copied from somewhere, not a
@@ -151,14 +153,10 @@ def declared_bundle(method: str, label: str, project: str) -> Path | None:
     import yaml as _yaml
     from data_sheets_schema.provenance import record_path_for
 
-    # Both the lookup and the result are resolved from the repository root, not
-    # the working directory. `FULL_SCHEMA` above was fixed for this and the
-    # assumption crept back in a few lines below it. The failure is silent: the
-    # record is not found, None is returned, and the caller falls back to the
-    # baseline bundle — which is exactly the wrong-sources bug this function
-    # exists to prevent, now producing a plausible number from the wrong input.
+    from data_sheets_schema.corpus import root
+    corpus_root = root()
     rec = record_path_for(project, method, label,
-                          _REPO_ROOT / "data/d4d_concatenated")
+                          corpus_root / "data/d4d_concatenated")
     if not rec.exists():
         return None
     data = _yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
@@ -166,7 +164,7 @@ def declared_bundle(method: str, label: str, project: str) -> Path | None:
     if not path:
         return None
     p = Path(path)
-    return p if p.is_absolute() else _REPO_ROOT / p
+    return p if p.is_absolute() else corpus_root / p
 
 
 def identifier_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:

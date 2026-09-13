@@ -63,7 +63,7 @@ def test_default_backfill_defers_an_unfinished_api_generation_and_resume_reuses_
     assert len(completed["usage"]) == 4
 
 
-@pytest.mark.parametrize("drift", [None, "progress", "bundle", "legacy-ledger", "unbound"])
+@pytest.mark.parametrize("drift", [None, "progress", "bundle", "legacy-ledger", "unbound", "progress-subset"])
 def test_an_old_generationless_reconstruction_cannot_override_bound_resume_evidence(interrupted, drift):
     spec = interrupted
     reconstruction = pv.build_record(spec.project, spec.method, spec.label,
@@ -86,6 +86,27 @@ def test_an_old_generationless_reconstruction_cannot_override_bound_resume_evide
             progress = json.loads(api._progress_path(spec).read_text())
             del progress["input_identity"]
             api._progress_path(spec).write_text(json.dumps(progress))
+    elif drift == "progress-subset":
+        # Optional render-spec metadata can be absent while the original
+        # bundle/source-manifest/chunk file pins and instrument evidence stay
+        # complete (#1749). Raw equality would fail to bind this generation
+        # and adopt the reconstruction instead (#1629, #1704).
+        usage = json.loads(ledger.ledger_path(spec).read_text())
+        del usage["input_identity"]["instruction"]["spec"]["chunk_manifest"]
+        ledger.ledger_path(spec).write_text(json.dumps(usage))
+        progress = json.loads(api._progress_path(spec).read_text())
+        del progress["input_identity"]["instruction"]["spec"]["chunk_manifest"]
+        api._progress_path(spec).write_text(json.dumps(progress))
+        # The snapshot index was written by the same run and carries the same
+        # shape as its owner's pin: strip the key there too.
+        for index in spec.provenance_path.parent.rglob("*.json"):
+            try:
+                doc = json.loads(index.read_text())
+            except ValueError:
+                continue
+            if isinstance(doc, dict) and isinstance(doc.get("input_identity"), dict) and "snapshots" in doc:
+                del doc["input_identity"]["instruction"]["spec"]["chunk_manifest"]
+                index.write_text(json.dumps(doc))
     client = client_for(spec)
     if drift in {"progress", "bundle", "unbound"}:
         reason = "no recorded generation input hash" if drift == "unbound" else "input identity changed"

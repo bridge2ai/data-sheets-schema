@@ -416,7 +416,8 @@ runtime list, so any VOICE_PEDIATRIC failure would have attributed as
 `unattributed` — silently, since nothing distinguishes "a project we did not
 open" from "a value that matched nothing". Fixed to read `PROJECTS` (#463).
 Two four-project literals are still live and are *not* prose:
-`agreement.DEFAULT_PROJECTS`, and the byte-identity assertion in
+`agreement.DEFAULT_PROJECTS` (since moved into the `bridge2ai` profile,
+#1444), and the byte-identity assertion in
 `tests/test_download/test_generic_v2_prompt.py` (#467). "Broke nothing" held
 because nothing from the fifth project had reached those code paths yet, not
 because they were generic.

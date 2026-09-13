@@ -22,12 +22,17 @@ def get_repo_root() -> Path:
     Raises:
         RuntimeError: If not running in a repository checkout
     """
-    # Try to find repo root by looking for pyproject.toml
-    current = Path(__file__).resolve()
-
-    for parent in [current] + list(current.parents):
-        if (parent / "pyproject.toml").exists():
-            return parent
+    # The same decision as `resources.resource_root` (#1501, #1588): the
+    # working directory when it is a checkout of this project, else the
+    # checkout the package is imported from — never an arbitrary ancestor,
+    # so a wheel installed in a user's project venv does not adopt that
+    # project as the root (#1577).
+    from data_sheets_schema.resources import CHECKOUT_ROOT, cwd_checkout
+    here = cwd_checkout()
+    if here is not None:
+        return here
+    if CHECKOUT_ROOT is not None:
+        return CHECKOUT_ROOT
 
     raise RuntimeError(
         "This command requires a repository checkout.\n"
@@ -71,6 +76,9 @@ def require_repo_context(command_name: str = "this command"):
         get_repo_root()
     except RuntimeError as e:
         import click
+        from data_sheets_schema.resources import ResourceRootError
+        if isinstance(e, ResourceRootError):
+            raise                            # already a click error, and the reason is the whole message (#1730)
         raise click.ClickException(
             f"{command_name} requires a repository checkout.\n"
             f"The d4d CLI currently relies on repository-local code.\n"

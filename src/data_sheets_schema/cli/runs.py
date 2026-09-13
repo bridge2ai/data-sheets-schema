@@ -5,6 +5,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.corpus import anchored as _corpus_path
+
 from data_sheets_schema.registry import project_choice, projects_for
 
 from data_sheets_schema.constants import PROJECTS
@@ -60,8 +62,9 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
                    f"out={r['total_output_tokens']:,} "
                    f"~${r['approx_cost_usd']:.2f} timing={r['timing_basis']}")
     if do_validate:
+        from data_sheets_schema.resources import linkml_validate, resource_path
         res = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", str(SCHEMA_PATH),
+            [*linkml_validate(), "-s", str(resource_path(SCHEMA_PATH)),
              "-C", "RunTelemetryReport", str(out)],
             capture_output=True, text=True, timeout=180)
         if res.returncode != 0:
@@ -194,7 +197,7 @@ def identifiers_cmd(label, method, output, show, strict):
     from data_sheets_schema import identifiers as ident
     from data_sheets_schema.runs import CONCAT_DIR
 
-    root = CONCAT_DIR
+    root = _corpus_path(CONCAT_DIR)
     if method:
         root = root / method
     report = ident.audit(root=root)
@@ -276,6 +279,8 @@ def trap_inventory_cmd(output, do_validate):
     Runs the validator over the whole corpus (slow: one subprocess per
     record) and aggregates findings by normalized slot path and error class.
     """
+    from data_sheets_schema.cli.provenance import _require_corpus_root
+    _require_corpus_root("d4d runs trap-inventory")   # it scans and writes the implicit corpus (#1721)
     import subprocess
     import yaml as _yaml
 
@@ -293,8 +298,9 @@ def trap_inventory_cmd(output, do_validate):
         click.echo(f"   {t['occurrence_count']:>4}x {t['error_class']:18} "
                    f"{t['slot_path']}")
     if do_validate:
+        from data_sheets_schema.resources import linkml_validate, resource_path
         res = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", str(SCHEMA_PATH),
+            [*linkml_validate(), "-s", str(resource_path(SCHEMA_PATH)),
              "-C", "TrapSlotInventoryReport", str(out)],
             capture_output=True, text=True, timeout=180)
         if res.returncode != 0:
@@ -534,6 +540,8 @@ def check_cmd(method, label, project, strict):
     from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
     header_mismatches = []
     pack_pin_drift = []                                        # a record's review pins a pack no longer on disk (#1095)
+    profile_disagreements: list[str] = []
+    malformed_records: list[str] = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -546,11 +554,24 @@ def check_cmd(method, label, project, strict):
                 continue
             if not is_complete(run.method, run.label, proj):
                 continue
-            rows.append(check_provenance(run.method, run.label, proj))
             # Duplicate mapping keys the validation block recorded (#1029):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
-            prov_data = _prov(run.method, run.label, proj) or {}
+            prov_data = _prov(run.method, run.label, proj)
+            if prov_data is None:
+                prov_data = {}
+            from data_sheets_schema.provenance import record_mapping_problem
+            malformed = record_mapping_problem(prov_data)
+            if malformed:
+                malformed_records.append(f"{run.label}/{proj}: {malformed}")
+                continue
+            rows.append(check_provenance(run.method, run.label, proj))
+            # A record whose profile and digest, or whose stored spec and
+            # schema, name different instruments is two records in one:
+            # the gate and the readers would disagree (#1581, #1678, #1699).
+            from data_sheets_schema.provenance import profile_problems
+            for problem in profile_problems(prov_data):
+                profile_disagreements.append(f"{run.label}/{proj}: {problem}")
             # The record's review block pins the pack by sha256; a pack rewritten
             # underneath it (a forced `d4d review pack`) leaves `review.adverse`
             # ranking canonicals on a review of a pack that no longer exists
@@ -673,7 +694,7 @@ def check_cmd(method, label, project, strict):
     click.echo(f"\n{len(rows)} run(s) checked, {len(required)} subject to the "
                f"requirement, {len(failed)} failing"
                + (f"; {len(duplicates)} with duplicate mapping keys (reported)" if duplicates else ""))
-    if not failed:
+    if not failed and not malformed_records:
         click.echo("All runs subject to the live-provenance requirement satisfy it.")
 
     if unobserved:
@@ -689,7 +710,7 @@ def check_cmd(method, label, project, strict):
     # — a drifted record is still usable, it just cannot be re-derived from the
     # path it names, and a gate would collapse that distinction.
     from data_sheets_schema.runs import (
-        BUNDLE_ABSENT, BUNDLE_CURRENT, BUNDLE_DRIFTED, BUNDLE_UNRECORDED,
+        BUNDLE_ABSENT, BUNDLE_CURRENT, BUNDLE_DRIFTED, BUNDLE_UNRECORDED, BUNDLE_UNRESOLVED,
         bundle_drift_detail,
     )
     drift: collections.Counter = collections.Counter()
@@ -896,6 +917,9 @@ def check_cmd(method, label, project, strict):
                    "not consistent.")
 
     stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
+    if drift[BUNDLE_UNRESOLVED]:
+        click.echo(f"\nⓘ  {drift[BUNDLE_UNRESOLVED]} record(s) name relative input bundles "
+                   "with no known corpus owner; whether their bytes still match is unknown.")
     if stale:
         click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "
                    f"have since changed ({drift[BUNDLE_CURRENT]} still match, "
@@ -1031,7 +1055,17 @@ def check_cmd(method, label, project, strict):
                    "the header from the record; a run resumed past its record write "
                    "keeps the header it had.")
 
-    if strict and (failed or bad_requests or never_pinned or condition_contradictions):
+    if profile_disagreements:
+        click.echo(f"\n❌ {len(profile_disagreements)} record(s) name two instruments (profile vs digest, or "
+                   "stored spec vs schema; #1699) — fatal under --strict:")
+        for line in profile_disagreements:
+            click.echo(f"   {line}")
+    if malformed_records:
+        click.echo(f"\n❌ {len(malformed_records)} malformed record(s) — fatal under --strict:")
+        for line in malformed_records:
+            click.echo(f"   {line}")
+    if strict and (failed or bad_requests or never_pinned or condition_contradictions
+                   or profile_disagreements or malformed_records):
         raise SystemExit(1)
 
 
@@ -1168,7 +1202,7 @@ def validate_cmd(method, project, label, recheck, dry_run):
     """
     import yaml as _yaml
     from data_sheets_schema.api_runner import (
-        RunSpec, validate_outputs, validation_block,
+        ValidationInputs, validate_outputs, validation_block,
     )
     from data_sheets_schema.provenance import (
         ProvenanceRecord, record_path_for,
@@ -1188,9 +1222,10 @@ def validate_cmd(method, project, label, recheck, dry_run):
         for proj in run.projects:
             if project and proj != project:
                 continue
-            if not is_complete(run.method, run.label, proj):
+            corpus_dir = run.path.parent.parent
+            if not is_complete(run.method, run.label, proj, corpus_dir):
                 continue
-            status = validation_status(run.method, run.label, proj)
+            status = validation_status(run.method, run.label, proj, corpus_dir)
             # STALE is *not* re-validated by default (#657 review). It
             # conflates two situations, and the default action is wrong for
             # both: a verdict whose schema pin predates a deliberate schema
@@ -1201,23 +1236,33 @@ def validate_cmd(method, project, label, recheck, dry_run):
             # investigation, not a fresh verdict quietly laundering it.
             # Re-validation of an already-verdicted record is `--recheck`,
             # a deliberate act naming its scope.
-            if not recheck and status != UNVERIFIED:
-                continue
-            targets.append((run.method, run.label, proj))
+            if not recheck:
+                if status != UNVERIFIED:
+                    continue
+                # UNVERIFIED also means an existing verdict's old artifact
+                # locations are unavailable. That never authorizes replacing
+                # the historical verdict without an explicit --recheck.
+                record = record_path_for(proj, run.method, run.label, corpus_dir)
+                if record.exists():
+                    prior_record = _yaml.safe_load(record.read_text(encoding="utf-8"))
+                    prior_verdict = prior_record.get("validation") if isinstance(prior_record, dict) else None
+                    if isinstance(prior_verdict, dict) and "passed" in prior_verdict:
+                        continue
+            targets.append((run.method, run.label, proj, corpus_dir))
 
     click.echo(f"🔍 {len(targets)} run(s) to validate")
     if dry_run:
-        for m, l, p in targets:
+        for m, l, p, _ in targets:
             click.echo(f"   {p:9} {m:34} {l}")
         return
 
     passed = failed = norec = 0
-    for m, l, p in targets:
-        spec = RunSpec(project=p, arm="", method=m,
-                       bundle=Path("data/preprocessed/concatenated") /
-                              f"{p}_preprocessed.txt", label=l)
+    for m, l, p, corpus_dir in targets:
+        spec = ValidationInputs(
+            full_path=corpus_dir / m / l / f"{p}_d4d.yaml",
+            core_path=corpus_dir / f"{m}_core" / l / f"{p}_d4d_core.yaml")
         problems = validate_outputs(spec)
-        rec = record_path_for(p, m, l)
+        rec = record_path_for(p, m, l, corpus_dir)
         icon = "✓" if not problems else "❌"
         click.echo(f"   {icon} {p:9} {l}")
         for q in problems:
@@ -1301,7 +1346,7 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     from data_sheets_schema.merge import union_merge, write_merge
 
     from data_sheets_schema.runs import CONCAT_DIR
-    base_dir = CONCAT_DIR / method
+    base_dir = _corpus_path(CONCAT_DIR) / method
     if config and not labels:
         labels = tuple(sorted(
             p.name for p in base_dir.glob(f"{config}_rep*") if p.is_dir()))
@@ -1367,9 +1412,11 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
 
 def _validates_one(record: Path, schema: str, cls: str) -> bool:
     import subprocess
+
+    from data_sheets_schema.resources import linkml_validate, resource_path
     try:
         return subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
+            [*linkml_validate(), "-s", str(resource_path(schema)), "-C", cls,
              str(record)], capture_output=True, text=True,
             timeout=300).returncode == 0
     except Exception:                                   # noqa: BLE001
@@ -1455,6 +1502,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     block naming every candidate and the criterion, so the choice is auditable
     and reversible.
     """
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d runs select")          # a corpus write lands under the cwd (#1685)
     if review_margin is not None:
         raise click.ClickException(
             "--review-margin is retired: review metrics are reported only "
@@ -1467,7 +1516,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         CONCAT_DIR, INVALID, UNVERIFIED, VALID, is_complete, validation_status)
     from data_sheets_schema.provenance import ProvenanceRecord, record_path_for
 
-    base_dir = CONCAT_DIR / method
+    base_dir = _corpus_path(CONCAT_DIR) / method
     labels = sorted(p.name for p in base_dir.glob(f"{config}_rep*") if p.is_dir())
     if len(labels) < 2:
         raise click.ClickException(
@@ -1479,7 +1528,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         is evidence, else None and the reason — no block, not checked, or
         a checked block with findings or unanswered items, which is not the
         same as no block (#1124 round-9 review, M-R9-1). Absence is not zero adverse."""
-        pp = record_path_for(project, method, label, CONCAT_DIR)
+        pp = record_path_for(project, method, label, _corpus_path(CONCAT_DIR))
         if not pp.exists():
             return None, "no provenance record"
         try:
@@ -1499,7 +1548,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         if not record.exists():
             candidates.append((label, None, "no record", 0, "no record", "no record"))
             continue
-        if not is_complete(method, label, project, CONCAT_DIR):
+        if not is_complete(method, label, project, _corpus_path(CONCAT_DIR)):
             candidates.append((label, record, "incomplete", 0, "incomplete", "incomplete"))
             continue
         loaded = _yaml.safe_load(record.read_text(encoding="utf-8"))
@@ -1514,7 +1563,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         # have excluded a perfectly good record.
         ok, detail = _validates(record)
         live = VALID if ok else INVALID
-        recorded = validation_status(method, label, project, CONCAT_DIR)
+        recorded = validation_status(method, label, project, _corpus_path(CONCAT_DIR))
         candidates.append((label, record, live, slots, recorded, detail))
 
     accept = {VALID} | ({UNVERIFIED} if allow_unverified else set())
@@ -1572,7 +1621,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         click.echo("\nDry run. Re-run with --execute to record the choice.")
         return
 
-    prov_path = record_path_for(project, method, winner[0], CONCAT_DIR)
+    prov_path = record_path_for(project, method, winner[0], _corpus_path(CONCAT_DIR))
     if not prov_path.exists():
         raise click.ClickException(
             f"{winner[0]} has no provenance record at {prov_path}; a canonical "
@@ -1585,7 +1634,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     winner_runtime = runtime_of(_yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {})
     superseded = []
     skipped_runtimes = []
-    for other in sorted(CONCAT_DIR.rglob(f"{project}_provenance.yaml")):
+    for other in sorted(_corpus_path(CONCAT_DIR).rglob(f"{project}_provenance.yaml")):
         if other == prov_path:
             continue
         try:
@@ -1745,7 +1794,7 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
     total_sentences = total_prose = total_structural = 0
     rows = []
     for proj, lab, meth, rt in sorted(targets, key=lambda t: (t[0], t[3] or "", t[1])):
-        path = _Path(CONCAT_DIR) / meth / lab / f"{proj}_d4d.yaml"
+        path = _Path(_corpus_path(CONCAT_DIR)) / meth / lab / f"{proj}_d4d.yaml"
         if not path.exists():
             continue
         summary = red.summarize(red.load(path), **kwargs)

@@ -161,6 +161,7 @@ def normalize(project, packages_dir):
     fork), a size-reduced crate JSON-LD (de novo fork), and a changes report.
     Raw inputs are never modified.
     """
+    require_repo_context("d4d rocrate normalize")     # the mapping table and packages are the corpus (#1551); below the docstring (#1590)
     from linkml_runtime import SchemaView
 
     from data_sheets_schema.rocrate_normalize import (
@@ -176,7 +177,8 @@ def normalize(project, packages_dir):
         click.echo(f"No crate packages found under {root}", err=True)
         sys.exit(1)
 
-    sv = SchemaView(str(FULL_SCHEMA))
+    from data_sheets_schema.resources import resource_path
+    sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
     failures = 0
     for name in targets:
         click.echo(f"\n📦 {name}")
@@ -298,6 +300,7 @@ def map_cmd(project, packages_dir):
     upstream ro-crate-linkml.yaml, so it works uniformly across crates and
     reports the declared mapping quality of every field it fills.
     """
+    require_repo_context("d4d rocrate map")
     from linkml_runtime import SchemaView
 
     from data_sheets_schema.rocrate_map import (
@@ -314,7 +317,8 @@ def map_cmd(project, packages_dir):
         click.echo(f"No crates with ro-crate-metadata.json under {root}", err=True)
         sys.exit(1)
 
-    sv = SchemaView(str(FULL_SCHEMA))
+    from data_sheets_schema.resources import resource_path
+    sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
     rows = load_mapping()
     click.echo(f"Mapping table: {len(rows)} rows")
     failures = 0

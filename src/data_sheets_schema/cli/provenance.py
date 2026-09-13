@@ -4,6 +4,8 @@ import functools
 
 import click
 
+from data_sheets_schema.corpus import anchored as _corpus_path
+
 from data_sheets_schema.cli.api import ARMS as _ARMS
 from data_sheets_schema.provenance import SOURCE_MANIFEST as SOURCE_MANIFEST_DEFAULT
 from pathlib import Path
@@ -138,8 +140,31 @@ def _CONDITIONS_FOR_RECORD() -> list[str]:
     return list(CONDITION_PROMPTS)
 
 
+def _require_corpus_root(command: str) -> None:
+    """An implicit corpus target — a project's bundles, its chunk manifests,
+    the trap inventory — is written under the checkout the corpus is
+    anchored on (`chunking.corpus_root`). Only that directory may write it:
+    a subdirectory would write above itself and a directory outside every
+    checkout would write into the importing checkout without naming it
+    (#1714, #1721). Explicit `--bundle`/`--output` paths are the caller's."""
+    from data_sheets_schema.chunking import corpus_root
+    _require_repo_root_cwd(command)
+    root = corpus_root()
+    if root is None:
+        return
+    try:
+        here = Path.cwd().resolve()
+    except OSError:
+        here = None
+    if here != root.resolve():
+        raise click.ClickException(
+            f"{command}: its implicit corpus targets are written under {root}, not {Path.cwd()}; "
+            "run from that checkout root, or name every bundle explicitly (#1714)")
+
+
 def _require_repo_root_cwd(command: str) -> None:
-    """Refuse to record from anywhere but the repository root (#672 review).
+    """Refuse to record from a directory inside the checkout that is not its
+    root (#672 review; narrowed by #1301).
 
     #659's resolution fix turned an outside-the-root recorder from a loud
     FileNotFoundError into a quietly degraded record: playbook hashes
@@ -150,14 +175,27 @@ def _require_repo_root_cwd(command: str) -> None:
     cwd-relative constants this codebase runs on make "the repo root" the
     only cwd a record can honestly be written from.
     """
-    if not (Path("data/d4d_concatenated").is_dir()
-            and Path("src/data_sheets_schema").is_dir()):
+    # Since #1301 the playbooks, schemas and prompts resolve from any
+    # directory, and the record is written into the caller's own tree —
+    # which is right for a user of the installed package and wrong for a
+    # shell that wandered into a subdirectory of the checkout: that record
+    # would land under <subdir>/data/ where no check reads it. Refuse
+    # exactly that case.
+    # Any checkout of this project, not only the one the code is imported
+    # from (#1588): a worktree's subdirectory is as wrong a place as the
+    # primary's.
+    from data_sheets_schema.resources import ResourceRootError, checkout_at
+    cwd = Path.cwd().resolve()
+    try:
+        root = checkout_at(cwd)
+    except ResourceRootError as exc:
+        raise click.ClickException(f"{command}: {exc}; a record cannot say whose resources it hashed (#1619)")
+    if root is not None and cwd != root:
         raise click.ClickException(
-            f"{command} must run from the data-sheets-schema repository root: "
-            "the playbook hashes, manifest, schemas and output paths all "
-            "resolve relative to it, and a record written from elsewhere "
-            "would attest the wrong inputs or none. cd to the repo root and "
-            "re-run.")
+            f"{command} must run from the data-sheets-schema repository root ({root}), "
+            f"not a directory inside it: output paths resolve relative to the "
+            f"working directory, and a record written from {cwd} would land "
+            "where no check reads it. cd to the repo root and re-run.")
 
 
 def _parse_phases(specs) -> list[dict]:
@@ -307,10 +345,16 @@ def _parse_phases(specs) -> list[dict]:
                    'already existed and validated — the same field the API '
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
+@click.option('--profile', 'stated_profile', default=None,
+              type=click.Choice(sorted(__import__("data_sheets_schema.profiles", fromlist=["PROFILES"]).PROFILES)),
+              help='the profile the launch instruction was rendered under (the rendered `d4d provenance record` '
+                   'line carries it); recorded with the basis `rendered instruction`, over what the manifest '
+                   'or this process\'s environment would select (#1581)')
 @click.option('--manifest', default=None,
-              help='the source manifest this run consulted and attests as an input; default: '
-                   'the manifest selected by the resolved bundle and output header; `none` '
-                   'for a run that read no manifest (#621)')
+              help='the source manifest this run selected: its `profile:` decides the digest '
+                   'and, unless the output header declares its context unused, it is attested '
+                   'as an input; default: the manifest selected by the resolved bundle and '
+                   'output header; `none` for a run that selected no manifest (#621, #1461)')
 @click.option('--chunk-manifest', type=click.Path(exists=True, dir_okay=False),
               help='the exact chunk manifest consumed by this run; default: discover beside the bundle')
 @click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
@@ -319,7 +363,8 @@ def _parse_phases(specs) -> list[dict]:
                    'rather than as not-applicable')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected):
+           reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
+           stated_profile=None):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -344,8 +389,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # the digest is observed rather than asserted. `d4d api run` has always
     # recorded it and this path never could, which left the agentic arm off the
     # axis the whole prompt comparison is stratified by — and unable to go
-    # STALE when the schema moves (#426, #433, #497).
-    digest = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+    # STALE when the schema moves (#426, #433, #497). Rendered under the
+    # profile the selected manifest declares, once the manifest is selected
+    # below (#1438).
 
     # Reconstruct the render spec, so the gate can re-render and compare rather
     # than reporting `unverifiable`. Only when the caller says which condition
@@ -354,24 +400,69 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     from data_sheets_schema.registry import AUTO, select_manifest, manifest_declared_unused
     requested = (None if (manifest and str(manifest).lower() == "none")
                  else Path(manifest) if manifest else AUTO)
-    # The bundle the record will name: the one passed, else the one the
-    # output's header declares — read here, before selecting, so a study
-    # key over an external header bundle selects none (#1384).
+    from data_sheets_schema.corpus import AUTO as NO_OVERRIDE, manifest_override
+    if requested is AUTO:
+        explicit = manifest_override()
+        if explicit is not NO_OVERRIDE:
+            requested = explicit
     from data_sheets_schema.provenance import CONCAT_DIR as _CD, parse_header
-    header_bundle = None
     base = method[:-5] if method.endswith("_core") else method
-    full_out = _CD / base / label / f"{project}_d4d.yaml"
-    h = parse_header(full_out) if full_out.exists() else {}
-    header_bundle = h.get("Source bundle") or h.get("Source")
-    resolved_bundle = input_bundle or header_bundle
-    header_manifest = h.get("Source manifest", "").strip()
-    header_unused = manifest_declared_unused(header_manifest)
-    if requested is AUTO and header_manifest and not header_unused:
-        requested = Path(header_manifest)
-    selected = (None if requested is AUTO and (resolved_bundle is None or header_unused)
-                else select_manifest(project, resolved_bundle, requested))
+    # An explicit external bundle can select no manifest even below another
+    # corpus. Resolve that namespace before reading any output header (#1735).
+    selected_manifest = select_manifest(project, input_bundle, requested)
+    for _ in range(2):
+        concat_dir = _corpus_path(_CD, selected_manifest)
+        full_out = concat_dir / base / label / f"{project}_d4d.yaml"
+        h = parse_header(full_out) if full_out.exists() else {}
+        header_bundle = h.get("Source bundle") or h.get("Source")
+        resolved_bundle = (input_bundle or
+                           (_corpus_path(Path(header_bundle), selected_manifest)
+                            if header_bundle else None))
+        header_manifest = h.get("Source manifest", "").strip()
+        header_unused = manifest_declared_unused(header_manifest)
+        header_selection = requested
+        if requested is AUTO:
+            if header_unused and "no manifest selected" in header_manifest.lower():
+                header_selection = None
+            elif header_manifest and not header_unused:
+                header_selection = _corpus_path(Path(header_manifest), selected_manifest)
+        # Unused context does not erase the selected output namespace.
+        selected_manifest = (None if header_selection is AUTO and resolved_bundle is None
+                             else select_manifest(project, resolved_bundle, header_selection))
+        if _corpus_path(_CD, selected_manifest).resolve() == concat_dir.resolve():
+            break
+        # A header selecting another owner must be read from that owner too.
+    else:
+        raise click.ClickException(
+            "output headers disagree about the corpus owner; pass --manifest to select it")
+    from data_sheets_schema.profiles import select_profile
+    if stated_profile:
+        # The instruction's profile is authoritative (#1581); what this
+        # process would have selected is a diagnostic, and a process whose
+        # own selection is invalid — `D4D_PROFILE=typo` — still records the
+        # profile it was told (#1606).
+        from data_sheets_schema.profiles import Selection, profile_named
+        stated = profile_named(stated_profile)
+        basis = "rendered instruction"
+        try:
+            ambient = select_profile(selected_manifest)
+        except ValueError as exc:
+            basis += f" (this process could not select one: {exc})"
+        else:
+            if stated is not ambient.profile:
+                basis += f" (this process would select {ambient.name}: {ambient.basis})"
+        profile_selection = Selection(stated, basis)
+    else:
+        try:
+            profile_selection = select_profile(selected_manifest)
+        except ValueError as exc:                # a manifest declaring a profile this code does not know (#1630)
+            raise click.ClickException(str(exc))
+    # … and the header governs what the input block attests.
+    selected = None if header_unused else selected_manifest
     manifest_basis = ("the output header declares the source manifest unused"
-                      if selected is None and header_unused else None)
+                      if header_unused else None)
+    digest = schema_digest.fingerprint(
+        schema_digest.digest_text("Dataset", profile=profile_selection.profile))
     spec = None
     if condition:
         from data_sheets_schema.api_runner import RunSpec
@@ -386,8 +477,11 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             bundle=Path(bundle) if bundle else None, label=label,
             condition=condition, runtime=runtime, provider=provider,
             manifest_line=_ARMS[arm][3],
-            manifest=selected,           # the same selection the input block records (#1367 review, must-fix 3)
+            manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
             chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
+            # The spec the gate re-renders carries the profile the record
+            # states, not a second selection of this process's own (#1606).
+            profile=profile_selection.name, profile_basis=profile_selection.basis,
         )
         spec = run_spec.render_spec()
         if not run_spec.manifest_used:
@@ -395,6 +489,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             manifest_basis = f"the arm's header declares the source manifest unused ({run_spec.manifest_line})"
 
     rec = build_record(project, method, label, mode="live",
+                       # The selected manifest owns outputs even when this
+                       # arm consumes none of its context blocks.
+                       concat_dir=concat_dir,
                        input_bundle=Path(input_bundle) if input_bundle else None,
                        input_verified=True,
                        prompt_paths=[Path(p) for p in prompts] or None,
@@ -402,11 +499,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                                        if prompt_text else None),
                        prompt_request_spec=spec,
                        schema_digest_md5=digest,
+                       profile=profile_selection,
                        reasoning_effort=reasoning_effort,
                        phases=_parse_phases(phase_specs),
                        receipt_expected=receipt_expected,
                        condition=condition,                  # the launcher's own claim (#1094)
                        manifest=selected, manifest_basis=manifest_basis,
+                       selected_manifest=selected_manifest,
                        chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
     if phases_skipped:
         known = _known_phases()
@@ -416,9 +515,14 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 f"--phase-skipped {bad}: not phases this pipeline has. "
                 f"Known: {', '.join(sorted(known))}")
         rec.data["phases_skipped"] = list(phases_skipped)
-    out = rec.write(record_path_for(project, method, label))
+    # Freeze the write destination so record_path_for cannot rediscover an
+    # ambient owner; the record itself keeps portable paths at its own root.
+    out = rec.write(record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
     click.echo(f"✓ {out}")
-    _inline_checks(out)
+    # Evidence pins retain the same portable spelling as the record's
+    # outputs. Reuse the resolved address without another corpus selection.
+    inline_address = out if concat_dir.is_absolute() else out.relative_to(Path.cwd())
+    _inline_checks(inline_address)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the
     # honest act — it is what puts the evidence in the record for `d4d runs
@@ -452,8 +556,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
 @click.option("--condition", required=True, help="the condition the instruction was rendered under")
 @click.option("--runtime", default="Claude Code", show_default=True)
 @click.option("--arm", type=click.Choice(sorted(_ARMS)), default="baseline", show_default=True)
+@click.option("--manifest", "selected_manifest_opt", default=None,
+              help="the manifest the run selected, for a record whose attested path is null (an arm whose header "
+                   "declares it unused) and whose selection was not the study default — tried first, proven only "
+                   "by the hash (#1654)")
 @click.option("--execute", is_flag=True, help="write the spec; without it, report only")
-def backfill_spec(project, method, label, condition, runtime, arm, execute):
+def backfill_spec(project, method, label, condition, runtime, arm, execute, selected_manifest_opt=None):
     """Attach the render spec to a record that recorded its request hash
     without one (#772).
 
@@ -479,7 +587,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     path = pv.record_path_for(project, method, label, pv.CONCAT_DIR)   # resolved at call time
     if not path.exists():
         raise click.ClickException(f"no provenance record at {path}")
-    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    try:
+        data = _yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, _yaml.YAMLError) as exc:
+        raise click.ClickException(f"cannot read provenance record {path}: {exc}") from exc
+    if data is None:
+        data = {}
+    malformed = pv.record_mapping_problem(data)
+    if malformed:
+        raise click.ClickException(malformed)
     req = ((data.get("prompts") or {}).get("request")) or {}
     if not req.get("sha256"):
         raise click.ClickException("the record carries no request hash; nothing to attach a spec to")
@@ -489,8 +605,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     bundle = ((data.get("inputs") or {}).get("bundle_path"))
     if not bundle:
         raise click.ClickException("the record names no input bundle; the spec needs one")
-    stamp = (data.get("record_generated_at") or "")[:10]
-    base = date.fromisoformat(stamp) if stamp else date.today()
+    stamp = data.get("record_generated_at")
+    if isinstance(stamp, date):
+        stamp = stamp.isoformat()
+    if stamp is not None and not isinstance(stamp, str):
+        raise click.ClickException("record_generated_at must be an ISO date/time string or null")
+    try:
+        base = date.fromisoformat(stamp[:10]) if stamp else date.today()
+    except ValueError as exc:
+        raise click.ClickException(f"record_generated_at is not a valid ISO date/time: {stamp!r}") from exc
     # The provider the record itself states — `d4d prompt render` writes the
     # runtime's provider (Anthropic for Claude Code), not the proxy identity
     # the API path's default spec carries, and the header line differs.
@@ -500,33 +623,130 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # only by reproducing the complete original instruction hash.
     from data_sheets_schema.registry import DEFAULT_MANIFEST, default_manifest_path
     sm = ((data.get("inputs") or {}).get("source_manifest")) or {}
-    manifest_choices = ([Path(sm["path"]) if sm.get("path") else None] if "path" in sm
+    # A recorded path is authoritative. A null path says the manifest's
+    # blocks were not consumed — an arm whose header declares it unused,
+    # or none selected — but the renderer still names the *selected*
+    # manifest in the recording command, so every way it could have been
+    # selected is tried, proven by the hash alone (#1607).
+    manifest_choices = ([Path(sm["path"])] if sm.get("path")
                         else [None, DEFAULT_MANIFEST, default_manifest_path()])
+    if selected_manifest_opt:
+        manifest_choices = [Path(selected_manifest_opt)] + manifest_choices   # the caller's candidate first (#1654)
+    # An arm that declares its own header keeps it — the crate-only and
+    # healthsheet arms say "not used" whatever was selected — and the
+    # default header follows the selection (#1607).
+    arm_header = _ARMS[arm][3]
+    own_header = "not used" in arm_header.lower()
     from itertools import product
     chunks = ((data.get("inputs") or {}).get("chunks") or {}).get("path")
     # A discovered sidecar is attested as an input too. Only an explicit
     # selection belongs in the rendered recording command (#1408).
     chunk_choices = (None, Path(chunks)) if chunks else (None,)
-    for delta, render_version, selected_chunks, selected_manifest in product(
-            (0, -1, 1, -2, 2), (4, 3, 2, 1), chunk_choices, manifest_choices):
+    outputs = data.get("outputs") or {}
+    destinations = {key: value["path"] for key, value in outputs.items()
+                    if key in {"full", "core", "report"} and isinstance(value, dict)
+                    and isinstance(value.get("path"), str) and value["path"]}
+    if set(destinations) == {"full", "core", "report"}:
+        destinations["receipt"] = str(Path(destinations["report"]).parent / f"{project}_coverage_receipt.yaml")
+    else:
+        destinations = None
+    destination_choices = [destinations]
+    owner = pv.artifact_root(path)
+    if destinations and owner is not None:
+        absolute = {key: str(owner / Path(value)) for key, value in destinations.items()}
+        if absolute != destinations:
+            destination_choices.append(absolute)
+        try:
+            relative = {key: str(Path(value).relative_to(owner))
+                        for key, value in destinations.items()}
+        except ValueError:
+            pass
+        else:
+            if relative != destinations:
+                destination_choices.append(relative)
+    # The profile the record states is the one its instruction was rendered
+    # under: the recording command carries `--profile <name>` whenever the
+    # run had one, and a record from before profiles carries neither. The
+    # candidate restates the record rather than selecting live (#1438).
+    schema_block = data.get("schema") if isinstance(data.get("schema"), dict) else {}
+    if "profile" in schema_block and schema_block["profile"] is not None:
+        from data_sheets_schema.profiles import PROFILES as _known
+        if not isinstance(schema_block["profile"], str) or schema_block["profile"] not in _known:
+            raise click.ClickException(f"the record's schema.profile is {schema_block['profile']!r}, not a profile "
+                                       f"this code knows ({', '.join(sorted(_known))}); nothing can be re-rendered under it (#1702)")
+        profile_choices: list[dict[str, str]] = [
+            {k: schema_block[k] for k in ("profile", "profile_basis") if schema_block.get(k)}]
+    else:
+        # A record that states no profile is from before profiles — or from
+        # a writer that did not record one: no `--profile` line first, then
+        # each profile this code knows, proven only by the hash.
+        from data_sheets_schema.profiles import PROFILES
+        profile_choices = [{}] + [
+            {"profile": name,
+             "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
+            for name in PROFILES]
+    backfill_basis = "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"
+    current_toolchain = None
+    if runtime in {"Claude Code", "Codex CLI"}:
+        from data_sheets_schema.agentic_runtime import toolchain
+        from data_sheets_schema.resources import ResourceRootError
+        try:
+            current_toolchain = toolchain()
+        except (OSError, ValueError, ResourceRootError):
+            # Current resources may be gone while older renderer hashes
+            # still reproduce. Only this candidate becomes unavailable.
+            pass
+    for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations, scoped_chunks in product(
+            (0, -1, 1, -2, 2), (6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
+            destination_choices, (True, False)):
+        if render_version == 1 and selected_profile and not schema_block.get("profile"):
+            continue  # renderer 1 cannot prove a profile (#1678)
+        if scoped_chunks and (render_version < 5 or runtime not in {"Claude Code", "Codex CLI"}):
+            continue
+        # This is only a candidate: current installed paths may recover an
+        # unrecorded renderer6 toolchain only if the complete original hash
+        # agrees. A different installation cannot silently reinterpret it.
+        environment = {}
+        if render_version >= 6 and runtime in {"Claude Code", "Codex CLI"}:
+            if current_toolchain is None:
+                continue
+            environment["agentic_toolchain"] = current_toolchain
         spec = RunSpec.from_render_spec({
+            **environment,
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
             "manifest": str(selected_manifest) if selected_manifest is not None else None,
-            "manifest_line": RunSpec.header_for_manifest(selected_manifest),
+            "manifest_line": arm_header if own_header else RunSpec.header_for_manifest(selected_manifest),
             "render_version": render_version,
+            **({"chunk_check_uses_manifest": True} if scoped_chunks else {}),
+            **({"agentic_artifact_paths": destinations} if destinations is not None
+               and render_version >= 5 and runtime in {"Claude Code", "Codex CLI"} else {}),
             "chunk_manifest": str(selected_chunks) if selected_chunks is not None else None,
             "run_date": (base + timedelta(days=delta)).isoformat(),
+            **selected_profile,
         }, project=project, method=method, label=label)
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:
             rendered = spec.render_spec()
+            from copy import deepcopy
+            proposed = deepcopy(data)
+            proposed["prompts"]["request"]["spec"] = rendered
+            proposed["prompts"]["request"]["spec_basis"] = (
+                "backfilled by d4d provenance backfill-spec: verified by re-rendering to the recorded hash (#772)"
+                + ("" if render_version > 1 else
+                   "; render version 1 does not hash the profile, which is restated"))
+            if rendered.get("profile") and not schema_block.get("profile") and render_version > 1:
+                if not isinstance(proposed.get("schema"), dict):
+                    proposed["schema"] = {}
+                proposed["schema"]["profile"] = rendered["profile"]
+                proposed["schema"]["profile_basis"] = backfill_basis
+            problems = pv.profile_problems(proposed)
+            if problems:
+                raise click.ClickException("reconstructed spec conflicts with recorded instrument evidence; "
+                                           "not written: " + "; ".join(problems))
             click.echo(f"   ✓ {label}/{project}: {condition} on {rendered['run_date']} re-renders to the recorded hash")
             if execute:
-                data["prompts"]["request"]["spec"] = rendered
-                data["prompts"]["request"]["spec_basis"] = ("backfilled by d4d provenance backfill-spec: "
-                                                            "verified by re-rendering to the recorded hash (#772)")
-                pv.ProvenanceRecord(data=data).write(path)
+                pv.ProvenanceRecord(data=proposed).write(path)
                 click.echo(f"     written to {path}")
             return
     raise click.ClickException(
@@ -592,11 +812,11 @@ def recheck_validation(method, label, project, every, execute):
                 continue
             considered.add(run.method)
             for proj in run.projects:
-                path = record_path_for(proj, run.method, run.label)
+                path = record_path_for(proj, run.method, run.label, run.path.parent.parent)
                 if not path.exists() or str(path) in seen:
                     continue
                 seen.add(str(path))
-                status = _recheck_one(run.method, run.label, proj, execute, gated=True)
+                status = _recheck_one(run.method, run.label, proj, execute, gated=True, record_path=path)
                 counts[status] = counts.get(status, 0) + 1
         if wanted is not None and not considered:
             raise click.ClickException(f"--method {method!r} matched no run directory")
@@ -630,31 +850,34 @@ def _schema_pin_moved(block: dict) -> bool:
     return any(pinned.get(k) and pinned[k] != v for k, v in live.items())
 
 
-def _problem_shape(block: dict) -> list:
+def _problem_shape(block: dict, artifact_aliases: dict | None = None) -> list:
     """What a validation problem names, message wording aside: its artifact,
     its class and the JSON-pointer paths in its message (#1190 review, M3)."""
     import re as _re
-    return sorted((str(p.get("artifact")), str(p.get("class")),
+    return sorted((str((artifact_aliases or {}).get(str(p.get("artifact")), p.get("artifact"))), str(p.get("class")),
                    tuple(sorted(set(_re.findall(r"\bin (/[^\s|]*)", str(p.get("error") or ""))))))
                   for p in (block.get("problems") or []))
 
 
-def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool) -> str:
+def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool,
+                 record_path: Path | None = None) -> str:
     """One record; returns what happened. Under `gated` the write needs the
     verdict and the artifacts unchanged and the field absent."""
     import yaml as _yaml
 
-    from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
+    from data_sheets_schema.api_runner import ValidationInputs, validate_outputs, validation_block
     from data_sheets_schema.provenance import record_path_for
-    path = record_path_for(project, method, label)
+    path = record_path if record_path is not None else record_path_for(project, method, label)
     if not path.exists():
         raise click.ClickException(f"no record at {path}")
-    from pathlib import Path as _P
     # The record lives under `{method}_core`; the artifacts under `{method}`
     # and `{method}_core`. A `_core` suffix names the record's directory,
     # not the method (#1032).
     base = method[:-5] if method.endswith("_core") else method
-    spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    corpus_dir = path.parent.parent.parent
+    spec = ValidationInputs(
+        full_path=corpus_dir / base / label / f"{project}_d4d.yaml",
+        core_path=path.parent / f"{project}_d4d_core.yaml")
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     prior = data.get("validation") or {}
     tag = f"{project} {method} {label}"
@@ -705,10 +928,25 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
         # An artifact still on disk is verified against its own recorded
         # hash, as `provenance.verify_entry` does.
         from data_sheets_schema.provenance import verify_entry
-        drifted = [k for k, v in (prior.get("artifacts") or {}).items()
-                   if isinstance(v, dict) and verify_entry(v) is False]
-        moved = ("verdict" if not same_verdict else "artifacts" if drifted
-                 else "problems" if _problem_shape(prior) != _problem_shape(block) else None)
+        previous = prior.get("artifacts") or {}
+        replacement = block.get("artifacts") or {}
+        same_artifacts = (isinstance(previous, dict) and isinstance(replacement, dict)
+            and bool(previous) and previous.keys() == replacement.keys()
+            and all(isinstance(entry, dict) and isinstance(replacement[name], dict)
+                    and verify_entry(entry, record=path) is True
+                    and all(replacement[name].get(algorithm) == digest
+                            for algorithm, digest in entry.items()
+                            if algorithm in ("sha256", "md5") and digest)
+                    for name, entry in previous.items()))
+        # Equivalent recorded path spellings may become absolute when a
+        # recheck runs from a nested directory. Compare problem locations by
+        # their artifact only after its recorded hashes have reproduced.
+        aliases = ({str(entry.get("path")): replacement[name].get("path")
+                    for name, entry in previous.items()
+                    if entry.get("path") and replacement[name].get("path")}
+                   if same_artifacts else {})
+        moved = ("verdict" if not same_verdict else "artifacts" if not same_artifacts
+                 else "problems" if _problem_shape(prior, aliases) != _problem_shape(block) else None)
         if moved:
             click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
             return "held"
@@ -1092,16 +1330,10 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
 
 #: How launchers have named a project in a subagent's name: the project
 #: itself with its underscore dropped, and the abbreviations on disk.
-_PROJECT_NAME_KEYS: dict[str, tuple[str, ...]] = {
-    "AI_READI": ("aireadi",), "CHORUS": ("chorus",), "CM4AI": ("cm4ai",),
-    "VOICE": ("voice",), "VOICE_PEDIATRIC": ("voicepediatric", "voicepeds"),
-}
-
-
-def _transcript_candidates(project: str, label: str, roots: list[Path] | None = None) -> list[Path]:
+def _transcript_candidates(project: str, label: str, roots: list[Path] | None = None, *, profile=None) -> list[Path]:
     """Subagent transcripts that could be this run's, by name (#1010): a
     launcher names its subagent after the project and the replicate
-    (`agent-av6-AI_READI-rep1-…`, `agent-afanout-aireadi-rep3-…`) or, for
+    (`agent-run-COHORT_X-rep1-…`, `agent-batch-cohortx-rep3-…`) or, for
     the canary that opened an arm, after the project and the word canary
     (`agent-acanary-chorus-agentic-…`). Both config directories are
     searched — the two hold identical copies of some transcripts (#688) —
@@ -1124,10 +1356,11 @@ def _transcript_candidates(project: str, label: str, roots: list[Path] | None = 
                                              Path.home() / ".claude-work" / "projects" / repo_dir]
     m = _re.search(r"_rep(\d+)$", label)
     rep = m.group(1) if m else None
-    keys = _PROJECT_NAME_KEYS.get(project, (project.lower().replace("_", ""),))
-    # A sibling project whose name contains this one's (VOICE_PEDIATRIC,
-    # VOICE) must not be offered as this one's run (#1191 review, S3).
-    others = [k for p, ks in _PROJECT_NAME_KEYS.items() if p != project for k in ks
+    from data_sheets_schema.profiles import active_profile
+    aliases = (profile if profile is not None else active_profile()).transcript_name_keys
+    keys = aliases.get(project, (project.lower().replace("_", "").replace("-", ""),))
+    # A sibling project's longer alias must not be offered as this run.
+    others = [k for p, ks in aliases.items() if p != project for k in ks
               if any(key in k and key != k for key in keys)]
     out: list[Path] = []; seen: set[str] = set()
     for root in roots:
@@ -1145,11 +1378,9 @@ def _transcript_candidates(project: str, label: str, roots: list[Path] | None = 
 
 
 def _observe(transcripts: list, bundle, until, receipt, manifest) -> dict:
-    """`scripts/agentic_observed.observe`, imported from the script."""
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("agentic_observed", Path("scripts/agentic_observed.py"))
-    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
-    obs = mod.observe(transcripts, bundle, until, receipt, manifest)
+    """The packaged transcript observer, shared with the command entry point."""
+    from data_sheets_schema.agentic_observed import observe
+    obs = observe(transcripts, bundle, until, receipt, manifest)
     return {k: v for k, v in obs.items() if not k.startswith("_") and k in _RUN_OBSERVED_FIELDS
             and isinstance(v, int) and not isinstance(v, bool)}
 
@@ -1158,7 +1389,8 @@ def _observer_sha256() -> str:
     """The instrument's own hash, recorded with every extension (#1191
     review, S1): the observer is what the proof rests on."""
     import hashlib as _h
-    return _h.sha256(Path("scripts/agentic_observed.py").read_bytes()).hexdigest()
+    from data_sheets_schema import agentic_observed
+    return _h.sha256(Path(agentic_observed.__file__).read_bytes()).hexdigest()
 
 
 @provenance.command('extend-observed')
@@ -1253,7 +1485,8 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         basis = {"bundle_basis": {"source": "git blob", "path": bpath, "commit": entry["commit"],
                                   "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
     rule = ((inputs.get("chunks") or {}).get("rule")) or None
-    candidates = list(given) or _transcript_candidates(proj, label)
+    from data_sheets_schema.profiles import for_record
+    candidates = list(given) or _transcript_candidates(proj, label, profile=for_record(data))
     if not candidates:
         click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
     # A killed-and-resumed run has two transcripts under one name and
@@ -1332,7 +1565,7 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         click.echo("   (report only; --execute writes the extension)"); return
     _extend_run_observed(log, obs, recorded_by="d4d provenance extend-observed (#1010)",
                          instrument="the transcript's reasoning measure (#1000/#1011), recomputed by "
-                                    "scripts/agentic_observed.py from the transcripts named on the bytes the "
+                                    "data_sheets_schema/agentic_observed.py from the transcripts named on the bytes the "
                                     "record hashed, "
                                     + ("under the record's own run_observed_until cut"
                                        if until is not None else
@@ -1506,7 +1739,8 @@ def backfill(verified, dry_run):
         if run.is_core or run.deterministic:
             continue
         for project in run.projects:
-            target = record_path_for(project, run.method, run.label)
+            concat_dir = run.path.parent.parent
+            target = record_path_for(project, run.method, run.label, concat_dir=concat_dir)
             if target.exists():
                 click.echo(f"  kept existing {target}")
                 kept += 1
@@ -1526,7 +1760,8 @@ def backfill(verified, dry_run):
                         deferred += 1
                         continue
                     rec = build_record(project, run.method, run.label,
-                                       mode="reconstructed", input_verified=run.label in verified)
+                                       mode="reconstructed", input_verified=run.label in verified,
+                                       concat_dir=concat_dir)
                     n_unrec = len(rec.data.get("unrecoverable") or [])
                     if dry_run:
                         click.echo(f"  would write {target}  ({n_unrec} unrecoverable)")
@@ -1594,7 +1829,7 @@ def reasoning_cmd(method, project, label, path):
             for proj in run.projects:
                 if project and proj != project:
                     continue
-                logs.append(CONCAT_DIR / f"{run.method}_core" / run.label /
+                logs.append(_corpus_path(CONCAT_DIR) / f"{run.method}_core" / run.label /
                             f"{proj}_reasoning.jsonl")
 
     # Classify the runs that produced no log, rather than printing one message
@@ -1740,7 +1975,7 @@ def backfill_effort(execute, method, label):
         CONCAT_DIR, apply_observed_effort, observed_effort_gap,
     )
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if method:
         base = method[:-5] if method.endswith("_core") else method
         paths = [p for p in paths if p.parts[-3] == f"{base}_core"]
@@ -1803,7 +2038,7 @@ def backfill_effort_basis(execute, label):
         CONCAT_DIR, apply_effort_basis, effort_basis_gap,
     )
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
 
@@ -1931,7 +2166,9 @@ def backfill_bundle_md5(execute, label):
     # git history from the package's own checkout; a `d4d` resolving to a
     # worktree's src while run from another checkout would prove one tree's
     # md5 against another's history (#1132 round 2).
-    if Path.cwd().resolve() != _REPO_ROOT.resolve():
+    from data_sheets_schema.corpus import root as corpus_root
+    if (Path.cwd().resolve() != _REPO_ROOT.resolve()
+            or corpus_root().resolve() != _REPO_ROOT.resolve()):
         raise click.ClickException(
             f"the package is installed from {_REPO_ROOT} but the cwd is {Path.cwd()}; "
             "run this from the checkout the package resolves to")
@@ -1996,7 +2233,7 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     from data_sheets_schema.provenance import CONCAT_DIR
     from data_sheets_schema.report_claims import declared_slots
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if method:
         base = method[:-5] if method.endswith("_core") else method
         paths = [p for p in paths if p.parts[-3] == f"{base}_core"]
@@ -2098,7 +2335,7 @@ def backfill_context(execute, label):
     from data_sheets_schema.backfill_checks import _split_header
     from data_sheets_schema.provenance import CONCAT_DIR
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
     rows, skipped = [], 0
@@ -2168,7 +2405,7 @@ def validate_records(strict, label):
 
     # The same validator and packaged-schema resolution as the runtime gate
     # (#614/#620), including non-null required values and validator failures.
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
     if not paths:

@@ -101,11 +101,12 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
     LinkML package imports are captured too; dependency versions also remain
     part of the key because generator behavior depends on them.
     """
+    from data_sheets_schema.resources import physical
     source_name = str(source)
-    source = Path(os.path.abspath(source))
+    source = physical(source)                            # `..` through the filesystem, aliases as spelled (#1570)
     merged_names = {m.name for m, _s, _c, _k in MERGED_SCHEMAS}
-    files = {Path(os.path.abspath(p)): p.read_bytes() for p in source.parent.rglob("*.yaml")
-             if p.name not in merged_names or Path(os.path.abspath(p)) == source}
+    files = {physical(p): p.read_bytes() for p in source.parent.rglob("*.yaml")
+             if p.name not in merged_names or physical(p) == source}
     if source not in files:
         files[source] = source.read_bytes()
     def read(path):
@@ -129,10 +130,16 @@ def _source_state(source: Path) -> tuple:
 
 
 def _regenerate(source: Path, target: Path,
-                marker: bool, *, snapshot: tuple | None = None) -> tuple[bool, str | None]:
-    """Run the same generation the Makefile runs. (ok, why not)"""
+                marker: bool, *, snapshot: tuple | None = None,
+                name: str | None = None) -> tuple[bool, str | None]:
+    """Run the same generation the Makefile runs. (ok, why not)
+
+    `name` is the logical source spelling written as `source_file:` —
+    the repository-relative one the committed artifact carries — when
+    `source` is a resolved absolute read path (#1478)."""
+    from data_sheets_schema.resources import physical
     state, files = _source_snapshot(source) if snapshot is None else snapshot
-    key = (state, marker)
+    key = (state, marker, name)                     # the name is in the bytes (#1527)
     cached = _REBUILT.get(key)
     if cached is not None:
         target.write_bytes(cached)
@@ -144,7 +151,7 @@ def _regenerate(source: Path, target: Path,
                 copy = Path(tmp) / path.relative_to(base)
                 copy.parent.mkdir(parents=True, exist_ok=True)
                 copy.write_bytes(content)
-            captured_source = Path(tmp) / Path(os.path.abspath(source)).relative_to(base)
+            captured_source = Path(tmp) / physical(source).relative_to(base)
             # Relative and namespace-resolved imports read captured files,
             # including package CURIEs and official URL aliases.
             captured_map = {}
@@ -194,15 +201,15 @@ def _regenerate(source: Path, target: Path,
     content = target.read_text(encoding="utf-8")
     source_line = re.search(r"(?ms)^source_file:.*?(?=^\S|\Z)", content)
     if source_line and yaml.safe_load(source_line.group()).get("source_file") == str(captured_source):
-        named = yaml.safe_dump({"source_file": str(source)}, sort_keys=False, allow_unicode=True)
+        named = yaml.safe_dump({"source_file": name or str(source)}, sort_keys=False, allow_unicode=True)
         content = content[:source_line.start()] + named + content[source_line.end():]
-    target.write_text(("---\n" if marker else "") + content, encoding="utf-8")
+    target.write_bytes((("---\n" if marker else "") + content).encode("utf-8"))   # no newline translation, and no 3.10-only keyword (#1531, #1571)
     _REBUILT[key] = target.read_bytes()
     return True, None
 
 
 def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
-                         source_name: str) -> str:
+                         source_name: str, profile=None) -> str:
     """Digest frozen rebuild bytes without retaining a LinkML view (#946).
 
     Each check has a new temporary path. LinkML's method caches retain views
@@ -212,9 +219,13 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
     Cache only the resulting strings under content hashes, including the
     displayed source name. Unchanged successful checks reuse that result.
     """
+    from data_sheets_schema.profiles import active_profile
     from data_sheets_schema.schema_view import content_key
+    prof = profile or active_profile()
+    # The profile is part of the digest, so of the key (#1463); the child
+    # is told which one rather than reading the environment.
     key = (class_name, source_name, content_key(path)[1], content_key(vocabulary)[1],
-           _generator_versions())
+           _generator_versions(), prof.name)
     if key in _REBUILT_DIGESTS:
         return _REBUILT_DIGESTS[key]
     code = (
@@ -224,10 +235,12 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
         "d.VOCABULARY_PIN = Path(sys.argv[4])\n"
         "inventory = d.build(sys.argv[2], Path(sys.argv[3]))\n"
         "inventory.schema_path = sys.argv[5]\n"
-        "print(d.fingerprint(d.render(inventory)))\n")
+        "from data_sheets_schema.profiles import profile_named\n"
+        "prof = profile_named(sys.argv[6])\n"
+        "print(d.fingerprint(d.render(inventory, vocabulary=d.vocabularies(profile=prof))))\n")
     result = subprocess.run(
         [sys.executable, "-c", code, str(Path(__file__).resolve().parents[1]),
-         class_name, str(path.resolve()), str(vocabulary.resolve()), source_name],
+         class_name, str(path.resolve()), str(vocabulary.resolve()), source_name, prof.name],
         capture_output=True, text=True, timeout=60)
     value = result.stdout.strip()
     if result.returncode or len(value) != 32 or any(c not in "0123456789abcdef" for c in value):
@@ -239,12 +252,18 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
 
 
 def check_one(merged: Path, source: Path, class_name: str,
-              marker: bool = False) -> dict[str, Any]:
-    """Rebuild `merged` from `source` and compare."""
+              marker: bool = False, *, profile=None) -> dict[str, Any]:
+    """Rebuild `merged` from `source` and compare — under `profile`, else
+    the ambient one; the runner passes the run's (#1463)."""
     from data_sheets_schema import schema_digest
+    from data_sheets_schema.profiles import active_profile
+    profile = profile or active_profile()
 
     out: dict[str, Any] = {"merged": str(merged), "source": str(source),
                            "class": class_name}
+    from data_sheets_schema.resources import resource_path
+    logical_source = Path(source).as_posix()   # what the artifact names, on every platform (#1478, #1531)
+    merged, source = resource_path(merged), resource_path(source)   # from any directory (#1301)
     if not source.exists():
         return {**out, "status": UNCHECKED,
                 "reason": f"source schema {source} is not on disk"}
@@ -260,27 +279,32 @@ def check_one(merged: Path, source: Path, class_name: str,
             source_snapshot = _source_snapshot(source)
             source_state = source_snapshot[0]
             merged_bytes = merged.read_bytes()
-            vocabulary_bytes = schema_digest.VOCABULARY_PIN.read_bytes()
-            vocabulary = Path(tmp) / "vocabulary" / schema_digest.VOCABULARY_PIN.name
+            # The selected profile's vocabulary inputs — none for neutral,
+            # whose render consumes no pin (#1520).
+            from data_sheets_schema.profiles import vocabulary_bytes as _vb
+            vocabulary_bytes = _vb(profile)
+            vocabulary = Path(tmp) / "vocabulary" / (profile.pin_path.name if profile.pin_path else "no-vocabulary.yaml")
             vocabulary.parent.mkdir()
             vocabulary.write_bytes(vocabulary_bytes)
-            ok, why = _regenerate(source, rebuilt, marker, snapshot=source_snapshot)
+            ok, why = _regenerate(source, rebuilt, marker, snapshot=source_snapshot,
+                                  name=logical_source)
             if not ok:
                 return {**out, "status": UNCHECKED, "reason": why}
             same = rebuilt.read_bytes() == merged_bytes
             live = schema_digest.fingerprint(
-                schema_digest.digest_text(class_name, merged))
+                schema_digest.digest_text(class_name, merged, profile=profile))
             # Compare against the preserved rebuild, not another read of the
             # live merged file: a changed-then-restored file can defeat an
             # end-of-check stability guard (#1258). No temporary views remain
             # in this process, on either successful or failed retries (#946).
             fresh = _rebuilt_fingerprint(class_name, rebuilt, vocabulary,
-                                         schema_digest._schema_name(class_name, merged))
+                                         schema_digest._schema_name(class_name, merged),
+                                         profile=profile)
             source_changed = _source_state(source) != source_state
             if source_changed:
                 forget_rebuilds()
             if (merged.read_bytes() != merged_bytes or source_changed
-                    or schema_digest.VOCABULARY_PIN.read_bytes() != vocabulary_bytes):
+                    or _vb(profile) != vocabulary_bytes):
                 return {**out, "status": UNCHECKED,
                         "reason": "schema inputs changed during the sync check; retry with stable inputs"}
         except Exception as exc:                               # noqa: BLE001
@@ -300,8 +324,8 @@ def check_one(merged: Path, source: Path, class_name: str,
                            "the merged schema matches but its digest does not")}
 
 
-def check(schemas=MERGED_SCHEMAS) -> list[dict[str, Any]]:
-    return [check_one(m, s, c, k) for m, s, c, k in schemas]
+def check(schemas=MERGED_SCHEMAS, *, profile=None) -> list[dict[str, Any]]:
+    return [check_one(m, s, c, k, profile=profile) for m, s, c, k in schemas]
 
 
 def blocking(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:

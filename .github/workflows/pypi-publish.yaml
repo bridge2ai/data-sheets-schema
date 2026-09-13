@@ -30,6 +30,15 @@ jobs:
       # - name: Install dependencies
       #   run: poetry install --no-interaction
 
+      - name: Install the project
+        run: poetry install --no-interaction
+
+      # The release canary (#1301): builds the wheel, installs it into a fresh
+      # virtual environment, and runs the offline generation path from a
+      # directory that is neither a checkout nor holds a pyproject.toml.
+      - name: Install the wheel elsewhere and generate from there
+        run: D4D_INSTALL_TESTS=1 poetry run pytest tests/test_installed_wheel.py -q
+
       - name: Build source and wheel archives
         run: poetry build
 

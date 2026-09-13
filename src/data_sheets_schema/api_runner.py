@@ -43,6 +43,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
+from data_sheets_schema.corpus import AUTO as SOURCE_MANIFEST_AUTO
 from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest, manifest_declared_unused
 from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
@@ -468,9 +469,19 @@ class RunSpec:
     # The chunk manifest the run was given explicitly, when it is not the
     # one discovered beside the bundle (#1299). None means discover.
     chunk_manifest: Path | None = None
-    # Version 4 binds every agentic playbook read/check to selected inputs.
+    # The profile every digest of this run is rendered under (#1302,
+    # #1438): resolved once in `__post_init__` from the selected manifest
+    # — its `profile:` key, else neutral, `D4D_PROFILE` overriding — and
+    # recorded with the basis of that selection beside the digest md5
+    # (#1443). The manifest's *blocks* may be declared unused by an arm's
+    # header; the profile is the study's whenever the study's manifest
+    # was selected, blocks or no blocks.
+    profile: str | None = None
+    profile_basis: str | None = None
+    # Version 5 binds output destinations to the selected corpus root.
     # Historical render specs omit this field and replay under version 1.
-    render_version: int = 4
+    # Version 6 additionally binds the installed agentic toolchain.
+    render_version: int | object = AUTO
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
     # ran past midnight UTC, so recomputing per call gave phases of one run
@@ -493,34 +504,85 @@ class RunSpec:
     # another runtime will execute — it rendered "LBL CBORG (proxy to
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
-    _replay_only: bool = field(default=False, init=False, repr=False)
+    _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
+    _agentic_toolchain: dict | None = field(default=None, init=False, repr=False)
+    _chunk_check_uses_manifest: bool = field(default=False, init=False, repr=False)
+    _corpus_root: Path | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
+        if self.out_dir is not None:
+            # An explicit override belongs to the launch directory. Freeze
+            # it so later provenance readers cannot adopt an ancestor corpus.
+            self.out_dir = Path(self.out_dir).absolute()
         if self.run_date is AUTO:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
-        if self.render_version not in (1, 2, 3, 4):
+        if self.render_version is AUTO:
+            self.render_version = 6 if self.is_agentic else 5
+        if self.render_version not in (1, 2, 3, 4, 5, 6):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
+        self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
         if self.manifest is not None:
             self.manifest = Path(self.manifest)
+        from data_sheets_schema.corpus import root
+        self._corpus_root = root(self.manifest)
+        if self._corpus_root != Path.cwd().resolve():
+            # CLI input paths belong to the launch directory, not to the
+            # manifest's output tree. Preserve that identity in the record.
+            if self.bundle is not None:
+                self.bundle = Path(self.bundle).absolute()
+            if self.manifest is not None:
+                self.manifest = self.manifest.absolute()
+            if self.chunk_manifest is not None:
+                self.chunk_manifest = Path(self.chunk_manifest).absolute()
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
-        elif self.render_version >= 4 and self.is_agentic:
+        elif ((self.render_version >= 4 and self.is_agentic)
+              or (self.render_version >= 5 and self.manifest is not None
+                  and self.condition in RECEIPT_CONDITIONS)):
             # The agentic playbook reads a chunk mapping even when discovery
             # chose it. Freeze that path for instruction replay (#1507).
             from data_sheets_schema.chunking import manifest_for
-            self.chunk_manifest = manifest_for(self.bundle)
+            self.chunk_manifest = manifest_for(self.bundle, source_manifest=self.manifest)
         if self.render_version >= 4 and self.is_agentic:
             self._agentic_artifact_paths = {
                 "full": str(self.full_path), "core": str(self.core_path),
                 "receipt": str(self.report_path.parent / f"{self.project}_coverage_receipt.yaml")}
-        if self.manifest_line != default_line:
-            return                      # an arm that declares its own header keeps it
-        self.manifest_line = self.header_for_manifest(self.manifest)
+            if self.render_version >= 5:
+                self._agentic_artifact_paths["report"] = str(self.report_path)
+        if self.render_version >= 6 and self.is_agentic and not self._replay_only:
+            from data_sheets_schema.agentic_runtime import toolchain
+            self._agentic_toolchain = toolchain()
+        if self.manifest_line == default_line:   # an arm that declares its own header keeps it
+            self.manifest_line = self.header_for_manifest(self.manifest)
+        if self.profile is None:
+            self._select_profile()
+        else:
+            from data_sheets_schema.profiles import profile_named
+            profile_named(self.profile)                              # unknown names fail here, not mid-batch (#1585)
+            if self.profile_basis is None:
+                self.profile_basis = "stated by the caller"       # the record says why, always (#1549)
+
+    def _select_profile(self) -> None:
+        from data_sheets_schema.profiles import select_profile
+        sel = select_profile(self.manifest)
+        self.profile, self.profile_basis = sel.name, sel.basis
+
+    @property
+    def profile_obj(self):
+        """The `Profile` the digest is rendered under."""
+        from data_sheets_schema.profiles import profile_named
+        return profile_named(self.profile) if self.profile else None
+
+    @property
+    def profile_selection(self):
+        """What the record states: the profile and why (#1443)."""
+        from data_sheets_schema.profiles import Selection
+        return Selection(self.profile_obj, self.profile_basis) if self.profile else None
 
     @staticmethod
     def header_for_manifest(manifest: Path | None) -> str:
@@ -544,6 +606,8 @@ class RunSpec:
         requires a freshly validated spec; this object is only for replay.
         """
         spec = cls(project=project, method=method, label=label,
+                   profile=recorded.get("profile") or "neutral",   # never live selection (#1468); the recorded values are restored below
+                   profile_basis=recorded.get("profile_basis") or "replay",
                    arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
                    condition=recorded["condition"],
                    render_version=recorded.get("render_version", 1),
@@ -551,16 +615,31 @@ class RunSpec:
                    manifest_line=recorded.get("manifest_line", ""),
                    manifest=None,
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
-                   provider=recorded.get("provider"))
+                   provider=recorded.get("provider"), _replay_only=True)
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
+        chunk_check_uses_manifest = recorded.get("chunk_check_uses_manifest", False)
+        if not isinstance(chunk_check_uses_manifest, bool):
+            raise ValueError("invalid recorded chunk-check manifest selection")
+        # Older instructions omitted the command's manifest option. Retain
+        # those exact bytes during replay; new specifications bind it (#1650).
+        spec._chunk_check_uses_manifest = chunk_check_uses_manifest
         if "agentic_artifact_paths" in recorded:
             paths = recorded["agentic_artifact_paths"]
-            if (not isinstance(paths, dict) or set(paths) != {"full", "core", "receipt"}
+            expected = {"full", "core", "receipt"} | ({"report"} if spec.render_version >= 5 else set())
+            if (not isinstance(paths, dict) or set(paths) != expected
                     or any(not isinstance(value, str) or not value for value in paths.values())):
                 raise ValueError("invalid recorded agentic artifact paths")
             spec._agentic_artifact_paths = dict(paths)
+        if spec.render_version >= 6 and spec.is_agentic:
+            from data_sheets_schema.agentic_runtime import validate_toolchain
+            spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"))
+        # A replay reads no live declaration — the manifest may be gone or
+        # malformed since — so the profile is not resolved here either;
+        # a replay never renders the digest (#1438).
+        spec.profile = recorded.get("profile")                    # what was recorded, or None for an older spec
+        spec.profile_basis = recorded.get("profile_basis")
         spec._replay_only = True
         return spec
 
@@ -587,12 +666,23 @@ class RunSpec:
                     "sha256": hashlib.sha256(path.read_bytes()).hexdigest()
                     if path.is_file() else None}
 
-        chunks = (self.chunk_manifest or manifest_for(self.bundle)) if self.bundle else None
+        chunks = (self.chunk_manifest or manifest_for(self.bundle, source_manifest=self.manifest)) if self.bundle else None
+        # The instrument is an input too (#1460): a resumed run under
+        # another profile would render another digest for its remaining
+        # phases and record only that one.
+        digest = (schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=self.profile_obj))
+                  if self.profile else None)
         return {"bundle": entry(self.bundle),
                 "source_manifest": entry(self.manifest) if self.manifest_used else None,
                 "chunks": entry(chunks),
+                "profile": {"name": self.profile, "digest_md5": digest},
+                # The basis says *why* a profile was selected; the identity
+                # carries *what* — the profile and its digest above and the
+                # instruction hash below — so a comment edit to a manifest
+                # an arm never consumed, or the same profile reached by
+                # another route, does not refuse a resume (#1626).
                 "instruction": {"render_version": self.render_version,
-                                "spec": self.render_spec(),
+                                "spec": {k: v for k, v in self.render_spec().items() if k != "profile_basis"},
                                 "sha256": hashlib.sha256(self.instruction.encode()).hexdigest()}}
 
     def render_spec(self) -> dict[str, Any]:
@@ -605,11 +695,16 @@ class RunSpec:
         """
         return {**({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
+                **({"agentic_toolchain": {"python": self._agentic_toolchain["python"],
+                                         "resources": dict(self._agentic_toolchain["resources"])}}
+                   if self.render_version >= 6 and self._agentic_toolchain is not None else {}),
+                **({"chunk_check_uses_manifest": True} if self._chunk_check_uses_manifest else {}),
                 "render_version": self.render_version,
                 "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
                 "condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
                 "manifest": str(self.manifest) if self.manifest is not None else None,
+                **({"profile": self.profile, "profile_basis": self.profile_basis} if self.profile else {}),   # the gate re-renders under them (#1581); absent on an older spec
                 "runtime": self.runtime,
                 "provider": self.provider or provider_identity()["provider"]
                 or PROVIDER,
@@ -635,23 +730,29 @@ class RunSpec:
         return resolve_prompt(self)
 
     @property
+    def output_root(self) -> Path:
+        from data_sheets_schema.corpus import relative_to_root
+        return (relative_to_root(CONCAT_DIR, self._corpus_root)
+                if self._corpus_root is not None else CONCAT_DIR)
+
+    @property
     def full_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d.yaml"
-        return CONCAT_DIR / self.method / self.label / f"{self.project}_d4d.yaml"
+        return self.output_root / self.method / self.label / f"{self.project}_d4d.yaml"
 
     @property
     def core_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d_core.yaml"
-        return (CONCAT_DIR / f"{self.method}_core" / self.label /
+        return (self.output_root / f"{self.method}_core" / self.label /
                 f"{self.project}_d4d_core.yaml")
 
     @property
     def report_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_reconciliation.md"
-        return (CONCAT_DIR / f"{self.method}_core" / self.label /
+        return (self.output_root / f"{self.method}_core" / self.label /
                 f"{self.project}_reconciliation.md")
 
     @property
@@ -690,7 +791,8 @@ class RunSpec:
 
 
 def prompt_body(path: Path = GENERIC_PROMPT) -> str:
-    text = path.read_text(encoding="utf-8")
+    from data_sheets_schema.resources import resource_path
+    text = resource_path(path).read_text(encoding="utf-8")
     if "## Prompt body" not in text:
         raise ValueError(f"{path} has no '## Prompt body' section")
     return text.split("## Prompt body", 1)[1].strip()
@@ -803,6 +905,9 @@ def agentic_selected_inputs(spec: RunSpec) -> str:
     def command(*args):
         return shlex.join(["poetry", "run", "d4d", *map(str, args)])
 
+    chunk_selection = (["--manifest", spec.manifest if spec.manifest is not None else "none"]
+                       if spec._chunk_check_uses_manifest else [])
+
     text = (
         "\n\n## Selected inputs for all four phases (renderer v4)\n\n"
         "This section overrides the input paths and manifest-dependent commands in "
@@ -812,7 +917,7 @@ def agentic_selected_inputs(spec: RunSpec) -> str:
         f"`{spec.chunk_manifest}`. Use its ordered chunk IDs and line windows. "
         "Replace the playbook's default chunk-path read and bundle-chunk check with:\n\n"
         + command("bundle", "chunk", "--bundle", spec.bundle, "--chunk-manifest", spec.chunk_manifest,
-                  "--check", "--strict") + "\n\n"
+                  *chunk_selection, "--check", "--strict") + "\n\n"
         "Require current canonical coverage under the selected rule. Stop on failure; "
         "do not regenerate or replace the selected manifest during this run.\n\n"
     )
@@ -838,7 +943,9 @@ def agentic_selected_inputs(spec: RunSpec) -> str:
         )
     text += (
         "Before Phase 2, use this exact receipt check, then repeat it with --write after provenance recording:\n\n"
-        + command(*(["--manifest", spec.manifest] if spec.manifest_used else []),
+        + command(*(["--manifest", spec.manifest if spec.manifest is not None else "none"]
+                    if spec.render_version >= 5 else
+                    ["--manifest", spec.manifest] if spec.manifest_used else []),
                   "receipts", "check", "--method", spec.method, "--label", spec.label,
                   "--project", spec.project, "--bundle", spec.bundle,
                   "--chunk-manifest", spec.chunk_manifest, "--strict") + "\n\n"
@@ -887,7 +994,16 @@ def resolve_prompt(spec: RunSpec) -> str:
             command = match.group(1)
             for key, value in subs.items():
                 command = command.replace(key, shlex.quote(value))
-            command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest_used else "none")
+            # The manifest that was *selected*, even when the arm's header
+            # declares its context blocks unused: the recorder selects the
+            # profile from it, and the header still governs what the input
+            # block attests (#1461). `none` means none was selected.
+            command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest is not None else "none")
+            if spec.profile:
+                # The profile this instruction was rendered under: the
+                # recorder runs in another process, where the environment
+                # that may have selected it is not set (#1581).
+                command += " --profile " + shlex.quote(spec.profile)
             if spec.chunk_manifest is not None:
                 command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
             return command
@@ -914,6 +1030,23 @@ def resolve_prompt(spec: RunSpec) -> str:
                  + shlex.join(args) + "\n")
     if spec.render_version >= 4 and spec.is_agentic:
         body += agentic_selected_inputs(spec)
+    if spec.render_version >= 5 and spec.is_agentic:
+        paths = spec._agentic_artifact_paths
+        conventional = {
+            "full": CONCAT_DIR / spec.method / spec.label / f"{spec.project}_d4d.yaml",
+            "core": CONCAT_DIR / f"{spec.method}_core" / spec.label / f"{spec.project}_d4d_core.yaml",
+            "report": CONCAT_DIR / f"{spec.method}_core" / spec.label / f"{spec.project}_reconciliation.md",
+            "receipt": CONCAT_DIR / f"{spec.method}_core" / spec.label / f"{spec.project}_coverage_receipt.yaml",
+        }
+        # Replace only the historical template's paths, not occurrences in
+        # the already-rooted selected-input appendices.
+        head, marker, tail = body.partition("\n\n## Selected inputs for all four phases")
+        for key, old in conventional.items():
+            head = head.replace(str(old), paths[key])
+        body = head + marker + tail
+        body += "\n\n## Authoritative output destinations (renderer v5)\n\n"
+        body += "Use these destinations in every phase and every playbook command:\n\n"
+        body += "\n".join(f"- {key}: `{paths[key]}`" for key in ("full", "core", "receipt", "report")) + "\n"
 
     # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
     # line takes a placeholder, so every record produced under it since that
@@ -924,7 +1057,8 @@ def resolve_prompt(spec: RunSpec) -> str:
     body = re.sub(r"(?m)^(\s*#\s*Generated:).*$", rf"\1 {spec.run_date}", body)
 
     if spec.condition == "tuned":
-        comp = COMPONENTS / f"{spec.project}.md"
+        from data_sheets_schema.resources import resource_path
+        comp = resource_path(COMPONENTS / f"{spec.project}.md")
         block = comp.read_text(encoding="utf-8") if comp.exists() else ""
         body = body.replace(
             "# Mode: four-phase project agent, generic prompt",
@@ -940,18 +1074,24 @@ def resolve_prompt(spec: RunSpec) -> str:
             "state nothing about what the output should contain, how many slots "
             "to populate, or how this record should compare to any other.\n\n"
             f"{block}\n\nRETURN:", 1)
+    if spec.render_version >= 6 and spec.is_agentic:
+        from data_sheets_schema.agentic_runtime import portable_text, instruction_adapter
+        body = portable_text(body, spec._agentic_toolchain) + instruction_adapter(spec)
     return body
 
 
 def _model_settings() -> dict[str, Any]:
     cfg = load_generation_config()
+    found = bool(cfg)
     m = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}
     name = m.get("name") or "claude-opus-5"
     settings = {
         "name": name,
         "temperature": float(m.get("temperature", 0.0)),
         "max_tokens": int(m.get("max_tokens", DEFAULT_MAX_TOKENS)),
-        "config_path": str(DETERMINISTIC_CONFIG),
+        # The file the values came from — or None, with the note, when the
+        # shipped config was not found and the defaults above applied (#1529).
+        "config_path": str(DETERMINISTIC_CONFIG) if found else None,
         "temperature_applies": accepts_temperature(name),
     }
     # What the request says about thinking (#1047). On claude-opus-5 thinking
@@ -968,6 +1108,9 @@ def _model_settings() -> dict[str, Any]:
     # proposed shape is refused here, and a test holds that line. A model that
     # predates adaptive thinking gets no parameter and a note, mirroring the
     # temperature gate.
+    if not found:
+        settings["config_note"] = (f"{DETERMINISTIC_CONFIG} was not found (from the working directory, the "
+                                   "checkout or the installed package); the built-in defaults above apply")
     if accepts_adaptive_thinking(name):
         settings["thinking"] = {"type": "adaptive"}
     else:
@@ -985,8 +1128,9 @@ def _model_settings() -> dict[str, Any]:
         # that never reached the request.
         settings["temperature_note"] = (
             f"{name} rejects `temperature` (400: deprecated for this model), "
-            f"so the {settings['temperature']} declared in "
-            f"{DETERMINISTIC_CONFIG} is not sent and does not apply. Sampling "
+            f"so the {settings['temperature']} "
+            + (f"declared in {DETERMINISTIC_CONFIG}" if found else "defaulted here")
+            + " is not sent and does not apply. Sampling "
             "for this model family is selected by model-name suffix "
             "(-low/-medium/-high/-xhigh/-max), not by parameter.")
     return settings
@@ -1426,7 +1570,8 @@ def source_ranking_block(project: str,
     return "\n".join(lines)
 
 
-def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str, str]:
+def chunk_marked_bundle(bundle: Path, manifest: Path | None = None, *,
+                        source_manifest: Path | None | object = SOURCE_MANIFEST_AUTO) -> tuple[str, str]:
     """The bundle's text with a `[cNNN]` marker line opening each chunk of
     its manifest (#710), and the manifest's md5.
 
@@ -1441,7 +1586,7 @@ def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str
 
     from data_sheets_schema.chunking import load_manifest, manifest_for
     raw = bundle.read_bytes()
-    mpath = Path(manifest) if manifest is not None else manifest_for(bundle)   # any bundle kind (#725)
+    mpath = Path(manifest) if manifest is not None else manifest_for(bundle, source_manifest=source_manifest)
     if not mpath.exists():
         raise RuntimeError(f"no chunk manifest for {bundle} (expected {mpath}); "
                            f"run `d4d bundle chunk --bundle {bundle}`")
@@ -1451,7 +1596,7 @@ def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str
                            "run `d4d bundle chunk`")
     from data_sheets_schema.chunking import canonical_name, validate_manifest_mapping
     try:
-        validate_manifest_mapping(m, raw, canonical_name(bundle))
+        validate_manifest_mapping(m, raw, canonical_name(bundle, source_manifest=source_manifest))
     except (TypeError, ValueError) as exc:
         raise RuntimeError(f"invalid chunk manifest {mpath}: {exc}") from exc
     lines = raw.decode("utf-8", errors="ignore").split("\n")
@@ -1546,10 +1691,10 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # `third_party_sharing`) that CoreDataset does not accept — the first live
     # run produced a core record that failed validation for exactly that.
     cls = "CoreDataset" if PHASE_ARTIFACT.get(phase) == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls)
+    digest = schema_digest.digest_text(cls, profile=spec.profile_obj)
     receipted = spec.condition in RECEIPT_CONDITIONS
     if receipted:
-        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest)
+        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest, source_manifest=spec.manifest)
         bundle_head = (BUNDLE_HEAD.format(bundle=spec.bundle)
                        + BUNDLE_MD5_LINE.format(md5=bundle_md5)
                        + CHUNK_MARKER_NOTE)
@@ -1704,7 +1849,8 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "runtime": RUNTIME,
         "prompt_files": [repo_relative(p) for p in spec.prompt_files],
         "schema_digest_md5": schema_digest.fingerprint(
-            schema_digest.digest_text("Dataset")),
+            schema_digest.digest_text("Dataset", profile=spec.profile_obj)),
+        "profile": spec.profile, "profile_basis": spec.profile_basis,
         "phases": phases,
         "approx_total_input_tokens": sum(p["approx_input_tokens"] for p in phases),
         "estimate_basis": basis,
@@ -2310,7 +2456,8 @@ def _enum_aliases() -> dict[str, dict[str, str]]:
     generation emits, because they are what the vocabulary is called elsewhere.
     """
     from data_sheets_schema.schema_cache import load_schema
-    schema = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+    from data_sheets_schema.resources import resource_path
+    schema = resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
     if not schema.exists():
         return {}
     doc = load_schema(schema) or {}                  # one parse per process (#1203)
@@ -2556,7 +2703,14 @@ def keep_recorded_algorithms(new: dict, prior: dict) -> dict:
     return out
 
 
-def validation_block(spec: RunSpec, problems: list[dict[str, str]],
+@dataclass(frozen=True)
+class ValidationInputs:
+    """Existing artifacts selected for validation, independent of generation inputs."""
+    full_path: Path
+    core_path: Path
+
+
+def validation_block(spec: RunSpec | ValidationInputs, problems: list[dict[str, str]],
                      recorded_by: str = "api_runner.execute",
                      prior: dict[str, Any] | None = None) -> dict[str, Any]:
     """The validation verdict, bound to the exact bytes it was reached on.
@@ -2628,6 +2782,78 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
+def _crash_diagnostic(text: str) -> list[str]:
+    """The lines of a traceback that say what went wrong: after the last
+    `Traceback` header, every unindented line (the exception) and every
+    YAML position marker (`  in "<file>", line N, column M`)."""
+    crash = text[text.rindex("Traceback (most recent call last)"):]
+    out = []
+    for line in crash.splitlines()[1:]:
+        if not line.strip():
+            continue
+        if not line[:1].isspace() or re.match(r'\s*in ".*", (line|position) \d+', line):     # a quote in the name keeps the marker (#1672); `position` is PyYAML's reader marker (#1722)
+            out.append(line.strip())
+    return out or [l for l in crash.strip().splitlines() if l.strip()][-3:]
+
+
+def _finding_class(lines, path: Path | None = None) -> str:
+    """`structured` when the record could be read and the findings are
+    about its content; `diagnostic` when it could not even be parsed. A
+    round that turns a diagnostic into structured findings made progress,
+    whatever the counts (#1670). Decided on the artifact, not on how the
+    findings are spelled: a duplicate-key finding is ordinary text beside
+    `[ERROR]` lines and says nothing about readability (#1718)."""
+    if path is not None:
+        try:
+            yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+            return "structured"
+        except (OSError, yaml.YAMLError, UnicodeDecodeError):
+            return "diagnostic"
+    return "structured" if all(str(l).startswith(("[ERROR]", "[WARN")) for l in lines) else "diagnostic"
+
+
+#: A crash whose last line is an OS error never opened the data file
+#: (#1589, #1620): `[Errno N]` is how every one of them reads.
+_OS_ERROR_LINE = re.compile(r"^\w*Error: \[Errno \d+\]")
+
+
+def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bool:
+    """A traceback, a missing module or a usage error is the validator failing
+    to start, not a finding about the record (#1506); handed to a repair
+    round as findings it would be repaired against. Decided on whole lines
+    (#1525): a finding line — `[ERROR] …` — proves the validator ran, and a
+    value inside a finding (`'does not exist.' is not of type 'object'`)
+    never counts as a marker.
+
+    A crash that names the data file — a YAML the loader rejects, a value a
+    plugin chokes on — is the validator failing *on the record* (#1589):
+    that is a finding about the record, and what a repair round is for. A
+    crash before the data file is opened, or one saying it could not be
+    opened, is the validator not running."""
+    lines = [l.strip() for l in text.splitlines()]
+    if any(l.startswith(("Traceback (most recent call last)", "ModuleNotFoundError:", "ImportError:"))
+           for l in lines):
+        if data_path is not None and "Traceback" in text:
+            # The *last* traceback: a chained exception's earlier frames may
+            # name the record while the failure that ended the run did not
+            # (#1668).
+            crash = text[text.rindex("Traceback (most recent call last)"):] if "Traceback (most recent call last)" in text else text[text.rindex("Traceback"):]
+            # The data file, as it was named to the validator — quoted, as a
+            # YAML diagnostic (`in "<path>"`) or an exception message
+            # (`'<path>'`) names it — never a bare basename, which a schema
+            # file, a class or a module can share (#1620).
+            spelled = {str(data_path), os.path.abspath(str(data_path))}
+            named = any(f'"{s}"' in crash or f"'{s}'" in crash for s in spelled)
+            last = [l for l in crash.splitlines() if l.strip()][-1].strip()
+            if named and not _OS_ERROR_LINE.match(last):
+                return False                 # it ran, and the record broke it
+        return True                          # a crash, whatever it printed first (#1572)
+    if any(l.startswith(("[ERROR]", "[WARN", "[WARNING]")) for l in lines):
+        return False
+    return any(l.startswith(("Usage: linkml-validate", "Usage: -c", "Error: Invalid value for"))
+               for l in lines)
+
+
 def _validator_lines(path: Path, schema: str,
                      cls: str) -> tuple[list[str] | None, str | None]:
     """(findings, failure): every validator finding, one per line.
@@ -2637,21 +2863,53 @@ def _validator_lines(path: Path, schema: str,
     record that could not be checked is not a record that passed, and a
     repair attempted against a broken validator would be flying blind.
     """
+    from data_sheets_schema.resources import linkml_validate, resource_path
     try:
         r = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
+            [*linkml_validate(), "-s", str(resource_path(schema)), "-C", cls,
              str(path)],
             capture_output=True, text=True, timeout=180)
     except Exception as exc:                           # noqa: BLE001
         return None, str(exc)
     if r.returncode == 0:
         return [], None
-    lines = [l for l in (r.stdout + r.stderr).strip().splitlines()
-             if l.strip()]
+    text = r.stdout + r.stderr
+    if _validator_did_not_run(text, path):
+        return None, f"linkml-validate did not run: {text.strip()[-300:]}"
+    if "Traceback (most recent call last)" in text:
+        # The validator ran and the record broke it (#1589): the finding is
+        # the diagnostic — the exception line and any `in "<file>", line N`
+        # marker — not fifty lines of frames (#1639); every `[ERROR]` line it
+        # emitted before crashing is a finding too (#1669).
+        emitted = [l.strip() for l in text.splitlines() if l.strip().startswith(("[ERROR]", "[WARN"))]
+        lines = emitted + _crash_diagnostic(text)
+    else:
+        lines = [l for l in text.strip().splitlines()
+                 if l.strip()]
+    if not lines:
+        # A nonzero exit with nothing to say — a signal, a crash before
+        # output — is not a clean validation (#1524).
+        return None, f"linkml-validate exited {r.returncode} with no output"
     return lines, None
 
 
-def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
+def _generation_bound_inputs_observed(spec, progress: dict, generation, recorded, current: dict) -> bool:
+    """Whether the ledger or the progress file binds this generation to the
+    current inputs — the evidence a generic backfill cannot supersede (main's
+    #1555 rule). Compared under the one compatibility rule (#1629, #1676): a
+    pin that lacks a key says nothing about it, every key it carries must
+    match."""
+    from data_sheets_schema.usage_ledger import _identity_differs
+    saved = progress.get("input_identity") if isinstance(progress, dict) else None
+    bound_progress = (
+        isinstance(progress, dict)
+        and progress.get("generation_id") == generation
+        and _usage_record_matches(spec, progress.get("run_identity"))
+        and isinstance(saved, dict) and not _identity_differs(saved, current))
+    return (isinstance(recorded, dict) and not _identity_differs(recorded, current)) or bound_progress
+
+
+def validate_outputs(spec: RunSpec | ValidationInputs) -> list[dict[str, str]]:
     """LinkML-validate both records, returning problems rather than raising.
 
     Returned so the caller can record the outcome in provenance before deciding
@@ -2735,8 +2993,8 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         # This run's own digest, so a presence mismatch is excused only for
         # slots the ledger shows did not exist then (#580).
         from data_sheets_schema import schema_digest as _sd
-        _sd.record_inventory()
-        run_digest = _sd.fingerprint(_sd.digest_text("Dataset"))
+        _sd.record_inventory(profile=spec.profile_obj)
+        run_digest = _sd.fingerprint(_sd.digest_text("Dataset", profile=spec.profile_obj))
         report = validate_pair_data(full, core, pair, schema_moved=moved,
                                     run_digest=run_digest)
     except Exception as exc:                                       # noqa: BLE001
@@ -3477,7 +3735,8 @@ def normalise_multivalued(text: str) -> str:
     return "\n".join(out)
 
 
-def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
+def build_repair(artifact: str, body: str, errors: list[str], *,
+                 profile=None) -> PhaseRequest:
     """A shape-repair request: digest, failing record, validator findings.
 
     Deliberately excludes the input bundle. The validator names shapes, not
@@ -3486,7 +3745,7 @@ def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
     it also makes a repair call an order of magnitude cheaper than a phase.
     """
     cls = "CoreDataset" if artifact == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls)
+    digest = schema_digest.digest_text(cls, profile=profile)
     cached = [{"type": "text", "text": digest,
                "cache_control": {"type": "ephemeral"}}]
     parts: list[dict[str, Any]] = list(cached)
@@ -3587,16 +3846,21 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             text = stamp_provenance_header(text, settings)      # the same sequence as the phase write (#1027 review)
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
-            log.append({"phase": ph, "round": 1,
-                        "outcome": ("re-derived from the repaired full record"
-                                    + ("; validates" if not errors and failure is None
-                                       else f"; still {len(errors)} validator finding(s) — the full record carries a shape the core schema rejects"))})
+            outcome = "re-derived from the repaired full record"
+            if failure is not None:                       # the validator did not run (#1526)
+                outcome += f"; validator did not run: {failure}"
+            elif not errors:
+                outcome += "; validates"
+            else:
+                outcome += f"; still {len(errors)} validator finding(s) — the full record carries a shape the core schema rejects"
+            log.append({"phase": ph, "round": 1, "outcome": outcome})
             continue
         # The count the last APPLIED repair was working from. Compared only
         # against applied rounds: a truncated or unusable round rewrote
         # nothing, so its unchanged count says nothing about convergence and
         # must not cancel the retry the round ceiling allows for.
         applied_from: int | None = None
+        applied_class: str | None = None
         for rnd in range(1, REPAIR_ROUNDS + 1):
             errors, failure = _validator_lines(path, schema, cls)
             if failure is not None:
@@ -3612,13 +3876,13 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             if not errors:
                 break
 
-            if applied_from is not None and len(errors) >= applied_from:
+            if applied_from is not None and applied_class == _finding_class(errors, path) and len(errors) >= applied_from:
                 log.append({"phase": ph, "round": rnd,
                             "outcome": (f"not converging: {applied_from} -> "
                                         f"{len(errors)} findings; stopped")})
                 break
             req = build_repair(artifact, path.read_text(encoding="utf-8"),
-                               errors)
+                               errors, profile=spec.profile_obj)
             attempt_started = datetime.now(timezone.utc).isoformat(
                 timespec="seconds")
             attempt_t0 = time.monotonic()
@@ -3679,9 +3943,13 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # repair applied on 87 API records (61%). Unstamped here, the
             # false header came back on the majority of runs (#1027 review).
             body = stamp_provenance_header(body, settings)
+            # Classify the input that produced these findings before the
+            # repaired output changes its readability (#1747).
+            repaired_from_class = _finding_class(errors, path)
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
+            applied_class = repaired_from_class
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
                         "findings": len(errors)})
     return log
@@ -4769,6 +5037,22 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
         if changed:
             raise UsageLedgerError(f"generation input identity changed for {name}; restore the "
                                    "recorded inputs or use --no-resume for an explicit new generation")
+    # The instrument (#1460): a record that names its digest — every record
+    # since #426 — and its profile must be resumed under the same ones.
+    schema_block = record.get("schema") or {}
+    recorded_digest = schema_block.get("digest_md5")
+    # A record without a digest carries no instrument evidence of its own;
+    # `_execute` then requires the pinned identity to carry one (#1519).
+    if recorded_digest and recorded_digest != current["profile"]["digest_md5"]:
+        raise UsageLedgerError("generation instrument changed: the record's schema digest "
+                               f"{recorded_digest} is not this run's {current['profile']['digest_md5']} "
+                               f"(profile {current['profile']['name']}); restore the recorded "
+                               "profile and schema or use --no-resume for an explicit new generation")
+    recorded_profile = schema_block.get("profile")
+    if recorded_profile and recorded_profile != current["profile"]["name"]:
+        raise UsageLedgerError(f"generation profile changed: the record was made under {recorded_profile}, "
+                               f"this run resolves {current['profile']['name']}; restore it or use "
+                               "--no-resume for an explicit new generation")
     instruction = ((record.get("prompts") or {}).get("request") or {}).get("sha256")
     if instruction is not None and instruction != current["instruction"]["sha256"]:
         raise UsageLedgerError("generation instruction identity changed; restore the recorded renderer "
@@ -4792,7 +5076,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     _rewrites: list[dict[str, Any]] = []
     _rewrite_token = _REWRITE_LOG.set(_rewrites)
     from data_sheets_schema.schema_sync import blocking, check as _schema_check
-    stale = blocking(_schema_check())
+    stale = blocking(_schema_check(profile=spec.profile_obj))     # this run's instrument (#1463)
     if stale:
         detail = "; ".join(f"{r['class']}: {r.get('reason', r['status'])}"
                            for r in stale)
@@ -4845,12 +5129,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                 # Generic backfill cannot supersede observed generation-bound
                 # inputs. Older backfill could publish during an interruption.
                 from data_sheets_schema.usage_ledger import recorded_inputs
-                current = spec.input_identity()
-                bound_progress = (
-                    progress.get("generation_id") == generation
-                    and _usage_record_matches(spec, progress.get("run_identity"))
-                    and progress.get("input_identity") == current)
-                if recorded_inputs(spec) == current or bound_progress:
+                if _generation_bound_inputs_observed(
+                        spec, progress, generation, recorded_inputs(spec), spec.input_identity()):
                     prior_matches = False
             if prior_matches:
                 _require_recorded_inputs(spec, prior)
@@ -4876,15 +5156,25 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                             and progress.get("generation_id") in (None, foreign_identifier)))
     if foreign_progress or not _same_usage_generation(spec, progress.get("generation_id")):
         progress = {}
-    if progress.get("input_identity") is not None and progress["input_identity"] != spec.input_identity():
-        raise UsageLedgerError("generation input identity changed since saved progress; restore the "
-                               "recorded inputs or use --no-resume for an explicit new generation")
+    from data_sheets_schema.usage_ledger import _identity_differs, identity_refusal
+    if progress.get("input_identity") is not None and _identity_differs(progress["input_identity"], spec.input_identity()):
+        raise UsageLedgerError(identity_refusal(progress["input_identity"], "since saved progress"))
     done = set(progress.get("completed", []))
     if done and progress.get("input_identity") is None and not prior_record:
         from data_sheets_schema.usage_ledger import recorded_inputs
         if recorded_inputs(spec) is None:
             raise UsageLedgerError("saved phases have no recorded generation input identity; restore "
                                    "their input evidence or use --no-resume for an explicit new generation")
+    if done and not ((prior_record.get("schema") or {}).get("digest_md5") if prior_record else None):
+        # A pin made before the instrument was part of the identity says
+        # nothing about it; without a record attesting the digest, the
+        # finished phases' instrument is unknown and they are not continued
+        # under whatever this run resolved (#1519).
+        from data_sheets_schema.usage_ledger import recorded_inputs
+        sources = (progress.get("input_identity"), recorded_inputs(spec))   # each on its own (#1559)
+        if not any(isinstance(s, dict) and "profile" in s for s in sources):
+            raise UsageLedgerError("saved phases carry no instrument identity (profile and schema digest) and "
+                                   "no record attests one; use --no-resume for an explicit new generation")
     if done:
         from data_sheets_schema.usage_ledger import recorded_inputs
         evidence = progress.get("input_identity") or recorded_inputs(spec) or {}
@@ -5180,6 +5470,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         # default for a bundle it did not declare, and none for an arm whose
         # header declares the manifest unused (#621, #1299).
         manifest=spec.manifest if spec.manifest_used else None,
+        selected_manifest=spec.manifest,
         manifest_basis=(None if spec.manifest_used else
                         "no source manifest was consulted: the arm's header declares "
                         f"it unused ({spec.manifest_line.lstrip('# ').strip()})"),
@@ -5196,14 +5487,17 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         outputs={"full": spec.full_path, "core": spec.core_path,
                  "report": spec.report_path,
                  "reasoning": _reasoning_path(spec)},
-        schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
+        schema_digest_md5=schema_digest.fingerprint(
+            schema_digest.digest_text("Dataset", profile=spec.profile_obj)),
+        profile=spec.profile_selection,
         receipt_expected=spec.condition in RECEIPT_CONDITIONS,
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "
              "was set on the request and is therefore observed, not asserted."
              if settings["temperature_applies"]
              else f"Generated via {RUNTIME}. {settings['temperature_note']}"),
-            f"Model settings read from {settings['config_path']}.",
+            (f"Model settings read from {settings['config_path']}." if settings.get("config_path")
+             else f"Model settings are the runner's defaults: {settings.get('config_note')}."),
             f"Endpoint: {provider_identity()['provider']} at "
             f"{provider_identity()['base_url']}.",
         ] + ([f"Resumed run; phases skipped as already present: {', '.join(skipped)}."]

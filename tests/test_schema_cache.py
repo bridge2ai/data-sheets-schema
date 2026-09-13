@@ -103,7 +103,7 @@ class TheRebuildCache(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp)
             src = d / "data_sheets_schema.yaml"; _write(src, "id: x\n", 1_000_000_000)
-            key = (schema_sync._source_state(src), False)
+            key = (schema_sync._source_state(src), False, None)      # the logical name is in the key (#1527)
             schema_sync._REBUILT[key] = b"merged bytes\n"
             self.addCleanup(schema_sync.forget_rebuilds)
             target = d / "out.yaml"
@@ -119,7 +119,7 @@ class TheRebuildCache(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp)
             src = d / "data_sheets_schema.yaml"; _write(src, "id: x\n", 1_000_000_000)
-            key = (schema_sync._source_state(src), False)
+            key = (schema_sync._source_state(src), False, None)
             schema_sync.forget_rebuilds()
             failed = mock.Mock(returncode=1, stderr="boom", stdout="")
             with mock.patch.object(schema_sync.subprocess, "run", return_value=failed):

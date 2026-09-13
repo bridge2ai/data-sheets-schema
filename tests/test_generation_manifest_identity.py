@@ -124,7 +124,7 @@ def test_agentic_render_to_record_preserves_selected_inputs(external, tmp_path, 
     full.write_text(f"# Source bundle: {spec.bundle}\n{spec.manifest_line}\nid: https://example.org/cohort\n")
     monkeypatch.setattr(pv, "CONCAT_DIR", root)
     destination = root / "saved-provenance.yaml"
-    monkeypatch.setattr(pv, "record_path_for", lambda project, method, label, *a: destination)
+    monkeypatch.setattr(pv, "record_path_for", lambda project, method, label, *a, **kw: destination)
     monkeypatch.setattr(command_module, "_inline_checks", lambda path: None)
     if mode == "header":
         index = args.index("--manifest")

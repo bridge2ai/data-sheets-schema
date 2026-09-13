@@ -30,7 +30,7 @@ from typing import Any
 import click
 
 #: The study's manifest, used when a caller selects nothing else.
-DEFAULT_MANIFEST = Path("data/preprocessed/source_manifest.yaml")
+from data_sheets_schema.corpus import DEFAULT_MANIFEST
 
 #: The legacy override key: `<PROJECT>_source_dir` beside the projects.
 _SOURCE_DIR_SUFFIX = "_source_dir"
@@ -60,8 +60,8 @@ def _concat_dir() -> Path:
 
 
 def default_manifest_path() -> Path:
-    from data_sheets_schema.chunking import anchored
-    return anchored(DEFAULT_MANIFEST)
+    from data_sheets_schema.corpus import default_manifest_path as resolve
+    return resolve()
 
 
 @dataclass(frozen=True)
@@ -75,6 +75,15 @@ class Registry:
     """
     path: Path | None
     data: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def root(self) -> Path:
+        from data_sheets_schema.corpus import root
+        return root(self.path)
+
+    def anchored(self, path: Path) -> Path:
+        from data_sheets_schema.corpus import relative_to_root
+        return relative_to_root(path, self.root)
 
     # ---- projects ---------------------------------------------------------
     def projects(self) -> list[str]:
@@ -120,13 +129,13 @@ class Registry:
         are not under `data/preprocessed/individual/<project>`: the override
         that lets VOICE_PEDIATRIC read VOICE's directory (#302)."""
         v = self._setting(project, "source_dir")
-        return Path(v) if isinstance(v, str) and v else None
+        return self.anchored(Path(v)) if isinstance(v, str) and v else None
 
     def raw_dir(self, project: str) -> Path | None:
         """Where the project's raw downloads are, when they are not under
         the input directory's `<project>` subdirectory (#637)."""
         v = self._setting(project, "raw_dir")
-        return Path(v) if isinstance(v, str) and v else None
+        return self.anchored(Path(v)) if isinstance(v, str) and v else None
 
     def preprocessed_directory(self, project: str, root: Path) -> Path:
         """Declared source_dir wins; a pipeline root supplies only the fallback.
@@ -168,8 +177,9 @@ class Registry:
         record, else `<concat_dir>/<project>_preprocessed.txt` by convention."""
         v = self._setting(project, "bundle")
         if isinstance(v, str) and v:
-            return Path(v)
-        return (concat_dir or _concat_dir()) / f"{project}{DOCUMENT_BUNDLE_SUFFIX}"
+            return self.anchored(Path(v))
+        from data_sheets_schema.chunking import CONCAT_DIR
+        return (concat_dir or self.anchored(CONCAT_DIR)) / f"{project}{DOCUMENT_BUNDLE_SUFFIX}"
 
     def bundles(self, project: str, concat_dir: Path | None = None) -> list[Path]:
         """Every bundle this manifest resolves for `project`: the declared or
@@ -179,7 +189,7 @@ class Registry:
         those, and they are the project's inputs as much as the document
         bundle is (#1367 round 2, #1385)."""
         from data_sheets_schema import chunking
-        base = concat_dir or _concat_dir()
+        base = concat_dir or self.anchored(chunking.CONCAT_DIR)
         out = [self.bundle(project, concat_dir)]
         if self.path is not None and self.path.resolve() == default_manifest_path().resolve():
             out += [base / f"{project}{s}" for s in chunking.BUNDLE_SUFFIXES]
@@ -236,8 +246,8 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
     if path is None:
         return Registry(path=None)
     p = Path(path)
-    if p == DEFAULT_MANIFEST and not p.exists():
-        p = default_manifest_path()
+    if p == DEFAULT_MANIFEST:
+        p = default_manifest_path()          # one rule, whether or not a relative copy is here (#1563)
     if not p.exists():
         return Registry(path=p)
     import yaml
@@ -246,8 +256,10 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
         # its manifest through here, and re-reading a 300-line YAML on each
         # construction cost ~50 ms (#1367 round 2, #1394).
         from data_sheets_schema.schema_cache import load_yaml
-        data = load_yaml(p) or {}
-    except (OSError, yaml.YAMLError) as exc:
+        data = load_yaml(p)
+        if data is None:
+            data = {}                        # an empty document; a falsey non-mapping is refused below (#1658)
+    except (OSError, yaml.YAMLError, UnicodeDecodeError) as exc:     # a non-UTF-8 file included (#1708)
         raise click.ClickException(f"manifest {p} could not be read: {exc}") from exc
     if not isinstance(data, dict):
         raise click.ClickException(f"manifest {p} is not a mapping")
@@ -337,6 +349,11 @@ def select_manifest(project: str, bundle: Path | str | None,
     describe a bundle the run is not reading, and hashing the study's file
     into the record would attest an input the run never consulted.
     """
+    if requested is AUTO:
+        from data_sheets_schema.corpus import AUTO as NO_OVERRIDE, manifest_override
+        explicit = manifest_override()
+        if explicit is not NO_OVERRIDE:
+            requested = explicit
     if requested is None:
         return None
     if requested is not AUTO:

@@ -113,6 +113,11 @@ class FormFailure:
     reason: str
     fitness: float
     config: str = ""          # v1 | v2, filled by attribution
+    # The instrument the judgement was made under (#1514): the digest and
+    # complete-specification hashes the fitness entry recorded, so a set
+    # spanning two profiles is refused like one spanning two models.
+    schema: str = ""
+    specification: str = ""
 
     @property
     def key(self) -> str:
@@ -136,6 +141,8 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
     out: list[FormFailure] = []
     rubrics: set[str] = set()
     models: set[str] = set()
+    schemas: set[str] = set()
+    specifications: set[str] = set()
     for path in sorted(cache_dir.glob("*_fitness.jsonl")):
         project = path.name.replace("_fitness.jsonl", "")
         for line in path.read_text(encoding="utf-8").splitlines():
@@ -146,11 +153,19 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
                 continue
             rubrics.add(entry.get("rubric", ""))
             models.add(entry.get("model", ""))
+            schemas.add(entry.get("schema", ""))
+            # An entry with no attestation is its own population: a failure
+            # judged before the complete specification was recorded is not
+            # the same instrument as one judged under it (#1608).
+            specifications.add(str(entry.get("specification") or ""))
             out.append(FormFailure(
                 project=project, slot=entry["slot"], value=entry["value"],
                 reason=entry.get("reason", ""),
-                fitness=float(entry.get("fitness", 0.0))))
-    for name, seen in (("rubric", rubrics), ("model", models)):
+                fitness=float(entry.get("fitness", 0.0)),
+                schema=str(entry.get("schema", "") or ""),
+                specification=str(entry.get("specification", "") or "")))
+    for name, seen in (("rubric", rubrics), ("model", models), ("schema", schemas),
+                       ("specification", specifications)):     # the digest omits distinctions the specification keeps (#1562)
         if len(seen) > 1:
             raise ValueError(
                 f"form failures span {len(seen)} fitness {name}s: "
@@ -288,8 +303,11 @@ class FormSubtypeClassifier:
     def __init__(self, client=None, model: str | None = None,
                  max_tokens: int = 8000, cache_path: Path | None = None,
                  offline: bool = False, schema: str | None = None,
-                 specification: str | None = None):
+                 specification: str | None = None, profile=None):
         self._client, self._model = client, model
+        # The instrument of the records being classified (#1496); None is
+        # the ambient profile, right only for a fresh run in the study.
+        self.profile = profile
         self._schema = schema
         self._specification = specification
         self.max_tokens = max_tokens
@@ -362,10 +380,9 @@ class FormSubtypeClassifier:
                 key += ":" + reason_hash
             self._memo[key] = (entry["subtype"], entry.get("reason", ""))
 
-    @staticmethod
-    def _live_snapshot() -> tuple:
+    def _live_snapshot(self) -> tuple:
         from data_sheets_schema.evidence_score import slot_specification_snapshot
-        return slot_specification_snapshot()
+        return slot_specification_snapshot(profile=self.profile)      # the classifier's instrument (#1513)
 
     @property
     def specification(self) -> str:
@@ -421,7 +438,7 @@ class FormSubtypeClassifier:
         """
         from data_sheets_schema import schema_digest
         def live_schema():
-            return schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+            return schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=self.profile))
         if not (self.cache_path and Path(self.cache_path).exists()):
             return live_schema()
         try:
@@ -464,6 +481,20 @@ class FormSubtypeClassifier:
                                  "subtype": subtype, "reason": reason}) + "\n")
 
     def __call__(self, failure: FormFailure) -> tuple[str, str]:
+        # The instrument first, before any cache can answer for it (#1561):
+        # a failure judged under another schema or complete specification
+        # is not this classifier's to classify, cached or not (#1514, #1562).
+        if failure.schema and failure.schema != self.schema:
+            raise ValueError(f"the failure was judged under schema {failure.schema[:12]}…, this classifier "
+                             f"is keyed on {self.schema[:12]}…; they are different instruments (#1514)")
+        if failure.specification and failure.specification != self.specification:
+            # A failure that carries a complete-specification hash never
+            # takes a label cached under another one — or under none: a
+            # classifier with no attestation is not this instrument (#1562,
+            # #1608). A failure with no attestation is read like one with no
+            # schema: legacy, stamped rather than refused.
+            raise ValueError(f"the failure was judged under specification {failure.specification[:12]}…, this "
+                             f"classifier is keyed on {self.specification[:12] or '(none)'}; they are different instruments (#1562, #1608)")
         reason_hash = hashlib.sha256(str(failure.reason).encode("utf-8")).hexdigest()
         key = failure.key + (":" + reason_hash if self.specification else "")
         if key in self._memo:
@@ -577,6 +608,9 @@ def main(argv: list[str] | None = None) -> int:
                         default=SUBTYPE_CACHE / "form_subtypes.jsonl")
     parser.add_argument("--offline", action="store_true",
                         help="fail instead of making a paid call")
+    parser.add_argument("--profile", default=None, choices=sorted(__import__("data_sheets_schema.profiles", fromlist=["PROFILES"]).PROFILES),
+                        help="the profile the judged records were generated under (bridge2ai | neutral); "
+                             "default: the ambient profile (#1541)")
     parser.add_argument("--limit", type=int, default=None,
                         help="classify only the first N (for a canary)")
     parser.add_argument("--model", default=None,
@@ -628,15 +662,23 @@ def main(argv: list[str] | None = None) -> int:
         failures = failures[:args.limit]
     print(f"{len(failures)} form failure(s) loaded", file=sys.stderr)
 
-    classifier = FormSubtypeClassifier(cache_path=args.cache,
-                                       model=args.model,
-                                       schema=args.schema,
-                                       specification=args.specification,
-                                       offline=args.offline)
-    print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",
-          file=sys.stderr)
-    print(f"specification: {classifier.specification or 'historical, unattested; replay only'}",
-          file=sys.stderr)
+    from data_sheets_schema.profiles import profile_named
+    try:
+        classifier = FormSubtypeClassifier(cache_path=args.cache,
+                                           model=args.model,
+                                           schema=args.schema,
+                                           specification=args.specification,
+                                           offline=args.offline,
+                                           profile=profile_named(args.profile) if args.profile else None)
+        # The live instrument is materialised here: an unknown ambient
+        # profile surfaces as a named error, not a traceback (#1679, #1703).
+        print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",
+              file=sys.stderr)
+        print(f"specification: {classifier.specification or 'historical, unattested; replay only'}",
+              file=sys.stderr)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     classified = classify(failures, classifier)
     counts = table(classified)
 

@@ -98,16 +98,17 @@ GENERATION_ARMS = {
         "measures": "fidelity of OUR mapping table; every filled field carries "
                     "its declared SKOS mapping type and information loss",
     },
-    # AI-READI only. It is the sole GC publishing a Healthsheet, so this arm
-    # cannot be run elsewhere and must never be pooled with the others. The
-    # healthsheet also remains in AI-READI's standard corpus: the corpus
-    # reflects what upstream actually publishes rather than a levelled set.
+    # Which datasets this arm may run on is the study profile's fact
+    # (`profiles.BRIDGE2AI.arm_projects`, #628, #1444), not the arm's: one
+    # dataset publishes a Healthsheet, so the arm cannot be run elsewhere
+    # and must never be pooled with the others. The healthsheet also
+    # remains in that dataset's standard corpus: the corpus reflects what
+    # upstream actually publishes rather than a levelled set.
     "healthsheet_only": {
         "method": "claudecode_agent_healthsheet",
         "core_method": "claudecode_agent_healthsheet_core",
         "input": "data/preprocessed/concatenated/{project}_healthsheet_only.txt",
         "model_involved": True,
-        "projects": ["AI_READI"],
         "measures": "what one structured upstream source yields alone, with no "
                     "publications, documentation, license or protocol",
     },
@@ -120,7 +121,6 @@ GENERATION_ARMS = {
         "core_method": "claudecode_agent_crate_only_core",
         "input": "data/preprocessed/concatenated/{project}_crate_only.txt",
         "model_involved": True,
-        "projects": ["CHORUS", "CM4AI", "VOICE"],
         "measures": "what one RO-Crate supports on its own, with no documents",
     },
     "de_novo": {

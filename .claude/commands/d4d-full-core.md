@@ -1,6 +1,6 @@
-Generate paired full D4D and D4D-core records for Bridge2AI Grand Challenge
-projects using a model-neutral, schema-grounded agent workflow with four ordered
-phases:
+Generate paired full D4D and D4D-core records for the projects the selected
+source manifest declares, using a model-neutral, schema-grounded agent workflow
+with four ordered phases:
 
 1. Generate the full D4D directly from the input documents, writing its
    coverage receipt as you read.
@@ -11,8 +11,9 @@ phases:
    the pair checker asks for, report, and repair.
 
 Phases 3 and 4 are required for production runs. Write a reconciliation report
-even when no discrepancies are found. Run the requested phases for all four
-projects (AI_READI, CHORUS, CM4AI, VOICE) unless the user names specific ones.
+even when no discrepancies are found. Run the requested phases for every
+project the selected manifest declares (`d4d download list-projects`) unless
+the user names specific ones.
 
 Before any phase, read and enforce
 `.claude/agents/d4d-provenance-guard.md`.
@@ -97,16 +98,16 @@ The bundle is the evidence. What the record is *about* is declared in the
 any dataset that is related to it but distinct from it, with the slot that
 carries the relation. Read it with `d4d download scope --project {PROJECT}`.
 
-**A scope constraint goes in the manifest, never in the launch text.** The VOICE
-run of 2026-08-07 was sent a paragraph naming the project, the companion
-pediatric dataset, a file not to read, and the issue number of the last time it
-went wrong (#422). It worked, and it was per-GC adaptation invisible to every
-prompt test, because it lived in the message rather than in a file. If a run
+**A scope constraint goes in the manifest, never in the launch text.** One run
+was once sent a paragraph naming the project, a companion dataset, a file not
+to read, and the issue number of the last time it went wrong (#422). It worked,
+and it was per-dataset adaptation invisible to every prompt test, because it
+lived in the message rather than in a file. If a run
 seems to need a constraint the bundle and the manifest cannot express, that is a
 manifest bug — fix it there, where the next dataset inherits it.
 
-A bundle may legitimately contain sources *about* a related dataset: VOICE's
-does, and the manifest says so (`in_bundle: physionet_pediatric_1_1_0`).
+A bundle may legitimately contain sources *about* a related dataset; when it
+does, the manifest says so (`in_bundle: <source id>` on the related dataset).
 Represent the relation through the declared slot — `related_datasets` — rather
 than merging the two, and never as a nested object standing in for the other
 dataset's own record. `d4d download scope --check` verifies afterwards that no
@@ -224,8 +225,8 @@ equivalent, and only the first two are ever acceptable:
 | kind | example | generic | tuned |
 |---|---|---|---|
 | **decision rule** | "prefer omission over inference" | ✅ if applied to every project identically | ✅ |
-| **factual disambiguation** | "this bundle describes a release programme, not one release" | ❌ project-specific | ✅ |
-| **quality warning** | "earlier runs conflated two entities here" | ❌ | ⚠️ steers behaviour; avoid |
+| **factual disambiguation** | "this bundle describes a release program, not one release" | ❌ project-specific | ✅ |
+| **quality warning** | "earlier runs conflated two entities here" | ❌ | ⚠️ steers behavior; avoid |
 | **outcome expectation** | "expect roughly 60 populated slots" | ❌ | ❌ **never, in any condition** |
 
 Outcome expectations are excluded from *both* conditions. They tell the model
@@ -309,7 +310,7 @@ reasoning effort, and mode.
 **Phase 1 is a receipt protocol, not a reading instruction.** The API path
 has every byte of the bundle in context on every call; this path reads it
 through a file tool, and the 2026-08-24 arm's agents never opened roughly a
-fifth of AI_READI, CM4AI and VOICE (#700). "Read the whole bundle" was the
+fifth of most of the bundles (#700). "Read the whole bundle" was the
 rule; nothing could tell laziness from compliance. So the reading now leaves
 a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
 
@@ -336,7 +337,7 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    - `extracted` with `extracted: [{slot, snippet}, …]` — the record slot
      path the fact fills (`funders[0].grant_id`, or an entry path such as
      `funders[0]` when one passage attests a whole entry) and a **verbatim**
-     snippet from *this* chunk of at least 8 characters after normalisation
+     snippet from *this* chunk of at least 8 characters after normalization
      per `...`-separated part (a grant number or an identifier qualifies; a
      short common word does not, and fails the check);
    - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
@@ -411,7 +412,7 @@ receipt, nothing else. It must not create a core record.
 of every generated core's slot values and the rest was the two core-only
 slots. Generating it was where the API arm's pair errors came from. So Phase
 2 is one command, run on the validated Phase 1 file, and involves no model
-judgement:
+judgment:
 
 ```bash
 poetry run d4d derive core \
@@ -502,7 +503,7 @@ There is no full/core reconciliation for a model to perform: the shared
 slots agree because the core is projected from the full record, the
 projection rules (`resources` by id, `file_collections` → `distributions`,
 `dialect` when files agree) are code, and the pair checker is the proof.
-What remains for judgement is the semantic review the checker asks for and
+What remains for judgment is the semantic review the checker asks for and
 the repair of what the checkers find.
 
 1. **Re-derive the core from the corrected full record** (Phase 2's command
@@ -565,7 +566,7 @@ the repair of what the checkers find.
    [print(f) for f in out['findings']]"
    ```
    Findings are printed once per identifier, not once per slot that repeats
-   it: VOICE rep1 has 19 ungrounded identifiers across 78 occurrences, and the
+   it: one record had 19 ungrounded identifiers across 78 occurrences, and the
    number to act on is 19.
 
    `removal_not_performed` means the report says a slot was removed and it is

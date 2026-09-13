@@ -23,6 +23,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 from typing import Any
+from data_sheets_schema.corpus import AUTO as SOURCE_MANIFEST_AUTO
 
 CHUNKS_DIR = Path("data/preprocessed/chunks")
 CONCAT_DIR = Path("data/preprocessed/concatenated")
@@ -190,35 +191,39 @@ def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
+def corpus_root() -> Path | None:
+    """The checkout the corpus is anchored on: the resource root when it is
+    a checkout — the working directory's when it is one, else the code's
+    (#1640, #1588) — and None from an install, where the corpus is the
+    caller's own tree."""
+    from data_sheets_schema.resources import resource_root
+    root, kind = resource_root()
+    return root if kind == "checkout" else None
+
+
 def anchored(d: Path) -> Path:
-    """A repository-owned relative directory as a path that is correct from
-    any working directory: as written from the repository root — so the
-    paths a record carries stay relative and portable (`inputs.chunks.path`
-    is `data/preprocessed/chunks/…` on every record) — and anchored to the
-    checkout from anywhere else (#1367 round 2, #1388)."""
-    d = Path(d)
-    if d.is_absolute():
-        return d
-    try:
-        if Path.cwd().resolve() == REPO_ROOT:
-            return d
-    except OSError:
-        pass
-    return REPO_ROOT / d
+    """A conventional corpus path under the selected manifest's project root."""
+    from data_sheets_schema.corpus import anchored as resolve, selected_manifest
+    return resolve(d, selected_manifest(allow_checkout_fallback=True))
 
 
 def _study_dir() -> Path:
     return anchored(CONCAT_DIR).resolve()
 
 
-def canonical_name(bundle: Path) -> str:
+def canonical_name(bundle: Path, *, source_manifest: Path | None | object = SOURCE_MANIFEST_AUTO) -> str:
     """The basename a manifest records for `bundle`: a study bundle's own,
     through any symlink; any other bundle's as given. The name in the
     payload and the destination of the file are decided together, so an
     alias never writes the canonical manifest under a different `bundle:`
     (#1367 round 2, #1389)."""
     bundle = Path(bundle)
-    if _under_concat_dir(bundle):
+    if source_manifest is not SOURCE_MANIFEST_AUTO:
+        from data_sheets_schema.corpus import root
+        conventional = bundle.resolve().parent == (root(source_manifest) / CONCAT_DIR).resolve()
+    else:
+        conventional = _under_concat_dir(bundle)
+    if conventional:
         try:
             return bundle.resolve().name
         except OSError:
@@ -237,7 +242,8 @@ def _under_concat_dir(bundle: Path) -> bool:
         return False
 
 
-def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
+def manifest_for(bundle: Path, chunks_dir: Path | None = None, *,
+                 source_manifest: Path | None | object = SOURCE_MANIFEST_AUTO) -> Path:
     """The manifest for any bundle kind (#725).
 
     A study bundle — one under `CONCAT_DIR`, or any bundle when the caller
@@ -255,12 +261,23 @@ def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
     bundle was read from (#713).
     """
     bundle = Path(bundle)
+    if source_manifest is not SOURCE_MANIFEST_AUTO and chunks_dir is None:
+        # Omitted selection follows ambient discovery; explicit None uses
+        # only the caller's namespace, like `--manifest none` (#1653).
+        from data_sheets_schema.corpus import root, relative_to_root
+        owner = root(source_manifest)
+        if bundle.resolve().parent == (owner / CONCAT_DIR).resolve():
+            chunks_dir = relative_to_root(CHUNKS_DIR, owner)
+            bundle = bundle.resolve()
+        else:
+            stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
+            return bundle.parent / f"{stem}_chunks.yaml"
     if chunks_dir is None and not _under_concat_dir(bundle):
         stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
         return bundle.parent / f"{stem}_chunks.yaml"
     # A study bundle is named by what it resolves to: a symlink's alias is
     # not a second identity for the same bytes.
-    name = canonical_name(bundle) if chunks_dir is None else bundle.name
+    name = canonical_name(bundle, source_manifest=source_manifest) if chunks_dir is None else bundle.name
     stem = name[:-4] if name.endswith(".txt") else name
     if name.endswith("_preprocessed.txt"):
         return manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
@@ -377,7 +394,8 @@ def manifest_status_for(bundle: Path, chunks_dir: Path | None = None) -> tuple[s
 
 def chunks_input(bundle: Path | None, bundle_md5: str | None,
                  chunks_dir: Path | None = None,
-                 manifest: Path | None = None) -> dict[str, Any] | None:
+                 manifest: Path | None = None, *,
+                 source_manifest: Path | None | object = SOURCE_MANIFEST_AUTO) -> dict[str, Any] | None:
     """What a provenance record should carry under `inputs.chunks`.
 
     Returned only when a manifest exists for this bundle *and* it was built
@@ -390,7 +408,7 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
         return None
     # An explicitly selected manifest wins over discovery (#1299): the run
     # that chunked an external bundle knows where it put the manifest.
-    path = Path(manifest) if manifest is not None else manifest_for(bundle, chunks_dir)
+    path = Path(manifest) if manifest is not None else manifest_for(bundle, chunks_dir, source_manifest=source_manifest)
     if not path.exists():
         return None
     try:
@@ -399,7 +417,7 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
         m = yaml.safe_load(manifest_bytes)
         if not isinstance(m, dict) or m.get("bundle_md5") != bundle_md5:
             return None
-        validate_manifest_mapping(m, bundle.read_bytes(), canonical_name(bundle))
+        validate_manifest_mapping(m, bundle.read_bytes(), canonical_name(bundle, source_manifest=source_manifest))
         return {"path": str(path), "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
                 "bundle_name": m["bundle"],
                 "rule": m.get("rule"), "chunk_count": m.get("chunk_count")}

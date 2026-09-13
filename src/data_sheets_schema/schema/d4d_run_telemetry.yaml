@@ -145,6 +145,45 @@ classes:
         range: TrapSlot
         multivalued: true
         inlined_as_list: true
+      records_with_unparsed_findings:
+        description: >-
+          How many records carried findings no `[ERROR]` line expresses — a
+          YAML the loader rejects, named in a traceback (#1623).
+        range: integer
+      unparsed_findings:
+        description: Those findings, with the record they belong to.
+        range: UnparsedFindings
+        multivalued: true
+        inlined_as_list: true
+      records_unchecked:
+        description: >-
+          How many records the validator could not run on — neither scanned
+          nor clean (#1642).
+        range: integer
+      unchecked:
+        description: Those records, with why the validator did not run.
+        range: UncheckedRecord
+        multivalued: true
+        inlined_as_list: true
+
+  UnparsedFindings:
+    description: Findings of one record that no `[ERROR]` line expresses (#1623).
+    attributes:
+      record:
+        required: true
+      project:
+      method:
+      lines:
+        multivalued: true
+
+  UncheckedRecord:
+    description: A record the validator could not run on (#1642).
+    attributes:
+      record:
+        required: true
+      project:
+      method:
+      failure:
 
   TrapSlot:
     description: >-

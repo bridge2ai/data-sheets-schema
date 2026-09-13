@@ -350,3 +350,50 @@ evaluation and rendering into the package and will verify the complete
 workflow in a clean environment. Claude continues profile and packaging
 reviews. Preserve generation → evaluation → profiles → packaging merge order,
 both generation arms, all evaluation styles and the no-new-measurement boundary.
+
+## Installed explicit-file workflow — 2026-09-13
+
+The #1457 follow-up integrates the reviewed evaluation implementation and
+latest committed profile/packaging fixes in its own worktree. A clean wheel
+install with only declared runtime dependencies passes six release checks,
+including actual fake-provider generation, core derivation, validation,
+presence scoring, both API and semantic contracts and HTML rendering. See
+the separate installed-evaluation boundary and its 39 source pins. The
+completed manuscript condition still passes its 56-rating/450-hash audit.
+
+Generation PR #1367 at 73976cc20 and evaluation PR #1449 at 163eace0b both have
+independent approval. Full exact-head CI remains required before merging.
+Keep the prescribed merge order. The profile and packaging branches are
+still being reviewed by Claude. Complete #1523 (manifest-relative corpus
+roots) and #1556 (installed agentic commands/helpers) before declaring both
+generation arms fully installable. Preserve all prior measurements and keep
+source downloads and new production generation/scoring deferred.
+
+## 2026-09-13: external corpus roots and remaining installed arm
+
+Generation PR #1367 and evaluation PR #1449 are merged and their branches
+removed. Installed evaluation/rendering PR #1557 has an approved round-3
+review; its exact-head CI is pending. The #1523 follow-up now roots context,
+bundles, chunks and conventional outputs together, with external-project
+clean-wheel acceptance. It awaits independent review and CI.
+
+Finish the active profiles and packaging reviews, integrate their committed
+fixes, and complete #1556 for installed agentic execution and definition
+checks. Preserve every existing evaluation, the registered CBORG v7/v8
+reference condition, its repeat ratings, and the historical v9 canary. The
+API and agentic arms and all evaluation styles remain required. No new
+production generation, scoring or downloads belong to this implementation
+acceptance run; a future measurement needs its dated condition registration.
+
+### 2026-09-13 review boundary: corpus renderer 5
+
+PR #1587 round 2 addresses #1594–#1598 and #1601. New instructions bind
+actual output locations; old renderer 1–4 controls are byte-identical. The
+input/context/profile tree is selected consistently, and missing pinned
+artifacts cannot be treated as currently valid. Existing measured artifacts
+are preserved (56 ratings, 450 hashes verified). Installed evaluation/rendering
+PR #1557 round 4 fixes CI #1599/#1600 and has six fresh-wheel checks passing.
+The installed-agentic #1556 prototype passes seven fresh-wheel checks; its
+portable toolchain must be rebased onto this corpus boundary and reviewed
+before merge. Both generation arms and all registered evaluation styles
+remain in scope; no new measurement is authorized by these implementation tests.
