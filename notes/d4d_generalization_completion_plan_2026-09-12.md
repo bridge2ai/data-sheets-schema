@@ -350,3 +350,21 @@ evaluation and rendering into the package and will verify the complete
 workflow in a clean environment. Claude continues profile and packaging
 reviews. Preserve generation → evaluation → profiles → packaging merge order,
 both generation arms, all evaluation styles and the no-new-measurement boundary.
+
+## Installed explicit-file workflow — 2026-09-13
+
+The #1457 follow-up integrates the reviewed evaluation implementation and
+latest committed profile/packaging fixes in its own worktree. A clean wheel
+install with only declared runtime dependencies passes six release checks,
+including actual fake-provider generation, core derivation, validation,
+presence scoring, both API and semantic contracts and HTML rendering. See
+the separate installed-evaluation boundary and its 39 source pins. The
+completed manuscript condition still passes its 56-rating/450-hash audit.
+
+Generation PR #1367 at 73976cc20 and evaluation PR #1449 at 163eace0b both have
+independent approval. Full exact-head CI remains required before merging.
+Keep the prescribed merge order. The profile and packaging branches are
+still being reviewed by Claude. Complete #1523 (manifest-relative corpus
+roots) and #1556 (installed agentic commands/helpers) before declaring both
+generation arms fully installable. Preserve all prior measurements and keep
+source downloads and new production generation/scoring deferred.

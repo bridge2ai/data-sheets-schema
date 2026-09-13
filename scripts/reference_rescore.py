@@ -32,6 +32,9 @@ PLAN = ROOT / f"notes/reference_rescore_{DATE}"
 MODEL = "claude-opus-5[1m]"
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
 VALIDATOR_SUPPORT = (
+    "src/data_sheets_schema/resources.py",
+    "src/data_sheets_schema/evaluation/__init__.py",
+    "src/data_sheets_schema/evaluation/validate.py",
     "src/data_sheets_schema/evaluation_context.py",
     "src/data_sheets_schema/judge_contract.py",
     "src/data_sheets_schema/semantic_scope.py",

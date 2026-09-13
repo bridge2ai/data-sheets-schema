@@ -84,7 +84,29 @@ poetry run d4d --help
 
 After installation you can also invoke it as `d4d`, but `poetry run d4d` is the safest form while developing in the repo.
 
-Most subcommands currently expect a repository checkout because they import repo-local code from `src/` and `.claude/agents/scripts/`.
+The installed package supports explicit-file API generation, presence and API
+evaluation, semantic-output validation, and HTML rendering outside the checkout.
+Build with `poetry build` and install the resulting wheel into your environment.
+Use caller-owned input and output paths; the API workflow does not require the
+study's data tree. Repository maintenance and some agentic playbook helpers
+still require a checkout.
+
+For example, from your own project directory:
+
+```bash
+d4d api plan --project COHORT_X --bundle ./cohort.txt \
+  --label review_only --out-dir ./generated
+d4d evaluate presence --file ./generated/COHORT_X_d4d.yaml \
+  --project COHORT_X --method external_api --output-dir ./evaluations
+d4d render html ./generated/COHORT_X_d4d.yaml -o ./reports/cohort.html
+d4d evaluate validate ./rating.json --input ./generated/COHORT_X_d4d.yaml \
+  --agent-definition ./evaluator.md --context ./context.yaml
+```
+
+Presence evaluation and rendering make no model calls. `evaluate validate`
+checks a version-2 semantic output against the original D4D, exact evaluator
+definition and trusted applicability declarations. Omit `--context` when no
+predicates were declared; omitted predicates remain in the denominator.
 
 ### Command Groups
 

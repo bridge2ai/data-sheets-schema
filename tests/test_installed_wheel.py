@@ -40,16 +40,16 @@ class TestTheInstalledWheel(unittest.TestCase):
         cls.venv = cls.tmp / "venv"
         subprocess.run([sys.executable, "-m", "venv", str(cls.venv)], check=True)
         cls.python = cls.venv / ("Scripts" if os.name == "nt" else "bin") / "python"
-        # pytest only so the offline fake client of the runner tests can be
-        # imported by the child; the wheel's own dependencies come from its
-        # metadata — which is what this canary checks.
-        r = subprocess.run([str(cls.python), "-m", "pip", "install", "--quiet", str(cls.wheel), "pytest"],
+        # Install only the wheel and its declared runtime dependencies.
+        r = subprocess.run([str(cls.python), "-m", "pip", "install", "--quiet", str(cls.wheel)],
                            capture_output=True, text=True)
         if r.returncode != 0:
             # An opted-in canary fails on an install failure; it does not skip (#1489).
             raise AssertionError(f"the wheel did not install: {r.stderr[-1200:]}")
         cls.work = cls.tmp / "work"
         cls.work.mkdir()
+        for fixture in ("installed_workflow_fixture.py", "judge_fixtures.py"):
+            shutil.copy2(ROOT / "tests" / fixture, cls.work / fixture)
 
     @classmethod
     def tearDownClass(cls):
@@ -139,10 +139,9 @@ class TestTheInstalledWheel(unittest.TestCase):
                           "adult outpatients, released under CC-BY-4.0. 1,200 participants at three sites.\n" * 30,
                           encoding="utf-8")
         r = self._run(f"""
-            import sys, yaml
+            import yaml
             from pathlib import Path
-            sys.path.insert(0, {str(ROOT / "tests" / "test_download")!r})
-            from test_api_runner import FakeClient            # imports data_sheets_schema from the install
+            from installed_workflow_fixture import GenerationClient, check_installed_evaluation_and_rendering
             from data_sheets_schema import api_runner, resources
             assert not resources.is_checkout()
             out = Path("out")
@@ -150,7 +149,7 @@ class TestTheInstalledWheel(unittest.TestCase):
                                       method="claudecode_api", bundle=Path({str(bundle)!r}),
                                       label="2026-09-13_x-api-generic_rep1", out_dir=out)
             assert spec.profile == "neutral", (spec.profile, spec.profile_basis)
-            res = api_runner.execute(spec, client=FakeClient())
+            res = api_runner.execute(spec, client=GenerationClient())
             for p in (spec.full_path, spec.core_path, spec.report_path):
                 assert p.exists() and p.stat().st_size > 0, p
             rec = yaml.safe_load((out / "EXTERNAL_CLINICAL_provenance.yaml").read_text(encoding="utf-8"))
@@ -169,6 +168,7 @@ class TestTheInstalledWheel(unittest.TestCase):
             from data_sheets_schema.provenance import check_record
             violations, why = check_record(rec)
             assert why is None and not violations, (violations, why)
+            check_installed_evaluation_and_rendering(spec.full_path, spec.core_path)
             print("ok", len(res["usage"]))
         """)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
