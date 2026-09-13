@@ -5,12 +5,11 @@ Commands for working with RO-Crate metadata.
 
 import click
 
-from data_sheets_schema.registry import project_choice
+from data_sheets_schema.registry import project_choice, projects_for
 import sys
 from pathlib import Path
 
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
-from data_sheets_schema.constants import PROJECTS
 @click.group()
 def rocrate():
     """RO-Crate integration commands."""
@@ -170,7 +169,7 @@ def normalize(project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'raw').is_dir() or (root / p / 'crate').is_dir()
     ]
     if not targets:
@@ -221,7 +220,7 @@ def bundle(project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS if (root / p / 'processed').is_dir()
+        p for p in projects_for(click.get_current_context()) if (root / p / 'processed').is_dir()
     ]
     if not targets:
         click.echo(f"No normalized crates under {root}; run `d4d rocrate normalize`",
@@ -265,7 +264,7 @@ def emit_arm(version, project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'processed' / f'{p}_crate_d4d.yaml').exists()
     ]
     if not targets:
@@ -307,7 +306,7 @@ def map_cmd(project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'raw' / 'ro-crate-metadata.json').exists()
         or (root / p / 'crate' / 'ro-crate-metadata.json').exists()
     ]
@@ -356,7 +355,7 @@ def emit_map_arm(version, project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'processed' / f'{p}_crate_mapped_d4d.yaml').exists()
     ]
     if not targets:

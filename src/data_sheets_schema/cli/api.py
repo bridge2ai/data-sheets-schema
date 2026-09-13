@@ -57,12 +57,13 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     a run without a manifest records that it had none.
     """
     from data_sheets_schema.api_runner import RunSpec
+    from data_sheets_schema.registry import _concat_dir
     display, method, pattern, manifest_line = ARMS[arm]
     selected = select_manifest(project, bundle, manifest)      # one rule, everywhere (#1367 review)
     reg = load_registry(selected)
     resolved = (Path(bundle) if bundle else
                 reg.bundle(project) if reg.declares(project) and arm == "baseline" else
-                Path("data/preprocessed/concatenated") / pattern.format(p=project))
+                _concat_dir() / pattern.format(p=project))
     kw = {"manifest": selected,
           "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None}
     if runtime:
@@ -139,7 +140,7 @@ def _require_canonical_prompts(spec):
 
 
 def _require_bundle(spec, project, bundle):
-    if bundle is None and not load_registry(spec.manifest).declares(project):
+    if bundle is None and not load_registry(spec.manifest).declares_bundle(project, spec.bundle):
         reg = load_registry(spec.manifest)
         where = (f"{reg.path} declares {', '.join(reg.projects()) or 'no projects'}"
                  if reg.path is not None else "no manifest was selected")
@@ -461,9 +462,10 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         for n in range(1, replicates + 1):
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
                       bundle=bundles.get(p), manifest=requested)
-            if not s.bundle.exists():
-                raise click.ClickException(
-                    f"bundle not found for {p}: {s.bundle}")
+            # As `plan` and `run` do: a project no selected manifest declares
+            # needs an explicit bundle, never the repository's by convention
+            # (#1367 round 2, #1386).
+            _require_bundle(s, p, bundles.get(p))
             _require_canonical_prompts(s)
             _refuse_condition_mismatch(s, allow_condition_mismatch)   # before any spend (#1094)
             specs.append(s)

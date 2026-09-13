@@ -59,6 +59,9 @@ class Source:
     minimum_characters: int | None = None
     curation_note: str | None = None
     fetch: str | None = None          # "manual" => no handler can reproduce it
+    # Declared per-project directories (#1392); None means the convention.
+    raw_dir: Path | None = None
+    processed_dir: Path | None = None
 
     @property
     def is_manual(self) -> bool:
@@ -74,11 +77,11 @@ class Source:
 
     @property
     def raw_path(self) -> Path:
-        return RAW_DIR / self.project / self.raw_file
+        return (self.raw_dir or RAW_DIR / self.project) / self.raw_file
 
     @property
     def processed_path(self) -> Path:
-        return PROCESSED_DIR / self.project / self.processed_file
+        return (self.processed_dir or PROCESSED_DIR / self.project) / self.processed_file
 
     @property
     def has_raw(self) -> bool:
@@ -131,6 +134,8 @@ def load_sources(manifest_path: Path = MANIFEST,
                 minimum_characters=e.get("minimum_characters"),
                 curation_note=e.get("curation_note"),
                 fetch=e.get("fetch"),
+                raw_dir=reg.raw_dir(project),
+                processed_dir=reg.source_dir(project),
             ))
     return out
 

@@ -274,11 +274,11 @@ def preprocess_manifest(
     for project in registry.projects():
         if project not in selected_projects:
             continue
-        if registry.source_dir(project) is not None:
-            # Its preprocessed files are another project's (VOICE_PEDIATRIC
-            # reads VOICE's directory, #302): there is nothing of its own to
-            # preprocess, and looking for `<input>/<project>` reports every
-            # source missing (#1367 review, must-fix 9).
+        owner = registry.shared_source_project(project, output_dir)
+        if owner is not None:
+            # A verified legacy shared-directory declaration reuses a subset
+            # of another project's sources. An output-directory override or
+            # a unique source never triggers this skip (#1390).
             print(f"\n📁 {project}: preprocessed files are declared under "
                   f"{registry.source_dir(project)}; nothing to preprocess here")
             stats["projects"][project] = {"processed": 0, "errors": 0,
@@ -295,7 +295,7 @@ def preprocess_manifest(
         seen_ids = set()
         seen_outputs = set()
         project_stats = {"processed": 0, "errors": 0}
-        destination_dir = output_dir / project
+        destination_dir = registry.source_dir(project) or (output_dir / project)
         destination_dir.mkdir(parents=True, exist_ok=True)
 
         print(f"\n📁 {project} ({len(entries)} canonical sources)")

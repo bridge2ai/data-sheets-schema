@@ -6,7 +6,7 @@ from pathlib import Path
 
 import click
 
-from data_sheets_schema.registry import (DEFAULT_MANIFEST, load_registry,
+from data_sheets_schema.registry import (DEFAULT_MANIFEST, default_manifest_path, load_registry,
                                          project_choice)
 
 
@@ -52,7 +52,7 @@ def chunk(manifest, project, bundles, check, strict, max_lines, max_bytes):
     if project or not bundles:
         reg = load_registry(manifest)
         names = [project] if project else reg.projects()
-        study = Path(manifest).resolve() == Path(DEFAULT_MANIFEST).resolve()
+        study = reg.path is not None and reg.path.resolve() == default_manifest_path().resolve()
         for name in names:
             declared = reg.bundle(name)
             if study:

@@ -152,7 +152,7 @@ def chunk_texts(text: str, chunks: list[dict[str, Any]]) -> list[str]:
 
 
 def build_manifest(bundle: Path, rule: dict[str, Any] | None = None) -> dict[str, Any]:
-    return manifest_from_bytes(bundle.read_bytes(), bundle.name, rule)
+    return manifest_from_bytes(bundle.read_bytes(), canonical_name(bundle), rule)
 
 
 def manifest_from_bytes(raw: bytes, name: str, rule: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -180,7 +180,7 @@ def manifest_from_bytes(raw: bytes, name: str, rule: dict[str, Any] | None = Non
 def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
     """The document bundle's manifest: `{PROJECT}_chunks.yaml`."""
     # Resolved at call time so a test (or a caller) can repoint the module dirs.
-    return (chunks_dir or CHUNKS_DIR) / f"{project}_chunks.yaml"
+    return (chunks_dir if chunks_dir is not None else anchored(CHUNKS_DIR)) / f"{project}_chunks.yaml"
 
 
 #: The repository this package is checked out in — the root `CONCAT_DIR`
@@ -190,9 +190,40 @@ def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
+def anchored(d: Path) -> Path:
+    """A repository-owned relative directory as a path that is correct from
+    any working directory: as written from the repository root — so the
+    paths a record carries stay relative and portable (`inputs.chunks.path`
+    is `data/preprocessed/chunks/…` on every record) — and anchored to the
+    checkout from anywhere else (#1367 round 2, #1388)."""
+    d = Path(d)
+    if d.is_absolute():
+        return d
+    try:
+        if Path.cwd().resolve() == REPO_ROOT:
+            return d
+    except OSError:
+        pass
+    return REPO_ROOT / d
+
+
 def _study_dir() -> Path:
-    d = Path(CONCAT_DIR)
-    return (d if d.is_absolute() else REPO_ROOT / d).resolve()
+    return anchored(CONCAT_DIR).resolve()
+
+
+def canonical_name(bundle: Path) -> str:
+    """The basename a manifest records for `bundle`: a study bundle's own,
+    through any symlink; any other bundle's as given. The name in the
+    payload and the destination of the file are decided together, so an
+    alias never writes the canonical manifest under a different `bundle:`
+    (#1367 round 2, #1389)."""
+    bundle = Path(bundle)
+    if _under_concat_dir(bundle):
+        try:
+            return bundle.resolve().name
+        except OSError:
+            return bundle.name
+    return bundle.name
 
 
 def _under_concat_dir(bundle: Path) -> bool:
@@ -229,24 +260,21 @@ def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
         return bundle.parent / f"{stem}_chunks.yaml"
     # A study bundle is named by what it resolves to: a symlink's alias is
     # not a second identity for the same bytes.
-    try:
-        name = bundle.resolve().name if chunks_dir is None else bundle.name
-    except OSError:
-        name = bundle.name
+    name = canonical_name(bundle) if chunks_dir is None else bundle.name
     stem = name[:-4] if name.endswith(".txt") else name
     if name.endswith("_preprocessed.txt"):
         return manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
-    return (chunks_dir or CHUNKS_DIR) / f"{stem}_chunks.yaml"
+    return (chunks_dir if chunks_dir is not None else anchored(CHUNKS_DIR)) / f"{stem}_chunks.yaml"
 
 
 def bundle_path(project: str, concat_dir: Path | None = None) -> Path:
-    return (concat_dir or CONCAT_DIR) / f"{project}_preprocessed.txt"
+    return (concat_dir if concat_dir is not None else anchored(CONCAT_DIR)) / f"{project}_preprocessed.txt"
 
 
 def project_bundles(project: str, concat_dir: Path | None = None) -> list[Path]:
     """Every bundle of a known kind that exists for the project, document
     bundle first."""
-    base = concat_dir or CONCAT_DIR
+    base = concat_dir if concat_dir is not None else anchored(CONCAT_DIR)
     return [p for s in BUNDLE_SUFFIXES if (p := base / f"{project}{s}").exists()]
 
 

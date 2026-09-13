@@ -1314,9 +1314,16 @@ to write "the Bridge2AI" itself — and what happens for a dataset the study
 does not declare: no study context is sent, and the record's
 `inputs.source_manifest` says no manifest was selected instead of naming
 the study's file with its hash. Records made before this attest the
-study's manifest on every verified bundle, which was true for every study
-run and false for any external one; no external run exists in the corpus,
-so no record is re-attested. The chunk-manifest identity for bundles
+study's manifest on every verified bundle, including bundles whose source
+context it did not describe. Existing records retain their original
+attestations; none is rewritten by this change. **One study-side change**: the crate-only and
+healthsheet arms, whose headers have always said "Source manifest: not
+used", attested the study manifest's path and md5 anyway (the July 31
+CHORUS crate-only and AI_READI healthsheet records do). A re-record of
+such a run now writes `path: null` with the basis "the arm's header
+declares it unused"; the existing records are left as they are, and the
+difference is a statement about the recorder, not about what those runs
+read. The chunk-manifest identity for bundles
 outside the study directory is new (`<stem>_chunks.yaml` beside the
 bundle); the study's twelve manifests keep their paths and bytes.
 

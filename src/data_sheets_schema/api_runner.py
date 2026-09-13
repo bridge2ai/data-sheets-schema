@@ -494,8 +494,7 @@ class RunSpec:
 
     def __post_init__(self):
         default_line = type(self).__dataclass_fields__["manifest_line"].default
-        if self.manifest is AUTO:
-            self.manifest = select_manifest(self.project, self.bundle)
+        self.manifest = select_manifest(self.project, self.bundle, self.manifest)
         if self.manifest is not None:
             self.manifest = Path(self.manifest)
         if self.chunk_manifest is not None:
@@ -4822,6 +4821,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         # default for a bundle it did not declare, and none for an arm whose
         # header declares the manifest unused (#621, #1299).
         manifest=spec.manifest if spec.manifest_used else None,
+        manifest_basis=(None if spec.manifest_used else
+                        "no source manifest was consulted: the arm's header declares "
+                        f"it unused ({spec.manifest_line.lstrip('# ').strip()})"),
         chunk_manifest=spec.chunk_manifest,
         prompt_paths=spec.prompt_files,
         # The API path builds its instruction with `resolve_prompt`, so it can

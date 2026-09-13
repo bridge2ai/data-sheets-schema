@@ -5,7 +5,7 @@ from pathlib import Path
 
 import click
 
-from data_sheets_schema.registry import project_choice
+from data_sheets_schema.registry import project_choice, projects_for
 
 from data_sheets_schema.constants import PROJECTS
 
@@ -89,7 +89,7 @@ def award_numbers_cmd(method, labels, projects, bundle_dir, contexts):
     from data_sheets_schema.cli.method import resolve_method
     from data_sheets_schema.runs import full_record_path
     import yaml as _yaml
-    projects = list(projects) or list(PROJECTS)
+    projects = list(projects) or projects_for(click.get_current_context())   # the selected registry (#1387)
     method = method or (resolve_method(labels[0]) if labels else None)
     for project in projects:
         bundle = Path(bundle_dir) / f"{project}_preprocessed.txt"
@@ -150,7 +150,7 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
         if not families:
             raise click.ClickException("none of the labels lives under claudecode_agent_core or claudecode_api_core; pass --method")
         method = families.pop()
-    base = full_output_baseline(method, list(labels), list(projects) or list(PROJECTS))
+    base = full_output_baseline(method, list(labels), list(projects) or projects_for(click.get_current_context()))
     if as_json:
         click.echo(_json.dumps(base, indent=2))
         return

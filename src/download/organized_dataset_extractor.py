@@ -110,7 +110,7 @@ def promote_canonical_downloads(
             filename = entry["raw_file"]
             minimum = int(entry.get("minimum_characters", default_minimum))
             staged_path = staging_dir / project / filename
-            active_path = output_dir / project / filename
+            active_path = (registry.raw_dir(project) or output_dir / project) / filename   # #1392
             staged_error = validate_raw_artifact(staged_path, minimum)
 
             if not staged_error:

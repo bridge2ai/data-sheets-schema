@@ -45,7 +45,12 @@ AUTO = object()
 
 def _concat_dir() -> Path:
     from data_sheets_schema import chunking
-    return chunking.CONCAT_DIR
+    return chunking.anchored(chunking.CONCAT_DIR)
+
+
+def default_manifest_path() -> Path:
+    from data_sheets_schema.chunking import anchored
+    return anchored(DEFAULT_MANIFEST)
 
 
 @dataclass(frozen=True)
@@ -112,6 +117,33 @@ class Registry:
         v = self._setting(project, "raw_dir")
         return Path(v) if isinstance(v, str) and v else None
 
+    def shared_source_project(self, project: str, preprocessed_root: Path | None = None) -> str | None:
+        """Resolve the legacy shared-directory declaration only when its
+        source list is a subset of the owner's. A mapping's source_dir is
+        an output override; it never implies that raw work can be skipped."""
+        entry = self.entry(project)
+        if isinstance(entry, dict) or self.raw_dir(project) is not None:
+            return None
+        shared = self.source_dir(project)
+        if shared is None:
+            return None
+        source_pairs = lambda name: {(s.get("raw_file"), s.get("processed_file"))
+                                     for s in self.sources(name)}
+        wanted = source_pairs(project)
+        if not wanted or any(not all(pair) for pair in wanted):
+            return None
+        for owner in self.projects():
+            if owner == project:
+                continue
+            roots = [Path("data/preprocessed/individual")]
+            if preprocessed_root is not None:
+                roots.append(preprocessed_root)
+            candidates = [self.source_dir(owner) or root / owner for root in roots]
+            if (any(shared.resolve() == path.resolve() for path in candidates)
+                    and wanted <= source_pairs(owner)):
+                return owner
+        return None
+
     def bundle(self, project: str, concat_dir: Path | None = None) -> Path:
         """The project's document bundle: declared as `bundle` on a mapping
         record, else `<concat_dir>/<project>_preprocessed.txt` by convention."""
@@ -120,9 +152,27 @@ class Registry:
             return Path(v)
         return (concat_dir or _concat_dir()) / f"{project}{DOCUMENT_BUNDLE_SUFFIX}"
 
+    def bundles(self, project: str, concat_dir: Path | None = None) -> list[Path]:
+        """Every bundle this manifest resolves for `project`: the declared or
+        conventional document bundle, and every other kind the study keeps
+        beside it (`chunking.BUNDLE_SUFFIXES`: with-crate, crate-only,
+        healthsheet) — the de-novo, crate-only and healthsheet arms read
+        those, and they are the project's inputs as much as the document
+        bundle is (#1367 round 2, #1385)."""
+        from data_sheets_schema import chunking
+        base = concat_dir or _concat_dir()
+        out = [self.bundle(project, concat_dir)]
+        if self.path is not None and self.path.resolve() == default_manifest_path().resolve():
+            out += [base / f"{project}{s}" for s in chunking.BUNDLE_SUFFIXES]
+        seen: list[Path] = []
+        for b in out:
+            if b not in seen:
+                seen.append(b)
+        return seen
+
     def declares_bundle(self, project: str, bundle: Path,
                         concat_dir: Path | None = None) -> bool:
-        """Whether `bundle` is the one this manifest resolves for `project`.
+        """Whether `bundle` is one this manifest resolves for `project`.
 
         The test that decides whether a run *used* the manifest (#621): a
         run given an explicit bundle that is not the manifest's own did not
@@ -132,7 +182,8 @@ class Registry:
         if not self.declares(project):
             return False
         try:
-            return Path(bundle).resolve() == self.bundle(project, concat_dir).resolve()
+            target = Path(bundle).resolve()
+            return any(target == b.resolve() for b in self.bundles(project, concat_dir))
         except OSError:
             return False
 
@@ -166,11 +217,17 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
     if path is None:
         return Registry(path=None)
     p = Path(path)
+    if p == DEFAULT_MANIFEST and not p.exists():
+        p = default_manifest_path()
     if not p.exists():
         return Registry(path=p)
     import yaml
     try:
-        data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        # One parse per file per process (#1203): every `RunSpec` selects
+        # its manifest through here, and re-reading a 300-line YAML on each
+        # construction cost ~50 ms (#1367 round 2, #1394).
+        from data_sheets_schema.schema_cache import load_yaml
+        data = load_yaml(p) or {}
     except (OSError, yaml.YAMLError) as exc:
         raise click.ClickException(f"manifest {p} could not be read: {exc}") from exc
     if not isinstance(data, dict):
@@ -195,13 +252,17 @@ def select_manifest(project: str, bundle: Path | str | None,
     if requested is None:
         return None
     if requested is not AUTO:
-        return Path(requested)
-    reg = load_registry(DEFAULT_MANIFEST)
+        path = Path(requested)
+        if not path.is_file():
+            raise click.ClickException(f"selected source manifest does not exist or is not a file: {path}")
+        load_registry(path)  # An explicit unreadable/malformed declaration is never a neutral default.
+        return path
+    reg = load_registry(default_manifest_path())
     if not reg.declares(project):
         return None
     if bundle is None:
-        return DEFAULT_MANIFEST
-    return DEFAULT_MANIFEST if reg.declares_bundle(project, Path(bundle)) else None
+        return reg.path
+    return reg.path if reg.declares_bundle(project, Path(bundle)) else None
 
 
 # ---- click integration --------------------------------------------------

@@ -220,12 +220,15 @@ def validate_manifest_project(
     project: str,
 ) -> Dict:
     """Validate only canonical manifest sources and reject active extras."""
-    entries = manifest.get("projects", {}).get(project)
-    if entries is None:
+    from data_sheets_schema.registry import Registry
+    registry = Registry(path=None, data=manifest)
+    if not registry.declares(project):
         return {"error": f"Project not found in source manifest: {project}"}
+    entries = registry.sources(project)          # list or mapping record (#1391)
 
-    raw_dir = raw_root / project
-    preprocessed_dir = preprocessed_root / project
+    owner = registry.shared_source_project(project, preprocessed_root)
+    raw_dir = registry.raw_dir(project) or (registry.raw_dir(owner) if owner else None) or (raw_root / (owner or project))
+    preprocessed_dir = registry.source_dir(project) or (preprocessed_root / project)
     default_minimum = int(manifest.get("default_minimum_characters", 500))
     results = {
         "project": project,
@@ -238,7 +241,8 @@ def validate_manifest_project(
         "unexpected_outputs": 0,
         "quality_reports": [],
     }
-    expected_outputs = set()
+    expected_outputs = ({s["processed_file"] for s in registry.sources(owner)}
+                        if owner else set())
 
     for entry in entries:
         raw_file = raw_dir / entry["raw_file"]
@@ -416,9 +420,10 @@ def main():
         if args.manifest:
             from data_sheets_schema.registry import load_registry
             reg = load_registry(args.manifest)
-            args.projects = [p for p in reg.projects() if reg.source_dir(p) is None]
+            args.projects = [p for p in reg.projects()
+                             if reg.shared_source_project(p, args.preprocessed_dir) is None]
         else:
-            args.projects = ["AI_READI", "CHORUS", "CM4AI", "VOICE"]
+            args.projects = sorted(p.name for p in args.raw_dir.iterdir() if p.is_dir())
 
     for project in args.projects:
         if manifest:

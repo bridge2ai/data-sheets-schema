@@ -147,12 +147,12 @@ def instruction_text(record: dict[str, Any], instruction_file: Path | None) -> t
         try:
             from data_sheets_schema.api_runner import RunSpec, resolve_prompt
             run = record.get("run") or {}
-            from data_sheets_schema.registry import DEFAULT_MANIFEST
-            recorded = spec.get("manifest", str(DEFAULT_MANIFEST))   # absent: predates recording, the study's
+            from data_sheets_schema.registry import AUTO
+            recorded = spec.get("manifest", AUTO)     # absent: predates recording; the rule decides from the bundle
             s = RunSpec(project=run.get("project"), arm=spec.get("arm", ""), method=run.get("method", "claudecode_agent"),
                         bundle=Path(spec.get("bundle", "")), label=run.get("label", ""),
                         condition=spec["condition"], manifest_line=spec.get("manifest_line", ""),
-                        manifest=Path(recorded) if recorded else None,
+                        manifest=(recorded if recorded is AUTO else Path(recorded) if recorded else None),
                         run_date=spec.get("run_date", ""), runtime=spec.get("runtime", ""),
                         provider=spec.get("provider"))
             text = resolve_prompt(s)

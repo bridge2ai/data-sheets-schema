@@ -309,8 +309,8 @@ def _parse_phases(specs) -> list[dict]:
                    'phase; names are validated like --phase.')
 @click.option('--manifest', default=None,
               help='the source manifest this run consulted and attests as an input; default: '
-                   'the study\'s (data/preprocessed/source_manifest.yaml); `none` for a run '
-                   'that read no manifest — an explicit external bundle (#621)')
+                   'the manifest selected by the resolved bundle and output header; `none` '
+                   'for a run that read no manifest (#621)')
 @click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
               help='this run\'s procedure wrote a coverage receipt (#708); the '
                    'canary gate then treats a missing or failing one as a stop '
@@ -349,10 +349,24 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # than reporting `unverifiable`. Only when the caller says which condition
     # was rendered: guessing it would assert a condition the run may not have
     # used, which is the failure the gate exists to catch.
-    from data_sheets_schema.registry import select_manifest
-    selected = select_manifest(project, input_bundle,
-                               None if (manifest and str(manifest).lower() == "none")
-                               else Path(manifest) if manifest else __import__("data_sheets_schema.registry", fromlist=["AUTO"]).AUTO)
+    from data_sheets_schema.registry import AUTO, select_manifest
+    requested = (None if (manifest and str(manifest).lower() == "none")
+                 else Path(manifest) if manifest else AUTO)
+    # The bundle the record will name: the one passed, else the one the
+    # output's header declares — read here, before selecting, so a study
+    # key over an external header bundle selects none (#1384).
+    from data_sheets_schema.provenance import CONCAT_DIR as _CD, parse_header
+    header_bundle = None
+    base = method[:-5] if method.endswith("_core") else method
+    full_out = _CD / base / label / f"{project}_d4d.yaml"
+    h = parse_header(full_out) if full_out.exists() else {}
+    header_bundle = h.get("Source bundle") or h.get("Source")
+    resolved_bundle = input_bundle or header_bundle
+    header_unused = "not used" in h.get("Source manifest", "").lower()
+    selected = (None if requested is AUTO and (resolved_bundle is None or header_unused)
+                else select_manifest(project, resolved_bundle, requested))
+    manifest_basis = ("the output header declares the source manifest unused"
+                      if selected is None and header_unused else None)
     spec = None
     if condition:
         from data_sheets_schema.api_runner import RunSpec
@@ -362,12 +376,17 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         # re-render to what was sent, and the gate blamed an unchanged prompt
         # file for it (#500). Expanded through the same table, so the two
         # commands cannot drift apart.
-        spec = RunSpec(
+        run_spec = RunSpec(
             project=project, arm=_ARMS[arm][0], method=method,
             bundle=Path(bundle) if bundle else None, label=label,
             condition=condition, runtime=runtime, provider=provider,
+            manifest_line=_ARMS[arm][3],
             manifest=selected,           # the same selection the input block records (#1367 review, must-fix 3)
-        ).render_spec()
+        )
+        spec = run_spec.render_spec()
+        if not run_spec.manifest_used:
+            selected = None
+            manifest_basis = f"the arm's header declares the source manifest unused ({run_spec.manifest_line})"
 
     rec = build_record(project, method, label, mode="live",
                        input_bundle=Path(input_bundle) if input_bundle else None,
@@ -381,7 +400,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        phases=_parse_phases(phase_specs),
                        receipt_expected=receipt_expected,
                        condition=condition,                  # the launcher's own claim (#1094)
-                       manifest=selected)
+                       manifest=selected, manifest_basis=manifest_basis)
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
@@ -471,8 +490,11 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     provider = (data.get("model") or {}).get("provider") or None
     # The manifest the record's input block names, none where it names none;
     # a record that predates the field consulted the study's (#1367 review, M2).
+    from data_sheets_schema.registry import AUTO as _AUTO
     sm = ((data.get("inputs") or {}).get("source_manifest")) or {}
-    recorded_manifest = (Path(sm["path"]) if sm.get("path") else None) if "path" in sm else SOURCE_MANIFEST_DEFAULT
+    # Absent: the record predates the field, and the rule decides from the
+    # bundle exactly as it did for the run that produced the hash.
+    recorded_manifest = (Path(sm["path"]) if sm.get("path") else None) if "path" in sm else _AUTO
     for delta in (0, -1, 1, -2):
         spec = RunSpec(project=project, arm=_ARMS[arm][0], method=method, bundle=Path(bundle),
                        label=label, condition=condition, runtime=runtime, provider=provider,
@@ -1473,7 +1495,8 @@ def backfill(verified, dry_run):
                     source_paths = []
             # A reconstruction keeps the manifest the existing record names —
             # none where it recorded none (#1367 review, must-fix 2).
-            prior_manifest = SOURCE_MANIFEST_DEFAULT
+            from data_sheets_schema.registry import AUTO as _AUTO
+            prior_manifest = _AUTO                  # no prior record: the rule decides from the bundle (#1384)
             if existing.exists():
                 try:
                     sm = ((_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("inputs") or {}).get("source_manifest")
