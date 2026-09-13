@@ -98,16 +98,16 @@ The bundle is the evidence. What the record is *about* is declared in the
 any dataset that is related to it but distinct from it, with the slot that
 carries the relation. Read it with `d4d download scope --project {PROJECT}`.
 
-**A scope constraint goes in the manifest, never in the launch text.** The VOICE
-run of 2026-08-07 was sent a paragraph naming the project, the companion
-pediatric dataset, a file not to read, and the issue number of the last time it
-went wrong (#422). It worked, and it was per-GC adaptation invisible to every
-prompt test, because it lived in the message rather than in a file. If a run
+**A scope constraint goes in the manifest, never in the launch text.** One run
+was once sent a paragraph naming the project, a companion dataset, a file not
+to read, and the issue number of the last time it went wrong (#422). It worked,
+and it was per-dataset adaptation invisible to every prompt test, because it
+lived in the message rather than in a file. If a run
 seems to need a constraint the bundle and the manifest cannot express, that is a
 manifest bug — fix it there, where the next dataset inherits it.
 
-A bundle may legitimately contain sources *about* a related dataset: VOICE's
-does, and the manifest says so (`in_bundle: physionet_pediatric_1_1_0`).
+A bundle may legitimately contain sources *about* a related dataset; when it
+does, the manifest says so (`in_bundle: <source id>` on the related dataset).
 Represent the relation through the declared slot — `related_datasets` — rather
 than merging the two, and never as a nested object standing in for the other
 dataset's own record. `d4d download scope --check` verifies afterwards that no
@@ -310,7 +310,7 @@ reasoning effort, and mode.
 **Phase 1 is a receipt protocol, not a reading instruction.** The API path
 has every byte of the bundle in context on every call; this path reads it
 through a file tool, and the 2026-08-24 arm's agents never opened roughly a
-fifth of AI_READI, CM4AI and VOICE (#700). "Read the whole bundle" was the
+fifth of three of the four bundles (#700). "Read the whole bundle" was the
 rule; nothing could tell laziness from compliance. So the reading now leaves
 a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
 
@@ -566,7 +566,7 @@ the repair of what the checkers find.
    [print(f) for f in out['findings']]"
    ```
    Findings are printed once per identifier, not once per slot that repeats
-   it: VOICE rep1 has 19 ungrounded identifiers across 78 occurrences, and the
+   it: one record had 19 ungrounded identifiers across 78 occurrences, and the
    number to act on is 19.
 
    `removal_not_performed` means the report says a slot was removed and it is

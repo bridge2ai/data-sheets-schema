@@ -1248,6 +1248,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  prompt_request: str | None = None,
                  prompt_request_spec: dict[str, Any] | None = None,
                  schema_digest_md5: str | None = None,
+                 profile: Any = None,
                  reasoning_effort: str | None = None,
                  phases: list[dict[str, Any]] | None = None,
                  outputs: dict[str, Path] | None = None,
@@ -1558,8 +1559,12 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         # inferred from the artifacts on disk, because a phase that ran and a
         # phase whose output happens to exist are different claims.
         "phase_log": phase_facts(phases or []),
+        # The digest md5 names the instrument; the profile and the basis of
+        # its selection say why it is that one (#1443) — two records made
+        # under different profiles differ only here and in the md5.
         "schema": schema_facts() | (
-            {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),
+            {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}) | (
+            {"profile": profile.name, "profile_basis": profile.basis} if profile else {}),
         "software": software_facts() if mode == "live" else {
             "note": "reconstructed; versions are today's, not the run's"},
         "repo": repo_facts(),

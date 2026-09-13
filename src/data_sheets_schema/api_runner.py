@@ -468,6 +468,15 @@ class RunSpec:
     # The chunk manifest the run was given explicitly, when it is not the
     # one discovered beside the bundle (#1299). None means discover.
     chunk_manifest: Path | None = None
+    # The profile every digest of this run is rendered under (#1302,
+    # #1438): resolved once in `__post_init__` from the selected manifest
+    # — its `profile:` key, else neutral, `D4D_PROFILE` overriding — and
+    # recorded with the basis of that selection beside the digest md5
+    # (#1443). The manifest's *blocks* may be declared unused by an arm's
+    # header; the profile is the study's whenever the study's manifest
+    # was selected, blocks or no blocks.
+    profile: str | None = None
+    profile_basis: str | None = None
     # Version 2 passes selected manifest arguments to agentic recording.
     # Historical render specs omit this field and replay under version 1.
     render_version: int = 3
@@ -505,9 +514,27 @@ class RunSpec:
             self.manifest = Path(self.manifest)
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
-        if self.manifest_line != default_line:
-            return                      # an arm that declares its own header keeps it
-        self.manifest_line = self.header_for_manifest(self.manifest)
+        if self.manifest_line == default_line:   # an arm that declares its own header keeps it
+            self.manifest_line = self.header_for_manifest(self.manifest)
+        if self.profile is None:
+            self._select_profile()
+
+    def _select_profile(self) -> None:
+        from data_sheets_schema.profiles import select_profile
+        sel = select_profile(self.manifest)
+        self.profile, self.profile_basis = sel.name, sel.basis
+
+    @property
+    def profile_obj(self):
+        """The `Profile` the digest is rendered under."""
+        from data_sheets_schema.profiles import profile_named
+        return profile_named(self.profile) if self.profile else None
+
+    @property
+    def profile_selection(self):
+        """What the record states: the profile and why (#1443)."""
+        from data_sheets_schema.profiles import Selection
+        return Selection(self.profile_obj, self.profile_basis) if self.profile else None
 
     @staticmethod
     def header_for_manifest(manifest: Path | None) -> str:
@@ -537,6 +564,10 @@ class RunSpec:
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
+        # A replay reads no live declaration — the manifest may be gone or
+        # malformed since — so the profile is not resolved here either;
+        # a replay never renders the digest (#1438).
+        spec.profile = spec.profile_basis = None
         spec._replay_only = True
         return spec
 
@@ -1464,7 +1495,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # `third_party_sharing`) that CoreDataset does not accept — the first live
     # run produced a core record that failed validation for exactly that.
     cls = "CoreDataset" if PHASE_ARTIFACT.get(phase) == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls)
+    digest = schema_digest.digest_text(cls, profile=spec.profile_obj)
     receipted = spec.condition in RECEIPT_CONDITIONS
     if receipted:
         bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest)
@@ -1622,7 +1653,8 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "runtime": RUNTIME,
         "prompt_files": [repo_relative(p) for p in spec.prompt_files],
         "schema_digest_md5": schema_digest.fingerprint(
-            schema_digest.digest_text("Dataset")),
+            schema_digest.digest_text("Dataset", profile=spec.profile_obj)),
+        "profile": spec.profile, "profile_basis": spec.profile_basis,
         "phases": phases,
         "approx_total_input_tokens": sum(p["approx_input_tokens"] for p in phases),
         "estimate_basis": basis,
@@ -2653,8 +2685,8 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         # This run's own digest, so a presence mismatch is excused only for
         # slots the ledger shows did not exist then (#580).
         from data_sheets_schema import schema_digest as _sd
-        _sd.record_inventory()
-        run_digest = _sd.fingerprint(_sd.digest_text("Dataset"))
+        _sd.record_inventory(profile=spec.profile_obj)
+        run_digest = _sd.fingerprint(_sd.digest_text("Dataset", profile=spec.profile_obj))
         report = validate_pair_data(full, core, pair, schema_moved=moved,
                                     run_digest=run_digest)
     except Exception as exc:                                       # noqa: BLE001
@@ -3395,7 +3427,8 @@ def normalise_multivalued(text: str) -> str:
     return "\n".join(out)
 
 
-def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
+def build_repair(artifact: str, body: str, errors: list[str], *,
+                 profile=None) -> PhaseRequest:
     """A shape-repair request: digest, failing record, validator findings.
 
     Deliberately excludes the input bundle. The validator names shapes, not
@@ -3404,7 +3437,7 @@ def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
     it also makes a repair call an order of magnitude cheaper than a phase.
     """
     cls = "CoreDataset" if artifact == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls)
+    digest = schema_digest.digest_text(cls, profile=profile)
     cached = [{"type": "text", "text": digest,
                "cache_control": {"type": "ephemeral"}}]
     parts: list[dict[str, Any]] = list(cached)
@@ -3536,7 +3569,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                                         f"{len(errors)} findings; stopped")})
                 break
             req = build_repair(artifact, path.read_text(encoding="utf-8"),
-                               errors)
+                               errors, profile=spec.profile_obj)
             attempt_started = datetime.now(timezone.utc).isoformat(
                 timespec="seconds")
             attempt_t0 = time.monotonic()
@@ -5069,7 +5102,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         outputs={"full": spec.full_path, "core": spec.core_path,
                  "report": spec.report_path,
                  "reasoning": _reasoning_path(spec)},
-        schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
+        schema_digest_md5=schema_digest.fingerprint(
+            schema_digest.digest_text("Dataset", profile=spec.profile_obj)),
+        profile=spec.profile_selection,
         receipt_expected=spec.condition in RECEIPT_CONDITIONS,
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "

@@ -669,8 +669,13 @@ LEDGER_KEY_CLASS = "Dataset"
 
 
 def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
-                     ledger: Path | None = None) -> bool:
+                     ledger: Path | None = None, *,
+                     profile: "Profile | None" = None) -> bool:
     """Note today's digest and the slot inventory of each class. True if new.
+
+    Under `profile`, else the ambient one: the digest is keyed on the
+    profile's vocabulary, so a run records the ledger entry for the
+    digest it consumed and both profiles' digests are entries (#1441).
 
     Called when a run records its schema, so the ledger grows as digests do.
     Entries are never edited: an inventory recorded for a digest is a fact
@@ -684,7 +689,7 @@ def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
     if path.exists():
         data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     entries = data.setdefault("digests", {})
-    digest = fingerprint(digest_text(LEDGER_KEY_CLASS))
+    digest = fingerprint(digest_text(LEDGER_KEY_CLASS, profile=profile))
     entry = entries.setdefault(digest, {})
     added = False
     for class_name in classes:
@@ -718,7 +723,8 @@ def slot_existed_at(digest: str, class_name: str, slot: str,
     return slot in names
 
 
-def digest_text(class_name: str, schema_path: Path | None = None) -> str:
+def digest_text(class_name: str, schema_path: Path | None = None, *,
+                profile: "Profile | None" = None) -> str:
     """The rendered digest, memoised separately from `build`.
 
     `build` returns a deep copy so a caller cannot corrupt the cache (#528),
@@ -736,8 +742,10 @@ def digest_text(class_name: str, schema_path: Path | None = None) -> str:
     snapshot = capture_schema(path)
     # The profile decides which vocabulary, if any, the digest carries
     # (#1302, #628); it is part of the cache key and of the fingerprint.
+    # A run passes the one it resolved from its selected manifest (#1438);
+    # a caller that has not selected a manifest gets the ambient one.
     from data_sheets_schema.profiles import active_profile, vocabulary_bytes as _vb
-    prof = active_profile()
+    prof = profile or active_profile()
     vocabulary_bytes = _vb(prof)
     key = (*_cache_key(class_name, path, snapshot), prof.name,
            *(content_key(prof.pin_path, content=vocabulary_bytes)

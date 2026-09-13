@@ -344,8 +344,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # the digest is observed rather than asserted. `d4d api run` has always
     # recorded it and this path never could, which left the agentic arm off the
     # axis the whole prompt comparison is stratified by — and unable to go
-    # STALE when the schema moves (#426, #433, #497).
-    digest = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+    # STALE when the schema moves (#426, #433, #497). Rendered under the
+    # profile the selected manifest declares, once the manifest is selected
+    # below (#1438).
 
     # Reconstruct the render spec, so the gate can re-render and compare rather
     # than reporting `unverifiable`. Only when the caller says which condition
@@ -372,6 +373,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 else select_manifest(project, resolved_bundle, requested))
     manifest_basis = ("the output header declares the source manifest unused"
                       if selected is None and header_unused else None)
+    from data_sheets_schema.profiles import select_profile
+    profile_selection = select_profile(selected)
+    digest = schema_digest.fingerprint(
+        schema_digest.digest_text("Dataset", profile=profile_selection.profile))
     spec = None
     if condition:
         from data_sheets_schema.api_runner import RunSpec
@@ -402,6 +407,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                                        if prompt_text else None),
                        prompt_request_spec=spec,
                        schema_digest_md5=digest,
+                       profile=profile_selection,
                        reasoning_effort=reasoning_effort,
                        phases=_parse_phases(phase_specs),
                        receipt_expected=receipt_expected,

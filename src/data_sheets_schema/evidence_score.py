@@ -761,12 +761,16 @@ def _render_slot_spec(slot: str, digest, vocabulary: dict) -> str:
         lines.append(
             "A value of the wrong kind for its declared range is a form "
             "failure even when it reads well.")
-        # The registry vocabulary those attributes draw from (#538). Without
-        # it a judge cannot tell that a Cellosaurus cell line in
-        # `data_substrate` is the wrong *kind* of thing — it is a resolvable
-        # IRI, so every syntactic check passes it.
-        for attribute, names in sorted(nested.values_from.items()):
-            terms = schema_digest.render_values_from(names, vocabulary=vocabulary)
+        # The registry vocabulary those attributes draw from (#538), and the
+        # term sources the schema itself declares for them (#1440) — the
+        # same split the digest renders, so what the judge is told is what
+        # the model was told. Without it a judge cannot tell that a
+        # Cellosaurus cell line in `data_substrate` is the wrong *kind* of
+        # thing — it is a resolvable IRI, so every syntactic check passes it.
+        for attribute in sorted(set(nested.values_from) | set(nested.term_sources)):
+            terms = schema_digest.render_values_from(
+                nested.values_from.get(attribute, []), vocabulary=vocabulary,
+                term_sources=nested.term_sources.get(attribute))
             if terms:
                 lines.append(f"`{attribute}` must be drawn from {terms}")
     return "\n".join(lines)

@@ -1458,6 +1458,26 @@ merged-schema edit moves the schema hashes every checked report block
 attests (#1362). Test: `tests/test_profiles.py` asserts on the assembled
 full-phase request under both profiles.
 
+**A run resolves its profile once and says so** (#1438, #1443): `RunSpec`
+selects it from the manifest it selected — `profile:` key, else neutral;
+`D4D_PROFILE` overriding — and passes it to every digest it renders
+(`digest_text(…, profile=)`, the repair request, the pair-consistency
+ledger call) and to the record, whose `schema` block carries `profile` and
+`profile_basis` (`environment`, `manifest:<path>`, `default manifest:<path>`,
+`no manifest`) beside `digest_md5`; `d4d api plan` prints them. The agentic
+recorder resolves it the same way from the manifest it attests. A caller
+that selected nothing gets the default manifest resolved *when asked*
+(#1439): the working directory's, else the checkout's — so a script run
+from `tests/` still sees the study's — else none. Both digests are in
+`digest_inventory.yaml` (`record_inventory(profile=)`, #1441), so
+`slot_existed_at` answers for a neutral run. The fitness judge's slot
+specification renders the same term-source scope the digest does (#1440;
+an evaluation-instrument change, dated in the plan note). The arm table
+(`GENERATION_ARMS`) carries no project lists: `profiles.arm_projects_for`
+is the study's scope for its comparison arms, and `agreement.default_projects()`
+/ `healthsheet.default_record()` read the active profile when called —
+empty and `None` under `neutral`, where a caller must name them (#1444).
+
 ## The manifest is the project registry (#621, #623, #624, #637, #1299)
 
 A dataset is whatever the selected source manifest declares under

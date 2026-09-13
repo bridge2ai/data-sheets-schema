@@ -1329,6 +1329,25 @@ B2AI Standards Explorer or B2AI_ORG ids: it says the selected manifest's
 is what the study's manifest does. The agentic playbook's hash moves with
 that sentence; no agentic run is in flight.
 
+**Round-1 review amendment (2026-09-13; #1438–#1447).** The profile is no
+longer ambient: a run resolves it once from the manifest it selected and
+passes it to every digest it renders and to its record, which carries
+`schema.profile` and `schema.profile_basis` beside `digest_md5` — so two
+records made under different profiles differ in a stated field, not only
+in an md5 a ledger lookup would have to explain. The neutral digest
+(`029c2abc…`) is now in the inventory beside the study's. **One
+evaluation-side instrument moves**: the fitness judge's slot specification
+(`evidence_score.slot_spec`) renders the schema's term-source scope for
+`data_topic`/`data_substrate` exactly as the digest does, under both
+profiles — under `neutral` it previously rendered no guidance for those
+attributes at all. Fitness judgements cached under the earlier
+specification stay retained and are not reused (the scorer keys on the
+specification); no rescore is made by this change, and any later fitness
+comparison across it is a comparison across instruments. The comparison
+arms' project lists, the agreement default and the healthsheet input are
+read from the active profile when asked rather than bound at import, and
+the arm table carries none.
+
 ### The manifest is the registry, and a run attests the manifest it read (#621, #623, #624, #637, #1299; 2026-09-12)
 
 Not a generation-path change for the study: every study run selects the

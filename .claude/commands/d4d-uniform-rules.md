@@ -36,7 +36,7 @@ to every project:
   decide**: represent what the evidence states, as the rule above says. This
   refines that rule rather than replacing it.
 
-  It exists because a v4 CHORUS record wrote that no instance count was
+  It exists because one v4 record wrote that no instance count was
   asserted "because the two sources give different figures … and the bundle
   offers no basis for preferring one". The rule was right; the basis was
   missing.
