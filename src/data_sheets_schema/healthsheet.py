@@ -20,9 +20,12 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-FAIRHUB_RECORD = Path("data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json")
+# The study's upstream record and bundle name live in the study profile
+# (#628); this module is the healthsheet renderer, not the study.
+from data_sheets_schema.profiles import BRIDGE2AI as _STUDY   # noqa: E402
+FAIRHUB_RECORD = _STUDY.healthsheet_record
 OUTPUT_DIR = Path("data/preprocessed/concatenated")
-BUNDLE_NAME = "AI_READI_healthsheet_only.txt"
+BUNDLE_NAME = _STUDY.healthsheet_bundle
 RULE = "=" * 80
 
 

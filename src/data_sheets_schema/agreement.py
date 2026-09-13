@@ -563,7 +563,10 @@ DEFAULT_CONFIGS = {"v1  (2026-07-28 generic)": "2026-07-28_claude-opus-5-generic
 #: Unlike `form_defects._value_index`, whose omission of the fifth project was
 #: an oversight that silently produced an `unattributed` column, an absent
 #: project here is visible: it simply has no row.
-DEFAULT_PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
+#: Read from the study profile (#628): the set is the study's, and a
+#: neutral profile has no published matrix to keep faith with.
+from data_sheets_schema.profiles import BRIDGE2AI as _STUDY   # noqa: E402
+DEFAULT_PROJECTS = _STUDY.agreement_projects
 DEFAULT_ROOT = Path("data/d4d_concatenated")
 DEFAULT_CACHE = Path("data/evaluation_llm/agreement_cache")
 

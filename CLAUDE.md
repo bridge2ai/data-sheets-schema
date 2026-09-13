@@ -1431,6 +1431,31 @@ hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
 the one annotated artifact. New evaluations use the strict exact-file check,
 whose exit status must be 0.
 
+## Profiles: the study's text and vocabularies (#628, #1302)
+
+What is Bridge2AI's and not the pipeline's lives in `profiles.py`: the
+pinned registry vocabularies the schema digest renders for `data_topic`
+and `data_substrate`, the four-project default of the agreement matrix,
+the AI-READI healthsheet input, and the project lists of the comparison
+arms. The **`bridge2ai`** profile carries them; the **`neutral`** profile
+carries none. The source manifest selects the profile with a top-level
+`profile:` key (the study's declares `bridge2ai`); a manifest without one,
+or a run that selected no manifest, is neutral; `D4D_PROFILE` overrides
+for one process. A profile is never inferred from a project name.
+
+The digest now renders the term sources the schema's description declares
+for a slot (`schema_digest.TERM_SOURCES`: GO, MeSH, EFO, NCIT for
+`Instance.data_topic`; a `d4d:termSources` slot annotation wins when a
+schema carries one) before any pinned list, so a source-supported GO,
+MeSH, EFO or NCIT identifier is in range whether or not the registry lists
+it; the neutral profile renders only that scope. **This changes the
+study's digest** — its md5 moves for every run made after it — and is
+registered as a condition boundary in the plan note; the schema files and
+every record are untouched. The table, not a schema annotation, because a
+merged-schema edit moves the schema hashes every checked report block
+attests (#1362). Test: `tests/test_profiles.py` asserts on the assembled
+full-phase request under both profiles.
+
 ## One parse per file per process (#1203)
 
 `data_sheets_schema.schema_cache.load_yaml(path)` parses a YAML file once

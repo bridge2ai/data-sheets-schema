@@ -107,6 +107,7 @@ GENERATION_ARMS = {
         "core_method": "claudecode_agent_healthsheet_core",
         "input": "data/preprocessed/concatenated/{project}_healthsheet_only.txt",
         "model_involved": True,
+        # The study's; a profile fact, not the pipeline's (#628).
         "projects": ["AI_READI"],
         "measures": "what one structured upstream source yields alone, with no "
                     "publications, documentation, license or protocol",

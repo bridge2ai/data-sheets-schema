@@ -1,6 +1,6 @@
-Generate paired full D4D and D4D-core records for Bridge2AI Grand Challenge
-projects using a model-neutral, schema-grounded agent workflow with four ordered
-phases:
+Generate paired full D4D and D4D-core records for the projects the selected
+source manifest declares, using a model-neutral, schema-grounded agent workflow
+with four ordered phases:
 
 1. Generate the full D4D directly from the input documents, writing its
    coverage receipt as you read.
@@ -11,8 +11,9 @@ phases:
    the pair checker asks for, report, and repair.
 
 Phases 3 and 4 are required for production runs. Write a reconciliation report
-even when no discrepancies are found. Run the requested phases for all four
-projects (AI_READI, CHORUS, CM4AI, VOICE) unless the user names specific ones.
+even when no discrepancies are found. Run the requested phases for every
+project the selected manifest declares (`d4d download list-projects`) unless
+the user names specific ones.
 
 Before any phase, read and enforce
 `.claude/agents/d4d-provenance-guard.md`.
