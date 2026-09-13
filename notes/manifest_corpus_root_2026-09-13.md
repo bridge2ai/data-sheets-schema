@@ -281,3 +281,20 @@ the fix to the write destination. Packaging commit 53359f583 and profile
 compatibility commit b1d04ab0 are integrated. All 60 historical renderer
 controls reproduce their hashes. No production records were generated or
 rescored. Independent round-13 review and exact-head CI follow.
+
+## Review round 14 — 2026-09-13
+
+Round 13 found #1738: the absolute write destination reached inline checks
+and turned their pair/report artifact pins into absolute paths. A relocated
+corpus became stale, and a copy could keep verifying files in the original.
+The physical write remains fixed to the resolved owner, while inline checks
+reuse that address with the same portable spelling as the record's outputs.
+No ambient manifest selection is repeated.
+
+Four real CLI move/copy regressions reproduce the defect before correction,
+covering both pair and report evidence. All 57 focused ownership, inline-check
+and profile integration checks pass after correction. The independently
+approved profile follow-up #1737 and installed integration 721d2471c are now
+included; all 60 historical renderer controls still match. No production
+record, rating or source bundle was changed. Round-14 review and exact-head
+CI are the remaining corpus merge gates.

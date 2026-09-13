@@ -519,7 +519,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # ambient owner; the record itself keeps portable paths at its own root.
     out = rec.write(record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
     click.echo(f"✓ {out}")
-    _inline_checks(out)
+    # Evidence pins retain the same portable spelling as the record's
+    # outputs. Reuse the resolved address without another corpus selection.
+    inline_address = out if concat_dir.is_absolute() else out.relative_to(Path.cwd())
+    _inline_checks(inline_address)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the
     # honest act — it is what puts the evidence in the record for `d4d runs

@@ -5,9 +5,9 @@
     "src/data_sheets_schema/backfill_checks.py": "e80e7ae38236d2bc83f4ab332b8ae0465aa5e3c050061be32899191180a7a101",
     "src/data_sheets_schema/chunking.py": "21ecc188bffe61efc38ce3fca84292dbbab08043973649364449263cdbe86e4a",
     "src/data_sheets_schema/cli/api.py": "cd45007f463ecb2a553f7ec5084f2ca5348c1592af0f9eb38d17d5ad24ad6d9a",
-    "src/data_sheets_schema/cli/provenance.py": "739b486eb63fd510efc57e6c9816000df5a5a40229022ac39a98582428a35e9a",
+    "src/data_sheets_schema/cli/provenance.py": "00eba2cffe3e38708f5aee5231dbae0f4b91f6c33902242c914b26dd7533aa95",
     "src/data_sheets_schema/cli/receipts.py": "4134a1e383fd4fd4775de172824f1c142e3ed7ed1a9ecef2511887d572222d6f",
-    "src/data_sheets_schema/cli/runs.py": "252451d708a46524703b6b645d153df86ee5a9da394712677ff0bdcba4a4de58",
+    "src/data_sheets_schema/cli/runs.py": "f845d572e5935b3cbb3ea251870d9d0003345b63f331b6e937e90c811b4c60f2",
     "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
     "src/data_sheets_schema/profiles.py": "55524c2ede59dbd320ef2646ae0aa4018076030944a9ced1b4f0dc7bc4d9faaf",
     "src/data_sheets_schema/provenance.py": "df34f0c6dd64e264a57f442fcc05c3353f56dc0071ddde252903983eef846158",
@@ -23,7 +23,7 @@
     "api"
   ],
   "historical_renderer_controls": 60,
-  "integration_dependency_commit": "acd2997fb88a2f0992e3c0804c5cbfde0bf9c99d",
+  "integration_dependency_commit": "721d2471ccc549b003c6596276d71e5dd3be7a87",
   "issues": [
     1523,
     1594,
@@ -59,7 +59,8 @@
     1731,
     1732,
     1735,
-    1736
+    1736,
+    1738
   ],
   "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
