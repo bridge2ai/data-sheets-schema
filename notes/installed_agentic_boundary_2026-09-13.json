@@ -20,7 +20,7 @@
     ".claude/commands/d4d-add-mapping.md": "2c73d1e8aa2980caaf2c544c3254c408f498fb350b33e217e8bcba161e3ecbc1",
     ".claude/commands/d4d-agent.md": "bc5e09a24b43fc46731d0326ceeb64352c20d263e6384294710f4de4f62ac3ca",
     ".claude/commands/d4d-assistant.md": "cff15f9beb10c1b2f54319aafdd8dc3962ddbeeaede32c12462fdeb7bed52af0",
-    ".claude/commands/d4d-full-core.md": "1dd5e86967b3789ad2a2a9d868c6f78f872e60cd97c253b6c463a467445c64ac",
+    ".claude/commands/d4d-full-core.md": "a4e71dec1bc9bcbeb082a214ccb9973ca291f566fe1972dfc9048d76dc382b1f",
     ".claude/commands/d4d-input-deep-research.md": "1bcc0254a34d261bb3ab355b05d45330a9dd23c6512f02f444dc11fbc750141e",
     ".claude/commands/d4d-uniform-rules.md": "d21ab21800c527f38c570163bf1cca5eff780948ffd941272cadad97b87ccfd8",
     ".claude/commands/d4d-webfetch.md": "783c1659c0d4ec4280c6d993e53cec7c0ecbc6a88b07318bbf2f84429bd2431b",
@@ -28,23 +28,23 @@
     "pyproject.toml": "0e8f6254787c40e09030cd75282fa80921996460da042ff1d0ad50a537f42572",
     "scripts/agentic_observed.py": "dd6ca4294eef8afaa9248ea71d652541fe4a62064e998d6193ccc402c1751653",
     "scripts/update_agent_preimages.py": "497f3565fdfa25a81d99d3bfb50022ac3180cba1bfe6e7ea1e4371668d82b4b0",
-    "src/data_sheets_schema/agent_pin.py": "1e8cbbe113c1ad0b6f1c16c0adb71f3f8db2e6d999d71871e6858fe68eb1aee9",
+    "src/data_sheets_schema/agent_pin.py": "555088cdaaa460d437b7467dfaab7709091732122bd375c4cc029c5c1b48381b",
     "src/data_sheets_schema/agentic_observed.py": "1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8",
     "src/data_sheets_schema/agentic_runtime.py": "6b4fbe2ee80b3d33d5c930ad75d58be7c0247aba12f57d23389bce166a452c33",
-    "src/data_sheets_schema/api_runner.py": "5592f8392ec58ef725587b829abe47d445e295dd99647ff628d1a0b515b5d59f",
+    "src/data_sheets_schema/api_runner.py": "c13f8fdd7abf3fc2beefaf5594ff5878c1cbe492ab358e7989fd40181bcb7448",
     "src/data_sheets_schema/cli/__main__.py": "0848b1c32239a50b9efd3b432181704327b749c2e470a75865baa55ed997674e",
     "src/data_sheets_schema/cli/agents.py": "958bbfab19faac7dd23f0ddcbb48150bffedf865fcc8cdf76e562fa08122e12b",
-    "src/data_sheets_schema/cli/provenance.py": "c38abb3822cde509de5e0fe384c4ecb3b0f01d78c146de204230ce869ed62695",
-    "src/data_sheets_schema/profiles.py": "860e2445f8fe0beaca537917527e4b8277d2d59e2a70215d95460cfa97020a35",
-    "src/data_sheets_schema/provenance.py": "4e69ef3ca5ce85f40a7389a7fb569b855647a14d5c12f9fade7f7d624ce37824",
-    "src/data_sheets_schema/resources.py": "3d74348ebef7dcbe2126396f292ba237ce1b148652b8e7e8a1c40dd58e5e9520"
+    "src/data_sheets_schema/cli/provenance.py": "be482feecc4f74ce59093af910792e339965e9baeb5d8b45c166888e4dd7d7f2",
+    "src/data_sheets_schema/profiles.py": "36de6c72c773ca7583705ee24611ddab6ecad4803f63cbc9b541d1ce519600aa",
+    "src/data_sheets_schema/provenance.py": "f8d61b2495ce1c54c392df81f22da002c0257ebc5672564ab4190f0098498917",
+    "src/data_sheets_schema/resources.py": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435"
   },
   "generation_arms": [
     "agentic",
     "api"
   ],
-  "installed_validator_dependency_commit": "b5e41e6ce",
-  "integration_dependency_commit": "ff6236161",
+  "installed_validator_dependency_commit": "1f05d8c63a3ae2d4a7bceb90112aff09435d5de6",
+  "integration_dependency_commit": "9f522f49dcad47e49a6c4694f0e71095ed20dbe6",
   "issues": [
     1556,
     1612,
@@ -62,7 +62,7 @@
   "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
   "previous_boundary": {
     "path": "notes/manifest_corpus_root_boundary_2026-09-13.json",
-    "sha256": "9f86db953f699ada327a461f5bf2cfa9db90510509d596d28b497c4d2913066a"
+    "sha256": "468a5bf9f82af43dd09165ffc5851e82222f9d01ed0b803bf41091d6157c211c"
   },
   "records_generated": [],
   "records_rescored": [],

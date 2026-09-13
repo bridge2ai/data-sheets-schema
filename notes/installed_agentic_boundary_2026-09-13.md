@@ -122,3 +122,34 @@ After the final validator integration, 28 validator/agentic checks pass. All
 60 historical renderer controls remain byte-identical. No real provider calls,
 production outputs or historical score changes occur. Profile-parent findings,
 including #1700, still require their own completed review and integration.
+
+## Final integration and review round 7 — 2026-09-13
+
+The branch now contains the final profile corrections (37c958ff2, #1737),
+packaging corrections (5d6d885f0, #1752), installed evaluation (1f05d8c63,
+#1557), and corpus ownership corrections (9f522f49d, #1587). The shared Git
+helper retains both the installed no-checkout guard and sanitized Git context.
+Profile and packaging follow-ups have independent approval; the final installed,
+corpus and agentic integration reviews are the remaining review gates.
+
+All 147 combined agentic identity, selected-playbook, profile, packaging,
+corpus and enabled fresh-wheel checks pass. All 60 historical renderer
+controls reproduce their recorded hashes. The preservation audit verifies
+56 registered ratings, 259 prior evaluations and 450 preservation hashes.
+The last parent merge changes boundary notes only; the tested source is
+unchanged. The JSON refreshes 35 implementation pins and the parent boundary.
+
+Finalization plan: retain the dependency commits in this integrated branch,
+retarget the remaining PRs to main, and merge this complete reviewed head only
+after exact-head CI passes. Verify every component head is included, confirm
+the dependent PRs and linked issues are closed as merged, and delete completed
+branches/worktrees while preserving unrelated local work. No squash or
+historical artifact rewriting is part of this plan.
+
+Both API and agentic generation arms and every registered evaluation style
+remain represented: rubric presence/completeness, both semantic rubrics,
+agent and API judging, deterministic schema/provenance checks, grounding,
+receipts/report checks, pair/source review, human adjudication and repeats.
+No production generation, rescore, evaluator spawn, download or measurement
+attribution change occurred. There is no new evaluator-quoted definition SHA
+or newly scored record set at this implementation boundary.
