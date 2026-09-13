@@ -138,6 +138,28 @@ def _CONDITIONS_FOR_RECORD() -> list[str]:
     return list(CONDITION_PROMPTS)
 
 
+def _require_corpus_root(command: str) -> None:
+    """An implicit corpus target — a project's bundles, its chunk manifests,
+    the trap inventory — is written under the checkout the corpus is
+    anchored on (`chunking.corpus_root`). Only that directory may write it:
+    a subdirectory would write above itself and a directory outside every
+    checkout would write into the importing checkout without naming it
+    (#1714, #1721). Explicit `--bundle`/`--output` paths are the caller's."""
+    from data_sheets_schema.chunking import corpus_root
+    _require_repo_root_cwd(command)
+    root = corpus_root()
+    if root is None:
+        return
+    try:
+        here = Path.cwd().resolve()
+    except OSError:
+        here = None
+    if here != root.resolve():
+        raise click.ClickException(
+            f"{command}: its implicit corpus targets are written under {root}, not {Path.cwd()}; "
+            "run from that checkout root, or name every bundle explicitly (#1714)")
+
+
 def _require_repo_root_cwd(command: str) -> None:
     """Refuse to record from a directory inside the checkout that is not its
     root (#672 review; narrowed by #1301).

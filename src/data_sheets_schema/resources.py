@@ -64,8 +64,12 @@ def _is_our_checkout(root: Path) -> bool:
     # The source layout first (#1681): a directory without it is no
     # checkout whatever its marker says, so another project's unreadable
     # `pyproject.toml` above the working directory decides nothing.
-    if not (root / "src" / "data_sheets_schema").is_dir():
-        return False
+    try:
+        if not (root / "src" / "data_sheets_schema").is_dir():
+            return False
+    except OSError as exc:                       # an uninspectable layout is unknown, not absent (#1719)
+        raise ResourceRootError(f"{root / 'src' / 'data_sheets_schema'} could not be inspected: {exc}; "
+                                f"whether {root} is a checkout is unknown") from exc
     marker = root / "pyproject.toml"
     try:
         raw = marker.read_bytes()                # bytes: a non-UTF-8 marker is another project's, not a crash (#1682)

@@ -277,6 +277,8 @@ def trap_inventory_cmd(output, do_validate):
     Runs the validator over the whole corpus (slow: one subprocess per
     record) and aggregates findings by normalized slot path and error class.
     """
+    from data_sheets_schema.cli.provenance import _require_corpus_root
+    _require_corpus_root("d4d runs trap-inventory")   # it scans and writes the implicit corpus (#1721)
     import subprocess
     import yaml as _yaml
 
