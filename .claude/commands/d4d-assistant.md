@@ -20,14 +20,12 @@ output formatting guidelines.
 
 ### Concatenated Sources (for comprehensive D4Ds - RECOMMENDED)
 Location: data/preprocessed/concatenated/
-- AI_READI_preprocessed.txt (238K, 7 source files)
-- CHORUS_preprocessed.txt (35K, 4 source files)
-- CM4AI_preprocessed.txt (287K, 9 source files)
-- VOICE_preprocessed.txt (295K, 9 source files)
+- `{PROJECT}_preprocessed.txt`, one per project the selected manifest declares
+  (`d4d download list-projects`; `d4d utils status` lists them with sizes)
 
-The source inventory and document order are defined in
-`data/preprocessed/source_manifest.yaml`. Use the concatenated files to generate
-ONE comprehensive D4D per project.
+The source inventory and document order are defined in the selected source
+manifest (`data/preprocessed/source_manifest.yaml` by default). Use the
+concatenated files to generate ONE comprehensive D4D per project.
 
 ### Individual Sources (for per-document D4Ds)
 Location: data/preprocessed/individual/{PROJECT}/

@@ -687,11 +687,15 @@ def main(argv: list[str] | None = None) -> int:
 
     configs = ({c.split("=", 1)[0]: c.split("=", 1)[1] for c in a.configs}
                if a.configs else None)
-    matrix, rows = build_matrix(
-        root=a.root, method=a.method, configs=configs,
-        projects=tuple(a.projects) if a.projects else None,
-        reps=a.reps, cache_dir=a.cache_dir, embed=a.embed, offline=a.offline,
-        embed_online=a.embed_online)
+    try:
+        matrix, rows = build_matrix(
+            root=a.root, method=a.method, configs=configs,
+            projects=tuple(a.projects) if a.projects else None,
+            reps=a.reps, cache_dir=a.cache_dir, embed=a.embed, offline=a.offline,
+            embed_online=a.embed_online)
+    except ValueError as exc:                          # the profile names no projects (#1495)
+        print(f"agreement: {exc}", file=sys.stderr)
+        return 2
 
     for key, cell in sorted(matrix.items()):
         rate = f"{cell['rate']:6.1%}" if cell["rate"] is not None else "     —"

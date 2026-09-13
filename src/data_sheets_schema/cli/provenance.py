@@ -379,19 +379,17 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     header_unused = manifest_declared_unused(header_manifest)
     if requested is AUTO and header_manifest and not header_unused:
         requested = Path(header_manifest)
-    selected = (None if requested is AUTO and (resolved_bundle is None or header_unused)
-                else select_manifest(project, resolved_bundle, requested))
-    manifest_basis = ("the output header declares the source manifest unused"
-                      if selected is None and header_unused else None)
-    # The profile is selected from the manifest whether or not the arm's
-    # header declares the manifest's context blocks unused (#1461) …
+    # Selected by the runner's rule whenever a bundle is resolved — the
+    # header's "not used" says the manifest's *context blocks* were not
+    # sent, not that no manifest was selected (#1461, #1512) …
+    selected_manifest = (None if requested is AUTO and resolved_bundle is None
+                         else select_manifest(project, resolved_bundle, requested))
     from data_sheets_schema.profiles import select_profile
-    profile_selection = select_profile(selected)
-    selected_manifest = selected
-    if selected is not None and header_unused:
-        # … and the header still governs what the input block attests.
-        selected = None
-        manifest_basis = "the output header declares the source manifest unused"
+    profile_selection = select_profile(selected_manifest)
+    # … and the header governs what the input block attests.
+    selected = None if header_unused else selected_manifest
+    manifest_basis = ("the output header declares the source manifest unused"
+                      if header_unused else None)
     digest = schema_digest.fingerprint(
         schema_digest.digest_text("Dataset", profile=profile_selection.profile))
     spec = None
