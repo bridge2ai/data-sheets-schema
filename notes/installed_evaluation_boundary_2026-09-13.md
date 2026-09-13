@@ -84,3 +84,16 @@ renderer checks pass 11 tests. A fresh wheel passes all six workflow checks.
 The boundary now pins 42 files, including the shared view and snapshot modules.
 No scoring rules, source rubrics, evaluator definitions or measured artifacts
 change in this correction.
+
+## Combined dependency review — 2026-09-13
+
+The branch now includes published profile/packaging head
+805ff3eb01bc08ceef715e6c92e1fcf0122f0007. The integration preserves recorded
+profile choices during replay and keeps current resource ownership alongside
+the installed evaluation/rendering entry points. Its 965 profile, resource,
+evaluation and reference-controller tests pass (one existing skip), and all
+six fresh-wheel acceptance checks pass with declared runtime dependencies.
+The read-only historical audit verifies all 56 accepted ratings and 450
+preservation hashes. No new model call, generated record or rescore occurred.
+The adjacent JSON refreshes the implementation pins for this combined tree.
+An independent review and CI on the resulting head remain merge gates.

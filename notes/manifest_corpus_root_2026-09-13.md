@@ -82,3 +82,9 @@ the final targeted lane. The selected generation/replay lane passes 62 checks.
 All 48 historical renderer 1–4 controls remain byte-identical. All seven
 fresh-wheel acceptance checks pass (107.19 seconds). No production
 record, rating, instrument attribution or source bundle was modified.
+
+After integrating published profile/packaging head 805ff3eb and the installed
+workflow's validation note, all 101 combined corpus/profile/recording checks
+pass. Backfill retains both recorded profile selection and output destinations.
+The implementation JSON is refreshed for this combined tree; independent
+review and CI will use the committed head.
