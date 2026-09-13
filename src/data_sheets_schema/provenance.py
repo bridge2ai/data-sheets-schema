@@ -125,6 +125,7 @@ def load_generation_config(path: Path = DETERMINISTIC_CONFIG) -> dict[str, Any]:
     paths disagree about the model or temperature they are different
     procedures, and the fingerprint should say so rather than paper over it.
     """
+    path = _resource(path)                  # shipped with the package (#1529)
     if not path.exists():
         return {}
     try:
@@ -354,14 +355,14 @@ def prompt_facts(prompt_paths: list[Path] | None,
     return facts
 
 
-def _run(cmd: list[str], *, strip: bool = True) -> str | None:
+def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str | None:
     try:
         # Bytes, decoded with a reversible escape (#1045): a path git prints
         # verbatim under -z that is not UTF-8 must neither turn the whole
         # status into None (a dirty tree recorded as clean) nor collapse
         # into U+FFFD (two files recorded as one); and no newline
         # translation, so a `\r` in a name is kept.
-        r = subprocess.run(cmd, capture_output=True, timeout=15)
+        r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None)
         text = r.stdout.decode("utf-8", errors="backslashreplace")
         out = text.strip() if strip else text
         return out or None
@@ -635,7 +636,25 @@ DIRTY_PATHS_MAX = 50
 
 
 def repo_facts() -> dict[str, Any]:
-    dirty = _run(["git", "status", "--porcelain", "-z"], strip=False)
+    """The repository the *resources* came from (#1550): the checkout this
+    package is imported from, whatever the working directory — a record
+    made from a user's own repository used to attest that repository's
+    commit beside hashes of the checkout's playbooks and schemas. From an
+    installed package there is no commit; the record names the install
+    root and the package version instead."""
+    from data_sheets_schema.resources import CHECKOUT_ROOT, INSTALL_ROOT
+    if CHECKOUT_ROOT is None:
+        from importlib.metadata import PackageNotFoundError, version
+        try:
+            pkg = version("data-sheets-schema")
+        except PackageNotFoundError:
+            pkg = None
+        return {"commit": None, "commit_short": None, "branch": None, "dirty": False,
+                "dirty_file_count": 0, "dirty_paths": [],
+                "resource_root": str(INSTALL_ROOT), "resource_kind": "install", "package_version": pkg,
+                "note": "no checkout: the resources are the installed package's, so there is no commit to name"}
+    at = CHECKOUT_ROOT
+    dirty = _run(["git", "status", "--porcelain", "-z"], strip=False, cwd=at)
     # NUL-separated, unstripped (#1039): `_run`'s strip took the leading
     # status space off the first line and `aurelian` was recorded as
     # `urelian`; a path with a space survives -z where a line split does
@@ -657,9 +676,10 @@ def repo_facts() -> dict[str, Any]:
     # it names; one that lists `data/.run_locks/x.json`, `aurelian` can.
     paths = [ln[3:] for ln in lines if len(ln) > 3]
     return {
-        "commit": _run(["git", "rev-parse", "HEAD"]),
-        "commit_short": _run(["git", "rev-parse", "--short", "HEAD"]),
-        "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"]),
+        "commit": _run(["git", "rev-parse", "HEAD"], cwd=at),
+        "commit_short": _run(["git", "rev-parse", "--short", "HEAD"], cwd=at),
+        "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=at),
+        "resource_root": str(at), "resource_kind": "checkout",
         "dirty": bool(dirty),
         "dirty_file_count": len(lines),
         "dirty_paths": paths[:DIRTY_PATHS_MAX],

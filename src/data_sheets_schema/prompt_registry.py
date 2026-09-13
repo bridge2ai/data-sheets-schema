@@ -315,6 +315,11 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     sha = sha256_of(p)
     if sha is None:
         raise FileNotFoundError(f"{p} is not on disk; nothing to pin")
+    head = _head_commit(p.parent)
+    if head is None:
+        # No repository to audit against: recorded as such, not as a commit
+        # of nothing (#1534); the contract's audit route is unavailable here.
+        pass
     if _is_dirty(p):
         raise ValueError(
             f"{p} has uncommitted changes. Commit the prompt first, then pin "
@@ -352,7 +357,8 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
                            "reason": prev.get("reason")})
     files[key] = {"sha256": sha, "body_sha256": body_sha256_of(p),
                   "bytes": p.stat().st_size,
-                  "pinned_on": today, "pinned_at_commit": _head_commit(p.parent),
+                  "pinned_on": today, "pinned_at_commit": head,
+        **({"commit_unavailable": f"not under a git repository: {p.parent}"} if head is None else {}),
                   "reason": reason.strip()}
     if superseded:
         files[key]["superseded"] = superseded

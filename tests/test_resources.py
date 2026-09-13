@@ -146,12 +146,59 @@ class TestRoundOne(unittest.TestCase):
         from data_sheets_schema.resources import is_resource, repo_relative, resource_path
         escape = Path("src/../data/d4d_concatenated/claudecode/VOICE_d4d.yaml")
         self.assertFalse(is_resource(escape))
-        self.assertEqual(resource_path(escape), Path("data/d4d_concatenated/claudecode/VOICE_d4d.yaml"))
+        self.assertEqual(resource_path(escape), escape)                  # the caller's path, as given
         self.assertFalse(is_resource("src/../README.md"))
         self.assertFalse(is_resource("../src/download/prompts/x.md"))
+        # A `..` spelling is canonicalized by the filesystem, never lexically
+        # (#1528): from the checkout it names the canonical prompt; from here
+        # it names nothing, and says so.
         alias = "src/download/../download/prompts/d4d_generic_arm_prompt_v9.md"
+        self.assertFalse(resource_path(alias).exists())
+        os.chdir(ROOT)
         self.assertEqual(repo_relative(alias), "src/download/prompts/d4d_generic_arm_prompt_v9.md")
         self.assertTrue(resource_path(alias).exists())
+        os.chdir(self.tmp)
+
+    def test_dotdot_follows_the_filesystem_not_the_spelling(self):
+        """#1528: `.venv/../pyproject.toml` through a symlinked `.venv` is the
+        other checkout's file, and the readers hash that file."""
+        import hashlib
+        from data_sheets_schema import prompt_registry
+        os.chdir(ROOT)
+        link = ROOT / ".venv"
+        if not link.is_symlink():
+            self.skipTest("no symlinked .venv to walk through")
+        p = Path(".venv/../pyproject.toml")
+        self.assertEqual(prompt_registry.sha256_of(p), hashlib.sha256(p.read_bytes()).hexdigest())
+
+    def test_a_staged_file_has_one_recorded_identity(self):
+        """#1536"""
+        from data_sheets_schema.resources import repo_relative
+        staged = Path(self.tmp) / "src/download/prompts/x.md"
+        staged.parent.mkdir(parents=True)
+        staged.write_text("x")
+        rel = "src/download/prompts/x.md"
+        self.assertEqual(repo_relative(rel, cwd=False), repo_relative(staged, cwd=False))
+        self.assertEqual(Path(repo_relative(rel, cwd=False)), staged.resolve())
+        self.assertEqual(repo_relative(rel, cwd=True), rel)              # the registry's key
+        # A shipped file read through the fallback keeps its logical spelling.
+        self.assertEqual(repo_relative("src/download/prompts/d4d_generic_arm_prompt_v9.md", cwd=False),
+                         "src/download/prompts/d4d_generic_arm_prompt_v9.md")
+
+    def test_a_directory_and_its_files_answer_alike(self):
+        """#1535: a depth-two marker establishes nothing; a staged depth-three
+        directory is authoritative for itself and everything under it."""
+        from data_sheets_schema.resources import resource_path
+        (Path(self.tmp) / "src/data_sheets_schema").mkdir(parents=True)          # the old root marker only
+        d = Path("src/data_sheets_schema/schema")
+        self.assertTrue(resource_path(d).is_dir())                              # falls back
+        self.assertTrue(resource_path(d / "data_sheets_schema_all.yaml").exists())
+        (Path(self.tmp) / "src/download/prompts").mkdir(parents=True)          # a staged prompts tree
+        c = Path("src/download/prompts/components")
+        self.assertFalse(resource_path(c).exists())
+        self.assertFalse(resource_path(c / "CHORUS.md").exists())
+        from data_sheets_schema import prompt_registry as pr
+        self.assertEqual([f for f in pr.prompt_files() if "components/" in f.as_posix()], [])
 
     def test_a_resource_directory_resolves_like_its_files(self):
         """#1488"""
@@ -204,7 +251,8 @@ class TestRoundOne(unittest.TestCase):
         self.assertIn("not in the working tree", str(caught.exception))
 
     def test_readers_agree_on_an_authoritative_absence(self):
-        """#1483: no by-name fallback after `resource_path` said absent."""
+        """#1483: no by-name fallback after `resource_path` said absent (a
+        staged depth-three schema directory is authoritative)."""
         from data_sheets_schema import provenance, schema_digest
         from data_sheets_schema.resources import resource_path
         (Path(self.tmp) / "src/data_sheets_schema/schema").mkdir(parents=True)
@@ -240,3 +288,54 @@ class TestRoundOne(unittest.TestCase):
         with self.assertRaises(click.ClickException) as caught:
             _require_repo_root_cwd("t")
         self.assertIn("not a directory inside it", str(caught.exception))
+
+    def test_a_validator_that_says_nothing_or_cannot_start_is_a_failure(self):
+        """#1524, #1525"""
+        from subprocess import CompletedProcess
+        from unittest import mock
+        from data_sheets_schema import api_runner as a
+        schema = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+        with mock.patch.object(a.subprocess, "run", return_value=CompletedProcess([], -9, "", "")):
+            lines, failure = a._validator_lines(Path("r.yaml"), schema, "Dataset")
+        self.assertIsNone(lines); self.assertIn("no output", failure)
+        finding = "[ERROR] [r.yaml/0] 'does not exist.' is not of type 'object' in /creators/0"
+        with mock.patch.object(a.subprocess, "run", return_value=CompletedProcess([], 1, finding, "")):
+            lines, failure = a._validator_lines(Path("r.yaml"), schema, "Dataset")
+        self.assertEqual(lines, [finding]); self.assertIsNone(failure)
+        crash = "Traceback (most recent call last):\n  File x\nModuleNotFoundError: No module named 'linkml'"
+        with mock.patch.object(a.subprocess, "run", return_value=CompletedProcess([], 1, "", crash)):
+            lines, failure = a._validator_lines(Path("r.yaml"), schema, "Dataset")
+        self.assertIsNone(lines); self.assertIn("did not run", failure)
+
+    def test_the_deterministic_config_is_a_resource_and_its_absence_is_said(self):
+        """#1529"""
+        from unittest import mock
+        from data_sheets_schema import api_runner, provenance
+        self.assertTrue(provenance.load_generation_config())                       # from here: shipped copy
+        s = api_runner._model_settings()
+        self.assertEqual(s["config_path"], str(provenance.DETERMINISTIC_CONFIG))
+        with mock.patch.object(api_runner, "load_generation_config", return_value={}):
+            s = api_runner._model_settings()
+        self.assertIsNone(s["config_path"]); self.assertIn("not found", s["config_note"])
+
+    def test_the_record_names_the_resource_root_not_the_working_directorys_repository(self):
+        """#1550"""
+        import subprocess
+        from data_sheets_schema import provenance
+        from data_sheets_schema.resources import CHECKOUT_ROOT
+        subprocess.run(["git", "init", "-q"], cwd=self.tmp, check=True)
+        subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "x"],
+                       cwd=self.tmp, check=True)
+        other = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.tmp, capture_output=True, text=True).stdout.strip()
+        facts = provenance.repo_facts()
+        self.assertEqual(facts["resource_kind"], "checkout")
+        self.assertEqual(Path(facts["resource_root"]), CHECKOUT_ROOT)
+        self.assertNotEqual(facts["commit"], other)
+        here = subprocess.run(["git", "rev-parse", "HEAD"], cwd=CHECKOUT_ROOT, capture_output=True, text=True).stdout.strip()
+        self.assertEqual(facts["commit"], here)
+
+    def test_agent_definitions_resolve_from_elsewhere(self):
+        """#1553"""
+        from data_sheets_schema import agent_pin
+        p = agent_pin.agent_path("d4d-review-record")
+        self.assertTrue(p.exists())

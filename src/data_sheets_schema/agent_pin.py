@@ -106,7 +106,10 @@ class NoDiscriminatingChallenge(RuntimeError):
 
 
 def agent_path(name: str) -> Path:
-    path = AGENT_DIR / f"{name}.md"
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(Path(".claude/agents") / f"{name}.md")      # the wheel ships them (#1553)
+    if not path.exists():
+        path = AGENT_DIR / f"{name}.md"
     if not path.exists():
         raise FileNotFoundError(f"no agent definition at {path}")
     return path
@@ -160,7 +163,8 @@ def _previous_text(name: str) -> str | None:
     moment anything else is committed, which left the mechanism inert for all
     twelve definitions.
     """
-    rel = str(agent_path(name).relative_to(REPO))
+    from data_sheets_schema.resources import repo_relative
+    rel = repo_relative(agent_path(name), cwd=False)
     if _git("diff", "HEAD", "--name-only", "--", rel).strip():
         blob = _git("show", f"HEAD:{rel}")
         return blob or None

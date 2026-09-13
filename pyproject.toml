@@ -24,13 +24,15 @@ include = [
     { path = ".claude/agents/*.md", format = ["sdist", "wheel"] },
     { path = "data/rubric/*", format = ["sdist", "wheel"] },
     { path = "src/data_sheets_schema/rendering/*.css", format = ["sdist", "wheel"] },
+    { path = ".github/workflows/*.config", format = ["sdist", "wheel"] },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 # The runtime the generator was locked with: linkml 1.9.3 imports `Format.JSON`
 # from it, which a freely resolved 1.10+ runtime no longer has (install canary).
-linkml-runtime = ">=1.9.4,<1.10"
+# Exact: the sync gate attests this generator's bytes (#1552).
+linkml-runtime = "==1.9.4"
 pyyaml = "^6.0.2"
 jinja2 = "^3.1.6"
 requests = "^2.31.0"
@@ -49,8 +51,10 @@ python-docx = "^1.2.0"
 # the locked minor: the committed merged schemas are the generator's bytes,
 # and the sync gate compares bytes — an install that resolved 1.11 rebuilt
 # them differently (`domain_of` lists, a type description) with an
-# identical digest and read STALE (#1478, canary).
-linkml = ">=1.9.3,<1.10"
+# identical digest and read STALE (#1478, canary). Exact, not a range: a 1.9.x
+# release we do not control can change the generator's output, and the
+# canary would then prove that release, not the lock (#1552).
+linkml = "==1.9.3"
 
 [tool.poetry.scripts]
 d4d = "data_sheets_schema.cli:cli"

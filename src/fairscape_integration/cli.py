@@ -142,7 +142,8 @@ def validate(yaml_file: str, schema: Optional[str], target_class: str, verbose: 
     try:
         # Use bundled schema if not specified
         if not schema:
-            schema = str(repo_root / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+            from data_sheets_schema.resources import resource_path
+            schema = str(resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml"))   # any layout (#1530)
 
             if not Path(schema).exists():
                 click.echo(f"✗ Error: Bundled schema not found at {schema}", err=True)
@@ -518,7 +519,8 @@ def transform(input_file, output, mapping, report, validate):
 
         # Validate if requested
         if validate:
-            schema = str(repo_root / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+            from data_sheets_schema.resources import resource_path
+            schema = str(resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml"))
             validator = D4DValidator(schema)
             is_valid, validation_output = validator.validate_d4d_yaml(str(output_path))
 

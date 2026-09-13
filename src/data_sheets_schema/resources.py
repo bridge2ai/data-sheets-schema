@@ -34,7 +34,6 @@ in, and a fixture test that ran later then read — or wrote — the real file.
 """
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -53,7 +52,7 @@ INSTALL_ROOT: Path = PACKAGE_ROOT.parent
 #: What counts as a resource, by path components (#1488). Everything else
 #: is the caller's tree.
 RESOURCE_PREFIXES: tuple[tuple[str, ...], ...] = (
-    ("src",), (".claude",), ("data", "rubric"), ("project",))
+    ("src",), (".claude",), ("data", "rubric"), ("project",), (".github",))
 
 #: The package-data prefix: `src/data_sheets_schema/X` is `PACKAGE_ROOT/X`
 #: wherever the package is.
@@ -73,16 +72,12 @@ def roots() -> list[Path]:
     return out
 
 
-def normalized(path: str | Path) -> Path:
-    """`path` with `.` and `..` collapsed, as given otherwise (#1481, #1482):
-    `src/download/../download/prompts/x.md` is `src/download/prompts/x.md`,
-    and `src/../data/x` is `data/x` — the corpus, not a resource."""
-    p = Path(path)
-    return Path(os.path.normpath(str(p))) if str(p) not in ("", ".") else Path(".")
-
-
 def is_resource(path: str | Path) -> bool:
-    p = normalized(path)
+    """Under a resource prefix, spelled plainly: a path with `..` is never a
+    resource and is never collapsed — `.venv/../x` through a symlink is not
+    `x` (#1528); it is the caller's own path, resolved by the filesystem
+    when a canonical form is needed."""
+    p = Path(path)
     if p.is_absolute() or ".." in p.parts:
         return False
     return any(p.parts[:len(prefix)] == prefix for prefix in RESOURCE_PREFIXES)
@@ -96,37 +91,40 @@ def _candidates(rel: Path) -> list[Path]:
 
 
 def _cwd_carries(rel: Path) -> bool:
-    """Whether the working directory holds the directory `rel` is in —
-    `src/download/prompts` for a prompt, `src/data_sheets_schema/schema`
-    for a schema; the directory itself, not an ancestor, and never a
-    top-level one such as `src` or `.claude`, which any project may have.
+    """Whether the working directory is the tree `rel` belongs to: the
+    nearest existing ancestor of `rel` at depth three or deeper under
+    `src/` — `src/download/prompts`, `src/data_sheets_schema/schema` — the
+    same answer for a directory and for the files in it (#1535). A depth-two
+    marker such as `src/data_sheets_schema` establishes nothing, and only the
+    study's own source layout can be authoritative: a project's own
+    `.claude/commands/` or `data/rubric/` must not hide what an install ships
+    (#1500).
 
-    Then the working directory is the tree being read, and a file absent
-    from it is absent: a staged fixture that deliberately omits a prompt
-    must read `missing`, not the checkout's copy. A directory with no such
-    directory — a user's data tree, or a fixture that carries only the
-    `src/data_sheets_schema` marker the old root guard wanted — has nothing
-    to be authoritative about, and the checkout's or the install's copy is
-    read. A project that happens to carry the exact directory reads its
-    own files: that is the rule, stated.
+    Then a file absent from the working directory is absent: a staged fixture
+    that deliberately omits a prompt must read `missing`, not the checkout's
+    copy. A directory with no such tree — a user's data tree, or a fixture
+    that carries only the old root marker — has nothing to be authoritative
+    about, and the checkout's or the install's copy is read.
     """
-    # Only the study's own source layout can be authoritative: a project's
-    # own `.claude/commands/` or `data/rubric/` must not hide the playbooks
-    # or the rubric an install ships (#1500).
-    return rel.parts[0] == "src" and len(rel.parts) > 2 and rel.parent.is_dir()
+    parts = rel.parts
+    if not parts or parts[0] != "src":
+        return False
+    for depth in range(len(parts) - 1, 2, -1):
+        if Path(*parts[:depth]).is_dir():
+            return True
+    return False
 
 
 def resource_path(path: str | Path) -> Path:
     """Where a repository-relative resource is read from, decided now.
 
-    The working directory's copy, as the (normalized) relative path it was
-    given, when it exists there or the working directory carries its
-    directory (`_cwd_carries`); else the checkout's, else the installed
-    copy, as an absolute path; else the path unchanged so the caller's own
-    error names it. An absolute path, or one outside `RESOURCE_PREFIXES`
-    (including anything that climbs out with `..`), is returned as is.
+    The working directory's copy, as the relative path it was given, when it
+    exists there or the working directory carries its tree (`_cwd_carries`);
+    else the checkout's, else the installed copy, as an absolute path; else
+    the path unchanged so the caller's own error names it. An absolute path,
+    one with `..`, or one outside `RESOURCE_PREFIXES`, is returned as given.
     """
-    p = normalized(path)
+    p = Path(path)
     if p.is_absolute() or not is_resource(p) or p.exists() or _cwd_carries(p):
         return p
     for candidate in _candidates(p):
@@ -138,21 +136,28 @@ def resource_path(path: str | Path) -> Path:
 def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
     """The repository-relative, posix form a record stores for `path`.
 
-    A relative resource path is returned normalized. Any other path is
-    resolved and anchored to the checkout, else to the package (a wheel's
-    package data, spelled back as `src/data_sheets_schema/…`), else to the
-    installation root when the result is a resource (an unrelated file under
-    `site-packages` stays absolute, #1487), else — with `cwd`, as the prompt
-    registry always keyed a staged fixture — to the working directory; a
-    path under none of them stays absolute, resolved. The provenance record
-    passes `cwd=False`: a file outside every root is recorded absolute, so
-    one file is never recordable under two strings (#398). A run launched
-    from elsewhere used to store an absolute path for a prompt *inside* the
-    checkout, which no pin could match (#673).
+    A relative resource spelling is the shipped file's identity and is
+    returned as given — except, for a record (`cwd=False`), when it exists in
+    a working directory that is not the checkout: that is a staged tree's own
+    file, recorded resolved, so the relative and the absolute spelling of one
+    staged file are one identity (#1536). Anything else is resolved through
+    the filesystem (so `..` follows symlinks, #1528) and anchored to the
+    checkout, else to the package (a wheel's package data, spelled back as
+    `src/data_sheets_schema/…`), else to the installation root when the
+    result is a resource (#1487), else — with `cwd`, as the prompt registry
+    always keyed a staged fixture — to the working directory; a path under
+    none of them stays absolute. The provenance record passes `cwd=False`,
+    so a file outside every root is recorded absolute and one file is never
+    recordable under two strings (#398); a run launched from elsewhere used
+    to store an absolute path for a prompt *inside* the checkout, which no
+    pin could match (#673).
     """
-    p = normalized(path)
+    p = Path(path)
     if not p.is_absolute() and is_resource(p):
-        return p.as_posix()
+        in_checkout = (CHECKOUT_ROOT is not None
+                       and Path.cwd().resolve() == CHECKOUT_ROOT.resolve())
+        if cwd or in_checkout or not p.exists():
+            return p.as_posix()
     try:
         resolved = p.resolve()
     except OSError:

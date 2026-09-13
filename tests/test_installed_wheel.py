@@ -161,7 +161,11 @@ class TestTheInstalledWheel(unittest.TestCase):
             assert all(pb["exists"] for pb in rec["playbooks"]["files"]), rec["playbooks"]
             assert rec["schema"]["profile"] == "neutral", rec["schema"]
             v = rec.get("validation") or {{}}
-            assert v.get("passed") is not None and not v.get("failure"), v
+            assert v.get("passed") is True and not v.get("problems") and not v.get("failure"), v
+            assert (rec.get("pair_consistency") or {{}}).get("ran") is True, rec.get("pair_consistency")
+            assert "form" in rec and "grounding" in rec, sorted(rec)
+            notes = rec.get("notes") or []
+            assert any("Model settings read from .github/workflows/d4d_assistant_deterministic.config" in n for n in notes), notes   # the shipped config was read (#1529)
             from data_sheets_schema.provenance import check_record
             violations, why = check_record(rec)
             assert why is None and not violations, (violations, why)
