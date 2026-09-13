@@ -332,9 +332,10 @@ def prompt_facts(prompt_paths: list[Path] | None,
         out = []
         for p in prompt_paths:
             p = Path(p)
+            q = _resource(p)                # read from wherever it is (#1479)
             out.append({"path": repo_relative(p), "sha256": _sha256(p),
-                        "bytes": p.stat().st_size if p.exists() else None,
-                        "exists": p.exists()})
+                        "bytes": q.stat().st_size if q.exists() else None,
+                        "exists": q.exists()})
         facts = {"hash_algorithm": PROMPT_HASH, "files": out}
 
     if request_text is not None:
@@ -883,11 +884,11 @@ RECORD_SCHEMA = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
 
 
 def record_schema_path() -> Path:
-    """`RECORD_SCHEMA` if it resolves from here, else the packaged copy."""
-    found = _resource(RECORD_SCHEMA)
-    if found.exists():
-        return found
-    return Path(__file__).resolve().parent / "schema" / RECORD_SCHEMA.name
+    """`RECORD_SCHEMA` where it is read from (#1301)."""
+    # No second, by-name fallback: `resource_path` reaches the package data
+    # itself, and a working directory that carries the schema directory
+    # without the file is an absence every reader answers alike (#1483).
+    return _resource(RECORD_SCHEMA)
 
 
 def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
@@ -2033,7 +2034,7 @@ def referenced_playbooks(roots: tuple[Path, ...] = PLAYBOOK_ROOTS
     seen: set[str] = set()
     queue = [Path(r) for r in roots]
     while queue:
-        current = queue.pop()
+        current = _resource(queue.pop())        # (#1479)
         if not current.exists():
             continue
         try:

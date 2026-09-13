@@ -525,9 +525,21 @@ class TestKnownLimits(unittest.TestCase):
 class TestWorksFromAnyDirectory(unittest.TestCase):
     """Paths resolved from the module, not the working directory."""
 
-    def test_the_schema_path_is_absolute(self):
+    def test_the_schema_path_resolves_from_anywhere(self):
+        """Repository-relative, resolved when read (#1301, #1485): an
+        installed package has no checkout layout to anchor an absolute path on."""
+        import os
+        import tempfile
+        from data_sheets_schema.resources import resource_path
         from data_sheets_schema.verifiable import FULL_SCHEMA
-        self.assertTrue(FULL_SCHEMA.is_absolute())
+        self.assertFalse(FULL_SCHEMA.is_absolute())
+        cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as d:
+            os.chdir(d)
+            try:
+                self.assertTrue(resource_path(FULL_SCHEMA).exists())
+            finally:
+                os.chdir(cwd)
 
     def test_identifier_slots_works_from_a_foreign_cwd(self):
         import os

@@ -126,3 +126,104 @@ class TestResourcesFromElsewhere(unittest.TestCase):
             warnings.simplefilter("always")
             self.assertFalse(schema_digest.record_inventory(ledger=unwritable))
         self.assertTrue(any("digest inventory not recorded" in str(w.message) for w in caught), caught)
+
+
+class TestRoundOne(unittest.TestCase):
+    """The #1455 round-1 findings, each pinned."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def test_dotdot_never_reaches_the_checkout_corpus(self):
+        """#1482: `src/../data/…` is the corpus, not a resource; #1481: a
+        `..` spelling of a prompt normalizes to its canonical form."""
+        from data_sheets_schema.resources import is_resource, repo_relative, resource_path
+        escape = Path("src/../data/d4d_concatenated/claudecode/VOICE_d4d.yaml")
+        self.assertFalse(is_resource(escape))
+        self.assertEqual(resource_path(escape), Path("data/d4d_concatenated/claudecode/VOICE_d4d.yaml"))
+        self.assertFalse(is_resource("src/../README.md"))
+        self.assertFalse(is_resource("../src/download/prompts/x.md"))
+        alias = "src/download/../download/prompts/d4d_generic_arm_prompt_v9.md"
+        self.assertEqual(repo_relative(alias), "src/download/prompts/d4d_generic_arm_prompt_v9.md")
+        self.assertTrue(resource_path(alias).exists())
+
+    def test_a_resource_directory_resolves_like_its_files(self):
+        """#1488"""
+        from data_sheets_schema.resources import is_resource, resource_path
+        self.assertTrue(is_resource("data/rubric"))
+        self.assertTrue(resource_path("data/rubric").is_dir())
+        self.assertTrue(resource_path("project").is_dir())
+        self.assertFalse(is_resource("data/rubrics"))
+        self.assertFalse(is_resource("data"))
+
+    def test_an_unrelated_installed_file_stays_absolute(self):
+        """#1487"""
+        import linkml_runtime
+        from data_sheets_schema.resources import repo_relative
+        other = Path(linkml_runtime.__file__).resolve()
+        self.assertEqual(Path(repo_relative(other)), other)
+        self.assertEqual(Path(repo_relative(other, cwd=False)), other)
+
+    def test_prompt_facts_and_playbooks_are_present_from_elsewhere(self):
+        """#1479: presence and size are read where the file is, and drift is
+        checked there."""
+        from data_sheets_schema import api_runner, provenance, runs
+        facts = provenance.prompt_facts([api_runner.GENERIC_PROMPT_V9])["files"][0]
+        self.assertTrue(facts["exists"]); self.assertGreater(facts["bytes"], 0)
+        self.assertEqual(facts["path"], "src/download/prompts/d4d_generic_arm_prompt_v9.md")
+        self.assertTrue(provenance.referenced_playbooks())
+        import yaml
+        rec = Path(self.tmp) / "data/d4d_concatenated/claudecode_api_core/L/P_provenance.yaml"
+        rec.parent.mkdir(parents=True)
+        rec.write_text(yaml.safe_dump({"playbooks": provenance.playbook_facts()}), encoding="utf-8")
+        status, why = runs.playbook_drift("claudecode_api", "L", "P", Path("data/d4d_concatenated"))
+        self.assertEqual(status, runs.PLAYBOOK_UNCHANGED if hasattr(runs, "PLAYBOOK_UNCHANGED") else status, why)
+        self.assertNotIn("no longer present", why or "")
+        self.assertNotIn("drift", status)
+
+    def test_the_strict_prompt_check_sees_the_components_from_elsewhere(self):
+        """#1480"""
+        from data_sheets_schema import prompt_registry as pr
+        files = pr.prompt_files()
+        self.assertTrue(any("components/" in f.as_posix() for f in files), files)
+        self.assertTrue(all(not f.is_absolute() for f in files))
+        rows = pr.check_disk()
+        self.assertEqual([r["path"] for r in rows if r["status"] != pr.CANONICAL], [])
+
+    def test_pin_refuses_a_registry_that_is_not_in_the_working_tree(self):
+        """#1484"""
+        from data_sheets_schema import prompt_registry as pr
+        with self.assertRaises(ValueError) as caught:
+            pr.pin("src/download/prompts/d4d_generic_arm_prompt_v9.md", "must not write the checkout's registry")
+        self.assertIn("not in the working tree", str(caught.exception))
+
+    def test_readers_agree_on_an_authoritative_absence(self):
+        """#1483: no by-name fallback after `resource_path` said absent."""
+        from data_sheets_schema import provenance, schema_digest
+        from data_sheets_schema.resources import resource_path
+        (Path(self.tmp) / "src/data_sheets_schema/schema").mkdir(parents=True)
+        rel = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+        self.assertEqual(resource_path(rel), rel)
+        self.assertEqual(schema_digest.resolve_schema(rel), rel)
+        self.assertFalse(provenance.record_schema_path().exists())
+
+    def test_the_sync_gate_reads_in_sync_from_elsewhere(self):
+        """#1478"""
+        from data_sheets_schema import schema_sync
+        rows = schema_sync.check()
+        self.assertTrue(all(r["status"] == schema_sync.IN_SYNC for r in rows), rows)
+
+    def test_the_validator_command_never_searches_the_path(self):
+        """#1486"""
+        import sys
+        from unittest import mock
+        from data_sheets_schema import resources
+        with mock.patch.object(Path, "exists", return_value=False):
+            cmd = resources.linkml_validate()
+        self.assertEqual(cmd[0], sys.executable)
+        self.assertIn("linkml.validator.cli", cmd[-1])

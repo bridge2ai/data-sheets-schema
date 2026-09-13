@@ -139,7 +139,8 @@ def _CONDITIONS_FOR_RECORD() -> list[str]:
 
 
 def _require_repo_root_cwd(command: str) -> None:
-    """Refuse to record from anywhere but the repository root (#672 review).
+    """Refuse to record from a directory inside the checkout that is not its
+    root (#672 review; narrowed by #1301).
 
     #659's resolution fix turned an outside-the-root recorder from a loud
     FileNotFoundError into a quietly degraded record: playbook hashes

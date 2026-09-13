@@ -1771,7 +1771,8 @@ def playbook_drift(method: str, label: str, project: str,
         declared, recorded = entry.get("path"), entry.get(algorithm)
         if not declared or not recorded:
             continue
-        playbook = Path(declared)
+        from data_sheets_schema.resources import resource_path
+        playbook = resource_path(Path(declared))       # read from wherever it is (#1479)
         if not playbook.exists():
             # Distinguished from drift: a renamed or deleted playbook is a
             # different diagnosis from an edited one, and #431 was filed

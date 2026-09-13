@@ -40,10 +40,14 @@ class TestTheInstalledWheel(unittest.TestCase):
         cls.venv = cls.tmp / "venv"
         subprocess.run([sys.executable, "-m", "venv", str(cls.venv)], check=True)
         cls.python = cls.venv / ("Scripts" if os.name == "nt" else "bin") / "python"
-        r = subprocess.run([str(cls.python), "-m", "pip", "install", "--quiet", str(cls.wheel)],
+        # pytest only so the offline fake client of the runner tests can be
+        # imported by the child; the wheel's own dependencies come from its
+        # metadata — which is what this canary checks.
+        r = subprocess.run([str(cls.python), "-m", "pip", "install", "--quiet", str(cls.wheel), "pytest"],
                            capture_output=True, text=True)
         if r.returncode != 0:
-            raise unittest.SkipTest(f"could not install the wheel (network?): {r.stderr[-800:]}")
+            # An opted-in canary fails on an install failure; it does not skip (#1489).
+            raise AssertionError(f"the wheel did not install: {r.stderr[-1200:]}")
         cls.work = cls.tmp / "work"
         cls.work.mkdir()
 
@@ -60,6 +64,19 @@ class TestTheInstalledWheel(unittest.TestCase):
         e.update(env)
         return subprocess.run([str(self.python), "-c", textwrap.dedent(code)], cwd=self.work,
                               capture_output=True, text=True, env=e)
+
+    def test_the_metadata_requires_linkml_unconditionally(self):
+        """#1476: `linkml` was in the `docs` extra as well as the main table, and
+        poetry emitted it extra-only."""
+        r = self._run("""
+            from importlib.metadata import requires
+            reqs = [x for x in requires("data-sheets-schema") if x.startswith("linkml")]
+            assert reqs, "no linkml requirement"
+            assert all("extra ==" not in x for x in reqs), reqs
+            import linkml, linkml.validator          # importable in the install
+            print("ok")
+        """)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
     def test_it_is_not_a_checkout_and_the_resources_are_there(self):
         r = self._run("""
@@ -101,6 +118,58 @@ class TestTheInstalledWheel(unittest.TestCase):
         """)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertNotIn("requires a repository checkout", r.stdout + r.stderr)
+
+    def test_the_schema_preflight_passes_from_the_install(self):
+        """#1478: the rebuilt merged schema names the logical source, so the
+        sync gate reads IN_SYNC from any directory."""
+        r = self._run("""
+            from data_sheets_schema import schema_sync
+            rows = schema_sync.check()
+            assert rows and all(r["status"] == schema_sync.IN_SYNC for r in rows), rows
+            print("ok")
+        """)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_a_fake_client_generation_writes_and_validates_from_the_install(self):
+        """#1489: the whole offline path from an installed package in a
+        directory that is no checkout — every phase through the runner's
+        fake client, the derived core, the record write, the deterministic
+        checks, and `linkml-validate` through the install's own interpreter."""
+        bundle = self.work / "clinical_preprocessed.txt"
+        bundle.write_text("FILE: overview.txt\nOpen Clinical Cohort. A synthetic observational study of "
+                          "adult outpatients, released under CC-BY-4.0. 1,200 participants at three sites.\n" * 30,
+                          encoding="utf-8")
+        r = self._run(f"""
+            import sys, yaml
+            from pathlib import Path
+            sys.path.insert(0, {str(ROOT / "tests" / "test_download")!r})
+            from test_api_runner import FakeClient            # imports data_sheets_schema from the install
+            from data_sheets_schema import api_runner, resources
+            assert not resources.is_checkout()
+            out = Path("out")
+            spec = api_runner.RunSpec(project="EXTERNAL_CLINICAL", arm="BASELINE (input documents only)",
+                                      method="claudecode_api", bundle=Path({str(bundle)!r}),
+                                      label="2026-09-13_x-api-generic_rep1", out_dir=out)
+            assert spec.profile == "neutral", (spec.profile, spec.profile_basis)
+            res = api_runner.execute(spec, client=FakeClient())
+            for p in (spec.full_path, spec.core_path, spec.report_path):
+                assert p.exists() and p.stat().st_size > 0, p
+            rec = yaml.safe_load((out / "EXTERNAL_CLINICAL_provenance.yaml").read_text(encoding="utf-8"))
+            assert rec["record_mode"] == "live"
+            f = rec["prompts"]["files"][0]
+            assert f["path"] == "src/download/prompts/d4d_generic_arm_prompt.md", f
+            assert f["exists"] is True and f["bytes"] > 0 and len(f["sha256"]) == 64, f
+            assert all(pb["exists"] for pb in rec["playbooks"]["files"]), rec["playbooks"]
+            assert rec["schema"]["profile"] == "neutral", rec["schema"]
+            v = rec.get("validation") or {{}}
+            assert v.get("passed") is not None and not v.get("failure"), v
+            from data_sheets_schema.provenance import check_record
+            violations, why = check_record(rec)
+            assert why is None and not violations, (violations, why)
+            print("ok", len(res["usage"]))
+        """)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("ok 4", r.stdout)
 
     def test_a_record_written_from_the_install_stores_relative_resource_paths(self):
         full = self.work / "rec" / "P_d4d.yaml"

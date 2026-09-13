@@ -43,12 +43,11 @@ def resolve_schema(path: Path) -> Path:
     the packaged copy sits beside this module, so resolve against it when the
     cwd-relative path does not exist.
     """
+    # `resource_path` reaches the package data itself; no second by-name
+    # fallback, so an authoritative absence is the same for every reader
+    # (#1483).
     from data_sheets_schema.resources import resource_path
-    found = resource_path(path)
-    if found.exists():
-        return found
-    packaged = Path(__file__).resolve().parent / "schema" / path.name
-    return packaged if packaged.exists() else path
+    return resource_path(path)
 
 # Where each target class is actually defined. They are separate merged
 # artifacts; CoreDataset does not exist in the full schema.

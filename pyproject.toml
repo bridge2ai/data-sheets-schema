@@ -71,7 +71,7 @@ requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry.extras]
-docs = ["linkml", "mkdocs-material"]
+docs = ["mkdocs-material"]
 
 [tool.pytest.ini_options]
 markers = [

@@ -69,10 +69,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
 
-# Resolved from this file, not the working directory. Running the CLI from a
-# subdirectory tried to open `tests/src/data_sheets_schema/schema/...`.
+# The corpus lookups below are anchored on the checkout (running the CLI
+# from a subdirectory tried to open `tests/src/...`); the schema is a
+# resource and resolves through `resources.resource_path` when read, so
+# an installed package finds its own copy (#1485).
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-FULL_SCHEMA = _REPO_ROOT / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 
 # Token kinds that must appear verbatim in a source document if they are real.
 # Deliberately narrow: each is a string a human copied from somewhere, not a

@@ -236,9 +236,12 @@ def prompt_files() -> list[Path]:
     from data_sheets_schema.api_runner import (COMPONENTS, CONDITION_PROMPTS,
                                                TUNED_PROMPT)
 
+    from data_sheets_schema.resources import resource_path
     files = set(CONDITION_PROMPTS.values()) | {TUNED_PROMPT}
-    if COMPONENTS.is_dir():
-        files |= {p for p in COMPONENTS.glob("*.md") if p.name != "README.md"}
+    components = resource_path(COMPONENTS)          # from any directory (#1480)
+    if components.is_dir():
+        # Keyed by the logical relative spelling, read where they are.
+        files |= {COMPONENTS / p.name for p in components.glob("*.md") if p.name != "README.md"}
     return sorted(files, key=lambda p: p.as_posix())
 
 
@@ -297,7 +300,15 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
         raise ValueError("a pin needs a reason — see the docstring")
     from data_sheets_schema.resources import resource_path
     p = resource_path(path)
-    registry = resource_path(registry)
+    target = resource_path(registry)
+    if target != Path(registry):
+        # Resolution fell through to the checkout's or the installed
+        # registry: a shared canonical declaration is never an implicit
+        # write target from a directory that has none (#1484).
+        raise ValueError(
+            f"the registry {registry} is not in the working tree ({target} would be written); "
+            "run from the checkout root or name the registry explicitly")
+    registry = target
     sha = sha256_of(p)
     if sha is None:
         raise FileNotFoundError(f"{p} is not on disk; nothing to pin")
