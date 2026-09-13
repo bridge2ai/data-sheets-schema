@@ -701,13 +701,22 @@ def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
             added = True
     if not added:
         return False
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        "# digest -> slot inventory, appended as digests appear.\n"
-        "# Written by schema_digest.record_inventory; never edit an existing\n"
-        "# entry — it is the evidence that tells a slot a run omitted from a\n"
-        "# slot that did not yet exist (#580).\n"
-        + _yaml.safe_dump(data, sort_keys=True), encoding="utf-8")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            "# digest -> slot inventory, appended as digests appear.\n"
+            "# Written by schema_digest.record_inventory; never edit an existing\n"
+            "# entry — it is the evidence that tells a slot a run omitted from a\n"
+            "# slot that did not yet exist (#580).\n"
+            + _yaml.safe_dump(data, sort_keys=True), encoding="utf-8")
+    except OSError as exc:
+        # An installed package's ledger lives under site-packages (#1301),
+        # which may be read-only; the study's checkout is always writable.
+        # Said, not swallowed: the run continues, the entry is not recorded,
+        # and `slot_existed_at` for this digest answers None until it is.
+        import warnings
+        warnings.warn(f"digest inventory not recorded at {path}: {exc}", RuntimeWarning, stacklevel=2)
+        return False
     return True
 
 

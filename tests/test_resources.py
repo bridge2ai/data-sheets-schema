@@ -115,3 +115,14 @@ class TestResourcesFromElsewhere(unittest.TestCase):
     def test_the_digest_renders_from_another_directory(self):
         from data_sheets_schema import schema_digest
         self.assertIn("## `title`", schema_digest.digest_text("Dataset"))
+
+    def test_an_unwritable_ledger_is_reported_not_fatal(self):
+        """Under site-packages the digest inventory may be read-only; a run
+        must not die on it, and the non-recording must be said."""
+        import warnings
+        from data_sheets_schema import schema_digest
+        unwritable = Path("/nonexistent-root-for-d4d-tests/digest_inventory.yaml")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            self.assertFalse(schema_digest.record_inventory(ledger=unwritable))
+        self.assertTrue(any("digest inventory not recorded" in str(w.message) for w in caught), caught)
