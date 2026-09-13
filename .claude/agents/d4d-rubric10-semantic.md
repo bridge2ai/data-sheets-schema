@@ -49,11 +49,20 @@ original declarations; a self-consistent output hash alone is insufficient.
 Report applicability_context and evaluation_scope. In metadata, record full
 64-character context_sha256, input_sha256 (the original D4D bytes), and
 rubric_sha256 (the source rubric bytes), alongside this definition's
-instrument_sha256. Use the context_digest function on normalized predicates. For a DatasetCollection or CoreDatasetCollection, enumerate
-every terminal resource with its JSON pointer path and dataset id. Assess
-all children, including nested resources. Distribution/file fields can
-support their own dataset, with exact evidence paths. Collection metadata
-is not implicitly inherited, and one sibling cannot satisfy another's gap.
+instrument_sha256. Use the context_digest function on normalized predicates.
+An explicit Dataset or CoreDataset declaration (a class wrapper or a
+conforms_to_class value, including a URI) remains the dataset being scored,
+even when it has resources. Use its own documentation and the scope path #;
+do not substitute its child components. Component assessments require a
+separately selected input and do not change the parent assessment.
+For DatasetCollection or CoreDatasetCollection inputs, enumerate member
+datasets with JSON pointer paths and ids, recursively reducing nested
+collections but stopping at each explicitly declared Dataset/CoreDataset.
+An undeclared mapping with nonempty resources retains the collection
+interpretation. Paths refer to the unwrapped evaluation document.
+Distribution/file fields support their own dataset, with exact evidence
+paths. Collection metadata is not implicitly inherited, and one sibling
+cannot satisfy another's gap.
 Rubric10 sub-elements also carry their source item_id (for example E1.1).
 Each item includes applicable, applicability_status (applicable, unknown or
 not_applicable), applicability_evidence, and unit_scores: one path, score and evidence entry for every

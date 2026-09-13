@@ -5,6 +5,8 @@ Validate D4D evaluation JSON files against their schemas.
 This ensures evaluations conform to the standardized schema, which in turn
 ensures HTML renderers can reliably parse the output.
 """
+from __future__ import annotations
+
 import argparse
 import json
 import re as _re

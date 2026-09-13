@@ -298,3 +298,37 @@ combined evaluation lane passed 816 tests, final controller checks 169 and
 inventory checks 12. Continue generation, evaluation, profile PR #1436, then
 packaging PR #1455; preserve both generation arms, all evaluation styles and
 all measured artifacts, with source downloads and new measurements deferred.
+
+## Generation review round 18 — 2026-09-13
+
+Round 17 CI is green. Independent review found #1510 (priority commands
+ignored the selected registry) and #1511 (scope membership rejected the
+supported project mapping form). Both are fixed and the focused priority,
+scope and selected-agentic-input lane passes 105 tests. Eleven new tests
+reproduced the preceding defects. See the round-18 review note; require
+revised-head CI and independent approval before merging.
+
+Evaluation round 4 is pushed: independent caller context authorizes semantic
+exclusions, and explicit Dataset/CoreDataset classes survive resource fields.
+The 213-test focused lane, 658-test broader lane, nine CBORG compatibility
+checks and 12 inventory checks pass. All 315 historical attributions and 21
+boundary hashes are verified. Claude continues the profile and packaging
+branches; retain generation → evaluation → profiles → packaging merge order.
+Both generation arms and all evaluation styles stay in scope. No source
+downloads, production generation or new ratings are launched.
+
+## Generation review round 19 — 2026-09-13
+
+Round 18 confirms the selected priority/scope fixes and finds #1538: Codex CLI
+must receive the same selected-input playbook controls as Claude Code.
+A shared runtime predicate now governs path freezing and rendering.
+Both runtime variants run the behavioral checks; 76 tests pass after six
+Codex regressions reproduce on the preceding head. Require full CI and
+independent approval before merge.
+
+Evaluation round 4 confirms preservation and finds one remaining scoring
+scope defect: an explicitly declared Dataset with resources must remain
+the scoring target rather than being replaced by its children. Address it
+before the next evaluation review. The #1457 installed-workflow completion
+is being prepared in a separate worktree, retaining the prescribed merge
+order and the no-new-measurement boundary.
