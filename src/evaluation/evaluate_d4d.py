@@ -102,7 +102,7 @@ def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
                         str(unit.get("conforms_to_class", "")))
                     for _, unit in units):
                 class_name = "CoreDataset"
-            if document.get("resources"):
+            if not match and document.get("resources"):
                 class_name = "CoreDatasetCollection" if class_name.startswith("Core") else "DatasetCollection"
             schema_file = (_METHOD_SCHEMA["claudecode_agent_core"][0]
                            if class_name.startswith("Core") else _DEFAULT_SCHEMA[0])

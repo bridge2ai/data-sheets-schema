@@ -67,8 +67,8 @@ instrument digest and the actual expanded API system-prompt digests.
 |---|---|
 | `d4d-rubric10.md` | `031118e9121ade1c7fad246663ccf24eb02fb5d383ed426971b448912e48a5f7` |
 | `d4d-rubric20.md` | `2b11d1b903a07bac5f2cd23f639b36dd05a3f6ad4554df9effc83abdfbadc31b` |
-| `d4d-rubric10-semantic.md` | `b1dd37d24b271ee8c69adb37cff1204d161bbf04b0b2c0a36a6855bf7e8c87ea` |
-| `d4d-rubric20-semantic.md` | `8aa735fb746df6b425d034a9db399705445783f81e3947e309c752739a93ca6a` |
+| `d4d-rubric10-semantic.md` | `71ea72d9dfc36a3a9f34071ac8e692e338ca7c07f2f166c10bd2da28197c6a6b` |
+| `d4d-rubric20-semantic.md` | `1d2598f750bf3183d8ecaee62396035d5a2e1193039d2f1ec6cbfda32dcd06a2` |
 
 The earlier completed CBORG condition remains bound to its original schemas,
 rubrics, definitions and helper bytes by merged PR #1396. Its read-only audit
@@ -98,17 +98,16 @@ project selection, collection coverage, and repeated external-file CLI exports.
 Tests use local fixtures and fake providers. Full CI and independent review
 remain required before merge.
 
-## Independent review corrections
+## Independent review corrections through round 4
 
-Round 3 finishes the optional Dataset-resources, Core-collection inference,
-complete format/MIME and semantic 0/3/5 guidance corrections. It also upgrades
-the live reference-rescore controller to pin/copy the version-2 validator and
-support modules, check the registered context, and validate the original input
-and definition in both isolated sessions and offline recovery (#1474).
-The controller and validator select their own source helpers before ambient
-checkouts; the check-echo helper is itself pinned. All 21 boundary files are
-hashed in the adjacent JSON. The completed CBORG condition continues using
-its archived instrument; its preservation audit passes with 56 accepted
-ratings and 450 unchanged preservation hashes. The combined offline lane
-passes 816 tests; see `reviews/pr_1449_round3_2026-09-13.md` for later focused
-verification. No new measurement is registered or performed here.
+New semantic acceptance binds applicability to an independent caller context
+file (--context); omission means unknown. Output-authored exclusions cannot
+raise adjusted scores. The reference controller carries registered context
+through isolated validation and reconstructs it independently for post-checks
+and recovery. Historical classification and the completed CBORG instrument
+retain their original roles. Explicit Dataset/CoreDataset declarations remain
+authoritative when resources are present. All 21 boundary files are hashed in
+the adjacent JSON. The focused suite passes 213 tests and the broader evaluation
+lane 658; the completed-condition audit verifies 56 accepted ratings and 450
+preservation hashes. See `reviews/pr_1449_round4_2026-09-13.md` for the independent
+reproductions and final CI compatibility checks. No new measurement is run.

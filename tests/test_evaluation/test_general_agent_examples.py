@@ -34,4 +34,7 @@ def test_examples_are_complete_and_do_not_teach_circular_na(rubric, semantic):
         schema = json.loads((ROOT / f"src/download/prompts/{rubric}_semantic_schema.json").read_text())
         jsonschema.validate(result, schema)
         raw = b"id: https://example.org/synthetic-dataset\n"
-        validate_scope(result, document=yaml.safe_load(raw), input_sha256=hashlib.sha256(raw).hexdigest())
+        validate_scope(result, document=yaml.safe_load(raw), input_sha256=hashlib.sha256(raw).hexdigest(),
+                       expected_context={key: {"value": False,
+                           "evidence": "Explicit caller declaration for this structural example."}
+                           for key in ("human_subjects", "regulated_access")})

@@ -30,14 +30,14 @@ def valid_record(number=10):
     return doc
 
 
-def current_record(input_path, number=10):
+def current_record(input_path, number=10, context=None):
     """A complete version-2 fake rating for the actual isolated input."""
     import yaml
     from data_sheets_schema.evaluation_context import context_digest, load_document
     from data_sheets_schema.judge_contract import evaluation_contract
     document, input_sha = load_document(input_path)
     raw = (REAL_ROOT / f"data/rubric/rubric{number}.txt").read_bytes()
-    contract = evaluation_contract(f"rubric{number}", yaml.safe_load(raw), {}, document)
+    contract = evaluation_contract(f"rubric{number}", yaml.safe_load(raw), context, document)
     doc = valid_record(number)
     doc.update(version="2.0", applicability_context=contract["context"], evaluation_scope=contract["scope"])
     doc["metadata"] = {"context_sha256": context_digest(contract["context"]), "input_sha256": input_sha}
@@ -110,11 +110,12 @@ def test_plausible_but_wrong_item_or_percentage_results_fail(mutation):
 
 
 def events(doc, validator_success=True):
+    context_argument = " --context input/context.yaml" if doc.get("applicability_context") else ""
     return [
         {"type": "assistant", "message": {"model": "claude-opus-5", "content": [
             {"type": "text", "text": "verified current definition"},
             {"type": "tool_use", "name": "Bash", "id": "validate", "input": {
-                "command": f"poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric {doc['rubric']} --input input/record.yaml --agent-definition .claude/agents/d4d-{doc['rubric']}.md"}}]}},
+                "command": f"poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric {doc['rubric']} --input input/record.yaml --agent-definition .claude/agents/d4d-{doc['rubric']}.md{context_argument}"}}]}},
         {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "validate",
             "is_error": not validator_success, "content": f"VALID output_evaluation.json: {doc['rubric']}"}]}},
         {"type": "result", "subtype": "success", "is_error": False},
@@ -1214,3 +1215,30 @@ def test_evaluator_cannot_replace_the_registered_context(environment):
     assert receipt["status"] == "incomplete"
     assert "registered version-2 applicability context" in receipt["error"]
     assert not (root / job["output"]).exists()
+
+
+@pytest.mark.parametrize("context", [{"human_subjects": True}, {"human_subjects": False}])
+def test_registered_context_reaches_real_isolated_and_controller_validators(environment, context):
+    root, manifest, job, doc = environment
+    job["applicability_context"] = context
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    updated = current_record(root / job["input"], context=context)
+    for field in ("elements", "overall_score", "applicability_context", "evaluation_scope"):
+        doc[field] = updated[field]
+    doc["metadata"]["context_sha256"] = updated["metadata"]["context_sha256"]
+    trace = events(doc)
+    trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
+    cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+    assert json.loads((root / job["output"]).read_bytes()) == doc
+
+
+def test_a_declared_context_requires_the_exact_context_validator_argument():
+    trace = events(valid_record())
+    assert not runner.evaluator_validated(trace, "rubric10-semantic", context_required=True)
+    command = trace[0]["message"]["content"][1]["input"]
+    command["command"] += " --context input/context.yaml"
+    assert runner.evaluator_validated(trace, "rubric10-semantic", context_required=True)
+    command["command"] = command["command"].replace("input/context.yaml", "input/invented.yaml")
+    assert not runner.evaluator_validated(trace, "rubric10-semantic", context_required=True)

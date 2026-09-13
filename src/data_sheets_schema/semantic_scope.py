@@ -16,14 +16,25 @@ from data_sheets_schema.evaluation_context import (
 )
 from data_sheets_schema.judge_contract import _equal, _number, evaluation_contract
 
+_CLASSIFICATION_ONLY = object()
 
-def validate_scope(result: dict, *, document: dict | None = None, input_sha256: str | None = None):
+
+def validate_scope(result: dict, *, document: dict | None = None, input_sha256: str | None = None,
+                   expected_context: dict | None | object = _CLASSIFICATION_ONLY):
     if result.get("version") != "2.0":
         return
     rubric_name = result.get("rubric", "").removesuffix("-semantic")
     if rubric_name not in {"rubric10", "rubric20"}:
         raise ValueError("unknown general-context semantic rubric")
     context = normalize_context(result.get("applicability_context"))
+    # Historical structural classification can check internal consistency.
+    # New-output acceptance with an input must use independent caller context;
+    # omission means unknown, never the evaluator's own N/A declaration.
+    if expected_context is not _CLASSIFICATION_ONLY or document is not None or input_sha256 is not None:
+        trusted = normalize_context(None if expected_context is _CLASSIFICATION_ONLY else expected_context)
+        if context != trusted:
+            raise ValueError("evaluation applicability context does not match the supplied caller context")
+        context = trusted
     scope = result.get("evaluation_scope")
     if not isinstance(scope, dict) or scope.get("collection_metadata_inherited") is not False:
         raise ValueError("version 2 requires an explicit non-inherited evaluation scope")

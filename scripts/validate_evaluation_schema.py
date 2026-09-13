@@ -82,7 +82,7 @@ def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]
 
 def validate_outputs(paths: List[Path], rubric: str | None = None,
                      schema_dir: Path | None = None, input_path: Path | None = None,
-                     definition_path: Path | None = None) -> int:
+                     definition_path: Path | None = None, context_path: Path | None = None) -> int:
     """Require each explicitly named new output to pass its semantic schema.
 
     Directory names and superseded shapes do not exempt a new output. This
@@ -118,10 +118,11 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 definition_sha256 = hashlib.sha256(definition_path.read_bytes()).hexdigest()
                 if doc["metadata"]["instrument_sha256"] != definition_sha256:
                     raise ValueError("evaluation instrument SHA256 does not match the supplied agent definition")
-                from data_sheets_schema.evaluation_context import load_document
+                from data_sheets_schema.evaluation_context import load_context, load_document
                 from data_sheets_schema.semantic_scope import validate_scope
                 document, digest = load_document(input_path)
-                validate_scope(doc, document=document, input_sha256=digest)
+                validate_scope(doc, document=document, input_sha256=digest,
+                               expected_context=load_context(context_path))
         except (OSError, ValueError, jsonschema.SchemaError) as exc:
             print(f"INVALID {path}: {exc}")
             failed = True
@@ -246,6 +247,7 @@ def cli(argv: List[str] | None = None) -> int:
                         help="require the named outputs to use this rubric")
     parser.add_argument("--input", type=Path, help="original D4D input for version-2 resource coverage and byte identity")
     parser.add_argument("--agent-definition", type=Path, help="exact agent definition used for this version-2 assessment")
+    parser.add_argument("--context", type=Path, help="trusted caller YAML/JSON applicability declarations; omitted predicates remain unknown")
     args = parser.parse_args(argv)
     if args.rubric and not args.files:
         parser.error("--rubric requires --file")
@@ -253,8 +255,10 @@ def cli(argv: List[str] | None = None) -> int:
         parser.error("--input requires --file")
     if args.agent_definition and not args.files:
         parser.error("--agent-definition requires --file")
+    if args.context and not args.files:
+        parser.error("--context requires --file")
     return validate_outputs(args.files, args.rubric, input_path=args.input,
-                            definition_path=args.agent_definition) if args.files else main()
+                            definition_path=args.agent_definition, context_path=args.context) if args.files else main()
 
 
 if __name__ == "__main__":

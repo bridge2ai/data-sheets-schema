@@ -32,8 +32,8 @@
   "files": {
     ".claude/agents/d4d-rubric10.md": "031118e9121ade1c7fad246663ccf24eb02fb5d383ed426971b448912e48a5f7",
     ".claude/agents/d4d-rubric20.md": "2b11d1b903a07bac5f2cd23f639b36dd05a3f6ad4554df9effc83abdfbadc31b",
-    ".claude/agents/d4d-rubric10-semantic.md": "b1dd37d24b271ee8c69adb37cff1204d161bbf04b0b2c0a36a6855bf7e8c87ea",
-    ".claude/agents/d4d-rubric20-semantic.md": "8aa735fb746df6b425d034a9db399705445783f81e3947e309c752739a93ca6a",
+    ".claude/agents/d4d-rubric10-semantic.md": "71ea72d9dfc36a3a9f34071ac8e692e338ca7c07f2f166c10bd2da28197c6a6b",
+    ".claude/agents/d4d-rubric20-semantic.md": "1d2598f750bf3183d8ecaee62396035d5a2e1193039d2f1ec6cbfda32dcd06a2",
     "data/rubric/rubric10.txt": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
     "data/rubric/rubric20.txt": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
     "src/download/prompts/rubric10_system_prompt.md": "b2dda0c4576050634f406dde1838ae58a23056723538725c4471a882d45b8776",
@@ -43,23 +43,23 @@
     "src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml": "2cc165cd388d53918d8cc6f5c4bbf2bdd347194e3c6f7b914cfb1695165da765",
     "src/data_sheets_schema/evaluation_context.py": "43d513d2410f972112746593d9b33dfc34867d689ac195bc08c6b0dc8c0684b9",
     "src/data_sheets_schema/judge_contract.py": "40c424dd282c864fa3add1f036d00e7dfcfb5f988ed3d8588ee034301cbf24db",
-    "src/data_sheets_schema/semantic_scope.py": "90f69a1c473939111e3312f927690e4f83958c3bf80c160c890e4f5f59ecc4eb",
+    "src/data_sheets_schema/semantic_scope.py": "d3677eab91bd61072fb259cf43ee9cb6732a4b9626f9c7747b443ea6a08aeb55",
     "src/data_sheets_schema/semantic_comparison.py": "c2522d718477fdc4ff296213e5983f3b549d689189e120fc85f1f868a36e060d",
-    "src/evaluation/evaluate_d4d.py": "de7e32b8d8d1b3afed1dd006ae3c7e5e2c11b2ed0caa57a05e610ba90ffd0238",
+    "src/evaluation/evaluate_d4d.py": "b57f2b8dc4a646ae7678ec16f36b47a9f51abecc08e3bf70b1b0450fa2a1f44a",
     "src/evaluation/evaluate_d4d_llm.py": "88e6e309c4924e72eb8e29bd8225a2ab19fd955ce163d0bcc7acda90ab7e84d1",
     "src/data_sheets_schema/cli/evaluate.py": "9b6c72d1a158b9428a4988fd2833d00b188215f297d63c0edbb93b5e4db278a5",
-    "scripts/validate_evaluation_schema.py": "b2333dcdb8c2229f491530d26d1af92c8b707290d283dc74a24522147597929d",
-    "scripts/reference_rescore.py": "9c967d7a57b3b0e4e6d452118793e1670746315e1207acc84303088f1067ffc5",
+    "scripts/validate_evaluation_schema.py": "d04292c4f6aa3ca1efe88cdc0a0375dbf4d5803953a0b19491de911326f3630a",
+    "scripts/reference_rescore.py": "13478d53f74c5f4873c899abbc1fd2dc20e18eb29d1e3bf47a4af7c28d242223",
     "src/data_sheets_schema/agent_pin.py": "35d60bcc835ba0d77e3c3c531fe225b8825ff77f038a7cc499cfbcaa535ba962"
   },
   "presence_instrument": {
     "kind": "deterministic_presence",
     "version": "2.0",
-    "sha256": "41ce5469e0b022c4d4f0fca1e8b1c1a168eb3581c5098c365f5acd82c7a4f387",
+    "sha256": "4db3a70f5971ad3872e31008c2a79aefdd1bfaa3709460584e43ba100127a814",
     "inputs": {
       "rubric10": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
       "rubric20": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
-      "runner": "de7e32b8d8d1b3afed1dd006ae3c7e5e2c11b2ed0caa57a05e610ba90ffd0238",
+      "runner": "b57f2b8dc4a646ae7678ec16f36b47a9f51abecc08e3bf70b1b0450fa2a1f44a",
       "context_policy": "43d513d2410f972112746593d9b33dfc34867d689ac195bc08c6b0dc8c0684b9"
     }
   },

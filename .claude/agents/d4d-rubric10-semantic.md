@@ -37,6 +37,15 @@ denominator. Do not derive non-applicability from absent scoring fields.
 The source rubric assigns predicates to items; all/any rules use three-valued
 logic. A false assigned predicate permits N/A; unknown does not.
 
+Use only the applicability declarations supplied independently by the caller.
+If the caller supplied a context YAML/JSON file, preserve that file and pass
+its exact path to the validator with --context. Never create or edit a context
+file to justify an exclusion, and never copy declarations from your own
+assessment back into that input. If no caller context was supplied, use an
+empty applicability_context: all conditional predicates remain unknown and
+in the denominator. The validator checks your context against the caller's
+original declarations; a self-consistent output hash alone is insufficient.
+
 Report applicability_context and evaluation_scope. In metadata, record full
 64-character context_sha256, input_sha256 (the original D4D bytes), and
 rubric_sha256 (the source rubric bytes), alongside this definition's
@@ -814,6 +823,11 @@ path, and require exit status 0 before reporting the evaluation complete:
 ```bash
 poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --input ORIGINAL_D4D_PATH --agent-definition .claude/agents/d4d-rubric10-semantic.md --rubric rubric10-semantic
 ```
+
+When the caller supplied applicability context, append
+`--context ORIGINAL_CALLER_CONTEXT_PATH` to that command. Otherwise omit the
+option and retain unknown applicability; do not invent a context file.
+
 
 Validate only the output you just wrote; a corpus sweep would expose other
 evaluators' judgements. This check rejects invalid output even in a dated or

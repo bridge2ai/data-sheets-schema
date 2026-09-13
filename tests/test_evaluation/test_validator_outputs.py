@@ -38,7 +38,8 @@ class NewEvaluationOutputs(unittest.TestCase):
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             status = self.m.validate_outputs(paths, rubric, input_path=self.input_path,
-                                             definition_path=self.definition_path)
+                                             definition_path=self.definition_path,
+                                             context_path=self.root / "caller-context.yaml")
         return status, output.getvalue()
 
     def test_each_rubric_accepts_its_documented_contract(self):
@@ -56,7 +57,7 @@ class NewEvaluationOutputs(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, self.m.__file__, "--file", str(answer),
              "--input", str(self.input_path), "--agent-definition", str(self.definition_path),
-             "--rubric", "rubric10-semantic"], capture_output=True, text=True,
+             "--rubric", "rubric10-semantic", "--context", str(self.root / "caller-context.yaml")], capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn(str(answer), result.stdout)

@@ -17,13 +17,15 @@ from tests.test_evaluation.test_semantic_evaluation_contract import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def record(tmp_path, rubric):
+def record(tmp_path, rubric, context=None):
     input_path = tmp_path / "external.yaml"
     input_path.write_text("CoreDatasetCollection:\n  resources:\n    - id: example:a\n    - id: example:b\n")
     document, digest = load_document(input_path)
     raw = (ROOT / f"data/rubric/{rubric}.txt").read_bytes()
     specification = yaml.safe_load(raw)
-    contract = evaluation_contract(rubric, specification, {"human_subjects": False}, document)
+    context = {"human_subjects": False} if context is None else context
+    contract = evaluation_contract(rubric, specification, context, document)
+    input_path.with_name("caller-context.yaml").write_text(yaml.safe_dump(context))
     result = _rubric10_record() if rubric == "rubric10" else _rubric20_record()
     result.update(version="2.0", project="EXTERNAL_CLINICAL", method="manual",
                   d4d_file=str(input_path), applicability_context=contract["context"],
@@ -71,7 +73,7 @@ def test_complete_external_assessment_accepts_every_resource_and_explicit_na(tmp
     assert status == "valid", errors
     path = tmp_path / "assessment.json"
     path.write_text(json.dumps(result))
-    assert _validator().validate_outputs([path], input_path=input_path, definition_path=ROOT / f".claude/agents/d4d-{result['rubric']}.md") == 0
+    assert _validator().validate_outputs([path], input_path=input_path, definition_path=ROOT / f".claude/agents/d4d-{result['rubric']}.md", context_path=input_path.with_name("caller-context.yaml")) == 0
 
 
 @pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
@@ -108,7 +110,7 @@ def test_cli_validation_requires_and_verifies_the_original_input(tmp_path, rubri
     validator = _validator()
     assert validator.validate_outputs([path]) == 1
     input_path.write_text("id: example:another\n")
-    assert validator.validate_outputs([path], input_path=input_path, definition_path=ROOT / f".claude/agents/d4d-{result['rubric']}.md") == 1
+    assert validator.validate_outputs([path], input_path=input_path, definition_path=ROOT / f".claude/agents/d4d-{result['rubric']}.md", context_path=input_path.with_name("caller-context.yaml")) == 1
 
 
 @pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
@@ -121,7 +123,7 @@ def test_a_model_cannot_omit_a_child_from_both_scope_and_item_scores(tmp_path, r
             item["unit_scores"].pop()
     path = tmp_path / "assessment.json"
     path.write_text(json.dumps(result))
-    assert _validator().validate_outputs([path], input_path=input_path, definition_path=ROOT / f".claude/agents/d4d-{result['rubric']}.md") == 1
+    assert _validator().validate_outputs([path], input_path=input_path, definition_path=ROOT / f".claude/agents/d4d-{result['rubric']}.md", context_path=input_path.with_name("caller-context.yaml")) == 1
 
 
 @pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
@@ -133,4 +135,4 @@ def test_cli_validation_refuses_a_stale_or_unspecified_definition(tmp_path, rubr
     assert validator.validate_outputs([path], input_path=input_path) == 1
     changed = tmp_path / "another-definition.md"
     changed.write_text("Another evaluator definition.\n")
-    assert validator.validate_outputs([path], input_path=input_path, definition_path=changed) == 1
+    assert validator.validate_outputs([path], input_path=input_path, definition_path=changed, context_path=input_path.with_name("caller-context.yaml")) == 1
