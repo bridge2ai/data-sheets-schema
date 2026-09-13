@@ -137,3 +137,21 @@ only declared runtime dependencies and fake-provider fixtures. All 60
 historical renderer controls match. The read-only preservation audit verifies
 56 accepted ratings, 259 prior evaluations and 450 preservation hashes.
 The next independent review and exact-head CI remain required before merge.
+
+## Review round 6 — 2026-09-13
+
+The round-5 findings are #1649–#1651. Output artifact verification follows
+the record before considering resource namespaces, so a deleted flat output
+under project/ cannot verify through a package copy. New agentic specs record
+chunk_check_uses_manifest and emit bundle chunk's own selected --manifest
+option, including explicit none. Older saved specs omit that switch and
+retain their original command bytes. Backfill tries both forms and both
+relative and owner-anchored destinations, writing only after the complete
+original instruction hash matches.
+
+The expanded corpus/backfill/replay lane passes 66 tests; the emitted-command
+and remaining prompt-consumer lane passes 100 tests. The cross-directory
+fixture captures its chunk path before changing directory. All 60 historical
+renderer controls remain unchanged. Prior-head CI had exactly the copied
+pair-gate fixture failure already fixed by #1646, with 4406 passes and 13
+skips. No measured record, rating or original working-tree file was changed.

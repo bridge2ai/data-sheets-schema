@@ -564,6 +564,9 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     destination_choices = [destinations]
     owner = pv.artifact_root(path)
     if destinations and owner is not None:
+        absolute = {key: str(owner / Path(value)) for key, value in destinations.items()}
+        if absolute != destinations:
+            destination_choices.append(absolute)
         try:
             relative = {key: str(Path(value).relative_to(owner))
                         for key, value in destinations.items()}
@@ -589,14 +592,18 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
             {"profile": name,
              "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
             for name in PROFILES]
-    for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations in product(
-            (0, -1, 1, -2, 2), (5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices, destination_choices):
+    for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations, scoped_chunks in product(
+            (0, -1, 1, -2, 2), (5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
+            destination_choices, (True, False)):
+        if scoped_chunks and (render_version < 5 or runtime not in {"Claude Code", "Codex CLI"}):
+            continue
         spec = RunSpec.from_render_spec({
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
             "manifest": str(selected_manifest) if selected_manifest is not None else None,
             "manifest_line": RunSpec.header_for_manifest(selected_manifest),
             "render_version": render_version,
+            **({"chunk_check_uses_manifest": True} if scoped_chunks else {}),
             **({"agentic_artifact_paths": destinations} if destinations is not None
                and render_version >= 5 and runtime in {"Claude Code", "Codex CLI"} else {}),
             "chunk_manifest": str(selected_chunks) if selected_chunks is not None else None,
