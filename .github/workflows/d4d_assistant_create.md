@@ -370,7 +370,7 @@ collection_process:
 All D4D datasheets created by the assistant MUST be saved to:
 ```bash
 # Extract dataset name from YAML (use lowercase, replace spaces with underscores)
-DATASET_NAME="<dataset_name>"  # e.g., "cm4ai", "ai_readi_voice"
+DATASET_NAME="<dataset_name>"  # e.g., "clinical_cohort", "imaging_study"
 
 # Save location (REQUIRED - all assistant-created D4Ds go here)
 OUTPUT_FILE="data/sheets_d4dassistant/${DATASET_NAME}_d4d.yaml"
