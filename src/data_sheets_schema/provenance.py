@@ -1059,14 +1059,17 @@ def record_schema_path() -> Path:
 
 
 def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
-    """A record whose `schema.profile` names one profile while its
+    """A record whose effective profile names one instrument while its
     `schema.digest_md5` is the *other* profile's current digest states an
     instrument it did not consume (#1581). Only the current digests are
     known here; an older digest of the same profile is not a finding."""
     schema = data.get("schema") if isinstance(data, dict) else None
-    if not isinstance(schema, dict) or not schema.get("profile") or not schema.get("digest_md5"):
+    if not isinstance(schema, dict) or not schema.get("digest_md5"):
         return None
-    if not isinstance(schema["profile"], str) or not isinstance(schema["digest_md5"], str):
+    stated = schema.get("profile")
+    from data_sheets_schema.profiles import for_record
+    effective = for_record(data).name if stated is None else stated
+    if not isinstance(effective, str) or not isinstance(schema["digest_md5"], str):
         return None                        # a malformed value is the structural validator's finding (#1655)
     try:
         from data_sheets_schema import schema_digest
@@ -1078,11 +1081,12 @@ def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
         if isinstance(exc, MissingVocabulary):
             return (f"the record's profile cannot be checked here: {exc}")   # a finding, not silence (#1729)
         return None
-    if current.get(schema["profile"]) == schema["digest_md5"]:
+    if current.get(effective) == schema["digest_md5"]:
         return None                        # its own current digest, whatever else renders the same bytes (#1609)
     for name, md5 in current.items():
-        if name != schema["profile"] and md5 == schema["digest_md5"]:
-            return (f"schema.profile is {schema['profile']!r} but schema.digest_md5 {md5[:12]}… is the "
+        if name != effective and md5 == schema["digest_md5"]:
+            basis = f" (read as {effective!r})" if stated is None else ""
+            return (f"schema.profile is {stated!r}{basis} but schema.digest_md5 {md5[:12]}… is the "
                     f"{name} profile's current digest")
     return None
 
