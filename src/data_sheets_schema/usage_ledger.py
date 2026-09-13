@@ -213,6 +213,24 @@ def _identity_differs(pinned: dict, current: dict) -> bool:
             node = node.get(key) if isinstance(node, dict) else None
         if not node:
             return True
+    # These file entries were all present in the original input identity
+    # (#1402). None records an unused input; a mapping records both its
+    # address and its observed hash, including an explicit missing-file null.
+    # Dropping a hash is not the compatibility case of a newly added key.
+    for name in ("bundle", "source_manifest", "chunks"):
+        if name not in pinned:
+            return True
+        entry = pinned[name]
+        if entry is not None and (not isinstance(entry, dict)
+                                  or not {"path", "sha256"} <= entry.keys()):
+            return True
+    # Only omission of the whole profile has a historical meaning (#1460).
+    # A partial profile cannot attest the instrument for a resumed phase.
+    if "profile" in pinned:
+        profile = pinned["profile"]
+        if (not isinstance(profile, dict) or not profile.get("name")
+                or not profile.get("digest_md5")):
+            return True
     return _subset_differs(_comparable(pinned), _comparable(current))
 
 
