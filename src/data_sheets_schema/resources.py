@@ -41,8 +41,22 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parent
 
 #: The source checkout this package is imported from, or None for a wheel.
+def _is_our_checkout(root: Path) -> bool:
+    """A `pyproject.toml` two levels up is the checkout only when it is this
+    project's and the source layout is there — a copy installed under a
+    user's own project (`<project>/vendor/data_sheets_schema/`) must not
+    adopt that project (#1577)."""
+    try:
+        text = (root / "pyproject.toml").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    import re
+    return (re.search(r'^name\s*=\s*"data[-_]sheets[-_]schema"', text, re.M) is not None
+            and (root / "src" / "data_sheets_schema").is_dir())
+
+
 CHECKOUT_ROOT: Path | None = (
-    PACKAGE_ROOT.parents[1] if (PACKAGE_ROOT.parents[1] / "pyproject.toml").exists() else None)
+    PACKAGE_ROOT.parents[1] if _is_our_checkout(PACKAGE_ROOT.parents[1]) else None)
 
 #: For a wheel, the directory the repository-relative includes were
 #: installed under: the wheel's root is `site-packages`, one level above
@@ -115,6 +129,16 @@ def _cwd_carries(rel: Path) -> bool:
     return False
 
 
+def physical(path: str | Path) -> Path:
+    """An absolute path for reading: as spelled (an alias directory keeps its
+    meaning — a schema's imports resolve beside the alias, as the generator
+    reads them), except that a `..` segment is resolved through the
+    filesystem, never lexically (#1528, #1570)."""
+    import os
+    p = Path(path)
+    return p.resolve() if ".." in p.parts else Path(os.path.abspath(p))
+
+
 def resource_path(path: str | Path) -> Path:
     """Where a repository-relative resource is read from, decided now.
 
@@ -156,7 +180,10 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
     if not p.is_absolute() and is_resource(p):
         in_checkout = (CHECKOUT_ROOT is not None
                        and Path.cwd().resolve() == CHECKOUT_ROOT.resolve())
-        if cwd or in_checkout or not p.exists():
+        # The shipped file's identity is its spelling; a staged tree's own
+        # file (it exists here, and here is not the checkout) is resolved —
+        # for the registry's key and the record alike (#1536, #1573).
+        if in_checkout or not p.exists():
             return p.as_posix()
     try:
         resolved = p.resolve()

@@ -339,3 +339,90 @@ class TestRoundOne(unittest.TestCase):
         from data_sheets_schema import agent_pin
         p = agent_pin.agent_path("d4d-review-record")
         self.assertTrue(p.exists())
+
+
+class TestRoundThree(unittest.TestCase):
+    """The #1455 round-3 findings (#1570–#1579)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def test_schema_readers_follow_the_filesystem_through_a_symlink(self):
+        """#1570"""
+        import hashlib
+        from data_sheets_schema.schema_snapshot import capture_schema
+        os.chdir(ROOT)
+        if not (ROOT / ".venv").is_symlink():
+            self.skipTest("no symlinked .venv to walk through")
+        p = Path(".venv/../src/data_sheets_schema/schema/d4d_generation_record.yaml")
+        if not p.exists():
+            self.skipTest("the other checkout carries no record schema")
+        snap = capture_schema(p)
+        self.assertEqual(Path(snap.key[0]).resolve(), p.resolve())
+        self.assertEqual(hashlib.sha256(snap.sources[0][2]).hexdigest(), hashlib.sha256(p.read_bytes()).hexdigest())
+
+    def test_a_crash_after_findings_is_still_a_crash(self):
+        """#1572"""
+        from data_sheets_schema.api_runner import _validator_did_not_run
+        self.assertTrue(_validator_did_not_run("[ERROR] [r/0] invalid\nTraceback (most recent call last):\nRuntimeError: boom"))
+        self.assertTrue(_validator_did_not_run("Usage: -c [OPTIONS] [DATA_SOURCES]...\nError: Invalid value"))
+        self.assertFalse(_validator_did_not_run("[ERROR] [r/0] 'does not exist.' is not of type 'object' in /creators/0"))
+
+    def test_a_staged_symlinked_prompt_has_one_identity_for_registry_and_record(self):
+        """#1573"""
+        from data_sheets_schema import prompt_registry as pr, provenance
+        (Path(self.tmp) / "src/download").mkdir(parents=True)
+        os.symlink(ROOT / "src/download/prompts", Path(self.tmp) / "src/download/prompts")
+        rel = "src/download/prompts/d4d_generic_arm_prompt_v9.md"
+        self.assertEqual(pr.normalise(rel), rel)                                   # resolves into the checkout
+        self.assertEqual(provenance.repo_relative(rel), rel)
+        self.assertEqual(pr.normalise(Path(self.tmp) / rel), rel)
+
+    def test_an_implicit_registry_that_resolves_to_the_checkouts_is_refused(self):
+        """#1576"""
+        from data_sheets_schema import prompt_registry as pr
+        (Path(self.tmp) / "src/download").mkdir(parents=True)
+        os.symlink(ROOT / "src/download/prompts", Path(self.tmp) / "src/download/prompts")
+        with self.assertRaises(ValueError) as caught:
+            pr.pin("src/download/prompts/d4d_generic_arm_prompt_v9.md", "must not write through the alias")
+        self.assertIn("not in the working tree", str(caught.exception))
+
+    def test_pin_metadata_names_the_blob_and_refuses_untracked_files(self):
+        """#1574, #1575"""
+        import subprocess
+        from data_sheets_schema import prompt_registry as pr
+        repo = Path(self.tmp) / "repo"; repo.mkdir()
+        git = lambda *a: subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *a], cwd=repo, check=True, capture_output=True)
+        git("init", "-q")
+        (repo / "nested").mkdir(); (repo / "nested" / "p.md").write_text("# x\n\n## Prompt body\nbody\n")
+        (repo / ".gitignore").write_text("ignored/\n")
+        git("add", "."); git("commit", "-q", "-m", "x")
+        # An *ignored* file: status reads clean, yet git holds no blob for it
+        # (an untracked one reads dirty and is refused as an uncommitted edit).
+        (repo / "nested" / "ignored").mkdir(); (repo / "nested" / "ignored" / "loose.md").write_text("never in history\n")
+        reg = Path(self.tmp) / "registry.yaml"
+        entry = pr.pin(repo / "nested" / "p.md", "tracked", registry=reg)
+        pinned = pr.entry_for(repo / "nested" / "p.md", reg)
+        self.assertIsNotNone(pinned["pinned_at_commit"])
+        self.assertEqual(pinned["pinned_blob_path"], "nested/p.md")
+        self.assertEqual(Path(pinned["pinned_in_repository"]).resolve(), repo.resolve())
+        blob = subprocess.run(["git", "show", f"{pinned['pinned_at_commit']}:{pinned['pinned_blob_path']}"],
+                              cwd=repo, capture_output=True, text=True, check=True).stdout
+        self.assertEqual(blob, "# x\n\n## Prompt body\nbody\n")                   # the audit route works
+        pr.pin(repo / "nested" / "ignored" / "loose.md", "ignored", registry=reg)
+        loose = pr.entry_for(repo / "nested" / "ignored" / "loose.md", reg)
+        self.assertIsNone(loose["pinned_at_commit"])
+        self.assertIn("not tracked", loose["commit_unavailable"])
+
+    def test_a_foreign_pyproject_is_not_this_checkout(self):
+        """#1577"""
+        from data_sheets_schema.resources import _is_our_checkout
+        other = Path(self.tmp) / "proj"; (other / "src" / "data_sheets_schema").mkdir(parents=True)
+        (other / "pyproject.toml").write_text('[tool.poetry]\nname = "someone-elses"\n')
+        self.assertFalse(_is_our_checkout(other))
+        self.assertTrue(_is_our_checkout(ROOT))

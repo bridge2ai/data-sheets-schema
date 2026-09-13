@@ -301,25 +301,40 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     """
     if not reason or not reason.strip():
         raise ValueError("a pin needs a reason — see the docstring")
-    from data_sheets_schema.resources import resource_path
+    from data_sheets_schema.resources import CHECKOUT_ROOT, resource_path, roots
     p = resource_path(path)
     target = resource_path(registry)
-    if target != Path(registry):
+    shipped = {(root / REGISTRY).resolve() for root in roots()}
+    at_checkout_root = CHECKOUT_ROOT is not None and Path.cwd().resolve() == CHECKOUT_ROOT.resolve()
+    implicit = not Path(registry).is_absolute()
+    if implicit and (target != Path(registry) or (target.resolve() in shipped and not at_checkout_root)):
         # Resolution fell through to the checkout's or the installed
-        # registry: a shared canonical declaration is never an implicit
-        # write target from a directory that has none (#1484).
+        # registry — or a staged alias resolves to it (#1576): a shared
+        # canonical declaration is never an implicit write target from a
+        # directory that has none (#1484). An explicit absolute path is
+        # the escape hatch.
         raise ValueError(
-            f"the registry {registry} is not in the working tree ({target} would be written); "
+            f"the registry {registry} is not in the working tree ({target.resolve()} would be written); "
             "run from the checkout root or name the registry explicitly")
     registry = target
     sha = sha256_of(p)
     if sha is None:
         raise FileNotFoundError(f"{p} is not on disk; nothing to pin")
     head = _head_commit(p.parent)
-    if head is None:
-        # No repository to audit against: recorded as such, not as a commit
-        # of nothing (#1534); the contract's audit route is unavailable here.
-        pass
+    unavailable = f"not under a git repository: {p.parent}" if head is None else None
+    toplevel = blob = None
+    if head is not None:
+        # The audit route is `git show <commit>:<blob path>` in the file's own
+        # repository (#1574); a file git does not track is in no commit,
+        # however clean its status reads (#1575).
+        import os as _os
+        tracked = _git("ls-files", "--error-unmatch", "--", p.name, cwd=p.parent) is not None
+        top = (_git("rev-parse", "--show-toplevel", cwd=p.parent) or "").strip()
+        if not tracked:
+            unavailable, head = f"not tracked by git: {p}", None
+        elif top:
+            toplevel = top
+            blob = _os.path.relpath(p.resolve(), Path(top).resolve()).replace(_os.sep, "/")
     if _is_dirty(p):
         raise ValueError(
             f"{p} has uncommitted changes. Commit the prompt first, then pin "
@@ -358,7 +373,8 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     files[key] = {"sha256": sha, "body_sha256": body_sha256_of(p),
                   "bytes": p.stat().st_size,
                   "pinned_on": today, "pinned_at_commit": head,
-        **({"commit_unavailable": f"not under a git repository: {p.parent}"} if head is None else {}),
+                  **({"commit_unavailable": unavailable} if unavailable else {}),
+                  **({"pinned_in_repository": toplevel, "pinned_blob_path": blob} if blob else {}),
                   "reason": reason.strip()}
     if superseded:
         files[key]["superseded"] = superseded

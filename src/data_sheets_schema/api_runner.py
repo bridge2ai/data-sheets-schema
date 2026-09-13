@@ -2610,10 +2610,12 @@ def _validator_did_not_run(text: str) -> bool:
     value inside a finding (`'does not exist.' is not of type 'object'`)
     never counts as a marker."""
     lines = [l.strip() for l in text.splitlines()]
+    if any(l.startswith(("Traceback (most recent call last)", "ModuleNotFoundError:", "ImportError:"))
+           for l in lines):
+        return True                          # a crash, whatever it printed first (#1572)
     if any(l.startswith(("[ERROR]", "[WARN", "[WARNING]")) for l in lines):
         return False
-    return any(l.startswith(("Traceback (most recent call last)", "Usage: linkml-validate",
-                             "Error: Invalid value for", "ModuleNotFoundError:", "ImportError:"))
+    return any(l.startswith(("Usage: linkml-validate", "Usage: -c", "Error: Invalid value for"))
                for l in lines)
 
 

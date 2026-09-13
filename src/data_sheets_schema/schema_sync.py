@@ -101,11 +101,12 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
     LinkML package imports are captured too; dependency versions also remain
     part of the key because generator behavior depends on them.
     """
+    from data_sheets_schema.resources import physical
     source_name = str(source)
-    source = Path(os.path.abspath(source))
+    source = physical(source)                            # `..` through the filesystem, aliases as spelled (#1570)
     merged_names = {m.name for m, _s, _c, _k in MERGED_SCHEMAS}
-    files = {Path(os.path.abspath(p)): p.read_bytes() for p in source.parent.rglob("*.yaml")
-             if p.name not in merged_names or Path(os.path.abspath(p)) == source}
+    files = {physical(p): p.read_bytes() for p in source.parent.rglob("*.yaml")
+             if p.name not in merged_names or physical(p) == source}
     if source not in files:
         files[source] = source.read_bytes()
     def read(path):
@@ -136,6 +137,7 @@ def _regenerate(source: Path, target: Path,
     `name` is the logical source spelling written as `source_file:` —
     the repository-relative one the committed artifact carries — when
     `source` is a resolved absolute read path (#1478)."""
+    from data_sheets_schema.resources import physical
     state, files = _source_snapshot(source) if snapshot is None else snapshot
     key = (state, marker, name)                     # the name is in the bytes (#1527)
     cached = _REBUILT.get(key)
@@ -149,7 +151,7 @@ def _regenerate(source: Path, target: Path,
                 copy = Path(tmp) / path.relative_to(base)
                 copy.parent.mkdir(parents=True, exist_ok=True)
                 copy.write_bytes(content)
-            captured_source = Path(tmp) / Path(os.path.abspath(source)).relative_to(base)
+            captured_source = Path(tmp) / physical(source).relative_to(base)
             # Relative and namespace-resolved imports read captured files,
             # including package CURIEs and official URL aliases.
             captured_map = {}
@@ -201,7 +203,7 @@ def _regenerate(source: Path, target: Path,
     if source_line and yaml.safe_load(source_line.group()).get("source_file") == str(captured_source):
         named = yaml.safe_dump({"source_file": name or str(source)}, sort_keys=False, allow_unicode=True)
         content = content[:source_line.start()] + named + content[source_line.end():]
-    target.write_text(("---\n" if marker else "") + content, encoding="utf-8", newline="\n")
+    target.write_bytes((("---\n" if marker else "") + content).encode("utf-8"))   # no newline translation, and no 3.10-only keyword (#1531, #1571)
     _REBUILT[key] = target.read_bytes()
     return True, None
 

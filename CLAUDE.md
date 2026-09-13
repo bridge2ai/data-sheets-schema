@@ -1543,7 +1543,7 @@ rubric sources at the same relative paths under the installation root, and
 the schema files as package data — so `src`, `data` and `.claude` are
 top-level entries of `site-packages` and `import src` resolves as a
 namespace package there, a stated cost of keeping one spelling in both
-places (#1504). Only `src/`, `.claude/`, `data/rubric/` and
+places (#1504). Only `src/`, `.claude/`, `.github/`, `data/rubric/` and
 `project/` are resources; the corpus under `data/` is the caller's tree and a
 missing record never resolves to the checkout's. Not at import time: a
 constant resolved once takes the value of whichever directory the first
@@ -1564,9 +1564,10 @@ the tuned component, `schema_sync.check_one` (which keeps the logical
 which runs `resources.linkml_validate()` — the console script beside the
 interpreter, else the module entry point through the interpreter, never a
 `PATH` search (#1486) — because `poetry run` needs a `pyproject.toml` in
-the working directory and failed from anywhere else. Paths are normalized
-before classification: a `..` spelling of a prompt is its canonical form
-and `src/../data/…` is the corpus (#1481, #1482). `repo_relative` anchors
+the working directory and failed from anywhere else. A spelling with `..` is never a resource and is never
+collapsed lexically — `.venv/../x` through a symlinked `.venv` is the file
+the filesystem says it is, in every reader (#1481, #1482, #1528, #1570) — and
+a resource directory classifies like its files (#1488). `repo_relative` anchors
 an absolute path to the checkout, the package data, then — for a resource
 only — the install root; the registry's key also falls back to the working
 directory as it always did, the record's never does (#398). `d4d provenance
