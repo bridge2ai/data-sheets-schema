@@ -820,10 +820,10 @@ class TestClaudeRoundFour(unittest.TestCase):
             return SimpleNamespace(hash=SimpleNamespace(mode="sha256", value=value), locate=lambda: path, __str__=lambda self: path.name)
         entries = [entry(good, b"bytes\n"), entry(bad, b"other\n")]
         with mock.patch("importlib.metadata.files", return_value=entries):
-            changed, measured, unmeasured = provenance._installed_files_changed()
+            changed, measured, unmeasured, _ = provenance._installed_files_changed()
         self.assertTrue(measured); self.assertEqual(len(changed), 1); self.assertEqual(unmeasured, [])
         with mock.patch("importlib.metadata.files", return_value=[]):
-            self.assertEqual(provenance._installed_files_changed(), ([], False, []))
+            self.assertEqual(provenance._installed_files_changed(), ([], False, [], False))
         with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
                 mock.patch("importlib.metadata.files", return_value=[entry(good, b"bytes\n")]):
             facts = provenance.repo_facts()
@@ -930,11 +930,11 @@ class TestCodexRoundFive(unittest.TestCase):
         pth = Entry("startup.pth", None, good)
         unhashed = Entry("data_sheets_schema/schema/x.yaml", None, good)
         with mock.patch("importlib.metadata.files", return_value=[g, missing]):
-            self.assertEqual(provenance._installed_files_changed(), (["data_sheets_schema/schema/missing.yaml"], True, []))
+            self.assertEqual(provenance._installed_files_changed(), (["data_sheets_schema/schema/missing.yaml"], True, [], False))
         with mock.patch("importlib.metadata.files", return_value=[g, pth]):
-            self.assertEqual(provenance._installed_files_changed(), ([], True, []))
+            self.assertEqual(provenance._installed_files_changed(), ([], True, [], False))
         with mock.patch("importlib.metadata.files", return_value=[g, unhashed]):
-            changed, measured, unmeasured = provenance._installed_files_changed()
+            changed, measured, unmeasured, _ = provenance._installed_files_changed()
             self.assertEqual((changed, measured, unmeasured), ([], False, ["data_sheets_schema/schema/x.yaml"]))
 
     def test_the_last_traceback_decides_and_a_quoted_name_keeps_its_marker(self):
@@ -1087,12 +1087,12 @@ class TestClaudeRoundFive(unittest.TestCase):
             def locate(self): return self.path
         entries = [Entry("good.py", good, b"good"), Entry("data_sheets_schema/schema/digest_inventory.yaml", ledger, b"shipped\n")]
         with mock.patch("importlib.metadata.files", return_value=entries):
-            self.assertEqual(provenance._installed_files_changed(), ([], True, []))
-            self.assertTrue(provenance._installed_files_changed.ledger_appended)
+            self.assertEqual(provenance._installed_files_changed(), ([], True, [], True))
         with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
                 mock.patch("importlib.metadata.files", return_value=entries):
             facts = provenance.repo_facts()
-        self.assertEqual((facts["dirty"], facts.get("ledger_appended")), (False, True))
+        self.assertEqual((facts["dirty"], facts.get("ledger_changed")), (False, True))
+        self.assertIn("not established", facts["note"])
 
     def test_git_is_asked_without_a_borrowed_git_dir(self):
         """#1684"""
@@ -1129,3 +1129,94 @@ class TestClaudeRoundFive(unittest.TestCase):
         text = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
         self.assertNotIn("`chunking.anchored`, the review\npack's bundle path", text)
         self.assertIn("`chunking.anchored` follows the resource\nroot", text)
+
+
+class TestCodexRoundSix(unittest.TestCase):
+    """The Codex round-6 findings on #1455 (#1714–#1723)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def _entry(self, name, path, of=None, mode="sha256", hashed=True):
+        import base64, hashlib
+        from types import SimpleNamespace
+        class Entry:
+            def __init__(s): s.name, s.path = name, path
+            def __str__(s): return s.name
+            def locate(s): return s.path
+        e = Entry()
+        e.hash = SimpleNamespace(mode=mode, value=base64.urlsafe_b64encode(hashlib.sha256(of).digest()).rstrip(b"=").decode()) if hashed else None
+        return e
+
+    def test_implicit_corpus_targets_are_written_only_from_the_corpus_root(self):
+        """#1714, #1721"""
+        import click.testing
+        from data_sheets_schema.cli.bundle import bundle
+        from data_sheets_schema.cli.runs import runs
+        elsewhere = Path(self.tmp) / "work"; elsewhere.mkdir(); os.chdir(elsewhere)      # outside every checkout
+        r = click.testing.CliRunner().invoke(bundle, ["chunk", "--project", "CHORUS", "--bundle", str(Path(self.tmp) / "b.txt")])
+        self.assertNotEqual(r.exit_code, 0); self.assertIn("implicit corpus targets", r.output)
+        r = click.testing.CliRunner().invoke(runs, ["trap-inventory", "--output", str(Path(self.tmp) / "out.json")])
+        self.assertNotEqual(r.exit_code, 0); self.assertIn("implicit corpus targets", r.output)
+
+    def test_a_declared_vocabulary_that_is_missing_is_an_error(self):
+        """#1715"""
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, vocabulary_bytes
+        repo = Path(self.tmp) / "wt"; (repo / "src" / "data_sheets_schema").mkdir(parents=True)
+        (repo / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        os.chdir(repo)
+        with self.assertRaises(FileNotFoundError) as caught:
+            vocabulary_bytes(BRIDGE2AI)
+        self.assertIn("cannot be rendered", str(caught.exception))
+        self.assertEqual(vocabulary_bytes(NEUTRAL), b"")
+
+    def test_record_measurement_exempts_only_bookkeeping_and_names_a_changed_ledger(self):
+        """#1716, #1717, #1720, #1723"""
+        from data_sheets_schema import provenance
+        good = Path(self.tmp) / "good.py"; good.write_text("good", encoding="utf-8")
+        ledger = Path(self.tmp) / "digest_inventory.yaml"; ledger.write_text("{}\n", encoding="utf-8")
+        g = self._entry("good.py", good, b"good")
+        cases = {
+            "unhashed ledger": ([g, self._entry("data_sheets_schema/schema/digest_inventory.yaml", ledger, hashed=False)], ([], False, ["data_sheets_schema/schema/digest_inventory.yaml"], False)),
+            "rewritten ledger": ([g, self._entry("data_sheets_schema/schema/digest_inventory.yaml", ledger, b"shipped")], ([], True, [], True)),
+            "unhashed nested pth": ([g, self._entry("data_sheets_schema/startup.pth", good, hashed=False)], ([], False, ["data_sheets_schema/startup.pth"], False)),
+            "root pth": ([g, self._entry("startup.pth", good, hashed=False)], ([], True, [], False)),
+            "dist-info RECORD": ([g, self._entry("data_sheets_schema-1.0.dist-info/RECORD", good, hashed=False)], ([], True, [], False)),
+            "a RECORD-named resource": ([g, self._entry("data_sheets_schema/schema/MYRECORD", good, hashed=False)], ([], False, ["data_sheets_schema/schema/MYRECORD"], False)),
+            "missing pycache-named resource": ([g, self._entry("data_sheets_schema/schema/__pycache__rules.yaml", Path(self.tmp) / "absent", hashed=False)], (["data_sheets_schema/schema/__pycache__rules.yaml"], True, [], False)),
+            "unsupported ledger algorithm": ([g, self._entry("data_sheets_schema/schema/digest_inventory.yaml", ledger, b"x", mode="no-such-hash")], ([], False, ["data_sheets_schema/schema/digest_inventory.yaml"], False)),
+        }
+        for label, (entries, expected) in cases.items():
+            with mock.patch("importlib.metadata.files", return_value=entries):
+                self.assertEqual(provenance._installed_files_changed(), expected, label)
+
+    def test_readability_decides_the_repair_finding_class(self):
+        """#1718"""
+        from data_sheets_schema.api_runner import _finding_class
+        good = Path(self.tmp) / "good.yaml"; good.write_text("id: x\ncreators: [1, 1]\n", encoding="utf-8")
+        bad = Path(self.tmp) / "bad.yaml"; bad.write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
+        mixed = ["[ERROR] [good.yaml/0] 1 is not of type object in /creators/0", "duplicate mapping key `id` at line 3 (kept the last value)"]
+        self.assertEqual(_finding_class(mixed, good), "structured")
+        self.assertEqual(_finding_class(["yaml.parser.ParserError: while parsing"], bad), "diagnostic")
+
+    def test_an_uninspectable_layout_is_refused_and_a_position_marker_survives(self):
+        """#1719, #1722"""
+        from data_sheets_schema import resources
+        from data_sheets_schema.api_runner import _crash_diagnostic
+        repo = Path(self.tmp) / "wt"; (repo / "src" / "data_sheets_schema").mkdir(parents=True)
+        (repo / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        real = Path.is_dir
+        def denied(p):
+            if p == repo / "src" / "data_sheets_schema":
+                raise PermissionError(13, "Permission denied", str(p))
+            return real(p)
+        with mock.patch.object(Path, "is_dir", denied):
+            with self.assertRaises(resources.ResourceRootError):
+                resources._is_our_checkout(repo)
+        tb = "Traceback (most recent call last):\n  File \"x\", line 1\n    y()\nyaml.reader.ReaderError: unacceptable character\n  in \"/tmp/r.yaml\", position 12\n"
+        self.assertIn('in "/tmp/r.yaml", position 12', _crash_diagnostic(tb))

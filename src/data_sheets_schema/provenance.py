@@ -649,48 +649,45 @@ def software_facts() -> dict[str, Any]:
 DIRTY_PATHS_MAX = 50
 
 
-#: RECORD entries the installer writes without a hash by design.
-_INSTALL_BOOKKEEPING = ("RECORD", "INSTALLER", "REQUESTED", "direct_url.json")
+#: The installer's own bookkeeping: the wheel's metadata directory, a
+#: root-level `.pth`, byte-code caches. Nothing else is exempt (#1717).
+_LEDGER = "data_sheets_schema/schema/digest_inventory.yaml"
 
 
-def _installed_files_changed() -> tuple[list[str], bool, list[str]]:
-    """`(changed, measured, unmeasured)`: the installed files whose bytes no
-    longer match the wheel's RECORD — an edited shipped file, a rewritten
-    digest ledger (#1537) — or that are gone; `measured` False when the
-    RECORD cannot be read or when a resource it lists carries no hash, those
-    listed under `unmeasured` (#1641, #1667). A missing file is missing
-    whether or not it was hashed; the installer's own bookkeeping (`RECORD`,
-    `.pth`, `__pycache__`) is neither. The record's hashes are
+def _is_bookkeeping(name: str) -> bool:
+    parts = name.replace("\\", "/").split("/")
+    return (any(p.endswith(".dist-info") for p in parts[:-1])
+            or (len(parts) == 1 and parts[0].endswith(".pth"))
+            or "__pycache__" in parts[:-1])
+
+
+def _installed_files_changed() -> tuple[list[str], bool, list[str], bool]:
+    """`(changed, measured, unmeasured, ledger_changed)`: the installed files
+    whose bytes no longer match the wheel's RECORD or that are gone;
+    `measured` False when the RECORD cannot be read or a resource it lists
+    carries no usable hash, those listed under `unmeasured` (#1641, #1667,
+    #1723). The digest ledger a run appends to (#1537) is reported apart as
+    `ledger_changed`: a hash says it differs, not that earlier entries
+    survived, so it is neither counted clean nor called an append (#1716).
+    Exempt is only the installer's bookkeeping (#1717). Returned, never
+    stored on the function (#1720). The record's hashes are
     `<algorithm>=<urlsafe base64, unpadded>`."""
     import base64
     from importlib.metadata import PackageNotFoundError, files
     try:
         entries = files("data-sheets-schema")
     except PackageNotFoundError:
-        return [], False, []
+        return [], False, [], False
     if not entries:
-        return [], False, []
+        return [], False, [], False
     changed: list[str] = []
     unmeasured: list[str] = []
-    ledger_appended = False
+    ledger_changed = False
     seen = 0
     for entry in entries:
         name = str(entry)
-        if name.endswith("data_sheets_schema/schema/digest_inventory.yaml"):
-            # The digest ledger is package data a run appends to by design
-            # (#1537): a difference there is the ledger growing, reported
-            # under its own key, not an edited shipped file (#1683).
-            try:
-                data = entry.locate().read_bytes()
-            except OSError:
-                changed.append(name); continue
-            h = getattr(entry, "hash", None)
-            if h is not None and getattr(h, "value", None):
-                digest = hashlib.new(getattr(h, "mode", "sha256"), data).digest()
-                ledger_appended = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value
-            continue
-        bookkeeping = (name.endswith(".pth") or "__pycache__" in name
-                       or any(name.endswith(b) for b in _INSTALL_BOOKKEEPING))
+        bookkeeping = _is_bookkeeping(name)
+        is_ledger = name.replace("\\", "/").endswith(_LEDGER)
         h = getattr(entry, "hash", None)
         try:
             data = entry.locate().read_bytes()
@@ -703,18 +700,21 @@ def _installed_files_changed() -> tuple[list[str], bool, list[str]]:
             continue
         if h is None or not getattr(h, "value", None):
             if not bookkeeping:
-                unmeasured.append(name)      # a resource the RECORD does not attest
+                unmeasured.append(name)      # a resource the RECORD does not attest — the ledger included
             continue
-        seen += 1
         try:
             digest = hashlib.new(getattr(h, "mode", "sha256"), data).digest()
         except ValueError:
-            unmeasured.append(name)
+            unmeasured.append(name)          # an algorithm this interpreter lacks (#1723)
             continue
-        if base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value:
+        same = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") == h.value
+        if is_ledger:
+            ledger_changed = not same
+            continue
+        seen += 1
+        if not same:
             changed.append(name)
-    _installed_files_changed.ledger_appended = ledger_appended
-    return sorted(changed), seen > 0 and not unmeasured, sorted(unmeasured)
+    return sorted(changed), seen > 0 and not unmeasured, sorted(unmeasured), ledger_changed
 
 
 def repo_facts() -> dict[str, Any]:
@@ -738,10 +738,9 @@ def repo_facts() -> dict[str, Any]:
             pkg = version("data-sheets-schema")
         except PackageNotFoundError:
             pkg = None
-        changed, measured, unmeasured = _installed_files_changed()
-        ledger_appended = getattr(_installed_files_changed, "ledger_appended", False)
+        changed, measured, unmeasured, ledger_changed = _installed_files_changed()
         return {"commit": None, "commit_short": None, "branch": None,
-                **({"ledger_appended": True} if ledger_appended else {}),
+                **({"ledger_changed": True} if ledger_changed else {}),
                 "dirty": (bool(changed) if measured else None),
                 "dirty_file_count": (len(changed) if measured else None),
                 "dirty_paths": changed[:DIRTY_PATHS_MAX],
@@ -752,7 +751,9 @@ def repo_facts() -> dict[str, Any]:
                          + ("the installed files were compared with the wheel's RECORD hashes (#1641)" if measured
                             else ("the wheel's RECORD lists resources it does not hash, so whether the installed files "
                                   "changed is unknown, not clean (#1667)" if unmeasured
-                                  else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)")))}
+                                  else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)"))
+                         + ("; the digest ledger differs from the shipped one — a run appends to it by design (#1537), and "
+                            "whether the shipped entries survived is not established (#1716)" if ledger_changed else ""))}
     commit = _run(["git", "rev-parse", "HEAD"], cwd=at)
     top = _run(["git", "rev-parse", "--show-toplevel"], cwd=at)
     try:
