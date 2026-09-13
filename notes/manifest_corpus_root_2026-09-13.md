@@ -313,3 +313,26 @@ and all 212 downstream pair/report/selection checks pass after correction.
 Installed validator fix 3dff432e3 (#1739) is integrated. The recorded source
 pins are refreshed; no generation instructions, production records or ratings
 were changed by this correction. Independent review and exact-head CI follow.
+
+## Review round 16 — 2026-09-13
+
+Round 15 approved the pair/report ownership behavior and found #1750 in
+bundle-drift reporting. The bundle reader now resolves inputs from the
+provenance owner. A relative path with no known owner reports unresolved,
+separately from current, drifted, missing or unrecorded evidence. Nested,
+foreign and copied callers cannot substitute their own bundle bytes.
+
+The new regressions produced seven failures with three controls passing.
+The integrated corpus/drift/profile/resume lane passed 63 checks and exposed
+four incomplete synthetic reconstruction fixtures. Adding the actual fresh
+output identities (#1753) preserves the no-write digest guard; all 26 fixture
+checks then passed. After the final profile digest integration, all 48 focused
+ownership and reconstruction checks pass. The preceding 212 pair/report/select
+checks remain valid for their unchanged status readers.
+
+Installed integration 1f05d8c63 includes independently approved profile
+37c958ff2 and packaging 5d6d885f0. The source/dependency pins are refreshed.
+All 60 historical renderer controls still match on the combined implementation,
+and the read-only audit verifies 56 registered ratings, 259 earlier evaluations
+and all 450 preservation hashes. No production records, scores or source bundles
+were changed. Round-16 review and exact-head CI remain the merge gates.
