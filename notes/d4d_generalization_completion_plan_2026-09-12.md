@@ -203,3 +203,40 @@ worktree. Existing profile PR #1436 is the candidate for the subsequent
 profile stage; review it after generation and evaluation rather than duplicate
 that work. Packaging follows. All API/agentic arms and evaluation styles above
 remain in scope, with historical measurements preserved and downloads deferred.
+
+## Generation review round 13 — 2026-09-13
+
+Round 12 found #1448: automatic date selection prevented ordinary resumes on
+the next UTC day. Resume now restores the date from matching persisted render
+evidence while preserving explicit choices and all other instruction/input
+pins. Nine new cases include real batch reconstruction, completed canary
+reuse, portable provenance and controls for fresh/foreign runs and instruction
+drift. The API/batch/canary lane passes 189 tests and the usage-journal/midnight
+lane passes 60. Round-12 CI passes 3,928
+tests with four skips and one corrected condition fixture (#1437). See
+`reviews/pr_1367_round13_2026-09-13.md`; full revised-head checks and review
+still precede merge.
+
+The evaluation stage is now draft PR #1449, based on #1367 and held for its
+first independent review. Its dated boundary note and hash registration cover
+all requested generation arms and evaluation styles; the historical condition
+audit passes unchanged. Merge order remains generation, evaluation, existing
+profile PR #1436, then packaging. Preserve Claude's separate profile/packaging
+worktrees while their work continues.
+
+## Generation review round 14 — 2026-09-13
+
+Round 13 is green in full CI. Its independent review reproduced #1454:
+backfill could replace a selected chunk instrument with a discovered sidecar.
+The fix verifies and preserves the original bundle/chunk identity, retains
+recorded absence and refuses unverifiable evidence before writing. The
+manifest/replay lane passes 48 tests and provenance compatibility passes 88;
+see `reviews/pr_1367_round14_2026-09-13.md`. Revised-head CI and independent
+approval remain required before merge.
+
+Evaluation PR #1449 is addressing round-1 findings #1450–#1453 (new-output
+version downgrade, source-item criteria, format/MIME double counting, semantic
+score-band instructions), plus current hash-contract fixtures and instrument
+inventory. No new measurement is launched. The remaining work order stays
+evaluation, Claude's profile PR #1436, then packaging, with both generation
+arms, every evaluation style and historical preservation still in scope.

@@ -1487,6 +1487,10 @@ def backfill(verified, dry_run):
     rather than filled from present-day observation. Pass --verified-label for
     runs whose inputs are known unchanged, so their input hashes can be
     recorded.
+
+    An existing chunk attestation must reproduce under --verified-label;
+    missing or changed evidence leaves that record unchanged. Backfill keeps
+    the recorded selection and never invents one for an existing record.
     """
     _require_repo_root_cwd("d4d provenance backfill")
     from data_sheets_schema.provenance import build_record, record_path_for
@@ -1502,30 +1506,71 @@ def backfill(verified, dry_run):
             # prompt file the existing record hashed, never from a label a
             # reconstruction cannot check (#1094 review, N2).
             existing = record_path_for(project, run.method, run.label)
-            source_paths: list[str] = []
             import yaml as _yaml
-            if existing.exists():
-                try:
-                    prompts = (_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("prompts") or {}
-                    source_paths = [f.get("path", "") if isinstance(f, dict) else str(f)
-                                    for f in (prompts.get("files") or prompts.get("paths") or [])]
-                except Exception:                              # noqa: BLE001
-                    source_paths = []
-            # A reconstruction keeps the manifest the existing record names —
-            # none where it recorded none (#1367 review, must-fix 2).
             from data_sheets_schema.registry import AUTO as _AUTO
-            prior_manifest = _AUTO                  # no prior record: the rule decides from the bundle (#1384)
+            prior = None
             if existing.exists():
                 try:
-                    sm = ((_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("inputs") or {}).get("source_manifest")
-                    if isinstance(sm, dict) and "path" in sm:
-                        prior_manifest = Path(sm["path"]) if sm["path"] else None
-                except Exception:                              # noqa: BLE001
-                    pass
+                    prior = _yaml.safe_load(existing.read_bytes())
+                    if not isinstance(prior, dict) or not isinstance(prior.get("inputs"), dict):
+                        raise ValueError("record and inputs must be mappings")
+                except Exception as exc:                       # noqa: BLE001
+                    raise click.ClickException(f"cannot backfill {existing}: {exc}") from exc
+            prompts = (prior or {}).get("prompts") or {}
+            source_paths = [f.get("path", "") if isinstance(f, dict) else str(f)
+                            for f in (prompts.get("files") or prompts.get("paths") or [])]
+            prior_inputs = prior["inputs"] if prior is not None else {}
+            # Preserve a recorded source selection, including explicit none.
+            prior_manifest = _AUTO
+            sm = prior_inputs.get("source_manifest")
+            if isinstance(sm, dict) and "path" in sm:
+                prior_manifest = Path(sm["path"]) if sm["path"] else None
+            # A verified label attests unchanged input bytes, not permission to
+            # select a different chunk instrument (#1454). Verify before build
+            # and compare its independently read result before any write.
+            prior_chunks = prior_inputs.get("chunks")
+            selected_chunks = selected_bundle = None
+            if prior_chunks is not None:
+                from data_sheets_schema.chunking import chunks_input
+                from data_sheets_schema.provenance import _md5
+                if not is_verified:
+                    raise click.ClickException(
+                        f"cannot backfill {existing}: preserving its chunk attestation "
+                        f"requires --verified-label {run.label}; the record was left unchanged")
+                if (not isinstance(prior_chunks, dict)
+                        or not isinstance(prior_chunks.get("path"), str)
+                        or not prior_chunks["path"]
+                        or not isinstance(prior_chunks.get("sha256"), str)
+                        or len(prior_chunks["sha256"]) != 64
+                        or not prior_inputs.get("bundle_path")
+                        or not prior_inputs.get("bundle_md5")):
+                    raise click.ClickException(
+                        f"cannot backfill {existing}: incomplete recorded chunk attestation")
+                selected_chunks = Path(prior_chunks["path"])
+                selected_bundle = Path(prior_inputs["bundle_path"])
+                bundle_md5 = _md5(selected_bundle)
+                observed = chunks_input(selected_bundle, bundle_md5, manifest=selected_chunks)
+                if (bundle_md5 != prior_inputs["bundle_md5"] or observed is None
+                        or any(observed.get(k) != v for k, v in prior_chunks.items())):
+                    raise click.ClickException(
+                        f"cannot backfill {existing}: recorded chunk evidence is missing, "
+                        "changed or inconsistent; the record was left unchanged")
             rec = build_record(project, run.method, run.label,
                                mode="reconstructed", input_verified=is_verified,
                                condition_source_paths=source_paths,
-                               manifest=prior_manifest)
+                               input_bundle=selected_bundle,
+                               manifest=prior_manifest, chunk_manifest=selected_chunks)
+            if prior_chunks is not None:
+                observed = rec.data["inputs"].get("chunks")
+                if (rec.data["inputs"].get("bundle_md5") != prior_inputs["bundle_md5"]
+                        or observed is None
+                        or any(observed.get(k) != v for k, v in prior_chunks.items())):
+                    raise click.ClickException(
+                        f"cannot backfill {existing}: chunk evidence changed during reconstruction")
+            if prior is not None:
+                # The old record's absence is evidence too. Do not invent a
+                # historical selection by discovering a present-day sidecar.
+                rec.data["inputs"]["chunks"] = prior_chunks
             target = record_path_for(project, run.method, run.label)
             n_unrec = len(rec.data.get("unrecoverable") or [])
             if dry_run:
