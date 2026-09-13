@@ -1466,8 +1466,15 @@ ledger call) and to the record, whose `schema` block carries `profile` and
 `profile_basis` (`environment`; `no manifest`; `stated by the caller`;
 `manifest:<repo-relative path>@<sha256[:12]>` or `default manifest:…`, with
 ` (undeclared)` when the manifest declares no profile, or `(missing)` when
-the path is not there) beside `digest_md5`; `d4d api plan` prints them. The agentic
-recorder resolves it the same way from the manifest it attests. A caller
+the path is not there; `rendered instruction`, with ` (this process would
+select …)` when the recorder's own selection differs) beside `digest_md5`;
+`d4d api plan` prints them. The rendered `d4d provenance record` line
+carries `--profile <name>`, so the agentic recorder — another process,
+without the environment that selected it — records the instruction's
+profile and states what it would have selected itself (#1581); the basis
+is a record fact and not part of the resume identity (#1626). A generation
+pinned before profiles existed hashed an instruction that no longer
+renders and cannot be resumed (#1628). A caller
 that selected nothing gets the default manifest resolved *when asked*
 (#1439): the working directory's, else the checkout's — so a script run
 from `tests/` still sees the study's — else none. Both digests are in
@@ -1601,7 +1608,16 @@ is a checkout of this project — a worktree or a second clone, whose files
 the readers take first — else the checkout the code is imported from, so
 a run from a worktree with the primary's code names the worktree's
 commit and keeps its files repository-relative, and the root guard
-refuses a subdirectory of any checkout, #1588; where git cannot answer
+refuses a subdirectory of any checkout, #1588; that checkout is
+authoritative for its absences too — a playbook or prompt it lacks is
+`exists: false`, never another checkout's — a file under another
+checkout keeps its absolute identity, an unreadable `pyproject.toml` is
+refused rather than read as no checkout, and the corpus (`chunking.anchored`,
+the default manifest, the healthsheet's Source line) anchors on the same
+root, #1617/#1618/#1619/#1640; git must answer for that root itself, not
+an enclosing repository, and a failed status query is unknown, not
+clean, #1621/#1635; an install compares its files with the wheel's
+RECORD, #1641; where git cannot answer
 there the commit and the dirty state are recorded unknown, not clean,
 #1591; `agent_pin`
 reads the shipped definitions, while `chunking.anchored`, the review

@@ -665,8 +665,13 @@ class RunSpec:
                 "source_manifest": entry(self.manifest) if self.manifest_used else None,
                 "chunks": entry(chunks),
                 "profile": {"name": self.profile, "digest_md5": digest},
+                # The basis says *why* a profile was selected; the identity
+                # carries *what* — the profile and its digest above and the
+                # instruction hash below — so a comment edit to a manifest
+                # an arm never consumed, or the same profile reached by
+                # another route, does not refuse a resume (#1626).
                 "instruction": {"render_version": self.render_version,
-                                "spec": self.render_spec(),
+                                "spec": {k: v for k, v in self.render_spec().items() if k != "profile_basis"},
                                 "sha256": hashlib.sha256(self.instruction.encode()).hexdigest()}}
 
     def render_spec(self) -> dict[str, Any]:
@@ -2753,8 +2758,23 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
-#: What a crash says when it never opened the data file (#1589).
-_NOT_OPENED = ("No such file or directory", "Permission denied", "Is a directory")
+def _crash_diagnostic(text: str) -> list[str]:
+    """The lines of a traceback that say what went wrong: after the last
+    `Traceback` header, every unindented line (the exception) and every
+    YAML position marker (`  in "<file>", line N, column M`)."""
+    crash = text[text.rindex("Traceback (most recent call last)"):]
+    out = []
+    for line in crash.splitlines()[1:]:
+        if not line.strip():
+            continue
+        if not line[:1].isspace() or re.match(r'\s*in "[^"]*", line \d+', line):
+            out.append(line.strip())
+    return out or [l for l in crash.strip().splitlines() if l.strip()][-3:]
+
+
+#: A crash whose last line is an OS error never opened the data file
+#: (#1589, #1620): `[Errno N]` is how every one of them reads.
+_OS_ERROR_LINE = re.compile(r"^\w*Error: \[Errno \d+\]")
 
 
 def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bool:
@@ -2775,8 +2795,14 @@ def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bo
            for l in lines):
         if data_path is not None and "Traceback" in text:
             crash = text[text.index("Traceback"):]
-            names = {str(data_path), Path(data_path).name}
-            if any(n in crash for n in names) and not any(m in crash for m in _NOT_OPENED):
+            # The data file, as it was named to the validator — quoted, as a
+            # YAML diagnostic (`in "<path>"`) or an exception message
+            # (`'<path>'`) names it — never a bare basename, which a schema
+            # file, a class or a module can share (#1620).
+            spelled = {str(data_path), os.path.abspath(str(data_path))}
+            named = any(f'"{s}"' in crash or f"'{s}'" in crash for s in spelled)
+            last = [l for l in crash.splitlines() if l.strip()][-1].strip()
+            if named and not _OS_ERROR_LINE.match(last):
                 return False                 # it ran, and the record broke it
         return True                          # a crash, whatever it printed first (#1572)
     if any(l.startswith(("[ERROR]", "[WARN", "[WARNING]")) for l in lines):
@@ -2807,8 +2833,14 @@ def _validator_lines(path: Path, schema: str,
     text = r.stdout + r.stderr
     if _validator_did_not_run(text, path):
         return None, f"linkml-validate did not run: {text.strip()[-300:]}"
-    lines = [l for l in text.strip().splitlines()
-             if l.strip()]
+    if "Traceback (most recent call last)" in text:
+        # The validator ran and the record broke it (#1589): the finding is
+        # the diagnostic — the exception line and any `in "<file>", line N`
+        # marker — not fifty lines of frames (#1639).
+        lines = _crash_diagnostic(text)
+    else:
+        lines = [l for l in text.strip().splitlines()
+                 if l.strip()]
     if not lines:
         # A nonzero exit with nothing to say — a signal, a crash before
         # output — is not a clean validation (#1524).
@@ -5030,13 +5062,18 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                     and prior.get("record_mode") == "reconstructed"):
                 # Generic backfill cannot supersede observed generation-bound
                 # inputs. Older backfill could publish during an interruption.
-                from data_sheets_schema.usage_ledger import recorded_inputs
+                from data_sheets_schema.usage_ledger import _identity_differs, recorded_inputs
                 current = spec.input_identity()
+                # The same compatibility rule as every other identity
+                # compare (#1629): a pin that lacks a key says nothing
+                # about it, and every key it carries must match.
+                saved = progress.get("input_identity")
                 bound_progress = (
                     progress.get("generation_id") == generation
                     and _usage_record_matches(spec, progress.get("run_identity"))
-                    and progress.get("input_identity") == current)
-                if recorded_inputs(spec) == current or bound_progress:
+                    and isinstance(saved, dict) and not _identity_differs(saved, current))
+                recorded = recorded_inputs(spec)
+                if (isinstance(recorded, dict) and not _identity_differs(recorded, current)) or bound_progress:
                     prior_matches = False
             if prior_matches:
                 _require_recorded_inputs(spec, prior)
@@ -5065,7 +5102,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     from data_sheets_schema.usage_ledger import _identity_differs
     if progress.get("input_identity") is not None and _identity_differs(progress["input_identity"], spec.input_identity()):
         raise UsageLedgerError("generation input identity changed since saved progress; restore the "
-                               "recorded inputs or use --no-resume for an explicit new generation")
+                               "recorded inputs or use --no-resume for an explicit new generation "
+                               "(a generation saved before profiles existed hashed an instruction that no "
+                               "longer renders, and cannot be resumed; #1628)")
     done = set(progress.get("completed", []))
     if done and progress.get("input_identity") is None and not prior_record:
         from data_sheets_schema.usage_ledger import recorded_inputs

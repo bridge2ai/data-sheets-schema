@@ -190,6 +190,16 @@ def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
+def corpus_root() -> Path | None:
+    """The checkout the corpus is anchored on: the resource root when it is
+    a checkout — the working directory's when it is one, else the code's
+    (#1640, #1588) — and None from an install, where the corpus is the
+    caller's own tree."""
+    from data_sheets_schema.resources import resource_root
+    root, kind = resource_root()
+    return root if kind == "checkout" else None
+
+
 def anchored(d: Path) -> Path:
     """A conventional corpus path under the selected manifest's project root."""
     from data_sheets_schema.corpus import anchored as resolve, selected_manifest
