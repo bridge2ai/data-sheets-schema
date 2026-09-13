@@ -51,6 +51,8 @@ def chunk(manifest, project, bundles, check, strict, max_lines, max_bytes):
         targets.append(("--bundle", [Path(b) for b in bundles]))
     if project or not bundles:
         reg = load_registry(manifest)
+        if reg.path is None or not reg.path.is_file():
+            raise click.ClickException(f"selected source manifest does not exist or is not a file: {reg.path}")
         names = [project] if project else reg.projects()
         study = reg.path is not None and reg.path.resolve() == default_manifest_path().resolve()
         for name in names:
@@ -68,6 +70,8 @@ def chunk(manifest, project, bundles, check, strict, max_lines, max_bytes):
             targets.append((name, found))
 
     if check:
+        if strict and not targets:
+            raise click.ClickException("selected source manifest declares no bundle targets to check")
         bad = 0
         for name, found in targets:
             if not found:

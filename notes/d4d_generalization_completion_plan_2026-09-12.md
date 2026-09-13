@@ -130,3 +130,17 @@ are updated without relaxing the behavior being tested. The revised head
 still requires green full CI and independent plugin approval. Evaluation
 identities/applicability (#1300, #627, #159, #1414), vocabulary/study profiles
 (#1302, #628), and installable packaging (#1301) remain queued in that order.
+
+## Generation review round 7
+
+Round 6 still found a stale same-generation index overriding completed
+checks (#1420) and a strict registry check with zero targets (#1419). Local
+corpus replay identified the historical pin needed for #1418. These are
+addressed in round 7, with 158 tests passing, including the registered
+historical report aggregate. Two adjacent interrupted-resume probes found
+#1421 (progress lacks phase-history recovery evidence) and #1422 (a completed
+return omits later journaled charges); both have fixes under expanded testing.
+See `reviews/pr_1367_round7_2026-09-12.md`. Merge still requires exact-head CI
+and independent Codex plugin approval. No measurement is launched by this
+maintenance work; all API and agentic arms and evaluation styles remain in
+the next-stage plan.

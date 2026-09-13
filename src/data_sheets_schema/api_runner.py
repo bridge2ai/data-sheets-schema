@@ -2365,6 +2365,10 @@ def _save_progress(spec: RunSpec, completed: list[str],
     if generation is not None:
         data["generation_id"] = generation
         data["run_identity"] = _usage_identity(spec)
+        from data_sheets_schema.snapshot_store import entries
+        snapshots = entries(spec)
+        if snapshots is not None:
+            data["intermediates"] = snapshots
     if audit:
         data["Audit findings"] = audit
     # The bytes each completed phase was computed against (#601). Without them
@@ -2702,7 +2706,7 @@ def context_facts(model_name: str,
     return out
 
 
-def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
+def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[str, Any] | None:
     """Check the reconciliation report against the record and the schema (#546).
 
     The report is what a reviewer reads instead of diffing YAML, and nothing
@@ -2728,7 +2732,7 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
             if spec.core_path.exists() else {}
         # This runner always asks the report phase for the table (#929),
         # and records the expectation on the record it writes (#961).
-        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(spec.core_path, spec=spec)
+        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(spec.core_path, spec=spec, record=record)
         if snapshot_pin and snapshot_pin.get("state") == "unusable":
             return {"checked": False, "reason": snapshot_pin["reason"],
                     "artifacts": {"phase1_snapshot": snapshot_pin}}
@@ -4726,6 +4730,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if prior["ok"]:
             existing = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
+            snapshot_store.require_completed_accounted(spec, existing)
             if not foreign_progress:
                 _progress_path(spec).unlink(missing_ok=True)
             # Re-validate rather than report a clean bill nobody checked.
@@ -4771,7 +4776,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "validation": validation_block(spec, problems),
                                # A run this runner produced asked for the
                                # dispositions table (#929); its record says so.
-                               "report": {**(report_claims_block(spec) or {}),
+                               "report": {**(report_claims_block(spec, record=existing) or {}),
                                           **({"dispositions_expected": True}
                                              if existing.get("report_gate") else {})},
                                "grounding": grounding_block(spec),
@@ -4790,7 +4795,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         fresh_generation = bool(foreign_prior or foreign_progress)
     from data_sheets_schema.usage_ledger import pin_inputs
     pin_inputs(spec)
-    snapshot_store.activate(spec, fresh=fresh_generation, completed=bool(done), prior_record=prior_record)
+    phase_record = prior_record
+    if "intermediates" in progress:
+        phase_record = {"run": {**(progress.get("run_identity") or {}),
+                                "generation_id": progress.get("generation_id")},
+                        "intermediates": progress["intermediates"]}
+    snapshot_store.activate(spec, fresh=fresh_generation, completed=bool(done), prior_record=phase_record)
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]

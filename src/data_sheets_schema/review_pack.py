@@ -618,7 +618,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             # "unreadable" was a false claim for a file that parsed to
             # nothing (Codex review, SF2); the reason says which it is.
             pack["receipt_join"] = {"basis": "index",
-                                    "reason": f"the phase-1 snapshot {snapshot_file.name if snapshot_file else 'ownership evidence'} is not "
+                                    "reason": f"the phase-1 snapshot {snapshot_file.name if snapshot_file else 'ownership evidence'} "
+                                              f"{'is present but not' if snapshot_file else 'is not'} "
                                               f"usable ({snap_why}); receipt paths joined by index, not entry "
                                               "identity (#899)"}
             pack["gaps"].append(f"phase-1 snapshot not usable ({snap_why}): {snapshot_file}")

@@ -120,11 +120,15 @@ def test_changed_input_restart_recovers_only_its_own_snapshots(external):
     checked = api.report_claims_block(external)
     assert checked["artifacts"]["phase1_snapshot"]["path"] == str(phase1)
     # Hash drift in the selected snapshot is refused before any further calls.
+    api._save_progress(external, ["full", "core"], None)
+    saved_progress = api._progress_path(external).read_bytes()
     phase1.write_text(phase1.read_text() + "\n# tampered\n")
     refused = client_named("GENERATION_B_EVIDENCE")
     assert receipts.phase1_snapshot_state(api._receipt_path(external))[0] == "unusable"
     assert api.report_claims_block(external)["checked"] is False
-    api._save_progress(external, ["full", "core"], None)
+    with pytest.raises(ledger.UsageLedgerError, match="snapshot bytes changed"):
+        api._save_progress(external, ["full", "core"], None)
+    assert api._progress_path(external).read_bytes() == saved_progress
     with pytest.raises(ledger.UsageLedgerError, match="snapshot bytes changed"):
         api.execute(replace(external), client=refused)
     assert refused.messages.calls == []

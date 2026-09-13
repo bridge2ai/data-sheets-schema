@@ -104,6 +104,24 @@ def activate(spec, *, fresh: bool, completed: bool, prior_record: dict) -> None:
     if existing is not None and existing.get("generation_id") == generation:
         if existing["run_identity"] != identity or existing["input_identity"] != spec.input_identity():
             raise ledger.UsageLedgerError("generation snapshot identity disagrees with the active run")
+        run = prior_record.get("run") or {}
+        if run.get("generation_id") == generation and "intermediates" in prior_record:
+            expected = []
+            for entry in prior_record["intermediates"]:
+                if entry.get("generation_id") != generation or not entry.get("phase"):
+                    raise ledger.UsageLedgerError("saved phase history has ambiguous snapshot ownership")
+                _verified(entry)
+                expected.append({"name": entry["phase"], "path": entry["path"], "sha256": entry["sha256"],
+                                 **({"usage_id": entry["usage_id"]} if entry.get("usage_id") else {})})
+            current = existing["snapshots"]
+            common = min(len(current), len(expected))
+            if current[:common] != expected[:common]:
+                raise ledger.UsageLedgerError("snapshot index diverges from the saved phase history; restore its evidence")
+            if len(current) < len(expected):
+                # The saved progress/portable record proves the missing suffix.
+                # Restore only those verified entries; never directory guesses.
+                existing["snapshots"] = expected
+                _write(path, existing)
         return
     if existing is not None and existing.get("generation_id") in ledger.prior_generation_ids(spec):
         fresh = True  # an explicit restart already recorded this predecessor
@@ -201,6 +219,17 @@ def _portable_entry(record: dict, project: str, name: str) -> dict | None:
             if entry.get("generation_id") not in (None, run.get("generation_id")):
                 raise ledger.UsageLedgerError("portable phase snapshot belongs to a different generation")
             candidates.append(entry)
+    # Earlier report instruments recorded their selected phase input before
+    # generation UUIDs existed. That exact path/hash can disambiguate a legacy
+    # inventory without guessing from directory order (#1418).
+    if not run.get("generation_id") and name == f"{project}_full.yaml":
+        pin = ((record.get("report_claims") or {}).get("artifacts") or {}).get("phase1_snapshot")
+        if isinstance(pin, dict) and pin.get("path") and pin.get("sha256"):
+            selected = [entry for entry in candidates
+                        if entry["path"] == pin["path"] and entry["sha256"] == pin["sha256"]]
+            if len(selected) != 1:
+                raise ledger.UsageLedgerError("recorded phase snapshot pin does not match its portable inventory")
+            return selected[0]
     if len(candidates) > 1 and any(e.get("phase") is None or not e.get("generation_id") for e in candidates):
         raise ledger.UsageLedgerError("portable phase snapshots have ambiguous generation ownership; restore their index")
     return candidates[-1] if candidates else None
@@ -218,6 +247,17 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
         expected_inputs = ledger.recorded_inputs(spec)
         if expected_inputs is not None and expected_inputs != spec.input_identity():
             raise ledger.UsageLedgerError("snapshot input identity differs from the active generation")
+    if record is not None and "intermediates" in record:
+        # A caller checking a completed record supplies its exact attestation.
+        # Its phase history outranks a restored index with the same UUID.
+        portable = _portable(directory, project, record, spec)
+        if generation is not None and portable["run"].get("generation_id") not in (None, generation):
+            raise ledger.UsageLedgerError("completed snapshot record belongs to another generation")
+        entry = _portable_entry(portable, project, name)
+        if entry is None and portable["run"].get("generation_id"):
+            raise ledger.UsageLedgerError("identified run has no attested phase snapshot; restore its evidence")
+        return True, _read_verified(entry) if entry is not None else None
+    if generation is not None:
         data = _load(directory, project)
         if (data is not None and not data.get("superseded")
                 and data["generation_id"] == generation
@@ -255,7 +295,7 @@ def require_accounted(spec, prior_record: dict) -> None:
     run = prior_record.get("run") or {}
     known = set(ledger.prior_generation_ids(spec) if generation else run.get("prior_generation_ids") or [])
     expected = generation or run.get("generation_id")
-    rows = ledger.merge_usage(spec, prior_record.get("api_usage") or []) if generation else prior_record.get("api_usage") or []
+    rows = ledger.merge_usage(spec, list(prior_record.get("api_usage") or [])) if generation else prior_record.get("api_usage") or []
     accounted = {row.get("usage_id") for row in rows if isinstance(row, dict)}
     path = index_path(spec.metadata_dir, spec.project)
     paths = [path, *sorted(path.parent.glob(f"{spec.project}_snapshot_index.previous-*.json"))]
@@ -274,6 +314,18 @@ def require_accounted(spec, prior_record: dict) -> None:
                 e.get("usage_id") is not None and e["usage_id"] not in accounted for e in data["snapshots"]):
             raise ledger.UsageLedgerError("generation snapshot evidence includes an unaccounted attempt; "
                                            "restore its usage ledger before resuming")
+
+
+
+def require_completed_accounted(spec, record: dict) -> None:
+    """A completed return must include every surviving call of this generation."""
+    if ledger.generation_id(spec) is None:
+        return
+    recorded = {row.get("usage_id") for row in record.get("api_usage") or [] if isinstance(row, dict)}
+    extra = [row for row in ledger.merge_usage(spec, []) if row.get("usage_id") not in recorded]
+    if extra:
+        raise ledger.UsageLedgerError("additional billed attempts are absent from the completed record; "
+                                       "restore its progress and accounting before resuming")
 
 
 def entries(spec) -> list[dict] | None:

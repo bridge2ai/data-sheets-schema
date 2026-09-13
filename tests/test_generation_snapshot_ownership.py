@@ -184,3 +184,90 @@ def test_identified_record_without_phase_attestation_is_unusable(external):
     record = {'run': {**ledger.run_identity(external), 'generation_id': 'owner'}, 'intermediates': []}
     state, _, _, why = receipts.phase1_snapshot_state(api._receipt_path(external), record=record)
     assert state == 'unusable' and 'no attested' in why
+
+
+@pytest.mark.parametrize('damage', [None, 'hash', 'path', 'bytes'])
+def test_historical_report_pin_disambiguates_only_attested_phase_bytes(external, damage):
+    import hashlib
+    selected = api._snapshot(external, 'EXTERNAL_full.yaml', 'id: selected\n')
+    other = api._snapshot(external, 'EXTERNAL_full.yaml', 'id: other\n')
+    entries = [{'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+               for path in (selected, other)]
+    pin = {**entries[0], 'state': 'usable'}
+    record = {'run': ledger.run_identity(external), 'intermediates': entries,
+              'report_claims': {'artifacts': {'phase1_snapshot': pin}}}
+    if damage == 'hash':
+        pin['sha256'] = 'a' * 64
+    elif damage == 'path':
+        pin['path'] = str(other)
+    elif damage == 'bytes':
+        selected.write_text('id: tampered\n')
+    state, path, doc, why = receipts.phase1_snapshot_state(api._receipt_path(external), record=record)
+    if damage is None:
+        assert state == 'usable' and path == selected and doc['id'] == 'selected'
+    else:
+        assert state == 'unusable' and ('pin' in why or 'bytes changed' in why)
+
+
+@pytest.mark.parametrize('content', [None, 'projects: {}\n', 'projects: []\n'])
+def test_strict_chunk_check_requires_a_readable_nonempty_registry(tmp_path, content):
+    manifest = tmp_path / 'selected.yaml'
+    if content is not None:
+        manifest.write_text(content)
+    before = {str(path): path.read_bytes() for path in tmp_path.rglob('*') if path.is_file()}
+    result = CliRunner().invoke(cli, ['bundle', 'chunk', '--manifest', str(manifest), '--check', '--strict'])
+    assert result.exit_code == 1, result.output
+    assert 'manifest' in result.output.lower() or 'no bundle' in result.output.lower()
+    assert {str(path): path.read_bytes() for path in tmp_path.rglob('*') if path.is_file()} == before
+
+
+def test_completed_record_phase_wins_over_a_same_generation_old_index(external):
+    ledger.prepare_usage(external, resume=True)
+    store.activate(external, fresh=True, completed=False, prior_record={})
+    api._snapshot(external, 'EXTERNAL_full.yaml', 'id: x\nfunders: [{id: inserted}, {id: original}]\n')
+    index = store.index_path(external.metadata_dir, external.project)
+    old_index = index.read_bytes()
+    latest = api._snapshot(external, 'EXTERNAL_full.yaml', 'id: x\nfunders: [{id: original}, {id: inserted}]\n')
+    record = {'run': {**ledger.run_identity(external), 'generation_id': ledger.generation_id(external)},
+              'intermediates': store.entries(external)}
+    external.provenance_path.write_text(yaml.safe_dump(record))
+    index.write_bytes(old_index)
+    store.require_accounted(external, record)
+    state, path, doc, why = receipts.phase1_snapshot_state(api._receipt_path(external), spec=external, record=record)
+    assert state == 'usable', why
+    assert path == latest and doc['funders'][0]['id'] == 'original'
+    report, pin = phase1_snapshot_with_pin_for(external.core_path, spec=external, record=record)
+    assert report == doc and pin['path'] == str(latest)
+
+
+def test_completed_api_shortcut_checks_the_portable_phase_after_rerun(external):
+    from tests.test_generation_recovery_review import client_named
+    api.execute(external, client=client_named('FIRST_PHASE'))
+    index = store.index_path(external.metadata_dir, external.project)
+    old_index = index.read_bytes()
+    external.full_path.write_text('not a D4D mapping\n')
+    api._save_progress(external, ['full', 'core'], None)
+    api.execute(external, client=client_named('LATER_PHASE'))
+    prior_bytes = external.provenance_path.read_bytes()
+    prior = yaml.safe_load(prior_bytes)
+    snapshot = next(e for e in reversed(prior['intermediates']) if e.get('phase') == 'EXTERNAL_full.yaml')
+    assert 'LATER_PHASE' in Path(snapshot['path']).read_text()
+    index.write_bytes(old_index)
+    client = client_named('MUST_NOT_CALL')
+    resumed = api.execute(external, client=client)
+    assert resumed['already_complete'] and client.messages.calls == []
+    assert resumed['usage'] == prior['api_usage']
+    assert resumed['checks']['report']['artifacts']['phase1_snapshot']['path'] == snapshot['path']
+    assert external.provenance_path.read_bytes() == prior_bytes
+
+
+def test_live_phase_check_uses_current_index_over_an_older_portable_record(external):
+    ledger.prepare_usage(external, resume=True)
+    store.activate(external, fresh=True, completed=False, prior_record={})
+    api._snapshot(external, 'EXTERNAL_full.yaml', 'id: old\n')
+    record = {'run': {**ledger.run_identity(external), 'generation_id': ledger.generation_id(external)},
+              'intermediates': store.entries(external)}
+    external.provenance_path.write_text(yaml.safe_dump(record))
+    latest = api._snapshot(external, 'EXTERNAL_full.yaml', 'id: live\n')
+    state, path, doc, _ = receipts.phase1_snapshot_state(api._receipt_path(external), spec=external)
+    assert state == 'usable' and path == latest and doc['id'] == 'live'
