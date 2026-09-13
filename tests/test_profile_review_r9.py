@@ -23,6 +23,10 @@ def reconstruction(generation, monkeypatch):
             "inputs": {"bundle_path": str(spec.bundle),
                        "source_manifest": {"path": str(spec.manifest)},
                        "chunks": {"path": str(spec.chunk_manifest)}},
+            # A fresh agentic instruction pins its selected output paths;
+            # reconstruction needs the same evidence as a real record (#1753).
+            "outputs": {key: {"path": str(getattr(spec, f"{key}_path"))}
+                        for key in ("full", "core", "report")},
             "prompts": {"request": {"sha256": hashlib.sha256(spec.instruction.encode()).hexdigest()}}}
     monkeypatch.setattr(provenance, "record_path_for", lambda *a, **kw: target)
     args = ["backfill-spec", "--project", spec.project, "--method", spec.method,
