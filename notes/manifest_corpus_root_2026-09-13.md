@@ -209,3 +209,20 @@ keeps the implicit chunk-write guard fixture in its own synthetic manifest.
 The branch includes installed dependency a18659192 and packaging 2a840076a.
 No production artifact, score or historical attribution changes; the next
 independent review and exact-head CI remain required.
+
+## Review round 10 — 2026-09-13
+
+#1693 binds a review pack's bundle and chunk map to the provenance record's
+corpus before loading evidence. Resolved bundle paths also reach receipt and
+snippet checks. An absolute legacy flat record with relative inputs and no
+established base reports a gap; a caller's same-named files are never used
+as substitute evidence. Five nested/unrelated-caller regressions fail before
+the fix, with missing or conflicting local maps and an unknown legacy base.
+
+All 65 focused review-pack/disposition checks pass. The combined corpus,
+selected-command and latest profile lane passes 164 checks. The installed
+agentic integration passes its 25 review-pack/identity checks. This tree also
+retains the profile27b627fa2 compatibility fixes, with explicit ValidationInputs
+for validation and the complete corpus destination/backfill candidate set.
+The next independent review and exact-head CI remain required. Existing
+production records, ratings and historical attributions are unchanged.
