@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import shlex
 import sys
+import re
 from pathlib import Path
 
 from data_sheets_schema.resources import resource_path
@@ -54,6 +55,9 @@ def portable_text(text: str, environment: dict) -> str:
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
+    d4d = shlex.join(d4d_command(environment))
+    text = re.sub(r"(?m)^(\s*)d4d(?=\s)", lambda match: match[1] + d4d, text)
+    text = text.replace("`d4d ", "`" + d4d + " ")
     for logical, physical in sorted(environment["resources"].items(), key=lambda x: -len(x[0])):
         text = text.replace(logical, shlex.quote(physical))
     return text

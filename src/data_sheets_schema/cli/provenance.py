@@ -532,7 +532,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     chunk_choices = (None, Path(chunks)) if chunks else (None,)
     for delta, render_version, selected_chunks, selected_manifest in product(
             (0, -1, 1, -2, 2), (6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices):
+        # This is only a candidate: current installed paths may recover an
+        # unrecorded renderer6 toolchain only if the complete original hash
+        # agrees. A different installation cannot silently reinterpret it.
+        environment = {}
+        if render_version >= 6 and runtime in {"Claude Code", "Codex CLI"}:
+            from data_sheets_schema.agentic_runtime import toolchain
+            environment["agentic_toolchain"] = toolchain()
         spec = RunSpec.from_render_spec({
+            **environment,
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
             "manifest": str(selected_manifest) if selected_manifest is not None else None,
