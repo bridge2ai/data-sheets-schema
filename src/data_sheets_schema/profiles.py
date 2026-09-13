@@ -116,10 +116,13 @@ ENV_VAR = "D4D_PROFILE"
 class Selection:
     """A profile and why it was selected — what a record states (#1443)."""
     profile: Profile
-    #: `environment`; `no manifest`; `manifest:<path>@<sha256[:12]>` or
-    #: `default manifest:<path>@<sha256[:12]>`, each with ` (undeclared)`
-    #: when the manifest has no `profile:` key; `<kind>:<path> (missing)`
-    #: when the path is not there. The path is repository-relative under
+    #: `environment`; `no manifest`; `stated by the caller`;
+    #: `manifest:<path>@<sha256[:12]>` or `default manifest:<path>@<sha256[:12]>`,
+    #: each with ` (undeclared)` when the manifest has no `profile:` key;
+    #: `<kind>:<path> (missing)` when the path is not there;
+    #: `rendered instruction`, with ` (this process would select <name>: <basis>)`
+    #: when the recorder's own selection differs, for the profile a launch
+    #: instruction carried (#1581). The path is repository-relative under
     #: the checkout (#1466, #1494).
     basis: str
 

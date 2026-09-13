@@ -72,10 +72,13 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         kw["provider"] = provider
     if condition is None:                      # not chosen: the default applies and the record says so (#1094)
         condition, kw["condition_stated"] = "generic", False
-    return RunSpec(project=project, arm=display, method=method,
-                   bundle=resolved, label=label, condition=condition,
-                   manifest_line=manifest_line,
-                   out_dir=Path(out_dir) if out_dir else None, **kw)
+    try:
+        return RunSpec(project=project, arm=display, method=method,
+                       bundle=resolved, label=label, condition=condition,
+                       manifest_line=manifest_line,
+                       out_dir=Path(out_dir) if out_dir else None, **kw)
+    except ValueError as exc:                    # an unknown profile, from a manifest or the environment (#1630)
+        raise click.ClickException(str(exc))
 
 
 def _manifest_kw(manifest, chunk_manifest) -> dict:

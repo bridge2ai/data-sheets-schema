@@ -1299,6 +1299,9 @@ def bundle_drift_detail(method: str, label: str, project: str,
 #: which reasons from condition *names*, this reads what the runs recorded.
 ARM_PROCEDURE_FIELDS = (
     ("schema digest", ("schema", "digest_md5")),
+    # Two arms under different profiles differ in the digest too, which a
+    # reader would look for in the schema; the profile names it (#1631).
+    ("profile", ("schema", "profile")),
     ("assembly digest", ("prompts", "assembly", "sha256")),
     # `run.condition` since #1094; a record that predates it reads its label
     # (`arm_facts` falls back to `condition_from_label`), which is where the

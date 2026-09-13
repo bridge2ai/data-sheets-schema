@@ -340,7 +340,7 @@ class TestTheThreadingHolds(_Clean):
         self.assertIn("instrument", str(caught.exception))
         self.assertTrue(usage_ledger._identity_differs(identity, resumed.input_identity()))
         # A pin made before the key existed says nothing about it.
-        older = {k: v for k, v in identity.items() if k != "profile"}
+        older = {k: v for k, v in identity.items() if k != "profile"}      # the subset rule, not a real pre-profile pin (#1628)
         self.assertFalse(usage_ledger._identity_differs(older, first.input_identity()))
 
     def test_the_rendered_recording_command_names_the_selected_manifest(self):
@@ -701,6 +701,346 @@ class TestRoundFour(_Clean):
         from data_sheets_schema import api_runner, usage_ledger
         spec = self._spec()
         identity = spec.input_identity()
+        legacy = {k: v for k, v in identity.items() if k != "profile"}     # the subset rule, not a real pre-profile pin (#1628)
+        self.assertFalse(usage_ledger._identity_differs(legacy, identity))
+        record = {"inputs": {"bundle_path": identity["bundle"]["path"], "bundle_sha256": identity["bundle"]["sha256"],
+                             "source_manifest": identity["source_manifest"], "chunks": identity["chunks"]},
+                  "schema": {}, "prompts": {"request": {"sha256": identity["instruction"]["sha256"]}}}
+        api_runner._require_recorded_inputs(spec, record)             # no digest: no evidence here, no refusal here
+        # … the refusal is at continuation: finished phases, no digest in the
+        # record, no profile in the pin.
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d:
+            spec = self._spec(out_dir=Path(d))
+            api_runner._prepare_usage(spec, resume=False)
+            with mock.patch.object(api_runner, "_load_progress", return_value={"completed": ["full"], "input_identity": legacy,
+                                                                                 "generation_id": api_runner._usage_generation(spec)}), \
+                    mock.patch.object(usage_ledger, "recorded_inputs", return_value=legacy):
+                with self.assertRaises(usage_ledger.UsageLedgerError) as caught:
+                    api_runner.execute(spec, resume=True, client=self._fake_client())
+            self.assertIn("no instrument identity", str(caught.exception))
+
+    def _spec(self, **kw):
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                       label="2026-09-13_x-api-generic-v9_rep1", condition="generic_v9", run_date="2026-09-13",
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt", **kw)
+
+    def test_neutral_sync_needs_no_pin(self):
+        """#1520"""
+        from unittest import mock
+        from data_sheets_schema import schema_digest, schema_sync
+        from data_sheets_schema.profiles import NEUTRAL
+        with mock.patch.object(schema_digest, "VOCABULARY_PIN", Path("/nonexistent-round4-vocabulary.yaml")):
+            rows = schema_sync.check(profile=NEUTRAL)
+        self.assertTrue(all(r["status"] == schema_sync.IN_SYNC for r in rows), rows)
+
+
+class TestRoundFive(_Clean):
+    """The Claude round-3 residuals (#1540–#1549)."""
+
+    def test_the_studys_own_bundle_reproduces_the_tracked_bytes(self):
+        """#1542: the profile's record renders what the chunk manifest and 12
+        records hash — the display name in prose, the key in the header."""
+        from data_sheets_schema import healthsheet
+        from data_sheets_schema.profiles import BRIDGE2AI
+        rec = ROOT / BRIDGE2AI.healthsheet_record
+        tracked = ROOT / "data/preprocessed/concatenated" / BRIDGE2AI.healthsheet_bundle
+        if not (rec.exists() and tracked.exists()):
+            self.skipTest("the study's healthsheet record or bundle is not in this checkout")
+        with tempfile.TemporaryDirectory() as d:
+            target, _ = healthsheet.build_bundle(rec, Path(d))
+            self.assertEqual(target.name, BRIDGE2AI.healthsheet_bundle)
+            got = [l for l in target.read_text(encoding="utf-8").splitlines() if not l.startswith("Source: ")]
+        want = [l for l in tracked.read_text(encoding="utf-8").splitlines() if not l.startswith("Source: ")]
+        self.assertEqual(got, want)
+        # #1544: from another directory, by absolute path, it is still the profile's record.
+        os.chdir(ROOT / "tests")
+        with tempfile.TemporaryDirectory() as d:
+            target, _ = healthsheet.build_bundle(rec, Path(d))
+            self.assertEqual(target.name, BRIDGE2AI.healthsheet_bundle)
+        os.chdir(ROOT)
+
+    def test_a_foreign_record_cannot_take_the_studys_bundle_name(self):
+        """#1543"""
+        import json
+        from data_sheets_schema import healthsheet
+        with tempfile.TemporaryDirectory() as d:
+            rec = Path(d) / "other.json"
+            rec.write_text(json.dumps({"title": "Other", "metadata": {"healthsheet": {"cohort": [
+                {"question": "Q?", "response": "A."}]}}}), encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                healthsheet.build_bundle(rec, Path(d), project="AI_READI")
+            self.assertIn("pass --name", str(caught.exception))
+            target, _ = healthsheet.build_bundle(rec, Path(d), project="AI_READI", name="other.txt")
+            self.assertEqual(target.name, "other.txt")
+            self.assertIn("AI_READI baseline", target.read_text(encoding="utf-8"))   # a foreign record: the key, not the study's prose
+
+    def test_a_nested_manifest_copy_inside_the_checkout_is_not_the_registry(self):
+        """#1545"""
+        from data_sheets_schema import profiles, registry
+        nested = ROOT / "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files"
+        if not (nested / "data/preprocessed/source_manifest.yaml").exists():
+            self.skipTest("no nested manifest copy in this checkout")
+        os.chdir(nested)
+        self.assertEqual(registry.default_manifest_path().resolve(), STUDY_MANIFEST.resolve())
+        self.assertEqual(profiles.select_profile().name, "bridge2ai")
+        os.chdir(ROOT)
+
+    def test_a_caller_stated_profile_has_a_basis(self):
+        """#1549"""
+        spec = self._spec(profile="neutral")
+        self.assertEqual((spec.profile, spec.profile_basis), ("neutral", "stated by the caller"))
+
+    def test_the_snapshot_store_accepts_a_pre_profile_identity(self):
+        """#1540, #1560, #1566: an index written before the `profile` key
+        existed is still this generation's — read, not superseded — and one
+        under another instrument is not."""
+        import json
+        from data_sheets_schema import api_runner, snapshot_store, usage_ledger
+        with tempfile.TemporaryDirectory() as d:
+            spec = self._spec(out_dir=Path(d))
+            api_runner._prepare_usage(spec, resume=False)
+            snapshot_store.activate(spec, fresh=True, completed=False, prior_record={})
+            artifact = Path(d) / "intermediate" / "CHORUS_full.yaml"
+            artifact.parent.mkdir(parents=True, exist_ok=True)
+            artifact.write_text("id: https://example.org/x\n", encoding="utf-8")
+            snapshot_store.record(spec, "full", artifact)
+            index = snapshot_store.index_path(Path(d), "CHORUS")
+            data = json.loads(index.read_text(encoding="utf-8"))
+            self.assertIn("profile", data["input_identity"])
+            data["input_identity"].pop("profile")                        # the pre-profile shape
+            index.write_text(json.dumps(data), encoding="utf-8")
+            loaded = snapshot_store._load(Path(d), "CHORUS")
+            self.assertFalse(loaded.get("superseded"), loaded)
+            found, entry = snapshot_store.read_latest(Path(d), "CHORUS", "full", spec=spec)
+            self.assertTrue(found); self.assertIsNotNone(entry)
+            # The same index under another instrument is not this generation's.
+            data["input_identity"]["profile"] = {"name": "neutral", "digest_md5": "029c2abcda26e45c4465fd0a8455893d"}
+            index.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(snapshot_store._load(Path(d), "CHORUS").get("superseded"))
+            with self.assertRaises(usage_ledger.UsageLedgerError):
+                snapshot_store.read_latest(Path(d), "CHORUS", "full", spec=spec)
+
+    def _spec(self, **kw):
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                       label="2026-09-13_x-api-generic-v9_rep1", condition="generic_v9", run_date="2026-09-13",
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt", **kw)
+
+
+class TestRoundSix(_Clean):
+    """The Codex round-4 findings (#1558–#1568)."""
+
+    STUDY = "cd3c79f2c62f11675d5ce2c1df96b88e"
+
+    def _fake_client(self):
+        import sys
+        sys.path.insert(0, str(ROOT / "tests" / "test_download"))
+        try:
+            from test_api_runner import FakeClient
+        finally:
+            sys.path.pop(0)
+        return FakeClient()
+
+    def _spec(self, **kw):
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                       label="2026-09-13_x-api-generic-v9_rep1", condition="generic_v9", run_date="2026-09-13",
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt", **kw)
+
+    def test_the_recorder_honours_a_no_manifest_selected_header(self):
+        """#1558, #1627: from the checkout, on the tracked study bundle the
+        automatic rule would select the study manifest — and the runner's
+        own "not used (no manifest selected …)" header must still record
+        neutral / no manifest. A scratch tree cannot exercise the automatic
+        rule, so the header is supplied by a patched parser and the write
+        is captured, not made."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.cli import provenance as prov_cli
+        label = "2026-07-31_claude-opus-5-api-generic_rep2"
+        full = ROOT / "data/d4d_concatenated/claudecode_agent_crate_only" / label / "CHORUS_d4d.yaml"
+        if not full.exists():
+            self.skipTest("the tracked crate-only output is not in this checkout")
+        captured = {}
+
+        def capture(self_, path):
+            captured["data"] = self_.data
+            return path
+        header = {"Source bundle": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+                  "Source manifest": "not used (no manifest selected; the bundle was passed explicitly)"}
+        with mock.patch.object(pv.ProvenanceRecord, "write", capture), \
+                mock.patch.object(pv, "parse_header", lambda *a, **k: dict(header)), \
+                mock.patch.object(prov_cli, "_inline_checks", lambda *a, **k: None):
+            r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                "record", "--project", "CHORUS", "--method", "claudecode_agent_crate_only", "--label", label,
+                "--input-bundle", "data/preprocessed/concatenated/CHORUS_preprocessed.txt", "--phase", "generate_full"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        rec = captured["data"]
+        self.assertEqual((rec["schema"]["profile"], rec["schema"]["profile_basis"]), ("neutral", "no manifest"))
+        self.assertIsNone(((rec.get("inputs") or {}).get("source_manifest") or {}).get("path"))
+
+    def test_the_recorder_with_no_manifest_option_follows_the_runners_rule(self):
+        """#1512: from the checkout, on a tracked crate-only output whose
+        header declares the manifest unused, no `--manifest` at all selects
+        the study manifest as the runner would — the write is captured, not
+        made."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.cli import provenance as prov_cli
+        label = "2026-07-31_claude-opus-5-api-generic_rep2"
+        full = ROOT / "data/d4d_concatenated/claudecode_agent_crate_only" / label / "CHORUS_d4d.yaml"
+        if not full.exists():
+            self.skipTest("the tracked crate-only output is not in this checkout")
+        self.assertIn("not used", full.read_text(encoding="utf-8")[:2000].lower())
+        captured = {}
+
+        def capture(self_, path):
+            captured["data"] = self_.data
+            return path
+        with mock.patch.object(pv.ProvenanceRecord, "write", capture), \
+                mock.patch.object(prov_cli, "_inline_checks", lambda *a, **k: None):
+            r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                "record", "--project", "CHORUS", "--method", "claudecode_agent_crate_only", "--label", label,
+                "--arm", "crate_only", "--input-bundle", "data/preprocessed/concatenated/CHORUS_crate_only.txt",
+                "--phase", "generate_full"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        rec = captured["data"]
+        self.assertEqual(rec["schema"]["profile"], "bridge2ai")
+        self.assertRegex(rec["schema"]["profile_basis"], r"^manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
+        attested = (rec.get("inputs") or {}).get("source_manifest") or {}
+        self.assertIsNone(attested.get("path"))
+        self.assertIn("unused", attested.get("basis", ""))
+
+
+class TestRoundFour(_Clean):
+    """The Codex round-3 findings (#1512–#1522)."""
+
+    STUDY = "cd3c79f2c62f11675d5ce2c1df96b88e"
+
+    def _fake_client(self):
+        import sys
+        sys.path.insert(0, str(ROOT / "tests" / "test_download"))
+        try:
+            from test_api_runner import FakeClient
+        finally:
+            sys.path.pop(0)
+        return FakeClient()
+
+    def test_a_repair_round_sends_the_specs_digest(self):
+        """#1521: through `_repair_invalid` itself, not `build_repair`."""
+        from data_sheets_schema import api_runner, schema_digest
+        from data_sheets_schema.api_runner import RunSpec
+        with tempfile.TemporaryDirectory() as d:
+            spec = RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                           label="2026-09-13_x-api-generic_rep1", run_date="2026-09-13", out_dir=Path(d),
+                           bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+            self.assertEqual(spec.profile, "bridge2ai")
+            spec.full_path.parent.mkdir(parents=True, exist_ok=True)
+            spec.full_path.write_text("# Generated: 2026-09-13\nid: 123\ntitle: T\n", encoding="utf-8")   # id is not a uriorcurie
+            os.environ["D4D_PROFILE"] = "neutral"
+            schema_digest._TEXT_CACHE.clear()
+            client = self._fake_client()
+            api_runner._prepare_usage(spec, resume=False)
+            api_runner._repair_invalid(spec, client, api_runner._model_settings(), [])
+            repairs = [kw for kw in client.messages.calls if api_runner.REPAIR_INSTRUCTION in
+                       " ".join(p.get("text", "") for p in kw["messages"][0]["content"])]
+            self.assertTrue(repairs, "no repair request was sent")
+            first_block = repairs[0]["messages"][0]["content"][0]["text"]
+            self.assertEqual(schema_digest.fingerprint(first_block), self.STUDY)
+
+    def test_the_sync_gate_and_the_record_follow_the_spec_through_execute(self):
+        """#1521: through `execute()` itself, with a spy on the gate."""
+        from unittest import mock
+        from data_sheets_schema import api_runner, schema_digest, schema_sync
+        from data_sheets_schema.api_runner import RunSpec
+        with tempfile.TemporaryDirectory() as d:
+            spec = RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                           label="2026-09-13_x-api-generic_rep1", run_date="2026-09-13", out_dir=Path(d),
+                           bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+            os.environ["D4D_PROFILE"] = "neutral"
+            schema_digest._TEXT_CACHE.clear()
+            seen = []
+            real = schema_sync.check
+
+            def spy(*a, **kw):
+                seen.append(kw.get("profile"))
+                return real(*a, **kw)
+            with mock.patch.object(schema_sync, "check", spy):
+                api_runner.execute(spec, client=self._fake_client())
+            self.assertEqual([p.name for p in seen if p is not None], ["bridge2ai"])
+            rec = yaml.safe_load((Path(d) / "CHORUS_provenance.yaml").read_text(encoding="utf-8"))
+            self.assertEqual(rec["schema"]["profile"], "bridge2ai")
+            self.assertEqual(rec["schema"]["digest_md5"], self.STUDY)
+            self.assertEqual(rec["pair_consistency"].get("schema_moved"), False)
+
+    def test_the_form_classifier_snapshot_is_its_own_instrument(self):
+        """#1513: a fresh classifier under the opposite environment does not
+        raise on its own snapshot."""
+        from data_sheets_schema.form_defects import FormFailure, FormSubtypeClassifier
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL
+        os.environ["D4D_PROFILE"] = "bridge2ai"
+        c = FormSubtypeClassifier(client=object(), model="offline-test", profile=NEUTRAL)
+        self.assertEqual(c.schema, c._live_snapshot()[0])
+        os.environ["D4D_PROFILE"] = "neutral"
+        c = FormSubtypeClassifier(client=object(), model="offline-test", profile=BRIDGE2AI)
+        self.assertEqual(c.schema, c._live_snapshot()[0])
+        # #1514: a failure judged under another instrument is refused, not pooled.
+        other = FormFailure(project="P", slot="instances", value="[]", reason="wrong kind", fitness=0.0,
+                            schema="029c2abcda26e45c4465fd0a8455893d")
+        with self.assertRaises(ValueError):
+            c(other)
+
+    def test_loading_refuses_failures_from_two_instruments(self):
+        """#1514"""
+        import json
+        from data_sheets_schema.form_defects import load_form_failures
+        with tempfile.TemporaryDirectory() as d:
+            rows = [{"failure": "form", "rubric": "r", "model": "m", "slot": "instances", "value": "[]",
+                     "reason": "x", "fitness": 0.0, "schema": s} for s in (self.STUDY, "029c2abcda26e45c4465fd0a8455893d")]
+            (Path(d) / "P_fitness.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                load_form_failures(Path(d))
+            self.assertIn("schema", str(caught.exception))
+            (Path(d) / "P_fitness.jsonl").write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
+            self.assertEqual(load_form_failures(Path(d))[0].schema, self.STUDY)
+
+    def test_a_pre_profile_record_is_the_studys_whatever_the_environment(self):
+        """#1518"""
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, for_record
+        os.environ["D4D_PROFILE"] = "neutral"
+        self.assertIs(for_record({"schema": {"digest_md5": "34d24ff30fb6ad0f10d82af09ddc1fba"}}), BRIDGE2AI)
+        self.assertIs(for_record({"schema": {}}), BRIDGE2AI)               # no profile at all: before profiles, the study's (#1583)
+        self.assertIs(for_record({"schema": "not a mapping"}), BRIDGE2AI)
+        import warnings
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            self.assertIs(for_record({"schema": {"profile": "acme"}}), BRIDGE2AI)
+        self.assertTrue(any("does not know" in str(w.message) for w in caught))
+
+    def test_own_record_under_another_project_gets_its_own_file(self):
+        """#1516"""
+        from unittest import mock
+        from data_sheets_schema import healthsheet
+        from data_sheets_schema.profiles import BRIDGE2AI
+        rec = BRIDGE2AI.healthsheet_record
+        if not (ROOT / rec).exists():
+            self.skipTest("the study's healthsheet record is not in this checkout")
+        with tempfile.TemporaryDirectory() as d:
+            target, _ = healthsheet.build_bundle(ROOT / rec, Path(d), project="CLINIC")
+            self.assertEqual(target.name, "CLINIC_healthsheet_only.txt")
+            target, _ = healthsheet.build_bundle(ROOT / rec, Path(d))
+            self.assertEqual(target.name, "AI_READI_healthsheet_only.txt")
+
+    def test_legacy_progress_and_continuation(self):
+        """#1517: a saved identity without the profile key matches when the
+        rest does; #1519: a record with no digest cannot be resumed."""
+        from data_sheets_schema import api_runner, usage_ledger
+        spec = self._spec()
+        identity = spec.input_identity()
         legacy = {k: v for k, v in identity.items() if k != "profile"}
         self.assertFalse(usage_ledger._identity_differs(legacy, identity))
         record = {"inputs": {"bundle_path": identity["bundle"]["path"], "bundle_sha256": identity["bundle"]["sha256"],
@@ -894,7 +1234,7 @@ class TestRoundSix(_Clean):
                            bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
             api_runner._prepare_usage(spec, resume=False)                           # a modern pin, with the profile
             identity = spec.input_identity()
-            legacy = {k: v for k, v in identity.items() if k != "profile"}
+            legacy = {k: v for k, v in identity.items() if k != "profile"}  # the subset rule, not a real pre-profile pin (#1628)
             with mock.patch.object(api_runner, "_load_progress", return_value={"completed": ["full"], "input_identity": legacy,
                                                                                  "generation_id": api_runner._usage_generation(spec)}):
                 api_runner.execute(spec, resume=True, client=self._fake_client())   # continues: the ledger attests the instrument
@@ -1204,3 +1544,78 @@ class TestRoundEight(_Clean):
             text = (ROOT / rel).read_text(encoding="utf-8")
             self.assertIsNone(re.search(r"\b(AI_READI|CHORUS|CM4AI|VOICE)\b", text), rel)
         self.assertNotIn("b2ai-voice", (ROOT / ".claude/commands/d4d-uniform-rules.md").read_text(encoding="utf-8"))
+
+
+class TestRoundNine(_Clean):
+    """The Claude round-5 findings (#1626–#1632)."""
+
+    def _spec(self, **over):
+        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.cli.api import ARMS
+        return RunSpec(project="CHORUS", method=ARMS["baseline"][1], arm=ARMS["baseline"][0],
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+                       label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                       runtime="Claude Code", provider="Anthropic", run_date="2026-09-13", **over)
+
+    def test_the_basis_is_recorded_but_is_not_the_resume_identity(self):
+        """#1626"""
+        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.usage_ledger import _identity_differs
+        a = self._spec(profile="bridge2ai", profile_basis="manifest:data/preprocessed/source_manifest.yaml@000000000000")
+        b = self._spec(profile="bridge2ai", profile_basis="environment")
+        self.assertNotEqual(a.render_spec()["profile_basis"], b.render_spec()["profile_basis"])   # the record keeps it
+        self.assertFalse(_identity_differs(a.input_identity(), b.input_identity()))
+        self.assertNotIn("profile_basis", a.input_identity()["instruction"]["spec"])
+        self.assertEqual(a.input_identity()["profile"]["name"], "bridge2ai")
+        replay = RunSpec.from_render_spec(a.render_spec(), project="CHORUS", method=a.method, label=a.label)
+        self.assertEqual(replay.profile_basis, a.profile_basis)
+
+    def test_a_real_pre_profile_pin_is_refused_and_the_refusal_says_why(self):
+        """#1628: a pin whose instruction predates `--profile` never matches."""
+        import hashlib
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.usage_ledger import UsageLedgerError, _identity_differs, require_resolved
+        current = self._spec()
+        old_dict = {k: v for k, v in current.render_spec().items() if k not in ("profile", "profile_basis")}
+        old = RunSpec.from_render_spec(old_dict, project="CHORUS", method=current.method, label=current.label)
+        old_identity = {k: v for k, v in current.input_identity().items() if k != "profile"}
+        old_identity["instruction"] = {"render_version": old.render_version, "spec": old_dict,
+                                       "sha256": hashlib.sha256(resolve_prompt(old).encode()).hexdigest()}
+        self.assertNotIn("--profile", resolve_prompt(old))
+        self.assertTrue(_identity_differs(old_identity, current.input_identity()))
+        with mock.patch("data_sheets_schema.usage_ledger._read", return_value={"input_identity": old_identity}):
+            with self.assertRaises(UsageLedgerError) as caught:
+                require_resolved(current)
+        self.assertIn("before profiles existed", str(caught.exception))
+
+    def test_an_unknown_profile_is_a_usage_error_not_a_traceback(self):
+        """#1630"""
+        import click.testing
+        from data_sheets_schema.cli import provenance as prov_cli
+        from data_sheets_schema.cli.api import _spec
+        r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+            "record", "--project", "CHORUS", "--method", "claudecode_api", "--label", "x", "--profile", "bogus"])
+        self.assertEqual(r.exit_code, 2, r.output)
+        self.assertIn("Invalid value for '--profile'", r.output)
+        with tempfile.TemporaryDirectory() as d:
+            man = Path(d) / "m.yaml"
+            man.write_text("profile: Bridge2AI\nprojects:\n  CHORUS:\n    - {id: s, source: s, title: s}\n", encoding="utf-8")
+            with self.assertRaises(click.ClickException) as caught:
+                _spec("CHORUS", "baseline", "2026-09-13_x_rep1", "generic_v9",
+                      bundle=str(ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"), manifest=man)
+            self.assertIn("unknown profile", str(caught.exception))
+
+    def test_the_profile_is_an_arm_procedure_field(self):
+        """#1631"""
+        from data_sheets_schema.runs import ARM_PROCEDURE_FIELDS
+        self.assertIn(("profile", ("schema", "profile")), ARM_PROCEDURE_FIELDS)
+
+    def test_the_basis_vocabulary_is_documented_everywhere(self):
+        """#1632"""
+        from data_sheets_schema.profiles import Selection
+        import inspect
+        for text, where in ((inspect.getsource(Selection), "Selection"),
+                            ((ROOT / "src/data_sheets_schema/schema/d4d_generation_record.yaml").read_text(encoding="utf-8"), "record schema"),
+                            ((ROOT / "CLAUDE.md").read_text(encoding="utf-8"), "CLAUDE.md")):
+            self.assertIn("rendered instruction", text, where)
+            self.assertIn("stated by the caller", text, where)

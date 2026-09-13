@@ -308,6 +308,7 @@ def _parse_phases(specs) -> list[dict]:
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
 @click.option('--profile', 'stated_profile', default=None,
+              type=click.Choice(sorted(__import__("data_sheets_schema.profiles", fromlist=["PROFILES"]).PROFILES)),
               help='the profile the launch instruction was rendered under (the rendered `d4d provenance record` '
                    'line carries it); recorded with the basis `rendered instruction`, over what the manifest '
                    'or this process\'s environment would select (#1581)')
@@ -403,7 +404,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 basis += f" (this process would select {ambient.name}: {ambient.basis})"
         profile_selection = Selection(stated, basis)
     else:
-        profile_selection = select_profile(selected_manifest)
+        try:
+            profile_selection = select_profile(selected_manifest)
+        except ValueError as exc:                # a manifest declaring a profile this code does not know (#1630)
+            raise click.ClickException(str(exc))
     # … and the header governs what the input block attests.
     selected = None if header_unused else selected_manifest
     manifest_basis = ("the output header declares the source manifest unused"

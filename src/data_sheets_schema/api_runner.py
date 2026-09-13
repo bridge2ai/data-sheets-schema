@@ -636,8 +636,13 @@ class RunSpec:
                 "source_manifest": entry(self.manifest) if self.manifest_used else None,
                 "chunks": entry(chunks),
                 "profile": {"name": self.profile, "digest_md5": digest},
+                # The basis says *why* a profile was selected; the identity
+                # carries *what* — the profile and its digest above and the
+                # instruction hash below — so a comment edit to a manifest
+                # an arm never consumed, or the same profile reached by
+                # another route, does not refuse a resume (#1626).
                 "instruction": {"render_version": self.render_version,
-                                "spec": self.render_spec(),
+                                "spec": {k: v for k, v in self.render_spec().items() if k != "profile_basis"},
                                 "sha256": hashlib.sha256(self.instruction.encode()).hexdigest()}}
 
     def render_spec(self) -> dict[str, Any]:
@@ -4917,13 +4922,18 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                     and prior.get("record_mode") == "reconstructed"):
                 # Generic backfill cannot supersede observed generation-bound
                 # inputs. Older backfill could publish during an interruption.
-                from data_sheets_schema.usage_ledger import recorded_inputs
+                from data_sheets_schema.usage_ledger import _identity_differs, recorded_inputs
                 current = spec.input_identity()
+                # The same compatibility rule as every other identity
+                # compare (#1629): a pin that lacks a key says nothing
+                # about it, and every key it carries must match.
+                saved = progress.get("input_identity")
                 bound_progress = (
                     progress.get("generation_id") == generation
                     and _usage_record_matches(spec, progress.get("run_identity"))
-                    and progress.get("input_identity") == current)
-                if recorded_inputs(spec) == current or bound_progress:
+                    and isinstance(saved, dict) and not _identity_differs(saved, current))
+                recorded = recorded_inputs(spec)
+                if (isinstance(recorded, dict) and not _identity_differs(recorded, current)) or bound_progress:
                     prior_matches = False
             if prior_matches:
                 _require_recorded_inputs(spec, prior)
@@ -4952,7 +4962,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     from data_sheets_schema.usage_ledger import _identity_differs
     if progress.get("input_identity") is not None and _identity_differs(progress["input_identity"], spec.input_identity()):
         raise UsageLedgerError("generation input identity changed since saved progress; restore the "
-                               "recorded inputs or use --no-resume for an explicit new generation")
+                               "recorded inputs or use --no-resume for an explicit new generation "
+                               "(a generation saved before profiles existed hashed an instruction that no "
+                               "longer renders, and cannot be resumed; #1628)")
     done = set(progress.get("completed", []))
     if done and progress.get("input_identity") is None and not prior_record:
         from data_sheets_schema.usage_ledger import recorded_inputs
