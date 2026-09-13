@@ -194,6 +194,10 @@ def prepare_usage(spec, *, resume: bool) -> str:
     data = _empty(spec, accept_legacy=resume)
     if not resume:
         data["prior_generation_ids"] = _record_generations(spec)
+        from data_sheets_schema.snapshot_store import predecessor_generation
+        predecessor = predecessor_generation(spec)
+        if predecessor is not None and predecessor not in data["prior_generation_ids"]:
+            data["prior_generation_ids"].append(predecessor)
     if path.exists():
         try:
             previous = _read(spec)

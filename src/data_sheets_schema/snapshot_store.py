@@ -16,7 +16,8 @@ def index_path(directory: Path, project: str) -> Path:
     return directory / "intermediate" / f"{project}_snapshot_index.json"
 
 
-def _load(directory: Path, project: str, *, path: Path | None = None) -> dict | None:
+def _load(directory: Path, project: str, *, path: Path | None = None,
+          check_account: bool = True) -> dict | None:
     path = path or index_path(directory, project)
     if not path.exists():
         return None
@@ -32,7 +33,7 @@ def _load(directory: Path, project: str, *, path: Path | None = None) -> dict | 
             raise ValueError("invalid snapshot index identity")
         key = hashlib.sha256(json.dumps(data["run_identity"], sort_keys=True).encode()).hexdigest()[:16]
         account = directory / f"{project}_api_usage_{key}.json"
-        if account.is_file():
+        if check_account and account.is_file():
             owner = json.loads(account.read_text(encoding="utf-8"))
             if not isinstance(owner, dict):
                 raise ValueError("invalid snapshot owner ledger")
@@ -52,6 +53,21 @@ def _load(directory: Path, project: str, *, path: Path | None = None) -> dict | 
         return data
     except (OSError, ValueError) as exc:
         raise ledger.UsageLedgerError(f"cannot recover generation snapshots from {path}: {exc}") from exc
+
+
+def predecessor_generation(spec) -> str | None:
+    """The current index explicitly superseded by a fresh run.
+
+    Its own identity survives a missing or malformed usage journal. Only this
+    index is selected; unrelated archives are not accepted as predecessors.
+    """
+    try:
+        data = _load(spec.metadata_dir, spec.project, check_account=False)
+    except ledger.UsageLedgerError:
+        return None  # a fresh activation preserves opaque old bytes separately
+    if data is not None and data["run_identity"] == ledger.run_identity(spec):
+        return data["generation_id"]
+    return None
 
 
 def _write(path: Path, data: dict) -> None:

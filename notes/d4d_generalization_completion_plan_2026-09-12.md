@@ -165,3 +165,16 @@ CI and independent review still precede merge. Evaluation preparation is
 isolated on `generalize-evaluation-applicability`; its merge remains after
 generation, followed by profiles and packaging. No paid measurement or source
 download is launched by these maintenance stages.
+
+## Generation review round 10
+
+Independent round-9 review confirmed the preceding fixes and found #1430:
+an explicit fresh restart failed when a partial predecessor retained its
+snapshot index but had lost its usage journal. The successor now durably
+records that specific predecessor before activating a new index. Unrelated
+archives remain unaccounted and are refused. All 107 focused and broader
+recovery tests pass; see `reviews/pr_1367_round10_2026-09-12.md`. Round-8 full
+CI passed 3,884 tests with four skips. The final generation head still needs
+green CI and independent approval. Evaluation applicability preparation
+continues in its separate worktree without new scoring; profiles and
+installable packaging remain the subsequent stages.
