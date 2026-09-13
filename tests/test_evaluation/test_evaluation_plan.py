@@ -19,6 +19,7 @@ the marks, the plan changes with them.
 """
 
 import unittest
+import hashlib
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -29,7 +30,8 @@ from data_sheets_schema.evaluation_plan import (SEMANTIC_RUBRICS, VARIANTS,
                                                 plan, summarise)
 
 
-def _corpus(root: Path, projects, config="2026-08-05_cfg", variants=VARIANTS):
+def _corpus(root: Path, projects, config="2026-08-05_cfg", variants=VARIANTS,
+            method="claudecode_agent"):
     """A concatenated directory with `canonical` marks for the named projects.
 
     Shaped as `canonical_runs` reads it: a `canonical` block, `run.project`,
@@ -40,19 +42,29 @@ def _corpus(root: Path, projects, config="2026-08-05_cfg", variants=VARIANTS):
     for project in projects:
         outputs = {}
         for variant in variants:
-            sub = "claudecode_agent" if variant == "full" else "claudecode_agent_core"
+            sub = method if variant == "full" else method + "_core"
             suffix = "_d4d.yaml" if variant == "full" else "_d4d_core.yaml"
             path = root / sub / label / f"{project}{suffix}"
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("id: x\n")
             outputs[variant] = {"path": str(path)}
-        prov_dir = root / "claudecode_agent_core" / label
+        prov_dir = root / (method + "_core") / label
         prov_dir.mkdir(parents=True, exist_ok=True)
+        from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
         (prov_dir / f"{project}_provenance.yaml").write_text(yaml.safe_dump({
             "run": {"project": project, "label": label,
-                    "method": "claudecode_agent"},
+                    "method": method},
+            "model": {"agent_runtime": "Claude API (direct)" if method == "claudecode_api" else "Claude Code"},
             "outputs": outputs,
             "canonical": {"criterion": "test", "selected_from": ["a"]},
+            "validation": {
+                "passed": True,
+                "artifacts": {variant: {"path": item["path"],
+                    "sha256": hashlib.sha256(Path(item["path"]).read_bytes()).hexdigest()}
+                    for variant, item in outputs.items()},
+                "schema": {"full_sha256": hashlib.sha256(FULL_SCHEMA.read_bytes()).hexdigest(),
+                           "core_sha256": hashlib.sha256(CORE_SCHEMA.read_bytes()).hexdigest()},
+            },
         }))
     return root
 
@@ -117,7 +129,8 @@ class TestThePlanFollowsTheMarks(unittest.TestCase):
             "AI_READI": {"full": "a.yaml", "core": "ac.yaml"},
         }
         with patch("data_sheets_schema.runs.canonical_runs",
-                   return_value=unsorted):
+                   return_value=unsorted), patch(
+                       "data_sheets_schema.runs.validation_status", return_value="valid"):
             projects = [e.project for e in module.plan()]
         self.assertEqual(projects[0], "AI_READI",
                          "plan must sort projects itself")
@@ -227,7 +240,7 @@ class TestReplicateCoverage(unittest.TestCase):
             self._corpus_with_replicates(root, project="CHORUS")
             self._corpus_with_replicates(root, project="CM4AI")
             # CHORUS keeps all three; CM4AI keeps only rep1.
-            def status(method, label, project):
+            def status(method, label, project, concat_dir=None):
                 if project == "CM4AI" and not label.endswith("rep1"):
                     return "invalid"
                 return "valid"
@@ -246,7 +259,7 @@ class TestReplicateCoverage(unittest.TestCase):
         with TemporaryDirectory() as tmp:
             root = self._corpus_with_replicates(Path(tmp))
             with patch("data_sheets_schema.runs.validation_status",
-                       side_effect=lambda m, l, p: (
+                       side_effect=lambda m, l, p, concat_dir=None: (
                            "valid" if l.endswith("rep1") else "invalid")):
                 line = summarise(plan(concat_dir=root, all_replicates=True))
         self.assertNotIn("not a product", line)
@@ -266,7 +279,7 @@ class TestReplicateCoverage(unittest.TestCase):
         with TemporaryDirectory() as tmp:
             root = self._corpus_with_replicates(Path(tmp))
             with patch("data_sheets_schema.runs.validation_status",
-                       side_effect=lambda m, l, p: (
+                       side_effect=lambda m, l, p, concat_dir=None: (
                            "valid" if l.endswith("rep1") else "invalid")):
                 got = plan(concat_dir=root, all_replicates=True)
         self.assertEqual({e.label for e in got},
@@ -332,7 +345,8 @@ class TestTheCliRendersFailures(unittest.TestCase):
         from data_sheets_schema.cli.evaluate import evaluate
         kwargs = ({"side_effect": side_effect} if side_effect
                   else {"return_value": return_value})
-        with patch("data_sheets_schema.runs.canonical_runs", **kwargs):
+        with patch("data_sheets_schema.runs.canonical_runs", **kwargs), patch(
+                "data_sheets_schema.runs.validation_status", return_value="valid"):
             return CliRunner().invoke(evaluate, ["plan"])
 
     def test_two_marks_are_reported_with_the_remedy(self):
@@ -369,6 +383,106 @@ class TestTheLiveCorpus(unittest.TestCase):
             len(got),
             len({(e.project, e.variant) for e in got}) * len(SEMANTIC_RUBRICS),
             "every canonical record must pair with every rubric exactly once")
+
+
+class TestCurrentValidationEligibility(unittest.TestCase):
+    """#1364: real temporary pins, without replacing validation_status."""
+
+    def _change_verdict(self, root, method, project, kind):
+        prov = root / (method + "_core") / "2026-08-05_cfg_rep1" / f"{project}_provenance.yaml"
+        data = yaml.safe_load(prov.read_text())
+        if kind == "artifact":
+            Path(data["outputs"]["full"]["path"]).write_text("id: changed\n")
+        elif kind == "schema":
+            data["validation"]["schema"]["full_sha256"] = "0" * 64
+        elif kind == "invalid":
+            data["validation"]["passed"] = False
+        elif kind == "unverified":
+            del data["validation"]
+        prov.write_text(yaml.safe_dump(data))
+        return prov
+
+    def test_both_modes_and_runtimes_filter_the_same_real_validation_failures(self):
+        import data_sheets_schema.evaluation_plan as module
+        for runtime, method in (("api", "claudecode_api"), ("agentic", "claudecode_agent")):
+            for kind in ("artifact", "schema", "invalid", "unverified"):
+                with self.subTest(runtime=runtime, kind=kind), TemporaryDirectory() as tmp:
+                    root = _corpus(Path(tmp), ["ELIGIBLE", "EXCLUDED"], method=method)
+                    prov = self._change_verdict(root, method, "EXCLUDED", kind)
+                    original = prov.read_bytes()
+                    for widen in (False, True):
+                        got = plan(concat_dir=root, runtime=runtime, all_replicates=widen)
+                        self.assertEqual({e.project for e in got}, {"ELIGIBLE"})
+                        self.assertEqual({e.variant for e in got}, set(VARIANTS))
+                        self.assertEqual({e.rubric for e in got}, set(SEMANTIC_RUBRICS))
+                        expected = "stale" if kind in ("artifact", "schema") else kind
+                        self.assertEqual(module.LAST_EXCLUDED,
+                            [("EXCLUDED", "2026-08-05_cfg_rep1", expected)])
+                        self.assertIn(expected, summarise(got))
+                    self.assertEqual(prov.read_bytes(), original)
+
+    def test_all_excluded_names_the_actual_reason_in_each_mode(self):
+        for widen in (False, True):
+            with self.subTest(all_replicates=widen), TemporaryDirectory() as tmp:
+                root = _corpus(Path(tmp), ["EXCLUDED"])
+                self._change_verdict(root, "claudecode_agent", "EXCLUDED", "schema")
+                with self.assertRaises(NothingSelected) as caught:
+                    plan(concat_dir=root, all_replicates=widen)
+                self.assertIn("no currently valid records", str(caught.exception))
+                self.assertIn("EXCLUDED", str(caught.exception))
+                self.assertIn("stale", str(caught.exception))
+
+    def test_exclusions_are_cleared_before_each_call_including_empty_and_error(self):
+        from unittest.mock import patch
+        from data_sheets_schema.runs import AmbiguousCanonical
+        import data_sheets_schema.evaluation_plan as module
+        with TemporaryDirectory() as tmp:
+            root = _corpus(Path(tmp), ["ELIGIBLE"])
+            module.LAST_EXCLUDED[:] = [("OLD", "old_rep1", "stale")]
+            self.assertNotIn("excluded", summarise(plan(concat_dir=root)))
+            module.LAST_EXCLUDED[:] = [("OLD", "old_rep1", "stale")]
+            with self.assertRaises(NothingSelected):
+                plan(concat_dir=root, config="does-not-match")
+            self.assertEqual(module.LAST_EXCLUDED, [])
+            module.LAST_EXCLUDED[:] = [("OLD", "old_rep1", "stale")]
+            with patch("data_sheets_schema.runs.canonical_runs", side_effect=AmbiguousCanonical("two marks")):
+                with self.assertRaises(AmbiguousCanonical):
+                    plan(concat_dir=root)
+            self.assertEqual(module.LAST_EXCLUDED, [])
+
+    def test_public_cli_reports_real_exclusions_without_rewriting_provenance(self):
+        from unittest.mock import patch
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.evaluate import evaluate
+        for runtime, method in (("api", "claudecode_api"), ("agentic", "claudecode_agent")):
+            with self.subTest(runtime=runtime), TemporaryDirectory() as tmp:
+                root = _corpus(Path(tmp), ["ELIGIBLE", "EXCLUDED"], method=method)
+                prov = self._change_verdict(root, method, "EXCLUDED", "schema")
+                original = prov.read_bytes()
+                with patch("data_sheets_schema.runs.CONCAT_DIR", root):
+                    result = CliRunner().invoke(evaluate, ["plan", "--runtime", runtime])
+                self.assertEqual(result.exit_code, 0, result.output)
+                self.assertIn("ELIGIBLE/full/", result.output)
+                self.assertIn("ELIGIBLE/core/", result.output)
+                self.assertNotIn("EXCLUDED/full/", result.output)
+                self.assertIn("EXCLUDED 2026-08-05_cfg_rep1 (stale)", result.output)
+                self.assertEqual(prov.read_bytes(), original)
+
+                with patch("data_sheets_schema.runs.CONCAT_DIR", root):
+                    streamed = CliRunner(mix_stderr=False).invoke(evaluate,
+                        ["plan", "--runtime", runtime, "--paths-only"])
+                self.assertEqual(streamed.exit_code, 0, streamed.output)
+                self.assertEqual(len(streamed.stdout.splitlines()), 2)
+                self.assertTrue(all("ELIGIBLE_d4d" in p for p in streamed.stdout.splitlines()))
+                self.assertIn("EXCLUDED 2026-08-05_cfg_rep1 (stale)", streamed.stderr)
+
+                self._change_verdict(root, method, "ELIGIBLE", "unverified")
+                with patch("data_sheets_schema.runs.CONCAT_DIR", root):
+                    empty = CliRunner().invoke(evaluate, ["plan", "--runtime", runtime])
+                self.assertNotEqual(empty.exit_code, 0)
+                self.assertIn("no currently valid records", empty.output)
+                self.assertIn("(stale)", empty.output)
+                self.assertIn("(unverified)", empty.output)
 
 
 if __name__ == "__main__":

@@ -229,6 +229,11 @@ def plan_cmd(config, paths_only, all_replicates, runtime):
     if paths_only:
         for path in dict.fromkeys(str(e.path) for e in evaluations):
             click.echo(path)
+        # Preserve a clean path stream while making reduced cohort coverage
+        # visible to a caller piping it into a sweep (#1364).
+        from data_sheets_schema.evaluation_plan import LAST_EXCLUDED
+        if LAST_EXCLUDED:
+            click.echo(summarise(evaluations), err=True)
         return
 
     for evaluation in evaluations:
