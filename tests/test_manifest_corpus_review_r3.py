@@ -1,6 +1,7 @@
 """PR1587 round 2: verification must follow the record, never another corpus."""
 import hashlib
 import shlex
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,7 @@ from data_sheets_schema import api_runner as api, provenance as pv, runs
 from data_sheets_schema.cli import cli
 from data_sheets_schema.cli.api import _spec
 from tests.test_manifest_corpus_root import project_tree
+from tests.test_agentic_selected_playbook import commands
 
 
 @pytest.mark.parametrize("damage", ["changed", "missing", "unchanged"])
@@ -68,8 +70,7 @@ def test_unused_manifest_still_owns_receipt_commands(project_tree, arm, runtime)
     spec = _spec("CLINICAL_X", arm, "external_run", "generic_v9", bundle=bundle,
         manifest=manifest, runtime=runtime)
     assert not spec.manifest_used
-    command = next(shlex.split(line)[3:] for line in spec.instruction.splitlines()
-        if line.startswith("poetry run d4d ") and " receipts check " in line)
+    command = next(row for row in commands(spec) if row[2:4] == ["receipts", "check"])
     assert command[:2] == ["--manifest", str(manifest)]
 
 
@@ -77,8 +78,7 @@ def test_no_manifest_receipt_check_explicitly_disables_ambient_selection(project
     _, _, bundle = project_tree
     spec = _spec("CLINICAL_X", "baseline", "external_run", "generic_v9", bundle=bundle,
         manifest=None, runtime="Claude Code")
-    command = next(shlex.split(line)[3:] for line in spec.instruction.splitlines()
-        if line.startswith("poetry run d4d ") and " receipts check " in line)
+    command = next(row for row in commands(spec) if row[2:4] == ["receipts", "check"])
     assert command[:2] == ["--manifest", "none"]
 
 
@@ -99,14 +99,15 @@ def test_unused_manifest_recorder_keeps_the_selected_output_owner(project_tree):
     assert data["inputs"]["source_manifest"]["path"] is None
 
 
-def test_nested_renderer5_backfill_restores_recorded_destinations(project_tree, monkeypatch):
+@pytest.mark.parametrize("version", [5, 6])
+def test_nested_renderer5_backfill_restores_recorded_destinations(project_tree, monkeypatch, version):
     root, manifest, bundle = project_tree
     nested = root / "analysis"
     nested.mkdir()
     monkeypatch.chdir(nested)
     spec = _spec("CLINICAL_X", "baseline", "external_run", "generic_v9", bundle=bundle,
         manifest=manifest, runtime="Claude Code")
-    spec.run_date = "2026-09-13"
+    spec = replace(spec, render_version=version, run_date="2026-09-13")
     path = pv.record_path_for(spec.project, spec.method, spec.label)
     path.parent.mkdir(parents=True)
     data = {"record_generated_at": "2026-09-13T00:00:00+00:00",

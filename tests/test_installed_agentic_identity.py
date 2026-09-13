@@ -26,6 +26,7 @@ def test_installed_definition_preimages_are_verified(tmp_path, monkeypatch, dama
     if damage != "missing":
         path.write_text(json.dumps(data))
     monkeypatch.setattr(resources, "CHECKOUT_ROOT", None)
+    monkeypatch.setattr(resources, "resource_root", lambda: (tmp_path, "install"))
     monkeypatch.setattr(resources, "resource_path", lambda logical: path)
     monkeypatch.setattr(agent_pin, "agent_digest", lambda name: "a" * 64)
     monkeypatch.setattr(agent_pin, "_git", lambda *args: pytest.fail("installed challenge must not consult Git"))
@@ -59,3 +60,26 @@ def test_renderer6_rejects_unusable_recorded_toolchains(external, damage):
         recorded["agentic_toolchain"]["resources"][agentic_runtime.SCHEMAS[0]] = "schema.yaml"
     with pytest.raises(ValueError, match="agentic toolchain"):
         api_runner.RunSpec.from_render_spec(recorded, project=spec.project, method=spec.method, label=spec.label)
+
+
+@pytest.mark.parametrize("imported_checkout", [True, False])
+def test_definition_challenge_uses_the_checkout_that_supplies_the_definition(tmp_path, monkeypatch, imported_checkout):
+    import subprocess
+    roots = []
+    for name in ("imported", "selected"):
+        root = tmp_path / name
+        (root / "src/data_sheets_schema").mkdir(parents=True)
+        (root / "pyproject.toml").write_text('name = "data-sheets-schema"\n')
+        path = root / ".claude/agents/synthetic.md"
+        path.parent.mkdir(parents=True)
+        subprocess.run(["git", "init", "-q", str(root)], check=True)
+        for revision in ("previous", "current"):
+            path.write_text(f"## Procedure\n\nThe {name} checkout's {revision} rule is distinct.\n")
+            subprocess.run(["git", "-C", str(root), "add", ".claude/agents/synthetic.md"], check=True)
+            subprocess.run(["git", "-C", str(root), "-c", "user.name=Offline test",
+                "-c", "user.email=offline@example.invalid", "commit", "-qm", revision], check=True)
+        roots.append(root)
+    monkeypatch.setattr(agent_pin, "REPO", roots[0])
+    monkeypatch.setattr(resources, "CHECKOUT_ROOT", roots[0] if imported_checkout else None)
+    monkeypatch.chdir(roots[1])
+    assert agent_pin._previous_text("synthetic") == "## Procedure\n\nThe selected checkout's previous rule is distinct.\n"
