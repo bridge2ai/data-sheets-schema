@@ -442,11 +442,17 @@ class TestRoundThree(_Clean):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d); man = root / "data/preprocessed/source_manifest.yaml"; man.parent.mkdir(parents=True)
             man.write_text(yaml.safe_dump({"profile": "neutral", "projects": {"X": [{"id": "s", "source": "s"}]}}), encoding="utf-8")
-            sub = root / "work" / "deeper"; sub.mkdir(parents=True)
-            os.chdir(sub)
+            os.chdir(root)
             self.assertEqual(registry.default_manifest_path().resolve(), man.resolve())
             self.assertEqual(profiles.default_manifest().resolve(), man.resolve())
             self.assertEqual(profiles.select_profile().name, "neutral")
+            # Not from a subdirectory: the corpus root is anchored to the
+            # checkout, so an ancestor's manifest is not discovered until the
+            # corpus root follows the manifest (#1515, #1523).
+            sub = root / "work" / "deeper"; sub.mkdir(parents=True)
+            os.chdir(sub)
+            self.assertEqual(registry.default_manifest_path().resolve(), STUDY_MANIFEST.resolve())
+            self.assertEqual(profiles.select_profile().name, "bridge2ai")
             os.chdir(ROOT)
 
     def test_the_basis_says_undeclared_and_missing(self):
@@ -516,6 +522,9 @@ class TestRoundThree(_Clean):
             (full_dir / "CHORUS_d4d.yaml").write_text(body, encoding="utf-8")
             (core_dir / "CHORUS_d4d_core.yaml").write_text(body, encoding="utf-8")
             (core_dir / "CHORUS_reconciliation.md").write_text("# r\n", encoding="utf-8")
+            # A scratch tree cannot exercise the automatic rule: the conventional
+            # bundles are anchored to the checkout (#1523), so only an explicit
+            # manifest selects here; the automatic case is the next test.
             os.chdir(root)
             try:
                 r = click.testing.CliRunner().invoke(prov_cli.provenance, [
@@ -532,3 +541,180 @@ class TestRoundThree(_Clean):
         attested = (rec.get("inputs") or {}).get("source_manifest") or {}
         self.assertIsNone(attested.get("path"))                      # not consumed as context …
         self.assertIn("unused", attested.get("basis", ""))           # … and the record says why
+
+    def test_the_recorder_with_no_manifest_option_follows_the_runners_rule(self):
+        """#1512: from the checkout, on a tracked crate-only output whose
+        header declares the manifest unused, no `--manifest` at all selects
+        the study manifest as the runner would — the write is captured, not
+        made."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.cli import provenance as prov_cli
+        label = "2026-07-31_claude-opus-5-api-generic_rep2"
+        full = ROOT / "data/d4d_concatenated/claudecode_agent_crate_only" / label / "CHORUS_d4d.yaml"
+        if not full.exists():
+            self.skipTest("the tracked crate-only output is not in this checkout")
+        self.assertIn("not used", full.read_text(encoding="utf-8")[:2000].lower())
+        captured = {}
+
+        def capture(self_, path):
+            captured["data"] = self_.data
+            return path
+        with mock.patch.object(pv.ProvenanceRecord, "write", capture), \
+                mock.patch.object(prov_cli, "_inline_checks", lambda *a, **k: None):
+            r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                "record", "--project", "CHORUS", "--method", "claudecode_agent_crate_only", "--label", label,
+                "--arm", "crate_only", "--input-bundle", "data/preprocessed/concatenated/CHORUS_crate_only.txt",
+                "--phase", "generate_full"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        rec = captured["data"]
+        self.assertEqual(rec["schema"]["profile"], "bridge2ai")
+        self.assertRegex(rec["schema"]["profile_basis"], r"^manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
+        attested = (rec.get("inputs") or {}).get("source_manifest") or {}
+        self.assertIsNone(attested.get("path"))
+        self.assertIn("unused", attested.get("basis", ""))
+
+
+class TestRoundFour(_Clean):
+    """The Codex round-3 findings (#1512–#1522)."""
+
+    STUDY = "cd3c79f2c62f11675d5ce2c1df96b88e"
+
+    def _fake_client(self):
+        import sys
+        sys.path.insert(0, str(ROOT / "tests" / "test_download"))
+        try:
+            from test_api_runner import FakeClient
+        finally:
+            sys.path.pop(0)
+        return FakeClient()
+
+    def test_a_repair_round_sends_the_specs_digest(self):
+        """#1521: through `_repair_invalid` itself, not `build_repair`."""
+        from data_sheets_schema import api_runner, schema_digest
+        from data_sheets_schema.api_runner import RunSpec
+        with tempfile.TemporaryDirectory() as d:
+            spec = RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                           label="2026-09-13_x-api-generic_rep1", run_date="2026-09-13", out_dir=Path(d),
+                           bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+            self.assertEqual(spec.profile, "bridge2ai")
+            spec.full_path.parent.mkdir(parents=True, exist_ok=True)
+            spec.full_path.write_text("# Generated: 2026-09-13\nid: 123\ntitle: T\n", encoding="utf-8")   # id is not a uriorcurie
+            os.environ["D4D_PROFILE"] = "neutral"
+            schema_digest._TEXT_CACHE.clear()
+            client = self._fake_client()
+            api_runner._prepare_usage(spec, resume=False)
+            api_runner._repair_invalid(spec, client, api_runner._model_settings(), [])
+            repairs = [kw for kw in client.messages.calls if api_runner.REPAIR_INSTRUCTION in
+                       " ".join(p.get("text", "") for p in kw["messages"][0]["content"])]
+            self.assertTrue(repairs, "no repair request was sent")
+            first_block = repairs[0]["messages"][0]["content"][0]["text"]
+            self.assertEqual(schema_digest.fingerprint(first_block), self.STUDY)
+
+    def test_the_sync_gate_and_the_record_follow_the_spec_through_execute(self):
+        """#1521: through `execute()` itself, with a spy on the gate."""
+        from unittest import mock
+        from data_sheets_schema import api_runner, schema_digest, schema_sync
+        from data_sheets_schema.api_runner import RunSpec
+        with tempfile.TemporaryDirectory() as d:
+            spec = RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                           label="2026-09-13_x-api-generic_rep1", run_date="2026-09-13", out_dir=Path(d),
+                           bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+            os.environ["D4D_PROFILE"] = "neutral"
+            schema_digest._TEXT_CACHE.clear()
+            seen = []
+            real = schema_sync.check
+
+            def spy(*a, **kw):
+                seen.append(kw.get("profile"))
+                return real(*a, **kw)
+            with mock.patch.object(schema_sync, "check", spy):
+                api_runner.execute(spec, client=self._fake_client())
+            self.assertEqual([p.name for p in seen if p is not None], ["bridge2ai"])
+            rec = yaml.safe_load((Path(d) / "CHORUS_provenance.yaml").read_text(encoding="utf-8"))
+            self.assertEqual(rec["schema"]["profile"], "bridge2ai")
+            self.assertEqual(rec["schema"]["digest_md5"], self.STUDY)
+            self.assertEqual(rec["pair_consistency"].get("schema_moved"), False)
+
+    def test_the_form_classifier_snapshot_is_its_own_instrument(self):
+        """#1513: a fresh classifier under the opposite environment does not
+        raise on its own snapshot."""
+        from data_sheets_schema.form_defects import FormFailure, FormSubtypeClassifier
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL
+        os.environ["D4D_PROFILE"] = "bridge2ai"
+        c = FormSubtypeClassifier(client=object(), model="offline-test", profile=NEUTRAL)
+        self.assertEqual(c.schema, c._live_snapshot()[0])
+        os.environ["D4D_PROFILE"] = "neutral"
+        c = FormSubtypeClassifier(client=object(), model="offline-test", profile=BRIDGE2AI)
+        self.assertEqual(c.schema, c._live_snapshot()[0])
+        # #1514: a failure judged under another instrument is refused, not pooled.
+        other = FormFailure(project="P", slot="instances", value="[]", reason="wrong kind", fitness=0.0,
+                            schema="029c2abcda26e45c4465fd0a8455893d")
+        with self.assertRaises(ValueError):
+            c(other)
+
+    def test_loading_refuses_failures_from_two_instruments(self):
+        """#1514"""
+        import json
+        from data_sheets_schema.form_defects import load_form_failures
+        with tempfile.TemporaryDirectory() as d:
+            rows = [{"failure": "form", "rubric": "r", "model": "m", "slot": "instances", "value": "[]",
+                     "reason": "x", "fitness": 0.0, "schema": s} for s in (self.STUDY, "029c2abcda26e45c4465fd0a8455893d")]
+            (Path(d) / "P_fitness.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                load_form_failures(Path(d))
+            self.assertIn("schema", str(caught.exception))
+            (Path(d) / "P_fitness.jsonl").write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
+            self.assertEqual(load_form_failures(Path(d))[0].schema, self.STUDY)
+
+    def test_a_pre_profile_record_is_the_studys_whatever_the_environment(self):
+        """#1518"""
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, for_record
+        os.environ["D4D_PROFILE"] = "neutral"
+        self.assertIs(for_record({"schema": {"digest_md5": "34d24ff30fb6ad0f10d82af09ddc1fba"}}), BRIDGE2AI)
+        self.assertIs(for_record({"schema": {}}), NEUTRAL)                 # nothing recorded: the ambient one
+
+    def test_own_record_under_another_project_gets_its_own_file(self):
+        """#1516"""
+        from unittest import mock
+        from data_sheets_schema import healthsheet
+        from data_sheets_schema.profiles import BRIDGE2AI
+        rec = BRIDGE2AI.healthsheet_record
+        if not (ROOT / rec).exists():
+            self.skipTest("the study's healthsheet record is not in this checkout")
+        with tempfile.TemporaryDirectory() as d:
+            target, _ = healthsheet.build_bundle(ROOT / rec, Path(d), project="CLINIC")
+            self.assertEqual(target.name, "CLINIC_healthsheet_only.txt")
+            target, _ = healthsheet.build_bundle(ROOT / rec, Path(d))
+            self.assertEqual(target.name, "AI_READI_healthsheet_only.txt")
+
+    def test_legacy_progress_and_continuation(self):
+        """#1517: a saved identity without the profile key matches when the
+        rest does; #1519: a record with no digest cannot be resumed."""
+        from data_sheets_schema import api_runner, usage_ledger
+        spec = self._spec()
+        identity = spec.input_identity()
+        legacy = {k: v for k, v in identity.items() if k != "profile"}
+        self.assertFalse(usage_ledger._identity_differs(legacy, identity))
+        record = {"inputs": {"bundle_path": identity["bundle"]["path"], "bundle_sha256": identity["bundle"]["sha256"],
+                             "source_manifest": identity["source_manifest"], "chunks": identity["chunks"]},
+                  "schema": {}, "prompts": {"request": {"sha256": identity["instruction"]["sha256"]}}}
+        with self.assertRaises(usage_ledger.UsageLedgerError) as caught:
+            api_runner._require_recorded_inputs(spec, record)
+        self.assertIn("no schema digest", str(caught.exception))
+
+    def _spec(self):
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                       label="2026-09-13_x-api-generic-v9_rep1", condition="generic_v9", run_date="2026-09-13",
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+
+    def test_neutral_sync_needs_no_pin(self):
+        """#1520"""
+        from unittest import mock
+        from data_sheets_schema import schema_digest, schema_sync
+        from data_sheets_schema.profiles import NEUTRAL
+        with mock.patch.object(schema_digest, "VOCABULARY_PIN", Path("/nonexistent-round4-vocabulary.yaml")):
+            rows = schema_sync.check(profile=NEUTRAL)
+        self.assertTrue(all(r["status"] == schema_sync.IN_SYNC for r in rows), rows)

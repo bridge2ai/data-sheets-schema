@@ -143,11 +143,10 @@ def declared_profile(manifest: Path | str | None) -> str | None:
 def default_manifest() -> Path | None:
     """The manifest a caller that selected none is read against, decided
     when asked rather than when imported (#1439): the working directory's
-    default manifest if there is one, else the nearest ancestor's (an
-    installed package run from a subdirectory of the user's project, #1467
-    — the way git finds a repository), else the checkout's when this
-    package is imported from a checkout — so a script run from `tests/` in
-    the study's checkout still sees the study's — else none."""
+    default manifest if there is one, else the checkout's when this package
+    is imported from a checkout — so a script run from `tests/` in the
+    study's checkout still sees the study's — else none (the registry's
+    rule, #1491; an ancestor's manifest waits on #1523)."""
     # The registry's rule, not a second one (#1491).
     from data_sheets_schema.registry import default_manifest_path
     p = default_manifest_path()
@@ -222,8 +221,15 @@ def for_record(record: dict[str, Any] | None) -> Profile:
     checkout. Evaluation, review packs and backfills read this, never the
     environment alone, so a historical record keeps its instrument when the
     environment changes."""
-    name = ((record or {}).get("schema") or {}).get("profile") if isinstance(record, dict) else None
-    return profile_named(str(name)) if name else active_profile()
+    schema = ((record or {}).get("schema") or {}) if isinstance(record, dict) else {}
+    name = schema.get("profile")
+    if name:
+        return profile_named(str(name))
+    if schema.get("digest_md5"):
+        # A digest with no profile is a record made before profiles existed —
+        # under the study's — and must not follow the environment (#1518).
+        return BRIDGE2AI
+    return active_profile()
 
 
 def arm_projects_for(arm: str, profile: Profile | None = None) -> list[str] | None:

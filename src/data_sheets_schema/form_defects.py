@@ -113,6 +113,11 @@ class FormFailure:
     reason: str
     fitness: float
     config: str = ""          # v1 | v2, filled by attribution
+    # The instrument the judgement was made under (#1514): the digest and
+    # complete-specification hashes the fitness entry recorded, so a set
+    # spanning two profiles is refused like one spanning two models.
+    schema: str = ""
+    specification: str = ""
 
     @property
     def key(self) -> str:
@@ -136,6 +141,7 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
     out: list[FormFailure] = []
     rubrics: set[str] = set()
     models: set[str] = set()
+    schemas: set[str] = set()
     for path in sorted(cache_dir.glob("*_fitness.jsonl")):
         project = path.name.replace("_fitness.jsonl", "")
         for line in path.read_text(encoding="utf-8").splitlines():
@@ -146,11 +152,14 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
                 continue
             rubrics.add(entry.get("rubric", ""))
             models.add(entry.get("model", ""))
+            schemas.add(entry.get("schema", ""))
             out.append(FormFailure(
                 project=project, slot=entry["slot"], value=entry["value"],
                 reason=entry.get("reason", ""),
-                fitness=float(entry.get("fitness", 0.0))))
-    for name, seen in (("rubric", rubrics), ("model", models)):
+                fitness=float(entry.get("fitness", 0.0)),
+                schema=str(entry.get("schema", "") or ""),
+                specification=str(entry.get("specification", "") or "")))
+    for name, seen in (("rubric", rubrics), ("model", models), ("schema", schemas)):
         if len(seen) > 1:
             raise ValueError(
                 f"form failures span {len(seen)} fitness {name}s: "
@@ -365,10 +374,9 @@ class FormSubtypeClassifier:
                 key += ":" + reason_hash
             self._memo[key] = (entry["subtype"], entry.get("reason", ""))
 
-    @staticmethod
-    def _live_snapshot() -> tuple:
+    def _live_snapshot(self) -> tuple:
         from data_sheets_schema.evidence_score import slot_specification_snapshot
-        return slot_specification_snapshot()
+        return slot_specification_snapshot(profile=self.profile)      # the classifier's instrument (#1513)
 
     @property
     def specification(self) -> str:
@@ -474,6 +482,9 @@ class FormSubtypeClassifier:
             return self._memo[key]
         if self.offline:
             raise OfflineCacheMiss(f"no cached subtype for {failure.slot!r}")
+        if failure.schema and failure.schema != self.schema:
+            raise ValueError(f"the failure was judged under schema {failure.schema[:12]}…, this classifier "
+                             f"is keyed on {self.schema[:12]}…; they are different instruments (#1514)")
 
         snapshot = self._live_snapshot()
         if self.schema != snapshot[0] or self.specification != snapshot[3]:

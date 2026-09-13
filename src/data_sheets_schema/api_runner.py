@@ -4738,7 +4738,10 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
     # since #426 — and its profile must be resumed under the same ones.
     schema_block = record.get("schema") or {}
     recorded_digest = schema_block.get("digest_md5")
-    if recorded_digest and recorded_digest != current["profile"]["digest_md5"]:
+    if not recorded_digest:
+        raise UsageLedgerError("the record names no schema digest, so the instrument its phases were made "
+                               "under cannot be established; use --no-resume for an explicit new generation (#1519)")
+    if recorded_digest != current["profile"]["digest_md5"]:
         raise UsageLedgerError("generation instrument changed: the record's schema digest "
                                f"{recorded_digest} is not this run's {current['profile']['digest_md5']} "
                                f"(profile {current['profile']['name']}); restore the recorded "
@@ -4843,7 +4846,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                             and progress.get("generation_id") in (None, foreign_identifier)))
     if foreign_progress or not _same_usage_generation(spec, progress.get("generation_id")):
         progress = {}
-    if progress.get("input_identity") is not None and progress["input_identity"] != spec.input_identity():
+    from data_sheets_schema.usage_ledger import _identity_differs
+    if progress.get("input_identity") is not None and _identity_differs(progress["input_identity"], spec.input_identity()):
         raise UsageLedgerError("generation input identity changed since saved progress; restore the "
                                "recorded inputs or use --no-resume for an explicit new generation")
     done = set(progress.get("completed", []))
@@ -4852,6 +4856,16 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if recorded_inputs(spec) is None:
             raise UsageLedgerError("saved phases have no recorded generation input identity; restore "
                                    "their input evidence or use --no-resume for an explicit new generation")
+    if done and not prior_record:
+        # A pin made before the instrument was part of the identity says
+        # nothing about it; without a record attesting the digest, the
+        # finished phases' instrument is unknown and they are not continued
+        # under whatever this run resolved (#1519).
+        from data_sheets_schema.usage_ledger import recorded_inputs
+        pinned = progress.get("input_identity") or recorded_inputs(spec) or {}
+        if "profile" not in pinned:
+            raise UsageLedgerError("saved phases carry no instrument identity (profile and schema digest) and "
+                                   "no record attests one; use --no-resume for an explicit new generation")
     if done:
         from data_sheets_schema.usage_ledger import recorded_inputs
         evidence = progress.get("input_identity") or recorded_inputs(spec) or {}

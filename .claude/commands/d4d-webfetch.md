@@ -7,20 +7,10 @@ Read .github/workflows/d4d_assistant_create.md for the full workflow.
 
 ## Projects and Source URLs
 
-### 1. AI_READI
-- https://docs.aireadi.org
-- https://fairhub.io/datasets/2
-
-### 2. CM4AI
-- https://cm4ai.org
-- https://doi.org/10.18130/V3/B35XWX
-
-### 3. VOICE
-- https://docs.b2ai-voice.org
-- https://doi.org/10.13026/249v-w155
-
-### 4. CHORUS
-- https://chorus4ai.org
+The selected source manifest declares each project and its sources with their
+URLs (`d4d download list-projects`; the project's entries under `projects:` in
+`data/preprocessed/source_manifest.yaml` by default). Fetch those; do not keep a
+list here.
 
 ## Output Location
 

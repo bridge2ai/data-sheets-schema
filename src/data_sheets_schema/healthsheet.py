@@ -146,6 +146,7 @@ def build_bundle(record_path: Path | None = None,
     healthsheet, record = load_healthsheet(record_path)
     text, stats = render(healthsheet, record, record_path, project=project)
     output_dir.mkdir(parents=True, exist_ok=True)
-    target = output_dir / (name or (bundle_name() if own else None) or f"{project}_healthsheet_only.txt")
+    own_name = own and project == prof.healthsheet_project        # the study's bundle is the study's dataset (#1516)
+    target = output_dir / (name or (bundle_name() if own_name else None) or f"{project}_healthsheet_only.txt")
     target.write_text(text, encoding="utf-8")
     return target, stats

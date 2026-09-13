@@ -269,8 +269,11 @@ def check_one(merged: Path, source: Path, class_name: str,
             source_snapshot = _source_snapshot(source)
             source_state = source_snapshot[0]
             merged_bytes = merged.read_bytes()
-            vocabulary_bytes = schema_digest.VOCABULARY_PIN.read_bytes()
-            vocabulary = Path(tmp) / "vocabulary" / schema_digest.VOCABULARY_PIN.name
+            # The selected profile's vocabulary inputs — none for neutral,
+            # whose render consumes no pin (#1520).
+            from data_sheets_schema.profiles import vocabulary_bytes as _vb
+            vocabulary_bytes = _vb(profile)
+            vocabulary = Path(tmp) / "vocabulary" / (profile.pin_path.name if profile.pin_path else "no-vocabulary.yaml")
             vocabulary.parent.mkdir()
             vocabulary.write_bytes(vocabulary_bytes)
             ok, why = _regenerate(source, rebuilt, marker, snapshot=source_snapshot)
@@ -290,7 +293,7 @@ def check_one(merged: Path, source: Path, class_name: str,
             if source_changed:
                 forget_rebuilds()
             if (merged.read_bytes() != merged_bytes or source_changed
-                    or schema_digest.VOCABULARY_PIN.read_bytes() != vocabulary_bytes):
+                    or _vb(profile) != vocabulary_bytes):
                 return {**out, "status": UNCHECKED,
                         "reason": "schema inputs changed during the sync check; retry with stable inputs"}
         except Exception as exc:                               # noqa: BLE001
