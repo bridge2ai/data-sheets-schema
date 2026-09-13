@@ -400,30 +400,41 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     from data_sheets_schema.registry import AUTO, select_manifest, manifest_declared_unused
     requested = (None if (manifest and str(manifest).lower() == "none")
                  else Path(manifest) if manifest else AUTO)
-    # The bundle the record will name: the one passed, else the one the
-    # output's header declares — read here, before selecting, so a study
-    # key over an external header bundle selects none (#1384).
+    from data_sheets_schema.corpus import AUTO as NO_OVERRIDE, manifest_override
+    if requested is AUTO:
+        explicit = manifest_override()
+        if explicit is not NO_OVERRIDE:
+            requested = explicit
     from data_sheets_schema.provenance import CONCAT_DIR as _CD, parse_header
-    header_bundle = None
     base = method[:-5] if method.endswith("_core") else method
-    full_out = _corpus_path(_CD) / base / label / f"{project}_d4d.yaml"
-    h = parse_header(full_out) if full_out.exists() else {}
-    header_bundle = h.get("Source bundle") or h.get("Source")
-    resolved_bundle = input_bundle or header_bundle
-    header_manifest = h.get("Source manifest", "").strip()
-    header_unused = manifest_declared_unused(header_manifest)
-    if requested is AUTO and header_manifest and not header_unused:
-        requested = Path(header_manifest)
-    if requested is AUTO and "no manifest selected" in header_manifest.lower():
-        # The runner's own header for a run that selected none (#1558):
-        # not context withheld from a selected manifest, but no manifest —
-        # the profile is neutral, whatever the study's manifest declares.
-        requested = None
-    # Selected by the runner's rule whenever a bundle is resolved — the
-    # header's "not used" says the manifest's *context blocks* were not
-    # sent, not that no manifest was selected (#1461, #1512) …
-    selected_manifest = (None if requested is AUTO and resolved_bundle is None
-                         else select_manifest(project, resolved_bundle, requested))
+    # An explicit external bundle can select no manifest even below another
+    # corpus. Resolve that namespace before reading any output header (#1735).
+    selected_manifest = select_manifest(project, input_bundle, requested)
+    for _ in range(2):
+        concat_dir = _corpus_path(_CD, selected_manifest).absolute()
+        full_out = concat_dir / base / label / f"{project}_d4d.yaml"
+        h = parse_header(full_out) if full_out.exists() else {}
+        header_bundle = h.get("Source bundle") or h.get("Source")
+        resolved_bundle = (input_bundle or
+                           (_corpus_path(Path(header_bundle), selected_manifest)
+                            if header_bundle else None))
+        header_manifest = h.get("Source manifest", "").strip()
+        header_unused = manifest_declared_unused(header_manifest)
+        header_selection = requested
+        if requested is AUTO:
+            if header_unused and "no manifest selected" in header_manifest.lower():
+                header_selection = None
+            elif header_manifest and not header_unused:
+                header_selection = _corpus_path(Path(header_manifest), selected_manifest)
+        # Unused context does not erase the selected output namespace.
+        selected_manifest = (None if header_selection is AUTO and resolved_bundle is None
+                             else select_manifest(project, resolved_bundle, header_selection))
+        if _corpus_path(_CD, selected_manifest).resolve() == concat_dir.resolve():
+            break
+        # A header selecting another owner must be read from that owner too.
+    else:
+        raise click.ClickException(
+            "output headers disagree about the corpus owner; pass --manifest to select it")
     from data_sheets_schema.profiles import select_profile
     if stated_profile:
         # The instruction's profile is authoritative (#1581); what this
@@ -480,7 +491,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     rec = build_record(project, method, label, mode="live",
                        # The selected manifest owns outputs even when this
                        # arm consumes none of its context blocks.
-                       concat_dir=_corpus_path(_CD),
+                       concat_dir=concat_dir,
                        input_bundle=Path(input_bundle) if input_bundle else None,
                        input_verified=True,
                        prompt_paths=[Path(p) for p in prompts] or None,
@@ -504,7 +515,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 f"--phase-skipped {bad}: not phases this pipeline has. "
                 f"Known: {', '.join(sorted(known))}")
         rec.data["phases_skipped"] = list(phases_skipped)
-    out = rec.write(record_path_for(project, method, label))
+    out = rec.write(record_path_for(project, method, label, concat_dir=concat_dir))
     click.echo(f"✓ {out}")
     _inline_checks(out)
 
@@ -1705,7 +1716,8 @@ def backfill(verified, dry_run):
         if run.is_core or run.deterministic:
             continue
         for project in run.projects:
-            target = record_path_for(project, run.method, run.label)
+            concat_dir = run.path.parent.parent
+            target = record_path_for(project, run.method, run.label, concat_dir=concat_dir)
             if target.exists():
                 click.echo(f"  kept existing {target}")
                 kept += 1
@@ -1725,7 +1737,8 @@ def backfill(verified, dry_run):
                         deferred += 1
                         continue
                     rec = build_record(project, run.method, run.label,
-                                       mode="reconstructed", input_verified=run.label in verified)
+                                       mode="reconstructed", input_verified=run.label in verified,
+                                       concat_dir=concat_dir)
                     n_unrec = len(rec.data.get("unrecoverable") or [])
                     if dry_run:
                         click.echo(f"  would write {target}  ({n_unrec} unrecoverable)")

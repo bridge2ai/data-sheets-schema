@@ -817,19 +817,18 @@ class TestClaudeRoundFour(unittest.TestCase):
         bad = Path(self.tmp) / "bad.txt"; bad.write_text("bytes\n", encoding="utf-8")
         def entry(path, digest_of):
             value = base64.urlsafe_b64encode(hashlib.sha256(digest_of).digest()).rstrip(b"=").decode()
-            return SimpleNamespace(hash=SimpleNamespace(mode="sha256", value=value), locate=lambda: path, __str__=lambda self: path.name)
+            return (path.name, "sha256", value, path)
         entries = [entry(good, b"bytes\n"), entry(bad, b"other\n")]
-        with mock.patch("importlib.metadata.files", return_value=entries):
-            changed, measured, unmeasured, _ = provenance._installed_files_changed()
+        changed, measured, unmeasured, _ = provenance._installed_files_changed(rows=entries)
         self.assertTrue(measured); self.assertEqual(len(changed), 1); self.assertEqual(unmeasured, [])
-        with mock.patch("importlib.metadata.files", return_value=[]):
+        with mock.patch.object(provenance, "_record_rows", return_value=None):
             self.assertEqual(provenance._installed_files_changed(), ([], False, [], False))
         with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
-                mock.patch("importlib.metadata.files", return_value=[entry(good, b"bytes\n")]):
+                mock.patch.object(provenance, "_record_rows", return_value=[entry(good, b"bytes\n")]):
             facts = provenance.repo_facts()
         self.assertEqual((facts["resource_kind"], facts["dirty"], facts["dirty_file_count"]), ("install", False, 0))
         with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
-                mock.patch("importlib.metadata.files", return_value=[]):
+                mock.patch.object(provenance, "_record_rows", return_value=None):
             facts = provenance.repo_facts()
         self.assertEqual((facts["dirty"], facts["dirty_file_count"]), (None, None))
         self.assertIn("unknown, not clean", facts["note"])
@@ -925,21 +924,14 @@ class TestCodexRoundFive(unittest.TestCase):
         from data_sheets_schema import provenance
         good = Path(self.tmp) / "good.py"; good.write_text("good", encoding="utf-8")
         h = SimpleNamespace(mode="sha256", value=base64.urlsafe_b64encode(hashlib.sha256(b"good").digest()).rstrip(b"=").decode())
-        class Entry:
-            def __init__(self, name, hash_value, path): self.name, self.hash, self.path = name, hash_value, path
-            def __str__(self): return self.name
-            def locate(self): return self.path
-        g = Entry("good.py", h, good)
-        missing = Entry("data_sheets_schema/schema/missing.yaml", None, Path(self.tmp) / "absent.yaml")
-        pth = Entry("startup.pth", None, good)
-        unhashed = Entry("data_sheets_schema/schema/x.yaml", None, good)
-        with mock.patch("importlib.metadata.files", return_value=[g, missing]):
-            self.assertEqual(provenance._installed_files_changed(), (["data_sheets_schema/schema/missing.yaml"], True, [], False))
-        with mock.patch("importlib.metadata.files", return_value=[g, pth]):
-            self.assertEqual(provenance._installed_files_changed(), ([], True, [], False))
-        with mock.patch("importlib.metadata.files", return_value=[g, unhashed]):
-            changed, measured, unmeasured, _ = provenance._installed_files_changed()
-            self.assertEqual((changed, measured, unmeasured), ([], False, ["data_sheets_schema/schema/x.yaml"]))
+        g = ("good.py", "sha256", h.value, good)
+        missing = ("data_sheets_schema/schema/missing.yaml", None, None, Path(self.tmp) / "absent.yaml")
+        pth = ("startup.pth", None, None, good)
+        unhashed = ("data_sheets_schema/schema/x.yaml", None, None, good)
+        self.assertEqual(provenance._installed_files_changed(rows=[g, missing]), (["data_sheets_schema/schema/missing.yaml"], True, [], False))
+        self.assertEqual(provenance._installed_files_changed(rows=[g, pth]), ([], True, [], False))
+        changed, measured, unmeasured, _ = provenance._installed_files_changed(rows=[g, unhashed])
+        self.assertEqual((changed, measured, unmeasured), ([], False, ["data_sheets_schema/schema/x.yaml"]))
 
     def test_the_last_traceback_decides_and_a_quoted_name_keeps_its_marker(self):
         """#1668, #1672"""
@@ -1083,17 +1075,12 @@ class TestClaudeRoundFive(unittest.TestCase):
         from data_sheets_schema import provenance
         good = Path(self.tmp) / "good.py"; good.write_text("good", encoding="utf-8")
         ledger = Path(self.tmp) / "digest_inventory.yaml"; ledger.write_text("grown\n", encoding="utf-8")
-        class Entry:
-            def __init__(self, name, path, of):
-                self.name, self.path = name, path
-                self.hash = SimpleNamespace(mode="sha256", value=base64.urlsafe_b64encode(hashlib.sha256(of).digest()).rstrip(b"=").decode())
-            def __str__(self): return self.name
-            def locate(self): return self.path
-        entries = [Entry("good.py", good, b"good"), Entry("data_sheets_schema/schema/digest_inventory.yaml", ledger, b"shipped\n")]
-        with mock.patch("importlib.metadata.files", return_value=entries):
-            self.assertEqual(provenance._installed_files_changed(), ([], True, [], True))
+        def row(name, path, of):
+            return (name, "sha256", base64.urlsafe_b64encode(hashlib.sha256(of).digest()).rstrip(b"=").decode(), path)
+        entries = [row("good.py", good, b"good"), row("data_sheets_schema/schema/digest_inventory.yaml", ledger, b"shipped\n")]
+        self.assertEqual(provenance._installed_files_changed(rows=entries), ([], True, [], True))
         with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
-                mock.patch("importlib.metadata.files", return_value=entries):
+                mock.patch.object(provenance, "_record_rows", return_value=entries):
             facts = provenance.repo_facts()
         self.assertEqual((facts["dirty"], facts.get("ledger_changed")), (False, True))
         self.assertIn("not established", facts["note"])
@@ -1148,14 +1135,8 @@ class TestCodexRoundSix(unittest.TestCase):
 
     def _entry(self, name, path, of=None, mode="sha256", hashed=True):
         import base64, hashlib
-        from types import SimpleNamespace
-        class Entry:
-            def __init__(s): s.name, s.path = name, path
-            def __str__(s): return s.name
-            def locate(s): return s.path
-        e = Entry()
-        e.hash = SimpleNamespace(mode=mode, value=base64.urlsafe_b64encode(hashlib.sha256(of).digest()).rstrip(b"=").decode()) if hashed else None
-        return e
+        value = base64.urlsafe_b64encode(hashlib.sha256(of).digest()).rstrip(b"=").decode() if hashed else None
+        return (name, mode if hashed else None, value, path)
 
     def test_implicit_corpus_targets_are_written_only_from_the_corpus_root(self):
         """#1714, #1721"""
@@ -1199,8 +1180,7 @@ class TestCodexRoundSix(unittest.TestCase):
             "unsupported ledger algorithm": ([g, self._entry("data_sheets_schema/schema/digest_inventory.yaml", ledger, b"x", mode="no-such-hash")], ([], False, ["data_sheets_schema/schema/digest_inventory.yaml"], False)),
         }
         for label, (entries, expected) in cases.items():
-            with mock.patch("importlib.metadata.files", return_value=entries):
-                self.assertEqual(provenance._installed_files_changed(), expected, label)
+            self.assertEqual(provenance._installed_files_changed(rows=entries), expected, label)
 
     def test_readability_decides_the_repair_finding_class(self):
         """#1718"""
@@ -1227,3 +1207,97 @@ class TestCodexRoundSix(unittest.TestCase):
                 resources._is_our_checkout(repo)
         tb = "Traceback (most recent call last):\n  File \"x\", line 1\n    y()\nyaml.reader.ReaderError: unacceptable character\n  in \"/tmp/r.yaml\", position 12\n"
         self.assertIn('in "/tmp/r.yaml", position 12', _crash_diagnostic(tb))
+
+
+class TestClaudeRoundSix(unittest.TestCase):
+    """The Claude round-6 findings on #1455 (#1727–#1730)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def test_a_deleted_shipped_file_is_seen_through_the_record_itself(self):
+        """#1727: the RECORD is read as rows, so a missing file is still a row."""
+        import base64, hashlib, sys
+        from data_sheets_schema import provenance
+        site = Path(self.tmp) / "site"; (site / "foo").mkdir(parents=True)
+        info = site / "foo-1.0.dist-info"; info.mkdir()
+        (site / "foo" / "present.txt").write_bytes(b"here")
+        h = base64.urlsafe_b64encode(hashlib.sha256(b"here").digest()).rstrip(b"=").decode()
+        (info / "METADATA").write_text("Metadata-Version: 2.1\nName: foo\nVersion: 1.0\n", encoding="utf-8")
+        (info / "RECORD").write_text(f"foo/present.txt,sha256={h},4\nfoo/missing.txt,sha256={h},4\nfoo-1.0.dist-info/RECORD,,\n", encoding="utf-8")
+        from importlib.metadata import distribution
+        sys.path.insert(0, str(site))
+        try:
+            import importlib.metadata as md
+            with mock.patch.object(provenance, "_record_rows", lambda: [
+                    (r[0], (r[1].partition("=")[0] or None) if len(r) > 1 and r[1] else None,
+                     (r[1].partition("=")[2] or None) if len(r) > 1 and r[1] else None, Path(distribution("foo").locate_file(r[0])))
+                    for r in __import__("csv").reader(distribution("foo").read_text("RECORD").splitlines()) if r and r[0]]):
+                changed, measured, unmeasured, _ = provenance._installed_files_changed()
+        finally:
+            sys.path.remove(str(site))
+        self.assertEqual(changed, ["foo/missing.txt"]); self.assertTrue(measured)
+
+    def test_every_git_caller_uses_the_same_environment(self):
+        """#1728"""
+        from data_sheets_schema import agent_pin, prompt_registry, resources
+        seen = []
+        real = __import__("subprocess").run
+        def spy(cmd, **kw):
+            seen.append(kw.get("env")); return real(cmd, **kw)
+        with mock.patch.dict(os.environ, {"GIT_DIR": "/nowhere"}), \
+                mock.patch.object(agent_pin.subprocess, "run", spy), mock.patch.object(prompt_registry.subprocess, "run", spy):
+            agent_pin._git("rev-parse", "HEAD", cwd=ROOT)
+            prompt_registry._git("rev-parse", "HEAD", cwd=ROOT)
+        self.assertEqual(len(seen), 2)
+        for env in seen:
+            self.assertIsNotNone(env); self.assertNotIn("GIT_DIR", env)
+        self.assertNotIn("GIT_DIR", resources.git_env()) if "GIT_DIR" in os.environ else None
+
+    def test_a_missing_declared_vocabulary_is_an_error_from_every_reader(self):
+        """#1729"""
+        import click.testing
+        from data_sheets_schema import provenance
+        from data_sheets_schema.cli.api import api
+        from data_sheets_schema.profiles import BRIDGE2AI, MissingVocabulary, vocabulary_for
+        import shutil
+        repo = Path(self.tmp) / "wt"; (repo / "src" / "data_sheets_schema").mkdir(parents=True)
+        (repo / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        # The schemas are there, the vocabulary is not: the digest render
+        # reaches the pin and must say so (the reviewer's scenario).
+        shutil.copytree(ROOT / "src/data_sheets_schema/schema", repo / "src/data_sheets_schema/schema")
+        shutil.copytree(ROOT / "src/download", repo / "src/download")           # the prompts and their registry
+        shutil.copytree(ROOT / ".claude", repo / ".claude")                     # the playbooks
+        os.chdir(repo)
+        with self.assertRaises(MissingVocabulary):
+            BRIDGE2AI.has_vocabulary
+        with self.assertRaises(MissingVocabulary):
+            vocabulary_for(BRIDGE2AI)
+        self.assertTrue(issubclass(MissingVocabulary, ValueError))
+        finding = provenance._profile_digest_disagreement({"schema": {"profile": "bridge2ai", "digest_md5": "029c2abcda26e45c4465fd0a8455893d"}})
+        self.assertIsNotNone(finding); self.assertIn("cannot be checked here", finding)
+        (repo / "data" / "preprocessed" / "concatenated").mkdir(parents=True)
+        (repo / "data" / "preprocessed" / "concatenated" / "X_preprocessed.txt").write_text("docs\n", encoding="utf-8")
+        # `--manifest none` would select the neutral profile, which declares no
+        # vocabulary; the study profile is the one that must fail loudly.
+        r = click.testing.CliRunner(env={"D4D_PROFILE": "bridge2ai"}).invoke(api, [
+            "plan", "--project", "X", "--label", "2026-09-13_x-api-generic_rep1",
+            "--bundle", "data/preprocessed/concatenated/X_preprocessed.txt", "--manifest", "none"])
+        self.assertNotEqual(r.exit_code, 0)
+        self.assertTrue(r.exception is None or isinstance(r.exception, SystemExit), repr(r.exception))   # a click error, not a traceback
+        self.assertIn("vocabulary", r.output.lower())
+
+    def test_the_root_error_passes_through_require_repo_context(self):
+        """#1730 (nit)"""
+        import click
+        from data_sheets_schema.cli._repo_utils import require_repo_context
+        from data_sheets_schema.resources import ResourceRootError
+        with mock.patch("data_sheets_schema.cli._repo_utils.get_repo_root", side_effect=ResourceRootError("marker unreadable")):
+            with self.assertRaises(ResourceRootError) as caught:
+                require_repo_context("d4d x")
+        self.assertEqual(caught.exception.message, "marker unreadable")

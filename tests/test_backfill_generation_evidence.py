@@ -34,7 +34,7 @@ def generated(external, monkeypatch):
     monkeypatch.setattr(pv, "record_path_for", lambda *args, **kwargs: spec.provenance_path)
     monkeypatch.setattr(runs, "discover", lambda: [SimpleNamespace(
         is_core=False, deterministic=False, projects=[spec.project],
-        method=spec.method, label=spec.label)])
+        method=spec.method, label=spec.label, path=spec.full_path.parent)])
     receipt_cli = importlib.import_module("data_sheets_schema.cli.receipts")
     monkeypatch.setattr(receipt_cli, "_run_paths", lambda *args: {
         "full": spec.full_path, "core_dir": spec.core_path.parent,

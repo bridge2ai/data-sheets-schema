@@ -148,14 +148,13 @@ def _usable(lines):
 
 
 def _git(*args, cwd: Path | None = None) -> str:
-    from data_sheets_schema.resources import resource_root
+    from data_sheets_schema.resources import git_env, resource_root
     root, kind = resource_root()
     if kind != "checkout":
         return ""
-    env = {key: value for key, value in os.environ.items()
-           if key not in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")}
     return subprocess.run(["git", *args], capture_output=True, text=True,
-                          cwd=cwd or root, env=env).stdout
+                          cwd=cwd or root, env=git_env()).stdout
+
 
 
 def _history_root(path: Path) -> Path:

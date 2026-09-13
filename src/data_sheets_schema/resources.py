@@ -304,6 +304,16 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
     return resolved.as_posix()
 
 
+def git_env() -> dict[str, str]:
+    """The environment git is asked in: the caller's, without a borrowed
+    `GIT_DIR`/`GIT_WORK_TREE`/`GIT_INDEX_FILE`/`GIT_COMMON_DIR`, which would
+    make git answer for another repository while `--show-toplevel` echoes
+    the working directory (#1684, #1728)."""
+    import os
+    return {k: v for k, v in os.environ.items()
+            if k not in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")}
+
+
 def linkml_validate() -> list[str]:
     """The command that runs `linkml-validate` for *this* interpreter.
 

@@ -35,7 +35,7 @@ def prior(external, monkeypatch):
     monkeypatch.setattr(pv, "record_path_for", path_for)
     monkeypatch.setattr(runs, "discover", lambda: [SimpleNamespace(
         is_core=False, deterministic=False, projects=[spec.project],
-        method=spec.method, label=spec.label)])
+        method=spec.method, label=spec.label, path=spec.out_dir / spec.method / spec.label)])
     return spec, selected, path
 
 

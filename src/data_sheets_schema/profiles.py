@@ -45,6 +45,12 @@ STUDY_VOCABULARY_PIN = Path("src/data_sheets_schema/b2ai_registry_vocabularies.y
 from data_sheets_schema.resources import CHECKOUT_ROOT as _CHECKOUT_ROOT   # the one checkout test (#1577, #1643)
 
 
+class MissingVocabulary(FileNotFoundError, ValueError):
+    """A profile declares a vocabulary the resources do not carry (#1715,
+    #1729). A `ValueError` too, so every command that already turns an
+    unknown profile into a click error does the same for this."""
+
+
 @dataclass(frozen=True)
 class Profile:
     name: str
@@ -96,8 +102,16 @@ class Profile:
 
     @property
     def has_vocabulary(self) -> bool:
+        """Declared and present. A profile that declares a vocabulary whose
+        file is not where the resources are is an error here too, so no
+        reader renders the neutral instrument in its place (#1715, #1729)."""
         pin = self.pin_path
-        return pin is not None and pin.exists()
+        if pin is None:
+            return False
+        if not pin.exists():
+            raise MissingVocabulary(f"the {self.name} profile declares a vocabulary at {pin}, which is not there; "
+                                    "its digest cannot be rendered from this checkout (#1715)")
+        return True
 
 
 BRIDGE2AI = Profile(
@@ -296,12 +310,6 @@ def vocabulary_bytes(profile: Profile) -> bytes:
     """The bytes the digest cache keys on: the pin's, or none for a profile
     that declares no vocabulary. A profile that declares one whose file is
     not where the resources are is an error, never the neutral instrument
-    in disguise (#1715): the study's digest cannot be rendered from a
-    checkout that lacks the study's vocabulary."""
-    pin = profile.pin_path
-    if pin is None:
-        return b""
-    if not pin.exists():
-        raise FileNotFoundError(f"the {profile.name} profile declares a vocabulary at {pin}, which is not there; "
-                                "its digest cannot be rendered from this checkout (#1715)")
-    return pin.read_bytes()
+    in disguise (#1715, #1729): the study's digest cannot be rendered from
+    a checkout that lacks the study's vocabulary."""
+    return profile.pin_path.read_bytes() if profile.has_vocabulary else b""

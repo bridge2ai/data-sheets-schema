@@ -367,10 +367,8 @@ def _run_result(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) 
         # translation, so a `\r` in a name is kept.
         env = None
         if cmd and cmd[0] == "git":
-            # `GIT_DIR`/`GIT_WORK_TREE` would make git answer for another
-            # repository while `--show-toplevel` echoes the cwd (#1684).
-            env = {k: v for k, v in os.environ.items()
-                   if k not in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")}
+            from data_sheets_schema.resources import git_env
+            env = git_env()                  # never a borrowed GIT_DIR (#1684, #1728)
         r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None, env=env)
     except Exception:
         return False, ""
@@ -662,7 +660,34 @@ def _is_bookkeeping(name: str) -> bool:
             or "__pycache__" in parts[:-1])
 
 
-def _installed_files_changed() -> tuple[list[str], bool, list[str], bool]:
+def _record_rows() -> list[tuple[str, str | None, str | None, "Path"]] | None:
+    """The wheel's RECORD, row by row: `(name, algorithm, value, path)`.
+    Read from the distribution's own RECORD text, not through
+    `importlib.metadata.files()`, which drops the rows whose files are
+    missing on Python 3.12+ — the one case a measurement of an install
+    must be able to report (#1727). None when there is no distribution or
+    no RECORD."""
+    import csv
+    from importlib.metadata import PackageNotFoundError, distribution
+    try:
+        dist = distribution("data-sheets-schema")
+    except PackageNotFoundError:
+        return None
+    text = dist.read_text("RECORD")
+    if not text:
+        return None
+    rows = []
+    for row in csv.reader(text.splitlines()):
+        if not row or not row[0]:
+            continue
+        name = row[0]
+        spec = row[1] if len(row) > 1 else ""
+        algo, _, value = spec.partition("=") if spec else (None, None, None)
+        rows.append((name, algo or None, value or None, Path(dist.locate_file(name))))
+    return rows
+
+
+def _installed_files_changed(rows=None) -> tuple[list[str], bool, list[str], bool]:
     """`(changed, measured, unmeasured, ledger_changed)`: the installed files
     whose bytes no longer match the wheel's RECORD or that are gone;
     `measured` False when the RECORD cannot be read or a resource it lists
@@ -671,27 +696,22 @@ def _installed_files_changed() -> tuple[list[str], bool, list[str], bool]:
     `ledger_changed`: a hash says it differs, not that earlier entries
     survived, so it is neither counted clean nor called an append (#1716).
     Exempt is only the installer's bookkeeping (#1717). Returned, never
-    stored on the function (#1720). The record's hashes are
-    `<algorithm>=<urlsafe base64, unpadded>`."""
+    stored on the function (#1720). The RECORD is read as rows, so a
+    deleted file is still seen (#1727)."""
     import base64
-    from importlib.metadata import PackageNotFoundError, files
-    try:
-        entries = files("data-sheets-schema")
-    except PackageNotFoundError:
-        return [], False, [], False
-    if not entries:
+    if rows is None:
+        rows = _record_rows()
+    if not rows:
         return [], False, [], False
     changed: list[str] = []
     unmeasured: list[str] = []
     ledger_changed = False
     seen = 0
-    for entry in entries:
-        name = str(entry)
+    for name, algo, value, path in rows:
         bookkeeping = _is_bookkeeping(name)
         is_ledger = name.replace("\\", "/").endswith(_LEDGER)
-        h = getattr(entry, "hash", None)
         try:
-            data = entry.locate().read_bytes()
+            data = Path(path).read_bytes()
         except FileNotFoundError:
             if not bookkeeping:
                 changed.append(name)         # gone, hashed or not
@@ -699,16 +719,16 @@ def _installed_files_changed() -> tuple[list[str], bool, list[str], bool]:
         except (OSError, ValueError):
             changed.append(name)
             continue
-        if h is None or not getattr(h, "value", None):
+        if not algo or not value:
             if not bookkeeping:
                 unmeasured.append(name)      # a resource the RECORD does not attest — the ledger included
             continue
         try:
-            digest = hashlib.new(getattr(h, "mode", "sha256"), data).digest()
+            digest = hashlib.new(algo, data).digest()
         except ValueError:
             unmeasured.append(name)          # an algorithm this interpreter lacks (#1723)
             continue
-        same = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") == h.value
+        same = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") == value
         if is_ledger:
             ledger_changed = not same
             continue
@@ -1099,7 +1119,10 @@ def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
         from data_sheets_schema.profiles import PROFILES
         current = {name: schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=prof))
                    for name, prof in PROFILES.items()}
-    except Exception:                                          # noqa: BLE001 — no schema here: nothing to compare
+    except Exception as exc:                                   # noqa: BLE001 — no schema here: nothing to compare
+        from data_sheets_schema.profiles import MissingVocabulary
+        if isinstance(exc, MissingVocabulary):
+            return (f"the record's profile cannot be checked here: {exc}")   # a finding, not silence (#1729)
         return None
     if current.get(schema["profile"]) == schema["digest_md5"]:
         return None                        # its own current digest, whatever else renders the same bytes (#1609)
