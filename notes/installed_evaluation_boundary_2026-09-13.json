@@ -31,7 +31,7 @@
     "scripts/render_evaluation_html_rubric10_semantic.py": "f9deb21b82dcad3bddf1c742b526523ef06904cc32f991619f59e65074c72b03",
     "scripts/render_evaluation_html_rubric20_semantic.py": "6990ab4d859c76a5c43d5df7b3c25098abfc5eb69cf3a4abffa455f7b6b04610",
     "scripts/validate_evaluation_schema.py": "5d11f730b566ae9adf554af1fcfb18581e1fd9a37ce9ce77704f092dc50118fd",
-    "src/data_sheets_schema/agent_pin.py": "9df5eaf49a684e382f1d52e6e607c864e026713ead616d140fe683e72de868c6",
+    "src/data_sheets_schema/agent_pin.py": "cd69fd77751a4489f0de1105b46f45fce8b5797679fd00edf75484b6e5e08654",
     "src/data_sheets_schema/cli/evaluate.py": "f7cb0c174aa9db60afb9c9151c3b10a047c024fd99ded53b7a2ef352436410c0",
     "src/data_sheets_schema/cli/render.py": "e8304b2d6b99e951ca35dee57d9c84c5ee6fb32ed9a6ffa5f0baa473c225f418",
     "src/data_sheets_schema/evaluation/__init__.py": "216a416e75fdb3561aeac7916ba0832573c6cd85d7e2f12ad0454f4955e4501b",
@@ -47,7 +47,7 @@
     "src/data_sheets_schema/rendering/process_text_files.py": "dbaa5b1a9e87b7f66aa703879ff1aa2b452fc83e47094ee66211b6394d3d3a72",
     "src/data_sheets_schema/rendering/rubric10_semantic.py": "960ab6e4db38d6a0bcf8663d8f0c6cf36691f47f08b2fa85de9ddd52382efc82",
     "src/data_sheets_schema/rendering/rubric20_semantic.py": "15ab76025dea2fcf4a9552bc1c5686cb458abad85e634db49da19abb5cf7ec5c",
-    "src/data_sheets_schema/resources.py": "3d74348ebef7dcbe2126396f292ba237ce1b148652b8e7e8a1c40dd58e5e9520",
+    "src/data_sheets_schema/resources.py": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435",
     "src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml": "2cc165cd388d53918d8cc6f5c4bbf2bdd347194e3c6f7b914cfb1695165da765",
     "src/data_sheets_schema/schema_snapshot.py": "33e2928f435d1f1ca9c6d13edb0ec0c3e393d4ee28c5e9e4957c60c089ef52b1",
     "src/data_sheets_schema/schema_view.py": "c95e6777751aaf26b1acaa59c6366d67a1703f77e9f250927871b3c41bde6f09",
@@ -67,7 +67,7 @@
     "agentic"
   ],
   "generation_dependency": "PR #1367, PR #1436 and PR #1455",
-  "integration_dependency_commit": "4c18986170c6521ad3cc9562bf75c9790ecb306c",
+  "integration_dependency_commit": "53359f5833f6da9c0453630ea6d4a9567c45f31b",
   "issues": [
     1301,
     1457,
@@ -96,7 +96,7 @@
     "path": "notes/evaluation_general_context_boundary_2026-09-13.json",
     "sha256": "0a915145cd9db8feab67f3ee4249853ddd1cc47217063805aacaaf018f573c0a"
   },
-  "profile_dependency_commit": "27b627fa2f565cb2ce06f8499db2891903fa4303",
+  "profile_dependency_commit": "00ec443ad91f5a3611545c9c018200025c17d1c8",
   "records_generated": [],
   "records_rescored": [],
   "runtime_quoted_definition_sha256": null,
