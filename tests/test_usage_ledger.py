@@ -544,6 +544,10 @@ def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tm
     old = prior["api_usage"]
     s.provenance_path.write_text(yaml.safe_dump(prior))
     ledger.ledger_path(s).unlink()
+    # This fixture simulates a run from before generation identities and
+    # snapshot indices existed; retaining the new index would contradict it.
+    from data_sheets_schema.snapshot_store import index_path
+    index_path(s.metadata_dir, s.project).unlink()
     api._save_progress(s, list(api.PHASES), None)
     assert "generation_id" not in json.loads(api._progress_path(s).read_text())
     client = FakeClient()

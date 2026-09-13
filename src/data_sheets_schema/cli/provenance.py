@@ -504,11 +504,14 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     recorded_manifest = (Path(sm["path"]) if sm.get("path") else None) if "path" in sm else _AUTO
     from itertools import product
     chunks = ((data.get("inputs") or {}).get("chunks") or {}).get("path")
-    for delta, render_version in product((0, -1, 1, -2), (2, 1)):
+    # A discovered sidecar is attested as an input too. Only an explicit
+    # selection belongs in the rendered recording command (#1408).
+    chunk_choices = (None, Path(chunks)) if chunks else (None,)
+    for delta, render_version, selected_chunks in product((0, -1, 1, -2, 2), (2, 1), chunk_choices):
         spec = RunSpec(project=project, arm=_ARMS[arm][0], method=method, bundle=Path(bundle),
                        label=label, condition=condition, runtime=runtime, provider=provider,
                        manifest=recorded_manifest, render_version=render_version,
-                       chunk_manifest=Path(chunks) if chunks else None,
+                       chunk_manifest=selected_chunks,
                        run_date=(base + timedelta(days=delta)).isoformat())
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:

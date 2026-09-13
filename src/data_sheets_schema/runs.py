@@ -1151,19 +1151,7 @@ def verify_request(method: str, label: str, project: str,
     try:
         import hashlib
         from data_sheets_schema.api_runner import RunSpec, resolve_prompt
-        from data_sheets_schema.registry import AUTO
-        recorded = spec_d.get("manifest", AUTO)     # absent: predates recording; the rule decides from the bundle
-        spec = RunSpec(
-            project=project, arm=spec_d.get("arm", ""), method=method,
-            bundle=Path(spec_d.get("bundle", "")), label=label,
-            condition=spec_d["condition"],
-            render_version=spec_d.get("render_version", 1),
-            chunk_manifest=Path(spec_d["chunk_manifest"]) if spec_d.get("chunk_manifest") else None,
-            manifest_line=spec_d.get("manifest_line", ""),
-            manifest=(recorded if recorded is AUTO else Path(recorded) if recorded else None),
-            run_date=spec_d.get("run_date", ""),
-            runtime=spec_d.get("runtime", ""),
-            provider=spec_d.get("provider"))
+        spec = RunSpec.from_render_spec(spec_d, project=project, method=method, label=label)
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
     except Exception as exc:                                 # noqa: BLE001
         return "unverifiable", f"could not re-render: {exc}"

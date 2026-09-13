@@ -100,3 +100,18 @@ Changing the retained v9 request count, its cost, or the successful-Write audit
 now stops publication. Default-runner compatibility and the original receipt
 uniqueness/accounting tests also pass. Independent review and CI on this
 committed round-3 head remain required before merge.
+
+## Completed prerequisite and current generation review
+
+PR #1396 merged as `140cd10b90231beda811ece02d59929112f70f1e` after
+independent round-3 approval and full CI (3,760 passed, 4 skipped). Issues
+#1381, #1397, #1398, #1400 and #1401 are closed; its branch and worktree
+were deleted. The merged read-only audit reproduced all retained facts, and
+the pre-existing unrelated main-checkout files remained unchanged.
+
+PR #1367 round 4 passed full CI (3,815 passed, 4 skipped), but independent
+review still found five defects. Together with an additional backfill
+reproduction, they are tracked as #1408–#1413 and addressed in round 5; see
+`reviews/pr_1367_round5_2026-09-12.md`. Review and exact-head CI remain
+required before merging that patch. The next evaluation-applicability stage
+also includes #1414, the incorrectly gated preprocessing item.

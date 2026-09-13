@@ -147,14 +147,9 @@ def instruction_text(record: dict[str, Any], instruction_file: Path | None) -> t
         try:
             from data_sheets_schema.api_runner import RunSpec, resolve_prompt
             run = record.get("run") or {}
-            from data_sheets_schema.registry import AUTO
-            recorded = spec.get("manifest", AUTO)     # absent: predates recording; the rule decides from the bundle
-            s = RunSpec(project=run.get("project"), arm=spec.get("arm", ""), method=run.get("method", "claudecode_agent"),
-                        bundle=Path(spec.get("bundle", "")), label=run.get("label", ""),
-                        condition=spec["condition"], manifest_line=spec.get("manifest_line", ""),
-                        manifest=(recorded if recorded is AUTO else Path(recorded) if recorded else None),
-                        run_date=spec.get("run_date", ""), runtime=spec.get("runtime", ""),
-                        provider=spec.get("provider"))
+            s = RunSpec.from_render_spec(spec, project=run.get("project"),
+                                         method=run.get("method", "claudecode_agent"),
+                                         label=run.get("label", ""))
             text = resolve_prompt(s)
             got = hashlib.sha256(text.encode("utf-8")).hexdigest()
             return text, ("re-rendered from the recorded spec (sha256 matches)" if got == want

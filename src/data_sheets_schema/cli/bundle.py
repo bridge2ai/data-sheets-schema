@@ -27,8 +27,8 @@ def bundle():
 @click.option("--check", is_flag=True,
               help="rebuild each manifest under its recorded rule and compare; write nothing")
 @click.option("--strict", is_flag=True, help="with --check: exit 1 on stale or missing")
-@click.option("--max-lines", type=int, default=None, help="override the rule's line bound")
-@click.option("--max-bytes", type=int, default=None, help="override the rule's byte bound")
+@click.option("--max-lines", type=click.IntRange(min=1), default=None, help="override the rule's line bound")
+@click.option("--max-bytes", type=click.IntRange(min=1), default=None, help="override the rule's byte bound")
 def chunk(manifest, project, bundles, check, strict, max_lines, max_bytes):
     """Write a chunk manifest for each bundle.
 

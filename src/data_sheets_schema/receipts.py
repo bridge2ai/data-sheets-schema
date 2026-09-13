@@ -640,7 +640,10 @@ def phase1_snapshot_state(receipt: Path) -> tuple[str, Path | None, dict[str, An
     that is a list or a scalar (#1124 Codex review, SF2: the two-valued
     reading returned None for all of these and a truthy list as if it were
     a record)."""
-    path = phase1_snapshot_path(receipt)
+    try:
+        path = phase1_snapshot_path(receipt)
+    except OSError as exc:
+        return "unusable", None, None, str(exc)
     if path is None:
         return "absent", None, None, None
     try:
@@ -659,6 +662,11 @@ def phase1_snapshot_path(receipt: Path) -> Path | None:
     so a caller can tell "no snapshot" from "a snapshot that would not
     parse" (#1124 round 6): the two are different claims about a record."""
     stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
+    from data_sheets_schema.snapshot_store import latest
+    project = receipt.name.removesuffix("_coverage_receipt.yaml")
+    indexed, path = latest(receipt.parent, project, f"{project}_full.yaml")
+    if indexed:
+        return path
     snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
         (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
         key=lambda p: int(p.stem.rsplit("_", 1)[1]))

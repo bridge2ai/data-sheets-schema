@@ -512,6 +512,21 @@ class RunSpec:
         elif self.manifest != DEFAULT_MANIFEST:
             self.manifest_line = f"# Source manifest: {self.manifest}"
 
+    @classmethod
+    def from_render_spec(cls, recorded: dict[str, Any], *, project: str,
+                         method: str, label: str) -> "RunSpec":
+        """Replay the same version and explicit input choices in every reader."""
+        manifest = recorded.get("manifest", AUTO)
+        return cls(project=project, method=method, label=label,
+                   arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
+                   condition=recorded["condition"],
+                   render_version=recorded.get("render_version", 1),
+                   chunk_manifest=Path(recorded["chunk_manifest"]) if recorded.get("chunk_manifest") else None,
+                   manifest_line=recorded.get("manifest_line", ""),
+                   manifest=(manifest if manifest is AUTO else Path(manifest) if manifest else None),
+                   run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
+                   provider=recorded.get("provider"))
+
     @property
     def manifest_used(self) -> bool:
         """Whether the run consults a manifest at all: one is selected and
@@ -3367,7 +3382,7 @@ def _intermediate_dir(spec: RunSpec) -> Path:
     return spec.provenance_path.parent / "intermediate"
 
 
-def _snapshot(spec: RunSpec, name: str, body: str) -> Path:
+def _snapshot(spec: RunSpec, name: str, body: str, *, usage_id: str | None = None) -> Path:
     """Preserve one phase's output before a later phase overwrites it (#369).
 
     Never overwrites: repair round numbers restart on a resumed invocation,
@@ -3382,7 +3397,12 @@ def _snapshot(spec: RunSpec, name: str, body: str) -> Path:
     while path.exists():
         path = d / f"{stem}_{n}.{ext}"
         n += 1
-    path.write_text(body, encoding="utf-8")
+    with path.open("x", encoding="utf-8") as stream:
+        stream.write(body)
+        stream.flush()
+        os.fsync(stream.fileno())
+    from data_sheets_schema.snapshot_store import record
+    record(spec, name, path, usage_id=usage_id)
     return path
 
 
@@ -3392,6 +3412,10 @@ def _intermediates_block(spec: RunSpec) -> list[dict[str, Any]] | None:
     Globbed at record-build time rather than accumulated in memory, so a
     resumed invocation lists the earlier invocations' snapshots too.
     """
+    from data_sheets_schema.snapshot_store import entries
+    recorded = entries(spec)
+    if recorded is not None:
+        return recorded or None
     d = _intermediate_dir(spec)
     if not d.is_dir():
         return None
@@ -4430,6 +4454,11 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                        if getattr(b, "type", "") == "text")
         # Preserve the entire delivered body before split_receipt (#1048).
         response_text = text
+        if ph == "full" and spec.condition in RECEIPT_CONDITIONS:
+            # Re-addressing can refuse after a billed response was delivered.
+            # Keep the complete body, linked to its call and generation, first.
+            _snapshot(spec, f"{spec.project}_{ph}_response_{call_id}.txt", text,
+                      usage_id=call_id)
         cap = reasoning.capture(resp)
         reasoning.append(_reasoning_path(spec),
                          {"phase": ph, "label": spec.label,
@@ -4595,6 +4624,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     settings = _model_settings()
     client = client or _client()
     usage: list[dict[str, Any]] = []
+    fresh_generation = not resume
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
     if resume:
         _require_resolved_usage(spec)
@@ -4750,8 +4780,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             raise UsageLedgerError("identified generation needs recovery but its usage ledger is missing; "
                                    "restore the ledger before resuming")
         generation = _prepare_usage(spec, resume=not (foreign_prior or foreign_progress))
+        fresh_generation = bool(foreign_prior or foreign_progress)
     from data_sheets_schema.usage_ledger import pin_inputs
     pin_inputs(spec)
+    from data_sheets_schema import snapshot_store
+    snapshot_store.activate(spec, fresh=fresh_generation, completed=bool(done), prior_record=prior_record)
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
@@ -4816,8 +4849,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # produces it rather than reporting a diff against a record it never saw.
     for phase, name in (("full", "Original full record"),
                         ("core", "Original core record")):
-        snapshot = _intermediate_dir(spec) / f"{spec.project}_{phase}.yaml"
-        if not snapshot.exists():
+        _, snapshot = snapshot_store.latest(spec.provenance_path.parent, spec.project,
+                                             f"{spec.project}_{phase}.yaml")
+        if snapshot is None:
+            done.discard(phase)
+            done -= _dependents_of(name, (phase,))
             continue
         body = snapshot.read_text(encoding="utf-8")
         schema_path, class_name = PHASE_SCHEMA[phase]
