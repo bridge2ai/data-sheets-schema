@@ -61,16 +61,20 @@ def _is_our_checkout(root: Path) -> bool:
     adopt that project (#1577). A marker that is absent is no checkout; one
     that cannot be read is not evidence of anything and is refused rather
     than read as absent (#1619)."""
+    # The source layout first (#1681): a directory without it is no
+    # checkout whatever its marker says, so another project's unreadable
+    # `pyproject.toml` above the working directory decides nothing.
+    if not (root / "src" / "data_sheets_schema").is_dir():
+        return False
     marker = root / "pyproject.toml"
     try:
-        text = marker.read_text(encoding="utf-8")
+        raw = marker.read_bytes()                # bytes: a non-UTF-8 marker is another project's, not a crash (#1682)
     except (FileNotFoundError, NotADirectoryError):
         return False
     except OSError as exc:
         raise ResourceRootError(f"{marker} could not be read: {exc}; whether {root} is a checkout is unknown") from exc
     import re
-    return (re.search(r'^name\s*=\s*"data[-_]sheets[-_]schema"', text, re.M) is not None
-            and (root / "src" / "data_sheets_schema").is_dir())
+    return re.search(rb'^name\s*=\s*"data[-_]sheets[-_]schema"', raw, re.M) is not None
 
 
 CHECKOUT_ROOT: Path | None = (

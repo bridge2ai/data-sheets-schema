@@ -142,7 +142,10 @@ class NestedClass:
 #: The study's registry vocabularies for slots declaring `values_from`
 #: (#538). Kept as a name for the callers that pin the study's file; which
 #: vocabulary a digest renders is the active profile's (#1302, #628).
-VOCABULARY_PIN = Path(__file__).with_name("b2ai_registry_vocabularies.yaml")
+#: Spelled as the resource it is and resolved when read (`Profile.pin_path`):
+#: the working checkout's copy from a checkout, package data from an
+#: install — never the importing code's (#1680).
+VOCABULARY_PIN = Path("src/data_sheets_schema/b2ai_registry_vocabularies.yaml")
 
 #: The slot annotation that names a slot's term sources in prose the digest
 #: renders (#1302): `"d4d:termSources": "GO, MeSH, EFO, NCIT"`. Read when a
