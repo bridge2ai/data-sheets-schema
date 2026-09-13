@@ -8,6 +8,7 @@ not a helper.
 from __future__ import annotations
 
 import os
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -89,7 +90,7 @@ class TestSelection(_Clean):
             m.write_text(yaml.safe_dump({"profile": "neutral", "projects": {"X": []}}), encoding="utf-8")
             sel = select_profile(m)
             self.assertEqual(sel.name, "neutral")
-            self.assertEqual(sel.basis, f"manifest:{m.as_posix()}")
+            self.assertRegex(sel.basis, rf"^manifest:{re.escape(m.as_posix())}@[0-9a-f]{{12}}$")
             m.write_text(yaml.safe_dump({"profile": "acme", "projects": {"X": []}}), encoding="utf-8")
             from data_sheets_schema import schema_cache
             schema_cache.clear()
@@ -103,7 +104,10 @@ class TestSelection(_Clean):
         `no manifest` — what the record states (#1443)."""
         from data_sheets_schema.profiles import select_profile
         self.assertEqual(select_profile(None).basis, "no manifest")
-        self.assertEqual(select_profile(STUDY_MANIFEST).basis, f"manifest:{STUDY_MANIFEST.as_posix()}")
+        # Repository-relative and content-stamped, so one string names one
+        # manifest and no local path reaches a record (#1466).
+        self.assertRegex(select_profile(STUDY_MANIFEST).basis,
+                         r"^manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
         self.assertTrue(select_profile().basis.startswith("default manifest:"))
         os.environ["D4D_PROFILE"] = "neutral"
         self.assertEqual(select_profile(STUDY_MANIFEST).basis, "environment")
@@ -122,7 +126,7 @@ class TestSelection(_Clean):
             os.chdir(elsewhere)
             sel = select_profile()
             self.assertEqual(sel.name, "bridge2ai", elsewhere)
-            self.assertEqual(sel.basis, f"default manifest:{STUDY_MANIFEST.as_posix()}")
+            self.assertRegex(sel.basis, r"^default manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
             schema_digest._TEXT_CACHE.clear()
             self.assertEqual(schema_digest.fingerprint(schema_digest.digest_text("Dataset")), study)
         os.chdir(ROOT)
@@ -242,7 +246,7 @@ class TestTheRecord(_Clean):
                         bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
                         condition="generic_v9")
         self.assertEqual(study.profile, "bridge2ai")
-        self.assertEqual(study.profile_basis, "manifest:data/preprocessed/source_manifest.yaml")
+        self.assertRegex(study.profile_basis, r"^manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
         with tempfile.TemporaryDirectory() as d:
             ext = Path(d) / "clinic_preprocessed.txt"; ext.write_text("FILE: a\nhi\n", encoding="utf-8")
             external = RunSpec(project="CLINIC", arm="x", method="claudecode_api", label="L",
@@ -285,3 +289,144 @@ class TestTheRecord(_Clean):
         out = plan(spec)
         self.assertEqual(out["profile"], "bridge2ai")
         self.assertEqual(out["schema_digest_md5"], "cd3c79f2c62f11675d5ce2c1df96b88e")
+
+
+class TestTheThreadingHolds(_Clean):
+    """The round-2 review showed the round-1 tests passed with the profile
+    argument discarded (#1470): every case here resolves one profile on the
+    spec and changes the environment before looking."""
+
+    STUDY = "cd3c79f2c62f11675d5ce2c1df96b88e"
+    NEUTRAL = "029c2abcda26e45c4465fd0a8455893d"
+
+    def _study_spec(self, **kw):
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                       label="2026-09-13_x-api-generic-v9_rep1", condition="generic_v9", run_date="2026-09-13",
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt", **kw)
+
+    def test_every_request_of_a_run_follows_the_spec_not_the_environment(self):
+        from data_sheets_schema import api_runner, schema_digest
+        spec = self._study_spec()
+        self.assertEqual(spec.profile, "bridge2ai")
+        os.environ["D4D_PROFILE"] = "neutral"
+        schema_digest._TEXT_CACHE.clear()
+        full = api_runner.build_phase(spec, "full", carry={})
+        self.assertEqual(schema_digest.fingerprint(full.cached_blocks[0]["text"]), self.STUDY)
+        repair = api_runner.build_repair("full", "id: https://example.org/x\n", ["e"], profile=spec.profile_obj)
+        self.assertEqual(schema_digest.fingerprint(repair.cached_blocks[0]["text"]), self.STUDY)
+        self.assertEqual(api_runner.plan(spec)["schema_digest_md5"], self.STUDY)
+        self.assertEqual(spec.input_identity()["profile"], {"name": "bridge2ai", "digest_md5": self.STUDY})
+        # And the ambient one really is the other instrument now.
+        self.assertEqual(schema_digest.fingerprint(schema_digest.digest_text("Dataset")), self.NEUTRAL)
+
+    def test_a_resume_under_another_profile_is_refused(self):
+        """#1460: the instrument is an input; a record made under one profile
+        is not continued under another."""
+        from data_sheets_schema import api_runner, schema_digest, usage_ledger
+        first = self._study_spec()
+        identity = first.input_identity()
+        record = {"inputs": {"bundle_path": identity["bundle"]["path"], "bundle_sha256": identity["bundle"]["sha256"],
+                             "source_manifest": identity["source_manifest"], "chunks": identity["chunks"]},
+                  "schema": {"digest_md5": self.STUDY, "profile": "bridge2ai"},
+                  "prompts": {"request": {"sha256": identity["instruction"]["sha256"]}}}
+        api_runner._require_recorded_inputs(first, record)          # same instrument: allowed
+        os.environ["D4D_PROFILE"] = "neutral"
+        schema_digest._TEXT_CACHE.clear()
+        resumed = self._study_spec()
+        self.assertEqual(resumed.profile, "neutral")
+        with self.assertRaises(usage_ledger.UsageLedgerError) as caught:
+            api_runner._require_recorded_inputs(resumed, record)
+        self.assertIn("instrument", str(caught.exception))
+        self.assertTrue(usage_ledger._identity_differs(identity, resumed.input_identity()))
+        # A pin made before the key existed says nothing about it.
+        older = {k: v for k, v in identity.items() if k != "profile"}
+        self.assertFalse(usage_ledger._identity_differs(older, first.input_identity()))
+
+    def test_the_rendered_recording_command_names_the_selected_manifest(self):
+        """#1461: an arm whose header declares the manifest's context unused
+        still selected it, and the recorder selects the profile from it."""
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli.api import ARMS
+        crate = RunSpec(project="CHORUS", arm=ARMS["crate_only"][0], method=ARMS["crate_only"][1],
+                        label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                        runtime="Claude Code", run_date="2026-09-13",
+                        bundle=ROOT / "data/preprocessed/concatenated/CHORUS_crate_only.txt",
+                        manifest=STUDY_MANIFEST, manifest_line=ARMS["crate_only"][3])
+        self.assertEqual((crate.profile, crate.manifest_used), ("bridge2ai", False))
+        line = next(l for l in resolve_prompt(crate).splitlines() if "d4d provenance record" in l)
+        self.assertIn(f"--manifest {STUDY_MANIFEST}", line)
+        self.assertNotIn("--manifest none", line)
+        with tempfile.TemporaryDirectory() as d:
+            ext = Path(d) / "clinic_preprocessed.txt"; ext.write_text("FILE: a\nhi\n", encoding="utf-8")
+            external = RunSpec(project="CLINIC", arm=ARMS["baseline"][0], method=ARMS["baseline"][1],
+                               label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                               runtime="Claude Code", run_date="2026-09-13", bundle=ext)
+            line = next(l for l in resolve_prompt(external).splitlines() if "d4d provenance record" in l)
+        self.assertIn("--manifest none", line)
+
+    def test_replay_never_consults_the_environment(self):
+        """#1468: verifying a historical instruction must not fail on an
+        irrelevant current setting."""
+        from data_sheets_schema.api_runner import RunSpec
+        os.environ["D4D_PROFILE"] = "invalid-profile"
+        replay = RunSpec.from_render_spec({"condition": "generic"}, project="P", method="claudecode_api", label="L")
+        self.assertIsNone(replay.profile)
+        self.assertIsNone(replay.profile_obj)
+
+    def test_readers_of_a_record_use_the_records_profile(self):
+        """#1462: the judge, the review pack's labels and the pair backfill
+        read the profile the record states, not the environment."""
+        from data_sheets_schema import evidence_score, schema_digest
+        from data_sheets_schema.d4d_pair_consistency import pair_predates_current_schema
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, for_record
+        self.assertIs(for_record({"schema": {"profile": "neutral"}}), NEUTRAL)
+        self.assertIs(for_record({"schema": {"digest_md5": "x"}}), BRIDGE2AI)      # pre-profile: the ambient one
+        self.assertNotIn("B2AI_TOPIC", evidence_score.slot_spec("instances", profile=NEUTRAL))
+        self.assertIn("MeSH", evidence_score.slot_spec("instances", profile=NEUTRAL))
+        judge = evidence_score.LLMSlotFitnessScorer(client=object(), model="offline-test", profile=NEUTRAL)
+        self.assertEqual(judge._context("offline-test").schema, self.NEUTRAL)
+        with tempfile.TemporaryDirectory() as d:
+            core = Path(d) / "P_d4d_core.yaml"; core.write_text("id: x\n", encoding="utf-8")
+            (Path(d) / "P_provenance.yaml").write_text(
+                yaml.safe_dump({"schema": {"digest_md5": self.NEUTRAL, "profile": "neutral"}}), encoding="utf-8")
+            self.assertFalse(pair_predates_current_schema(core))         # ambient is bridge2ai; the record is not
+            (Path(d) / "P_provenance.yaml").write_text(
+                yaml.safe_dump({"schema": {"digest_md5": self.STUDY, "profile": "bridge2ai"}}), encoding="utf-8")
+            self.assertFalse(pair_predates_current_schema(core))
+
+    def test_the_sync_gate_is_keyed_on_the_profile(self):
+        """#1463: the rebuilt digest is cached per profile, so a profile
+        switch cannot classify an unchanged schema as stale."""
+        from data_sheets_schema import schema_sync
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL
+        study = {r["class"]: r for r in schema_sync.check(profile=BRIDGE2AI)}
+        neutral = {r["class"]: r for r in schema_sync.check(profile=NEUTRAL)}
+        for cls in ("Dataset", "CoreDataset"):
+            self.assertEqual(study[cls]["status"], schema_sync.IN_SYNC, study[cls])
+            self.assertEqual(neutral[cls]["status"], schema_sync.IN_SYNC, neutral[cls])
+        self.assertEqual(study["Dataset"]["digest"], self.STUDY)
+        self.assertEqual(neutral["Dataset"]["digest"], self.NEUTRAL)
+
+    def test_the_healthsheet_bundle_names_its_own_dataset(self):
+        """#1464: no literal project identity in the model's source bundle."""
+        from data_sheets_schema.healthsheet import render
+        text, _ = render({"cohort": [{"question": "Population?", "response": "Clinic participants"}]},
+                         {"title": "Independent Clinic"}, Path("CLINIC.json"), project="CLINIC")
+        self.assertIn("Project: CLINIC", text)
+        self.assertIn("It is NOT the\nCLINIC baseline", text)
+        self.assertNotIn("AI_READI", text); self.assertNotIn("AI-READI", text)
+        text, _ = render({}, {"title": "t"}, Path("x.json"))                     # study default
+        self.assertIn("Project: AI_READI", text)
+        os.environ["D4D_PROFILE"] = "neutral"
+        with self.assertRaises(ValueError):
+            render({}, {"title": "t"}, Path("x.json"))
+
+    def test_the_ledger_carries_the_whole_inventory_for_both_profiles(self):
+        from data_sheets_schema import schema_digest
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL
+        for prof in (BRIDGE2AI, NEUTRAL):
+            md5 = schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=prof))
+            for cls in ("Dataset", "CoreDataset"):
+                for slot in schema_digest.slot_names(cls):
+                    self.assertIs(schema_digest.slot_existed_at(md5, cls, slot), True, (prof.name, cls, slot))

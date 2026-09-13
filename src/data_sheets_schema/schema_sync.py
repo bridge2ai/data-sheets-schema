@@ -202,7 +202,7 @@ def _regenerate(source: Path, target: Path,
 
 
 def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
-                         source_name: str) -> str:
+                         source_name: str, profile=None) -> str:
     """Digest frozen rebuild bytes without retaining a LinkML view (#946).
 
     Each check has a new temporary path. LinkML's method caches retain views
@@ -212,9 +212,13 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
     Cache only the resulting strings under content hashes, including the
     displayed source name. Unchanged successful checks reuse that result.
     """
+    from data_sheets_schema.profiles import active_profile
     from data_sheets_schema.schema_view import content_key
+    prof = profile or active_profile()
+    # The profile is part of the digest, so of the key (#1463); the child
+    # is told which one rather than reading the environment.
     key = (class_name, source_name, content_key(path)[1], content_key(vocabulary)[1],
-           _generator_versions())
+           _generator_versions(), prof.name)
     if key in _REBUILT_DIGESTS:
         return _REBUILT_DIGESTS[key]
     code = (
@@ -224,10 +228,12 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
         "d.VOCABULARY_PIN = Path(sys.argv[4])\n"
         "inventory = d.build(sys.argv[2], Path(sys.argv[3]))\n"
         "inventory.schema_path = sys.argv[5]\n"
-        "print(d.fingerprint(d.render(inventory)))\n")
+        "from data_sheets_schema.profiles import profile_named\n"
+        "prof = profile_named(sys.argv[6])\n"
+        "print(d.fingerprint(d.render(inventory, vocabulary=d.vocabularies(profile=prof))))\n")
     result = subprocess.run(
         [sys.executable, "-c", code, str(Path(__file__).resolve().parents[1]),
-         class_name, str(path.resolve()), str(vocabulary.resolve()), source_name],
+         class_name, str(path.resolve()), str(vocabulary.resolve()), source_name, prof.name],
         capture_output=True, text=True, timeout=60)
     value = result.stdout.strip()
     if result.returncode or len(value) != 32 or any(c not in "0123456789abcdef" for c in value):
@@ -239,9 +245,12 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
 
 
 def check_one(merged: Path, source: Path, class_name: str,
-              marker: bool = False) -> dict[str, Any]:
-    """Rebuild `merged` from `source` and compare."""
+              marker: bool = False, *, profile=None) -> dict[str, Any]:
+    """Rebuild `merged` from `source` and compare — under `profile`, else
+    the ambient one; the runner passes the run's (#1463)."""
     from data_sheets_schema import schema_digest
+    from data_sheets_schema.profiles import active_profile
+    profile = profile or active_profile()
 
     out: dict[str, Any] = {"merged": str(merged), "source": str(source),
                            "class": class_name}
@@ -271,13 +280,14 @@ def check_one(merged: Path, source: Path, class_name: str,
                 return {**out, "status": UNCHECKED, "reason": why}
             same = rebuilt.read_bytes() == merged_bytes
             live = schema_digest.fingerprint(
-                schema_digest.digest_text(class_name, merged))
+                schema_digest.digest_text(class_name, merged, profile=profile))
             # Compare against the preserved rebuild, not another read of the
             # live merged file: a changed-then-restored file can defeat an
             # end-of-check stability guard (#1258). No temporary views remain
             # in this process, on either successful or failed retries (#946).
             fresh = _rebuilt_fingerprint(class_name, rebuilt, vocabulary,
-                                         schema_digest._schema_name(class_name, merged))
+                                         schema_digest._schema_name(class_name, merged),
+                                         profile=profile)
             source_changed = _source_state(source) != source_state
             if source_changed:
                 forget_rebuilds()
@@ -302,8 +312,8 @@ def check_one(merged: Path, source: Path, class_name: str,
                            "the merged schema matches but its digest does not")}
 
 
-def check(schemas=MERGED_SCHEMAS) -> list[dict[str, Any]]:
-    return [check_one(m, s, c, k) for m, s, c, k in schemas]
+def check(schemas=MERGED_SCHEMAS, *, profile=None) -> list[dict[str, Any]]:
+    return [check_one(m, s, c, k, profile=profile) for m, s, c, k in schemas]
 
 
 def blocking(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:

@@ -316,9 +316,10 @@ def _parse_phases(specs) -> list[dict]:
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
 @click.option('--manifest', default=None,
-              help='the source manifest this run consulted and attests as an input; default: '
-                   'the manifest selected by the resolved bundle and output header; `none` '
-                   'for a run that read no manifest (#621)')
+              help='the source manifest this run selected: its `profile:` decides the digest '
+                   'and, unless the output header declares its context unused, it is attested '
+                   'as an input; default: the manifest selected by the resolved bundle and '
+                   'output header; `none` for a run that selected no manifest (#621, #1461)')
 @click.option('--chunk-manifest', type=click.Path(exists=True, dir_okay=False),
               help='the exact chunk manifest consumed by this run; default: discover beside the bundle')
 @click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
@@ -381,8 +382,15 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 else select_manifest(project, resolved_bundle, requested))
     manifest_basis = ("the output header declares the source manifest unused"
                       if selected is None and header_unused else None)
+    # The profile is selected from the manifest whether or not the arm's
+    # header declares the manifest's context blocks unused (#1461) …
     from data_sheets_schema.profiles import select_profile
     profile_selection = select_profile(selected)
+    selected_manifest = selected
+    if selected is not None and header_unused:
+        # … and the header still governs what the input block attests.
+        selected = None
+        manifest_basis = "the output header declares the source manifest unused"
     digest = schema_digest.fingerprint(
         schema_digest.digest_text("Dataset", profile=profile_selection.profile))
     spec = None
@@ -399,7 +407,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             bundle=Path(bundle) if bundle else None, label=label,
             condition=condition, runtime=runtime, provider=provider,
             manifest_line=_ARMS[arm][3],
-            manifest=selected,           # the same selection the input block records (#1367 review, must-fix 3)
+            manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
             chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
         )
         spec = run_spec.render_spec()

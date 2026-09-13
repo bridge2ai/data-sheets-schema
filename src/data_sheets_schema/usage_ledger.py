@@ -150,6 +150,12 @@ def pin_inputs(spec) -> None:
         _write(spec, data)
 
 
+def _identity_differs(pinned: dict, current: dict) -> bool:
+    """A pin made before a key existed says nothing about it (`profile`,
+    #1460); every key the pin carries must match."""
+    return any(current.get(k) != v for k, v in pinned.items())
+
+
 def require_resolved(spec) -> None:
     data = _read(spec)
     pending = data.get("pending_call")
@@ -159,7 +165,7 @@ def require_resolved(spec) -> None:
             "restore its usage before resuming, or explicitly start fresh to archive this generation")
 
     pinned = data.get("input_identity")
-    if pinned is not None and pinned != spec.input_identity():
+    if pinned is not None and _identity_differs(pinned, spec.input_identity()):
         raise UsageLedgerError("generation input identity changed (bundle, manifests or resolved instruction); "
                                "restore the recorded inputs or use --no-resume for an explicit new generation")
     _finish_reasoning_archive(spec, data)
