@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Compatibility batch entry point; rendering lives in data_sheets_schema.rendering.process_text_files."""
 from data_sheets_schema.rendering.process_text_files import *  # noqa: F401,F403
 from data_sheets_schema.rendering import process_text_files as _implementation

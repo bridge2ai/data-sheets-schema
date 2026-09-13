@@ -108,8 +108,8 @@ class NoDiscriminatingChallenge(RuntimeError):
 def agent_path(name: str) -> Path:
     from data_sheets_schema.resources import resource_path
     path = resource_path(Path(".claude/agents") / f"{name}.md")      # the wheel ships them (#1553)
-    if not path.exists():
-        path = AGENT_DIR / f"{name}.md"
+    # No second fallback: the resolver's answer is authoritative, and a
+    # checkout that lacks a definition lacks it (#1617, #1664).
     if not path.exists():
         raise FileNotFoundError(f"no agent definition at {path}")
     return path

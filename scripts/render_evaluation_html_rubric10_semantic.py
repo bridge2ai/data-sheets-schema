@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Compatibility batch entry point; rendering lives in data_sheets_schema.rendering.rubric10_semantic."""
 from data_sheets_schema.rendering.rubric10_semantic import *  # noqa: F401,F403
 from data_sheets_schema.rendering import rubric10_semantic as _implementation
