@@ -4863,8 +4863,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         # finished phases' instrument is unknown and they are not continued
         # under whatever this run resolved (#1519).
         from data_sheets_schema.usage_ledger import recorded_inputs
-        pinned = progress.get("input_identity") or recorded_inputs(spec) or {}
-        if "profile" not in pinned:
+        sources = (progress.get("input_identity"), recorded_inputs(spec))   # each on its own (#1559)
+        if not any(isinstance(s, dict) and "profile" in s for s in sources):
             raise UsageLedgerError("saved phases carry no instrument identity (profile and schema digest) and "
                                    "no record attests one; use --no-resume for an explicit new generation")
     if done:

@@ -370,6 +370,11 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     header_unused = "not used" in header_manifest.lower()
     if requested is AUTO and header_manifest and not header_unused:
         requested = Path(header_manifest)
+    if requested is AUTO and "no manifest selected" in header_manifest.lower():
+        # The runner's own header for a run that selected none (#1558):
+        # not context withheld from a selected manifest, but no manifest —
+        # the profile is neutral, whatever the study's manifest declares.
+        requested = None
     # Selected by the runner's rule whenever a bundle is resolved — the
     # header's "not used" says the manifest's *context blocks* were not
     # sent, not that no manifest was selected (#1461, #1512) …
