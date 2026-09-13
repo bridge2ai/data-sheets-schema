@@ -241,3 +241,23 @@ pass 185 tests. After integrating #1694 from 8dec686e5, the eleven combined
 regressions pass. All 60 historical renderer controls retain identical bytes.
 The boundary refreshes the affected source pins and names the integrated
 validator dependency. No production generation, scoring or downloads occur.
+
+## Review round 12 — 2026-09-13
+
+Round 11 confirmed canonical planning and found #1724–#1726. Automatic
+selection now precedes output ownership; header-only reconstruction uses its
+discovered owner and retains explicit manifest overrides. A different output
+owner makes new input addresses absolute, including flat destinations that
+resemble another corpus. Backfill and review share a recorded-input resolver.
+Unknown relative bases cannot borrow caller bundles or chunk maps. Receipt
+recovery remains available when recorded hashes and rules establish it.
+
+Eight initial ownership cases fail before the correction. The focused
+receipt/backfill lane passes 96 tests; the explicit-manifest compatibility
+case is then added and corrected, and the broader corpus/receipt/review lane
+passes 223 tests. Profile 9671c91e9, packaging c50d65508 and validator #1713
+are integrated through 1e50aa0e7. Their combined checks pass 185 tests with
+one existing skip and one fixture failure; #1731 gives that fixture its own
+dataset, and its targeted check passes. All 60 historical renderer controls
+remain identical. The boundary now pins 17 source files. No production
+generation, scoring, downloads or historical artifact rewrites occur.
