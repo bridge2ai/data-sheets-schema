@@ -13,7 +13,11 @@ import click
 
 @click.group()
 @click.version_option()
-def cli():
+@click.option("--manifest", default=None, envvar="D4D_MANIFEST", is_eager=True,
+              help="the source manifest that is the project registry for every command "
+                   "that names a --project and has no --manifest of its own (#623); "
+                   "default data/preprocessed/source_manifest.yaml")
+def cli(manifest):
     """D4D command-line interface for dataset documentation."""
     pass
 

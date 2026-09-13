@@ -147,11 +147,9 @@ def instruction_text(record: dict[str, Any], instruction_file: Path | None) -> t
         try:
             from data_sheets_schema.api_runner import RunSpec, resolve_prompt
             run = record.get("run") or {}
-            s = RunSpec(project=run.get("project"), arm=spec.get("arm", ""), method=run.get("method", "claudecode_agent"),
-                        bundle=Path(spec.get("bundle", "")), label=run.get("label", ""),
-                        condition=spec["condition"], manifest_line=spec.get("manifest_line", ""),
-                        run_date=spec.get("run_date", ""), runtime=spec.get("runtime", ""),
-                        provider=spec.get("provider"))
+            s = RunSpec.from_render_spec(spec, project=run.get("project"),
+                                         method=run.get("method", "claudecode_agent"),
+                                         label=run.get("label", ""))
             text = resolve_prompt(s)
             got = hashlib.sha256(text.encode("utf-8")).hexdigest()
             return text, ("re-rendered from the recorded spec (sha256 matches)" if got == want
@@ -606,7 +604,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         # the reviewer scores a bundle-attested value `unsupported`. The
         # item carries the path as written and where it resolves.
         from data_sheets_schema.receipts import phase1_snapshot_state
-        snap_state, snapshot_file, original, snap_why = phase1_snapshot_state(paths["receipt"])
+        snap_state, snapshot_file, original, snap_why = phase1_snapshot_state(paths["receipt"], record=record)
         # Not a gap: the agentic path writes no snapshot by design (its
         # Phase 3 re-receipts what it changes), so an index join there is
         # the instrument, not a defect in this pack. A snapshot that exists
@@ -620,7 +618,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             # "unreadable" was a false claim for a file that parsed to
             # nothing (Codex review, SF2); the reason says which it is.
             pack["receipt_join"] = {"basis": "index",
-                                    "reason": f"the phase-1 snapshot {snapshot_file.name} is present but not "
+                                    "reason": f"the phase-1 snapshot {snapshot_file.name if snapshot_file else 'ownership evidence'} "
+                                              f"{'is present but not' if snapshot_file else 'is not'} "
                                               f"usable ({snap_why}); receipt paths joined by index, not entry "
                                               "identity (#899)"}
             pack["gaps"].append(f"phase-1 snapshot not usable ({snap_why}): {snapshot_file}")
