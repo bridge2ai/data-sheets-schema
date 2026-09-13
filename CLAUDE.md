@@ -1467,7 +1467,10 @@ ledger call) and to the record, whose `schema` block carries `profile` and
 `manifest:<repo-relative path>@<sha256[:12]>` or `default manifest:…`, with
 ` (undeclared)` when the manifest declares no profile, or `(missing)` when
 the path is not there; `rendered instruction`, with ` (this process would
-select …)` when the recorder's own selection differs) beside `digest_md5`;
+select …)` when the recorder's own selection differs or ` (this process
+could not select one: …)` when it could not; `re-rendered to the recorded
+hash by d4d provenance backfill-spec (#772)` on a reconstructed spec)
+beside `digest_md5`;
 `d4d api plan` prints them. The rendered `d4d provenance record` line
 carries `--profile <name>`, so the agentic recorder — another process,
 without the environment that selected it — records the instruction's

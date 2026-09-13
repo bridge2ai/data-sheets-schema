@@ -267,7 +267,9 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
         # its manifest through here, and re-reading a 300-line YAML on each
         # construction cost ~50 ms (#1367 round 2, #1394).
         from data_sheets_schema.schema_cache import load_yaml
-        data = load_yaml(p) or {}
+        data = load_yaml(p)
+        if data is None:
+            data = {}                        # an empty document; a falsey non-mapping is refused below (#1658)
     except (OSError, yaml.YAMLError) as exc:
         raise click.ClickException(f"manifest {p} could not be read: {exc}") from exc
     if not isinstance(data, dict):

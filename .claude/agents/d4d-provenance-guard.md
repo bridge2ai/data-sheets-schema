@@ -130,7 +130,7 @@ Forbidden:
 
 Nothing is copied from full to core by an agent: shared slots are identical
 because the core is a projection, and the pair checker is the proof. What
-remains for judgement is the semantic review of related content (the
+remains for judgment is the semantic review of related content (the
 checker's `semantic-review-required` warning and the unprompted count,
 dialect and release-scope reviews the playbook names), written as rows of
 the report's `## Semantic review` section.

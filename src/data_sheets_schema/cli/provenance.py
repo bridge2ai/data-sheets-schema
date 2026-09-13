@@ -512,8 +512,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
 @click.option("--condition", required=True, help="the condition the instruction was rendered under")
 @click.option("--runtime", default="Claude Code", show_default=True)
 @click.option("--arm", type=click.Choice(sorted(_ARMS)), default="baseline", show_default=True)
+@click.option("--manifest", "selected_manifest_opt", default=None,
+              help="the manifest the run selected, for a record whose attested path is null (an arm whose header "
+                   "declares it unused) and whose selection was not the study default — tried first, proven only "
+                   "by the hash (#1654)")
 @click.option("--execute", is_flag=True, help="write the spec; without it, report only")
-def backfill_spec(project, method, label, condition, runtime, arm, execute):
+def backfill_spec(project, method, label, condition, runtime, arm, execute, selected_manifest_opt=None):
     """Attach the render spec to a record that recorded its request hash
     without one (#772).
 
@@ -567,6 +571,8 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # selected is tried, proven by the hash alone (#1607).
     manifest_choices = ([Path(sm["path"])] if sm.get("path")
                         else [None, DEFAULT_MANIFEST, default_manifest_path()])
+    if selected_manifest_opt:
+        manifest_choices = [Path(selected_manifest_opt)] + manifest_choices   # the caller's candidate first (#1654)
     # An arm that declares its own header keeps it — the crate-only and
     # healthsheet arms say "not used" whatever was selected — and the
     # default header follows the selection (#1607).
@@ -594,8 +600,11 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
             {"profile": name,
              "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
             for name in PROFILES]
+    backfill_basis = "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"
     for delta, render_version, selected_chunks, selected_manifest, selected_profile in product(
             (0, -1, 1, -2, 2), (4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices):
+        if render_version == 1 and selected_profile and not schema_block.get("profile"):
+            continue                 # version 1 cannot see the profile: no evidence to assert one (#1678)
         spec = RunSpec.from_render_spec({
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
@@ -613,7 +622,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
             if execute:
                 data["prompts"]["request"]["spec"] = rendered
                 data["prompts"]["request"]["spec_basis"] = ("backfilled by d4d provenance backfill-spec: "
-                                                            "verified by re-rendering to the recorded hash (#772)")
+                                                            "verified by re-rendering to the recorded hash (#772)"
+                                                            + ("" if render_version > 1 else
+                                                               "; render version 1 does not hash the profile, which is restated"))
+                # The profile the hash proved is the record's, for every
+                # reader (`profiles.for_record`): a spec stating one the
+                # record does not is two records in one (#1678).
+                if rendered.get("profile") and not schema_block.get("profile") and render_version > 1:
+                    data.setdefault("schema", {})["profile"] = rendered["profile"]
+                    data["schema"]["profile_basis"] = backfill_basis
                 pv.ProvenanceRecord(data=data).write(path)
                 click.echo(f"     written to {path}")
             return
@@ -742,7 +759,10 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
     # and `{method}_core`. A `_core` suffix names the record's directory,
     # not the method (#1032).
     base = method[:-5] if method.endswith("_core") else method
-    spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    try:
+        spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    except ValueError as exc:                    # an unknown ambient profile (#1679)
+        raise click.ClickException(str(exc))
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     prior = data.get("validation") or {}
     tag = f"{project} {method} {label}"

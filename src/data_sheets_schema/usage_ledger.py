@@ -167,14 +167,52 @@ def pin_inputs(spec) -> None:
         _write(spec, data)
 
 
+def _comparable(identity: dict) -> dict:
+    """An identity without `profile_basis` inside its instruction spec: the
+    basis was never an input (#1626), and a pin written while it sat there
+    (#1581–#1626) must not refuse a resume whose inputs are the same (#1657)."""
+    out = dict(identity)
+    instr = out.get("instruction")
+    if isinstance(instr, dict) and isinstance(instr.get("spec"), dict) and "profile_basis" in instr["spec"]:
+        out["instruction"] = {**instr, "spec": {k: v for k, v in instr["spec"].items() if k != "profile_basis"}}
+    return out
+
+
+def _subset_differs(pinned, current) -> bool:
+    """Every key the pin carries must match, at every depth (#1677): a
+    nested mapping is compared key by key, so a spec that gained a key
+    after the pin was written is not a different spec."""
+    if isinstance(pinned, dict) and isinstance(current, dict):
+        return any(_subset_differs(v, current.get(k)) if k in current else True for k, v in pinned.items())
+    return pinned != current
+
+
 def _identity_differs(pinned: dict, current: dict) -> bool:
     """A pin made before a key existed says nothing about it (`profile`,
-    #1460); every key the pin carries must match. That is the rule for any
-    key added later; it does not readmit the generations pinned before
-    profiles existed, whose instruction hash — the recorder line carries
-    `--profile` now — no longer renders (#1628): those cannot be resumed,
-    and the refusal says so."""
-    return any(current.get(k) != v for k, v in pinned.items())
+    #1460); every key the pin carries must match, at every depth (#1677),
+    the basis excepted (#1657). That is the rule for any key added later;
+    it does not readmit the generations pinned before profiles existed,
+    whose instruction hash — the recorder line carries `--profile` now —
+    no longer renders (#1628): those cannot be resumed, and the refusal
+    says so where that is the cause (`pre_profile_pin`)."""
+    return _subset_differs(_comparable(pinned), _comparable(current))
+
+
+def pre_profile_pin(pinned: dict) -> bool:
+    """A pin from before profiles: no `profile` key, and an instruction
+    spec that carries none — the case whose instruction cannot render
+    again (#1628, #1677)."""
+    spec = ((pinned.get("instruction") or {}).get("spec") or {}) if isinstance(pinned, dict) else {}
+    return isinstance(pinned, dict) and "profile" not in pinned and "profile" not in spec
+
+
+def identity_refusal(pinned: dict, where: str) -> str:
+    base = (f"generation input identity changed {where}; restore the recorded inputs or use "
+            "--no-resume for an explicit new generation")
+    if pre_profile_pin(pinned):
+        base += (" (a generation pinned before profiles existed hashed an instruction that no "
+                 "longer renders, and cannot be resumed; #1628)")
+    return base
 
 
 def require_resolved(spec) -> None:
@@ -187,10 +225,7 @@ def require_resolved(spec) -> None:
 
     pinned = data.get("input_identity")
     if pinned is not None and _identity_differs(pinned, spec.input_identity()):
-        raise UsageLedgerError("generation input identity changed (bundle, manifests or resolved instruction); "
-                               "restore the recorded inputs or use --no-resume for an explicit new generation "
-                               "(a generation pinned before profiles existed hashed an instruction that no "
-                               "longer renders, and cannot be resumed; #1628)")
+        raise UsageLedgerError(identity_refusal(pinned, "(bundle, manifests or resolved instruction)"))
     _finish_reasoning_archive(spec, data)
     from data_sheets_schema.snapshot_store import finish_activation
     finish_activation(spec)
