@@ -139,7 +139,7 @@ FIELD_ALIASES = {
     "encoding": ("distributions.encoding", "file_collections.resources.encoding"),
     "media_type": ("distributions.media_type", "distribution_formats.media_type"),
     "compression": ("distributions.compression", "file_collections.compression"),
-    "distribution_formats": ("distributions.format", "distributions.media_type"),
+    "distribution_formats": ("distributions",),
     "total_size_bytes": ("distributions.bytes",),
     "file_collections.total_bytes": ("distributions.bytes",),
     "file_collections.compression": ("distributions.compression",),
@@ -165,6 +165,9 @@ def field_values(data: dict, field: str) -> list[tuple[str, Any]]:
     seen = set()
     for candidate in (field, *FIELD_ALIASES.get(field, ())):
         for pointer, value in walk(data, candidate.split("."), ""):
+            if field == "distribution_formats" and candidate == "distributions":
+                if not isinstance(value, dict) or not any(value.get(k) for k in ("format", "media_type")):
+                    continue
             if pointer not in seen:
                 found.append((pointer, value))
                 seen.add(pointer)

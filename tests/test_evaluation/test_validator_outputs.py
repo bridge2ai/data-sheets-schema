@@ -10,8 +10,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from tests.test_evaluation.test_semantic_evaluation_contract import (
-    _rubric10_record, _rubric20_record, _validator,
+    _validator,
 )
+from tests.test_evaluation.test_semantic_context_scope import record, ROOT
 
 
 class NewEvaluationOutputs(unittest.TestCase):
@@ -20,6 +21,12 @@ class NewEvaluationOutputs(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
+        self.input_path = self.definition_path = None
+
+    def make(self, rubric):
+        doc, self.input_path = record(self.root, rubric)
+        self.definition_path = ROOT / f".claude/agents/d4d-{rubric}-semantic.md"
+        return doc
 
     def write(self, name, doc):
         path = self.root / name
@@ -30,23 +37,25 @@ class NewEvaluationOutputs(unittest.TestCase):
     def check(self, paths, rubric=None):
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            status = self.m.validate_outputs(paths, rubric)
+            status = self.m.validate_outputs(paths, rubric, input_path=self.input_path,
+                                             definition_path=self.definition_path)
         return status, output.getvalue()
 
     def test_each_rubric_accepts_its_documented_contract(self):
-        for rubric, doc in (("rubric10-semantic", _rubric10_record()),
-                           ("rubric20-semantic", _rubric20_record())):
+        for name in ("rubric10", "rubric20"):
+            rubric, doc = name + "-semantic", self.make(name)
             with self.subTest(rubric=rubric):
                 self.assertEqual(self.check([self.write("answer.json", doc)], rubric)[0], 0)
 
     def test_cli_checks_the_named_file_without_opening_its_siblings(self):
-        answer = self.write("answer.json", _rubric10_record())
+        answer = self.write("answer.json", self.make("rubric10"))
         self.write("another_evaluation.json", {"rubric": "not a real rubric"})
         with patch.object(self.m, "load_evaluation", wraps=self.m.load_evaluation) as read:
             self.assertEqual(self.check([answer], "rubric10-semantic")[0], 0)
             read.assert_called_once_with(answer)
         result = subprocess.run(
             [sys.executable, self.m.__file__, "--file", str(answer),
+             "--input", str(self.input_path), "--agent-definition", str(self.definition_path),
              "--rubric", "rubric10-semantic"], capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -54,7 +63,7 @@ class NewEvaluationOutputs(unittest.TestCase):
         self.assertNotIn("another_evaluation", result.stdout)
 
     def test_new_output_cannot_use_archive_or_superseded_exemptions(self):
-        bad = _rubric10_record()
+        bad = self.make("rubric10")
         bad["semantic_analysis"]["issues_detected"][0]["severity"] = "info"
         for name in ("label_aware/answer.json", "2026-09-11/answer.json",
                      "_archive/answer.json", "superseded/answer.json"):
@@ -70,13 +79,13 @@ class NewEvaluationOutputs(unittest.TestCase):
             with self.subTest(doc=doc):
                 self.assertEqual(self.check([self.write("answer.json", doc)])[0], 1)
         self.assertEqual(self.check([self.root / "missing.json"])[0], 1)
-        wrong = self.write("wrong.json", _rubric20_record())
+        wrong = self.write("wrong.json", self.make("rubric20"))
         status, output = self.check([wrong], "rubric10-semantic")
         self.assertEqual(status, 1)
         self.assertIn("expected rubric10-semantic", output)
 
     def test_one_bad_file_fails_the_whole_explicit_selection(self):
-        good = self.write("good.json", _rubric10_record())
+        good = self.write("good.json", self.make("rubric10"))
         bad = self.write("bad.json", {})
         status, output = self.check([bad, good])
         self.assertEqual(status, 1)

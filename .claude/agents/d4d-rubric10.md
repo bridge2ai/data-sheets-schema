@@ -95,8 +95,13 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Persistent Identifier (DOI, RRID, or URI)**
-   - Fields: `doi`, `rrid`, `id`
-   - Look for: Properly formatted persistent identifiers (DOI, RRID, or unique dataset ID)
+   - Fields: `doi`, `id`
+   - Look for: Properly formatted persistent identifiers (DOI, RRID in `id`, or unique dataset ID)
+   - **Semantic Check:**
+     - DOI must match `10.XXXX/...` pattern
+     - Prefix plausibility: `10.13026` (PhysioNet), `10.5281` (Zenodo), `10.18130` (Harvard Dataverse)
+     - RRID must match `RRID:SCR_XXXXX` or `RRID:AB_XXXXX` format
+     - Score 1 ONLY if format valid AND prefix is plausible
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Dataset Title and Description Completeness**
@@ -110,13 +115,13 @@ Score **0** (absent/fail) if:
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Landing Page and Resources (page, hierarchical resources)**
-   - Fields: `page`, `external_resources`
-   - Look for: Accessible landing page URL where users can learn more
+   - Fields: `page`, `resources`
+   - Look for: Accessible landing page URL and/or hierarchical resource structures
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Hierarchical Structure (parent datasets, relationships)**
-   - Fields: `project`, `keywords`
-   - Look for: Clear association with project (e.g., Example Research Program, AIM-AHEAD)
+   - Fields: `parent_datasets`, `related_datasets`
+   - Look for: Links to parent datasets or related datasets with typed relationships
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
@@ -126,28 +131,28 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Access Policy and IP Restrictions Defined**
-   - Fields: `access_and_licensing.access_policy`
-   - Look for: Clear statement (open, restricted, registered access)
+   - Fields: `license_and_use_terms`, `ip_restrictions`
+   - Look for: Clear access policy, IP-based restrictions, or licensing terms
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Regulatory Compliance and Confidentiality Classification**
-   - Fields: `access_and_licensing.data_use_agreement`
-   - Look for: Whether DUA is required and how to sign it
+   - Fields: `regulatory_restrictions`, `regulatory_restrictions.confidentiality_level`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`, `data_governance.committee_contact`, `regulatory_restrictions.governance_committee_contact`
+   - Look for: Export control restrictions, GDPR compliance, data sensitivity classification, HIPAA compliance status, other regulatory frameworks (CCPA, PIPEDA), and contact information for the responsible governance committee
    - **Applies to:** Use the declared regulated_access predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Download URL or Platform Link Available**
-   - Fields: `distribution_formats`, `download_url`
+   - Fields: `download_url`
    - Look for: Direct download links or platform access instructions
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Distribution Formats and File Types Specified**
-   - Fields: `data_characteristics.data_formats`, `files.listing.type`
-   - Look for: Specific file formats (TSV, Parquet, DICOM, etc.)
+   - Fields: `distribution_formats`, `distribution_formats.format`, `distribution_formats.media_type`, `file_collections.resources.format`, `file_collections.resources.media_type`
+   - Look for: Specific file formats (TSV, Parquet, DICOM, etc.) and MIME types
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Related Datasets and External Resources Linked**
-   - Fields: `external_resources`, `project_website`
-   - Look for: Links to related resources, repositories, or datasets
+   - Fields: `related_datasets`, `external_resources`
+   - Look for: Links to related datasets and external documentation
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
@@ -157,28 +162,28 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **License Terms Allow Reuse**
-   - Fields: `license_and_use_terms.description`
+   - Fields: `license_and_use_terms`
    - Look for: Clear license (CC BY, CC BY-NC-SA, etc.) with reuse permissions
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Data Formats Are Standardized (encoding, format)**
-   - Fields: `data_characteristics.data_formats`
-   - Look for: Use of standard formats (JSON, TSV, Parquet, DICOM, WFDB)
+   - Fields: `distribution_formats`, `file_collections`, `distribution_formats.format`, `file_collections.resources.format`, `file_collections.resources.encoding`
+   - Look for: Use of standard formats (JSON, TSV, Parquet, DICOM, WFDB) and character encoding
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Schema or Ontology Conformance Stated**
-   - Fields: `conforms_to`
+   - Fields: `conforms_to`, `conforms_to_schema`
    - Look for: References to schemas (OMOP, FHIR, schema.org, etc.)
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Variable Metadata with Identifiers Defined**
-   - Fields: `data_characteristics.identifiers_in_files`
-   - Look for: Participant IDs, linking keys, unique identifiers
+   - Fields: `variables`
+   - Look for: Variable-level metadata with identifiers and descriptions
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **Use Guidance Provided (intended, prohibited uses)**
-   - Fields: `software_and_tools`, `open_source_code`
-   - Look for: Software names, versions, processing pipelines, code repos
+   - Fields: `intended_uses`, `prohibited_uses`, `discouraged_uses`
+   - Look for: Clear guidance on allowed, prohibited, and discouraged uses
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
@@ -186,30 +191,48 @@ Score **0** (absent/fail) if:
 ### Element 4: Ethical Use and Privacy Safeguards
 **Question:** Does the dataset provide clear information about consent, privacy, and ethical oversight?
 
+**Applicability is per sub-element, not per element (#1060).** Sub-elements 1
+and 2 ask about oversight and deidentification, which a dataset with no human
+participants can still have. Sub-elements 3, 4 and 5 ask about participants —
+their privacy, their consent, their compensation — and where there are none,
+there is nothing to document and nothing to score. Marking those three
+`not_applicable` is not leniency: it keeps the element measuring documentation
+quality rather than whether the dataset happens to involve people. The five
+sub-elements previously carried one copy-pasted trigger, and evaluators split
+on it, scoring the same cell-line dataset out of 50 and out of 45.
+
+**Consistency Checks (apply across all sub-elements):**
+- IF `human_subject_research.involves_human_subjects=True` → EXPECT sub-element 1 (IRB approval) AND sub-element 4 (consent) to score 1
+- IF `is_deidentified` present → EXPECT deidentification method described
+- IF human participation and ethics approval are documented → check whether consent or an explicit applicable waiver is described
+- IF `data_protection_impacts` present → EXPECT `participant_privacy.reidentification_risk` assessed
+- Flag any inconsistencies in semantic_analysis.issues_detected
+
 **Sub-elements:**
 1. **IRB or Ethics Review and Data Protection Impact**
-   - Fields: `ethics.irb_approval`
-   - Look for: IRB approval details, institutional oversight
+   - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `data_governance.committee_contact`, `regulatory_restrictions.governance_committee_contact`
+   - Look for: Documented IRB/ethics review or an applicable review waiver, oversight decision, or data protection impact assessment. A governance committee contact alone is not an ethics review or assessment.
+   - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
    - **Applies to:** Use human_subjects OR regulated_access. The latter must describe a governance constraint that applies; a declaration that no restriction applies is not a constraint. Unknown remains scored.
 
 2. **Deidentification Method Described**
-   - Fields: `deidentification_and_privacy.approach`
-   - Look for: Specific method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
+   - Fields: `is_deidentified`
+   - Look for: Specific deidentification method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
    - **Applies to:** Use human_subjects OR regulated_access. The latter must describe a governance constraint that applies; a declaration that no restriction applies is not a constraint. Unknown remains scored.
 
 3. **Privacy Protections and Re-identification Risk Assessment**
-   - Fields: `deidentification_and_privacy.examples_of_identifiers_removed`
-   - Look for: List of removed identifiers (names, dates, SSNs, etc.)
+   - Fields: `participant_privacy`, `participant_privacy.reidentification_risk`
+   - Look for: Privacy protections, anonymization procedures, explicit re-identification risk assessment and mitigation measures
    - **Applies to:** Use human_subjects only. Governance is not a participant signal; a governance constraint does not make it fire. A human-subjects condition that plainly fails is not borderline. Unknown remains scored.
 
 4. **Informed Consent Obtained from Participants**
-   - Fields: `collection_process.consent`
-   - Look for: Consent procedures, consent type (written, verbal)
+   - Fields: `informed_consent`
+   - Look for: Consent procedures, consent type (written, verbal), withdrawal mechanisms
    - **Applies to:** Use human_subjects only. Governance is not a participant signal; a governance constraint does not make it fire. A human-subjects condition that plainly fails is not borderline. Unknown remains scored.
 
 5. **Vulnerable Populations and Compensation Documented**
-   - Fields: `ethics.ethical_position`
-   - Look for: Statement on ethical data collection practices
+   - Fields: `at_risk_populations`, `participant_compensation`
+   - Look for: Protections for at-risk populations, compensation details
    - **Applies to:** Use human_subjects only. Governance is not a participant signal; a governance constraint does not make it fire. A human-subjects condition that plainly fails is not borderline. Unknown remains scored.
 
 ---
@@ -219,28 +242,28 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Cohort or Subpopulations Characteristics Described**
-   - Fields: `composition.population`
-   - Look for: Demographics, inclusion/exclusion criteria
+   - Fields: `subpopulations`, `subsets.is_subpopulation`
+   - Look for: Demographics, inclusion/exclusion criteria, or population characteristics. A subpopulation flag alone identifies a subset but does not describe its characteristics.
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Number of Instances or Samples Reported**
-   - Fields: `composition.population.participants`
-   - Look for: Specific counts (e.g., 306 participants, 12,523 recordings)
+   - Fields: `instances`, `subsets.is_data_split`
+   - Look for: Specific counts of instances or samples (for example participants, recordings, specimens or images). Split flags alone do not report a count.
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Variable-Level Metadata, Tabular Flag, and Data Splits**
-   - Fields: `data_characteristics.modalities`
-   - Look for: EHR, imaging, waveforms, genomics, voice, etc.
+   - Fields: `variables`, `is_tabular`, `subsets.is_data_split`, `subsets.is_subpopulation`
+   - Look for: Variable/column descriptions, data dictionary, tabular data indicator, and documented split/subpopulation flags identifying the roles of dataset subsets
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Data Topics or Conditions Represented**
-   - Fields: `composition.condition_groups`
-   - Look for: Disease conditions, phenotypes studied
+   - Fields: `instances`
+   - Look for: Disease conditions, phenotypes, topics covered in the dataset
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Data Quality, Anomalies, and Missing Data Documented**
-   - Fields: `data_characteristics.sampling_and_dimensions`
-   - Look for: Array dimensions (513×N), sampling rates (16 kHz), file sizes
+   - Fields: `anomalies`, `sampling_strategies`, `missing_data_documentation`
+   - Look for: Known data quality issues, anomalies, sampling methods, missing data patterns and handling strategies
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
@@ -250,28 +273,28 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Dataset Version Number Provided**
-   - Fields: `dataset_version`, `version`
+   - Fields: `version`
    - Look for: Version number (1.0, 1.1, 2.0.1)
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Version Access Methods Documented**
-   - Fields: `release_notes`
-   - Look for: Release notes or change log
+   - Fields: `version_access`
+   - Look for: How to access different versions of the dataset
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Change Descriptions and Errata Provided**
-   - Fields: `release_notes.notes`
-   - Look for: Specific changes made in each version
+   - Fields: `errata`, `updates`
+   - Look for: Errata documentation, update descriptions, change logs
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Update Schedule or Frequency Indicated**
    - Fields: `updates`
-   - Look for: Update schedule, maintenance plan
+   - Look for: Update schedule, maintenance plan, update frequency
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **Provenance, Source Derivation, and Raw Data Sources**
-   - Fields: `version_access`, `external_resources`
-   - Look for: Links to version-specific documentation
+   - Fields: `was_derived_from`, `updates.update_details`, `updates.description`, `notes`, `raw_data_sources`
+   - Look for: Source provenance, dataset derivation, release notes, or raw data sources before preprocessing. Generic notes or an update schedule alone do not describe provenance or derivation.
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 ---
@@ -281,28 +304,32 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Motivation or Purpose for Dataset Creation**
-   - Fields: `motivation`
-   - Look for: Scientific rationale, research gaps addressed
+   - Fields: `purposes`
+   - Look for: Scientific rationale, research gaps addressed, dataset purposes
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Primary Research Objectives or Tasks**
-   - Fields: `intended_uses.primary`
-   - Look for: Specific research questions or ML tasks
+   - Fields: `tasks`
+   - Look for: Specific research questions, ML tasks, intended analyses
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Funding Sources and Mechanisms Listed**
-   - Fields: `funding_and_acknowledgements.funding.agency`
-   - Look for: NIH, NSF, specific grant agency
+   - Fields: `funders`
+   - Look for: Named funders or sponsoring organisations and their funding mechanisms; no particular agency or country is required
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Grant IDs or Award Numbers Present**
-   - Fields: `funding_and_acknowledgements.funding.award_number`
-   - Look for: Grant numbers (1OT2OD032742-01, etc.)
+   - Fields: `funders`
+   - Look for: Grant or award identifiers within funder descriptions, using the named funder's own identifier convention
+   - **Semantic Check:**
+     - NIH format: `[Type][Number][Institute][Digits]` (e.g., `OT2OD032742`, `R01GM123456`)
+     - NSF format: `[Division]-[Number]` (e.g., `DBI-1234567`)
+     - Score 1 if grant number follows expected pattern for stated agency
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Creators and Acknowledgements Documented**
-   - Fields: `funding_and_acknowledgements.acknowledgements`
-   - Look for: Acknowledgements section
+   - Fields: `creators`, `funders`
+   - Look for: Dataset creators, contributor acknowledgements, institutional support
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
@@ -312,28 +339,67 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Collection Mechanisms and Settings Described**
-   - Fields: `collection_process.setting`
-   - Look for: Clinical sites, institutions, collection locations
+   - Fields: `collection_mechanisms`
+   - Look for: Collection procedures, settings, timeframes
    - **Applies to:** Use the declared data_collection predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Data Acquisition Methods Listed**
-   - Fields: `collection_process.data_capture`
-   - Look for: Instruments, devices, software used for data capture
+   - Fields: `acquisition_methods`, `raw_data_sources`
+   - Look for: Methods, instruments, devices or software used for data capture and acquisition. Raw source descriptions may supply these details; a source name or URL alone does not describe an acquisition method.
    - **Applies to:** Use the declared data_collection predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Preprocessing, Cleaning, Labeling, and Annotation Quality**
-   - Fields: `preprocessing_and_derived_data.raw_audio_processing`
-   - Look for: Preprocessing pipeline, cleaning steps
+   - Fields: `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `annotation_analyses`, `machine_annotation_tools`, `imputation_protocols`
+   - Look for: Preprocessing pipeline, cleaning steps, labeling methods, annotation quality analyses, machine annotation tools, imputation protocols for missing values
    - **Applies to:** Use the declared data_processing predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Software and Tools Documented**
-   - Fields: `software_and_tools.preprocessing_code`
-   - Look for: GitHub repos, code availability
+   - Fields: `preprocessing_strategies.used_software`, `cleaning_strategies.used_software`, `labeling_strategies.used_software`, `imputation_protocols.used_software`, `machine_annotation_tools`, `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `imputation_protocols`, `external_resources`
+   - Evidence paths: Software can be attached through `used_software` on any
+     dataset property; the qualified paths above are examples. The schema
+     declares no top-level `software_and_tools` slot (#1081).
+     Tooling named in `machine_annotation_tools`,
+     `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`,
+     `imputation_protocols` or `external_resources`, including those slots'
+     prose, is the alternative evidence, and any one of them carrying the
+     evidence satisfies the global requirement that the field exist.
+   - Look for: Software names, versions, processing tools, GitHub repos
+   - **Applicability.** This item uses processing_software. It is **not** gated on whether a repository is pointed at. Unknown remains applicable; missing tooling documentation cannot establish non-applicability.
+   - **Threshold (#1059, #1082).** The question is whether a reader can tell
+     what software **produced or transformed the data being distributed**.
+     Score 1 when the record names such software, by name, in any of the slots
+     above: a processing, conversion, cleaning, labeling, annotation,
+     imputation or integration step the released data passed through. A name
+     is enough; a version, a repository or a software DOI strengthens the
+     evidence and is what "Look for" asks for, but the sub-element is about
+     whether the tooling is disclosed at all.
+   - **Score 0 whenever no such software is named.** Software in each of the
+     roles below leaves the question unanswered, however prominently the
+     record documents it, and naming one of them alongside the processing
+     software neither adds nor subtracts:
+     - (a) **capture and instrumentation** — a data-entry or e-consent
+       application, a device's vendor app, an acquisition console;
+     - (b) **hosting and serving** — the repository or platform the data is
+       distributed from;
+     - (c) **packaging, containerisation and metadata production** — software
+       that wrapped the release or generated its provenance metadata without
+       transforming the data inside it;
+     - (d) **validation and quality assessment** — software that checked the
+       released data without producing or transforming it;
+     - (e) **a pipeline the record itself states produced outputs that are not
+       in this release**, so what produced the release is still unstated.
+
+     The roles are about what the software did to the released data, not about
+     how important it is. A pointer that identifies only the publisher — an
+     organisation or account root, a project homepage — neither earns nor
+     forfeits the point on its own; it is the name that matters. State which
+     slot carried the evidence, and when scoring 0 either that nothing was
+     named or which of (a)-(e) applies.
    - **Applies to:** Use the declared processing_software predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **External Standards, Resources, and Imputation Protocols**
-   - Fields: `references`
-   - Look for: Published papers, standards documents
+   - Fields: `external_resources`, `conforms_to`, `imputation_protocols`
+   - Look for: Published papers, standards documents, external documentation, and protocols explaining how missing values were imputed or explicitly documenting that imputation was not used
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
@@ -343,28 +409,28 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Known Limitations Documented**
-   - Fields: `limitations`
+   - Fields: `known_limitations`
    - Look for: Explicit limitations section with known issues
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Biases Categorized Using Standard Taxonomy (RAI-aligned)**
-   - Fields: `composition.population`, `sampling_and_dimensions`
-   - Look for: Discussion of sampling biases, representativeness
+   - Fields: `known_biases`, `future_use_impacts`
+   - Look for: Categorized dataset biases with the relevant bias type, fairness issue or representativeness limitation. Future-use impacts may explain a documented bias; a generic impact statement alone does not categorize bias.
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Data Anomalies and Quality Issues Noted**
-   - Fields: `preprocessing_and_derived_data`, `data_quality`
-   - Look for: QC procedures, validation steps
+   - Fields: `anomalies`
+   - Look for: Data quality issues, anomalies, outliers documented
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Sensitive Content and Warnings Provided**
-   - Fields: `intended_uses.usage_notes`
-   - Look for: Discouraged uses, known constraints
+   - Fields: `sensitive_elements`, `content_warnings`
+   - Look for: Sensitive content descriptions, content warnings
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Ethical Review and Social Impact Analysis**
-   - Fields: `ethics.conflicts_of_interest`
-   - Look for: COI statement
+   - Fields: `ethical_reviews`, `future_use_impacts`
+   - Look for: Ethical review documentation, conflicts of interest, and analysis of anticipated downstream social impacts and mitigations
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
@@ -374,29 +440,29 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Dataset Published on a Recognized Platform**
-   - Fields: `publisher`, `access_and_licensing.platform`
-   - Look for: PhysioNet, Dataverse, FAIRhub, Zenodo, etc.
+   - Fields: `publisher`
+   - Look for: PhysioNet, Dataverse, FAIRhub, Zenodo, institutional repository
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Citation and DOI for Cross-referencing**
-   - Fields: `external_resources`, `references`
-   - Look for: DOI links to related work
+   - Fields: `citation`, `doi`
+   - Look for: Recommended citation format, DOI for cross-referencing
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
    - With true or unknown shared_dataset, a record with neither citation nor DOI earns 0.
 
 3. **Community Standards or Schema Conformance**
    - Fields: `conforms_to`
-   - Look for: OMOP, FHIR, schema.org, Dublin Core
+   - Look for: OMOP, FHIR, schema.org, Dublin Core, other community standards
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Outreach Materials and Documentation Links**
-   - Fields: `external_resources`, `distribution_formats`
-   - Look for: Webinars, tutorials, documentation
+   - Fields: `external_resources`, `page`
+   - Look for: Webinars, tutorials, documentation links, landing pages
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **Related Datasets with Typed Relationships**
-   - Fields: `project`, `related_datasets`
-   - Look for: Related datasets, thematic collections
+   - Fields: `related_datasets`
+   - Look for: Related datasets with relationship types (supplements, derives from, is version of)
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 ---
@@ -599,7 +665,7 @@ context, never from missing scoring fields.
     "collection_metadata_inherited": false
   },
   "metadata": {
-    "instrument_sha256": "<SHA256 of this agent definition>",
+    "instrument_sha256": "<sha256 of .claude/agents/d4d-rubric10.md, this file>",
     "rubric_sha256": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
     "input_sha256": "4036882d0087e11a4a436c5987461fc05006c6a0ba66ca0b165ead5de23830d0",
     "context_sha256": "1abc4085973dd1ce6e0e3e0f1048f2d8982e61f827b8350b195969360a5f4694"

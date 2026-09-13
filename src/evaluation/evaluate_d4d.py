@@ -428,6 +428,15 @@ class D4DEvaluator:
     @staticmethod
     def _count_distinct_types(found_values) -> int:
         seen = set()
+        aliases = {"text/csv": "csv", "text/tab-separated-values": "tsv",
+                   "application/json": "json", "application/ld+json": "jsonld",
+                   "application/xml": "xml", "text/xml": "xml",
+                   "text/plain": "txt", "image/png": "png", "image/jpeg": "jpeg",
+                   "jpg": "jpeg", "image/tiff": "tiff", "tif": "tiff",
+                   "application/pdf": "pdf", "application/dicom": "dicom"}
+        def canonical(value):
+            token = str(value).strip().lower().split(";", 1)[0].strip().lstrip(".")
+            return aliases.get(token, token)
         for v in found_values:
             items = v if isinstance(v, (list, tuple)) else [v]
             for it in items:
@@ -435,10 +444,10 @@ class D4DEvaluator:
                     for key in ("format", "file_type", "media_type", "type",
                                 "extension"):
                         if it.get(key):
-                            seen.add(str(it[key]).lower())
+                            seen.add(canonical(it[key]))
                             break
                 elif it is not None:
-                    seen.add(str(it).lower())
+                    seen.add(canonical(it))
         return len(seen)
 
     def _score_rubric20_question(self, d4d_data: Dict[str, Any], question: Dict[str, Any]) -> QuestionScore:

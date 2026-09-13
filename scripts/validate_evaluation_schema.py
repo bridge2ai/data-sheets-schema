@@ -99,6 +99,9 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 raise ValueError(f"no semantic evaluation schema for rubric {declared!r}")
             if rubric is not None and declared != rubric:
                 raise ValueError(f"expected {rubric}, found {declared}")
+            if doc.get("version") != "2.0":
+                raise ValueError("new-output acceptance requires instrument version 2.0; "
+                                 "use historical classification for earlier instruments")
             valid, errors = validate_evaluation(doc, load_schema(schema_dir / names[declared]))
             if not valid:
                 raise ValueError("\n".join(errors))

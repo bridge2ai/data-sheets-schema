@@ -524,7 +524,7 @@ context, never from missing scoring fields.
     "collection_metadata_inherited": false
   },
   "metadata": {
-    "instrument_sha256": "<SHA256 of this agent definition>",
+    "instrument_sha256": "<sha256 of .claude/agents/d4d-rubric20.md, this file>",
     "rubric_sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
     "input_sha256": "4036882d0087e11a4a436c5987461fc05006c6a0ba66ca0b165ead5de23830d0",
     "context_sha256": "1abc4085973dd1ce6e0e3e0f1048f2d8982e61f827b8350b195969360a5f4694"

@@ -74,13 +74,16 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 ### Scoring Standards
 
-#### For Numeric Questions (0-5 scale):
+#### For Numeric Questions (discrete 0/3/5 bands):
 - **5:** Excellent - Comprehensive, detailed, actionable information
-- **4:** Very Good - Most information present with minor gaps
 - **3:** Good - Adequate information but lacking some detail
-- **2:** Fair - Minimal information, significant gaps
-- **1:** Poor - Very limited information, mostly incomplete
 - **0:** Absent - No relevant information found
+
+Use each question's anchored 0, 3 or 5 band, including its explicit threshold
+and any question-specific clarification. Intermediate scores 1, 2 and 4 and
+fractional scores are not part of this semantic instrument. Record uncertainty
+in the rationale; do not interpolate between bands. This differs from the
+direct API and conversational quality judges' numeric scale.
 
 #### For Pass/Fail Questions:
 - **Pass (1):** Required information is present and meaningful
@@ -600,7 +603,7 @@ context, never from missing scoring fields.
     "collection_metadata_inherited": false
   },
   "metadata": {
-    "instrument_sha256": "<SHA256 of this agent definition>",
+    "instrument_sha256": "<sha256 of .claude/agents/d4d-rubric20-semantic.md, this file>",
     "rubric_sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
     "input_sha256": "4036882d0087e11a4a436c5987461fc05006c6a0ba66ca0b165ead5de23830d0",
     "context_sha256": "1abc4085973dd1ce6e0e3e0f1048f2d8982e61f827b8350b195969360a5f4694"
@@ -608,14 +611,14 @@ context, never from missing scoring fields.
 }
 ```
 
-**Why two hashes (#1077).** `rubric_hash` names the rubric *text*; the rules
+**Why two hashes (#1077).** `rubric_sha256` names the source rubric bytes (`data/rubric/rubric20.txt`); the rules
 that decide a score live in this file, and the text did not change across the
 Element 4 gate fix (#1060), the software threshold (#1059) or its
 re-adjudication (#1082) — three revisions that moved scores. So a rubric-text
 hash cannot tell two instruments apart, and the evaluations that followed the
 old contract exactly are the ones whose instrument their own artifact cannot
 name. Record both: `instrument_sha256` identifies the scoring rules,
-`rubric_hash` the text they read.
+`rubric_sha256` the text they read. Historical version 1 evaluations used the key `rubric_hash` for the source text; new version 2 outputs use `rubric_sha256`.
 
 ## Validate the output before completion (#833)
 

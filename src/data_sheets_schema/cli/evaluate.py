@@ -134,9 +134,10 @@ def presence(file, context, project, method, output_dir):
 
     # Set up args for the evaluation script
     old_argv = sys.argv
-    sys.argv = ['evaluate_d4d.py', '--output-dir', output_dir]
+    sys.argv = ['evaluate_d4d.py']
     if method:
         sys.argv.extend(['--methods', method])
+    sys.argv.extend(['--output-dir', output_dir])
     if project:
         sys.argv.extend(['--project', project])
     if file:

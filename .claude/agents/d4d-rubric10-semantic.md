@@ -321,7 +321,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 **Sub-elements:**
 1. **IRB or Ethics Review and Data Protection Impact**
    - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `data_governance.committee_contact`, `regulatory_restrictions.governance_committee_contact`
-   - Look for: IRB approval details, institutional oversight, ethics review boards, data protection impact assessments (DPIAs), governance committee contacts
+   - Look for: Documented IRB/ethics review or an applicable review waiver, oversight decision, or data protection impact assessment. A governance committee contact alone is not an ethics review or assessment.
    - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
    - **Applies to:** Use human_subjects OR regulated_access. The latter must describe a governance constraint that applies; a declaration that no restriction applies is not a constraint. Unknown remains scored.
 
@@ -353,12 +353,12 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 **Sub-elements:**
 1. **Cohort or Subpopulations Characteristics Described**
    - Fields: `subpopulations`, `subsets.is_subpopulation`
-   - Look for: Demographics, inclusion/exclusion criteria, population characteristics, subpopulation flags on dataset subsets
+   - Look for: Demographics, inclusion/exclusion criteria, or population characteristics. A subpopulation flag alone identifies a subset but does not describe its characteristics.
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Number of Instances or Samples Reported**
    - Fields: `instances`, `subsets.is_data_split`
-   - Look for: Specific counts (e.g., 306 participants, 12,523 recordings), dataset split flags indicating training/test/validation subsets
+   - Look for: Specific counts of instances or samples (for example participants, recordings, specimens or images). Split flags alone do not report a count.
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Variable-Level Metadata, Tabular Flag, and Data Splits**
@@ -404,7 +404,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 
 5. **Provenance, Source Derivation, and Raw Data Sources**
    - Fields: `was_derived_from`, `updates.update_details`, `updates.description`, `notes`, `raw_data_sources`
-   - Look for: Source provenance, dataset derivation, release notes, raw data sources before preprocessing
+   - Look for: Source provenance, dataset derivation, release notes, or raw data sources before preprocessing. Generic notes or an update schedule alone do not describe provenance or derivation.
    - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 ---
@@ -425,16 +425,16 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 
 3. **Funding Sources and Mechanisms Listed**
    - Fields: `funders`
-   - Look for: NIH, NSF, specific grant agencies and funding mechanisms
+   - Look for: Named funders or sponsoring organisations and their funding mechanisms; no particular agency or country is required
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Grant IDs or Award Numbers Present**
    - Fields: `funders`
-   - Look for: Grant numbers (1OT2OD032742-01, etc.) within funder descriptions
+   - Look for: Grant or award identifiers within funder descriptions, using the named funder's own identifier convention
    - **Semantic Check:**
-     - NIH format: `[Type][Number][Institute][Digits]` (e.g., `OT2OD032742`, `R01GM123456`)
-     - NSF format: `[Division]-[Number]` (e.g., `DBI-1234567`)
-     - Score 1 if grant number follows expected pattern for stated agency
+     - Check the identifier against the stated funder's own convention when it is available.
+     - Do not require a US agency prefix or a particular national funding system.
+     - Distinguish a grant/award identifier from an investigator name or general programme title; record uncertainty if its validity cannot be established.
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Creators and Acknowledgements Documented**
@@ -455,7 +455,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 
 2. **Data Acquisition Methods Listed**
    - Fields: `acquisition_methods`, `raw_data_sources`
-   - Look for: Instruments, devices, software used for data capture and acquisition, raw data sources before preprocessing
+   - Look for: Methods, instruments, devices or software used for data capture and acquisition. Raw source descriptions may supply these details; a source name or URL alone does not describe an acquisition method.
    - **Applies to:** Use the declared data_collection predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Preprocessing, Cleaning, Labeling, and Annotation Quality**
@@ -525,7 +525,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 
 2. **Biases Categorized Using Standard Taxonomy (RAI-aligned)**
    - Fields: `known_biases`, `future_use_impacts`
-   - Look for: Structured bias categorization via `BiasTypeEnum` (mapped to AI Ontology), fairness issues, representativeness, anticipated downstream social impacts (`rai:dataSocialImpact`)
+   - Look for: Categorized dataset biases with the relevant bias type, fairness issue or representativeness limitation. Future-use impacts may explain a documented bias; a generic impact statement alone does not categorize bias.
    - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Data Anomalies and Quality Issues Noted**
@@ -789,7 +789,7 @@ context, never from missing scoring fields.
     "collection_metadata_inherited": false
   },
   "metadata": {
-    "instrument_sha256": "<SHA256 of this agent definition>",
+    "instrument_sha256": "<sha256 of .claude/agents/d4d-rubric10-semantic.md, this file>",
     "rubric_sha256": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
     "input_sha256": "4036882d0087e11a4a436c5987461fc05006c6a0ba66ca0b165ead5de23830d0",
     "context_sha256": "1abc4085973dd1ce6e0e3e0f1048f2d8982e61f827b8350b195969360a5f4694"
@@ -797,14 +797,14 @@ context, never from missing scoring fields.
 }
 ```
 
-**Why two hashes (#1077).** `rubric_hash` names the rubric *text*; the rules
+**Why two hashes (#1077).** `rubric_sha256` names the source rubric bytes (`data/rubric/rubric10.txt`); the rules
 that decide a score live in this file, and the text did not change across the
 Element 4 gate fix (#1060), the software threshold (#1059) or its
 re-adjudication (#1082) — three revisions that moved scores. So a rubric-text
 hash cannot tell two instruments apart, and the evaluations that followed the
 old contract exactly are the ones whose instrument their own artifact cannot
 name. Record both: `instrument_sha256` identifies the scoring rules,
-`rubric_hash` the text they read.
+`rubric_sha256` the text they read. Historical version 1 evaluations used the key `rubric_hash` for the source text; new version 2 outputs use `rubric_sha256`.
 
 ## Validate the output before completion (#833)
 
