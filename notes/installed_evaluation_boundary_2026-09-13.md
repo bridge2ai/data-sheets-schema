@@ -124,3 +124,22 @@ reproduced errno 8. The original shebangs are restored on all six affected
 wrappers, retaining their existing modes. Direct evaluator --help succeeds,
 and all seven legacy-renderer/evaluation CLI checks pass. Packaged scoring
 implementation and instrument texts are unchanged.
+
+## Profile and packaging review integration — 2026-09-13
+
+The combined implementation includes profile 27b627fa2 and packaging 2a840076a.
+The earlier installed-evaluation head 1a9a1a348 passed Codex round 7 and CI
+34760898615. The subsequent resource/profile/evaluation integration passes
+1050 checks (one existing skip), followed by 337 resource, review, receipt and
+selection checks after the packaging corrections. The receipt assertion uses
+the playbook's corrected American spelling. All seven fresh-wheel workflows
+pass after that integration (93.31 seconds). The latest profile/backfill/resume
+changes pass 157 checks. The dependency lock remains valid.
+
+The parent-targeted PR #1692 carries the already reviewed runtime-path fix
+into packaging so its sole CI failure can clear. This implementation keeps
+source and installed evaluation entry points aligned, recorded instrument
+attributions intact, and the existing measured archive unchanged. No new
+production model call, generation output, score or definition quotation occurs.
+The refreshed JSON describes the committed implementation for the next review
+and exact-head CI.
