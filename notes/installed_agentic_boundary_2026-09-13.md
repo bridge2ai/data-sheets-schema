@@ -106,3 +106,19 @@ ratings, 259 prior evaluations and 450 preservation hashes. No production model
 call, source download, generation output, rescore or historical attribution
 change occurs. The refreshed JSON registers the combined implementation for
 independent review and exact-head CI.
+
+## Review round 6 — 2026-09-13
+
+Codex round 5 found #1697: optional current-toolchain discovery did not catch
+ResourceRootError. That exception now disables only the renderer-6 candidate;
+recoverable renderer-1–5 histories still replay. The concrete exception fails
+on the prior implementation while ValueError/OSError controls pass. The
+identity/profile/backfill lane passes 154 tests.
+
+The branch integrates corpus ff6236161 (#1695/#1696) and installed-validator
+b5e41e6ce (#1694/#1713). The combined identity and corpus lane passes 62 tests,
+and an explicitly enabled fresh-wheel run passes all nine acceptance tests.
+After the final validator integration, 28 validator/agentic checks pass. All
+60 historical renderer controls remain byte-identical. No real provider calls,
+production outputs or historical score changes occur. Profile-parent findings,
+including #1700, still require their own completed review and integration.
