@@ -121,9 +121,13 @@ class Selection:
     #: each with ` (undeclared)` when the manifest has no `profile:` key;
     #: `<kind>:<path> (missing)` when the path is not there;
     #: `rendered instruction`, with ` (this process would select <name>: <basis>)`
-    #: when the recorder's own selection differs, for the profile a launch
-    #: instruction carried (#1581). The path is repository-relative under
-    #: the checkout (#1466, #1494).
+    #: when the recorder's own selection differs, or
+    #: ` (this process could not select one: <error>)` when it could not
+    #: select at all, for the profile a launch instruction carried (#1581,
+    #: #1606); `re-rendered to the recorded hash by d4d provenance
+    #: backfill-spec (#772)` on a spec that command reconstructed for a
+    #: record stating no profile (#1607). The path is repository-relative
+    #: under the checkout (#1466, #1494).
     basis: str
 
     @property

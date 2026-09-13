@@ -30,8 +30,11 @@ def bundle(record, output_dir, project, name):
     """
     from data_sheets_schema.healthsheet import build_bundle, default_record
 
-    src = Path(record) if record else default_record()
-    if src is None:
+    # An omitted record stays None: the library anchors the profile's
+    # default from any directory (#1567); resolving it here made it an
+    # explicit relative path that failed from a subdirectory (#1659).
+    src = Path(record) if record else None
+    if src is None and default_record() is None:
         click.echo("❌ no --record given and the active profile names no healthsheet record", err=True)
         raise SystemExit(1)
     try:
