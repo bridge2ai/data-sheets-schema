@@ -143,3 +143,14 @@ attributions intact, and the existing measured archive unchanged. No new
 production model call, generation output, score or definition quotation occurs.
 The refreshed JSON describes the committed implementation for the next review
 and exact-head CI.
+
+## Review round 8 — 2026-09-13
+
+Codex found #1694: the legacy validator batch script used the caller's
+evaluation directory after delegation to the installed implementation. The
+wrapper now supplies its own repository's evaluation directory for batch
+invocations. Explicit `--file` paths retain caller ownership. Four actual
+subprocess cases cover opposing valid/invalid corpora and explicit-file
+selection; the focused validator and semantic-contract lane passes 38 tests.
+Only the compatibility dispatch changes; recorded scores and instrument
+definitions remain untouched. The JSON refreshes the two implementation pins.
