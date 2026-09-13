@@ -223,3 +223,20 @@ all requested generation arms and evaluation styles; the historical condition
 audit passes unchanged. Merge order remains generation, evaluation, existing
 profile PR #1436, then packaging. Preserve Claude's separate profile/packaging
 worktrees while their work continues.
+
+## Generation review round 14 — 2026-09-13
+
+Round 13 is green in full CI. Its independent review reproduced #1454:
+backfill could replace a selected chunk instrument with a discovered sidecar.
+The fix verifies and preserves the original bundle/chunk identity, retains
+recorded absence and refuses unverifiable evidence before writing. The
+manifest/replay lane passes 48 tests and provenance compatibility passes 88;
+see `reviews/pr_1367_round14_2026-09-13.md`. Revised-head CI and independent
+approval remain required before merge.
+
+Evaluation PR #1449 is addressing round-1 findings #1450–#1453 (new-output
+version downgrade, source-item criteria, format/MIME double counting, semantic
+score-band instructions), plus current hash-contract fixtures and instrument
+inventory. No new measurement is launched. The remaining work order stays
+evaluation, Claude's profile PR #1436, then packaging, with both generation
+arms, every evaluation style and historical preservation still in scope.
