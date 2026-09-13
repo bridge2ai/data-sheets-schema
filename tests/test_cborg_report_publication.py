@@ -115,6 +115,40 @@ def test_interrupt_after_rename_still_restores_prior_reports(report_files, monke
     assert not list(plan.glob(".report-staging-*"))
 
 
+@pytest.mark.parametrize("cancellation", [KeyboardInterrupt, SystemExit])
+def test_cancelled_rollback_retains_original_reports(report_files, monkeypatch, cancellation):
+    r, plan, before = report_files
+    replace = os.replace
+    publications = 0
+    interrupted = False
+
+    def fail_publication_then_cancel_rollback(source, target):
+        nonlocal publications, interrupted
+        if source.parent.name.startswith(".report-staging-"):
+            publications += 1
+            if publications == 2:
+                raise OSError(errno.ENOSPC, "second publication rename refused")
+        replace(source, target)
+        if source.parent.name == "backups" and not interrupted:
+            interrupted = True
+            raise cancellation("rollback interrupted after a rename")
+
+    with pytest.raises(reporter.ReportRecoveryError, match="backups retained") as error:
+        with monkeypatch.context() as failures:
+            failures.setattr(os, "replace", fail_publication_then_cancel_rollback)
+            with reporter.staged_publication(r) as staging:
+                for name in reporter.REPORT_NAMES:
+                    (staging / name).write_bytes(b"new qualified " + name.encode())
+    assert interrupted and r.PLAN == plan
+    assert staging.is_dir()
+    assert str(staging / "backups") in str(error.value)
+    assert cancellation.__name__ in str(error.value)
+    for name, original in before.items():
+        backup = staging / "backups" / name
+        assert ((plan / name).read_bytes() == original
+                or (backup.is_file() and backup.read_bytes() == original))
+
+
 def test_backup_failure_leaves_published_files_unchanged(report_files, monkeypatch):
     r, plan, before = report_files
 

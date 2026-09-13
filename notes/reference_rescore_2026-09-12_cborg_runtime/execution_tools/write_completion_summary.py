@@ -35,8 +35,9 @@ class ReportRecoveryError(RuntimeError):
     """A filesystem failure prevented rollback; retained backups need recovery."""
 
 
-def publish_staged_reports(plan, staging):
+def publish_staged_reports(plan, staging, state=None):
     """Publish completed files, retaining the old inodes until all renames pass."""
+    state = {"safe_to_clean": True} if state is None else state
     if not all((staging / name).is_file() for name in REPORT_NAMES):
         raise ValueError("all four qualified reports must be staged before publication")
     backups = staging / "backups"
@@ -45,6 +46,7 @@ def publish_staged_reports(plan, staging):
         if (plan / name).exists():
             os.link(plan / name, backups / name)
     replaced = []
+    state["safe_to_clean"] = False
     try:
         for name in REPORT_NAMES:
             # Include the destination before the syscall, so an interruption
@@ -59,12 +61,15 @@ def publish_staged_reports(plan, staging):
                     os.replace(backups / name, plan / name)
                 else:
                     (plan / name).unlink(missing_ok=True)
-            except OSError:
-                failed.append(name)
+            except BaseException as recovery_error:
+                failed.append(f"{name} ({type(recovery_error).__name__})")
         if failed:
             raise ReportRecoveryError(
                 f"report rollback failed for {failed}; original backups retained at {backups}") from error
+        state["safe_to_clean"] = True
         raise
+    else:
+        state["safe_to_clean"] = True
 
 
 @contextmanager
@@ -75,18 +80,20 @@ def staged_publication(r):
     # condition no longer permits new canary or worker launches.
     with r.canary_lock():
         staging = Path(tempfile.mkdtemp(prefix=".report-staging-", dir=plan))
-        retain = False
+        state = {"safe_to_clean": True}
         try:
             r.PLAN = ReportDestinations(plan, staging)
             yield staging
             r.PLAN = plan
-            publish_staged_reports(plan, staging)
-        except ReportRecoveryError:
-            retain = True
+            publish_staged_reports(plan, staging, state)
+        except BaseException as error:
+            if not state["safe_to_clean"] and not isinstance(error, ReportRecoveryError):
+                raise ReportRecoveryError(
+                    f"report recovery is unconfirmed; original backups retained at {staging / 'backups'}") from error
             raise
         finally:
             r.PLAN = plan
-            if not retain:
+            if state["safe_to_clean"]:
                 shutil.rmtree(staging)
 
 
