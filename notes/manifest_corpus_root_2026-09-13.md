@@ -88,3 +88,28 @@ workflow's validation note, all 101 combined corpus/profile/recording checks
 pass. Backfill retains both recorded profile selection and output destinations.
 The implementation JSON is refreshed for this combined tree; independent
 review and CI will use the committed head.
+
+## Review round 4 — 2026-09-13
+
+The round-3 review found #1613 and #1614. Explicit output overrides now freeze
+their caller-owned absolute paths when a run is specified. Conventional
+corpus-relative pins retain their corpus owner; old absolute flat record
+addresses do not guess an unrecorded base for relative pins. This prevents an
+ancestor project's duplicate output from hiding drift in the actual output.
+The recorder preserves conventional relative destinations when launched at
+the project root. Hash-only backfill also tries a corpus-relative spelling of
+recorded absolute destinations, still writing only when the original complete
+request hash matches.
+
+Five synthetic cases fail at the prior head. All 53 targeted corpus/CLI checks
+pass after the fix; the broader generation, provenance, recovery and usage
+lane passes 331 tests. All seven fresh-wheel checks pass, including an actual
+API run with a caller-relative flat output override under an ancestor manifest.
+All 60 renderer 1–5 controls remain unchanged. CI on the previous head had one
+legacy fixture failure and 4367 passes: #1615 updates that fixture to select
+its study manifest and chunk directory explicitly from an external cwd,
+retaining the original chunk-identity assertion without reinstating imported
+checkout ownership. The dated implementation pins are refreshed.
+
+No production input, output, rating or historical attribution was rewritten.
+The next independent review and exact-head CI remain merge gates.

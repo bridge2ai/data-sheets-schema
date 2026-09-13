@@ -438,7 +438,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     rec = build_record(project, method, label, mode="live",
                        # The selected manifest owns outputs even when this
                        # arm consumes none of its context blocks.
-                       concat_dir=_corpus_path(_CD).absolute(),
+                       concat_dir=_corpus_path(_CD),
                        input_bundle=Path(input_bundle) if input_bundle else None,
                        input_verified=True,
                        prompt_paths=[Path(p) for p in prompts] or None,
@@ -560,6 +560,17 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
         destinations["receipt"] = str(Path(destinations["report"]).parent / f"{project}_coverage_receipt.yaml")
     else:
         destinations = None
+    destination_choices = [destinations]
+    owner = pv.artifact_root(path)
+    if destinations and owner is not None:
+        try:
+            relative = {key: str(Path(value).relative_to(owner))
+                        for key, value in destinations.items()}
+        except ValueError:
+            pass
+        else:
+            if relative != destinations:
+                destination_choices.append(relative)
     # The profile the record states is the one its instruction was rendered
     # under: the recording command carries `--profile <name>` whenever the
     # run had one, and a record from before profiles carries neither. The
@@ -577,8 +588,8 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
             {"profile": name,
              "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
             for name in PROFILES]
-    for delta, render_version, selected_chunks, selected_manifest, selected_profile in product(
-            (0, -1, 1, -2, 2), (6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices):
+    for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations in product(
+            (0, -1, 1, -2, 2), (6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices, destination_choices):
         # This is only a candidate: current installed paths may recover an
         # unrecorded renderer6 toolchain only if the complete original hash
         # agrees. A different installation cannot silently reinterpret it.

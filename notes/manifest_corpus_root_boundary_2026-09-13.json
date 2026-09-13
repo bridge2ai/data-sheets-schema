@@ -1,14 +1,14 @@
 {
   "date": "2026-09-13",
   "files": {
-    "src/data_sheets_schema/api_runner.py": "59698429e8b41a5779566772a1f75c7bc4a1a2e0206b207d290face8d2aace78",
+    "src/data_sheets_schema/api_runner.py": "42d84e7404047e5dc65adfada7fca22b9d47f19626f675bf4ee15c056197017d",
     "src/data_sheets_schema/chunking.py": "9cbce2687ae2770f9c65928696ac397480e56e3da8a8d6148b9cde8beb4949e3",
-    "src/data_sheets_schema/cli/provenance.py": "97ab308f2133747d484709a250d6d119d3bdb30b2b4ee19eef94a11ad894bdc4",
+    "src/data_sheets_schema/cli/provenance.py": "22b5061cfad40b24a638622fd361579fa9933add63863ce12b5c0368cae5ee30",
     "src/data_sheets_schema/cli/receipts.py": "aa321289cf79ab32d26c00699c4a40c1c3f57930cfc7dac850a40188337ae29b",
     "src/data_sheets_schema/cli/runs.py": "431a6485e88b7566c505c0a706b266f752fd3e04834819c74b0ec98dede4213c",
     "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
     "src/data_sheets_schema/profiles.py": "ebbc1df09cfdae96b14fc2f62c60d0abaec98bc1a07edd4df285938902f6f06a",
-    "src/data_sheets_schema/provenance.py": "98a084fce97cc6f324bfed383bffb6e4464ec45b71355b529c3e6c22edf2f0b8",
+    "src/data_sheets_schema/provenance.py": "929937fbc7b9eeb303c4cae9545d73772252321051fbbd9466259384388433b5",
     "src/data_sheets_schema/registry.py": "728a09f36ead8e5b2588849fca71338d09a23004e3ad5ee5dacb0014fdc108eb",
     "src/data_sheets_schema/resources.py": "0438987d06609f6bc99680e4efa0423b52b80bde10f29ffa4a2f314d3897c073",
     "src/data_sheets_schema/runs.py": "609158ba70b60049e381bb2a83d85214498d3ff5e61bffcc2a3cc6f18483b4b0"
@@ -30,7 +30,10 @@
     1602,
     1603,
     1604,
-    1605
+    1605,
+    1613,
+    1614,
+    1615
   ],
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
   "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",

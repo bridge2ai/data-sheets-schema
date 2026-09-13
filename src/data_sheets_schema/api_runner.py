@@ -510,6 +510,10 @@ class RunSpec:
     _corpus_root: Path | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
+        if self.out_dir is not None:
+            # An explicit override belongs to the launch directory. Freeze
+            # it so later provenance readers cannot adopt an ancestor corpus.
+            self.out_dir = Path(self.out_dir).absolute()
         if self.run_date is AUTO:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date

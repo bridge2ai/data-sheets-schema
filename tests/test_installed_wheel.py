@@ -238,6 +238,11 @@ class TestTheInstalledWheel(unittest.TestCase):
                 result = CliRunner().invoke(cli, args)
                 assert result.exit_code == 0 and "no records matched" not in result.output, result.output
             assert not (nested / "data").exists()
+            flat = _spec("EXTERNAL_CLINICAL", "baseline", "installed_flat_rep1", "generic", out_dir="out")
+            api_runner.execute(flat, client=GenerationClient())
+            assert flat.full_path.is_absolute() and flat.full_path.is_relative_to(nested / "out")
+            assert runs.check_provenance(flat.method, flat.label, flat.project,
+                                         record=flat.provenance_path)["ok"]
             # A global option/environment selection must govern the API's
             # context and bundle selection too, from outside this project.
             os.chdir(root.parent)
