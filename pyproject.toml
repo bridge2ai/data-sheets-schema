@@ -27,7 +27,9 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-linkml-runtime = "^1.1.24"
+# The runtime the generator was locked with: linkml 1.9.3 imports `Format.JSON`
+# from it, which a freely resolved 1.10+ runtime no longer has (install canary).
+linkml-runtime = ">=1.9.4,<1.10"
 pyyaml = "^6.0.2"
 jinja2 = "^3.1.6"
 requests = "^2.31.0"
