@@ -43,7 +43,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
-from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest
+from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest, manifest_declared_unused
 from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
     append_usage as _append_usage,
@@ -547,7 +547,7 @@ class RunSpec:
     def manifest_used(self) -> bool:
         """Whether the run consults a manifest at all: one is selected and
         the arm's header does not declare it unused (#603)."""
-        return self.manifest is not None and "not used" not in self.manifest_line.lower()
+        return self.manifest is not None and not manifest_declared_unused(self.manifest_line)
 
     def input_identity(self) -> dict[str, Any]:
         """Current bundle and manifest bytes, separate from billing identity.
@@ -737,7 +737,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
                                 if manifest is None else
                                 "arm declares the manifest unused"
                                 if spec.manifest_line
-                                and "not used" in spec.manifest_line.lower()
+                                and manifest_declared_unused(spec.manifest_line)
                                 else "project declares none, or the manifest "
                                      "was not readable")})
     return out
@@ -1181,7 +1181,7 @@ def naming_block(project: str,
     no naming, and None when the arm declares the manifest unused, for the
     same reason as `source_ranking_block` (#603).
     """
-    if manifest_line is not None and "not used" in manifest_line.lower():
+    if manifest_line is not None and manifest_declared_unused(manifest_line):
         return None
     if manifest is None:
         return None
@@ -1227,7 +1227,7 @@ def scope_block(project: str,
     unused (#603), and None when the project declares no referent — the
     block would then assert nothing.
     """
-    if manifest_line is not None and "not used" in manifest_line.lower():
+    if manifest_line is not None and manifest_declared_unused(manifest_line):
         return None
     if manifest is None:
         return None
@@ -1308,7 +1308,7 @@ def source_ranking_block(project: str,
     supply a single bundle, so sending the baseline arm's ranking would tell the
     model to prefer between documents it was never given.
     """
-    if manifest_line and "not used" in manifest_line.lower():
+    if manifest_line and manifest_declared_unused(manifest_line):
         return None
     if manifest is None:
         return None

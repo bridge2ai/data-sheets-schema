@@ -351,7 +351,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # than reporting `unverifiable`. Only when the caller says which condition
     # was rendered: guessing it would assert a condition the run may not have
     # used, which is the failure the gate exists to catch.
-    from data_sheets_schema.registry import AUTO, select_manifest
+    from data_sheets_schema.registry import AUTO, select_manifest, manifest_declared_unused
     requested = (None if (manifest and str(manifest).lower() == "none")
                  else Path(manifest) if manifest else AUTO)
     # The bundle the record will name: the one passed, else the one the
@@ -365,7 +365,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     header_bundle = h.get("Source bundle") or h.get("Source")
     resolved_bundle = input_bundle or header_bundle
     header_manifest = h.get("Source manifest", "").strip()
-    header_unused = "not used" in header_manifest.lower()
+    header_unused = manifest_declared_unused(header_manifest)
     if requested is AUTO and header_manifest and not header_unused:
         requested = Path(header_manifest)
     selected = (None if requested is AUTO and (resolved_bundle is None or header_unused)

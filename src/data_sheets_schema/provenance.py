@@ -12,10 +12,9 @@ Two modes, and the distinction is load-bearing:
   an input bundle that has since been regenerated).
 
 A reconstructed record **must not** present a present-day observation as if it
-were the run's own. The input bundles were refreshed on 2026-07-24 and
-2026-07-27; hashing them today and recording that against an April run would be
-a fabricated provenance claim. Such fields are listed under ``unrecoverable``
-with the reason, never silently filled.
+were the run's own. A source may have changed since the run; its current hash
+does not establish the consumed bytes. Unverified fields are listed under
+``unrecoverable`` with the reason, never silently filled.
 """
 
 from __future__ import annotations
@@ -35,7 +34,7 @@ from typing import Any
 
 import yaml
 
-from data_sheets_schema.registry import AUTO
+from data_sheets_schema.registry import AUTO, manifest_declared_unused
 
 RECORD_VERSION = 1
 CONCAT_DIR = Path("data/d4d_concatenated")
@@ -1336,18 +1335,20 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             )
         unrecoverable.append({
             "field": "inputs.bundle_md5",
-            "reason": ("the input bundles were regenerated on 2026-07-24 and "
-                       "2026-07-27; the bytes this run consumed are not "
-                       "recoverable, and hashing the current file would assert "
-                       "a false provenance claim"),
+            "reason": ("the bytes consumed by this run have not been verified; "
+                       "hashing a present-day file would not establish the "
+                       "historical input identity"),
         })
 
     if manifest is AUTO:
         from data_sheets_schema.registry import select_manifest
-        header_manifest = header.get("Source manifest", "")
-        if "not used" in header_manifest.lower():
+        header_manifest = header.get("Source manifest", "").strip()
+        if manifest_declared_unused(header_manifest):
             manifest = None
             manifest_basis = manifest_basis or f"the output header declares the source manifest unused ({header_manifest})"
+        elif header_manifest:
+            manifest = Path(header_manifest)
+            manifest_basis = manifest_basis or "the output header declares this source manifest"
         else:
             manifest = select_manifest(project, bundle) if bundle is not None else None
     if manifest is None:
@@ -1360,15 +1361,22 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "no source manifest was selected for this run")}
     else:
         manifest = Path(manifest)
-        manifest_md5 = _md5(manifest)
-        if input_verified:
+        try:
+            manifest_md5 = _md5(manifest)
+        except OSError:
+            manifest_md5 = None
+        if input_verified and manifest_md5 is not None:
             inputs["source_manifest"] = {"path": str(manifest), "md5": manifest_md5}
         else:
             inputs["source_manifest"] = {"path": str(manifest), "md5": None}
             unrecoverable.append({
                 "field": "inputs.source_manifest.md5",
-                "reason": "manifest has been edited since this run",
+                "reason": ("the selected source manifest is missing or unreadable"
+                           if manifest_md5 is None else
+                           "the source manifest bytes consumed by this run have not been verified"),
             })
+        if manifest_basis:
+            inputs["source_manifest"]["basis"] = manifest_basis
 
     # ---- agent playbooks -------------------------------------------------
     # Hashed only for a live record. A reconstructed one is assembled today,
