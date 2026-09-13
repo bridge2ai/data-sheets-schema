@@ -1,14 +1,14 @@
 {
   "date": "2026-09-13",
   "files": {
-    "src/data_sheets_schema/api_runner.py": "01fcfb3e2707cd646f41f29e678d8658d599e5d5c6729fcb88b79bb98ac3b694",
+    "src/data_sheets_schema/api_runner.py": "f020b577ad78afbac8158b1b0a2fc1eb9b2f8d9093acff1ede3bcd07fef61369",
     "src/data_sheets_schema/chunking.py": "be58c5dc332b79d19b01fb52785f6acb13e186fb81088eeb449befdeec2b11e4",
-    "src/data_sheets_schema/cli/provenance.py": "f5a0a25720fedf318d0ad726e47e55970567a1a494b9adcd58fa839f795c7d6d",
+    "src/data_sheets_schema/cli/provenance.py": "db4850757cf1e74284fd37afe168d878baa217e2981ec44ba05a798fb11c57a1",
     "src/data_sheets_schema/cli/receipts.py": "aa321289cf79ab32d26c00699c4a40c1c3f57930cfc7dac850a40188337ae29b",
     "src/data_sheets_schema/cli/runs.py": "431a6485e88b7566c505c0a706b266f752fd3e04834819c74b0ec98dede4213c",
     "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
     "src/data_sheets_schema/profiles.py": "ebbc1df09cfdae96b14fc2f62c60d0abaec98bc1a07edd4df285938902f6f06a",
-    "src/data_sheets_schema/provenance.py": "9be0bdec4231ccf62c19011fc80bb70626e6b83998ca2c5c341f5676d3a3d776",
+    "src/data_sheets_schema/provenance.py": "66fc753997a610aad39c679ba9757ffcb47c46f76c7cb6256dee91aeda1c7393",
     "src/data_sheets_schema/registry.py": "728a09f36ead8e5b2588849fca71338d09a23004e3ad5ee5dacb0014fdc108eb",
     "src/data_sheets_schema/resources.py": "0438987d06609f6bc99680e4efa0423b52b80bde10f29ffa4a2f314d3897c073",
     "src/data_sheets_schema/runs.py": "609158ba70b60049e381bb2a83d85214498d3ff5e61bffcc2a3cc6f18483b4b0"
@@ -36,8 +36,12 @@
     1615,
     1644,
     1645,
-    1646
+    1646,
+    1649,
+    1650,
+    1651
   ],
+  "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
   "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
   "records_generated": [],

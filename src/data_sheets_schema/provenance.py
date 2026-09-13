@@ -859,9 +859,7 @@ def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool |
         return None
     from data_sheets_schema.corpus import anchored
     from data_sheets_schema.resources import is_resource, resource_path
-    if is_resource(path):
-        resolved = resource_path(path)
-    elif Path(path).is_absolute():
+    if Path(path).is_absolute():
         resolved = Path(path)
     elif record is not None:
         # A flat override can itself sit inside the conventional directory.
@@ -871,6 +869,8 @@ def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool |
         if owner is None:
             return None
         resolved = owner / Path(path)
+    elif is_resource(path):
+        resolved = resource_path(path)
     else:
         resolved = anchored(Path(path))
     if not resolved.exists():

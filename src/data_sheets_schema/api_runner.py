@@ -507,6 +507,7 @@ class RunSpec:
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
     _agentic_toolchain: dict | None = field(default=None, init=False, repr=False)
+    _chunk_check_uses_manifest: bool = field(default=False, init=False, repr=False)
     _corpus_root: Path | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
@@ -521,6 +522,7 @@ class RunSpec:
             self.render_version = 6 if self.is_agentic else 5
         if self.render_version not in (1, 2, 3, 4, 5, 6):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
+        self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
         if self.manifest is not None:
@@ -616,6 +618,12 @@ class RunSpec:
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
+        chunk_check_uses_manifest = recorded.get("chunk_check_uses_manifest", False)
+        if not isinstance(chunk_check_uses_manifest, bool):
+            raise ValueError("invalid recorded chunk-check manifest selection")
+        # Older instructions omitted the command's manifest option. Retain
+        # those exact bytes during replay; new specifications bind it (#1650).
+        spec._chunk_check_uses_manifest = chunk_check_uses_manifest
         if "agentic_artifact_paths" in recorded:
             paths = recorded["agentic_artifact_paths"]
             expected = {"full", "core", "receipt"} | ({"report"} if spec.render_version >= 5 else set())
@@ -684,6 +692,7 @@ class RunSpec:
                 **({"agentic_toolchain": {"python": self._agentic_toolchain["python"],
                                          "resources": dict(self._agentic_toolchain["resources"])}}
                    if self.render_version >= 6 and self._agentic_toolchain is not None else {}),
+                **({"chunk_check_uses_manifest": True} if self._chunk_check_uses_manifest else {}),
                 "render_version": self.render_version,
                 "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
                 "condition": self.condition, "arm": self.arm,
@@ -890,6 +899,9 @@ def agentic_selected_inputs(spec: RunSpec) -> str:
     def command(*args):
         return shlex.join(["poetry", "run", "d4d", *map(str, args)])
 
+    chunk_selection = (["--manifest", spec.manifest if spec.manifest is not None else "none"]
+                       if spec._chunk_check_uses_manifest else [])
+
     text = (
         "\n\n## Selected inputs for all four phases (renderer v4)\n\n"
         "This section overrides the input paths and manifest-dependent commands in "
@@ -899,7 +911,7 @@ def agentic_selected_inputs(spec: RunSpec) -> str:
         f"`{spec.chunk_manifest}`. Use its ordered chunk IDs and line windows. "
         "Replace the playbook's default chunk-path read and bundle-chunk check with:\n\n"
         + command("bundle", "chunk", "--bundle", spec.bundle, "--chunk-manifest", spec.chunk_manifest,
-                  "--check", "--strict") + "\n\n"
+                  *chunk_selection, "--check", "--strict") + "\n\n"
         "Require current canonical coverage under the selected rule. Stop on failure; "
         "do not regenerate or replace the selected manifest during this run.\n\n"
     )
