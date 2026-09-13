@@ -709,3 +709,132 @@ class TestCodexRoundFour(unittest.TestCase):
         elsewhere = Path(self.tmp) / "site" / "data_sheets_schema"; elsewhere.mkdir(parents=True)
         with mock.patch.object(scope, "__file__", str(elsewhere / "semantic_scope.py")):
             scope.validate_scope(result)                                       # from an install-shaped location
+
+
+class TestClaudeRoundFour(unittest.TestCase):
+    """The Claude round-4 findings on #1455 (#1635–#1643)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def _git(self, repo, *a):
+        import subprocess
+        return subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *a],
+                              cwd=repo, check=True, capture_output=True, text=True).stdout.strip()
+
+    def _checkout(self, at: Path, *, git: bool) -> Path:
+        (at / "src" / "data_sheets_schema").mkdir(parents=True)
+        (at / ".claude" / "agents").mkdir(parents=True)
+        (at / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        (at / ".claude" / "agents" / "d4d-review-record.md").write_text(
+            "---\nname: d4d-review-record\n---\n\n## Rules\n\nThe first version of this sentence is long enough to discriminate a version.\n", encoding="utf-8")
+        if git:
+            self._git(at, "init", "-q"); self._git(at, "add", "."); self._git(at, "commit", "-q", "-m", "one")
+        return at
+
+    def test_git_must_answer_for_the_resource_root_itself(self):
+        """#1635: an export inside another repository is not that repository's commit."""
+        from data_sheets_schema import provenance
+        outer = Path(self.tmp) / "outer"; outer.mkdir()
+        self._git(outer, "init", "-q"); (outer / "README").write_text("x\n"); self._git(outer, "add", "."); self._git(outer, "commit", "-q", "-m", "outer")
+        export = self._checkout(outer / "export", git=False)
+        os.chdir(export)
+        facts = provenance.repo_facts()
+        self.assertEqual((facts["commit"], facts["dirty"], facts["resource_kind"]), (None, None, "checkout"))
+        self.assertIn("not the resource root", facts["note"])
+        self.assertEqual(Path(facts["resource_root"]), export.resolve())
+
+    def test_the_agent_definitions_history_is_read_where_the_definition_is(self):
+        """#1638"""
+        from data_sheets_schema import agent_pin
+        repo = self._checkout(Path(self.tmp) / "wt", git=True)
+        p = repo / ".claude" / "agents" / "d4d-review-record.md"
+        p.write_text(p.read_text(encoding="utf-8") + "\nA second version adds this sentence, absent from the first one entirely.\n", encoding="utf-8")
+        self._git(repo, "add", "."); self._git(repo, "commit", "-q", "-m", "two")
+        os.chdir(repo)
+        self.assertEqual(agent_pin.agent_path("d4d-review-record").resolve(), p.resolve())
+        self.assertEqual(agent_pin._history_root(p), repo.resolve())
+        previous = agent_pin._previous_text("d4d-review-record")
+        self.assertIsNotNone(previous)
+        self.assertIn("The first version", previous); self.assertNotIn("A second version", previous)
+
+    def test_a_crash_on_the_record_is_reduced_to_its_diagnostic(self):
+        """#1639"""
+        from data_sheets_schema.api_runner import FULL_SCHEMA_PATH, _crash_diagnostic, _validator_lines
+        bad = Path(self.tmp) / "bad.yaml"; bad.write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
+        os.chdir(ROOT)
+        findings, failure = _validator_lines(bad, FULL_SCHEMA_PATH, "Dataset")
+        self.assertIsNone(failure)
+        self.assertLessEqual(len(findings), 6, findings)
+        self.assertTrue(any("ParserError" in l for l in findings), findings)
+        self.assertTrue(any(l.startswith("in ") and str(bad) in l for l in findings), findings)
+        self.assertEqual(_crash_diagnostic("Traceback (most recent call last):\n  File \"x\", line 1\n    y()\nValueError: boom\n"), ["ValueError: boom"])
+
+    def test_the_corpus_anchors_on_the_resource_root(self):
+        """#1640: from a second checkout the corpus and the manifest are its own."""
+        from data_sheets_schema import chunking, registry
+        repo = self._checkout(Path(self.tmp) / "wt", git=True)
+        (repo / "data" / "preprocessed").mkdir(parents=True)
+        (repo / "data" / "preprocessed" / "source_manifest.yaml").write_text("projects: {}\n", encoding="utf-8")
+        os.chdir(repo)
+        self.assertEqual(chunking.corpus_root(), repo.resolve())
+        self.assertEqual(chunking.anchored(chunking.CONCAT_DIR), Path(chunking.CONCAT_DIR))           # relative at the root
+        self.assertEqual(registry._concat_dir().resolve(), (repo / chunking.CONCAT_DIR).resolve())
+        self.assertEqual(Path(registry.default_manifest_path()).resolve(), (repo / "data/preprocessed/source_manifest.yaml").resolve())
+        # A copy of the tree nested inside a checkout is part of that checkout,
+        # not a root of its own (#1545): its manifest is not the registry.
+        from data_sheets_schema.resources import checkout_at, cwd_checkout
+        nested = self._checkout(repo / "notes" / "registration" / "files", git=False)
+        os.chdir(nested)
+        self.assertIsNone(cwd_checkout()); self.assertEqual(checkout_at(nested), repo.resolve())
+
+    def test_an_install_measures_its_files_against_the_record(self):
+        """#1641"""
+        import base64, hashlib
+        from types import SimpleNamespace
+        from data_sheets_schema import provenance
+        good = Path(self.tmp) / "good.txt"; good.write_text("bytes\n", encoding="utf-8")
+        bad = Path(self.tmp) / "bad.txt"; bad.write_text("bytes\n", encoding="utf-8")
+        def entry(path, digest_of):
+            value = base64.urlsafe_b64encode(hashlib.sha256(digest_of).digest()).rstrip(b"=").decode()
+            return SimpleNamespace(hash=SimpleNamespace(mode="sha256", value=value), locate=lambda: path, __str__=lambda self: path.name)
+        entries = [entry(good, b"bytes\n"), entry(bad, b"other\n")]
+        with mock.patch("importlib.metadata.files", return_value=entries):
+            changed, measured = provenance._installed_files_changed()
+        self.assertTrue(measured); self.assertEqual(len(changed), 1)
+        with mock.patch("importlib.metadata.files", return_value=[]):
+            self.assertEqual(provenance._installed_files_changed(), ([], False))
+        with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
+                mock.patch("importlib.metadata.files", return_value=[entry(good, b"bytes\n")]):
+            facts = provenance.repo_facts()
+        self.assertEqual((facts["resource_kind"], facts["dirty"], facts["dirty_file_count"]), ("install", False, 0))
+        with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
+                mock.patch("importlib.metadata.files", return_value=[]):
+            facts = provenance.repo_facts()
+        self.assertEqual((facts["dirty"], facts["dirty_file_count"]), (None, None))
+        self.assertIn("unknown, not clean", facts["note"])
+
+    def test_trap_inventory_lists_what_it_could_not_check(self):
+        """#1642"""
+        from data_sheets_schema import api_runner as a, run_telemetry as t
+        base = Path(self.tmp) / "corpus"; rec = base / "api" / "run" / "P_d4d.yaml"; rec.parent.mkdir(parents=True)
+        rec.write_text("id: x\n", encoding="utf-8")
+        with mock.patch.object(a, "_validator_lines", return_value=(None, "linkml-validate did not run: boom")):
+            result = t.trap_inventory(base)
+        self.assertEqual((result["records_scanned"], result["records_unchecked"]), (0, 1))
+        self.assertEqual(result["unchecked"][0]["record"], str(rec))
+
+    def test_api_run_and_batch_refuse_a_subdirectory_of_a_checkout(self):
+        """#1643"""
+        import click.testing
+        from data_sheets_schema.cli.api import api
+        os.chdir(ROOT / "tests")
+        for args in (["run", "--project", "CHORUS", "--label", "x"], ["batch", "--label-prefix", "x"]):
+            r = click.testing.CliRunner().invoke(api, args)
+            self.assertNotEqual(r.exit_code, 0)
+            self.assertIn("repository root", r.output, args[0])

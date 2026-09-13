@@ -38,6 +38,8 @@ class TestRepoFacts(unittest.TestCase):
         def fake(cmd, *, strip=True, cwd=None):          # `_run` now takes the checkout as cwd (#1550)
             if "--porcelain" in cmd:
                 return porcelain.strip() if strip else porcelain
+            if "--show-toplevel" in cmd:                  # git answers for this root (#1635)
+                return str(cwd)
             return "abc"
 
         def fake_result(cmd, *, strip=True, cwd=None):   # the status query reports its exit too (#1621)
@@ -57,7 +59,8 @@ class TestRepoFacts(unittest.TestCase):
 
     def test_dirty_paths_are_named_and_bounded(self):
         porcelain = "\0".join([" M src/a.py", "?? notes/scratch.md"] + [f"?? f{i}" for i in range(60)]) + "\0"
-        with mock.patch.object(provenance, "_run", lambda args, **kw: "abc"), \
+        top = lambda args, **kw: str(kw.get("cwd")) if "--show-toplevel" in args else "abc"
+        with mock.patch.object(provenance, "_run", top), \
                 mock.patch.object(provenance, "_run_result", lambda args, **kw: (True, porcelain)):
             facts = provenance.repo_facts()
         self.assertTrue(facts["dirty"])
@@ -65,7 +68,7 @@ class TestRepoFacts(unittest.TestCase):
         self.assertEqual(facts["dirty_paths"][:2], ["src/a.py", "notes/scratch.md"])
         self.assertEqual(len(facts["dirty_paths"]), provenance.DIRTY_PATHS_MAX)
         self.assertEqual(facts["dirty_paths_truncated"], 12)
-        with mock.patch.object(provenance, "_run", lambda args, **kw: "abc"), \
+        with mock.patch.object(provenance, "_run", top), \
                 mock.patch.object(provenance, "_run_result", lambda args, **kw: (True, "")):
             clean = provenance.repo_facts()
         self.assertEqual((clean["dirty"], clean["dirty_paths"]), (False, []))

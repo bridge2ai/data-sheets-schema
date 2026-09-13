@@ -87,27 +87,31 @@ def is_checkout() -> bool:
 
 
 def checkout_at(directory: str | Path) -> Path | None:
-    """The checkout of this project `directory` is in: itself when it is
-    one, else its nearest ancestor that is — a worktree or a second clone as
-    much as the checkout the code is imported from. None outside every
-    checkout."""
+    """The checkout of this project `directory` is in: the *outermost* of
+    itself and its ancestors that is one — a worktree or a second clone as
+    much as the checkout the code is imported from. Outermost, because a
+    copy of the tree archived inside a checkout (a registration of measured
+    inputs under `notes/`, #1545) is part of the checkout that holds it,
+    not a checkout of its own. None outside every checkout."""
     try:
         p = Path(directory).resolve()
     except OSError:
         return None
+    found = None
     for candidate in (p, *p.parents):
         if _is_our_checkout(candidate):
-            return candidate
-    return None
+            found = candidate
+    return found
 
 
 def cwd_checkout() -> Path | None:
     """The working directory when it is the *root* of a checkout of this
     project (#1588): its files are what `resource_path` reads first, so it —
     not the checkout the code happens to be imported from — is where the
-    resources come from. A subdirectory of a checkout is not one (#672)."""
-    cwd = Path.cwd()
-    return cwd.resolve() if _is_our_checkout(cwd) else None
+    resources come from. A subdirectory of a checkout is not one (#672),
+    and neither is a copy of the tree nested inside one (#1545)."""
+    cwd = Path.cwd().resolve()
+    return cwd if checkout_at(cwd) == cwd else None
 
 
 def resource_root() -> tuple[Path, str]:

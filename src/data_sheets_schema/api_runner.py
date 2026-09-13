@@ -2694,6 +2694,20 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
+def _crash_diagnostic(text: str) -> list[str]:
+    """The lines of a traceback that say what went wrong: after the last
+    `Traceback` header, every unindented line (the exception) and every
+    YAML position marker (`  in "<file>", line N, column M`)."""
+    crash = text[text.rindex("Traceback (most recent call last)"):]
+    out = []
+    for line in crash.splitlines()[1:]:
+        if not line.strip():
+            continue
+        if not line[:1].isspace() or re.match(r'\s*in "[^"]*", line \d+', line):
+            out.append(line.strip())
+    return out or [l for l in crash.strip().splitlines() if l.strip()][-3:]
+
+
 #: A crash whose last line is an OS error never opened the data file
 #: (#1589, #1620): `[Errno N]` is how every one of them reads.
 _OS_ERROR_LINE = re.compile(r"^\w*Error: \[Errno \d+\]")
@@ -2755,8 +2769,14 @@ def _validator_lines(path: Path, schema: str,
     text = r.stdout + r.stderr
     if _validator_did_not_run(text, path):
         return None, f"linkml-validate did not run: {text.strip()[-300:]}"
-    lines = [l for l in text.strip().splitlines()
-             if l.strip()]
+    if "Traceback (most recent call last)" in text:
+        # The validator ran and the record broke it (#1589): the finding is
+        # the diagnostic — the exception line and any `in "<file>", line N`
+        # marker — not fifty lines of frames (#1639).
+        lines = _crash_diagnostic(text)
+    else:
+        lines = [l for l in text.strip().splitlines()
+                 if l.strip()]
     if not lines:
         # A nonzero exit with nothing to say — a signal, a crash before
         # output — is not a clean validation (#1524).

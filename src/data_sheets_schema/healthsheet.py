@@ -80,11 +80,12 @@ def _shown(source: Path) -> str:
     the checkout, so the bytes do not depend on how the caller spelled it
     (#1564)."""
     import os
-    from data_sheets_schema.chunking import REPO_ROOT
+    from data_sheets_schema.chunking import corpus_root
+    REPO_ROOT = corpus_root()                      # the checkout the run's corpus is anchored on (#1640)
     p = Path(source)
     try:
         r = p.resolve()
-        if r == REPO_ROOT or REPO_ROOT in r.parents:
+        if REPO_ROOT is not None and (r == REPO_ROOT.resolve() or REPO_ROOT.resolve() in r.parents):
             return os.path.relpath(r, REPO_ROOT)
     except OSError:
         pass

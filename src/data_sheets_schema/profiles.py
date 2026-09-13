@@ -42,9 +42,7 @@ STUDY_VOCABULARY_PIN = Path(__file__).with_name("b2ai_registry_vocabularies.yaml
 
 #: The source checkout this module is imported from, or None for an install:
 #: `pyproject.toml` two levels up (`<root>/src/data_sheets_schema/profiles.py`).
-_CHECKOUT_ROOT: Path | None = (
-    Path(__file__).resolve().parents[2]
-    if (Path(__file__).resolve().parents[2] / "pyproject.toml").exists() else None)
+from data_sheets_schema.resources import CHECKOUT_ROOT as _CHECKOUT_ROOT   # the one checkout test (#1577, #1643)
 
 
 @dataclass(frozen=True)

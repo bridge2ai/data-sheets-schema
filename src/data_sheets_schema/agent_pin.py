@@ -146,9 +146,17 @@ def _usable(lines):
     return out
 
 
-def _git(*args) -> str:
+def _git(*args, cwd: Path | None = None) -> str:
     return subprocess.run(["git", *args], capture_output=True, text=True,
-                          cwd=REPO).stdout
+                          cwd=cwd or REPO).stdout
+
+
+def _history_root(path: Path) -> Path:
+    """The checkout whose git holds `path`'s history: the checkout the
+    definition was read from — the working directory's when it is one —
+    not the checkout the code was imported from (#1638)."""
+    from data_sheets_schema.resources import checkout_at
+    return checkout_at(path.resolve()) or REPO
 
 
 def _previous_text(name: str) -> str | None:
@@ -163,18 +171,23 @@ def _previous_text(name: str) -> str | None:
     moment anything else is committed, which left the mechanism inert for all
     twelve definitions.
     """
-    from data_sheets_schema.resources import repo_relative
-    rel = repo_relative(agent_path(name), cwd=False)
-    if _git("diff", "HEAD", "--name-only", "--", rel).strip():
-        blob = _git("show", f"HEAD:{rel}")
+    path = agent_path(name)
+    root = _history_root(path)
+    try:
+        rel = path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        from data_sheets_schema.resources import repo_relative
+        rel = repo_relative(path, cwd=False)
+    if _git("diff", "HEAD", "--name-only", "--", rel, cwd=root).strip():
+        blob = _git("show", f"HEAD:{rel}", cwd=root)
         return blob or None
-    commit = _git("log", "-n1", "--format=%H", "--", rel).strip()
+    commit = _git("log", "-n1", "--format=%H", "--", rel, cwd=root).strip()
     if not commit:
         return None
-    parent = _git("rev-parse", f"{commit}^").strip()
+    parent = _git("rev-parse", f"{commit}^", cwd=root).strip()
     if not parent:
         return None
-    return _git("show", f"{parent}:{rel}") or None
+    return _git("show", f"{parent}:{rel}", cwd=root) or None
 
 
 def sentences_by_section(body: str) -> list[tuple[str | None, str]]:

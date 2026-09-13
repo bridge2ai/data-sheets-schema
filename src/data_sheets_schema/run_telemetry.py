@@ -725,6 +725,9 @@ def trap_inventory(root: Path | None = None,
     # A finding that is not a `[ERROR]` line — a YAML the loader rejects,
     # named in a traceback — is kept with its record, not dropped (#1623).
     unparsed: list[dict[str, Any]] = []
+    # A record the validator could not run on is neither scanned nor clean:
+    # it is listed, so the report says what it could not check (#1642).
+    unchecked: list[dict[str, Any]] = []
     for f in files:
         core = f.name.endswith("_d4d_core.yaml")
         project = f.name.replace("_d4d_core.yaml", "").replace(
@@ -734,6 +737,8 @@ def trap_inventory(root: Path | None = None,
             f, CORE_SCHEMA_PATH if core else FULL_SCHEMA_PATH,
             "CoreDataset" if core else "Dataset")
         if failure is not None:
+            unchecked.append({"record": str(f), "project": project, "method": method,
+                              "failure": failure[:300]})
             continue
         scanned += 1
         if lines:
@@ -782,6 +787,8 @@ def trap_inventory(root: Path | None = None,
         "records_scanned": scanned,
         "records_with_unparsed_findings": len(unparsed),
         "unparsed_findings": unparsed,
+        "records_unchecked": len(unchecked),
+        "unchecked": unchecked,
         "records_with_errors": with_errors,
         "traps": rows,
     }
