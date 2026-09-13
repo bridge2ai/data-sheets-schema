@@ -8,6 +8,7 @@ import pytest
 
 from data_sheets_schema import agent_pin, agentic_runtime, api_runner, resources
 from tests.test_generation_manifest_identity import external
+from tests.test_manifest_corpus_root import project_tree
 
 
 @pytest.mark.parametrize("damage", [None, "version", "current", "previous", "missing"])
@@ -45,6 +46,47 @@ def test_recorded_toolchain_replays_without_live_environment(external, monkeypat
         method=spec.method, label=spec.label)
     assert restored.instruction == instruction
     assert restored.render_spec() == recorded
+
+
+def test_historical_backfill_does_not_require_a_current_toolchain(project_tree, monkeypatch):
+    import yaml
+    from click.testing import CliRunner
+    from data_sheets_schema import chunking, provenance
+    from data_sheets_schema.cli import cli
+    root, manifest, bundle = project_tree
+    monkeypatch.chdir(root)
+    chunks, _ = chunking.write_manifest_for(bundle)
+    spec = api_runner.RunSpec(project="CLINICAL_X", arm="BASELINE (input documents only)",
+        method="external", label="historical_run", condition="generic_v9", bundle=bundle,
+        manifest=manifest, chunk_manifest=chunks, runtime="Claude Code", provider="offline",
+        render_version=5, run_date="2026-09-13", profile="neutral")
+    original = spec.instruction
+    path = provenance.record_path_for(spec.project, spec.method, spec.label)
+    path.parent.mkdir(parents=True)
+    data = {"record_generated_at": "2026-09-13T00:00:00+00:00",
+        "run": {"project": spec.project, "method": spec.method, "label": spec.label},
+        "model": {"provider": spec.provider}, "schema": {"profile": "neutral"},
+        "inputs": {"bundle_path": str(bundle), "source_manifest": {"path": str(manifest)},
+                   "chunks": {"path": str(chunks)}},
+        "outputs": {key: {"path": str(value)} for key, value in
+                    (("full", spec.full_path), ("core", spec.core_path), ("report", spec.report_path))},
+        "prompts": {"request": {"sha256": hashlib.sha256(original.encode()).hexdigest()}}}
+    path.write_text(yaml.safe_dump(data))
+    attempted = []
+    def unavailable():
+        attempted.append(True)
+        raise ValueError("current playbook resources are unavailable")
+    monkeypatch.setattr(agentic_runtime, "toolchain", unavailable)
+    result = CliRunner().invoke(cli, ["--manifest", str(manifest), "provenance", "backfill-spec",
+        "--project", spec.project, "--method", spec.method, "--label", spec.label,
+        "--condition", spec.condition, "--runtime", spec.runtime, "--execute"])
+    assert result.exit_code == 0, (result.output, result.exception)
+    assert attempted
+    recorded = yaml.safe_load(path.read_text())["prompts"]["request"]["spec"]
+    assert recorded["render_version"] == 5
+    restored = api_runner.RunSpec.from_render_spec(recorded, project=spec.project,
+        method=spec.method, label=spec.label)
+    assert restored.instruction == original
 
 
 @pytest.mark.parametrize("damage", ["missing", "relative_python", "missing_schema", "relative_resource"])

@@ -589,6 +589,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
             {"profile": name,
              "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
             for name in PROFILES]
+    current_toolchain = None
+    if runtime in {"Claude Code", "Codex CLI"}:
+        from data_sheets_schema.agentic_runtime import toolchain
+        try:
+            current_toolchain = toolchain()
+        except (OSError, ValueError):
+            # Current resources may be gone while older renderer hashes
+            # still reproduce. Only this candidate becomes unavailable.
+            pass
     for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations in product(
             (0, -1, 1, -2, 2), (6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices, destination_choices):
         # This is only a candidate: current installed paths may recover an
@@ -596,8 +605,9 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
         # agrees. A different installation cannot silently reinterpret it.
         environment = {}
         if render_version >= 6 and runtime in {"Claude Code", "Codex CLI"}:
-            from data_sheets_schema.agentic_runtime import toolchain
-            environment["agentic_toolchain"] = toolchain()
+            if current_toolchain is None:
+                continue
+            environment["agentic_toolchain"] = current_toolchain
         spec = RunSpec.from_render_spec({
             **environment,
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
