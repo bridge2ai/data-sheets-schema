@@ -203,3 +203,23 @@ worktree. Existing profile PR #1436 is the candidate for the subsequent
 profile stage; review it after generation and evaluation rather than duplicate
 that work. Packaging follows. All API/agentic arms and evaluation styles above
 remain in scope, with historical measurements preserved and downloads deferred.
+
+## Generation review round 13 — 2026-09-13
+
+Round 12 found #1448: automatic date selection prevented ordinary resumes on
+the next UTC day. Resume now restores the date from matching persisted render
+evidence while preserving explicit choices and all other instruction/input
+pins. Nine new cases include real batch reconstruction, completed canary
+reuse, portable provenance and controls for fresh/foreign runs and instruction
+drift. The API/batch/canary lane passes 189 tests and the usage-journal/midnight
+lane passes 60. Round-12 CI passes 3,928
+tests with four skips and one corrected condition fixture (#1437). See
+`reviews/pr_1367_round13_2026-09-13.md`; full revised-head checks and review
+still precede merge.
+
+The evaluation stage is now draft PR #1449, based on #1367 and held for its
+first independent review. Its dated boundary note and hash registration cover
+all requested generation arms and evaluation styles; the historical condition
+audit passes unchanged. Merge order remains generation, evaluation, existing
+profile PR #1436, then packaging. Preserve Claude's separate profile/packaging
+worktrees while their work continues.

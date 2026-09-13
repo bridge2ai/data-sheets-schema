@@ -42,7 +42,7 @@ def test_flat_output_identities_and_forced_fresh_runs_keep_accounts_separate(tmp
     ledger.append_usage(s, [], row())
     old_bytes = ledger.ledger_path(s).read_bytes()
     for other in (replace(s, label="another_rep1"), replace(s, method="another"),
-                  replace(s, condition="schema")):
+                  replace(s, condition="generic_v2")):
         assert ledger.ledger_path(other) != ledger.ledger_path(s)
         assert ledger.merge_usage(other, []) == []
     ledger.prepare_usage(s, resume=False)

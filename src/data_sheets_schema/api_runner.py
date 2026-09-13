@@ -485,8 +485,7 @@ class RunSpec:
     # ran past midnight UTC, so recomputing per call gave phases of one run
     # different `# Generated:` dates — and made the provenance digest, which is
     # computed after the last phase, attest a prompt that was never sent.
-    run_date: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).date().isoformat())
+    run_date: str | object = AUTO
     # The study writes into the run-labelled layout under data/d4d_concatenated.
     # The GitHub assistant writes flat into data/sheets_d4dassistant. Rather than
     # two runners, the layout is a parameter — everything else is identical.
@@ -504,8 +503,12 @@ class RunSpec:
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
     _replay_only: bool = field(default=False, init=False, repr=False)
+    _automatic_run_date: str | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
+        if self.run_date is AUTO:
+            self.run_date = datetime.now(timezone.utc).date().isoformat()
+            self._automatic_run_date = self.run_date
         if self.render_version not in (1, 2, 3):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -4645,7 +4648,40 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         return plan(spec)
 
     with _exclusive_run(spec):
+        if resume:
+            _restore_resume_date(spec)
         return _execute(spec, resume=resume, client=client)
+
+
+def _restore_resume_date(spec: RunSpec) -> None:
+    """Restore only an implicit clock substitution, never a caller's choice."""
+    if spec._automatic_run_date is None or spec.run_date != spec._automatic_run_date:
+        return
+    from data_sheets_schema import usage_ledger as ledger
+    pins = ledger.recorded_inputs(spec) or {}
+    instruction = pins.get("instruction") or {}
+    if not isinstance(instruction, dict):
+        raise UsageLedgerError("invalid saved instruction identity for automatic run date recovery")
+    recorded = instruction.get("spec") or {}
+    if not recorded and spec.provenance_path.is_file():
+        try:
+            record = yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, yaml.YAMLError):
+            record = None  # ordinary recovery reports missing or invalid evidence
+        if isinstance(record, dict) and ledger.record_matches(spec, record.get("run")):
+            recorded = ((record.get("prompts") or {}).get("request") or {}).get("spec") or {}
+    if not isinstance(recorded, dict):
+        raise UsageLedgerError("invalid saved render spec for automatic run date recovery")
+    previous = recorded.get("run_date")
+    if previous is None:
+        return  # no evidence: the ordinary instruction pin must still match
+    if not isinstance(previous, str) or not previous:
+        raise UsageLedgerError("invalid recorded automatic run date")
+    if previous != spec.run_date:
+        spec.run_date = previous
+        # Batch plans resolve the prompt before execution. That cached clock
+        # substitution is not the instruction consumed by the saved phases.
+        spec.__dict__.pop("instruction", None)
 
 
 def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
