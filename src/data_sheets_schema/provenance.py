@@ -1541,6 +1541,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
     report = outputs.get("report") or (
         concat_dir / f"{base}_core" / label / f"{project}_reconciliation.md")
+    # A flat record's absolute address does not encode its launch directory.
+    # Capture input addresses now, while their caller base is still known.
+    freeze_inputs = (owner != Path.cwd().resolve() or artifact_root(
+        Path(core).absolute().with_name(f"{project}_provenance.yaml")) is None)
 
     header = parse_header(full)
     unrecoverable: list[dict[str, str]] = []
@@ -1553,11 +1557,11 @@ def build_record(project: str, method: str, label: str, *, mode: str,
 
     # ---- inputs -------------------------------------------------------
     bundle = input_bundle
-    if bundle is not None and owner != Path.cwd().resolve():
-        bundle = Path(bundle).absolute()
     if bundle is None:
         declared = header.get("Source bundle") or header.get("Source")
         bundle = relative_to_root(Path(declared), owner) if declared else None
+    if bundle is not None and freeze_inputs:
+        bundle = Path(bundle).absolute()
 
     inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
                               "chunks": None,
@@ -1576,6 +1580,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         from data_sheets_schema.chunking import chunks_input
         inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"], manifest=chunk_manifest,
                                          source_manifest=SOURCE_MANIFEST_AUTO if namespace is AUTO else namespace)
+        if freeze_inputs and inputs["chunks"] is not None:
+            inputs["chunks"]["path"] = str(Path(inputs["chunks"]["path"]).absolute())
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
@@ -1614,6 +1620,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "no source manifest was selected for this run")}
     else:
         manifest = Path(manifest)
+        if freeze_inputs:
+            manifest = manifest.absolute()
         try:
             manifest_md5 = _md5(manifest)
         except OSError:

@@ -449,6 +449,19 @@ class AmbiguousCanonical(RuntimeError):
     """A project carries a canonical mark under more than one configuration."""
 
 
+def _canonical_artifact_path(entry: dict | None, record: Path) -> str | None:
+    """Return a usable address; an unknown relative base is unavailable."""
+    from data_sheets_schema.provenance import artifact_root
+    value = (entry or {}).get("path")
+    if not value:
+        return None
+    path = Path(value)
+    if path.is_absolute():
+        return str(path)
+    owner = artifact_root(record)
+    return str(owner / path) if owner is not None else None
+
+
 def canonical_runs(concat_dir: Path | None = None,
                    config: str | None = None,
                    runtime: str | None = None) -> dict[str, dict]:
@@ -501,8 +514,8 @@ def canonical_runs(concat_dir: Path | None = None,
             "method": run.get("method"),
             "criterion": (data["canonical"] or {}).get("criterion"),
             "candidates": len((data["canonical"] or {}).get("selected_from") or []),
-            "full": (outputs.get("full") or {}).get("path"),
-            "core": (outputs.get("core") or {}).get("path"),
+            "full": _canonical_artifact_path(outputs.get("full"), prov),
+            "core": _canonical_artifact_path(outputs.get("core"), prov),
             "provenance": str(prov),
         }
     # Refuse rather than pick. `select --execute` does not clear a previous
