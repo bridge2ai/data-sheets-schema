@@ -384,3 +384,16 @@ reference condition, its repeat ratings, and the historical v9 canary. The
 API and agentic arms and all evaluation styles remain required. No new
 production generation, scoring or downloads belong to this implementation
 acceptance run; a future measurement needs its dated condition registration.
+
+### 2026-09-13 review boundary: corpus renderer 5
+
+PR #1587 round 2 addresses #1594–#1598 and #1601. New instructions bind
+actual output locations; old renderer 1–4 controls are byte-identical. The
+input/context/profile tree is selected consistently, and missing pinned
+artifacts cannot be treated as currently valid. Existing measured artifacts
+are preserved (56 ratings, 450 hashes verified). Installed evaluation/rendering
+PR #1557 round 4 fixes CI #1599/#1600 and has six fresh-wheel checks passing.
+The installed-agentic #1556 prototype passes seven fresh-wheel checks; its
+portable toolchain must be rebased onto this corpus boundary and reviewed
+before merge. Both generation arms and all registered evaluation styles
+remain in scope; no new measurement is authorized by these implementation tests.

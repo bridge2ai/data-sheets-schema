@@ -823,10 +823,15 @@ def verify_entry(entry: dict[str, Any]) -> bool | None:
     """Does the file still hash to what the entry recorded? None if unknowable."""
     got = recorded_hash(entry)
     path = entry.get("path")
-    if not got or not path or not Path(path).exists():
+    if not got or not path:
+        return None
+    from data_sheets_schema.corpus import anchored
+    from data_sheets_schema.resources import is_resource, resource_path
+    resolved = resource_path(path) if is_resource(path) else anchored(Path(path))
+    if not resolved.exists():
         return None
     algo, value = got
-    return hash_file(Path(path), algo) == value
+    return hash_file(resolved, algo) == value
 
 
 def preservable_validation(path: Path,
@@ -1312,6 +1317,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # were elsewhere or absent — the GitHub assistant's layout, and the same
     # class as the declared-bundle defect: a path assumed rather than derived
     # from the spec that already knew it (#604).
+    from data_sheets_schema.corpus import root, relative_to_root
+    owner = root(manifest) if manifest is not AUTO and manifest is not None else root()
+    if concat_dir == CONCAT_DIR:
+        concat_dir = relative_to_root(concat_dir, owner)
     base = method[:-5] if method.endswith("_core") else method
     outputs = outputs or {}
     full = outputs.get("full") or concat_dir / base / label / f"{project}_d4d.yaml"
@@ -1331,9 +1340,11 @@ def build_record(project: str, method: str, label: str, *, mode: str,
 
     # ---- inputs -------------------------------------------------------
     bundle = input_bundle
+    if bundle is not None and owner != Path.cwd().resolve():
+        bundle = Path(bundle).absolute()
     if bundle is None:
         declared = header.get("Source bundle") or header.get("Source")
-        bundle = Path(declared) if declared else None
+        bundle = relative_to_root(Path(declared), owner) if declared else None
 
     inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
                               "chunks": None,

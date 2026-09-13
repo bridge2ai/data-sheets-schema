@@ -149,16 +149,10 @@ def declared_profile(manifest: Path | str | None) -> str | None:
 
 
 def default_manifest() -> Path | None:
-    """The manifest a caller that selected none is read against, decided
-    when asked rather than when imported (#1439): the working directory's
-    default manifest if there is one, else the checkout's when this package
-    is imported from a checkout — so a script run from `tests/` in the
-    study's checkout still sees the study's — else none (the registry's
-    rule, #1491; an ancestor's manifest waits on #1523)."""
-    # The registry's rule, not a second one (#1491).
-    from data_sheets_schema.registry import default_manifest_path
-    p = default_manifest_path()
-    return p if p.exists() else None
+    """The selected CLI/environment manifest, else the caller's discovered one."""
+    from data_sheets_schema.corpus import selected_manifest
+    p = selected_manifest()
+    return p if p is not None and p.exists() else None
 
 
 def _shown(path: Path) -> str:

@@ -112,23 +112,24 @@ class TestSelection(_Clean):
         os.environ["D4D_PROFILE"] = "neutral"
         self.assertEqual(select_profile(STUDY_MANIFEST).basis, "environment")
 
-    def test_the_default_manifest_does_not_follow_the_working_directory(self):
-        """From `tests/` in the study's checkout, and from a directory that is
-        no checkout at all, a caller that selected nothing still gets the
-        study's manifest — the checkout's — rather than a silent neutral
-        (#1439)."""
+    def test_default_manifest_stays_checkout_local(self):
+        """Inside the checkout the study is stable; outside it, no caller
+        manifest means neutral rather than an implicit study corpus (#1594)."""
         from data_sheets_schema import schema_digest
         from data_sheets_schema.profiles import select_profile
         here = select_profile()
         self.assertEqual(here.name, "bridge2ai")
         study = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
-        for elsewhere in (ROOT / "tests", Path(tempfile.gettempdir())):
-            os.chdir(elsewhere)
-            sel = select_profile()
-            self.assertEqual(sel.name, "bridge2ai", elsewhere)
-            self.assertRegex(sel.basis, r"^default manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
-            schema_digest._TEXT_CACHE.clear()
-            self.assertEqual(schema_digest.fingerprint(schema_digest.digest_text("Dataset")), study)
+        os.chdir(ROOT / "tests")
+        sel = select_profile()
+        self.assertEqual(sel.name, "bridge2ai")
+        self.assertRegex(sel.basis, r"^default manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
+        schema_digest._TEXT_CACHE.clear()
+        self.assertEqual(schema_digest.fingerprint(schema_digest.digest_text("Dataset")), study)
+        os.chdir(tempfile.gettempdir())
+        self.assertEqual(select_profile().name, "neutral")
+        schema_digest._TEXT_CACHE.clear()
+        self.assertNotEqual(schema_digest.fingerprint(schema_digest.digest_text("Dataset")), study)
         os.chdir(ROOT)
 
     def test_an_explicit_profile_overrides_the_ambient_one(self):

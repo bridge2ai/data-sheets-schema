@@ -39,7 +39,9 @@ def default_manifest_path() -> Path:
         candidate = root / DEFAULT_MANIFEST
         if candidate.is_file():
             return relative_to_root(DEFAULT_MANIFEST, root)
-    return relative_to_root(DEFAULT_MANIFEST, checkout or here)
+    # A checkout can supply installed resources, but does not own an
+    # unrelated caller's corpus without an explicit selection (#1594).
+    return DEFAULT_MANIFEST
 
 
 def _selected_path(value) -> Path | None:
@@ -49,8 +51,8 @@ def _selected_path(value) -> Path | None:
     return default_manifest_path() if path == DEFAULT_MANIFEST and not path.exists() else path
 
 
-def selected_manifest(*, allow_checkout_fallback: bool = False) -> Path | None:
-    """The active CLI/environment selection, else the discovered manifest."""
+def manifest_override():
+    """An explicit command/environment selection, including explicit none."""
     ctx = click.get_current_context(silent=True)
     while ctx is not None:
         value = ctx.params.get("manifest")
@@ -60,6 +62,14 @@ def selected_manifest(*, allow_checkout_fallback: bool = False) -> Path | None:
     value = os.environ.get("D4D_MANIFEST")
     if value:
         return _selected_path(value)
+    return AUTO
+
+
+def selected_manifest(*, allow_checkout_fallback: bool = False) -> Path | None:
+    """The active CLI/environment selection, else the discovered manifest."""
+    explicit = manifest_override()
+    if explicit is not AUTO:
+        return explicit
     selected = default_manifest_path()
     here = Path.cwd().resolve()
     checkout = resources.CHECKOUT_ROOT

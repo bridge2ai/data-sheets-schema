@@ -324,6 +324,8 @@ def validation_status(method: str, label: str, project: str,
             ok = verify_entry(entry)
             if ok is False:
                 return STALE
+            if ok is None and entry.get("path") and (entry.get("sha256") or entry.get("md5")):
+                return UNVERIFIED
 
     # And a verdict is about a schema. Pinning only the artifacts let one
     # survive a schema change that would have failed it: the record was

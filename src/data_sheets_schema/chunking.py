@@ -226,7 +226,8 @@ def _under_concat_dir(bundle: Path) -> bool:
         return False
 
 
-def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
+def manifest_for(bundle: Path, chunks_dir: Path | None = None, *,
+                 source_manifest: Path | None = None) -> Path:
     """The manifest for any bundle kind (#725).
 
     A study bundle — one under `CONCAT_DIR`, or any bundle when the caller
@@ -244,6 +245,15 @@ def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
     bundle was read from (#713).
     """
     bundle = Path(bundle)
+    if source_manifest is not None and chunks_dir is None:
+        from data_sheets_schema.corpus import manifest_root, relative_to_root
+        owner = manifest_root(source_manifest)
+        if bundle.resolve().parent == (owner / CONCAT_DIR).resolve():
+            chunks_dir = relative_to_root(CHUNKS_DIR, owner)
+            bundle = bundle.resolve()
+        else:
+            stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
+            return bundle.parent / f"{stem}_chunks.yaml"
     if chunks_dir is None and not _under_concat_dir(bundle):
         stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
         return bundle.parent / f"{stem}_chunks.yaml"

@@ -228,6 +228,19 @@ class TestTheInstalledWheel(unittest.TestCase):
                 result = CliRunner().invoke(cli, args)
                 assert result.exit_code == 0 and "no records matched" not in result.output, result.output
             assert not (nested / "data").exists()
+            # A global option/environment selection must govern the API's
+            # context and bundle selection too, from outside this project.
+            os.chdir(root.parent)
+            for mode in ("option", "environment"):
+                if mode == "environment":
+                    os.environ["D4D_MANIFEST"] = str(manifest)
+                prefix = ["--manifest", str(manifest)] if mode == "option" else []
+                result = CliRunner().invoke(cli, prefix + ["api", "plan", "--project", spec.project,
+                    "--label", "selection_only", "--condition", "generic", "--json"])
+                assert result.exit_code == 0, result.output
+                import json
+                planned = json.loads(result.output)
+                assert Path(planned["outputs"]["full"]).is_relative_to(root), planned["outputs"]
             print("ok")
         ''')
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

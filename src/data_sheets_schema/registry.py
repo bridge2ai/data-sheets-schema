@@ -347,6 +347,11 @@ def select_manifest(project: str, bundle: Path | str | None,
     describe a bundle the run is not reading, and hashing the study's file
     into the record would attest an input the run never consulted.
     """
+    if requested is AUTO:
+        from data_sheets_schema.corpus import AUTO as NO_OVERRIDE, manifest_override
+        explicit = manifest_override()
+        if explicit is not NO_OVERRIDE:
+            requested = explicit
     if requested is None:
         return None
     if requested is not AUTO:

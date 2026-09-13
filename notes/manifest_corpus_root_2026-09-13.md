@@ -31,3 +31,34 @@ nested external directory. Synthetic archive planning remains read-only.
 
 The remaining installed-agentic command and transcript-helper work is #1556.
 Independent review and exact-head CI are required before merge.
+
+## Review round 2 — 2026-09-13
+
+The independent review produced #1594–#1598; the adjacent explicit root/
+environment-selection mismatch is #1601. Automatic discovery outside the
+checkout now selects only the caller's manifest, so a checkout fallback
+cannot acquire output ownership. Explicit --manifest and D4D_MANIFEST
+selections govern API context and profile defaults; a command's own explicit
+path or none takes precedence. Relative caller input paths are captured as
+absolute when they cross into another manifest's output tree. Default
+provenance outputs follow that tree, including programmatic recording.
+
+Artifact-pin verification resolves against the same corpus. A modified
+artifact reports stale; an unavailable pinned artifact reports unverified.
+Programmatic selected manifests now govern chunk discovery directly for
+agentic and receipt-condition API specs. Renderer 5 records full/core/report/
+receipt destinations and substitutes them into the actual output instructions.
+Versions 1–4 remain replayable: all 48 historical controls match byte hashes.
+Backfill includes renderer 5, but still writes only after exact hash matching.
+
+Nine regression cases fail before these fixes. The compatibility lane passes
+222 tests before updating the old outside-checkout profile expectation; the
+final nine review guards and that expectation pass all 10 checks. The runner/
+record lane passes 174 tests before adding renderer 5 to backfill; the complete
+backfill test then passes. The actual wheel passes all seven release checks.
+The preservation audit verifies 56 existing ratings and all 450 hashes.
+Additional root/environment selection and installed plan checks follow the
+same controls. No new production generation, scoring or source downloads.
+
+The additional context/profile/rendering lane passes 70 tests. A fresh-wheel
+check of global CLI/environment selection is running on the same source.
