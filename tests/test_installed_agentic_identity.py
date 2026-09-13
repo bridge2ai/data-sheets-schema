@@ -40,6 +40,7 @@ def test_recorded_toolchain_replays_without_live_environment(external, monkeypat
     moved.mkdir()
     monkeypatch.chdir(moved)
     monkeypatch.setattr(agentic_runtime.sys, "executable", "/different/install/python")
+    monkeypatch.setattr(agentic_runtime, "toolchain", lambda: pytest.fail("replay must not discover today's resources"))
     restored = api_runner.RunSpec.from_render_spec(recorded, project=spec.project,
         method=spec.method, label=spec.label)
     assert restored.instruction == instruction
@@ -83,6 +84,65 @@ def test_definition_challenge_uses_the_checkout_that_supplies_the_definition(tmp
     monkeypatch.setattr(resources, "CHECKOUT_ROOT", roots[0] if imported_checkout else None)
     monkeypatch.chdir(roots[1])
     assert agent_pin._previous_text("synthetic") == "## Procedure\n\nThe selected checkout's previous rule is distinct.\n"
+
+
+def test_preimage_registration_uses_only_the_selected_checkout(tmp_path, monkeypatch):
+    import importlib.util
+    import subprocess
+    source = Path(__file__).resolve().parents[1] / "scripts/update_agent_preimages.py"
+    definition = importlib.util.spec_from_file_location("register_preimages", source)
+    helper = importlib.util.module_from_spec(definition)
+    definition.loader.exec_module(helper)
+    roots = []
+    for name in ("imported", "selected"):
+        root = tmp_path / name
+        (root / "src/data_sheets_schema").mkdir(parents=True)
+        (root / "pyproject.toml").write_text('name = "data-sheets-schema"\n')
+        path = root / ".claude/agents/synthetic.md"
+        path.parent.mkdir(parents=True)
+        subprocess.run(["git", "init", "-q", str(root)], check=True)
+        for revision in ("previous", "current"):
+            path.write_text(f"## Procedure\n\nThe {name} checkout's {revision} rule is distinct.\n")
+            subprocess.run(["git", "-C", str(root), "add", ".claude/agents/synthetic.md"], check=True)
+            subprocess.run(["git", "-C", str(root), "-c", "user.name=Offline test",
+                "-c", "user.email=offline@example.invalid", "commit", "-qm", revision], check=True)
+        roots.append(root)
+    monkeypatch.setattr(resources, "CHECKOUT_ROOT", roots[0])
+    monkeypatch.setattr(agent_pin, "AGENT_DIR", roots[0] / ".claude/agents")
+    monkeypatch.chdir(roots[1])
+    helper.main()
+    target = roots[1] / ".claude/agents/_preimages.json"
+    assert target.is_file()
+    assert not (roots[0] / ".claude/agents/_preimages.json").exists()
+    row = json.loads(target.read_text())["agents"]["synthetic"]
+    assert row["current_sha256"] == hashlib.sha256((target.parent / "synthetic.md").read_bytes()).hexdigest()
+    assert row["previous_text"] == "## Procedure\n\nThe selected checkout's previous rule is distinct.\n"
+
+
+@pytest.mark.parametrize("damage", ["definition", "registry"])
+def test_preimage_registration_rejects_cross_checkout_paths(tmp_path, monkeypatch, damage):
+    import importlib.util
+    source = Path(__file__).resolve().parents[1] / "scripts/update_agent_preimages.py"
+    definition = importlib.util.spec_from_file_location("register_preimages", source)
+    helper = importlib.util.module_from_spec(definition)
+    definition.loader.exec_module(helper)
+    root = tmp_path / "selected"
+    directory = root / ".claude/agents"
+    directory.mkdir(parents=True)
+    path = directory / "synthetic.md"
+    path.write_text("The current definition.")
+    foreign = tmp_path / "foreign.md"
+    foreign.write_text("Foreign bytes remain untouched.")
+    target = directory / "_preimages.json"
+    if damage == "registry":
+        target.symlink_to(foreign)
+    monkeypatch.setattr(resources, "resource_root", lambda: (root, "checkout"))
+    monkeypatch.setattr(agent_pin, "agent_path", lambda name: foreign if damage == "definition" else path)
+    monkeypatch.setattr(agent_pin, "_previous_text", lambda name: pytest.fail("mismatch must fail before history is read"))
+    with pytest.raises(ValueError, match="selected checkout"):
+        helper.main()
+    assert foreign.read_text() == "Foreign bytes remain untouched."
+    assert target.is_symlink() if damage == "registry" else not target.exists()
 
 
 def test_unrelated_local_claude_directories_do_not_hide_installed_resources(tmp_path, monkeypatch):

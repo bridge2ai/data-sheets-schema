@@ -503,7 +503,7 @@ class RunSpec:
     # another runtime will execute — it rendered "LBL CBORG (proxy to
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
-    _replay_only: bool = field(default=False, init=False, repr=False)
+    _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
     _agentic_toolchain: dict | None = field(default=None, init=False, repr=False)
@@ -551,7 +551,7 @@ class RunSpec:
                 "receipt": str(self.report_path.parent / f"{self.project}_coverage_receipt.yaml")}
             if self.render_version >= 5:
                 self._agentic_artifact_paths["report"] = str(self.report_path)
-        if self.render_version >= 6 and self.is_agentic:
+        if self.render_version >= 6 and self.is_agentic and not self._replay_only:
             from data_sheets_schema.agentic_runtime import toolchain
             self._agentic_toolchain = toolchain()
         if self.manifest_line == default_line:   # an arm that declares its own header keeps it
@@ -612,7 +612,7 @@ class RunSpec:
                    manifest_line=recorded.get("manifest_line", ""),
                    manifest=None,
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
-                   provider=recorded.get("provider"))
+                   provider=recorded.get("provider"), _replay_only=True)
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
