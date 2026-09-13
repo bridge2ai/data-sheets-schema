@@ -2775,16 +2775,24 @@ def _crash_diagnostic(text: str) -> list[str]:
     for line in crash.splitlines()[1:]:
         if not line.strip():
             continue
-        if not line[:1].isspace() or re.match(r'\s*in ".*", line \d+', line):     # a quote in the name keeps the marker (#1672)
+        if not line[:1].isspace() or re.match(r'\s*in ".*", (line|position) \d+', line):     # a quote in the name keeps the marker (#1672); `position` is PyYAML's reader marker (#1722)
             out.append(line.strip())
     return out or [l for l in crash.strip().splitlines() if l.strip()][-3:]
 
 
-def _finding_class(lines) -> str:
-    """`structured` when every finding is a validator line the repair can
-    count against the next round; `diagnostic` when the record could not
-    even be read. A round that turns a diagnostic into structured findings
-    made progress, whatever the counts (#1670)."""
+def _finding_class(lines, path: Path | None = None) -> str:
+    """`structured` when the record could be read and the findings are
+    about its content; `diagnostic` when it could not even be parsed. A
+    round that turns a diagnostic into structured findings made progress,
+    whatever the counts (#1670). Decided on the artifact, not on how the
+    findings are spelled: a duplicate-key finding is ordinary text beside
+    `[ERROR]` lines and says nothing about readability (#1718)."""
+    if path is not None:
+        try:
+            yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+            return "structured"
+        except (OSError, yaml.YAMLError, UnicodeDecodeError):
+            return "diagnostic"
     return "structured" if all(str(l).startswith(("[ERROR]", "[WARN")) for l in lines) else "diagnostic"
 
 
@@ -3852,7 +3860,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             if not errors:
                 break
 
-            if applied_from is not None and applied_class == _finding_class(errors) and len(errors) >= applied_from:
+            if applied_from is not None and applied_class == _finding_class(errors, path) and len(errors) >= applied_from:
                 log.append({"phase": ph, "round": rnd,
                             "outcome": (f"not converging: {applied_from} -> "
                                         f"{len(errors)} findings; stopped")})
@@ -3922,7 +3930,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
-            applied_class = _finding_class(errors)
+            applied_class = _finding_class(errors, path)
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
                         "findings": len(errors)})
     return log

@@ -171,6 +171,8 @@ def _comparable(identity: dict) -> dict:
     """An identity without `profile_basis` inside its instruction spec: the
     basis was never an input (#1626), and a pin written while it sat there
     (#1581–#1626) must not refuse a resume whose inputs are the same (#1657)."""
+    if not isinstance(identity, dict):
+        return {}
     out = dict(identity)
     instr = out.get("instruction")
     if isinstance(instr, dict) and isinstance(instr.get("spec"), dict) and "profile_basis" in instr["spec"]:
@@ -187,31 +189,52 @@ def _subset_differs(pinned, current) -> bool:
     return pinned != current
 
 
+#: What every pin has carried since identities were first written: the
+#: bundle it read and the hash of the instruction it sent. A pin without
+#: them is evidence of nothing, and compatible with nothing (#1698).
+_REQUIRED_IN_A_PIN = (("bundle", "sha256"), ("instruction", "sha256"))
+
+
 def _identity_differs(pinned: dict, current: dict) -> bool:
     """A pin made before a key existed says nothing about it (`profile`,
     #1460); every key the pin carries must match, at every depth (#1677),
-    the basis excepted (#1657). That is the rule for any key added later;
-    it does not readmit the generations pinned before profiles existed,
-    whose instruction hash — the recorder line carries `--profile` now —
-    no longer renders (#1628): those cannot be resumed, and the refusal
-    says so where that is the cause (`pre_profile_pin`)."""
+    the basis excepted (#1657). That is the rule for keys added later — a
+    pin that lacks the bundle hash or the instruction hash is not an older
+    pin but no pin, and differs (#1698). The rule does not readmit the
+    generations pinned before profiles existed, whose instruction hash —
+    the recorder line carries `--profile` now — no longer renders (#1628):
+    those cannot be resumed, and the refusal says so where that is the
+    cause (`pre_profile_pin`)."""
+    if not isinstance(pinned, dict) or not isinstance(current, dict):
+        return True
+    for path in _REQUIRED_IN_A_PIN:
+        node = pinned
+        for key in path:
+            node = node.get(key) if isinstance(node, dict) else None
+        if not node:
+            return True
     return _subset_differs(_comparable(pinned), _comparable(current))
 
 
-def pre_profile_pin(pinned: dict) -> bool:
-    """A pin from before profiles: no `profile` key, and an instruction
-    spec that carries none — the case whose instruction cannot render
-    again (#1628, #1677)."""
-    spec = ((pinned.get("instruction") or {}).get("spec") or {}) if isinstance(pinned, dict) else {}
-    return isinstance(pinned, dict) and "profile" not in pinned and "profile" not in spec
+def pre_profile_pin(pinned) -> bool:
+    """A pin whose instruction predates the `--profile` line: its spec
+    carries no `profile`, whether or not the pin's top level does (the
+    #1460–#1581 window wrote the key beside an instruction that had not
+    yet changed, #1712) — the case whose instruction cannot render again
+    (#1628, #1677). A pin of any other shape is not one (#1701)."""
+    if not isinstance(pinned, dict):
+        return False
+    instr = pinned.get("instruction")
+    spec = instr.get("spec") if isinstance(instr, dict) else None
+    return not (isinstance(spec, dict) and "profile" in spec)
 
 
 def identity_refusal(pinned: dict, where: str) -> str:
     base = (f"generation input identity changed {where}; restore the recorded inputs or use "
             "--no-resume for an explicit new generation")
     if pre_profile_pin(pinned):
-        base += (" (a generation pinned before profiles existed hashed an instruction that no "
-                 "longer renders, and cannot be resumed; #1628)")
+        base += (" (a generation pinned before the instruction carried its profile hashed an "
+                 "instruction that no longer renders, and cannot be resumed; #1628, #1712)")
     return base
 
 

@@ -225,7 +225,7 @@ equivalent, and only the first two are ever acceptable:
 | kind | example | generic | tuned |
 |---|---|---|---|
 | **decision rule** | "prefer omission over inference" | ✅ if applied to every project identically | ✅ |
-| **factual disambiguation** | "this bundle describes a release programme, not one release" | ❌ project-specific | ✅ |
+| **factual disambiguation** | "this bundle describes a release program, not one release" | ❌ project-specific | ✅ |
 | **quality warning** | "earlier runs conflated two entities here" | ❌ | ⚠️ steers behavior; avoid |
 | **outcome expectation** | "expect roughly 60 populated slots" | ❌ | ❌ **never, in any condition** |
 

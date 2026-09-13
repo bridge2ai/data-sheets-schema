@@ -140,6 +140,28 @@ def _CONDITIONS_FOR_RECORD() -> list[str]:
     return list(CONDITION_PROMPTS)
 
 
+def _require_corpus_root(command: str) -> None:
+    """An implicit corpus target — a project's bundles, its chunk manifests,
+    the trap inventory — is written under the checkout the corpus is
+    anchored on (`chunking.corpus_root`). Only that directory may write it:
+    a subdirectory would write above itself and a directory outside every
+    checkout would write into the importing checkout without naming it
+    (#1714, #1721). Explicit `--bundle`/`--output` paths are the caller's."""
+    from data_sheets_schema.chunking import corpus_root
+    _require_repo_root_cwd(command)
+    root = corpus_root()
+    if root is None:
+        return
+    try:
+        here = Path.cwd().resolve()
+    except OSError:
+        here = None
+    if here != root.resolve():
+        raise click.ClickException(
+            f"{command}: its implicit corpus targets are written under {root}, not {Path.cwd()}; "
+            "run from that checkout root, or name every bundle explicitly (#1714)")
+
+
 def _require_repo_root_cwd(command: str) -> None:
     """Refuse to record from a directory inside the checkout that is not its
     root (#672 review; narrowed by #1301).
@@ -617,6 +639,10 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
     # candidate restates the record rather than selecting live (#1438).
     schema_block = data.get("schema") if isinstance(data.get("schema"), dict) else {}
     if schema_block.get("profile"):
+        from data_sheets_schema.profiles import PROFILES as _known
+        if not isinstance(schema_block["profile"], str) or schema_block["profile"] not in _known:
+            raise click.ClickException(f"the record's schema.profile is {schema_block['profile']!r}, not a profile "
+                                       f"this code knows ({', '.join(sorted(_known))}); nothing can be re-rendered under it (#1702)")
         profile_choices: list[dict[str, str]] = [
             {k: schema_block[k] for k in ("profile", "profile_basis") if schema_block.get(k)}]
     else:
@@ -663,7 +689,9 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
                 # reader (`profiles.for_record`): a spec stating one the
                 # record does not is two records in one (#1678).
                 if rendered.get("profile") and not schema_block.get("profile") and render_version > 1:
-                    data.setdefault("schema", {})["profile"] = rendered["profile"]
+                    if not isinstance(data.get("schema"), dict):
+                        data["schema"] = {}            # absent or null (#1710)
+                    data["schema"]["profile"] = rendered["profile"]
                     data["schema"]["profile_basis"] = backfill_basis
                 pv.ProvenanceRecord(data=data).write(path)
                 click.echo(f"     written to {path}")

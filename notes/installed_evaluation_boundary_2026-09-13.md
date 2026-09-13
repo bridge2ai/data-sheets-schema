@@ -154,3 +154,18 @@ subprocess cases cover opposing valid/invalid corpora and explicit-file
 selection; the focused validator and semantic-contract lane passes 38 tests.
 Only the compatibility dispatch changes; recorded scores and instrument
 definitions remain untouched. The JSON refreshes the two implementation pins.
+
+## Review round 9 — 2026-09-13
+
+Codex confirmed the corpus selection fix and found #1713: a legacy batch
+audit could still read semantic schemas from the caller's checkout. The
+wrapper now supplies both its repository's corpus and schema directory.
+Two real subprocess cases reproduce acceptance under permissive caller
+schemas before the fix; both rubrics now reject those malformed assessments.
+The complete focused validator lane passes 40 tests. Explicit-file input
+ownership and the installed interface remain covered. The other finding,
+malformed prompt blocks in profile consistency checks, is tracked on the
+profile parent as #1700 and still awaits integration.
+
+The committed packaging-parent integration at 4c1898617 is now included.
+Its merge changes no files relative to the tested installed implementation.

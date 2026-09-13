@@ -30,14 +30,14 @@
     "scripts/reference_rescore.py": "73d54c3baa304502536ce88dcb899f9acf72ee2e8a672a268c0ccc5c158d3f06",
     "scripts/render_evaluation_html_rubric10_semantic.py": "f9deb21b82dcad3bddf1c742b526523ef06904cc32f991619f59e65074c72b03",
     "scripts/render_evaluation_html_rubric20_semantic.py": "6990ab4d859c76a5c43d5df7b3c25098abfc5eb69cf3a4abffa455f7b6b04610",
-    "scripts/validate_evaluation_schema.py": "3c83d2c86d67a020a73f633ec39f1fdb2114f9a9abc9313f28fc0666bebdedf9",
+    "scripts/validate_evaluation_schema.py": "5d11f730b566ae9adf554af1fcfb18581e1fd9a37ce9ce77704f092dc50118fd",
     "src/data_sheets_schema/agent_pin.py": "9df5eaf49a684e382f1d52e6e607c864e026713ead616d140fe683e72de868c6",
     "src/data_sheets_schema/cli/evaluate.py": "f7cb0c174aa9db60afb9c9151c3b10a047c024fd99ded53b7a2ef352436410c0",
     "src/data_sheets_schema/cli/render.py": "e8304b2d6b99e951ca35dee57d9c84c5ee6fb32ed9a6ffa5f0baa473c225f418",
     "src/data_sheets_schema/evaluation/__init__.py": "216a416e75fdb3561aeac7916ba0832573c6cd85d7e2f12ad0454f4955e4501b",
     "src/data_sheets_schema/evaluation/evaluate_d4d.py": "1ee3debcbd234f300115ec67885bac707c167ded1ef5256470b1c057f9812d41",
     "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py": "9d54a162d65f804a56e6ccf0f6831cb29ec450bee7730a8a26b591b2714a007b",
-    "src/data_sheets_schema/evaluation/validate.py": "0ef22aa85280a764791c21af47f4de46ca230997d76937df35fe0c91aafc0dd1",
+    "src/data_sheets_schema/evaluation/validate.py": "981603d35c654692515953c4acaf3b3a44e0c158cf9809d82233ccc1bf73ff5a",
     "src/data_sheets_schema/evaluation_context.py": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e",
     "src/data_sheets_schema/judge_contract.py": "7905b7e942eb87c4c79418680e3ff697a70ca45102f41d4c349d3a785e24ee6a",
     "src/data_sheets_schema/rendering/__init__.py": "c4a8d9be0da17a01ecd29db65f0ac6a33db0262226fc7edbe2cee67000c79b25",
@@ -67,7 +67,7 @@
     "agentic"
   ],
   "generation_dependency": "PR #1367, PR #1436 and PR #1455",
-  "integration_dependency_commit": "2a840076a8aca8d67a49652caa82e07eb6ff390d",
+  "integration_dependency_commit": "4c18986170c6521ad3cc9562bf75c9790ecb306c",
   "issues": [
     1301,
     1457,
@@ -76,7 +76,8 @@
     1599,
     1600,
     1662,
-    1694
+    1694,
+    1713
   ],
   "presence_instrument": {
     "inputs": {

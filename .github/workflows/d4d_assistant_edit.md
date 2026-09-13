@@ -159,7 +159,7 @@ make full-schema
 **CRITICAL**: Before making edits, verify you're using correct schema field names.
 
 **Read Reference Examples:**
-- `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/AI_READI_d4d.yaml` - Validated example structure
+- `src/data/examples/valid/*.yaml` - the schema's validated example structures (never a previously generated datasheet: the provenance guard forbids it)
 - Compare existing datasheet structure with reference examples
 - Note field naming patterns for classes you'll modify
 

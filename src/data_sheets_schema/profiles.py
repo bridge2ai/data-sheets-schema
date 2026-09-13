@@ -287,5 +287,15 @@ def vocabulary_for(profile: Profile) -> dict[str, dict[str, str]]:
 
 
 def vocabulary_bytes(profile: Profile) -> bytes:
-    """The bytes the digest cache keys on: the pin's, or none."""
-    return profile.pin_path.read_bytes() if profile.has_vocabulary else b""
+    """The bytes the digest cache keys on: the pin's, or none for a profile
+    that declares no vocabulary. A profile that declares one whose file is
+    not where the resources are is an error, never the neutral instrument
+    in disguise (#1715): the study's digest cannot be rendered from a
+    checkout that lacks the study's vocabulary."""
+    pin = profile.pin_path
+    if pin is None:
+        return b""
+    if not pin.exists():
+        raise FileNotFoundError(f"the {profile.name} profile declares a vocabulary at {pin}, which is not there; "
+                                "its digest cannot be rendered from this checkout (#1715)")
+    return pin.read_bytes()
