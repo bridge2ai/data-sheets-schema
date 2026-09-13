@@ -447,8 +447,9 @@ def canonical_cmd(project, config, paths_only, missing, runtime):
     is how many projects *have* one, which is three of four while no VOICE
     replicate validates (#292).
     """
-    from data_sheets_schema.constants import PROJECTS
     from data_sheets_schema.runs import AmbiguousCanonical, canonical_runs
+
+    projects = projects_for(click.get_current_context(), project)
 
     try:
         found = canonical_runs(config=config, runtime=runtime)
@@ -461,7 +462,7 @@ def canonical_cmd(project, config, paths_only, missing, runtime):
         found = {k: v for k, v in found.items() if k == project}
 
     if missing:
-        gap = [p for p in PROJECTS if p not in found]
+        gap = [p for p in projects if p not in found]
         if project:
             gap = [p for p in gap if p == project]
         for p in gap:

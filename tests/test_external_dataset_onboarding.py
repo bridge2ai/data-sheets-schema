@@ -197,8 +197,7 @@ class TestTheCliAcceptsAManifestDeclaredDataset(_Offline):
         for args in (
             ["download", "preprocess", "--manifest", str(m), "--project", "EXTERNAL_CLINICAL",
              "--input-dir", str(self.tmp / "unused"), "--output-dir", str(self.tmp / "unused-output")],
-            ["download", "concatenate", "--manifest", str(m), "--project", "EXTERNAL_CLINICAL",
-             "--output-file", str(bundle)],
+            ["download", "concatenate", "--manifest", str(m), "--project", "EXTERNAL_CLINICAL"],
             ["bundle", "chunk", "--bundle", str(bundle)],
         ):
             result = CliRunner().invoke(cli, args)

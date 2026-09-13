@@ -144,7 +144,9 @@ def preprocess(project, input_dir, output_dir, manifest):
               default='data/preprocessed/individual',
               help='Input directory with preprocessed files')
 @click.option('--output-file', type=click.Path(),
-              help='Output file path (default: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt)')
+              help='Output file path (default: the selected registry bundle destination)')
+@click.option('--output-dir', type=click.Path(), default=None,
+              help='Fallback directory for projects without a declared bundle path')
 @click.option(
     '--manifest',
     type=click.Path(exists=True), is_eager=True,
@@ -152,12 +154,12 @@ def preprocess(project, input_dir, output_dir, manifest):
     show_default=True,
     help='Canonical source selection manifest',
 )
-def concatenate(project, input_dir, output_file, manifest):
+def concatenate(project, input_dir, output_file, output_dir, manifest):
     """Concatenate preprocessed files by project."""
     require_repo_context("d4d download concatenate")
 
     if not output_file:
-        output_file = f"data/preprocessed/concatenated/{project}_preprocessed.txt"
+        output_file = str(load_registry(manifest).bundle(project, Path(output_dir) if output_dir else None))
 
     click.echo(f"📑 Concatenating {project} files...")
 

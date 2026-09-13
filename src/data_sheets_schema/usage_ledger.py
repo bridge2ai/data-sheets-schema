@@ -97,7 +97,8 @@ def ledger_path(spec) -> Path:
 def _empty(spec, *, accept_legacy: bool) -> dict:
     return {"version": 1, "identity": run_identity(spec),
             "generation_id": uuid.uuid4().hex, "prior_generation_ids": [],
-            "accept_legacy": accept_legacy, "rows": []}
+            "accept_legacy": accept_legacy, "rows": [],
+            "input_identity": spec.input_identity()}
 
 
 def _read(spec) -> dict:
@@ -111,6 +112,8 @@ def _read(spec) -> dict:
     if (not isinstance(data, dict) or data.get("version") != 1
             or data.get("identity") != run_identity(spec) or not isinstance(data.get("rows"), list)):
         raise UsageLedgerError(f"invalid API usage ledger identity or version: {path}")
+    if "input_identity" in data and not isinstance(data["input_identity"], dict):
+        raise UsageLedgerError(f"invalid API input identity: {path}")
     if (not isinstance(data.get("generation_id"), str) or not data["generation_id"]
             or not isinstance(data.get("accept_legacy"), bool)):
         raise UsageLedgerError(f"invalid API usage generation identity: {path}")
@@ -133,12 +136,31 @@ def _read(spec) -> dict:
     return data
 
 
+def recorded_inputs(spec) -> dict | None:
+    """Only persisted pins count as evidence for a legacy progress file."""
+    return _read(spec).get("input_identity") if ledger_path(spec).is_file() else None
+
+
+def pin_inputs(spec) -> None:
+    """Bind a verified legacy continuation before it can make another call."""
+    data = _read(spec)
+    if data.get("input_identity") is None:
+        data["input_identity"] = spec.input_identity()
+        _write(spec, data)
+
+
 def require_resolved(spec) -> None:
-    pending = _read(spec).get("pending_call")
+    data = _read(spec)
+    pending = data.get("pending_call")
     if pending is not None:
         raise UsageLedgerError(
             f"API call {pending['usage_id']} has unresolved accounting in {ledger_path(spec)}; "
             "restore its usage before resuming, or explicitly start fresh to archive this generation")
+
+    pinned = data.get("input_identity")
+    if pinned is not None and pinned != spec.input_identity():
+        raise UsageLedgerError("generation input identity changed (bundle, source manifest or chunk manifest); "
+                               "restore the recorded inputs or use --no-resume for an explicit new generation")
 
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:

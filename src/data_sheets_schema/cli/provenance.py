@@ -311,13 +311,15 @@ def _parse_phases(specs) -> list[dict]:
               help='the source manifest this run consulted and attests as an input; default: '
                    'the manifest selected by the resolved bundle and output header; `none` '
                    'for a run that read no manifest (#621)')
+@click.option('--chunk-manifest', type=click.Path(exists=True, dir_okay=False),
+              help='the exact chunk manifest consumed by this run; default: discover beside the bundle')
 @click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
               help='this run\'s procedure wrote a coverage receipt (#708); the '
                    'canary gate then treats a missing or failing one as a stop '
                    'rather than as not-applicable')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort, phase_specs, phases_skipped, manifest, receipt_expected):
+           reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -362,7 +364,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     h = parse_header(full_out) if full_out.exists() else {}
     header_bundle = h.get("Source bundle") or h.get("Source")
     resolved_bundle = input_bundle or header_bundle
-    header_unused = "not used" in h.get("Source manifest", "").lower()
+    header_manifest = h.get("Source manifest", "").strip()
+    header_unused = "not used" in header_manifest.lower()
+    if requested is AUTO and header_manifest and not header_unused:
+        requested = Path(header_manifest)
     selected = (None if requested is AUTO and (resolved_bundle is None or header_unused)
                 else select_manifest(project, resolved_bundle, requested))
     manifest_basis = ("the output header declares the source manifest unused"
@@ -370,7 +375,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     spec = None
     if condition:
         from data_sheets_schema.api_runner import RunSpec
-        bundle = bundle_for_spec or input_bundle
+        bundle = bundle_for_spec or resolved_bundle
         # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
         # token. Storing the token here produced a spec that could never
         # re-render to what was sent, and the gate blamed an unchanged prompt
@@ -382,6 +387,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             condition=condition, runtime=runtime, provider=provider,
             manifest_line=_ARMS[arm][3],
             manifest=selected,           # the same selection the input block records (#1367 review, must-fix 3)
+            chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
         )
         spec = run_spec.render_spec()
         if not run_spec.manifest_used:
@@ -400,7 +406,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        phases=_parse_phases(phase_specs),
                        receipt_expected=receipt_expected,
                        condition=condition,                  # the launcher's own claim (#1094)
-                       manifest=selected, manifest_basis=manifest_basis)
+                       manifest=selected, manifest_basis=manifest_basis,
+                       chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
@@ -495,10 +502,13 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # Absent: the record predates the field, and the rule decides from the
     # bundle exactly as it did for the run that produced the hash.
     recorded_manifest = (Path(sm["path"]) if sm.get("path") else None) if "path" in sm else _AUTO
-    for delta in (0, -1, 1, -2):
+    from itertools import product
+    chunks = ((data.get("inputs") or {}).get("chunks") or {}).get("path")
+    for delta, render_version in product((0, -1, 1, -2), (2, 1)):
         spec = RunSpec(project=project, arm=_ARMS[arm][0], method=method, bundle=Path(bundle),
                        label=label, condition=condition, runtime=runtime, provider=provider,
-                       manifest=recorded_manifest,
+                       manifest=recorded_manifest, render_version=render_version,
+                       chunk_manifest=Path(chunks) if chunks else None,
                        run_date=(base + timedelta(days=delta)).isoformat())
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:

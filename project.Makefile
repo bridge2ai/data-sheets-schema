@@ -656,7 +656,7 @@ concat-preprocessed:
 			--manifest $(SOURCE_MANIFEST) \
 			--project "$$project" \
 			--input-dir $(PREPROCESSED_INDIVIDUAL_DIR) \
-			--output-file "$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt" || exit 1; \
+			--output-dir $(PREPROCESSED_CONCAT_DIR) || exit 1; \
 	done
 	@echo "✅ All preprocessed files concatenated to $(PREPROCESSED_CONCAT_DIR)/"
 

@@ -305,6 +305,25 @@ def load_manifest(path: Path) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
+def validate_manifest_mapping(manifest: dict[str, Any], raw: bytes, name: str) -> None:
+    """A receipt procedure may only send deterministic chunk IDs (#1404)."""
+    if not isinstance(manifest, dict) or not isinstance(manifest.get("rule"), dict):
+        raise ValueError("chunk manifest must declare a chunking rule")
+    rule = manifest["rule"]
+    for key, value in DEFAULT_RULE.items():
+        selected = rule.get(key)
+        if key in ("max_lines", "max_bytes"):
+            if type(selected) is not int or selected < 1:
+                raise ValueError(f"chunk rule {key} must be a positive integer")
+        elif selected != value:
+            raise ValueError(f"unsupported chunk rule {key}: {selected!r}")
+    if set(rule) != set(DEFAULT_RULE):
+        raise ValueError("unsupported chunk rule fields")
+    expected = manifest_from_bytes(raw, name, rule)
+    if manifest != expected:
+        raise ValueError("chunk manifest does not reproduce canonical chunk identities under its recorded rule")
+
+
 def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -375,6 +394,7 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
         m = load_manifest(path)
         if not isinstance(m, dict) or m.get("bundle_md5") != bundle_md5:
             return None
+        validate_manifest_mapping(m, bundle.read_bytes(), canonical_name(bundle))
         return {"path": str(path), "sha256": file_sha256(path),
                 "rule": m.get("rule"), "chunk_count": m.get("chunk_count")}
     except Exception:                                               # noqa: BLE001

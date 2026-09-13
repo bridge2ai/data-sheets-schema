@@ -235,6 +235,75 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
     return Registry(path=p, data=data)
 
 
+def validate_context(registry: Registry, project: str) -> None:
+    """Reject a declared context that request assembly cannot honor (#1406).
+
+    Optional sections may be absent. Once supplied, their types must be
+    meaningful to every reader; dropping invalid ranking changes the run.
+    """
+    data = registry.data
+
+    def fail(field: str, detail: str) -> None:
+        raise click.ClickException(f"invalid source manifest {registry.path}: {field} {detail}")
+
+    def text(value, field):
+        if not isinstance(value, str) or not value.strip():
+            fail(field, "must be a nonempty string")
+
+    def tier(value, field):
+        if isinstance(value, bool) or not str(value).isdigit() or int(value) < 1:
+            fail(field, "must be a positive integer")
+
+    raw_projects = data.get("projects", {})
+    if not isinstance(raw_projects, dict):
+        fail("projects", "must be a mapping")
+    entry = raw_projects.get(project)
+    if entry is not None:
+        sources = entry.get("sources", []) if isinstance(entry, dict) else entry
+        if not isinstance(sources, list):
+            fail(f"projects.{project}.sources", "must be a list")
+        for i, source in enumerate(sources):
+            field = f"projects.{project}.sources[{i}]"
+            if not isinstance(source, dict):
+                fail(field, "must be a mapping")
+            if source.get("priority") is not None:
+                tier(source["priority"], field + ".priority")
+            for key in ("id", "source_type", "superseded_by"):
+                if key in source and source[key] is not None:
+                    text(source[key], field + "." + key)
+    table = data.get("source_priority", {})
+    if not isinstance(table, dict):
+        fail("source_priority", "must be a mapping of integer tiers to source-type lists")
+    for rank, types in table.items():
+        tier(rank, "source_priority tier")
+        if not isinstance(types, list):
+            fail(f"source_priority.{rank}", "must be a list")
+        for value in types:
+            text(value, f"source_priority.{rank}")
+    for section in ("naming", "scope"):
+        records = data.get(section, {})
+        if not isinstance(records, dict):
+            fail(section, "must be a mapping")
+        if project not in records:
+            continue
+        declaration = records[project]
+        if not isinstance(declaration, dict):
+            fail(f"{section}.{project}", "must be a mapping")
+        keys = (("canonical_label", "programme", "gc_name") if section == "naming"
+                else ("referent", "referent_note"))
+        for key in keys:
+            if key in declaration:
+                text(declaration[key], f"{section}.{project}.{key}")
+        if section == "scope":
+            related = declaration.get("related_but_distinct", [])
+            if not isinstance(related, list):
+                fail(f"scope.{project}.related_but_distinct", "must be a list")
+            from data_sheets_schema.scope import malformed_in
+            problems = malformed_in(declaration)
+            if problems:
+                fail(f"scope.{project}.related_but_distinct", "; ".join(p["problem"] for p in problems))
+
+
 def select_manifest(project: str, bundle: Path | str | None,
                     requested=AUTO) -> Path | None:
     """The one rule for which manifest a run consults (#621, #1367 review,
@@ -255,14 +324,15 @@ def select_manifest(project: str, bundle: Path | str | None,
         path = Path(requested)
         if not path.is_file():
             raise click.ClickException(f"selected source manifest does not exist or is not a file: {path}")
-        load_registry(path)  # An explicit unreadable/malformed declaration is never a neutral default.
+        validate_context(load_registry(path), project)
         return path
     reg = load_registry(default_manifest_path())
     if not reg.declares(project):
         return None
-    if bundle is None:
+    if bundle is None or reg.declares_bundle(project, Path(bundle)):
+        validate_context(reg, project)
         return reg.path
-    return reg.path if reg.declares_bundle(project, Path(bundle)) else None
+    return None
 
 
 # ---- click integration --------------------------------------------------

@@ -468,6 +468,9 @@ class RunSpec:
     # The chunk manifest the run was given explicitly, when it is not the
     # one discovered beside the bundle (#1299). None means discover.
     chunk_manifest: Path | None = None
+    # Version 2 passes selected manifest arguments to agentic recording.
+    # Historical render specs omit this field and replay under version 1.
+    render_version: int = 2
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
     # ran past midnight UTC, so recomputing per call gave phases of one run
@@ -493,6 +496,8 @@ class RunSpec:
     provider: str | None = None
 
     def __post_init__(self):
+        if self.render_version not in (1, 2):
+            raise ValueError(f"unsupported prompt render version: {self.render_version}")
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
         if self.manifest is not None:
@@ -513,6 +518,28 @@ class RunSpec:
         the arm's header does not declare it unused (#603)."""
         return self.manifest is not None and "not used" not in self.manifest_line.lower()
 
+    def input_identity(self) -> dict[str, Any]:
+        """Current bundle and manifest bytes, separate from billing identity.
+
+        Keeping the ledger filename stable preserves old charges when a
+        caller changes inputs. Stored pins, not renamed accounts, refuse
+        mixing generations (#1402).
+        """
+        from data_sheets_schema.chunking import manifest_for
+
+        def entry(path):
+            if path is None:
+                return None
+            path = Path(path)
+            return {"path": str(path.resolve()),
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest()
+                    if path.is_file() else None}
+
+        chunks = (self.chunk_manifest or manifest_for(self.bundle)) if self.bundle else None
+        return {"bundle": entry(self.bundle),
+                "source_manifest": entry(self.manifest) if self.manifest_used else None,
+                "chunks": entry(chunks)}
+
     def render_spec(self) -> dict[str, Any]:
         """Everything `resolve_prompt` reads, for the record to keep.
 
@@ -521,7 +548,9 @@ class RunSpec:
         lets `verify_request()` re-render and compare, which is what turns
         "do not intervene" from a rule into something detectable (#420).
         """
-        return {"condition": self.condition, "arm": self.arm,
+        return {"render_version": self.render_version,
+                "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
+                "condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
                 "manifest": str(self.manifest) if self.manifest is not None else None,
                 "runtime": self.runtime,
@@ -738,6 +767,21 @@ def resolve_prompt(spec: RunSpec) -> str:
         # because the model read it off `{LABEL}` and guessed correctly.
         "{DATE}": spec.run_date,
     }
+    # Keep pinned templates intact. Version 2 emits a complete shell command
+    # with the same selected inputs, quoting paths and labels independently
+    # of their human-readable header substitutions (#1403).
+    if spec.render_version >= 2:
+        import shlex
+        def recording_command(match):
+            command = match.group(1)
+            for key, value in subs.items():
+                command = command.replace(key, shlex.quote(value))
+            command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest_used else "none")
+            if spec.chunk_manifest is not None:
+                command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
+            return command
+        body = re.sub(r"(?m)^([ \t]*(?:poetry run )?d4d provenance record[^\n]*)$",
+                      recording_command, body)
     for k, v in subs.items():
         body = body.replace(k, v)
 
@@ -1217,12 +1261,11 @@ def source_ranking_block(project: str,
         return None
     if manifest is None:
         return None
-    try:
-        from data_sheets_schema.source_priority import ranked
-        from data_sheets_schema.scope import load_manifest
-        rows = ranked(project, load_manifest(Path(manifest)))
-    except Exception:                                          # noqa: BLE001
-        return None
+    from data_sheets_schema.source_priority import ranked
+    from data_sheets_schema.registry import load_registry, validate_context
+    registry = load_registry(Path(manifest))
+    validate_context(registry, project)
+    rows = ranked(project, registry.data)
     if not rows:
         return None
     lines = [
@@ -1273,9 +1316,14 @@ def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str
         raise RuntimeError(f"no chunk manifest for {bundle} (expected {mpath}); "
                            f"run `d4d bundle chunk --bundle {bundle}`")
     m = load_manifest(mpath)
-    if m.get("bundle_md5") != hashlib.md5(raw).hexdigest():
+    if isinstance(m, dict) and m.get("bundle_md5") != hashlib.md5(raw).hexdigest():
         raise RuntimeError(f"chunk manifest {mpath} is not of the bytes at {bundle}; "
                            "run `d4d bundle chunk`")
+    from data_sheets_schema.chunking import canonical_name, validate_manifest_mapping
+    try:
+        validate_manifest_mapping(m, raw, canonical_name(bundle))
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(f"invalid chunk manifest {mpath}: {exc}") from exc
     lines = raw.decode("utf-8", errors="ignore").split("\n")
     starts = {c["lines"][0]: c["id"] for c in m["chunks"]}
     out = []
@@ -2292,9 +2340,11 @@ def _load_progress(spec: RunSpec) -> dict[str, Any]:
 
 def _save_progress(spec: RunSpec, completed: list[str],
                    audit: str | None) -> None:
+    _require_resolved_usage(spec)
     p = _progress_path(spec)
     p.parent.mkdir(parents=True, exist_ok=True)
-    data: dict[str, Any] = {"completed": completed, "label": spec.label}
+    data: dict[str, Any] = {"completed": completed, "label": spec.label,
+                            "input_identity": spec.input_identity()}
     generation = _usage_generation(spec)
     if generation is not None:
         data["generation_id"] = generation
@@ -4472,6 +4522,47 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         return _execute(spec, resume=resume, client=client)
 
 
+def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
+    """Match portable provenance to selected inputs before any resume (#1402)."""
+    inputs = record.get("inputs") or {}
+    current = spec.input_identity()
+    entries = {"bundle": {"path": inputs.get("bundle_path"),
+                           "sha256": inputs.get("bundle_sha256"),
+                           "md5": inputs.get("bundle_md5")},
+               "source_manifest": inputs.get("source_manifest"),
+               "chunks": inputs.get("chunks")}
+    for name, recorded in entries.items():
+        selected = current[name] or {}
+        required = (name == "bundle" or name == "source_manifest"
+                    or spec.condition in RECEIPT_CONDITIONS)
+        if name not in inputs and name != "bundle":
+            if required:
+                raise UsageLedgerError(f"no recorded generation input identity for {name}; restore its "
+                                       "input evidence or use --no-resume for an explicit new generation")
+            continue
+        recorded = recorded if isinstance(recorded, dict) else {}
+        path = recorded.get("path")
+        if required and selected and not any(recorded.get(key) for key in ("sha256", "md5")):
+            raise UsageLedgerError(f"no recorded generation input hash for {name}; restore its "
+                                   "input evidence or use --no-resume for an explicit new generation")
+        if path:
+            changed = str(Path(path).resolve()) != selected.get("path")
+            for algorithm in ("sha256", "md5"):
+                expected = recorded.get(algorithm)
+                if expected:
+                    file = Path(selected.get("path") or "")
+                    observed = (hashlib.new(algorithm, file.read_bytes()).hexdigest()
+                                if file.is_file() else None)
+                    changed |= observed != expected
+        else:
+            # Missing historical chunk attestations do not prove that a
+            # non-receipted procedure read any chunks at all.
+            changed = bool(selected) if name == "source_manifest" else False
+        if changed:
+            raise UsageLedgerError(f"generation input identity changed for {name}; restore the "
+                                   "recorded inputs or use --no-resume for an explicit new generation")
+
+
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
 
@@ -4536,6 +4627,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                 prior_identifier = identifier
             prior_matches = _usage_record_matches(spec, identity) and _same_usage_generation(spec, identifier)
             if prior_matches:
+                _require_recorded_inputs(spec, prior)
                 prior_record = prior
             if prior_matches and _progress_path(spec).exists():
                 usage.extend(prior.get("api_usage") or [])
@@ -4559,7 +4651,15 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                             and progress.get("generation_id") in (None, foreign_identifier)))
     if foreign_progress or not _same_usage_generation(spec, progress.get("generation_id")):
         progress = {}
+    if progress.get("input_identity") is not None and progress["input_identity"] != spec.input_identity():
+        raise UsageLedgerError("generation input identity changed since saved progress; restore the "
+                               "recorded inputs or use --no-resume for an explicit new generation")
     done = set(progress.get("completed", []))
+    if done and progress.get("input_identity") is None and not prior_record:
+        from data_sheets_schema.usage_ledger import recorded_inputs
+        if recorded_inputs(spec) is None:
+            raise UsageLedgerError("saved phases have no recorded generation input identity; restore "
+                                   "their input evidence or use --no-resume for an explicit new generation")
     if generation is None and _unrecorded_abandoned(spec, prior_record):
         raise UsageLedgerError("identified abandoned charges survive but their usage ledger is missing; "
                                "restore the ledger before resuming")
@@ -4650,6 +4750,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             raise UsageLedgerError("identified generation needs recovery but its usage ledger is missing; "
                                    "restore the ledger before resuming")
         generation = _prepare_usage(spec, resume=not (foreign_prior or foreign_progress))
+    from data_sheets_schema.usage_ledger import pin_inputs
+    pin_inputs(spec)
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
@@ -4812,6 +4914,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         _save_progress(spec, [x for x in PHASES if x in done],
                        carry.get("Audit findings"))
 
+    _require_resolved_usage(spec)
     rec = build_record(
         spec.project, spec.method, spec.label, mode="live",
         condition=spec.condition if spec.condition_stated else None,   # the run's own claim, or none (#1094)

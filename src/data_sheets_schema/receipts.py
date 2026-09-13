@@ -1345,6 +1345,13 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                     disk_state = ("the manifest on disk is not the one the record names "
                                   "(its sha256 differs from inputs.chunks.sha256)")
                     disk_advice = "check against the recorded manifest, or re-record the run"
+                elif ((record_chunks or {}).get("rule") is not None
+                      and cand.get("rule") != record_chunks["rule"]):
+                    disk_state = "the manifest on disk uses a different rule than the record"
+                elif ((record_chunks or {}).get("chunk_count") is not None
+                      and cand.get("chunk_count") != record_chunks["chunk_count"]):
+                    disk_state = (f"the manifest on disk has {cand.get('chunk_count')} chunks, "
+                                  f"not the {record_chunks['chunk_count']} the record cites")
                 else:
                     on_disk = cand
             except (ValueError, yaml.YAMLError) as exc:
@@ -1373,7 +1380,18 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             refusal = (f"{where}, but neither the record nor a usable manifest on disk says which chunking "
                        "rule to read it under")
             return None
-        built = manifest_from_bytes(source_bytes, name, rule)
+        try:
+            built = manifest_from_bytes(source_bytes, name, rule)
+        except (KeyError, TypeError, ValueError) as exc:
+            refusal = f"{where}, but the recorded chunk rule cannot be reconstructed ({exc})"
+            return None
+        expected_digest = (record_chunks or {}).get("sha256")
+        if expected_digest:
+            from data_sheets_schema.chunking import dump_manifest
+            if hashlib.sha256(dump_manifest(built).encode("utf-8")).hexdigest() != expected_digest:
+                refusal = (f"{where}, but reconstruction does not reproduce inputs.chunks.sha256; "
+                           "the recorded chunk identities cannot be established")
+                return None
         if expected_count is not None and built.get("chunk_count") != expected_count:
             refusal = (f"{where}, but chunks to {built.get('chunk_count')} under {rule_basis}, not the "
                        f"{expected_count} the record cites, so its chunk ids would not name the receipt's text")
