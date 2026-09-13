@@ -628,9 +628,12 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             {"profile": name,
              "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
             for name in PROFILES]
+    backfill_basis = "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"
     for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations, scoped_chunks in product(
             (0, -1, 1, -2, 2), (5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
             destination_choices, (True, False)):
+        if render_version == 1 and selected_profile and not schema_block.get("profile"):
+            continue  # renderer 1 cannot prove a profile (#1678)
         if scoped_chunks and (render_version < 5 or runtime not in {"Claude Code", "Codex CLI"}):
             continue
         spec = RunSpec.from_render_spec({
@@ -653,7 +656,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             if execute:
                 data["prompts"]["request"]["spec"] = rendered
                 data["prompts"]["request"]["spec_basis"] = ("backfilled by d4d provenance backfill-spec: "
-                                                            "verified by re-rendering to the recorded hash (#772)")
+                                                            "verified by re-rendering to the recorded hash (#772)"
+                                                            + ("" if render_version > 1 else
+                                                               "; render version 1 does not hash the profile, which is restated"))
+                # The profile the hash proved is the record's, for every
+                # reader (`profiles.for_record`): a spec stating one the
+                # record does not is two records in one (#1678).
+                if rendered.get("profile") and not schema_block.get("profile") and render_version > 1:
+                    data.setdefault("schema", {})["profile"] = rendered["profile"]
+                    data["schema"]["profile_basis"] = backfill_basis
                 pv.ProvenanceRecord(data=data).write(path)
                 click.echo(f"     written to {path}")
             return
