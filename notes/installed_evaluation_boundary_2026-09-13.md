@@ -67,3 +67,20 @@ release checks with nonzero fake API ratings and real N/A exclusions in both
 rubrics. This explicitly checks both displayed percentages; zeros alone did
 not reveal the earlier denominator error. The boundary now pins 40 files.
 No new real ratings, generation runs or downloads are performed.
+
+## CI correction round 4 — 2026-09-13
+
+CI on the prior head passes 4,338 tests and finds #1599 and #1600. The
+installed HTML renderer now uses the shared captured-schema view. Third-party
+runtime library files retain absolute identities when the environment is
+inside a checkout; package resources and corpus identities retain their
+existing normalization. A new regression stages that runtime layout. The
+symlink/parent-path fixture now creates its own two distinct parents instead
+of assuming a developer virtualenv's parent contains pyproject.toml.
+
+The source/schema/resource/legacy-render lane passes 39 tests, with only that
+pre-existing fixture assumption failing; its replacement and the additional
+renderer checks pass 11 tests. A fresh wheel passes all six workflow checks.
+The boundary now pins 42 files, including the shared view and snapshot modules.
+No scoring rules, source rubrics, evaluator definitions or measured artifacts
+change in this correction.

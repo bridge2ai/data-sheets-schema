@@ -162,6 +162,19 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
         resolved = p.resolve()
     except OSError:
         return p.as_posix()
+    # A checkout-local venv is still a third-party installation. Its files
+    # are not repository artifacts merely because its path is below the
+    # checkout (#1600). Our package and wheel resources retain their logical
+    # identities even when they share that installation root.
+    import sysconfig
+    ours = resolved.is_relative_to(PACKAGE_ROOT.resolve())
+    if not ours and resolved.is_relative_to(INSTALL_ROOT.resolve()):
+        ours = is_resource(resolved.relative_to(INSTALL_ROOT.resolve()))
+    if not ours:
+        for kind in ("purelib", "platlib"):
+            library = sysconfig.get_path(kind)
+            if library and resolved.is_relative_to(Path(library).resolve()):
+                return resolved.as_posix()
     anchors: list[tuple[Path, tuple[str, ...], bool]] = []
     if CHECKOUT_ROOT is not None:
         anchors.append((CHECKOUT_ROOT, (), False))
