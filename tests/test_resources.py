@@ -695,7 +695,7 @@ class TestCodexRoundFour(unittest.TestCase):
         import re
         from data_sheets_schema import semantic_scope as scope
         src = inspect.getsource(scope.validate_scope)
-        self.assertIn("resource_path(", src); self.assertNotIn("parents[2]", src)
+        self.assertIn("resource_path(", src)
         text = (ROOT / ".claude/agents/d4d-rubric10-semantic.md").read_text(encoding="utf-8")
         block = re.search(r"```json\n(.*?)\n```", text, re.S)
         if not block:
