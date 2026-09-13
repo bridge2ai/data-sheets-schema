@@ -484,6 +484,52 @@ class TestCurrentValidationEligibility(unittest.TestCase):
                 self.assertIn("(stale)", empty.output)
                 self.assertIn("(unverified)", empty.output)
 
+    def test_diagnostics_inspect_excluded_full_and_core_records_in_both_runtimes(self):
+        from unittest.mock import patch
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.evaluate import evaluate
+        from tests.test_evaluation.test_related_datasets import TestTheCanonicalSetIsClean
+        for runtime, method in (("api", "claudecode_api"), ("agentic", "claudecode_agent")):
+            for variant in VARIANTS:
+                for state in ("stale", "invalid"):
+                    with self.subTest(runtime=runtime, variant=variant, state=state), TemporaryDirectory() as tmp:
+                        root = _corpus(Path(tmp), ["ELIGIBLE", "EXCLUDED"], method=method)
+                        prov = root / (method + "_core") / "2026-08-05_cfg_rep1" / "EXCLUDED_provenance.yaml"
+                        data = yaml.safe_load(prov.read_text())
+                        path = Path(data["outputs"][variant]["path"])
+                        path.write_text("id: x\nrelated_datasets:\n- relationship_type: related_to\n  target_dataset: x\n")
+                        if state == "invalid":
+                            data["validation"]["artifacts"][variant]["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+                            data["validation"]["passed"] = False
+                            prov.write_text(yaml.safe_dump(data))
+                        original = prov.read_bytes()
+                        with patch("data_sheets_schema.runs.CONCAT_DIR", root):
+                            self.assertEqual({e.project for e in plan(runtime=runtime)}, {"ELIGIBLE"})
+                            for selected in ([], ["--project", "EXCLUDED"]):
+                                result = CliRunner().invoke(evaluate,
+                                    ["related-datasets", "--runtime", runtime, *selected])
+                                self.assertEqual(result.exit_code, 1, result.output)
+                                self.assertIn(str(path), result.output)
+                                self.assertIn("unknown_type", result.output)
+                                self.assertIn("1 defect(s)", result.output)
+                                self.assertNotIn("across 0 record(s)", result.output)
+                            with self.assertRaises(AssertionError):
+                                TestTheCanonicalSetIsClean().test_no_canonical_record_has_a_related_datasets_defect()
+                        self.assertEqual(prov.read_bytes(), original)
+
+    def test_diagnostic_does_not_claim_an_unmatched_project_was_clean(self):
+        from unittest.mock import patch
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.evaluate import evaluate
+        with TemporaryDirectory() as tmp:
+            root = _corpus(Path(tmp), ["ELIGIBLE"])
+            with patch("data_sheets_schema.runs.CONCAT_DIR", root):
+                result = CliRunner().invoke(evaluate,
+                    ["related-datasets", "--runtime", "agentic", "--project", "MISSING"])
+            self.assertNotEqual(result.exit_code, 0)
+            self.assertIn("no canonical records matched", result.output)
+            self.assertNotIn("0 defect(s)", result.output)
+
 
 if __name__ == "__main__":
     unittest.main()
