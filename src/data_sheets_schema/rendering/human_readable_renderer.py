@@ -69,9 +69,9 @@ class HumanReadableRenderer:
     
     def _load_schema_info(self):
         """Read required fields from the installed canonical LinkML schema."""
-        from linkml_runtime.utils.schemaview import SchemaView
-        schema = SchemaView(str(resource_path(
-            "src/data_sheets_schema/schema/data_sheets_schema.yaml")))
+        from data_sheets_schema.schema_view import shared_view
+        schema = shared_view(resource_path(
+            "src/data_sheets_schema/schema/data_sheets_schema.yaml"))
         return {name.lower(): [slot.name for slot in schema.class_induced_slots(name)
                                if slot.required]
                 for name in schema.all_classes()}

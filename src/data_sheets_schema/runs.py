@@ -95,13 +95,19 @@ class Run:
     is_core: bool = False
     deterministic: bool = False
     legacy_revision: int | None = None
+    corpus_dir: Path | None = field(default=None, repr=False)
 
     @property
     def path(self) -> Path:
-        return CONCAT_DIR / self.method / self.label
+        return (self.corpus_dir or _corpus_dir(CONCAT_DIR)) / self.method / self.label
 
 
 _DEFAULT_CONCAT = CONCAT_DIR
+
+
+def _corpus_dir(path: Path) -> Path:
+    from data_sheets_schema.corpus import anchored
+    return anchored(path) if path == CONCAT_DIR else path
 
 
 def method_for_label(label: str, project: str | None = None,
@@ -128,6 +134,7 @@ def method_for_label(label: str, project: str | None = None,
         roots = [r for r in (globals()["CONCAT_DIR"], _pv.CONCAT_DIR) if r != _DEFAULT_CONCAT] or [_DEFAULT_CONCAT]
     else:
         roots = [concat_dir]
+    roots = [_corpus_dir(path) for path in roots]
     exact: dict[str, list[Path]] = {}
     prefix: dict[str, list[Path]] = {}
     for root in roots:
@@ -168,6 +175,7 @@ def method_for_label(label: str, project: str | None = None,
 
 def discover(concat_dir: Path = CONCAT_DIR) -> list[Run]:
     """Find every run directory on disk."""
+    concat_dir = _corpus_dir(concat_dir)
     runs: list[Run] = []
     for method_dir in sorted(p for p in concat_dir.iterdir() if p.is_dir()):
         method = method_dir.name
@@ -188,6 +196,7 @@ def discover(concat_dir: Path = CONCAT_DIR) -> list[Run]:
                         break
             runs.append(Run(
                 method=method,
+                corpus_dir=concat_dir,
                 label=label_dir.name,
                 arm=ARM_BY_METHOD.get(method, "unknown"),
                 config=m.group("config") if m else (
@@ -238,6 +247,7 @@ def slots(path: Path) -> set[str]:
 
 def record_path(method: str, label: str, project: str,
                 concat_dir: Path = CONCAT_DIR) -> Path | None:
+    concat_dir = _corpus_dir(concat_dir)
     core = method.endswith("_core")
     name = f"{project}_d4d_core.yaml" if core else f"{project}_d4d.yaml"
     p = concat_dir / method / label / name
@@ -252,6 +262,7 @@ def is_complete(method: str, label: str, project: str,
     that exists is not necessarily a finished one. Comparing mid-flight output
     silently measures an unfinished run.
     """
+    concat_dir = _corpus_dir(concat_dir)
     base = method[:-5] if method.endswith("_core") else method
     full = concat_dir / base / label / f"{project}_d4d.yaml"
     core = concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml"
@@ -313,6 +324,8 @@ def validation_status(method: str, label: str, project: str,
             ok = verify_entry(entry)
             if ok is False:
                 return STALE
+            if ok is None and entry.get("path") and (entry.get("sha256") or entry.get("md5")):
+                return UNVERIFIED
 
     # And a verdict is about a schema. Pinning only the artifacts let one
     # survive a schema change that would have failed it: the record was
@@ -460,7 +473,7 @@ def canonical_runs(concat_dir: Path | None = None,
     # Resolved at call time, not bound as a default. A default argument freezes
     # CONCAT_DIR at import, which makes the corpus root unpatchable and the
     # function untestable against a fixture.
-    concat_dir = Path(concat_dir) if concat_dir is not None else CONCAT_DIR
+    concat_dir = _corpus_dir(Path(concat_dir) if concat_dir is not None else CONCAT_DIR)
     out: dict[str, dict] = {}
     seen: dict[str, list[str]] = {}
     for prov in sorted(concat_dir.rglob("*_provenance.yaml")):
@@ -1353,13 +1366,13 @@ _NOT_ASSERTED = ("not sent", "not set", "not requested", "not applicable")
 def full_record_path(method: str, label: str, project: str,
                      concat_dir: Path = CONCAT_DIR) -> Path:
     """`{concat_dir}/{method}/{label}/{project}_d4d.yaml`."""
-    return concat_dir / method / label / f"{project}_d4d.yaml"
+    return _corpus_dir(concat_dir) / method / label / f"{project}_d4d.yaml"
 
 
 def core_record_path(method: str, label: str, project: str,
                      concat_dir: Path = CONCAT_DIR) -> Path:
     """`{concat_dir}/{method}_core/{label}/{project}_d4d_core.yaml`."""
-    return concat_dir / f"{method}_core" / label / f"{project}_d4d_core.yaml"
+    return _corpus_dir(concat_dir) / f"{method}_core" / label / f"{project}_d4d_core.yaml"
 
 
 def _same_value(said: str, recorded: Any) -> bool:
@@ -1458,7 +1471,7 @@ def arm_facts(label_prefix: str, method: str | None = None,
         except LookupError:
             method = "claudecode_agent"          # an absent arm reads as empty facts, as before
 
-    base = (concat_dir or CONCAT_DIR)
+    base = _corpus_dir(concat_dir or CONCAT_DIR)
     seen: dict[str, set] = {name: set() for name, _ in ARM_PROCEDURE_FIELDS}
     labels, projects = set(), set()
     for path in sorted(base.glob(f"{method}_core/{label_prefix}*/*_provenance.yaml")):
@@ -2150,6 +2163,9 @@ def archive_runs(labels: list[str], *, reason: str,
     reconciliation report would leave a run `is_complete()` reports as unfinished
     forever.
     """
+    concat_dir = _corpus_dir(concat_dir)
+    from data_sheets_schema.corpus import anchored
+    attic = anchored(attic) if attic == ATTIC else attic
     wanted = set(projects or [])
 
     def _files_for(label_dir: Path) -> list[Path]:
@@ -2233,6 +2249,9 @@ def restore_runs(labels: list[str], *,
                  archive_name: str = "d4d_concatenated_archived",
                  dry_run: bool = True) -> dict:
     """Move archived records back into discovery — the exact inverse of archiving."""
+    concat_dir = _corpus_dir(concat_dir)
+    from data_sheets_schema.corpus import anchored
+    attic = anchored(attic) if attic == ATTIC else attic
     root = attic / archive_name
     wanted = set(projects or [])
     moved: list[tuple[Path, Path]] = []

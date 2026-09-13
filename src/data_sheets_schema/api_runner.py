@@ -477,8 +477,9 @@ class RunSpec:
     # was selected, blocks or no blocks.
     profile: str | None = None
     profile_basis: str | None = None
-    # Version 4 binds every agentic playbook read/check to selected inputs.
+    # Version 5 binds output destinations to the selected corpus root.
     # Historical render specs omit this field and replay under version 1.
+    # Version 6 additionally binds the installed agentic toolchain.
     render_version: int | object = AUTO
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
@@ -506,31 +507,47 @@ class RunSpec:
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
     _agentic_toolchain: dict | None = field(default=None, init=False, repr=False)
+    _corpus_root: Path | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         if self.run_date is AUTO:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
-            self.render_version = 5 if self.is_agentic else 4
-        if self.render_version not in (1, 2, 3, 4, 5):
+            self.render_version = 6 if self.is_agentic else 5
+        if self.render_version not in (1, 2, 3, 4, 5, 6):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
         if self.manifest is not None:
             self.manifest = Path(self.manifest)
+        from data_sheets_schema.corpus import root
+        self._corpus_root = root(self.manifest)
+        if self._corpus_root != Path.cwd().resolve():
+            # CLI input paths belong to the launch directory, not to the
+            # manifest's output tree. Preserve that identity in the record.
+            if self.bundle is not None:
+                self.bundle = Path(self.bundle).absolute()
+            if self.manifest is not None:
+                self.manifest = self.manifest.absolute()
+            if self.chunk_manifest is not None:
+                self.chunk_manifest = Path(self.chunk_manifest).absolute()
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
-        elif self.render_version >= 4 and self.is_agentic:
+        elif ((self.render_version >= 4 and self.is_agentic)
+              or (self.render_version >= 5 and self.manifest is not None
+                  and self.condition in RECEIPT_CONDITIONS)):
             # The agentic playbook reads a chunk mapping even when discovery
             # chose it. Freeze that path for instruction replay (#1507).
             from data_sheets_schema.chunking import manifest_for
-            self.chunk_manifest = manifest_for(self.bundle)
+            self.chunk_manifest = manifest_for(self.bundle, source_manifest=self.manifest)
         if self.render_version >= 4 and self.is_agentic:
             self._agentic_artifact_paths = {
                 "full": str(self.full_path), "core": str(self.core_path),
                 "receipt": str(self.report_path.parent / f"{self.project}_coverage_receipt.yaml")}
-        if self.render_version >= 5 and self.is_agentic:
+            if self.render_version >= 5:
+                self._agentic_artifact_paths["report"] = str(self.report_path)
+        if self.render_version >= 6 and self.is_agentic:
             from data_sheets_schema.agentic_runtime import toolchain
             self._agentic_toolchain = toolchain()
         if self.manifest_line == default_line:   # an arm that declares its own header keeps it
@@ -597,11 +614,12 @@ class RunSpec:
         spec.profile = spec.profile_basis = None
         if "agentic_artifact_paths" in recorded:
             paths = recorded["agentic_artifact_paths"]
-            if (not isinstance(paths, dict) or set(paths) != {"full", "core", "receipt"}
+            expected = {"full", "core", "receipt"} | ({"report"} if spec.render_version >= 5 else set())
+            if (not isinstance(paths, dict) or set(paths) != expected
                     or any(not isinstance(value, str) or not value for value in paths.values())):
                 raise ValueError("invalid recorded agentic artifact paths")
             spec._agentic_artifact_paths = dict(paths)
-        if spec.render_version >= 5 and spec.is_agentic:
+        if spec.render_version >= 6 and spec.is_agentic:
             from data_sheets_schema.agentic_runtime import validate_toolchain
             spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"))
         spec._replay_only = True
@@ -630,7 +648,7 @@ class RunSpec:
                     "sha256": hashlib.sha256(path.read_bytes()).hexdigest()
                     if path.is_file() else None}
 
-        chunks = (self.chunk_manifest or manifest_for(self.bundle)) if self.bundle else None
+        chunks = (self.chunk_manifest or manifest_for(self.bundle, source_manifest=self.manifest)) if self.bundle else None
         # The instrument is an input too (#1460): a resumed run under
         # another profile would render another digest for its remaining
         # phases and record only that one.
@@ -656,7 +674,7 @@ class RunSpec:
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
                 **({"agentic_toolchain": {"python": self._agentic_toolchain["python"],
                                          "resources": dict(self._agentic_toolchain["resources"])}}
-                   if self.render_version >= 5 and self._agentic_toolchain is not None else {}),
+                   if self.render_version >= 6 and self._agentic_toolchain is not None else {}),
                 "render_version": self.render_version,
                 "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
                 "condition": self.condition, "arm": self.arm,
@@ -687,23 +705,29 @@ class RunSpec:
         return resolve_prompt(self)
 
     @property
+    def output_root(self) -> Path:
+        from data_sheets_schema.corpus import relative_to_root
+        return (relative_to_root(CONCAT_DIR, self._corpus_root)
+                if self._corpus_root is not None else CONCAT_DIR)
+
+    @property
     def full_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d.yaml"
-        return CONCAT_DIR / self.method / self.label / f"{self.project}_d4d.yaml"
+        return self.output_root / self.method / self.label / f"{self.project}_d4d.yaml"
 
     @property
     def core_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d_core.yaml"
-        return (CONCAT_DIR / f"{self.method}_core" / self.label /
+        return (self.output_root / f"{self.method}_core" / self.label /
                 f"{self.project}_d4d_core.yaml")
 
     @property
     def report_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_reconciliation.md"
-        return (CONCAT_DIR / f"{self.method}_core" / self.label /
+        return (self.output_root / f"{self.method}_core" / self.label /
                 f"{self.project}_reconciliation.md")
 
     @property
@@ -971,6 +995,23 @@ def resolve_prompt(spec: RunSpec) -> str:
                  + shlex.join(args) + "\n")
     if spec.render_version >= 4 and spec.is_agentic:
         body += agentic_selected_inputs(spec)
+    if spec.render_version >= 5 and spec.is_agentic:
+        paths = spec._agentic_artifact_paths
+        conventional = {
+            "full": CONCAT_DIR / spec.method / spec.label / f"{spec.project}_d4d.yaml",
+            "core": CONCAT_DIR / f"{spec.method}_core" / spec.label / f"{spec.project}_d4d_core.yaml",
+            "report": CONCAT_DIR / f"{spec.method}_core" / spec.label / f"{spec.project}_reconciliation.md",
+            "receipt": CONCAT_DIR / f"{spec.method}_core" / spec.label / f"{spec.project}_coverage_receipt.yaml",
+        }
+        # Replace only the historical template's paths, not occurrences in
+        # the already-rooted selected-input appendices.
+        head, marker, tail = body.partition("\n\n## Selected inputs for all four phases")
+        for key, old in conventional.items():
+            head = head.replace(str(old), paths[key])
+        body = head + marker + tail
+        body += "\n\n## Authoritative output destinations (renderer v5)\n\n"
+        body += "Use these destinations in every phase and every playbook command:\n\n"
+        body += "\n".join(f"- {key}: `{value}`" for key, value in paths.items()) + "\n"
 
     # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
     # line takes a placeholder, so every record produced under it since that
@@ -998,7 +1039,7 @@ def resolve_prompt(spec: RunSpec) -> str:
             "state nothing about what the output should contain, how many slots "
             "to populate, or how this record should compare to any other.\n\n"
             f"{block}\n\nRETURN:", 1)
-    if spec.render_version >= 5 and spec.is_agentic:
+    if spec.render_version >= 6 and spec.is_agentic:
         from data_sheets_schema.agentic_runtime import portable_text, instruction_adapter
         body = portable_text(body, spec._agentic_toolchain) + instruction_adapter(spec)
     return body

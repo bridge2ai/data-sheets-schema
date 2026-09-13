@@ -200,3 +200,55 @@ class TestTheInstalledWheel(unittest.TestCase):
             print("ok")
         """)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_an_ancestor_manifest_owns_the_installed_corpus(self):
+        r = self._run('''
+            import os, yaml
+            from pathlib import Path
+            from click.testing import CliRunner
+            from data_sheets_schema.cli import cli
+            from data_sheets_schema.cli.api import _spec
+            from data_sheets_schema import api_runner, chunking, registry, resources, runs
+            from installed_workflow_fixture import GenerationClient
+            assert not resources.is_checkout()
+            root = Path("external-project").resolve()
+            manifest = root / "data/preprocessed/source_manifest.yaml"
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text(yaml.safe_dump({"projects": {"EXTERNAL_CLINICAL": {"sources": []}}}))
+            bundle = root / "data/preprocessed/concatenated/EXTERNAL_CLINICAL_preprocessed.txt"
+            bundle.parent.mkdir(parents=True)
+            bundle.write_text("FILE: overview.txt\\nSynthetic clinical documentation.\\n" * 30)
+            nested = root / "analysis/notes"
+            nested.mkdir(parents=True)
+            os.chdir(nested)
+            assert registry.default_manifest_path().resolve() == manifest
+            chunks, _ = chunking.write_manifest("EXTERNAL_CLINICAL")
+            assert chunks.resolve().is_relative_to(root / "data/preprocessed/chunks")
+            spec = _spec("EXTERNAL_CLINICAL", "baseline", "installed_root_rep1", "generic")
+            assert spec.bundle.resolve() == bundle and spec.profile == "neutral"
+            api_runner.execute(spec, client=GenerationClient())
+            assert all(p.is_file() and p.resolve().is_relative_to(root / "data/d4d_concatenated")
+                       for p in (spec.full_path, spec.core_path, spec.report_path))
+            assert len(runs.discover()) == 2
+            for args in (["runs", "check", "--method", spec.method, "--label", spec.label,
+                          "--project", spec.project, "--strict"],
+                         ["provenance", "validate-records", "--strict"]):
+                result = CliRunner().invoke(cli, args)
+                assert result.exit_code == 0 and "no records matched" not in result.output, result.output
+            assert not (nested / "data").exists()
+            # A global option/environment selection must govern the API's
+            # context and bundle selection too, from outside this project.
+            os.chdir(root.parent)
+            for mode in ("option", "environment"):
+                if mode == "environment":
+                    os.environ["D4D_MANIFEST"] = str(manifest)
+                prefix = ["--manifest", str(manifest)] if mode == "option" else []
+                result = CliRunner().invoke(cli, prefix + ["api", "plan", "--project", spec.project,
+                    "--label", "selection_only", "--condition", "generic", "--json"])
+                assert result.exit_code == 0, result.output
+                import json
+                planned = json.loads(result.output)
+                assert Path(planned["outputs"]["full"]).is_relative_to(root), planned["outputs"]
+            print("ok")
+        ''')
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

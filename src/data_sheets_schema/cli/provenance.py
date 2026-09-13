@@ -4,6 +4,8 @@ import functools
 
 import click
 
+from data_sheets_schema.corpus import anchored as _corpus_path
+
 from data_sheets_schema.cli.api import ARMS as _ARMS
 from data_sheets_schema.provenance import SOURCE_MANIFEST as SOURCE_MANIFEST_DEFAULT
 from pathlib import Path
@@ -371,7 +373,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     from data_sheets_schema.provenance import CONCAT_DIR as _CD, parse_header
     header_bundle = None
     base = method[:-5] if method.endswith("_core") else method
-    full_out = _CD / base / label / f"{project}_d4d.yaml"
+    full_out = _corpus_path(_CD) / base / label / f"{project}_d4d.yaml"
     h = parse_header(full_out) if full_out.exists() else {}
     header_bundle = h.get("Source bundle") or h.get("Source")
     resolved_bundle = input_bundle or header_bundle
@@ -529,7 +531,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # selection belongs in the rendered recording command (#1408).
     chunk_choices = (None, Path(chunks)) if chunks else (None,)
     for delta, render_version, selected_chunks, selected_manifest in product(
-            (0, -1, 1, -2, 2), (4, 3, 2, 1), chunk_choices, manifest_choices):
+            (0, -1, 1, -2, 2), (6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices):
         spec = RunSpec.from_render_spec({
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
@@ -1614,7 +1616,7 @@ def reasoning_cmd(method, project, label, path):
             for proj in run.projects:
                 if project and proj != project:
                     continue
-                logs.append(CONCAT_DIR / f"{run.method}_core" / run.label /
+                logs.append(_corpus_path(CONCAT_DIR) / f"{run.method}_core" / run.label /
                             f"{proj}_reasoning.jsonl")
 
     # Classify the runs that produced no log, rather than printing one message
@@ -1760,7 +1762,7 @@ def backfill_effort(execute, method, label):
         CONCAT_DIR, apply_observed_effort, observed_effort_gap,
     )
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if method:
         base = method[:-5] if method.endswith("_core") else method
         paths = [p for p in paths if p.parts[-3] == f"{base}_core"]
@@ -1823,7 +1825,7 @@ def backfill_effort_basis(execute, label):
         CONCAT_DIR, apply_effort_basis, effort_basis_gap,
     )
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
 
@@ -1951,7 +1953,9 @@ def backfill_bundle_md5(execute, label):
     # git history from the package's own checkout; a `d4d` resolving to a
     # worktree's src while run from another checkout would prove one tree's
     # md5 against another's history (#1132 round 2).
-    if Path.cwd().resolve() != _REPO_ROOT.resolve():
+    from data_sheets_schema.corpus import root as corpus_root
+    if (Path.cwd().resolve() != _REPO_ROOT.resolve()
+            or corpus_root().resolve() != _REPO_ROOT.resolve()):
         raise click.ClickException(
             f"the package is installed from {_REPO_ROOT} but the cwd is {Path.cwd()}; "
             "run this from the checkout the package resolves to")
@@ -2016,7 +2020,7 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     from data_sheets_schema.provenance import CONCAT_DIR
     from data_sheets_schema.report_claims import declared_slots
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if method:
         base = method[:-5] if method.endswith("_core") else method
         paths = [p for p in paths if p.parts[-3] == f"{base}_core"]
@@ -2118,7 +2122,7 @@ def backfill_context(execute, label):
     from data_sheets_schema.backfill_checks import _split_header
     from data_sheets_schema.provenance import CONCAT_DIR
 
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
     rows, skipped = [], 0
@@ -2188,7 +2192,7 @@ def validate_records(strict, label):
 
     # The same validator and packaged-schema resolution as the runtime gate
     # (#614/#620), including non-null required values and validator failures.
-    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
     if not paths:

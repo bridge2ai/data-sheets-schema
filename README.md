@@ -108,6 +108,15 @@ checks a version-2 semantic output against the original D4D, exact evaluator
 definition and trusted applicability declarations. Omit `--context` when no
 predicates were declared; omitted predicates remain in the denominator.
 
+A source manifest at `PROJECT/data/preprocessed/source_manifest.yaml` owns
+that project's conventional bundles, chunk manifests and generated outputs.
+Run from the project root or any subdirectory, or pass
+`d4d --manifest /path/to/PROJECT/data/preprocessed/source_manifest.yaml ...`
+from elsewhere. Relative paths declared inside the manifest resolve from
+`PROJECT`; a standalone manifest uses its own directory. Explicit `--out-dir`
+continues to resolve from the caller's working directory. Repository-history
+repair commands still require their original checkout.
+
 ### Command Groups
 
 The CLI is organized into six top-level groups:

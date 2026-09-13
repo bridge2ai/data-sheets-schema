@@ -57,13 +57,13 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     a run without a manifest records that it had none.
     """
     from data_sheets_schema.api_runner import RunSpec
-    from data_sheets_schema.registry import _concat_dir
+    from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR
     display, method, pattern, manifest_line = ARMS[arm]
     selected = select_manifest(project, bundle, manifest)      # one rule, everywhere (#1367 review)
     reg = load_registry(selected)
     resolved = (Path(bundle) if bundle else
-                reg.bundle(project) if reg.declares(project) and arm == "baseline" else
-                _concat_dir() / pattern.format(p=project))
+                reg.bundle(project) if arm == "baseline" else
+                reg.anchored(BUNDLE_DIR) / pattern.format(p=project))
     kw = {"manifest": selected,
           "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None}
     if runtime:

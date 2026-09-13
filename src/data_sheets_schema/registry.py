@@ -30,7 +30,7 @@ from typing import Any
 import click
 
 #: The study's manifest, used when a caller selects nothing else.
-DEFAULT_MANIFEST = Path("data/preprocessed/source_manifest.yaml")
+from data_sheets_schema.corpus import DEFAULT_MANIFEST
 
 #: The legacy override key: `<PROJECT>_source_dir` beside the projects.
 _SOURCE_DIR_SUFFIX = "_source_dir"
@@ -60,28 +60,8 @@ def _concat_dir() -> Path:
 
 
 def default_manifest_path() -> Path:
-    """The default manifest from here — one rule for the registry, the
-    chunk manifests and the profile (#1491): the working directory's, else
-    the checkout's (`anchored`), which may not exist. Not an ancestor's:
-    the conventional bundles are anchored to the checkout, so a manifest
-    found higher up would pair its context and profile with another
-    tree's corpus (#1515); discovery in an ancestor returns when the
-    corpus root follows the manifest (#1523)."""
-    from data_sheets_schema.chunking import REPO_ROOT, anchored
-    rel = Path(DEFAULT_MANIFEST)
-    try:
-        here = Path.cwd().resolve()
-    except OSError:
-        here = None
-    inside = here is not None and (here == REPO_ROOT or REPO_ROOT in here.parents)
-    if inside:
-        # The corpus root is the checkout (#1523): a copy of the manifest
-        # nested inside it — an archived registration under `notes/` — is
-        # not the registry from its own directory (#1545).
-        return anchored(rel)
-    if rel.exists():
-        return rel
-    return anchored(rel)
+    from data_sheets_schema.corpus import default_manifest_path as resolve
+    return resolve()
 
 
 @dataclass(frozen=True)
@@ -95,6 +75,15 @@ class Registry:
     """
     path: Path | None
     data: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def root(self) -> Path:
+        from data_sheets_schema.corpus import root
+        return root(self.path)
+
+    def anchored(self, path: Path) -> Path:
+        from data_sheets_schema.corpus import relative_to_root
+        return relative_to_root(path, self.root)
 
     # ---- projects ---------------------------------------------------------
     def projects(self) -> list[str]:
@@ -140,13 +129,13 @@ class Registry:
         are not under `data/preprocessed/individual/<project>`: the override
         that lets VOICE_PEDIATRIC read VOICE's directory (#302)."""
         v = self._setting(project, "source_dir")
-        return Path(v) if isinstance(v, str) and v else None
+        return self.anchored(Path(v)) if isinstance(v, str) and v else None
 
     def raw_dir(self, project: str) -> Path | None:
         """Where the project's raw downloads are, when they are not under
         the input directory's `<project>` subdirectory (#637)."""
         v = self._setting(project, "raw_dir")
-        return Path(v) if isinstance(v, str) and v else None
+        return self.anchored(Path(v)) if isinstance(v, str) and v else None
 
     def preprocessed_directory(self, project: str, root: Path) -> Path:
         """Declared source_dir wins; a pipeline root supplies only the fallback.
@@ -188,8 +177,9 @@ class Registry:
         record, else `<concat_dir>/<project>_preprocessed.txt` by convention."""
         v = self._setting(project, "bundle")
         if isinstance(v, str) and v:
-            return Path(v)
-        return (concat_dir or _concat_dir()) / f"{project}{DOCUMENT_BUNDLE_SUFFIX}"
+            return self.anchored(Path(v))
+        from data_sheets_schema.chunking import CONCAT_DIR
+        return (concat_dir or self.anchored(CONCAT_DIR)) / f"{project}{DOCUMENT_BUNDLE_SUFFIX}"
 
     def bundles(self, project: str, concat_dir: Path | None = None) -> list[Path]:
         """Every bundle this manifest resolves for `project`: the declared or
@@ -199,7 +189,7 @@ class Registry:
         those, and they are the project's inputs as much as the document
         bundle is (#1367 round 2, #1385)."""
         from data_sheets_schema import chunking
-        base = concat_dir or _concat_dir()
+        base = concat_dir or self.anchored(chunking.CONCAT_DIR)
         out = [self.bundle(project, concat_dir)]
         if self.path is not None and self.path.resolve() == default_manifest_path().resolve():
             out += [base / f"{project}{s}" for s in chunking.BUNDLE_SUFFIXES]
@@ -357,6 +347,11 @@ def select_manifest(project: str, bundle: Path | str | None,
     describe a bundle the run is not reading, and hashing the study's file
     into the record would attest an input the run never consulted.
     """
+    if requested is AUTO:
+        from data_sheets_schema.corpus import AUTO as NO_OVERRIDE, manifest_override
+        explicit = manifest_override()
+        if explicit is not NO_OVERRIDE:
+            requested = explicit
     if requested is None:
         return None
     if requested is not AUTO:

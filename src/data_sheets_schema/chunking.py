@@ -191,20 +191,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def anchored(d: Path) -> Path:
-    """A repository-owned relative directory as a path that is correct from
-    any working directory: as written from the repository root — so the
-    paths a record carries stay relative and portable (`inputs.chunks.path`
-    is `data/preprocessed/chunks/…` on every record) — and anchored to the
-    checkout from anywhere else (#1367 round 2, #1388)."""
-    d = Path(d)
-    if d.is_absolute():
-        return d
-    try:
-        if Path.cwd().resolve() == REPO_ROOT:
-            return d
-    except OSError:
-        pass
-    return REPO_ROOT / d
+    """A conventional corpus path under the selected manifest's project root."""
+    from data_sheets_schema.corpus import anchored as resolve, selected_manifest
+    return resolve(d, selected_manifest(allow_checkout_fallback=True))
 
 
 def _study_dir() -> Path:
@@ -237,7 +226,8 @@ def _under_concat_dir(bundle: Path) -> bool:
         return False
 
 
-def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
+def manifest_for(bundle: Path, chunks_dir: Path | None = None, *,
+                 source_manifest: Path | None = None) -> Path:
     """The manifest for any bundle kind (#725).
 
     A study bundle — one under `CONCAT_DIR`, or any bundle when the caller
@@ -255,6 +245,15 @@ def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
     bundle was read from (#713).
     """
     bundle = Path(bundle)
+    if source_manifest is not None and chunks_dir is None:
+        from data_sheets_schema.corpus import manifest_root, relative_to_root
+        owner = manifest_root(source_manifest)
+        if bundle.resolve().parent == (owner / CONCAT_DIR).resolve():
+            chunks_dir = relative_to_root(CHUNKS_DIR, owner)
+            bundle = bundle.resolve()
+        else:
+            stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
+            return bundle.parent / f"{stem}_chunks.yaml"
     if chunks_dir is None and not _under_concat_dir(bundle):
         stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
         return bundle.parent / f"{stem}_chunks.yaml"

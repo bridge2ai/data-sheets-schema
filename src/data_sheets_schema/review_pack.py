@@ -98,9 +98,10 @@ AFFIRMATIVE = {"confirmed", "supported", "bundle_supports", "exempt_by_nature", 
                "followed", "not_applicable", "consistent"}
 ADVERSE = {k: tuple(v for v in vs if v not in AFFIRMATIVE and v != "cannot_tell") for k, vs in VERDICTS.items()}
 def _anchored(rel: Path) -> Path:
-    """cwd-proof (#822): a relative repo path resolved against the package
-    root, so pack content cannot depend on the launch directory."""
-    return rel if rel.is_absolute() else Path(__file__).resolve().parents[2] / rel
+    """Resources belong to the package; corpus paths to the selected project."""
+    from data_sheets_schema.corpus import anchored
+    from data_sheets_schema.resources import is_resource, resource_path
+    return resource_path(rel) if is_resource(rel) else anchored(rel)
 
 
 PAIR_SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
@@ -385,9 +386,7 @@ def _id_slots(full: Any, root_class: str | None = None,
         from data_sheets_schema.receipts import _minted, populated_leaves
         # The merged artifact carries every imported module's rules. A view
         # keyed only on the modular root misses changes to its imports (#948).
-        schema_path = Path(SCHEMA_FULL_PATH)
-        if not schema_path.is_absolute():                     # cwd-proof (#822)
-            schema_path = Path(__file__).resolve().parents[2] / schema_path
+        schema_path = _anchored(Path(SCHEMA_FULL_PATH))
         sv = shared_view(schema_path)
     except Exception as e:                                    # noqa: BLE001
         return [], f"id slot flags unavailable: {type(e).__name__}"
@@ -511,7 +510,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     # the schema does (#822).
     bundle_text, bundle_state = None, "no bundle_path recorded"
     if bundle:
-        bpath = bundle if bundle.is_absolute() else Path(__file__).resolve().parents[2] / bundle
+        bpath = _anchored(bundle)
         pack["bundle"]["resolved_path"] = str(bpath)          # which root the bytes came from (round 2, note 6)
         if not bpath.exists():
             bundle_state = f"bundle not on disk ({bpath})"

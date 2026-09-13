@@ -5,6 +5,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.corpus import anchored as _corpus_path
+
 from data_sheets_schema.registry import project_choice, projects_for
 
 from data_sheets_schema.constants import PROJECTS
@@ -195,7 +197,7 @@ def identifiers_cmd(label, method, output, show, strict):
     from data_sheets_schema import identifiers as ident
     from data_sheets_schema.runs import CONCAT_DIR
 
-    root = CONCAT_DIR
+    root = _corpus_path(CONCAT_DIR)
     if method:
         root = root / method
     report = ident.audit(root=root)
@@ -1303,7 +1305,7 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     from data_sheets_schema.merge import union_merge, write_merge
 
     from data_sheets_schema.runs import CONCAT_DIR
-    base_dir = CONCAT_DIR / method
+    base_dir = _corpus_path(CONCAT_DIR) / method
     if config and not labels:
         labels = tuple(sorted(
             p.name for p in base_dir.glob(f"{config}_rep*") if p.is_dir()))
@@ -1471,7 +1473,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         CONCAT_DIR, INVALID, UNVERIFIED, VALID, is_complete, validation_status)
     from data_sheets_schema.provenance import ProvenanceRecord, record_path_for
 
-    base_dir = CONCAT_DIR / method
+    base_dir = _corpus_path(CONCAT_DIR) / method
     labels = sorted(p.name for p in base_dir.glob(f"{config}_rep*") if p.is_dir())
     if len(labels) < 2:
         raise click.ClickException(
@@ -1483,7 +1485,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         is evidence, else None and the reason — no block, not checked, or
         a checked block with findings or unanswered items, which is not the
         same as no block (#1124 round-9 review, M-R9-1). Absence is not zero adverse."""
-        pp = record_path_for(project, method, label, CONCAT_DIR)
+        pp = record_path_for(project, method, label, _corpus_path(CONCAT_DIR))
         if not pp.exists():
             return None, "no provenance record"
         try:
@@ -1503,7 +1505,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         if not record.exists():
             candidates.append((label, None, "no record", 0, "no record", "no record"))
             continue
-        if not is_complete(method, label, project, CONCAT_DIR):
+        if not is_complete(method, label, project, _corpus_path(CONCAT_DIR)):
             candidates.append((label, record, "incomplete", 0, "incomplete", "incomplete"))
             continue
         loaded = _yaml.safe_load(record.read_text(encoding="utf-8"))
@@ -1518,7 +1520,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         # have excluded a perfectly good record.
         ok, detail = _validates(record)
         live = VALID if ok else INVALID
-        recorded = validation_status(method, label, project, CONCAT_DIR)
+        recorded = validation_status(method, label, project, _corpus_path(CONCAT_DIR))
         candidates.append((label, record, live, slots, recorded, detail))
 
     accept = {VALID} | ({UNVERIFIED} if allow_unverified else set())
@@ -1576,7 +1578,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         click.echo("\nDry run. Re-run with --execute to record the choice.")
         return
 
-    prov_path = record_path_for(project, method, winner[0], CONCAT_DIR)
+    prov_path = record_path_for(project, method, winner[0], _corpus_path(CONCAT_DIR))
     if not prov_path.exists():
         raise click.ClickException(
             f"{winner[0]} has no provenance record at {prov_path}; a canonical "
@@ -1589,7 +1591,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     winner_runtime = runtime_of(_yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {})
     superseded = []
     skipped_runtimes = []
-    for other in sorted(CONCAT_DIR.rglob(f"{project}_provenance.yaml")):
+    for other in sorted(_corpus_path(CONCAT_DIR).rglob(f"{project}_provenance.yaml")):
         if other == prov_path:
             continue
         try:
@@ -1749,7 +1751,7 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
     total_sentences = total_prose = total_structural = 0
     rows = []
     for proj, lab, meth, rt in sorted(targets, key=lambda t: (t[0], t[3] or "", t[1])):
-        path = _Path(CONCAT_DIR) / meth / lab / f"{proj}_d4d.yaml"
+        path = _Path(_corpus_path(CONCAT_DIR)) / meth / lab / f"{proj}_d4d.yaml"
         if not path.exists():
             continue
         summary = red.summarize(red.load(path), **kwargs)

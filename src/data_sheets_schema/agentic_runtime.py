@@ -1,6 +1,6 @@
 """Executable views of the agentic instructions for the current installation.
 
-Renderer 5 records the toolchain paths in its render spec. Versions 1–4 retain
+Renderer 6 records the toolchain paths in its render spec. Versions 1–5 retain
 their original instruction bytes and never use this adapter.
 """
 from __future__ import annotations
@@ -78,7 +78,7 @@ def instruction_adapter(spec) -> str:
         "Check the pair": [py, "-m", "data_sheets_schema.d4d_pair_consistency",
             "--full", paths["full"], "--core", paths["core"]],
     }
-    text = ("\n\n## Installed agentic execution (renderer v5)\n\n"
+    text = ("\n\n## Installed agentic execution (renderer v6)\n\n"
             "The executable playbook view preserves the source playbook's rules and replaces "
             "its tool and schema locations for this Python environment. Read that view before "
             "Phase 1 and apply the selected-input overrides above in every phase. "
