@@ -13,6 +13,12 @@ the denied request without counting it as paid, and checks the stop before
 token counting, subsequent admission and declaring a completed attempt.
 A recreated controller using the same ledger must also refuse that attempt.
 
+Round-one review found #1773: an unresolved final report charge could escape
+the active check when no later reservation occurred. Final status now also
+requires every ledger row to be settled, and provider/response failures
+persist the stop. Real report-call regressions cover lost responses, model
+substitution and over-reservation, including recreation without another call.
+
 Issue #1771: the schema digest hid `string[]` together with default scalar
 strings. Nested list obligations now reach both generation prompts and the
 fitness specification. The change applies to ordinary external schemas as
