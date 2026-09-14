@@ -1,0 +1,82 @@
+{
+  "registered_at": "2026-09-14T04:36:40.923750+00:00",
+  "status": "draft_awaiting_independent_review_and_prior_canary_acceptance",
+  "registration": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/registration.json",
+  "registration_sha256": "0fbe4d0853b0fbdcef6f4788532420800428aecd069ae8db48fa5a3485495a12",
+  "allowed_jobs": [
+    "CHORUS_agentic_rep1",
+    "KIDS_FIRST_agentic_rep1"
+  ],
+  "condition_boundary": "Native execution controls supplement the immutable source/instrument registration. They do not alter its source bytes, prompt files, schemas, profiles, cohort labels or budget ledger identity.",
+  "claude_executable": "/Users/marcin/.local/bin/claude",
+  "claude_version": "2.1.270 (Claude Code)",
+  "system_prompt": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/native_controls/system.md",
+  "cli_flags": [
+    "--print",
+    "--safe-mode",
+    "--restricted",
+    "--strict-mcp-config",
+    "--disable-slash-commands",
+    "--no-session-persistence",
+    "--prompt-suggestions",
+    "false",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--permission-mode",
+    "dontAsk",
+    "--tools",
+    "Read,Write,Bash"
+  ],
+  "allowed_tools": [
+    "Read",
+    "Write",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli agents playbook *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli bundle chunk *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli download scope *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli download priority *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli receipts check *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli derive core *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli provenance record *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli provenance annotate-observed *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli runs check *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli runs validate *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.cli --manifest *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.d4d_pair_consistency *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -m data_sheets_schema.agentic_observed *)",
+    "Bash(/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python -c *)"
+  ],
+  "environment": {
+    "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1",
+    "DISABLE_TELEMETRY": "1",
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+  },
+  "per_job_environment": {
+    "CHORUS_agentic_rep1": {
+      "D4D_MANIFEST": "/private/tmp/d4d-canaries-2026-09-13/data/preprocessed/source_manifest.yaml",
+      "D4D_PROFILE": "bridge2ai"
+    },
+    "KIDS_FIRST_agentic_rep1": {
+      "D4D_MANIFEST": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml",
+      "D4D_PROFILE": "neutral"
+    }
+  },
+  "credential_boundary": "Only the parent transport receives CBORG_API_KEY. The child receives an ephemeral local transport token and has no inherited provider, GitHub or OAuth credentials.",
+  "accounting": "All native model calls, including auxiliary calls, pass serial admission against the same cumulative attempt and sequence ledger as the API arm. A fixed session name suppressed auxiliary title generation in the offline probe; the guard does not rely on that suppression.",
+  "native_limits_observed_offline": {
+    "context_window": 200000,
+    "max_output_tokens": 64000
+  },
+  "limit_basis": "Installed CLI declaration during a scripted offline probe; distinct from CBORG route maxima (1M input, 128k output). Confirm runtime declaration, actual request ceilings and any compaction in the scientific trace.",
+  "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
+  "pinned_files": {
+    "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": "7e9f0a7a714d720a6d6d7a3dcefe686cad9a2936339dedef58f8761a84443f64",
+    "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "5011636a5ca4555dade352ee7b83c7c7304769642543ce061f7e3106882f0b77",
+    "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "8832be38cae429a3ab4218ed6610be46f294879aa767dad6c2856e530f6053b3",
+    "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/native_controls/system.md": "c38c66f9a34ffaa6019cb34d9720b5ab4e683465602de4a0177bf71ca8653e00",
+    "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/budgeted_cborg.py": "452efd83ecd6908adefd28277c9a6e259b16c592acb7f83c32aa8cec81d5c909",
+    "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/run_api_canary.py": "953f93a5036dafc8e2a669d010d041629e337f0b347b382fcd12b75ee040b147",
+    "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/prepare_registration.py": "9576199e60785936129f621221d5f7d9c5588c6094a56fbb80df3549344fef0c",
+    "/Users/marcin/.local/share/claude/versions/2.1.270": "a506b6d970a4cf44f6abdb53a81ddcd5d3b0ce042a95c502fe9d1f946bdb8807"
+  }
+}

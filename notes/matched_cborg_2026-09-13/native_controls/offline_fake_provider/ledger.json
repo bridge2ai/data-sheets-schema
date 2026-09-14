@@ -1,0 +1,67 @@
+{
+  "manifest_sha256": "offline-cli-probe",
+  "additional_cap_usd": "200",
+  "attempt_cap_usd": "5",
+  "requests": [
+    {
+      "id": "1f039f6bf1914aad87b825c940bde252",
+      "attempt": "offline",
+      "request_sha256": "9054734b41a88c7b0a796d2758a61878df5c220c2193bca5e2ac9d2fe3f14a9e",
+      "reserved_at": "2026-09-14T04:14:31.866271+00:00",
+      "reserved_usd": "1.60715000",
+      "status": "settled",
+      "cost_usd": "0.00080000",
+      "settled_at": "2026-09-14T04:14:31.869536+00:00",
+      "response_sha256": "9899044cafa76ad61c4a20c37e2c8be203ba47d948c64bb89b78997bffcf8b9d",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 12
+      }
+    },
+    {
+      "id": "ab165bf213d7428a9caf2a4c053c03cb",
+      "attempt": "offline",
+      "request_sha256": "9bd20073571d10dc70e43bfe14cf6a861b892737fb0112b18c13f5de0f5199e8",
+      "reserved_at": "2026-09-14T04:14:31.886841+00:00",
+      "reserved_usd": "1.60715000",
+      "status": "settled",
+      "cost_usd": "0.00080000",
+      "settled_at": "2026-09-14T04:14:31.888960+00:00",
+      "response_sha256": "b3cc9534fc16ca11f425427a010bc8a39d07f683144b233916df09b9f212317c",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 12
+      }
+    },
+    {
+      "id": "95489735f43a4d81bc3fda47dc766e08",
+      "attempt": "offline",
+      "request_sha256": "b1511785c2a8ea1350a609745b26277e996b8c0c9376106811959be2fbefc662",
+      "reserved_at": "2026-09-14T04:14:31.901453+00:00",
+      "reserved_usd": "1.60715000",
+      "status": "settled",
+      "cost_usd": "0.00080000",
+      "settled_at": "2026-09-14T04:14:31.903531+00:00",
+      "response_sha256": "944d568bf8245310bbd9ba4d22a3b34b4b29c7c5a26b8be39f3ba92b4cd2ef21",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 12
+      }
+    },
+    {
+      "id": "57bdb20ca07c4516863c25de890dbf5d",
+      "attempt": "offline",
+      "request_sha256": "cd0a2503921eee97aa97f52e6fdb813bd0bf73ad814b98c3f20c844e8ff5b6c9",
+      "reserved_at": "2026-09-14T04:14:35.779177+00:00",
+      "reserved_usd": "1.60715000",
+      "status": "settled",
+      "cost_usd": "0.00080000",
+      "settled_at": "2026-09-14T04:14:35.781183+00:00",
+      "response_sha256": "86054720ecb3a81ba9b9dacb73a447d9012be7f33768a8c517b5d3b35cceb89e",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 12
+      }
+    }
+  ]
+}

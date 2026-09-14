@@ -1,0 +1,2 @@
+# Preserve original stream framing, including the terminal empty line.
+*.sse -text -whitespace

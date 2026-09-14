@@ -1,0 +1,22 @@
+{
+  "manifest_sha256": "offline-cli-probe",
+  "additional_cap_usd": "200",
+  "attempt_cap_usd": "5",
+  "requests": [
+    {
+      "id": "7294873d5f2e46a9983a663c2470cec2",
+      "attempt": "offline",
+      "request_sha256": "6e2a98508a77c68e9301c89da95fa15056762da117065196d768394a45a04cf6",
+      "reserved_at": "2026-09-14T04:13:32.289681+00:00",
+      "reserved_usd": "1.60715000",
+      "status": "settled",
+      "cost_usd": "0.00080000",
+      "settled_at": "2026-09-14T04:13:32.292498+00:00",
+      "response_sha256": "9899044cafa76ad61c4a20c37e2c8be203ba47d948c64bb89b78997bffcf8b9d",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 12
+      }
+    }
+  ]
+}

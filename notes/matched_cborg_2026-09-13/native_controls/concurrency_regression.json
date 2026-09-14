@@ -1,0 +1,8 @@
+{
+  "observed_at": "2026-09-14T04:30:08.061239+00:00",
+  "issue": 1766,
+  "passed": 16,
+  "scientific_requests": 0,
+  "log_sha256": "9852cc2cac49bc912fdb7494c090a3158caceec4023f37ba8f3620bcdd5c4bc9",
+  "additional_regression": "Two concurrent native HTTP requests wait for preceding settlement and both complete with separate ledger entries."
+}
