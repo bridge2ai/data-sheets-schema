@@ -1,0 +1,15 @@
+{
+  "id": "drc_data_dictionary",
+  "url": "https://kidsfirstdrc.org/help-center/data-dictionary/",
+  "retrieved_at": "2026-09-14T03:21:40.958424+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/help-center/data-dictionary/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:21:41 GMT",
+  "bytes": 183057,
+  "sha256": "e96e96f67df31019c1ded12e0fc1bac69247a0d3c8cec13d6a8cc8c398173bd7",
+  "local_path": "raw/drc_data_dictionary.raw",
+  "status": "captured_unreviewed"
+}

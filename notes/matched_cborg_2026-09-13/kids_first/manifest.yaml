@@ -1,0 +1,353 @@
+version: 1
+profile: neutral
+naming:
+  KIDS_FIRST:
+    canonical_label: Gabriella Miller Kids First Data Resource
+    variants:
+    - Kids First Data Resource
+scope:
+  KIDS_FIRST:
+    referent: the Kids First Data Resource as a collection of pediatric genomic and
+      clinical studies
+    referent_id: https://kidsfirstdrc.org/
+    referent_note: Resource-level documentation. The captured DRC catalogue enumerates
+      36 distinct dbGaP studies. Keep study-specific populations, eligibility, releases,
+      consent/access and data issues distinct. NIH award-abstract pages also describe
+      funded projects; funding alone does not establish release. The nominated AJHG
+      article is represented by its metadata and abstract; full text was unavailable.
+projects:
+  KIDS_FIRST:
+    bundle: KIDS_FIRST_preprocessed.txt
+    source_dir: processed
+    raw_dir: raw
+    sources:
+    - id: paper_abstract
+      source_type: publication abstract
+      url: https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:42607672&format=json&resultType=core
+      raw_file: paper_abstract.raw
+      processed_file: paper_abstract.txt
+      captured_at: '2026-09-14'
+    - id: drc_about
+      source_type: documentation
+      url: https://kidsfirstdrc.org/about/
+      raw_file: drc_about.raw
+      processed_file: drc_about.txt
+      captured_at: '2026-09-14'
+    - id: drc_resources
+      source_type: documentation
+      url: https://kidsfirstdrc.org/resources/
+      raw_file: drc_resources.raw
+      processed_file: drc_resources.txt
+      captured_at: '2026-09-14'
+    - id: drc_faqs
+      source_type: documentation
+      url: https://kidsfirstdrc.org/faqs/
+      raw_file: drc_faqs.raw
+      processed_file: drc_faqs.txt
+      captured_at: '2026-09-14'
+    - id: drc_our_data_process
+      source_type: documentation
+      url: https://kidsfirstdrc.org/help-center/our-data-process/
+      raw_file: drc_our_data_process.raw
+      processed_file: drc_our_data_process.txt
+      captured_at: '2026-09-14'
+    - id: drc_data_dictionary
+      source_type: documentation
+      url: https://kidsfirstdrc.org/help-center/data-dictionary/
+      raw_file: drc_data_dictionary.raw
+      processed_file: drc_data_dictionary.txt
+      captured_at: '2026-09-14'
+    - id: drc_security
+      source_type: documentation
+      url: https://kidsfirstdrc.org/help-center/security/
+      raw_file: drc_security.raw
+      processed_file: drc_security.txt
+      captured_at: '2026-09-14'
+    - id: drc_quick_start_guide
+      source_type: documentation
+      url: https://kidsfirstdrc.org/help-center/quick-start-guide/
+      raw_file: drc_quick_start_guide.raw
+      processed_file: drc_quick_start_guide.txt
+      captured_at: '2026-09-14'
+    - id: drc_accessing_controlled_data_via_dbgap
+      source_type: documentation
+      url: https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/
+      raw_file: drc_accessing_controlled_data_via_dbgap.raw
+      processed_file: drc_accessing_controlled_data_via_dbgap.txt
+      captured_at: '2026-09-14'
+    - id: drc_article_release
+      source_type: documentation
+      url: https://kidsfirstdrc.org/kidsfirstdrc-study-demonstrates-a-new-standard-for-pediatric-research/
+      raw_file: drc_article_release.raw
+      processed_file: drc_article_release.txt
+      captured_at: '2026-09-14'
+    - id: nih_faq
+      source_type: documentation
+      url: https://commonfund.nih.gov/kidsfirst/faq
+      raw_file: nih_faq.raw
+      processed_file: nih_faq.txt
+      captured_at: '2026-09-14'
+    - id: nih_1
+      source_type: documentation
+      url: https://commonfund.nih.gov/kidsfirst/2015X01projects
+      raw_file: nih_1.raw
+      processed_file: nih_1.txt
+      captured_at: '2026-09-14'
+    - id: nih_2
+      source_type: documentation
+      url: https://commonfund.nih.gov/kidsfirst/2016x01projects/
+      raw_file: nih_2.raw
+      processed_file: nih_2.txt
+      captured_at: '2026-09-14'
+    - id: nih_3
+      source_type: documentation
+      url: https://commonfund.nih.gov/kidsfirst/2017X01projects
+      raw_file: nih_3.raw
+      processed_file: nih_3.txt
+      captured_at: '2026-09-14'
+    - id: nih_4
+      source_type: documentation
+      url: https://commonfund.nih.gov/kidsfirst/2018X01projects
+      raw_file: nih_4.raw
+      processed_file: nih_4.txt
+      captured_at: '2026-09-14'
+    - id: nih_5
+      source_type: documentation
+      url: https://commonfund.nih.gov/kidsfirst/2019X01projects
+      raw_file: nih_5.raw
+      processed_file: nih_5.txt
+      captured_at: '2026-09-14'
+    - id: nih_6
+      source_type: documentation
+      url: https://commonfund.nih.gov/kidsfirst/2021X01projects
+      raw_file: nih_6.raw
+      processed_file: nih_6.txt
+      captured_at: '2026-09-14'
+    - id: nih_7
+      source_type: documentation
+      url: https://www.cbtn.org
+      raw_file: nih_7.raw
+      processed_file: nih_7.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001110
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001110.v4.p1
+      raw_file: dbgap_phs001110.raw
+      processed_file: dbgap_phs001110.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002626
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002626.v1.p1
+      raw_file: dbgap_phs002626.raw
+      processed_file: dbgap_phs002626.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002276
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002276
+      raw_file: dbgap_phs002276.raw
+      processed_file: dbgap_phs002276.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001987
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001987.v1.p1
+      raw_file: dbgap_phs001987.raw
+      processed_file: dbgap_phs001987.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002173
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002173.v1.p1
+      raw_file: dbgap_phs002173.raw
+      processed_file: dbgap_phs002173.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002517
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002517.v4.p2
+      raw_file: dbgap_phs002517.raw
+      processed_file: dbgap_phs002517.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002174
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002174.v1.p1
+      raw_file: dbgap_phs002174.raw
+      processed_file: dbgap_phs002174.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001228
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001228
+      raw_file: dbgap_phs001228.raw
+      processed_file: dbgap_phs001228.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002627
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002627.v1.p1
+      raw_file: dbgap_phs002627.raw
+      processed_file: dbgap_phs002627.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002590
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002590.v1.p1
+      raw_file: dbgap_phs002590.raw
+      processed_file: dbgap_phs002590.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002161
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002161.v1.p1
+      raw_file: dbgap_phs002161.raw
+      processed_file: dbgap_phs002161.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002330
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002330.v1.p1
+      raw_file: dbgap_phs002330.raw
+      processed_file: dbgap_phs002330.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002591
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002591.v1.p1
+      raw_file: dbgap_phs002591.raw
+      processed_file: dbgap_phs002591.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002162
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002162.v1.p1
+      raw_file: dbgap_phs002162.raw
+      processed_file: dbgap_phs002162.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002322
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002322.v1.p1
+      raw_file: dbgap_phs002322.raw
+      processed_file: dbgap_phs002322.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002594
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002594.v1.p1
+      raw_file: dbgap_phs002594.raw
+      processed_file: dbgap_phs002594.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002595
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002595.v1.p1
+      raw_file: dbgap_phs002595.raw
+      processed_file: dbgap_phs002595.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002592
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002592.v1.p1
+      raw_file: dbgap_phs002592.raw
+      processed_file: dbgap_phs002592.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002589
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002589.v1.p1
+      raw_file: dbgap_phs002589.raw
+      processed_file: dbgap_phs002589.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001410
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001410
+      raw_file: dbgap_phs001410.raw
+      processed_file: dbgap_phs001410.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002187
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002187.v1.p1
+      raw_file: dbgap_phs002187.raw
+      processed_file: dbgap_phs002187.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001138
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001138
+      raw_file: dbgap_phs001138.raw
+      processed_file: dbgap_phs001138.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002172
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002172
+      raw_file: dbgap_phs002172.raw
+      processed_file: dbgap_phs002172.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001785
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001785.v1.p1
+      raw_file: dbgap_phs001785.raw
+      processed_file: dbgap_phs001785.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001806
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001806.v1.p1
+      raw_file: dbgap_phs001806.raw
+      processed_file: dbgap_phs001806.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001846
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001846.v1.p1
+      raw_file: dbgap_phs001846.raw
+      processed_file: dbgap_phs001846.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001168
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001168
+      raw_file: dbgap_phs001168.raw
+      processed_file: dbgap_phs001168.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs002130
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002130.v1.p1
+      raw_file: dbgap_phs002130.raw
+      processed_file: dbgap_phs002130.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001714
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001714.v1.p1
+      raw_file: dbgap_phs001714.raw
+      processed_file: dbgap_phs001714.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001878
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001878.v2.p1
+      raw_file: dbgap_phs001878.raw
+      processed_file: dbgap_phs001878.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001997
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001997.v1.p1
+      raw_file: dbgap_phs001997.raw
+      processed_file: dbgap_phs001997.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001738
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001738.v1.p1
+      raw_file: dbgap_phs001738.raw
+      processed_file: dbgap_phs001738.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001436
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001436.v1.p1
+      raw_file: dbgap_phs001436.raw
+      processed_file: dbgap_phs001436.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001420
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001420
+      raw_file: dbgap_phs001420.raw
+      processed_file: dbgap_phs001420.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001178
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001178
+      raw_file: dbgap_phs001178.raw
+      processed_file: dbgap_phs001178.txt
+      captured_at: '2026-09-14'
+    - id: dbgap_phs001247
+      source_type: data resource
+      url: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001247
+      raw_file: dbgap_phs001247.raw
+      processed_file: dbgap_phs001247.txt
+      captured_at: '2026-09-14'
+    - id: study_catalogue
+      source_type: data resource catalogue
+      url: https://kidsfirstdrc.org/studies/
+      raw_file: drc_studies.raw
+      processed_file: study_catalogue.txt
+      captured_at: '2026-09-14'

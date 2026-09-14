@@ -1,0 +1,66 @@
+TITLE: Kids First: Congenital Heart Defects and Laterality Birth Defects
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002589.v1.p1
+CAPTURED AT: 2026-09-14T03:21:27.395620+00:00
+
+dbGaP accession: phs002589.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002589.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Laterality defects occur in approximately 1:10,000 newborns and are associated with a range of structural birth defects and abnormalities of organ positioning. Gut malrotation, biliary atresia, asplenia or polysplenia, complex cardiovascular malformations, and midline defects such as neural tube defects, vertebral anomalies and rib fusions are found in various combinations in patients with laterality defects. In addition, a subset of laterality defects caused by abnormalities of cilia position or function are associated with additional medical problems such as chronic sinusitis and bronchiectasis that require specific preventive care; however these patients frequently are undiagnosed until late in disease course. The goal of this project is to elucidate the genetic architecture of laterality disorders in order to inform medical management and risk stratification and to prevent complications. Laterality disorders are genetically heterogeneous and we and others have previously identified single nucleotide variants inherited in an X-linked or autosomal recessive manner as explanations for a minority of cases. In addition, we have demonstrated copy number variants (CNVs) as a mechanism of disease that requires additional investigation. We hypothesize that the majority of cases result from complex genetic inheritance. We propose to investigate this hypothesis using a multifaceted analysis approach in our extremely well phenotyped cohort of 538 probands with laterality disorders. Nested within this cohort are 105 trios who have not had previous sequencing, probands who have had exome sequencing and are excellent candidates for gene discovery
+via
+whole genome sequencing (WGS), and families with multiple affected family members for family-based analysis. All trios will be analyzed by transmission disequilibrium test (TDT) including rare variant TDT.
+De novo
+mutations will also be identified from trios for potential gene discovery. Using all probands, we will identify the prevalence of pathogenic CNVs. In addition, we will perform burden analyses to identify genes, gene interactions, and pathways important for susceptibility to laterality disorders. Finally, our rare families with multiple affected members will be studied using family based segregation analysis. This comprehensive genetic analysis in patients with laterality disorders is necessary to identify the appropriate clinical diagnostic testing for risk stratification, to elucidate underlying genetic architecture and facilitate novel gene discovery, and to provide essential knowledge about genes and pathways impacting the development of laterality disorders.
+Study Weblinks:
+Kids First X01 Abstracts (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Cohort
+Total number of consented subjects: 754
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002589.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+Inclusion Criteria:
+Subjects with heterotaxy or related congenital heart defects
+Family members of subjects with heterotaxy or related congenital heart defects
+Exclusion Criteria:
+Patients without heterotaxy or related congenital heart defects
+Family members of subjects without heterotaxy or related congenital heart defects
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Heterotaxy Syndrome (https://www.ncbi.nlm.nih.gov/mesh?term=Heterotaxy Syndrome)
+Heart Defects, Congenital (https://www.ncbi.nlm.nih.gov/mesh?term=Heart Defects, Congenital)
+VACTERL association (https://www.ncbi.nlm.nih.gov/mesh?term=VACTERL association)
+
+Study Attribution
+Principal Investigator
+Stephanie Ware, MD, PhD.
+Indiana University, Indianapolis, IN, USA.
+Funding Sources
+X01HD100699.
+National
+Institutes of Health, Bethesda, MD, USA.
+P01HL134599.
+National Institutes of Health, Bethesda, MD, USA.
+Sequencing Center
+Stacey Gabriel.
+Broad Institute, Cambridge, MA, USA.

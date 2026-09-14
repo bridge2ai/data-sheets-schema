@@ -1,0 +1,15 @@
+{
+  "id": "drc_faqs",
+  "url": "https://kidsfirstdrc.org/faqs/",
+  "retrieved_at": "2026-09-14T03:19:47.509407+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/faqs/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:19:48 GMT",
+  "bytes": 182620,
+  "sha256": "c395873b161e7dd3ed032b11489b0ed12af92b2638e6a621172e4bac7a320c29",
+  "local_path": "raw/drc_faqs.raw",
+  "status": "captured_unreviewed"
+}

@@ -1,0 +1,65 @@
+TITLE: Kids First: Pediatric Research Project on the Genomic Analysis of Congenital Diaphragmatic Hernia
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001110.v4.p1
+CAPTURED AT: 2026-09-14T03:21:17.902812+00:00
+
+dbGaP accession: phs001110.v4.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs001110.v4.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://www.commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). Both, childhood cancers and structural birth defects are critical and costly conditions associated with substantial morbidity and mortality. Elucidating the underlying genetic etiology of these diseases has the potential to profoundly improve preventative measures, diagnostics, and therapeutic interventions.
+WGS and phenotypic data from this study are accessible through dbGaP and
+kidsfirstdrc.org (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed.
+In collaboration with the University of Utah, DNA from four families were selected for high-depth WGS (60X) including diaphragm and skin tissue to identify mosaicism.
+In collaboration with the Broad Institute, DNA from four families underwent linked long read sequencing using 10X Genomics technology.
+Probands with congenital diaphragmatic hernia/defects and both biological parents enrolled as part of the DHREAMS study.
+Study Weblinks:
+DHREAMS (http://www.cdhgenetics.com/)
+Kids First (https://commonfund.nih.gov/kidsfirst/overview)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 3968
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs001110.v4.p1)
+
+Study Inclusion/Exclusion Criteria
+Probands with congenital diaphragmatic hernia/defects and both biological parents enrolled as part of the DHREAMS study.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Hernias, Diaphragmatic, Congenital (https://www.ncbi.nlm.nih.gov/mesh?term=Hernias, Diaphragmatic, Congenital)
+
+Study Attribution
+Principal Investigator
+Wendy Chung, MD, PhD.
+Columbia University Medical Center, New York, NY, USA.
+Co-Principal Investigator
+Yufeng Shen, PhD.
+Columbia University Medical Center, New York, NY, USA.
+Funding Sources
+X01 HL132366.
+National Institutes of Health, Bethesda, MD, USA.
+X01 HL136998.
+National Institutes of Health, Bethesda, MD, USA.
+X01 HL140543.
+National Institutes of Health, Bethesda, MD, USA.
+R01 HD057036.
+National Institutes of Health, Bethesda, MD, USA.
+Co-Investigator
+Gabrielle Kardon, PhD.
+University of Utah, Salt Lake City, UT, USA.

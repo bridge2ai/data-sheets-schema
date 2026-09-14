@@ -1,0 +1,125 @@
+TITLE: Data Dictionary - Kids First
+SOURCE URL: https://kidsfirstdrc.org/help-center/data-dictionary/
+CAPTURED AT: 2026-09-14T03:21:40.958424+00:00
+
+Getting Started
+Quick Start Guide (https://kidsfirstdrc.org/help-center/quick-start-guide/)
+Video Tutorials (https://kidsfirstdrc.org/help-center/video-tutorials/)
+Studies Tool (https://kidsfirstdrc.org/help-center/studies-tool/)
+Our Data Process (https://kidsfirstdrc.org/help-center/our-data-process/)
+Accessing Controlled Data via dbGaP (https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/)
+Connecting Platforms (https://kidsfirstdrc.org/help-center/connecting-platforms/)
+User Support (https://kidsfirstdrc.org/help-center/support-sessions/)
+Data Exploration
+Applying Filters (https://kidsfirstdrc.org/help-center/applying-filters/)
+Participants Tab (https://kidsfirstdrc.org/help-center/participants-tab/)
+Biospecimens Tab (https://kidsfirstdrc.org/help-center/biospecimens-tab/)
+Data Files Tab (https://kidsfirstdrc.org/help-center/data-files-tab/)
+Variant Search (https://kidsfirstdrc.org/help-center/variant-search/)
+Portal Data Dictionary (https://kidsfirstdrc.org/help-center/data-dictionary/)
+Analyzing Data
+Cavatica Cloud Platform (https://kidsfirstdrc.org/help-center/cavatica-cloud-platform/)
+Variant Workbench (https://kidsfirstdrc.org/help-center/variant-workbench/)
+Export Locally (https://kidsfirstdrc.org/help-center/export-locally/)
+Applying for Cloud Credits (https://kidsfirstdrc.org/help-center/applying-for-cloud-credits/)
+Cost FAQs (https://kidsfirstdrc.org/help-center/cost-faqs/)
+Data Security (https://kidsfirstdrc.org/help-center/security/)
+Portal Data Dictionary
+Data Exploration Filters
+Study
+Study Name
+The full study name. This matches the name of the dbGaP study the data files are released under.
+Study Code
+A short code assigned to each study for the purpose of searching and labeling on the Kids First Portal.
+Study Program
+The funding program which supported the sequencing of samples in the study.
+Study Domain
+The broad category of condition which is the focus of the study
+dbGaP Accession Number
+The ID assigned by dbGaP for each study. These have the format phs00xxxx and are used to identify studies of interest for dbGaP applications for controlled access data.
+Participant
+Proband
+The participant who serves as the starting point for enrollment into study, often the first family member seeking medical attention.
+Ethnicity
+An individual’s self-described social and cultural grouping, specifically whether an individual describes themselves as Hispanic or Latino. This value is self-reported and may come from a form, questionnaire, interview, etc.
+Sex
+Designation of the biological sex of the individual participant. This value is self-reported and may come from a form, questionnaire, interview, etc.
+Race
+A characterization of shared common history, nationality, or geographic distribution. This value is self-reported and may come from a form, questionnaire, interview, etc.
+Clinical
+Age at Diagnosis (days)
+The participant’s age in days that they were diagnosed with the disease.
+Age at Vital Status (days)
+Participant’s age in days at their most recent time of their most recently known Vital Status
+Age at Observed Phenotype (days)
+The participant’s age in days that the phenotype was observed.
+Diagnosis (MONDO)
+The MONDO ID associated with the Diagnosis (Source Text) value. Derived by matching the Diagnosis (Source Text) value with MONDO ID lookups.
+Diagnosis (NCIT)
+The National Cancer Institute Thesaurus (NCIT) ID associated with the Diagnosis value. Derived by matching the Diagnosis Source Text value with NCIT lookups.
+Diagnosis (Source Text)
+Analysis, and recognition of the presence and nature of disease, condition, or injury from expressed signs and symptoms; also, the scientific determination of any kind; the concise results of such a study/investigation. Source text values are not harmonized and presented as obtained directly from the original investigator.
+Family Composition
+A calculated value based on the family members present with genomic data within a participant’s pedigree.
+Observed Phenotype (HPO)
+The Human Phenotype Ontology ID associated with the Observed Phenotype (Source Text) value. Derived by matching the Observed Phenotype (Source Text) value with HPO ID lookups.
+Not Observed Phenotype (HPO)
+The Human Phenotype Ontology ID associated with phenotypes that were negatively observed, that is were specifically checked by a clinician and observed to not be present in the participant.
+Observed Phenotype (Source Text)
+The observable characteristics in a participant resulting from the expression of genes, environment factors, and their interactions. Source text values are not harmonized and presented as obtained directly from the original investigator.
+Vital Status
+The survival state of the participant.
+Biospecimen
+Sample Type
+Text term that represents the kind of molecular specimen analyte
+Collection Sample Type
+Text term that represents the cellular composition of the sample
+Age at Biospecimen Collection (days)
+Age of the participant in days on the date the biospecimen was collected
+Age at Histological Diagnosis (days)
+Age of the participant in days on the date the biospecimen was assigned a histology
+Sample Availability
+Whether or not the biospecimen is available upon request of the investigator group
+Anatomical Site (NCIT)
+The National Cancer Institute Thesaurus (NCIT) ID associated with the Anatomical Site value. Derived by matching the Anatomical Site (Source Text) value with NCIT lookups.
+Anatomical Site (Source Text)
+The location on or within the participant that the biospecimen was collected from. Source text values are not harmonized and presented as obtained directly from the original investigator.
+Consent Type
+A code corresponding to the types of research that participants in that study consented to allow carried out on the given biospecimen. For a complete description of these codes, view the study’s dbGaP page.
+dbGaP Consent Code
+A code which combines the biospecimen’s dbGaP accession number with its consent type. Mapping values for each of these codes is provided on the study’s dbGaP page.
+Histological Diagnosis (MONDO)
+The MONDO ID associated with the Histological Diagnosis (Source Text) value. Derived by matching the Histological Diagnosis (Source Text) value with NCIT lookups.
+Histological Diagnosis (NCIT)
+The National Cancer Institute Thesaurus (NCIT) ID associated with the Histological Diagnosis (Source Text) value. Derived by matching the Histological Diagnosis (Source Text) value with NCIT lookups.
+Histological Diagnosis (Source Text)
+A specific type of malignancy to describe the pattern of growth of the given biospecimen, typically assigned by a pathologist. Source text values are not harmonized and presented as obtained directly from the original investigator.
+Tumor Location (Source Text)
+The location on or within the participant where the tumor was located from which this biospecimen was derived. Source text values are not harmonized and presented as obtained directly from the original investigator.
+Method of Sample Procurement
+The clinical or laboratory procedure used to collect the biospecimen from the participant
+Tumor Descriptor (Source Text)
+Whether the malignancy is a primary tumor or a recurrence
+Data File
+Access
+The type of authorization required in order to download the file. Open Access files are available to any registered portal user. Controlled access files require approval & authorization by dbGaP or the controlling DAC.
+Data Category
+The broadest descriptor of the type of experiment which the data file was generated as a part of. Possible values include genomics, transcriptomics, proteomics, etc.
+Data Type
+The type of data contained within the data file. Possible values include aligned reads, variant calls, etc.
+Experimental Strategy
+A more specific descriptor of the type of experiment which the data file was generated as a part of. Possible values include whole genome sequencing, whole exome sequencing, linked-read WGS, etc.
+File Format
+The technical specification of the file, typically the file extension of the file.
+Platform
+Name of the sequencing platform used to generate the sequencing data.
+Instrument Model
+The model of the sequencer used to generate the sequencing data.
+Library Strand
+Whether the sequencing library used to generate the data file is stranded or not.
+Is Paired End
+Whether the sequencing library used to generate the data file is paired end or not.
+Repository
+The entity which authorizes and authenticates access to the data file.
+ACL
+The access control list value assigned to the file based on data access committee (DAC) authorization. This is obtained from dbGaP for NIH based datasets.

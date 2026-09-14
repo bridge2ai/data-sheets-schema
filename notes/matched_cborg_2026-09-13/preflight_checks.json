@@ -1,0 +1,26 @@
+{
+  "observed_at": "2026-09-14T04:06:31.270142+00:00",
+  "registration_sha256": "0fbe4d0853b0fbdcef6f4788532420800428aecd069ae8db48fa5a3485495a12",
+  "status": "offline_checks_passed",
+  "generation_jobs": 32,
+  "matched_pairs": 16,
+  "unused_output_directories": 64,
+  "input_pins_verified": 458,
+  "historical_files_preserved": 3241,
+  "kids_first": {
+    "source_documents": 55,
+    "catalogue_studies": 36,
+    "chunks": 58,
+    "bundle_sha256": "cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c",
+    "article_full_text_captured": false
+  },
+  "controller_tests": {
+    "passed": 16,
+    "scientific_requests": 0,
+    "log_sha256": "70e4f141f0ebdcea0b20fdad79ae2967534dabb9591cf897387aae9553c06057",
+    "counterfactual_expected_failures": 2
+  },
+  "scientific_canaries_run": 0,
+  "independent_review": "round 2 pending; round 1 finding #1765 fixed",
+  "ci_for_new_registration": "pending"
+}

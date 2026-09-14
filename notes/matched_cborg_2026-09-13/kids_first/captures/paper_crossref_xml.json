@@ -1,0 +1,15 @@
+{
+  "id": "paper_crossref_xml",
+  "url": "https://api.elsevier.com/content/article/PII:S0002929726002764?httpAccept=text/xml",
+  "retrieved_at": "2026-09-14T03:21:41.443837+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://api.elsevier.com/content/article/PII:S0002929726002764?httpAccept=text/xml",
+  "content_type": "text/xml;charset=UTF-8",
+  "etag": null,
+  "last_modified": "Wed, 09 Sep 2026 04:00:12 GMT",
+  "bytes": 2053,
+  "sha256": "d31c704c46793b8946e18393e849886628de4e4ed66d62098ed450fe38332800",
+  "local_path": "raw/paper_crossref_xml.raw",
+  "status": "captured_unreviewed"
+}

@@ -1,0 +1,21 @@
+human_subjects:
+  value: false
+  evidence: overview.txt explicitly states no observations from people or clinical records and no human subjects.
+regulated_access:
+  value: false
+  evidence: protocol.txt explicitly states there are no protected access rules.
+shared_dataset:
+  value: null
+  evidence: overview.txt permits sharing documentation only. No actual tables or dataset access terms are supplied; a shared-dataset designation is unknown.
+data_collection:
+  value: false
+  evidence: overview.txt states no observations were collected and no tables are supplied.
+data_processing:
+  value: false
+  evidence: protocol.txt describes proposed validation rules, not an executed procedure; no data tables or measured audit are supplied.
+processing_software:
+  value: false
+  evidence: protocol.txt explicitly states no processing software or executable generator is supplied.
+ml_training_dataset:
+  value: false
+  evidence: overview.txt excludes model training and protocol.txt states there are no predictive-task splits or labels.

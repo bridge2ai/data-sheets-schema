@@ -1,0 +1,13 @@
+{
+  "url": "https://kidsfirstdrc.org/studies/",
+  "final_url": "https://kidsfirstdrc.org/studies/",
+  "content_type": "text/html; charset=UTF-8",
+  "retrieved_at": "2026-09-14T03:17:35.053844+00:00",
+  "bytes": 257877,
+  "sha256": "952d776a82c487c0f5cf0c636024cd371bdfe5cf6eafa5700f684cb5c3918008",
+  "id": "drc_studies",
+  "http_status": 200,
+  "local_path": "raw/drc_studies.raw",
+  "status": "captured_unreviewed",
+  "purpose": "public documentation and aggregate study metadata"
+}

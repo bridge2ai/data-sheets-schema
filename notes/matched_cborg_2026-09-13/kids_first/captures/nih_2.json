@@ -1,0 +1,15 @@
+{
+  "id": "nih_2",
+  "url": "https://commonfund.nih.gov/kidsfirst/2016x01projects/",
+  "retrieved_at": "2026-09-14T03:19:46.457440+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://commonfund.nih.gov/kidsfirst/2016X01projects",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": null,
+  "bytes": 114011,
+  "sha256": "f6e78160ef0a846dfd8d2d092c2b3ecf9fb1d8ef35626df48c22388d2af5ed98",
+  "local_path": "raw/nih_2.raw",
+  "status": "captured_unreviewed"
+}

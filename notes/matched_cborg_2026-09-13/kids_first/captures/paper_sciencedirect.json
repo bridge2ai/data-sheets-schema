@@ -1,0 +1,15 @@
+{
+  "id": "paper_sciencedirect",
+  "url": "https://www.sciencedirect.com/science/article/pii/S0002929726002764",
+  "retrieved_at": "2026-09-14T03:19:48.025917+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 403,
+  "final_url": "https://www.sciencedirect.com/science/article/pii/S0002929726002764",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": null,
+  "bytes": 832806,
+  "sha256": "66e7d449a4c1b28d4884e08ca1759bedbd90c58b75b0568aa0225de5124ceb49",
+  "local_path": "raw/paper_sciencedirect.raw",
+  "status": "http_failure"
+}

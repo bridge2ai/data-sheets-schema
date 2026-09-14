@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-09-14T03:13:48.093350+00:00",
+  "registration_sha256": "8614573a577af16c06cee4cb7ed165e640540e1d6837b89de6959c4a7a60692f",
+  "source_implementation_commit": "452a8020e2ad26de8b2f492c45434b978baf133d",
+  "equivalent_main_commit": "194fb9ce17edcae3f038605543abc041e9cb9624",
+  "main_ci": {
+    "status": "success",
+    "url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/34797045522"
+  },
+  "wheel": {
+    "path": "/private/tmp/d4d-runtime-v10/dist/data_sheets_schema-0.0.0.post1708.dev0+452a8020e-py3-none-any.whl",
+    "sha256": "b359852aa2ed7437b1f8f90959092d3515943b94126c50b26438313745b6f9dc"
+  },
+  "installed_acceptance": {
+    "status": "pass",
+    "log": "/private/tmp/d4d-v10-installed-acceptance.log",
+    "log_sha256": "0a86252b110139af9ad7f987a41a5cf0f873aaeba6213497d7eca580409ca07a",
+    "checks": [
+      "schema_sync",
+      "fake_provider_generation",
+      "derived_core",
+      "provenance",
+      "evaluation_and_rendering",
+      "installed_agentic_commands",
+      "agent_definition_check_echo"
+    ]
+  },
+  "registration_checks": {
+    "status": "pass",
+    "paired_inputs_equal": 15,
+    "distinct_unused_generation_output_directories": 30,
+    "verified_input_pins": 248
+  },
+  "scientific_generation_requests": 0,
+  "scientific_evaluation_requests": 0,
+  "launch_ready": false,
+  "remaining_gates": [
+    "Kids First public source-capture decision and frozen bundle",
+    "complete and independently review exact execution/evaluator registration before launch"
+  ]
+}

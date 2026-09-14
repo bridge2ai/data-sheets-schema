@@ -1,0 +1,62 @@
+TITLE: Kids First: Genomic Studies of Orofacial Cleft Birth Defects
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001168
+CAPTURED AT: 2026-09-14T03:21:32.841602+00:00
+
+dbGaP accession: phs001168.v2.p2
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs001168.v2.p2)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://www.commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). Both childhood cancers and structural birth defects are critical and costly conditions associated with substantial morbidity and mortality. Elucidating the underlying genetic etiology of these diseases has the potential to profoundly improve preventative measures, diagnostics, and therapeutic interventions.
+WGS and phenotypic data from this study are accessible through dbGaP and
+kidsfirstdrc.org (https://kidsfirstdrc.org)
+, where other Kids First datasets can also be accessed.
+The Kids First study of nonsyndromic orofacial cleft birth defects (OFCs) is a whole genome sequencing study of 415 White parent-case trios drawn from ongoing collaborations led by Dr. Mary L. Marazita of the University of Pittsburgh Center for Craniofacial and Dental Genetics, including collaborations with Dr. George Wehby of the University of Iowa, Dr. Jacqueline Hecht of the University of Texas, and Dr. Terri Beaty of Johns Hopkins University. Sequencing was done by the Washington University McDonell Genome Institute. The case in each of the Kids First trios has cleft lip (CL, Figure A), cleft palate (CP, Figure B), or both (CL+CP, Figure C):
+OFCs are genetically complex structural birth defects caused by genetic factors, environmental exposures, and their interactions. OFCs are the most common craniofacial anomalies in humans, affecting approximately 1 in 700 newborns, and are one of the most common structural birth defects worldwide. On average a child with an OFC initially faces feeding difficulties, undergoes 6 surgeries, spends 30 days in hospital, receives 5 years of orthodontic treatment, and participates in ongoing speech therapy, leading to an estimated total lifetime treatment cost of about $200,000. Further, individuals born with an OFC have higher infant mortality, higher mortality rates at all other stages of life, increased incidence of mental health problems, and higher risk for other disorders (notably including breast, brain, and colon cancers). Prior genome-wide linkage and association studies have now identified at least 18 genomic regions likely to contribute to the risk for nonsyndromic OFCs. Despite this substantial progress, the functional/pathogenic variants at OFC-associated regions are mostly still unknown. Because previous OFC genomic studies (genome-wide linkage, genome-wide association studies (GWAS), and targeted sequencing) are based on relatively sparse genotyping data, they cannot distinguish between causal variants and variants in linkage disequilibrium with unobserved causal variants. Moreover, it is unknown whether the association or linkage signals are due to single common variants, haplotypes of multiple common variants, clusters of multiple rare variants, or some combination. Finally, we cannot yet attribute specific genetic risk to individual cases and case families.
+Therefore, the goal of the current study is to identify specific OFC risk variants in Whites by performing whole genome sequencing of parent-case trios.
+Study Weblinks:
+Gabriella Miller Kids First Pediatric Research Program (https://www.commonfund.nih.gov/KidsFirst)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 1378
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs001168.v2.p2)
+
+Study Inclusion/Exclusion Criteria
+Parent-child trios were included if the child has a cleft lip, cleft palate or both. Parents may or may not be affected. Only trios that self-identified as Caucasian were included.
+Trios were excluded if one or more members of the trio did not have sufficient genomic DNA for the proposed whole genome sequencing. Trios were excluded if they did not self-identify as Caucasian.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Cleft Lip (https://www.ncbi.nlm.nih.gov/mesh?term=Cleft Lip)
+Cleft Palate (https://www.ncbi.nlm.nih.gov/mesh?term=Cleft Palate)
+
+Study Attribution
+Principal Investigators
+Mary L. Marazita, PhD.
+Center for Craniofacial and Dental Genetics, University of Pittsburgh, Pittsburgh, PA, USA.
+Eleanor Feingold, PhD.
+Department of Human Genetics, University of Pittsburgh, Pittsburgh, PA, USA.
+Funding Sources
+X01-HL132363.
+National Institutes of Health, Bethesda, MD, USA.
+R01-DE016148.
+National Institutes of Health, Bethesda, MD, USA.
+R01-DE014581.
+National Institutes of Health, Bethesda, MD, USA.
+R01-DD000295.
+National Institutes of Health, Bethesda, MD, USA.

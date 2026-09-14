@@ -1,0 +1,52 @@
+TITLE: Kids First Pediatric Research Study in Familial Predisposition to Hematopoietic Malignancies (SJFAMILY-HM)
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001738.v1.p1
+CAPTURED AT: 2026-09-14T03:21:36.605970+00:00
+
+dbGaP accession: phs001738.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs001738.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Acute lymphoblastic leukemia (ALL) is the commonest childhood tumor and a leading cause of cancer death in children, adolescents and young adults. Hodgkin and non-Hodgkin lymphoma are also important hematologic malignancies (HM) that occur in children. Each are genetic diseases with growing evidence for a germline predisposition of both familial and sporadic cases, however the inherited genetic basis of ALL/lymphoma are poorly understood. Such knowledge is essential to gain mechanistic insight into the basis of tumor formation, and to guide genetic counseling and genetic management. Here we have assembled a large collection of familial HM kindreds, and extended recurrence cohorts of ALL and HL which will be used to identify the genetic basis of familial HM, examine the frequency of germline variants in sporadic ALL and HL, and to integrate inherited and somatic genomic data. These studies have high potential to provide fundamental new insights into the inherited genetic basis of HM, to provide important information to guide clinical management, and to provide an invaluable public resource of genomic data.
+Study Weblinks:
+Gabriella Miller Kids First (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Prospective Longitudinal Cohort
+Study Type:
+Cohort
+Parent-Offspring Trios
+Total number of consented subjects: 366
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs001738.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+Around 368 individuals from 56 families were selected for whole genome sequencing as part of the Gabriella Miller Kids First Hematologic Malignancies (HM) project. Patients with either acute lymphoblastic leukemia, Hodgkin's lymphoma, or Non-Hodgkin's lymphoma, having a first, second, or third degree relative with one of the aforementioned malignancies were included in the cohort. Germline DNA was collected from the proband, as well as the proband's affected and unaffected first-, second-, and third-degree relatives. Each kindred has associated phenotypic data including a detailed family history.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Precursor Cell Lymphoblastic Leukemia-Lymphoma (https://www.ncbi.nlm.nih.gov/mesh?term=Precursor Cell Lymphoblastic Leukemia-Lymphoma)
+Hodgkin Disease (https://www.ncbi.nlm.nih.gov/mesh?term=Hodgkin Disease)
+Lymphoma, Non-Hodgkin (https://www.ncbi.nlm.nih.gov/mesh?term=Lymphoma, Non-Hodgkin)
+
+Study Attribution
+Principal Investigator
+Charles G. Mullighan.
+St. Jude Children's Research Hospital, Memphis, TN, USA.
+Funding Source
+1  X01 HL136999-01.
+National Institutes of Health, Bethesda, MD, USA.

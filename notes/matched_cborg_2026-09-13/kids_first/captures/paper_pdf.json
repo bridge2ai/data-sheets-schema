@@ -1,0 +1,15 @@
+{
+  "id": "paper_pdf",
+  "url": "https://www.cell.com/ajhg/pdf/S0002-9297(26)00276-4.pdf",
+  "retrieved_at": "2026-09-14T03:19:47.959802+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 403,
+  "final_url": "https://www.cell.com/ajhg/pdf/S0002-9297(26)00276-4.pdf",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": null,
+  "bytes": 5590,
+  "sha256": "fe7fe286a1a2f46cd1d6744404153e6011cdad2bfff9437201baed8b70eac53d",
+  "local_path": "raw/paper_pdf.raw",
+  "status": "http_failure"
+}

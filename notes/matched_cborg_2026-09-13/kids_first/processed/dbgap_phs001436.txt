@@ -1,0 +1,61 @@
+TITLE: Discovering the Genetic Basis of Human Neuroblastoma: A Gabriella Miller Kids First Pediatric Research Program (Kids First) Project
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001436.v1.p1
+CAPTURED AT: 2026-09-14T03:21:36.655618+00:00
+
+dbGaP accession: phs001436.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs001436.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Children with disseminated neuroblastoma have a very high risk of treatment failure and death despite receiving intensified chemotherapy, radiation therapy and immunotherapy. The
+long-term goal
+of our research program is to ultimately improve neuroblastoma cure rates by first comprehensively defining the genetic basis of the disease. The
+central hypothesis
+to be tested here is that neuroblastoma arises largely due to the epistatic interaction of common and rare heritable DNA variation. Here we will perform a comprehensive whole genome sequencing of 563 quartets of neuroblastoma patient germline and diagnostic tumor DNAs and germline DNAs from both parents. The case series was recently collected through a Children's Oncology Group epidemiology clinical trial and is robustly annotated with complete demographic (age, sex, race, ethnicity), clinical (e.g. age at diagnosis, stage, risk group), epidemiologic (parental dietary and exposure questionnaire) and biological (e.g. tumor
+MYCN
+status and multiple other tumor genomic measures) co-variates. Subjects were consented for genetic research and DNA is immediately available for shipment for sequencing. We propose Illumina-based whole genome sequencing in the 593 "trio" germline samples (
+Aim 1
+; due to missing parent: 487 full neuroblastoma triads, 106 child-single parent dyads = 1673 whole genome sequences) and matched diagnostic tumor DNA (
+Aim 2
+; N=366) at 30x sequencing depth (N=2039 whole genome sequences). Also in Aim 2 we will perform whole exome (100x) and RNA sequencing on the 366 tumor DNA and 228 tumor RNA samples from this cohort. Finally, we propose a pilot study of structural variation using long-range sequencing in 10 non-overlapping tumor samples chosen based on potentially relevant chromosomal alterations discovered with conventional NGS. Thus, a total of 2277 individual samples and 2655 sequences will be generated. We will use our established analytic pipeline that is currently being used to study the germline genomes of all cases sequenced through the NCI supported Therapeutically Applicable Research to Generate Effective Treatments program. We plan a three-stage analytic approach, first focusing on classic
+de novo
+and inherited Mendelian damaging alterations. We will next integrate our extensive epigenomic data from human neuroblastoma cell lines and genome-wide association study data (N=5,703 neuroblastoma cases to date) to guide a comprehensive assessment of noncoding variants that influence tumor initiation with a recently established analytic pipeline. Finally, we will utilize the tumor DNA analyses to inform relevance via somatic gain or loss of function effects at the sequence and/or copy number levels. All data generated in this project will be immediately placed into the Genomic Data Commons (GDC) and we will compute within this environment by importing our analytic pipelines into the GDC. These data will be fully integrated into the Kids First Data Resource and freely shared with all academically qualified petitioners. This comprehensive data set derived from a large and richly phenotyped series of neuroblastoma DNA quartets will be integrated with existing germline and/or tumor genomic data from over 6,000 neuroblastoma subjects (but none with matched patient-parent germline sequencing data) to provide an unparalleled opportunity to comprehensively discover the genetic basis of neuroblastoma.
+Study Design:
+Tumor vs. Matched-Normal
+Study Type:
+Dyads
+Parent-Offspring Trios
+Tumor vs. Matched-Normal
+Total number of consented subjects: 1694
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs001436.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+Proband inclusion criteria: Diagnosis of neuroblastoma and enrolled on the Children's Oncology Group AEPI07N1 study with a minimum of 1 μg of germline DNA available from proband and at least one parent.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Neuroblastoma (https://www.ncbi.nlm.nih.gov/mesh?term=Neuroblastoma)
+
+Study Attribution
+Principal Investigator
+John M. Maris.
+The Children's Hospital of Philadelphia, Philadelphia, PA, USA.
+Funding Source
+GMKF X01: HL136997-01.
+NIH Common Fund, National Institutes of Child Health and Development (NICHD),      National Cancer Institute (NCI), National Institutes of Health, Bethesda, MD, USA.

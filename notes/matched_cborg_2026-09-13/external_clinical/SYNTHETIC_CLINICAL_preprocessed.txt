@@ -1,0 +1,98 @@
+================================================================================
+CONCATENATED DOCUMENT
+================================================================================
+Input Directory: /private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/external_clinical
+Total Files: 3
+Extensions: ['.txt']
+Recursive: False
+Selection Manifest: notes/matched_cborg_2026-09-13/external_clinical/manifest.yaml
+================================================================================
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+  1. overview.txt
+  2. protocol.txt
+  3. dictionary.txt
+================================================================================
+
+FILE: overview.txt
+PATH: /private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/external_clinical/overview.txt
+SIZE: 1293 bytes
+--------------------------------------------------------------------------------
+
+SYNTHETIC CLINICAL METADATA FIXTURE — NOT A REAL DATASET
+
+The Synthetic Outpatient Measurements fixture describes imaginary longitudinal
+outpatient tables solely to test documentation software. Its identifier is
+https://example.org/synthetic-outpatient-measurements/v1 and the release described
+here is version 1, dated 2026-09-13. The example.org identifier is a placeholder,
+not a downloadable study or functioning data service.
+
+The hypothetical tables contain 1,200 fabricated patient identifiers and 3,600
+fabricated visits, with exactly three visits per fictional patient. They include
+age in years, systolic blood pressure in mmHg, and a visit ordinal. No observations
+were collected from people or copied from clinical records. No human subjects,
+consent process, ethics approval, patient recruitment, or real clinical sites are
+involved. The tables themselves are not supplied; this fixture supplies only
+documentation for metadata-generation acceptance checks.
+
+The documentation may be shared as a public software test fixture. No separate
+data license, contact address, sponsor, or maintenance commitment is declared.
+The fixture is not intended for diagnosis, treatment, model training, estimating
+population statistics, or assessing the performance of a real clinical dataset.
+
+
+================================================================================
+
+FILE: protocol.txt
+PATH: /private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/external_clinical/protocol.txt
+SIZE: 1296 bytes
+--------------------------------------------------------------------------------
+
+SYNTHETIC CLINICAL METADATA FIXTURE — PROCEDURE AND LIMITATIONS
+
+This is a fictional specification for software acceptance. It is not a record
+of an executed clinical protocol. Patient identifiers are arbitrary strings with
+no relationship to a real person. Visit ordinal takes the values 1, 2, and 3 and
+does not encode dates or elapsed time. The hypothetical population is adults
+aged 18 through 90. No prevalence, outcome, representativeness, sampling frame,
+sex distribution, or ethnicity distribution is claimed.
+
+The proposed validation rules require unique patient identifiers in the patient
+table, a matching patient identifier for every visit, exactly three visits per
+patient, and nonmissing age and systolic blood pressure. These rules describe
+the fixture design; no processing software, executable generator, quality audit,
+or measured error rate is supplied. The data dictionary below defines the
+documented columns. There are no training, validation, or test splits, labels
+for a predictive task, protected access rules, or linked external datasets.
+
+All clinical quantities are invented examples. Numerical plausibility is not
+evidence of clinical validity. No additional people, institutions, identifiers,
+licenses, software, measurements, or ethics assurances are documented.
+
+
+================================================================================
+
+FILE: dictionary.txt
+PATH: /private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/external_clinical/dictionary.txt
+SIZE: 891 bytes
+--------------------------------------------------------------------------------
+
+SYNTHETIC CLINICAL METADATA FIXTURE — DATA DICTIONARY
+
+The hypothetical distribution format is comma-separated UTF-8 text. Files and
+download links are not supplied.
+
+patients.csv would contain 1,200 rows:
+- patient_id: string; unique fictional patient key; no real identifier.
+- age_years: integer from 18 to 90 inclusive; age in years; required.
+
+visits.csv would contain 3,600 rows:
+- patient_id: string referencing patients.csv patient_id; required.
+- visit_ordinal: integer 1, 2, or 3; ordinal only; required.
+- systolic_bp_mmhg: numeric systolic blood pressure in millimetres of mercury;
+  required; the documentation specifies no observed range or clinical threshold.
+
+The pair (patient_id, visit_ordinal) is unique in the hypothetical visit table.
+No free text, images, audio, genomic measurements, medications, diagnoses,
+outcomes, dates, or geographic information are described.

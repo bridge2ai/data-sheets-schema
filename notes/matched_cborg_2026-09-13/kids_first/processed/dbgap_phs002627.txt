@@ -1,0 +1,56 @@
+TITLE: Kids First: The Genomic Basis of Structural Birth Defects Associated with Chromosome 18 Copy Number Changes
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002627.v1.p1
+CAPTURED AT: 2026-09-14T03:21:22.747729+00:00
+
+dbGaP accession: phs002627.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002627.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Chromosome abnormalities are a common cause of structural birth defects. Both childhood cancers and structural birth defects are critical and costly conditions associated with substantial morbidity and mortality. Elucidating the underlying genetic etiology of these diseases has the potential to profoundly improve preventative measures, diagnostics, and therapeutic interventions.However, because these genomic copy number changes involve multiple genes and because most of these conditions are individually rare, defining the specific causative genes behind specific phenotypes has been a challenge. We met that challenge by spending the last 28 years enrolling and evaluating anyone with a chromosome 18 abnormality.
+The cohort now includes over 700 individuals with a wide variety of chromosome 18 copy number changes (CNV), as well as their parents. Because the vast majority of these participants have individually unique CNVs, we have been able to perform extensive genotype-phenotype correlations resulting in 58 publications. Of the 263 genes on chromosome 18, 28 are linked to specific hemizygous phenotypes. However, most have low penetrance. Genomic sequence data could identify variants in the extant allele that are hypermorphic and compensate for hemizygosity, or are hypomorphic and exacerbate hemizygosity.
+Additionally, there are phenotypes within this cohort that are rare, or an extreme version of one of the more common phenotypes. Genomic sequence data could help discover new biallelic conditions by revealing functional sequence variants of the extant allele. In both of these cases, there could also be variants in other genes on other chromosomes that may be associated with the phenotype that confer susceptibility or resilience. Inclusion of this unique cohort in the Gabriella Miller Kids First Pediatric Research Program can advance the goals of the program in several ways. First, by adding known susceptibility loci to the existing Kids First cohorts for the structural birth defects that are also found in our cohort. Second, for those structural birth defects known to be polygenetic, this cohort has a single defined risk factor which can simplify the search for secondary factors. Third, these studies can also bring clarity to people with chromosome 18 conditions and help to make the genotype more accurately predict phenotype. This approach could be a model for understanding the many other rare chromosome abnormalities which collectively are a common cause of structural birth defects.
+Study Weblinks:
+Kids First X01 Abstracts (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Case Set
+Study Type:
+Cohort
+Total number of consented subjects: 149
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002627.v1.p1)
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Trisomy 18 Syndrome (https://www.ncbi.nlm.nih.gov/mesh?term=Trisomy 18 Syndrome)
+
+Study Attribution
+Principal Investigator
+Jannine Cody.
+University of Texas Health Science Center at San Antonio, TX, USA.
+Co-Investigators
+Jonathan Gelfond.
+University of Texas Health Science Center at San Antonio.
+Santhosh Girirajan.
+University of Texas Health Science Center at San Antonio, TX, USA.
+Sequencing Center
+Stacey Gabriel.
+Broad Institute, Cambridge, MA, USA.
+Funding Source
+X01HD107271.
+National Institutes of Health, Bethesda, MD, USA.

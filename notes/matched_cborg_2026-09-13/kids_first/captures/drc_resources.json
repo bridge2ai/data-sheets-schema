@@ -1,0 +1,15 @@
+{
+  "id": "drc_resources",
+  "url": "https://kidsfirstdrc.org/resources/",
+  "retrieved_at": "2026-09-14T03:19:47.353997+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/resources/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:19:47 GMT",
+  "bytes": 234363,
+  "sha256": "5f052ccec59cc2d602068e672d18750ab580e6787af95e63e296aa67a9bfd5ce",
+  "local_path": "raw/drc_resources.raw",
+  "status": "captured_unreviewed"
+}

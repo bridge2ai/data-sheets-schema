@@ -1,0 +1,15 @@
+{
+  "id": "drc_article_release",
+  "url": "https://kidsfirstdrc.org/kidsfirstdrc-study-demonstrates-a-new-standard-for-pediatric-research/",
+  "retrieved_at": "2026-09-14T03:19:47.778585+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/kidsfirstdrc-study-demonstrates-a-new-standard-for-pediatric-research/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:19:47 GMT",
+  "bytes": 190964,
+  "sha256": "033125b5fbf0d02594fe1adeb31bdd9bfaead5208c7ae112da462bc14e9ec8c6",
+  "local_path": "raw/drc_article_release.raw",
+  "status": "captured_unreviewed"
+}

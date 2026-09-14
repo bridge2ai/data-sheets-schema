@@ -1,0 +1,15 @@
+{
+  "id": "drc_accessing_controlled_data_via_dbgap",
+  "url": "https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/",
+  "retrieved_at": "2026-09-14T03:21:40.522816+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:21:40 GMT",
+  "bytes": 191594,
+  "sha256": "2e6cf73ab1bad50ba67b4fc59966860c4c64ca2449cd718e6a2fa9404fe9053a",
+  "local_path": "raw/drc_accessing_controlled_data_via_dbgap.raw",
+  "status": "captured_unreviewed"
+}

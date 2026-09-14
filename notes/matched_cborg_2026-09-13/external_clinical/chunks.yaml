@@ -1,0 +1,43 @@
+bundle: SYNTHETIC_CLINICAL_preprocessed.txt
+bundle_md5: 9b9b1a57c6e6aab452d4ac9d64878676
+bundle_sha256: cea0f3eaebcd3ed373c5ef41a45c89afa7ceb52db7f09be0da1f260c43f8e257
+bundle_lines: 98
+bundle_bytes: 5062
+rule:
+  version: 2
+  unit: source-document
+  boundary: 'FILE: line followed by PATH: or ROLE:'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 4
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 17
+  bytes: 742
+  sha256: 000a5197187d9faa8e615ffc48e26512eddbb7cb213949aa8067ec22d4aead15
+- id: c002
+  source: overview.txt
+  lines:
+  - 18
+  - 46
+  bytes: 1600
+  sha256: bff6186c198a0d59edad6e1ac2dadf40979d5f782fae3d5019d0519c492130da
+- id: c003
+  source: protocol.txt
+  lines:
+  - 47
+  - 75
+  bytes: 1603
+  sha256: f2478fc2f8f79d4d71c2d667cd3cd64b0163111d9b16cde3cb8fdbb87c65d65d
+- id: c004
+  source: dictionary.txt
+  lines:
+  - 76
+  - 98
+  bytes: 1117
+  sha256: f28c0de491d9d07ce698c080fc9c11ce9f4aa190cb4dcbc2bf018bfcfaa2804b

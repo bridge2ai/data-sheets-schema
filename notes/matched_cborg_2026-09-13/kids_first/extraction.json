@@ -1,0 +1,452 @@
+{
+  "recipe_sha256": "f6c3a04dc24a81184596a479ca0ed425040406753b193140a9bbf601c8723be3",
+  "documents": [
+    {
+      "id": "paper_abstract",
+      "raw_sha256": "e89b41685d665f28425c960b305693a6dd7ade7278e7402bee3ef3cb1cdc0ed3",
+      "processed_sha256": "17277699bb3ef0abad987c31772aafa194d777deaf6b531b9fd1656dfe04f5e5",
+      "processed_bytes": 2745,
+      "method": "Europe PMC indexed article metadata and abstract; full text not captured",
+      "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:42607672&format=json&resultType=core"
+    },
+    {
+      "id": "drc_about",
+      "raw_sha256": "fe0b9122f1a4f1b23a13d16e315d18e73149e5275a15e1712e73dfb83bfd9773",
+      "processed_sha256": "cbd44a31750891c1945dcad8c696ef3025bd5233e2c40242b11a905c85477286",
+      "processed_bytes": 5013,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/about/"
+    },
+    {
+      "id": "drc_resources",
+      "raw_sha256": "5f052ccec59cc2d602068e672d18750ab580e6787af95e63e296aa67a9bfd5ce",
+      "processed_sha256": "96b53157775d71c973de1a60f9e843f5cccdb9e523679baf49e15b70b7160c17",
+      "processed_bytes": 5745,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/resources/"
+    },
+    {
+      "id": "drc_faqs",
+      "raw_sha256": "c395873b161e7dd3ed032b11489b0ed12af92b2638e6a621172e4bac7a320c29",
+      "processed_sha256": "54a894b3e34338bf1b7ffa891a38f498684dcdedd6dac7361efb6b13e8f46bf6",
+      "processed_bytes": 6444,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/faqs/"
+    },
+    {
+      "id": "drc_our_data_process",
+      "raw_sha256": "0091fd50bbec26823597269e8d6cf1a73961e191436f00cf02f83ec2a54c28cd",
+      "processed_sha256": "e444703f396bc73c90637e99f1d6f9ee6cb9311706052aefba2ad18b5a3cc12c",
+      "processed_bytes": 10053,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/help-center/our-data-process/"
+    },
+    {
+      "id": "drc_data_dictionary",
+      "raw_sha256": "e96e96f67df31019c1ded12e0fc1bac69247a0d3c8cec13d6a8cc8c398173bd7",
+      "processed_sha256": "9d93e3aec2cda7e8da297d8bf0fb1fa0c55b9fd90e06d0f1186194eb5f92b1d1",
+      "processed_bytes": 8802,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/help-center/data-dictionary/"
+    },
+    {
+      "id": "drc_security",
+      "raw_sha256": "6f6e39dc33e669e6d3faaaaebc0b779b9846202547ccb8c7b6d5e87b983696d4",
+      "processed_sha256": "02121d3d8a071f59f57bf08ee19606df624cf53c1acdad5884cc173e53e911c8",
+      "processed_bytes": 6367,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/help-center/security/"
+    },
+    {
+      "id": "drc_quick_start_guide",
+      "raw_sha256": "74334ddd4f87f0f286859d45cb31ae81f11053c47a2905c9860e82fcffa778a4",
+      "processed_sha256": "351a4d548271de72d46ba826adcb7e31684f1b3ca118fe20b78156fe3308d33f",
+      "processed_bytes": 4318,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/help-center/quick-start-guide/"
+    },
+    {
+      "id": "drc_accessing_controlled_data_via_dbgap",
+      "raw_sha256": "2e6cf73ab1bad50ba67b4fc59966860c4c64ca2449cd718e6a2fa9404fe9053a",
+      "processed_sha256": "2c48911675559230ed7be3c15d5805cb53987e27aef46e17fd323f4054eeda5b",
+      "processed_bytes": 7914,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/"
+    },
+    {
+      "id": "drc_article_release",
+      "raw_sha256": "033125b5fbf0d02594fe1adeb31bdd9bfaead5208c7ae112da462bc14e9ec8c6",
+      "processed_sha256": "ce398a6e9fac5f137cff4ba9be2886019c16bab0537207718502e8541fc0bd63",
+      "processed_bytes": 3769,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://kidsfirstdrc.org/kidsfirstdrc-study-demonstrates-a-new-standard-for-pediatric-research/"
+    },
+    {
+      "id": "nih_faq",
+      "raw_sha256": "e2c6d540b62c39c53e70d651db6db980e8783e618fd3df1426047ecce635d167",
+      "processed_sha256": "483a6574d7b0ee2648c65ce203b56710c934893b6cd1a9c65ec5f339cd656572",
+      "processed_bytes": 85750,
+      "method": "article including FAQ accordion content; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://commonfund.nih.gov/kidsfirst/faq"
+    },
+    {
+      "id": "nih_1",
+      "raw_sha256": "59d7c29463a591ac869b95544393fc01d2464e406c8bd0ab901716e007d677f7",
+      "processed_sha256": "f3ff2f066a87fb9de355a52bb26cabe787f8c608d6b9971009273100669a0c2a",
+      "processed_bytes": 24337,
+      "method": "largest .field--name-body inside article, else article; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://commonfund.nih.gov/kidsfirst/2015X01projects"
+    },
+    {
+      "id": "nih_2",
+      "raw_sha256": "f6e78160ef0a846dfd8d2d092c2b3ecf9fb1d8ef35626df48c22388d2af5ed98",
+      "processed_sha256": "79fff22f6660d9d4e2e89ba1d16dd58a2c81ed7e8092969b797fc2a884c69f5c",
+      "processed_bytes": 29319,
+      "method": "largest .field--name-body inside article, else article; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://commonfund.nih.gov/kidsfirst/2016x01projects/"
+    },
+    {
+      "id": "nih_3",
+      "raw_sha256": "b8c46b6340b58cecf04439c83785a7fea067de1339e3131d44ebf85a9c82889a",
+      "processed_sha256": "4e46c681e44534138b9bf8b263cceeee34ea548579c159512c0da1c82ae68b62",
+      "processed_bytes": 25492,
+      "method": "largest .field--name-body inside article, else article; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://commonfund.nih.gov/kidsfirst/2017X01projects"
+    },
+    {
+      "id": "nih_4",
+      "raw_sha256": "0ac804a0e0b626a77849f0142a5477415d97e57e7f7ca7b4011f30a6555c126b",
+      "processed_sha256": "1543318b571e900a0cdd7da4f75fdff978852de7de59631e9f6e77fa94e575b5",
+      "processed_bytes": 35452,
+      "method": "largest .field--name-body inside article, else article; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://commonfund.nih.gov/kidsfirst/2018X01projects"
+    },
+    {
+      "id": "nih_5",
+      "raw_sha256": "1721d77c9a7e210ea0257c25635d4d73dfa445c03787bd682dcb5e082ae69fb7",
+      "processed_sha256": "daebb79ec703cdfcc437c1db0dd22d9551a7cf5fff04bf0787e66cfbe64d0291",
+      "processed_bytes": 28143,
+      "method": "largest .field--name-body inside article, else article; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://commonfund.nih.gov/kidsfirst/2019X01projects"
+    },
+    {
+      "id": "nih_6",
+      "raw_sha256": "5d3f721672c8885099bc5b494657d1a6aa850167f39568748e9bdc10a7dc80de",
+      "processed_sha256": "4e70fe0e285dcc40181fb41be7de4a9fa0493ed013b36ad9c9efc59a5b5a6484",
+      "processed_bytes": 27079,
+      "method": "largest .field--name-body inside article, else article; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://commonfund.nih.gov/kidsfirst/2021X01projects"
+    },
+    {
+      "id": "nih_7",
+      "raw_sha256": "82fe92ec95a4d1d3c78bd87d1f3d78a35b539ee5d1ed4a6090fda79237559d46",
+      "processed_sha256": "daf613da06f8fa17936d0d6eed82d677400fb1d13a659f3480ab6df6fee24ff0",
+      "processed_bytes": 3646,
+      "method": "[role=\"main\"]; strip executable/navigation/form nodes; preserve link targets",
+      "url": "https://www.cbtn.org"
+    },
+    {
+      "id": "dbgap_phs001110",
+      "raw_sha256": "9953b5098b4c19499784f090d6dca0ba246d29d23bfd2e163641207dcd9aec78",
+      "processed_sha256": "14c6e88b5842da8bc4db36979d27f7b79728ccffa547e04e2d8798c270283691",
+      "processed_bytes": 3399,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001110.v4.p1"
+    },
+    {
+      "id": "dbgap_phs002626",
+      "raw_sha256": "b938b8e9388eee4e89fa80b44f8f3c612cfff62b8cb88b561bcb2c6fa2700be8",
+      "processed_sha256": "c4a40306a3f5260bcad231e3fbd5e643ea0054d3a0d80bf71fb795683e402ea7",
+      "processed_bytes": 3041,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002626.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002276",
+      "raw_sha256": "3383b824a6027daf425165e0bb5fb934c5106f57eac705b652cd2a5a28a13311",
+      "processed_sha256": "3a756bbfded2f135e6f1abefe526bea81f3dc754a96d77b73287f9830d071b9f",
+      "processed_bytes": 6086,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002276"
+    },
+    {
+      "id": "dbgap_phs001987",
+      "raw_sha256": "414cc2b4ed2d10c63de8b1bd204b1e8412a24b1f8aa77f80476b1a160cb0f0d7",
+      "processed_sha256": "9691ead8108b6fcdffb25f21d4df5b5df1daa2032c8f2c89f3c5ee0653a34aea",
+      "processed_bytes": 3677,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001987.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002173",
+      "raw_sha256": "dfa71a302307352d12286a0bded06d50d768fbe402850ac838e151f4f20662d2",
+      "processed_sha256": "c817db9fa769b09d05f07deb5745c6279a2cc9084c872d11f4849fb07e682744",
+      "processed_bytes": 3201,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002173.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002517",
+      "raw_sha256": "b2fddd02cbfb8df3209505e61c66076e04609fe6eb873adce1b8b480d4ca0a03",
+      "processed_sha256": "77bf594f34c6c4c8062082e6caa3ced0e07d5ce5dfaa415aa129663f3e107124",
+      "processed_bytes": 4862,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002517.v4.p2"
+    },
+    {
+      "id": "dbgap_phs002174",
+      "raw_sha256": "f394003808d8abfe9951a094739365689d55578ed97a0619d466c14050745738",
+      "processed_sha256": "ab3ff35c1d18b66fa406088576c975cc05db97b1631c9cf8abb22777ceaa781e",
+      "processed_bytes": 4207,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002174.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001228",
+      "raw_sha256": "4959c0f13a5898870ce7595d1da2eef56e7f11712a6bff5438cb70f2bf8c78b7",
+      "processed_sha256": "492ce06680c8975d4bafd9119fe45ad38458f9f6629fdfca4ff9bb5ff97254ce",
+      "processed_bytes": 5103,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001228"
+    },
+    {
+      "id": "dbgap_phs002627",
+      "raw_sha256": "a4888c87c2c31c6c3e72b7fd6e70df97d7bf238933f4219821971718e77443b4",
+      "processed_sha256": "69c1c53c4da20310e57f204a49ef08738d99d769f6656a28dd10c5e8020358cc",
+      "processed_bytes": 5017,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002627.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002590",
+      "raw_sha256": "82095bcc78fb993236970f0344d341cb5b2f6779764845cde607b0fee5c7de6b",
+      "processed_sha256": "40f0cbfac699b801b55d5f0b7e0a802798ad8bd95cd21816ca2e2ac050c5896c",
+      "processed_bytes": 7854,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002590.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002161",
+      "raw_sha256": "0f0061eab28d67e98a2aef258b5fdf7be37f4f5f8a7f89bfa8e3831aba277ed1",
+      "processed_sha256": "296ca474d0bbc9c2b3fedd754c49a150087cb4a7cdf626deb08fa3f7c3d534b0",
+      "processed_bytes": 2721,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002161.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002330",
+      "raw_sha256": "7c66f186d12f57dc39b7426b6afa0bdc0ca029ffc31074e519229cd8fddd7591",
+      "processed_sha256": "370f91ed0c6d0e76c93508b999e6c0784f497c0340875dfee9dac0100bd953c5",
+      "processed_bytes": 5958,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002330.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002591",
+      "raw_sha256": "3a9becf45afaf51e0f2685e6d5c8356c2488d57d9f62250f4e31d0407e608200",
+      "processed_sha256": "081dca4206f1d21ad6a289ed7e65158658ff7975adfdeaa1ca1de8e0089c690b",
+      "processed_bytes": 7752,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002591.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002162",
+      "raw_sha256": "3b7995a949c57df9156d81360bce2684ec2c3e91c68e33a7fd59b27ae4398afb",
+      "processed_sha256": "891a0a5300d682aba623f7d89a64529c97dbcd8cbb0f5d5facfffc383b006ab1",
+      "processed_bytes": 3116,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002162.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002322",
+      "raw_sha256": "36f2a24579c5c4d401a51adff15381a2e0d7562b7c0d17c8773a80a96a1b6542",
+      "processed_sha256": "4a99e95ca37837e44f755b82f975fcd26fd5fde4c194c634d271d0f9e33c806a",
+      "processed_bytes": 5020,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002322.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002594",
+      "raw_sha256": "8b53dba69138e6c9ee8a27ba4cce392fdbed7ef6c3ab59255477b41015c16d65",
+      "processed_sha256": "44d212fcfa701a0f7d86f2f4efec9cb26944ff8bc7b4d7ed9821a6ac0e09ceb3",
+      "processed_bytes": 3283,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002594.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002595",
+      "raw_sha256": "d194e3d9af17aa424cfeb91d225bdf2add23483cb5cdba12480f28efb467fad3",
+      "processed_sha256": "5e875b8bcd34b17764ba78fe16e16f82a338924f0b5bac318f16d8a1b66c94c5",
+      "processed_bytes": 3794,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002595.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002592",
+      "raw_sha256": "31a88775b3411985c481afd82dbd6e4ce60ef8861ab6e09f3f05f9ed8b1c5854",
+      "processed_sha256": "5e4ba7f4b9b7cd9e9bc7c26d66fdb2c43c82e137d0e2c10033bc806f4958325a",
+      "processed_bytes": 6519,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002592.v1.p1"
+    },
+    {
+      "id": "dbgap_phs002589",
+      "raw_sha256": "3d3551114c3ef146e3273d4cf8cc1cca788d92177a7c8ad043627fd049bbf456",
+      "processed_sha256": "a41f9f3be5fb5d905ac8a368cccf2c73ef9dfa525d42cfac6f7acac9a4c666f2",
+      "processed_bytes": 5519,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002589.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001410",
+      "raw_sha256": "9af9bc1095b7c70b409b97eb805126efa7b8a2b5acd8281f9a934370a3eba315",
+      "processed_sha256": "bba153e01771174e813433baf4253d33a50647018860be5b835a8e7d694f2655",
+      "processed_bytes": 3696,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001410"
+    },
+    {
+      "id": "dbgap_phs002187",
+      "raw_sha256": "511f3c85253975050838b42a3ad242bd37d6cb6f31b96906b88f69eba46ebaba",
+      "processed_sha256": "929bb758059142d12e6384e4a5e4c62d7a0abcf65c4b6f6f82a4ba36186a4f45",
+      "processed_bytes": 5010,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002187.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001138",
+      "raw_sha256": "8c3da9ff482db2842dc7ffdf6dd5adf39455ae82332a468c2db9e0cefe349b5e",
+      "processed_sha256": "cc349a9795498743f85d53300811ab48b0ae7c1bdfe0d009d49815939801913a",
+      "processed_bytes": 3127,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001138"
+    },
+    {
+      "id": "dbgap_phs002172",
+      "raw_sha256": "503221a53e54d7a84961dc197df822a94969f8031681c0b86702baab29e6ca9f",
+      "processed_sha256": "b6ade1acde775a8477260ba4aaf88b682b0c7a544f0e21e56adfbd532e316397",
+      "processed_bytes": 4189,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002172"
+    },
+    {
+      "id": "dbgap_phs001785",
+      "raw_sha256": "fcc9c4105cb180603158fc74ebccfb9055e70a74102d54dd3ef8415230e3f4e0",
+      "processed_sha256": "4c005f837ad303455a4d74b09358e1b947491de940a7122f6e0a2bccd474fed4",
+      "processed_bytes": 3431,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001785.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001806",
+      "raw_sha256": "1f7b9baf3af9454b017029171a619096b0c9b15505b54853df99178fc7766681",
+      "processed_sha256": "c63e9eea78eec074f77497e8d96830de742f9037ed74810e6642f7365c10f949",
+      "processed_bytes": 3310,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001806.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001846",
+      "raw_sha256": "c94b1578664db53d6fffb61c177c6f5c7abc2c3cf646704d96bf8b912b6b86f9",
+      "processed_sha256": "209ceada252e9e445acef9fc00762efa43621a608051c6d587e19e6321a15824",
+      "processed_bytes": 3180,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001846.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001168",
+      "raw_sha256": "50ce2005665e5199ef7667f878bec0aafff6555c8a6c0eab7fa1dcdb3625dd43",
+      "processed_sha256": "fb25829630a5581fd5d4a789a2a911e1278d5df274a4fbfa2a460cb336650a9f",
+      "processed_bytes": 5666,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001168"
+    },
+    {
+      "id": "dbgap_phs002130",
+      "raw_sha256": "dd54efa1ea893184d4baf11881d09cd27475b4c49cc80b3bc19f39ede46dc643",
+      "processed_sha256": "2cfa24d5712f006b3965eb04b7081ef7608f275623e14d7f740d57f989a71f40",
+      "processed_bytes": 4923,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002130.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001714",
+      "raw_sha256": "72e37d11f0ad7e56882c70a31a2014d6a0767a7d15d036d46ebfb00818efee12",
+      "processed_sha256": "9734324b2b957b8892f88e1fa9b594cd79546d150eb2ef4fd83c132964d6d214",
+      "processed_bytes": 3261,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001714.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001878",
+      "raw_sha256": "f2fd4fb5ff6322cce49c66dd5c8f503bd485835baa0ec612a4863eefb3c71d4a",
+      "processed_sha256": "28cfca825244154f9e3e1da1ba4886ee7743931aef659c32df7d99989825f0e9",
+      "processed_bytes": 4623,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001878.v2.p1"
+    },
+    {
+      "id": "dbgap_phs001997",
+      "raw_sha256": "2afe3ad790aef7225b87dbe569b396647ed198e1c8d4dd7bb5a62a59d081c6b1",
+      "processed_sha256": "5d82e977aadb9ce86d48a9e6cabe0b62d1fbc4a1fd1106227a5049182e0f76c0",
+      "processed_bytes": 3210,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001997.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001738",
+      "raw_sha256": "e009b62a28d4dd93b62dd7f9a673ec8be2a8506e14967ba9b7473e8209b5babf",
+      "processed_sha256": "7f1077154141d2bbb58cdd543ca6bb176fb103f13f565a6888b5bc80a8bf0208",
+      "processed_bytes": 4267,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001738.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001436",
+      "raw_sha256": "2e7eb4cd6cdba4e7070a0b6323dc2d4ed56e4b7335ffd2c52ba564d5d3fc6038",
+      "processed_sha256": "b1fef9c68dd9df19628adb443a1ac308c686162883de00e6d0fce3683a1c2912",
+      "processed_bytes": 6016,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001436.v1.p1"
+    },
+    {
+      "id": "dbgap_phs001420",
+      "raw_sha256": "e400fe00e650a49353a750e6b4fe56bff6928c18ed6c9cf7b459d9c284dbe50a",
+      "processed_sha256": "025c3127a4cd2cf853739d349d50e42b49ef829db52bb95341041193a5ea3ef4",
+      "processed_bytes": 6174,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001420"
+    },
+    {
+      "id": "dbgap_phs001178",
+      "raw_sha256": "86e4acb3489c68b72ce97a15a9954f4920ff8147440fd773ce8102f868e74138",
+      "processed_sha256": "11448f4495258118979e62659ebcef80eedadd027e0fd492548c5ba933e6d5d8",
+      "processed_bytes": 7435,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001178"
+    },
+    {
+      "id": "dbgap_phs001247",
+      "raw_sha256": "cd1f92ccbde7047b4486e7f77108e7e8e29e98f44165d700e0e61fa21f7a50ac",
+      "processed_sha256": "7dbd548fafb03fddc024c71880be4f632d047d51ff4359c73266e18a739aef15",
+      "processed_bytes": 4330,
+      "method": "declared public study description/eligibility/publication/trait/attribution sections; preserve links",
+      "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001247"
+    },
+    {
+      "id": "study_catalogue",
+      "raw_sha256": "952d776a82c487c0f5cf0c636024cd371bdfe5cf6eafa5700f684cb5c3918008",
+      "processed_sha256": "1988a090ff38fa78a70eec2d94fd487869cb9317b8e737a0246fb0d43e08b828",
+      "processed_bytes": 35178,
+      "method": "all 36 .publication[data-phs] cards; all data fields except individual-level historical data-notes; visible labels and dates",
+      "url": "https://kidsfirstdrc.org/studies/"
+    }
+  ],
+  "study_count": 36,
+  "full_article_captured": false,
+  "omissions": [
+    "article full text blocked by publisher",
+    "participant identifier mappings in catalogue data-notes",
+    "individual-level data files and authorized data-access-request listings"
+  ]
+}

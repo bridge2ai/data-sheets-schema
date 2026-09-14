@@ -1,0 +1,66 @@
+[
+  {
+    "id": "nih_1",
+    "url": "https://commonfund.nih.gov/kidsfirst/2015X01projects"
+  },
+  {
+    "id": "nih_2",
+    "url": "https://commonfund.nih.gov/kidsfirst/2016x01projects/"
+  },
+  {
+    "id": "nih_3",
+    "url": "https://commonfund.nih.gov/kidsfirst/2017X01projects"
+  },
+  {
+    "id": "nih_4",
+    "url": "https://commonfund.nih.gov/kidsfirst/2018X01projects"
+  },
+  {
+    "id": "nih_5",
+    "url": "https://commonfund.nih.gov/kidsfirst/2019X01projects"
+  },
+  {
+    "id": "nih_6",
+    "url": "https://commonfund.nih.gov/kidsfirst/2021X01projects"
+  },
+  {
+    "id": "nih_7",
+    "url": "https://www.cbtn.org"
+  },
+  {
+    "id": "drc_resources",
+    "url": "https://kidsfirstdrc.org/resources/"
+  },
+  {
+    "id": "drc_faqs",
+    "url": "https://kidsfirstdrc.org/faqs/"
+  },
+  {
+    "id": "nih_faq",
+    "url": "https://commonfund.nih.gov/kidsfirst/faq"
+  },
+  {
+    "id": "drc_article_release",
+    "url": "https://kidsfirstdrc.org/kidsfirstdrc-study-demonstrates-a-new-standard-for-pediatric-research/"
+  },
+  {
+    "id": "drc_help",
+    "url": "https://kidsfirstdrc.org/help-center/"
+  },
+  {
+    "id": "paper_cell",
+    "url": "https://www.cell.com/ajhg/fulltext/S0002-9297(26)00276-4"
+  },
+  {
+    "id": "paper_pdf",
+    "url": "https://www.cell.com/ajhg/pdf/S0002-9297(26)00276-4.pdf"
+  },
+  {
+    "id": "paper_sciencedirect",
+    "url": "https://www.sciencedirect.com/science/article/pii/S0002929726002764"
+  },
+  {
+    "id": "dbgap_example",
+    "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001110.v4.p1"
+  }
+]

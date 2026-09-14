@@ -1,0 +1,115 @@
+TITLE: Our Data Process - Kids First
+SOURCE URL: https://kidsfirstdrc.org/help-center/our-data-process/
+CAPTURED AT: 2026-09-14T03:21:40.020315+00:00
+
+Getting Started
+Quick Start Guide (https://kidsfirstdrc.org/help-center/quick-start-guide/)
+Video Tutorials (https://kidsfirstdrc.org/help-center/video-tutorials/)
+Studies Tool (https://kidsfirstdrc.org/help-center/studies-tool/)
+Our Data Process (https://kidsfirstdrc.org/help-center/our-data-process/)
+Accessing Controlled Data via dbGaP (https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/)
+Connecting Platforms (https://kidsfirstdrc.org/help-center/connecting-platforms/)
+User Support (https://kidsfirstdrc.org/help-center/support-sessions/)
+Data Exploration
+Applying Filters (https://kidsfirstdrc.org/help-center/applying-filters/)
+Participants Tab (https://kidsfirstdrc.org/help-center/participants-tab/)
+Biospecimens Tab (https://kidsfirstdrc.org/help-center/biospecimens-tab/)
+Data Files Tab (https://kidsfirstdrc.org/help-center/data-files-tab/)
+Variant Search (https://kidsfirstdrc.org/help-center/variant-search/)
+Portal Data Dictionary (https://kidsfirstdrc.org/help-center/data-dictionary/)
+Analyzing Data
+Cavatica Cloud Platform (https://kidsfirstdrc.org/help-center/cavatica-cloud-platform/)
+Variant Workbench (https://kidsfirstdrc.org/help-center/variant-workbench/)
+Export Locally (https://kidsfirstdrc.org/help-center/export-locally/)
+Applying for Cloud Credits (https://kidsfirstdrc.org/help-center/applying-for-cloud-credits/)
+Cost FAQs (https://kidsfirstdrc.org/help-center/cost-faqs/)
+Data Security (https://kidsfirstdrc.org/help-center/security/)
+Our Data Process
+The Kids First Data Resource is a genomic data resource which empowers discoveries into the underlying genetic causes of pediatric cancer and structural birth defects.
+Structure of the Kids First Data Resource
+A Kids First
+study
+is a cohort of participants submitted by a single group of investigators for the purpose of researching a particular condition. Studies are selected by the Gabriella Miller Kids First Research Program (NIH) and information about the original research projects underlying these studies is available on their website
+here (https://commonfund.nih.gov/kidsfirst/X01Projects)
+. Biospecimens and files from these studies that have been released on the Kids First Portal are now available for secondary research by investigators around the world.
+A
+participant
+is a single individual who enrolled in a Kids First study and has consented to share biospecimens and data for research and discovery. A participant can only be enrolled in one Kids First study. Not all participants are themselves affected by the condition of interest of their study – for example, some studies enroll parents and siblings who do not have the condition.
+A
+biospecimen
+is a collection of biological material from a participant. Each biospecimen can only belong to a single participant. One participant may have multiple biospecimens that are represented in the Kids First Portal – for example, a sample of tumor tissue as well as a sample of germline tissue such as blood or buccal cells derived from saliva.
+A
+data file
+is a digital computer file generated based on information derived from a biospecimen. In the context of Kids First, these are often genomic sequencing files derived from DNA/RNA extracted from a biospecimen. A single biospecimen may have multiple data files – for example, aligned reads in .bam format and variants in .g.vcf format. Furthermore, a single data file may be associated with multiple biospecimens – for example, joint-called variants in .vcf format derived from a family of related participants.
+Identifying Participants Across Studies – Clinical Ontologies
+The Kids First Data Resource Center supports cross-study comparisons of participants in accordance with our cross-disease mandate for discovery. Because Kids First studies are derived from different groups of investigators around the country, the descriptive terms assigned to participants are not universal. A cardiologist may use the term
+ASD
+to refer to the heart condition
+atrial septal defect
+, while a psychologist might infer that to mean
+autism spectrum disorder
+, without any given context.
+To address issues such as these, the Kids First Data Resource Center uses clinical ontologies to standardize the descriptive language across individual studies. We use two ontologies – the
+Human Phenotype Ontology (HPO) (https://hpo.jax.org/app/)
+for phenotypes and the
+MONDO Disease Ontology (MONDO) (https://mondo.monarchinitiative.org/)
+for diagnoses. Ontologies assign unique, numerical codes which distinguish conditions from one another: the ASD you research might be either
+HP:0001631 (https://hpo.jax.org/app/browse/term/HP:0001631)
+or
+HP:0000729 (https://hpo.jax.org/app/browse/term/HP:0000729)
+. Ontologies are organized in a hierarchical structure, in which very specific terms (such as
+HP:0001631 atrial septal defect
+and
+HP:001636 tetralogy of fallot
+) are joined by broader, less specific terms (
+HP:0030680 Abnormal cardiovascular system morphology
+). Building virtual cohorts of Kids First participants across studies using ontology codes supports either broad or specific searches. For more information, see the Participants Tab page.
+Combine Data Files Across Studies – Shared Bioinformatic Workflows
+The Kids First Data Resource Center supports cross-study analysis of data files by using a set of standardized bioinformatic workflows. Outputs from a single workflow are harmonized for combined analysis regardless of which Kids First study they are associated with.
+The Kids First Data Resource Center supports four bioinformatic workflows.
+The
+Kids First DRC Alignment and GATK HaplotypeCaller Workflow (https://github.com/kids-first/kf-alignment-workflow?tab=readme-ov-file)
+follows Broad best practices outlined in
+Data pre-processing for variant discovery (https://gatk.broadinstitute.org/hc/en-us/articles/360035535912-Data-pre-processing-for-variant-discovery)
+. It uses bam/fastq input and aligns/re-aligns to a bwa-indexed reference fasta, version hg38. The resultant bam is de-dupped and base score recalibrated. Contamination is calculated and a gVCF is created optionally using GATK4 vbeta.1-3.5 HaplotypeCaller.
+The
+Kids First DRC Joint Genotyping Workflow (https://github.com/kids-first/kf-jointgenotyping-workflow)
+uses existing gVCFs, likely from GATK Haplotype to identify germline short variants (SNPs + indels) to create family joint-called variant calls (typically mother-father-child). Peddy is run to raise any potential issues in family relation definitions and sex assignment.
+The
+Kids First DRC Somatic Variant Workflow (https://github.com/kids-first/kf-somatic-workflow)
+takes aligned cram input and performs somatic variant calling using Strelka2, Mutect2, Lancet, and VarDict Java, CNV estimation using Control-FREEC, CNVkit, and GATK, and SV calls using Manta. For whole genome sequencing data, the workflow will also predict extra chromosomal DNA (ecDNA) using AmpliconArchitect Somatic variant call results are annotated with hotspots, assigned population frequencies using gnomAD AF, calculated gene models using Variant Effect Predictor (VEP), then added an additional MAF output using a modified version of Memorial Sloan Kettering Cancer Center’s (MSKCC) vcf2maf.
+The
+Kids First DRC RNA-Seq Workflow (https://github.com/kids-first/kf-rnaseq-workflow)
+passes RNA reads to STAR for alignment. The alignment output is used by RSEM for gene expression abundance estimation and rMATS for differential alternative splicing events detection. Additionally, Kallisto is used for quantification, but uses pseudo alignments to estimate the gene abundance from the raw data. Fusion calling is performed using Arriba and STAR-Fusion detection tools on the STAR alignment outputs. Filtering and prioritization of fusion calls is done by annoFuse. Metrics for the workflow are generated by RNA-SeQC. Junction files for the workflow are generated by rMATS.
+The
+Kids First Long Reads Workflow (https://github.com/kids-first/kf-longreads-workflow)
+accepts input from either the Pacific Biosciences (PacBio) or the Oxford Nanopore Technologies (ONT) long reads platforms. Outputs include alignments, small variants from the software tool Nanocaller, and structural variants from Sniffles, Sentieon LongReadSV, and pbsv.
+Interested in combining your own data with Kids First’s? Each of the Kids First DRC bioinformatic workflows is available on GitHub and CAVATICA for user’s own analyses, allowing investigators to “bring their own data” to the thousands of harmonized Kids First samples for an even larger analysis.
+Data Access Tiers – Registered vs Controlled
+While users can browse all available files in the Kids First Portal, they may have to apply for access to specific data files of interest. Files generated by the Kids First DRC are organized into two broad categories. Registration-access files are available for immediate access and analysis by any user who creates an account on the Kids First Portal. Controlled-access files require dbGaP approval before access is granted. For more information about applying for access, see our page on dbGaP.
+Both levels of access require users to accept the Kids First DRC Disclaimers, Terms & Conditions, and Privacy Policy, as they agreed to follow upon creating their Kids First Portal account.
+Kids First Bioinformatic Workflow
+Registration-Access Files
+Controlled-Access Files
+Alignment and GATK Haplotype Caller
+n/a
+Aligned Reads
+Germline Variants in gVCF Format
+Joint-Genotyping Workflow
+n/a
+Trio-Based Joint-Called Germline Variants
+Somatic Workflow
+Annotated SNVs with Predicted Germline Variants Removed
+Copy Number Variants
+Structural Variants
+Annotated SNVs with Predicted Germline Variants Flagged
+RNA-Seq Workflow
+Quantified Gene Expression
+Called Gene Fusions
+Aligned Reads
+Unaligned Reads
+Long Reads Workflow
+n/a
+Aligned Reads
+Simple Nucleotide Variants
+Structural Variants

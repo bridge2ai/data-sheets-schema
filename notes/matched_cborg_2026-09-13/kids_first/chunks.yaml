@@ -1,0 +1,433 @@
+bundle: KIDS_FIRST_preprocessed.txt
+bundle_md5: 93b807515b5066eb5c328c9fc0921f15
+bundle_sha256: cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c
+bundle_lines: 5494
+bundle_bytes: 541184
+rule:
+  version: 2
+  unit: source-document
+  boundary: 'FILE: line followed by PATH: or ROLE:'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 58
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 69
+  bytes: 2004
+  sha256: 054ae6a78190f96096f9948263ed9860844a6d45152b0e2fee9e2ad71494ff40
+- id: c002
+  source: paper_abstract.txt
+  lines:
+  - 70
+  - 89
+  bytes: 3067
+  sha256: 7df602267364fbb2ac5519d721b61403305c85e1623fe4c3c5f726754b81f3f2
+- id: c003
+  source: drc_about.txt
+  lines:
+  - 90
+  - 151
+  bytes: 5325
+  sha256: 485e5c4e7dab5bd1a1cab8d45b86d58467abffb7a4edb94bf01c35f630294e98
+- id: c004
+  source: drc_resources.txt
+  lines:
+  - 152
+  - 235
+  bytes: 6065
+  sha256: 3e37d7308aa587a1fc8728339dd8d9fab3cf13a5d63c2b09e7b9da9168c1b130
+- id: c005
+  source: drc_faqs.txt
+  lines:
+  - 236
+  - 295
+  bytes: 6754
+  sha256: a0164d32d9b9c1a9f38dc16d7130f8610dae3984c2b899aef0749d7474a79f19
+- id: c006
+  source: drc_our_data_process.txt
+  lines:
+  - 296
+  - 419
+  bytes: 10388
+  sha256: c74edcca93681552a6a4de3ef70bc7a827d7b24b89995a2973520da9c6e1e94f
+- id: c007
+  source: drc_data_dictionary.txt
+  lines:
+  - 420
+  - 553
+  bytes: 9134
+  sha256: c62ef79ce92f9c853c083cda3540252369bc9244c9afbf5c88ba81e08914a6ce
+- id: c008
+  source: drc_security.txt
+  lines:
+  - 554
+  - 665
+  bytes: 6685
+  sha256: bba3d042b878eed8cfb2f12de3077c413d0fef45acace83e4cea8a46e65fa3d9
+- id: c009
+  source: drc_quick_start_guide.txt
+  lines:
+  - 666
+  - 733
+  bytes: 4654
+  sha256: ce7e269b1ed745da6af1c1922e27b84284bae23bdf02e9cec0edad091d25b295
+- id: c010
+  source: drc_accessing_controlled_data_via_dbgap.txt
+  lines:
+  - 734
+  - 821
+  bytes: 8286
+  sha256: 68b3afe31e33b071101b6df242a5deed6d50ec431fe7fe11a83a308b05102777
+- id: c011
+  source: drc_article_release.txt
+  lines:
+  - 822
+  - 857
+  bytes: 4101
+  sha256: 16895dd0d3ee9641fbdcec5f07709d90c63f9da9da87305f8014479fe11783a7
+- id: c012
+  source: nih_faq.txt
+  lines:
+  - 858
+  - 1202
+  bytes: 47622
+  sha256: 167c014f4e1b6dea9552a1287d252792734b8990e6c2be7f5caf9ffcbead89fc
+  part:
+  - 1
+  - 2
+- id: c013
+  source: nih_faq.txt
+  lines:
+  - 1203
+  - 1504
+  bytes: 38437
+  sha256: 9eb43aec1e4aa12ef54d0eec0e9d15e9baa715bc11cff02fffa0bca3216fe900
+  part:
+  - 2
+  - 2
+- id: c014
+  source: nih_1.txt
+  lines:
+  - 1505
+  - 1613
+  bytes: 24642
+  sha256: d505af5e06f21613319ab822fcaf67b85dab35c96a9bae7e0a54f33a8f0a4ad0
+- id: c015
+  source: nih_2.txt
+  lines:
+  - 1614
+  - 1724
+  bytes: 29624
+  sha256: 61084d70b439df1167455af3ba17f9b3d426d49e9c6ca46a22b0a72e4c520922
+- id: c016
+  source: nih_3.txt
+  lines:
+  - 1725
+  - 1828
+  bytes: 25797
+  sha256: 51c71390e10744d57d157fcebadad931fac4dcf1bc689bed7cf19a481006b710
+- id: c017
+  source: nih_4.txt
+  lines:
+  - 1829
+  - 1968
+  bytes: 35757
+  sha256: 9fa11123b37824bc83fed6882ee0cb225534f9d87787e0e39b1a7af7af4bdea6
+- id: c018
+  source: nih_5.txt
+  lines:
+  - 1969
+  - 2135
+  bytes: 28448
+  sha256: 5f5d7cc467381e6c3f851e4a23bd2a0812d5593597a6a24ec66b19cee501e35f
+- id: c019
+  source: nih_6.txt
+  lines:
+  - 2136
+  - 2277
+  bytes: 27384
+  sha256: e76ff6439511cfd0d166613aaafacaac17e40b6c944df0a454077fcb735d663b
+- id: c020
+  source: nih_7.txt
+  lines:
+  - 2278
+  - 2347
+  bytes: 3950
+  sha256: 656ca97a58b09e47d1df8af02d573754e1bbf2342aa18e1cd4e306eace39e15e
+- id: c021
+  source: dbgap_phs001110.txt
+  lines:
+  - 2348
+  - 2421
+  bytes: 3723
+  sha256: 6751ead8319bfa08a1a606ed40a88f4cb03e8a878ad165f30c7a8d474922b844
+- id: c022
+  source: dbgap_phs002626.txt
+  lines:
+  - 2422
+  - 2481
+  bytes: 3365
+  sha256: cf34c89b78b0d9632dc67419baaf8597d3d1093fc616e097a7f15b74a7e7a5e3
+- id: c023
+  source: dbgap_phs002276.txt
+  lines:
+  - 2482
+  - 2554
+  bytes: 6410
+  sha256: ac1d4a6c592fcea4015128965c4c12005814b519bfb4943cdd88ab846630406f
+- id: c024
+  source: dbgap_phs001987.txt
+  lines:
+  - 2555
+  - 2615
+  bytes: 4001
+  sha256: fbc3eb6b72c160f6c143908e9f54fbc570147dd560b281356930198b6cd379ff
+- id: c025
+  source: dbgap_phs002173.txt
+  lines:
+  - 2616
+  - 2675
+  bytes: 3525
+  sha256: 5c169fd443dc1d4e0f6629b35d9c318c921ff98c158a76c7404e9c43db4b91b1
+- id: c026
+  source: dbgap_phs002517.txt
+  lines:
+  - 2676
+  - 2771
+  bytes: 5186
+  sha256: 9e71d2938ca092512ddf68937a2653baa9d54338421cfa8d8a748ce45a28ec48
+- id: c027
+  source: dbgap_phs002174.txt
+  lines:
+  - 2772
+  - 2832
+  bytes: 4531
+  sha256: b9cf6c4ea1b8ea21d496c598df792b76653bc0c65aebf511665512674922958e
+- id: c028
+  source: dbgap_phs001228.txt
+  lines:
+  - 2833
+  - 2890
+  bytes: 5427
+  sha256: 252d5f2b51b707afb23ad1e0b0f0836f1419420fea157df059100a35cf2e942e
+- id: c029
+  source: dbgap_phs002627.txt
+  lines:
+  - 2891
+  - 2955
+  bytes: 5341
+  sha256: 40424c27515d1b6d21d21b695c966c5a8839b274e63aae9b1b5ef33c626d835c
+- id: c030
+  source: dbgap_phs002590.txt
+  lines:
+  - 2956
+  - 3025
+  bytes: 8178
+  sha256: 9894b170e67075bf9e46c1ab9e734f50971e453fdff966d312a845c0eacb6833
+- id: c031
+  source: dbgap_phs002161.txt
+  lines:
+  - 3026
+  - 3082
+  bytes: 3045
+  sha256: ae45f05b89686168e9f83d91123b3e6f8dd3cebae7184eab2175b9dd1234b6d4
+- id: c032
+  source: dbgap_phs002330.txt
+  lines:
+  - 3083
+  - 3162
+  bytes: 6282
+  sha256: ddd7dfcab1bf5785e871031ef81fddd90a332bb9b5209db33a57b7ef393584a2
+- id: c033
+  source: dbgap_phs002591.txt
+  lines:
+  - 3163
+  - 3229
+  bytes: 8076
+  sha256: 22f1ad8339dd576b599716c1cfbd1bac81b8e40c9f9def1b0428e04b06892193
+- id: c034
+  source: dbgap_phs002162.txt
+  lines:
+  - 3230
+  - 3290
+  bytes: 3440
+  sha256: 70712db763ad9283826b447ac9df1485e2b823a5c36f1ceb1fba00772cc46d3c
+- id: c035
+  source: dbgap_phs002322.txt
+  lines:
+  - 3291
+  - 3363
+  bytes: 5344
+  sha256: e6871e66df3d66676be482988153791b19a59e10e53fe4f447229caa53356491
+- id: c036
+  source: dbgap_phs002594.txt
+  lines:
+  - 3364
+  - 3427
+  bytes: 3607
+  sha256: a85054ab62d5df02bf3ea5ef83d2cca1a08594a2267f96e9e20ab419801a8ee5
+- id: c037
+  source: dbgap_phs002595.txt
+  lines:
+  - 3428
+  - 3504
+  bytes: 4118
+  sha256: a57b9001d8f17809edca99ada441e0eecc02b96acd58a83ff802e59bd5b6325b
+- id: c038
+  source: dbgap_phs002592.txt
+  lines:
+  - 3505
+  - 3597
+  bytes: 6843
+  sha256: bc28517bbdde4c3ffae38d407cbb67c81a77e825dfd0374896d3f82663a580f1
+- id: c039
+  source: dbgap_phs002589.txt
+  lines:
+  - 3598
+  - 3672
+  bytes: 5843
+  sha256: e9d83827f73891b87f4455bf6346fb0bce559680bbfd7ba11dd9fe93096c8eb5
+- id: c040
+  source: dbgap_phs001410.txt
+  lines:
+  - 3673
+  - 3743
+  bytes: 4020
+  sha256: 654f66c6e095b51ad1d6afe7e62d4c63b8de8a7f9d1b75ee3f0867fd3c27ef1b
+- id: c041
+  source: dbgap_phs002187.txt
+  lines:
+  - 3744
+  - 3811
+  bytes: 5334
+  sha256: 4911177197659ad228f6a5c2db882b7295b262d706f4037aa2f48cc8c04efedb
+- id: c042
+  source: dbgap_phs001138.txt
+  lines:
+  - 3812
+  - 3885
+  bytes: 3451
+  sha256: 18d5382ad060778204a11f8be3d170da764545fc3cafb5006fad881775f15e11
+- id: c043
+  source: dbgap_phs002172.txt
+  lines:
+  - 3886
+  - 3946
+  bytes: 4513
+  sha256: 5a53a9dbe7459d92a9ed7f5c0e79633e421a4d47529ea39feeaf4adc0fcf000e
+- id: c044
+  source: dbgap_phs001785.txt
+  lines:
+  - 3947
+  - 4005
+  bytes: 3755
+  sha256: a2a903264c7abfcb3e96ac9b815ee760a6b402c79a988664dfc9f6a5df4f29bb
+- id: c045
+  source: dbgap_phs001806.txt
+  lines:
+  - 4006
+  - 4071
+  bytes: 3634
+  sha256: 1ef60a1790b79827c4272da120b952cd6339f124d6fc2285541b5b3edd649693
+- id: c046
+  source: dbgap_phs001846.txt
+  lines:
+  - 4072
+  - 4133
+  bytes: 3504
+  sha256: 47761644b99f4ba3c91931e040efef40b624effb57dfbf836a4794969deec94e
+- id: c047
+  source: dbgap_phs001168.txt
+  lines:
+  - 4134
+  - 4204
+  bytes: 5990
+  sha256: 1431b82e70d2d489b28bcd1719dadad03eeaac2a337979e5aabbb05271299227
+- id: c048
+  source: dbgap_phs002130.txt
+  lines:
+  - 4205
+  - 4293
+  bytes: 5247
+  sha256: 00670a41c0c4ad9328dfa26b5b334058edae61ebecb92b6900800e951c0a071b
+- id: c049
+  source: dbgap_phs001714.txt
+  lines:
+  - 4294
+  - 4351
+  bytes: 3585
+  sha256: 71ae54032ad9bcc6af4298545fd40bede45e807e2f01ea8050869c5a65f7ef91
+- id: c050
+  source: dbgap_phs001878.txt
+  lines:
+  - 4352
+  - 4422
+  bytes: 4947
+  sha256: 05b9bc556095e33a336d8f60015947c041715f6790527a0e6e46c3e3682363e4
+- id: c051
+  source: dbgap_phs001997.txt
+  lines:
+  - 4423
+  - 4484
+  bytes: 3534
+  sha256: 0a187a2d8c954dba2a95a6c6843e668259b03ea6e3bc2b9d1644ada77c7177bd
+- id: c052
+  source: dbgap_phs001738.txt
+  lines:
+  - 4485
+  - 4545
+  bytes: 4591
+  sha256: de8c252412974a2b2cfb667287de6029c44f48b5b2fbb8cd1b195149138c04c2
+- id: c053
+  source: dbgap_phs001436.txt
+  lines:
+  - 4546
+  - 4615
+  bytes: 6340
+  sha256: 082683036e3f64267567c95cb95fef82a286c7d555442280d24fc8b3ad803bd6
+- id: c054
+  source: dbgap_phs001420.txt
+  lines:
+  - 4616
+  - 4687
+  bytes: 6498
+  sha256: 2bafdeab69960d33f3255a4ecf3889e4bdcf0aa1577fd3f248e3cc9d4d23030f
+- id: c055
+  source: dbgap_phs001178.txt
+  lines:
+  - 4688
+  - 4775
+  bytes: 7759
+  sha256: daa62b349ad45c298915deb2dfdc6f560203d7ad43b07581f303a990f2ef3d25
+- id: c056
+  source: dbgap_phs001247.txt
+  lines:
+  - 4776
+  - 4838
+  bytes: 4654
+  sha256: e687c83000ded7ad440739fb208ed2a82efd3006aab69036440ca580876373f7
+- id: c057
+  source: study_catalogue.txt
+  lines:
+  - 4839
+  - 5238
+  bytes: 20917
+  sha256: d89613694801f7c1e7b586842b8d6a6192773b01e56ef801388b7b0fa555d843
+  part:
+  - 1
+  - 2
+- id: c058
+  source: study_catalogue.txt
+  lines:
+  - 5239
+  - 5494
+  bytes: 14502
+  sha256: 83044da48a65b8db3826b5132cb89896237a2f33751a0050358bc1ec64c50ea6
+  part:
+  - 2
+  - 2

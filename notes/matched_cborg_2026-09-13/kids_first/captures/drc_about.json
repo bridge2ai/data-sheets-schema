@@ -1,0 +1,13 @@
+{
+  "url": "https://kidsfirstdrc.org/about/",
+  "final_url": "https://kidsfirstdrc.org/about/",
+  "content_type": "text/html; charset=UTF-8",
+  "retrieved_at": "2026-09-14T03:17:35.084493+00:00",
+  "bytes": 217687,
+  "sha256": "fe0b9122f1a4f1b23a13d16e315d18e73149e5275a15e1712e73dfb83bfd9773",
+  "id": "drc_about",
+  "http_status": 200,
+  "local_path": "raw/drc_about.raw",
+  "status": "captured_unreviewed",
+  "purpose": "public documentation and aggregate study metadata"
+}

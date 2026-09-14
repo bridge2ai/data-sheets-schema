@@ -1,0 +1,58 @@
+TITLE: Kids First: Whole Genome Sequencing in Structural Defects of the Neural Tube
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002591.v1.p1
+CAPTURED AT: 2026-09-14T03:21:25.112947+00:00
+
+dbGaP accession: phs002591.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002591.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Myelomeningocele (aka meningomyelocele, MM) is the most severe form of spina bifida, a neural tube defect (NTD) in humans and the most common CNS birth defect. MM is considered a genetically complex disease, and occurs in 3.72/10,000 live US birth, and is partly preventable with prenatal folate, but the genetic basis and the mechanisms by which folate work to reduce disease incidence remain obscure. MM is associated nearly uniformly with prenatal hydrocephalus and the Arnold-Chiari malformation, as well as paraplegia and lifelong neuromotor disability. The genes for several rare syndromic forms of NTDs are known, but the causes for the majority with sporadic MM remain unknown.
+Despite the importance of MM, most previous research has been limited to targeted sequencing and association studies of folate metabolism genes, or very small-scale exome sequencing. We hypothesize that de novo mutations (DNMs) produce likely gene disrupting (LGD) events that contribution to MM risk. Using conservative estimates of between 50-100 recurrently mutated discoverable genes contributing to risk, and our preliminary data demonstrating an excess of LGD DNMs in MM compared with control individuals, we estimate that with a cohort size of 1000 trios, we should uncover between 5-20 new recurrently mutated genes underlying MM, with minimal false-discovery. With this in mind, we formed the Spina Bifida Sequencing Consortium, and established a platform for data and sample sharing. Preliminary analysis of our first batch of 100 trios analyzed by WGS from GMKF suggests a wealth of important gene mutations. We have embarked on a new recruitment effort of an additional cohort of 400 new simplex MM trios, in collaboration with the US Spina Bifida Association, consented trios to allow for data sharing, and have performed detailed sample quality control. We also have preliminary data that use of dried bloodspot DNA from trios performs comparably to whole blood DNA, so will be happy to swap saliva for bloodspot recruitment at NIH’s preference. This cohort is now half-way assembled, with the remaining cohort to be ascertained in the next 6 months. We have established a workflow for de novo SNP/INDEL/SV detection from WGS and have ample computer storage and nodes to see the project to completion. We also plan to continue recruitment into the future with the goal of 2000 trios in the next 5 years. We propose a detailed bioinformatics workflow to identify gene mutations within a statistical framework, considering detailed scRNA expression profiling from developing mammalian neural tube, and have developed a robust functional validation workflow using Xenopus and mouse gene targeting. Our project has the potential to uncover a host of causes for this most common of the CNS birth defects, paving the way for future breakthroughs in detection, treatment, and prevention.
+Study Weblinks:
+Spina Bifida Sequencing Consortium (https://neurosciences.ucsd.edu/research/labs/gleeson/spinabifida/index.html)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 492
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002591.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+1. Family type: All samples are from trios (father, mother, affected child) where saliva or blood samples were obtained on both biological parents and the affected individual. These criteria were established to ensure that de novo mutations could be identified.
+2. Diagnosis: For each trio, the child has myelomeningocele (MM) that was diagnosed prior to or at the time of birth, with paralysis below the level of the spinal lesion. Almost all cases have coexisting hydrocephalus that required a ventriculoperitoneal shunt at birth. The only exception are cases that had fetal surgery to repair the myelomeningocele, because studies shows that fetal surgery can reduce the risk of hydrocephalus 1. This criterion was established to limit phenotypic variability, and ensure that all affected individuals have a uniformly severe form of neural tube defect. Our criteria represent the most severe form of neural tube defect that is compatible with long term survival.
+3. Demographics: Demographics including age and sex are presented for each affected child. In our cohort, most cases are between 1 and 20 years of age. Most parents are between 30 and 60 years of age. We maintain data on the year and location of birth so that we can track whether folate fortification was instituted by the time the child was conceived. Because the number of expected de novo mutations in an offspring correlates with the parental age at the time of conception 2, we track age of the parents at the time of conception, to allow correction for the number of expected de novo mutations
+4. Clinical information: The location of the spinal lesion, medications, seizure history, ambulatory information and health status were collected on each case including notable pregnancy events, trauma and delivery history. Most cases were identified through the national Spina Bifida Association, through Facebook, or outreach to Spina Bifida clinics. Cases were selected from among those that responded to a study invitation based upon our entry criteria. We have ability to recontact all cases if needed, and ability to gather additional information if required in the future.
+5. Family history: Family medical history relevant to spina bifida is collected, including history of neural tube defects, hydrocephalus, spina bifida occulta, or other birth defects.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Meningomyelocele (https://www.ncbi.nlm.nih.gov/mesh?term=Meningomyelocele)
+Spinal dysraphism (https://www.ncbi.nlm.nih.gov/mesh?term=Spinal dysraphism)
+Neural tube defects (https://www.ncbi.nlm.nih.gov/mesh?term=Neural tube defects)
+
+Study Attribution
+Principal Investigator
+Joseph G. Gleeson.
+University of California, San Diego, San Diego, California, USA.
+Funding Source
+X01HD100672-01.
+National Institutes of Health, Bethesda, Maryland, USA.
+P01HD104436.
+National Institutes of Health, Bethesda, Maryland, USA.

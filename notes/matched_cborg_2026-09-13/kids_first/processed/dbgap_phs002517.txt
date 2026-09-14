@@ -1,0 +1,87 @@
+TITLE: Childhood Cancer Data Initiative (CCDI): Molecular Characterization across Pediatric Brain Tumors and Other Solid and Hematologic Malignancies for Research, Diagnostic, and Precision Medicine
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002517.v4.p2
+CAPTURED AT: 2026-09-14T03:21:20.437827+00:00
+
+dbGaP accession: phs002517.v4.p2
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002517.v4.p2)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+This study contains tumor and germline WGS, RNA-Seq, Clinical Panel Sequencing, and other omics and molecular data for patients with pediatric brain tumors and other solid and hematologic malignancies. This data has been collected from multiple organizations including the multi-institute
+Children's Brain Tumor Network (https://cbtn.org/)
+(CBTN), the
+Pacific Pediatric Neuro-Oncology Consortium (https://pnoc.us/)
+(PNOC), and the
+Children's Hospital of Philadelphia Division for Genomic Diagnostics (https://www.chop.edu/centers-programs/division-genomic-diagnostics)
+(CHOP DGD).
+In addition to being available pre-publication and without embargo via dbGaP and the
+NCI Cancer Research Data Commons (https://datacommons.cancer.gov)
+, this data is made available via
+Cavatica (https://www.cavatica.org/)
+,
+PedcBioPortal (https://pedcbioportal.org/)
+and the
+Kids First Data Resource Portal (https://kidsfirstdrc.org/)
+. Collectively, this availability strives to accelerate the research process and enable members of the scientific and patient communities to partner and make discoveries faster than ever before.
+In 2019, the CBTN launched the
+Pediatric Brain Tumor Atlas (https://cbtn.org/pediatric-brain-tumor-atlas)
+, which now comprises the largest collection of childhood brain tumor data in the world. This resource is helping accelerate not only brain tumor research, but is also empowering discovery for other rare childhood conditions. Brain tumors are the most common form of cancer in children aged 0-19 in the United States, and are the largest cause of cancer-related deaths. The estimated number of new cases in 2019 is nearly 3,800, and thus brain tumors are a rare disease. Despite their relative rarity, the years of potential life lost due to brain tumors in 2009 was estimated at 47,631 years for children and adolescents aged 0-19 in the United States; this is a disproportionate amount of life lost compared to adult cancers and represents an unrecognized societal threat. There is an urgent need to improve therapies for these children. This sequencing cohort defines the largest, clinically annotated pediatric brain tumor cohort study to date and seeks to define the intersection of germline and somatic underpinnings of pediatric brain tumors across a shared developmental context of cancer and structural birth defects.
+Study Weblinks:
+Childrens Brain Tumor Network (https://www.cbtn.org)
+Pacific Pediatric Neuro-Oncology Consortium (https://pnoc.us/)
+CHOP Division of Genomic Diagnostics (https://www.chop.edu/centers-programs/division-genomic-diagnostics)
+Kids First Data Resource Portal (https://portal.kidsfirstdrc.org)
+PedCBio Portal (https://pedcbioportal.kidsfirstdrc.org/)
+Study Design:
+Tumor vs. Matched-Normal
+Study Type:
+Clinical Cohort
+Clinical Genetic Testing
+Clinical Trial
+Copy Number Variation (CNV)
+Exome Sequencing
+Genotype/Expression
+Individual-Level Genomic Data
+Longitudinal
+Longitudinal Cohort
+Multicenter
+Observational
+Parent-Offspring
+Parent-Offspring Trios
+Probands
+Prospective
+RNA Sequencing
+Sequencing
+Tissue Expression
+Tumor
+Tumor vs. Matched-Normal
+Whole Genome Sequencing
+Total number of consented subjects: 3960
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002517.v4.p2)
+
+Study Inclusion/Exclusion Criteria
+Pediatric and AYA patients diagnosed with a central nervous system tumor, solid tumor, or hematologic malignancy.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Brain Neoplasms (https://www.ncbi.nlm.nih.gov/mesh?term=Brain Neoplasms)
+Neoplasms (https://www.ncbi.nlm.nih.gov/mesh?term=Neoplasms)
+Pediatrics (https://www.ncbi.nlm.nih.gov/mesh?term=Pediatrics)
+Whole Genome Sequencing (https://www.ncbi.nlm.nih.gov/mesh?term=Whole Genome Sequencing)
+RNA-Seq (https://www.ncbi.nlm.nih.gov/mesh?term=RNA-Seq)
+
+Study Attribution
+Principal Investigators
+Adam C. Resnick, PhD.
+Children's Hospital of Philadelphia, PA, USA.
+Allison Heath, PhD.
+Children's Hospital of Philadelphia, PA, USA.

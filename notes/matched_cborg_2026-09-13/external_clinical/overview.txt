@@ -1,0 +1,20 @@
+SYNTHETIC CLINICAL METADATA FIXTURE — NOT A REAL DATASET
+
+The Synthetic Outpatient Measurements fixture describes imaginary longitudinal
+outpatient tables solely to test documentation software. Its identifier is
+https://example.org/synthetic-outpatient-measurements/v1 and the release described
+here is version 1, dated 2026-09-13. The example.org identifier is a placeholder,
+not a downloadable study or functioning data service.
+
+The hypothetical tables contain 1,200 fabricated patient identifiers and 3,600
+fabricated visits, with exactly three visits per fictional patient. They include
+age in years, systolic blood pressure in mmHg, and a visit ordinal. No observations
+were collected from people or copied from clinical records. No human subjects,
+consent process, ethics approval, patient recruitment, or real clinical sites are
+involved. The tables themselves are not supplied; this fixture supplies only
+documentation for metadata-generation acceptance checks.
+
+The documentation may be shared as a public software test fixture. No separate
+data license, contact address, sponsor, or maintenance commitment is declared.
+The fixture is not intended for diagnosis, treatment, model training, estimating
+population statistics, or assessing the performance of a real clinical dataset.

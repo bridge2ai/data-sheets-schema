@@ -1,0 +1,61 @@
+TITLE: Kids First: Whole Genome Sequencing in Recessive Structural Brain Defects
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002590.v1.p1
+CAPTURED AT: 2026-09-14T03:21:22.921699+00:00
+
+dbGaP accession: phs002590.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002590.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Almost 5% of all live births in the US (1:20 births) display an inborn defect, including both structural and functional/metabolic abnormalities. These are among the most common causes of Infant mortality in the developed world and underlie nearly half of hospitalizations in the first 3 years of life. Of the 35 major defects observable at birth from the International Clearinghouse for Birth Defects Surveillance Program (
+www.icbdsr.org (https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/www.icbdsr.org)
+, external link), about half involve the nervous system. Many of these result in lifelong neurodevelopmental disorders. Structural Brain Defects (SBDs) result from errors in development of the central nervous system, including defects in the forebrain, midbrain and hindbrain. Many SBDs arise as the consequence of a single gene bi-allelic mutation, and for this reason, occur more commonly in populations or communities with elevated consanguinity.
+Our lab has identified dozens of novel SBD genes using WES/WGS in consanguineous SBD families. Importantly, the genes that we and others have identified in these unique families are then used to advance diagnosis in pediatric SBDs around the world. We have built an enormous cohort of SBD families, including newly recruited families not yet studied genetically, and previous families that were negative for cause following WES analysis. Here we propose to collaborate with the Gabriella Miller Kids First Pediatric Research Program (X01) to have sequencing performed in individuals from a total of 200 families with genetically undiagnosed SBDs. The Gleeson Lab team of researchers is dedicated to the field of SBDs, with an outstanding track record of high-impact science, and a collaborative approach to discovery. We have 150 newly recruited families that we propose to study by WES by sequencing blood-derived DNA from two affected patients, or the parents and one affected patient. We also have 50 families in which WES was negative, which we propose to study in a multi-omics approach combining WGS from blood-derived DNA. We anticipate that this study will lead to the identification of many new molecular causes of SBDs, as well as uncover new genotype-phenotype correlations and new disease mechanisms, paving the way for future breakthroughs in detection, treatment and prevention.
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 1039
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002590.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+1. Family type: Most samples are from multiplex families (father, mother, two affected members), but a few families are simplex (father, mother, one affected, and one unaffected). In all cases there is documented consanguinity.
+2. Diagnosis: For each family, one or more children have an identical, or nearly identical, structural defect of the brain that was diagnosed in the first few years of life based upon presenting features of a severe neurodevelopmental disorders. In all families, a detailed pedigree is available including the specific clinical signs and symptoms of the affected(s) and the general health of the rest of the family, and documenting the inter-relatedness of the parents. In each family, brain MRI was obtained on the affected(s) to categorize the structural brain defects. These defects are grouped into several categories including defects of the forebrain, midbrain, and hindbrain, following expert MRI review. Exclusion criteria is a known genetic disease (but cases with negative diagnostic genetic testing are included) or perinatal history that would account for the structural defect (i.e. neonatal strokes or microcephaly due to prematurity).
+3. Demographics: Demographics, including age and sex, affectation status and general health are documented for each family member. Particular attention is paid to families in which there is any evidence of discordance in features between the affected members, or where any of the healthy children show subtle features of disease. Most families were collected through international outreach efforts where consanguinity rates are elevated, but where our lab has published extensively and shared the genetic backgrounds and population allele frequencies. Most children are between 0-20 years of age and most parents are between 20-40 years of age. All families have signed the UCSD consent forms for genetic sequencing and for skin punch which allows for broad data sharing.
+4. Clinical information: Detailed clinical information is available on each affected member of the family including pregnancy and neonatal history, developmental milestones, seizure history, medication history, brain MRI in all cases, as well as EEG, X-rays, notes from specialists such as ophthalmology and physical therapists, metabolic testing, karyotype, microarray and prior diagnostic genetic testing as medically indicated. We maintain contact information for all families, and most families retain that contact information for many years, meaning that if additional information, sampling or tests are requested, it is relatively easy to arrange.
+5. Family history: Family medical history relevant to neurodevelopmental disease including extended family history and other relevant pediatric disease is documented.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Brain (https://www.ncbi.nlm.nih.gov/mesh?term=Brain)
+Pontocerebellar Hypoplasia (https://www.ncbi.nlm.nih.gov/mesh?term=Pontocerebellar Hypoplasia)
+Lissencephaly (https://www.ncbi.nlm.nih.gov/mesh?term=Lissencephaly)
+Band Heterotopia of Brain (https://www.ncbi.nlm.nih.gov/mesh?term=Band Heterotopia of Brain)
+Polymicrogyria (https://www.ncbi.nlm.nih.gov/mesh?term=Polymicrogyria)
+Cerebellar Hypoplasia (https://www.ncbi.nlm.nih.gov/mesh?term=Cerebellar Hypoplasia)
+Dandy-Walker Syndrome (https://www.ncbi.nlm.nih.gov/mesh?term=Dandy-Walker Syndrome)
+Agenesis of Cerebellar Vermis (https://www.ncbi.nlm.nih.gov/mesh?term=Agenesis of Cerebellar Vermis)
+
+Study Attribution
+Principal Investigator
+Joseph G. Gleeson.
+University of California, San Diego, CA, USA.
+Funding Source
+X01 HD100698-01.
+National Institutes of Health, Bethesda, MD, USA.

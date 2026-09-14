@@ -1,0 +1,15 @@
+{
+  "id": "drc_quick_start_guide",
+  "url": "https://kidsfirstdrc.org/help-center/quick-start-guide/",
+  "retrieved_at": "2026-09-14T03:21:39.159082+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/help-center/quick-start-guide/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:21:39 GMT",
+  "bytes": 183555,
+  "sha256": "74334ddd4f87f0f286859d45cb31ae81f11053c47a2905c9860e82fcffa778a4",
+  "local_path": "raw/drc_quick_start_guide.raw",
+  "status": "captured_unreviewed"
+}
