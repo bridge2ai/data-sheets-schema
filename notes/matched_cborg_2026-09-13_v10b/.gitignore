@@ -1,0 +1,11 @@
+# Keep exact machine-bound launch inputs and originals locally.
+registration.json
+native_overlay.json
+rendered_jobs.json
+prompts/
+initial_requests/
+.local_drafts/
+attempts/
+billing.json*
+acceptances/
+reviews/*launch*.json

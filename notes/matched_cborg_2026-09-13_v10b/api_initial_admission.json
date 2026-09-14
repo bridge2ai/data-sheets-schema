@@ -1,0 +1,30 @@
+{
+  "counted_at": "2026-09-14T05:24:52.055338+00:00",
+  "method": "CBORG count_tokens only; no generation request",
+  "prior_settled_cost_usd": "3.29146500",
+  "remaining_additional_budget_usd": "196.70853500",
+  "per_attempt_usd": "5",
+  "generation_requests": 0,
+  "requests": [
+    {
+      "job": "CHORUS_api_rep1",
+      "request_sha256": "fbe1a56761179b36d624b24fa79cf2ceb189425c1c4384648d6f428a2be7a141",
+      "input_tokens": 41870,
+      "input_bound": 51268,
+      "output_ceiling": 128000,
+      "initial_reservation_usd": "3.52042500",
+      "fits_new_attempt_cap": true,
+      "fits_remaining_sequence_cap": true
+    },
+    {
+      "job": "KIDS_FIRST_api_rep1",
+      "request_sha256": "821efb1dbe2d922a7092b75c1ac49dccf8fff8b8e0f6b65d2189258a80d97343",
+      "input_tokens": 233534,
+      "input_bound": 281265,
+      "output_ceiling": 128000,
+      "initial_reservation_usd": "4.95790625",
+      "fits_new_attempt_cap": true,
+      "fits_remaining_sequence_cap": true
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 """Prepare a reviewed, hash-bound experiment manifest without model calls."""
 from datetime import datetime, timezone
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -41,11 +42,24 @@ def spec_for(job):
         bundle=Path(job["bundle"]), label=job["label"], condition="generic_v9",
         manifest=Path(job["manifest"]), chunk_manifest=Path(job["chunks"]),
         profile=job["profile"], profile_basis="stated by the registered caller",
-        run_date="2026-09-14",
+        run_date=job.get("run_date", "2026-09-14"),
         runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)")
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=HERE)
+    parser.add_argument("--cohort", default="generalized_v10")
+    parser.add_argument("--label-date", default="2026-09-13")
+    parser.add_argument("--run-date", default="2026-09-14")
+    parser.add_argument("--prior-billing", type=Path)
+    parser.add_argument("--prior-cost-usd")
+    parser.add_argument("--previous-attempt-audit", type=Path)
+    parser.add_argument("--render-only", action="store_true")
+    args = parser.parse_args()
+    output = args.output.resolve()
+    if (args.prior_billing is None) != (args.prior_cost_usd is None):
+        parser.error("prior billing and its registered total must be supplied together")
     registry = load_registry(ROOT / "data/preprocessed/source_manifest.yaml")
     cases = [{"project": p, "manifest": str(registry.path),
               "bundle": str(registry.bundle(p)),
@@ -77,9 +91,14 @@ def main():
                  ROOT / ".github/workflows/d4d_assistant_deterministic.config",
                  ROOT / "data/rubric/rubric10.txt", ROOT / "data/rubric/rubric20.txt",
                  HERE / "model_catalogue.json", HERE / "token_count_probe.json",
-                 HERE / "api_initial_admission.json",
                  HERE / "budgeted_cborg.py", HERE / "run_api_canary.py", Path(__file__)]:
         pins[str(path)] = sha(path)
+    if not args.render_only:
+        pins[str(output / "api_initial_admission.json")] = sha(output / "api_initial_admission.json")
+    if args.prior_billing:
+        pins[str(args.prior_billing.resolve())] = sha(args.prior_billing)
+    if args.previous_attempt_audit:
+        pins[str(args.previous_attempt_audit.resolve())] = sha(args.previous_attempt_audit)
     for path in sorted(external.iterdir()):
         if path.is_file():
             pins[str(path)] = sha(path)
@@ -102,14 +121,15 @@ def main():
                 job = {**case, "id": identifier, "execution_arm": arm, "runtime": runtime,
                        "method": method, "replicate": replicate,
                        "canary": replicate == 1 and case["project"] in {"CHORUS", "KIDS_FIRST"},
-                       "label": f"2026-09-13_claude-opus-5-{arm}-generalized-v10-{case['project'].lower()}_rep{replicate}"}
+                       "run_date": args.run_date,
+                       "label": f"{args.label_date}_claude-opus-5-{arm}-{args.cohort.replace('_','-')}-{case['project'].lower()}_rep{replicate}"}
                 spec = spec_for(job)
                 # Use the public CLI's corpus layout so provenance/receipt
                 # helpers resolve the same full/core files as generation.
                 # Dataset-qualified labels isolate each attempt's directories.
                 job["output_directory"] = str(spec.metadata_dir)
                 job["output_directories"] = sorted({str(spec.full_path.parent), str(spec.core_path.parent)})
-                instruction = HERE / "prompts" / f"{identifier}.md"
+                instruction = output / "prompts" / f"{identifier}.md"
                 instruction.parent.mkdir(parents=True, exist_ok=True)
                 keep(instruction, spec.instruction)
                 pins[str(instruction)] = sha(instruction)
@@ -120,7 +140,7 @@ def main():
                 if arm == "api":
                     job["offline_plan"] = api_runner.plan(spec)
                     request = api_runner.build_phase(spec, "full", carry={})
-                    initial = HERE / "initial_requests" / f"{identifier}.json"
+                    initial = output / "initial_requests" / f"{identifier}.json"
                     settings = api_runner._model_settings()
                     save(initial, {"model": settings["name"], "system": request.system,
                          "messages": request.messages, "thinking": settings.get("thinking"),
@@ -141,7 +161,7 @@ def main():
                 "rubric": str(ROOT / f"data/rubric/rubric{n}.txt"), "quoted_definition_sha256": None,
                 "observed_runtime_model": None, "canary_status": "not_run"}
         text = evaluator._build_system_prompt(f"rubric{n}")
-        path = HERE / "prompts" / f"rubric{n}_api_system.md"
+        path = output / "prompts" / f"rubric{n}_api_system.md"
         keep(path, text)
         pins[str(path)] = sha(path)
         instruments[f"rubric{n}_api_quality"] = {"system_prompt": str(path), "system_prompt_sha256": sha(path),
@@ -156,7 +176,7 @@ def main():
                             "generation_digest_md5": snapshot[0], "specification_sha256": snapshot[3]})
     catalogue = json.loads((HERE / "model_catalogue.json").read_bytes())
     selected_model = next(row for row in catalogue["models"] if row["model"] == "claude-opus-5")
-    manifest = {"schema_version": 1, "series": SERIES, "registered_at": datetime.now(timezone.utc).isoformat(),
+    manifest = {"schema_version": 1, "series": f"{args.cohort}_{args.label_date}", "registered_at": datetime.now(timezone.utc).isoformat(),
         "status": "awaiting_preflight_review" if external_status == "registered" else "draft_external_sources_pending", "repository": str(ROOT),
         "code_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "code_commit_basis": "source implementation base; experiment controllers and inputs are identified by pinned_files; the actual launch commit is retained in the attempt receipt",
@@ -167,7 +187,7 @@ def main():
                    "prices_per_token": {"input": 0.000005, "output": 0.000025, "cache_write": 0.00000625, "cache_read": 0.0000005},
                    "unknown_charge_policy": "retain reservation and stop", "automatic_whole_attempt_retries": 0,
                    "funding": "cap-limited staged sequence; the proposed full matrix is not assumed fully funded"},
-        "generation": {"template_condition": "generic_v9", "cohort_version": "generalized_v10",
+        "generation": {"template_condition": "generic_v9", "cohort_version": args.cohort,
                        "api_max_attempts": 1, "sdk_max_retries": 0,
                        "api_phase_deadline_seconds": api_runner.PHASE_WALL_CLOCK_SECONDS,
                        "agentic_attempt_deadline_seconds": 1800,
@@ -194,7 +214,20 @@ def main():
         "preservation_inventory": str(HERE / "historical_inventory.json"),
         "preservation_inventory_sha256": sha(HERE / "historical_inventory.json"),
         "pinned_files": pins}
-    save(HERE / "registration.json", manifest)
+    if args.prior_billing:
+        manifest["budget"]["continuation"] = {
+            "checkpoint": str(args.prior_billing.resolve()), "sha256": sha(args.prior_billing),
+            "cost_usd": args.prior_cost_usd,
+            "basis": "Settled charges from the rejected prior condition; same additional allocation, new attempt identities."}
+    if args.previous_attempt_audit:
+        audit = json.loads(args.previous_attempt_audit.read_bytes())
+        manifest["prior_attempt_artifacts"] = [
+            {"path": value["original_path"], "sha256": value["sha256"]}
+            for value in audit["copies"].values()]
+    if not args.render_only:
+        save(output / "registration.json", manifest)
+    else:
+        save(output / "rendered_jobs.json", {"generation": manifest["generation"], "budget": manifest["budget"]})
     print(json.dumps({"generation_jobs": len(jobs), "registered_canaries": sum(j["canary"] for j in jobs),
                       "required_canaries": 4, "external_status": external_status,
                       "input_pins": len(pins), "additional_budget_usd": 200}))

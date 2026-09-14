@@ -1,12 +1,16 @@
 """Freeze draft native execution controls without any model request."""
 from datetime import datetime,timezone
 from pathlib import Path
-import hashlib,json,subprocess
+import argparse,hashlib,json,subprocess
 
 HERE=Path(__file__).resolve().parent
 BASE=HERE.parent
 sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
-registration=BASE/'registration.json';r=json.loads(registration.read_bytes())
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--registration',type=Path,default=BASE/'registration.json')
+parser.add_argument('--output',type=Path,default=HERE/'overlay.json')
+args=parser.parse_args()
+registration=args.registration.resolve();r=json.loads(registration.read_bytes())
 if Path(r['repository']).resolve()!=BASE.parents[1].resolve():
     raise SystemExit('Prepare a fresh source/instrument registration in this checkout before freezing its native overlay')
 cli_alias=Path('/Users/marcin/.local/bin/claude')
@@ -32,6 +36,7 @@ value={'registered_at':datetime.now(timezone.utc).isoformat(),'status':'draft_aw
  'native_limits_observed_offline':{'context_window':200000,'max_output_tokens':64000},
  'limit_basis':'Installed CLI declaration during a scripted offline probe; distinct from CBORG route maxima (1M input, 128k output). Confirm runtime declaration, actual request ceilings and any compaction in the scientific trace.',
  'effort_policy':r['generation']['effort_policy'],'pinned_files':{str(p):sha(p) for p in files}}
-path=HERE/'overlay.json'
+path=args.output
+path.parent.mkdir(parents=True,exist_ok=True)
 with path.open('x') as f:json.dump(value,f,indent=2);f.write('\n')
 print(json.dumps({'overlay_sha256':sha(path),'pinned_files':len(files),'allowed_jobs':value['allowed_jobs'],'status':value['status']},indent=2))
