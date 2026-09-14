@@ -300,8 +300,9 @@ def shown_ranges(nested: "NestedClass") -> dict[str, str]:
     leaving the key unchanged — cached labels answering a worse-informed
     question, silently, which is the #465 failure this was meant to prevent.
 
-    `string` is excluded because it is the schema's `default_range`: naming it
-    costs size and carries no information. Enum-ranged attributes are excluded
+    Scalar `string` is excluded because it is the schema's `default_range`.
+    `string[]` must remain visible: a list is a different validation obligation
+    even when it has only one value (#1771). Enum-ranged attributes are excluded
     because their permitted values are rendered separately and in more detail.
 
     Universal attributes are excluded and stated once as `UNIVERSAL_RANGES`
@@ -313,7 +314,7 @@ def shown_ranges(nested: "NestedClass") -> dict[str, str]:
     and the cache key in step.
     """
     return {k: v for k, v in sorted(nested.ranges.items())
-            if v not in ("string", "string[]") and k not in nested.enums
+            if v != "string" and k not in nested.enums
             and k not in UNIVERSAL_ATTRIBUTES}
 
 
@@ -650,9 +651,8 @@ def render(digest: ClassDigest, *, vocabulary: dict | None = None) -> str:
             # Ranges of nested attributes, for the same reason the enums are
             # here: the top-level listing never reaches them (#486).
             #
-            # Only non-string ranges are shown. `string` is the schema's
-            # default_range, so naming it costs digest size and tells a reader
-            # nothing — while `uriorcurie`, `integer` and a class range are
+            # Scalar string ranges are omitted; string[] still states a list
+            # obligation (#1771). `uriorcurie`, `integer` and a class range are
             # exactly where a plausible-looking value can be the wrong kind.
             # `unit: mg/dL` is a correct-looking string under a `uriorcurie`
             # declaration, and it was invisible to the fitness judge because the

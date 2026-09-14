@@ -113,6 +113,7 @@ def main():
     write_new(attempt / "started.json", receipt)
     try:
         record = api_runner.execute(spec, client=client, resume=False)
+        client.messages.require_active()
         verify(manifest, args.registration, manifest_sha)
         verify_history(manifest)
         receipt.update(status="validation_failed" if record["validation_problems"] else "completed_pending_independent_review",

@@ -67,17 +67,42 @@ class Ledger:
         if not estimate.is_finite() or estimate <= 0:
             raise BudgetStop("request reservation must be finite and positive")
         with self.transaction() as state:
+            self._check_stopped(state, attempt)
             if any(row["status"] != "settled" for row in state["requests"]):
                 raise BudgetStop("an earlier charge is pending or unknown; reconcile before continuing")
             total = sum((money(row["cost_usd"]) for row in state["requests"]), Decimal(0))
             used = sum((money(row["cost_usd"]) for row in state["requests"] if row["attempt"] == attempt), Decimal(0))
             if estimate <= 0 or total + estimate > self.total_cap or used + estimate > self.attempt_cap:
-                raise BudgetStop(f"request reserve ${estimate} exceeds remaining budget: attempt ${self.attempt_cap-used}, sequence ${self.total_cap-total}")
-            ticket = uuid.uuid4().hex
-            state["requests"].append({"id": ticket, "attempt": attempt,
-                "request_sha256": request_sha256, "reserved_at": now(),
-                "reserved_usd": str(estimate), "status": "pending"})
-            return ticket
+                reason = f"request reserve ${estimate} exceeds remaining budget: attempt ${self.attempt_cap-used}, sequence ${self.total_cap-total}"
+                state.setdefault("stopped_attempts", {})[attempt] = {
+                    "stopped_at": now(), "reason": reason,
+                    "denied_request_sha256": request_sha256,
+                    "denied_reservation_usd": str(estimate), "paid_request": False}
+                ticket = None
+            else:
+                ticket = uuid.uuid4().hex
+                state["requests"].append({"id": ticket, "attempt": attempt,
+                    "request_sha256": request_sha256, "reserved_at": now(),
+                    "reserved_usd": str(estimate), "status": "pending"})
+        # Raise after the transaction commits, or the stop event is lost.
+        if ticket is None:
+            raise BudgetStop(reason)
+        return ticket
+
+    @staticmethod
+    def _check_stopped(state, attempt):
+        stop = state.get("stopped_attempts", {}).get(attempt)
+        if stop:
+            raise BudgetStop(f"attempt previously stopped: {stop['reason']}")
+
+    def check_attempt(self, attempt):
+        with self.transaction() as state:
+            self._check_stopped(state, attempt)
+
+    def stop_attempt(self, attempt, reason):
+        with self.transaction() as state:
+            state.setdefault("stopped_attempts", {}).setdefault(
+                attempt, {"stopped_at": now(), "reason": reason})
 
     def settle(self, ticket, actual, *, response_sha256, usage, protocol_failure=None):
         actual = money(actual)
@@ -106,8 +131,27 @@ class CappedMessages:
         self.verify = verify
         self.initial_request = initial_request
         self.requests_started = 0
+        self.stop_reason = None
 
     def prepare(self, request):
+        if self.stop_reason is not None:
+            raise BudgetStop(f"attempt previously stopped: {self.stop_reason}")
+        try:
+            self.ledger.check_attempt(self.attempt)
+            return self._prepare(request)
+        except Exception as exc:
+            # The runner may catch repair/report exceptions and continue.
+            # Preserve the first refusal across calls AND controller restarts.
+            self.stop_reason = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
+            self.ledger.stop_attempt(self.attempt, self.stop_reason)
+            raise
+
+    def require_active(self):
+        if self.stop_reason is not None:
+            raise BudgetStop(self.stop_reason)
+        self.ledger.check_attempt(self.attempt)
+
+    def _prepare(self, request):
         self.verify()
         if request.get("model") != self.model:
             raise BudgetStop("model differs from registration")
@@ -138,7 +182,17 @@ class CappedMessages:
         estimate = (input_bound * max(money(self.prices["input"]), money(self.prices["cache_write"]))
                     + ceiling * money(self.prices["output"]))
         raw = (json.dumps(request, sort_keys=True, ensure_ascii=False) + "\n").encode()
-        ticket = self.ledger.reserve(self.attempt, estimate, digest(raw))
+        try:
+            ticket = self.ledger.reserve(self.attempt, estimate, digest(raw))
+        except BudgetStop as exc:
+            folder = self.evidence.parent / "denied_requests" / uuid.uuid4().hex
+            folder.mkdir(parents=True, exist_ok=False)
+            (folder / "request.json").write_bytes(raw)
+            write_new(folder / "admission.json", {
+                "input_count": count, "input_bound": input_bound,
+                "output_ceiling": ceiling, "required_reservation_usd": str(estimate),
+                "denied_at": now(), "reason": str(exc), "paid_request": False})
+            raise
         self.requests_started += 1
         folder = self.evidence / ticket
         folder.mkdir(parents=True, exist_ok=False)
