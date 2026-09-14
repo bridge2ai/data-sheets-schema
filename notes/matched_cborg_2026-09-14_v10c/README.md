@@ -1,4 +1,10 @@
-# v10c canary registration — awaiting review and CI
+# v10c canary registration — preserved, unexecuted
+
+Review approved and PR #1785 passed exact-commit CI before merging. No
+scientific calls ran under this registration. The
+[2026-09-14 continuation](../matched_cborg_final_controls_2026-09-14.md)
+prepares v10d with the final optional budget controls before the next launch.
+The following records the unchanged v10c registration and its launch gates.
 
 This is a distinct condition after v10b failed independent source review.
 The [dated continuation plan](../source_status_audit_canary_2026-09-14.md)

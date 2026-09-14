@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-09-14T08:26:11.527297+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "bae17a6d500794231a6b12c83ef5e6540a26bdf29feae83006e83652791c9993",
+  "native_overlay_sha256": "c757ec6f43b2b3e13f1237b5be612c95861c0b2ebb39eb2a0fd0a046c0008c71",
+  "registered_pins_verified": 461,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "rejected_original_files_verified": 85,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 10,
+  "estimated_cost_usd": "6.32208600",
+  "remaining_additional_budget_usd": "193.67791400",
+  "default_attempt_cap_usd": "5",
+  "proposed_per_job_caps_usd": {
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "kids_first_exception_approval": "pending_explicit_user_approval",
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Public metadata cannot establish independent inspection of unpublished originals. A candidate cap policy does not grant spending approval."
+}
