@@ -472,7 +472,10 @@ allowed to prefer a value merely because the full record already states it.
 2. Confirm from the agent's read history that no prior-run D4D, evaluation,
    or reconciliation report was used.
 3. Check the full record against the current source bundle and manifest:
-   - resolve source disagreements using authority, version, date, and scope;
+   - establish that any claimed source conflict is genuine using the uniform
+     rules' contextual and numerical compatibility check; then resolve it by
+     the declared manifest ranking and applicable supersession. Retain
+     compatible or uncertain observations with their scope and bounds;
    - identify unsupported, stale, omitted, or mis-scoped assertions;
    - verify repeated identifiers, versions, dates, counts, licenses, access
      rules, people, and organizations are internally consistent;
@@ -481,6 +484,11 @@ allowed to prefer a value merely because the full record already states it.
      collection, processing or privacy, including prose and nested list
      entries. Compare each occurrence with the supporting passage's subject,
      release/date and status: completed, in progress, planned or unstated.
+     Include the governing clause or heading when checking and quoting that
+     status, including future scope inherited across a list or sentence. A
+     present-element boolean and an applied-method assertion each need
+     evidence of that state; a neighboring plan or a generic goal does not
+     supply it. An ambition also does not establish current non-attainment.
      A repository or tool description establishes a capability, not its use
      on this dataset; a format table alone does not establish released
      availability. A caveat in another field does not qualify an unqualified
@@ -509,6 +517,11 @@ allowed to prefer a value merely because the full record already states it.
    assertion. Recheck the subject, release/date, operational status and field
    meaning of every added or changed assertion against its source passage;
    a repair must not introduce a stronger availability or privacy claim.
+   An audit recommendation is also subject to this check: restore the
+   governing source context before accepting an isolated quotation as an
+   applied method or present element. Correct a manufactured source conflict
+   when its observations are compatible; do not drop an observation merely
+   to follow a source-priority recommendation.
    Keep a supported plan or in-progress fact qualified in its own value where
    that field permits it, with evidence commentary in `source_caveats`.
    **Every back-ported or repaired value gets its receipt**:

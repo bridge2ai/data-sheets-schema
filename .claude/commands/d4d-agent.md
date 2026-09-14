@@ -179,7 +179,11 @@ For each declared project:
 When multiple sources describe the same dataset:
 1. Merge complementary information from all sources
 2. Prefer more detailed and specific information over generic descriptions
-3. Resolve conflicts by the declared ranking, not by your own reading of
+3. First apply the uniform rules' compatibility check to the subject, units,
+   population/release, observation time and numerical meaning. Compatible
+   bounds and differently scoped observations do not need a source-priority
+   winner; preserve their qualifications and any uncertainty about comparability.
+   Resolve genuine conflicts by the declared ranking, not by your own reading of
    authority and recency: `source_priority` in
    `data/preprocessed/source_manifest.yaml`, and `superseded_by` where a source
    states which one replaced it. `d4d download priority --project X --decide

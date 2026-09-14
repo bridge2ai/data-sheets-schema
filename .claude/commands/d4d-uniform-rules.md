@@ -26,6 +26,14 @@ to every project:
   entities into a single claim.
 
 - **Where two sources disagree, prefer the one the manifest ranks higher.**
+  First establish a genuine conflict: compare the subject, units,
+  population/release, observation time, and whether a figure is exact, an
+  approximation, a range or a bound. Twelve is compatible with more than ten.
+  Different figures, units or document dates alone do not prove a conflict.
+  Call a conflict only when comparable claims cannot both be true; where
+  comparability is uncertain, retain the qualified observations and that
+  uncertainty. Keep bounds as bounds and do not silently combine populations.
+
   State its value, and record in the caveat that the sources disagreed, what
   each said, and which was preferred. The ranking is `source_priority` in
   `data/preprocessed/source_manifest.yaml`, lowest tier strongest;
@@ -149,6 +157,18 @@ to every project:
   fact about that version; a passage whose subject is another dataset
   describes that other dataset and belongs only in `related_datasets`. A
   receipt's snippet comes from a passage about the value's own subject.
+
+  Read the governing clause or heading and any explicit local change of
+  scope. A future commitment or aim can govern later clauses and every item
+  of an enumeration even when those items do not repeat the modal verb. A
+  matching snippet or an audit's quoted fragment can omit that context;
+  inspect the enclosing passage. A plan does not establish that an element
+  is present, an operation has been applied, or a capability is currently
+  absent. Do not infer actual-presence booleans or completed methods from a
+  plan, and do not turn an ambition into an assertion of current
+  non-attainment. Preserve supported plans with explicit status in fields
+  that permit them; a caveat elsewhere cannot qualify an unsupported
+  actual-presence or completion assertion.
 
 - **A figure the record derives — a sum, difference, fraction, count — is
   stated as the record's own computation with its inputs named, never as a
