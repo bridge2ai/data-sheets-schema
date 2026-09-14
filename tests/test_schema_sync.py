@@ -122,12 +122,18 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         added or removed, no schema hash or record validity moves — and
         both new digests are in the ledger. The v9 CHORUS canary of
         2026-09-12 consumed `a91bad8b`, which its record carries.
+
+        `cd3c79f2` -> the pinned value below, on 2026-09-13 (#1771):
+        nested string-list cardinality is now rendered. Neutral moves from
+        `029c2abc` to `94859bbb`. Schema bytes and inventories are unchanged;
+        the failed v10 CHORUS canary retains its prior `cd3c79f2` instrument.
+        Both previous profile inventories remain in the historical ledger.
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=BRIDGE2AI)),
-            "cd3c79f2c62f11675d5ce2c1df96b88e")
+            "6be1582236d9320bac6040b9a8b92da9")
 
 
 class SyncCheckTest(unittest.TestCase):
