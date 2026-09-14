@@ -147,9 +147,13 @@ class CappedMessages:
                   "output_ceiling": ceiling, "reserved_usd": str(estimate), "token_count_at": now()})
         return ticket, folder
 
-    def finish(self, ticket, folder, response):
+    def finish(self, ticket, folder, response, *, stream_complete=None):
         value = response.model_dump(mode="json")
         write_new(folder / "response.json", value)
+        terminal_reasons = {"end_turn", "max_tokens", "stop_sequence", "tool_use", "pause_turn",
+                            "refusal", "model_context_window_exceeded"}
+        if stream_complete is False or value.get("stop_reason") not in terminal_reasons:
+            raise BudgetStop("response completion is unverified; original response and reservation retained")
         usage = value.get("usage") or {}
         if not all(type(usage.get(k)) is int and usage[k] >= 0 for k in ("input_tokens", "output_tokens")):
             raise BudgetStop("response usage is missing; reservation retained")
@@ -177,13 +181,25 @@ class CappedMessages:
         with self.client.messages.stream(**request) as wrapped:
             class ObservedStream:
                 result = None
+                saw_stop = False
+                exhausted = False
 
                 def __iter__(self):
-                    return iter(wrapped)
+                    for event in wrapped:
+                        if getattr(event, "type", None) == "message_stop":
+                            self.saw_stop = True
+                        yield event
+                    self.exhausted = True
 
                 def get_final_message(self):
                     if self.result is None:
-                        self.result = owner.finish(ticket, folder, wrapped.get_final_message())
+                        # Even a caller that goes directly to the final message
+                        # must establish completeness through the observed stream.
+                        if not self.exhausted:
+                            for _ in self:
+                                pass
+                        self.result = owner.finish(ticket, folder, wrapped.get_final_message(),
+                                                   stream_complete=self.saw_stop)
                     return self.result
 
                 def __getattr__(self, name):

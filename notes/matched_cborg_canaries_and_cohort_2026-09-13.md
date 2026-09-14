@@ -199,3 +199,4 @@ or a self-reported identity alone.
   phases will fit. Every later request needs fresh admission against the same
   cumulative attempt and $200 sequence caps. Fourteen offline controller/SDK
   tests pass, including invalid usage, unknown charges and model substitution.
+- 2026-09-13: Independent Codex review of public PR #1764 found one spending-guard defect, filed as [#1765](https://github.com/bridge2ai/data-sheets-schema/issues/1765). A streamed response with no verified terminal stop reason now retains its reservation and blocks further spending. Both real-SDK malformed-stream regressions fail against the prior controller and pass with the fix; all 16 offline tests pass. The unexecuted round-1 registration is archived before refreshing pins. No scientific calls have run.

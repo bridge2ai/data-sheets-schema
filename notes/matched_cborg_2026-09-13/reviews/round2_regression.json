@@ -1,0 +1,15 @@
+{
+  "observed_at": "2026-09-14T04:05:04.917042+00:00",
+  "finding": "https://github.com/bridge2ai/data-sheets-schema/issues/1765",
+  "fixed_tests": {
+    "passed": 16,
+    "log_sha256": "70e4f141f0ebdcea0b20fdad79ae2967534dabb9591cf897387aae9553c06057"
+  },
+  "counterfactual": {
+    "implementation_commit": "32b1b6e811bec9e4da10b29780e27359478a954c",
+    "expected_regression_failures": 2,
+    "deselected": 14,
+    "log_sha256": "6009fd58dd449cbc57117b8ca3e746d2a3cc89e73ea1b825a18c550e89d52ef3"
+  },
+  "scientific_calls": 0
+}

@@ -1,6 +1,6 @@
 {
-  "observed_at": "2026-09-14T04:06:31.270142+00:00",
-  "registration_sha256": "0fbe4d0853b0fbdcef6f4788532420800428aecd069ae8db48fa5a3485495a12",
+  "observed_at": "2026-09-14T03:52:00.797721+00:00",
+  "registration_sha256": "705ac7c884774b4429e0f2cdf2fc85828c52f457a78bb4662a0326ca81ea499e",
   "status": "offline_checks_passed",
   "generation_jobs": 32,
   "matched_pairs": 16,
@@ -15,12 +15,11 @@
     "article_full_text_captured": false
   },
   "controller_tests": {
-    "passed": 16,
+    "passed": 14,
     "scientific_requests": 0,
-    "log_sha256": "70e4f141f0ebdcea0b20fdad79ae2967534dabb9591cf897387aae9553c06057",
-    "counterfactual_expected_failures": 2
+    "log_sha256": "19c8483afe6819e0a6a3fc8ef9a27080703cac338577a8cbfd95d69c3e927b92"
   },
   "scientific_canaries_run": 0,
-  "independent_review": "round 2 pending; round 1 finding #1765 fixed",
+  "independent_review": "pending",
   "ci_for_new_registration": "pending"
 }

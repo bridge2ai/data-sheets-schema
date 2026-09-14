@@ -29,14 +29,19 @@ class Fake:
         self.calls += 1
         if self.fail:
             raise TimeoutError("response was lost")
-        value = {"model": "claude-opus-5", "content": [{"type": "text", "text": "fixture"}],
+        value = {"model": "claude-opus-5", "stop_reason": "end_turn", "content": [{"type": "text", "text": "fixture"}],
                  "usage": {"input_tokens": 100, "output_tokens": 50,
                            "cache_read_input_tokens": 1000, "cache_creation_input_tokens": 500}}
         return SimpleNamespace(model_dump=lambda **kw: value)
 
     @contextmanager
     def stream(self, **request):
-        yield SimpleNamespace(get_final_message=lambda: self.create(**request))
+        class Stream:
+            def __iter__(self):
+                yield SimpleNamespace(type="message_stop")
+            def get_final_message(inner):
+                return self.create(**request)
+        yield Stream()
 
 
 def client(tmp_path, *, fail=False, cap=5, verify=lambda: None):
@@ -157,7 +162,8 @@ def test_negative_cache_usage_keeps_unknown_charge_reserved(tmp_path):
 
 
 @pytest.mark.parametrize("project", ["CHORUS", "KIDS_FIRST"])
-def test_registered_first_request_passes_real_runner_and_sdk_offline(tmp_path, project):
+@pytest.mark.parametrize("stop_reason", ["end_turn", None])
+def test_registered_first_request_passes_real_runner_and_sdk_offline(tmp_path, monkeypatch, project, stop_reason):
     """Exercise actual request assembly, SDK token count and SSE handling.
 
     Every HTTP request terminates in MockTransport; no provider is contacted.
@@ -165,6 +171,7 @@ def test_registered_first_request_passes_real_runner_and_sdk_offline(tmp_path, p
     import anthropic
     import httpx
     from data_sheets_schema import api_runner
+    monkeypatch.setattr(api_runner, "MAX_ATTEMPTS", 1)
     here = Path(__file__).resolve().parent
     request = json.loads((here / "initial_requests" / f"{project}_api_rep1.json").read_bytes())
     observed = json.loads((here / "api_initial_admission.json").read_bytes())["requests"]
@@ -184,7 +191,7 @@ def test_registered_first_request_passes_real_runner_and_sdk_offline(tmp_path, p
             {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
             {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "offline fixture"}},
             {"type": "content_block_stop", "index": 0},
-            {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": None}, "usage": {"output_tokens": 1}},
+            {"type": "message_delta", "delta": {"stop_reason": stop_reason, "stop_sequence": None}, "usage": {"output_tokens": 1}},
             {"type": "message_stop"},
         ]
         wire = "".join(f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events)
@@ -194,8 +201,16 @@ def test_registered_first_request_passes_real_runner_and_sdk_offline(tmp_path, p
     ledger = Ledger(tmp_path / "ledger.json", manifest_sha256="offline")
     capped = CappedClient(sdk, ledger=ledger, attempt="offline", evidence=tmp_path / "requests",
         model=request["model"], prices=PRICES, verify=lambda: None, initial_request=request)
-    result = api_runner._call_with_retry(capped, **request, temperature=0, wall_clock=5)
-    assert result.stop_reason == "end_turn" and result.content[0].text == "offline fixture"
+    if stop_reason is None:
+        with pytest.raises(BudgetStop, match="completion is unverified"):
+            api_runner._call_with_retry(capped, **request, temperature=0, wall_clock=5)
+        assert json.loads(ledger.path.read_bytes())["requests"][0]["status"] == "pending"
+        assert len(list((tmp_path / "requests").rglob("response.json"))) == 1
+        with pytest.raises(BudgetStop, match="pending or unknown"):
+            ledger.reserve("another-attempt", 0.001, "next-request")
+    else:
+        result = api_runner._call_with_retry(capped, **request, temperature=0, wall_clock=5)
+        assert result.stop_reason == "end_turn" and result.content[0].text == "offline fixture"
+        assert json.loads(ledger.path.read_bytes())["requests"][0]["status"] == "settled"
     assert paths == ["/v1/messages/count_tokens", "/v1/messages"]
-    assert json.loads(ledger.path.read_bytes())["requests"][0]["status"] == "settled"
     sdk.close()
