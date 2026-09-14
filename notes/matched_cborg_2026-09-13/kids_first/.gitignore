@@ -1,0 +1,6 @@
+# Original web responses are retained locally with capture hashes. Publication
+# uses the selected documentation and aggregate metadata, not site scripts,
+# challenge pages, or participant identifiers embedded in old release notes.
+raw/
+discovery/
+__pycache__/

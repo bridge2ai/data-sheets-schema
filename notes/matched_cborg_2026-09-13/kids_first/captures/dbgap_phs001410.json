@@ -1,0 +1,15 @@
+{
+  "id": "dbgap_phs001410",
+  "url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001410",
+  "retrieved_at": "2026-09-14T03:21:29.142475+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001410.v2.p2",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": null,
+  "bytes": 24390,
+  "sha256": "9af9bc1095b7c70b409b97eb805126efa7b8a2b5acd8281f9a934370a3eba315",
+  "local_path": "raw/dbgap_phs001410.raw",
+  "status": "captured_unreviewed"
+}

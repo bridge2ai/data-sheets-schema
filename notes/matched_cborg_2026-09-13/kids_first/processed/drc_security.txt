@@ -1,0 +1,103 @@
+TITLE: Data Security - Kids First
+SOURCE URL: https://kidsfirstdrc.org/help-center/security/
+CAPTURED AT: 2026-09-14T03:21:41.061294+00:00
+
+Getting Started
+Quick Start Guide (https://kidsfirstdrc.org/help-center/quick-start-guide/)
+Video Tutorials (https://kidsfirstdrc.org/help-center/video-tutorials/)
+Studies Tool (https://kidsfirstdrc.org/help-center/studies-tool/)
+Our Data Process (https://kidsfirstdrc.org/help-center/our-data-process/)
+Accessing Controlled Data via dbGaP (https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/)
+Connecting Platforms (https://kidsfirstdrc.org/help-center/connecting-platforms/)
+User Support (https://kidsfirstdrc.org/help-center/support-sessions/)
+Data Exploration
+Applying Filters (https://kidsfirstdrc.org/help-center/applying-filters/)
+Participants Tab (https://kidsfirstdrc.org/help-center/participants-tab/)
+Biospecimens Tab (https://kidsfirstdrc.org/help-center/biospecimens-tab/)
+Data Files Tab (https://kidsfirstdrc.org/help-center/data-files-tab/)
+Variant Search (https://kidsfirstdrc.org/help-center/variant-search/)
+Portal Data Dictionary (https://kidsfirstdrc.org/help-center/data-dictionary/)
+Analyzing Data
+Cavatica Cloud Platform (https://kidsfirstdrc.org/help-center/cavatica-cloud-platform/)
+Variant Workbench (https://kidsfirstdrc.org/help-center/variant-workbench/)
+Export Locally (https://kidsfirstdrc.org/help-center/export-locally/)
+Applying for Cloud Credits (https://kidsfirstdrc.org/help-center/applying-for-cloud-credits/)
+Cost FAQs (https://kidsfirstdrc.org/help-center/cost-faqs/)
+Data Security (https://kidsfirstdrc.org/help-center/security/)
+How Kids First DRC Protects Your Data and Privacy
+The Gabriella Miller Kids First Data Resource Center (Kids First DRC), supported by the National Institutes of Health (NIH), is committed to protecting ecosystem data participant privacy while enabling responsible scientific discovery.
+Kids First DRC follows NIH policies and federal regulations to ensure that participant data is secure, de-identified, and accessed only by authorized researchers for approved purposes.
+Our Approach: Controlled Access and Responsible Use
+Kids First DRC uses a controlled-access data model, which means:
+Participant data does not include identifying information
+Only approved researchers (“authorized users”) can access data
+Access is granted only for specific, reviewed research purposes
+Data use is governed by NIH data sharing and data use policies
+Many datasets are made available through NIH-designated systems such as
+dbGaP, (https://grants.nih.gov/policy-and-compliance/policy-topics/sharing-policies/accessing-data/requirements)
+which manage controlled access to sensitive genomic and health data.
+How We Protect Participant Privacy
+De-identification and Data Safeguards
+Before data is shared:
+Kids First does not receive direct identifiers like names or contact details
+Data is assigned codes to protect participant identity
+Additional protections are applied in accordance with NIH and federal privacy standards
+These steps help ensure that individuals cannot be readily identified from the data.
+Secure, Authorized Access
+Access to Kids First data is limited to approved investigators working within secure environments, including platforms such as
+CAVATICA (https://www.cavatica.org/)
+.
+Within these environments:
+Data remains in a secure, cloud-based infrastructure
+Access is restricted to authorized users with approved credentials
+Data use is logged, monitored, and auditable
+Data Access Review and Approval
+Researchers must apply for access through a formal review process.
+This includes:
+Submission of a Data Access Request (DAR) describing the proposed research
+Review by an NIH Data Access Committee (DAC)
+Approval only for research that aligns with participant consent and NIH policy
+Access is granted only after this review process is completed.
+Data Use Agreements and Researcher Responsibilities
+All approved researchers must:
+Agree to NIH Data Use Certifications (DUCs)
+Comply with all applicable NIH data use policies and security requirements
+Use data only for the approved research purpose
+Not attempt to identify or contact participants
+Failure to comply can result in revocation of access and additional enforcement actions.
+Institutional Accountability
+Researchers access Kids First data through their affiliated institutions (such as universities or hospitals).
+Institutions must agree to uphold NIH data use requirements
+They are responsible for ensuring their researchers comply with all policies
+Violations may result in consequences for both the individual and the institution
+Monitoring, Compliance, and Enforcement
+Kids First and NIH implement safeguards to:
+Monitor data access and usage
+Detect unauthorized activity or policy violations
+Investigate and respond to potential misuse
+Enforcement actions may include:
+Suspension or termination of data access
+Requirement to correct or withdraw research findings
+Institutional notification and further review
+Governance and Federal Oversight
+Kids First operates under NIH governance and complies with:
+Federal regulations for human subjects research
+NIH Genomic Data Sharing (GDS) Policy (https://grants.nih.gov/policy-and-compliance/policy-topics/sharing-policies/gds/overview)
+Institutional Review Board (IRB) oversight, where applicable
+These layers of oversight ensure that data is used ethically, responsibly, and in alignment with participant consent.
+Understanding Risk and How We Address It
+While no system can eliminate all risk, Kids First is designed to:
+Reduce risk through controlled-access systems and de-identification
+Prevent misuse through review, agreements, and training
+Detect and respond through monitoring and enforcement
+We continuously evaluate and strengthen our safeguards as technologies and risks evolve.
+Our Commitment to Participants and Families
+Kids First exists because of the generosity of participants and families.
+We are committed to:
+Protecting participant privacy using NIH-approved standards
+Ensuring data is used only for responsible, scientifically valid research
+Advancing discoveries that improve outcomes for children
+Questions About Data Privacy?
+If you have questions about how data is protected, we’re here to help.
+Contact Us (mailto:support@kidsfirstdrc.org)
+or explore additional resources in our Help Center.

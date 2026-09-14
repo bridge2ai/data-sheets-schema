@@ -1,0 +1,49 @@
+TITLE: Gabriella Miller Kids First (GMKF) Pediatric Research Program in Susceptibility to Ewing Sarcoma Based on Germline Risk and Familial History of Cancer
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001228
+CAPTURED AT: 2026-09-14T03:21:21.414974+00:00
+
+dbGaP accession: phs001228.v3.p2
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs001228.v3.p2)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Ewing sarcoma (EWS) is a deadly bone cancer that occurs in children and adolescents. Mounting evidence suggests that a genetic predisposition exists for this pediatric cancer, although the specific genetic contribution has yet to be identified. EWS has never been linked to a specific cancer predisposition syndrome, although several case reports have been published that describe siblings and cousins with EWS. Furthermore, neuroectodermal tumors appear to occur more commonly in families with EWS. The two consistent epidemiology findings in EWS include a very strong Caucasian predilection and increased rates of hernia in EWS patients and their family members. Finally, the role of genetic microsatellite repeats in EWS tumorigenesis has been recently described, and these GGAA microsatellites are polymorphic in repeat size and location across the genome.
+The study goals of this Kids First project include (1) To identify cancer predisposition genes in EWS trios increasing disease risk, (2) To identify genome-wide GGAA microsatellite repeats in EWS trios increasing disease risk, and (3) To identity de novo mutation and structural variant rates in EWS trios reflecting underlying DNA repair defects that increase disease risk. As part of the Kids First Common Fund initiative, this study proposal will further elucidate the genetic contribution to pediatric cancer development. Around 375 of these trios were selected for whole genome sequencing as part of the Gabriella Miller Kids First fund. The EWS trios have been collected as part of the Children's Oncology Group's AEPI10N5 Study ("Genetic Epidemiology of Ewing Sarcoma"), and each trio has associated phenotypic data including a detailed family history. We will interrogate the sequence data using our genomic analysis pipeline at the University of Utah and the Utah Science Technology and Research initiative's (USTAR) Center for Genetic Discovery. We will look for the genetic contribution to EWS and the sequence data with be shared in a repository designated by the Kids First Common Fund.
+The WGS of these ~375 EWS trios will help us to understand the genetic origins of a deadly childhood cancer and may lead to novel strategies for prevention and treatment.
+Study Weblinks:
+X01 Projects GMKF: Genetic Contribution to Ewing Sarcoma in 330 Parent-Offspring Trios (https://commonfund.nih.gov/kidsfirst/X01Projects#Schiffman)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 1332
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs001228.v3.p2)
+
+Study Inclusion/Exclusion Criteria
+Around 375 "trio" samples were selected for whole genome sequencing as part of the Gabriella Miller Kids First EWS project. Patients with Ewing sarcoma (germline tissues), along with germline DNA from the proband's mother and/or father make up each trio. The EWS trios have been collected as part of the Children's Oncology Group's AEPI10N5 Study ("Genetic Epidemiology of Ewing Sarcoma"), and each trio has associated phenotypic data including a detailed family history.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Sarcoma, Ewing (https://www.ncbi.nlm.nih.gov/mesh?term=Sarcoma, Ewing)
+Neoplasms (https://www.ncbi.nlm.nih.gov/mesh?term=Neoplasms)
+
+Study Attribution
+Principal Investigator
+Joshua D. Schiffman, MD.
+Huntsman Cancer Institute, University of Utah, Salt Lake City, UT, USA.

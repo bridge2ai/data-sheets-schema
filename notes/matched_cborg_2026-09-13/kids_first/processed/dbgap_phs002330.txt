@@ -1,0 +1,71 @@
+TITLE: Kids First and INCLUDE: Down Syndrome, Heart Defects, and Acute Lymphoblastic Leukemia
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002330.v1.p1
+CAPTURED AT: 2026-09-14T03:21:24.314566+00:00
+
+dbGaP accession: phs002330.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002330.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+This project is a collaboration with the trans-NIH INvestigation of Co-occurring conditions across the Lifespan to Understand Down syndromE (INCLUDE) Project, which seeks to improve health and quality-of-life for individuals with Down syndrome, and NHLBI's TransOmics for Precision Medicine (TOPMed) program, which seeks to apply omics technologies to improve scientific understanding of the fundamental biological processes that underlie heart, lung, blood, and sleep (HLBS) disorders.
+Down syndrome (DS), which occurs due to trisomy 21, is one of the strongest risk factors for both congenital heart disease (CHD) and acute leukemia. For instance, children with DS have a 2000-fold increased risk of atrioventricular septal defects (AVSD) and a 20-fold increased risk of acute lymphoblastic leukemia (ALL). An important and innovative aspect of the Kids First program is understanding the overlap between structural birth defects and childhood cancer. Notably, the background of DS predisposes children to both of these phenotypes, however, the genomic architecture of risk remains largely undiscovered. In this joint Kids First/TOPMed/INCLUDE project, we are currently including >2,000 samples for whole-genome sequencing, including: 1) paired germline-tumor samples from children with DS-ALL; and 2) samples from families with DS-CHD. This work will advance our understanding of the developmental pathways that may lead to both structural birth defects and childhood cancer.
+The objectives of this study are to determine the genetic variants underlying AVSD and ALL risk in children with DS. Therefore, the aims of our study are: 1) compare whole-genome sequencing (WGS) data between children with documented DS-AVSD and children with DS who have structurally normal hearts to identify genetic variants that perturb heart development; and 2) compare WGS data between children with documented DS-ALL and children (from Aim 1) with DS who do not have a known history of ALL. We will also examine associations between germline mutations and somatic genomic features. This study will address the fundamental question of why children with DS have an elevated risk of AVSD and ALL. Insights into the genes that drive DS-AVSD and DS-ALL may have implications for improved genetic counseling, surveillance, clinical management, and treatment strategies for these children. Additionally, our findings may inform targeted therapies or interventions for children without DS who are at risk for structural birth defects and cancer.
+Additional Pediatric Cardiac Genetics Consortium (PCGC) data from children affected with Down syndrome and congenital heart disease are accessible through two separate dbGaP studies:
+phs001138 (https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001138)
+(Kids First) and
+phs001194 (https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001194)
+(TOPMed).
+Study Weblinks:
+Kids First X01 Abstracts (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Cohort
+Parent-Offspring Trios
+Tumor vs. Matched-Normal
+Total number of consented subjects: 2067
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002330.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+Inclusion criteria:
+documented (parent-report or medical record) live birth with trisomy 21 (including standard, translocation, mosaic karyotypes)
+no age restrictions
+males and females
+no ethnic or race restrictions
+documentation related to heart status at birth (parent-report or medical record) on a subset
+documentation related to a diagnosis of acute lymphoblastic leukemia on a subset
+Exclusion criteria:
+lack of consent
+disease-specific or more restrictive data sharing
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Down Syndrome (https://www.ncbi.nlm.nih.gov/mesh?term=Down Syndrome)
+Heart Defects, Congenital (https://www.ncbi.nlm.nih.gov/mesh?term=Heart Defects, Congenital)
+Precursor Cell Lymphoblastic Leukemia-Lymphoma (https://www.ncbi.nlm.nih.gov/mesh?term=Precursor Cell Lymphoblastic Leukemia-Lymphoma)
+
+Study Attribution
+Principal Investigators
+Stephanie Sherman.
+Emory University, Atlanta, GA, USA.
+Philip Lupo.
+Baylor College of Medicine, Houston, TX, USA.
+Funding Source
+X01 HL145686-01.
+National Institutes of Health, Bethesda, MD, USA.

@@ -1,0 +1,64 @@
+TITLE: Gabriella Miller Kids First Pediatric Research Program in Pediatric T-Cell Acute Lymphoblastic Leukemia
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002276
+CAPTURED AT: 2026-09-14T03:21:17.903454+00:00
+
+dbGaP accession: phs002276.v5.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002276.v5.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+The outcome for patients with relapsed T-ALL is dismal with 3-year event free survival of <15%. Thus, the primary goal in the treatment of T-ALL is to prevent relapse, which requires accurate risk stratification. Unfortunately, no genetic alterations have been identified to date that are reproducibly prognostic independent of minimal residual disease (MRD), making it difficult at diagnosis to identify which patients are more likely to relapse.
+AALL0434 (https://pubmed.ncbi.nlm.nih.gov/32813610/)
+was a Children's Oncology Group-initiated phase 3 randomized clinical trial comparing Capizzi-style escalating methotrexate plus pegaspargase (CMTX) vs. high dose methotrexate (HDMTX), with/without six 5-day courses of nelarabine. Survival on this study was superior to any prior trial for
+de novo
+T-ALL, changing the standard of care. Yet, a substantial minority (~15%) of patients had relapsed or refractory (r/r) disease.
+Through the TARGET initiative, RNA sequencing (RNA-Seq), DNA copy number analysis, and whole-exome sequencing (WES) were performed on 264 T-ALL patients treated on AALL0434, demonstrating recurrent alterations could be grouped into 10 different potentially targetable functional pathways. This analysis was not powered to examine associations between genetic lesions with outcome, because too few patients with r/r disease were included.
+This project is dedicated to testing the hypothesis that comprehensive genomic profiling of the entire AALL0434 cohort will identify recurrent genetic alterations that can be segregated into biologically relevant deregulated pathways that can be combined with MRD to identify patients at risk for poor outcomes before they relapse and provide rationale for treatment with alternative therapies. In addition, a number of small recent studies demonstrated that many of the biologically relevant alterations in T-ALL occur in non-coding regions of the genome, but no large studies have performed whole genome sequencing (WGS) in T-ALL. This project also tests the hypothesis that WGS of a large cohort of patients with T-ALL will identify novel lesions in coding and non-coding regions that will be highly impactful in the understanding of T-ALL pathogenesis.
+These hypotheses are tested by performing comprehensive genomic profiling (WGS, WES, RNA-Seq, and copy number analysis) of the entire AALL0434 cohort with available samples with the following specific aims: (1) identify recurrent genetic alterations that predict poor outcome in T-ALL; (2) identify novel alterations, including non-coding alterations in T-ALL; and (3) identify germline genetic variants that predispose to T-ALL and to increased toxicity to chemotherapy.
+Study Weblinks:
+Kids First X01 Projects (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Tumor vs. Matched-Normal
+Study Type:
+Cohort
+Total number of consented subjects: 1358
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002276.v5.p1)
+
+Study Inclusion/Exclusion Criteria
+Approximately 1350 were selected for WGS, WES, and transcriptome profiling (RNA-Seq) of tumor DNA/RNA and WGS of germline DNA as part of the Gabriella Miller Kids First T-ALL project. 1545 eligible and evaluable patients with T-ALL were treated on the Children's Oncology Group (COG) phase 3 clinical trial
+AALL0434 (https://pubmed.ncbi.nlm.nih.gov/32813610/)
+. Of the 1545, 1430 patients had available diagnostic and remission samples, and signed consent for future research. Of those, approximately 1350 samples had DNA and approximately 1040 samples had RNA that passed quality control for sequencing.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Precursor T-Cell Lymphoblastic Leukemia-Lymphoma (https://www.ncbi.nlm.nih.gov/mesh?term=Precursor T-Cell Lymphoblastic Leukemia-Lymphoma)
+Neoplasms (https://www.ncbi.nlm.nih.gov/mesh?term=Neoplasms)
+Hemic and Lymphatic Diseases (https://www.ncbi.nlm.nih.gov/mesh?term=Hemic and Lymphatic Diseases)
+Congenital, Hereditary, and Neonatal Diseases and Abnormalities (https://www.ncbi.nlm.nih.gov/mesh?term=Congenital, Hereditary, and Neonatal Diseases and Abnormalities)
+
+Study Attribution
+Principal Investigator
+David T. Teachey.
+Children's Hospital of Philadelphia, University of Pennsylvania, Philadelphia, PA, USA.
+Funding Source
+X01HD100702-01.
+National Institutes of Health, Bethesda, MD, USA.
+Sequencing Center
+Shawn Levy.
+HudsonAlpha Institute for Biotechnology, Huntsville, AL, USA.

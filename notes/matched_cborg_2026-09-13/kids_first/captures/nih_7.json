@@ -1,0 +1,15 @@
+{
+  "id": "nih_7",
+  "url": "https://www.cbtn.org",
+  "retrieved_at": "2026-09-14T03:19:47.313982+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://cbtn.org/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:19:47 GMT",
+  "bytes": 305081,
+  "sha256": "82fe92ec95a4d1d3c78bd87d1f3d78a35b539ee5d1ed4a6090fda79237559d46",
+  "local_path": "raw/nih_7.raw",
+  "status": "captured_unreviewed"
+}

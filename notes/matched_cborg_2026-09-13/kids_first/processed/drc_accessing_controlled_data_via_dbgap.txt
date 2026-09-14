@@ -1,0 +1,79 @@
+TITLE: Accessing Controlled Data via dbGaP - Kids First
+SOURCE URL: https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/
+CAPTURED AT: 2026-09-14T03:21:40.522816+00:00
+
+Getting Started
+Quick Start Guide (https://kidsfirstdrc.org/help-center/quick-start-guide/)
+Video Tutorials (https://kidsfirstdrc.org/help-center/video-tutorials/)
+Studies Tool (https://kidsfirstdrc.org/help-center/studies-tool/)
+Our Data Process (https://kidsfirstdrc.org/help-center/our-data-process/)
+Accessing Controlled Data via dbGaP (https://kidsfirstdrc.org/help-center/accessing-controlled-data-via-dbgap/)
+Connecting Platforms (https://kidsfirstdrc.org/help-center/connecting-platforms/)
+User Support (https://kidsfirstdrc.org/help-center/support-sessions/)
+Data Exploration
+Applying Filters (https://kidsfirstdrc.org/help-center/applying-filters/)
+Participants Tab (https://kidsfirstdrc.org/help-center/participants-tab/)
+Biospecimens Tab (https://kidsfirstdrc.org/help-center/biospecimens-tab/)
+Data Files Tab (https://kidsfirstdrc.org/help-center/data-files-tab/)
+Variant Search (https://kidsfirstdrc.org/help-center/variant-search/)
+Portal Data Dictionary (https://kidsfirstdrc.org/help-center/data-dictionary/)
+Analyzing Data
+Cavatica Cloud Platform (https://kidsfirstdrc.org/help-center/cavatica-cloud-platform/)
+Variant Workbench (https://kidsfirstdrc.org/help-center/variant-workbench/)
+Export Locally (https://kidsfirstdrc.org/help-center/export-locally/)
+Applying for Cloud Credits (https://kidsfirstdrc.org/help-center/applying-for-cloud-credits/)
+Cost FAQs (https://kidsfirstdrc.org/help-center/cost-faqs/)
+Data Security (https://kidsfirstdrc.org/help-center/security/)
+Accessing Controlled Data via dbGaP
+Tiers of Data Access
+The Kids First Data Resource Portal hosts thousands of data files holding genetic information of individuals who consented to take part in clinical research. Access to these files is managed under a two-tier system.
+Registered access
+files are immediately available to any user who registers a Kids First Portal account. Once you agree to the Terms and Conditions and log in you will be able to access these files for analysis.
+Controlled access
+files are only available to users who have been specifically granted permission by the appropriate Data Access Committee (DAC). Any user can review these files on the Kids First Portal, but will only be able to access their contents for analysis if they have been approved.
+Determining a File’s Access Tier
+The access tier of a file can be determined by reviewing it in the Data Exploration Tool. Registered tier files are labeled with an
+R
+while controlled tier files are labeled with a
+C
+. The permissions associated with the current user’s accounts are represented with the lock symbols. A closed lock means the user does not have permission to access this file, while an opened lock does grant access.
+https://kidsfirstdrc.org/wp-content/uploads/2024/03/controlled-access1.png
+Access information for a set of data files using the Data Exploration tool. Registered tier files are shown with a green R and controlled tier files are shown with a blue C.
+dbGaP
+dbGaP (Database of Genotypes and Phenotypes) (https://www.ncbi.nlm.nih.gov/gap/)
+is an NIH platform that archives and distributes data from government-funded studies. dbGaP partners with the Kids First Data Resource Center partners to review data access requests and approve applications for controlled-access files on the Kids First Portal. Once an investigator’s research request is approved, their Kids First Portal account will be authenticated to access these files to complete their project.
+Applications for controlled-access Kids First datasets must be submitted through the dbGaP website. Users can navigate to
+the dbGaP site (https://www.ncbi.nlm.nih.gov/gap/)
+on their own, or can be linked to specific dbGaP study pages through the Kids First Portal Studies page by clicking the dbGaP study accession number (phs).
+https://kidsfirstdrc.org/wp-content/uploads/2024/03/dbgap1.png
+A user has identified two studies they want to receive controlled access data for. They can begin the application process by clicking the dbGaP study accession number (phs) to navigate out of the Kids First Portal and into dbGaP.
+The dbGaP study page contains additional information about the study, including the types of research that study participants consented to upon enrolling in the study.
+https://kidsfirstdrc.org/wp-content/uploads/2024/03/dbgap2-compressed.gif
+The dbGaP study page for the KF-CHDALL study (phs002330). A user can learn information about the study, how participants were enrolled, and what types of research the participants consented these files to be used for. After reviewing this information, they can begin a data access request by clicking
+Request Access
+at the top of the screen.
+dbGaP requires logging in using an NIH eRA Commons ID. Approval associated with the eRA Commons ID is detected by the Kids First Portal, ultimately allowing access to requested files. After logging in, select
+Create a New Research Project
+.
+https://kidsfirstdrc.org/wp-content/uploads/2024/03/dbgap3.png
+The dbGaP login page. Applying for controlled-access Kids First data via dbGaP requires an NIH eRA Commons ID.
+When completing a research project request, users choose the appropriate Kids First studies by entering the matching dbGaP study accession number into the search box. Select the consent groups you are interested in accessing and click
+Add Selected and Continue.
+Note that you can add multiple Kids First studies to a single access request.
+https://kidsfirstdrc.org/wp-content/uploads/2024/03/dbgap4.png
+The Project Details page in the dbGaP access request form. By entering the dbGaP study accession for the KF-CHDALL study (phs002330), the user was able to choose individuals in the two consent groups in this study.
+Complete your application by providing a brief description of your proposed project, identifying any collaborators, and reviewing your submission. Once complete, the Kids First DAC typically reviews applications within 2-3 business days.
+https://kidsfirstdrc.org/wp-content/uploads/2024/03/dbgap5.png
+The Research Project page in the dbGaP access request form. The user will provide written details about the nature of their research project to allow the DAC to review their request.
+Note that dbGaP access approvals are limited to the individuals whose names are on the application, typically a lab group’s principal investigator (PI). The PI can designate other individuals to receive access to the files for analysis, such as a fellow, trainee, or student working under them. They can do this under the
+Downloaders
+tab on dbGaP.
+https://kidsfirstdrc.org/wp-content/uploads/2024/03/dbgap6.png
+Note that dbGaP access approvals are limited to the individuals whose names are on the application, typically a lab group’s principal investigator (PI). The PI can designate other individuals to receive access to the files for analysis, such as a fellow, trainee, or student working under them. They can do this under the
+Downloaders
+tab on dbGaP.
+dbGaP also provides their own directions for submitting a successful application.
+Tips for Preparing a Successful Data Access Request (pdf) (https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/GetPdf.cgi?document_name=GeneralAAInstructions.pdf)
+NCBI Tutorial – dbGaP: Apply for Controlled Access Data (YouTube) (https://www.youtube.com/watch?v=m0xp_cCO7kA)
+NCBI Tutorial: Assign Downloaders for dbGaP Data (YouTube) (https://www.youtube.com/watch?v=Yem3OH26kX4)
+Users who are approved will have their access granted in the Kids First Portal automatically, though it is required that their Portal account be connected to their eRA Commons ID. For information on how to ensure the Kids First Portal recognizes your approval, follow the directions on the Connecting Platforms page.

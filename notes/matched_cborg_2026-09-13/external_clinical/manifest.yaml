@@ -1,0 +1,31 @@
+version: 1
+profile: neutral
+naming:
+  SYNTHETIC_CLINICAL:
+    canonical_label: Synthetic Outpatient Measurements
+    variants: []
+scope:
+  SYNTHETIC_CLINICAL:
+    referent: the documented fictional version 1 outpatient measurement tables
+    referent_id: https://example.org/synthetic-outpatient-measurements/v1
+projects:
+  SYNTHETIC_CLINICAL:
+    bundle: SYNTHETIC_CLINICAL_preprocessed.txt
+    source_dir: .
+    raw_dir: .
+    sources:
+      - id: fixture_overview
+        raw_file: overview.txt
+        processed_file: overview.txt
+        source_type: documentation
+        priority: 1
+      - id: fixture_protocol
+        raw_file: protocol.txt
+        processed_file: protocol.txt
+        source_type: protocol
+        priority: 2
+      - id: fixture_dictionary
+        raw_file: dictionary.txt
+        processed_file: dictionary.txt
+        source_type: documentation
+        priority: 3

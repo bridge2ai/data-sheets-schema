@@ -1,0 +1,59 @@
+TITLE: Gabriella Miller Kids First Pediatric Research Program in Germline and Somatic Variants in Myeloid Malignancies in Children
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002187.v1.p1
+CAPTURED AT: 2026-09-14T03:21:29.475382+00:00
+
+dbGaP accession: phs002187.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002187.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+This project aims to sequence an unparalleled number of cases of
+de novo
+Acute Myeloid Leukemia (AML) and Down Syndrome AML (DS-AML), to establish a database comprised of genomic and transcriptome information which can be interrogated for both somatic and germline variants.  Identification of the somatic variants will provide valuable data on the potential genes and pathways that can be targeted for therapeutic purposes. In addition, interrogation of the host's constitutional genome may yield valuable information about potential germline variants that, in combination with the somatic data, might provide a more informed approach to patient care. For those patients with predisposition mutations, chemotherapy alone might not be adequate for cure, and stem cell transplantation might be required. Also, those who might be at high risk of adverse secondary events (cardiac complications, secondary malignancies, etc.) can be identified early and their therapy can be tailored to minimize anticipated complications. Thus, we propose that the optimum outcome can only be obtained through comprehensive interrogation of the somatic and germline genomes to fully annotate the genomic makeup of the leukemia and its host. Knowing the genomic and transcriptomic makeup of these patients, along with a full complement of clinical characteristics for this cohort, will be critical for making strong correlations which may aid in therapeutic development for future patients.  The
+de novo
+AML, DS-AML, and Acute Promyelocytic Leukemia (APL) cases were all collected through clinical protocols conducted by the Children's Oncology Group (COG).  In addition to funding from the Gabriella Miller Kids First Pediatric Research Program, the DS-AML cohort was specifically funded by the Lifespan to Understand Down syndrome (INCLUDE) Project.
+Study Weblinks:
+Kids First X01 Projects (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Tumor vs. Matched-Normal
+Study Type:
+Cohort
+Tumor vs. Matched-Normal
+Total number of consented subjects: 408
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002187.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+All samples utilized in this study were from participants in COG clinical trials.  Patients enrolled on AAML1031, “A Phase III Randomized Trial for Patients with
+de novo
+AML using Bortezomib and Sorafenib for Patients with High Allelic Ratio Ratio FLT3/ITD,” represent the
+de novo
+AML cases.  The Down Syndrome AML samples came from participants on COG trials, AAML1531 (“Risk Stratified Therapy for Acute Myeloid Leukemia in Down Syndrome”) and AAML08B1 (“Biology Study of Transient Myeloproliferative Disorder (TMD) in Children with Down Syndrome).  Inclusion from these studies as part of the Gabriella Miller project was based on available clinical covariates and availability of adequate specimens for testing.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Leukemia, Myeloid, Acute (https://www.ncbi.nlm.nih.gov/mesh?term=Leukemia, Myeloid, Acute)
+Leukemia, Promyelocytic, Acute (https://www.ncbi.nlm.nih.gov/mesh?term=Leukemia, Promyelocytic, Acute)
+
+Study Attribution
+Principal Investigator
+Soheil Meshinchi, MD, PhD.
+Fred Hutchinson Cancer Research Center, Seattle, WA, USA.
+Funding Source
+X01 HL145696-01.
+National Institutes of Health, Bethesda, MD, USA.

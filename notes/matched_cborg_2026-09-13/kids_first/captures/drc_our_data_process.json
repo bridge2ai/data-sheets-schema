@@ -1,0 +1,15 @@
+{
+  "id": "drc_our_data_process",
+  "url": "https://kidsfirstdrc.org/help-center/our-data-process/",
+  "retrieved_at": "2026-09-14T03:21:40.020315+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/help-center/our-data-process/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:21:40 GMT",
+  "bytes": 182465,
+  "sha256": "0091fd50bbec26823597269e8d6cf1a73961e191436f00cf02f83ec2a54c28cd",
+  "local_path": "raw/drc_our_data_process.raw",
+  "status": "captured_unreviewed"
+}

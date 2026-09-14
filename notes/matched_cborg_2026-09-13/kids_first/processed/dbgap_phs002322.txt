@@ -1,0 +1,64 @@
+TITLE: Kids First: Genetics of Pediatric Germ Cell Tumors
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002322.v1.p1
+CAPTURED AT: 2026-09-14T03:21:25.266004+00:00
+
+dbGaP accession: phs002322.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002322.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://www.commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Pediatric malignant germ cell tumors (GCTs) represent approximately 6% of childhood cancers, including 3% of tumors in children aged 0-14 years and 15% of tumors in adolescents. GCTs are heterogeneous and grouped together due to the presumed common cell of origin, the primordial germ cell (PGC). GCTs typically occur in the testes or ovaries; however, extragonadal GCTs can occur and are likely a result of abnormal germ cell migration during development. Evidence suggests that GCTs, including those diagnosed in adults, are initiated in utero. Thus, alterations in normal embryonic development are likely to be especially relevant to GCT etiology. Germline susceptibility has not been evaluated in an agnostic fashion in pediatric GCT, mainly due to a lack of an adequate number of samples; however, emerging evidence supports a genetic etiology.
+In the two Kids First GCT projects, we will evaluate genetic susceptibility to intracranial and extracranial GCT by sequencing probands and their unaffected parents. The goals of the project are to: 1) Evaluate the contribution of rare genetic variants in GCT through the use of aggregate burden tests, focusing on genes and established regulatory regions; 2) Identify
+de novo
+SNVs and CNVs in pediatric GCT using a case-parent triad design; and 3) Identify molecular signatures in GCT tumor specimens, overall and by age group and tumor characteristics. Whole Genome Sequencing data generated through the
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/kidsfirst)
+will provide an opportunity to investigate the genetic origins of GCT in a diverse set of samples. Given the limited knowledge of GCT etiology and biology, the results of the proposed analyses are likely to have a big impact on the field.
+Study Weblinks:
+Kids First X01 Abstracts (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 368
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002322.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+This study includes GCT cases and their unaffected parents recruited for an NIH-funded case parent triad study ("
+Molecular Epidemiology of Pediatric Germ Cell Tumors (https://grantome.com/grant/NIH/R01-CA151284-05)
+"; R01 CA151284). GCT cases were identified through the
+Children's Oncology Groups (COG) Childhood Cancer Research Network (CCRN) (https://childrensoncologygroup.org/59-research/childhood-cancer-research-network-)
+. Cases were eligible for the study if they had a primary diagnosis of GCT between July 1, 2008 and December 31, 2015. Additional eligibility criteria included age < 20 years at diagnosis, the availability of at least one biological parent alive and willing to participate, and the ability to complete a questionnaire in English or Spanish.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Neoplasms, Germ Cell and Embryonal (https://www.ncbi.nlm.nih.gov/mesh?term=Neoplasms, Germ Cell and Embryonal)
+
+Study Attribution
+Principal Investigators
+Jenny N. Poynter, PhD.
+University of Minnesota, Minneapolis, MN, USA.
+Ching C. Lau, MD.
+The Jackson Laboratory, Bar Harbor, ME, USA.
+Funding Sources
+X01 HL145700.
+National Institutes of Health, Bethesda, MD, USA.
+X01 HD100697.
+National Institutes of Health, Bethesda, MD, USA.
+R01 CA151284.
+National Institutes of Health, Bethesda, MD, USA.

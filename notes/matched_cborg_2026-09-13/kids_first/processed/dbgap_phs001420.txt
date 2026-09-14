@@ -1,0 +1,63 @@
+TITLE: Kids First: Genomics of Orofacial Cleft Birth Defects in Latin American Families
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001420
+CAPTURED AT: 2026-09-14T03:21:37.575768+00:00
+
+dbGaP accession: phs001420.v2.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs001420.v2.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+The Kids First study of nonsyndromic orofacial cleft (OFC) birth defects in Latin American families is a whole genome sequencing study of 283 Latin-American parent-case trios drawn from ongoing collaborations led by Dr. Mary L. Marazita of the University of Pittsburgh Center for Craniofacial and Dental Genetics, and including a collaboration with Dr. Lina Moreno Uribe and Dr. Andrew Lidral of the University of Iowa. All families were ascertained through the Clinica Noel where patients with OFCs receive care from the Antioquia University School of Dentistry in Medellin, Colombia (key on-site colleagues included Dr. Luz Consuelo Valencia-Ramirez and Dr. Mauricio Arcos-Burgos). Genetic studies have shown that this population is comprised of an admixture of immigrant male Caucasians (mainly Spaniards and Basques) and native Amerindian females. Every subject has had a genetic evaluation, including a pedigree analysis for a family history of clefting and other birth defects, a pregnancy history for environmental exposures, and a complete physical exam to rule out suspected or known syndromes or environmental phenocopies. Sequencing was done by the Broad Institute sequencing center funded by the Kids First program (grant number U24-HD090743). The case in each of the Kids First OFC trios has cleft lip (CL, Figure A below), cleft palate (CP, Figure B), or both (CL+CP, Figure C):
+OFCs are genetically complex structural birth defects caused by genetic factors, environmental exposures, and their interactions. OFCs are the most common craniofacial anomalies in humans, affecting approximately 1 in 700 newborns, and are one of the most common structural birth defects worldwide. On average a child with an OFC initially faces feeding difficulties, undergoes 6 surgeries, spends 30 days in hospital, receives 5 years of orthodontic treatment, and participates in ongoing speech therapy, leading to an estimated total lifetime treatment cost of about $200,000. Further, individuals born with an OFC have higher infant mortality, higher mortality rates at all other stages of life, increased incidence of mental health problems, and higher risk for other disorders (notably including breast, brain, and colon cancers). Prior genome-wide linkage and association studies have now identified at least 18 genomic regions likely to contribute to the risk for nonsyndromic OFCs. Despite this substantial progress, the functional/pathogenic variants at OFC-associated regions are mostly still unknown. Because previous OFC genomic studies (genome-wide linkage, genome-wide association studies (GWAS), and targeted sequencing) are based on relatively sparse genotyping data, they cannot distinguish between causal variants and variants in linkage disequilibrium with unobserved causal variants. Moreover, it is unknown whether the association or linkage signals are due to single common variants, haplotypes of multiple common variants, clusters of multiple rare variants, or some combination. Finally, we cannot yet attribute specific genetic risk to individual cases and case families.
+Therefore, the goal of the current study is identify specific OFC risk variants in Latin American families by performing whole genome sequencing of parent-case trios.
+Study Weblinks:
+Gabriella Miller Kids First Pediatric Research Program (https://www.commonfund.nih.gov/KidsFirst)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 1084
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs001420.v2.p1)
+
+Study Inclusion/Exclusion Criteria
+The trios in this study are Latin American, specifically from Colombia. Each trio has a child with cleft lip, cleft palate, or both.
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Cleft Lip (https://www.ncbi.nlm.nih.gov/mesh?term=Cleft Lip)
+Cleft Palate (https://www.ncbi.nlm.nih.gov/mesh?term=Cleft Palate)
+
+Study Attribution
+Principal Investigators
+Mary L. Marazita, PhD.
+Center for Craniofacial and Dental Genetics, University of Pittsburgh, Pittsburgh, PA, USA.
+Eleanor Feingold, PhD.
+Center for Craniofacial and Dental Genetics, University of Pittsburgh, Pittsburgh, PA, USA.
+Co-Investigator
+Lina Moreno-Uribe.
+Department of Orthodontics, University of Iowa, Iowa City, IA, USA.
+Funding Sources
+X01-HL136465.
+National Institutes of Health, Bethesda, MD, USA.
+R01-DE016148.
+National Institutes of Health, Bethesda, MD, USA.
+R01-DE015667.
+National Institutes of Health, Bethesda, MD, USA.
+U24-HD090743.
+National Institutes of Health, Bethesda, MD, USA.

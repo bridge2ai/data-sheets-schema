@@ -1,0 +1,20 @@
+SYNTHETIC CLINICAL METADATA FIXTURE — PROCEDURE AND LIMITATIONS
+
+This is a fictional specification for software acceptance. It is not a record
+of an executed clinical protocol. Patient identifiers are arbitrary strings with
+no relationship to a real person. Visit ordinal takes the values 1, 2, and 3 and
+does not encode dates or elapsed time. The hypothetical population is adults
+aged 18 through 90. No prevalence, outcome, representativeness, sampling frame,
+sex distribution, or ethnicity distribution is claimed.
+
+The proposed validation rules require unique patient identifiers in the patient
+table, a matching patient identifier for every visit, exactly three visits per
+patient, and nonmissing age and systolic blood pressure. These rules describe
+the fixture design; no processing software, executable generator, quality audit,
+or measured error rate is supplied. The data dictionary below defines the
+documented columns. There are no training, validation, or test splits, labels
+for a predictive task, protected access rules, or linked external datasets.
+
+All clinical quantities are invented examples. Numerical plausibility is not
+evidence of clinical validity. No additional people, institutions, identifiers,
+licenses, software, measurements, or ethics assurances are documented.

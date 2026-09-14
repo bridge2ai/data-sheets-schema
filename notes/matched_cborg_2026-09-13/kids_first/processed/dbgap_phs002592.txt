@@ -1,0 +1,84 @@
+TITLE: Kids First: Genomic Etiologies of CHARGE Syndrome, Related Conditions and Structural Anomalies
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs002592.v1.p1
+CAPTURED AT: 2026-09-14T03:21:27.318512+00:00
+
+dbGaP accession: phs002592.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs002592.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The
+Gabriella Miller Kids First Pediatric Research Program (https://commonfund.nih.gov/KidsFirst)
+(Kids First) is a trans-NIH effort initiated in response to the
+2014 Gabriella Miller Kids First Research Act (https://www.govtrack.us/congress/bills/113/hr2019)
+and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). All of the genomic and phenotypic data from this study are accessible through dbGaP. The data is also available at the
+Kids First Portal (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed in the cloud for data analysis, data visualization, collaboration and interoperability, open to all researchers and developers.
+Developmental disorders with structural birth defects account for the majority of morbidity and mortality in children's hospitals, and the genetic bases of many clinical phenotypes remain unknown. Genetic testing for individuals with structural malformations has uncovered the basis of many such birth defects; however, many more cases remain unsolved, posing challenges for diagnosis, treatment, and prevention. Multiple anomaly conditions are particularly challenging to diagnose, since they often present with unique combinations of clinical features that vary widely between affected individuals, even in the same family. CHARGE Syndrome (Coloboma of the eye, Heart Defects, Atresia of the choanae, Retardation of growth and development, Genital abnormalities including pubertal delay and infertility, Ear abnormalities with deafness and vestibular disorders) is a multiple anomaly condition that affects a wide variety of organ systems. CHARGE Syndrome is caused in most cases by monoallelic pathogenic variants in
+CHD7 (https://www.ncbi.nlm.nih.gov/gene/55636)
+, the gene encoding ATP-dependent helicase chromodomain DNA binding protein 7. Both
+de novo
+and inherited variants in
+CHD7 (https://www.ncbi.nlm.nih.gov/gene/55636)
+have been reported in CHARGE, and a growing number of families present with individuals who test positive for a pathogenic
+CHD7 (https://www.ncbi.nlm.nih.gov/gene/55636)
+variant yet exhibit only mild features. Similarly, individuals with CHARGE Syndrome often exhibit broad variability and reduced penetrance of clinical features, consistent with pleiotropic roles for
+CHD7 (https://www.ncbi.nlm.nih.gov/gene/55636)
+during development and/or additional genetic contributors or modifying alleles. Recent work has also implicated
+RERE (https://www.ncbi.nlm.nih.gov/gene/473)
+,
+KMT2D (https://www.ncbi.nlm.nih.gov/gene/8085)
+,
+EP300 (https://www.ncbi.nlm.nih.gov/gene/2033)
+, and
+PUF60 (https://www.ncbi.nlm.nih.gov/gene/22827)
+in having a role in CHARGE Syndrome.
+We hypothesize that (1) some cases of CHARGE are due to other genetic etiologies including oligogenicity, and (2) genetic modifiers contribute to the broad clinical variability and reduced penetrance of CHARGE features. To address these hypotheses, we have generated a cohort of 223 deeply clinically phenotyped individuals with CHARGE Syndrome and related disorders and structural anomalies who tested negative by chromosomal microarray, single gene sequencing, next generation panel sequencing, or exome sequencing. These individuals exhibit clinical CHARGE-like features including structural birth defects affecting craniofacial, ocular, neurosensory, brain, heart, mediastinal, renal, genitourinary, and skeletal organs. Our cohort includes these 223 individuals as well as affected and unaffected family members who consented to clinical and research genetic testing and donated blood samples for DNA and RNA isolation and sequencing. Building on this valuable cohort, we propose to use exome and genome sequencing to identify novel genetic etiologies of CHARGE and related developmental disorders for which alternative genetic tests have been inconclusive. Identification of novel pathogenic genetic variants and contributing modifier alleles within the coding and non-coding portion of the genome of these individuals will improve genetic diagnosis and provide important insights toward understanding the developmental mechanisms of structural birth defects.
+Study Weblinks:
+Kids First X01 Abstracts (https://commonfund.nih.gov/kidsfirst/X01Projects)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Cohort
+Parent-Offspring Trios
+Total number of consented subjects: 547
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs002592.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+Inclusion Criteria
+Parent-offspring trios; children with clinical features of CHARGE and their family members
+Individuals with CHARGE-related structural and developmental anomalies
+Exclusion Criteria
+Patients with documented exposure to teratogens, CHD7 pathogenic variants, or other genetic diagnoses
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+CHARGE Syndrome (https://www.ncbi.nlm.nih.gov/mesh?term=CHARGE Syndrome)
+Developmental Disabilities (https://www.ncbi.nlm.nih.gov/mesh?term=Developmental Disabilities)
+Coloboma (https://www.ncbi.nlm.nih.gov/mesh?term=Coloboma)
+Heart Defects, Congenital (https://www.ncbi.nlm.nih.gov/mesh?term=Heart Defects, Congenital)
+Choanal Atresia (https://www.ncbi.nlm.nih.gov/mesh?term=68002754[uid])
+
+Study Attribution
+Principal Investigator
+Donna M. Martin, MD.
+University of Michigan, Ann Arbor, MI, USA.
+Co-Investigator
+Stephanie L. Bielas, PhD.
+University of Michigan, Ann Arbor, MI, USA.
+Funding Source
+X01 Project HD100700-01.
+National
+Institutes of Health, Bethesda, MD, USA.
+Sequencing Center
+Stacey Gabriel.
+Broad Institute, Cambridge, MA, USA.

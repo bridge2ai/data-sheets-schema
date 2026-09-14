@@ -1,0 +1,15 @@
+{
+  "id": "paper_cell",
+  "url": "https://www.cell.com/ajhg/fulltext/S0002-9297(26)00276-4",
+  "retrieved_at": "2026-09-14T03:19:47.938490+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 403,
+  "final_url": "https://www.cell.com/ajhg/fulltext/S0002-9297(26)00276-4",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": null,
+  "bytes": 5593,
+  "sha256": "c9ff9af69efe6e34d3c605b967a1932ad4639e69684bfd040421c86d0d223de5",
+  "local_path": "raw/paper_cell.raw",
+  "status": "http_failure"
+}

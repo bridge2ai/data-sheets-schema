@@ -1,0 +1,15 @@
+{
+  "id": "nih_faq",
+  "url": "https://commonfund.nih.gov/kidsfirst/faq",
+  "retrieved_at": "2026-09-14T03:19:47.549647+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://commonfund.nih.gov/kidsfirst/faq",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": null,
+  "bytes": 185092,
+  "sha256": "e2c6d540b62c39c53e70d651db6db980e8783e618fd3df1426047ecce635d167",
+  "local_path": "raw/nih_faq.raw",
+  "status": "captured_unreviewed"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "drc_security",
+  "url": "https://kidsfirstdrc.org/help-center/security/",
+  "retrieved_at": "2026-09-14T03:21:41.061294+00:00",
+  "purpose": "public documentation and aggregate study metadata",
+  "http_status": 200,
+  "final_url": "https://kidsfirstdrc.org/help-center/security/",
+  "content_type": "text/html; charset=UTF-8",
+  "etag": null,
+  "last_modified": "Mon, 14 Sep 2026 03:21:41 GMT",
+  "bytes": 182597,
+  "sha256": "6f6e39dc33e669e6d3faaaaebc0b779b9846202547ccb8c7b6d5e87b983696d4",
+  "local_path": "raw/drc_security.raw",
+  "status": "captured_unreviewed"
+}

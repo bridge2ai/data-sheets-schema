@@ -1,0 +1,79 @@
+TITLE: Disorders/Differences of Sex Development (DSD) Study Performed at UCLA in Collaboration with the DSD-Translational Research Network (DSD-TRN), with the Support of the Gabriella Miller Kids First Pediatric Research Program
+SOURCE URL: https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001178
+CAPTURED AT: 2026-09-14T03:21:38.008338+00:00
+
+dbGaP accession: phs001178.v1.p1
+
+Study Description
+Important Links and Information
+Request access via
+Authorized Access (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+Instructions (https://sharing.nih.gov/sites/default/files/flmngr/Tips%20for%20Preparing%20a%20Successful%20DAR.pdf)
+for requestors
+Data Use Certification (DUC) Agreement (https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs001178.v1.p1)
+Talking Glossary of Genetic Terms (http://www.genome.gov/Glossary/)
+The Gabriella Miller Kids First Pediatric Research Program (Kids First) is a trans-NIH effort initiated in response to the 2014 Gabriella Miller Kids First Research Act and supported by the NIH Common Fund. This program focuses on gene discovery in pediatric cancers and structural birth defects and the development of the Gabriella Miller Kids First Pediatric Data Resource (Kids First Data Resource). Both childhood cancers and structural birth defects are critical and costly conditions associated with substantial morbidity and mortality. Elucidating the underlying genetic etiology of these diseases has the potential to profoundly improve preventative measures, diagnostics, and therapeutic interventions.
+Whole Genome Sequence (WGS) and phenotypic data from this study are accessible through dbGaP and
+kidsfirstdrc.org (https://kidsfirstdrc.org/)
+, where other Kids First datasets can also be accessed. Disorders/Differences of Sex Development (DSD) are congenital conditions in which development of chromosomal, gonadal, or anatomic sex is atypical. DSD are chronic medical conditions collectively affecting ~1% of the population, frequently requiring life-long care by multiple specialists, and carrying a significant public health burden. Some are associated with life-threatening events, such as adrenal crises in Congenital Adrenal Hyperplasia (CAH). DSD are also associated with increased infertility, cancer, gender dysphoria risks, psychosocial distress and pervasive challenges to health-related quality of life (HRQoL) for patients and families. DSD are broadly classified into three categories: sex chromosome DSD, 46,XY DSD and 46,XX DSD, and further classified according to the type of gonad found in the patient (ovary, testis, ovotestis).
+We were able to increase significantly the diagnostic success for DSD using Whole Exome Sequencing (WES), with the identification of disease-causing and likely pathogenic variants in a third of a cohort of 46,XY patients. We have therefore proposed a shift in the diagnostic approach to DSD to use next-gen sequencing as a first-line clinical test, which could lead to faster and more accurate diagnosis, and orient further clinical management, limiting unnecessary, costly, and often invasive endocrine testing and imaging. However many remain unexplained (over half of the XY cases, a significant minority of XX cases, including most ovotesticular DSD, and most syndromic cases). In addition, the very large phenotypic variability in cases with known variants in the same gene is unexplained.
+We here propose to use Whole-Genome Sequencing (WGS), which dramatically improves upon exome sequencing, covering both coding and non-coding parts of the genome more uniformly, as an approach to not only improve diagnostic yield, but also to identify novel genes and regulatory elements involved in DSD.
+Study Weblinks:
+Genetic Basis of Disorders/Differences of Sex Development (DSD) (https://commonfund.nih.gov/kidsfirst/X01Projects#Vilain)
+Study Design:
+Family/Twin/Trios
+Study Type:
+Parent-Offspring Trios
+Total number of consented subjects: 300
+Subject Sample Telemetry Report (SSTR) (https://www.ncbi.nlm.nih.gov/gap/sstr/report/phs001178.v1.p1)
+
+Study Inclusion/Exclusion Criteria
+Included in the study are trios or larger families with a diagnosed DSD for whom no genetic etiology has been uncovered by the clinical teams. Exceptionally, singletons were included when parents were not available (e.g. adoption) AND previous genetic testing had identified a single candidate variant in a gene known to cause DSD in a recessive fashion, looking for a second structural or non-exonic allele. Patients of all ethnicities, races, sexes, genders were eligible to be included. Only patients for whom standardized phenotypic information was available were included.
+Population studied includes patients with 46,XX DSD and 46,XY DSD, regardless of endocrine and/or developmental phenotype:
+46,XY disorders of testicular development: complete gonadal dysgenesis (Swyer syndrome), partial gonadal dysgenesis, testicular regression, ovotesticular DSD
+suspected 46,XY disorders of androgen & other hormone biosynthesis or action (e.g. androgen resistance)
+46,XX disorders of ovarian development, including gonadal dysgenesis and ovotesticular DSD
+suspected 46,XX excess of androgen exposure (of fetal, placental, maternal, or environmental origin)
+other syndromes of unknown etiology: cloacal exstrophy, vaginal atresia, and other syndromic DSD (XX and XY).
+
+Selected Publications
+
+
+Diseases/Traits Related to Study (MeSH terms)
+Primary Phenotype
+:
+Disorders of Sex Development (https://www.ncbi.nlm.nih.gov/mesh?term=Disorders of Sex Development)
+Disorders of sex development (https://www.ncbi.nlm.nih.gov/mesh?term=Disorders of sex development)
+46, XY Disorders of Sex Development (https://www.ncbi.nlm.nih.gov/mesh?term=46, XY Disorders of Sex Development)
+Sex Chromosome Disorders of Sex Development (https://www.ncbi.nlm.nih.gov/mesh?term=Sex Chromosome Disorders of Sex Development)
+Ovotesticular Disorders of Sex Development (https://www.ncbi.nlm.nih.gov/mesh?term=Ovotesticular Disorders of Sex Development)
+46, XX Testicular Disorders of Sex Development (https://www.ncbi.nlm.nih.gov/mesh?term=46, XX Testicular Disorders of Sex Development)
+Hypospadias (https://www.ncbi.nlm.nih.gov/mesh?term=Hypospadias)
+Cloaca (https://www.ncbi.nlm.nih.gov/mesh?term=Cloaca)
+Gonadal Dysgenesis (https://www.ncbi.nlm.nih.gov/mesh?term=Gonadal Dysgenesis)
+Urogenital Abnormalities (https://www.ncbi.nlm.nih.gov/mesh?term=Urogenital Abnormalities)
+Mullerian aplasia (https://www.ncbi.nlm.nih.gov/mesh?term=Mullerian aplasia)
+Omphalocele exstrophy imperforate anus (https://www.ncbi.nlm.nih.gov/mesh?term=Omphalocele exstrophy imperforate anus)
+Sexual Development (https://www.ncbi.nlm.nih.gov/mesh?term=Sexual Development)
+
+Study Attribution
+Principal Investigator
+Eric VILAIN, MD, PhD.
+University of California, Los Angeles, CA, USA.
+Co-Investigator
+Patrick Allard, PhD.
+University of California, Los Angeles, CA, USA.
+Rita Cantor, PhD.
+University of California, Los Angeles, CA, US.
+Emmanuele Delot, PhD.
+University of California, Los Angeles, CA, US.
+Hane Lee, PhD.
+University of California, Los Angeles, CA, US.
+University of California, Los Angeles, CA, US.
+Stanley Nelson MD.
+University of California, Los Angeles, CA, US.
+Jeanette Papp, PhD.
+University of California, Los Angeles, CA, US.
+Funding Source
+X01HL132384.
+National Institutes of Health, 			Bethesda, MD, USA, Gabriella Miller Kids 			First Pediatric Research Program.

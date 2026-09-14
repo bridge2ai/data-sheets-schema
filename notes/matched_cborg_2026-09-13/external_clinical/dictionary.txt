@@ -1,0 +1,18 @@
+SYNTHETIC CLINICAL METADATA FIXTURE — DATA DICTIONARY
+
+The hypothetical distribution format is comma-separated UTF-8 text. Files and
+download links are not supplied.
+
+patients.csv would contain 1,200 rows:
+- patient_id: string; unique fictional patient key; no real identifier.
+- age_years: integer from 18 to 90 inclusive; age in years; required.
+
+visits.csv would contain 3,600 rows:
+- patient_id: string referencing patients.csv patient_id; required.
+- visit_ordinal: integer 1, 2, or 3; ordinal only; required.
+- systolic_bp_mmhg: numeric systolic blood pressure in millimetres of mercury;
+  required; the documentation specifies no observed range or clinical threshold.
+
+The pair (patient_id, visit_ordinal) is unique in the hypothetical visit table.
+No free text, images, audio, genomic measurements, medications, diagnoses,
+outcomes, dates, or geographic information are described.

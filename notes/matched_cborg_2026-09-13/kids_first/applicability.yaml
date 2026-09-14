@@ -1,0 +1,21 @@
+human_subjects:
+  value: true
+  evidence: Public dbGaP study descriptions and eligibility sections document enrolled pediatric patients and, for several studies, biological relatives; see processed/dbgap_phs001110.txt and processed/dbgap_phs002517.txt.
+regulated_access:
+  value: true
+  evidence: processed/nih_faq.txt, FAQs for Accessing Kids First Data, requires dbGaP approval and study-specific data-use conditions for individual-level genomic data.
+shared_dataset:
+  value: true
+  evidence: processed/nih_faq.txt describes released datasets and secondary research access; processed/study_catalogue.txt records the public DRC catalogue and per-study access links.
+data_collection:
+  value: true
+  evidence: The public dbGaP Study Description and Study Inclusion/Exclusion Criteria sections document specimen and phenotype collection by participating studies; see processed/dbgap_phs001110.txt.
+data_processing:
+  value: true
+  evidence: processed/drc_our_data_process.txt describes genomic and clinical data processing, harmonization and quality control.
+processing_software:
+  value: true
+  evidence: processed/drc_our_data_process.txt links the DRC genomic workflow documentation and clinical harmonization model; processed/nih_faq.txt describes development and deployment of processing workflows and pipelines.
+ml_training_dataset:
+  value: null
+  evidence: The captured resource-wide documentation establishes a genomic and clinical secondary-research resource, not a single designated machine-learning training cohort; individual studies and derived analyses may have different uses.

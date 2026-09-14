@@ -1,0 +1,13 @@
+{
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:42607672&format=json&resultType=core",
+  "final_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:42607672&format=json&resultType=core",
+  "content_type": "application/json;charset=UTF-8",
+  "retrieved_at": "2026-09-14T03:17:35.751431+00:00",
+  "bytes": 23163,
+  "sha256": "e89b41685d665f28425c960b305693a6dd7ade7278e7402bee3ef3cb1cdc0ed3",
+  "id": "paper_abstract",
+  "http_status": 200,
+  "local_path": "raw/paper_abstract.raw",
+  "status": "captured_unreviewed",
+  "purpose": "public documentation and aggregate study metadata"
+}
