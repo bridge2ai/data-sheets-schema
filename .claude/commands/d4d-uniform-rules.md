@@ -170,6 +170,13 @@ to every project:
   that permit them; a caveat elsewhere cannot qualify an unsupported
   actual-presence or completion assertion.
 
+  Check every member of a list of present data separately, including members
+  embedded in prose: the list's presence claim applies to each member.
+  Present, planned and unstated members cannot share an unqualified inventory
+  merely because another field carries their different statuses. A claimed
+  absence or lack of comparable resources needs affirmative source support,
+  not just a goal to create or improve something.
+
 - **A figure the record derives — a sum, difference, fraction, count — is
   stated as the record's own computation with its inputs named, never as a
   figure a source reported** (v8, R3); it is receipted at its own path by

@@ -91,10 +91,10 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         historical condition-prompt pins are checked separately below."""
         import hashlib
         from data_sheets_schema import api_runner
-        # #1794 deliberately expands the system rules and registers fresh
+        # #1782 deliberately expands the system rules and registers fresh
         # canary inputs. Retain an exact-byte guard for the reviewed surface.
         self.assertEqual(hashlib.sha256(api_runner.PHASE_SYSTEM.encode()).hexdigest(),
-                         "4cd53ad8c9b21790e7a65817eb966d14b756dd9824263405436a614d25d168ac")
+                         "d16ae58c48ef3db7ed4b8adbcba87e852f8506e3b6581a5a77bcc006a94eaedb")
         self.assertEqual(api_runner.CHUNK_MARKER_NOTE,
                          "# Chunk markers: a line of the form [cNNN] opens each chunk; the markers are not "
                          "part of the bundle's text.\n\n")

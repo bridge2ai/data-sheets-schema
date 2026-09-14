@@ -1,0 +1,341 @@
+{
+  "registration_sha256": "104c9fedaa79e3ad3a4e03bdce0714dcbdbe6cbd23d73377fab6d6645c91c05d",
+  "native_overlay_sha256": "f43845a214773591c601de6613af9b1562be1cfbf16c028ad576f99e68359a24",
+  "job": "CHORUS_api_rep1",
+  "launch_commit": "3a3ee95a9e8221be99eebe710197e768b75963b8",
+  "generation_status": "completed_pending_independent_review",
+  "source_acceptance": "reject",
+  "started_at": "2026-09-14T20:45:43.820567+00:00",
+  "finished_at": "2026-09-14T21:03:12.979724+00:00",
+  "source_review_scope": "Every substantive assertion in the unchanged reconciled full and derived core records, checked against all four complete frozen CHORUS source documents. Snapshot hashes taken during report generation still match the completed attempt.",
+  "findings": [
+    {
+      "id": "unqualified_inventory_member_after_repair",
+      "issue": 1782,
+      "severity": "blocking",
+      "paths": [
+        "sensitive_elements[0].sensitivity_details"
+      ],
+      "full_line": 321,
+      "core_line": 144,
+      "finding": "Both unchanged final records state that the dataset consists of hospital data including EEG waveforms. The webinar documents EEG extraction as in progress, which does not establish released availability. The description, EEG instance and limitations carry this status, but the sensitivity-field inventory does not. The first audit flagged the description and EEG instance; reconciliation corrected those locations while leaving this additional occurrence unchanged. This review does not infer that EEG data are absent.",
+      "supporting_source_id": "cohort_2_webinar",
+      "supporting_chunk": "c003",
+      "source_excerpt": "EEG \u2013 extraction in process at this point"
+    },
+    {
+      "id": "ambition_to_absence",
+      "issue": 1782,
+      "severity": "additional_source_finding",
+      "paths": [
+        "addressing_gaps[1].response"
+      ],
+      "full_line": 153,
+      "core_line": 40,
+      "finding": "The records assert the absence of a comparably diverse, high-resolution, ethically sourced AI-ready dataset. The sources describe an infrastructure need and a goal to develop a highly diverse resource; that ambition does not establish that no comparable dataset exists. The unqualified negative claim was not flagged in the audit and remains after reconciliation.",
+      "supporting_source_ids": [
+        "nih_reporter_project",
+        "github_organization_overview"
+      ]
+    }
+  ],
+  "improvements": [
+    {
+      "issue": 1792,
+      "observation": "The final pair retains compatible count observations with units, bounds and temporal scope and does not manufacture a disagreement."
+    },
+    {
+      "issue": 1783,
+      "observation": "Tokenization is retained as processing, not a de-identification method; imaging de-identification is qualified as in progress and the NIH transformation is explicitly planned."
+    },
+    {
+      "issue": 1782,
+      "observation": "The prior unqualified NIH planned-data and planned-transformation assertions are corrected, but the remaining inventory and negative-state findings prevent acceptance."
+    }
+  ],
+  "mechanical": {
+    "schema_problems": [],
+    "pair": {
+      "passed": true,
+      "errors": [],
+      "warnings": []
+    },
+    "core_derivation_byte_equal": true,
+    "live_provenance_ok": true,
+    "report_findings": [],
+    "report_claims_checked": 23,
+    "report_disposition_rows": 22,
+    "grounding_findings": [],
+    "receipt_findings": [
+      {
+        "kind": "snippet_adjacent_chunk",
+        "chunk": "c007",
+        "found_in": [
+          "c006"
+        ],
+        "slot": "description",
+        "snippet": "one data generation project of four"
+      }
+    ],
+    "receipt_findings_gated": 0,
+    "receipt_summary": "chunks 8/8 reviewed \u00b7 snippets 127/128 verified (1 in an adjacent chunk) (3 bearing on no token of their value) \u00b7 slots 80/115 with a receipt (32 never receipted, 3 added after the receipt) (10 exempt) \u00b7 6 receipt path(s) reshaped by reconcile \u00b7 11 value(s) changed after the receipt",
+    "limitation": "Mechanical passes and lexical matches do not establish semantic source support or universal receipt coverage."
+  },
+  "billing": {
+    "settled_requests_in_attempt": 5,
+    "settled_requests_in_allocation": 22,
+    "attempt_estimated_cost_usd": "3.48794600",
+    "allocation_estimated_cost_usd": "16.16391800",
+    "remaining_allocation_usd": "183.83608200",
+    "unresolved_requests": 0,
+    "approved_attempt_cap_usd": 20,
+    "approved_combined_canary_ceiling_usd": "63.75",
+    "combined_spent_including_v10e_usd": "7.23501200",
+    "no_later_canary_launched": true,
+    "requests": [
+      {
+        "id": "6c3195303e674aafa7121c9f82622df6",
+        "status": "settled",
+        "reserved_usd": "3.52042500",
+        "cost_usd": "1.61048875",
+        "request_sha256": "05feaaa3c8ea24848ed2642ae1d2bf7056e80d4edd4e2bbaf647d3065230cb36",
+        "response_sha256": "3015ab4031b487b28cc372c5c3b8cbf86aa5f38f7cd0c38c3bb7695f9f414edc",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 32499
+          },
+          "cache_creation_input_tokens": 32499,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 9789,
+          "output_tokens": 54337,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "20",
+        "reserved_at": "2026-09-14T20:45:56.479567+00:00",
+        "settled_at": "2026-09-14T20:56:01.013234+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "a4333e84303d99b28fc778c8db7d559c8d8603066f6a3583f9a5c82cd15e561f",
+        "admission": {
+          "input_count": 41870,
+          "input_bound": 51268,
+          "output_ceiling": 128000,
+          "reserved_usd": "3.52042500",
+          "token_count_at": "2026-09-14T20:45:56.480361+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn"
+      },
+      {
+        "id": "8c9b4ae5319f488bada94f9dc8d70cc2",
+        "status": "settled",
+        "reserved_usd": "0.97951875",
+        "cost_usd": "0.70233375",
+        "request_sha256": "ea76b1db83a6a4aeae109896b31c95aa291505216b83e6f02aa19ea7ca74bc62",
+        "response_sha256": "48276482548c54ac2996feb8865fb769d3c406c3be917cdc250e9eff8367a0be",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 32499
+          },
+          "cache_creation_input_tokens": 32499,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 17668,
+          "output_tokens": 16435,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "20",
+        "reserved_at": "2026-09-14T20:56:04.143886+00:00",
+        "settled_at": "2026-09-14T20:59:22.199961+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "775237eddf0e0dd0c4d366d713b501b54607d381c6d42e045c6680bce7b1c90d",
+        "admission": {
+          "input_count": 49749,
+          "input_bound": 60723,
+          "output_ceiling": 24000,
+          "reserved_usd": "0.97951875",
+          "token_count_at": "2026-09-14T20:56:04.144730+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn"
+      },
+      {
+        "id": "09dac173c79049e38dc5b81402f49109",
+        "status": "settled",
+        "reserved_usd": "2.81169375",
+        "cost_usd": "0.37426450",
+        "request_sha256": "aa64d70505ca6363497c0c1760167a02beb5fd168818c63de72ace996560cc41",
+        "response_sha256": "06ba14431b69d53450caaea975583a9d7d9f0e17dc2a1a381d4a90d65b87514a",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32499,
+          "input_tokens": 21958,
+          "output_tokens": 9929,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "20",
+        "reserved_at": "2026-09-14T20:59:23.924738+00:00",
+        "settled_at": "2026-09-14T21:01:02.202078+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "abfdffe2b60735ad762b492d512aa473dc2ec378f18e55f5d015492a0b63fc4d",
+        "admission": {
+          "input_count": 54039,
+          "input_bound": 65871,
+          "output_ceiling": 96000,
+          "reserved_usd": "2.81169375",
+          "token_count_at": "2026-09-14T20:59:23.925455+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn"
+      },
+      {
+        "id": "71c46dec30df4f10a6204d8f0829861d",
+        "status": "settled",
+        "reserved_usd": "1.19522500",
+        "cost_usd": "0.38444450",
+        "request_sha256": "3662e305e28b13f3f58fdc13595b3afa6a3ba5ef9dd09ba3b69fdd8c746d6a13",
+        "response_sha256": "2c677b1b5f817c4261973b1017ad9921795286ff365afe1df125300d3812fe7f",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32499,
+          "input_tokens": 46429,
+          "output_tokens": 5442,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "20",
+        "reserved_at": "2026-09-14T21:01:03.704666+00:00",
+        "settled_at": "2026-09-14T21:02:08.404070+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "11fc2e8c4a4146082c0ffc243a17f057ddb0665a22376a3fd991ca8110bb373b",
+        "admission": {
+          "input_count": 78510,
+          "input_bound": 95236,
+          "output_ceiling": 24000,
+          "reserved_usd": "1.19522500",
+          "token_count_at": "2026-09-14T21:01:03.705332+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn"
+      },
+      {
+        "id": "2fd6c937f18a4cefa01f6f95f22870d8",
+        "status": "settled",
+        "reserved_usd": "1.23860625",
+        "cost_usd": "0.41641450",
+        "request_sha256": "ed7a4ab9d71b34dea2861119dfc291a6673b745fb4f83040a0917a1055dd6ee8",
+        "response_sha256": "cb08eb5e9b42a76ed7e4c77d065c8d0689f83985318a65ceec3544cfff819146",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32499,
+          "input_tokens": 52213,
+          "output_tokens": 5564,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "20",
+        "reserved_at": "2026-09-14T21:02:13.711799+00:00",
+        "settled_at": "2026-09-14T21:03:11.286745+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "94d23a9ba7681b14a03c6221d86f38fd375b09b3c5242366fe62d0dc8645b02c",
+        "admission": {
+          "input_count": 84294,
+          "input_bound": 102177,
+          "output_ceiling": 24000,
+          "reserved_usd": "1.23860625",
+          "token_count_at": "2026-09-14T21:02:13.712543+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn"
+      }
+    ]
+  },
+  "preservation": {
+    "original_files": 38,
+    "backup": "Verified local copies of all originals, including full request/response evidence; raw payloads remain unpublished.",
+    "source_review_sha256": "f5056a4c966ac66f09ea81c7b595916ef334d953e02872c11395b41444c5e2e2",
+    "acceptance_sha256": "6b91d92cdb87fec14f5e6942fdc4c60ca5468f94b887e1c30cd71fda0290fed1",
+    "mechanical_review_sha256": "e9e8c1585fcdfa7f9bf45d7a694a194af0e8d6a288875365e51c80a2715b5070",
+    "artifacts": {
+      "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/.CHORUS_d4d.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/CHORUS_d4d.yaml": "11db6f7d87a83fe210d074ddf26a0fc87f25eed9236e4e301382011a82e0db17",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/.CHORUS_d4d_core.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/.CHORUS_provenance.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/.CHORUS_reconciliation.md_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/CHORUS_api_usage_3b89562377eef209.json": "ea8ec99072a0395129b7271f5aacc06d16171a6de2ff800fed550fbfcd5d1db4",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/CHORUS_coverage_receipt.yaml": "c89c43f9b3cac7812802f3c4ace9141334cde22d733ec4f7a5795f9c60c5f22d",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/CHORUS_d4d_core.yaml": "092079acaf57ef19004d4325f0431eeb9101c5734e065215aadc12303baf9d4e",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/CHORUS_provenance.yaml": "85b383988e01a3538a3bd921aa5acd6ca2e5a15832d594fdae21a06be86a6f5e",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/CHORUS_reasoning.jsonl": "8b9187e6421f6628bbd1fbfd4f0339e0a6872bee32cb510219b858031975403c",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/CHORUS_reconciliation.md": "1edc9a1914c833091e4d5272a59a3d6545f20f6f38599d36f3c848356cc7129e",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_audit.json": "c435596ec5db3ac5f558c741f6551395baf55f1599930c33548eea741f13f46c",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_core.yaml": "950d52a19a044873a68b2d3cc7feac8cf142801494e745faf8762fff0c0d6dc7",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_coverage_receipt.yaml": "c89c43f9b3cac7812802f3c4ace9141334cde22d733ec4f7a5795f9c60c5f22d",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_full.yaml": "39f297d1b1126b043b0e86531b5cd50519dd92f27aae21659a5dba9d20880ba3",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_full_response_7d9e2bd707f44a4892bcc69dde074866.txt": "46ab2342413afe708470728de6b7ac6145815d21eb99c1d2889b17a9539adad1",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_reconcile_core.yaml": "092079acaf57ef19004d4325f0431eeb9101c5734e065215aadc12303baf9d4e",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_reconcile_full.yaml": "11db6f7d87a83fe210d074ddf26a0fc87f25eed9236e4e301382011a82e0db17",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_report.md": "bcea7d7e2e8593408e1c0319199357ab33e911365d8c8827e8b848475d972ff7",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_report_before_regate.md": "bcea7d7e2e8593408e1c0319199357ab33e911365d8c8827e8b848475d972ff7",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10f-chorus_rep1/intermediate/CHORUS_snapshot_index.json": "534b0641dd608d0246c4e0a47b751509682e4e9712eef2faa8a5da1f65008837",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/result.json": "624b61c2260b5b08e76dc1ecc2bd91058d5e7267d2e3d8abafbc6feb53b0c376",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/started.json": "bed43b0029fe7594e157fb85831d6903ead62eb0bda62bebeb86ee474dbc7617",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/8c9b4ae5319f488bada94f9dc8d70cc2/request.json": "ea76b1db83a6a4aeae109896b31c95aa291505216b83e6f02aa19ea7ca74bc62",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/8c9b4ae5319f488bada94f9dc8d70cc2/response.json": "48276482548c54ac2996feb8865fb769d3c406c3be917cdc250e9eff8367a0be",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/8c9b4ae5319f488bada94f9dc8d70cc2/admission.json": "775237eddf0e0dd0c4d366d713b501b54607d381c6d42e045c6680bce7b1c90d",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/71c46dec30df4f10a6204d8f0829861d/request.json": "3662e305e28b13f3f58fdc13595b3afa6a3ba5ef9dd09ba3b69fdd8c746d6a13",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/71c46dec30df4f10a6204d8f0829861d/response.json": "2c677b1b5f817c4261973b1017ad9921795286ff365afe1df125300d3812fe7f",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/71c46dec30df4f10a6204d8f0829861d/admission.json": "11fc2e8c4a4146082c0ffc243a17f057ddb0665a22376a3fd991ca8110bb373b",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/09dac173c79049e38dc5b81402f49109/request.json": "aa64d70505ca6363497c0c1760167a02beb5fd168818c63de72ace996560cc41",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/09dac173c79049e38dc5b81402f49109/response.json": "06ba14431b69d53450caaea975583a9d7d9f0e17dc2a1a381d4a90d65b87514a",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/09dac173c79049e38dc5b81402f49109/admission.json": "abfdffe2b60735ad762b492d512aa473dc2ec378f18e55f5d015492a0b63fc4d",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/6c3195303e674aafa7121c9f82622df6/request.json": "05feaaa3c8ea24848ed2642ae1d2bf7056e80d4edd4e2bbaf647d3065230cb36",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/6c3195303e674aafa7121c9f82622df6/response.json": "3015ab4031b487b28cc372c5c3b8cbf86aa5f38f7cd0c38c3bb7695f9f414edc",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/6c3195303e674aafa7121c9f82622df6/admission.json": "a4333e84303d99b28fc778c8db7d559c8d8603066f6a3583f9a5c82cd15e561f",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/2fd6c937f18a4cefa01f6f95f22870d8/request.json": "ed7a4ab9d71b34dea2861119dfc291a6673b745fb4f83040a0917a1055dd6ee8",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/2fd6c937f18a4cefa01f6f95f22870d8/response.json": "cb08eb5e9b42a76ed7e4c77d065c8d0689f83985318a65ceec3544cfff819146",
+      "notes/matched_cborg_2026-09-14_v10f_cap20/attempts/CHORUS_api_rep1/requests/2fd6c937f18a4cefa01f6f95f22870d8/admission.json": "94d23a9ba7681b14a03c6221d86f38fd375b09b3c5242366fe62d0dc8645b02c"
+    }
+  },
+  "after_review": "Stop subsequent canaries, evaluators and production expansion. Preserve originals and all charges; address generic audit/repair propagation before any separately registered and authorized replacement. No automatic whole-attempt retry."
+}
