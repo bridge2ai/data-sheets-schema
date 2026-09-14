@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-09-14T04:32:25.858840+00:00",
+  "registration_sha256": "0fbe4d0853b0fbdcef6f4788532420800428aecd069ae8db48fa5a3485495a12",
+  "verdict": "approve",
+  "allowed_jobs": [
+    "CHORUS_api_rep1"
+  ],
+  "reviewer": "Codex plugin adversarial-review, round 2; separate local verification by Codex",
+  "reviewed_commit": "4a084a55b19dde93e6f7acf4ab397268cd68e50c",
+  "review_report": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/reviews/round2.md",
+  "review_report_sha256": "8bbb26e00ba044de1449dea8264298f18a055383641717c00ab57fc23c6e9cc1",
+  "ci_conclusion": "success",
+  "ci_run": 34804873090,
+  "ci_url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/34804873090",
+  "ci_head": "4a084a55b19dde93e6f7acf4ab397268cd68e50c",
+  "ci_observation_sha256": "e5622cad55cd1e14109e44233cfa8a9cc576ee4337619a7d4f268e1c98be4a21",
+  "local_pins_verified": 458,
+  "preserved_history_files": 3241,
+  "scope": "Only the first CHORUS API generation attempt. This is not acceptance of generated results, an evaluator, native transport or production expansion.",
+  "budget": {
+    "additional_usd": 200,
+    "per_attempt_usd": 5,
+    "authorization": "user: +$200, 2026-09-13",
+    "prices_per_token": {
+      "input": 5e-06,
+      "output": 2.5e-05,
+      "cache_write": 6.25e-06,
+      "cache_read": 5e-07
+    },
+    "unknown_charge_policy": "retain reservation and stop",
+    "automatic_whole_attempt_retries": 0,
+    "funding": "cap-limited staged sequence; the proposed full matrix is not assumed fully funded"
+  },
+  "post_generation_review": [
+    "full/core schema and duplicate keys",
+    "pair consistency and provenance",
+    "scope, grounding, receipts and source coverage",
+    "report claims and original-artifact source review",
+    "returned model, complete usage and cumulative attempt cost"
+  ]
+}
