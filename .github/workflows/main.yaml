@@ -65,6 +65,9 @@ jobs:
       - name: Run the suite including the corpus walks
         run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto
 
+      - name: Exercise experimental canary admission offline
+        run: poetry run pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py -q -p no:cacheprovider
+
   # Merge to main, or on demand: everything, everywhere.
   full:
     if: github.event_name != 'pull_request'

@@ -750,8 +750,8 @@ def _render_slot_spec(slot: str, digest, vocabulary: dict) -> str:
         # of the two defects FORM_SUBTYPE_SYSTEM asks the judge to separate —
         # cannot be assessed below the top level (#486).
         #
-        # Only non-string ranges: `string` is the default, so naming it adds
-        # prompt length and no information, while `uriorcurie` is where a
+        # Omit scalar strings only: string[] is a list obligation (#1771).
+        # `uriorcurie` is where a
         # plausible-looking value is the wrong kind. `unit: mg/dL` reads as a
         # perfectly good value until you know `unit` is declared `uriorcurie`.
         # Universal ranges once, then the ones specific to this class — the

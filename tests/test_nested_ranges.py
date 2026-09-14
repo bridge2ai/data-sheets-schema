@@ -75,12 +75,12 @@ class TestTheJudgeSeesThem(unittest.TestCase):
         to infer the rule, which is what produced the gap."""
         self.assertIn("wrong kind for its declared range", slot_spec("variables"))
 
-    def test_string_ranges_are_omitted(self):
+    def test_scalar_string_ranges_are_omitted(self):
         """`string` is the schema default: naming it costs prompt length and
         tells a reader nothing. `unit` is `string` since #456, so it must not
         appear even though it is the attribute the issue was filed about."""
         spec = slot_spec("variables")
-        self.assertNotIn("→ string", spec)
+        self.assertNotRegex(spec, r"→ string(?:,|$)")
         self.assertNotIn("unit →", spec)
 
     def test_a_slot_with_no_class_range_is_unaffected(self):
@@ -213,7 +213,8 @@ class DepthTwo(unittest.TestCase):
         self.assertEqual(schema_digest.digest_text("Dataset").count(marker), 0)
 
     def test_the_second_level_stays_within_budget(self):
-        self.assertLess(len(schema_digest.digest_text("Dataset")), 44_000)
+        # #1771 adds the previously omitted nested string-list obligations.
+        self.assertLess(len(schema_digest.digest_text("Dataset")), 46_000)
         self.assertEqual(schema_digest.NESTING_DEPTH, 2)
 
     def test_every_class_reachable_through_an_inlined_attribute_is_rendered(self):

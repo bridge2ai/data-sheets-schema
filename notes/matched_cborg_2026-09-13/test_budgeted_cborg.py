@@ -74,6 +74,91 @@ def test_unaffordable_call_never_reaches_generation(tmp_path):
     assert provider.calls == 0
 
 
+def test_refusal_survives_swallowed_exception_and_new_transport(tmp_path):
+    provider, capped, ledger = client(tmp_path, cap=0.01)
+    with pytest.raises(BudgetStop, match="remaining budget"):
+        capped.messages.create(**REQUEST)
+    # This cheaper call would fit, including after a process/controller restart.
+    provider2, restarted, _ = client(tmp_path, cap=0.01)
+    for instance in (capped, restarted):
+        with pytest.raises(BudgetStop, match="previously stopped"):
+            instance.messages.create(**{**REQUEST, "max_tokens": 1})
+    assert provider.calls == provider2.calls == provider2.counts == 0
+    assert provider.counts == 1
+    denied = json.loads(ledger.path.read_bytes())["stopped_attempts"]["canary-1"]
+    assert denied["paid_request"] is False and denied["denied_request_sha256"]
+    assert len(list((tmp_path / "denied_requests").rglob("request.json"))) == 1
+
+
+def test_real_repair_catch_cannot_allow_a_cheaper_report(tmp_path, monkeypatch):
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import spec
+    bundle = tmp_path / "bundle.txt"
+    bundle.write_text("Synthetic input\n")
+    run = spec(project="EXTERNAL", bundle=bundle, manifest=None, profile="neutral", out_dir=tmp_path)
+    body = "id: x\nname: n\ntitle: T\ndescription: d\n"
+    run.full_path.write_text(body)
+    provider, capped, ledger = client(tmp_path, cap=0.1)
+    monkeypatch.setattr(api, "MAX_ATTEMPTS", 1)
+    monkeypatch.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+    monkeypatch.setattr(api, "phase_max_tokens", lambda spec, phase, *args, **kw: 1000 if phase == "report" else 100000)
+    settings = {"name": "claude-opus-5", "temperature": None, "temperature_applies": False, "max_tokens": 1000}
+    log = api._repair_invalid(run, capped, settings, [])
+    assert "remaining budget" in log[0]["outcome"]  # The real runner caught it.
+    carry = {key: body for key in api.PHASE_NEEDS["report"]}
+    assert api._regenerate_report(run, capped, settings, [], carry, phase="report_regate") is False
+    assert provider.calls == 0 and provider.counts == 1
+    with pytest.raises(BudgetStop, match="remaining budget"):
+        capped.messages.require_active()  # Controller cannot call this completed.
+    assert json.loads(ledger.path.read_bytes())["requests"] == []
+
+
+@pytest.mark.parametrize("failure,status", [("lost", "pending"), ("model", "protocol_failure"), ("charge", "over_reservation")])
+def test_last_report_failure_stops_without_a_subsequent_request(tmp_path, monkeypatch, failure, status):
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import spec
+    bundle = tmp_path / "bundle.txt"
+    bundle.write_text("Synthetic input\n")
+    run = spec(project="EXTERNAL", bundle=bundle, manifest=None, profile="neutral", out_dir=tmp_path)
+    provider, capped, ledger = client(tmp_path, fail=failure == "lost")
+    original = provider.create
+    def failed_response(**request):
+        value = original(**request).model_dump()
+        if failure == "model":
+            value["model"] = "unexpected-model"
+        if failure == "charge":
+            value["usage"]["output_tokens"] = 1000000
+        return SimpleNamespace(model_dump=lambda **kw: value)
+    provider.create = failed_response
+    monkeypatch.setattr(api, "MAX_ATTEMPTS", 1)
+    monkeypatch.setattr(api, "phase_max_tokens", lambda *args, **kw: 1000)
+    settings = {"name": "claude-opus-5", "temperature": None, "temperature_applies": False, "max_tokens": 1000}
+    carry = {key: "id: x\nname: n\ntitle: T\ndescription: d\n" for key in api.PHASE_NEEDS["report"]}
+    assert api._regenerate_report(run, capped, settings, [], carry, phase="report_regate") is False
+    assert provider.calls == provider.counts == 1
+    state = json.loads(ledger.path.read_bytes())
+    assert state["requests"][0]["status"] == status
+    with pytest.raises(BudgetStop):
+        capped.messages.require_active()
+    _, restarted, _ = client(tmp_path)
+    with pytest.raises(BudgetStop):
+        restarted.messages.require_active()
+    assert "canary-1" in state["stopped_attempts"]
+
+
+@pytest.mark.parametrize("status", ["pending", "protocol_failure", "over_reservation"])
+def test_final_check_rejects_unsettled_rows_even_without_a_stop_event(tmp_path, status):
+    _, capped, ledger = client(tmp_path)
+    ticket = ledger.reserve("interrupted-earlier-attempt", 0.1, "request")
+    if status != "pending":
+        with pytest.raises(BudgetStop):
+            ledger.settle(ticket, 0.2 if status == "over_reservation" else 0.01,
+                          response_sha256="response", usage={},
+                          protocol_failure="unexpected model" if status == "protocol_failure" else None)
+    with pytest.raises(BudgetStop, match="pending or unknown"):
+        capped.messages.require_active()
+
+
 def test_unknown_charge_blocks_a_new_attempt(tmp_path):
     provider, capped, ledger = client(tmp_path, fail=True)
     with pytest.raises(TimeoutError):
