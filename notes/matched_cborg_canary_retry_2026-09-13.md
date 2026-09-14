@@ -24,6 +24,11 @@ and share the new ledger containing all earlier charges. Reject changed or
 unresolved checkpoints, duplicated requests, mismatched totals/caps and
 attempts to replace existing ledger rows.
 
+Issue #1777 also binds one absolute, canonical ledger path into the
+registration. Relocating a registration cannot create a separate allowance
+or hide later charges, pending reservations or the shared lock. The
+unexecuted first review draft is preserved before refreshing the registration.
+
 Only the newly registered CHORUS API canary may receive initial launch
 approval after exact registration review and CI. Accept its original full,
 derived core, provenance, receipts and report independently before the native

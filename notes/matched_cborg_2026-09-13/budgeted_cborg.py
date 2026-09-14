@@ -332,9 +332,16 @@ class CappedClient:
         self.messages = CappedMessages(client, **kwargs)
 
 
-def open_ledger(manifest, manifest_sha256, directory):
+def open_ledger(manifest, manifest_sha256):
+    """Use the hash-bound sequence ledger even if the registration is copied."""
     budget = manifest["budget"]
-    ledger = Ledger(Path(directory) / "billing.json", manifest_sha256=manifest_sha256,
+    location = budget.get("ledger_path")
+    if not isinstance(location, str) or not location:
+        raise BudgetStop("registration lacks a canonical sequence ledger path")
+    path = Path(location)
+    if not path.is_absolute() or str(path.resolve()) != location:
+        raise BudgetStop("registered sequence ledger path is not absolute and canonical")
+    ledger = Ledger(path, manifest_sha256=manifest_sha256,
                     total_cap=budget["additional_usd"], attempt_cap=budget["per_attempt_usd"])
     prior = budget.get("continuation")
     if prior is not None:

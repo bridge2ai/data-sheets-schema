@@ -19,6 +19,8 @@ The budget remains $200 additional and $5 cumulatively per attempt. The pinned
 costing an estimated $3.291465. Continuation retains those rows exactly and
 uses condition-qualified attempt IDs. It does not reset the allocation;
 $196.708535 remains. Unknown charges stop execution.
+The registration also pins the canonical ledger path: relocated copies use
+the same later charges, pending reservations and lock (#1777).
 
 The fresh CBORG token counts admit initial reservations of $3.520425 for
 CHORUS (41,870 input tokens) and $4.95790625 for Kids First (233,534 input

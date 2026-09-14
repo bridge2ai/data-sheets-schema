@@ -101,7 +101,7 @@ def main():
         raise BudgetStop("generation render or input identity changed")
     if api_runner.provider_identity()["base_url"] != manifest["provider_base_url"]:
         raise BudgetStop("provider identity does not match the configured CBORG endpoint")
-    ledger = open_ledger(manifest, manifest_sha, here)
+    ledger = open_ledger(manifest, manifest_sha)
     client = CappedClient(anthropic.Anthropic(api_key=key, base_url=manifest["provider_base_url"],
                                              max_retries=manifest["generation"]["sdk_max_retries"]),
         ledger=ledger, attempt=attempt_identity(manifest_sha, job["id"]), evidence=attempt / "requests",

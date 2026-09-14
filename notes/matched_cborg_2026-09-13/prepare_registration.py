@@ -184,6 +184,7 @@ def main():
         "model": selected_model, "provider_base_url": "https://api.cborg.lbl.gov",
         "claude_version": subprocess.check_output(["/Users/marcin/.local/bin/claude", "--version"], text=True).strip(),
         "budget": {"additional_usd": 200, "per_attempt_usd": 5, "authorization": "user: +$200, 2026-09-13",
+                   "ledger_path": str(output / "billing.json"),
                    "prices_per_token": {"input": 0.000005, "output": 0.000025, "cache_write": 0.00000625, "cache_read": 0.0000005},
                    "unknown_charge_policy": "retain reservation and stop", "automatic_whole_attempt_retries": 0,
                    "funding": "cap-limited staged sequence; the proposed full matrix is not assumed fully funded"},

@@ -116,7 +116,7 @@ def main():
     attempt=here/'attempts'/args.job;attempt.mkdir(parents=True,exist_ok=False)
     config=attempt/'cli_config';config.mkdir(mode=0o700)
     import anthropic
-    ledger=open_ledger(base,registration_sha,here)
+    ledger=open_ledger(base,registration_sha)
     billing_attempt=attempt_identity(registration_sha,job['id'])
     proxy=NativeProxy(sdk=anthropic.Anthropic(api_key=key,base_url=base['provider_base_url'],max_retries=0),
           ledger=ledger,attempt=billing_attempt,evidence=attempt/'requests',model=base['model']['model'],

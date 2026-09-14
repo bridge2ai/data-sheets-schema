@@ -1,12 +1,12 @@
 {
   "kind": "public_review_view_not_executable",
-  "original_sha256": "1732bc49771387d53f27131a90e848871b2459092f2236650fd1f22f8dac3858",
+  "original_sha256": "40852137a0e1daed6ab31997c658362d895264a08b2e2b8c4a408303d0042083",
   "transform": "Only machine-specific path bindings are replaced by named placeholders. Original launch files remain local and unchanged.",
   "view": {
-    "registered_at": "2026-09-14T05:34:26.994750+00:00",
+    "registered_at": "2026-09-14T05:50:49.349238+00:00",
     "status": "draft_awaiting_independent_review_and_prior_canary_acceptance",
     "registration": "<repository>/notes/matched_cborg_2026-09-13_v10b/registration.json",
-    "registration_sha256": "3581fd9844421c325e094ebc38d88a9951232ce7d825e1e3677ff2ddcc83fd34",
+    "registration_sha256": "841bfbcc773e23a83c5c9d4b71e711e18e07a75878653357125f00b1649808a1",
     "allowed_jobs": [
       "CHORUS_agentic_rep1",
       "KIDS_FIRST_agentic_rep1"
@@ -77,12 +77,12 @@
     "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
     "pinned_files": {
       "<repository>/notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": "428a2a097f6d2a98c1a0c01ea5b8dcfff47a18fc8806f7d9027d847b976ff548",
-      "<repository>/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "292aeb2e8881ce296ad93ca2ac0b82e8cdcee6b24467972c0f76c57c88376bb7",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "8ece0df3ce00609033f117fa085e08e778941e4938238f6c37452040453ec9fd",
       "<repository>/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "b5ed8aa15da38348ffffaed2c20a85905faf97863366c51f6aa4a128fcbb2191",
       "<repository>/notes/matched_cborg_2026-09-13/native_controls/system.md": "c38c66f9a34ffaa6019cb34d9720b5ab4e683465602de4a0177bf71ca8653e00",
-      "<repository>/notes/matched_cborg_2026-09-13/budgeted_cborg.py": "1e111bf0d9b7e6b9bbd1e45f9ce980d3d8a1e2297faef4a9f6b74f93310449b5",
-      "<repository>/notes/matched_cborg_2026-09-13/run_api_canary.py": "67315d64af634d254e160bec342e74e5dad67ab9bb746d061c5ccc98417cea49",
-      "<repository>/notes/matched_cborg_2026-09-13/prepare_registration.py": "3becf40ed6cc01797492cc44a6cb19836576ae9cb5611576405a957b51799d88",
+      "<repository>/notes/matched_cborg_2026-09-13/budgeted_cborg.py": "5a78936382a49887e7fc15a5a8423838f4ccd877d753f465a7f9503828c9ee50",
+      "<repository>/notes/matched_cborg_2026-09-13/run_api_canary.py": "f9c762b87c88f15bbc3a02904a31effd8efbec72f88f0cb3b7ce7d57ea26f0ff",
+      "<repository>/notes/matched_cborg_2026-09-13/prepare_registration.py": "2b13701e29abbd88f494ee5073ab87ea83b4acebd436941fad354afaccd64343",
       "<registered-claude>": "a506b6d970a4cf44f6abdb53a81ddcd5d3b0ce042a95c502fe9d1f946bdb8807"
     }
   }
