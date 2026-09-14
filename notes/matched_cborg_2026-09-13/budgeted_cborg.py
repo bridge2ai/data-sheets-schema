@@ -110,6 +110,41 @@ class Ledger:
             state.setdefault("stopped_attempts", {}).setdefault(
                 attempt, {"stopped_at": now(), "reason": reason})
 
+    def continue_from(self, checkpoint, *, expected_sha256, expected_cost_usd):
+        """Carry settled charges forward exactly once; never grant a new cap."""
+        raw = Path(checkpoint).read_bytes()
+        if digest(raw) != expected_sha256:
+            raise BudgetStop("prior billing checkpoint changed")
+        previous = json.loads(raw)
+        if any(previous.get(k) != self.identity[k] for k in ("additional_cap_usd", "attempt_cap_usd")):
+            raise BudgetStop("prior billing checkpoint has different budget caps")
+        if not isinstance(previous.get("manifest_sha256"), str) or not previous["manifest_sha256"]:
+            raise BudgetStop("prior billing checkpoint lacks its registration identity")
+        rows = previous.get("requests")
+        if not isinstance(rows, list) or any(not isinstance(row, dict) or row.get("status") != "settled" for row in rows):
+            raise BudgetStop("prior billing contains an unresolved charge")
+        identifiers = [row.get("id") for row in rows]
+        if any(not isinstance(i, str) or not i for i in identifiers) or len(set(identifiers)) != len(identifiers):
+            raise BudgetStop("prior billing request identities are missing or duplicated")
+        costs = [money(row.get("cost_usd", "NaN")) for row in rows]
+        if any(not cost.is_finite() or cost < 0 for cost in costs):
+            raise BudgetStop("prior billing charge is invalid")
+        total = sum(costs, Decimal(0))
+        expected = money(expected_cost_usd)
+        if not expected.is_finite() or total != expected or total > self.total_cap:
+            raise BudgetStop("prior billing total differs from the registered continuation")
+        identity = {"checkpoint_sha256": expected_sha256,
+                    "manifest_sha256": previous["manifest_sha256"],
+                    "cost_usd": str(total), "requests": len(rows)}
+        with self.transaction() as state:
+            if "continued_from" in state:
+                if state["continued_from"] != identity or state["requests"][:len(rows)] != rows:
+                    raise BudgetStop("continued billing history changed")
+            else:
+                if state["requests"]:
+                    raise BudgetStop("cannot replace existing requests with a prior checkpoint")
+                state.update(continued_from=identity, requests=rows)
+
     def settle(self, ticket, actual, *, response_sha256, usage, protocol_failure=None):
         actual = money(actual)
         if not actual.is_finite() or actual < 0:
@@ -295,3 +330,27 @@ class CappedMessages:
 class CappedClient:
     def __init__(self, client, **kwargs):
         self.messages = CappedMessages(client, **kwargs)
+
+
+def open_ledger(manifest, manifest_sha256):
+    """Use the hash-bound sequence ledger even if the registration is copied."""
+    budget = manifest["budget"]
+    location = budget.get("ledger_path")
+    if not isinstance(location, str) or not location:
+        raise BudgetStop("registration lacks a canonical sequence ledger path")
+    path = Path(location)
+    if not path.is_absolute() or str(path.resolve()) != location:
+        raise BudgetStop("registered sequence ledger path is not absolute and canonical")
+    ledger = Ledger(path, manifest_sha256=manifest_sha256,
+                    total_cap=budget["additional_usd"], attempt_cap=budget["per_attempt_usd"])
+    prior = budget.get("continuation")
+    if prior is not None:
+        if manifest["pinned_files"].get(prior["checkpoint"]) != prior["sha256"]:
+            raise BudgetStop("prior billing checkpoint is not pinned by this registration")
+        ledger.continue_from(prior["checkpoint"], expected_sha256=prior["sha256"],
+                             expected_cost_usd=prior["cost_usd"])
+    return ledger
+
+
+def attempt_identity(manifest_sha256, job):
+    return f"{manifest_sha256}:{job}"

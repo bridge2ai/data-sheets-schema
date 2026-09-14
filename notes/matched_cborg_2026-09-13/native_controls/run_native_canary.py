@@ -11,7 +11,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from budgeted_cborg import BudgetStop, Ledger, write_new
+from budgeted_cborg import BudgetStop, open_ledger, attempt_identity, write_new
 from native_proxy import NativeProxy
 from prepare_registration import spec_for
 from run_api_canary import verify, verify_history, sha
@@ -116,9 +116,10 @@ def main():
     attempt=here/'attempts'/args.job;attempt.mkdir(parents=True,exist_ok=False)
     config=attempt/'cli_config';config.mkdir(mode=0o700)
     import anthropic
-    ledger=Ledger(here/'billing.json',manifest_sha256=registration_sha,total_cap=base['budget']['additional_usd'],attempt_cap=base['budget']['per_attempt_usd'])
+    ledger=open_ledger(base,registration_sha)
+    billing_attempt=attempt_identity(registration_sha,job['id'])
     proxy=NativeProxy(sdk=anthropic.Anthropic(api_key=key,base_url=base['provider_base_url'],max_retries=0),
-          ledger=ledger,attempt=job['id'],evidence=attempt/'requests',model=base['model']['model'],
+          ledger=ledger,attempt=billing_attempt,evidence=attempt/'requests',model=base['model']['model'],
           prices=base['budget']['prices_per_token'],verify=verify_all,provider_key=key,base_url=base['provider_base_url'])
     # Explicitly whitelist non-credential environment fields. The child gets
     # only the local transport token; provider credentials stay in the parent.
@@ -161,7 +162,7 @@ def main():
         if observed.get('contextWindow')!=expected_limits['context_window'] or observed.get('maxOutputTokens')!=expected_limits['max_output_tokens']:
             raise BudgetStop('native runtime limits differ from the registered observation')
         state=json.loads(ledger.path.read_bytes())
-        rows=[r for r in state['requests'] if r['attempt']==job['id']]
+        rows=[r for r in state['requests'] if r['attempt']==billing_attempt]
         if not rows or any(r['status']!='settled' for r in rows):
             raise BudgetStop('native attempt has missing or unresolved request accounting')
         if not all(Path(p).is_file() for p in job['outputs'].values()):
@@ -179,7 +180,7 @@ def main():
         if isinstance(exc,BudgetStop): receipt['reason']=str(exc)
     finally:
         state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}
-        admitted=[row for row in state['requests'] if row['attempt']==job['id']]
+        admitted=[row for row in state['requests'] if row['attempt']==billing_attempt]
         receipt.update(finished_at=now(),model_requests_admitted=len(admitted),
             unfinished_handlers_at_freeze=proxy.unfinished_handlers,
             artifacts={str(p):sha(p) for folder in job['output_directories'] for p in sorted(Path(folder).rglob('*')) if p.is_file()})

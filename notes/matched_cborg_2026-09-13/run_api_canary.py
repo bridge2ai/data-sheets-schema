@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 import subprocess
 
-from budgeted_cborg import BudgetStop, CappedClient, Ledger, write_new
+from budgeted_cborg import BudgetStop, CappedClient, open_ledger, attempt_identity, write_new
 from prepare_registration import spec_for
 
 HERE = Path(__file__).resolve().parent
@@ -44,6 +44,9 @@ def verify_history(manifest):
                if not (root / rel).is_file() or sha(root / rel) != pin["sha256"]]
     if changed:
         raise BudgetStop(f"historical source artifacts changed: {changed[:5]}")
+    for item in manifest.get("prior_attempt_artifacts", []):
+        if not Path(item["path"]).is_file() or sha(item["path"]) != item["sha256"]:
+            raise BudgetStop("a preserved prior-canary artifact changed")
 
 
 def main():
@@ -52,6 +55,7 @@ def main():
     parser.add_argument("--job", required=True)
     parser.add_argument("--review", type=Path, required=True)
     args = parser.parse_args()
+    here = args.registration.resolve().parent
     manifest = json.loads(args.registration.read_bytes())
     if manifest.get("generation", {}).get("external_canary", {}).get("status") != "registered":
         raise BudgetStop("external source registration is incomplete; no canary launch")
@@ -65,7 +69,7 @@ def main():
         raise BudgetStop("this entry point only launches API generation canaries")
     order = manifest["generation"]["canary_order"]
     for previous in order[:order.index(args.job)]:
-        acceptance = HERE / "acceptances" / f"{previous}.json"
+        acceptance = here / "acceptances" / f"{previous}.json"
         if not acceptance.exists():
             raise BudgetStop(f"earlier canary needs independent acceptance: {previous}")
         value = json.loads(acceptance.read_bytes())
@@ -77,7 +81,7 @@ def main():
     verify_history(manifest)
     if any(Path(p).exists() for p in job["output_directories"]):
         raise BudgetStop("attempt output directory already exists; never overwrite or automatically resume")
-    attempt = HERE / "attempts" / job["id"]
+    attempt = here / "attempts" / job["id"]
     attempt.mkdir(parents=True, exist_ok=False)
     # Metadata and the actual client must agree: api_runner otherwise gives
     # inherited direct Anthropic credentials precedence over CBORG.
@@ -97,12 +101,10 @@ def main():
         raise BudgetStop("generation render or input identity changed")
     if api_runner.provider_identity()["base_url"] != manifest["provider_base_url"]:
         raise BudgetStop("provider identity does not match the configured CBORG endpoint")
-    ledger = Ledger(HERE / "billing.json", manifest_sha256=manifest_sha,
-                    total_cap=manifest["budget"]["additional_usd"],
-                    attempt_cap=manifest["budget"]["per_attempt_usd"])
+    ledger = open_ledger(manifest, manifest_sha)
     client = CappedClient(anthropic.Anthropic(api_key=key, base_url=manifest["provider_base_url"],
                                              max_retries=manifest["generation"]["sdk_max_retries"]),
-        ledger=ledger, attempt=job["id"], evidence=attempt / "requests",
+        ledger=ledger, attempt=attempt_identity(manifest_sha, job["id"]), evidence=attempt / "requests",
         model=manifest["model"]["model"], prices=manifest["budget"]["prices_per_token"],
         verify=lambda: verify(manifest, args.registration, manifest_sha),
         initial_request=json.loads(Path(job["initial_request"]).read_bytes()))

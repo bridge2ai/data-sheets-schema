@@ -140,11 +140,12 @@ request. Do not hide multiple billable calls behind one nominal attempt.
 Actual usage, estimated charges, retries, excluded attempts and unknown costs
 must remain visible. Catalogue/CLI estimates are not reconciled invoices.
 
-No paid launch has occurred under this registration. Each launch will require
-the final immutable manifest, a reviewed preflight result, the applicable
-spend allocation and a clear stop rule. Acceptance records will name the
-original output and actual observed instrument/runtime, never a later copy
-or a self-reported identity alone.
+The first paid launch under this registration was rejected, as recorded above.
+Its five requests and estimated $3.291465 cost remain part of this allocation.
+The [separate v10b retry plan](matched_cborg_canary_retry_2026-09-13.md) requires
+a new immutable manifest, reviewed preflight result and exact CI before launch.
+Acceptance records name the original output and actual observed
+instrument/runtime, never a later copy or a self-reported identity alone.
 
 ## Execution log
 
