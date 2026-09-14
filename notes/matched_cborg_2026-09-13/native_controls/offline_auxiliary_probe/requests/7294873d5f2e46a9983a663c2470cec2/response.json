@@ -1,0 +1,13 @@
+{
+  "id": "offline_1",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-opus-5",
+  "content": [],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 100,
+    "output_tokens": 12
+  }
+}

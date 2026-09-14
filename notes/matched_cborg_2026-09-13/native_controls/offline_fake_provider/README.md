@@ -1,0 +1,1 @@
+Every provider response in this fixture was scripted in memory. The ledger records simulated charges only; no scientific generation or paid provider call occurred. The transcript is the original installed-CLI capability probe.

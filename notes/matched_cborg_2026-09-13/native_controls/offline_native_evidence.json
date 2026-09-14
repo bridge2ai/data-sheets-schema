@@ -1,0 +1,25 @@
+{
+  "status": "offline_native_capability_passed",
+  "scientific_calls": 0,
+  "fake_requests": 4,
+  "tools": [
+    "Bash",
+    "Read",
+    "Write"
+  ],
+  "permission_denials": [],
+  "claude_code_version": "2.1.270",
+  "configured_identifier": "claude-opus-5",
+  "native_reported_limits": {
+    "contextWindow": 200000,
+    "maxOutputTokens": 64000
+  },
+  "limitation": "Scripted fake responses verify transport and tools, not model capability or live CBORG behavior. Native runtime limits differ from catalogue maxima; preserve the observed execution condition.",
+  "proxy_tests": {
+    "passed": 15,
+    "log_sha256": "1c446df41096238bf8bc5f26599d9d0a76838559bc5547aab6940d958ad95220"
+  },
+  "original_probe": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-native-offline-iyj3fgti",
+  "transcript_sha256": "e881e63bc1dc22756bf9c46b94161391fcd78c3f325ccd2d3e7ef2adaf406e13",
+  "fake_ledger_sha256": "5280029946cb600ab81e65ff2bd344d0d2f67aa1aa62bd9c709a8943fc56502d"
+}
