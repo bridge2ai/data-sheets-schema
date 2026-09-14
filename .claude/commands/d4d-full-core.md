@@ -482,13 +482,19 @@ allowed to prefer a value merely because the full record already states it.
    - keep historical values only when their historical scope is explicit;
    - inspect every occurrence of a claim about availability, deployment,
      collection, processing or privacy, including prose and nested list
-     entries. Compare each occurrence with the supporting passage's subject,
+     entries. Check every member of a composite inventory separately: an
+     "includes" or "consists of" assertion assigns presence to each member,
+     even in a sensitivity, governance or other contextual field. A list can
+     mix present and planned members; one member's evidence or status does not
+     support the others. Compare each occurrence with the passage's subject,
      release/date and status: completed, in progress, planned or unstated.
      Include the governing clause or heading when checking and quoting that
      status, including future scope inherited across a list or sentence. A
      present-element boolean and an applied-method assertion each need
      evidence of that state; a neighboring plan or a generic goal does not
-     supply it. An ambition also does not establish current non-attainment.
+     supply it. Audit negative current-state claims too, including an asserted
+     absence of comparable resources: require a source that establishes that
+     absence, rather than inferring it from a development goal.
      A repository or tool description establishes a capability, not its use
      on this dataset; a format table alone does not establish released
      availability. A caveat in another field does not qualify an unqualified
@@ -514,7 +520,16 @@ allowed to prefer a value merely because the full record already states it.
 4. Back-port every source-supported omission into the full record in the
    correct full-schema slot, and correct the full record wherever the audit
    changes a fact, including every occurrence of the same unsupported
-   assertion. Recheck the subject, release/date, operational status and field
+   assertion. Before editing, find every mention of each affected fact,
+   including synonyms and members of prose inventories in fields the audit
+   did not name. After repairing the named locations, revisit occurrences
+   left unchanged; the findings are not a complete occurrence inventory.
+   Check every member of a mixed-status list individually. Qualify or omit an
+   unsupported member without discarding supported members or changing a
+   supported presence boolean to false. Recheck negative current-state
+   claims too: an aim to create or improve a resource does not prove that
+   comparable resources are absent.
+   Recheck the subject, release/date, operational status and field
    meaning of every added or changed assertion against its source passage;
    a repair must not introduce a stronger availability or privacy claim.
    An audit recommendation is also subject to this check: restore the

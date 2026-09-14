@@ -1,0 +1,37 @@
+{
+  "counted_at": "2026-09-14T21:14:21.921073+00:00",
+  "method": "CBORG count_tokens only; no generation request",
+  "prior_settled_cost_usd": "16.16391800",
+  "remaining_additional_budget_usd": "183.83608200",
+  "per_attempt_default_usd": "5",
+  "generation_canary_proposed_caps_status": "awaiting_explicit_replacement_attempt_approval",
+  "generation_requests": 0,
+  "requests": [
+    {
+      "job": "CHORUS_api_rep1",
+      "request_sha256": "76f06b33ac99e1e1bd1e0415ec02285dfd1782b14a71a73d86133e72ee3429b0",
+      "input_tokens": 41870,
+      "input_bound": 51268,
+      "output_ceiling": 128000,
+      "initial_reservation_usd": "3.52042500",
+      "default_cap_usd": "5",
+      "fits_default_cap": true,
+      "proposed_cap_usd": "16.51",
+      "fits_proposed_cap": true,
+      "fits_remaining_sequence_cap": true
+    },
+    {
+      "job": "KIDS_FIRST_api_rep1",
+      "request_sha256": "fd8998bec9e85035314c0ca320fc768b834d83406fdbf48b65b75c9496864d1b",
+      "input_tokens": 233534,
+      "input_bound": 281265,
+      "output_ceiling": 128000,
+      "initial_reservation_usd": "4.95790625",
+      "default_cap_usd": "5",
+      "fits_default_cap": true,
+      "proposed_cap_usd": "15",
+      "fits_proposed_cap": true,
+      "fits_remaining_sequence_cap": true
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # v10f budget amendment — approved 2026-09-14
 
+The approved replacement [completed for $3.487946 and failed source review](rejected_canaries/CHORUS_api_rep1/README.md). All originals are preserved and later launches stopped. The registration and prelaunch controls below remain the historical record.
+
 The user approved **one replacement CHORUS API attempt capped at $20**,
 changing the proposed $10 cap. CHORUS native remains $10; Kids First API and
 native remain $15 each. The four unrun attempts have a $60 maximum combined
