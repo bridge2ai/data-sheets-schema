@@ -1,0 +1,26 @@
+{
+  "kind": "replacement_canary_proposal_not_launch_approval",
+  "status": "awaiting_explicit_replacement_attempt_approval",
+  "prior_approval": "User approved one fresh attempt for each of four v10e generation canaries, with CHORUS caps $10, Kids First caps $15, at most $50 combined within the additional $200.",
+  "prior_canary_outcome": "Only CHORUS API ran; completed but source review rejected. Its $3.747066 cost remains charged. No automatic whole-attempt retry.",
+  "proposed_action": "One replacement CHORUS API attempt under a fresh source-scope instruction condition, then the three unrun matched canaries only after each preceding acceptance.",
+  "proposed_whole_attempt_caps_usd": {
+    "CHORUS_api_rep1": 10,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "other_attempts_cap_usd": 5,
+  "maximum_new_four_canary_attempts_usd": "50.00",
+  "already_spent_from_original_four_canary_ceiling_usd": "3.74706600",
+  "maximum_combined_including_rejected_v10e_usd": "53.74706600",
+  "proposed_rounded_combined_ceiling_usd": "53.75",
+  "existing_additional_allocation_usd": "200.00",
+  "allocation_spent_usd": "12.67597200",
+  "allocation_remaining_usd": "187.32402800",
+  "no_automatic_retries": true,
+  "effort_changes": false,
+  "source_changes": false,
+  "scientific_requests_from_preparation": 0,
+  "activation": "No launch receipt before explicit replacement approval, independent registration review, current pricing/pin/accounting checks and exact-launch-commit CI. Any failed canary stops the sequence. No evaluator or production expansion approval is implied."
+}
