@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-09-14T09:20:27.353640+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2",
+  "native_overlay_sha256": "0ae75587df7fe7076bce826db889b8a7e70381049821924248116104a88d5b23",
+  "registered_pins_verified": 461,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 111,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "generation_implementation_and_shipped_instructions_unchanged_from_v10d": true,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 12,
+  "prior_stop_event_retained_in_checkpoint": true,
+  "estimated_cost_usd": "8.92890600",
+  "remaining_additional_budget_usd": "191.07109400",
+  "default_attempt_cap_usd": "5",
+  "proposed_per_job_caps_usd": {
+    "CHORUS_api_rep1": 10,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "all_four_cap_exception_approvals": "pending_explicit_user_approval",
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Public hashes do not establish independent inspection of unpublished originals. A candidate cap policy grants no spending approval."
+}

@@ -1,0 +1,98 @@
+{
+  "kind": "incomplete_generation_canary_budget_stop",
+  "registration_sha256": "bae17a6d500794231a6b12c83ef5e6540a26bdf29feae83006e83652791c9993",
+  "launch_commit": "9a8212489c9184b41a75876af1f6751f6a362735",
+  "started_at": "2026-09-14T08:54:49.745274+00:00",
+  "finished_at": "2026-09-14T09:10:30.781830+00:00",
+  "status": "rejected_incomplete",
+  "attempt_result_sha256": "8b3ca72ed740612f4efff48600c1bafd3ca2aca5ba31141c308a0c1d18904b92",
+  "launch_review_sha256": "57544a941829ca1acff42a677725e72ce0be00dc275549fbd71106b822af4f50",
+  "billing_checkpoint_sha256": "7963cff1e0cd8a78dcfa2930d6926428cf1d35281226b5541be520437027f3a2",
+  "paid_requests": [
+    {
+      "id": "f46b8fe78c9b4d33b46fe464be3ea1ac",
+      "request_sha256": "c2e127e81165a01464b8c6bcd10b7f0c9b3239a69b6b8b5421139ad594587148",
+      "response_sha256": "0d7895e30acfbfd44bc2f0d3056186dbae3c10ba6bc3dbe0ba6c1db453a54e73",
+      "cost_usd": "1.87952000",
+      "response_model": "claude-opus-5",
+      "stop_reason": "end_turn",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9789,
+        "output_tokens": 65187,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "f4b6fa39750d4926a5f128e9500b5f8d",
+      "request_sha256": "63ea53d1d2336ebf9245c89cd8f1feda8a0341ca07edf10ea2cddd6fde5b18d6",
+      "response_sha256": "bcb65695fb31cd1dbc22f971ee6d9fd51f4679326cb30d8c5dfe3140c7fa79b0",
+      "cost_usd": "0.72730000",
+      "response_model": "claude-opus-5",
+      "stop_reason": "end_turn",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 18620,
+        "output_tokens": 17332,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    }
+  ],
+  "denied_admission": {
+    "input_count": 56270,
+    "input_bound": 68548,
+    "output_ceiling": 96000,
+    "required_reservation_usd": "2.82842500",
+    "denied_at": "2026-09-14T09:10:30.780029+00:00",
+    "reason": "request reserve $2.82842500 exceeds remaining budget: attempt $2.39318000, sequence $191.07109400",
+    "paid_request": false
+  },
+  "denied_request_sha256": "802b7cc745e3aa9135547c43a5f463a0dfce8cad0f7398dee6c0e17b7e03ddf4",
+  "attempt_cost_usd": "2.60682000",
+  "sequence_estimated_cost_usd": "8.92890600",
+  "remaining_additional_allocation_usd": "191.07109400",
+  "all_sequence_rows_settled": true,
+  "no_request_after_refusal": true,
+  "original_artifacts": {
+    "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/.CHORUS_d4d.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/CHORUS_d4d.yaml": "787b73225a72e9cda71e1a1aba55b68151b7e78441812bb8f7234aa53814a10b",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/.CHORUS_d4d_core.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/.CHORUS_provenance.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/.CHORUS_reconciliation.md_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/CHORUS_api_progress.json": "88f6850fe0edbf9a50b7a6dfe5277dbcd285e30ea357e0df76fbc205a2b529ce",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/CHORUS_api_usage_6d811058cc319fa7.json": "0b78b99ff3e3942cf69145285a6f5e647fcc495b7a878bf9256864ce88c280a1",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/CHORUS_coverage_receipt.yaml": "923051e4adf9cdd450c94d22ff17c7e6ea62d37f5fb6daf9de953f30d0be7a1d",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/CHORUS_d4d_core.yaml": "c7bfc477b639c5c54c0b751b77d4c3cfe4d992537798b2a44062fe1580bc1464",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/CHORUS_reasoning.jsonl": "dfb59e5a6508e30d2e8050730488e6a229cacc2880f796ac5ef5ccb5ab026977",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/intermediate/CHORUS_audit.json": "0c2c09bec7702eab7408d14dd159fae1506b9ecb50aae8e34373500493840f8a",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/intermediate/CHORUS_core.yaml": "c7bfc477b639c5c54c0b751b77d4c3cfe4d992537798b2a44062fe1580bc1464",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/intermediate/CHORUS_coverage_receipt.yaml": "923051e4adf9cdd450c94d22ff17c7e6ea62d37f5fb6daf9de953f30d0be7a1d",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/intermediate/CHORUS_full.yaml": "787b73225a72e9cda71e1a1aba55b68151b7e78441812bb8f7234aa53814a10b",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/intermediate/CHORUS_full_response_f55f1e45b73b4085ac3507bb08ec44b3.txt": "5321ffe1f0d3e7652752a4265cc9071afddbbde51226743099da36180d2ba6ab",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10d-chorus_rep1/intermediate/CHORUS_snapshot_index.json": "4e01935acc3f49feaf309a720c84589a7d54a16ee2bc750f71798df3575cd0fe",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/result.json": "8b3ca72ed740612f4efff48600c1bafd3ca2aca5ba31141c308a0c1d18904b92",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/started.json": "6c9b3b9302e65cd38d9db97d32b226fc9fd8a2b16641dfb2f65d8c4933955e17",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/requests/f4b6fa39750d4926a5f128e9500b5f8d/request.json": "63ea53d1d2336ebf9245c89cd8f1feda8a0341ca07edf10ea2cddd6fde5b18d6",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/requests/f4b6fa39750d4926a5f128e9500b5f8d/response.json": "bcb65695fb31cd1dbc22f971ee6d9fd51f4679326cb30d8c5dfe3140c7fa79b0",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/requests/f4b6fa39750d4926a5f128e9500b5f8d/admission.json": "715b3ed94e8ca0e4ce40d522b8c9bc66a840b7addc522f04e766ab12e049f844",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/requests/f46b8fe78c9b4d33b46fe464be3ea1ac/request.json": "c2e127e81165a01464b8c6bcd10b7f0c9b3239a69b6b8b5421139ad594587148",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/requests/f46b8fe78c9b4d33b46fe464be3ea1ac/response.json": "0d7895e30acfbfd44bc2f0d3056186dbae3c10ba6bc3dbe0ba6c1db453a54e73",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/requests/f46b8fe78c9b4d33b46fe464be3ea1ac/admission.json": "6b93f89d84b9653369a8cf8509c6574ac0473b8b061087884b631f64cc878e23",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/denied_requests/9689cdab84f04a19adcfac11e350957d/request.json": "802b7cc745e3aa9135547c43a5f463a0dfce8cad0f7398dee6c0e17b7e03ddf4",
+    "notes/matched_cborg_2026-09-14_v10d/attempts/CHORUS_api_rep1/denied_requests/9689cdab84f04a19adcfac11e350957d/admission.json": "af4fc95eeca4d5981f786eb1fee3e335f391d3ab7df9ff6143e726c4fe83fd8b"
+  },
+  "original_artifacts_verified_and_preserved": 26,
+  "limitations": "Unreconciled full/core files are not a completed canary. Final provenance/report and independent final-source acceptance did not run. Raw originals and launch files remain local; public hashes do not establish independent inspection."
+}
