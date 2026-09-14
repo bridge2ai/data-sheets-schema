@@ -95,6 +95,12 @@ class D4DLLMEvaluator:
         # Validate inputs and load local assets before constructing a provider.
         self.client = client if client is not None else anthropic.Anthropic()
 
+    @property
+    def request_temperature(self) -> Optional[float]:
+        """The value sent to this model, or None when it rejects temperature."""
+        from data_sheets_schema.api_runner import accepts_temperature
+        return self.config.temperature if accepts_temperature(self.config.model) else None
+
     def _load_rubric(self, filename: str) -> Dict[str, Any]:
         """Load and parse rubric YAML"""
         path = resource_path(self.config.rubric_dir / filename)
@@ -239,14 +245,18 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
         user_prompt = self._build_user_prompt(
             d4d_content, project, method, d4d_filename, contract=contract)
 
+        # Some models reject temperature rather than ignoring it. Use the
+        # generation runner's capability rule and attest the actual request.
+        temperature = self.request_temperature
+        sampling = {"temperature": temperature} if temperature is not None else {}
         # Call Claude API
         try:
             response = self.client.messages.create(
                 model=self.config.model,
                 max_tokens=self.config.max_tokens,
-                temperature=self.config.temperature,
                 system=system_prompt,
-                messages=[{"role": "user", "content": user_prompt}]
+                messages=[{"role": "user", "content": user_prompt}],
+                **sampling,
             )
         except Exception as e:
             raise RuntimeError(f"Claude API call failed: {e}") from e
@@ -289,10 +299,11 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
             "context_sha256": context_digest(self.context),
             "instrument_version": VERSION,
             "model": self.config.model,
-            "temperature": self.config.temperature,
+            "temperature": temperature,
+            "temperature_basis": "set on request" if temperature is not None else "not applicable to this model",
         })
         evaluation["metadata"] = metadata
-        evaluation["model"] = {"name": self.config.model, "temperature": self.config.temperature,
+        evaluation["model"] = {"name": self.config.model, "temperature": temperature,
                                "evaluation_type": "llm_as_judge"}
         evaluation["d4d_file"] = d4d_filename
         if getattr(response, "model", None):
@@ -393,7 +404,9 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
         with open(output_path, 'w') as f:
             f.write(f"# D4D {rubric_name.upper()} LLM Evaluation Report\n\n")
             f.write(f"**Generated:** {datetime.now().isoformat()}\n\n")
-            f.write(f"**Model:** {self.config.model} (temperature={self.config.temperature})\n\n")
+            temperature = self.request_temperature
+            shown_temperature = temperature if temperature is not None else "not applicable to this model"
+            f.write(f"**Model:** {self.config.model} (temperature={shown_temperature})\n\n")
             f.write("Fixed and applicability-adjusted scores have different denominators. "
                     "Compare only matching instruments, contexts and excluded-item sets.\n\n")
             f.write("---\n\n")
