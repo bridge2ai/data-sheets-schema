@@ -55,6 +55,8 @@ def main():
     parser.add_argument("--prior-billing", type=Path)
     parser.add_argument("--prior-cost-usd")
     parser.add_argument("--previous-attempt-audit", type=Path)
+    parser.add_argument("--per-job-attempt-caps", type=Path,
+                        help="JSON mapping of explicitly approved job IDs to whole-attempt USD caps; preparation grants no launch approval")
     parser.add_argument("--render-only", action="store_true")
     args = parser.parse_args()
     output = args.output.resolve()
@@ -99,6 +101,10 @@ def main():
         pins[str(args.prior_billing.resolve())] = sha(args.prior_billing)
     if args.previous_attempt_audit:
         pins[str(args.previous_attempt_audit.resolve())] = sha(args.previous_attempt_audit)
+    if args.per_job_attempt_caps:
+        cap_policy_bytes = args.per_job_attempt_caps.read_bytes()
+        pins[str(args.per_job_attempt_caps.resolve())] = hashlib.sha256(cap_policy_bytes).hexdigest()
+        per_job_attempt_caps = json.loads(cap_policy_bytes)
     for path in sorted(external.iterdir()):
         if path.is_file():
             pins[str(path)] = sha(path)
@@ -215,6 +221,15 @@ def main():
         "preservation_inventory": str(HERE / "historical_inventory.json"),
         "preservation_inventory_sha256": sha(HERE / "historical_inventory.json"),
         "pinned_files": pins}
+    if args.per_job_attempt_caps:
+        from budgeted_cborg import Ledger, registered_attempt_caps
+        manifest["budget"]["per_job_attempt_usd"] = per_job_attempt_caps
+        # Validate the roster and amounts without opening or seeding a ledger.
+        # The actual attempt prefixes use the final registration hash at launch.
+        Ledger(output / "billing.json", manifest_sha256="preparation-validation-only",
+               total_cap=manifest["budget"]["additional_usd"],
+               attempt_cap=manifest["budget"]["per_attempt_usd"],
+               attempt_caps_usd=registered_attempt_caps(manifest, "preparation-validation-only"))
     if args.prior_billing:
         manifest["budget"]["continuation"] = {
             "checkpoint": str(args.prior_billing.resolve()), "sha256": sha(args.prior_billing),

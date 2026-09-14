@@ -129,7 +129,7 @@ def main():
     env.update(CLAUDE_CONFIG_DIR=str(config),ANTHROPIC_API_KEY=proxy.token,
                PYTHONPATH=str(Path(base['repository'])/'src'),VIRTUAL_ENV=sys.prefix)
     argv=[executable,*overlay['cli_flags'],'--model',base['model']['model'],'--name',job['id'],
-          '--max-budget-usd',str(base['budget']['per_attempt_usd']),
+          '--max-budget-usd',str(ledger.limit_for_attempt(billing_attempt)),
           '--allowedTools',*overlay['allowed_tools'],'--system-prompt',Path(overlay['system_prompt']).read_text()]
     receipt={'job':job['id'],'registration_sha256':registration_sha,'overlay_sha256':overlay_sha,
              'review_sha256':sha(args.review),'started_at':now(),'status':'incomplete',
