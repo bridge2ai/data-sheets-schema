@@ -1,0 +1,61 @@
+{
+  "condition": "fitness_nested_vocabulary_2026-09-13",
+  "issue": 1469,
+  "date": "2026-09-13",
+  "timezone": "America/Los_Angeles",
+  "base_commit": "3fdd2bce8e1d58ddaa2af34c93bcfc6449f21785",
+  "prior_source_sha256": {
+    "src/data_sheets_schema/evidence_score.py": "d53bc6c666e8e96af9d46e1c66f3f82284fb955e5ae4f47f5286999a203433fe",
+    "src/data_sheets_schema/schema_digest.py": "4351ce75167d07d3019363c380a22f66d84b1913004eaba65b1aa2658b9421b4"
+  },
+  "source_sha256": {
+    "src/data_sheets_schema/evidence_score.py": "bb7cce8edec1d2de8d76d23122e749d39aff1b0175d9c052f9feb521bd4513c1",
+    "src/data_sheets_schema/schema_digest.py": "b68f32d81cf95b11d5c64c9dda36778a4056085d7f9a8d1d6311b0d73c157b09"
+  },
+  "instruments": [
+    {
+      "class": "Dataset",
+      "profile": "neutral",
+      "generation_md5": "029c2abcda26e45c4465fd0a8455893d",
+      "generation_sha256": "0fd6dbd27e20ea96f3c0a652d75cd16470caf9860af0be3b7a982ada3ff9c9f5",
+      "prior_specification_sha256": "d2e0852a86a6be232944215e581177fa4192acf94ebc577b970f61267a49c107",
+      "specification_sha256": "f880edfcd94282fa959ce5d45f7f457b01f8995397a5ddb1e1ec03d7db1e20b0",
+      "resources_characters_before": 4769,
+      "resources_characters_after": 5043
+    },
+    {
+      "class": "Dataset",
+      "profile": "bridge2ai",
+      "generation_md5": "cd3c79f2c62f11675d5ce2c1df96b88e",
+      "generation_sha256": "5ee2023af5a2921c6b047f197048ba9a8f694e3f46b57673afb5eff9cef2a896",
+      "prior_specification_sha256": "b4c1119208ce8b4a31c487968556ab3928db9da8b305acb8ffed7e430a213835",
+      "specification_sha256": "19d993f5873014efa850e2550b0d2bebbe05f39246837ba1439eb5211a2bd489",
+      "resources_characters_before": 4769,
+      "resources_characters_after": 7695
+    },
+    {
+      "class": "CoreDataset",
+      "profile": "neutral",
+      "generation_md5": "96293b7e98d720cc9ca66a92c952b523",
+      "generation_sha256": "fa9cd4838c30a0b1111c60ef15f74d2a3e4b258950497a9dd8bf47859c7dda30",
+      "prior_specification_sha256": "acadb26fafe4429db1f3ff51324be22b3fa6637f3e5dc51febd3db63b8796907",
+      "specification_sha256": "ea73dc7b6547b65b5a51807da7274d3de39dc81ca08c66334e9a95707860ec94",
+      "resources_characters_before": 3976,
+      "resources_characters_after": 4250
+    },
+    {
+      "class": "CoreDataset",
+      "profile": "bridge2ai",
+      "generation_md5": "0e00409d3b35a81d76c3d880a27523e5",
+      "generation_sha256": "0b8b7efd7959a410cd552a94f02527e7be5983168b8c08e8310231b9a8a81c58",
+      "prior_specification_sha256": "4c52e369021d0c43bc2364b373dfb677de9dbf10f4daa8fb1d06736a21ce13a0",
+      "specification_sha256": "7ba706f605c953adaf4c45b5247af3231b1043460c3e636004e69c8b943fd5cb",
+      "resources_characters_before": 3976,
+      "resources_characters_after": 6902
+    }
+  ],
+  "new_measurements": [],
+  "evaluator_quoted_definition_sha256": null,
+  "model_requests": 0,
+  "preservation": "Historical evaluations and caches remain unchanged. New fitness and form-subtype judgements use the changed specification SHA256; generation prompts retain their original digests."
+}

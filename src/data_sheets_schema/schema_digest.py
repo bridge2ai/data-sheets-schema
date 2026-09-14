@@ -97,6 +97,8 @@ class SlotDigest:
     values_from: list[str] = field(default_factory=list)
     #: The schema's declared term sources for the slot (#1302).
     term_sources: str | None = None
+    # Evaluation follows object values, never the target of a reference.
+    inlined: bool = False
 
 
 @dataclass
@@ -137,6 +139,8 @@ class NestedClass:
     values_from: dict[str, list[str]] = field(default_factory=dict)
     #: Declared term sources per nested attribute (#1302).
     term_sources: dict[str, str] = field(default_factory=dict)
+    # Captured LinkML object edges, independent of their displayed spelling.
+    inlined_ranges: dict[str, str] = field(default_factory=dict)
 
 
 #: The study's registry vocabularies for slots declaring `values_from`
@@ -334,6 +338,7 @@ def _truncate(text: str | None, limit: int = DESCRIPTION_CHARS) -> str | None:
 
 _CacheKey = tuple[str, str, str, str, str]
 _BUILD_CACHE: dict[_CacheKey, "ClassDigest"] = {}
+_JUDGEMENT_BUILD_CACHE: dict[_CacheKey, "ClassDigest"] = {}
 
 
 def _schema_path(class_name: str, schema_path: Path | None) -> Path:
@@ -406,9 +411,29 @@ def _build_cached(class_name: str, path: Path, snapshot: SchemaSnapshot) -> Clas
     return _BUILD_CACHE[key]
 
 
+def build_for_judgement(class_name: str, schema_path: Path | None = None
+                        ) -> tuple[ClassDigest, ClassDigest]:
+    """Generation and complete object inventories from one schema snapshot.
+
+    Generation retains its bounded digest. Judges also need vocabulary rules
+    beyond that depth (#1469); a separate cache keeps those inventories from
+    changing generation text or displacing its cached inventory.
+    """
+    path = _schema_path(class_name, schema_path)
+    snapshot = capture_schema(path)
+    generation = _build_cached(class_name, path, snapshot)
+    key = _cache_key(class_name, path, snapshot)
+    if key not in _JUDGEMENT_BUILD_CACHE:
+        complete = _build_uncached(class_name, path, snapshot=snapshot, complete=True)
+        _drop_stale(_JUDGEMENT_BUILD_CACHE, key)
+        _JUDGEMENT_BUILD_CACHE[key] = complete
+    return copy.deepcopy(generation), copy.deepcopy(_JUDGEMENT_BUILD_CACHE[key])
+
+
 def _build_uncached(class_name: str, schema_path: Path | None = None, *,
                     content: bytes | None = None,
-                    snapshot: SchemaSnapshot | None = None) -> ClassDigest:
+                    snapshot: SchemaSnapshot | None = None,
+                    complete: bool = False) -> ClassDigest:
     """Slot inventory for one target class."""
     path = (Path(schema_path) if (content is not None or snapshot is not None) and schema_path is not None
             else _schema_path(class_name, schema_path))
@@ -446,6 +471,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
             enum_truncated=truncated,
             values_from=[str(v) for v in (slot.values_from or [])],
             term_sources=term_sources_of(slot) or TERM_SOURCES.get((class_name, str(slot.name))),
+            inlined=bool(rng and sv.get_class(str(rng)) and sv.is_inlined(slot)),
         ))
     digest.slots.sort(key=lambda s: s.name)
 
@@ -478,6 +504,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
         values_from: dict[str, list[str]] = {}
         term_sources: dict[str, str] = {}
         inlined_ranges: list[str] = []
+        object_edges: dict[str, str] = {}
         for sub in sv.class_induced_slots(rng):
             (req if sub.required else opt).append(str(sub.name))
             if sub.range:
@@ -498,8 +525,10 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
                 if is_class and not inlined:
                     shown += " (reference — a string, not an object)"
                 ranges[str(sub.name)] = shown
-                if inlined and str(sub.name) not in UNIVERSAL_ATTRIBUTES:
-                    inlined_ranges.append(str(sub.range))
+                if inlined:
+                    object_edges[str(sub.name)] = str(sub.range)
+                    if complete or str(sub.name) not in UNIVERSAL_ATTRIBUTES:
+                        inlined_ranges.append(str(sub.range))
             if sub.values_from:
                 values_from[str(sub.name)] = [str(v) for v in sub.values_from]
             ts = term_sources_of(sub) or TERM_SOURCES.get((rng, str(sub.name)))
@@ -517,10 +546,13 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
         return NestedClass(name=rng, required=sorted(req), optional=sorted(opt),
                            enums=enums, enums_truncated=enums_truncated,
                            ranges=ranges, values_from=values_from,
-                           term_sources=term_sources), inlined_ranges
+                           term_sources=term_sources,
+                           inlined_ranges=object_edges), inlined_ranges
 
-    frontier = [slot.range for slot in digest.slots if slot.range]
-    for depth in range(NESTING_DEPTH):
+    frontier = [slot.range for slot in digest.slots
+                if slot.range and (not complete or slot.inlined)]
+    depth = 0
+    while frontier and (complete or depth < NESTING_DEPTH):
         next_frontier: list[str] = []
         for rng in frontier:
             if rng in seen or sv.get_class(rng) is None:
@@ -532,6 +564,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
             digest.nested.append(nested)
             next_frontier.extend(reachable)
         frontier = next_frontier
+        depth += 1
     digest.nested.sort(key=lambda n: n.name)
     return digest
 

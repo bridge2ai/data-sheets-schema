@@ -1484,7 +1484,12 @@ from `tests/` still sees the study's — else none. Both digests are in
 `digest_inventory.yaml` (`record_inventory(profile=)`, #1441), so
 `slot_existed_at` answers for a neutral run. The fitness judge's slot
 specification renders the same term-source scope the digest does (#1440;
-an evaluation-instrument change, dated in the plan note). The arm table
+an evaluation-instrument change, dated in the plan note). It follows all
+inline object depths for vocabulary guidance (#1469), with class-scoped
+rules, cycle detection and no traversal through references. This changes
+the fitness and form-subtype specification identities while preserving
+generation prompt bytes; see `notes/fitness_nested_vocabulary_2026-09-13.md`.
+The arm table
 (`GENERATION_ARMS`) carries no project lists: `profiles.arm_projects_for`
 is the study's scope for its comparison arms, and `agreement.default_projects()`
 / `healthsheet.default_record()` read the active profile when called —
