@@ -710,7 +710,8 @@ def slot_spec(slot: str, class_name: str = "Dataset",
     """
     from data_sheets_schema import schema_digest
 
-    return _render_slot_spec(slot, schema_digest.build(class_name, schema_path),
+    _, inventory = schema_digest.build_for_judgement(class_name, schema_path)
+    return _render_slot_spec(slot, inventory,
                              schema_digest.vocabularies(profile=profile))
 
 
@@ -732,8 +733,13 @@ def _render_slot_spec(slot: str, digest, vocabulary: dict) -> str:
         shown = ", ".join(sd.enum_values)
         more = (f" (+{sd.enum_truncated} more)" if sd.enum_truncated else "")
         lines.append(f"Permitted values: {shown}{more}")
+    terms = schema_digest.render_values_from(
+        sd.values_from, vocabulary=vocabulary, term_sources=sd.term_sources)
+    if terms:
+        lines.append(f"`{sd.name}` must be drawn from {terms}")
 
-    nested = next((n for n in digest.nested if n.name == sd.range), None)
+    classes = {n.name: n for n in digest.nested}
+    nested = classes.get(sd.range) if sd.inlined else None
     if nested:
         lines.append(f"`{sd.range}` requires: "
                      f"{', '.join(nested.required) or '(nothing)'}")
@@ -761,18 +767,27 @@ def _render_slot_spec(slot: str, digest, vocabulary: dict) -> str:
         lines.append(
             "A value of the wrong kind for its declared range is a form "
             "failure even when it reads well.")
-        # The registry vocabulary those attributes draw from (#538), and the
-        # term sources the schema itself declares for them (#1440) — the
-        # same split the digest renders, so what the judge is told is what
-        # the model was told. Without it a judge cannot tell that a
-        # Cellosaurus cell line in `data_substrate` is the wrong *kind* of
-        # thing — it is a resolvable IRI, so every syntactic check passes it.
+    # Vocabulary obligations apply throughout the supplied object (#1469).
+    # Follow captured LinkML inline edges, not every class in the inventory:
+    # unrelated fields and reference targets must not constrain this value.
+    # Name each class once so repeated objects and recursive schemas are finite.
+    pending = [nested.name] if nested else []
+    seen: set[str] = set()
+    while pending:
+        name = pending.pop()
+        if name in seen:
+            continue
+        seen.add(name)
+        nested = classes[name]
         for attribute in sorted(set(nested.values_from) | set(nested.term_sources)):
             terms = schema_digest.render_values_from(
                 nested.values_from.get(attribute, []), vocabulary=vocabulary,
                 term_sources=nested.term_sources.get(attribute))
             if terms:
-                lines.append(f"`{attribute}` must be drawn from {terms}")
+                lines.append(f"On each `{name}` object, `{attribute}` must be drawn from {terms}")
+        pending.extend(sorted(
+            {target for target in nested.inlined_ranges.values() if target in classes},
+            reverse=True))
     return "\n".join(lines)
 
 
@@ -789,9 +804,9 @@ def slot_specification_snapshot(class_name: str = "Dataset", schema_path: Path |
     hashes — under `profile`, else the ambient one; a judge of a record
     passes the record's (`profiles.for_record`, #1462)."""
     from data_sheets_schema import schema_digest
-    inventory = schema_digest.build(class_name, schema_path)
+    generation, inventory = schema_digest.build_for_judgement(class_name, schema_path)
     vocabulary = schema_digest.vocabularies(profile=profile)
-    schema = schema_digest.fingerprint(schema_digest.render(inventory, vocabulary=vocabulary))
+    schema = schema_digest.fingerprint(schema_digest.render(generation, vocabulary=vocabulary))
     # Generation deliberately truncates some ranges; the fitness and subtype
     # judges see all of them. Key their full specifications separately (#1261).
     specifications = {s.name: _render_slot_spec(s.name, inventory, vocabulary)
