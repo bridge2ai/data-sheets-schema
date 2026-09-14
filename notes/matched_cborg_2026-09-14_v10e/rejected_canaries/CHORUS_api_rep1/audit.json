@@ -73,7 +73,117 @@
     "unresolved_requests": 0,
     "approved_attempt_cap_usd": 10,
     "approved_four_canary_combined_cap_usd": 50,
-    "no_later_canary_launched": true
+    "no_later_canary_launched": true,
+    "previous_allocation_estimated_cost_usd": "8.92890600",
+    "prices_usd_per_token": {
+      "input": "0.000005",
+      "output": "0.000025",
+      "cache_write": "0.00000625",
+      "cache_read": "0.0000005"
+    },
+    "evidence_basis": "Operator-reported response usage, reconciled with registered CBORG prices and the private settled ledger. Request/response SHA-256 values link to the unchanged original-file inventory. These estimates are not an invoice; raw payloads remain unpublished.",
+    "requests": [
+      {
+        "id": "070ee6dc58d54ee0af6a907b784fcd0a",
+        "phase": "full",
+        "status": "settled",
+        "estimated_cost_usd": "1.65004500",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 32144
+          },
+          "cache_creation_input_tokens": 32144,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 9789,
+          "output_tokens": 56008,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "request_sha256": "fe1a4f0640dfee189129084dac68a6769940373f4626af0e208337dabb3408d9",
+        "response_sha256": "ff15ee9586a8d2f69ed41019f47bc789ed73a24f4ef49322f2c0e085cfa25feb"
+      },
+      {
+        "id": "9ec8253bc06d4b4baab9a7c68417eb5e",
+        "phase": "audit",
+        "status": "settled",
+        "estimated_cost_usd": "0.63595500",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 32144
+          },
+          "cache_creation_input_tokens": 32144,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 19406,
+          "output_tokens": 13521,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "request_sha256": "f3b49127ebfa4a3588aa178c7bded51ca1d89f5b4cb56eba8df6e21ac9264a40",
+        "response_sha256": "fa38b8565ba35b38074763a2aa21f089b4bef02c2a35955f8c5eacaff46a4643"
+      },
+      {
+        "id": "b07f971a18454048a45ca0c87a426ccf",
+        "phase": "reconcile_full",
+        "status": "settled",
+        "estimated_cost_usd": "0.41109700",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32144,
+          "input_tokens": 25415,
+          "output_tokens": 10718,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "request_sha256": "691b371b21d27903bd932c1842d1df5c2010442058cb8d8474ce9db563d9329d",
+        "response_sha256": "8c91308f6496c3a9b714c2f5b22035f47a7463ccf9b70a4c2d3e0a34ea542e23"
+      },
+      {
+        "id": "47ced42c98004655824b82a7e959a2a0",
+        "phase": "report",
+        "status": "settled",
+        "estimated_cost_usd": "0.45845200",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32144,
+          "input_tokens": 53111,
+          "output_tokens": 7073,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "request_sha256": "313bcaac6753f22b46aeddd065ef16930332f8f8260d1b7ed9a8b53ebcee671a",
+        "response_sha256": "d747cec012783fe7e8ebde3ad72e753e1e0a5286233aa5e1383d5d33f43254cc"
+      },
+      {
+        "id": "d844cbe78ba2463d9983a2809b4bb924",
+        "phase": "report_regate",
+        "status": "settled",
+        "estimated_cost_usd": "0.59151700",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32144,
+          "input_tokens": 61149,
+          "output_tokens": 10788,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "request_sha256": "6f5f52421a6de27c3ffa5d96f6bc212136d137401765eb34806565f81af9ea35",
+        "response_sha256": "90af8c9ba1743ef15d0e55838c45276ecf47dde98aa650885a6b4e719829d5f9"
+      }
+    ]
   },
   "preservation": {
     "original_files": 38,
