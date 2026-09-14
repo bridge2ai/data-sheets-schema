@@ -75,6 +75,9 @@ class LLMEvaluationConfig:
     schema_path: Path = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
     error_dir: Path = Path("data/evaluation_llm/errors")
     attempts_dir: Optional[Path] = None
+    # Explicitly register streaming for long responses; keep prior callers'
+    # transport unchanged unless they opt in.
+    stream: bool = False
 
 
 class D4DLLMEvaluator:
@@ -249,21 +252,28 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
         # generation runner's capability rule and attest the actual request.
         temperature = self.request_temperature
         sampling = {"temperature": temperature} if temperature is not None else {}
+        request = dict(model=self.config.model, max_tokens=self.config.max_tokens,
+                       system=system_prompt,
+                       messages=[{"role": "user", "content": user_prompt}], **sampling)
+        stream_complete = False
         # Call Claude API
         try:
-            response = self.client.messages.create(
-                model=self.config.model,
-                max_tokens=self.config.max_tokens,
-                system=system_prompt,
-                messages=[{"role": "user", "content": user_prompt}],
-                **sampling,
-            )
+            if self.config.stream:
+                with self.client.messages.stream(**request) as events:
+                    for event in events:
+                        if getattr(event, "type", None) == "message_stop":
+                            stream_complete = True
+                    response = events.get_final_message()
+            else:
+                response = self.client.messages.create(**request)
         except Exception as e:
             raise RuntimeError(f"Claude API call failed: {e}") from e
 
         raw_response = "\n".join(block.text for block in response.content if hasattr(block, "text"))
         # Validate the accepted score under this instrument's own contract.
         try:
+            if self.config.stream and not stream_complete:
+                raise ValueError("provider stream did not deliver message_stop")
             if getattr(response, "stop_reason", "end_turn") not in {"end_turn", "stop_sequence"}:
                 raise ValueError("provider did not finish the evaluation")
             evaluation = self._parse_llm_response(raw_response)
@@ -301,6 +311,7 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
             "model": self.config.model,
             "temperature": temperature,
             "temperature_basis": "set on request" if temperature is not None else "not applicable to this model",
+            "response_transport": "streaming" if self.config.stream else "non_streaming",
         })
         evaluation["metadata"] = metadata
         evaluation["model"] = {"name": self.config.model, "temperature": temperature,
