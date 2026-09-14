@@ -21,6 +21,57 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
+def verified_executable(overlay):
+    path = Path(overlay['claude_executable'])
+    if not path.is_absolute() or path.resolve(strict=True) != path:
+        raise BudgetStop('native executable must be an absolute resolved path')
+    if overlay['pinned_files'].get(str(path)) != sha(path):
+        raise BudgetStop('native executable bytes differ from the launch pin')
+    return str(path)
+
+
+def terminate_group(process):
+    if process is None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        pass
+    # Also remove descendants if the parent exited before them.
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait(timeout=2)
+
+
+def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch):
+    process = None
+    deadline = time.monotonic() + deadline_seconds
+    try:
+        with Path(instruction).open('r') as incoming, (attempt/'transcript.jsonl').open('x') as out, (attempt/'stderr.txt').open('x') as err:
+            verify_launch()  # Bind the executable immediately before Popen.
+            process = subprocess.Popen(argv, stdin=incoming, text=True, cwd=cwd,
+                env=env, stdout=out, stderr=err, start_new_session=True)
+            while process.poll() is None:
+                if proxy.failed.is_set():
+                    raise BudgetStop(proxy.failure)
+                if time.monotonic() >= deadline:
+                    raise BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
+                time.sleep(0.05)
+        if proxy.failed.is_set():
+            raise BudgetStop(proxy.failure)
+        return process.returncode
+    finally:
+        # This runs INSIDE proxy.running(), before server/pool cleanup.
+        proxy.close_admission()
+        terminate_group(process)
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--overlay',type=Path,required=True)
@@ -59,7 +110,7 @@ def main():
         raise BudgetStop('native generation instruction or input identity changed')
     key=os.environ.get('CBORG_API_KEY')
     if not key: raise BudgetStop('CBORG_API_KEY is required')
-    executable=overlay['claude_executable']
+    executable=verified_executable(overlay)
     if subprocess.check_output([executable,'--version'],text=True).strip()!=base['claude_version']:
         raise BudgetStop('native runtime version changed')
     attempt=here/'attempts'/args.job;attempt.mkdir(parents=True,exist_ok=False)
@@ -85,20 +136,14 @@ def main():
              'provider':base['provider_base_url'],'model':base['model']['model'],
              'instruction_sha256':sha(job['instruction']),'native_system_sha256':sha(overlay['system_prompt'])}
     write_new(attempt/'started.json',receipt)
-    process=None
     try:
         with proxy.running() as url:
             env['ANTHROPIC_BASE_URL']=url
-            with (attempt/'transcript.jsonl').open('x') as out,(attempt/'stderr.txt').open('x') as err:
-                process=subprocess.Popen(argv,stdin=subprocess.PIPE,text=True,cwd=base['repository'],env=env,stdout=out,stderr=err,start_new_session=True)
-                process.stdin.write(Path(job['instruction']).read_text());process.stdin.close()
-                deadline=time.monotonic()+base['generation']['agentic_attempt_deadline_seconds']
-                while process.poll() is None:
-                    if proxy.failed.is_set(): raise BudgetStop(proxy.failure)
-                    if time.monotonic()>=deadline: raise BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
-                    time.sleep(0.25)
-            receipt['exit_code']=process.returncode
-            if proxy.failed.is_set(): raise BudgetStop(proxy.failure)
+            receipt['exit_code']=execute_child(argv,proxy=proxy,instruction=job['instruction'],attempt=attempt,
+                cwd=base['repository'],env=env,deadline_seconds=base['generation']['agentic_attempt_deadline_seconds'],
+                verify_launch=lambda: verified_executable(overlay))
+        if proxy.failed.is_set() or proxy.unfinished_handlers:
+            raise BudgetStop(proxy.failure or 'native handlers did not finish before evidence freeze')
         events=[json.loads(line) for line in (attempt/'transcript.jsonl').read_text().splitlines() if line.strip()]
         initializers=[e for e in events if e.get('type')=='system' and e.get('subtype')=='init']
         finals=[e for e in events if e.get('type')=='result']
@@ -107,7 +152,7 @@ def main():
         init,terminal=initializers[0],finals[0]
         if init.get('model')!=base['model']['model'] or init.get('apiKeySource')!='ANTHROPIC_API_KEY' or init.get('claude_code_version')!=base['claude_version'].split()[0] or set(init.get('tools',[]))!={'Read','Write','Bash'}:
             raise BudgetStop('native runtime initialization differs from registration')
-        if process.returncode or terminal.get('is_error') or terminal.get('permission_denials') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
+        if receipt['exit_code'] or terminal.get('is_error') or terminal.get('permission_denials') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
             raise BudgetStop('native attempt failed, stopped, or had a tool permission denial')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
             raise BudgetStop('native terminal model accounting differs from registration')
@@ -133,12 +178,10 @@ def main():
         receipt.update(status='stopped',error_type=type(exc).__name__)
         if isinstance(exc,BudgetStop): receipt['reason']=str(exc)
     finally:
-        if process is not None and process.poll() is None:
-            os.killpg(process.pid,signal.SIGTERM)
-            try: process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid,signal.SIGKILL);process.wait(timeout=5)
-        receipt.update(finished_at=now(),model_requests_admitted=proxy.messages.requests_started,
+        state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}
+        admitted=[row for row in state['requests'] if row['attempt']==job['id']]
+        receipt.update(finished_at=now(),model_requests_admitted=len(admitted),
+            unfinished_handlers_at_freeze=proxy.unfinished_handlers,
             artifacts={str(p):sha(p) for folder in job['output_directories'] for p in sorted(Path(folder).rglob('*')) if p.is_file()})
         write_new(attempt/'result.json',receipt)
         print(json.dumps({k:v for k,v in receipt.items() if k not in {'artifacts','validation_problems','pair_consistency','native_observed','cli_model_usage'}},indent=2))

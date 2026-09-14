@@ -137,3 +137,92 @@ def test_concurrent_native_requests_are_serialized_until_settled(tmp_path):
     assert not proxy.failed.is_set() and len(calls)==2
     rows=json.loads(ledger.path.read_bytes())['requests']
     assert len(rows)==2 and all(row['status']=='settled' for row in rows)
+
+
+def test_shutdown_blocks_queued_admission_and_freezes_late_evidence(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    import time
+    proxy,ledger,calls=fixture_proxy(tmp_path)
+    first_started=threading.Event();release_first=threading.Event()
+    original=proxy.upstream._transport.handler
+    def delayed(request):
+        first_started.set()
+        assert release_first.wait(timeout=5)
+        return original(request)
+    proxy.upstream._transport.handler=delayed
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        with proxy.running(cleanup_timeout=0.05) as url:
+            def post():
+                return httpx.post(url+'/v1/messages?beta=true',json=REQUEST,headers={'x-api-key':proxy.token},timeout=5)
+            first=pool.submit(post)
+            assert first_started.wait(timeout=5)
+            second=pool.submit(post)
+            with proxy.state:
+                assert proxy.state.wait_for(lambda: proxy.active_handlers==2,timeout=5)
+            # Simulate a deadline while the first response is blocked and the
+            # auxiliary handler is already queued behind it.
+            before=time.monotonic()
+        assert time.monotonic()-before < 1
+        assert proxy.closed and proxy.frozen and proxy.unfinished_handlers==2
+        frozen={str(p):p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+        assert len(json.loads(ledger.path.read_bytes())['requests'])==1
+        release_first.set()
+        assert first.result(timeout=5).status_code==402
+        assert second.result(timeout=5).status_code==402
+        with proxy.state:
+            assert proxy.state.wait_for(lambda: proxy.active_handlers==0,timeout=5)
+        assert frozen=={str(p):p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    assert len(calls)==1
+    assert json.loads(ledger.path.read_bytes())['requests'][0]['status']=='pending'
+
+
+def test_shutdown_while_counting_cannot_later_reserve_or_forward(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    proxy,ledger,calls=fixture_proxy(tmp_path)
+    counting=threading.Event();release=threading.Event()
+    def count(**kw):
+        counting.set();assert release.wait(timeout=5)
+        return SimpleNamespace(input_tokens=100)
+    proxy.messages.client.messages.count_tokens=count
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with proxy.running(cleanup_timeout=0.05) as url:
+            future=pool.submit(httpx.post,url+'/v1/messages?beta=true',json=REQUEST,headers={'x-api-key':proxy.token},timeout=5)
+            assert counting.wait(timeout=5)
+        frozen={str(p):p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+        release.set()
+        assert future.result(timeout=5).status_code==402
+        assert not calls
+        assert frozen=={str(p):p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    assert json.loads(ledger.path.read_bytes())['requests']==[]
+
+
+def test_queued_request_cannot_start_when_active_stream_settles_during_shutdown(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    proxy,ledger,calls=fixture_proxy(tmp_path)
+    started=threading.Event();release=threading.Event()
+    original=proxy.upstream._transport.handler
+    def delayed(request):
+        started.set();assert release.wait(timeout=5)
+        return original(request)
+    proxy.upstream._transport.handler=delayed
+    close=proxy.close_admission
+    def closing():
+        close()
+        release.set()  # The first call settles during shutdown's grace period.
+    proxy.close_admission=closing
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        with proxy.running() as url:
+            def post():
+                return httpx.post(url+'/v1/messages?beta=true',json=REQUEST,headers={'x-api-key':proxy.token},timeout=5)
+            first=pool.submit(post);assert started.wait(timeout=5)
+            second=pool.submit(post)
+            with proxy.state:
+                assert proxy.state.wait_for(lambda:proxy.active_handlers==2,timeout=5)
+        assert len(calls)==1
+        assert first.result(timeout=5).status_code==200
+        assert second.result(timeout=5).status_code==402
+    rows=json.loads(ledger.path.read_bytes())['requests']
+    assert len(rows)==1 and rows[0]['status']=='settled'

@@ -7,7 +7,10 @@ HERE=Path(__file__).resolve().parent
 BASE=HERE.parent
 sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 registration=BASE/'registration.json';r=json.loads(registration.read_bytes())
-cli=Path('/Users/marcin/.local/bin/claude')
+if Path(r['repository']).resolve()!=BASE.parents[1].resolve():
+    raise SystemExit('Prepare a fresh source/instrument registration in this checkout before freezing its native overlay')
+cli_alias=Path('/Users/marcin/.local/bin/claude')
+cli=cli_alias.resolve(strict=True)
 assert subprocess.check_output([str(cli),'--version'],text=True).strip()==r['claude_version']
 py=r['python']
 cli_prefix=f'Bash({py} -m data_sheets_schema.cli '
@@ -20,7 +23,7 @@ files.append(cli.resolve())
 value={'registered_at':datetime.now(timezone.utc).isoformat(),'status':'draft_awaiting_independent_review_and_prior_canary_acceptance',
  'registration':str(registration),'registration_sha256':sha(registration),'allowed_jobs':['CHORUS_agentic_rep1','KIDS_FIRST_agentic_rep1'],
  'condition_boundary':'Native execution controls supplement the immutable source/instrument registration. They do not alter its source bytes, prompt files, schemas, profiles, cohort labels or budget ledger identity.',
- 'claude_executable':str(cli),'claude_version':r['claude_version'],'system_prompt':str(HERE/'system.md'),
+ 'claude_executable':str(cli),'observed_cli_alias':str(cli_alias),'claude_version':r['claude_version'],'system_prompt':str(HERE/'system.md'),
  'cli_flags':['--print','--safe-mode','--restricted','--strict-mcp-config','--disable-slash-commands','--no-session-persistence','--prompt-suggestions','false','--output-format','stream-json','--verbose','--permission-mode','dontAsk','--tools','Read,Write,Bash'],
  'allowed_tools':allowed,'environment':{'DISABLE_NON_ESSENTIAL_MODEL_CALLS':'1','DISABLE_TELEMETRY':'1','CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS':'1'},
  'per_job_environment':{j['id']:{'D4D_MANIFEST':j['manifest'],'D4D_PROFILE':j['profile']} for j in r['generation']['jobs'] if j['id'] in ['CHORUS_agentic_rep1','KIDS_FIRST_agentic_rep1']},

@@ -83,8 +83,14 @@ class NativeProxy:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
         self.token = secrets.token_urlsafe(32)
         self.key, self.base_url = provider_key, base_url
+        self.state = threading.Condition(threading.RLock())
+        self.closed = False
+        self.frozen = False
+        self.active_handlers = 0
+        self.unfinished_handlers = 0
         self.messages = CappedMessages(sdk, ledger=ledger, attempt=attempt,
-            evidence=Path(evidence), model=model, prices=prices, verify=verify)
+            evidence=Path(evidence), model=model, prices=prices, verify=verify,
+            mutation_guard=self.mutation_guard)
         self.upstream = upstream or httpx.Client(timeout=httpx.Timeout(1800, connect=20), follow_redirects=False)
         self.failure = None
         self.failed = threading.Event()
@@ -95,12 +101,47 @@ class NativeProxy:
     def fail(self, exc):
         # Provider exception strings may include HTTP headers. Preserve only
         # controller-authored explanations or an exception class.
-        if self.failure is None:
-            self.failure = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
-        self.failed.set()
+        with self.state:
+            if self.frozen:
+                return
+            if self.failure is None:
+                self.failure = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
+            self.closed = True
+            self.failed.set()
+
+    def close_admission(self):
+        with self.state:
+            self.closed = True
+
+    def require_open(self):
+        if self.closed:
+            raise BudgetStop("native admission is closed")
+
+    def require_writable(self):
+        if self.frozen:
+            raise BudgetStop("native evidence is frozen after shutdown")
 
     @contextmanager
-    def running(self):
+    def mutation_guard(self, phase):
+        with self.state:
+            self.require_writable()
+            if phase == "admit":
+                self.require_open()
+            yield
+
+    def capture(self, path, raw, *, append=False):
+        with self.state:
+            self.require_writable()
+            with path.open("ab" if append else "xb") as out:
+                out.write(raw)
+
+    def capture_json(self, path, value):
+        with self.state:
+            self.require_writable()
+            write_new(path, value)
+
+    @contextmanager
+    def running(self, *, cleanup_timeout=2):
         owner = self
         class Handler(BaseHTTPRequestHandler):
             protocol_version = "HTTP/1.0"
@@ -116,8 +157,16 @@ class NativeProxy:
             def do_POST(self):
                 # Native runtimes may issue auxiliary calls concurrently.
                 # Serialize admission so every charge settles before the next.
-                with owner.serial:
-                    self._post_serially()
+                with owner.state:
+                    owner.active_handlers += 1
+                    owner.state.notify_all()
+                try:
+                    with owner.serial:
+                        self._post_serially()
+                finally:
+                    with owner.state:
+                        owner.active_handlers -= 1
+                        owner.state.notify_all()
             def _post_serially(self):
                 self.connection.settimeout(20)
                 sent = False
@@ -130,6 +179,8 @@ class NativeProxy:
                         return
                     if owner.failed.is_set():
                         raise BudgetStop("native attempt previously stopped")
+                    with owner.state:
+                        owner.require_open()
                     path = urlsplit(self.path).path
                     if path not in {"/v1/messages", "/v1/messages/count_tokens"}:
                         raise BudgetStop("unregistered native transport endpoint")
@@ -155,19 +206,21 @@ class NativeProxy:
                     if request.get("service_tier") not in (None, "auto", "standard_only"):
                         raise BudgetStop("unregistered native service tier")
                     ticket, folder = owner.messages.prepare(request)
-                    (folder / "native_request.json").write_bytes(raw)
+                    owner.capture(folder / "native_request.json", raw)
                     headers = {"x-api-key":owner.key, "content-type":"application/json", "accept":"text/event-stream"}
                     for name in ("anthropic-version", "anthropic-beta"):
                         if self.headers.get(name):
                             headers[name] = self.headers[name]
-                    write_new(folder / "request_protocol.json", {k:v for k,v in headers.items() if k != "x-api-key"})
+                    owner.capture_json(folder / "request_protocol.json", {k:v for k,v in headers.items() if k != "x-api-key"})
                     completion = Completion()
+                    with owner.state:
+                        owner.require_open()
                     with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers) as response:
-                        write_new(folder / "http_status.json", {"status":response.status_code, "content_type":response.headers.get("content-type")})
+                        owner.capture_json(folder / "http_status.json", {"status":response.status_code, "content_type":response.headers.get("content-type")})
                         if response.status_code != 200:
-                            with (folder / "upstream_error.body").open("xb") as out:
-                                for chunk in response.iter_bytes():
-                                    out.write(chunk)
+                            owner.capture(folder / "upstream_error.body", b"")
+                            for chunk in response.iter_bytes():
+                                owner.capture(folder / "upstream_error.body", chunk, append=True)
                             raise BudgetStop("upstream HTTP response did not confirm a completed charge")
                         if "text/event-stream" not in response.headers.get("content-type", ""):
                             raise BudgetStop("unregistered upstream response format")
@@ -176,15 +229,17 @@ class NativeProxy:
                         self.end_headers()
                         sent = True
                         deferred = []
-                        with (folder / "response.sse").open("xb") as out:
-                            for chunk in response.iter_bytes():
-                                out.write(chunk); out.flush()
-                                completion.feed(chunk)
-                                if completion.stopped:
-                                    deferred.append(chunk)
-                                else:
-                                    self.wfile.write(chunk); self.wfile.flush()
-                        owner.messages.finish(ticket, folder, completion.final(), stream_complete=True)
+                        owner.capture(folder / "response.sse", b"")
+                        for chunk in response.iter_bytes():
+                            owner.capture(folder / "response.sse", chunk, append=True)
+                            completion.feed(chunk)
+                            if completion.stopped:
+                                deferred.append(chunk)
+                            else:
+                                self.wfile.write(chunk); self.wfile.flush()
+                        with owner.state:
+                            owner.require_writable()
+                            owner.messages.finish(ticket, folder, completion.final(), stream_complete=True)
                         # Do not let the child issue its next request before
                         # the preceding completed request has been accounted.
                         for chunk in deferred:
@@ -203,12 +258,30 @@ class NativeProxy:
                 self.reply(404, {"type":"error", "error":{"type":"not_found_error", "message":"no registered read endpoint"}})
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.server.daemon_threads = True
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread = threading.Thread(target=lambda: self.server.serve_forever(poll_interval=0.05), daemon=True)
         self.thread.start()
         try:
             yield f"http://127.0.0.1:{self.server.server_port}"
         finally:
+            self.close_admission()
             self.server.shutdown()
             self.server.server_close()
             self.thread.join(timeout=2)
-            self.upstream.close()
+            with self.state:
+                self.state.wait_for(lambda: self.active_handlers == 0, timeout=cleanup_timeout)
+                self.unfinished_handlers = self.active_handlers
+                self.frozen = True
+            # HTTP pool closure can block on an in-flight socket. Receipt
+            # finalization is bounded; frozen handlers cannot settle charges
+            # or change evidence afterward. Unknown reservations stay pending.
+            def close_clients():
+                try:
+                    self.upstream.close()
+                    close = getattr(self.messages.client, "close", None)
+                    if close:
+                        close()
+                except Exception:
+                    pass
+            closer = threading.Thread(target=close_clients, daemon=True)
+            closer.start()
+            closer.join(timeout=cleanup_timeout)

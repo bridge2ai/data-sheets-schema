@@ -1,0 +1,204 @@
+{
+  "exit_code": 0,
+  "scripted_requests": 4,
+  "proxy_failure": null,
+  "output_created": true,
+  "real_provider_requests": 0,
+  "unfinished_handlers": 0,
+  "software_verification_only": true,
+  "ledger": {
+    "manifest_sha256": "offline-cli-probe",
+    "additional_cap_usd": "200",
+    "attempt_cap_usd": "5",
+    "requests": [
+      {
+        "id": "2f8d1bb8a3ba409698a855b630cdc8d9",
+        "attempt": "offline",
+        "request_sha256": "fe04822a5f05ac171796e9374b1fdd2dab0c6e3ecd8ce3a11f8dcdf18ac6067d",
+        "reserved_at": "2026-09-14T05:12:03.763303+00:00",
+        "reserved_usd": "1.60715000",
+        "status": "settled",
+        "cost_usd": "0.00080000",
+        "settled_at": "2026-09-14T05:12:03.766098+00:00",
+        "response_sha256": "9899044cafa76ad61c4a20c37e2c8be203ba47d948c64bb89b78997bffcf8b9d",
+        "usage": {
+          "input_tokens": 100,
+          "output_tokens": 12
+        }
+      },
+      {
+        "id": "52aeec0ab6e74648af6e665aa0a9206a",
+        "attempt": "offline",
+        "request_sha256": "2a469019e63bc2b8037ae4dfd03fe85982a0936ebaf5ba40c5cc5a4d6aebd172",
+        "reserved_at": "2026-09-14T05:12:03.784900+00:00",
+        "reserved_usd": "1.60715000",
+        "status": "settled",
+        "cost_usd": "0.00080000",
+        "settled_at": "2026-09-14T05:12:03.787360+00:00",
+        "response_sha256": "b3cc9534fc16ca11f425427a010bc8a39d07f683144b233916df09b9f212317c",
+        "usage": {
+          "input_tokens": 100,
+          "output_tokens": 12
+        }
+      },
+      {
+        "id": "8cf00a5b8fe94b5bbcc844c7a6a619a2",
+        "attempt": "offline",
+        "request_sha256": "91dbd262fd33e3b18f8e50eae5f5a66ef8becf30d7480aa2f09af6ed1ba8a2b4",
+        "reserved_at": "2026-09-14T05:12:03.801188+00:00",
+        "reserved_usd": "1.60715000",
+        "status": "settled",
+        "cost_usd": "0.00080000",
+        "settled_at": "2026-09-14T05:12:03.803279+00:00",
+        "response_sha256": "944d568bf8245310bbd9ba4d22a3b34b4b29c7c5a26b8be39f3ba92b4cd2ef21",
+        "usage": {
+          "input_tokens": 100,
+          "output_tokens": 12
+        }
+      },
+      {
+        "id": "8ee4a8d929694f08bc4bb423af916ee6",
+        "attempt": "offline",
+        "request_sha256": "50ec9f8c23b9fcb09f208fa027a3554cca622642858aa353b967e03344134b42",
+        "reserved_at": "2026-09-14T05:12:07.915072+00:00",
+        "reserved_usd": "1.60715000",
+        "status": "settled",
+        "cost_usd": "0.00080000",
+        "settled_at": "2026-09-14T05:12:07.916968+00:00",
+        "response_sha256": "86054720ecb3a81ba9b9dacb73a447d9012be7f33768a8c517b5d3b35cceb89e",
+        "usage": {
+          "input_tokens": 100,
+          "output_tokens": 12
+        }
+      }
+    ]
+  },
+  "originals": {
+    "transcript.jsonl": {
+      "sha256": "b122c435d748a7a320f91f93aaa48aabca6aa768441d5681f9fd9a4ffaeb5e53",
+      "bytes": 6356
+    },
+    "stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "requests/8ee4a8d929694f08bc4bb423af916ee6/request.json": {
+      "sha256": "50ec9f8c23b9fcb09f208fa027a3554cca622642858aa353b967e03344134b42",
+      "bytes": 9114
+    },
+    "requests/8ee4a8d929694f08bc4bb423af916ee6/request_protocol.json": {
+      "sha256": "c8904a68dbb0d925d9b44e64d170afa66d8b69c6a933d93ffe08014059ea2684",
+      "bytes": 267
+    },
+    "requests/8ee4a8d929694f08bc4bb423af916ee6/native_request.json": {
+      "sha256": "e069eef89277c814956ca5d80db9de67b82daf1ac0681ad80f43f8eb96eb080f",
+      "bytes": 8873
+    },
+    "requests/8ee4a8d929694f08bc4bb423af916ee6/http_status.json": {
+      "sha256": "6dd3efe4a907a637bb30af1c7599934884d6479f2f68e6dbd8326dbdd4318394",
+      "bytes": 59
+    },
+    "requests/8ee4a8d929694f08bc4bb423af916ee6/response.json": {
+      "sha256": "86054720ecb3a81ba9b9dacb73a447d9012be7f33768a8c517b5d3b35cceb89e",
+      "bytes": 234
+    },
+    "requests/8ee4a8d929694f08bc4bb423af916ee6/admission.json": {
+      "sha256": "9a25df572e007a0dc947a55f3dcb7f418d4b81b08adde4735c635bd25539b5f7",
+      "bytes": 163
+    },
+    "requests/8cf00a5b8fe94b5bbcc844c7a6a619a2/request.json": {
+      "sha256": "91dbd262fd33e3b18f8e50eae5f5a66ef8becf30d7480aa2f09af6ed1ba8a2b4",
+      "bytes": 8555
+    },
+    "requests/8cf00a5b8fe94b5bbcc844c7a6a619a2/request_protocol.json": {
+      "sha256": "c8904a68dbb0d925d9b44e64d170afa66d8b69c6a933d93ffe08014059ea2684",
+      "bytes": 267
+    },
+    "requests/8cf00a5b8fe94b5bbcc844c7a6a619a2/native_request.json": {
+      "sha256": "40d579fb2299307692cb8be56be6b6c9b4ceddb70f1ce40721708a1b02b4ad2d",
+      "bytes": 8343
+    },
+    "requests/8cf00a5b8fe94b5bbcc844c7a6a619a2/http_status.json": {
+      "sha256": "6dd3efe4a907a637bb30af1c7599934884d6479f2f68e6dbd8326dbdd4318394",
+      "bytes": 59
+    },
+    "requests/8cf00a5b8fe94b5bbcc844c7a6a619a2/response.json": {
+      "sha256": "944d568bf8245310bbd9ba4d22a3b34b4b29c7c5a26b8be39f3ba92b4cd2ef21",
+      "bytes": 234
+    },
+    "requests/8cf00a5b8fe94b5bbcc844c7a6a619a2/admission.json": {
+      "sha256": "38e48953b20174cc665a0a03d58ae745eec1ead73245cd36a82dcf18c31f6552",
+      "bytes": 163
+    },
+    "requests/2f8d1bb8a3ba409698a855b630cdc8d9/request.json": {
+      "sha256": "fe04822a5f05ac171796e9374b1fdd2dab0c6e3ecd8ce3a11f8dcdf18ac6067d",
+      "bytes": 7351
+    },
+    "requests/2f8d1bb8a3ba409698a855b630cdc8d9/request_protocol.json": {
+      "sha256": "c8904a68dbb0d925d9b44e64d170afa66d8b69c6a933d93ffe08014059ea2684",
+      "bytes": 267
+    },
+    "requests/2f8d1bb8a3ba409698a855b630cdc8d9/native_request.json": {
+      "sha256": "d4e101b8047138e7af7154ae703d221dfd4680c25f053566e1129e7533a8b907",
+      "bytes": 7191
+    },
+    "requests/2f8d1bb8a3ba409698a855b630cdc8d9/http_status.json": {
+      "sha256": "6dd3efe4a907a637bb30af1c7599934884d6479f2f68e6dbd8326dbdd4318394",
+      "bytes": 59
+    },
+    "requests/2f8d1bb8a3ba409698a855b630cdc8d9/response.json": {
+      "sha256": "9899044cafa76ad61c4a20c37e2c8be203ba47d948c64bb89b78997bffcf8b9d",
+      "bytes": 234
+    },
+    "requests/2f8d1bb8a3ba409698a855b630cdc8d9/admission.json": {
+      "sha256": "97df071dc6046b41b90ee9b79686b7d9fd1e6cd554a3a5bfb4e98a360f62d4fa",
+      "bytes": 163
+    },
+    "requests/52aeec0ab6e74648af6e665aa0a9206a/request.json": {
+      "sha256": "2a469019e63bc2b8037ae4dfd03fe85982a0936ebaf5ba40c5cc5a4d6aebd172",
+      "bytes": 7866
+    },
+    "requests/52aeec0ab6e74648af6e665aa0a9206a/request_protocol.json": {
+      "sha256": "c8904a68dbb0d925d9b44e64d170afa66d8b69c6a933d93ffe08014059ea2684",
+      "bytes": 267
+    },
+    "requests/52aeec0ab6e74648af6e665aa0a9206a/native_request.json": {
+      "sha256": "dc37d183ebe468c534d9f201a5349967a953ebd5b68b19b178f8acb285e8261d",
+      "bytes": 7681
+    },
+    "requests/52aeec0ab6e74648af6e665aa0a9206a/http_status.json": {
+      "sha256": "6dd3efe4a907a637bb30af1c7599934884d6479f2f68e6dbd8326dbdd4318394",
+      "bytes": 59
+    },
+    "requests/52aeec0ab6e74648af6e665aa0a9206a/response.json": {
+      "sha256": "b3cc9534fc16ca11f425427a010bc8a39d07f683144b233916df09b9f212317c",
+      "bytes": 234
+    },
+    "requests/52aeec0ab6e74648af6e665aa0a9206a/admission.json": {
+      "sha256": "72d92db7b7adda4b79522e008004b5936d39bccbbff161fc95d59ade24aa5c48",
+      "bytes": 163
+    },
+    "requests/8ee4a8d929694f08bc4bb423af916ee6/response.sse": {
+      "sha256": "962f87575e4a0ad90724d3864e37276eb77a5031fe87bafd93f7ae0e76b31fb4",
+      "bytes": 802
+    },
+    "requests/8cf00a5b8fe94b5bbcc844c7a6a619a2/response.sse": {
+      "sha256": "ff707709bdd8c1409d375cf9dfb77a5f7b67ef71c49e8e31a3be51c025357ebe",
+      "bytes": 1021
+    },
+    "requests/2f8d1bb8a3ba409698a855b630cdc8d9/response.sse": {
+      "sha256": "0b441d0e0add1e85c83bdae14749b33c0ab584eb668c5c51ba4cfb26eebf34b4",
+      "bytes": 963
+    },
+    "requests/52aeec0ab6e74648af6e665aa0a9206a/response.sse": {
+      "sha256": "c8c4d498ef9cd5e470ff4a559bc0fe354025ceb74b00e215faa6161fa51d119f",
+      "bytes": 1004
+    }
+  },
+  "runtime": {
+    "name": "Claude CLI",
+    "version": "2.1.270",
+    "executable_sha256": "a506b6d970a4cf44f6abdb53a81ddcd5d3b0ce042a95c502fe9d1f946bdb8807"
+  },
+  "original_location": "Retained locally; this public inventory uses paths relative to the synthetic probe directory."
+}

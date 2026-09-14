@@ -6,9 +6,11 @@ import httpx
 
 from budgeted_cborg import Ledger
 from native_proxy import NativeProxy
+from run_native_canary import execute_child, verified_executable, sha
 
 PYTHON='/Users/marcin/Library/Caches/pypoetry/virtualenvs/data-sheets-schema-KeX3bMFJ-py3.13/bin/python'
-CLI='/Users/marcin/.local/bin/claude'
+CLI=str(Path('/Users/marcin/.local/bin/claude').resolve(strict=True))
+overlay={'claude_executable':CLI,'pinned_files':{CLI:sha(CLI)}}
 PRICES={"input":0.000005,"output":0.000025,"cache_read":0.0000005,"cache_write":0.00000625}
 root=Path(tempfile.mkdtemp(prefix='d4d-native-offline-')).resolve()
 work=root/'work';work.mkdir()
@@ -48,8 +50,9 @@ env.update(CLAUDE_CONFIG_DIR=str(config),DISABLE_NON_ESSENTIAL_MODEL_CALLS='1',D
 with proxy.running() as url:
     env['ANTHROPIC_BASE_URL']=url
     args=[CLI,'--print','--safe-mode','--restricted','--strict-mcp-config','--no-session-persistence','--model','claude-opus-5','--name','d4d-offline-capability','--disable-slash-commands','--max-budget-usd','5','--prompt-suggestions','false','--output-format','stream-json','--verbose','--permission-mode','dontAsk','--tools','Read,Write,Bash','--allowedTools','Read','Write',f'Bash({PYTHON} probe.py)','--system-prompt','Synthetic offline capability probe. Read input.txt, write output.txt, run the provided probe.py and finish. Do not access other files or networks.']
-    with (root/'transcript.jsonl').open('w') as out,(root/'stderr.txt').open('w') as err:
-        proc=subprocess.run(args,input='Perform the synthetic offline capability probe.',text=True,cwd=work,env=env,stdout=out,stderr=err,timeout=60)
-value={'root':str(root),'exit_code':proc.returncode,'scripted_requests':len(calls),'proxy_failure':proxy.failure,'output_created':(work/'output.txt').exists(),'real_provider_requests':0}
+    instruction=root/'instruction.txt';instruction.write_text('Perform the synthetic offline capability probe.')
+    code=execute_child(args,proxy=proxy,instruction=instruction,attempt=root,cwd=work,env=env,deadline_seconds=60,
+        verify_launch=lambda:verified_executable(overlay))
+value={'root':str(root),'exit_code':code,'scripted_requests':len(calls),'proxy_failure':proxy.failure,'output_created':(work/'output.txt').exists(),'real_provider_requests':0,'executable':overlay,'unfinished_handlers':proxy.unfinished_handlers}
 (root/'result.json').write_text(json.dumps(value,indent=2)+'\n')
 print(json.dumps(value,indent=2))
