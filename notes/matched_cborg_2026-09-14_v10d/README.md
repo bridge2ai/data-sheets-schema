@@ -1,4 +1,14 @@
-# v10d canary registration — awaiting review, CI and external-cap approval
+# v10d canary registration — incomplete attempt preserved
+
+PR #1787 passed review and exact-commit CI and merged. The CHORUS API canary
+then stopped at its $5 cumulative budget gate on 2026-09-14 after two settled
+calls costing $2.606820. Reconciliation's $2.828425 reservation exceeded the
+$2.393180 remaining attempt budget; no later request was sent. The
+[original-artifact summary](stopped_canaries/CHORUS_api_rep1/README.md)
+records this incomplete, rejected attempt. The
+[budget continuation proposal](../matched_cborg_budget_continuation_2026-09-14.md)
+requires a user decision before another paid canary. The registration below
+remains unchanged as the record of the stopped condition.
 
 This candidate freezes the generic source-status audit changes for #1782 and
 #1783 together with the optional per-job budget controls. The v10c condition

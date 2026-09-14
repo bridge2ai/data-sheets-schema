@@ -1,0 +1,25 @@
+{
+  "kind": "budget_policy_proposal_not_launch_approval",
+  "status": "awaiting_explicit_user_approval",
+  "related_issues": [
+    1789,
+    1781
+  ],
+  "proposed_whole_attempt_caps_usd": {
+    "CHORUS_api_rep1": 10,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "all_other_attempts_usd": 5,
+  "additional_allocation_cap_usd": 200,
+  "prior_settled_requests": 12,
+  "prior_estimated_cost_usd": "8.92890600",
+  "remaining_additional_budget_usd": "191.07109400",
+  "maximum_for_four_new_generation_canaries_usd": 50,
+  "no_automatic_retries": true,
+  "sources": "All existing study downloads and complete Kids First 55-document/36-study bundle unchanged.",
+  "basis": "CHORUS v10d stopped before reconciliation: spent 2.606820, remaining attempt 2.393180, required reservation 2.828425. This does not predict actual reconciliation cost. Kids First constraints remain in issue 1781.",
+  "activation": "No job receives a launch receipt until the user explicitly approves the changed caps, followed by current input/pricing/CI checks and prior-canary acceptance gates.",
+  "other_work": "This proposal does not authorize evaluator or production expansion or change the shared allocation."
+}
