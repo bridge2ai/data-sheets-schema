@@ -477,6 +477,24 @@ allowed to prefer a value merely because the full record already states it.
    - verify repeated identifiers, versions, dates, counts, licenses, access
      rules, people, and organizations are internally consistent;
    - keep historical values only when their historical scope is explicit;
+   - inspect every occurrence of a claim about availability, deployment,
+     collection, processing or privacy, including prose and nested list
+     entries. Compare each occurrence with the supporting passage's subject,
+     release/date and status: completed, in progress, planned or unstated.
+     A repository or tool description establishes a capability, not its use
+     on this dataset; a format table alone does not establish released
+     availability. A caveat in another field does not qualify an unqualified
+     assertion here. Name every affected slot separately in the findings,
+     with the source (and chunk when available), a short supporting passage
+     and the qualifier the record lost. Preserve supported plans in a field
+     that permits them, with their status explicit, rather than removing all
+     planned facts;
+   - for a privacy or identifiability field, verify that the passage attests
+     the operation in the privacy role that field asserts. Tokenization,
+     controlled access, local storage or a software name alone does not
+     attest de-identification or anonymity. Keep documented processing facts
+     in the fields they answer, and retain a privacy method where the source
+     actually attests it;
    - audit shape as well as evidence (same contract as the API pipeline's
      audit phase): flag any value whose shape does not conform to the
      schema — prose where the schema requires a list, enum values the
@@ -487,7 +505,13 @@ allowed to prefer a value merely because the full record already states it.
      `notes`, or evidence commentary outside `source_caveats`.
 4. Back-port every source-supported omission into the full record in the
    correct full-schema slot, and correct the full record wherever the audit
-   changes a fact. **Every back-ported or repaired value gets its receipt**:
+   changes a fact, including every occurrence of the same unsupported
+   assertion. Recheck the subject, release/date, operational status and field
+   meaning of every added or changed assertion against its source passage;
+   a repair must not introduce a stronger availability or privacy claim.
+   Keep a supported plan or in-progress fact qualified in its own value where
+   that field permits it, with evidence commentary in `source_caveats`.
+   **Every back-ported or repaired value gets its receipt**:
    add the `{slot, snippet}` pair to the *existing* entry of the chunk the
    passage sits in (edit that entry in place — a second entry for the same
    chunk is a finding), and re-run `d4d receipts check`. A value you cannot
