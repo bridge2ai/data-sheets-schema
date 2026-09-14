@@ -66,7 +66,7 @@ jobs:
         run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto
 
       - name: Exercise experimental canary admission offline
-        run: poetry run pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py -q -p no:cacheprovider
+        run: poetry run python -m pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py -q -p no:cacheprovider
 
       - name: Exercise native canary transport and shutdown offline
         run: PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls poetry run pytest notes/matched_cborg_2026-09-13/native_controls/test_native_proxy.py notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py -q -p no:cacheprovider
