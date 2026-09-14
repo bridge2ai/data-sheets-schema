@@ -19,6 +19,11 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 STUDY_MANIFEST = ROOT / "data/preprocessed/source_manifest.yaml"
 
+# Current generated-record fixtures after the deliberate #1771 boundary.
+# Historical fingerprints remain covered by test_nested_string_lists.py.
+CURRENT_STUDY = "6be1582236d9320bac6040b9a8b92da9"
+CURRENT_NEUTRAL = "94859bbbe7fa229619a3d5e2a50c3668"
+
 
 class _Clean(unittest.TestCase):
     def setUp(self):
@@ -275,7 +280,7 @@ class TestTheRecord(_Clean):
             block = rec.data["schema"]
             self.assertEqual(block["profile"], "neutral")
             self.assertEqual(block["profile_basis"], "no manifest")
-            self.assertEqual(block["digest_md5"], "029c2abcda26e45c4465fd0a8455893d")
+            self.assertEqual(block["digest_md5"], CURRENT_NEUTRAL)
             violations, why = check_record(rec.data)
             self.assertIsNone(why, why)
             self.assertEqual([v for v in violations if "profile" in v], [])
@@ -289,7 +294,7 @@ class TestTheRecord(_Clean):
                        condition="generic_v9")
         out = plan(spec)
         self.assertEqual(out["profile"], "bridge2ai")
-        self.assertEqual(out["schema_digest_md5"], "cd3c79f2c62f11675d5ce2c1df96b88e")
+        self.assertEqual(out["schema_digest_md5"], CURRENT_STUDY)
 
 
 class TestTheThreadingHolds(_Clean):
@@ -297,8 +302,8 @@ class TestTheThreadingHolds(_Clean):
     argument discarded (#1470): every case here resolves one profile on the
     spec and changes the environment before looking."""
 
-    STUDY = "cd3c79f2c62f11675d5ce2c1df96b88e"
-    NEUTRAL = "029c2abcda26e45c4465fd0a8455893d"
+    STUDY = CURRENT_STUDY
+    NEUTRAL = CURRENT_NEUTRAL
 
     def _study_spec(self, **kw):
         from data_sheets_schema.api_runner import RunSpec
@@ -496,8 +501,8 @@ class TestRoundThree(_Clean):
         """#1496"""
         from data_sheets_schema.form_defects import FormSubtypeClassifier
         from data_sheets_schema.profiles import NEUTRAL
-        self.assertEqual(FormSubtypeClassifier(profile=NEUTRAL)._default_schema(), "029c2abcda26e45c4465fd0a8455893d")
-        self.assertEqual(FormSubtypeClassifier()._default_schema(), "cd3c79f2c62f11675d5ce2c1df96b88e")
+        self.assertEqual(FormSubtypeClassifier(profile=NEUTRAL)._default_schema(), CURRENT_NEUTRAL)
+        self.assertEqual(FormSubtypeClassifier()._default_schema(), CURRENT_STUDY)
 
     def test_the_recorder_selects_the_profile_from_a_manifest_the_header_declares_unused(self):
         """#1461 at the recorder itself (#1497): the crate-only arm's header
@@ -537,7 +542,7 @@ class TestRoundThree(_Clean):
             rec = yaml.safe_load((core_dir / "CHORUS_provenance.yaml").read_text(encoding="utf-8"))
         self.assertEqual(rec["schema"]["profile"], "bridge2ai")
         self.assertRegex(rec["schema"]["profile_basis"], r"^manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
-        self.assertEqual(rec["schema"]["digest_md5"], "cd3c79f2c62f11675d5ce2c1df96b88e")
+        self.assertEqual(rec["schema"]["digest_md5"], CURRENT_STUDY)
         attested = (rec.get("inputs") or {}).get("source_manifest") or {}
         self.assertIsNone(attested.get("path"))                      # not consumed as context …
         self.assertIn("unused", attested.get("basis", ""))           # … and the record says why
@@ -579,7 +584,7 @@ class TestRoundThree(_Clean):
 class TestRoundFour(_Clean):
     """The Codex round-3 findings (#1512–#1522)."""
 
-    STUDY = "cd3c79f2c62f11675d5ce2c1df96b88e"
+    STUDY = CURRENT_STUDY
 
     def _fake_client(self):
         import sys
@@ -650,7 +655,7 @@ class TestRoundFour(_Clean):
         self.assertEqual(c.schema, c._live_snapshot()[0])
         # #1514: a failure judged under another instrument is refused, not pooled.
         other = FormFailure(project="P", slot="instances", value="[]", reason="wrong kind", fitness=0.0,
-                            schema="029c2abcda26e45c4465fd0a8455893d")
+                            schema=CURRENT_NEUTRAL)
         with self.assertRaises(ValueError):
             c(other)
 
@@ -660,7 +665,7 @@ class TestRoundFour(_Clean):
         from data_sheets_schema.form_defects import load_form_failures
         with tempfile.TemporaryDirectory() as d:
             rows = [{"failure": "form", "rubric": "r", "model": "m", "slot": "instances", "value": "[]",
-                     "reason": "x", "fitness": 0.0, "schema": s} for s in (self.STUDY, "029c2abcda26e45c4465fd0a8455893d")]
+                     "reason": "x", "fitness": 0.0, "schema": s} for s in (self.STUDY, CURRENT_NEUTRAL)]
             (Path(d) / "P_fitness.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
             with self.assertRaises(ValueError) as caught:
                 load_form_failures(Path(d))
@@ -816,7 +821,7 @@ class TestRoundFive(_Clean):
             found, entry = snapshot_store.read_latest(Path(d), "CHORUS", "full", spec=spec)
             self.assertTrue(found); self.assertIsNotNone(entry)
             # The same index under another instrument is not this generation's.
-            data["input_identity"]["profile"] = {"name": "neutral", "digest_md5": "029c2abcda26e45c4465fd0a8455893d"}
+            data["input_identity"]["profile"] = {"name": "neutral", "digest_md5": CURRENT_NEUTRAL}
             index.write_text(json.dumps(data), encoding="utf-8")
             self.assertTrue(snapshot_store._load(Path(d), "CHORUS").get("superseded"))
             with self.assertRaises(usage_ledger.UsageLedgerError):
@@ -832,7 +837,7 @@ class TestRoundFive(_Clean):
 class TestRoundSix(_Clean):
     """The Codex round-4 findings (#1558–#1568)."""
 
-    STUDY = "cd3c79f2c62f11675d5ce2c1df96b88e"
+    STUDY = CURRENT_STUDY
 
     def _fake_client(self):
         import sys
@@ -942,7 +947,7 @@ class TestRoundSix(_Clean):
         c._memo[own.key + (":" + __import__("hashlib").sha256(b"wrong kind").hexdigest() if c.specification else "")] = ("other", "cached")
         self.assertEqual(c(own), ("other", "cached"))
         foreign = FormFailure(project="P", slot="instances", value="[]", reason="wrong kind", fitness=0.0,
-                              schema="029c2abcda26e45c4465fd0a8455893d")
+                              schema=CURRENT_NEUTRAL)
         with self.assertRaises(ValueError):
             c(foreign)                                                          # cached for its key, refused before the memo
         if c.specification:
@@ -1063,9 +1068,9 @@ class TestRoundSeven(_Clean):
             rec = yaml.safe_load((core_dir / "CHORUS_provenance.yaml").read_text(encoding="utf-8"))
         self.assertEqual(rec["schema"]["profile"], "neutral")
         self.assertTrue(rec["schema"]["profile_basis"].startswith("rendered instruction (this process would select bridge2ai"))
-        self.assertEqual(rec["schema"]["digest_md5"], "029c2abcda26e45c4465fd0a8455893d")
+        self.assertEqual(rec["schema"]["digest_md5"], CURRENT_NEUTRAL)
         # A profile whose digest is the other profile's current digest is a finding.
-        bad = dict(rec); bad["schema"] = dict(rec["schema"], digest_md5="cd3c79f2c62f11675d5ce2c1df96b88e")
+        bad = dict(rec); bad["schema"] = dict(rec["schema"], digest_md5=CURRENT_STUDY)
         violations, why = check_record(bad)
         self.assertIsNone(why)
         self.assertTrue(any("bridge2ai profile's current digest" in v for v in violations), violations)
@@ -1177,7 +1182,7 @@ class TestRoundEight(_Clean):
         import json
         from data_sheets_schema.form_defects import FormFailure, FormSubtypeClassifier, load_form_failures
         from data_sheets_schema.profiles import BRIDGE2AI
-        study = "cd3c79f2c62f11675d5ce2c1df96b88e"
+        study = CURRENT_STUDY
         fresh = FormFailure(project="P", slot="instances", value="[]", reason="wrong kind", fitness=0.0,
                             schema=study, specification="b" * 64)
         legacy = FormSubtypeClassifier(client=object(), model="offline-test", schema=study, specification="",
@@ -1358,8 +1363,8 @@ class TestRoundTen(_Clean):
         """#1655"""
         from data_sheets_schema.provenance import _profile_digest_disagreement, check_record
         for value in (["neutral"], {"name": "neutral"}, 3):
-            self.assertIsNone(_profile_digest_disagreement({"schema": {"profile": value, "digest_md5": "029c2abcda26e45c4465fd0a8455893d"}}))
-            problems, why = check_record({"schema": {"profile": value, "digest_md5": "029c2abcda26e45c4465fd0a8455893d"}})
+            self.assertIsNone(_profile_digest_disagreement({"schema": {"profile": value, "digest_md5": CURRENT_NEUTRAL}}))
+            problems, why = check_record({"schema": {"profile": value, "digest_md5": CURRENT_NEUTRAL}})
             self.assertTrue(problems or why)
 
     def test_a_pin_that_carried_the_basis_still_resumes(self):

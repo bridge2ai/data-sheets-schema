@@ -248,10 +248,14 @@ class TestTheDigestStaysCompact(unittest.TestCase):
 
         The prefix is stated once and terms listed `id=name`, which halves what
         repeating `B2AI_SUBSTRATE:` 81 times would have cost.
+
+        Ceiling raised 44k -> 46k on 2026-09-13 for #1771. Nested string-list
+        cardinality is required validation guidance; the study digest is
+        44,684 characters with it, still below one fifth of the merged schema.
         """
         for target in TARGETS:
             with self.subTest(target=target):
-                self.assertLess(len(schema_digest.digest_text(target)), 44_000)
+                self.assertLess(len(schema_digest.digest_text(target)), 46_000)
 
 
 class TestTheTruncationSafeguard(unittest.TestCase):
