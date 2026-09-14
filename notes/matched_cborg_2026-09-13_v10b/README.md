@@ -1,4 +1,12 @@
-# v10b canary registration — awaiting review and CI
+# v10b canary registration — rejected in source review
+
+The reviewed registration passed exact-commit CI. The CHORUS API canary then
+passed its mechanical checks but failed independent source review (#1782,
+#1783). [The rejection summary](rejected_canaries/CHORUS_api_rep1/README.md)
+preserves its original-artifact hashes and five settled calls. No native,
+external, evaluator or production launch follows this attempt. The
+[dated continuation plan](../source_status_audit_canary_2026-09-14.md) requires
+a distinct condition after the generic audit instructions are reviewed.
 
 This is a distinct retry condition after the rejected v10 CHORUS attempt.
 The [dated retry plan](../matched_cborg_canary_retry_2026-09-13.md) retains
@@ -18,7 +26,8 @@ The budget remains $200 additional and $5 cumulatively per attempt. The pinned
 `previous_billing.json` checkpoint contains all five prior settled requests,
 costing an estimated $3.291465. Continuation retains those rows exactly and
 uses condition-qualified attempt IDs. It does not reset the allocation;
-$196.708535 remains. Unknown charges stop execution.
+$196.708535 remained at registration. After the rejected v10b attempt,
+$193.677914 remains. Unknown charges stop execution.
 The registration also pins the canonical ledger path: relocated copies use
 the same later charges, pending reservations and lock (#1777).
 
