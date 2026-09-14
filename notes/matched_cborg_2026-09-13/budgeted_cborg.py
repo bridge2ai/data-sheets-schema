@@ -41,7 +41,8 @@ def money(value):
 
 
 class Ledger:
-    def __init__(self, path, *, manifest_sha256, total_cap=200, attempt_cap=5):
+    def __init__(self, path, *, manifest_sha256, total_cap=200, attempt_cap=5,
+                 attempt_caps_usd=None):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.lock = FileLock(str(self.path) + ".lock", timeout=0)
@@ -50,12 +51,34 @@ class Ledger:
         self.total_cap, self.attempt_cap = money(total_cap), money(attempt_cap)
         if not all(value.is_finite() and value > 0 for value in (self.total_cap, self.attempt_cap)):
             raise BudgetStop("budget caps must be finite and positive")
+        if attempt_caps_usd is None:
+            attempt_caps_usd = {}
+        if not isinstance(attempt_caps_usd, dict):
+            raise BudgetStop("attempt cap overrides must be a mapping")
+        self.attempt_caps_usd = {}
+        for attempt, value in attempt_caps_usd.items():
+            if not isinstance(attempt, str) or not attempt or attempt.strip() != attempt:
+                raise BudgetStop("attempt cap override lacks an exact attempt identity")
+            try:
+                cap = money(value)
+            except (ArithmeticError, TypeError, ValueError) as exc:
+                raise BudgetStop("attempt cap override is not a valid amount") from exc
+            if not cap.is_finite() or cap <= 0 or cap > self.total_cap:
+                raise BudgetStop("attempt cap override must be positive and within the sequence cap")
+            self.attempt_caps_usd[attempt] = cap
+        if self.attempt_caps_usd:
+            self.identity["attempt_caps_usd"] = {
+                attempt: str(cap) for attempt, cap in sorted(self.attempt_caps_usd.items())}
+
+    def limit_for_attempt(self, attempt):
+        return self.attempt_caps_usd.get(attempt, self.attempt_cap)
 
     @contextmanager
     def transaction(self):
         with self.lock:
             state = json.loads(self.path.read_bytes()) if self.path.exists() else {**self.identity, "requests": []}
-            if any(state.get(k) != v for k, v in self.identity.items()):
+            if (any(state.get(k) != v for k, v in self.identity.items())
+                    or state.get("attempt_caps_usd", {}) != self.identity.get("attempt_caps_usd", {})):
                 raise BudgetStop("ledger registration or budget changed")
             yield state
             temporary = self.path.with_suffix(".tmp")
@@ -72,8 +95,9 @@ class Ledger:
                 raise BudgetStop("an earlier charge is pending or unknown; reconcile before continuing")
             total = sum((money(row["cost_usd"]) for row in state["requests"]), Decimal(0))
             used = sum((money(row["cost_usd"]) for row in state["requests"] if row["attempt"] == attempt), Decimal(0))
-            if estimate <= 0 or total + estimate > self.total_cap or used + estimate > self.attempt_cap:
-                reason = f"request reserve ${estimate} exceeds remaining budget: attempt ${self.attempt_cap-used}, sequence ${self.total_cap-total}"
+            cap = self.limit_for_attempt(attempt)
+            if estimate <= 0 or total + estimate > self.total_cap or used + estimate > cap:
+                reason = f"request reserve ${estimate} exceeds remaining budget: attempt ${cap-used}, sequence ${self.total_cap-total}"
                 state.setdefault("stopped_attempts", {})[attempt] = {
                     "stopped_at": now(), "reason": reason,
                     "denied_request_sha256": request_sha256,
@@ -83,7 +107,7 @@ class Ledger:
                 ticket = uuid.uuid4().hex
                 state["requests"].append({"id": ticket, "attempt": attempt,
                     "request_sha256": request_sha256, "reserved_at": now(),
-                    "reserved_usd": str(estimate), "status": "pending"})
+                    "reserved_usd": str(estimate), "attempt_cap_usd": str(cap), "status": "pending"})
         # Raise after the transaction commits, or the stop event is lost.
         if ticket is None:
             raise BudgetStop(reason)
@@ -111,7 +135,11 @@ class Ledger:
                 attempt, {"stopped_at": now(), "reason": reason})
 
     def continue_from(self, checkpoint, *, expected_sha256, expected_cost_usd):
-        """Carry settled charges forward exactly once; never grant a new cap."""
+        """Carry charges exactly once without changing the allocation or default cap.
+
+        Any per-attempt exception belongs to the new registration's exact job
+        identity; the prior checkpoint remains the evidence for its own caps.
+        """
         raw = Path(checkpoint).read_bytes()
         if digest(raw) != expected_sha256:
             raise BudgetStop("prior billing checkpoint changed")
@@ -332,6 +360,27 @@ class CappedClient:
         self.messages = CappedMessages(client, **kwargs)
 
 
+def registered_attempt_caps(manifest, manifest_sha256):
+    """Bind optional per-job caps to exact attempts in this registration."""
+    budget = manifest["budget"]
+    per_job = budget.get("per_job_attempt_usd", {})
+    if not isinstance(per_job, dict):
+        raise BudgetStop("registered per-job attempt caps must be a mapping")
+    caps = {}
+    if per_job:
+        jobs = manifest.get("generation", {}).get("jobs", [])
+        if not isinstance(jobs, list) or any(not isinstance(job, dict) for job in jobs):
+            raise BudgetStop("per-job caps require a valid registered job roster")
+        identifiers = [job.get("id") for job in jobs]
+        if (any(not isinstance(name, str) or not name for name in identifiers)
+                or len(set(identifiers)) != len(identifiers)):
+            raise BudgetStop("per-job caps require unique registered job identities")
+        if any(name not in identifiers for name in per_job):
+            raise BudgetStop("attempt cap override names an unregistered job")
+        caps = {attempt_identity(manifest_sha256, name): cap for name, cap in per_job.items()}
+    return caps
+
+
 def open_ledger(manifest, manifest_sha256):
     """Use the hash-bound sequence ledger even if the registration is copied."""
     budget = manifest["budget"]
@@ -341,8 +390,10 @@ def open_ledger(manifest, manifest_sha256):
     path = Path(location)
     if not path.is_absolute() or str(path.resolve()) != location:
         raise BudgetStop("registered sequence ledger path is not absolute and canonical")
+    caps = registered_attempt_caps(manifest, manifest_sha256)
     ledger = Ledger(path, manifest_sha256=manifest_sha256,
-                    total_cap=budget["additional_usd"], attempt_cap=budget["per_attempt_usd"])
+                    total_cap=budget["additional_usd"], attempt_cap=budget["per_attempt_usd"],
+                    attempt_caps_usd=caps)
     prior = budget.get("continuation")
     if prior is not None:
         if manifest["pinned_files"].get(prior["checkpoint"]) != prior["sha256"]:

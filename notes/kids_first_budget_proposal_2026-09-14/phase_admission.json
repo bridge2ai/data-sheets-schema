@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-09-14T08:02:57.073175+00:00",
+  "registration_sha256": "abde76bb0705cd96f09040cf547cff35043acf0ecfcce972630e51e6ea04714b",
+  "kind": "non_generating_phase_count_projection",
+  "scientific_calls": 0,
+  "count_requests": 4,
+  "job": "KIDS_FIRST_api_rep1",
+  "source_bundle_sha256": "cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c",
+  "rows": [
+    {
+      "phase": "full",
+      "required_carry_artifacts": [],
+      "carry_basis": "Empty placeholders; later generated artifact bytes are not known and are omitted from this lower-bound count.",
+      "input_tokens_without_carry": 233534,
+      "input_bound_without_carry": 281265,
+      "output_ceiling": 128000,
+      "admission_reservation_without_carry_usd": "4.95790625",
+      "request_sha256": "4915b9341970c8422aed6dfe0d798e79fd447d5c0fa239c3ed6e3507e829ab18"
+    },
+    {
+      "phase": "audit",
+      "required_carry_artifacts": [
+        "Completed full record"
+      ],
+      "carry_basis": "Empty placeholders; later generated artifact bytes are not known and are omitted from this lower-bound count.",
+      "input_tokens_without_carry": 233658,
+      "input_bound_without_carry": 281414,
+      "output_ceiling": 24000,
+      "admission_reservation_without_carry_usd": "2.35883750",
+      "request_sha256": "65df837d6da32dc5b562b767adcc6e20443e0db333bd7f4e9d54651e83bf6873"
+    },
+    {
+      "phase": "reconcile_full",
+      "required_carry_artifacts": [
+        "Completed full record",
+        "Audit findings"
+      ],
+      "carry_basis": "Empty placeholders; later generated artifact bytes are not known and are omitted from this lower-bound count.",
+      "input_tokens_without_carry": 233345,
+      "input_bound_without_carry": 281038,
+      "output_ceiling": 96000,
+      "admission_reservation_without_carry_usd": "4.15648750",
+      "request_sha256": "184568384c74ee1c7af856aa16b6472a17b3a7b623ae8b840c55759139ef62fd"
+    },
+    {
+      "phase": "report",
+      "required_carry_artifacts": [
+        "Audit findings",
+        "Original full record",
+        "Original core record",
+        "Reconciled full record",
+        "Completed core record"
+      ],
+      "carry_basis": "Empty placeholders; later generated artifact bytes are not known and are omitted from this lower-bound count.",
+      "input_tokens_without_carry": 234313,
+      "input_bound_without_carry": 282200,
+      "output_ceiling": 24000,
+      "admission_reservation_without_carry_usd": "2.36375000",
+      "request_sha256": "4fce3158f64bf7964427a00ad9bc1fe6d651a4838ecf79ead38c9fd41f56f328"
+    }
+  ],
+  "qualification": "These omit generated carried artifacts and repairs. Sum of admission reservations is not predicted expenditure; actual cache hits, response lengths and usage are not measured."
+}

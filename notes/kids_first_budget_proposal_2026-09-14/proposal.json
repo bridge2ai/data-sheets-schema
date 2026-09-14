@@ -1,0 +1,30 @@
+{
+  "kind": "budget_policy_proposal_not_a_launch_registration",
+  "status": "awaiting_explicit_user_approval",
+  "issue": 1781,
+  "additional_usd": 200,
+  "per_attempt_usd": 5,
+  "per_job_attempt_usd": {
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "maximum_combined_external_attempts_usd": 30,
+  "attempts_per_runtime": 1,
+  "scope": "One complete Kids First generation canary per runtime, including all phases and conditional calls, producing a full D4D and deterministic core. No paid retry, evaluator or production expansion is approved by this proposal.",
+  "provider": "CBORG",
+  "model": "claude-opus-5",
+  "source_bundle_sha256": "cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c",
+  "source_documents": 55,
+  "participating_studies": 36,
+  "source_profile": "neutral",
+  "continuation": "Freeze and carry the then-current canonical ledger after accepted preceding canaries; never reuse this planning subtotal as a later checkpoint.",
+  "current_settled_sequence_cost_usd": "6.32208600",
+  "current_remaining_usd": "193.67791400",
+  "activation_gates": [
+    "User approves the exact two-job cap exception.",
+    "New immutable registration includes the exception, its approval evidence, code and source pins, output paths and current billing checkpoint.",
+    "Independent review and exact-commit CI pass.",
+    "Preceding CHORUS API and native canaries pass original-artifact and source-support review.",
+    "Kids First API passes before Kids First native can run."
+  ]
+}

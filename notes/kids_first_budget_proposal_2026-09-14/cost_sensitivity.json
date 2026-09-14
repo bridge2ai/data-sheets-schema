@@ -1,0 +1,45 @@
+{
+  "kind": "illustrative_sensitivity_not_a_cost_forecast",
+  "observed_condition": "rejected_v10b_CHORUS_api_rep1",
+  "source_size_delta_input_tokens": 191664,
+  "rows": [
+    {
+      "phase": "full",
+      "observed_chorus_cost_usd": "1.25332000",
+      "assumed_extra_input_tokens": 191664,
+      "assumed_rate_basis": "cache_write",
+      "source_size_scenario_cost_usd": "2.45122000"
+    },
+    {
+      "phase": "audit",
+      "observed_chorus_cost_usd": "0.58661000",
+      "assumed_extra_input_tokens": 191664,
+      "assumed_rate_basis": "cache_write",
+      "source_size_scenario_cost_usd": "1.78451000"
+    },
+    {
+      "phase": "reconcile_full",
+      "observed_chorus_cost_usd": "0.37423200",
+      "assumed_extra_input_tokens": 191664,
+      "assumed_rate_basis": "cache_read",
+      "source_size_scenario_cost_usd": "0.47006400"
+    },
+    {
+      "phase": "report",
+      "observed_chorus_cost_usd": "0.36965700",
+      "assumed_extra_input_tokens": 191664,
+      "assumed_rate_basis": "cache_read",
+      "source_size_scenario_cost_usd": "0.46548900"
+    },
+    {
+      "phase": "report_regate",
+      "observed_chorus_cost_usd": "0.44680200",
+      "assumed_extra_input_tokens": 191664,
+      "assumed_rate_basis": "cache_read",
+      "source_size_scenario_cost_usd": "0.54263400"
+    }
+  ],
+  "scenario_total_usd": "5.71391700",
+  "assumptions": "Holds the rejected CHORUS attempt output lengths and per-phase cache behavior fixed, adding only the initial-request input-size difference. Does not account for Kids First output complexity, native tool use/compaction, different carried outputs, the changed audit wording, cache timing changes or additional repairs. Neither actual Kids First runtime has run.",
+  "scientific_calls": 0
+}

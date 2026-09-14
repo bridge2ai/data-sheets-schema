@@ -1,5 +1,7 @@
 """Exercise the launch identity and deadline using local synthetic processes."""
 import os
+import json
+from contextlib import contextmanager
 from pathlib import Path
 import signal
 import subprocess
@@ -62,3 +64,65 @@ def test_launch_verification_failure_never_starts_process(tmp_path):
             instruction=instruction,attempt=tmp_path,cwd=tmp_path,env=dict(os.environ),
             deadline_seconds=1,verify_launch=changed)
     assert not (tmp_path/'should-not-exist').exists()
+
+
+@pytest.mark.parametrize('override, expected', [(None, '5'), (15, '15')])
+def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeypatch, override, expected):
+    import anthropic
+    import run_native_canary as runner
+
+    job = {'id': 'external_native', 'canary': True, 'execution_arm': 'agentic',
+           'render_spec': {}, 'input_identity': {}, 'output_directories': [], 'outputs': {}}
+    instruction = tmp_path / 'instruction.md'
+    instruction.write_text('Synthetic offline instruction')
+    job['instruction'] = str(instruction)
+    base = {'repository': str(tmp_path), 'claude_version': 'test-version',
+            'provider_base_url': 'https://unused.invalid', 'model': {'model': 'test-model'},
+            'budget': {'additional_usd': 200, 'per_attempt_usd': 5,
+                       'ledger_path': str(tmp_path / 'billing.json'), 'prices_per_token': {}},
+            'generation': {'jobs': [job], 'canary_order': [job['id']],
+                           'agentic_attempt_deadline_seconds': 1}}
+    if override is not None:
+        base['budget']['per_job_attempt_usd'] = {job['id']: override}
+    registration = tmp_path / 'registration.json'
+    registration.write_text(json.dumps(base))
+    overlay = tmp_path / 'overlay.json'
+    overlay.write_text(json.dumps({'registration': str(registration),
+        'registration_sha256': sha(registration), 'allowed_jobs': [job['id']],
+        'pinned_files': {}, 'environment': {}, 'per_job_environment': {job['id']: {}},
+        'cli_flags': [], 'allowed_tools': ['Read'], 'system_prompt': str(instruction)}))
+    review = tmp_path / 'review.json'
+    review.write_text(json.dumps({'verdict': 'approve', 'ci_conclusion': 'success',
+        'overlay_sha256': sha(overlay), 'allowed_jobs': [job['id']]}))
+    observed = {}
+
+    class OfflineProxy:
+        token = 'synthetic-local-token'
+        unfinished_handlers = 0
+        failed = threading.Event()
+
+        def __init__(self, **kwargs):
+            observed['proxy_cap'] = str(kwargs['ledger'].limit_for_attempt(kwargs['attempt']))
+
+        @contextmanager
+        def running(self):
+            yield 'http://127.0.0.1:1'
+
+    def capture(argv, **kwargs):
+        observed['cli_cap'] = argv[argv.index('--max-budget-usd') + 1]
+        raise BudgetStop('synthetic probe stops before process or provider execution')
+
+    monkeypatch.setattr(runner, 'verify', lambda *args: None)
+    monkeypatch.setattr(runner, 'verify_history', lambda *args: None)
+    monkeypatch.setattr(runner, 'verified_executable', lambda *args: sys.executable)
+    monkeypatch.setattr(runner.subprocess, 'check_output', lambda *args, **kwargs: 'test-version')
+    monkeypatch.setattr(runner, 'spec_for', lambda *args: SimpleNamespace(
+        render_spec=lambda: {}, input_identity=lambda: {}))
+    monkeypatch.setattr(anthropic, 'Anthropic', lambda **kwargs: object())
+    monkeypatch.setattr(runner, 'NativeProxy', OfflineProxy)
+    monkeypatch.setattr(runner, 'execute_child', capture)
+    monkeypatch.setenv('CBORG_API_KEY', 'synthetic-never-sent')
+    monkeypatch.setattr(sys, 'argv', ['run_native_canary', '--overlay', str(overlay),
+                                    '--review', str(review), '--job', job['id']])
+    assert runner.main() == 1
+    assert observed == {'proxy_cap': expected, 'cli_cap': expected}
