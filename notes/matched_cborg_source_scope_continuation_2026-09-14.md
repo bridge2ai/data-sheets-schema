@@ -17,12 +17,15 @@ A new source-instrument condition is required. The exact, unexecuted
 original files and carries all 17 settled requests, estimated $12.675972,
 leaving $187.324028 of the existing additional $200.
 
-1. Finish review and exact-commit CI of the corrected code, rejection record
-   and replacement registration. A replacement CHORUS API attempt and a
-   combined ceiling of $53.75 including the rejected attempt remain proposed;
-   no launch receipt has been issued. Approval of this proposal would leave
-   the total $200 allocation and $10/$15 per-attempt caps unchanged.
-2. After that decision and fresh preflight, run the replacement CHORUS API
+1. The corrected code, rejection record and v10f registration are reviewed,
+   merged and green, including post-merge CI. On 2026-09-14 the user approved
+   one replacement CHORUS API attempt and changed its cap to **$20**. The
+   [budget amendment](matched_cborg_2026-09-14_v10f_cap20/README.md) preserves
+   the unexecuted candidate and scientific instrument. Other canary caps
+   remain $10/$15/$15, giving $60 maximum new exposure and **$63.75** including
+   the rejected attempt. The additional allocation remains $200. Complete
+   independent review, exact-commit CI and fresh preflight of the amendment.
+2. After those checks, run the approved replacement CHORUS API
    canary. Review unchanged original full/core records against every frozen
    source, including governing future scope, qualified observations, privacy
    field meaning and every repeated/reconciled assertion. Check schemas,
@@ -51,7 +54,7 @@ leaving $187.324028 of the existing additional $200.
    × three replicates × two generation arms, plus two external canaries,
    producing 32 full/core pairs. The inventory enumerates 256 rubric ratings;
    applicable remaining paid styles and any API/field production expansion
-   still require explicit counts and budgets. Its $1,470 sum of ceilings is
+   still require explicit counts and budgets. Its updated $1,480 sum of ceilings is
    exposure, not a forecast or a funded batch; do not silently omit an arm,
    dataset, variant, style or repeat to fit the allocation.
 6. Regenerate accepted production cohorts under their registered new
@@ -62,5 +65,6 @@ leaving $187.324028 of the existing additional $200.
    historical judgments separately.
 
 Every paid launch remains bound to its exact reviewed registration, settled
-shared ledger and predecessor acceptance. Preparation and a merged PR do not
-approve a replacement or expansion. All new scientific model work uses CBORG.
+shared ledger and predecessor acceptance. The user approved this replacement;
+preparation and merged PRs alone do not approve further replacements or
+expansion. All new scientific model work uses CBORG.

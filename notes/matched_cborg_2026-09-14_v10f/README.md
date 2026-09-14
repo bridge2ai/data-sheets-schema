@@ -1,5 +1,10 @@
 # v10f replacement canary candidate — not launched
 
+The user subsequently approved a $20 replacement CHORUS API cap. The
+[budget amendment](../matched_cborg_2026-09-14_v10f_cap20/README.md) supersedes
+this unexecuted $10 registration for launch. The original proposal and pinned
+artifacts below remain the pre-decision record.
+
 The [v10e CHORUS API attempt](../matched_cborg_2026-09-14_v10e/rejected_canaries/CHORUS_api_rep1/README.md)
 completed but failed independent source review. The [source-instruction fix](../generation_source_scope_2026-09-14.md)
 requires governing future scope and compatible numerical observations to be
