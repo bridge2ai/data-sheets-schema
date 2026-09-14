@@ -1,0 +1,284 @@
+{
+  "verdict": "reject",
+  "basis": "Codex offline controller/artifact audit; not a semantic rubric rating",
+  "recorded_date": "2026-09-13",
+  "registration_sha256": "0fbe4d0853b0fbdcef6f4788532420800428aecd069ae8db48fa5a3485495a12",
+  "launch_commit": "4a084a55b19dde93e6f7acf4ab397268cd68e50c",
+  "job": "CHORUS_api_rep1",
+  "estimated_cost_usd": "3.29146500",
+  "remaining_additional_cap_usd": "196.70853500",
+  "requests_settled": 5,
+  "unknown_charges": 0,
+  "per_attempt_cap_exceeded": false,
+  "spend_after_denied_repair_usd": "0.42126000",
+  "issues": [
+    1770,
+    1771,
+    1768,
+    1769
+  ],
+  "gates": {
+    "schema": "failed: nested scalar values where string lists are declared",
+    "pair": "consistent",
+    "duplicate_keys": "none",
+    "report_claims": "25 checked; zero findings",
+    "receipt_chunks": "8 of 8 reviewed",
+    "receipt_snippets": "117 of 118 verified; one mismatch",
+    "support_review": "not accepted: schema and receipt failures; no further paid judgments",
+    "registered_file_pins": 458,
+    "historical_artifacts": "3241 unchanged"
+  },
+  "copies": {
+    "attempt/requests/0496ae88cd684ce3bd8929efb01dd959/admission.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/0496ae88cd684ce3bd8929efb01dd959/admission.json",
+      "sha256": "8c3205dbe261824aa602a24c9ececf810af08b3de721895f29ab19c2942f3ddd",
+      "bytes": 166
+    },
+    "attempt/requests/0496ae88cd684ce3bd8929efb01dd959/request.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/0496ae88cd684ce3bd8929efb01dd959/request.json",
+      "sha256": "b0c57428cbb3bde92080df542a8dc4919dd3d58fa5641f993e18b10ee4218330",
+      "bytes": 151519
+    },
+    "attempt/requests/0496ae88cd684ce3bd8929efb01dd959/response.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/0496ae88cd684ce3bd8929efb01dd959/response.json",
+      "sha256": "963e6d6a9fc269237085ebcb70358c53abbd180e313b6fb6261941cfe6fa5e2f",
+      "bytes": 29313
+    },
+    "attempt/requests/0ff75c1972d4452083d596da491935fa/admission.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/0ff75c1972d4452083d596da491935fa/admission.json",
+      "sha256": "deac344237702e49a5f52e8a62b36aa95099eed502c5d1faaf3ff6ad4e8bb0da",
+      "bytes": 166
+    },
+    "attempt/requests/0ff75c1972d4452083d596da491935fa/request.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/0ff75c1972d4452083d596da491935fa/request.json",
+      "sha256": "66ad05ed6a230fe4d93d8ea8606396e66544ed5c83a26ec43b8809555f302f24",
+      "bytes": 140301
+    },
+    "attempt/requests/0ff75c1972d4452083d596da491935fa/response.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/0ff75c1972d4452083d596da491935fa/response.json",
+      "sha256": "a13b2318f6859bc158f3fb683efa222588dec0dd33f2570bac41495adf9a884c",
+      "bytes": 12182
+    },
+    "attempt/requests/4cd16f2f397243b29f0665749211307d/admission.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/4cd16f2f397243b29f0665749211307d/admission.json",
+      "sha256": "98dde02c83f7b4c4200609d59602f4795e7bea7a94a9e1cc66897bd209139439",
+      "bytes": 167
+    },
+    "attempt/requests/4cd16f2f397243b29f0665749211307d/request.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/4cd16f2f397243b29f0665749211307d/request.json",
+      "sha256": "0f9a6a549017a95a1e2b02a7771df9b7a138b7048c0c2cdae1f3c5fb8b122585",
+      "bytes": 244049
+    },
+    "attempt/requests/4cd16f2f397243b29f0665749211307d/response.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/4cd16f2f397243b29f0665749211307d/response.json",
+      "sha256": "c2ad0f3765f74701e1cdfd99a7e27df4ad925893ff35ca5095613e0707a56920",
+      "bytes": 18408
+    },
+    "attempt/requests/561d79f7f11c4fe38a113b46e68b7932/admission.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/561d79f7f11c4fe38a113b46e68b7932/admission.json",
+      "sha256": "9c4abfc08ff638e97f1c8a1ce9dc88ae98210054e0b236f2f2d0beea5dedc20e",
+      "bytes": 166
+    },
+    "attempt/requests/561d79f7f11c4fe38a113b46e68b7932/request.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/561d79f7f11c4fe38a113b46e68b7932/request.json",
+      "sha256": "fcc6287b2d3bc1f2332c41603133fe9b41ef4e5240038aaad94e9e9a4cd81de4",
+      "bytes": 230275
+    },
+    "attempt/requests/561d79f7f11c4fe38a113b46e68b7932/response.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/561d79f7f11c4fe38a113b46e68b7932/response.json",
+      "sha256": "2081f9cf3944838b819892e62dfe8d098cb91c966fb4d15f7e01bc0a342267b7",
+      "bytes": 13557
+    },
+    "attempt/requests/c1194ce40ee7436c8c2349a5231ab261/admission.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/c1194ce40ee7436c8c2349a5231ab261/admission.json",
+      "sha256": "f54a49d0a43fc047888114ff9f9e4643ee178ab70601443b8654e8ee63cadf49",
+      "bytes": 167
+    },
+    "attempt/requests/c1194ce40ee7436c8c2349a5231ab261/request.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/c1194ce40ee7436c8c2349a5231ab261/request.json",
+      "sha256": "7b432573047a27a9c451c5acdf335ed958b2b7c6de0fffc1364cb10bcf0c32f1",
+      "bytes": 113732
+    },
+    "attempt/requests/c1194ce40ee7436c8c2349a5231ab261/response.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/requests/c1194ce40ee7436c8c2349a5231ab261/response.json",
+      "sha256": "02c2a8c4815a4b72e7c8f81e08fa7dac00f6449f2a128fad42eace015b8fe0f2",
+      "bytes": 205750
+    },
+    "attempt/result.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/result.json",
+      "sha256": "9efd40866ccbd92addda93a8cdc16e0c136fb4d22a6fa70addcf8c4ecfcb9357",
+      "bytes": 26299
+    },
+    "attempt/started.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/attempts/CHORUS_api_rep1/started.json",
+      "sha256": "9ea9e29b4252c3e8452153c3eaa3b08ce4f040c94625c35944e4289b5db4797d",
+      "bytes": 389
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_d4d.yaml_api_run.lock": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_d4d.yaml_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_d4d.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_d4d.yaml",
+      "sha256": "933df1d7ea3528ca97bca0e1ca2d20cc780f08793b6a532eec917d44097d1570",
+      "bytes": 28202
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_d4d_core.yaml_api_run.lock": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_d4d_core.yaml_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_provenance.yaml_api_run.lock": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_provenance.yaml_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_reconciliation.md_api_run.lock": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/.CHORUS_reconciliation.md_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_api_progress.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_api_progress.json",
+      "sha256": "dc7d418223c9c9f5572041443d3f708875e98efb5d57c4b0eb6807e7acede17c",
+      "bytes": 16804
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_api_usage_e9839df8c8a165dd.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_api_usage_e9839df8c8a165dd.json",
+      "sha256": "8a3294febf5157769e6a42f1121c09b5691489c7f45fe9ff3b89b958417cf611",
+      "bytes": 3803
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_coverage_receipt.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_coverage_receipt.yaml",
+      "sha256": "c1a7775719c9c524c6fffcdb1cfef7d0967a3f4e784dc201bea1751e77667045",
+      "bytes": 14279
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_d4d_core.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_d4d_core.yaml",
+      "sha256": "35475e7c560cdaf8e56dbeadeae8d35640db7527821776bbc383df3d4ffd6107",
+      "bytes": 24148
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_provenance.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_provenance.yaml",
+      "sha256": "13adf42724fed8f0eddca34b17a44fdffb744b2136c4eea66ebd79a1099023f1",
+      "bytes": 32913
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_reasoning.jsonl": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_reasoning.jsonl",
+      "sha256": "bc52a9c35269536ea912dcc08dc79cb98d2ee785642a6b97c61ad5778f39796d",
+      "bytes": 3705
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_reconciliation.md": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/CHORUS_reconciliation.md",
+      "sha256": "62a1c225a1577eae4462c3845b17c6c9aede30348c51db8444462777e69bd38a",
+      "bytes": 12875
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_audit.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_audit.json",
+      "sha256": "6be34e1114d16b37187ce56f04dc0ab90d6966827df9eb81d7c57396b3b43d34",
+      "bytes": 11176
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_core.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_core.yaml",
+      "sha256": "22a245a873d64052a2ae815afebb35456b90c43786156f2650ccceb2464cc7a9",
+      "bytes": 22034
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_coverage_receipt.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_coverage_receipt.yaml",
+      "sha256": "c1a7775719c9c524c6fffcdb1cfef7d0967a3f4e784dc201bea1751e77667045",
+      "bytes": 14279
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_full.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_full.yaml",
+      "sha256": "1383eb5eabeae87c814cb2cd5d3dbb495a05942d9bec54f39c5c50c8dd82d0fa",
+      "bytes": 26348
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_full_response_1c1d4a96fba84b26a554db8047e95b0d.txt": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_full_response_1c1d4a96fba84b26a554db8047e95b0d.txt",
+      "sha256": "8326333d11da73f131a9c3f6f7971d892bd7a8b220576f7f8952eed91c6ca7c2",
+      "bytes": 40552
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_reconcile_core.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_reconcile_core.yaml",
+      "sha256": "35475e7c560cdaf8e56dbeadeae8d35640db7527821776bbc383df3d4ffd6107",
+      "bytes": 24148
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_reconcile_full.yaml": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_reconcile_full.yaml",
+      "sha256": "933df1d7ea3528ca97bca0e1ca2d20cc780f08793b6a532eec917d44097d1570",
+      "bytes": 28202
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_report.md": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_report.md",
+      "sha256": "477c558c090905b42ea12619e7402b13f44f8123f364dff1d7f725f469ba5b79",
+      "bytes": 12742
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_report_before_regate.md": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_report_before_regate.md",
+      "sha256": "477c558c090905b42ea12619e7402b13f44f8123f364dff1d7f725f469ba5b79",
+      "bytes": 12742
+    },
+    "artifacts/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_snapshot_index.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/data/d4d_concatenated/claudecode_api_core/2026-09-13_claude-opus-5-api-generalized-v10-chorus_rep1/intermediate/CHORUS_snapshot_index.json",
+      "sha256": "38b6cc983d2b9104817e3e0e64f3a0ee267bd41949a92488bb68cb4a4e57f260",
+      "bytes": 4755
+    },
+    "registration_and_billing/billing.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/billing.json",
+      "sha256": "c55abd0294f9bd0ab999f67bb95abedf1433ea42bb0443d6a93a35f25a855cbc",
+      "bytes": 4402
+    },
+    "registration_and_billing/registration.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/registration.json",
+      "sha256": "0fbe4d0853b0fbdcef6f4788532420800428aecd069ae8db48fa5a3485495a12",
+      "bytes": 418646
+    },
+    "registration_and_billing/reviews/first_api_launch.json": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/reviews/first_api_launch.json",
+      "sha256": "56a2c44b588f35bb50d609bb9d3eee4c4e32244c35fc8d63178ee89136f803f0",
+      "bytes": 1855
+    },
+    "registration_and_billing/reviews/round2.md": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/reviews/round2.md",
+      "sha256": "8bbb26e00ba044de1449dea8264298f18a055383641717c00ab57fc23c6e9cc1",
+      "bytes": 1760
+    },
+    "measured_code/notes/matched_cborg_2026-09-13/budgeted_cborg.py": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+      "sha256": "452efd83ecd6908adefd28277c9a6e259b16c592acb7f83c32aa8cec81d5c909",
+      "bytes": 10528
+    },
+    "measured_code/notes/matched_cborg_2026-09-13/run_api_canary.py": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/notes/matched_cborg_2026-09-13/run_api_canary.py",
+      "sha256": "953f93a5036dafc8e2a669d010d041629e337f0b347b382fcd12b75ee040b147",
+      "bytes": 7787
+    },
+    "measured_code/src/data_sheets_schema/schema_digest.py": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/src/data_sheets_schema/schema_digest.py",
+      "sha256": "b68f32d81cf95b11d5c64c9dda36778a4056085d7f9a8d1d6311b0d73c157b09",
+      "bytes": 41252
+    },
+    "measured_code/src/data_sheets_schema/api_runner.py": {
+      "original_path": "/private/tmp/d4d-canaries-2026-09-13/src/data_sheets_schema/api_runner.py",
+      "sha256": "c13f8fdd7abf3fc2beefaf5594ff5878c1cbe492ab358e7989fd40181bcb7448",
+      "bytes": 314382
+    }
+  },
+  "originals_preserved": true,
+  "next_paid_call_allowed": false,
+  "retry_requirements": [
+    "Resolve and review issues #1770 and #1771",
+    "New instrument/source registration with new output paths",
+    "Carry forward prior spending; retain $5 cumulative attempt cap",
+    "Review and CI for the actual retry registration",
+    "Resolve native review issues before launching that arm"
+  ],
+  "publication": {
+    "versioned": [
+      "README.md",
+      "audit.json"
+    ],
+    "raw_payload": "preserved locally; not published"
+  }
+}

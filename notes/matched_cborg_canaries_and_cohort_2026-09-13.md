@@ -7,6 +7,16 @@ note alone does not attest a completed canary or a new measurement.
 
 Execution tracking: [#1763](https://github.com/bridge2ai/data-sheets-schema/issues/1763).
 
+**Execution update, 2026-09-13:** the first CHORUS API canary failed schema
+validation and was rejected. Its original artifacts and five settled requests
+are preserved in [the failure archive](matched_cborg_2026-09-13/failed_canaries/CHORUS_api_rep1/README.md).
+Estimated spending is $3.291465, leaving $196.708535 of the additional cap.
+Expansion is stopped. Resolve #1770 (a swallowed budget refusal permitted a
+later request) and #1771 (nested string-list guidance omitted from digests),
+then register a distinct retry condition and review it. Native control review
+also requires #1768 and #1769. No generation pair or evaluator canary has been
+accepted under this registration, and no old measurement is replaced.
+
 ## Scope and preservation
 
 Use existing Bridge2AI source documents and the newly authorized Kids First
