@@ -100,7 +100,8 @@ class TestItReachesTheGenerationPrompt(unittest.TestCase):
                 self.assertIn(term, self.text)
 
     def test_the_digest_stays_within_budget(self):
-        self.assertLess(len(self.text), 44_000)
+        # #1771 deliberately adds nested string-list validation obligations.
+        self.assertLess(len(self.text), 46_000)
 
 
 class TestItReachesTheJudge(unittest.TestCase):
