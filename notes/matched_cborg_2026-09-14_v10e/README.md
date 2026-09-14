@@ -1,6 +1,6 @@
-# v10e canary candidate — all launches await the cap decision
+# v10e canaries — CHORUS API rejected on source support
 
-This is an **unexecuted proposal**, following the
+This condition was prepared as an unexecuted proposal, following the
 [v10d budget stop](../matched_cborg_2026-09-14_v10d/stopped_canaries/CHORUS_api_rep1/README.md).
 The [dated continuation plan](../matched_cborg_budget_continuation_2026-09-14.md)
 retains both generation runtimes, full/core outputs, every evaluation style,
@@ -14,41 +14,55 @@ Its native overlay SHA256 is
 Public views replace machine paths with named placeholders and cannot be
 executed. Original launch files remain local, and all 48 generation
 instructions/initial requests have exact hashes in the launch inventory.
-The actual launch commit will be retained in an eventual attempt receipt.
+The first CHORUS API attempt started on 2026-09-14 at 18:02:01 UTC, using
+reviewed launch commit `238d20198c5da552b6f62c3592fb5cf8864ecca4`.
+It completed at 18:20:16 UTC, but independent source review rejected its
+unchanged originals. The [rejection record](rejected_canaries/CHORUS_api_rep1/README.md)
+documents the remaining status-scope and compatible-count findings in
+#1782 and #1792. All 38 original files are preserved. No later canary ran.
 
-## Pending approval
+Five requests settled for estimated **$3.747066**. Total additional-allocation
+spending is **$12.675972**, leaving **$187.324028** with no unresolved request.
+The $10 cap worked. Budget approval does not make this an accepted canary or
+authorize an automatic whole-attempt retry.
+
+## Budget approval
 
 [cap_proposal.json](cap_proposal.json) and the pinned
 [proposed_caps.json](proposed_caps.json) name exactly four exceptions:
 **$10 each for CHORUS API and native**, and **$15 each for Kids First API and
-native**, cumulatively per whole attempt. **The user has not approved these
-exceptions.** All other jobs retain $5, and the additional allocation remains
+native**, cumulatively per whole attempt. **The user explicitly approved these
+exceptions on 2026-09-14.** The [authorization record](budget_authorization_2026-09-14.json)
+retains the question, affirmative answer and exact registration identity. The
+original proposal JSON remains unchanged as the pre-decision record. All other
+jobs retain $5, and the additional allocation remains
 $200. The four canaries can together use at most $50 within that allocation.
 Higher ceilings provide admission room; they do not guarantee completion or
 predict cost. Related decisions: #1789 and #1781.
 
-No job may receive a launch receipt before explicit user approval of its
-changed cap. Preparation, public-code review, CI and a merge grant no such
-approval. After approval, require current pin/pricing/accounting checks,
+The budget approval permits one fresh attempt in each named canary cell;
+independent original-artifact acceptance remains required before advancing.
+Effort settings remain exactly as registered. Require current pin/pricing/accounting checks,
 independent registration review and exact-commit CI. Run CHORUS API first;
 independent original-artifact/source acceptance precedes CHORUS native, then
 Kids First API, then Kids First native. Stop on failure, retain originals and
 allow no automatic whole-attempt retry. Each native CLI cap matches its
 registration-qualified ledger cap.
 
-## Verified inputs and accounting
+## Prelaunch input and accounting verification
 
 The [offline preflight](offline_preflight.json) verified 461 registration pins,
 eight native-overlay pins, 3,241 historical files and 111 original files from
 the three rejected/incomplete conditions. All 32 jobs retain v10d's source,
 manifest, chunk and profile identities; generation implementation and shipped
-instructions are unchanged. Their 64 output directories are distinct and
-unused. These are operator checks, not proof that public reviewers inspected
+instructions were unchanged. Their 64 output directories were distinct and
+unused before launch. These are operator checks, not proof that public reviewers inspected
 unpublished originals independently.
 
 The frozen billing checkpoint retains **12 settled requests**, estimated
-**$8.928906**, and the v10d stop event. The new canonical ledger preserves
-those rows unchanged, leaving **$191.071094** of the same additional $200.
+**$8.928906**, and the v10d stop event. The new canonical ledger began by preserving
+those rows unchanged, leaving **$191.071094** of the same additional $200
+before the v10e launch.
 No pending/unknown charge is hidden and no allocation is reset. Catalogue
 estimates are not reconciled invoices.
 
