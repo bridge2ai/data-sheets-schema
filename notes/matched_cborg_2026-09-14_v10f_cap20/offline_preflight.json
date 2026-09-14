@@ -1,0 +1,33 @@
+{
+  "kind": "operator_budget_amendment_preflight_not_scientific_acceptance",
+  "checked_at": "2026-09-14T20:18:32.646805+00:00",
+  "registration_sha256": "104c9fedaa79e3ad3a4e03bdce0714dcbdbe6cbd23d73377fab6d6645c91c05d",
+  "native_overlay_sha256": "f43845a214773591c601de6613af9b1562be1cfbf16c028ad576f99e68359a24",
+  "base_registration_sha256": "93da075cb69c1850ba2451829323fe86086a0739864e66f68faf0300fd6f8232",
+  "original_pins_unchanged": 461,
+  "registered_pins_verified": 465,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 149,
+  "generation_and_evaluation_configuration_unchanged": true,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "launch_input_inventory_identical_to_base": true,
+  "prior_settled_rows_preserved": 17,
+  "estimated_cost_usd": "12.67597200",
+  "remaining_additional_budget_usd": "187.32402800",
+  "approved_canary_caps_usd": {
+    "CHORUS_api_rep1": 20,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "default_attempt_cap_usd": "5",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "4abf3c33c25d840adfb562dc362d9a1d71a421a7d5a07d5fa1c0daac9ddf3587",
+    "CHORUS_source_review_plan.json": "9203867c2c5b89e40ba35d3fc73094570b19d7cb92b1d6390b7af1436749e7d1"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "initial_admission_basis": "Inherited exact initial requests and count observations are unchanged; original admission file records the superseded proposed $10 cap. Effective CHORUS API cap is the approved $20 in this amendment. The client recounts before each request."
+}

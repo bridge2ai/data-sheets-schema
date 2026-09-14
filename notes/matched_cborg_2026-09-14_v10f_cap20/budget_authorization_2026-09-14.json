@@ -1,0 +1,27 @@
+{
+  "kind": "explicit_user_budget_authorization",
+  "recorded_at": "2026-09-14T20:17:51.632819+00:00",
+  "source": "User message in this Codex conversation on 2026-09-14",
+  "quoted_proposal": "Approve one replacement CHORUS API attempt, capped at $10, raising the combined canary ceiling to $53.75 within that $200?",
+  "user_response": "yes approve and capt at $20 instead",
+  "interpretation": "The replacement CHORUS API cap is $20 instead of $10. Other three canary caps remain unchanged. The combined ceiling increases by the same $10, within the unchanged $200 additional allocation.",
+  "base_registration_sha256": "93da075cb69c1850ba2451829323fe86086a0739864e66f68faf0300fd6f8232",
+  "approved_whole_attempt_caps_usd": {
+    "CHORUS_api_rep1": 20,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "maximum_new_four_canary_attempts_usd": "60.00",
+  "already_spent_from_original_four_canary_ceiling_usd": "3.74706600",
+  "maximum_combined_including_rejected_v10e_usd": "63.74706600",
+  "rounded_combined_ceiling_usd": "63.75",
+  "additional_allocation_cap_usd": "200.00",
+  "allocation_spent_before_replacement_usd": "12.67597200",
+  "allocation_remaining_before_replacement_usd": "187.32402800",
+  "other_attempt_cap_usd": "5",
+  "no_automatic_whole_attempt_retries": true,
+  "effort_changed": false,
+  "source_changes": false,
+  "scope": "One replacement CHORUS API attempt, then the three unrun generation canaries after sequential original-artifact acceptance. Each launch needs exact-registration review, passed CI and current input/model/accounting checks. A failed canary stops expansion. No evaluation or production batch is authorized by this budget amendment."
+}
