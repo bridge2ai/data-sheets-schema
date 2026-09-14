@@ -16,11 +16,13 @@ from tests.judge_fixtures import judge_reply
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def evaluator(tmp_path, *, context=None, mutate=None):
+def evaluator(tmp_path, *, context=None, mutate=None, model=None):
     calls = []
 
     def create(**request):
         calls.append(request)
+        if model and "opus-5" in model and "temperature" in request:
+            raise ValueError("temperature is deprecated for this model")
         user = request["messages"][0]["content"]
         contract = json.loads(user.split("```json\n")[1].split("\n```")[0])
         rubric = "rubric10" if "Rubric10" in request["system"] else "rubric20"
@@ -31,11 +33,35 @@ def evaluator(tmp_path, *, context=None, mutate=None):
                                content=[SimpleNamespace(text=json.dumps(result))])
 
     obj = D4DLLMEvaluator(
-        LLMEvaluationConfig(rubric_dir=ROOT / "data/rubric",
+        LLMEvaluationConfig(model=model or LLMEvaluationConfig.model,
+                            rubric_dir=ROOT / "data/rubric",
                             prompts_dir=ROOT / "src/download/prompts",
                             error_dir=tmp_path / "errors"),
         context=context, client=SimpleNamespace(messages=SimpleNamespace(create=create)))
     return obj, calls
+
+
+@pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
+@pytest.mark.parametrize("model", ["claude-opus-5", "google/claude-opus-5-high",
+                                   "claude-sonnet-4-5-20250929"])
+def test_model_sampling_capability_matches_request_record_and_report(tmp_path, rubric, model):
+    record = tmp_path / "external.yaml"
+    record.write_text("id: example:external\n")
+    obj, calls = evaluator(tmp_path, model=model)
+    result = obj.evaluate_file(record, "EXTERNAL_CLINICAL", "manual", rubric)[rubric]
+    supported = "opus-5" not in model
+    assert ("temperature" in calls[0]) is supported
+    temperature = 0.0 if supported else None
+    assert result["model"]["temperature"] == temperature
+    assert result["metadata"]["temperature"] == temperature
+    if not supported:
+        assert result["metadata"]["temperature_basis"] == "not applicable to this model"
+    report = tmp_path / "report.md"
+    obj.export_to_markdown({"external": {IDENTITY: {"project": "EXTERNAL_CLINICAL", "method": "manual"},
+                                         rubric: result}}, report, rubric)
+    assert ("temperature=0.0" in report.read_text()) is supported
+    if not supported:
+        assert "temperature=not applicable to this model" in report.read_text()
 
 
 @pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
