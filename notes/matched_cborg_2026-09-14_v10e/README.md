@@ -1,4 +1,4 @@
-# v10e canaries — budget approved on 2026-09-14
+# v10e canaries — CHORUS API rejected on source support
 
 This condition was prepared as an unexecuted proposal, following the
 [v10d budget stop](../matched_cborg_2026-09-14_v10d/stopped_canaries/CHORUS_api_rep1/README.md).
@@ -16,8 +16,15 @@ executed. Original launch files remain local, and all 48 generation
 instructions/initial requests have exact hashes in the launch inventory.
 The first CHORUS API attempt started on 2026-09-14 at 18:02:01 UTC, using
 reviewed launch commit `238d20198c5da552b6f62c3592fb5cf8864ecca4`.
-[Execution status](https://github.com/bridge2ai/data-sheets-schema/issues/1763#issuecomment-5668435222)
-tracks the pending original-output acceptance separately from budget approval.
+It completed at 18:20:16 UTC, but independent source review rejected its
+unchanged originals. The [rejection record](rejected_canaries/CHORUS_api_rep1/README.md)
+documents the remaining status-scope and compatible-count findings in
+#1782 and #1792. All 38 original files are preserved. No later canary ran.
+
+Five requests settled for estimated **$3.747066**. Total additional-allocation
+spending is **$12.675972**, leaving **$187.324028** with no unresolved request.
+The $10 cap worked. Budget approval does not make this an accepted canary or
+authorize an automatic whole-attempt retry.
 
 ## Budget approval
 
@@ -48,8 +55,8 @@ The [offline preflight](offline_preflight.json) verified 461 registration pins,
 eight native-overlay pins, 3,241 historical files and 111 original files from
 the three rejected/incomplete conditions. All 32 jobs retain v10d's source,
 manifest, chunk and profile identities; generation implementation and shipped
-instructions are unchanged. Their 64 output directories are distinct and
-unused. These are operator checks, not proof that public reviewers inspected
+instructions were unchanged. Their 64 output directories were distinct and
+unused before launch. These are operator checks, not proof that public reviewers inspected
 unpublished originals independently.
 
 The frozen billing checkpoint retains **12 settled requests**, estimated

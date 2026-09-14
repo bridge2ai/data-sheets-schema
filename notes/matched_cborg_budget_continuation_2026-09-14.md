@@ -33,6 +33,21 @@ Effort, source bytes and other registered controls remain unchanged. Acceptance
 and accounting gates still apply independently to each launch. Related decisions are
 #1789 and #1781.
 
+## First approved attempt outcome
+
+CHORUS API completed on 2026-09-14 at 18:20:16 UTC after five settled requests
+costing estimated $3.747066. Mechanical checks passed, but independent source
+review rejected the unchanged original full/core records: governing future
+tense was lost in planned data/privacy assertions (#1782), and compatible
+count observations were called a source conflict (#1792). See the
+[preserved rejection](matched_cborg_2026-09-14_v10e/rejected_canaries/CHORUS_api_rep1/README.md).
+
+All 38 original files remain preserved with verified local backups. No later
+canary or evaluator ran. Estimated spending from the additional allocation is
+now $12.675972, leaving $187.324028 with no unresolved charge. Fix and review
+the generic instructions before preparing a distinct condition; the rejected
+attempt cannot be edited, resumed or relabeled as an accepted replicate.
+
 The candidate pins the same generation implementation, complete source
 bytes, profiles, schemas and instruments as v10d, with new condition labels,
 output paths and an exact four-job cap mapping. No source is trimmed and no

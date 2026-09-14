@@ -1,0 +1,124 @@
+{
+  "registration_sha256": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2",
+  "launch_commit": "238d20198c5da552b6f62c3592fb5cf8864ecca4",
+  "job": "CHORUS_api_rep1",
+  "generation_status": "completed_pending_independent_review",
+  "source_acceptance": "reject",
+  "started_at": "2026-09-14T18:02:01.990099+00:00",
+  "finished_at": "2026-09-14T18:20:16.558688+00:00",
+  "findings": [
+    {
+      "id": "governing_future_scope",
+      "issue": 1782,
+      "severity": "blocking",
+      "paths": [
+        "sensitive_elements[3].sensitive_elements_present",
+        "sensitive_elements[3].sensitivity_details",
+        "is_deidentified.method",
+        "is_deidentified.deidentification_details",
+        "preprocessing_strategies[2].preprocessing_details",
+        "participant_privacy[0].anonymization_method"
+      ],
+      "finding": "The source award abstract scopes the relevant enumerated activities under a future commitment. The records assert present data elements and current privacy/processing instead. The audit recommends retaining a transformation fragment as attested without its governing future-tense context. Modality-specific imaging de-identification in progress does not establish dataset-wide application of the planned transformation or released social-determinant/geographic data.",
+      "full_only_paths": [
+        "participant_privacy[0].anonymization_method"
+      ]
+    },
+    {
+      "id": "ambition_to_absence",
+      "issue": 1782,
+      "severity": "additional_source_finding",
+      "paths": [
+        "addressing_gaps[1].response"
+      ],
+      "finding": "An ambition to harmonize data is converted into a present-tense claim that data are not harmonized across institutions; the goal does not establish current non-attainment."
+    },
+    {
+      "id": "compatible_count_observations",
+      "issue": 1792,
+      "severity": "additional_source_finding",
+      "paths": [
+        "source_caveats"
+      ],
+      "finding": "The record calls 50,000 admissions and a more-than-45,000 admissions observation a disagreement. The bound is compatible with 50,000, and the temporal framing differs. Retain qualified observations without manufacturing a source conflict."
+    }
+  ],
+  "prior_role_issue": {
+    "issue": 1783,
+    "observation": "The final records no longer attribute a de-identification role to text tokenization. This narrower correction does not cure the temporal-scope rejection."
+  },
+  "mechanical": {
+    "schema_problems": [],
+    "pair": {
+      "passed": true,
+      "errors": [],
+      "warnings": []
+    },
+    "core_derivation_byte_equal": true,
+    "live_provenance_ok": true,
+    "report_findings": [],
+    "report_claims_checked": 55,
+    "report_disposition_rows": 55,
+    "grounding_findings": [],
+    "receipt_findings": [],
+    "receipt_summary": "chunks 8/8 reviewed \u00b7 snippets 145/145 verified (2 bearing on no token of their value) \u00b7 slots 119/164 with a receipt (36 never receipted, 9 added after the receipt) (27 exempt) \u00b7 18 receipt path(s) reshaped by reconcile \u00b7 23 value(s) changed after the receipt",
+    "limitation": "Structural and lexical passes do not establish semantic source support or universal receipt coverage."
+  },
+  "billing": {
+    "settled_requests_in_attempt": 5,
+    "settled_requests_in_allocation": 17,
+    "attempt_estimated_cost_usd": "3.74706600",
+    "allocation_estimated_cost_usd": "12.67597200",
+    "remaining_allocation_usd": "187.32402800",
+    "unresolved_requests": 0,
+    "approved_attempt_cap_usd": 10,
+    "approved_four_canary_combined_cap_usd": 50,
+    "no_later_canary_launched": true
+  },
+  "preservation": {
+    "original_files": 38,
+    "backup": "Verified local copies, including full request/response evidence; raw payloads remain unpublished.",
+    "source_review_sha256": "c0edd8eeab07e64ae7eedbdf017f9f279e0e66e2da134d4ad8d41b34a55e52c4",
+    "mechanical_review_sha256": "cfc1a7995b27918519fa5874ac892ce04c44c7f599dd44f81b6d0ce092f72483",
+    "artifacts": {
+      "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/.CHORUS_d4d.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/CHORUS_d4d.yaml": "6b09137331a63181377f8fd2d07237a2065c42649bfc48477d0674524ddbae24",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/.CHORUS_d4d_core.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/.CHORUS_provenance.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/.CHORUS_reconciliation.md_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/CHORUS_api_usage_f67dabe1e642beb2.json": "ed4bb12f05fc7370e3e593703b94d74db728102bcfd1e6ab9a85fd4e4a4a7add",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/CHORUS_coverage_receipt.yaml": "ecf3c8788257604f3425a075947eab22dc59f438e585589118138613ffee89d9",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/CHORUS_d4d_core.yaml": "9a8d5ec5c1ef35af516d82645397a9a8d7be205e79575eb082f299f886193f6f",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/CHORUS_provenance.yaml": "5e6856a6802d135522c786c0fdd3988a808de539b464f5c4f38178bd2368c0db",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/CHORUS_reasoning.jsonl": "e57d393deabb5c680fc7aaa1018930cd400a0d890b8846c6b252f9ff7ed3e4d4",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/CHORUS_reconciliation.md": "8be45d22717da62fbb8bdf81bb0536a794cf9c5670108c207983df2aa3974f5f",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_audit.json": "b288e29accc8340c051dc0bfafc90e525cd6ca92fc49b25bf5df2590106fb939",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_core.yaml": "b2f7d5dd3da64c1140c08d4642abcb0cc70014e0e1510612be2ff1c003ae84a9",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_coverage_receipt.yaml": "ecf3c8788257604f3425a075947eab22dc59f438e585589118138613ffee89d9",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_full.yaml": "bfc5b15ed30271f9e2801189c351f5605e5d0c814418f54517de306758c80a8d",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_full_response_bc6d81d19ced488e856eb9906a12b0fe.txt": "ae1b493ec5912df504d311481a3716e5d438197e8336717bb1055d54d9dab006",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_reconcile_core.yaml": "9a8d5ec5c1ef35af516d82645397a9a8d7be205e79575eb082f299f886193f6f",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_reconcile_full.yaml": "6b09137331a63181377f8fd2d07237a2065c42649bfc48477d0674524ddbae24",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_report.md": "34b919225c777495d4b8642b5da66f5c4a5a6a25e86427bdefa8da2cdfd07814",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_report_before_regate.md": "34b919225c777495d4b8642b5da66f5c4a5a6a25e86427bdefa8da2cdfd07814",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10e-chorus_rep1/intermediate/CHORUS_snapshot_index.json": "491ecc7c6185287d1287dfba79df74c5127cddc9bd83067c9729d5ccd0a1abd3",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/070ee6dc58d54ee0af6a907b784fcd0a/admission.json": "a4932f2de75c512a6a3b7caeb751cd54604e43a82291883482e1a74603f11b91",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/070ee6dc58d54ee0af6a907b784fcd0a/request.json": "fe1a4f0640dfee189129084dac68a6769940373f4626af0e208337dabb3408d9",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/070ee6dc58d54ee0af6a907b784fcd0a/response.json": "ff15ee9586a8d2f69ed41019f47bc789ed73a24f4ef49322f2c0e085cfa25feb",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/47ced42c98004655824b82a7e959a2a0/admission.json": "d43b7b90e3bdcb65d614186061442294415e720cf4ce02a0b552d20500ba0972",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/47ced42c98004655824b82a7e959a2a0/request.json": "313bcaac6753f22b46aeddd065ef16930332f8f8260d1b7ed9a8b53ebcee671a",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/47ced42c98004655824b82a7e959a2a0/response.json": "d747cec012783fe7e8ebde3ad72e753e1e0a5286233aa5e1383d5d33f43254cc",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/9ec8253bc06d4b4baab9a7c68417eb5e/admission.json": "74cc9a8aadfe52eeb57fa639ad7da3cab8a3f5b958bf4ef3847f84c7d8bd2e28",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/9ec8253bc06d4b4baab9a7c68417eb5e/request.json": "f3b49127ebfa4a3588aa178c7bded51ca1d89f5b4cb56eba8df6e21ac9264a40",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/9ec8253bc06d4b4baab9a7c68417eb5e/response.json": "fa38b8565ba35b38074763a2aa21f089b4bef02c2a35955f8c5eacaff46a4643",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/b07f971a18454048a45ca0c87a426ccf/admission.json": "5ee7470487358bacc4ed4787c6c91ed36a7aae1e38d40f1e514e0aedd1f61c22",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/b07f971a18454048a45ca0c87a426ccf/request.json": "691b371b21d27903bd932c1842d1df5c2010442058cb8d8474ce9db563d9329d",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/b07f971a18454048a45ca0c87a426ccf/response.json": "8c91308f6496c3a9b714c2f5b22035f47a7463ccf9b70a4c2d3e0a34ea542e23",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/d844cbe78ba2463d9983a2809b4bb924/admission.json": "2f6395b39017a4fd405469954c000d631a80bacfdb0c65ee7db2f2df77f98d03",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/d844cbe78ba2463d9983a2809b4bb924/request.json": "6f5f52421a6de27c3ffa5d96f6bc212136d137401765eb34806565f81af9ea35",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/requests/d844cbe78ba2463d9983a2809b4bb924/response.json": "90af8c9ba1743ef15d0e55838c45276ecf47dde98aa650885a6b4e719829d5f9",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/result.json": "23fba21984b636fed752494052a50993b9fe861c46ce28edb31a1107c5ad6e95",
+      "notes/matched_cborg_2026-09-14_v10e/attempts/CHORUS_api_rep1/started.json": "aa98a9e65bc839fd6a80700c20ac226e1399cc3a20c64058a60daca294444900"
+    }
+  }
+}
