@@ -86,14 +86,15 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         self.assertEqual(british_forms('write it exactly as "the programme centre"'), [])
 
     def test_the_sent_surfaces_are_the_request_text(self):
-        """Lifting the literals into constants must not change a byte of
-        what is sent — pinned exactly, trailing newlines included, since
-        these constants are now the only definition (#1151 round 2, S2)."""
+        """Pin authored request surfaces exactly, including trailing newlines
+        (#1151 round 2, S2). Deliberate instrument changes update this snapshot;
+        historical condition-prompt pins are checked separately below."""
+        import hashlib
         from data_sheets_schema import api_runner
-        self.assertEqual(api_runner.PHASE_SYSTEM,
-                         "You generate Datasheets-for-Datasets records. The declared input bundle is your "
-                         "only source of dataset facts. The schema digest defines structure, never content. "
-                         "Never consult a previously generated D4D record.")
+        # #1794 deliberately expands the system rules and registers fresh
+        # canary inputs. Retain an exact-byte guard for the reviewed surface.
+        self.assertEqual(hashlib.sha256(api_runner.PHASE_SYSTEM.encode()).hexdigest(),
+                         "4cd53ad8c9b21790e7a65817eb966d14b756dd9824263405436a614d25d168ac")
         self.assertEqual(api_runner.CHUNK_MARKER_NOTE,
                          "# Chunk markers: a line of the form [cNNN] opens each chunk; the markers are not "
                          "part of the bundle's text.\n\n")
