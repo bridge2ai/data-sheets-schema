@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-09-14T18:01:38.442487+00:00",
+  "kind": "explicit_user_budget_authorization",
+  "source": "User message in this Codex conversation on 2026-09-14",
+  "quoted_proposal": "Approve $10 per CHORUS attempt and $15 per Kids First attempt for the four API/agentic generation canaries\u2014at most $50 combined, within the existing $200 total?",
+  "user_response": "yes",
+  "registration_sha256": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2",
+  "approved_whole_attempt_caps_usd": {
+    "CHORUS_api_rep1": 10,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "maximum_combined_canary_cost_usd": 50,
+  "additional_allocation_cap_usd": 200,
+  "other_attempt_cap_usd": 5,
+  "scope": "One fresh attempt in each of the four registered generation canary cells. Original-artifact acceptance gates and no automatic whole-attempt retry remain binding.",
+  "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
+  "effort_changed": false,
+  "private_authorization_sha256": "124f702bde8f0161e32a6a7441c514d7a8d591cc58372de503155924b1c208a1",
+  "launch_review_sha256": "f52f033b7dacbb373f1798429a9bfc7ab48331f8eb8c2f677ca7ce9a9e1bb8d9",
+  "reviewed_launch_commit": "238d20198c5da552b6f62c3592fb5cf8864ecca4",
+  "ci_url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/34827826496",
+  "scientific_acceptance": "Not granted by budget approval. Each original canary requires independent acceptance."
+}

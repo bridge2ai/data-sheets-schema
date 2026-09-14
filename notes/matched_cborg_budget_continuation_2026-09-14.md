@@ -1,4 +1,4 @@
-# Canary budget continuation proposal — 2026-09-14
+# Canary budget continuation — approved 2026-09-14
 
 The v10d CHORUS API canary stopped before reconciliation at the approved
 $5 whole-attempt cap. Its two completed calls cost $2.606820; reconciliation
@@ -8,26 +8,29 @@ registered and admitted no later request. Preserve the
 and all earlier measurements. It does not count as an accepted canary or
 production replicate. #1782/#1783 still need a complete fresh source review.
 
-## Concrete decision awaiting user approval
+## Approved budget decision
 
-The [v10e candidate](matched_cborg_2026-09-14_v10e/README.md) proposes these
+The [v10e candidate](matched_cborg_2026-09-14_v10e/README.md) registers these
 **cumulative whole-attempt** caps for one fresh attempt in each canary cell:
 
-| Generation canary | Proposed cap |
+| Generation canary | Approved cap |
 |---|---:|
 | CHORUS API | $10 |
 | CHORUS native agentic | $10 |
 | Kids First API | $15 |
 | Kids First native agentic | $15 |
 
-**These four exceptions are not approved.** All other attempts retain $5;
-the additional allocation remains $200. The four proposed attempts can
+**The user approved these four exceptions on 2026-09-14** in response to
+the exact $10/$15/four-canary/$50/$200 question. The
+[authorization record](matched_cborg_2026-09-14_v10e/budget_authorization_2026-09-14.json)
+preserves that decision and the registration digest. All other attempts retain $5;
+the additional allocation remains $200. The four approved attempts can
 together use at most $50, including every phase, conditional request and
 native model/tool turn. Higher ceilings provide admission room, not a
 guarantee of completion or a spending forecast. The native attempts remain
-unmeasured. No job receives a launch receipt before the user's explicit
-decision. This proposal changes the earlier $5 limit, so that decision is
-required despite the unchanged total allocation. Related decisions are
+unmeasured. This approval changes the earlier $5 limit only for the four named attempts.
+Effort, source bytes and other registered controls remain unchanged. Acceptance
+and accounting gates still apply independently to each launch. Related decisions are
 #1789 and #1781.
 
 The candidate pins the same generation implementation, complete source
