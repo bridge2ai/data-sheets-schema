@@ -84,3 +84,10 @@ shared pipeline behavior are introduced.
 
 See the [dated plan](../matched_cborg_continuation_canaries_2026-09-15.md)
 and [sequence tracking #1763](https://github.com/bridge2ai/data-sheets-schema/issues/1763).
+
+## Recorded outcome — 2026-09-15
+
+The CHORUS API attempt completed, with all accounting settled, but was
+[rejected by independent source review](CHORUS_api_source_rejected.md).
+All originals remain unchanged. No downstream job was launched. See the
+dated continuation plan for the source and controller fixes required next.

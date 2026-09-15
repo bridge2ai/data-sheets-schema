@@ -1,7 +1,10 @@
 # Matched generation and evaluation continuation — 2026-09-15
 
 The user resolved the interrupted v10n charge confirmation. Reconciliation
-preserves the original pending ledger and stopped artifacts. The native final
+preserves the original pending ledger and stopped artifacts. The subsequent
+v10o CHORUS API canary completed with settled accounting but was
+[rejected by source review](matched_cborg_2026-09-15_v10o/CHORUS_api_source_rejected.md).
+All 41 originals are preserved. No downstream scientific job has launched. The native final
 checker correction #1846 is merged after independent review and required CI.
 The provider interruption itself remains unexplained (#1849).
 
@@ -11,11 +14,13 @@ v2, profiles, schemas, model and evaluator definitions remain fixed. Native
 final validation now selects the matching protocol. Retain the pinned native
 runtime despite an unrelated update to the local alias.
 
-1. Complete independent registration review and required CI; recheck frozen
-   inputs, historical preservation, current provider capabilities, complete
-   accounting, approved limits and unused output paths. Admit only one new
-   CHORUS API attempt, including live token counting. No automatic retry or
-   resumption of a stopped identity.
+1. Resolve the source-attribution and applied-status failures (#1815/#1782) and
+   enforce the existing receipt floors in both controllers (#1854). The explicit
+   provider-context control (#1852) is merged after independent review and CI. Register
+   any new condition with both-arm controls, current code and unchanged source
+   identities; review it and recheck historical preservation, provider settings,
+   accounting, limits and unused paths before any new paid attempt. No
+   automatic retry or resumption of a stopped or rejected identity.
 2. Review the actual original full D4D, derived core, audit, source grounding,
    qualifiers, provenance, receipts and report. Accept only after the complete
    scientific criteria pass. Then run matched native CHORUS and Kids First
@@ -45,4 +50,6 @@ CBORG and does not depend on Aurelian.
 Detailed accounting and provider identifiers remain local. The existing
 allocation, combined canary ceiling and per-attempt limits remain binding.
 Unknown charges retain reservations and stop execution; a failed canary stops
-expansion. No new paid attempt has launched at this plan's preparation.
+expansion. The v10o API attempt is complete and rejected; no new paid attempt
+is admitted by this plan update. Source corrections and unchanged-canary
+acceptance remain necessary after the mechanical fixes.

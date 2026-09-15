@@ -15,7 +15,7 @@ from budgeted_cborg import BudgetStop, open_ledger, attempt_identity, write_new
 from budgeted_cborg import cborg_client, provider_context_headers, provider_context_evidence
 from native_proxy import NativeProxy
 from prepare_registration import spec_for
-from run_api_canary import verify, verify_history, sha
+from run_api_canary import verify, verify_history, sha, check_canary_receipts
 
 
 def now():
@@ -186,6 +186,10 @@ def main():
         from data_sheets_schema import api_runner, agentic_observed
         problems=api_runner.validate_outputs(spec)
         pair=api_runner.pair_consistency(spec)
+        receipt_check=check_canary_receipts(spec,job['input_identity'])
+        receipt['receipt_acceptance']=receipt_check
+        if not receipt_check['passed']:
+            problems=list(problems)+['coverage receipt acceptance failed']
         if spec.render_version >= 9:
             evidence = native_evidence_check(spec)
             receipt['evidence_assertions'] = evidence
