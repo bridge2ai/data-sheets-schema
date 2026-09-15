@@ -480,6 +480,14 @@ allowed to prefer a value merely because the full record already states it.
    - verify repeated identifiers, versions, dates, counts, licenses, access
      rules, people, and organizations are internally consistent;
    - keep historical values only when their historical scope is explicit;
+   - check structured relationships as well as literal values: pair every
+     count with the source's counted unit and its owning instance type;
+     preserve table row/column ownership; verify the subject and
+     responsibility asserted by each role container and enum. A correct
+     caveat cannot justify an unsupported type or role. Where the registered
+     table text is ambiguous, omit the unestablished mapping and state the
+     limitation. Inspect organizational quantities and other contextual
+     facts under governing headings too;
    - inspect every occurrence of a claim about availability, deployment,
      collection, processing or privacy, including prose and nested list
      entries. Check every member of a composite inventory separately: an
@@ -529,6 +537,12 @@ allowed to prefer a value merely because the full record already states it.
    supported presence boolean to false. Recheck negative current-state
    claims too: an aim to create or improve a resource does not prove that
    comparable resources are absent.
+   Recheck count/type/unit relationships, table column ownership and typed
+   roles in unchanged entries as well as repairs. Remove an unsupported
+   structural assertion instead of retaining it with a disclaimer, while
+   preserving independently supported neutral facts in appropriate text.
+   Do not borrow a schema example or an affiliation to fill a different
+   entity type. Keep each clause attached to the source that supports it.
    Recheck the subject, release/date, operational status and field
    meaning of every added or changed assertion against its source passage;
    a repair must not introduce a stronger availability or privacy claim.
@@ -630,6 +644,14 @@ the repair of what the checkers find.
    sections: source/provenance findings, the derivation facts the Phase 2
    command printed, corrections, related-content review, files changed, all
    commands, and final results. If nothing needed correcting, say so explicitly.
+
+   Compute finding totals and severity subtotals from the actual recorded
+   finding entries, using local arithmetic, before writing summary numbers.
+   If a prose audit summary disagrees with those entries, the entries govern.
+   Do not infer zero from missing or malformed audit data. Recheck these
+   totals after any report repair. The API report phase receives a separate
+   computed-count block from its structured audit; this native arm must
+   likewise count its own recorded findings rather than copy a prose total.
 
    **Two sections have a fixed shape.** The report-claims checker
    (`d4d provenance backfill-checks`; #546) parses exactly two claim forms,

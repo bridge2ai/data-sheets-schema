@@ -1,0 +1,38 @@
+{
+  "reviewed_at": "2026-09-14T23:31:30.907624+00:00",
+  "reviewer": "Codex operator with independent public engineering review and original-input preflight",
+  "registration_sha256": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729",
+  "verdict": "approve",
+  "ci_conclusion": "success",
+  "ci_head": "94ad1b403ce5ee6c6830cc986ccab321fcfbc93c",
+  "ci_url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/34898369189",
+  "allowed_jobs": [
+    "CHORUS_api_rep1"
+  ],
+  "effective_attempt_cap_usd": "16.51",
+  "additional_cap_usd": "200",
+  "prior_settled_cost_usd": "16.16391800",
+  "remaining_additional_budget_usd": "183.83608200",
+  "explicit_user_authorization_sha256": "39abcc4b1016300004d39b1235ee2886cf53f7893b16ed1a4d19814a0a225699",
+  "authorization_scope": "Explicit user approval after automatic-review rejection for one additional CHORUS API attempt at $16.51. Later canaries require sequential original-artifact acceptance.",
+  "review_links": [
+    "https://github.com/bridge2ai/data-sheets-schema/pull/1798#issuecomment-5671023422",
+    "https://github.com/bridge2ai/data-sheets-schema/pull/1798#issuecomment-5671041645"
+  ],
+  "authorization_source": "Latest user response: yes approve, to the explicit one-additional-attempt question after the rejected launch.",
+  "after_launch": "Independently review unchanged original artifacts and every frozen source before accepting. Failed canary stops expansion; no automatic whole-attempt retry.",
+  "kind": "public_non_executable_launch_evidence",
+  "original_receipt_sha256": "667f27914ecdd09a3a9085f914ffcf3277b805bd66a3f3596f34e783b9fe6b1b",
+  "started_at": "2026-09-14T23:31:53.860112+00:00",
+  "actual_launch_commit": "94ad1b403ce5ee6c6830cc986ccab321fcfbc93c",
+  "evidence": {
+    "d4d-v10g-ci-current.json": "89fa1ea159ab8d441c04df04427290958071c571ed98427d6993ddaa9cded26b",
+    "d4d-v10g-source-review-r1.md": "138962566a6581d3657569bb4e0c656cc9d00d6f805414ed94a612a5915156ff",
+    "d4d-v10g-registration-review-r1.md": "1dce870ae879ba48d07d83946790515e187de381b278bac41376b597f7a5d955",
+    "d4d-v10g-live-model-check.json": "04ad602a74330a12bcf4ab14d3f252d2b33475cd2a09f3629f6a4be474829bf0",
+    "user_authorization_2026-09-14.json": "39abcc4b1016300004d39b1235ee2886cf53f7893b16ed1a4d19814a0a225699",
+    "CHORUS_source_review_plan.json": "e3cb1446a14f53e098a6e1d7b07aebb9e8f2c20b46ba1f0273ed17f9a945f92a",
+    "native_overlay.json": "9a008cc8f2139c40dc72f8ebbcfa004f29730516efdb01ba269c97e0438c07a5",
+    "offline_preflight.json": "4b78733b294758b4763c113eb422565215aca165ce97753dd5ba2f2412443974"
+  }
+}

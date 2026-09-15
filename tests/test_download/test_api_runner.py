@@ -235,6 +235,41 @@ class TestPhaseAssembly(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_phase(spec(), "nonsense", carry={})
 
+    def test_report_counts_entries_instead_of_the_audits_wrong_summary(self):
+        from data_sheets_schema.api_runner import AUDIT_COUNTS_HEADER
+        findings = [{"severity": severity, "record": "full", "slot": f"field{i}",
+                     "issue": "unsupported"}
+                    for i, severity in enumerate([" HIGH ", "high", "low", None])]
+        audit = json.dumps({"findings": findings, "summary": "One low finding."})
+        carry = {"Audit findings": audit}
+        request = build_phase(spec(), "report", carry=carry)
+        blocks = request.messages[0]["content"]
+        totals = [part["text"][len(AUDIT_COUNTS_HEADER):] for part in blocks
+                  if part["text"].startswith(AUDIT_COUNTS_HEADER)]
+        self.assertEqual(len(totals), 1)
+        self.assertEqual(json.loads(totals[0]),
+                         {"total": 4, "by_severity": {"high": 2, "low": 1, "unclassified": 1}})
+        self.assertEqual(carry["Audit findings"], audit)
+        self.assertTrue(any(part["text"].endswith(audit) for part in blocks))
+        self.assertEqual(blocks[-1]["text"], PHASE_INSTRUCTIONS["report"])
+        other_phase = build_phase(spec(), "reconcile_full", carry=carry)
+        self.assertFalse(any(part["text"].startswith(AUDIT_COUNTS_HEADER)
+                             for part in other_phase.messages[0]["content"]))
+
+    def test_missing_or_malformed_audit_is_not_reported_as_zero(self):
+        from data_sheets_schema.api_runner import AUDIT_COUNTS_HEADER, audit_counts
+        for audit in (None, "", "not JSON", "[]", "{}",
+                      '{"findings": null, "summary": "none"}',
+                      '{"findings": [false], "summary": "none"}'):
+            with self.subTest(audit=audit):
+                self.assertIsNone(audit_counts(audit))
+                carry = {} if audit is None else {"Audit findings": audit}
+                request = build_phase(spec(), "report", carry=carry)
+                self.assertFalse(any(part["text"].startswith(AUDIT_COUNTS_HEADER)
+                                     for part in request.messages[0]["content"]))
+        self.assertEqual(audit_counts('{"findings": [], "summary": "No findings."}'),
+                         {"total": 0, "by_severity": {}})
+
 
 class TestPlan(unittest.TestCase):
     def test_plan_needs_no_api_key(self):

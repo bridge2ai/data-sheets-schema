@@ -177,6 +177,19 @@ to every project:
   absence or lack of comparable resources needs affirmative source support,
   not just a goal to create or improve something.
 
+  Preserve the relationships that make a value a fact: a count's source
+  unit and owning instance type, a table cell's row and column, and the
+  role asserted by a container, slot or enum. A correct number or name
+  attached to a different type or role is a different claim. Schema
+  examples and affiliations cannot supply that relationship. If extracted
+  table structure is ambiguous, omit the unsupported mapping and state the
+  limitation; proximity or similar headings are not evidence of cell
+  ownership. A prose disclaimer does not negate an unsupported structured
+  role: remove that role while preserving supported neutral facts in an
+  appropriate text field. Governing headings also apply to organizational
+  quantities and other contextual claims, not only data content. Keep each
+  clause's source identity when combining evidence from several sources.
+
 - **A figure the record derives — a sum, difference, fraction, count — is
   stated as the record's own computation with its inputs named, never as a
   figure a source reported** (v8, R3); it is receipted at its own path by
