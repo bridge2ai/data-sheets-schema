@@ -14,9 +14,9 @@ v2, profiles, schemas, model and evaluator definitions remain fixed. Native
 final validation now selects the matching protocol. Retain the pinned native
 runtime despite an unrelated update to the local alias.
 
-1. Resolve the source-attribution and applied-status failures (#1815/#1782),
-   enforce the existing receipt floors in both controllers (#1854), and finish
-   review and CI for the explicit provider-context control (#1852). Register
+1. Resolve the source-attribution and applied-status failures (#1815/#1782) and
+   enforce the existing receipt floors in both controllers (#1854). The explicit
+   provider-context control (#1852) is merged after independent review and CI. Register
    any new condition with both-arm controls, current code and unchanged source
    identities; review it and recheck historical preservation, provider settings,
    accounting, limits and unused paths before any new paid attempt. No
