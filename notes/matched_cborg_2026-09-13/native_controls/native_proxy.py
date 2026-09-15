@@ -78,9 +78,17 @@ class Completion:
 
 class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
-                 provider_key, base_url, upstream=None):
+                 provider_key, base_url, upstream=None, request_headers=None):
         if base_url != "https://api.cborg.lbl.gov":
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
+        if request_headers is not None and not isinstance(request_headers, dict):
+            raise BudgetStop("native provider headers must be a mapping")
+        self.request_headers = dict(request_headers) if request_headers is not None else {}
+        if self.request_headers not in ({}, {"x-headroom-bypass": "true"}):
+            raise BudgetStop("unregistered native provider headers")
+        sdk_headers = httpx.Headers(getattr(sdk, "default_headers", {}))
+        if sdk_headers.get("x-headroom-bypass") != self.request_headers.get("x-headroom-bypass"):
+            raise BudgetStop("native token counting and generation context policies differ")
         self.token = secrets.token_urlsafe(32)
         self.key, self.base_url = provider_key, base_url
         self.state = threading.Condition(threading.RLock())
@@ -208,6 +216,8 @@ class NativeProxy:
                     ticket, folder = owner.messages.prepare(request)
                     owner.capture(folder / "native_request.json", raw)
                     headers = {"x-api-key":owner.key, "content-type":"application/json", "accept":"text/event-stream"}
+                    # Set by the registered controller; the child cannot override it.
+                    headers.update(owner.request_headers)
                     for name in ("anthropic-version", "anthropic-beta"):
                         if self.headers.get(name):
                             headers[name] = self.headers[name]

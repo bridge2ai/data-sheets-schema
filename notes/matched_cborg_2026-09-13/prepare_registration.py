@@ -191,6 +191,7 @@ def main():
         "code_commit_basis": "source implementation base; experiment controllers and inputs are identified by pinned_files; the actual launch commit is retained in the attempt receipt",
         "python": sys.executable, "python_version": sys.version,
         "model": selected_model, "provider_base_url": "https://api.cborg.lbl.gov",
+        "provider_context_policy": "headroom_bypass_v1",
         "claude_version": subprocess.check_output(["/Users/marcin/.local/bin/claude", "--version"], text=True).strip(),
         "budget": {"additional_usd": 200, "per_attempt_usd": 5, "authorization": "user: +$200, 2026-09-13",
                    "ledger_path": str(output / "billing.json"),
