@@ -1,0 +1,14 @@
+{
+  "scope": "public engineering/registration metadata only",
+  "verdict": "approve_unexecuted_proposal",
+  "material_findings": 0,
+  "registration_sha256": "e17dcc3edfe9b69045488e882f89750c3f5713aa37df8466b1c5e1d4e67d6d7d",
+  "native_overlay_sha256": "86d929c84119ebf70e885c16eb454862e590b8d2e7881687baea5a1e88a55d78",
+  "review_log_sha256": "71a3414714e3c81c4245fde7b03daa443485e4156f4c9034ac603bc8e1d34f9b",
+  "limitations": [
+    "No private-source or scientific acceptance",
+    "No launch authorization",
+    "Final-commit CI required",
+    "Live token counting and requests await explicit additional-attempt approval"
+  ]
+}

@@ -95,7 +95,11 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
         if not stored.get("checked"):
             continue
         assert str(path) in origins, f"unregistered checked report: {path}"
-        fresh = bc.compute(path, only={"report_claims"}, declared=declared, ranges=ranges)["report_claims"]
+        # These are frozen v7 measurements, not a request to replace them
+        # with the current v8 reading (#1808). Keep every field comparable.
+        assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT_V7
+        fresh = bc.compute(path, only={"report_claims"}, declared=declared, ranges=ranges,
+                           report_claims_version=7)["report_claims"]
         assert_measurement_matches(stored, fresh, str(path), origins[str(path)])
         blocks.append(fresh)
         seen.add(str(path))

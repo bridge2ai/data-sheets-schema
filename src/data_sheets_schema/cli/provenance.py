@@ -697,12 +697,24 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             # still reproduce. Only this candidate becomes unavailable.
             pass
     for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations, scoped_chunks in product(
-            (0, -1, 1, -2, 2), (7, 6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
+            (0, -1, 1, -2, 2), (8, 7, 6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
             destination_choices, (True, False)):
         if render_version == 1 and selected_profile and not schema_block.get("profile"):
             continue  # renderer 1 cannot prove a profile (#1678)
         if scoped_chunks and (render_version < 5 or runtime not in {"Claude Code", "Codex CLI"}):
             continue
+        api_headers = {}
+        if render_version >= 8 and runtime not in {"Claude Code", "Codex CLI"}:
+            # Recover displayed values from the recorded execution, never
+            # today's config. The final instruction hash must still agree.
+            model = data.get("model") or {}
+            if not isinstance(model, dict) or not model.get("model") or "temperature" not in model:
+                continue
+            from data_sheets_schema.api_runner import request_header_values
+            api_headers = {"api_header_values": request_header_values({
+                "name": model["model"], "temperature": model["temperature"],
+                "temperature_applies": model["temperature"] is not None,
+                "effort": model.get("reasoning_effort")})}
         # This is only a candidate: current installed paths may recover an
         # unrecorded renderer6 toolchain only if the complete original hash
         # agrees. A different installation cannot silently reinterpret it.
@@ -718,6 +730,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             "manifest": str(selected_manifest) if selected_manifest is not None else None,
             "manifest_line": arm_header if own_header else RunSpec.header_for_manifest(selected_manifest),
             "render_version": render_version,
+            **api_headers,
             **({"chunk_check_uses_manifest": True} if scoped_chunks else {}),
             **({"agentic_artifact_paths": destinations} if destinations is not None
                and render_version >= 5 and runtime in {"Claude Code", "Codex CLI"} else {}),

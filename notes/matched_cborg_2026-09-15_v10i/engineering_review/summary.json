@@ -1,0 +1,10 @@
+{
+  "scope": "public engineering diff and synthetic fixtures only; no scientific payloads or model ratings",
+  "round1": "one high finding filed as #1809 and fixed",
+  "round2": "approve; no material findings",
+  "static_review_limit": "Reviewer did not run tests or infer scientific acceptance",
+  "logs_sha256": {
+    "1": "699759fff896f15827d43410a6dc832c63ed39e0823bd6820ed94d58533bf832",
+    "2": "8e7ab19dbbcc4a535597ff812985fbae376706f9cc28e88ddbc0d01f6a2b7678"
+  }
+}

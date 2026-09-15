@@ -183,13 +183,13 @@ class CorpusTest(unittest.TestCase):
             self.skipTest("no records in this checkout")
         self.assertEqual(thin, [])
 
-    def test_every_checked_report_block_in_the_corpus_is_under_one_instrument(self):
-        """A half-finished backfill at the next revision would leave the
-        corpus straddling two instruments with every other test green, and
-        a sum over `rows_by_record` would silently mix two readings (#1139
-        review, S3). Every checked block carries the current instrument and
-        the tally with its fixed keys, summing to `disposition_rows`."""
-        from data_sheets_schema.report_claims import RECORD_COLUMN_VALUES, REPORT_CLAIMS_INSTRUMENT
+    def test_historical_report_blocks_keep_their_registered_instrument(self):
+        """The preserved corpus is one v7 measurement set (#1139, #1808).
+
+        A newer checker must not silently replace that set or mix readings
+        in its aggregate. New measurements belong beside these originals.
+        """
+        from data_sheets_schema.report_claims import RECORD_COLUMN_VALUES, REPORT_CLAIMS_INSTRUMENT_V7
         off = []
         seen = 0
         for p in sorted(self.BASE.rglob("*_provenance.yaml")):
@@ -199,7 +199,7 @@ class CorpusTest(unittest.TestCase):
                 continue
             seen += 1
             rows = block.get("rows_by_record")
-            if block.get("instrument") != REPORT_CLAIMS_INSTRUMENT:
+            if block.get("instrument") != REPORT_CLAIMS_INSTRUMENT_V7:
                 off.append(f"{p}: instrument {str(block.get('instrument'))[:40]!r}")
             elif not isinstance(rows, dict) or tuple(rows) != RECORD_COLUMN_VALUES:
                 off.append(f"{p}: rows_by_record keys {list(rows) if isinstance(rows, dict) else rows}")
