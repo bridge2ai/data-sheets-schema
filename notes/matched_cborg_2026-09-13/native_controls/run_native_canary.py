@@ -33,14 +33,14 @@ def verified_executable(overlay):
 
 def native_evidence_check(spec):
     """Recheck the exact originals using the generation's selected protocol."""
-    from data_sheets_schema.evidence_assertions import check_files
+    from data_sheets_schema.evidence_assertions import check_files, protocol_for_renderer
     evidence_dir = spec.metadata_dir / 'evidence'
     return check_files(audit=evidence_dir/'audit.json', bundle=spec.bundle,
         manifest=spec.chunk_manifest, report=spec.report_path,
         artifacts={'original_full':evidence_dir/'original_full.yaml',
                    'original_core':evidence_dir/'original_core.yaml',
                    'final_full':spec.full_path,'final_core':spec.core_path},
-        protocol_version=2 if spec.render_version >= 11 else 1)
+        protocol_version=protocol_for_renderer(spec.render_version))
 
 
 def terminate_group(process):

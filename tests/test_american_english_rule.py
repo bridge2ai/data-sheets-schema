@@ -71,7 +71,7 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         # map is the regression this guard exists to catch. Nine phase
         # instructions, four versioned phase contracts, the layout, and
         # eleven authored surfaces.
-        self.assertEqual(len(surfaces), 25, sorted(surfaces))
+        self.assertEqual(len(surfaces), 30, sorted(surfaces))
         for name, text in surfaces.items():
             with self.subTest(surface=name):
                 found = british_forms(text, exempt_quotes=False)

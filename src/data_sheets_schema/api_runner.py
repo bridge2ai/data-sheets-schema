@@ -522,7 +522,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -908,9 +908,13 @@ def assembly_digest(render_version: int = 8) -> dict[str, Any]:
     """
     instructions = {phase: phase_instruction(phase, render_version)
                     for phase in PHASE_INSTRUCTIONS}
-    basis = json.dumps([ASSEMBLY_LAYOUT, instructions, REGATE_HEADERS], sort_keys=True)
+    layout = ASSEMBLY_LAYOUT
+    if render_version >= 12:
+        from data_sheets_schema.source_review import INVENTORY_HEADER
+        layout += "; hash-bound source-review inventory before audit/report instruction: " + INVENTORY_HEADER
+    basis = json.dumps([layout, instructions, REGATE_HEADERS], sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
-            "layout": ASSEMBLY_LAYOUT}
+            "layout": layout}
 
 
 def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
@@ -1114,7 +1118,8 @@ def resolve_prompt(spec: RunSpec) -> str:
         body = api_header_instructions(body, api_values)
     if spec.render_version >= 9:
         from data_sheets_schema.resources import resource_path
-        protocol = 2 if spec.render_version >= 11 else 1
+        from data_sheets_schema.evidence_assertions import protocol_for_renderer
+        protocol = protocol_for_renderer(spec.render_version)
         body += "\n\n" + resource_path(
             Path(f"src/download/prompts/evidence_protocol_v{protocol}.md")).read_text(encoding="utf-8")
         if spec.is_agentic:
@@ -1153,7 +1158,8 @@ def native_evidence_instructions(spec: RunSpec) -> str:
             "--manifest", str(spec.chunk_manifest), "--original-full", str(original_full),
             "--original-core", str(original_core)]
     if spec.render_version >= 11:
-        args += ["--protocol-version", "2"]
+        from data_sheets_schema.evidence_assertions import protocol_for_renderer
+        args += ["--protocol-version", str(protocol_for_renderer(spec.render_version))]
     freeze = (
         "from pathlib import Path\nimport hashlib, json\n"
         f"pairs = {[(paths['full'], str(original_full)), (paths['core'], str(original_core))]!r}\n"
@@ -1165,12 +1171,22 @@ def native_evidence_instructions(spec: RunSpec) -> str:
         "print(json.dumps({'original_sha256': pins}, sort_keys=True))\n"
     )
     command = shlex.join([spec._agentic_toolchain["python"], "-c", freeze])
+    source_inventory = ""
+    if spec.render_version >= 12:
+        source_inventory = (
+            "\nBefore the audit, read the complete original source-review inventory:\n\n"
+            + shlex.join([spec._agentic_toolchain["python"], "-m", "data_sheets_schema.source_review",
+                          "--record", str(original_full), "--artifact", "original_full"])
+            + "\n\nBefore every report or report rewrite, read the final inventory anew:\n\n"
+            + shlex.join([spec._agentic_toolchain["python"], "-m", "data_sheets_schema.source_review",
+                          "--record", paths["full"], "--artifact", "final_full"])
+            + "\n\nCover every listed value and copy the exact artifact hash into source_review.\n")
     return (
         "\n\n## Native evidence execution (renderer v9)\n\n"
         "Immediately after Phase 2, before auditing or changing either record, "
         "freeze both originals with this exclusive-write command. Stop if a destination exists:\n\n"
-        + command + "\n\n"
-        f"Write the Phase 3 audit JSON, including its evidence arrays, to {audit}. "
+        + command + "\n\n" + source_inventory
+        + f"Write the Phase 3 audit JSON, including its evidence arrays, to {audit}. "
         "Check it before applying any recommendation:\n\n"
         + shlex.join(args) + "\n\n"
         "After reconciliation, core derivation and reporting, check all evidence and "
@@ -1620,6 +1636,24 @@ EVIDENCE_PHASE_CONTRACTS = {
 
 def evidence_phase_contract(phase: str, render_version: int) -> str:
     contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
+    if render_version >= 12:
+        contract = contract.replace("protocol v1", "protocol v3")
+        if phase == "audit":
+            contract = contract.replace("with findings and summary", "with findings, summary and source_review")
+            contract += (" Include source_review bound to the original_full inventory, covering every "
+                         "populated value with source claims. Link every revise judgment to a finding "
+                         "using review_paths (JSON Pointers). Do not audit only claims you already suspect.")
+        elif phase == "reconcile_full":
+            contract += (" Resolve each source_review revise judgment throughout the record. "
+                         "Preserve each clause's document attribution and operational scope; an "
+                         "instruction or capability does not establish its application to this dataset.")
+        elif phase in {"report", "report_regate"}:
+            contract = contract.replace("with a claims array", "with a claims array and source_review")
+            contract += (" Bind source_review to the final_full inventory and review every populated "
+                         "value again, including unchanged values and each member of mixed-status prose. "
+                         "A retained claim requiring revision must be marked revise; it stops completion. "
+                         "Never relabel a contradiction as supported to pass a check.")
+        return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 
 
@@ -1629,6 +1663,9 @@ def phase_instruction(phase: str, render_version: int) -> str:
     if render_version < 10:
         return instruction
     if phase == "audit":
+        if render_version >= 12:
+            instruction = instruction.replace("JSON object with keys `findings`",
+                                              "JSON object with keys `source_review`, `findings`")
         instruction = instruction.replace(
             "a list of {severity, record, slot, issue}",
             "a list of {severity, record, slot, issue, evidence}, with a nonempty "
@@ -2002,7 +2039,8 @@ def audit_counts(audit: str | None) -> dict[str, Any] | None:
             "by_severity": dict(sorted(by_severity.items()))}
 
 
-def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
+def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
+                _source_review_estimate: bool = False) -> PhaseRequest:
     """Assemble one phase's request.
 
     The bundle and schema digest are the cached prefix: identical across all
@@ -2089,6 +2127,17 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
         # The core inventory the instruction's `both` rule refers to (#998);
         # before the instruction so the instruction stays last (#346).
         parts.append({"type": "text", "text": core_inventory_block()})
+    if spec.render_version >= 12 and phase in {"audit", "report"}:
+        from data_sheets_schema import source_review
+        artifact = "original_full" if phase == "audit" else "final_full"
+        key = "Completed full record" if phase == "audit" else "Reconciled full record"
+        if _source_review_estimate:
+            # Dry-run carries are byte-size placeholders, not YAML or scientific evidence.
+            # Budget admission always counts the actual request with its real inventory.
+            inventory_text = "x" * (2 * len(carry.get(key, "")) + 1024)
+        else:
+            inventory_text = json.dumps(source_review.inventory(carry[key], artifact), ensure_ascii=False)
+        parts.append({"type": "text", "text": source_review.INVENTORY_HEADER + inventory_text})
     instruction = phase_instruction(phase, spec.render_version)
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]
@@ -2167,7 +2216,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         # run could not see the largest thing in it — and after #566 could not
         # see the change whose size was the open question (#568).
         carry = {name: "x" * sizes.get(name, 0) for name in PHASE_NEEDS[ph]}
-        req = build_phase(spec, ph, carry=carry)
+        req = build_phase(spec, ph, carry=carry, _source_review_estimate=True)
         phases.append({"phase": ph, "approx_input_tokens": req.approx_tokens(),
                        "carried": {n: sizes.get(n, 0) for n in PHASE_NEEDS[ph]},
                        "cached_blocks": len(req.cached_blocks)})
@@ -2183,7 +2232,9 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "profile": spec.profile, "profile_basis": spec.profile_basis,
         "phases": phases,
         "approx_total_input_tokens": sum(p["approx_input_tokens"] for p in phases),
-        "estimate_basis": basis,
+        "estimate_basis": basis + ("; source-review inventory estimated at twice full-record bytes plus 1024; "
+                                    "not a bound or measured token count; actual admission must count the live payload"
+                                    if spec.render_version >= 12 else ""),
         "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                     "report": str(spec.report_path)},
         # Not costed above: made only when a receipt entry names a slot the
@@ -3488,7 +3539,7 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
                           reconciled: bool = False) -> dict[str, Any]:
     """Check the explicit v9 protocol against this invocation's own carry."""
     from data_sheets_schema import evidence_assertions as evidence
-    protocol = 2 if spec.render_version >= 11 else 1
+    protocol = evidence.protocol_for_renderer(spec.render_version)
     try:
         chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
         audit = evidence.load_json(carry["Audit findings"])
@@ -3509,9 +3560,12 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
                 protocol_version=protocol)
         if report:
             text = spec.report_path.read_bytes().decode("utf-8")
-            claims = evidence.report_assertions(text)
-            out["assertions_checked"] += len(claims)
-            out["findings"] += evidence.check_assertions(claims, artifacts=artifacts, chunks=chunks)
+            report_check = evidence.check_report(text, artifacts=artifacts, chunks=chunks,
+                                                protocol_version=protocol)
+            out["assertions_checked"] += report_check["assertions_checked"]
+            out["findings"] += report_check["findings"]
+            if "source_review_final" in report_check:
+                out["source_review_final"] = report_check["source_review_final"]
             pins["report"] = hashlib.sha256(text.encode()).hexdigest()
         pins["audit"] = hashlib.sha256(carry["Audit findings"].encode()).hexdigest()
         pins.update({name: hashlib.sha256(raw.encode()).hexdigest() for name, raw in artifacts.items()})
@@ -3632,6 +3686,10 @@ def sent_text_surfaces() -> dict[str, str]:
     out = {f"phase:{k}": v for k, v in PHASE_INSTRUCTIONS.items()}
     out.update({f"phase:v10:{phase}": phase_instruction(phase, 10)
                 for phase in (*EVIDENCE_PHASE_CONTRACTS, "report_regate")})
+    out.update({f"phase:v12:{phase}": phase_instruction(phase, 12)
+                for phase in (*EVIDENCE_PHASE_CONTRACTS, "report_regate")})
+    from data_sheets_schema.source_review import INVENTORY_HEADER
+    out["source_review_inventory_header"] = INVENTORY_HEADER
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),
@@ -4932,7 +4990,18 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
             block["findings"] = list(block.get("findings") or []) + evidence["findings"]
         return block
 
+    def require_source_review(block):
+        if spec.render_version >= 12:
+            evidence = block.get("evidence_assertions") or {}
+            reviews = [evidence.get(key) for key in ("source_review_original", "source_review_final")]
+            if (not evidence.get("checked")
+                    or any(not isinstance(review, dict) or review.get("findings") for review in reviews)):
+                # A report-only rewrite cannot repair a rejected record. Preserve
+                # this reading and latch refusal before any additional request.
+                require_evidence_checks(spec, carry, stage="report")
+
     before = reading()
+    require_source_review(before)
     from data_sheets_schema.usage_ledger import report_regate_attempted
     attempted = report_regate_attempted(spec)
     prior = None
@@ -4994,6 +5063,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
                                             contradictions=contradictions)
     out["regeneration_attempted"] = report_regate_attempted(spec)
     after = reading()
+    require_source_review(after)
     worse = (out["regenerated"] and (
         (before.get("disposition_rows") and not after.get("disposition_rows"))
         or len(after.get("findings") or []) > len(before.get("findings") or [])))
