@@ -1,0 +1,15 @@
+# Exact machine-bound launch files and original payloads remain local.
+registration.json
+native_overlay.json
+rendered_jobs.json
+prior_attempt_inventory.json
+prompts/
+initial_requests/
+.local_drafts/
+attempts/
+billing.json*
+acceptances/
+reviews/
+previous_billing.json
+registration.draft.json
+charge_reconciliation_receipt.json
