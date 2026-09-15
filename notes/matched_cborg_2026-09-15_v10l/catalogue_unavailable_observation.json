@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-09-15T17:52:15.724592+00:00",
+  "source": "https://api.cborg.lbl.gov/model/info",
+  "status": "catalogue_unavailable_launch_gate_closed",
+  "http_status": 530,
+  "server": "cloudflare",
+  "body_sha256": "6ed631ab203979a978c2d99956b60149aa7d502eb93945a0a60a6ef7987fe1b7",
+  "error_page_text": [
+    "Error",
+    "Cloudflare Tunnel error",
+    "You've requested a page on a website (api.cborg.lbl.gov) that is on the",
+    "Cloudflare",
+    "network. The host (api.cborg.lbl.gov) is configured as a Cloudflare Tunnel, and Cloudflare is currently unable to resolve it.",
+    "Timestamp: 2026-09-15 17:52:15 UTC",
+    "Requested URL: api.cborg.lbl.gov/model/info",
+    "Error reference number: 1033",
+    "User-Agent: python-httpx/0.28.1",
+    "If you believe you've reached this message in error, please contact the IT Help Desk with the above information."
+  ],
+  "scientific_calls": 0,
+  "source_payloads_transmitted": 0,
+  "registered_catalogue_revalidated": false,
+  "public_view_transform": "Client IP, request ray ID and server ID omitted; the response body digest identifies the original error page."
+}

@@ -1,0 +1,40 @@
+{
+  "checked_at": "2026-09-15T17:49:59.155805+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "4bb2333f8adb69016d63e88b4176fe9d8f0e7e983ef8f8e1ea386631b3f3b3fa",
+  "native_overlay_sha256": "e1020bd7725cb4bd492799e6a0a3b8bdecef18b58191e499c05bfbf7d9a60f8b",
+  "registered_pins_verified": 464,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 337,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [],
+  "new_pinned_implementation_files": [],
+  "pyproject_change": null,
+  "production_instrument_changes_from_v10k": false,
+  "generation_renderers": {
+    "api": 9,
+    "agentic": 9
+  },
+  "effort_policy_unchanged": true,
+  "unchanged_instrument": "evidence_assertions v1 (#1801, #1815, #1816)",
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 40,
+  "budget_accounted_cost_usd": "29.65881300",
+  "remaining_additional_budget_usd": "170.34118700",
+  "proposed_per_job_caps_usd": {
+    "CHORUS_api_rep1": 6.78,
+    "CHORUS_agentic_rep1": 6.2,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "82f7cf593e9d8a693b713c84388edc94084f293e44b82deb6d6cdf751e1574bf",
+    "CHORUS_source_review_plan.json": "157fa0bf823b5af8c83daf24684b70b5b8d22f78bceecb80cbd6bdc3e49abd4e"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks and public hashes do not establish scientific acceptance or inspection of unpublished originals. The user authorized continuation; live CBORG token counting, exact-commit CI, current model checks and a bound launch receipt remain launch gates. Prompt delivery does not establish model compliance."
+}

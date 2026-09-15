@@ -1,0 +1,92 @@
+{
+  "kind": "public_review_view_not_executable",
+  "original_sha256": "e1020bd7725cb4bd492799e6a0a3b8bdecef18b58191e499c05bfbf7d9a60f8b",
+  "transform": "Only machine-specific path bindings are replaced by named placeholders. Original launch files remain local and unchanged.",
+  "view": {
+    "registered_at": "2026-09-15T17:49:14.629902+00:00",
+    "status": "draft_awaiting_independent_review_and_prior_canary_acceptance",
+    "registration": "<repository>/notes/matched_cborg_2026-09-15_v10l/registration.json",
+    "registration_sha256": "4bb2333f8adb69016d63e88b4176fe9d8f0e7e983ef8f8e1ea386631b3f3b3fa",
+    "allowed_jobs": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1"
+    ],
+    "condition_boundary": "Native execution controls supplement the immutable source/instrument registration. They do not alter its source bytes, prompt files, schemas, profiles, cohort labels or budget ledger identity.",
+    "claude_executable": "<registered-claude>",
+    "observed_cli_alias": "<observed-cli-alias>",
+    "claude_version": "2.1.272 (Claude Code)",
+    "system_prompt": "<repository>/notes/matched_cborg_2026-09-13/native_controls/system.md",
+    "cli_flags": [
+      "--print",
+      "--safe-mode",
+      "--restricted",
+      "--strict-mcp-config",
+      "--disable-slash-commands",
+      "--no-session-persistence",
+      "--prompt-suggestions",
+      "false",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--permission-mode",
+      "dontAsk",
+      "--tools",
+      "Read,Write,Bash"
+    ],
+    "allowed_tools": [
+      "Read",
+      "Write",
+      "Bash(<registered-python> -m data_sheets_schema.cli agents playbook)",
+      "Bash(<registered-python> -m data_sheets_schema.cli agents playbook *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli bundle chunk *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli download scope *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli download priority *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli receipts check *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli derive core *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli provenance record *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli provenance annotate-observed *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli runs check *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli runs validate *)",
+      "Bash(<registered-python> -m data_sheets_schema.cli --manifest *)",
+      "Bash(<registered-python> -m data_sheets_schema.d4d_pair_consistency *)",
+      "Bash(<registered-python> -m data_sheets_schema.agentic_observed *)",
+      "Bash(<registered-python> -m data_sheets_schema.evidence_assertions *)",
+      "Bash(<registered-python> -c *)"
+    ],
+    "environment": {
+      "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1",
+      "DISABLE_TELEMETRY": "1",
+      "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+    },
+    "per_job_environment": {
+      "CHORUS_agentic_rep1": {
+        "D4D_MANIFEST": "<repository>/data/preprocessed/source_manifest.yaml",
+        "D4D_PROFILE": "bridge2ai",
+        "D4D_LAUNCH_INSTRUCTION": "<repository>/notes/matched_cborg_2026-09-15_v10l/prompts/CHORUS_agentic_rep1.md"
+      },
+      "KIDS_FIRST_agentic_rep1": {
+        "D4D_MANIFEST": "<repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml",
+        "D4D_PROFILE": "neutral",
+        "D4D_LAUNCH_INSTRUCTION": "<repository>/notes/matched_cborg_2026-09-15_v10l/prompts/KIDS_FIRST_agentic_rep1.md"
+      }
+    },
+    "credential_boundary": "Only the parent transport receives CBORG_API_KEY. The child receives an ephemeral local transport token and has no inherited provider, GitHub or OAuth credentials.",
+    "accounting": "All native model calls, including auxiliary calls, pass serial admission against the same cumulative attempt and sequence ledger as the API arm. A fixed session name suppressed auxiliary title generation in the offline probe; the guard does not rely on that suppression.",
+    "native_limits_observed_offline": {
+      "context_window": 200000,
+      "max_output_tokens": 64000
+    },
+    "limit_basis": "Installed CLI declaration during a scripted offline probe; distinct from CBORG route maxima (1M input, 128k output). Confirm runtime declaration, actual request ceilings and any compaction in the scientific trace.",
+    "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
+    "pinned_files": {
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": "428a2a097f6d2a98c1a0c01ea5b8dcfff47a18fc8806f7d9027d847b976ff548",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "dc2f57a72dc8644ab24710bc0d983d6d8add7a248a3de3504e5c6563d150999c",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "acb8ad4fcbf4040e5a238d472c8235986c10a6b117e05a9c15a675dc6a1077a1",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/system.md": "c38c66f9a34ffaa6019cb34d9720b5ab4e683465602de4a0177bf71ca8653e00",
+      "<repository>/notes/matched_cborg_2026-09-13/budgeted_cborg.py": "406ef55c2a1c7e7809a2c7de2894840b15f18f351969e2e8c73013f94ec26dcd",
+      "<repository>/notes/matched_cborg_2026-09-13/run_api_canary.py": "f9c762b87c88f15bbc3a02904a31effd8efbec72f88f0cb3b7ce7d57ea26f0ff",
+      "<repository>/notes/matched_cborg_2026-09-13/prepare_registration.py": "104dff4bf944b8393df99abfe5b4f333752ce76283b986634a4534506efef57b",
+      "<registered-claude>": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75"
+    }
+  }
+}
