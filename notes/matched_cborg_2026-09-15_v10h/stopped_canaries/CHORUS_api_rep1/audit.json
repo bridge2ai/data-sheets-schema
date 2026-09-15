@@ -200,5 +200,19 @@
   "scientific_source_acceptance": "not assessed for the unfinished pre-reconciliation pair",
   "audit_findings_status": "16 model-written entries, unadjudicated; this is not a completed source review or evaluation",
   "later_canaries_or_evaluators_launched": 0,
-  "originals_and_verified_backup_unchanged": true
+  "originals_and_verified_backup_unchanged": true,
+  "partial_mechanical_review": {
+    "checked_at": "2026-09-15T01:14:57.464205+00:00",
+    "status": "stopped_not_accepted",
+    "schema_problems": [],
+    "pair_passed": true,
+    "pair_errors": [],
+    "core_value_matches_projection": true,
+    "phase2_core_bytes_match": true,
+    "report_exists": false,
+    "provenance_exists": false,
+    "original_artifacts_unchanged": 16,
+    "source_review": "not assessed for unfinished pre-reconciliation artifacts",
+    "scientific_model_calls": 0
+  }
 }
