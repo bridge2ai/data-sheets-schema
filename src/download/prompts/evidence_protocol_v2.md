@@ -99,7 +99,11 @@ signatures, and removal of narrative fields cannot establish this proof.
 Retaining a field with null, a new value or a disclaimer is not its removal.
 
 The v2 checker validates removal preconditions during audit admission, before
-reconciliation. Any ambiguity stops for review. Its result establishes only
+reconciliation, including an in-memory projection of all declared removals
+at their original positions. If those actions erase the unique structural
+correspondence, admission stops without a reconciliation request. That
+hypothetical projection never changes the originals or becomes a generated
+record. Any ambiguity stops for review. The check establishes only
 these declared structural changes, not the semantic correctness of the audit.
 
 ### Reconciliation and report

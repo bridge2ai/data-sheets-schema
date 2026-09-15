@@ -148,11 +148,89 @@ def test_unique_bijection_can_be_resolved_by_elimination():
     assert check(audit, original, final)[0]["kind"] == "evidence_contract"
 
 
+def mixed_example():
+    original = {"instances": [
+        {"counts": 1, "data_substrate": "urn:bad-anonymous"},
+        {"id": "urn:identified", "name": "Identified", "counts": 2, "data_substrate": "urn:bad-identified"},
+        {"id": "urn:other", "name": "Other", "counts": 3},
+    ]}
+    audit = {"findings": [
+        {"remove_relationship": {"path": "/instances/0/data_substrate"}},
+        {"remove_relationship": {"path": "/instances/1/data_substrate"}},
+    ]}
+    final = copy.deepcopy(original)
+    for member in final["instances"][:2]: member.pop("data_substrate")
+    return audit, original, final
+
+
+def test_child_removals_in_mixed_lists_preserve_identifier_checks():
+    audit, original, final = mixed_example()
+    assert check(audit, original, final) == []
+    final["instances"].reverse()
+    assert check(audit, original, final) == []
+    final["instances"][1]["data_substrate"] = None
+    problems = check(audit, original, final)
+    assert len(problems) == 1 and problems[0]["kind"] == "unsupported_relationship_retained"
+    assert problems[0]["finding"] == 1
+
+
+@pytest.mark.parametrize("mutation", ["lost_id", "changed_id", "lost_name", "borrowed_id",
+                                      "borrowed_name", "new_orcid", "overlapping_original", "masked_id"])
+def test_mixed_lists_do_not_relax_identifier_invariants(mutation):
+    audit, original, final = mixed_example()
+    member = final["instances"][1]
+    if mutation == "lost_id": member.pop("id")
+    elif mutation == "changed_id": member["id"] = "urn:new"
+    elif mutation == "lost_name": member.pop("name")
+    elif mutation == "borrowed_id": member["id"] = "urn:other"
+    elif mutation == "borrowed_name": member["name"] = "Other"
+    elif mutation == "new_orcid": member["orcid"] = "0000-0000-0000-0001"
+    elif mutation == "overlapping_original":
+        original["instances"][2]["name"] = final["instances"][2]["name"] = "Identified"
+    else:
+        audit["findings"].append({"remove_relationship": {"path": "/instances/1/id"}})
+        member.pop("id")
+    assert check(audit, original, final)[0]["kind"] == "evidence_contract"
+
+
 def test_anonymous_whole_member_or_nested_list_removal_remains_unverified():
     original = {"members": [{"counts": 1, "children": [{"id": "urn:rejected"}]}]}
     for rule in ({"path": "/members/0"}, {"path": "/members/0/children/0", "identity": "/id"}):
         audit = {"findings": [{"remove_relationship": rule}]}
         assert check(audit, original, {"members": [{"counts": 1, "children": []}]})
+
+
+def collapsing_audit():
+    original = {"instances": [{"counts": 1, "data_substrate": "urn:a"},
+                              {"counts": 1, "data_topic": "urn:b"}]}
+    audit = {"findings": [], "summary": "Two medium findings."}
+    for index, (field, quote) in enumerate((("data_substrate", "urn:a"), ("data_topic", "urn:b"))):
+        path = f"/instances/{index}/{field}"
+        audit["findings"].append({"severity": "medium", "record": "full", "slot": f"instances[{index}].{field}",
+            "issue": "Unsupported assignment", "evidence": [artifact(path=path, quote=quote)],
+            "remove_relationship": {"path": path}})
+    return audit, original
+
+
+def test_admission_checks_the_complete_projected_plan_without_mutating_originals():
+    audit, original = collapsing_audit()
+    before = copy.deepcopy((audit, original))
+    result = check_audit(audit, artifacts={"original_full": yaml.safe_dump(original)}, chunks={}, protocol_version=2)
+    assert result["findings"] and all(f["kind"] == "evidence_contract" for f in result["findings"])
+    assert (audit, original) == before
+    # v1 admission remains its historical quotation-only check.
+    assert check_audit(audit, artifacts={"original_full": yaml.safe_dump(original)}, chunks={})["findings"] == []
+
+
+def test_projected_list_member_removals_use_original_positions():
+    original = {"members": [{"id": "urn:a"}, {"id": "urn:b"}, {"id": "urn:c"}]}
+    audit = {"findings": [{"evidence": [artifact(path=f"/members/{i}/id", quote=f"urn:{letter}")],
+                          "remove_relationship": {"path": f"/members/{i}", "identity": "/id"}}
+                         for i, letter in ((0, "a"), (2, "c"))]}
+    before = copy.deepcopy(original)
+    result = check_audit(audit, artifacts={"original_full": yaml.safe_dump(original)}, chunks={}, protocol_version=2)
+    assert result["findings"] == []
+    assert original == before
 
 
 @pytest.mark.parametrize("runtime", ["Claude API (direct)", "Claude Code"])
@@ -215,3 +293,15 @@ def test_unactionable_v11_audit_stops_before_reconciliation(tmp_path, monkeypatc
         run(spec, fake, monkeypatch)
     assert len(fake.calls) == 2
     assert before == {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+
+
+def test_plan_that_would_erase_anchors_stops_before_paid_reconciliation(tmp_path, monkeypatch):
+    spec = replace(specification(tmp_path), render_version=11)
+    fake = AnonymousFake()
+    fake.audit, fake.original = collapsing_audit()
+    with pytest.raises(RuntimeError, match="audit evidence assertions failed"):
+        run(spec, fake, monkeypatch)
+    assert len(fake.calls) == 2
+    with pytest.raises(RuntimeError, match="evidence assertions failed"):
+        run(spec, fake, monkeypatch)
+    assert len(fake.calls) == 2

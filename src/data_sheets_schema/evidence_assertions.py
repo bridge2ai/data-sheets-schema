@@ -185,9 +185,15 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict,
         # With identical inputs a valid action is retained, which is expected here.
         try:
             original = load_record(artifacts["original_full"])
-            problems += [f for f in check_relationship_removals(
+            preconditions = [f for f in check_relationship_removals(
                 audit, original, original, protocol_version=2)
                 if f["kind"] != "unsupported_relationship_retained"]
+            problems += preconditions
+            if not preconditions:
+                paths = [_tokens(f["remove_relationship"]["path"]) for f in audit["findings"]
+                         if isinstance(f, dict) and "remove_relationship" in f]
+                projected = _project_removals(original, paths)
+                problems += check_relationship_removals(audit, original, projected, protocol_version=2)
         except (ValueError, KeyError, yaml.YAMLError) as exc:
             problems.append(_problem("evidence_contract", str(exc)))
     return {"instrument": instrument(protocol_version), "checked": True,
@@ -302,6 +308,30 @@ def _without_fields(member, paths):
     return result
 
 
+def _project_removals(value, paths):
+    """Apply validated actions simultaneously in memory, using original indexes.
+
+    Only selected ancestors are copied. Neither original objects nor model
+    files are changed, and this hypothetical result is never published.
+    """
+    if not paths:
+        return value
+    if any(not path for path in paths):
+        return MISSING
+    mapping = isinstance(value, dict)
+    result = {} if mapping else []
+    entries = value.items() if mapping else enumerate(value)
+    for key, child in entries:
+        tails = [path[1:] for path in paths if path[0] == (key if mapping else str(key))]
+        remaining = _project_removals(child, tails)
+        if remaining is not MISSING:
+            if isinstance(result, dict):
+                result[key] = remaining
+            else:
+                result.append(remaining)
+    return result
+
+
 def _has_structural_anchor(structure):
     kind, value = structure
     if kind is dict:
@@ -334,11 +364,24 @@ def _matched_anonymous_ancestor(original, final, index, prefix, removal_paths):
                   for i, member in enumerate(original)]
     if not all(_has_structural_anchor(sig) for sig in signatures):
         raise ValueError("anonymous ancestor lacks an unchanged structural anchor")
+    identities = [_member_identities(member) if IDENTITY_FIELDS.intersection(member) else None
+                  for member in original]
     candidates = {}
     for position, member in enumerate(final):
         candidates[position] = set()
         for i, signature in enumerate(signatures):
             try:
+                if identities[i] is not None:
+                    identity = _member_identities(member)
+                    if identity != identities[i]:
+                        continue
+                    # Preserve v1's identifier safeguards in a mixed list.
+                    # Structural anchors cannot excuse missing/borrowed IDs.
+                    if any(j != i and fields is not None and any(
+                            value is not MISSING and identity[path] == value
+                            for path, value in fields.items())
+                           for j, fields in enumerate(identities)):
+                        continue
                 current = _member_structure(_without_fields(member, allowed[i]))
             except ValueError:
                 continue  # This member cannot match this original; other masks may match.
@@ -369,8 +412,8 @@ def _relationship_after(original, final, tokens, declared, *, protocol_version=1
             index = int(token)
             identity = declared if offset == len(tokens) - 1 else None
             if (protocol_version == 2 and offset < len(tokens) - 1
-                    and isinstance(old[index], dict)
-                    and not IDENTITY_FIELDS.intersection(old[index])):
+                    and any(isinstance(member, dict) and not IDENTITY_FIELDS.intersection(member)
+                            for member in old)):
                 current = _matched_anonymous_ancestor(
                     old, current, index, tokens[:offset], removal_paths)
                 old = old[index]
