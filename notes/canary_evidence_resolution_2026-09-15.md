@@ -133,3 +133,16 @@ launch controls, including refusal before billing when the v9 launch-instruction
 binding is missing or wrong. The initial proxy test invocation was sandboxed
 and could not bind its localhost test server; the rerun used synthetic provider
 responses with permitted localhost sockets. No scientific calls were made.
+
+## Engineering review, round 3 preparation
+
+The second Codex review of public commit `73f1f0e4e89ae8b93db9874f964e5b505c9c0812`
+found one remaining nested-identity case, filed as #1824. With a declared
+`/principal_investigator/name`, a creator wrapper without its own id/name could
+retain a rejected person's ID while adopting another person's name and pass
+the removal check. The fix binds both id and name in the object containing
+the declared identity, alongside any wrapper identities. Eight controls cover
+both declaration styles, conflicting or missing sibling identifiers, and
+legitimate removal. Before the fix, six controls failed and two already
+refused the malformed identity; the review's false-removal case reproduced.
+After the fix, all 50 evidence, generation and native-recording controls pass.

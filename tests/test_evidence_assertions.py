@@ -128,6 +128,26 @@ def test_nested_relationship_follows_every_indexed_ancestor():
     assert check_relationship_removals(audit, original, final)[0]["kind"] == "evidence_contract"
 
 
+@pytest.mark.parametrize("key", ["name", "id"])
+@pytest.mark.parametrize("survivor", [
+    {"id": "https://example.org/rejected", "name": "Supported"},
+    {"id": "https://example.org/supported", "name": "Rejected"},
+    {"name": "Supported"}, {"id": "https://example.org/supported"},
+])
+def test_nested_person_identity_cannot_ignore_a_sibling_identifier(key, survivor):
+    rejected = {"id": "https://example.org/rejected", "name": "Rejected"}
+    supported = {"id": "https://example.org/supported", "name": "Supported"}
+    original = {"creators": [{"principal_investigator": rejected}, {"principal_investigator": supported}]}
+    audit = {"findings": [{"remove_relationship": {
+        "path": "/creators/0", "identity": "/principal_investigator/" + key}}]}
+    final = {"creators": [{"principal_investigator": survivor}]}
+    assert check_relationship_removals(audit, original, final)[0]["kind"] == "evidence_contract"
+    assert check_relationship_removals(audit, original,
+        {"creators": [{"principal_investigator": supported}]}) == []
+    assert check_relationship_removals(audit, original,
+        {"creators": [{"principal_investigator": rejected}]})[0]["kind"] == "unsupported_relationship_retained"
+
+
 def test_relationship_identity_must_be_evidenced_in_original():
     audit = {"findings": [{"remove_relationship": {"path": "/creators/0", "identity": "/notes"}}]}
     assert check_relationship_removals(audit, {"creators": [{"notes": "not an identity"}]}, {})[0]["kind"] == "evidence_contract"

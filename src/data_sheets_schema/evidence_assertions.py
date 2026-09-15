@@ -173,7 +173,13 @@ def _member_identities(member, declared=None):
     if not isinstance(member, dict):
         raise ValueError("indexed relationship members must be objects with stable identities")
     paths = [(key,) for key in ("id", "name") if key in member]
-    if declared is not None and tuple(declared) not in paths:
+    if declared is not None:
+        owner = _at(member, declared[:-1])
+        if not isinstance(owner, dict):
+            raise ValueError("declared identity must belong to an object")
+        # The name and ID describe the same entity, including when it is
+        # nested inside a role wrapper. Neither can contradict the other.
+        paths.extend(tuple(declared[:-1]) + (key,) for key in ("id", "name") if key in owner)
         paths.append(tuple(declared))
     identities = {path: _at(member, path) for path in paths}
     if not identities or any(not isinstance(value, str) or not value.strip()
