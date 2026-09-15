@@ -42,6 +42,7 @@ def spec_for(job):
         bundle=Path(job["bundle"]), label=job["label"], condition="generic_v9",
         manifest=Path(job["manifest"]), chunk_manifest=Path(job["chunks"]),
         profile=job["profile"], profile_basis="stated by the registered caller",
+        render_version=job.get("render_version", job.get("render_spec", {}).get("render_version", 9)),
         run_date=job.get("run_date", "2026-09-14"),
         runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)")
 
@@ -127,7 +128,7 @@ def main():
                 job = {**case, "id": identifier, "execution_arm": arm, "runtime": runtime,
                        "method": method, "replicate": replicate,
                        "canary": replicate == 1 and case["project"] in {"CHORUS", "KIDS_FIRST"},
-                       "run_date": args.run_date,
+                       "run_date": args.run_date, "render_version": 9,
                        "label": f"{args.label_date}_claude-opus-5-{arm}-{args.cohort.replace('_','-')}-{case['project'].lower()}_rep{replicate}"}
                 spec = spec_for(job)
                 # Use the public CLI's corpus layout so provenance/receipt

@@ -522,7 +522,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -1110,7 +1110,53 @@ def resolve_prompt(spec: RunSpec) -> str:
         body = temperature_instructions(body)
     if spec.render_version >= 8 and not spec.is_agentic:
         body = api_header_instructions(body, api_values)
+    if spec.render_version >= 9:
+        from data_sheets_schema.resources import resource_path
+        body += "\n\n" + resource_path(
+            Path("src/download/prompts/evidence_protocol_v1.md")).read_text(encoding="utf-8")
+        if spec.is_agentic:
+            body += native_evidence_instructions(spec)
     return body
+
+
+def native_evidence_instructions(spec: RunSpec) -> str:
+    """Bind the native evidence protocol to this run's exact destinations."""
+    import shlex
+    paths = spec._agentic_artifact_paths
+    directory = Path(paths["core"]).parent / "evidence"
+    original_full = directory / "original_full.yaml"
+    original_core = directory / "original_core.yaml"
+    audit = directory / "audit.json"
+    args = [spec._agentic_toolchain["python"], "-m", "data_sheets_schema.evidence_assertions",
+            "--audit", str(audit), "--bundle", str(spec.bundle),
+            "--manifest", str(spec.chunk_manifest), "--original-full", str(original_full),
+            "--original-core", str(original_core)]
+    freeze = (
+        "from pathlib import Path\nimport hashlib, json\n"
+        f"pairs = {[(paths['full'], str(original_full)), (paths['core'], str(original_core))]!r}\n"
+        "pins = {}\nfor src, dst in pairs:\n"
+        "    raw = Path(src).read_bytes()\n"
+        "    Path(dst).parent.mkdir(parents=True, exist_ok=True)\n"
+        "    with Path(dst).open('xb') as stream:\n        stream.write(raw)\n"
+        "    pins[dst] = hashlib.sha256(raw).hexdigest()\n"
+        "print(json.dumps({'original_sha256': pins}, sort_keys=True))\n"
+    )
+    command = shlex.join([spec._agentic_toolchain["python"], "-c", freeze])
+    return (
+        "\n\n## Native evidence execution (renderer v9)\n\n"
+        "Immediately after Phase 2, before auditing or changing either record, "
+        "freeze both originals with this exclusive-write command. Stop if a destination exists:\n\n"
+        + command + "\n\n"
+        f"Write the Phase 3 audit JSON, including its evidence arrays, to {audit}. "
+        "Check it before applying any recommendation:\n\n"
+        + shlex.join(args) + "\n\n"
+        "After reconciliation, core derivation and reporting, check all evidence and "
+        "declared relationship removals with:\n\n"
+        + shlex.join(args + ["--final-full", paths["full"], "--final-core", paths["core"],
+                             "--report", paths["report"]]) + "\n\n"
+        "Preserve the originals and audit unchanged. Stop on any failed check. "
+        "The orchestrator must rerun the final check on the same files before acceptance.\n"
+    )
 
 
 def _model_settings() -> dict[str, Any]:
@@ -3339,6 +3385,78 @@ def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[st
     return out
 
 
+def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool = False,
+                          reconciled: bool = False) -> dict[str, Any]:
+    """Check the explicit v9 protocol against this invocation's own carry."""
+    from data_sheets_schema import evidence_assertions as evidence
+    try:
+        chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
+        audit = evidence.load_json(carry["Audit findings"])
+        originals = {"original_full": carry["Original full record"]}
+        if "Original core record" in carry:
+            originals["original_core"] = carry["Original core record"]
+        artifacts = dict(originals)
+        if reconciled or report:
+            artifacts["final_full"] = spec.full_path.read_bytes().decode("utf-8")
+        if report:
+            artifacts["final_core"] = spec.core_path.read_bytes().decode("utf-8")
+        # An audit must refer only to its original inputs, never to a later
+        # repair that happens to make an earlier allegation true.
+        out = evidence.check_audit(audit, artifacts=originals, chunks=chunks)
+        if reconciled or report:
+            out["findings"] += evidence.check_relationship_removals(
+                audit, evidence.load_record(originals["original_full"]), evidence.load_record(artifacts["final_full"]))
+        if report:
+            text = spec.report_path.read_bytes().decode("utf-8")
+            claims = evidence.report_assertions(text)
+            out["assertions_checked"] += len(claims)
+            out["findings"] += evidence.check_assertions(claims, artifacts=artifacts, chunks=chunks)
+            pins["report"] = hashlib.sha256(text.encode()).hexdigest()
+        pins["audit"] = hashlib.sha256(carry["Audit findings"].encode()).hexdigest()
+        pins.update({name: hashlib.sha256(raw.encode()).hexdigest() for name, raw in artifacts.items()})
+        out["artifact_sha256"] = pins
+        out["scope"] = "Declared evidence only; semantic support and omitted claims require independent review."
+        return out
+    except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as exc:
+        return {"instrument": evidence.INSTRUMENT, "checked": False, "assertions_checked": 0,
+                "findings": [{"kind": "evidence_inputs_unusable", "detail": str(exc)}]}
+
+
+def _assert_evidence_clean(out: dict | None, stage: str) -> None:
+    if out is not None and (not out["checked"] or out["findings"]):
+        raise RuntimeError(f"{stage} evidence assertions failed: "
+                           + json.dumps(out["findings"], ensure_ascii=False))
+
+
+def require_evidence_checks(spec: RunSpec, carry: dict[str, str], *, stage: str,
+                            preserve: bool = True, fail: bool = True) -> dict | None:
+    """Preserve a failed reading before stopping further phases or spending."""
+    if spec.render_version < 9:
+        return
+    out = evidence_checks_block(spec, carry, reconciled=stage == "reconcile",
+                                report=stage == "report")
+    if preserve:
+        _snapshot(spec, f"{spec.project}_{stage}_evidence.json", json.dumps(out, indent=2))
+    if fail:
+        _assert_evidence_clean(out, stage)
+    return out
+
+
+def saved_evidence_checks(spec: RunSpec, record: dict) -> dict:
+    """Recheck an already completed run using its attested phase inputs."""
+    from data_sheets_schema import snapshot_store
+    carry = {}
+    for suffix, label in (("full.yaml", "Original full record"),
+                          ("core.yaml", "Original core record"),
+                          ("audit.json", "Audit findings")):
+        _, snapshot = snapshot_store.read_latest(spec.metadata_dir, spec.project,
+            f"{spec.project}_{suffix}", spec=spec, record=record)
+        if snapshot is None:
+            raise RuntimeError(f"report evidence assertions failed: missing attested {suffix}")
+        carry[label] = snapshot[1].decode("utf-8")
+    return require_evidence_checks(spec, carry, stage="report", preserve=False)
+
+
 def _form_block(spec: RunSpec) -> dict[str, Any]:
     from data_sheets_schema.grounding import form_facts
     return form_facts(spec.full_path, spec.core_path)
@@ -4697,7 +4815,15 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     still contradicts the records after being told so is recorded as such,
     and the gate reading (#684) counts it.
     """
-    before = report_claims_block(spec) or {}
+    def reading():
+        block = dict(report_claims_block(spec) or {})
+        if spec.render_version >= 9:
+            evidence = evidence_checks_block(spec, carry, report=True)
+            block["evidence_assertions"] = evidence
+            block["findings"] = list(block.get("findings") or []) + evidence["findings"]
+        return block
+
+    before = reading()
     out: dict[str, Any] = {
         "checked": bool(before.get("checked")),
         "claims_checked_before": before.get("claims_checked"),
@@ -4708,6 +4834,9 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         # (#1139 review, S1); the record's block is the post-regate reading.
         "rows_by_record_before": before.get("rows_by_record"),
         "regenerated": False}
+    if spec.render_version >= 9:
+        out["evidence_assertions_before"] = before["evidence_assertions"]
+        out["findings_include_evidence_assertions"] = True
     if not before.get("checked"):
         out["reason"] = before.get("reason")
         return out
@@ -4743,7 +4872,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
                                             phase="report_regate",
                                             contradictions=contradictions)
-    after = report_claims_block(spec) or {}
+    after = reading()
     worse = (out["regenerated"] and (
         (before.get("disposition_rows") and not after.get("disposition_rows"))
         or len(after.get("findings") or []) > len(before.get("findings") or [])))
@@ -4760,6 +4889,8 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     out["findings_after"] = len(after.get("findings") or [])
     out["rows_by_record_after"] = after.get("rows_by_record")
     out["remaining"] = (after.get("findings") or [])[:20]
+    if spec.render_version >= 9:
+        out["evidence_assertions_after"] = after["evidence_assertions"]
     print(f"   report re-checked: {out['findings_before']} contradiction(s) before, "
           f"{out['findings_after']} after"
           + ("" if out["regenerated"] else " (report not regenerated)"))
@@ -5504,6 +5635,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # None on a resumed batch, so the canary reported `unmeasurable`
             # and a sweep interrupted after a *passing* canary could not resume
             # and fan out under the gate it had already satisfied.
+            evidence = saved_evidence_checks(spec, existing) if spec.render_version >= 9 else None
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
@@ -5516,7 +5648,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                              if existing.get("report_gate") else {})},
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
-                               "receipts": _receipts_block(spec, existing)},
+                               "receipts": _receipts_block(spec, existing),
+                               **({"evidence_assertions": evidence} if evidence is not None else {})},
                     "already_complete": True,
                     "outputs": {"full": str(spec.full_path),
                                 "core": str(spec.core_path),
@@ -5624,6 +5757,13 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if "reconcile_full" in done and "Completed full record" in carry:
         carry["Reconciled full record"] = carry["Completed full record"]
 
+    # A produced but rejected phase is still paid evidence. Recheck it on
+    # resume instead of generating it again or using it for another call.
+    if "audit" in done:
+        require_evidence_checks(spec, carry, stage="audit", preserve=False)
+    if "reconcile_full" in done:
+        require_evidence_checks(spec, carry, stage="reconcile", preserve=False)
+
     core_derivation: dict[str, Any] | None = None
     for ph in PHASES:
         artifact = PHASE_ARTIFACT.get(ph)
@@ -5702,6 +5842,10 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         done.add(ph)
         _save_progress(spec, [x for x in PHASES if x in done],
                        carry.get("Audit findings"))
+        if ph == "audit":
+            require_evidence_checks(spec, carry, stage="audit")
+        elif ph == "reconcile_full":
+            require_evidence_checks(spec, carry, stage="reconcile")
 
     _require_resolved_usage(spec)
     rec = build_record(
@@ -5913,6 +6057,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     _REWRITE_LOG.reset(_rewrite_token)
     rec.data["normalisation"] = identifier_rewrite_summary(_rewrites)
     rec.data["report_gate"] = _gate_report(spec, client, settings, usage, carry)
+    final_evidence = require_evidence_checks(spec, carry, stage="report", fail=False)
+    if final_evidence is not None:
+        rec.data["report_gate"]["evidence_assertions_final"] = final_evidence
     # The context facts were frozen before the gate could add a call (#967).
     rec.data["model"]["context"] = context_facts(settings["name"], usage)
     # `dispositions_expected`: the report phase was asked for the table, so
@@ -5947,6 +6094,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     provenance.refresh_output_sizes(rec.data)
     rec.data["api_usage"] = _require_surviving_accounting(spec, rec.data.get("api_usage") or [])
     rec.write(spec.provenance_path)
+    # Persist the one-time report regeneration and its usage before refusing
+    # completion; otherwise resume could admit that same call again (#1818).
+    _assert_evidence_clean(final_evidence, "report")
 
     # Verify what was just written rather than assuming it. The playbook lists a
     # live record as a completion criterion, and a criterion nothing checks is a

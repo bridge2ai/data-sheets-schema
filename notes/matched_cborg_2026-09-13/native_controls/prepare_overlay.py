@@ -20,7 +20,8 @@ py=r['python']
 cli_prefix=f'Bash({py} -m data_sheets_schema.cli '
 allowed=['Read','Write',cli_prefix+'agents playbook)',*(cli_prefix+command+' *)' for command in ('agents playbook','bundle chunk','download scope','download priority','receipts check','derive core','provenance record','provenance annotate-observed','runs check','runs validate')),
          cli_prefix+'--manifest *)',f'Bash({py} -m data_sheets_schema.d4d_pair_consistency *)',
-         f'Bash({py} -m data_sheets_schema.agentic_observed *)',f'Bash({py} -c *)']
+         f'Bash({py} -m data_sheets_schema.agentic_observed *)',
+         f'Bash({py} -m data_sheets_schema.evidence_assertions *)',f'Bash({py} -c *)']
 files=[HERE/name for name in ('native_proxy.py','run_native_canary.py','prepare_overlay.py','system.md')]
 files.extend(BASE/name for name in ('budgeted_cborg.py','run_api_canary.py','prepare_registration.py'))
 files.append(cli.resolve())
