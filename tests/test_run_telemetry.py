@@ -8,6 +8,8 @@ from pathlib import Path
 
 import yaml
 
+from data_sheets_schema.resources import linkml_validate
+
 from data_sheets_schema.api_runner import CONCAT_DIR
 
 from data_sheets_schema.run_telemetry import (
@@ -272,7 +274,7 @@ class TestRunTelemetry(unittest.TestCase):
         out.write_text(yaml.safe_dump(report, sort_keys=False),
                        encoding="utf-8")
         res = subprocess.run(
-            ["poetry", "run", "linkml-validate",
+            [*linkml_validate(),
              "-s", str(REPO / SCHEMA_PATH), "-C", "RunTelemetryReport",
              str(out)],
             capture_output=True, text=True, timeout=180, cwd=REPO)

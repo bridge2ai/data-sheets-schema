@@ -18,6 +18,8 @@ from pathlib import Path
 
 import yaml
 
+from data_sheets_schema.resources import linkml_validate
+
 SCHEMA = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
 CORPUS = Path("data/d4d_concatenated")
 
@@ -107,7 +109,7 @@ class CorpusValidatesTest(unittest.TestCase):
         if not (p.exists() and SCHEMA.exists()):
             self.skipTest("record or schema not present in this checkout")
         r = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", str(SCHEMA),
+            [*linkml_validate(), "-s", str(SCHEMA),
              "-C", "GenerationRecord", str(p)],
             capture_output=True, text=True, timeout=300)
         self.assertEqual(r.returncode, 0, (r.stdout + r.stderr)[-500:])
@@ -124,7 +126,7 @@ class CorpusValidatesTest(unittest.TestCase):
                  "record_version": 1, "record_mode": "live"}),
                 encoding="utf-8")
             r = subprocess.run(
-                ["poetry", "run", "linkml-validate", "-s", str(SCHEMA),
+                [*linkml_validate(), "-s", str(SCHEMA),
                  "-C", "GenerationRecord", str(bad)],
                 capture_output=True, text=True, timeout=300)
             self.assertNotEqual(r.returncode, 0)

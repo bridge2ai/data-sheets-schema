@@ -188,12 +188,10 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
         self.assertEqual(named, [])
 
     def test_every_pinned_prompt_is_still_at_its_pin(self):
-        import subprocess
-        result = subprocess.run(
-            ["poetry", "run", "d4d", "api", "prompts", "check", "--strict"],
-            capture_output=True, text=True, check=False, cwd=ROOT)
-        self.assertEqual(result.returncode, 0,
-                         (result.stdout + result.stderr)[-600:])
+        from click.testing import CliRunner
+        from data_sheets_schema.cli import cli
+        result = CliRunner().invoke(cli, ["api", "prompts", "check", "--strict"])
+        self.assertEqual(result.exit_code, 0, result.output[-600:])
 
     def test_the_canonical_arm_is_not_uncanonical(self):
         """The property that would have been lost by editing v1 *for this rule*.

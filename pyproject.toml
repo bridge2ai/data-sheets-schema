@@ -90,6 +90,6 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.pytest.ini_options]
 markers = [
-    "corpus: walks the committed corpus under data/ (hundreds of records or a whole-corpus CLI check). Run on merge to main and on demand; a pull request runs the rest (#1203).",
+    "corpus: walks the committed corpus under data/ (hundreds of records or a whole-corpus CLI check). Included in every pull request and in every main/manual interpreter matrix (#1361, #1812).",
     "install: builds the wheel and installs it into a fresh virtual environment (network for dependencies), then runs the generation path from a directory that is not a checkout (#1301).",
 ]
