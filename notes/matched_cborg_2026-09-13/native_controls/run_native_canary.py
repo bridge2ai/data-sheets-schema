@@ -30,6 +30,18 @@ def verified_executable(overlay):
     return str(path)
 
 
+def native_evidence_check(spec):
+    """Recheck the exact originals using the generation's selected protocol."""
+    from data_sheets_schema.evidence_assertions import check_files
+    evidence_dir = spec.metadata_dir / 'evidence'
+    return check_files(audit=evidence_dir/'audit.json', bundle=spec.bundle,
+        manifest=spec.chunk_manifest, report=spec.report_path,
+        artifacts={'original_full':evidence_dir/'original_full.yaml',
+                   'original_core':evidence_dir/'original_core.yaml',
+                   'final_full':spec.full_path,'final_core':spec.core_path},
+        protocol_version=2 if spec.render_version >= 11 else 1)
+
+
 def terminate_group(process):
     if process is None:
         return
@@ -173,13 +185,7 @@ def main():
         problems=api_runner.validate_outputs(spec)
         pair=api_runner.pair_consistency(spec)
         if spec.render_version >= 9:
-            from data_sheets_schema.evidence_assertions import check_files
-            evidence_dir = spec.metadata_dir / 'evidence'
-            evidence = check_files(audit=evidence_dir/'audit.json', bundle=spec.bundle,
-                manifest=spec.chunk_manifest, report=spec.report_path,
-                artifacts={'original_full':evidence_dir/'original_full.yaml',
-                           'original_core':evidence_dir/'original_core.yaml',
-                           'final_full':spec.full_path,'final_core':spec.core_path})
+            evidence = native_evidence_check(spec)
             receipt['evidence_assertions'] = evidence
             if not evidence['checked'] or evidence['findings']:
                 problems = list(problems) + ['explicit evidence assertions failed']
