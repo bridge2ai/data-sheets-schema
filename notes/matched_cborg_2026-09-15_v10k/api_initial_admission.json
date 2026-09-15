@@ -1,0 +1,36 @@
+{
+  "prepared_at": "2026-09-15T08:53:05.751530+00:00",
+  "status": "offline_preparation_only_pending_authorized_live_count",
+  "method": "Serialized input UTF-8 bytes, using a local one-token-per-byte sizing scenario with 20 percent plus 1024 margin. This is not a verified tokenizer bound, actual token count, live admission or proof that the whole attempt fits.",
+  "live_gate": "The unchanged transport must obtain CBORG count_tokens and reserve against the actual count before each generation request in an authorized attempt. Insufficient budget stops the attempt.",
+  "prior_settled_cost_usd": "29.39163800",
+  "remaining_additional_budget_usd": "170.60836200",
+  "generation_requests": 0,
+  "remote_token_count_requests": 0,
+  "requests": [
+    {
+      "job": "CHORUS_api_rep1",
+      "initial_request_file_sha256": "adca1eb11ebe4066ed13c407ff6d7a1ee39a702230d38a41a886997209eb32c3",
+      "input_tokens": null,
+      "serialized_input_bytes": 125552,
+      "local_token_sizing_scenario": 151687,
+      "output_ceiling": 128000,
+      "local_initial_reservation_scenario_usd": "4.14804375",
+      "proposed_cap_usd": "6.78",
+      "local_scenario_fits_cap": true,
+      "live_token_count_status": "not_sent_pending_authorized_launch"
+    },
+    {
+      "job": "KIDS_FIRST_api_rep1",
+      "initial_request_file_sha256": "d8a737cae8fc4008cbde34bbd790000a490131fa515f3dc420c4607fa427b8a1",
+      "input_tokens": null,
+      "serialized_input_bytes": 636905,
+      "local_token_sizing_scenario": 765310,
+      "output_ceiling": 128000,
+      "local_initial_reservation_scenario_usd": "7.98318750",
+      "proposed_cap_usd": "15",
+      "local_scenario_fits_cap": true,
+      "live_token_count_status": "not_sent_pending_authorized_launch"
+    }
+  ]
+}
