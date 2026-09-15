@@ -67,10 +67,11 @@ def test_launch_verification_failure_never_starts_process(tmp_path):
 
 
 @pytest.mark.parametrize('override, expected', [(None, '5'), (15, '15')])
+@pytest.mark.parametrize('bypass', [False, True])
 @pytest.mark.parametrize('render_version, binding', [(7, 'omitted'), (9, 'matched'),
                                                    (9, 'omitted'), (9, 'different')])
 def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeypatch, override, expected,
-                                                            render_version, binding):
+                                                            render_version, binding, bypass):
     import anthropic
     import run_native_canary as runner
 
@@ -87,6 +88,8 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
                            'agentic_attempt_deadline_seconds': 1}}
     if override is not None:
         base['budget']['per_job_attempt_usd'] = {job['id']: override}
+    if bypass:
+        base['provider_context_policy'] = 'headroom_bypass_v1'
     registration = tmp_path / 'registration.json'
     registration.write_text(json.dumps(base))
     overlay = tmp_path / 'overlay.json'
@@ -108,6 +111,7 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
 
         def __init__(self, **kwargs):
             observed['proxy_cap'] = str(kwargs['ledger'].limit_for_attempt(kwargs['attempt']))
+            assert kwargs['request_headers'] == ({'x-headroom-bypass': 'true'} if bypass else {})
 
         @contextmanager
         def running(self):
@@ -125,7 +129,10 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     monkeypatch.setattr(runner.subprocess, 'check_output', lambda *args, **kwargs: 'test-version')
     monkeypatch.setattr(runner, 'spec_for', lambda *args: SimpleNamespace(
         render_spec=lambda: {}, input_identity=lambda: {}, render_version=render_version))
-    monkeypatch.setattr(anthropic, 'Anthropic', lambda **kwargs: object())
+    def sdk(**kwargs):
+        assert kwargs['default_headers'] == ({'x-headroom-bypass': 'true'} if bypass else {})
+        return object()
+    monkeypatch.setattr(anthropic, 'Anthropic', sdk)
     monkeypatch.setattr(runner, 'NativeProxy', OfflineProxy)
     monkeypatch.setattr(runner, 'execute_child', capture)
     monkeypatch.setenv('CBORG_API_KEY', 'synthetic-never-sent')
@@ -139,3 +146,6 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
         return
     assert runner.main() == 1
     assert observed == {'proxy_cap': expected, 'cli_cap': expected}
+    receipt = json.loads((tmp_path/'attempts'/job['id']/'started.json').read_bytes())
+    assert receipt['provider_context']['requested_headers'] == ({'x-headroom-bypass': 'true'} if bypass else {})
+    assert receipt['provider_context']['provider_behavior_independently_observed'] is False

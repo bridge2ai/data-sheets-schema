@@ -7,7 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from budgeted_cborg import BudgetStop, CappedClient, Ledger
+from budgeted_cborg import (BudgetStop, CappedClient, Ledger, cborg_client,
+                           provider_context_evidence, provider_context_headers)
 
 
 PRICES = {"input": 0.000005, "output": 0.000025,
@@ -54,6 +55,55 @@ def client(tmp_path, *, fail=False, cap=5, verify=lambda: None):
 
 REQUEST = {"model": "claude-opus-5", "max_tokens": 1000,
            "messages": [{"role": "user", "content": "Synthetic fixture"}]}
+
+
+@pytest.mark.parametrize("policy", [None, False, True, {}, [], "", "default", "headroom-compressed"])
+def test_unknown_context_policy_stops_before_client_creation(policy):
+    with pytest.raises(BudgetStop, match="context policy"):
+        cborg_client({"provider_base_url": "https://unused.invalid",
+                      "provider_context_policy": policy}, "offline", max_retries=0)
+
+
+@pytest.mark.parametrize("bypass", [False, True])
+def test_registered_context_policy_reaches_sdk_count_and_generation_unchanged(tmp_path, bypass):
+    import httpx
+    manifest = {"provider_base_url": "https://api.cborg.lbl.gov"}
+    if bypass:
+        manifest["provider_context_policy"] = "headroom_bypass_v1"
+    calls = []
+    def respond(request):
+        calls.append(request)
+        if request.url.path.endswith("/count_tokens"):
+            return httpx.Response(200, json={"input_tokens": 100})
+        events = [
+            {"type": "message_start", "message": {"id": "offline", "type": "message", "role": "assistant",
+             "model": REQUEST["model"], "content": [], "stop_reason": None,
+             "usage": {"input_tokens": 100, "output_tokens": 0}}},
+            {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
+            {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "fixture"}},
+            {"type": "content_block_stop", "index": 0},
+            {"type": "message_delta", "delta": {"stop_reason": "end_turn"}, "usage": {"output_tokens": 10}},
+            {"type": "message_stop"},
+        ]
+        raw = "".join(f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events)
+        return httpx.Response(200, content=raw, headers={"content-type": "text/event-stream"})
+    sdk = cborg_client(manifest, "offline-never-sent", max_retries=0,
+                       http_client=httpx.Client(transport=httpx.MockTransport(respond)))
+    ledger = Ledger(tmp_path / "ledger.json", manifest_sha256="offline")
+    capped = CappedClient(sdk, ledger=ledger, attempt="offline", evidence=tmp_path / "requests",
+                          model=REQUEST["model"], prices=PRICES, verify=lambda: None)
+    with sdk:
+        with capped.messages.stream(**REQUEST) as stream:
+            list(stream)
+            assert stream.get_final_message().content[0].text == "fixture"
+    assert [call.url.path for call in calls] == ["/v1/messages/count_tokens", "/v1/messages"]
+    assert all(call.headers.get("x-headroom-bypass") == ("true" if bypass else None) for call in calls)
+    assert json.loads(calls[0].content) == {k: v for k, v in REQUEST.items() if k != "max_tokens"}
+    assert json.loads(calls[1].content) == {**REQUEST, "stream": True}
+    evidence = provider_context_evidence(manifest)
+    assert evidence["requested_headers"] == provider_context_headers(manifest)
+    assert evidence["provider_behavior_independently_observed"] is False
+    assert json.loads(ledger.path.read_bytes())["requests"][0]["status"] == "settled"
 
 
 def test_reserve_before_generation_and_capture_every_charge(tmp_path):

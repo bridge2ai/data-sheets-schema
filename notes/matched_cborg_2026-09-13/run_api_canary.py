@@ -9,6 +9,7 @@ import sys
 import subprocess
 
 from budgeted_cborg import BudgetStop, CappedClient, open_ledger, attempt_identity, write_new
+from budgeted_cborg import cborg_client, provider_context_evidence
 from prepare_registration import spec_for
 
 HERE = Path(__file__).resolve().parent
@@ -92,7 +93,6 @@ def main():
         if name.startswith("ANTHROPIC_") or name in {"D4D_PROFILE", "D4D_MANIFEST"}:
             os.environ.pop(name)
     from data_sheets_schema import api_runner
-    import anthropic
     api_runner.MAX_ATTEMPTS = manifest["generation"]["api_max_attempts"]
     if api_runner.PHASE_WALL_CLOCK_SECONDS != manifest["generation"]["api_phase_deadline_seconds"]:
         raise BudgetStop("phase deadline differs from registration")
@@ -102,13 +102,14 @@ def main():
     if api_runner.provider_identity()["base_url"] != manifest["provider_base_url"]:
         raise BudgetStop("provider identity does not match the configured CBORG endpoint")
     ledger = open_ledger(manifest, manifest_sha)
-    client = CappedClient(anthropic.Anthropic(api_key=key, base_url=manifest["provider_base_url"],
-                                             max_retries=manifest["generation"]["sdk_max_retries"]),
+    client = CappedClient(cborg_client(manifest, key,
+                                      max_retries=manifest["generation"]["sdk_max_retries"]),
         ledger=ledger, attempt=attempt_identity(manifest_sha, job["id"]), evidence=attempt / "requests",
         model=manifest["model"]["model"], prices=manifest["budget"]["prices_per_token"],
         verify=lambda: verify(manifest, args.registration, manifest_sha),
         initial_request=json.loads(Path(job["initial_request"]).read_bytes()))
     receipt = {"job": job["id"], "registration_sha256": manifest_sha,
+               "provider_context": provider_context_evidence(manifest),
                "review_sha256": sha(args.review), "started_at": datetime.now(timezone.utc).isoformat(),
                "launch_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                "status": "incomplete", "generation_requests_admitted": 0}

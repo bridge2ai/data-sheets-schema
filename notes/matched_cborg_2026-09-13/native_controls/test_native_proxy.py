@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import httpx
 import pytest
 
-from budgeted_cborg import BudgetStop, Ledger
+from budgeted_cborg import BudgetStop, Ledger, cborg_client, provider_context_headers
 from native_proxy import Completion, NativeProxy
 
 PRICES={"input":0.000005,"output":0.000025,"cache_read":0.0000005,"cache_write":0.00000625}
@@ -79,6 +79,65 @@ def test_native_request_unchanged_and_accounted_before_terminal_event(tmp_path):
     assert len(list((tmp_path/'requests').rglob('native_request.json')))==1
     assert len(list((tmp_path/'requests').rglob('response.sse')))==1
     assert 'offline-provider-key' not in ''.join(p.read_text() for p in (tmp_path/'requests').rglob('*') if p.is_file())
+
+
+@pytest.mark.parametrize('bypass', [False, True])
+def test_registered_context_policy_covers_native_counts_and_raw_forwarding(tmp_path, bypass):
+    manifest = {'provider_base_url': 'https://api.cborg.lbl.gov'}
+    if bypass:
+        manifest['provider_context_policy'] = 'headroom_bypass_v1'
+    calls = []
+    def respond(request):
+        calls.append(request)
+        if request.url.path.endswith('/count_tokens'):
+            return httpx.Response(200, json={'input_tokens': 100})
+        return httpx.Response(200, content=wire(events()), headers={'content-type': 'text/event-stream'})
+    sdk = cborg_client(manifest, 'offline-provider-key', max_retries=0,
+                       http_client=httpx.Client(transport=httpx.MockTransport(respond)))
+    ledger = Ledger(tmp_path/'ledger.json', manifest_sha256='offline')
+    proxy = NativeProxy(sdk=sdk, ledger=ledger, attempt='offline', evidence=tmp_path/'requests',
+        model=REQUEST['model'], prices=PRICES, verify=lambda: None, provider_key='offline-provider-key',
+        base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest),
+        upstream=httpx.Client(transport=httpx.MockTransport(respond)))
+    raw = json.dumps(REQUEST, indent=3).encode()
+    with proxy.running() as url:
+        # Neither a child-supplied bypass nor its opposite selects the policy.
+        headers = {'x-api-key': proxy.token, 'x-headroom-bypass': 'false' if bypass else 'true'}
+        count = httpx.post(url+'/v1/messages/count_tokens', json=REQUEST, headers=headers)
+        response = httpx.post(url+'/v1/messages?beta=true', content=raw, headers=headers)
+    assert count.status_code == response.status_code == 200
+    assert count.json() == {'input_tokens': 100} and response.content == wire(events())
+    assert [call.url.path for call in calls] == ['/v1/messages/count_tokens', '/v1/messages/count_tokens', '/v1/messages']
+    assert all(call.headers.get('x-headroom-bypass') == ('true' if bypass else None) for call in calls)
+    assert calls[-1].content == raw
+    assert all(json.loads(call.content) == {k: v for k, v in REQUEST.items() if k not in {'max_tokens', 'stream'}}
+               for call in calls[:-1])
+    protocol = json.loads(next((tmp_path/'requests').rglob('request_protocol.json')).read_bytes())
+    assert protocol.get('x-headroom-bypass') == ('true' if bypass else None)
+    assert 'x-api-key' not in protocol
+    assert json.loads(ledger.path.read_bytes())['requests'][0]['status'] == 'settled'
+
+
+def test_native_rejects_different_counting_and_forwarding_policy(tmp_path):
+    proxy, ledger, calls = fixture_proxy(tmp_path)
+    with pytest.raises(BudgetStop, match='context policies differ'):
+        NativeProxy(sdk=SimpleNamespace(default_headers={}), ledger=ledger, attempt='offline',
+            evidence=tmp_path/'other', model=REQUEST['model'], prices=PRICES, verify=lambda: None,
+            provider_key='offline', base_url='https://api.cborg.lbl.gov',
+            request_headers={'x-headroom-bypass': 'true'})
+    assert not calls and not ledger.path.exists()
+    proxy.upstream.close()
+
+
+@pytest.mark.parametrize('headers', [[], '', {'x-headroom-bypass': 'false'},
+                                     {'x-api-key': 'unregistered'}, {'unknown': 'true'}])
+def test_native_rejects_unregistered_provider_headers_before_network(tmp_path, headers):
+    ledger = Ledger(tmp_path/'ledger.json', manifest_sha256='offline')
+    with pytest.raises(BudgetStop, match='headers'):
+        NativeProxy(sdk=SimpleNamespace(default_headers={}), ledger=ledger, attempt='offline',
+            evidence=tmp_path/'requests', model=REQUEST['model'], prices=PRICES, verify=lambda: None,
+            provider_key='offline', base_url='https://api.cborg.lbl.gov', request_headers=headers)
+    assert not ledger.path.exists() and not (tmp_path/'requests').exists()
 
 
 @pytest.mark.parametrize('bad_events',[events(stop_reason=None),events(stop=False)])
