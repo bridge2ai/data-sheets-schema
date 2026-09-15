@@ -1,5 +1,11 @@
 # v10k matched generation canaries — first API attempt stopped
 
+**Later update, 2026-09-15:** the user confirmed $0.267175 as the complete
+charge and approved a fresh continuation. See the
+[v10l registration](../matched_cborg_2026-09-15_v10l/README.md). The original
+attempt and ledger remain unchanged; the historical status below describes
+the stopping state before that confirmation.
+
 The first CHORUS API request stopped with a transport error and no delivered D4D
 text. Its 12 original files are preserved. Accounting remains unresolved; the
 $3.539750 reservation is retained. No agentic canary or evaluation has launched.

@@ -1,5 +1,12 @@
 # Matched evidence-guided canaries — 2026-09-15
 
+**Later accounting update:** the user confirmed the complete stopped charge as
+$0.267175 and approved continuation. The
+[reconciled v10l plan](matched_cborg_reconciled_retry_2026-09-15.md) supersedes
+the unresolved-accounting next steps below. This earlier note retains the
+original stopping-state record; neither the original ledger nor the stopped
+scientific attempt was changed.
+
 The shared fixes for the v10j observations (#1801, #1815, #1816) are merged
 in #1819. Eleven engineering review issues were resolved and closed after
 the Codex review and required CI passed. Keep the three scientific observations
