@@ -1,0 +1,32 @@
+{
+  "kind": "additional_canary_attempt_proposal_not_launch_approval",
+  "status": "awaiting_explicit_additional_attempt_approval",
+  "prior_approved_scope": "One v10i CHORUS API attempt capped at $10.85 completed for $4.069292 and was independently rejected. Its approval is used; no automatic whole-attempt retry.",
+  "proposed_action": "One fresh CHORUS API v10j attempt using pinned API request-header instructions and report checker v8, followed by the three unrun matched canaries only after sequential acceptance.",
+  "previously_approved_per_attempt_maxima_usd": {
+    "CHORUS_api_rep1": 20,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "proposed_whole_attempt_caps_usd": {
+    "CHORUS_api_rep1": 6.78,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "maximum_new_four_canary_attempts_usd": "46.78",
+  "maximum_combined_including_rejected_attempts_usd": "63.74298500",
+  "already_approved_combined_ceiling_usd": "63.75",
+  "combined_ceiling_increase_requested": false,
+  "existing_additional_allocation_usd": "200.00",
+  "allocation_spent_usd": "25.89189100",
+  "allocation_remaining_usd": "174.10810900",
+  "default_other_attempt_cap_usd": "5",
+  "no_automatic_whole_attempt_retries": true,
+  "effort_changes": false,
+  "source_changes": false,
+  "generation_instruction_change": "API renderer 8 pins request-derived Model, Temperature and Reasoning effort headers; current report instructions distinguish omission, removal, addition and relocation. Report checker v8 detects false removal of absent original full-root fields; explicit v7 replay preserves historical measurements.",
+  "activation": "No launch receipt before explicit approval of an additional whole attempt, independent registration review, exact-commit CI and current pin/model/accounting checks. A failed canary stops the sequence. No evaluator or production batch launch.",
+  "spent_in_rejected_or_stopped_v10e_v10f_v10g_v10h_v10i_attempts_usd": "16.96298500"
+}

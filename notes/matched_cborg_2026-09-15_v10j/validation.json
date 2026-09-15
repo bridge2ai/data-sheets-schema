@@ -1,0 +1,23 @@
+{
+  "scope": "Offline software and frozen-input checks only; no scientific acceptance",
+  "targeted_pytest_result": "428 passed, 13 warnings in 350.33s",
+  "test_log_sha256": "e0b614af4df75a2260e85f022d9b7e582c9b4554e24325c0ec761da13ba6f7a1",
+  "test_files": [
+    "tests/test_download/test_api_runner.py",
+    "tests/test_api_header_instructions.py",
+    "tests/test_registry_audit_and_prompt_replay.py",
+    "tests/test_generation_manifest_identity.py",
+    "tests/test_generation_recovery_review.py",
+    "tests/test_backfill_manifest_portability.py",
+    "tests/test_report_original_removal.py",
+    "tests/test_report_claims.py",
+    "tests/test_report_claims_corpus.py",
+    "tests/test_backfill_checks.py",
+    "tests/test_cli/test_provenance_prompt.py"
+  ],
+  "historical_measurements": "The corpus test reproduces 278 stored v7 report measurements with explicit v7 instrumentation; no historical result is rewritten.",
+  "engineering_review": "Two public Codex rounds; #1809 filed/fixed after round 1; round 2 approved without material findings.",
+  "preflight": "461 registration pins, 8 native pins, 3241 historical files, 287 prior originals, 32 jobs with unchanged source/profile identities, 16 initial API requests reproduced, 64 unused output directories.",
+  "live_admission": "Pending explicit approval; local size scenarios do not replace mandatory CBORG count_tokens and reservation at execution.",
+  "ci": "Required on the final PR commit before merge/launch."
+}

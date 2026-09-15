@@ -1,0 +1,341 @@
+{
+  "purpose": "Exact local originals are not published; public source files and renderer permit reconstruction. Normalization only substitutes machine paths.",
+  "inputs": [
+    {
+      "job": "CHORUS_api_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "ba2412ae329ab5abe581f50bab39f52cae667df20b7db22761613d6329190afb",
+      "normalized_review_sha256": "34780ab1baecbd18fc37aaf0e8ac1e1244fb17f97388db9023afaf630d5a724c",
+      "bytes": 28015
+    },
+    {
+      "job": "CHORUS_api_rep1",
+      "kind": "initial_request",
+      "local_original_sha256": "4e740e2faee4f648d22eac5d193ffdb543a2b0e300f426b13cace592fe2c726e",
+      "normalized_review_sha256": "33ee9a966ae7a9a1b104745ba775eb299114d79d697960753e20232b9246b350",
+      "bytes": 119678
+    },
+    {
+      "job": "CHORUS_agentic_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "56e7596acf4f9298d7bb5d873b5560addfa775d61469663e0631e9562f1c79c7",
+      "normalized_review_sha256": "b44a1ba40e3cb31a4a66c1af280899760ec0828863775a31e4e3c62a82d9dedc",
+      "bytes": 35359
+    },
+    {
+      "job": "CHORUS_api_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "fa3c6156ee6d02e180be7ec4c608a4ce49f0dc3bac2f5c7794e49b77ce85adcf",
+      "normalized_review_sha256": "75fd6e385fff01ed014936c2abad0dcae3246489c935929c8ffb087d0a83f091",
+      "bytes": 28015
+    },
+    {
+      "job": "CHORUS_api_rep2",
+      "kind": "initial_request",
+      "local_original_sha256": "856180c9fb9a255597002a1b8aaabd30ef13f158f5ed0ad2d821e6ba7a8d8cf1",
+      "normalized_review_sha256": "1a94f608fdfce8d1f66eeb5ab40d3b2f0bdd0a0ddc1b2cde821c25b173606d2b",
+      "bytes": 119678
+    },
+    {
+      "job": "CHORUS_agentic_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "d445893d5eb5e972ad63e1e6abb5153c371ef089cbdd4f1b20f5144613b4eaf9",
+      "normalized_review_sha256": "3fbd95d3afb87076be8add4b08fc20e9ce4f619900dbd32c4248f5173dc5c399",
+      "bytes": 35359
+    },
+    {
+      "job": "CHORUS_api_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "e93d1a35b7185a92919fb15895dea77a8568b597e8320e2632e5101b4eada748",
+      "normalized_review_sha256": "242305781192a87c06781afee5ad4ef07e4d7a051cc4f2fa26246bb7ad5da14d",
+      "bytes": 28015
+    },
+    {
+      "job": "CHORUS_api_rep3",
+      "kind": "initial_request",
+      "local_original_sha256": "9046558cd5141626488aacdda29935a9f613cdcdfcefe8147be5d15fbfdffb63",
+      "normalized_review_sha256": "f6cce8fbe154ad7a465cbb018dad1df4f75850c62dcc9b0ec7889043f6f8f32b",
+      "bytes": 119678
+    },
+    {
+      "job": "CHORUS_agentic_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "b225afba991f2b6c82310643a219e0cd5677327937d8f94dae7016797149fdf3",
+      "normalized_review_sha256": "2020f77c95883141fceeb26211adc8775dab517e8039a8244b5eb008040f1f26",
+      "bytes": 35359
+    },
+    {
+      "job": "AI_READI_api_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "3ac413843a7ca16b1c28797e265a148f41e30f880c91f5cbb69bac48c3b211bc",
+      "normalized_review_sha256": "7a5fb576e508afa08cf74cefdcc760991d2fc329335f543301c4a9284dac5a63",
+      "bytes": 28053
+    },
+    {
+      "job": "AI_READI_api_rep1",
+      "kind": "initial_request",
+      "local_original_sha256": "992695beade46b2a42da6e4e507b9a8d4e690114f94bb9ec4f5c68059541005e",
+      "normalized_review_sha256": "2e4c6dfd2246aaba452388fd8e48d8dcdc1a1c8c7bcd1272d2263ff7efb3d3dc",
+      "bytes": 643936
+    },
+    {
+      "job": "AI_READI_agentic_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "ae862646cd27e3763a93fcf2cf237deacf294c2f83b0997f7aab04cdccb98408",
+      "normalized_review_sha256": "d235a7a0f7ab7debaa54a9ad0797344341d965ea32505ee6477fe24e2655e92d",
+      "bytes": 35481
+    },
+    {
+      "job": "AI_READI_api_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "ec9e2cb3b56ecb0436de20c5bcd1d5edacfb84fa4458e25a0ac3b4e0925f203c",
+      "normalized_review_sha256": "8337623322222779edffa1e3a24c5a9e2cc1025ab68aa70dcac652311c6afdca",
+      "bytes": 28053
+    },
+    {
+      "job": "AI_READI_api_rep2",
+      "kind": "initial_request",
+      "local_original_sha256": "7e7712a3d2a70f5b3104746a180c3972d629cd02e65221f9b10c7601c4e4aee1",
+      "normalized_review_sha256": "33dc80d7be174a53c63af6017d9c0276e9e70d8efe929d0a8722919dfbee27b1",
+      "bytes": 643936
+    },
+    {
+      "job": "AI_READI_agentic_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "b46d72b37e88e47d92d9664ec04a013e229c97db5262749002448c5fe4ef3707",
+      "normalized_review_sha256": "67a3e7b0d7fff3996a0a500b014b887c72c0797a5c512c6174b67beabb4216e5",
+      "bytes": 35481
+    },
+    {
+      "job": "AI_READI_api_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "4e38ad436c4e1659251b23cbbafc7bcd2db8e519bb414c77eeed0ae44c1cd6cf",
+      "normalized_review_sha256": "cc34ebe329f5af7b7c76f6f40042487444c9802bd03f805b4441c7412bce78a2",
+      "bytes": 28053
+    },
+    {
+      "job": "AI_READI_api_rep3",
+      "kind": "initial_request",
+      "local_original_sha256": "d09b838ffa15d5c6f9d7922d2e46a948775ab38c277419b0b123daa20e4c3013",
+      "normalized_review_sha256": "df7b74de9fbd51cf3418b58de3af88d96b0dae7ef69c35ea6f626aba155acd85",
+      "bytes": 643936
+    },
+    {
+      "job": "AI_READI_agentic_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "e4cadc2f3241425f4eaef767513428d73ff4231a2820075debf407da81e957e2",
+      "normalized_review_sha256": "3d22ec6f620f83a2752a7eb157b5502f768f369ac816645017eb9bf701a4d9ca",
+      "bytes": 35481
+    },
+    {
+      "job": "CM4AI_api_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "b62d3b95ef527f983078d90ee0cc1783a4eb4d9ff2c393710576150a314667be",
+      "normalized_review_sha256": "0f6b06a268455cf962bbb2e372774604f26a4ba75a68940bd9e8b504fe43cea4",
+      "bytes": 27996
+    },
+    {
+      "job": "CM4AI_api_rep1",
+      "kind": "initial_request",
+      "local_original_sha256": "c809983cd0c390301e61695e0e965f164f4e68e347078fcbd454efe76ad90f56",
+      "normalized_review_sha256": "8acfb8bb0787cb3b2edc6e73452e3ac98cf7024f3034cdbc8b68478a1cf65da4",
+      "bytes": 414102
+    },
+    {
+      "job": "CM4AI_agentic_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "d5c457ab630bd599a9f1a92d614694d801518561d10abb9851e2a1b46a9e79cd",
+      "normalized_review_sha256": "0dd53756224b6cb918afbbfe7136bbf6796f073004085bf535100b5a786d42cb",
+      "bytes": 35298
+    },
+    {
+      "job": "CM4AI_api_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "9a94944001591d1afe2b795d91f2839feec03145a5dbb71016893db47d49fafb",
+      "normalized_review_sha256": "760eb4b43a143e126ba8f640cbe85df4f1de158554a5bd0e62af9fb972ec1045",
+      "bytes": 27996
+    },
+    {
+      "job": "CM4AI_api_rep2",
+      "kind": "initial_request",
+      "local_original_sha256": "d35aea2166fbd3ed45e6abd382ebf27d606c69ad010f603306b0f9d950d8ac5b",
+      "normalized_review_sha256": "62110d244657e3a2fb1c55847f8c2389f9c1810f901c648472e6685e7c9e76f0",
+      "bytes": 414102
+    },
+    {
+      "job": "CM4AI_agentic_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "d4ab8e087620f35f7936d744f21c03e3a3de016bf32ef40e09184acdb7b1e5e3",
+      "normalized_review_sha256": "b6363b2d91e691a9ec6308950ed5ab31ef0fcb5f5d1c43057af46bd0317c3f16",
+      "bytes": 35298
+    },
+    {
+      "job": "CM4AI_api_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "119941b25fc0b025b243be02d3c57945f9e42d343b8d2a9799130c817f9a4e96",
+      "normalized_review_sha256": "27d7f7bc38c1fdc07019840d1422224a68f211aa750616601d9388f15b3bed03",
+      "bytes": 27996
+    },
+    {
+      "job": "CM4AI_api_rep3",
+      "kind": "initial_request",
+      "local_original_sha256": "2dfa2c247dd8dd8db76490df2f6ef6c756d6f8b6be4e3fe5628cbb8930d96343",
+      "normalized_review_sha256": "bfe18d13e5a2110663b68a44a834215f36c5843371828b02ed1efea985a5f978",
+      "bytes": 414102
+    },
+    {
+      "job": "CM4AI_agentic_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "e1bde1dc94d57c82546884aec53686756d9ae93cb2b5e5be46995fa7aeaf7d64",
+      "normalized_review_sha256": "e3265c365ecf87a015a9bfa05aff24ac59daf43b12349979e7ec8dd278968201",
+      "bytes": 35298
+    },
+    {
+      "job": "VOICE_api_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "ad2bf4da9907cbc52f6672a0d95e0da78179bbca2c6971f14bd4e3085de7e541",
+      "normalized_review_sha256": "8659f49899f979c190cc48f50e440c703571cf7f73ffe91546ad104168fb10aa",
+      "bytes": 27996
+    },
+    {
+      "job": "VOICE_api_rep1",
+      "kind": "initial_request",
+      "local_original_sha256": "82c075634dffd1ad54fc8fddc8122c3a3a98a3ff9ccef3620b37a515cc062b10",
+      "normalized_review_sha256": "d8366dccf56d1b3bcde7d8780cc7ad0f52e7e36eb521b013000ac8b6b9675a1c",
+      "bytes": 470772
+    },
+    {
+      "job": "VOICE_agentic_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "52f9024264b02735ee961a049bd46cb779583abe4ca1add15c12507507c43fc4",
+      "normalized_review_sha256": "091a4bc767d0104accb7bd48580f78800b65ce89031713317e61acfac3758f54",
+      "bytes": 35298
+    },
+    {
+      "job": "VOICE_api_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "32caee97b8f094ecdd13a7f60a6d1cf5f69b0b4be3cdeabf6335a6b6c98f6a20",
+      "normalized_review_sha256": "14484725da1ff87069b97b4a5e3c3e05def04308425dcf33bda015110b4f9cba",
+      "bytes": 27996
+    },
+    {
+      "job": "VOICE_api_rep2",
+      "kind": "initial_request",
+      "local_original_sha256": "8322598a6a6b94a94f1769d9b601f0bb2aa54299a335b14f7bbf8edb4b5430f9",
+      "normalized_review_sha256": "0f485fed8474f6b1d9d21e3f253705a9b31187f313895b4dbf7c6bd80528451d",
+      "bytes": 470772
+    },
+    {
+      "job": "VOICE_agentic_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "d6f02e4997ffaa370f3405664cced8636818cf69f96ccd5afda5ffd510d35a05",
+      "normalized_review_sha256": "88d09ac683faa4dc71eb067366a08e438bf5a92c50323ded32d1c4a78d3849e7",
+      "bytes": 35298
+    },
+    {
+      "job": "VOICE_api_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "5e9ebc34357d2e437068ec16977abbb9b8034264efc6edd4c7f900bd2d930818",
+      "normalized_review_sha256": "599822e959c86c7358e05e3b136b06c97a9191a11531d18859c765820a29ad5e",
+      "bytes": 27996
+    },
+    {
+      "job": "VOICE_api_rep3",
+      "kind": "initial_request",
+      "local_original_sha256": "f8c8c6459918cf7c6b64af15f801ef7494064043397d0a0ce2e8c4891ed71f8a",
+      "normalized_review_sha256": "b91f0588caaf44873c1f468704f280422dada977cbbc3634b53c533670bf07a8",
+      "bytes": 470772
+    },
+    {
+      "job": "VOICE_agentic_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "1a20f5d90a873175ba4627a001f75a733d2c3353dcbda421134a98bcf4dc5e1d",
+      "normalized_review_sha256": "e6ffa81514f98c6d8ea9a515d29ece0634d228e7f5bccb565f245a69214142a0",
+      "bytes": 35298
+    },
+    {
+      "job": "VOICE_PEDIATRIC_api_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "d24eadbbe6d1d14626734933bd7f7f62c9cda9a5259de7ed697802ed93b37edf",
+      "normalized_review_sha256": "b618284bb0472bdbc436ed216016f83c36337fa64496f7d1f1dbe6f2b46b8624",
+      "bytes": 28186
+    },
+    {
+      "job": "VOICE_PEDIATRIC_api_rep1",
+      "kind": "initial_request",
+      "local_original_sha256": "16c217c8ee5ea2f4e8a4cee6d1604505ad1815429ce9967e5d7cbe4a6e7584f7",
+      "normalized_review_sha256": "1b48a09383b9ab215644feb0bdb14dcd4c82b178e1db3a8fadedaebef215db15",
+      "bytes": 293170
+    },
+    {
+      "job": "VOICE_PEDIATRIC_agentic_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "6ca284a384551be1f750fe0660e65f831421c694267ae16a25b66c0300c2db14",
+      "normalized_review_sha256": "6f2a90b36b8a284f5ad9da255452fcbeacb859570c40124ae5e5f15088c8080d",
+      "bytes": 35908
+    },
+    {
+      "job": "VOICE_PEDIATRIC_api_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "a7f4b6df96d09b69d9e96cd0bf81dce843eb847edd8aa874d1897c52ff21b281",
+      "normalized_review_sha256": "da2bb58ca56018496c096efa9911834998349a63079c5181be96686c97208f42",
+      "bytes": 28186
+    },
+    {
+      "job": "VOICE_PEDIATRIC_api_rep2",
+      "kind": "initial_request",
+      "local_original_sha256": "29e4f05c10035b7509227f9829e28909964e13187cdb9d820eddbf7820b26d62",
+      "normalized_review_sha256": "450b42197f017ed12f95e31dd8e6240a270bad4ecef486cf9c45c785c25ed61b",
+      "bytes": 293170
+    },
+    {
+      "job": "VOICE_PEDIATRIC_agentic_rep2",
+      "kind": "instruction",
+      "local_original_sha256": "16d87559cf534856ccbbc890a3a6a01ee7028bd5694a8d992403f029ee32f271",
+      "normalized_review_sha256": "93ebc3834e35e487c4d04b21d64c290d3d8530eeea38a945a4a11d32624bcd34",
+      "bytes": 35908
+    },
+    {
+      "job": "VOICE_PEDIATRIC_api_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "d206718d97ee079fad80263b9f1fcbadd77a8a25088ef58298137c5d8a62ceed",
+      "normalized_review_sha256": "629fa7f3332be17b2428c44e954022c1296da10bede42171830002a233d72318",
+      "bytes": 28186
+    },
+    {
+      "job": "VOICE_PEDIATRIC_api_rep3",
+      "kind": "initial_request",
+      "local_original_sha256": "82229316c2c28c19b4b1abc96c5e1f1d9d9a8b4f081eeb0f69a10caffa614baf",
+      "normalized_review_sha256": "8d413d75ebc36912695040069e915afe3830109773a2df9ffe7001fee39bace3",
+      "bytes": 293170
+    },
+    {
+      "job": "VOICE_PEDIATRIC_agentic_rep3",
+      "kind": "instruction",
+      "local_original_sha256": "45201a869ceb93dbd1d598aa2a0d1c81723b954a94003535c0a893a741a8661f",
+      "normalized_review_sha256": "969abe0afbcc690e17af74ea83582ffad97692aa56c45c4b1825e446a30fbe9a",
+      "bytes": 35908
+    },
+    {
+      "job": "KIDS_FIRST_api_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "321ed29a489997a4fa64cec43e3cceeaa73ffb080cebbedbce2a5fcddbf2a396",
+      "normalized_review_sha256": "157a33cd79382a6b1ee9b933c8e4a2a39a8e6b0aaa9be8c8b405534f6dfe5f9e",
+      "bytes": 28345
+    },
+    {
+      "job": "KIDS_FIRST_api_rep1",
+      "kind": "initial_request",
+      "local_original_sha256": "d7488a18d0c440d9a31e5e1beb650a3f8d8cc1d77971080ac1319569b8e835fe",
+      "normalized_review_sha256": "5dc800d59ca17223de7d1e119d99657e0e01f7c81a5784d8ca52ec4b7609b125",
+      "bytes": 631890
+    },
+    {
+      "job": "KIDS_FIRST_agentic_rep1",
+      "kind": "instruction",
+      "local_original_sha256": "e94fc88890c80c43512d2a5af9d33d6f3daae6f825cedeefd92bc29743b08a6c",
+      "normalized_review_sha256": "d48e9c3bddd29fced5959eee28013b2a9e3ff3a6df6b26c33eee93e8feaaa4a9",
+      "bytes": 37651
+    }
+  ]
+}
