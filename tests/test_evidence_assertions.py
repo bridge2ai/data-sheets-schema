@@ -227,6 +227,47 @@ def test_cyclic_descendants_cannot_establish_removal():
     assert "cyclic" in problems[0]["detail"]
 
 
+@pytest.mark.parametrize("field,container", [
+    ("target_dataset", "related_datasets"), ("publisher", "members"),
+    ("path", "members"), ("reviewing_organization", "ethics_reviews"),
+])
+def test_unchanged_wrapper_cannot_hide_a_changed_structured_endpoint(field, container):
+    rejected = {"id": "urn:relation:rejected", field: "https://example.org/rejected"}
+    supported = {"id": "urn:relation:supported", field: "https://example.org/supported"}
+    if field == "target_dataset":
+        rejected["relationship_type"] = supported["relationship_type"] = "derives_from"
+    original = {container: [rejected, supported]}
+    audit = {"findings": [{"remove_relationship": {"path": "/" + container + "/0", "identity": "/id"}}]}
+    survivor = {**supported, field: rejected[field]}
+    assert check_relationship_removals(audit, original,
+        {container: [survivor]})[0]["kind"] == "evidence_contract"
+    assert check_relationship_removals(audit, original, {container: [supported]}) == []
+
+
+def test_dataset_target_can_identify_a_relationship_without_a_wrapper_id():
+    original = {"related_datasets": [
+        {"target_dataset": "https://example.org/rejected", "relationship_type": "derives_from"},
+        {"target_dataset": "https://example.org/supported", "relationship_type": "derives_from"},
+    ]}
+    audit = {"findings": [{"remove_relationship": {
+        "path": "/related_datasets/0", "identity": "/target_dataset"}}]}
+    assert check_relationship_removals(audit, original, original)[0]["kind"] == "unsupported_relationship_retained"
+    assert check_relationship_removals(audit, original, {"related_datasets": original["related_datasets"][1:]}) == []
+
+
+def test_narrative_corrections_do_not_change_a_remaining_relationship():
+    rejected = {"id": "urn:person:rejected"}
+    supported = {"id": "urn:person:supported", "description": "Original prose",
+                 "person": {"id": "urn:person:nested", "notes": "Original residual prose"}}
+    original = {"creators": [rejected, supported]}
+    audit = {"findings": [{"remove_relationship": {"path": "/creators/0", "identity": "/id"}}]}
+    survivor = copy.deepcopy(supported)
+    survivor["description"] = "Corrected prose"
+    survivor["source_caveats"] = "Source uncertainty"
+    survivor["person"].pop("notes")
+    assert check_relationship_removals(audit, original, {"creators": [survivor]}) == []
+
+
 @pytest.mark.parametrize("mode", ["retained", "added", "changed", "removed"])
 def test_person_orcid_is_bound_with_its_id_and_name(mode):
     rejected = {"id": "https://example.org/rejected", "name": "Rejected", "orcid": "0000-0002-1825-0097"}
@@ -267,7 +308,8 @@ def test_identity_signatures_cover_the_schema_declared_identifiers():
         for name, slot in slots.items():
             mappings = {slot.get("slot_uri"), *(slot.get("exact_mappings") or []),
                         *(slot.get("broad_mappings") or []), *(slot.get("close_mappings") or [])}
-            if slot.get("identifier") or concepts & mappings:
+            if slot.get("identifier") or concepts & mappings or (
+                    "dcterms:relation" in mappings and slot.get("range") in {"string", "uri", "uriorcurie"}):
                 declared.add(name)
     assert declared <= IDENTITY_FIELDS, "New schema identifiers need explicit removal-check coverage"
     assert "email" not in IDENTITY_FIELDS  # schema declares contact information, not a persistent identifier

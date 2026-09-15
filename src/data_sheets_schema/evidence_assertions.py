@@ -22,7 +22,8 @@ MISSING = object()
 # plus human-readable names. A schema-driven regression checks coverage when
 # the schema changes. Contact details and descriptive text are not identities.
 IDENTITY_FIELDS = frozenset({"id", "name", "orcid", "doi", "grant_number",
-                             "variable_name", "hash", "md5", "sha256", "checksum"})
+                             "variable_name", "hash", "md5", "sha256", "checksum", "target_dataset"})
+NARRATIVE_FIELDS = frozenset({"description", "notes", "source_caveats"})
 
 
 def load_json(raw: str | bytes):
@@ -222,6 +223,19 @@ def _member_identities(member, declared=None):
     return identities
 
 
+def _member_structure(value, ancestors=frozenset()):
+    """Bind structured content, allowing only narrative text to change."""
+    if not isinstance(value, (dict, list)):
+        return (type(value), value)
+    if id(value) in ancestors:
+        raise ValueError("cyclic relationship structure is ambiguous")
+    ancestors = ancestors | {id(value)}
+    if isinstance(value, list):
+        return (list, [_member_structure(child, ancestors) for child in value])
+    return (dict, {key: _member_structure(child, ancestors) for key, child in value.items()
+                   if not (key in NARRATIVE_FIELDS and (child is None or isinstance(child, str)))})
+
+
 def _matched_member(original, final, index, declared=None):
     """Resolve a member after reordering; a changed identity is ambiguous.
 
@@ -231,17 +245,20 @@ def _matched_member(original, final, index, declared=None):
     """
     identities = [_member_identities(member, declared) for member in original]
     overlap_paths = _identity_paths(declared)
+    structures = [_member_structure(member) for member in original] if declared is not None else None
     if not isinstance(final, list):
         raise ValueError("final relationship container changed shape")
     mapped = {}
     for member in final:
         current = _member_identities(member, declared)
-        candidates = [i for i, fields in enumerate(identities) if current == fields]
+        structure = _member_structure(member) if structures is not None else None
+        candidates = [i for i, fields in enumerate(identities) if current == fields
+                      and (structures is None or structure == structures[i])]
         overlaps = [i for i, fields in enumerate(identities)
                     if any(path in overlap_paths and value is not MISSING and current.get(path, MISSING) == value
                            for path, value in fields.items())]
         if len(candidates) != 1 or overlaps != candidates or candidates[0] in mapped:
-            raise ValueError("relationship identity changed, disappeared, or is ambiguous; removal is unverified")
+            raise ValueError("relationship identity or structure changed, disappeared, or is ambiguous; removal is unverified")
         mapped[candidates[0]] = member
     return mapped.get(index, MISSING)
 

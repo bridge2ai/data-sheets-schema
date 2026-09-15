@@ -204,3 +204,21 @@ declared subject and its containing objects.
 All 91 final evidence, generation and native-recording controls pass; the
 existing dependency deprecation warnings remain. Required CI and the full
 Codex plugin review must pass on the published revision before merge.
+
+## Engineering review, round 7 preparation
+
+The full Codex plugin review of public commit
+`f36a5254d57b958a7b9c92e6b8cd9522fc39c260` found #1829: an unchanged
+wrapper id could hide a changed scalar target_dataset. Four synthetic endpoint
+controls reproduced this problem, and a fifth showed that the target could
+not identify a relationship without an optional wrapper id/name.
+Matching now binds the selected member's structured content as well as its
+identifiers. Only narrative description, notes and source_caveats may change;
+other changes to surviving structured members stop as ambiguous. Ancestors
+still bind their own identities, allowing the declared child to be removed.
+target_dataset can identify a relationship directly. Narrative correction and
+unchanged-survivor controls preserve supported use cases. This is a deliberately
+conservative removal check; independent review still decides semantic support.
+All 97 updated evidence, generation and native-recording controls pass.
+CI passed on `f36a5254d57b958a7b9c92e6b8cd9522fc39c260` before this final
+matching revision; the updated commit requires its own CI and review.
