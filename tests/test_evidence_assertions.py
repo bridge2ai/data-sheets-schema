@@ -97,6 +97,37 @@ def test_nonlist_role_must_be_removed_not_qualified():
     assert check_relationship_removals(audit, original, {"governance": {}}) == []
 
 
+@pytest.mark.parametrize("member", [
+    {"id": "rejected"}, {"id": "rejected", "name": "Renamed"},
+    {"id": "rejected", "name": "Established Creator"}, {"notes": "identity deleted"},
+    {"id": "invented", "name": "New identity"},
+])
+def test_losing_or_changing_identity_cannot_prove_removal(member):
+    original = {"creators": [{"id": "rejected", "name": "Team Member"},
+                             {"name": "Established Creator"}]}
+    audit = {"findings": [{"remove_relationship": {"path": "/creators/0", "identity": "/name"}}]}
+    final = {"creators": [member]}
+    assert check_relationship_removals(audit, original, final)[0]["kind"] == "evidence_contract"
+    assert check_relationship_removals(audit, original,
+        {"creators": [{"name": "Established Creator"}]}) == []
+
+
+def test_nested_relationship_follows_every_indexed_ancestor():
+    original = {"groups": [{"id": "g1", "creators": [{"id": "supported"}]},
+                           {"id": "g2", "creators": [{"id": "other"},
+                               {"id": "rejected", "principal_investigator": {"name": "Member"}}]}]}
+    audit = {"findings": [{"remove_relationship": {
+        "path": "/groups/1/creators/1/principal_investigator"}}]}
+    final = copy.deepcopy(original)
+    final["groups"].reverse()
+    final["groups"][0]["creators"].reverse()
+    assert check_relationship_removals(audit, original, final)[0]["kind"] == "unsupported_relationship_retained"
+    final["groups"][0]["creators"][0].pop("principal_investigator")
+    assert check_relationship_removals(audit, original, final) == []
+    final["groups"][0].pop("id")
+    assert check_relationship_removals(audit, original, final)[0]["kind"] == "evidence_contract"
+
+
 def test_relationship_identity_must_be_evidenced_in_original():
     audit = {"findings": [{"remove_relationship": {"path": "/creators/0", "identity": "/notes"}}]}
     assert check_relationship_removals(audit, {"creators": [{"notes": "not an identity"}]}, {})[0]["kind"] == "evidence_contract"

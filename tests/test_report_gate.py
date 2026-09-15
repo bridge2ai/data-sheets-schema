@@ -389,6 +389,38 @@ class TestTheRunnerGate(unittest.TestCase):
         self.assertIn("prior invocation", out["reason"])
         self.assertEqual(out["prior"]["regenerated"], True)
 
+    def test_regeneration_exhaustion_survives_multiple_rechecks_and_unusable_answers(self):
+        root = self.out
+        for outcome in ("retained", "truncated", "discarded"):
+            with self.subTest(outcome=outcome):
+                self.out = root / outcome
+                fake = _ReportFake("| `keywords` | removed | full | gone |\n",
+                                   "| `keywords` | removed | full | gone |\n")
+                original = fake.create
+                def create(**kw):
+                    response = original(**kw)
+                    blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
+                    if PHASE_INSTRUCTIONS["report_regate"] in blob:
+                        if outcome == "truncated":
+                            response.stop_reason = "max_tokens"
+                        elif outcome == "discarded":
+                            return FakeResponse("No table in this answer.")
+                    return response
+                fake.create = create
+                s, result, record = self._run(fake)
+                self.assertTrue(record["report_gate"]["regeneration_attempted"])
+                self.assertEqual([u["phase"] for u in result["usage"]].count("report_regate"), 1)
+                class Boom:
+                    messages = property(lambda self: (_ for _ in ()).throw(AssertionError("must not call")))
+                # Exercise the gate itself, without the v9 terminal-refusal
+                # guard masking whether its allowance can reset (#1821).
+                for _ in range(3):
+                    gate = api_runner._gate_report(s, Boom(), api_runner._model_settings(), [], {})
+                    self.assertTrue(gate["regeneration_attempted"])
+                    self.assertFalse(gate["regenerated"])
+                    record["report_gate"] = gate
+                    s.provenance_path.write_text(yaml.safe_dump(record))
+
     def test_a_report_without_the_table_is_regenerated_once(self):
         """The table is itself a claim the gate checks; its absence is a contradiction."""
         fake = _ReportFake("unused", "| `keywords` | retained | full | kept |\n")

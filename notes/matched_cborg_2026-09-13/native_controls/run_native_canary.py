@@ -108,6 +108,8 @@ def main():
     spec=spec_for(job)
     if spec.render_spec()!=job['render_spec'] or spec.input_identity()!=job['input_identity']:
         raise BudgetStop('native generation instruction or input identity changed')
+    if spec.render_version >= 9 and overlay['per_job_environment'][job['id']].get('D4D_LAUNCH_INSTRUCTION') != job['instruction']:
+        raise BudgetStop('native provenance must read the exact registered launch instruction')
     key=os.environ.get('CBORG_API_KEY')
     if not key: raise BudgetStop('CBORG_API_KEY is required')
     executable=verified_executable(overlay)

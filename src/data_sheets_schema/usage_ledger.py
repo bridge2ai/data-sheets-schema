@@ -283,11 +283,51 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     """Commit intent before a request so response persistence can fail safely."""
     require_resolved(spec)
     data = _read(spec)
+    if data.get("evidence_refusal") is not None:
+        raise UsageLedgerError("this generation has a terminal evidence refusal; no further calls are allowed")
+    if phase == "report_regate":
+        if report_regate_attempted(spec):
+            raise UsageLedgerError("this generation already attempted its one report regeneration")
+        # Admission consumes the allowance even if the response is truncated,
+        # discarded, or the transport later fails (#1821).
+        data["report_regate_attempted"] = True
     identifier = uuid.uuid4().hex
     data["pending_call"] = {"usage_id": identifier, "phase": phase,
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)
     return identifier
+
+
+def report_regate_attempted(spec) -> bool:
+    """Paid or admitted work exhausts the allowance, not retained output."""
+    if not ledger_path(spec).exists():
+        return False
+    data = _read(spec)
+    return (bool(data.get("report_regate_attempted"))
+            or any(row.get("phase") == "report_regate" for row in data["rows"])
+            or (data.get("pending_call") or {}).get("phase") == "report_regate")
+
+
+def evidence_refusal(spec) -> dict | None:
+    """A terminal refusal belongs to this ledger's current generation."""
+    if not ledger_path(spec).exists():
+        return None
+    refusal = _read(spec).get("evidence_refusal")
+    if refusal is not None and (not isinstance(refusal, dict)
+            or refusal.get("stage") not in {"audit", "reconcile", "report"}
+            or not isinstance(refusal.get("reading"), dict)):
+        raise UsageLedgerError("invalid terminal evidence refusal; restore the generation ledger")
+    return refusal
+
+
+def record_evidence_refusal(spec, stage: str, reading: dict) -> None:
+    """Atomically retain rejection independently of progress and final files."""
+    if not ledger_path(spec).exists():
+        raise UsageLedgerError("cannot record evidence refusal without the generation ledger")
+    data = _read(spec)
+    if data.get("evidence_refusal") is None:
+        data["evidence_refusal"] = {"stage": stage, "reading": reading}
+        _write(spec, data)
 
 
 def cancel_call(spec, identifier: str) -> None:

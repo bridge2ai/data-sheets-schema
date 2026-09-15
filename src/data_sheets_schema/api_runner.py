@@ -1116,6 +1116,18 @@ def resolve_prompt(spec: RunSpec) -> str:
             Path("src/download/prompts/evidence_protocol_v1.md")).read_text(encoding="utf-8")
         if spec.is_agentic:
             body += native_evidence_instructions(spec)
+            # Add this after portable command/path adaptation: the serialized
+            # specification itself must never be rewritten by a text adapter.
+            import shlex
+            payload = shlex.quote(json.dumps(spec.render_spec(), sort_keys=True, separators=(",", ":")))
+            body = re.sub(
+                r"(?m)^([^\n]* -m data_sheets_schema\.cli provenance record[^\n]*)$",
+                lambda match: match.group(1) + " --render-spec-json " + payload
+                + ' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?Set D4D_LAUNCH_INSTRUCTION to the exact saved launch instruction}"',
+                body)
+            body += ("\nThe launcher must set D4D_LAUNCH_INSTRUCTION to the exact saved instruction "
+                     "file supplied on stdin. The provenance command verifies that file against "
+                     "the registered rendering specification. Do not reconstruct or edit it.\n")
     return body
 
 
@@ -3422,8 +3434,11 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
                 "findings": [{"kind": "evidence_inputs_unusable", "detail": str(exc)}]}
 
 
-def _assert_evidence_clean(out: dict | None, stage: str) -> None:
+def _assert_evidence_clean(out: dict | None, stage: str, *, spec: RunSpec | None = None) -> None:
     if out is not None and (not out["checked"] or out["findings"]):
+        if spec is not None:
+            from data_sheets_schema.usage_ledger import record_evidence_refusal
+            record_evidence_refusal(spec, stage, out)
         raise RuntimeError(f"{stage} evidence assertions failed: "
                            + json.dumps(out["findings"], ensure_ascii=False))
 
@@ -3436,9 +3451,12 @@ def require_evidence_checks(spec: RunSpec, carry: dict[str, str], *, stage: str,
     out = evidence_checks_block(spec, carry, reconciled=stage == "reconcile",
                                 report=stage == "report")
     if preserve:
+        if not out["checked"] or out["findings"]:
+            from data_sheets_schema.usage_ledger import record_evidence_refusal
+            record_evidence_refusal(spec, stage, out)
         _snapshot(spec, f"{spec.project}_{stage}_evidence.json", json.dumps(out, indent=2))
     if fail:
-        _assert_evidence_clean(out, stage)
+        _assert_evidence_clean(out, stage, spec=spec if preserve else None)
     return out
 
 
@@ -4824,6 +4842,23 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         return block
 
     before = reading()
+    from data_sheets_schema.usage_ledger import report_regate_attempted
+    attempted = report_regate_attempted(spec)
+    prior = None
+    if spec.provenance_path.exists():
+        try:
+            record = yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}
+            identity = record.get("run") or {}
+            if (not _foreign_usage_identity(spec, identity, recorded=True)
+                    and _same_usage_generation(spec, identity.get("generation_id"))):
+                prior = record.get("report_gate")
+        except yaml.YAMLError:
+            pass
+    previous, seen = prior, set()
+    while isinstance(previous, dict) and id(previous) not in seen:
+        seen.add(id(previous))
+        attempted |= bool(previous.get("regeneration_attempted") or previous.get("regenerated"))
+        previous = previous.get("prior")
     out: dict[str, Any] = {
         "checked": bool(before.get("checked")),
         "claims_checked_before": before.get("claims_checked"),
@@ -4833,7 +4868,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         # legitimate ones too — so the tally is kept from both sides
         # (#1139 review, S1); the record's block is the post-regate reading.
         "rows_by_record_before": before.get("rows_by_record"),
-        "regenerated": False}
+        "regenerated": False, "regeneration_attempted": attempted}
     if spec.render_version >= 9:
         out["evidence_assertions_before"] = before["evidence_assertions"]
         out["findings_include_evidence_assertions"] = True
@@ -4856,13 +4891,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     # Once per run, not once per invocation: a resumed invocation whose
     # earlier pass already regenerated the report must not spend again
     # (#965). The prior gate is kept under `prior`.
-    prior = None
-    if spec.provenance_path.exists():
-        try:
-            prior = (yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}).get("report_gate")
-        except yaml.YAMLError:
-            prior = None
-    if isinstance(prior, dict) and prior.get("regenerated"):
+    if attempted:
         out.update({"reason": "regenerated in a prior invocation; not repeated", "prior": prior,
                     "findings_after": out["findings_before"],
                     "remaining": (before.get("findings") or [])[:20]})
@@ -4872,6 +4901,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
                                             phase="report_regate",
                                             contradictions=contradictions)
+    out["regeneration_attempted"] = report_regate_attempted(spec)
     after = reading()
     worse = (out["regenerated"] and (
         (before.get("disposition_rows") and not after.get("disposition_rows"))
@@ -5469,6 +5499,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
     if resume:
         _require_resolved_usage(spec)
+        from data_sheets_schema.usage_ledger import evidence_refusal
+        refusal = evidence_refusal(spec)
+        if refusal is not None:
+            # Before artifact drift can invalidate paid phases (#1820).
+            _assert_evidence_clean(refusal["reading"], refusal["stage"])
     progress = _load_progress(spec) if resume else {}
     skipped: list[str] = []
     carry: dict[str, str] = {}
@@ -6060,6 +6095,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     final_evidence = require_evidence_checks(spec, carry, stage="report", fail=False)
     if final_evidence is not None:
         rec.data["report_gate"]["evidence_assertions_final"] = final_evidence
+        # Validation repair is an internal write, not external drift. Freeze
+        # its hashes and the latest snapshots before any terminal refusal.
+        _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
     # The context facts were frozen before the gate could add a call (#967).
     rec.data["model"]["context"] = context_facts(settings["name"], usage)
     # `dispositions_expected`: the report phase was asked for the table, so
@@ -6096,7 +6134,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     rec.write(spec.provenance_path)
     # Persist the one-time report regeneration and its usage before refusing
     # completion; otherwise resume could admit that same call again (#1818).
-    _assert_evidence_clean(final_evidence, "report")
+    _assert_evidence_clean(final_evidence, "report", spec=spec)
 
     # Verify what was just written rather than assuming it. The playbook lists a
     # live record as a completion criterion, and a criterion nothing checks is a

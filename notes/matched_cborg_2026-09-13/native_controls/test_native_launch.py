@@ -67,7 +67,10 @@ def test_launch_verification_failure_never_starts_process(tmp_path):
 
 
 @pytest.mark.parametrize('override, expected', [(None, '5'), (15, '15')])
-def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeypatch, override, expected):
+@pytest.mark.parametrize('render_version, binding', [(7, 'omitted'), (9, 'matched'),
+                                                   (9, 'omitted'), (9, 'different')])
+def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeypatch, override, expected,
+                                                            render_version, binding):
     import anthropic
     import run_native_canary as runner
 
@@ -87,9 +90,11 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     registration = tmp_path / 'registration.json'
     registration.write_text(json.dumps(base))
     overlay = tmp_path / 'overlay.json'
+    environment = ({} if binding == 'omitted' else {'D4D_LAUNCH_INSTRUCTION':
+                   str(instruction) if binding == 'matched' else str(tmp_path / 'another.md')})
     overlay.write_text(json.dumps({'registration': str(registration),
         'registration_sha256': sha(registration), 'allowed_jobs': [job['id']],
-        'pinned_files': {}, 'environment': {}, 'per_job_environment': {job['id']: {}},
+        'pinned_files': {}, 'environment': {}, 'per_job_environment': {job['id']: environment},
         'cli_flags': [], 'allowed_tools': ['Read'], 'system_prompt': str(instruction)}))
     review = tmp_path / 'review.json'
     review.write_text(json.dumps({'verdict': 'approve', 'ci_conclusion': 'success',
@@ -110,6 +115,8 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
 
     def capture(argv, **kwargs):
         observed['cli_cap'] = argv[argv.index('--max-budget-usd') + 1]
+        if render_version >= 9:
+            assert kwargs['env']['D4D_LAUNCH_INSTRUCTION'] == str(instruction)
         raise BudgetStop('synthetic probe stops before process or provider execution')
 
     monkeypatch.setattr(runner, 'verify', lambda *args: None)
@@ -117,12 +124,18 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     monkeypatch.setattr(runner, 'verified_executable', lambda *args: sys.executable)
     monkeypatch.setattr(runner.subprocess, 'check_output', lambda *args, **kwargs: 'test-version')
     monkeypatch.setattr(runner, 'spec_for', lambda *args: SimpleNamespace(
-        render_spec=lambda: {}, input_identity=lambda: {}))
+        render_spec=lambda: {}, input_identity=lambda: {}, render_version=render_version))
     monkeypatch.setattr(anthropic, 'Anthropic', lambda **kwargs: object())
     monkeypatch.setattr(runner, 'NativeProxy', OfflineProxy)
     monkeypatch.setattr(runner, 'execute_child', capture)
     monkeypatch.setenv('CBORG_API_KEY', 'synthetic-never-sent')
     monkeypatch.setattr(sys, 'argv', ['run_native_canary', '--overlay', str(overlay),
                                     '--review', str(review), '--job', job['id']])
+    if render_version >= 9 and binding != 'matched':
+        with pytest.raises(BudgetStop, match='exact registered launch instruction'):
+            runner.main()
+        assert observed == {}
+        assert not (tmp_path / 'billing.json').exists()
+        return
     assert runner.main() == 1
     assert observed == {'proxy_cap': expected, 'cli_cap': expected}

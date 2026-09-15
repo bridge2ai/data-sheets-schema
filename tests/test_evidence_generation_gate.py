@@ -65,11 +65,12 @@ def test_native_freeze_command_copies_exact_bytes_and_refuses_overwrite(tmp_path
 
 
 class EvidenceFake(FakeMessages):
-    def __init__(self, *, bad_audit=False, retained_role=False, repair_report=True):
+    def __init__(self, *, bad_audit=False, retained_role=False, repair_report=True, report_outcome="normal"):
         super().__init__()
         self.bad_audit = bad_audit
         self.retained_role = retained_role
         self.repair_report = repair_report
+        self.report_outcome = report_outcome
 
     def create(self, **kw):
         text = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
@@ -96,7 +97,12 @@ class EvidenceFake(FakeMessages):
             report = "# Reconciliation\n\n" + appendix([claim])
             report += "\n## Dispositions\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
             report += f"| {tick}keywords{tick} | retained | full | kept |\n"
-            return FakeResponse(report)
+            response = FakeResponse(report)
+            if phase == "report_regate" and self.report_outcome == "truncated":
+                response.stop_reason = "max_tokens"
+            if phase == "report_regate" and self.report_outcome == "discarded":
+                response = FakeResponse("A prose answer with no required table or appendix.")
+            return response
         if self.retained_role:
             self.calls.append(kw)
             members = [{"name": "Established Creator"}, {"name": "Team Member"}]
@@ -161,6 +167,7 @@ def test_uncorrected_header_history_stops_completion(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("options", [
     {"bad_audit": True}, {"retained_role": True}, {"repair_report": False},
+    {"report_outcome": "truncated"}, {"report_outcome": "discarded"},
 ])
 def test_evidence_refusal_cannot_spend_again_on_resume(tmp_path, monkeypatch, options):
     spec = specification(tmp_path)
@@ -168,9 +175,47 @@ def test_evidence_refusal_cannot_spend_again_on_resume(tmp_path, monkeypatch, op
     with pytest.raises(RuntimeError, match="evidence assertions failed"):
         run(spec, fake, monkeypatch)
     calls = len(fake.calls)
-    with pytest.raises(RuntimeError, match="evidence assertions failed"):
-        run(spec, fake, monkeypatch)
-    assert len(fake.calls) == calls
+    before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+    for _ in range(3):
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        assert len(fake.calls) == calls
+        assert before == {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+
+
+def test_shape_repair_then_evidence_refusal_is_terminal_before_phase_invalidation(tmp_path, monkeypatch):
+    spec = specification(tmp_path)
+    fake = EvidenceFake(repair_report=False)
+    monkeypatch.setattr(api_runner, "_client", lambda: SimpleNamespace(messages=fake))
+    state = {"repaired": False}
+    monkeypatch.setattr(api_runner, "_validator_lines",
+                        lambda *args: ([], None) if state["repaired"] else (["synthetic shape error"], None))
+    def repair(*args):
+        # Exercise the real post-repair controller with changed full/core
+        # bytes. This control needs no remote model or LinkML subprocess.
+        state["repaired"] = True
+        spec.full_path.write_text(spec.full_path.read_text() + "\n# shape repaired\n")
+        from data_sheets_schema.derive_core import core_text
+        spec.core_path.write_text(core_text(spec.full_path, phase4_complete=True)[0])
+        return [{"record": "full", "round": 1, "accepted": True}]
+    monkeypatch.setattr(api_runner, "_repair_invalid", repair)
+    with pytest.raises(RuntimeError, match="report evidence assertions failed"):
+        api_runner.execute(spec)
+    assert state["repaired"]
+    from data_sheets_schema.provenance import _md5
+    progress = api_runner._load_progress(spec)
+    assert progress["artifact_md5"] == {"full": _md5(spec.full_path), "core": _md5(spec.core_path)}
+    calls = len(fake.calls)
+    # Refusal is independent of progress and remains after further local
+    # drift. Neither can authorize new paid originals for this generation.
+    api_runner._progress_path(spec).unlink()
+    spec.full_path.write_text(spec.full_path.read_text() + "\n# later local drift\n")
+    before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+    for _ in range(3):
+        with pytest.raises(RuntimeError, match="report evidence assertions failed"):
+            api_runner.execute(spec)
+        assert len(fake.calls) == calls
+        assert before == {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
 
 
 def test_completed_resume_rechecks_without_calls_or_writes(tmp_path, monkeypatch):

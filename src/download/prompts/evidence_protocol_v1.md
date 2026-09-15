@@ -63,6 +63,10 @@ name; choose the person's or entity's own identity, not an affiliation.
 Reordering the list does not remove that relationship. For a non-list field,
 omit identity and remove the unsupported field entirely. Do not merely delete
 the name or identifier from an otherwise retained unsupported entry.
+Every indexed ancestor must also have an original id or name. Preserve all
+identifying fields of the remaining members, including their spelling. A
+missing, changed, duplicated or newly introduced identity in that container
+makes removal ambiguous; stop for review rather than claiming verification.
 
 ### Reconciliation and report
 

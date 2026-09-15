@@ -76,11 +76,60 @@ artifact changes. The generated native freeze command was executed offline
 with spaces and apostrophes in paths; it preserves exact CRLF/LF bytes, prints
 their hashes and refuses to replace existing originals.
 
-Validation so far: 236 existing/initial targeted tests passed, followed by
+Validation at the first head: 236 existing/initial targeted tests passed, followed by
 30 updated evidence, execution and native-control tests and the additional
-native freeze-command control. Required PR CI is still pending.
+native freeze-command control. Required PR CI passed on `febec9014d425573d4ce71089d221efb99f76327`
+(run `34942015635`, all four shards and the aggregate test gate).
 
 Automatic approval review rejected sending the uncommitted nine-file diff to
 the external Codex service because it lacked explicit authorization for that
-payload and destination. No review payload was sent. Local adversarial review
-and testing continue; no external review result is claimed.
+payload and destination. That attempted payload was not sent. After committing,
+pushing and opening public PR #1819, a clean clone fetched only the exact
+published GitHub commit and the Codex plugin reviewed that public branch.
+
+## Engineering review, round 2 preparation
+
+The external review of `febec9014d425573d4ce71089d221efb99f76327` returned
+`needs-attention`. Its four findings were filed as #1820–#1823:
+
+- #1820: validation repair changed artifacts after progress hashes were saved,
+  so a subsequent evidence refusal could resume as new generation work.
+- #1821: a skipped, truncated or discarded report regeneration could reset
+  the one-attempt allowance on later resumes.
+- #1822: removing an identity field or moving an indexed ancestor could be
+  mistaken for removal of the rejected relationship.
+- #1823: the prescribed native provenance command reconstructed renderer 7,
+  despite the instruction being registered under renderer 9.
+
+The revised implementation records terminal refusal in the generation's
+atomic usage ledger, refreshes progress after validation repair, and checks
+refusal before artifact-based phase invalidation. The same ledger consumes
+the report-regeneration allowance at call admission, including a transport
+failure or unusable response. Explicit new generations archive these controls
+with their predecessors; resuming cannot reset them.
+
+Relationship checks map remaining members to original identities and follow
+every indexed ancestor. Missing, changed or ambiguous identities stop the
+check. The native instruction supplies its complete render specification to
+the recorder, and the launch overlay binds `D4D_LAUNCH_INSTRUCTION` to the exact
+registered stdin file. The recorder verifies byte-identical replay and
+matching inputs before writing. Historical rendering defaults are preserved.
+The legacy backfill search remains historical; new native runs carry the exact
+registered spec directly instead of relying on guessed backfill parameters.
+
+New controls cover repeated resumes, successful shape repair before refusal,
+lost progress and subsequent artifact drift, transport failure, truncated and
+discarded report answers, identity deletion and nested ancestor reordering.
+A registration-to-recording-to-replay control executes the rendered native CLI
+arguments and rejects altered text, renderer, profile, runtime and bundle.
+Round-2 review and CI must pass on the revised commit before merging.
+
+Local validation: 125 evidence, generation, report and accounting tests passed;
+22 native provenance and historical-recorder controls passed; the two added
+regeneration-exhaustion controls passed. After the final persistence change,
+all 20 generation/native-recording controls passed again. All 25 native launch
+and proxy controls passed with localhost access, followed by all 12 expanded
+launch controls, including refusal before billing when the v9 launch-instruction
+binding is missing or wrong. The initial proxy test invocation was sandboxed
+and could not bind its localhost test server; the rerun used synthetic provider
+responses with permitted localhost sockets. No scientific calls were made.

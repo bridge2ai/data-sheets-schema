@@ -169,12 +169,71 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict) -> dict:
             "assertions_checked": count, "findings": problems}
 
 
+def _member_identities(member, declared=None):
+    if not isinstance(member, dict):
+        raise ValueError("indexed relationship members must be objects with stable identities")
+    paths = [(key,) for key in ("id", "name") if key in member]
+    if declared is not None and tuple(declared) not in paths:
+        paths.append(tuple(declared))
+    identities = {path: _at(member, path) for path in paths}
+    if not identities or any(not isinstance(value, str) or not value.strip()
+                             for value in identities.values()):
+        raise ValueError("indexed relationship member or ancestor has no usable stable identity")
+    return identities
+
+
+def _matched_member(original, final, index, declared=None):
+    """Resolve a member after reordering; a changed identity is ambiguous.
+
+    Every remaining member must match exactly one original member with all
+    its identifying fields intact. An unmatched/new member could be the
+    rejected subject renamed, so absence cannot be established in that case.
+    """
+    identities = [_member_identities(member, declared) for member in original]
+    if not isinstance(final, list):
+        raise ValueError("final relationship container changed shape")
+    mapped = {}
+    for member in final:
+        candidates = [i for i, fields in enumerate(identities)
+                      if isinstance(member, dict) and all(_at(member, path) == value
+                                                         for path, value in fields.items())]
+        overlaps = [i for i, fields in enumerate(identities)
+                    if isinstance(member, dict) and any(_at(member, path) == value
+                                                       for path, value in fields.items())]
+        if len(candidates) != 1 or overlaps != candidates or candidates[0] in mapped:
+            raise ValueError("relationship identity changed, disappeared, or is ambiguous; removal is unverified")
+        mapped[candidates[0]] = member
+    return mapped.get(index, MISSING)
+
+
+def _relationship_after(original, final, tokens, declared):
+    """Walk dict keys and match each indexed ancestor, never its old index."""
+    old, current = original, final
+    for offset, token in enumerate(tokens):
+        if isinstance(old, list):
+            index = int(token)
+            identity = declared if offset == len(tokens) - 1 else None
+            # Validate the subject/ancestor even when the entire container
+            # was removed; a declaration still needs an evidenced identity.
+            _member_identities(old[index], identity)
+            if current is not MISSING:
+                current = _matched_member(old, current, index, identity)
+            old = old[index]
+        else:
+            if current is not MISSING:
+                if not isinstance(current, dict):
+                    raise ValueError("final relationship ancestor changed shape")
+                current = current.get(token, MISSING)
+            old = old[token]
+    return current
+
+
 def check_relationship_removals(audit, original: dict, final: dict) -> list[dict]:
     """Check declared removal without treating list positions as identity.
 
     For a list member, identity is a pointer relative to that member, ending
-    in id or name. The same identity anywhere in the same final container
-    is retained. A non-list relationship must be absent altogether.
+    in id or name. All identifying fields and indexed ancestors must retain
+    stable identities. A non-list relationship must be absent altogether.
     This checks the declared action, not the audit's semantic judgment.
     """
     findings = []
@@ -190,6 +249,7 @@ def check_relationship_removals(audit, original: dict, final: dict) -> list[dict
             if old is MISSING:
                 raise ValueError("unsupported relationship does not exist in the original")
             parent = _at(original, tokens[:-1])
+            identity_tokens = None
             if isinstance(parent, list):
                 identity_tokens = _tokens(rule.get("identity"))
                 if identity_tokens[-1] not in {"id", "name"}:
@@ -197,17 +257,10 @@ def check_relationship_removals(audit, original: dict, final: dict) -> list[dict
                 identity = _at(old, identity_tokens)
                 if not isinstance(identity, str) or not identity.strip():
                     raise ValueError("original list member has no usable declared identity")
-                remaining = _at(final, tokens[:-1])
-                if remaining is MISSING:
-                    retained = False
-                elif not isinstance(remaining, list):
-                    raise ValueError("final relationship container changed shape")
-                else:
-                    retained = any(_at(item, identity_tokens) == identity for item in remaining)
             else:
                 if "identity" in rule:
                     raise ValueError("identity is only valid for an indexed list member")
-                retained = _at(final, tokens) is not MISSING
+            retained = _relationship_after(original, final, tokens, identity_tokens) is not MISSING
             if retained:
                 findings.append(_problem("unsupported_relationship_retained",
                     "the audit rejected this relationship, but the final record still asserts it; a disclaimer does not remove it",
