@@ -1,0 +1,18 @@
+{
+  "source_base": "12f97988a60b5f252941e9572a9ff3b5083f63aa",
+  "renderer": 11,
+  "evidence_protocol": 2,
+  "native_controller_reviewed_commit": "9f7a0d71741ad0df31ce4664b4593d299c96ad5b",
+  "native_controller_merge": "8f7ad83ff6cf257f8aac056e48236d610a965561",
+  "native_controller_sha256": "8d336cc21a005f3b24864cafda3ffd3f28c841f6373ed6eb1416fa6ccead0968",
+  "native_controller_ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35022780993",
+  "native_controller_review": "approved; no material findings; 21 targeted tests and required CI passed",
+  "shared_protocol_reviewed_commit": "1ffc8538004dd99075d79bed19a696b1746059b6",
+  "shared_protocol_ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35017263642",
+  "shared_protocol_review": "third independent review approved; historical behavior preserved",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "d850e1dcad54409321351d3f1ed9679d131043288202f554c58f1a0711654230",
+    "CHORUS_source_review_plan.json": "1baf6e5f7d7f399f680a3839de6c6f6666f1a6ecd6c091eaf115d36c51c7bdbd"
+  },
+  "limits": "Software reviews and local preservation checks do not establish scientific acceptance or private accounting verification by public reviewers."
+}
