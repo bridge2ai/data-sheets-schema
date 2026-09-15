@@ -1,5 +1,11 @@
 # v10n matched canaries — versioned anonymous-object evidence
 
+**Outcome, 2026-09-15:** the first API canary stopped when its provider stream
+ended incompletely. No complete D4D was produced or accepted. The
+[stopped outcome](CHORUS_api_stopped.md) records the status and continuation
+gates; new accounting remains open in #1847. The registration and pre-launch
+figures below are preserved as history, not the current available balance.
+
 This is a distinct condition after the v10m API canary stopped because the
 v1 checker could not identify an anonymous instance containing a field the
 audit requested removing. [PR #1840](https://github.com/bridge2ai/data-sheets-schema/pull/1840)
