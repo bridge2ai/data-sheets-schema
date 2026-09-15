@@ -312,7 +312,7 @@ def _parse_phases(specs) -> list[dict]:
                    'render gate can re-render and compare instead of reporting '
                    '`unverifiable` (#497).')
 @click.option('--render-spec-json', default=None,
-              help='Exact registered native renderer-9 specification as JSON. Requires --prompt-text; '
+              help='Exact registered native renderer-9-or-newer specification as JSON. Requires --prompt-text; '
                    'the recorder must reproduce its exact bytes before writing provenance.')
 @click.option('--arm', type=click.Choice(sorted(_ARMS)), default='baseline',
               show_default=True,
@@ -399,7 +399,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 raise ValueError("--render-spec-json requires an object and --prompt-text")
             registered = RunSpec.from_render_spec(supplied, project=project, method=method, label=label)
             if not registered.is_agentic or registered.render_version < 9:
-                raise ValueError("--render-spec-json requires a native renderer-9 specification")
+                raise ValueError("--render-spec-json requires a native renderer-9-or-newer specification")
             if registered.render_spec() != supplied or registered.instruction != supplied_text:
                 raise ValueError("registered rendering specification does not reproduce the supplied instruction")
             for name, explicit in (("condition", condition), ("runtime", runtime),

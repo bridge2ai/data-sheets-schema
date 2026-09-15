@@ -1,5 +1,16 @@
 # Reconciled matched-canary continuation — 2026-09-15
 
+**Latest execution state:** #1833 merged after independent review and required
+CI passed. CBORG recovered and fresh launch checks passed. The v10l API canary
+then [stopped at the audit evidence gate](matched_cborg_2026-09-15_v10l/CHORUS_api_stopped.md)
+after two requests because all nine findings lacked required evidence arrays.
+Its $2.008425 cost is fully accounted for; $168.332762 remains of the additional
+$200, with no unresolved charge. All 362 prior/current original files are
+preserved. Fix the inconsistent phase contracts in #1834 under explicit
+renderer 10, complete review and CI, then register a distinct, budgeted
+canary before further generation. API source acceptance, native canaries and
+evaluation remain pending. The original registration plan follows.
+
 The user confirmed $0.267175 as the complete charge for the interrupted v10k
 request and approved continuation. A separate reconciled checkpoint preserves
 all earlier accounting and leaves the failed request, original ledger and

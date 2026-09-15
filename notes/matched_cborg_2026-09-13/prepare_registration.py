@@ -53,6 +53,8 @@ def main():
     parser.add_argument("--cohort", default="generalized_v10")
     parser.add_argument("--label-date", default="2026-09-13")
     parser.add_argument("--run-date", default="2026-09-14")
+    parser.add_argument("--render-version", type=int, choices=(9, 10), default=9,
+                        help="Explicit generation renderer; existing registrations retain renderer 9")
     parser.add_argument("--prior-billing", type=Path)
     parser.add_argument("--prior-cost-usd")
     parser.add_argument("--previous-attempt-audit", type=Path)
@@ -128,7 +130,7 @@ def main():
                 job = {**case, "id": identifier, "execution_arm": arm, "runtime": runtime,
                        "method": method, "replicate": replicate,
                        "canary": replicate == 1 and case["project"] in {"CHORUS", "KIDS_FIRST"},
-                       "run_date": args.run_date, "render_version": 9,
+                       "run_date": args.run_date, "render_version": args.render_version,
                        "label": f"{args.label_date}_claude-opus-5-{arm}-{args.cohort.replace('_','-')}-{case['project'].lower()}_rep{replicate}"}
                 spec = spec_for(job)
                 # Use the public CLI's corpus layout so provenance/receipt
