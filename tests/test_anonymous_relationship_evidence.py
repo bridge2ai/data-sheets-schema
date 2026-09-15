@@ -86,7 +86,7 @@ def test_all_declared_child_removals_are_bound_to_their_original_member():
 
 
 @pytest.mark.parametrize("members", [
-    [{"counts": 1, "data_substrate": "urn:a"}, {"counts": 1, "data_substrate": "urn:b"}],
+    [{"counts": 1, "data_substrate": "urn:a"}, {"counts": 1, "data_substrate": "urn:a"}],
     [{"notes": "only narrative", "data_substrate": "urn:a"}],
     [{"id": None, "counts": 1, "data_substrate": "urn:a"}],
 ])
@@ -109,6 +109,43 @@ def test_nested_object_child_and_identified_outer_ancestor_can_be_reordered():
     final["groups"][1]["members"].reverse()
     final["groups"].reverse()
     assert check(audit, original, final) == []
+
+
+def test_different_removals_keep_each_siblings_own_structural_anchor():
+    original = {"instances": [
+        {"data_topic": "urn:kept-topic", "data_substrate": "urn:bad-substrate"},
+        {"data_topic": "urn:bad-topic", "data_substrate": "urn:kept-substrate"},
+    ]}
+    audit = {"findings": [
+        {"remove_relationship": {"path": "/instances/0/data_substrate"}},
+        {"remove_relationship": {"path": "/instances/1/data_topic"}},
+    ]}
+    final = {"instances": [{"data_substrate": "urn:kept-substrate"}, {"data_topic": "urn:kept-topic"}]}
+    assert check(audit, original, final) == []
+    final["instances"][0]["data_topic"] = "urn:bad-topic"
+    assert check(audit, original, final)[0]["kind"] == "unsupported_relationship_retained"
+
+
+def test_unchanged_null_optional_field_on_sibling_does_not_block_child_removal():
+    original = {"members": [
+        {"counts": 1, "person": {"target": "urn:bad", "retained": "value"}},
+        {"counts": 2, "person": None},
+    ]}
+    audit = {"findings": [{"remove_relationship": {"path": "/members/0/person/target"}}]}
+    final = copy.deepcopy(original)
+    final["members"][0]["person"].pop("target")
+    final["members"].reverse()
+    assert check(audit, original, final) == []
+
+
+def test_unique_bijection_can_be_resolved_by_elimination():
+    original = {"members": [{"counts": 1, "target": "urn:bad"}, {"counts": 1, "target": "urn:good"}]}
+    audit = {"findings": [{"remove_relationship": {"path": "/members/0/target"}}]}
+    final = {"members": [{"counts": 1, "target": "urn:good"}, {"counts": 1}]}
+    assert check(audit, original, final) == []
+    # If both removals leave only the same count, there is no unique correspondence.
+    audit["findings"].append({"remove_relationship": {"path": "/members/1/target"}})
+    assert check(audit, original, final)[0]["kind"] == "evidence_contract"
 
 
 def test_anonymous_whole_member_or_nested_list_removal_remains_unverified():

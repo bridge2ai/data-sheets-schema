@@ -315,8 +315,8 @@ def _matched_anonymous_ancestor(original, final, index, prefix, removal_paths):
     """Prove a bijection using all unchanged structure, not a chosen prose key.
 
     This supports child-field removals, not removal/replacement of anonymous
-    members. The same masks locate candidates; each candidate is then checked
-    with only its own declared removals masked. Ambiguity always fails closed.
+    members. Each original member's own masks locate its possible survivors.
+    Only a unique complete correspondence proves which member survived.
     """
     if not isinstance(final, list) or len(final) != len(original):
         raise ValueError("anonymous ancestor members must all survive; removal or replacement is unverified")
@@ -330,24 +330,34 @@ def _matched_anonymous_ancestor(original, final, index, prefix, removal_paths):
         if any(part in NARRATIVE_FIELDS for part in tail):
             raise ValueError("anonymous relationship removal cannot select narrative fields")
         allowed[int(token)].append(tail)
-    masks = [path for paths in allowed.values() for path in paths]
-    signatures = [_member_structure(_without_fields(member, masks)) for member in original]
+    signatures = [_member_structure(_without_fields(member, allowed[i]))
+                  for i, member in enumerate(original)]
     if not all(_has_structural_anchor(sig) for sig in signatures):
         raise ValueError("anonymous ancestor lacks an unchanged structural anchor")
-    if any(signatures.count(sig) != 1 for sig in signatures):
-        raise ValueError("anonymous ancestor signatures are ambiguous")
+    candidates = {}
+    for position, member in enumerate(final):
+        candidates[position] = set()
+        for i, signature in enumerate(signatures):
+            try:
+                current = _member_structure(_without_fields(member, allowed[i]))
+            except ValueError:
+                continue  # This member cannot match this original; other masks may match.
+            if current == signature:
+                candidates[position].add(i)
     mapped = {}
-    for member in final:
-        signature = _member_structure(_without_fields(member, masks))
-        candidates = [i for i, sig in enumerate(signatures) if sig == signature]
-        if len(candidates) != 1 or candidates[0] in mapped:
+    while candidates:
+        # A unique perfect bipartite matching always has a forced row.
+        # Peel it and repeat. Without one, any perfect matching would have
+        # an alternating cycle, or there is no complete matching at all.
+        forced = next(((position, next(iter(choices))) for position, choices in candidates.items()
+                       if len(choices) == 1), None)
+        if forced is None or any(not choices for choices in candidates.values()):
             raise ValueError("anonymous ancestor structure changed, disappeared, or is ambiguous")
-        matched = candidates[0]
-        before = _member_structure(_without_fields(original[matched], allowed[matched]))
-        after = _member_structure(_without_fields(member, allowed[matched]))
-        if before != after:
-            raise ValueError("anonymous ancestor has undeclared structured changes")
-        mapped[matched] = member
+        position, matched = forced
+        mapped[matched] = final[position]
+        del candidates[position]
+        for choices in candidates.values():
+            choices.discard(matched)
     return mapped[index]
 
 
