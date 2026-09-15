@@ -10,12 +10,19 @@ generation arms on implementation base
 `94099081c2b64cb704589ecab3812bf20bb4c0e0`, explicit renderer 9, existing
 sources/profiles/schemas and the CBORG Claude Opus 5 route. The agentic arm uses
 the pinned Claude Code runtime and repository CLI; Aurelian is not required.
-No scientific generation, token-count request or evaluation has run in v10k.
+Independent registration review and exact-commit CI passed; #1830 is merged.
+The first API generation request then stopped with a transport error and no
+delivered D4D text. All 12 originals are preserved unchanged. [The outcome](matched_cborg_2026-09-15_v10k/CHORUS_api_stopped.md)
+and [#1831](https://github.com/bridge2ai/data-sheets-schema/issues/1831) record the
+stop and unresolved accounting. No agentic canary or evaluation has launched.
 
-1. Finish independent registration review and CI on the exact final commit.
-   Preserve the registered hashes and prepare a launch receipt that records
-   applicable authorization, fresh model/input checks and the cumulative ledger.
-2. Run one CHORUS API canary. Review unchanged original full/core artifacts,
+1. Reconcile the stopped API request and review the transport failure. Keep its
+   $3.539750 reservation until complete accounting is established. A matching
+   provider log reports $0.267175 but records empty content and partial usage;
+   it is not scientific acceptance or conclusive final billing.
+2. Register any fresh CHORUS API attempt with distinct paths, recalculated
+   cumulative caps and a reviewed launch receipt. The first v10k attempt is
+   permanently stopped; no automatic retry. Review unchanged full/core artifacts,
    source grounding, schema/pair checks, receipts, provenance, audit and report
    assertions. A failure stops expansion; do not edit originals into acceptance
    or repeat the whole attempt automatically.
@@ -38,9 +45,11 @@ No scientific generation, token-count request or evaluation has run in v10k.
    scores. Build comparisons with matched instruments and adjudicate disputed
    historical judgments separately.
 
-The additional allocation has $170.608362 remaining after $29.391638 in settled
-usage. Proposed canary caps are $6.78/$6.50/$15/$15 in execution order. Their
+The additional allocation has $167.068612 uncommitted after $29.391638 in settled
+token-price estimates and the $3.539750 unresolved reservation. The prelaunch
+canary caps were $6.78/$6.50/$15/$15 in execution order. Their
 $43.28 maximum plus applicable prior spending remains within $63.75; reducing
 the native CHORUS cap creates that room and is not proof of sufficient budget.
-The full proposed matrix is not assumed funded. No allocation or combined
-canary ceiling increase is requested.
+The prelaunch proposal does not fund an extra retry. Recalculate any fresh
+workload after accounting is resolved. The full proposed matrix is not assumed
+funded. No allocation or combined canary ceiling increase is requested.

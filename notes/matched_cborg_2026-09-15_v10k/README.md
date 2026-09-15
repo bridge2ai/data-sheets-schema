@@ -1,4 +1,9 @@
-# v10k matched generation canaries — registered, not run
+# v10k matched generation canaries — first API attempt stopped
+
+The first CHORUS API request stopped with a transport error and no delivered D4D
+text. Its 12 original files are preserved. Accounting remains unresolved; the
+$3.539750 reservation is retained. No agentic canary or evaluation has launched.
+See the [attempt outcome](CHORUS_api_stopped.md) and [follow-up #1831](https://github.com/bridge2ai/data-sheets-schema/issues/1831).
 
 This condition applies the reviewed evidence fixes in [PR #1819](https://github.com/bridge2ai/data-sheets-schema/pull/1819)
 to both API and agentic generation. The implementation base is
@@ -7,8 +12,9 @@ approved engineering head, `b7c20719fd5ddb140a11d3330f522b03754be5ca`, whose fou
 required CI shards and aggregate gate passed. The
 [full review](engineering_review/round6.md) identified #1829; the
 [follow-up review](engineering_review/round7.md) approved its fix with no
-material findings. All 97 final targeted checks passed. Registration review
-and CI on the final registration commit remain required.
+material findings. All 97 final targeted checks passed. Independent registration
+review and required CI passed on frozen launch commit
+`19a5248e4d1fd2dd8e0b28b794b1c315c7915778` before the API attempt.
 
 Both arms explicitly select renderer 9 and the shared evidence protocol.
 `evidence_assertions v1` checks declared source quotes, original-artifact
@@ -33,7 +39,8 @@ wrappers that import Aurelian are separate entry points.
 - [Offline preflight](offline_preflight.json) verifies 463 registration pins,
   eight native pins, 3,241 historical files and 325 prior original files. All
   32 instructions and 16 initial API requests rebuild exactly. The 64 output
-  directories are distinct and unused. The independent source-review plans
+  directories were distinct and unused at preflight. The independent source-review
+  plans
   cover each attributed clause, original qualifiers/headers, actual relationship
   removal, and observed native snapshot hashes and ordering.
 
@@ -56,7 +63,9 @@ Run CHORUS API first. Acceptance of its unchanged originals gates CHORUS
 agentic, then Kids First API, then Kids First agentic, with independent review
 after each. Each pair uses identical frozen source bytes and produces a full
 D4D and a mechanically derived core. Stop expansion on failure; there is no
-automatic whole-attempt retry. No launch or acceptance receipt exists yet.
+automatic whole-attempt retry. The first API launch had a fresh preflight and
+review receipt; no scientific acceptance receipt exists. The stopped attempt
+does not authorize an automatic retry.
 
 | Generation canary | Proposed whole-attempt cap |
 | --- | ---: |
@@ -69,18 +78,21 @@ The [proposal](retry_proposal.json) totals $43.28 of new maximum exposure.
 Together with $20.462732 spent in applicable earlier canary attempts, that is
 $63.742732, within the existing $63.75 combined ceiling. CHORUS agentic's cap
 is reduced from $10 to $6.50 to remain within that ceiling; this does not show
-that the attempt will fit. Across the additional $200 allocation, 39 settled
-requests total $29.391638 and leave $170.608362. There are no unresolved charges.
-The earlier approval of one v10j attempt has been used; it is not a launch
-receipt for this new condition.
+that the attempt will fit. Before launch, 39 settled requests totalled
+$29.391638. The stopped request now holds $3.539750 unresolved,
+leaving $167.068612 uncommitted from the additional $200. Its provider log reports
+$0.267175, but does not establish complete billable usage. Retain the reservation.
+The earlier approval of one v10j attempt was used; the v10k launch instead
+recorded the current active goal directing this new condition. A fresh retry
+would need its own registration, accounting review and applicable launch receipt.
 
 [Initial sizing](api_initial_admission.json) is local only. Its conservative
 byte-based scenarios reserve $4.14804375 for the first CHORUS API request and
 $7.98318750 for Kids First. These are not verified tokenizer bounds, actual
-token counts, live admission or whole-attempt forecasts. An authorized launch
-must obtain CBORG token counts and reserve against each request before sending
+token counts, live admission or whole-attempt forecasts. The actual first
+CHORUS request counted 44,446 input tokens and reserved $3.539750 before sending
 generation. Unknown charges retain reservations and stop execution. Fresh
-model, input and accounting checks remain required at launch.
+model, input and accounting checks remain required for any later attempt.
 
 ## Sources and evaluation
 
