@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-09-15T21:44:18.510732+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "4d2f88dc4766805e73b55552e849938bb97857c83d90596a120caea304274f7c",
+  "native_overlay_sha256": "5edde955dd3b8442e03eecdfb3a4635035b0975ad429a4ee777d8d864241ab32",
+  "registered_pins_verified": 466,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 404,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [],
+  "new_pinned_implementation_files": [],
+  "changed_native_auxiliary_pins": [
+    "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py"
+  ],
+  "pyproject_change": null,
+  "api_instrument_changes_from_v10n": false,
+  "native_final_validation_changes_from_v10n": true,
+  "evaluation_instrument_changes_from_v10n": false,
+  "generation_renderers": {
+    "api": 11,
+    "agentic": 11
+  },
+  "effort_policy_unchanged": true,
+  "selected_checker": "evidence_assertions v2 (#1839)",
+  "generation_contract_change": "No API prompt/checker change; native final controller selects the same v2 checker as its renderer-11 instruction (#1846)",
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_equivalent_after_path_label_rebinding": 16,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "d850e1dcad54409321351d3f1ed9679d131043288202f554c58f1a0711654230",
+    "CHORUS_source_review_plan.json": "1baf6e5f7d7f399f680a3839de6c6f6666f1a6ecd6c091eaf115d36c51c7bdbd"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks and public hashes do not establish scientific acceptance or inspection of unpublished originals. The user authorized continuation; live CBORG token counting, exact-commit CI, current model checks and a bound launch receipt remain launch gates. Prompt delivery does not establish model compliance.",
+  "accounting_resolved": true,
+  "approved_limits_verified_locally": true,
+  "private_accounting_independently_reviewed": false
+}

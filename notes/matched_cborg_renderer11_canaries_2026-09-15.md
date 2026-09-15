@@ -1,5 +1,11 @@
 # Renderer-11 matched generation and evaluation plan — 2026-09-15
 
+**Later update, 2026-09-15:** the user confirmed the complete charge and
+accounting #1847 is resolved. Original evidence remains unchanged. The provider
+interruption is tracked separately in #1849; this stopped run is not accepted
+or resumed. The [continuation plan](matched_cborg_continuation_canaries_2026-09-15.md)
+registers the next condition. The original stop-time account follows.
+
 **Current status:** the v10n CHORUS API canary stopped on an incomplete
 provider stream. No complete D4D or scientific acceptance resulted, and no
 downstream canary or evaluator has launched. Resolve the new accounting
