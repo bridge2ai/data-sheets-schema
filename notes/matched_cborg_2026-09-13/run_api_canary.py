@@ -50,7 +50,46 @@ def verify_history(manifest):
             raise BudgetStop("a preserved prior-canary artifact changed")
 
 
-def check_canary_receipts(spec):
+def require_registered_receipt_inputs(spec, record, registered):
+    """A current canary cannot use provenance to select historical source bytes."""
+    import yaml
+    inputs = record.get("inputs")
+    if not isinstance(inputs, dict) or not isinstance(inputs.get("chunks"), dict):
+        raise ValueError("receipt source identities are missing")
+    declared = {"bundle": {"path": inputs.get("bundle_path"),
+                           "sha256": inputs.get("bundle_sha256"),
+                           "md5": inputs.get("bundle_md5")},
+                "chunks": inputs["chunks"]}
+    selected = {"bundle": spec.bundle, "chunks": spec.chunk_manifest}
+    for name in ("bundle", "chunks"):
+        expected = registered[name]
+        path = Path(expected["path"])
+        item = declared[name]
+        if (selected[name] is None or path.resolve() != Path(selected[name]).resolve()
+                or not isinstance(item.get("path"), str)
+                or Path(item["path"]).resolve() != path.resolve()):
+            raise ValueError("receipt source path differs from registration")
+        raw = path.read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != expected["sha256"]:
+            raise ValueError("registered receipt source bytes changed")
+        if name == "bundle":
+            if not (item.get("md5") or item.get("sha256")):
+                raise ValueError("receipt bundle has no recorded hash")
+            for algorithm in ("md5", "sha256"):
+                if item.get(algorithm) is not None and item[algorithm] != hashlib.new(algorithm, raw).hexdigest():
+                    raise ValueError("receipt bundle hash differs from registration")
+        else:
+            manifest = yaml.safe_load(raw)
+            if (item.get("sha256") != digest or not isinstance(manifest, dict)
+                    or item.get("rule") != manifest.get("rule")
+                    or item.get("bundle_name") != manifest.get("bundle")
+                    or type(item.get("chunk_count")) is not int
+                    or item["chunk_count"] != manifest.get("chunk_count")):
+                raise ValueError("receipt chunk identity differs from registration")
+
+
+def check_canary_receipts(spec, registered_inputs):
     """Recompute the existing strict receipt floors; never repair measured bytes."""
     import yaml
     from data_sheets_schema import api_runner
@@ -59,6 +98,7 @@ def check_canary_receipts(spec):
         record = yaml.safe_load(spec.provenance_path.read_bytes())
         if not isinstance(record, dict):
             raise ValueError("provenance is not a mapping")
+        require_registered_receipt_inputs(spec, record, registered_inputs)
         block = api_runner._receipts_block(spec, record)
         if block.get("checked") is not True:
             return {"passed": False, "floors": None, "receipts": block}
@@ -138,7 +178,7 @@ def main():
         client.messages.require_active()
         verify(manifest, args.registration, manifest_sha)
         verify_history(manifest)
-        receipt_check = check_canary_receipts(spec)
+        receipt_check = check_canary_receipts(spec, job["input_identity"])
         problems = list(record["validation_problems"])
         if not receipt_check["passed"]:
             problems.append("coverage receipt acceptance failed")

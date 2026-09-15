@@ -186,7 +186,7 @@ def main():
         from data_sheets_schema import api_runner, agentic_observed
         problems=api_runner.validate_outputs(spec)
         pair=api_runner.pair_consistency(spec)
-        receipt_check=check_canary_receipts(spec)
+        receipt_check=check_canary_receipts(spec,job['input_identity'])
         receipt['receipt_acceptance']=receipt_check
         if not receipt_check['passed']:
             problems=list(problems)+['coverage receipt acceptance failed']

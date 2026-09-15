@@ -1,6 +1,7 @@
 """Both canary controllers enforce the existing receipt floors on current files."""
 from contextlib import contextmanager
 import importlib
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -41,7 +42,12 @@ def fixture_record(tmp_path, case):
               'notes':'A separate public document describes the research team.'}
     run.full_path.write_text(yaml.safe_dump(record))
     run.core_path.write_text(yaml.safe_dump(record))
-    run.provenance_path.write_text(yaml.safe_dump({'run': {'project':run.project, 'label':run.label, 'method':run.method, 'condition':run.condition}, 'inputs': {'bundle_md5':manifest['bundle_md5']}}))
+    run.provenance_path.write_text(yaml.safe_dump({
+        'run': {'project':run.project, 'label':run.label, 'method':run.method, 'condition':run.condition},
+        'inputs': {'bundle_path':str(bundle), 'bundle_md5':manifest['bundle_md5'],
+                   'chunks': {'path':str(chunk_file), 'sha256':hashlib.sha256(chunk_file.read_bytes()).hexdigest(),
+                              'rule':manifest['rule'], 'bundle_name':manifest['bundle'],
+                              'chunk_count':manifest['chunk_count']}}}))
     if case == 'bad_provenance':
         run.provenance_path.write_text('not a mapping')
     texts = chunking.chunk_texts(bundle.read_text(), manifest['chunks'])
@@ -71,7 +77,7 @@ def test_current_file_receipts_use_existing_floors_without_repair(tmp_path, cont
     api, _ = controllers
     run = fixture_record(tmp_path, case)
     before = {p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
-    outcome = api.check_canary_receipts(run)
+    outcome = api.check_canary_receipts(run, run.input_identity())
     assert outcome['passed'] is passed
     if case == 'false_date':
         assert outcome['receipts']['findings_gated'] == 0
@@ -81,21 +87,85 @@ def test_current_file_receipts_use_existing_floors_without_repair(tmp_path, cont
     assert before == {p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
 
 
+def redirect_to_historical_bytes(run, monkeypatch):
+    """Exercise real receipt recovery, with only the historical-byte lookup stubbed."""
+    from data_sheets_schema.canary import receipt_floors
+    record = yaml.safe_load(run.provenance_path.read_bytes())
+    assert receipt_floors(api_runner._receipts_block(run, record))['snippets unverified'] == 1
+    alternative = run.bundle.read_bytes().replace(b'2020-04-03', b'2020-04-02')
+    mapping = chunking.manifest_from_bytes(alternative, run.bundle.name)
+    chunks = run.bundle.parent/'alternative_chunks.yaml'
+    chunks.write_text(chunking.dump_manifest(mapping))
+    record['inputs'] = {'bundle_path':'unrelated_committed_source.txt', 'bundle_md5':mapping['bundle_md5'],
+        'chunks': {'path':str(chunks), 'sha256':hashlib.sha256(chunks.read_bytes()).hexdigest(),
+                   'bundle_name':mapping['bundle'], 'rule':mapping['rule'], 'chunk_count':mapping['chunk_count']}}
+    run.provenance_path.write_text(yaml.safe_dump(record))
+    receipt_file = receipts.receipt_path(run.core_path.parent, run.project)
+    receipt = yaml.safe_load(receipt_file.read_bytes())
+    receipt['bundle_md5'] = mapping['bundle_md5']
+    receipt_file.write_text(yaml.safe_dump(receipt))
+    lookups = []
+    def historical(path, md5=None, sha256=None):
+        assert path == record['inputs']['bundle_path'] and md5 == mapping['bundle_md5']
+        lookups.append(path)
+        return alternative, {'commit':'synthetic-history', 'date':'2020-01-01',
+                             'md5':md5, 'sha256':hashlib.sha256(alternative).hexdigest()}
+    monkeypatch.setattr('data_sheets_schema.provenance.bundle_bytes_for', historical)
+    recovered = api_runner._receipts_block(run, record)
+    assert recovered['checked'] and not any(receipt_floors(recovered).values())
+    assert recovered['bundle_basis']['source'] == 'git blob'
+    assert len(lookups) == 1
+    return lookups
+
+
+@pytest.mark.parametrize('change', ['missing_inputs', 'missing_bundle_path', 'missing_bundle_hash',
+                                    'bundle_hash', 'bundle_sha', 'bundle_path', 'chunk_path',
+                                    'chunk_hash', 'chunk_rule', 'chunk_name', 'chunk_count'])
+def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controllers, change):
+    api, _ = controllers
+    run = fixture_record(tmp_path, 'valid')
+    registered = run.input_identity()
+    record = yaml.safe_load(run.provenance_path.read_bytes()); inputs = record['inputs']
+    if change == 'missing_inputs': del record['inputs']
+    elif change == 'missing_bundle_path': del inputs['bundle_path']
+    elif change == 'missing_bundle_hash': del inputs['bundle_md5']
+    elif change == 'bundle_hash': inputs['bundle_md5'] = '0'*32
+    elif change == 'bundle_sha': inputs['bundle_sha256'] = '0'*64
+    elif change in {'bundle_path', 'chunk_path'}:
+        source = run.bundle if change == 'bundle_path' else run.chunk_manifest
+        alias = tmp_path/('same_bytes_'+source.name); alias.write_bytes(source.read_bytes())
+        if change == 'bundle_path': inputs['bundle_path'] = str(alias)
+        else: inputs['chunks']['path'] = str(alias)
+    elif change == 'chunk_hash': inputs['chunks']['sha256'] = '0'*64
+    elif change == 'chunk_rule': inputs['chunks']['rule']['max_lines'] += 1
+    elif change == 'chunk_name': inputs['chunks']['bundle_name'] = 'elsewhere.txt'
+    elif change == 'chunk_count': inputs['chunks']['chunk_count'] += 1
+    run.provenance_path.write_text(yaml.safe_dump(record))
+    before = {p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    result = api.check_canary_receipts(run, registered)
+    assert result['passed'] is False and result['receipts'] is None
+    assert before == {p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+
+
 @pytest.mark.parametrize('arm', ['api','agentic'])
-@pytest.mark.parametrize('case, passed', [('valid',True), ('false_date',False), ('missing',False)])
+@pytest.mark.parametrize('case, passed', [('valid',True), ('false_date',False), ('missing',False),
+                                       ('redirected_provenance',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
     # main() configures process globals; keep the synthetic launch isolated.
     monkeypatch.setattr(runner.os, 'environ', dict(runner.os.environ))
     monkeypatch.setattr(api_runner, 'MAX_ATTEMPTS', api_runner.MAX_ATTEMPTS)
-    run = fixture_record(tmp_path, case)
+    run = fixture_record(tmp_path, 'false_date' if case == 'redirected_provenance' else case)
+    registered_inputs = run.input_identity()
+    pinned = {p:p.read_bytes() for p in (run.bundle,run.chunk_manifest)}
+    lookups = redirect_to_historical_bytes(run, monkeypatch) if case == 'redirected_provenance' else []
     monkeypatch.setattr(run, 'render_spec', lambda: {})
-    monkeypatch.setattr(run, 'input_identity', lambda: {})
+    monkeypatch.setattr(run, 'input_identity', lambda: registered_inputs)
     instruction = tmp_path/'instruction.md'; instruction.write_text('Synthetic offline fixture.')
     initial = tmp_path/'initial.json'; initial.write_text('{}')
     job = {'id':'example_'+arm, 'canary':True, 'execution_arm':arm, 'render_spec':{},
-           'input_identity':{}, 'output_directories':[], 'outputs':{},
+           'input_identity':registered_inputs, 'output_directories':[], 'outputs':{},
            'instruction':str(instruction), 'initial_request':str(initial), 'bundle':str(run.bundle)}
     base = {'repository':str(tmp_path), 'claude_version':'offline',
             'provider_base_url':'https://api.cborg.lbl.gov', 'model':{'model':'offline-model'},
@@ -162,4 +232,6 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
     assert check['passed'] is passed
+    assert pinned == {p:p.read_bytes() for p in pinned}
+    assert len(lookups) == (1 if case == 'redirected_provenance' else 0)
     assert before == {p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}

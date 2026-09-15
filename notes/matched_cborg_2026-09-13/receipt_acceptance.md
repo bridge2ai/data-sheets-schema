@@ -12,6 +12,12 @@ unreadable, uncheckable, vacuous or failing receipts produce validation failure;
 the result retains the observed block and floor counts. A cached passing block
 cannot replace this reading of current files. No generated artifact is repaired.
 
+Before reading receipts, the controllers bind provenance's bundle and chunk
+paths, recorded hashes and chunk metadata to the reviewed registration and its
+unchanged files (#1856). Missing or conflicting identities fail validation. A
+current canary cannot redirect its check to different historical source bytes.
+The shared checker's historical recovery remains available to historical callers.
+
 This fixes omitted enforcement, without changing receiptsv3 or the shared
 canary gate. In particular, the historical treatment of a quote found in another
 chunk remains unchanged. Literal matching does not establish source attribution,
