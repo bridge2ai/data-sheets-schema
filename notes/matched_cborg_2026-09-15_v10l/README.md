@@ -1,5 +1,14 @@
 # v10l matched canaries — reconciled retry registration
 
+**Execution update:** independent registration review and required CI passed,
+#1833 is merged, and CBORG recovered before a successful fresh preflight.
+The approved API attempt then stopped at the audit evidence gate after two
+requests: all nine findings omitted required evidence arrays. All 25 originals
+are preserved, and both requests are accounted for at $2.008425. See the
+[stopped outcome](CHORUS_api_stopped.md) and
+[#1834](https://github.com/bridge2ai/data-sheets-schema/issues/1834). The
+registration and prelaunch observations below are retained as originally recorded.
+
 The user confirmed the complete v10k interrupted-request charge as **$0.267175**
 and approved continuation on 2026-09-15. The separate
 [reconciliation record](charge_reconciliation.public.json) accounts for that

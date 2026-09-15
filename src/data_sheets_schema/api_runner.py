@@ -522,7 +522,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -895,7 +895,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest() -> dict[str, Any]:
+def assembly_digest(render_version: int = 8) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -906,7 +906,9 @@ def assembly_digest() -> dict[str, Any]:
     instruction texts, report re-check headers and the order the parts are
     assembled in.
     """
-    basis = json.dumps([ASSEMBLY_LAYOUT, PHASE_INSTRUCTIONS, REGATE_HEADERS], sort_keys=True)
+    instructions = {phase: phase_instruction(phase, render_version)
+                    for phase in PHASE_INSTRUCTIONS}
+    basis = json.dumps([ASSEMBLY_LAYOUT, instructions, REGATE_HEADERS], sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": ASSEMBLY_LAYOUT}
 
@@ -1128,6 +1130,11 @@ def resolve_prompt(spec: RunSpec) -> str:
             body += ("\nThe launcher must set D4D_LAUNCH_INSTRUCTION to the exact saved instruction "
                      "file supplied on stdin. The provenance command verifies that file against "
                      "the registered rendering specification. Do not reconstruct or edit it.\n")
+    if spec.render_version >= 10:
+        # Both arms receive the same complete output contracts. API requests
+        # also put the applicable contract after their carried artifacts.
+        body += "\n\n## Required phase output contracts (renderer 10)\n\n"
+        body += "\n\n".join(EVIDENCE_PHASE_CONTRACTS.values())
     return body
 
 
@@ -1563,6 +1570,77 @@ PHASE_INSTRUCTIONS = {
         "total and severity subtotal against the computed audit counts "
         "supplied, not the audit's prose summary. Output only Markdown."),
 }
+
+EVIDENCE_PHASE_CONTRACTS = {
+    "audit": (
+        "Audit output contract. Return a JSON object with findings and summary. "
+        "Each finding must contain severity, record, slot, issue, and a nonempty "
+        "evidence array. Quotations embedded in issue do not replace that array. "
+        "Use the evidence element shapes in Evidence protocol v1: a source filename, "
+        "chunk and exact quote, or an original artifact, JSON Pointer path, op and "
+        "exact quote. Source IDs are not filenames. Bind every allegation about "
+        "an original value or missing qualifier to that actual original location; "
+        "include each governing source passage needed to support the allegation. "
+        "Use only artifacts available to this phase; do not infer a core header "
+        "from the full record. If the alleged missing text is present, withdraw "
+        "that allegation. For every rejected structured relationship, also include "
+        "remove_relationship with its original-full path and the identity required "
+        "by the protocol; the recommendation must remove that relationship. "
+        "Keep summary a nonempty string with counts computed from findings. "
+        "For no findings, return an empty findings list and an accurate summary. "
+        "This complete contract applies even where an earlier example lists only "
+        "severity, record, slot and issue. Output only JSON."),
+    "reconcile_full": (
+        "Reconciliation evidence contract. Check each audit allegation against "
+        "the frozen originals and its declared evidence before applying it. "
+        "Perform every supported remove_relationship action under Evidence "
+        "protocol v1, preserving the identifiers and structured values of "
+        "surviving members. A retained relationship with a disclaimer is not "
+        "removal. Do not rewrite the audit or originals to make a check pass. "
+        "Output the complete corrected full record as YAML."),
+    "report": (
+        "Report evidence contract. The complete Markdown report must contain "
+        "exactly one section headed ## Evidence assertions before its final "
+        "## Dispositions section. That evidence section contains only a JSON "
+        "code block with a claims array using Evidence protocol v1. Supply "
+        "an assertion for each claim about an original quotation, qualifier or "
+        "header and for each source-attributed factual clause. Use original_full, "
+        "original_core, final_full and final_core for the actual artifact states; "
+        "a repaired header cannot establish its original presence. Empty claims "
+        "are allowed only when the report makes none of those claims. On a "
+        "report re-check, preserve or correct this appendix along with the prose "
+        "and Dispositions table; do not drop required evidence when repairing "
+        "another defect. Output the complete report as Markdown."),
+}
+
+
+def phase_instruction(phase: str, render_version: int) -> str:
+    """Keep historical phase bytes, and complete the v10 terminal contract."""
+    instruction = PHASE_INSTRUCTIONS[phase]
+    if render_version < 10:
+        return instruction
+    if phase == "audit":
+        instruction = instruction.replace(
+            "a list of {severity, record, slot, issue}",
+            "a list of {severity, record, slot, issue, evidence}, with a nonempty "
+            "evidence array on every finding and remove_relationship for every "
+            "rejected structured relationship")
+        instruction = instruction.replace(
+            "The core record supplied above is a projection derived from the full record, "
+            "not a second source: it cannot state anything the full record does not, ",
+            "A derived core is a projection of the full record, not a second source: "
+            "it cannot supply independent dataset facts, ")
+    elif phase == "reconcile_full":
+        instruction = instruction.replace(
+            "The core record supplied above is a projection of the full record and will be "
+            "re-derived from what you emit: it has nothing to absorb from and "
+            "nothing to reconcile against, so do not copy from it or edit toward it. ",
+            "Use the original full record and audit supplied above. A core will be "
+            "derived from the corrected full record; do not infer evidence from "
+            "an unavailable or derived core. ")
+    contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase)
+    return instruction + ("\n\n" + contract if contract else "")
+
 
 # What each phase produces, and where it lands. Writing as we go is what makes a
 # mid-run failure cost one call instead of six.
@@ -2002,7 +2080,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
         # The core inventory the instruction's `both` rule refers to (#998);
         # before the instruction so the instruction stays last (#346).
         parts.append({"type": "text", "text": core_inventory_block()})
-    instruction = PHASE_INSTRUCTIONS[phase]
+    instruction = phase_instruction(phase, spec.render_version)
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]
     parts.append({"type": "text", "text": instruction})
@@ -3541,6 +3619,8 @@ def sent_text_surfaces() -> dict[str, str]:
     unrecorded; tests/test_american_english_rule.py reads this map and pins
     its size, so a new surface is added here to be guarded."""
     out = {f"phase:{k}": v for k, v in PHASE_INSTRUCTIONS.items()}
+    out.update({f"phase:v10:{phase}": phase_instruction(phase, 10)
+                for phase in (*EVIDENCE_PHASE_CONTRACTS, "report_regate")})
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),
@@ -4778,7 +4858,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             {"type": "text", "text": REGATE_HEADERS[0]
              + (spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else "")},
             {"type": "text", "text": REGATE_HEADERS[1] + listing},
-            {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
+            {"type": "text", "text": phase_instruction("report_regate", spec.render_version)}])
     try:
         resp, call_id = _call_with_usage(
             spec, phase, 1, started, client,
@@ -5932,7 +6012,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # both: the file for provenance of the source, the resolution for the
     # request actually sent.
     rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
-    rec.data["prompts"]["assembly"] = assembly_digest()
+    rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version)
     rec.data["prompts"]["context_blocks"] = context_blocks(spec)
     ident = provider_identity()
     rec.data["model"] = {
