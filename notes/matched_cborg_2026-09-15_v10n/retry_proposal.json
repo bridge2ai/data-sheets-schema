@@ -1,0 +1,31 @@
+{
+  "kind": "distinct_condition_proposal_not_launch_receipt",
+  "prepared_at": "2026-09-15T20:05:05.554636+00:00",
+  "status": "approved_continuation_pending_registration_review_and_CI",
+  "prior_approved_scope": "The user approved the issue-fix-review loop and continuation within the existing allocation; charge reconciliation is complete. The v10m canary stopped at the anonymous-ancestor reconciliation gate and is not resumed.",
+  "proposed_action": "One CHORUS API v10n canary with reviewed renderer-11 evidence protocol v2, then matched CHORUS agentic and Kids First API/agentic only after sequential acceptance of unchanged originals.",
+  "proposed_whole_attempt_caps_usd": {
+    "CHORUS_api_rep1": 6.78,
+    "CHORUS_agentic_rep1": 6.2,
+    "KIDS_FIRST_api_rep1": 12.55,
+    "KIDS_FIRST_agentic_rep1": 12.55
+  },
+  "maximum_new_four_canary_attempts_usd": "38.08",
+  "applicable_prior_attempt_cost_usd": "25.63672600",
+  "maximum_combined_including_prior_attempts_usd": "63.71672600",
+  "already_approved_combined_ceiling_usd": "63.75",
+  "combined_ceiling_increase_requested": false,
+  "existing_additional_allocation_usd": "200.00",
+  "allocation_accounted_usd": "34.56563200",
+  "allocation_remaining_usd": "165.43436800",
+  "default_other_attempt_cap_usd": "5",
+  "cap_change": "Kids First API/native caps decrease from $14 to $12.55 each to retain all four canaries within $63.75 including prior applicable charges. Token ceilings and workload are unchanged; admission stops if the next request cannot fit.",
+  "automatic_whole_attempt_retries": 0,
+  "source_changes": false,
+  "effort_changes": false,
+  "instrument": "renderer 11 with evidence_assertions v2 (#1839; anonymous child relationship removals)",
+  "generation_instrument_change_from_v10m": true,
+  "evaluation_instrument_change_from_v10m": false,
+  "activation": "Exact-commit CI, independent registration review, fresh input/model/accounting checks and a bound launch receipt are required. Live token counting belongs to the admitted attempt. A failed canary stops expansion; no evaluator or production batch launch.",
+  "frozen_capture_files_copied": []
+}

@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-09-15T20:05:44.114723+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "3b7399084ca3d4259b4c3c7076335fe556ab8df68457441318a9bb3c99c61362",
+  "native_overlay_sha256": "43c6ab515e371fbf096602a038c04ab783fd84a5a2b24fe52443ff3298b74a82",
+  "registered_pins_verified": 465,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 392,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/evidence_assertions.py",
+    "notes/matched_cborg_2026-09-13/prepare_registration.py"
+  ],
+  "new_pinned_implementation_files": [
+    "src/download/prompts/evidence_protocol_v2.md"
+  ],
+  "changed_native_auxiliary_pins": [
+    "notes/matched_cborg_2026-09-13/prepare_registration.py"
+  ],
+  "pyproject_change": null,
+  "generation_instrument_changes_from_v10m": true,
+  "evaluation_instrument_changes_from_v10m": false,
+  "generation_renderers": {
+    "api": 11,
+    "agentic": 11
+  },
+  "effort_policy_unchanged": true,
+  "selected_checker": "evidence_assertions v2 (#1839)",
+  "generation_contract_change": "Renderer 11 selects evidence protocol v2, including anonymous child removals and audit-admission action checks (#1839)",
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 45,
+  "budget_accounted_cost_usd": "34.56563200",
+  "remaining_additional_budget_usd": "165.43436800",
+  "proposed_per_job_caps_usd": {
+    "CHORUS_api_rep1": 6.78,
+    "CHORUS_agentic_rep1": 6.2,
+    "KIDS_FIRST_api_rep1": 12.55,
+    "KIDS_FIRST_agentic_rep1": 12.55
+  },
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "f70d51dde57acfb2714cf63cc5baaf6d442c5a78467e95fbfcfa22e4b5ce3901",
+    "CHORUS_source_review_plan.json": "ab573947e8b8d2910d28860991a54e5bfab47212cf064f5b038d4133817ee48f"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks and public hashes do not establish scientific acceptance or inspection of unpublished originals. The user authorized continuation; live CBORG token counting, exact-commit CI, current model checks and a bound launch receipt remain launch gates. Prompt delivery does not establish model compliance."
+}

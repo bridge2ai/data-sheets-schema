@@ -1,0 +1,11 @@
+{
+  "reviewed_commit": "1ffc8538004dd99075d79bed19a696b1746059b6",
+  "base_commit": "e94745673c42093efa0615f6b1c05714ad38850d",
+  "report_sha256": "d721ded7c9cb28db9581310587fe4e67592ca7af2521d3e23b7c0ea520f9d85e",
+  "verdict": "approve",
+  "review_round": 3,
+  "review_url": "https://github.com/bridge2ai/data-sheets-schema/pull/1840#issuecomment-5687390285",
+  "source_pr": "https://github.com/bridge2ai/data-sheets-schema/pull/1840",
+  "targeted_tests_passed": 221,
+  "scientific_acceptance": false
+}
