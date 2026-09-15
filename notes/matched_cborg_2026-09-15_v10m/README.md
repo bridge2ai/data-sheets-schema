@@ -1,5 +1,11 @@
 # v10m matched canaries — explicit phase evidence contracts
 
+**Outcome, 2026-09-15:** the first API canary stopped after reconciliation on
+the anonymous-ancestor limitation in #1839. Its three requests cost $2.898394
+with complete accounting. The [stopped outcome](CHORUS_api_stopped.md) records
+the evidence and current balance; the registration and pre-launch figures
+below are preserved as history. No output has been accepted.
+
 This is a distinct condition after the v10l API canary stopped because all nine
 audit findings omitted required evidence arrays. [PR #1835](https://github.com/bridge2ai/data-sheets-schema/pull/1835)
 corrects the inconsistent final phase instructions under explicit renderer 10.

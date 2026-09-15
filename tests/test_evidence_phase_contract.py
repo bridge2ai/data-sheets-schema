@@ -64,17 +64,21 @@ def test_assembly_identity_binds_the_selected_contract_without_changing_v9(monke
     assert api.assembly_digest(9) == historical
 
 
-def test_renderer9_replays_its_pre_fix_instruction_bytes():
+@pytest.mark.parametrize("version,digest", [
+    (9, "9e050248abda069ce3ceb4b5a343baae4c8bf7f04d7b61778ea2179d9c3307ac"),
+    (10, "6320736dbdb48a20be3c808fabb642bb0e0f359c63879dc031545b743ea2083d"),
+])
+def test_historical_renderer_replays_its_pre_fix_instruction_bytes(version, digest):
     recorded = {"condition": "generic_v9", "arm": "baseline", "bundle": "/input/demo.txt",
         "manifest": None, "manifest_line": "# Source manifest: not used", "chunk_manifest": None,
         "run_date": "2026-09-15", "runtime": api.RUNTIME, "provider": "offline",
-        "profile": "neutral", "profile_basis": "explicit", "render_version": 9,
+        "profile": "neutral", "profile_basis": "explicit", "render_version": version,
         "api_header_values": {"Model": "synthetic-model", "Temperature": "not sent",
                               "Reasoning effort": "adaptive (provider default)"}}
     replay = api.RunSpec.from_render_spec(recorded, project="EXTERNAL",
         method="external_api", label="synthetic")
-    assert hashlib.sha256(replay.instruction.encode()).hexdigest() == (
-        "9e050248abda069ce3ceb4b5a343baae4c8bf7f04d7b61778ea2179d9c3307ac")
+    assert hashlib.sha256(replay.instruction.encode()).hexdigest() == digest
+    assert api.assembly_digest(10)["sha256"] == "efd42e290b8fa347d663fd7953d896d45a12827bca0049df64d9b74dd48c4eba"
 
 
 class PhaseContractFake(EvidenceFake):

@@ -1,8 +1,10 @@
 """Check explicit evidence, not semantic entailment (#1801/#1815/#1816).
 
 Version 1 binds quotations to an artifact/path or document/chunk and checks
-removal of relationships an audit explicitly rejected. It does not discover
-unreported claims or certify semantic conclusions. All inputs are read only.
+removal of relationships an audit explicitly rejected. Opt-in version 2 also
+proves child removals in uniquely matched anonymous objects and validates
+actions at audit admission. Neither version discovers unreported claims or
+certifies semantic conclusions. All inputs are read only.
 """
 from __future__ import annotations
 
@@ -24,6 +26,12 @@ MISSING = object()
 IDENTITY_FIELDS = frozenset({"id", "name", "orcid", "doi", "grant_number",
                              "variable_name", "hash", "md5", "sha256", "checksum", "target_dataset"})
 NARRATIVE_FIELDS = frozenset({"description", "notes", "source_caveats"})
+
+
+def instrument(protocol_version: int = 1) -> str:
+    if type(protocol_version) is not int or protocol_version not in (1, 2):
+        raise ValueError("unsupported evidence protocol version")
+    return INSTRUMENT if protocol_version == 1 else "evidence_assertions v2 (#1839)"
 
 
 def load_json(raw: str | bytes):
@@ -154,7 +162,8 @@ def check_assertions(claims, *, artifacts: dict[str, str],
     return findings
 
 
-def check_audit(audit, *, artifacts: dict[str, str], chunks: dict) -> dict:
+def check_audit(audit, *, artifacts: dict[str, str], chunks: dict,
+                protocol_version: int = 1) -> dict:
     """Require evidence for each finding before using its recommendation."""
     problems, count = [], 0
     if not isinstance(audit, dict) or not isinstance(audit.get("findings"), list):
@@ -171,7 +180,17 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict) -> dict:
             count += len(claims)
             problems += [{**f, "finding": index} for f in
                          check_assertions(claims, artifacts=artifacts, chunks=chunks)]
-    return {"instrument": INSTRUMENT, "checked": True,
+    if protocol_version == 2 and isinstance(audit, dict) and isinstance(audit.get("findings"), list):
+        # Check whether declarations are actionable before a paid reconciliation.
+        # With identical inputs a valid action is retained, which is expected here.
+        try:
+            original = load_record(artifacts["original_full"])
+            problems += [f for f in check_relationship_removals(
+                audit, original, original, protocol_version=2)
+                if f["kind"] != "unsupported_relationship_retained"]
+        except (ValueError, KeyError, yaml.YAMLError) as exc:
+            problems.append(_problem("evidence_contract", str(exc)))
+    return {"instrument": instrument(protocol_version), "checked": True,
             "assertions_checked": count, "findings": problems}
 
 
@@ -263,13 +282,89 @@ def _matched_member(original, final, index, declared=None):
     return mapped.get(index, MISSING)
 
 
-def _relationship_after(original, final, tokens, declared):
+def _without_fields(member, paths):
+    """Copy dictionary paths only; never mutate or follow unstable list indexes."""
+    if not isinstance(member, dict):
+        raise ValueError("anonymous relationship ancestors must be objects")
+    result = dict(member)
+    for path in paths:
+        current = result
+        for token in path[:-1]:
+            if token not in current:
+                break
+            child = current[token]
+            if not isinstance(child, dict):
+                raise ValueError("anonymous child removal paths must follow objects, not lists or scalars")
+            current[token] = dict(child)
+            current = current[token]
+        else:
+            current.pop(path[-1], None)
+    return result
+
+
+def _has_structural_anchor(structure):
+    kind, value = structure
+    if kind is dict:
+        return any(_has_structural_anchor(child) for child in value.values())
+    if kind is list:
+        return any(_has_structural_anchor(child) for child in value)
+    return value is not None and value != ""
+
+
+def _matched_anonymous_ancestor(original, final, index, prefix, removal_paths):
+    """Prove a bijection using all unchanged structure, not a chosen prose key.
+
+    This supports child-field removals, not removal/replacement of anonymous
+    members. The same masks locate candidates; each candidate is then checked
+    with only its own declared removals masked. Ambiguity always fails closed.
+    """
+    if not isinstance(final, list) or len(final) != len(original):
+        raise ValueError("anonymous ancestor members must all survive; removal or replacement is unverified")
+    allowed = {i: [] for i in range(len(original))}
+    for path in removal_paths:
+        if path[:len(prefix)] != prefix or len(path) <= len(prefix) + 1:
+            continue
+        token, tail = path[len(prefix)], path[len(prefix) + 1:]
+        if not re.fullmatch(r"0|[1-9][0-9]*", token) or int(token) not in allowed:
+            continue
+        if any(part in NARRATIVE_FIELDS for part in tail):
+            raise ValueError("anonymous relationship removal cannot select narrative fields")
+        allowed[int(token)].append(tail)
+    masks = [path for paths in allowed.values() for path in paths]
+    signatures = [_member_structure(_without_fields(member, masks)) for member in original]
+    if not all(_has_structural_anchor(sig) for sig in signatures):
+        raise ValueError("anonymous ancestor lacks an unchanged structural anchor")
+    if any(signatures.count(sig) != 1 for sig in signatures):
+        raise ValueError("anonymous ancestor signatures are ambiguous")
+    mapped = {}
+    for member in final:
+        signature = _member_structure(_without_fields(member, masks))
+        candidates = [i for i, sig in enumerate(signatures) if sig == signature]
+        if len(candidates) != 1 or candidates[0] in mapped:
+            raise ValueError("anonymous ancestor structure changed, disappeared, or is ambiguous")
+        matched = candidates[0]
+        before = _member_structure(_without_fields(original[matched], allowed[matched]))
+        after = _member_structure(_without_fields(member, allowed[matched]))
+        if before != after:
+            raise ValueError("anonymous ancestor has undeclared structured changes")
+        mapped[matched] = member
+    return mapped[index]
+
+
+def _relationship_after(original, final, tokens, declared, *, protocol_version=1, removal_paths=()):
     """Walk dict keys and match each indexed ancestor, never its old index."""
     old, current = original, final
     for offset, token in enumerate(tokens):
         if isinstance(old, list):
             index = int(token)
             identity = declared if offset == len(tokens) - 1 else None
+            if (protocol_version == 2 and offset < len(tokens) - 1
+                    and isinstance(old[index], dict)
+                    and not IDENTITY_FIELDS.intersection(old[index])):
+                current = _matched_anonymous_ancestor(
+                    old, current, index, tokens[:offset], removal_paths)
+                old = old[index]
+                continue
             # Validate the subject/ancestor even when the entire container
             # was removed; a declaration still needs an evidenced identity.
             _member_identities(old[index], identity)
@@ -285,7 +380,8 @@ def _relationship_after(original, final, tokens, declared):
     return current
 
 
-def check_relationship_removals(audit, original: dict, final: dict) -> list[dict]:
+def check_relationship_removals(audit, original: dict, final: dict, *,
+                                protocol_version: int = 1) -> list[dict]:
     """Check declared removal without treating list positions as identity.
 
     For a list member, identity is a pointer relative to that member, ending
@@ -293,7 +389,14 @@ def check_relationship_removals(audit, original: dict, final: dict) -> list[dict
     stable identities. A non-list relationship must be absent altogether.
     This checks the declared action, not the audit's semantic judgment.
     """
-    findings = []
+    instrument(protocol_version)
+    findings, removal_paths = [], []
+    if protocol_version == 2:
+        for finding in audit.get("findings", []):
+            try:
+                removal_paths.append(_tokens(finding["remove_relationship"]["path"]))
+            except (ValueError, TypeError, KeyError):
+                pass  # The per-finding validation below reports malformed declarations.
     for index, finding in enumerate(audit.get("findings", [])):
         if not isinstance(finding, dict) or "remove_relationship" not in finding:
             continue
@@ -317,7 +420,8 @@ def check_relationship_removals(audit, original: dict, final: dict) -> list[dict
             else:
                 if "identity" in rule:
                     raise ValueError("identity is only valid for an indexed list member")
-            retained = _relationship_after(original, final, tokens, identity_tokens) is not MISSING
+            retained = _relationship_after(original, final, tokens, identity_tokens,
+                protocol_version=protocol_version, removal_paths=removal_paths) is not MISSING
             if retained:
                 findings.append(_problem("unsupported_relationship_retained",
                     "the audit rejected this relationship, but the final record still asserts it; a disclaimer does not remove it",
@@ -358,7 +462,8 @@ def source_chunks(bundle: Path, manifest: Path) -> tuple[dict, dict]:
 
 
 def check_files(*, audit: Path, bundle: Path, manifest: Path,
-                artifacts: dict[str, Path], report: Path | None = None) -> dict:
+                artifacts: dict[str, Path], report: Path | None = None,
+                protocol_version: int = 1) -> dict:
     """Read exact supplied paths; never discover another run's snapshots."""
     raw_artifacts = {k: p.read_bytes() for k, p in artifacts.items()}
     texts = {k: raw.decode("utf-8") for k, raw in raw_artifacts.items()}
@@ -370,12 +475,13 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
     if shape:
         raise ValueError(shape)
     out = check_audit(parsed, artifacts={k: v for k, v in texts.items() if k.startswith("original_")},
-                      chunks=chunks)
+                      chunks=chunks, protocol_version=protocol_version)
     pins["audit"] = hashlib.sha256(audit_raw).hexdigest()
     pins.update({k: hashlib.sha256(raw).hexdigest() for k, raw in raw_artifacts.items()})
     if "original_full" in texts and "final_full" in texts and isinstance(parsed, dict):
         out["findings"] += check_relationship_removals(
-            parsed, load_record(texts["original_full"]), load_record(texts["final_full"]))
+            parsed, load_record(texts["original_full"]), load_record(texts["final_full"]),
+            protocol_version=protocol_version)
     if report is not None:
         raw = report.read_bytes()
         pins["report"] = hashlib.sha256(raw).hexdigest()
@@ -392,6 +498,7 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--protocol-version", type=int, choices=(1, 2), default=1)
     for name in ("audit", "bundle", "manifest", "original-full"):
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("original-core", "final-full", "final-core", "report"):
@@ -400,9 +507,9 @@ def main(argv=None) -> int:
     artifacts = {k: getattr(args, k) for k in sorted(ARTIFACTS) if getattr(args, k)}
     try:
         result = check_files(audit=args.audit, bundle=args.bundle, manifest=args.manifest,
-                             artifacts=artifacts, report=args.report)
+                             artifacts=artifacts, report=args.report, protocol_version=args.protocol_version)
     except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as exc:
-        result = {"instrument": INSTRUMENT, "checked": False,
+        result = {"instrument": instrument(args.protocol_version), "checked": False,
                   "findings": [_problem("evidence_inputs_unusable", str(exc))]}
     print(json.dumps(result, indent=2))
     return int(not result["checked"] or bool(result["findings"]))
