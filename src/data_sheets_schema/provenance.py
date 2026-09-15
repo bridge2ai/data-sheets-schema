@@ -1757,8 +1757,18 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # prompt template says to write it, not observed from a setting the runtime
     # exposes. Recording it as though it were measured would be the same class
     # of false claim this module exists to prevent.
+    from data_sheets_schema.agentic_runtime import UNOBSERVED_TEMPERATURE
     runtime = (model.get("agent_runtime") or "").strip().lower()
-    if model.get("temperature") and runtime == "claude code":
+    if model.get("temperature") == UNOBSERVED_TEMPERATURE:
+        model["temperature"] = None
+        model["temperature_basis"] = "not observed from the agent runtime"
+        unverified.append({
+            "field": "model.temperature", "value": None,
+            "reason": ("the header declares that the native runtime's temperature "
+                       "was not observed; neither a prompt example nor the shared "
+                       "API configuration supplies an observed setting"),
+        })
+    elif model.get("temperature") and runtime == "claude code":
         model["temperature_basis"] = "asserted by the generating agent, not observed"
         unverified.append({
             "field": "model.temperature",

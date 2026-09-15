@@ -398,7 +398,7 @@ File header:
 # Source manifest: data/preprocessed/source_manifest.yaml
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 # Prior D4D factual reuse: prohibited
-# Temperature: 0.0
+# Temperature: unknown (not observed from the agent runtime)
 # Generated: {DATE}
 ```
 
@@ -891,8 +891,12 @@ reconciliation report rather than pinning the edit to make the check pass.
 
 ## Settings
 
-- Temperature: 0.0; values only from current allowed sources; prefer
-  null/omission for unknowns.
+- Temperature is unknown unless observed independently from the runtime's
+  request evidence. Do not copy the shared API configuration or a prompt's
+  example as a native setting. Parameter omission does not establish an
+  effective temperature or deterministic generation. Keep this limitation in
+  provenance and reports.
+- Values only from current allowed sources; prefer null/omission for unknowns.
 - Phase 1 projects may run in parallel. Phase 2 projects may run in parallel only
   after all required full records exist. Never overlap phases for the same project.
 - Four-phase project agents may run in parallel with each other, but each agent

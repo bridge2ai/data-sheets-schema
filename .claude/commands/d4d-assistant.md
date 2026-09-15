@@ -91,7 +91,7 @@ Follow the workflow in .github/workflows/d4d_assistant_create.md:
 # Source manifest: data/preprocessed/source_manifest.yaml
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 # Prior D4D factual reuse: prohibited
-# Temperature: 0.0
+# Temperature: unknown (not observed from the agent runtime)
 # Generated: {DATE}
 ```
 

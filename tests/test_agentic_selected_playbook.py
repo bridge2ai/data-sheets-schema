@@ -13,7 +13,7 @@ from data_sheets_schema.cli import cli
 from tests.test_generation_manifest_identity import external
 
 
-@pytest.fixture(params=[(runtime, version) for runtime in ("Claude Code", "Codex CLI") for version in (5, 6)])
+@pytest.fixture(params=[(runtime, version) for runtime in ("Claude Code", "Codex CLI") for version in (5, 6, 7)])
 def selected(external, monkeypatch, tmp_path, request):
     runtime, version = request.param
     monkeypatch.setattr(socket.socket, "connect", lambda *a, **k: pytest.fail("network forbidden"))

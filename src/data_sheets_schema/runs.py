@@ -1458,7 +1458,9 @@ def header_disagreements(method: str, label: str, project: str,
             field, said = m.group(1).strip(), m.group(2).strip()
             key = HEADER_FIELDS[field]
             row = {"artifact": artifact, "field": field, "header": said}
-            not_asserted = said.lower().startswith(_NOT_ASSERTED)
+            from data_sheets_schema.agentic_runtime import UNOBSERVED_TEMPERATURE
+            not_asserted = (said.lower().startswith(_NOT_ASSERTED)
+                            or (key == "temperature" and said == UNOBSERVED_TEMPERATURE))
             if key not in model:
                 # Never recorded is not "recorded as not sent". Four records
                 # carry no `temperature` key at all; a header line cannot
@@ -1472,9 +1474,8 @@ def header_disagreements(method: str, label: str, project: str,
                 continue
             recorded = model.get(key)
             if recorded is None:
-                # The request carried none. A header stating a value asserts
-                # a setting the record contradicts; a header saying "not
-                # sent" agrees with it.
+                # Null may mean not sent or not observed; the basis explains
+                # which. Neither supports a numeric header assertion.
                 if said and not not_asserted:
                     out.append({**row, "record": "null",
                                 "basis": str(model.get(f"{key}_basis") or "")})
