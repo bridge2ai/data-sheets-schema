@@ -1,0 +1,32 @@
+{
+  "kind": "additional_canary_attempt_proposal_not_launch_approval",
+  "status": "awaiting_explicit_additional_attempt_approval",
+  "prior_approved_scope": "One additional CHORUS API v10h attempt capped at $13.34; it stopped at audit format validation for $2.485500. Its approval is used. No automatic whole-attempt retry.",
+  "proposed_action": "One fresh CHORUS API attempt with an explicit audit-summary type contract, followed by the three unrun matched canaries only after sequential acceptance. New native instructions use renderer 7 and declare temperature unknown.",
+  "previously_approved_per_attempt_maxima_usd": {
+    "CHORUS_api_rep1": 20,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "proposed_whole_attempt_caps_usd": {
+    "CHORUS_api_rep1": 10.85,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "maximum_new_four_canary_attempts_usd": "50.85",
+  "maximum_combined_including_rejected_attempts_usd": "63.74369300",
+  "already_approved_combined_ceiling_usd": "63.75",
+  "combined_ceiling_increase_requested": false,
+  "existing_additional_allocation_usd": "200.00",
+  "allocation_spent_usd": "21.82259900",
+  "allocation_remaining_usd": "178.17740100",
+  "default_other_attempt_cap_usd": "5",
+  "no_automatic_whole_attempt_retries": true,
+  "effort_changes": false,
+  "source_changes": false,
+  "generation_instruction_change": "State the existing non-empty audit summary string contract. Native renderer 7 declares unobserved temperature honestly; old renderer bytes remain replayable.",
+  "activation": "No launch receipt before explicit approval of an additional whole attempt, independent registration review, exact-commit CI and current pin/model/accounting checks. A failed canary stops the sequence. No evaluator or production batch launch.",
+  "spent_in_rejected_or_stopped_v10e_v10f_v10g_v10h_attempts_usd": "12.89369300"
+}

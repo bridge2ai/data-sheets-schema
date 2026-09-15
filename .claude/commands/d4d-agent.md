@@ -222,13 +222,15 @@ When multiple sources describe the same dataset:
 # Source manifest: data/preprocessed/source_manifest.yaml
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 # Prior D4D factual reuse: prohibited
-# Temperature: 0.0
+# Temperature: unknown (not observed from the agent runtime)
 # Generated: {DATE}
 ```
 
 ## Settings
 
-- Temperature: 0.0
+- Temperature is not observed by this workflow. Do not infer it from a prompt,
+  model name, effort level or shared API configuration. Preserve actual request
+  evidence separately; omission does not prove a temperature or determinism.
 - Follow schema strictly - only use defined fields
 - Prefer null or omission for unknown values
 - DataSubset inherits from Dataset (requires id field)

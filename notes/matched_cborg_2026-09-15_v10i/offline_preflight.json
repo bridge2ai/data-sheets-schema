@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-09-15T01:18:32.737963+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "e435929f0fd8a0f285df0a9c713f949ee8dacf5ee1ed40b07a4228f54110acd1",
+  "native_overlay_sha256": "252fa67b1eab1166538b32b46779649e37414fd0c8ea48542f925460fa3ff3ea",
+  "registered_pins_verified": 461,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 249,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_generation_instruction_files": [
+    "src/data_sheets_schema/agentic_runtime.py",
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/cli/provenance.py",
+    "src/data_sheets_schema/provenance.py",
+    "src/data_sheets_schema/runs.py",
+    ".claude/commands/d4d-agent.md",
+    ".claude/commands/d4d-assistant.md",
+    ".claude/commands/d4d-full-core.md"
+  ],
+  "assembled_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+  "effort_unchanged": true,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 29,
+  "estimated_cost_usd": "21.82259900",
+  "remaining_additional_budget_usd": "178.17740100",
+  "default_attempt_cap_usd": "5",
+  "proposed_per_job_caps_usd": {
+    "CHORUS_api_rep1": 10.85,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "replacement_attempt_authorization": "pending_explicit_user_approval",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "e327bf6ca67f4c49a61dbbefa602e0053ffbef757c75324c8c274b5af5f1fa28",
+    "CHORUS_source_review_plan.json": "e24f6d978bbd7309417011b7fe649e24e4e55f45ea00d7a0037175f17bc21631"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "These are operator checks. Public hashes do not establish independent inspection of unpublished originals. Instruction delivery does not establish model compliance. The replacement proposal and merge grant no spending approval."
+}

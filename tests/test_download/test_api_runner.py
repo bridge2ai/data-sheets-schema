@@ -1807,6 +1807,27 @@ class TestExtractionRefusesProse(unittest.TestCase):
                 '"slot": "id", "issue": "mismatch"}], "summary": "one finding"}')
         self.assertEqual(_extract(f"```json\n{good}\n```", "json"), good)
 
+    def test_parseable_audit_with_object_summary_is_rejected_with_the_actual_shape_problem(self):
+        from data_sheets_schema.api_runner import _extract, PHASE_INSTRUCTIONS
+        body = json.dumps({"findings": [{"severity": "high", "record": "full",
+            "slot": "description", "issue": "SYNTHETIC_PRIVATE_TEXT"}],
+            "summary": {"total_findings": 1}})
+        for response in (body, f"```json\n{body}\n```", f"```json\n{body}"):
+            with self.subTest(response=response), self.assertRaises(RuntimeError) as caught:
+                _extract(response, "json")
+            message = str(caught.exception)
+            self.assertIn("parseable JSON", message)
+            self.assertIn("audit.summary must be a non-empty JSON string", message)
+            self.assertNotIn("prose instead", message)
+            self.assertNotIn("SYNTHETIC_PRIVATE_TEXT", message)
+        self.assertIn("non-empty JSON string, never an object or array", PHASE_INSTRUCTIONS["audit"])
+
+    def test_a_bad_audit_example_does_not_hide_a_later_valid_audit(self):
+        from data_sheets_schema.api_runner import _extract
+        bad = '{"findings": [], "summary": {"count": 0}}'
+        good = '{"findings": [], "summary": "No findings."}'
+        self.assertEqual(_extract(f"```json\n{bad}\n```\n```json\n{good}\n```", "json"), good)
+
     def test_an_audit_with_no_findings_is_still_an_audit(self):
         """An empty list is a result; null is an absence."""
         from data_sheets_schema.api_runner import _extract

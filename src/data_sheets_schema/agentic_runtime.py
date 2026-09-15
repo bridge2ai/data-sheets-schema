@@ -1,7 +1,8 @@
 """Executable views of the agentic instructions for the current installation.
 
 Renderer 6 records the toolchain paths in its render spec. Versions 1–5 retain
-their original instruction bytes and never use this adapter.
+their original instruction bytes and never use this adapter. Renderer 7 adds
+honest native temperature headers without changing renderer 6 replay.
 """
 from __future__ import annotations
 
@@ -15,6 +16,22 @@ from data_sheets_schema.resources import resource_path
 PLAYBOOK = ".claude/commands/d4d-full-core.md"
 SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
            "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
+UNOBSERVED_TEMPERATURE = "unknown (not observed from the agent runtime)"
+
+
+def temperature_instructions(text: str) -> str:
+    """Current native instructions must not copy a template's zero as fact."""
+    text = re.sub(r"(?m)^([ \t]*# Temperature: )0\.0[ \t]*$",
+                  lambda match: match[1] + UNOBSERVED_TEMPERATURE, text)
+    return text + (
+        "\n\n## Native sampling metadata (renderer v7)\n\n"
+        "The full and derived core headers must state `Temperature: "
+        + UNOBSERVED_TEMPERATURE + "`. Do not infer a sampling setting from a prompt, "
+        "a shared API configuration, a model name or an effort level. This workflow "
+        "does not observe the native runtime's temperature. Preserve any actual request "
+        "evidence separately; an omitted parameter does not establish the provider's "
+        "effective temperature or deterministic generation. Keep this limitation in "
+        "provenance and reports.\n")
 
 
 def resource_names(directory: str) -> list[str]:

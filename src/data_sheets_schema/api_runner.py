@@ -520,8 +520,8 @@ class RunSpec:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
-            self.render_version = 6 if self.is_agentic else 5
-        if self.render_version not in (1, 2, 3, 4, 5, 6):
+            self.render_version = 7 if self.is_agentic else 5
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -1079,6 +1079,9 @@ def resolve_prompt(spec: RunSpec) -> str:
     if spec.render_version >= 6 and spec.is_agentic:
         from data_sheets_schema.agentic_runtime import portable_text, instruction_adapter
         body = portable_text(body, spec._agentic_toolchain) + instruction_adapter(spec)
+    if spec.render_version >= 7 and spec.is_agentic:
+        from data_sheets_schema.agentic_runtime import temperature_instructions
+        body = temperature_instructions(body)
     return body
 
 
@@ -1296,7 +1299,8 @@ PHASE_INSTRUCTIONS = {
         "anything the full record does not, so every finding concerns the "
         "full record (`record: full`) and is repaired there. Report, as a "
         "JSON object with keys `findings` (a list of {severity, record, slot, "
-        "issue}) and `summary`: any slot whose value the bundle does not "
+        "issue}) and `summary` (a non-empty JSON string, never an object or "
+        "array): any slot whose value the bundle does not "
         "support, any omission the bundle clearly supports, any internal "
         "inconsistency, and any value whose shape does not conform to the "
         "schema digest supplied above — prose where the schema requires a "
@@ -1348,7 +1352,8 @@ PHASE_INSTRUCTIONS = {
         "container and enum. A correct caveat cannot justify an unsupported "
         "type or role. Inspect contextual quantities under governing "
         "headings too. Calculate any summary totals from the final findings "
-        "list and its severity values. Output only JSON."),
+        "list and its severity values, and put them in the summary string. "
+        "Keep the findings list separate from that string. Output only JSON."),
     "reconcile_full": (
         "Phase 4a. Apply the audit findings and emit the corrected full "
         "record in its entirety, header block included. The core record "
@@ -2193,7 +2198,7 @@ MIN_RECORD_SLOTS = 5
 AUDIT_RECORD_VALUES = frozenset({"full", "core", "both"})
 
 
-def _audit_is_well_formed(parsed: dict) -> bool:
+def _audit_shape_problem(parsed: dict) -> str | None:
     """Does this JSON actually carry an audit, or merely the word `findings`?
 
     `{"findings": null}` and `{"findings": "unable to audit"}` both satisfy a
@@ -2203,7 +2208,7 @@ def _audit_is_well_formed(parsed: dict) -> bool:
     """
     findings = parsed.get("findings")
     if not isinstance(findings, list):
-        return False
+        return "audit.findings must be a JSON array"
     # `summary` and `record` are checked because the instruction asks for them
     # and reconciliation depends on them (#604). Each reconciliation phase is
     # told to apply "the findings that concern" its record — a finding that
@@ -2211,12 +2216,18 @@ def _audit_is_well_formed(parsed: dict) -> bool:
     # since #574 conditions absorption on the audit's verdict, a finding that
     # cannot be attributed is worse than one that is absent.
     if not isinstance(parsed.get("summary"), str) or not parsed["summary"].strip():
-        return False
+        return "audit.summary must be a non-empty JSON string"
     required = {"severity", "record", "slot", "issue"}
-    return all(isinstance(f, dict) and required <= set(f)
-               and str(f.get("record", "")).strip().lower()
-               in AUDIT_RECORD_VALUES
-               for f in findings)
+    for index, finding in enumerate(findings):
+        if not isinstance(finding, dict) or not required <= set(finding):
+            return f"audit.findings[{index}] must contain severity, record, slot and issue"
+        if str(finding.get("record", "")).strip().lower() not in AUDIT_RECORD_VALUES:
+            return f"audit.findings[{index}].record must name full, core or both"
+    return None
+
+
+def _audit_is_well_formed(parsed: dict) -> bool:
+    return _audit_shape_problem(parsed) is None
 
 
 def _extract_receipt(text: str) -> str:
@@ -2510,6 +2521,8 @@ def _extract(text: str, kind: str,
     stripped = re.sub(r"\A\s*(?:ya?ml|json)\s*\n", "", text,
                       flags=re.I)
 
+    audit_shape_problems = []
+
     def accepts(candidate: str) -> bool:
         if not candidate:
             return False
@@ -2519,11 +2532,16 @@ def _extract(text: str, kind: str,
         except (yaml.YAMLError, json.JSONDecodeError):
             return False
         if not isinstance(parsed, dict):
+            if kind == "json":
+                audit_shape_problems.append("the top-level audit must be a JSON object")
             return False
         # Each phase has a declared shape; anything else carried forward would
         # be a record, or an audit, that never happened.
         if kind == "json":
-            return _audit_is_well_formed(parsed)
+            problem = _audit_shape_problem(parsed)
+            if problem:
+                audit_shape_problems.append(problem)
+            return problem is None
         return _looks_like_a_record(parsed, schema_path, class_name)
 
     # Fences first, and *all* of them. Taking the last one on the grounds that
@@ -2547,6 +2565,9 @@ def _extract(text: str, kind: str,
         if accepts(candidate):
             return candidate
 
+    if audit_shape_problems:
+        raise RuntimeError("response contains parseable JSON but violates the audit contract: "
+                           + "; ".join(dict.fromkeys(audit_shape_problems)))
     raise RuntimeError(
         f"response contained no parseable {kind} object of the expected shape. "
         f"The model appears to have written prose instead of a record; first "

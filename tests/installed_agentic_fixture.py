@@ -27,7 +27,7 @@ def check_installed_agentic():
     spec = RunSpec(project="EXTERNAL", arm="BASELINE (input documents only)", method="external_agent",
                    bundle=bundle, manifest=None, chunk_manifest=chunks, label="offline_rep1",
                    runtime="Codex CLI", provider="offline", condition="generic_v9")
-    assert spec.render_version == 6
+    assert spec.render_version == 7
     instruction = spec.instruction
     assert "poetry run" not in instruction
     replay = RunSpec.from_render_spec(spec.render_spec(), project=spec.project, method=spec.method, label=spec.label)

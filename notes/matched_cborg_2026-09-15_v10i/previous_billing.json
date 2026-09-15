@@ -1,0 +1,705 @@
+{
+  "manifest_sha256": "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939",
+  "additional_cap_usd": "200",
+  "attempt_cap_usd": "5",
+  "attempt_caps_usd": {
+    "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939:CHORUS_agentic_rep1": "10",
+    "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939:CHORUS_api_rep1": "13.34",
+    "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939:KIDS_FIRST_agentic_rep1": "15",
+    "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939:KIDS_FIRST_api_rep1": "15"
+  },
+  "requests": [
+    {
+      "id": "c1194ce40ee7436c8c2349a5231ab261",
+      "attempt": "CHORUS_api_rep1",
+      "request_sha256": "7b432573047a27a9c451c5acdf335ed958b2b7c6de0fffc1364cb10bcf0c32f1",
+      "reserved_at": "2026-09-14T04:32:55.798920+00:00",
+      "reserved_usd": "3.51749375",
+      "status": "settled",
+      "cost_usd": "1.73682250",
+      "settled_at": "2026-09-14T04:43:42.643161+00:00",
+      "response_sha256": "02c2a8c4815a4b72e7c8f81e08fa7dac00f6449f2a128fad42eace015b8fe0f2",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 31750
+        },
+        "cache_creation_input_tokens": 31750,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9792,
+        "output_tokens": 59577,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "0ff75c1972d4452083d596da491935fa",
+      "attempt": "CHORUS_api_rep1",
+      "request_sha256": "66ad05ed6a230fe4d93d8ea8606396e66544ed5c83a26ec43b8809555f302f24",
+      "reserved_at": "2026-09-14T04:43:46.958131+00:00",
+      "reserved_usd": "0.98566250",
+      "status": "settled",
+      "cost_usd": "0.38501750",
+      "settled_at": "2026-09-14T04:44:38.040677+00:00",
+      "response_sha256": "a13b2318f6859bc158f3fb683efa222588dec0dd33f2570bac41495adf9a884c",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 31750
+        },
+        "cache_creation_input_tokens": 31750,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 18881,
+        "output_tokens": 3687,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "0496ae88cd684ce3bd8929efb01dd959",
+      "attempt": "CHORUS_api_rep1",
+      "request_sha256": "b0c57428cbb3bde92080df542a8dc4919dd3d58fa5641f993e18b10ee4218330",
+      "reserved_at": "2026-09-14T04:44:39.257834+00:00",
+      "reserved_usd": "2.81252500",
+      "status": "settled",
+      "cost_usd": "0.37794000",
+      "settled_at": "2026-09-14T04:46:09.266599+00:00",
+      "response_sha256": "963e6d6a9fc269237085ebcb70358c53abbd180e313b6fb6261941cfe6fa5e2f",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 31750,
+        "input_tokens": 22463,
+        "output_tokens": 9990,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "561d79f7f11c4fe38a113b46e68b7932",
+      "attempt": "CHORUS_api_rep1",
+      "request_sha256": "fcc6287b2d3bc1f2332c41603133fe9b41ef4e5240038aaad94e9e9a4cd81de4",
+      "reserved_at": "2026-09-14T04:46:10.927778+00:00",
+      "reserved_usd": "1.21620625",
+      "status": "settled",
+      "cost_usd": "0.37042500",
+      "settled_at": "2026-09-14T04:47:05.613621+00:00",
+      "response_sha256": "2081f9cf3944838b819892e62dfe8d098cb91c966fb4d15f7e01bc0a342267b7",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 31750,
+        "input_tokens": 49620,
+        "output_tokens": 4258,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "4cd16f2f397243b29f0665749211307d",
+      "attempt": "CHORUS_api_rep1",
+      "request_sha256": "0f9a6a549017a95a1e2b02a7771df9b7a138b7048c0c2cdae1f3c5fb8b122585",
+      "reserved_at": "2026-09-14T04:47:19.075628+00:00",
+      "reserved_usd": "1.25004375",
+      "status": "settled",
+      "cost_usd": "0.42126000",
+      "settled_at": "2026-09-14T04:48:14.199668+00:00",
+      "response_sha256": "c2ad0f3765f74701e1cdfd99a7e27df4ad925893ff35ca5095613e0707a56920",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 31750,
+        "input_tokens": 54132,
+        "output_tokens": 5389,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "ee693ad02c74414ca9c4cfc6116f89cb",
+      "attempt": "841bfbcc773e23a83c5c9d4b71e711e18e07a75878653357125f00b1649808a1:CHORUS_api_rep1",
+      "request_sha256": "8bc3feb3af550776e7cc6771a10a8b8aa6c3d2cac857a8ca84f7ab03661e61a7",
+      "reserved_at": "2026-09-14T06:28:46.308127+00:00",
+      "reserved_usd": "3.52042500",
+      "status": "settled",
+      "cost_usd": "1.25332000",
+      "settled_at": "2026-09-14T06:36:07.721037+00:00",
+      "response_sha256": "413b197611e57b20c26734782118ccaf2da3f59e3a78a7d824bacb0fb9650f97",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9789,
+        "output_tokens": 40139,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "d6efc47e32e640b5969446275d33f9a0",
+      "attempt": "841bfbcc773e23a83c5c9d4b71e711e18e07a75878653357125f00b1649808a1:CHORUS_api_rep1",
+      "request_sha256": "09f64fb08c488b86de8c68cd1ab49eee5df4da1259064398193c4049596b9dad",
+      "reserved_at": "2026-09-14T06:36:10.818288+00:00",
+      "reserved_usd": "0.98393750",
+      "status": "settled",
+      "cost_usd": "0.58661000",
+      "settled_at": "2026-09-14T06:38:37.018371+00:00",
+      "response_sha256": "371d0dca612fc71a486bea585170ea7ef24d1c715531716e34f03cb934f66035",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 18257,
+        "output_tokens": 11777,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "16cc54e39714439c9b884c3f3e22c996",
+      "attempt": "841bfbcc773e23a83c5c9d4b71e711e18e07a75878653357125f00b1649808a1:CHORUS_api_rep1",
+      "request_sha256": "7ab4dc229d1c1a3883907cc3a3f4237d44348596cbbefe82892c729d0b9cb7f5",
+      "reserved_at": "2026-09-14T06:38:39.442308+00:00",
+      "reserved_usd": "2.80707500",
+      "status": "settled",
+      "cost_usd": "0.37423200",
+      "settled_at": "2026-09-14T06:40:21.196946+00:00",
+      "response_sha256": "9403bec0c99b1335dd8cc2c1d2838d2b31dc9794ab4d452afd1d79c73192466d",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32144,
+        "input_tokens": 21342,
+        "output_tokens": 10058,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "41f05402197f4e029160ed7e84c1da6a",
+      "attempt": "841bfbcc773e23a83c5c9d4b71e711e18e07a75878653357125f00b1649808a1:CHORUS_api_rep1",
+      "request_sha256": "1590752d9384cb89375ff0dfd6c6263bc90dfa0c9e44e2e7d64dbad9754e91e7",
+      "reserved_at": "2026-09-14T06:40:23.714406+00:00",
+      "reserved_usd": "1.19937500",
+      "status": "settled",
+      "cost_usd": "0.36965700",
+      "settled_at": "2026-09-14T06:41:23.821126+00:00",
+      "response_sha256": "25f5b69038b9e8023da9f02608c75abcb4baa7c3b1d431499ab7fb48b7f24162",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32144,
+        "input_tokens": 46982,
+        "output_tokens": 4747,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "5697200933764fa9adb6e33e0beb299e",
+      "attempt": "841bfbcc773e23a83c5c9d4b71e711e18e07a75878653357125f00b1649808a1:CHORUS_api_rep1",
+      "request_sha256": "220d24c4a15a64099455d0bef32ec024893e46b78068972a41af38bd10836415",
+      "reserved_at": "2026-09-14T06:41:29.489283+00:00",
+      "reserved_usd": "1.23836875",
+      "status": "settled",
+      "cost_usd": "0.44680200",
+      "settled_at": "2026-09-14T06:42:43.384990+00:00",
+      "response_sha256": "8d2f2269da86e6f031fc49928ba58b4c941151ed5a96654c2c62d2b470f9994b",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32144,
+        "input_tokens": 52181,
+        "output_tokens": 6793,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "f46b8fe78c9b4d33b46fe464be3ea1ac",
+      "attempt": "bae17a6d500794231a6b12c83ef5e6540a26bdf29feae83006e83652791c9993:CHORUS_api_rep1",
+      "request_sha256": "c2e127e81165a01464b8c6bcd10b7f0c9b3239a69b6b8b5421139ad594587148",
+      "reserved_at": "2026-09-14T08:55:02.498627+00:00",
+      "reserved_usd": "3.52042500",
+      "attempt_cap_usd": "5",
+      "status": "settled",
+      "cost_usd": "1.87952000",
+      "settled_at": "2026-09-14T09:06:50.066628+00:00",
+      "response_sha256": "0d7895e30acfbfd44bc2f0d3056186dbae3c10ba6bc3dbe0ba6c1db453a54e73",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9789,
+        "output_tokens": 65187,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "f4b6fa39750d4926a5f128e9500b5f8d",
+      "attempt": "bae17a6d500794231a6b12c83ef5e6540a26bdf29feae83006e83652791c9993:CHORUS_api_rep1",
+      "request_sha256": "63ea53d1d2336ebf9245c89cd8f1feda8a0341ca07edf10ea2cddd6fde5b18d6",
+      "reserved_at": "2026-09-14T09:06:54.155599+00:00",
+      "reserved_usd": "0.98666250",
+      "attempt_cap_usd": "5",
+      "status": "settled",
+      "cost_usd": "0.72730000",
+      "settled_at": "2026-09-14T09:10:27.950554+00:00",
+      "response_sha256": "bcb65695fb31cd1dbc22f971ee6d9fd51f4679326cb30d8c5dfe3140c7fa79b0",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 18620,
+        "output_tokens": 17332,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "070ee6dc58d54ee0af6a907b784fcd0a",
+      "attempt": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2:CHORUS_api_rep1",
+      "request_sha256": "fe1a4f0640dfee189129084dac68a6769940373f4626af0e208337dabb3408d9",
+      "reserved_at": "2026-09-14T18:02:13.839527+00:00",
+      "reserved_usd": "3.52042500",
+      "attempt_cap_usd": "10",
+      "status": "settled",
+      "cost_usd": "1.65004500",
+      "settled_at": "2026-09-14T18:12:21.350995+00:00",
+      "response_sha256": "ff15ee9586a8d2f69ed41019f47bc789ed73a24f4ef49322f2c0e085cfa25feb",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9789,
+        "output_tokens": 56008,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "9ec8253bc06d4b4baab9a7c68417eb5e",
+      "attempt": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2:CHORUS_api_rep1",
+      "request_sha256": "f3b49127ebfa4a3588aa178c7bded51ca1d89f5b4cb56eba8df6e21ac9264a40",
+      "reserved_at": "2026-09-14T18:12:24.552376+00:00",
+      "reserved_usd": "0.99255625",
+      "attempt_cap_usd": "10",
+      "status": "settled",
+      "cost_usd": "0.63595500",
+      "settled_at": "2026-09-14T18:15:13.520727+00:00",
+      "response_sha256": "fa38b8565ba35b38074763a2aa21f089b4bef02c2a35955f8c5eacaff46a4643",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32144
+        },
+        "cache_creation_input_tokens": 32144,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 19406,
+        "output_tokens": 13521,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "b07f971a18454048a45ca0c87a426ccf",
+      "attempt": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2:CHORUS_api_rep1",
+      "request_sha256": "691b371b21d27903bd932c1842d1df5c2010442058cb8d8474ce9db563d9329d",
+      "reserved_at": "2026-09-14T18:15:15.555769+00:00",
+      "reserved_usd": "2.83762500",
+      "attempt_cap_usd": "10",
+      "status": "settled",
+      "cost_usd": "0.41109700",
+      "settled_at": "2026-09-14T18:16:56.348369+00:00",
+      "response_sha256": "8c91308f6496c3a9b714c2f5b22035f47a7463ccf9b70a4c2d3e0a34ea542e23",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32144,
+        "input_tokens": 25415,
+        "output_tokens": 10718,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "47ced42c98004655824b82a7e959a2a0",
+      "attempt": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2:CHORUS_api_rep1",
+      "request_sha256": "313bcaac6753f22b46aeddd065ef16930332f8f8260d1b7ed9a8b53ebcee671a",
+      "reserved_at": "2026-09-14T18:16:57.627236+00:00",
+      "reserved_usd": "1.24534375",
+      "attempt_cap_usd": "10",
+      "status": "settled",
+      "cost_usd": "0.45845200",
+      "settled_at": "2026-09-14T18:18:20.326338+00:00",
+      "response_sha256": "d747cec012783fe7e8ebde3ad72e753e1e0a5286233aa5e1383d5d33f43254cc",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32144,
+        "input_tokens": 53111,
+        "output_tokens": 7073,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "d844cbe78ba2463d9983a2809b4bb924",
+      "attempt": "a7328d181ed2fd4e5b783d3c3ac2a9ee70d8644a63727388fe285abafcce78b2:CHORUS_api_rep1",
+      "request_sha256": "6f5f52421a6de27c3ffa5d96f6bc212136d137401765eb34806565f81af9ea35",
+      "reserved_at": "2026-09-14T18:18:28.570657+00:00",
+      "reserved_usd": "1.30562500",
+      "attempt_cap_usd": "10",
+      "status": "settled",
+      "cost_usd": "0.59151700",
+      "settled_at": "2026-09-14T18:20:14.415085+00:00",
+      "response_sha256": "90af8c9ba1743ef15d0e55838c45276ecf47dde98aa650885a6b4e719829d5f9",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32144,
+        "input_tokens": 61149,
+        "output_tokens": 10788,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "6c3195303e674aafa7121c9f82622df6",
+      "attempt": "104c9fedaa79e3ad3a4e03bdce0714dcbdbe6cbd23d73377fab6d6645c91c05d:CHORUS_api_rep1",
+      "request_sha256": "05feaaa3c8ea24848ed2642ae1d2bf7056e80d4edd4e2bbaf647d3065230cb36",
+      "reserved_at": "2026-09-14T20:45:56.479567+00:00",
+      "reserved_usd": "3.52042500",
+      "attempt_cap_usd": "20",
+      "status": "settled",
+      "cost_usd": "1.61048875",
+      "settled_at": "2026-09-14T20:56:01.013234+00:00",
+      "response_sha256": "3015ab4031b487b28cc372c5c3b8cbf86aa5f38f7cd0c38c3bb7695f9f414edc",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32499
+        },
+        "cache_creation_input_tokens": 32499,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9789,
+        "output_tokens": 54337,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "8c9b4ae5319f488bada94f9dc8d70cc2",
+      "attempt": "104c9fedaa79e3ad3a4e03bdce0714dcbdbe6cbd23d73377fab6d6645c91c05d:CHORUS_api_rep1",
+      "request_sha256": "ea76b1db83a6a4aeae109896b31c95aa291505216b83e6f02aa19ea7ca74bc62",
+      "reserved_at": "2026-09-14T20:56:04.143886+00:00",
+      "reserved_usd": "0.97951875",
+      "attempt_cap_usd": "20",
+      "status": "settled",
+      "cost_usd": "0.70233375",
+      "settled_at": "2026-09-14T20:59:22.199961+00:00",
+      "response_sha256": "48276482548c54ac2996feb8865fb769d3c406c3be917cdc250e9eff8367a0be",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32499
+        },
+        "cache_creation_input_tokens": 32499,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 17668,
+        "output_tokens": 16435,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "09dac173c79049e38dc5b81402f49109",
+      "attempt": "104c9fedaa79e3ad3a4e03bdce0714dcbdbe6cbd23d73377fab6d6645c91c05d:CHORUS_api_rep1",
+      "request_sha256": "aa64d70505ca6363497c0c1760167a02beb5fd168818c63de72ace996560cc41",
+      "reserved_at": "2026-09-14T20:59:23.924738+00:00",
+      "reserved_usd": "2.81169375",
+      "attempt_cap_usd": "20",
+      "status": "settled",
+      "cost_usd": "0.37426450",
+      "settled_at": "2026-09-14T21:01:02.202078+00:00",
+      "response_sha256": "06ba14431b69d53450caaea975583a9d7d9f0e17dc2a1a381d4a90d65b87514a",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32499,
+        "input_tokens": 21958,
+        "output_tokens": 9929,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "71c46dec30df4f10a6204d8f0829861d",
+      "attempt": "104c9fedaa79e3ad3a4e03bdce0714dcbdbe6cbd23d73377fab6d6645c91c05d:CHORUS_api_rep1",
+      "request_sha256": "3662e305e28b13f3f58fdc13595b3afa6a3ba5ef9dd09ba3b69fdd8c746d6a13",
+      "reserved_at": "2026-09-14T21:01:03.704666+00:00",
+      "reserved_usd": "1.19522500",
+      "attempt_cap_usd": "20",
+      "status": "settled",
+      "cost_usd": "0.38444450",
+      "settled_at": "2026-09-14T21:02:08.404070+00:00",
+      "response_sha256": "2c677b1b5f817c4261973b1017ad9921795286ff365afe1df125300d3812fe7f",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32499,
+        "input_tokens": 46429,
+        "output_tokens": 5442,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "2fd6c937f18a4cefa01f6f95f22870d8",
+      "attempt": "104c9fedaa79e3ad3a4e03bdce0714dcbdbe6cbd23d73377fab6d6645c91c05d:CHORUS_api_rep1",
+      "request_sha256": "ed7a4ab9d71b34dea2861119dfc291a6673b745fb4f83040a0917a1055dd6ee8",
+      "reserved_at": "2026-09-14T21:02:13.711799+00:00",
+      "reserved_usd": "1.23860625",
+      "attempt_cap_usd": "20",
+      "status": "settled",
+      "cost_usd": "0.41641450",
+      "settled_at": "2026-09-14T21:03:11.286745+00:00",
+      "response_sha256": "cb08eb5e9b42a76ed7e4c77d065c8d0689f83985318a65ceec3544cfff819146",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32499,
+        "input_tokens": 52213,
+        "output_tokens": 5564,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "89e22bcb1737492bb279ee5b1578f3e5",
+      "attempt": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729:CHORUS_api_rep1",
+      "request_sha256": "16b6e991716062d3b7ce3c9640d1042b52907eaa8c593686c1c4176ffebde4bc",
+      "reserved_at": "2026-09-14T23:32:05.536371+00:00",
+      "reserved_usd": "3.52042500",
+      "attempt_cap_usd": "16.51",
+      "status": "settled",
+      "cost_usd": "1.47767625",
+      "settled_at": "2026-09-14T23:40:57.424230+00:00",
+      "response_sha256": "ebcbec2fe814ba6e7a52dc3a3a6c4622ad95e4624586b8412ebf4158ddf61635",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32589
+        },
+        "cache_creation_input_tokens": 32589,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9789,
+        "output_tokens": 49002,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "4b15a9e4ed534438a30dc00e71297162",
+      "attempt": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729:CHORUS_api_rep1",
+      "request_sha256": "5a70ec20f4ad56518a2594fdef1e867f320ace9fa3dd39e342d60f5e115b646d",
+      "reserved_at": "2026-09-14T23:41:00.719274+00:00",
+      "reserved_usd": "0.97635625",
+      "attempt_cap_usd": "16.51",
+      "status": "settled",
+      "cost_usd": "0.57723625",
+      "settled_at": "2026-09-14T23:43:26.653543+00:00",
+      "response_sha256": "f8a8ddf15275aab3c842ae50545b1259cbd1ea8b0a24805508948ec3009293d7",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32589
+        },
+        "cache_creation_input_tokens": 32589,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 17246,
+        "output_tokens": 11493,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "4600a12ed6e049e7b1aff1cda01b7d66",
+      "attempt": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729:CHORUS_api_rep1",
+      "request_sha256": "a4b42b7e601d611b6aa332b46c269452e187f8fd2f47ba9eca0504858c49f52b",
+      "reserved_at": "2026-09-14T23:43:28.545525+00:00",
+      "reserved_usd": "2.80490625",
+      "attempt_cap_usd": "16.51",
+      "status": "settled",
+      "cost_usd": "0.37608450",
+      "settled_at": "2026-09-14T23:45:10.213156+00:00",
+      "response_sha256": "a97efffd1a60538f3c3cc20a6f8971172bcdc4b97f8593f0592d1e8845ea684d",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32589,
+        "input_tokens": 21053,
+        "output_tokens": 10181,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "a223804cbe80428bac35815674352448",
+      "attempt": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729:CHORUS_api_rep1",
+      "request_sha256": "500fad324b11ead6df0e34e3c71bf8519178ae1de3c363fa2b9055c1d1f3841b",
+      "reserved_at": "2026-09-14T23:45:11.470202+00:00",
+      "reserved_usd": "1.18298125",
+      "attempt_cap_usd": "16.51",
+      "status": "settled",
+      "cost_usd": "0.35499950",
+      "settled_at": "2026-09-14T23:46:07.929262+00:00",
+      "response_sha256": "d9be2fb4d52a7f442b2ea2eccdae4db4b411d15ac0f8f32f9f021bf385f69a23",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32589,
+        "input_tokens": 44796,
+        "output_tokens": 4589,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "dcb843a105de4ad7a787bedd7f0d659d",
+      "attempt": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729:CHORUS_api_rep1",
+      "request_sha256": "6febdcc261be0ea6db80bc6dadf3873bb6422c64d48a82e09ec102a60eb77e0f",
+      "reserved_at": "2026-09-14T23:46:13.097986+00:00",
+      "reserved_usd": "1.22000625",
+      "attempt_cap_usd": "16.51",
+      "status": "settled",
+      "cost_usd": "0.38718450",
+      "settled_at": "2026-09-14T23:47:04.575386+00:00",
+      "response_sha256": "8e41ac42d6e2bbea68f88e6deb5e137e339790e186d32f6cf5e98d4e814f292d",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 32589,
+        "input_tokens": 49733,
+        "output_tokens": 4889,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "00aadfeeecfa4ae485e77509722a95d0",
+      "attempt": "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939:CHORUS_api_rep1",
+      "request_sha256": "c41649fd0fac00fe282e8cd7fdf2d56c47fc6f7bed84ceb32f50f43b81609519",
+      "reserved_at": "2026-09-15T00:52:29.527119+00:00",
+      "reserved_usd": "3.52042500",
+      "attempt_cap_usd": "13.34",
+      "status": "settled",
+      "cost_usd": "1.75619500",
+      "settled_at": "2026-09-15T01:03:12.928085+00:00",
+      "response_sha256": "2c0b7981c579e569977c8d214aa31ee314226c67b918aba90919d08d1ffe6d56",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32828
+        },
+        "cache_creation_input_tokens": 32828,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 9789,
+        "output_tokens": 60083,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    },
+    {
+      "id": "20338a8623554e2eb10ad1df7a887ff4",
+      "attempt": "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939:CHORUS_api_rep1",
+      "request_sha256": "a5717631092632f35c0bc7da945926d98912d98cca8f6307ef8d871aaafd9a4a",
+      "reserved_at": "2026-09-15T01:03:23.287591+00:00",
+      "reserved_usd": "0.99964375",
+      "attempt_cap_usd": "13.34",
+      "status": "settled",
+      "cost_usd": "0.72930500",
+      "settled_at": "2026-09-15T01:06:50.579174+00:00",
+      "response_sha256": "46f001a320b66406c389b6b55c45c13ca4cf6a37413e4f855dabb8a9588c6ddb",
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 32828
+        },
+        "cache_creation_input_tokens": 32828,
+        "cache_read_input_tokens": 0,
+        "input_tokens": 20351,
+        "output_tokens": 16895,
+        "server_tool_use": null,
+        "service_tier": null
+      }
+    }
+  ],
+  "continued_from": {
+    "checkpoint_sha256": "d3e724b34ccad81d8018f22eb0b95d6a7c96eada62646061b4d0523a27fd9c6e",
+    "manifest_sha256": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729",
+    "cost_usd": "19.33709900",
+    "requests": 27
+  }
+}

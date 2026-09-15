@@ -697,7 +697,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             # still reproduce. Only this candidate becomes unavailable.
             pass
     for delta, render_version, selected_chunks, selected_manifest, selected_profile, destinations, scoped_chunks in product(
-            (0, -1, 1, -2, 2), (6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
+            (0, -1, 1, -2, 2), (7, 6, 5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices,
             destination_choices, (True, False)):
         if render_version == 1 and selected_profile and not schema_block.get("profile"):
             continue  # renderer 1 cannot prove a profile (#1678)
