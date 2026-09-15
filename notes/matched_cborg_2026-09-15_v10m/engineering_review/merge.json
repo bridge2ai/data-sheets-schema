@@ -1,0 +1,19 @@
+{
+  "kind": "verified_engineering_merge",
+  "recorded_at": "2026-09-15T18:56:43.646989+00:00",
+  "pull_request": 1835,
+  "reviewed_commit": "893e9e941d3ea860c3c0f8861cc1ba64432dd4ae",
+  "merge_commit": "33a0bfe95af29f92aae16b20e2030ecfea547832",
+  "merge_tree_matches_reviewed_head": true,
+  "required_ci_run": 35009501429,
+  "main_user_preservation_guard": "passed_before_and_after",
+  "pr": {
+    "headRefOid": "893e9e941d3ea860c3c0f8861cc1ba64432dd4ae",
+    "mergeCommit": {
+      "oid": "33a0bfe95af29f92aae16b20e2030ecfea547832"
+    },
+    "mergedAt": "2026-09-15T18:55:59Z",
+    "state": "MERGED",
+    "url": "https://github.com/bridge2ai/data-sheets-schema/pull/1835"
+  }
+}
