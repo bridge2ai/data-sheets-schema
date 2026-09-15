@@ -14,6 +14,16 @@ from data_sheets_schema.evidence_assertions import (
 )
 
 
+@pytest.fixture(autouse=True, params=[1, 2])
+def relationship_protocol(request, monkeypatch):
+    """Run the existing identity attack cases under both protocol versions."""
+    original = check_relationship_removals
+    def versioned(*args, **kwargs):
+        kwargs.setdefault("protocol_version", request.param)
+        return original(*args, **kwargs)
+    monkeypatch.setitem(globals(), "check_relationship_removals", versioned)
+
+
 def artifact(name="original_full", path="/privacy/details", op="contains", quote="in process"):
     return {"artifact": name, "path": path, "op": op, "quote": quote}
 

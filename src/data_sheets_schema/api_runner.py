@@ -522,7 +522,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -1114,8 +1114,9 @@ def resolve_prompt(spec: RunSpec) -> str:
         body = api_header_instructions(body, api_values)
     if spec.render_version >= 9:
         from data_sheets_schema.resources import resource_path
+        protocol = 2 if spec.render_version >= 11 else 1
         body += "\n\n" + resource_path(
-            Path("src/download/prompts/evidence_protocol_v1.md")).read_text(encoding="utf-8")
+            Path(f"src/download/prompts/evidence_protocol_v{protocol}.md")).read_text(encoding="utf-8")
         if spec.is_agentic:
             body += native_evidence_instructions(spec)
             # Add this after portable command/path adaptation: the serialized
@@ -1133,8 +1134,9 @@ def resolve_prompt(spec: RunSpec) -> str:
     if spec.render_version >= 10:
         # Both arms receive the same complete output contracts. API requests
         # also put the applicable contract after their carried artifacts.
-        body += "\n\n## Required phase output contracts (renderer 10)\n\n"
-        body += "\n\n".join(EVIDENCE_PHASE_CONTRACTS.values())
+        body += f"\n\n## Required phase output contracts (renderer {spec.render_version})\n\n"
+        body += "\n\n".join(evidence_phase_contract(phase, spec.render_version)
+                              for phase in EVIDENCE_PHASE_CONTRACTS)
     return body
 
 
@@ -1150,6 +1152,8 @@ def native_evidence_instructions(spec: RunSpec) -> str:
             "--audit", str(audit), "--bundle", str(spec.bundle),
             "--manifest", str(spec.chunk_manifest), "--original-full", str(original_full),
             "--original-core", str(original_core)]
+    if spec.render_version >= 11:
+        args += ["--protocol-version", "2"]
     freeze = (
         "from pathlib import Path\nimport hashlib, json\n"
         f"pairs = {[(paths['full'], str(original_full)), (paths['core'], str(original_core))]!r}\n"
@@ -1614,6 +1618,11 @@ EVIDENCE_PHASE_CONTRACTS = {
 }
 
 
+def evidence_phase_contract(phase: str, render_version: int) -> str:
+    contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
+    return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
+
+
 def phase_instruction(phase: str, render_version: int) -> str:
     """Keep historical phase bytes, and complete the v10 terminal contract."""
     instruction = PHASE_INSTRUCTIONS[phase]
@@ -1638,7 +1647,7 @@ def phase_instruction(phase: str, render_version: int) -> str:
             "Use the original full record and audit supplied above. A core will be "
             "derived from the corrected full record; do not infer evidence from "
             "an unavailable or derived core. ")
-    contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase)
+    contract = evidence_phase_contract(phase, render_version)
     return instruction + ("\n\n" + contract if contract else "")
 
 
@@ -3479,6 +3488,7 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
                           reconciled: bool = False) -> dict[str, Any]:
     """Check the explicit v9 protocol against this invocation's own carry."""
     from data_sheets_schema import evidence_assertions as evidence
+    protocol = 2 if spec.render_version >= 11 else 1
     try:
         chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
         audit = evidence.load_json(carry["Audit findings"])
@@ -3492,10 +3502,11 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
             artifacts["final_core"] = spec.core_path.read_bytes().decode("utf-8")
         # An audit must refer only to its original inputs, never to a later
         # repair that happens to make an earlier allegation true.
-        out = evidence.check_audit(audit, artifacts=originals, chunks=chunks)
+        out = evidence.check_audit(audit, artifacts=originals, chunks=chunks, protocol_version=protocol)
         if reconciled or report:
             out["findings"] += evidence.check_relationship_removals(
-                audit, evidence.load_record(originals["original_full"]), evidence.load_record(artifacts["final_full"]))
+                audit, evidence.load_record(originals["original_full"]), evidence.load_record(artifacts["final_full"]),
+                protocol_version=protocol)
         if report:
             text = spec.report_path.read_bytes().decode("utf-8")
             claims = evidence.report_assertions(text)
@@ -3508,7 +3519,7 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
         out["scope"] = "Declared evidence only; semantic support and omitted claims require independent review."
         return out
     except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as exc:
-        return {"instrument": evidence.INSTRUMENT, "checked": False, "assertions_checked": 0,
+        return {"instrument": evidence.instrument(protocol), "checked": False, "assertions_checked": 0,
                 "findings": [{"kind": "evidence_inputs_unusable", "detail": str(exc)}]}
 
 

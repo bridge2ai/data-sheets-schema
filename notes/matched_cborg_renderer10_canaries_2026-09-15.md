@@ -1,5 +1,15 @@
 # Renderer-10 matched generation and evaluation plan — 2026-09-15
 
+**Execution update:** v10m stopped after reconciliation because the v1 checker
+cannot identify anonymous indexed ancestors. See the [preserved outcome](matched_cborg_2026-09-15_v10m/CHORUS_api_stopped.md)
+and #1839. All charges are settled: $34.565632 spent and $165.434368 remaining.
+All 392 original attempt files are preserved. Complete the versioned checker
+correction, independent review and CI before registering a separate condition.
+The four-canary combined ceiling remains $63.75; incorporate the new settled
+charge when setting fresh caps. No further generation/evaluation is running.
+The original registration sequence below remains historical and does not
+authorize resuming the stopped attempt.
+
 Charge reconciliation is complete and #1831 is closed. The stopped v10l
 canary's two requests are fully accounted for at $2.008425. Total spending is
 $31.667238, leaving $168.332762 from the additional $200. All 362 prior
