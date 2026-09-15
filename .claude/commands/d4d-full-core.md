@@ -653,6 +653,13 @@ the repair of what the checkers find.
    computed-count block from its structured audit; this native arm must
    likewise count its own recorded findings rather than copy a prose total.
 
+   Compare the original and final records for every stated action. A slot
+   absent in both was not removed: describe its continued omission in prose
+   without a removal row. A fact newly added from the bundle was not relocated
+   from the original record; identify its original location and final destination
+   before calling it a relocation. Check each member of a grouped action claim
+   separately. An accurate source addition can still have an inaccurate report.
+
    **Two sections have a fixed shape.** The report-claims checker
    (`d4d provenance backfill-checks`; #546) parses exactly two claim forms,
    and a report written in free prose registers zero claims — its "0

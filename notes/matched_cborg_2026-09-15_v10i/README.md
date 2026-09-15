@@ -1,4 +1,21 @@
-# v10i matched canaries — registered, unexecuted
+# v10i matched canaries — CHORUS API rejected
+
+The approved CHORUS API attempt completed for **$4.069292** across five
+settled CBORG requests. Independent review rejected its unchanged audit/report
+under #1807 and #1808. All 38 originals are preserved; the full/core schema,
+pair, exact derivation and live provenance checks passed. No later canary or
+evaluator launched. See the [outcome and accounting record](rejected_canaries/CHORUS_api_rep1/README.md).
+
+Across eight prior attempts, 34 settled requests total **$25.891891**, leaving
+**$174.108109** of the additional $200 allocation. All 287 original files are
+preserved. Six completed attempts were rejected and two stopped; none is an
+accepted canary. The used approval does not authorize a whole-attempt retry.
+
+## Original registration record — historical preparation status
+
+The text below records the proposal before launch; its pending status and
+pre-attempt balances are historical, superseded by the outcome above.
+
 
 The approved [v10h CHORUS API attempt](../matched_cborg_2026-09-15_v10h/README.md)
 stopped at audit-format validation for **$2.485500**. All 24 originals and

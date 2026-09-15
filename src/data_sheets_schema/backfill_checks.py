@@ -98,12 +98,15 @@ def declared_bundle(record: dict[str, Any], provenance: Path | None = None) -> P
 
 def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             only: set[str] | None = None,
-            ranges: dict[str, dict[str, str | None]] | None = None) -> dict[str, Any]:
+            ranges: dict[str, dict[str, str | None]] | None = None, *,
+            report_claims_version: int = 8) -> dict[str, Any]:
     """The check blocks for one record, or reasons they cannot be computed.
     `only` restricts the computation to the named blocks (`--blocks`): the
     receipts and grounding checks read the bundle and every chunk, which
     over the corpus is the difference between minutes and hours when the
-    revision being backfilled touches only `form`."""
+    revision being backfilled touches only `form`. `report_claims_version=7`
+    explicitly replays historical report measurements; current checks use v8.
+    This function computes blocks without rewriting stored measurements."""
     want = (lambda name: only is None or name in only)
     from data_sheets_schema.grounding import check_run
     from data_sheets_schema.identifiers import uriorcurie_slots
@@ -182,6 +185,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
             declared if declared is not None else declared_slots(),
             snapshot=snapshot,
+            instrument_version=report_claims_version,
             # Both maps describe one core schema and travel together: the
             # caller builds each once for a whole corpus pass, and rebuilding
             # one per record would both cost a SchemaView load per record and

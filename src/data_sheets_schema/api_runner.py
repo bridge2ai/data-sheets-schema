@@ -510,6 +510,7 @@ class RunSpec:
     _agentic_toolchain: dict | None = field(default=None, init=False, repr=False)
     _chunk_check_uses_manifest: bool = field(default=False, init=False, repr=False)
     _corpus_root: Path | None = field(default=None, init=False, repr=False)
+    _api_header_values: dict[str, str] | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         if self.out_dir is not None:
@@ -520,8 +521,8 @@ class RunSpec:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
-            self.render_version = 7 if self.is_agentic else 5
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7):
+            self.render_version = 7 if self.is_agentic else 8
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -635,6 +636,8 @@ class RunSpec:
         if spec.render_version >= 6 and spec.is_agentic:
             from data_sheets_schema.agentic_runtime import validate_toolchain
             spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"))
+        if spec.render_version >= 8 and not spec.is_agentic:
+            spec._api_header_values = validate_api_header_values(recorded.get("api_header_values"))
         # A replay reads no live declaration — the manifest may be gone or
         # malformed since — so the profile is not resolved here either;
         # a replay never renders the digest (#1438).
@@ -642,6 +645,26 @@ class RunSpec:
         spec.profile_basis = recorded.get("profile_basis")
         spec._replay_only = True
         return spec
+
+    @property
+    def api_header_values(self) -> dict[str, str]:
+        """Freeze the displayed request settings, independently of live config (#1809)."""
+        if self._api_header_values is None:
+            if self._replay_only:
+                raise ValueError("renderer v8 requires recorded API header values")
+            self._api_header_values = request_header_values(_model_settings())
+        return dict(self._api_header_values)
+
+    def bind_api_header_values(self, settings: dict[str, Any]) -> None:
+        """Before planning or spending, bind the instruction to request settings."""
+        if self.render_version < 8 or self.is_agentic:
+            return
+        actual = request_header_values(settings)
+        if self._api_header_values is None and not self._replay_only:
+            self._api_header_values = actual
+        if self.api_header_values != actual:
+            raise ValueError("API request settings differ from the pinned renderer v8 header values; "
+                             "create a new run specification for the changed settings")
 
     @property
     def manifest_used(self) -> bool:
@@ -699,6 +722,8 @@ class RunSpec:
                                          "resources": dict(self._agentic_toolchain["resources"])}}
                    if self.render_version >= 6 and self._agentic_toolchain is not None else {}),
                 **({"chunk_check_uses_manifest": True} if self._chunk_check_uses_manifest else {}),
+                **({"api_header_values": self.api_header_values}
+                   if self.render_version >= 8 and not self.is_agentic else {}),
                 "render_version": self.render_version,
                 "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
                 "condition": self.condition, "arm": self.arm,
@@ -967,7 +992,8 @@ def resolve_prompt(spec: RunSpec) -> str:
     """
     body = prompt_body(spec.base_prompt)
     ident = provider_identity()
-    settings = _model_settings()
+    api_values = spec.api_header_values if spec.render_version >= 8 and not spec.is_agentic else None
+    settings = _model_settings() if api_values is None else None
     subs = {
         "{PROJECT}": spec.project,
         "{ARM}": spec.arm,
@@ -981,7 +1007,7 @@ def resolve_prompt(spec: RunSpec) -> str:
         # artifact asserted a runtime and model it never touched.
         "{RUNTIME}": spec.runtime,
         "{PROVIDER}": spec.provider or ident["provider"] or PROVIDER,
-        "{MODEL}": settings["name"],
+        "{MODEL}": api_values["Model"] if api_values is not None else settings["name"],
         # v2 introduced `{DATE}` but nothing substituted it, so the literal
         # string reached the model. Its records carry the right date only
         # because the model read it off `{LABEL}` and guessed correctly.
@@ -1082,6 +1108,8 @@ def resolve_prompt(spec: RunSpec) -> str:
     if spec.render_version >= 7 and spec.is_agentic:
         from data_sheets_schema.agentic_runtime import temperature_instructions
         body = temperature_instructions(body)
+    if spec.render_version >= 8 and not spec.is_agentic:
+        body = api_header_instructions(body, api_values)
     return body
 
 
@@ -1438,7 +1466,13 @@ PHASE_INSTRUCTIONS = {
         "are supplied above: compare them and report the differences you can "
         "see. Do not describe a change you cannot locate in that comparison — "
         "if the two are identical for a finding, say the finding was left "
-        "as-is. Check each statement against them before you write it. Do not report a slot as "
+        "as-is. A slot absent before and after was not removed: describe "
+        "its continued omission in prose without a disposition row. A fact "
+        "newly added from the source bundle was not relocated from the "
+        "original record; a relocation needs an original source location "
+        "and a final destination carrying that fact. Check every member of "
+        "a grouped action claim separately. Check each statement against "
+        "the records before you write it. Do not report a slot as "
         "removed if it is still present, and do not state that a slot is not "
         "declared in the schema without the schema digest supporting you: both "
         "are checked against the records afterwards, and a report that fails "
@@ -1972,6 +2006,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     inspected and tested without a key or a charge.
     """
     settings = _model_settings()
+    spec.bind_api_header_values(settings)
     sizes, basis = _carry_sizes(spec)
     phases = []
     for ph in PHASES:
@@ -3775,6 +3810,46 @@ def header_value(field: str, settings: dict[str, Any]) -> str:
     raise KeyError(field)
 
 
+def validate_api_header_values(value: Any) -> dict[str, str]:
+    if (not isinstance(value, dict) or set(value) != set(_HEADER_FROM_RECORD)
+            or any(not isinstance(v, str) or not v.strip() or "\n" in v or "\r" in v
+                   for v in value.values())):
+        raise ValueError("renderer v8 requires complete recorded API header values")
+    return {field: value[field] for field in _HEADER_FROM_RECORD}
+
+
+def request_header_values(settings: dict[str, Any]) -> dict[str, str]:
+    return validate_api_header_values({field: header_value(field, settings) for field in _HEADER_FROM_RECORD})
+
+
+def api_header_instructions(text: str, values: dict[str, str]) -> str:
+    """Use the writer's request-derived settings in new API instructions.
+
+    A later phase reads the already-stamped record. Leaving template values
+    in its instructions asks the audit to undo an accurate header (#1807).
+    Historical renderers and native runtime observations stay separate.
+    """
+    fields = "|".join(re.escape(field) for field in _HEADER_FROM_RECORD)
+    text = re.sub(
+        rf"(?m)^([ \t]*#[ \t]*)({fields})([ \t]*:[ \t]*)[^\r\n]*",
+        lambda match: (match.group(1) + match.group(2) + match.group(3)
+                       + values[match.group(2)]), text)
+    return text + (
+        "\n\n## API execution metadata (renderer v8)\n\n"
+        "The Model, Temperature and Reasoning effort values below "
+        "come from the API controller's request settings, using the same "
+        "rules as its saved record headers. They describe execution, not "
+        "dataset facts. Check dataset assertions against the declared "
+        "source bundle; check these execution headers against the supplied "
+        "request settings. Do not replace an accurate execution header with "
+        "a template example or reject it because the dataset sources do not "
+        "describe this API request. A parameter that was not sent does not "
+        "establish an effective sampling value or deterministic generation. "
+        "Apply this distinction during auditing, reconciliation and reporting.\n\n"
+        + "\n".join(f"- {field}: {values[field]}" for field in _HEADER_FROM_RECORD)
+        + "\n")
+
+
 def stamp_provenance_header(text: str, settings: dict[str, Any]) -> str:
     """Rewrite the `#` provenance header's asserted settings from the record.
 
@@ -5256,6 +5331,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     from data_sheets_schema.provenance import build_record, record_path_for
 
     settings = _model_settings()
+    spec.bind_api_header_values(settings)
     client = client or _client()
     usage: list[dict[str, Any]] = []
     fresh_generation = not resume

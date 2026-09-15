@@ -543,7 +543,7 @@ _SNAPSHOT_EXEMPT = frozenset({"conforms_to_schema", "conforms_to_class", "notes"
 #: and the schema by hash, but the checker moved under #914, #929, #962 and
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
-REPORT_CLAIMS_INSTRUMENT = ("v7 (#1089, #1194, #1196): attributed schema claims, exact nested "
+REPORT_CLAIMS_INSTRUMENT_V7 = ("v7 (#1089, #1194, #1196): attributed schema claims, exact nested "
                             "paths and record scopes, table positions, mixed list counts and "
                             "removal suppression are distinguished; phase-1 snapshot bytes are pinned; "
                             "v6 (#994): a `both` row's path is judged step by step against the "
@@ -568,6 +568,11 @@ REPORT_CLAIMS_INSTRUMENT = ("v7 (#1089, #1194, #1196): attributed schema claims,
                             "every class; v2 (#990): a finding on a `both` row names when the "
                             "core class declares no such slot; `claims_core_cannot_hold` counts "
                             "them")
+REPORT_CLAIMS_INSTRUMENT = (
+    "v8 (#1808): an explicitly full/both top-level removal is false "
+    "when the key is absent from both the pinned original full snapshot "
+    "and final full record; no prior-core or nested-entry identity is inferred; "
+    + REPORT_CLAIMS_INSTRUMENT_V7)
 
 #: The values `disposition_rows` can read off a row's `record` cell, in the
 #: order the block lists them. Fixed keys, zero-filled, so two blocks compare
@@ -894,7 +899,8 @@ def check_report(report: Path, full: dict, core: dict,
                  declared: dict[str, set[str]],
                  snapshot: dict | None = None,
                  dispositions_expected: bool | None = None,
-                 ranges: dict[str, dict[str, str | None]] | None = None) -> dict[str, Any]:
+                 ranges: dict[str, dict[str, str | None]] | None = None, *,
+                 instrument_version: int = 8) -> dict[str, Any]:
     """Findings, plus what was skipped.
 
     `declared` maps a class name to its induced slot names — passed in so a
@@ -919,7 +925,14 @@ def check_report(report: Path, full: dict, core: dict,
     for a row the removals are listed, not counted (the #684 precedent) —
     and a parsed table is not the test, because a pre-#929 audit summary
     can parse as one (#1175 review, M2).
+
+    Version 8 also rejects an explicitly full/both root-key removal when
+    that key is absent from both the original and final full records.
+    Explicit version 7 reproduces historical measurements without changing
+    their instrument or artifacts. No original core or list identity is inferred.
     """
+    if type(instrument_version) is not int or instrument_version not in (7, 8):
+        raise ValueError(f"unsupported report-claims instrument version: {instrument_version}")
     if not report.exists():
         return {"checked": False, "reason": f"no report at {report}",
                 "findings": []}
@@ -990,6 +1003,20 @@ def check_report(report: Path, full: dict, core: dict,
                     "kind": "removal_not_performed", "slot": name,
                     "record": where,
                     "detail": f"report says removed; record has {_describe(v)}",
+                    "claim": claim[:240]})
+            elif (instrument_version >= 8 and snapshot is not None and where in {"full", "both"}
+                  and re.fullmatch(r"[A-Za-z_]\w*", name)
+                  and name not in snapshot and name not in full):
+                # An empty snapshot is evidence of absence; None means no
+                # original was supplied. Only root keys are unambiguous:
+                # list entries may have moved, and this is no core snapshot.
+                # A present null/empty key still existed before the edit.
+                findings.append({
+                    "kind": "removal_of_absent_slot", "slot": name,
+                    "record": where,
+                    "detail": "report says removed from full; the key was already absent "
+                              "from the original full snapshot and remains absent. "
+                              "Describe the continued omission in prose, not a removal row",
                     "claim": claim[:240]})
 
     # Rows of a dispositions table (#929) are read below, column by column;
@@ -1359,7 +1386,8 @@ def check_report(report: Path, full: dict, core: dict,
             "prose_retention_claims": prose_retained,
             "removals_unrecorded": [u["slot"] for u in unrecorded],
             "removals_unrecorded_count": len(unrecorded) if isinstance(snapshot, dict) else None,
-            "instrument": REPORT_CLAIMS_INSTRUMENT}
+            "instrument": (REPORT_CLAIMS_INSTRUMENT if instrument_version == 8
+                           else REPORT_CLAIMS_INSTRUMENT_V7)}
 
 
 def _leaf_under_root(rec: Any, path: str, root_slots: set[str] | None = None) -> bool:
