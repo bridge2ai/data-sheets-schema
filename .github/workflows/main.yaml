@@ -61,6 +61,7 @@ jobs:
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
           -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/4
+          --ci-shard-timings=utils/ci_test_durations.json
           --durations=25 -n auto --dist worksteal
           --junitxml=test-results/pytest.xml
 
