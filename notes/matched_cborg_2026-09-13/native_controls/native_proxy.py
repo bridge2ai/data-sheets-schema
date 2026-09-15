@@ -86,8 +86,8 @@ class NativeProxy:
         self.request_headers = dict(request_headers) if request_headers is not None else {}
         if self.request_headers not in ({}, {"x-headroom-bypass": "true"}):
             raise BudgetStop("unregistered native provider headers")
-        if self.request_headers and any(sdk.default_headers.get(k) != v
-                                        for k, v in self.request_headers.items()):
+        sdk_headers = httpx.Headers(getattr(sdk, "default_headers", {}))
+        if sdk_headers.get("x-headroom-bypass") != self.request_headers.get("x-headroom-bypass"):
             raise BudgetStop("native token counting and generation context policies differ")
         self.token = secrets.token_urlsafe(32)
         self.key, self.base_url = provider_key, base_url

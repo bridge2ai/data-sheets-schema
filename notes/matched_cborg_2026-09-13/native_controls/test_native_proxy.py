@@ -118,13 +118,20 @@ def test_registered_context_policy_covers_native_counts_and_raw_forwarding(tmp_p
     assert json.loads(ledger.path.read_bytes())['requests'][0]['status'] == 'settled'
 
 
-def test_native_rejects_different_counting_and_forwarding_policy(tmp_path):
+@pytest.mark.parametrize('sdk_headers, forwarding_headers', [
+    ({}, {'x-headroom-bypass': 'true'}),
+    ({'x-headroom-bypass': 'true'}, None),
+    ({'x-headroom-bypass': 'true'}, {}),
+    ({'X-Headroom-Bypass': 'true'}, None),
+    ({'X-Headroom-Bypass': 'true'}, {}),
+])
+def test_native_rejects_different_counting_and_forwarding_policy(tmp_path, sdk_headers, forwarding_headers):
     proxy, ledger, calls = fixture_proxy(tmp_path)
     with pytest.raises(BudgetStop, match='context policies differ'):
-        NativeProxy(sdk=SimpleNamespace(default_headers={}), ledger=ledger, attempt='offline',
+        NativeProxy(sdk=SimpleNamespace(default_headers=sdk_headers), ledger=ledger, attempt='offline',
             evidence=tmp_path/'other', model=REQUEST['model'], prices=PRICES, verify=lambda: None,
             provider_key='offline', base_url='https://api.cborg.lbl.gov',
-            request_headers={'x-headroom-bypass': 'true'})
+            request_headers=forwarding_headers)
     assert not calls and not ledger.path.exists()
     proxy.upstream.close()
 
