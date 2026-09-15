@@ -60,9 +60,13 @@ For each rejected relationship also add remove_relationship to its finding:
 The path names the unsupported relationship in the original full record.
 For a list member, identity is relative to that member and ends in a name or
 schema identifier field: id, name, orcid, doi, grant_number, variable_name,
-hash or md5. Choose the person's or entity's own identity, not an affiliation.
+hash, md5, sha256 or checksum. Choose the person's or entity's own identity,
+not an affiliation.
 All present identifiers must remain unchanged, including a person's ORCID;
 the check also binds identifying fields on the containing role wrapper.
+All nested identifiers in the selected member are bound too; an unchanged
+wrapper cannot hide a changed person or resource beneath it. Reordering a
+nested collection of identities can make matching ambiguous and needs review.
 An identity pointer must follow nested objects, not indexed lists. All
 containing objects retain both the presence and absence of these identifier
 and name fields; moving a rejected person's identity onto a surviving wrapper fails.

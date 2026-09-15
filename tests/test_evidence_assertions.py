@@ -186,6 +186,47 @@ def test_an_identity_cannot_select_an_arbitrary_person_from_an_indexed_list():
     assert check_relationship_removals(audit, original, {"creators": []})[0]["kind"] == "evidence_contract"
 
 
+@pytest.mark.parametrize("layout", ["person", "collection", "new_object"])
+def test_wrapper_identity_cannot_hide_a_rejected_descendant_identity(layout):
+    rejected_person = {"id": "https://example.org/rejected", "name": "Rejected"}
+    supported_person = {"id": "https://example.org/supported", "name": "Supported"}
+    def wrapper(person, identifier):
+        return {"id": identifier, "principal_investigator":
+                ([person] if layout == "collection" else person)}
+    rejected = wrapper(rejected_person, "https://example.org/role-rejected")
+    supported = wrapper(supported_person, "https://example.org/role-supported")
+    original = {"creators": [rejected, supported]}
+    audit = {"findings": [{"remove_relationship": {"path": "/creators/0", "identity": "/id"}}]}
+    survivor = copy.deepcopy(supported)
+    if layout == "new_object":
+        survivor["new_role"] = {"person": rejected_person}
+    else:
+        survivor["principal_investigator"] = rejected["principal_investigator"]
+    assert check_relationship_removals(audit, original,
+        {"creators": [survivor]})[0]["kind"] == "evidence_contract"
+    assert check_relationship_removals(audit, original, {"creators": [supported]}) == []
+
+
+def test_distinct_people_can_share_an_unchanged_affiliation_after_removal():
+    affiliation = {"id": "https://example.org/institution", "name": "Institution"}
+    original = {"creators": [
+        {"principal_investigator": {"id": "https://example.org/rejected", "affiliation": affiliation}},
+        {"principal_investigator": {"id": "https://example.org/supported", "affiliation": affiliation}},
+    ]}
+    audit = {"findings": [{"remove_relationship": {
+        "path": "/creators/0", "identity": "/principal_investigator/id"}}]}
+    assert check_relationship_removals(audit, original, {"creators": original["creators"][1:]}) == []
+
+
+def test_cyclic_descendants_cannot_establish_removal():
+    member = {"id": "https://example.org/rejected"}
+    member["recursive"] = member
+    audit = {"findings": [{"remove_relationship": {"path": "/members/0", "identity": "/id"}}]}
+    problems = check_relationship_removals(audit, {"members": [member]}, {"members": []})
+    assert problems[0]["kind"] == "evidence_contract"
+    assert "cyclic" in problems[0]["detail"]
+
+
 @pytest.mark.parametrize("mode", ["retained", "added", "changed", "removed"])
 def test_person_orcid_is_bound_with_its_id_and_name(mode):
     rejected = {"id": "https://example.org/rejected", "name": "Rejected", "orcid": "0000-0002-1825-0097"}
@@ -219,7 +260,7 @@ def test_identity_signatures_cover_the_schema_declared_identifiers():
     from data_sheets_schema.evidence_assertions import IDENTITY_FIELDS
     schema = yaml.safe_load((Path(__file__).resolve().parents[1] /
         "src/data_sheets_schema/schema/data_sheets_schema_all.yaml").read_bytes())
-    concepts = {"schema:identifier", "dcterms:identifier"}
+    concepts = {"schema:identifier", "dcterms:identifier", "schema:sha256", "spdx:checksum"}
     declared = set()
     sections = [schema.get("slots", {}), *(body.get("attributes", {}) for body in schema["classes"].values())]
     for slots in sections:
@@ -232,7 +273,38 @@ def test_identity_signatures_cover_the_schema_declared_identifiers():
     assert "email" not in IDENTITY_FIELDS  # schema declares contact information, not a persistent identifier
 
 
-@pytest.mark.parametrize("field", ["orcid", "doi", "grant_number", "variable_name", "hash", "md5"])
+@pytest.mark.parametrize("field,container,path", [
+    ("sha256", "file_collections", "/file_collections/0/resources/0"),
+    ("checksum", "distribution_formats", "/distribution_formats/0"),
+])
+@pytest.mark.parametrize("mode", ["retained", "added", "changed", "removed"])
+def test_content_digest_cannot_be_moved_to_a_surviving_resource(field, container, path, mode):
+    rejected = {"id": "https://example.org/rejected", "name": "Rejected", field: "a" * 64}
+    supported = {"id": "https://example.org/supported", "name": "Supported"}
+    if mode in {"changed", "removed"}:
+        supported[field] = "b" * 64
+    if field == "checksum":
+        rejected[field] = "sha256:" + rejected[field]
+        if field in supported:
+            supported[field] = "sha256:" + supported[field]
+
+    def record(members):
+        return {container: ([{"id": "https://example.org/files", "resources": members}]
+                            if container == "file_collections" else members)}
+
+    original = record([rejected, supported])
+    audit = {"findings": [{"remove_relationship": {"path": path, "identity": "/id"}}]}
+    survivor = copy.deepcopy(rejected if mode == "retained" else supported)
+    if mode in {"added", "changed"}:
+        survivor[field] = rejected[field]
+    elif mode == "removed":
+        survivor.pop(field)
+    problems = check_relationship_removals(audit, original, record([survivor]))
+    assert problems[0]["kind"] == ("unsupported_relationship_retained" if mode == "retained" else "evidence_contract")
+    assert check_relationship_removals(audit, original, record([supported])) == []
+
+
+@pytest.mark.parametrize("field", ["orcid", "doi", "grant_number", "variable_name", "hash", "md5", "sha256", "checksum"])
 def test_declared_identifier_can_bind_members_without_an_id_or_name(field):
     original = {"members": [{field: "rejected-identity"}, {field: "supported-identity"}]}
     audit = {"findings": [{"remove_relationship": {"path": "/members/0", "identity": "/" + field}}]}

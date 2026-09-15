@@ -177,3 +177,30 @@ Nine initial controls reproduced the ignored-identifier gap; the retained
 person control already failed closed. Added controls cover legitimate removal
 using each identifier without id/name and future schema coverage.
 All 76 evidence, generation and native-recording controls pass after the fix.
+
+## Engineering review, round 6 preparation
+
+The fifth incremental Codex review of public commit
+`b1e28ea0fe64c61a9310b2ec76c9f032a93dc90d` found #1827: a surviving file
+could acquire the rejected file's SHA-256 while retaining its own id/name.
+The schema recommends this digest in place of the already checked hash/md5.
+Local schema inspection identified the same gap in distribution checksum.
+The signature now binds sha256 and checksum, and the coverage test recognizes
+their schema:sha256 and spdx:checksum concepts. New resource controls exercise
+added, changed and removed digests, retained rejected resources and legitimate
+removals. Before the fix, nine controls failed and eight passed.
+Because five review rounds returned findings, the next Codex plugin review
+will cover the full public branch again before merge. No canary has launched.
+
+Local adversarial continuation also reproduced #1828 in three synthetic cases:
+selecting a wrapper's id left descendant identifiers outside the chosen path
+unchecked. The selected member now binds all descendant identifier paths,
+including additions beneath new objects or nested collections. Ancestors bind
+their own identities so the declared child removal can still match its parent.
+Cycles and changes in nested identifier positions are refused as ambiguous.
+Shared unchanged affiliations do not conflate otherwise distinct people:
+descendant identities must stay intact, while overlap detection concerns the
+declared subject and its containing objects.
+All 91 final evidence, generation and native-recording controls pass; the
+existing dependency deprecation warnings remain. Required CI and the full
+Codex plugin review must pass on the published revision before merge.

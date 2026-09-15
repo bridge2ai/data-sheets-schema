@@ -18,11 +18,11 @@ import yaml
 INSTRUMENT = "evidence_assertions v1 (#1801, #1815, #1816)"
 ARTIFACTS = {"original_full", "original_core", "final_full", "final_core"}
 MISSING = object()
-# Stable identifier slots declared by the D4D schema, plus human-readable
-# names. A schema-driven regression checks this coverage when the schema
-# changes. Contact details and descriptive text are not identity aliases.
+# Stable identifier and content-checksum slots declared by the D4D schema,
+# plus human-readable names. A schema-driven regression checks coverage when
+# the schema changes. Contact details and descriptive text are not identities.
 IDENTITY_FIELDS = frozenset({"id", "name", "orcid", "doi", "grant_number",
-                             "variable_name", "hash", "md5"})
+                             "variable_name", "hash", "md5", "sha256", "checksum"})
 
 
 def load_json(raw: str | bytes):
@@ -174,19 +174,47 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict) -> dict:
             "assertions_checked": count, "findings": problems}
 
 
+def _identity_paths(declared=None):
+    paths = {(key,) for key in IDENTITY_FIELDS}
+    if declared is not None:
+        for depth in range(1, len(declared)):
+            paths.update(tuple(declared[:depth]) + (key,) for key in IDENTITY_FIELDS)
+        paths.add(tuple(declared))
+    return paths
+
+
 def _member_identities(member, declared=None):
     if not isinstance(member, dict):
         raise ValueError("indexed relationship members must be objects with stable identities")
-    paths = {(key,) for key in IDENTITY_FIELDS}
+    paths = _identity_paths(declared)
     if declared is not None:
+        # The selected member is the entire rejected relationship. A stable
+        # wrapper ID cannot hide a different person or resource below it.
+        # Ancestors use only their own identity: binding their descendants
+        # would make the intended child removal invalidate ancestor matching.
+        def descendants(value, prefix=(), ancestors=frozenset()):
+            if not isinstance(value, (dict, list)):
+                return
+            if id(value) in ancestors:
+                raise ValueError("cyclic relationship identity is ambiguous")
+            ancestors = ancestors | {id(value)}
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    path = prefix + (key,)
+                    if key in IDENTITY_FIELDS:
+                        paths.add(path)
+                    descendants(child, path, ancestors)
+            else:
+                for index, child in enumerate(value):
+                    descendants(child, prefix + (str(index),), ancestors)
+
+        descendants(member)
         # Bind absence too, at every containing object. An ID moved from a
         # rejected person to a surviving wrapper is still a new identity.
         for depth in range(1, len(declared)):
             prefix = tuple(declared[:depth])
             if not isinstance(_at(member, prefix), dict):
                 raise ValueError("declared identity must follow nested objects, not indexed lists or scalars")
-            paths.update(prefix + (key,) for key in IDENTITY_FIELDS)
-        paths.add(tuple(declared))
     identities = {path: _at(member, path) for path in paths}
     present = [value for value in identities.values() if value is not MISSING]
     if not present or any(not isinstance(value, str) or not value.strip() for value in present):
@@ -202,6 +230,7 @@ def _matched_member(original, final, index, declared=None):
     rejected subject renamed, so absence cannot be established in that case.
     """
     identities = [_member_identities(member, declared) for member in original]
+    overlap_paths = _identity_paths(declared)
     if not isinstance(final, list):
         raise ValueError("final relationship container changed shape")
     mapped = {}
@@ -209,7 +238,7 @@ def _matched_member(original, final, index, declared=None):
         current = _member_identities(member, declared)
         candidates = [i for i, fields in enumerate(identities) if current == fields]
         overlaps = [i for i, fields in enumerate(identities)
-                    if any(value is not MISSING and current.get(path, MISSING) == value
+                    if any(path in overlap_paths and value is not MISSING and current.get(path, MISSING) == value
                            for path, value in fields.items())]
         if len(candidates) != 1 or overlaps != candidates or candidates[0] in mapped:
             raise ValueError("relationship identity changed, disappeared, or is ambiguous; removal is unverified")
