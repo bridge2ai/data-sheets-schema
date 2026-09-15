@@ -1,0 +1,24 @@
+{
+  "kind": "independent_public_engineering_review",
+  "recorded_at": "2026-09-15T18:51:43.650915+00:00",
+  "reviewed_commit": "893e9e941d3ea860c3c0f8861cc1ba64432dd4ae",
+  "base_commit": "54271fb451706a94c17b614174fd499f92334a28",
+  "verdict": "approve",
+  "material_findings": 0,
+  "pull_request": 1835,
+  "issue": 1834,
+  "comment_url": "https://github.com/bridge2ai/data-sheets-schema/pull/1835#issuecomment-5686200780",
+  "file_hashes": {
+    "round1.md": "8812a80736c5edbf2dfb09863a3fd38085590ea2a543205ad530f4e02ba3e9b0",
+    "published_comment.md": "0e7c37621f3d7d9be68d121b7ab830863992b7a36d5e61cf6ef868ce41e72679"
+  },
+  "scope": "Public static source and tests review; no private originals, no scientific acceptance, no paid launch approval.",
+  "local_validation": "330 targeted checks passed before final reconciliation wording refinement; 21 related checks and the affected end-to-end report-recheck test passed after refinement.",
+  "original_review_identity_sha256": "71b45a98516b8b327c5cd711fbbb5fa4d64c15f001d64bd1abb0f36557c63e65",
+  "ci_status_at_review_recording": "pending_exact_reviewed_head",
+  "subsequent_required_ci": {
+    "file": "required_ci.json",
+    "sha256": "30ba91ca3382ae047970382e8a826ff180f25452ea38723580e8701c59f2475d",
+    "status": "passed"
+  }
+}

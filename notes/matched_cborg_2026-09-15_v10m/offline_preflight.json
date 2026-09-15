@@ -1,0 +1,49 @@
+{
+  "checked_at": "2026-09-15T18:54:25.412626+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "6ffee52ce4a7ea2d855098c6aaff71880b7e27b3b2aa654ca360c727d5d44129",
+  "native_overlay_sha256": "a5aac0140eb082fc7250c08ecc55a2ec2ddc4c09d34c1bb65214e08cb79f8938",
+  "registered_pins_verified": 464,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 362,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/cli/provenance.py",
+    "notes/matched_cborg_2026-09-13/prepare_registration.py"
+  ],
+  "new_pinned_implementation_files": [],
+  "changed_native_auxiliary_pins": [
+    "notes/matched_cborg_2026-09-13/prepare_registration.py"
+  ],
+  "pyproject_change": null,
+  "generation_instrument_changes_from_v10l": true,
+  "evaluation_instrument_changes_from_v10l": false,
+  "generation_renderers": {
+    "api": 10,
+    "agentic": 10
+  },
+  "effort_policy_unchanged": true,
+  "unchanged_checker": "evidence_assertions v1 (#1801, #1815, #1816)",
+  "generation_contract_change": "Explicit renderer-10 phase contracts (#1834)",
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 42,
+  "budget_accounted_cost_usd": "31.66723800",
+  "remaining_additional_budget_usd": "168.33276200",
+  "proposed_per_job_caps_usd": {
+    "CHORUS_api_rep1": 6.78,
+    "CHORUS_agentic_rep1": 6.2,
+    "KIDS_FIRST_api_rep1": 14,
+    "KIDS_FIRST_agentic_rep1": 14
+  },
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "91ae7f0dc364dd752e8c3c9196d643f20cd8b0e7a6b2df2b3241433c1e548306",
+    "CHORUS_source_review_plan.json": "f1c7114d1cdbbdb8877f81c6a379df521470185460901f3f14ebd907cf634466"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks and public hashes do not establish scientific acceptance or inspection of unpublished originals. The user authorized continuation; live CBORG token counting, exact-commit CI, current model checks and a bound launch receipt remain launch gates. Prompt delivery does not establish model compliance."
+}
