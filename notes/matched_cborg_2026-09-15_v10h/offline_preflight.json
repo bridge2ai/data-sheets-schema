@@ -1,0 +1,38 @@
+{
+  "checked_at": "2026-09-15T00:10:28.452148+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "7c7270afe5c8de7eab48ce22307e6c38a30cb77d6b22b861e734b471e643a939",
+  "native_overlay_sha256": "e39288ae85054e5d79ebb2f2bce536ad034d9afde14722c85818c3ac5a4d2182",
+  "registered_pins_verified": 461,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 225,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_generation_instruction_files": [
+    "src/data_sheets_schema/api_runner.py",
+    ".claude/commands/d4d-full-core.md",
+    ".claude/commands/d4d-uniform-rules.md"
+  ],
+  "assembled_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+  "effort_unchanged": true,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 27,
+  "estimated_cost_usd": "19.33709900",
+  "remaining_additional_budget_usd": "180.66290100",
+  "default_attempt_cap_usd": "5",
+  "proposed_per_job_caps_usd": {
+    "CHORUS_api_rep1": 13.34,
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "replacement_attempt_authorization": "pending_explicit_user_approval",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "5cad81d7d7ebe2bce1a72e597f08e2a794a04577b4f3dbc0f105cb2ffb6e6bb4",
+    "CHORUS_source_review_plan.json": "49a841354432c20786e03ef33ff5d0b4514e05c4b0e927a0d13f77e9a0ec0bfa"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "These are operator checks. Public hashes do not establish independent inspection of unpublished originals. Instruction delivery does not establish model compliance. The replacement proposal and merge grant no spending approval."
+}

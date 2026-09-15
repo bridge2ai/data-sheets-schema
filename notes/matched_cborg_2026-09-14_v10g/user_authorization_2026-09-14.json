@@ -1,0 +1,27 @@
+{
+  "registration_sha256": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729",
+  "job": "CHORUS_api_rep1",
+  "effective_whole_attempt_cap_usd": "16.51",
+  "previously_approved_CHORUS_API_maximum_usd": "20",
+  "other_canary_caps_usd": {
+    "CHORUS_agentic_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "previously_approved_combined_ceiling_usd": "63.75",
+  "prior_rejected_cost_in_combined_ceiling_usd": "7.23501200",
+  "maximum_combined_cost_including_this_attempt_and_unrun_cells_usd": "63.74501200",
+  "additional_allocation_cap_usd": "200",
+  "settled_allocation_cost_usd": "16.16391800",
+  "remaining_allocation_usd": "183.83608200",
+  "financial_ceiling_increase": false,
+  "sdk_retries": 0,
+  "automatic_whole_attempt_retries": 0,
+  "kind": "explicit_user_approval_of_one_additional_attempt",
+  "recorded_at": "2026-09-14T23:31:29.163003+00:00",
+  "approval_question": "Approve one additional CHORUS API canary through CBORG, capped at $16.51, within the existing combined ceiling?",
+  "user_response": "yes approve",
+  "source": "Latest user message in this conversation, after the automatic-review rejection was explained.",
+  "scope": "One new v10g CHORUS API attempt using the frozen registered source bundle and prompts; review unchanged originals before any later canary. This does not authorize automatic whole-attempt retries or production expansion.",
+  "prior_block_record_sha256": "b86d1a61dbe118b0323d60c193effd0dc917e9d0baa668f76b0a7dd5317c379a"
+}

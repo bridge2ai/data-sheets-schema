@@ -803,7 +803,9 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
 # nothing derives this ordering from the code — keep it true.
 ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "declared naming, declared scope (#932), arm prompt, "
-                   "carried artifacts, phase instruction; "
+                   "carried artifacts, computed audit counts and core inventory "
+                   "for reports, phase instruction; audit counts come from the "
+                   "structured entries, never their prose summary (#1802); "
                    "core derived from the full record, not generated (#694); "
                    "audit and reconcile_full address the full record only, the "
                    "core being its projection (#705); "
@@ -1191,7 +1193,22 @@ PHASE_SYSTEM = ("You generate Datasheets-for-Datasets records. The declared "
                 "do not prove a conflict. Call a conflict only when comparable "
                 "claims cannot both be true; where comparability is uncertain, "
                 "retain the qualified observations and that uncertainty. Keep "
-                "bounds as bounds and do not silently combine populations.")
+                "bounds as bounds and do not silently combine populations. "
+                "Preserve the relationships that make a value a fact: a "
+                "count's source unit and owning instance type, a table cell's "
+                "row and column, and the role asserted by a container, slot "
+                "or enum. A correct number or name attached to a different "
+                "type or role is a different claim. Schema examples and "
+                "affiliations cannot supply that relationship. If extracted "
+                "table structure is ambiguous, omit the unsupported mapping "
+                "and state the limitation; proximity or similar headings "
+                "are not evidence of cell ownership. A prose disclaimer "
+                "does not negate an unsupported structured role: remove "
+                "that role while preserving supported neutral facts in an "
+                "appropriate text field. Governing headings also apply to "
+                "organizational quantities and other contextual claims, not "
+                "only data content. Keep each clause's source identity when "
+                "combining evidence from several sources.")
 
 #: Runner-written headers that precede sent material (the chunk-marker note
 #: under a receipt condition, the re-address listing, the regate's two
@@ -1204,6 +1221,7 @@ REGATE_HEADERS = ("# Reconciliation report as written\n\n", "# Report discrepanc
 #: Headers the runner writes above sent material (S3, round 2): the carry
 #: labels, the repair phase's two parts, and the bundle head templates.
 CARRY_LABEL = "# {name}\n\n"
+AUDIT_COUNTS_HEADER = "# Computed audit counts\n\n"
 REPAIR_HEADERS = ("# Record that failed validation\n\n", "# Validator findings\n\n")
 BUNDLE_HEAD = "# Declared input bundle — {bundle}\n"
 BUNDLE_MD5_LINE = "# bundle_md5: {md5}\n"
@@ -1323,7 +1341,14 @@ PHASE_INSTRUCTIONS = {
         "storage or a software name alone does not attest de-identification "
         "or anonymity. Keep documented processing facts in the fields they "
         "answer, and retain a privacy method where the source actually "
-        "attests it. Output only JSON."),
+        "attests it. Check structured relationships as well as literal "
+        "values: pair each count with the source's counted unit and its "
+        "owning instance type, preserve table row/column ownership, and "
+        "verify the subject and responsibility asserted by every role "
+        "container and enum. A correct caveat cannot justify an unsupported "
+        "type or role. Inspect contextual quantities under governing "
+        "headings too. Calculate any summary totals from the final findings "
+        "list and its severity values. Output only JSON."),
     "reconcile_full": (
         "Phase 4a. Apply the audit findings and emit the corrected full "
         "record in its entirety, header block included. The core record "
@@ -1358,8 +1383,16 @@ PHASE_INSTRUCTIONS = {
         "observation merely to follow a source-priority recommendation. "
         "Keep a supported plan or in-progress fact qualified in its own "
         "value where that field permits it, with evidence commentary in "
-        "source_caveats. If the audit and these source checks require no "
-        "change, emit the record unchanged. Output only YAML."),
+        "source_caveats. Before returning, also compare "
+        "each count with its owning type and source unit, each table-derived "
+        "claim with its row and column, and each typed role with its subject "
+        "and responsibility. Check unchanged entries as well as repairs. "
+        "Remove unsupported structural assertions instead of retaining "
+        "them with disclaimers; preserve independently supported neutral "
+        "facts in appropriate text. Do not borrow a schema example or an "
+        "affiliation to fill a different entity type. If the audit and all "
+        "these source checks require no change, emit the record unchanged. "
+        "Output only YAML."),
     "reconcile_core": (
         "Phase 4b. Apply the audit findings that concern the CORE record and "
         "emit the corrected core record in its entirety, header block included. "
@@ -1391,7 +1424,12 @@ PHASE_INSTRUCTIONS = {
     "report": (
         "Phase 4c. Write the reconciliation report as Markdown: what the audit "
         "found, what was changed in each record and why, and what was left "
-        "as-is and why. Both the original records and the reconciled records "
+        "as-is and why. Use the `Computed audit counts` block for finding "
+        "totals and severity subtotals: it is calculated from the structured "
+        "finding entries, which outrank an inconsistent model-written audit "
+        "summary. If that block is unavailable, count the actual entries "
+        "before stating a total; never infer zero from missing or malformed "
+        "audit data. Both the original records and the reconciled records "
         "are supplied above: compare them and report the differences you can "
         "see. Do not describe a change you cannot locate in that comparison — "
         "if the two are identical for a finding, say the finding was left "
@@ -1424,7 +1462,9 @@ PHASE_INSTRUCTIONS = {
         "dispositions table. For an unrecorded removal, add a removed "
         "disposition row for that slot. Rewrite the whole report so that every "
         "disposition row and every statement matches the records supplied, "
-        "keeping everything that was already right. Output only Markdown."),
+        "keeping everything that was already right. Check every finding "
+        "total and severity subtotal against the computed audit counts "
+        "supplied, not the audit's prose summary. Output only Markdown."),
 }
 
 # What each phase produces, and where it lands. Writing as we go is what makes a
@@ -1758,6 +1798,26 @@ def core_inventory_block() -> str:
             + ", ".join(f"`{n}`" for n in names) + "\n")
 
 
+def audit_counts(audit: str | None) -> dict[str, Any] | None:
+    """Count structured findings without treating an invalid audit as zero."""
+    if not isinstance(audit, str):
+        return None
+    try:
+        parsed = json.loads(audit)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(parsed, dict) or not _audit_is_well_formed(parsed):
+        return None
+    by_severity: dict[str, int] = {}
+    for finding in parsed["findings"]:
+        severity = finding["severity"]
+        severity = severity.strip().lower() if isinstance(severity, str) else ""
+        severity = severity or "unclassified"
+        by_severity[severity] = by_severity.get(severity, 0) + 1
+    return {"total": len(parsed["findings"]),
+            "by_severity": dict(sorted(by_severity.items()))}
+
+
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
     """Assemble one phase's request.
 
@@ -1838,6 +1898,10 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
         parts.append({"type": "text",
                       "text": CARRY_LABEL.format(name=name) + text})
     if phase == "report":
+        counts = audit_counts(carry.get("Audit findings"))
+        if counts is not None:
+            parts.append({"type": "text", "text": AUDIT_COUNTS_HEADER
+                          + json.dumps(counts, sort_keys=True)})
         # The core inventory the instruction's `both` rule refers to (#998);
         # before the instruction so the instruction stays last (#346).
         parts.append({"type": "text", "text": core_inventory_block()})
@@ -3288,6 +3352,7 @@ def sent_text_surfaces() -> dict[str, str]:
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),
+                "audit_counts_header": AUDIT_COUNTS_HEADER,
                 "chunk_marker_note": CHUNK_MARKER_NOTE, "readdress_header": READDRESS_HEADER,
                 "regate_headers": "".join(REGATE_HEADERS),
                 "carry_labels": " ".join(sorted({n for names in PHASE_NEEDS.values() for n in names})),

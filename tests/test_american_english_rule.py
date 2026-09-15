@@ -69,8 +69,8 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         surfaces = api_runner.sent_text_surfaces()
         # Exact, not a floor (#1151 round 2, S1): deleting a surface from the
         # map is the regression this guard exists to catch. Nine phase
-        # instructions, the layout, and ten authored surfaces.
-        self.assertEqual(len(surfaces), 20, sorted(surfaces))
+        # instructions, the layout, and eleven authored surfaces.
+        self.assertEqual(len(surfaces), 21, sorted(surfaces))
         for name, text in surfaces.items():
             with self.subTest(surface=name):
                 found = british_forms(text, exempt_quotes=False)
@@ -91,10 +91,10 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         historical condition-prompt pins are checked separately below."""
         import hashlib
         from data_sheets_schema import api_runner
-        # #1782 deliberately expands the system rules and registers fresh
+        # #1782/#1799-#1801 expand the system rules and register fresh
         # canary inputs. Retain an exact-byte guard for the reviewed surface.
         self.assertEqual(hashlib.sha256(api_runner.PHASE_SYSTEM.encode()).hexdigest(),
-                         "d16ae58c48ef3db7ed4b8adbcba87e852f8506e3b6581a5a77bcc006a94eaedb")
+                         "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88")
         self.assertEqual(api_runner.CHUNK_MARKER_NOTE,
                          "# Chunk markers: a line of the form [cNNN] opens each chunk; the markers are not "
                          "part of the bundle's text.\n\n")
@@ -103,6 +103,7 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
                                                      "# Report discrepancies\n\n"))  # #1181: also unrecorded changes
         self.assertEqual(api_runner.REPAIR_HEADERS, ("# Record that failed validation\n\n", "# Validator findings\n\n"))
         self.assertEqual(api_runner.CARRY_LABEL.format(name="Audit findings"), "# Audit findings\n\n")
+        self.assertEqual(api_runner.AUDIT_COUNTS_HEADER, "# Computed audit counts\n\n")
         self.assertEqual(api_runner.BUNDLE_HEAD.format(bundle="b.txt") + "\n", "# Declared input bundle — b.txt\n\n")
         self.assertEqual(api_runner.BUNDLE_MD5_LINE.format(md5="x"), "# bundle_md5: x\n")
 

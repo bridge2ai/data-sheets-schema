@@ -1,0 +1,392 @@
+{
+  "registration_sha256": "13620e339fafd1397d686adb549efbe3808d28aad1168422399954299a45a729",
+  "native_overlay_sha256": "9a008cc8f2139c40dc72f8ebbcfa004f29730516efdb01ba269c97e0438c07a5",
+  "job": "CHORUS_api_rep1",
+  "launch_commit": "94ad1b403ce5ee6c6830cc986ccab321fcfbc93c",
+  "generation_status": "completed_pending_independent_review",
+  "source_acceptance": "reject",
+  "started_at": "2026-09-14T23:31:53.860112+00:00",
+  "finished_at": "2026-09-14T23:47:06.497977+00:00",
+  "source_review_scope": "Complete unchanged reconciled full and derived core records, final report and structured audit were read against all four complete frozen source documents. Original PDF page 10 was additionally inspected to verify the extracted table column distinction; no new download or generator input was introduced.",
+  "findings": [
+    {
+      "issue": 1782,
+      "severity": "medium",
+      "gates_acceptance": true,
+      "slots": [
+        "description"
+      ],
+      "problem": "The consortium membership quantity is presented as current even though its only bundled occurrence is governed by the Anticipated Final Dataset heading.",
+      "output_excerpt": "The consortium counts more than 60 members across 20 different institutions.",
+      "source_context": "The homepage places 60+ CHoRUS consortium members across 20 different institutions under Anticipated Final Dataset. Other sources independently attest 20 centers and 14 hospitals, but do not independently attest a current 60+ membership count.",
+      "required_resolution": "Attribute the quantity to the source heading and preserve its status or uncertainty; do not infer either current attainment or current non-attainment."
+    },
+    {
+      "issue": 1799,
+      "severity": "high",
+      "gates_acceptance": true,
+      "slots": [
+        "instances[3].instance_type",
+        "instances[3].counts"
+      ],
+      "problem": "A source count of images is attached to an imaging-study instance type.",
+      "output_excerpt": "instance_type: Imaging study available for use; counts: 1000",
+      "source_context": "The webinar says 1000 images available; the bundle does not establish an imaging-study count or a correspondence between those units.",
+      "required_resolution": "Keep the source counted unit in the structured instance/count pair; a correct image-count note does not support the different type."
+    },
+    {
+      "issue": 1800,
+      "severity": "high",
+      "gates_acceptance": true,
+      "slots": [
+        "updates.update_details"
+      ],
+      "problem": "Planned status is assigned to the published-schema column instead of the metadata column.",
+      "output_excerpt": "marks published metadata schemas as planned for part of the data",
+      "source_context": "The bundle distinguishes Metadata from Published metadata schema, and the original PDF page 10 confirms Planned in the former and Yes in the latter. The record itself warns that the extracted table is garbled.",
+      "required_resolution": "Preserve cell/row/column ownership. Omit an unestablished relationship when the registered text is ambiguous; the raw-PDF review is not additional generator input."
+    },
+    {
+      "issue": 1801,
+      "severity": "high",
+      "gates_acceptance": true,
+      "slots": [
+        "maintainers[0].role",
+        "data_governance.committee_contact"
+      ],
+      "problem": "A named person is categorized as academic_institution and a project contact is assigned a governance-contact relationship without source support.",
+      "output_excerpt": "role: academic_institution; data_governance.committee_contact names the website program-manager contact",
+      "source_context": "The website states a program-manager/project contact and affiliation. Neither establishes the person as an institution or a governance contact. Reconciliation added these fields while its prose explicitly disclaims the corresponding responsibilities.",
+      "required_resolution": "Remove unsupported typed roles and retain supported neutral contact information in appropriate prose. A caveat does not negate a structured relationship."
+    },
+    {
+      "issue": 1802,
+      "severity": "medium",
+      "gates_acceptance": false,
+      "slots": [
+        "audit.summary",
+        "reconciliation_report"
+      ],
+      "problem": "The report repeats the audit prose summary count rather than the structured entries.",
+      "output_excerpt": "twelve findings; Six low findings",
+      "source_context": "The unchanged audit has 13 entries: 2 high, 4 medium and 7 low. The report-claims checker does not cover this arithmetic.",
+      "required_resolution": "Compute report totals from the structured finding list and verify severity subtotals."
+    },
+    {
+      "issue": null,
+      "severity": "low",
+      "gates_acceptance": false,
+      "slots": [
+        "is_deidentified.deidentification_details",
+        "coverage_receipt"
+      ],
+      "problem": "A supported planned privacy statement is attributed to the wrong source and cited to a different chunk.",
+      "output_excerpt": "patient-focused efforts will determine the ethical and legal approaches to manage privacy",
+      "source_context": "This wording belongs to the historical GitHub overview (c007), not the NIH abstract (c002) to which the record/receipt attaches it. The statement remains explicitly future; no de-identification method is inferred from tokenization.",
+      "required_resolution": "Keep source identity with each clause when combining evidence. The existing receipt checker records this as a non-gating elsewhere-chunk finding."
+    }
+  ],
+  "improvements": [
+    "EEG and imaging availability qualifiers are retained in the description and acquisition entries; the confidential-content entry describes the source table rather than asserting released availability.",
+    "The unsupported absence claim about comparable datasets is omitted; addressing_gaps retains the sourced infrastructure need.",
+    "Planned social/geographic contextual capabilities and repository capabilities are explicitly qualified.",
+    "Compatible admission bounds and different image/admission observations remain distinct; the new imaging-study unit defect is separate.",
+    "Temperature header accurately records that the parameter was not sent; the auditor requested an incorrect restoration, which reconciliation/report declined."
+  ],
+  "mechanical": {
+    "schema_problems": [],
+    "pair": {
+      "passed": true,
+      "errors": [],
+      "warnings": []
+    },
+    "core_derivation_byte_equal": true,
+    "live_provenance_ok": true,
+    "report_findings": [],
+    "report_claims_checked": 27,
+    "report_disposition_rows": 26,
+    "grounding_findings": [],
+    "receipt_findings": [
+      {
+        "kind": "snippet_elsewhere_chunk",
+        "chunk": "c002",
+        "found_in": [
+          "c007"
+        ],
+        "slot": "is_deidentified.deidentification_details",
+        "snippet": "determine the ethical and legal approaches to manage privacy"
+      }
+    ],
+    "receipt_findings_gated": 0,
+    "receipt_summary": "chunks 8/8 reviewed \u00b7 snippets 103/104 verified (1 in another chunk) (2 bearing on no token of their value) \u00b7 slots 67/94 with a receipt (20 never receipted, 7 added after the receipt) (24 exempt) \u00b7 9 value(s) changed after the receipt",
+    "limitation": "Mechanical passes do not establish semantic support, correct audit-summary arithmetic or universal receipt coverage."
+  },
+  "billing": {
+    "settled_requests_in_attempt": 5,
+    "settled_requests_in_allocation": 27,
+    "attempt_estimated_cost_usd": "3.17318100",
+    "allocation_estimated_cost_usd": "19.33709900",
+    "remaining_allocation_usd": "180.66290100",
+    "unresolved_requests": 0,
+    "approved_attempt_cap_usd": "16.51",
+    "approved_combined_canary_ceiling_usd": "63.75",
+    "combined_spent_including_v10e_v10f_usd": "10.40819300",
+    "no_later_canary_launched": true,
+    "requests": [
+      {
+        "id": "89e22bcb1737492bb279ee5b1578f3e5",
+        "status": "settled",
+        "reserved_usd": "3.52042500",
+        "cost_usd": "1.47767625",
+        "request_sha256": "16b6e991716062d3b7ce3c9640d1042b52907eaa8c593686c1c4176ffebde4bc",
+        "response_sha256": "ebcbec2fe814ba6e7a52dc3a3a6c4622ad95e4624586b8412ebf4158ddf61635",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 32589
+          },
+          "cache_creation_input_tokens": 32589,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 9789,
+          "output_tokens": 49002,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "16.51",
+        "reserved_at": "2026-09-14T23:32:05.536371+00:00",
+        "settled_at": "2026-09-14T23:40:57.424230+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "06e5ca9372eb9d7217e60d6a726432dfd0a42f284402343b50617577ab242e45",
+        "admission": {
+          "input_count": 41870,
+          "input_bound": 51268,
+          "output_ceiling": 128000,
+          "reserved_usd": "3.52042500",
+          "token_count_at": "2026-09-14T23:32:05.537305+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn",
+        "independently_recomputed_cost_usd": "1.47767625"
+      },
+      {
+        "id": "4b15a9e4ed534438a30dc00e71297162",
+        "status": "settled",
+        "reserved_usd": "0.97635625",
+        "cost_usd": "0.57723625",
+        "request_sha256": "5a70ec20f4ad56518a2594fdef1e867f320ace9fa3dd39e342d60f5e115b646d",
+        "response_sha256": "f8a8ddf15275aab3c842ae50545b1259cbd1ea8b0a24805508948ec3009293d7",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 32589
+          },
+          "cache_creation_input_tokens": 32589,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 17246,
+          "output_tokens": 11493,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "16.51",
+        "reserved_at": "2026-09-14T23:41:00.719274+00:00",
+        "settled_at": "2026-09-14T23:43:26.653543+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "491c18ca28623dcd3bbde8263ad9218d89a62402b55bdb47511f4a19969c58e9",
+        "admission": {
+          "input_count": 49327,
+          "input_bound": 60217,
+          "output_ceiling": 24000,
+          "reserved_usd": "0.97635625",
+          "token_count_at": "2026-09-14T23:41:00.720200+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn",
+        "independently_recomputed_cost_usd": "0.57723625"
+      },
+      {
+        "id": "4600a12ed6e049e7b1aff1cda01b7d66",
+        "status": "settled",
+        "reserved_usd": "2.80490625",
+        "cost_usd": "0.37608450",
+        "request_sha256": "a4b42b7e601d611b6aa332b46c269452e187f8fd2f47ba9eca0504858c49f52b",
+        "response_sha256": "a97efffd1a60538f3c3cc20a6f8971172bcdc4b97f8593f0592d1e8845ea684d",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32589,
+          "input_tokens": 21053,
+          "output_tokens": 10181,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "16.51",
+        "reserved_at": "2026-09-14T23:43:28.545525+00:00",
+        "settled_at": "2026-09-14T23:45:10.213156+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "01efb79b984f1da77b314c76317dfd3959b94abe490988339f2b1281839700b9",
+        "admission": {
+          "input_count": 53134,
+          "input_bound": 64785,
+          "output_ceiling": 96000,
+          "reserved_usd": "2.80490625",
+          "token_count_at": "2026-09-14T23:43:28.546344+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn",
+        "independently_recomputed_cost_usd": "0.37608450"
+      },
+      {
+        "id": "a223804cbe80428bac35815674352448",
+        "status": "settled",
+        "reserved_usd": "1.18298125",
+        "cost_usd": "0.35499950",
+        "request_sha256": "500fad324b11ead6df0e34e3c71bf8519178ae1de3c363fa2b9055c1d1f3841b",
+        "response_sha256": "d9be2fb4d52a7f442b2ea2eccdae4db4b411d15ac0f8f32f9f021bf385f69a23",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32589,
+          "input_tokens": 44796,
+          "output_tokens": 4589,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "16.51",
+        "reserved_at": "2026-09-14T23:45:11.470202+00:00",
+        "settled_at": "2026-09-14T23:46:07.929262+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "5413a14467a6d1777b2dd73e0e30ce58aa4bc852d752f05d863b6e38a67ed113",
+        "admission": {
+          "input_count": 76877,
+          "input_bound": 93277,
+          "output_ceiling": 24000,
+          "reserved_usd": "1.18298125",
+          "token_count_at": "2026-09-14T23:45:11.471017+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn",
+        "independently_recomputed_cost_usd": "0.35499950"
+      },
+      {
+        "id": "dcb843a105de4ad7a787bedd7f0d659d",
+        "status": "settled",
+        "reserved_usd": "1.22000625",
+        "cost_usd": "0.38718450",
+        "request_sha256": "6febdcc261be0ea6db80bc6dadf3873bb6422c64d48a82e09ec102a60eb77e0f",
+        "response_sha256": "8e41ac42d6e2bbea68f88e6deb5e137e339790e186d32f6cf5e98d4e814f292d",
+        "usage": {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 32589,
+          "input_tokens": 49733,
+          "output_tokens": 4889,
+          "server_tool_use": null,
+          "service_tier": null
+        },
+        "attempt_cap_usd": "16.51",
+        "reserved_at": "2026-09-14T23:46:13.097986+00:00",
+        "settled_at": "2026-09-14T23:47:04.575386+00:00",
+        "registered_prices_per_token": {
+          "input": 5e-06,
+          "output": 2.5e-05,
+          "cache_write": 6.25e-06,
+          "cache_read": 5e-07
+        },
+        "admission_sha256": "4e8ec00e9c96a44dfbb230e56642067d64bb077bbccdd122c605f95cf07bc561",
+        "admission": {
+          "input_count": 81814,
+          "input_bound": 99201,
+          "output_ceiling": 24000,
+          "reserved_usd": "1.22000625",
+          "token_count_at": "2026-09-14T23:46:13.099336+00:00"
+        },
+        "model": "claude-opus-5",
+        "stop_reason": "end_turn",
+        "independently_recomputed_cost_usd": "0.38718450"
+      }
+    ]
+  },
+  "preservation": {
+    "original_files": 38,
+    "backup": "Verified local copies of all originals, including full request/response evidence; raw payloads remain unpublished.",
+    "source_review_sha256": "336a979711ee597fb292f0a3f027f5c23716135d250e7390e1a6a3ad22dc5fed",
+    "acceptance_sha256": "822e96fa14b002a67871e0b97969ab68c9b70ef3cac1db000c56c0735c3caaf0",
+    "mechanical_review_sha256": "be1b2c520ff6080d19fa097c5028689c1fa3e6912d0c920feaeafd6f2256c5ae",
+    "artifacts": {
+      "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/.CHORUS_d4d.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/CHORUS_d4d.yaml": "961a913722e21dcc90aba3908558a92a541def7c39bfc5877da21d81165aa0c1",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/.CHORUS_d4d_core.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/.CHORUS_provenance.yaml_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/.CHORUS_reconciliation.md_api_run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/CHORUS_api_usage_1f9212e4a13dcbf9.json": "61cb669adfab5d0ab9e737beb6160aceb5acff6ea71bff1282bc49b668ca80f1",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/CHORUS_coverage_receipt.yaml": "c5b22784374dbad18fcb43b8da1b85f49370e7cd2d0277e7a6650a2f6f57a4e3",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/CHORUS_d4d_core.yaml": "8018abb261505323d30a2598f72b2299af752674f2bd15a57f4c96ec37c32da5",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/CHORUS_provenance.yaml": "798ae32fe5aa5108a3cd47c46214aa1d62fb2870259d30adc40f0dbbf9b1d005",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/CHORUS_reasoning.jsonl": "d088c63c877fbb8b7db00e94740a8b5cdcd57d777790079a4e6c72cab19614a9",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/CHORUS_reconciliation.md": "742222fc61c6c1a878d9895462353061635b35079dc7a422cd54ad36743ecfeb",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_audit.json": "fa25cd568340f6744b503ee78ec83bf1af4aea41306d1fc14a88c2aa6683e59d",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_core.yaml": "9738fe142163a0d003cf6fbff930f74968ca35dbb812857175a74e4b8173ed07",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_coverage_receipt.yaml": "c5b22784374dbad18fcb43b8da1b85f49370e7cd2d0277e7a6650a2f6f57a4e3",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_full.yaml": "3c701266f278155d962acf9bd71fa31acfebe7453788779834bacab43c598be1",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_full_response_4f0e465ec26e4c6cbdc29f196b998f2c.txt": "0ddf40bf7c66a3b610bd03c78081fd9c6412295410017c889763191635da3de2",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_reconcile_core.yaml": "8018abb261505323d30a2598f72b2299af752674f2bd15a57f4c96ec37c32da5",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_reconcile_full.yaml": "961a913722e21dcc90aba3908558a92a541def7c39bfc5877da21d81165aa0c1",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_report.md": "2562deb38a7169378f0adb63d48b68d7858abfb970aef10b3f4a8d9a096a530e",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_report_before_regate.md": "2562deb38a7169378f0adb63d48b68d7858abfb970aef10b3f4a8d9a096a530e",
+      "data/d4d_concatenated/claudecode_api_core/2026-09-14_claude-opus-5-api-generalized-v10g-chorus_rep1/intermediate/CHORUS_snapshot_index.json": "1ec96d5c835544af6a62d2c00c79b802de8d8b391321eb532f5abbb51feb1643",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/result.json": "d3312c49b16d9908a31940c31964a509dda7d84045a1b3307a7bbf0cc876c128",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/started.json": "67218c5ad3567162d46e4f044ba72be53990dcb7df600af8c847267b4dd1c0bc",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/a223804cbe80428bac35815674352448/request.json": "500fad324b11ead6df0e34e3c71bf8519178ae1de3c363fa2b9055c1d1f3841b",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/a223804cbe80428bac35815674352448/response.json": "d9be2fb4d52a7f442b2ea2eccdae4db4b411d15ac0f8f32f9f021bf385f69a23",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/a223804cbe80428bac35815674352448/admission.json": "5413a14467a6d1777b2dd73e0e30ce58aa4bc852d752f05d863b6e38a67ed113",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/4600a12ed6e049e7b1aff1cda01b7d66/request.json": "a4b42b7e601d611b6aa332b46c269452e187f8fd2f47ba9eca0504858c49f52b",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/4600a12ed6e049e7b1aff1cda01b7d66/response.json": "a97efffd1a60538f3c3cc20a6f8971172bcdc4b97f8593f0592d1e8845ea684d",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/4600a12ed6e049e7b1aff1cda01b7d66/admission.json": "01efb79b984f1da77b314c76317dfd3959b94abe490988339f2b1281839700b9",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/dcb843a105de4ad7a787bedd7f0d659d/request.json": "6febdcc261be0ea6db80bc6dadf3873bb6422c64d48a82e09ec102a60eb77e0f",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/dcb843a105de4ad7a787bedd7f0d659d/response.json": "8e41ac42d6e2bbea68f88e6deb5e137e339790e186d32f6cf5e98d4e814f292d",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/dcb843a105de4ad7a787bedd7f0d659d/admission.json": "4e8ec00e9c96a44dfbb230e56642067d64bb077bbccdd122c605f95cf07bc561",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/4b15a9e4ed534438a30dc00e71297162/request.json": "5a70ec20f4ad56518a2594fdef1e867f320ace9fa3dd39e342d60f5e115b646d",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/4b15a9e4ed534438a30dc00e71297162/response.json": "f8a8ddf15275aab3c842ae50545b1259cbd1ea8b0a24805508948ec3009293d7",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/4b15a9e4ed534438a30dc00e71297162/admission.json": "491c18ca28623dcd3bbde8263ad9218d89a62402b55bdb47511f4a19969c58e9",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/89e22bcb1737492bb279ee5b1578f3e5/request.json": "16b6e991716062d3b7ce3c9640d1042b52907eaa8c593686c1c4176ffebde4bc",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/89e22bcb1737492bb279ee5b1578f3e5/response.json": "ebcbec2fe814ba6e7a52dc3a3a6c4622ad95e4624586b8412ebf4158ddf61635",
+      "notes/matched_cborg_2026-09-14_v10g/attempts/CHORUS_api_rep1/requests/89e22bcb1737492bb279ee5b1578f3e5/admission.json": "06e5ca9372eb9d7217e60d6a726432dfd0a42f284402343b50617577ab242e45"
+    }
+  },
+  "source_presentation_review": {
+    "original_pdf_sha256": "f19aa45baa240ec65a478c957406e614e2e975bc7987c9629218b128114c1d6a",
+    "page": 10,
+    "registered_source_bundle_sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+    "scope": "Existing captured PDF used only to check table layout during source review. Generator inputs and all 38 originals remain unchanged."
+  },
+  "after_review": "Stop later canaries and evaluations; preserve originals and all charges. Address generic source associations and report counts, review changes and register a fresh condition before seeking approval for another paid whole attempt."
+}

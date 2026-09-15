@@ -1,4 +1,14 @@
-# v10g candidate — additional attempt not yet approved
+# v10g CHORUS API — completed and rejected
+
+The user explicitly approved one additional CHORUS API canary through CBORG
+at **$16.51** on 2026-09-14. It started at **23:31:53 UTC** on reviewed commit
+`94ad1b403ce5ee6c6830cc986ccab321fcfbc93c`. The
+[approval](user_authorization_2026-09-14.json) and
+[launch evidence](approved_launch_2026-09-14.json) bind this one attempt to
+the registration below. The attempt completed for **$3.173181** and failed
+[source review](rejected_canaries/CHORUS_api_rep1/README.md). All 38 originals
+are preserved. Total additional-allocation spending is **$19.337099 across
+27 settled requests**, leaving **$180.662901**; no later canary has launched.
 
 The approved [v10f replacement](../matched_cborg_2026-09-14_v10f_cap20/rejected_canaries/CHORUS_api_rep1/README.md)
 completed for $3.487946 and failed independent source review. The generic
@@ -20,9 +30,13 @@ reviewed commit and successful CI.
 
 ## Attempt decision within existing financial ceilings
 
-The user approved one replacement CHORUS API attempt at a $20 maximum. That
-attempt has now been used. An additional attempt is **not yet authorized**;
-there is no automatic whole-attempt retry.
+The earlier $20-capped v10f replacement was used and rejected. An initial
+attempt to launch v10g under the standing workflow authorization was blocked
+by automatic approval review before execution; no model request or charge
+resulted. The user then answered “yes approve” to the explicit question
+approving one additional CHORUS API canary at $16.51. A fresh launch receipt
+records that approval; the blocked receipt remains preserved and unused.
+There is no automatic whole-attempt retry.
 
 [retry_proposal.json](retry_proposal.json) proposes one fresh CHORUS API
 attempt capped at **$16.51**, followed by the three unrun matched canaries
@@ -39,12 +53,19 @@ charge remains counted. The candidate ledger uses new registration-qualified
 attempt identities; no charge or reservation is discarded. Estimates use the
 registered token prices and are not invoices.
 
-Require explicit approval of one additional attempt, independent registration
-review, exact-commit CI and fresh input/model/accounting checks before issuing
-a launch receipt. Launch only CHORUS API first, then CHORUS native, Kids First
-API and Kids First native after acceptance of each preceding unchanged
-original pair. A failed canary stops expansion. No evaluator or production
-batch launch is granted by preparing or merging this candidate.
+Both independent public engineering/registration reviews approved, and
+exact-commit CI passed: 4,763 tests with 15 skips, plus 24 admission and
+25 native transport tests. Fresh input/model/accounting checks passed before
+the single-job launch receipt. Only CHORUS API has launched; CHORUS native,
+Kids First API and Kids First native require acceptance of each preceding
+unchanged original pair. A failed canary stops expansion. No evaluator or
+production batch launch is granted by this generation approval.
+
+`retry_proposal.json`, `workload.json`, `previous_billing.json` and the offline
+preflight are preserved pre-execution snapshots. Their pending-approval and
+unused-output labels describe that earlier preparation state. The explicit
+approval and launch evidence above record the subsequent decision; the
+workload's cost bounds remain exposure, not a funded batch or current spend.
 
 ## Preserved inputs and verification
 

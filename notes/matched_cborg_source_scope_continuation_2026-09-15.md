@@ -1,4 +1,4 @@
-# Matched generation and evaluation continuation — 2026-09-14
+# Matched generation and evaluation continuation — 2026-09-15 (UTC)
 
 The explicitly approved additional v10g CHORUS API canary completed for
 **$3.173181** and failed [original-artifact source review](matched_cborg_2026-09-14_v10g/rejected_canaries/CHORUS_api_rep1/README.md).
@@ -24,9 +24,12 @@ assembled instrument. They preserve historical raw prompts, source bytes,
 schemas, profiles, vocabularies, model, effort and phase count. Tests and
 instruction delivery do not establish scientific acceptance.
 
-1. Finish independent engineering review and exact-head CI, and register a
-   fresh condition with unused output paths. Carry all 27 settled charges
-   and all 225 prior original files into its preservation checks. Pin the
+1. Complete independent registration review and exact-head CI for the
+   [unexecuted v10h registration](matched_cborg_2026-09-15_v10h/README.md).
+   The source-change review approved with no material findings; 225 focused
+   tests and 50 final wording checks passed. Its offline preflight confirms
+   fresh, unused output paths. The new registration carries all 27 settled charges
+   and all 225 prior original files in its preservation checks. Pin the
    code, instructions, source bundles, profiles, schemas, native runtime,
    CBORG route/prices/capabilities, output paths and budgets. Continue using
    existing downloads. Make the proposed additional attempt reviewable before
