@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-09-15T08:55:43.289731+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "5f7cf55e216c56ee0712e07b24f4442eae0a9ba4bfb893ee30d25c07f4f1ea0c",
+  "native_overlay_sha256": "817f4e16a2fa119cdee8f39497d00d9ba0747d2b02c92f951cddd21d7f7807ff",
+  "registered_pins_verified": 463,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 325,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/cli/provenance.py",
+    "src/data_sheets_schema/usage_ledger.py",
+    "pyproject.toml",
+    "notes/matched_cborg_2026-09-13/prepare_registration.py"
+  ],
+  "new_pinned_implementation_files": [
+    "src/data_sheets_schema/evidence_assertions.py",
+    "src/download/prompts/evidence_protocol_v1.md"
+  ],
+  "pyproject_change": "Only the pytest corpus-marker description changed in merged CI optimization #1813; dependency/build configuration is unchanged.",
+  "generation_renderers": {
+    "api": 9,
+    "agentic": 9
+  },
+  "effort_policy_unchanged": true,
+  "new_instrument": "evidence_assertions v1 (#1801, #1815, #1816)",
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "prior_settled_rows_preserved": 39,
+  "estimated_cost_usd": "29.39163800",
+  "remaining_additional_budget_usd": "170.60836200",
+  "proposed_per_job_caps_usd": {
+    "CHORUS_api_rep1": 6.78,
+    "CHORUS_agentic_rep1": 6.5,
+    "KIDS_FIRST_api_rep1": 15,
+    "KIDS_FIRST_agentic_rep1": 15
+  },
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "039b0a14228d90d32f15b39f1841cd489d24804e192d7237cd15926221fb40d5",
+    "CHORUS_source_review_plan.json": "4b5bae84d17c8c08b4f99d7047a6be0adf41006daa80f498225ae907f36caf0d"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks and public hashes do not establish scientific acceptance or inspection of unpublished originals. Live CBORG token counting, exact-commit CI, current model checks and authorization remain launch gates. Prompt delivery does not establish model compliance."
+}
