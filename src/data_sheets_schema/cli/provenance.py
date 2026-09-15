@@ -311,6 +311,9 @@ def _parse_phases(specs) -> list[dict]:
                    'and --runtime this reconstructs the render spec, so the '
                    'render gate can re-render and compare instead of reporting '
                    '`unverifiable` (#497).')
+@click.option('--render-spec-json', default=None,
+              help='Exact registered native renderer-9 specification as JSON. Requires --prompt-text; '
+                   'the recorder must reproduce its exact bytes before writing provenance.')
 @click.option('--arm', type=click.Choice(sorted(_ARMS)), default='baseline',
               show_default=True,
               help='Arm the instruction was rendered for. Expanded to the same '
@@ -364,7 +367,7 @@ def _parse_phases(specs) -> list[dict]:
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
            reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
-           stated_profile=None):
+           stated_profile=None, render_spec_json=None):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -384,6 +387,35 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     _require_repo_root_cwd("d4d provenance record")
     from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
+    registered = None
+    supplied_text = ((Path(prompt_text).read_bytes().decode("utf-8") if render_spec_json is not None
+                      else Path(prompt_text).read_text(encoding="utf-8")) if prompt_text else None)
+    if render_spec_json is not None:
+        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.evidence_assertions import load_json
+        try:
+            supplied = load_json(render_spec_json)
+            if not isinstance(supplied, dict) or supplied_text is None:
+                raise ValueError("--render-spec-json requires an object and --prompt-text")
+            registered = RunSpec.from_render_spec(supplied, project=project, method=method, label=label)
+            if not registered.is_agentic or registered.render_version < 9:
+                raise ValueError("--render-spec-json requires a native renderer-9 specification")
+            if registered.render_spec() != supplied or registered.instruction != supplied_text:
+                raise ValueError("registered rendering specification does not reproduce the supplied instruction")
+            for name, explicit in (("condition", condition), ("runtime", runtime),
+                                   ("provider", provider), ("profile", stated_profile)):
+                if explicit is not None and explicit != getattr(registered, name):
+                    raise ValueError(f"--{name} conflicts with the registered specification")
+            if (click.get_current_context().get_parameter_source("arm") == click.core.ParameterSource.COMMANDLINE
+                    and registered.arm not in {arm, _ARMS[arm][0]}):
+                raise ValueError("--arm conflicts with the registered specification")
+        except (ValueError, KeyError, TypeError) as exc:
+            raise click.ClickException(str(exc)) from exc
+        condition, stated_profile = registered.condition, registered.profile
+        if manifest is None:
+            manifest = str(registered.manifest) if registered.manifest is not None else "none"
+        if chunk_manifest is None:
+            chunk_manifest = str(registered.chunk_manifest) if registered.chunk_manifest is not None else None
 
     # The schema is on disk and the run has just been validated against it, so
     # the digest is observed rather than asserted. `d4d api run` has always
@@ -413,6 +445,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     for _ in range(2):
         concat_dir = _corpus_path(_CD, selected_manifest)
         full_out = concat_dir / base / label / f"{project}_d4d.yaml"
+        if registered is not None:
+            full_out = Path(registered._agentic_artifact_paths["full"])
         h = parse_header(full_out) if full_out.exists() else {}
         header_bundle = h.get("Source bundle") or h.get("Source")
         resolved_bundle = (input_bundle or
@@ -464,7 +498,21 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     digest = schema_digest.fingerprint(
         schema_digest.digest_text("Dataset", profile=profile_selection.profile))
     spec = None
-    if condition:
+    if registered is not None:
+        def same_path(left, right):
+            return ((left is None and right is None) or
+                    (left is not None and right is not None and Path(left).resolve() == Path(right).resolve()))
+        for name, selected_path, registered_path in (
+                ("bundle", resolved_bundle, registered.bundle),
+                ("rendering bundle", bundle_for_spec or resolved_bundle, registered.bundle),
+                ("manifest", selected_manifest, registered.manifest),
+                ("chunk manifest", chunk_manifest, registered.chunk_manifest)):
+            if not same_path(selected_path, registered_path):
+                raise click.ClickException(f"{name} conflicts with the registered rendering specification")
+        spec = registered.render_spec()
+        selected = selected_manifest if registered.manifest_used else None
+        manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
+    elif condition:
         from data_sheets_schema.api_runner import RunSpec
         bundle = bundle_for_spec or resolved_bundle
         # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
@@ -492,11 +540,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        # The selected manifest owns outputs even when this
                        # arm consumes none of its context blocks.
                        concat_dir=concat_dir,
+                       outputs=({key: Path(value) for key, value in registered._agentic_artifact_paths.items()
+                                 if key in {"full", "core", "report"}} if registered is not None else None),
                        input_bundle=Path(input_bundle) if input_bundle else None,
                        input_verified=True,
                        prompt_paths=[Path(p) for p in prompts] or None,
-                       prompt_request=(Path(prompt_text).read_text(encoding="utf-8")
-                                       if prompt_text else None),
+                       prompt_request=supplied_text,
                        prompt_request_spec=spec,
                        schema_digest_md5=digest,
                        profile=profile_selection,
@@ -517,11 +566,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         rec.data["phases_skipped"] = list(phases_skipped)
     # Freeze the write destination so record_path_for cannot rediscover an
     # ambient owner; the record itself keeps portable paths at its own root.
-    out = rec.write(record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
+    destination = (Path(registered._agentic_artifact_paths["core"]).resolve().parent / f"{project}_provenance.yaml"
+                   if registered is not None else record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
+    out = rec.write(destination)
     click.echo(f"✓ {out}")
     # Evidence pins retain the same portable spelling as the record's
     # outputs. Reuse the resolved address without another corpus selection.
-    inline_address = out if concat_dir.is_absolute() else out.relative_to(Path.cwd())
+    inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
     _inline_checks(inline_address)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the

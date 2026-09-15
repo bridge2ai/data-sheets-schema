@@ -108,6 +108,8 @@ def main():
     spec=spec_for(job)
     if spec.render_spec()!=job['render_spec'] or spec.input_identity()!=job['input_identity']:
         raise BudgetStop('native generation instruction or input identity changed')
+    if spec.render_version >= 9 and overlay['per_job_environment'][job['id']].get('D4D_LAUNCH_INSTRUCTION') != job['instruction']:
+        raise BudgetStop('native provenance must read the exact registered launch instruction')
     key=os.environ.get('CBORG_API_KEY')
     if not key: raise BudgetStop('CBORG_API_KEY is required')
     executable=verified_executable(overlay)
@@ -170,6 +172,17 @@ def main():
         from data_sheets_schema import api_runner, agentic_observed
         problems=api_runner.validate_outputs(spec)
         pair=api_runner.pair_consistency(spec)
+        if spec.render_version >= 9:
+            from data_sheets_schema.evidence_assertions import check_files
+            evidence_dir = spec.metadata_dir / 'evidence'
+            evidence = check_files(audit=evidence_dir/'audit.json', bundle=spec.bundle,
+                manifest=spec.chunk_manifest, report=spec.report_path,
+                artifacts={'original_full':evidence_dir/'original_full.yaml',
+                           'original_core':evidence_dir/'original_core.yaml',
+                           'final_full':spec.full_path,'final_core':spec.core_path})
+            receipt['evidence_assertions'] = evidence
+            if not evidence['checked'] or evidence['findings']:
+                problems = list(problems) + ['explicit evidence assertions failed']
         receipt.update(validation_problems=problems,pair_consistency=pair,
                        native_observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle'])),
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),

@@ -79,6 +79,20 @@ def test_failed_atomic_replace_keeps_the_previous_account(tmp_path, monkeypatch)
     assert ledger.ledger_path(s).read_bytes() == before
 
 
+def test_transport_failure_consumes_regate_allowance_only_in_its_generation(tmp_path):
+    s = spec(out_dir=tmp_path)
+    generation = ledger.prepare_usage(s, resume=True)
+    call = ledger.begin_call(s, "report_regate", 1, "2026-09-15T00:00:00Z")
+    ledger.cancel_call(s, call)
+    assert ledger.report_regate_attempted(s)
+    with pytest.raises(ledger.UsageLedgerError, match="already attempted"):
+        ledger.begin_call(s, "report_regate", 1, "2026-09-15T00:01:00Z")
+    assert ledger.prepare_usage(s, resume=False) != generation
+    assert not ledger.report_regate_attempted(s)
+    fresh = ledger.begin_call(s, "report_regate", 1, "2026-09-15T00:02:00Z")
+    ledger.cancel_call(s, fresh)
+
+
 @pytest.mark.parametrize("damage", ["invalid-json", "identity", "version", "missing-id", "duplicate-id",
                                    "generation", "legacy-policy"])
 def test_corrupt_accounts_fail_before_any_more_model_calls(tmp_path, damage):
