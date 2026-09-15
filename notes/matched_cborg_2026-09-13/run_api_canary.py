@@ -49,6 +49,25 @@ def verify_history(manifest):
             raise BudgetStop("a preserved prior-canary artifact changed")
 
 
+def check_canary_receipts(spec):
+    """Recompute the existing strict receipt floors; never repair measured bytes."""
+    import yaml
+    from data_sheets_schema import api_runner
+    from data_sheets_schema.canary import receipt_floors
+    try:
+        record = yaml.safe_load(spec.provenance_path.read_bytes())
+        if not isinstance(record, dict):
+            raise ValueError("provenance is not a mapping")
+        block = api_runner._receipts_block(spec, record)
+        if block.get("checked") is not True:
+            return {"passed": False, "floors": None, "receipts": block}
+        floors = receipt_floors(block)
+        return {"passed": not any(floors.values()), "floors": floors, "receipts": block}
+    except (OSError, ValueError, TypeError, KeyError, yaml.YAMLError) as exc:
+        return {"passed": False, "floors": None, "receipts": None,
+                "reason": f"receipt acceptance could not be recomputed: {type(exc).__name__}"}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--registration", type=Path, default=HERE / "registration.json")
@@ -118,8 +137,13 @@ def main():
         client.messages.require_active()
         verify(manifest, args.registration, manifest_sha)
         verify_history(manifest)
-        receipt.update(status="validation_failed" if record["validation_problems"] else "completed_pending_independent_review",
-                       validation_problems=record["validation_problems"], checks=record["checks"])
+        receipt_check = check_canary_receipts(spec)
+        problems = list(record["validation_problems"])
+        if not receipt_check["passed"]:
+            problems.append("coverage receipt acceptance failed")
+        receipt.update(status="validation_failed" if problems else "completed_pending_independent_review",
+                       validation_problems=problems,
+                       checks={**record["checks"], "receipt_acceptance": receipt_check})
     except Exception as exc:
         # Do not stringify provider exceptions: HTTP errors can contain headers.
         receipt.update(status="stopped", error_type=type(exc).__name__)
