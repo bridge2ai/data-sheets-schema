@@ -21,6 +21,31 @@ class BudgetStop(RuntimeError):
     pass
 
 
+def provider_context_headers(manifest):
+    """Select only a registered, documented provider control, never arbitrary headers."""
+    if "provider_context_policy" not in manifest:
+        return {}  # Historical registrations retain their original transport.
+    if manifest["provider_context_policy"] != "headroom_bypass_v1":
+        raise BudgetStop("unknown registered provider context policy")
+    return {"x-headroom-bypass": "true"}
+
+
+def provider_context_evidence(manifest):
+    return {"policy": manifest.get("provider_context_policy", "legacy_provider_default_unpinned"),
+            "requested_headers": provider_context_headers(manifest),
+            "provider_behavior_independently_observed": False}
+
+
+def cborg_client(manifest, api_key, *, max_retries, http_client=None):
+    """Use the same registered headers for generation and SDK token counting."""
+    import anthropic
+    kwargs = {"api_key": api_key, "base_url": manifest["provider_base_url"],
+              "max_retries": max_retries, "default_headers": provider_context_headers(manifest)}
+    if http_client is not None:
+        kwargs["http_client"] = http_client
+    return anthropic.Anthropic(**kwargs)
+
+
 def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 

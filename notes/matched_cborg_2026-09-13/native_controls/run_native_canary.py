@@ -12,6 +12,7 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from budgeted_cborg import BudgetStop, open_ledger, attempt_identity, write_new
+from budgeted_cborg import cborg_client, provider_context_headers, provider_context_evidence
 from native_proxy import NativeProxy
 from prepare_registration import spec_for
 from run_api_canary import verify, verify_history, sha, check_canary_receipts
@@ -129,12 +130,12 @@ def main():
         raise BudgetStop('native runtime version changed')
     attempt=here/'attempts'/args.job;attempt.mkdir(parents=True,exist_ok=False)
     config=attempt/'cli_config';config.mkdir(mode=0o700)
-    import anthropic
     ledger=open_ledger(base,registration_sha)
     billing_attempt=attempt_identity(registration_sha,job['id'])
-    proxy=NativeProxy(sdk=anthropic.Anthropic(api_key=key,base_url=base['provider_base_url'],max_retries=0),
+    proxy=NativeProxy(sdk=cborg_client(base,key,max_retries=0),
           ledger=ledger,attempt=billing_attempt,evidence=attempt/'requests',model=base['model']['model'],
-          prices=base['budget']['prices_per_token'],verify=verify_all,provider_key=key,base_url=base['provider_base_url'])
+          prices=base['budget']['prices_per_token'],verify=verify_all,provider_key=key,base_url=base['provider_base_url'],
+          request_headers=provider_context_headers(base))
     # Explicitly whitelist non-credential environment fields. The child gets
     # only the local transport token; provider credentials stay in the parent.
     env={k:v for k,v in os.environ.items() if k in {'PATH','HOME','SHELL','TMPDIR','LANG','LC_ALL','TERM'}}
@@ -146,6 +147,7 @@ def main():
           '--max-budget-usd',str(ledger.limit_for_attempt(billing_attempt)),
           '--allowedTools',*overlay['allowed_tools'],'--system-prompt',Path(overlay['system_prompt']).read_text()]
     receipt={'job':job['id'],'registration_sha256':registration_sha,'overlay_sha256':overlay_sha,
+             'provider_context':provider_context_evidence(base),
              'review_sha256':sha(args.review),'started_at':now(),'status':'incomplete',
              'launch_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
              'provider':base['provider_base_url'],'model':base['model']['model'],
