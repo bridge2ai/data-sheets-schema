@@ -1,5 +1,22 @@
 # Renderer-11 matched generation and evaluation plan — 2026-09-15
 
+**Current status:** the v10n CHORUS API canary stopped on an incomplete
+provider stream. No complete D4D or scientific acceptance resulted, and no
+downstream canary or evaluator has launched. Resolve the new accounting
+issue #1847 and clarify the empty provider result before any further paid
+attempt. The earlier reconciliation #1831 remains complete. Original attempt
+evidence and detailed accounting are preserved locally.
+
+The native final-check correction #1846 passed independent review and required
+CI, merged, and its branch was deleted. It does not fix the provider stream
+failure. The original v10n inputs and inactive native overlay remain frozen.
+Any new attempt requires a separately reviewed registration with updated
+accounting and unused output paths. Preserve both generation arms, every
+planned evaluation style and repeat, and the sequential acceptance gates.
+
+See the [stopped outcome](matched_cborg_2026-09-15_v10n/CHORUS_api_stopped.md).
+The original pre-launch plan and accounting snapshot follow as history.
+
 Charge reconciliation is complete. The stopped v10m canary's three requests
 cost $2.898394, with all 45 cumulative charges settled at $34.565632 and
 $165.434368 remaining from the additional $200. All 392 prior original files
