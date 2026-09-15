@@ -148,6 +148,43 @@ def test_nested_person_identity_cannot_ignore_a_sibling_identifier(key, survivor
         {"creators": [{"principal_investigator": rejected}]})[0]["kind"] == "unsupported_relationship_retained"
 
 
+@pytest.mark.parametrize("key", ["id", "name"])
+@pytest.mark.parametrize("level", ["wrapper", "owner", "owner_new", "middle"])
+def test_added_identity_fields_cannot_relocate_a_rejected_person(key, level):
+    rejected = {"id": "https://example.org/rejected", "name": "Rejected"}
+    supported = {"id": "https://example.org/supported", "name": "Supported"}
+    if level.startswith("owner"):
+        # A supported entity may originally expose only the declared field;
+        # adding the rejected entity's other identifier must not be ignored.
+        supported.pop("name" if key == "id" else "id")
+    def wrapper(person):
+        value = {"principal_investigator": person}
+        return {"role": value} if level == "middle" else value
+    original = {"creators": [wrapper(rejected), wrapper(supported)]}
+    pointer = ("/role" if level == "middle" else "") + "/principal_investigator/" + key
+    audit = {"findings": [{"remove_relationship": {"path": "/creators/0", "identity": pointer}}]}
+    survivor = copy.deepcopy(wrapper(supported))
+    if level.startswith("owner"):
+        added = "name" if key == "id" else "id"
+        survivor["principal_investigator"][added] = ("https://example.org/new-identity"
+            if level == "owner_new" else rejected[added])
+    elif level == "middle":
+        survivor["role"].update(rejected)
+    else:
+        survivor.update(rejected)
+    assert check_relationship_removals(audit, original,
+        {"creators": [survivor]})[0]["kind"] == "evidence_contract"
+    assert check_relationship_removals(audit, original,
+        {"creators": [wrapper(supported)]}) == []
+
+
+def test_an_identity_cannot_select_an_arbitrary_person_from_an_indexed_list():
+    original = {"creators": [{"people": [{"name": "First"}, {"name": "Second"}]}]}
+    audit = {"findings": [{"remove_relationship": {
+        "path": "/creators/0", "identity": "/people/0/name"}}]}
+    assert check_relationship_removals(audit, original, {"creators": []})[0]["kind"] == "evidence_contract"
+
+
 def test_relationship_identity_must_be_evidenced_in_original():
     audit = {"findings": [{"remove_relationship": {"path": "/creators/0", "identity": "/notes"}}]}
     assert check_relationship_removals(audit, {"creators": [{"notes": "not an identity"}]}, {})[0]["kind"] == "evidence_contract"

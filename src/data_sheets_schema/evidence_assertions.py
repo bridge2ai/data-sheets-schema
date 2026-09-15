@@ -172,18 +172,19 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict) -> dict:
 def _member_identities(member, declared=None):
     if not isinstance(member, dict):
         raise ValueError("indexed relationship members must be objects with stable identities")
-    paths = [(key,) for key in ("id", "name") if key in member]
+    paths = {(key,) for key in ("id", "name")}
     if declared is not None:
-        owner = _at(member, declared[:-1])
-        if not isinstance(owner, dict):
-            raise ValueError("declared identity must belong to an object")
-        # The name and ID describe the same entity, including when it is
-        # nested inside a role wrapper. Neither can contradict the other.
-        paths.extend(tuple(declared[:-1]) + (key,) for key in ("id", "name") if key in owner)
-        paths.append(tuple(declared))
+        # Bind absence too, at every containing object. An ID moved from a
+        # rejected person to a surviving wrapper is still a new identity.
+        for depth in range(1, len(declared)):
+            prefix = tuple(declared[:depth])
+            if not isinstance(_at(member, prefix), dict):
+                raise ValueError("declared identity must follow nested objects, not indexed lists or scalars")
+            paths.update(prefix + (key,) for key in ("id", "name"))
+        paths.add(tuple(declared))
     identities = {path: _at(member, path) for path in paths}
-    if not identities or any(not isinstance(value, str) or not value.strip()
-                             for value in identities.values()):
+    present = [value for value in identities.values() if value is not MISSING]
+    if not present or any(not isinstance(value, str) or not value.strip() for value in present):
         raise ValueError("indexed relationship member or ancestor has no usable stable identity")
     return identities
 
@@ -200,12 +201,11 @@ def _matched_member(original, final, index, declared=None):
         raise ValueError("final relationship container changed shape")
     mapped = {}
     for member in final:
-        candidates = [i for i, fields in enumerate(identities)
-                      if isinstance(member, dict) and all(_at(member, path) == value
-                                                         for path, value in fields.items())]
+        current = _member_identities(member, declared)
+        candidates = [i for i, fields in enumerate(identities) if current == fields]
         overlaps = [i for i, fields in enumerate(identities)
-                    if isinstance(member, dict) and any(_at(member, path) == value
-                                                       for path, value in fields.items())]
+                    if any(value is not MISSING and current.get(path, MISSING) == value
+                           for path, value in fields.items())]
         if len(candidates) != 1 or overlaps != candidates or candidates[0] in mapped:
             raise ValueError("relationship identity changed, disappeared, or is ambiguous; removal is unverified")
         mapped[candidates[0]] = member

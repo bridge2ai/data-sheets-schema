@@ -62,6 +62,9 @@ For a list member, identity is relative to that member and ends in id or
 name; choose the person's or entity's own identity, not an affiliation.
 When that identity is nested, both its id and name must remain unchanged;
 the check also binds any identifying fields on the containing role wrapper.
+An identity pointer must follow nested objects, not indexed lists. All
+containing objects retain both the presence and absence of their id/name
+fields; moving a rejected person's identity onto a surviving wrapper fails.
 Reordering the list does not remove that relationship. For a non-list field,
 omit identity and remove the unsupported field entirely. Do not merely delete
 the name or identifier from an otherwise retained unsupported entry.

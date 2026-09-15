@@ -146,3 +146,18 @@ both declaration styles, conflicting or missing sibling identifiers, and
 legitimate removal. Before the fix, six controls failed and two already
 refused the malformed identity; the review's false-removal case reproduced.
 After the fix, all 50 evidence, generation and native-recording controls pass.
+
+## Engineering review, round 4 preparation
+
+The third, incremental review of `73db8d50ef9686d531ed938f6b172d6a4a83195a`
+found #1825: a surviving creator wrapper could acquire the rejected person's
+id/name while retaining a supported nested person. Matching had captured only
+identity fields present in the originals. Four new controls reproduced the
+wrapper/intermediate-object bypass; two owner-level controls already refused
+the conflict. The revised identity signature binds both presence and absence
+of id/name at every object along the declared identity path. Matches require
+equal signatures, and missing fields do not count as identity overlaps.
+Indexed-list traversal inside an identity selector is refused as ambiguous.
+All 57 evidence/generation/native-recording controls passed after this change;
+two further controls cover newly introduced owner identifiers that do not
+collide with any original identity.
