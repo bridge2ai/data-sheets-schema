@@ -161,3 +161,19 @@ Indexed-list traversal inside an identity selector is refused as ambiguous.
 All 57 evidence/generation/native-recording controls passed after this change;
 two further controls cover newly introduced owner identifiers that do not
 collide with any original identity.
+
+## Engineering review, round 5 preparation
+
+The fourth incremental review of `06d78df7ce65ed268d08144b3aa8941e10257da6`
+found #1826: a rejected person's ORCID could be moved onto a supported
+survivor while id/name still matched. Schema inspection also identified DOI,
+grant_number, variable_name, hash and md5 as identifier slots. The signature
+now binds all eight identifier/name fields at every selected object, including
+absence. Declared selectors may use these schema identifiers directly.
+A regression derives identifier coverage from the schema's identifier flags
+and mappings; a future unhandled identifier makes that check fail. The schema
+describes email as contact information, so it is not treated as a stable ID.
+Nine initial controls reproduced the ignored-identifier gap; the retained
+person control already failed closed. Added controls cover legitimate removal
+using each identifier without id/name and future schema coverage.
+All 76 evidence, generation and native-recording controls pass after the fix.

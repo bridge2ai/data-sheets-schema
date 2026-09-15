@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 import yaml
@@ -183,6 +184,60 @@ def test_an_identity_cannot_select_an_arbitrary_person_from_an_indexed_list():
     audit = {"findings": [{"remove_relationship": {
         "path": "/creators/0", "identity": "/people/0/name"}}]}
     assert check_relationship_removals(audit, original, {"creators": []})[0]["kind"] == "evidence_contract"
+
+
+@pytest.mark.parametrize("mode", ["retained", "added", "changed", "removed"])
+def test_person_orcid_is_bound_with_its_id_and_name(mode):
+    rejected = {"id": "https://example.org/rejected", "name": "Rejected", "orcid": "0000-0002-1825-0097"}
+    supported = {"id": "https://example.org/supported", "name": "Supported"}
+    if mode in {"changed", "removed"}:
+        supported["orcid"] = "0000-0001-5109-3700"
+    original = {"creators": [{"principal_investigator": rejected}, {"principal_investigator": supported}]}
+    audit = {"findings": [{"remove_relationship": {
+        "path": "/creators/0", "identity": "/principal_investigator/name"}}]}
+    survivor = copy.deepcopy(rejected if mode == "retained" else supported)
+    if mode in {"added", "changed"}:
+        survivor["orcid"] = rejected["orcid"]
+    elif mode == "removed":
+        survivor.pop("orcid")
+    problems = check_relationship_removals(audit, original, {"creators": [{"principal_investigator": survivor}]})
+    assert problems[0]["kind"] == ("unsupported_relationship_retained" if mode == "retained" else "evidence_contract")
+    assert check_relationship_removals(audit, original,
+        {"creators": [{"principal_investigator": supported}]}) == []
+
+
+@pytest.mark.parametrize("field", ["orcid", "doi", "grant_number", "variable_name", "hash", "md5"])
+def test_schema_identifier_alias_cannot_be_borrowed_by_a_survivor(field):
+    original = {"members": [{"name": "Rejected", field: "rejected-identity"}, {"name": "Supported"}]}
+    audit = {"findings": [{"remove_relationship": {"path": "/members/0", "identity": "/name"}}]}
+    final = {"members": [{"name": "Supported", field: "rejected-identity"}]}
+    assert check_relationship_removals(audit, original, final)[0]["kind"] == "evidence_contract"
+    assert check_relationship_removals(audit, original, {"members": [{"name": "Supported"}]}) == []
+
+
+def test_identity_signatures_cover_the_schema_declared_identifiers():
+    from data_sheets_schema.evidence_assertions import IDENTITY_FIELDS
+    schema = yaml.safe_load((Path(__file__).resolve().parents[1] /
+        "src/data_sheets_schema/schema/data_sheets_schema_all.yaml").read_bytes())
+    concepts = {"schema:identifier", "dcterms:identifier"}
+    declared = set()
+    sections = [schema.get("slots", {}), *(body.get("attributes", {}) for body in schema["classes"].values())]
+    for slots in sections:
+        for name, slot in slots.items():
+            mappings = {slot.get("slot_uri"), *(slot.get("exact_mappings") or []),
+                        *(slot.get("broad_mappings") or []), *(slot.get("close_mappings") or [])}
+            if slot.get("identifier") or concepts & mappings:
+                declared.add(name)
+    assert declared <= IDENTITY_FIELDS, "New schema identifiers need explicit removal-check coverage"
+    assert "email" not in IDENTITY_FIELDS  # schema declares contact information, not a persistent identifier
+
+
+@pytest.mark.parametrize("field", ["orcid", "doi", "grant_number", "variable_name", "hash", "md5"])
+def test_declared_identifier_can_bind_members_without_an_id_or_name(field):
+    original = {"members": [{field: "rejected-identity"}, {field: "supported-identity"}]}
+    audit = {"findings": [{"remove_relationship": {"path": "/members/0", "identity": "/" + field}}]}
+    assert check_relationship_removals(audit, original, original)[0]["kind"] == "unsupported_relationship_retained"
+    assert check_relationship_removals(audit, original, {"members": [{field: "supported-identity"}]}) == []
 
 
 def test_relationship_identity_must_be_evidenced_in_original():

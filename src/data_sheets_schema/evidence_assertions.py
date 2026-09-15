@@ -18,6 +18,11 @@ import yaml
 INSTRUMENT = "evidence_assertions v1 (#1801, #1815, #1816)"
 ARTIFACTS = {"original_full", "original_core", "final_full", "final_core"}
 MISSING = object()
+# Stable identifier slots declared by the D4D schema, plus human-readable
+# names. A schema-driven regression checks this coverage when the schema
+# changes. Contact details and descriptive text are not identity aliases.
+IDENTITY_FIELDS = frozenset({"id", "name", "orcid", "doi", "grant_number",
+                             "variable_name", "hash", "md5"})
 
 
 def load_json(raw: str | bytes):
@@ -172,7 +177,7 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict) -> dict:
 def _member_identities(member, declared=None):
     if not isinstance(member, dict):
         raise ValueError("indexed relationship members must be objects with stable identities")
-    paths = {(key,) for key in ("id", "name")}
+    paths = {(key,) for key in IDENTITY_FIELDS}
     if declared is not None:
         # Bind absence too, at every containing object. An ID moved from a
         # rejected person to a surviving wrapper is still a new identity.
@@ -180,7 +185,7 @@ def _member_identities(member, declared=None):
             prefix = tuple(declared[:depth])
             if not isinstance(_at(member, prefix), dict):
                 raise ValueError("declared identity must follow nested objects, not indexed lists or scalars")
-            paths.update(prefix + (key,) for key in ("id", "name"))
+            paths.update(prefix + (key,) for key in IDENTITY_FIELDS)
         paths.add(tuple(declared))
     identities = {path: _at(member, path) for path in paths}
     present = [value for value in identities.values() if value is not MISSING]
@@ -238,7 +243,7 @@ def check_relationship_removals(audit, original: dict, final: dict) -> list[dict
     """Check declared removal without treating list positions as identity.
 
     For a list member, identity is a pointer relative to that member, ending
-    in id or name. All identifying fields and indexed ancestors must retain
+    in a schema identifier field or name. All identifiers and indexed ancestors must retain
     stable identities. A non-list relationship must be absent altogether.
     This checks the declared action, not the audit's semantic judgment.
     """
@@ -258,8 +263,8 @@ def check_relationship_removals(audit, original: dict, final: dict) -> list[dict
             identity_tokens = None
             if isinstance(parent, list):
                 identity_tokens = _tokens(rule.get("identity"))
-                if identity_tokens[-1] not in {"id", "name"}:
-                    raise ValueError("list identity must end in id or name")
+                if identity_tokens[-1] not in IDENTITY_FIELDS:
+                    raise ValueError("list identity must end in a schema identifier field or name")
                 identity = _at(old, identity_tokens)
                 if not isinstance(identity, str) or not identity.strip():
                     raise ValueError("original list member has no usable declared identity")

@@ -58,17 +58,18 @@ For each rejected relationship also add remove_relationship to its finding:
     {"path": "/data_governance/committee_contact"}
 
 The path names the unsupported relationship in the original full record.
-For a list member, identity is relative to that member and ends in id or
-name; choose the person's or entity's own identity, not an affiliation.
-When that identity is nested, both its id and name must remain unchanged;
-the check also binds any identifying fields on the containing role wrapper.
+For a list member, identity is relative to that member and ends in a name or
+schema identifier field: id, name, orcid, doi, grant_number, variable_name,
+hash or md5. Choose the person's or entity's own identity, not an affiliation.
+All present identifiers must remain unchanged, including a person's ORCID;
+the check also binds identifying fields on the containing role wrapper.
 An identity pointer must follow nested objects, not indexed lists. All
-containing objects retain both the presence and absence of their id/name
-fields; moving a rejected person's identity onto a surviving wrapper fails.
+containing objects retain both the presence and absence of these identifier
+and name fields; moving a rejected person's identity onto a surviving wrapper fails.
 Reordering the list does not remove that relationship. For a non-list field,
 omit identity and remove the unsupported field entirely. Do not merely delete
 the name or identifier from an otherwise retained unsupported entry.
-Every indexed ancestor must also have an original id or name. Preserve all
+Every indexed ancestor must also have an original identifier or name. Preserve all
 identifying fields of the remaining members, including their spelling. A
 missing, changed, duplicated or newly introduced identity in that container
 makes removal ambiguous; stop for review rather than claiming verification.
