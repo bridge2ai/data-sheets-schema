@@ -1,0 +1,102 @@
+{
+  "kind": "stopped_canary_observation_not_acceptance",
+  "job": "CHORUS_api_rep1",
+  "registration_sha256": "5f7cf55e216c56ee0712e07b24f4442eae0a9ba4bfb893ee30d25c07f4f1ea0c",
+  "launch_commit": "19a5248e4d1fd2dd8e0b28b794b1c315c7915778",
+  "implementation_pr": 1819,
+  "registration_pr": 1830,
+  "started_at": "2026-09-15T09:17:29.120414+00:00",
+  "finished_at": "2026-09-15T09:24:14.540649+00:00",
+  "status": "stopped",
+  "error_type": "RemoteProtocolError",
+  "generation_requests_admitted": 1,
+  "delivered_d4d_text_characters": 0,
+  "completed_d4d_files": 0,
+  "preserved_original_files": 12,
+  "preservation_inventory_sha256": "966d76bf2f48179f33d05b61bb63526aef0d43574f478c04409d078492abbb8f",
+  "originals": [
+    {
+      "path": "data/d4d_concatenated/claudecode_api/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/.CHORUS_d4d.yaml_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/.CHORUS_d4d_core.yaml_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/.CHORUS_provenance.yaml_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/.CHORUS_reconciliation.md_api_run.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/CHORUS_abandoned_attempts.jsonl",
+      "sha256": "f0368143c483df3d67596ce16911fabdf1c7d4dfb38be23352a7e30184432c55"
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/CHORUS_api_usage_c40e84c3f1bc0439.json",
+      "sha256": "5de2b91b28d72af9145465c1db45ead39f3bbb9df5ccb5c17ef372f892b5d0f6"
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/intermediate/CHORUS_full_incomplete_attempt1_1.txt",
+      "sha256": "22e0ad5d692d99e035f60bb0ca9449e276ca3d3f044643adb519d3dd1261ac65"
+    },
+    {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10k-chorus_rep1/intermediate/CHORUS_snapshot_index.json",
+      "sha256": "aee4bcd470a9d88ae8e1ce1b23f59987f478a2e6b148e81f25adc75b178c7af7"
+    },
+    {
+      "path": "notes/matched_cborg_2026-09-15_v10k/attempts/CHORUS_api_rep1/result.json",
+      "sha256": "0c886550ed627150de0aca3da5e6011fc0bb0afc0d720007ff691db6009fbf57"
+    },
+    {
+      "path": "notes/matched_cborg_2026-09-15_v10k/attempts/CHORUS_api_rep1/started.json",
+      "sha256": "22271f2579e18bab608146428dbb64ad62d100ce8ba940d9b68761529b3ae62c"
+    },
+    {
+      "path": "notes/matched_cborg_2026-09-15_v10k/attempts/CHORUS_api_rep1/requests/26949700dd2049f1a4bc7eac85096220/request.json",
+      "sha256": "90a0842de38f6d13a0c48112e444aeb776fc97ac5a96608b3efb105573885aa0"
+    },
+    {
+      "path": "notes/matched_cborg_2026-09-15_v10k/attempts/CHORUS_api_rep1/requests/26949700dd2049f1a4bc7eac85096220/admission.json",
+      "sha256": "9bd1eca9cc8af916e6f95c8e5e92c32ca9db8d57574eca587d1b06480e8836d4"
+    }
+  ],
+  "accounting": {
+    "settled_requests_before_attempt": 39,
+    "settled_estimate_usd": "29.39163800",
+    "unresolved_requests": 1,
+    "unresolved_reservation_usd": "3.53975000",
+    "uncommitted_allocation_usd": "167.06861200",
+    "pending_reservation_released": false,
+    "provider_log_reported_usd": "0.267175",
+    "provider_log_status": "success",
+    "provider_response_content_chars": 0,
+    "provider_log_output_tokens": 7,
+    "provider_log_is_final_charge_confirmation": false,
+    "payload_attribution": "Model, time, usage, system, reasoning settings and max_tokens match. Three long text fields match the recorded prefix/suffix and explicit DB elision lengths; full payload equality is unavailable from this truncated log."
+  },
+  "scientific_acceptance": false,
+  "later_canaries_started": false,
+  "evaluations_started": false,
+  "remaining_observation_issues": [
+    1801,
+    1815,
+    1816
+  ],
+  "next_steps": [
+    "Obtain conclusive accounting for the stopped request without dropping its reservation.",
+    "Review the transport failure and register any fresh attempt with distinct paths and a reviewed launch receipt; no automatic retry.",
+    "Accept unchanged API originals before matched agentic generation."
+  ],
+  "evidence_sha256": {
+    "result_json": "0c886550ed627150de0aca3da5e6011fc0bb0afc0d720007ff691db6009fbf57",
+    "admission_json": "9bd1eca9cc8af916e6f95c8e5e92c32ca9db8d57574eca587d1b06480e8836d4",
+    "billing_checkpoint": "08f1cc9a179e80bb7e633231f604375ab9eab22baf9e8f845cf52283ae42242d",
+    "provider_lookup": "a5c27c5ccbec8c80c1269d4e8e76530adf022b37634b1ae372e3b5d2d6433650",
+    "provider_payload_binding": "e5bd18bcf8745ae399f0e9fb5076528e828ac8ba599436d4bf1ba5cb717dcf22"
+  },
+  "follow_up_issue": 1831
+}
