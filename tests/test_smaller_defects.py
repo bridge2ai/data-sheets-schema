@@ -104,7 +104,7 @@ class ReportPhaseTest(unittest.TestCase):
         # prose fails for a reason that has nothing to do with the behaviour
         # it is guarding.
         text = PHASE_INSTRUCTIONS["report"].lower()
-        self.assertIn("check each statement against them", text)
+        self.assertIn("check each statement against the records", text)
         self.assertIn("still present", text)
 
     def test_it_is_given_both_sides_of_the_diff_and_told_to_use_them(self):
