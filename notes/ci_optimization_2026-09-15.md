@@ -48,5 +48,31 @@ repair the committed input before the independently running pytest gate.
 - Eight synthetic partition/exit-status tests passed in 9.17 seconds; the
   aggregate-gate test separately passed all 48 dependency/event combinations.
 - actionlint 1.7.7 accepted the workflow; `git diff --check` passed.
-- Final independent review and complete GitHub timings/test totals will be
-  recorded on #1812 and the pull request.
+- Independent engineering review approved the change with no findings;
+  [PR #1813](https://github.com/bridge2ai/data-sheets-schema/pull/1813)
+  merged as `55327958ecd6e30e3afcf9eae2937f8e6b3a334e`. The feature branch
+  and its worktree were removed. Issues #1812, #938, #1203 and #940 closed.
+- The [PR run](https://github.com/bridge2ai/data-sheets-schema/actions/runs/34931494738)
+  completed in 8:00, compared with 22:32 before sharding. Complete manual
+  validation took 9:43 and the
+  [post-merge run](https://github.com/bridge2ai/data-sheets-schema/actions/runs/34932451321)
+  took 11:21. Each Python version recorded 4,841 passes and 15 skips, with
+  all 4,847 original test identities retained and nine added CI guards;
+  the 49 offline controls also passed. Full-matrix runner usage increased
+  approximately 23–37%, while PR runner usage was essentially unchanged.
+
+## Existing Aurelian pin — approved publication
+
+The separate automatic Dependency Graph run failed to fetch the existing
+Aurelian pin `05741290eb26e88e40dc43440940b228db8741cd` (#1814). After explicit
+user approval, its exact two local commits were published as the persistent
+[archive/data-sheets-schema-0574129 branch](https://github.com/monarch-initiative/aurelian/tree/archive/data-sheets-schema-0574129).
+Only that branch was pushed. The parent dependency pin and existing local
+checkout stayed unchanged.
+
+The exact remote SHA was verified, and a fresh shallow, sparse checkout of
+main `55327958e` successfully initialized its submodules recursively using
+upstream objects. The old automatic run cannot be retried through GitHub
+Actions; its historical failure is not a successful check. Issue #1814
+remains open pending the next automatic Dependency Graph result. Preserve
+the archival branch while the parent repository references this commit.
