@@ -12,6 +12,9 @@ looked between them.
 
 import pytest
 import subprocess
+import sys
+from click.testing import CliRunner
+from data_sheets_schema.cli import cli
 import tempfile
 import unittest
 from pathlib import Path
@@ -277,9 +280,9 @@ class TestAgainstTheRealArm(unittest.TestCase):
 @pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestTheCheckReportsIt(unittest.TestCase):
     def test_check_names_the_straddled_series(self):
-        out = subprocess.run(["poetry", "run", "d4d", "runs", "check"],
+        out = subprocess.run([sys.executable, "-m", "data_sheets_schema.cli", "runs", "check"],
                              capture_output=True, text=True,
-                             check=False).stdout
+                             check=True, timeout=300).stdout
         if f"{ARM}_rep1" not in out and ARM not in out:
             self.skipTest("arm absent from corpus")
         self.assertIn("more than one schema", out)
@@ -287,9 +290,7 @@ class TestTheCheckReportsIt(unittest.TestCase):
     def test_it_is_reported_and_not_fatal(self):
         """A straddled series is usable if it is known to be straddled. Making
         it fatal would force a rerun of correct records to clear a gate."""
-        result = subprocess.run(
-            ["poetry", "run", "d4d", "runs", "check", "--strict"],
-            capture_output=True, text=True, check=False)
-        if "more than one schema" not in result.stdout:
+        result = CliRunner().invoke(cli, ["runs", "check", "--strict"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        if "more than one schema" not in result.output:
             self.skipTest("no straddled series in corpus")
-        self.assertEqual(result.returncode, 0)

@@ -115,14 +115,13 @@ class TestAgainstTheCorpus(unittest.TestCase):
         """Playbooks are meant to evolve. A gate would turn every improvement
         to the method into a corpus-wide failure, which is why this is drift
         detection and not prompt-style pinning."""
-        import subprocess
+        from click.testing import CliRunner
+        from data_sheets_schema.cli import cli
 
-        result = subprocess.run(
-            ["poetry", "run", "d4d", "runs", "check", "--strict"],
-            capture_output=True, text=True, check=False)
-        if "read a playbook" not in result.stdout:
+        result = CliRunner().invoke(cli, ["runs", "check", "--strict"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        if "read a playbook" not in result.output:
             self.skipTest("no drifted playbooks in corpus")
-        self.assertEqual(result.returncode, 0)
 
     def test_the_real_records_carry_playbook_hashes_to_check(self):
         """If this ever finds none, the guard above is vacuous."""

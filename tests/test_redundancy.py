@@ -6,7 +6,9 @@ hold that the measurement is honest and that nothing acts on it — a later chan
 that turned this into a gate would silently reverse a decision.
 """
 
-import subprocess
+import pytest
+from click.testing import CliRunner
+from data_sheets_schema.cli import cli
 import unittest
 from pathlib import Path
 
@@ -124,27 +126,30 @@ class TestAgainstTheCanonicalSet(unittest.TestCase):
         self.assertTrue(found, "no restatement found in the worst-case record")
 
 
-class TestItIsReportedNotEnforced(unittest.TestCase):
-    def test_the_command_exits_zero(self):
-        """The decision was to accept the repetition. A non-zero exit would
-        make it a gate and reverse that silently."""
-        result = subprocess.run(
-            ["poetry", "run", "d4d", "runs", "redundancy"],
-            capture_output=True, text=True, check=False)
-        if "no canonical records" in (result.stdout + result.stderr):
-            self.skipTest("no canonical records on disk")
-        self.assertEqual(result.returncode, 0)
+@pytest.fixture(scope="module")
+def redundancy_result():
+    """One read-only corpus command supplies its three presentation assertions.
 
-    def test_the_output_says_it_is_not_a_failure(self):
-        result = subprocess.run(
-            ["poetry", "run", "d4d", "runs", "redundancy"],
-            capture_output=True, text=True, check=False)
-        if result.returncode != 0:
-            self.skipTest("command unavailable here")
-        self.assertIn("reported, not failed", result.stdout)
+    This fixture is local to this module; tests which edit inputs or override
+    the threshold execute a fresh command instead of sharing a result.
+    """
+    result = CliRunner().invoke(cli, ["runs", "redundancy"])
+    assert result.exit_code == 0, result.output
+    if "no canonical records" in result.output:
+        pytest.skip("no canonical records on disk")
+    return result
 
 
-class TestTheRateIsReportedWithItsThreshold(unittest.TestCase):
+class TestItIsReportedNotEnforced:
+    def test_the_command_exits_zero(self, redundancy_result):
+        """An accepted repetition must not become a failing gate."""
+        assert redundancy_result.exit_code == 0
+
+    def test_the_output_says_it_is_not_a_failure(self, redundancy_result):
+        assert "reported, not failed" in redundancy_result.output
+
+
+class TestTheRateIsReportedWithItsThreshold:
     """Found reviewing this change. The headline swings 2.1% (exact match) to
     12.0% (0.6 -> 0.5) on the same corpus, so a rate quoted without its
     threshold is unfalsifiable and invites comparison against a future figure
@@ -156,22 +161,13 @@ class TestTheRateIsReportedWithItsThreshold(unittest.TestCase):
         record = {"is_deidentified": LONG, "preprocessing_strategies": PARA}
         loose = red.summarize(record, threshold=0.5)["prose_restatements"]
         strict = red.summarize(record, threshold=1.0)["prose_restatements"]
-        self.assertGreater(loose, strict)
+        assert loose > strict
 
-    def test_the_command_prints_the_threshold(self):
-        result = subprocess.run(
-            ["poetry", "run", "d4d", "runs", "redundancy"],
-            capture_output=True, text=True, check=False)
-        if result.returncode != 0:
-            self.skipTest("command unavailable here")
-        self.assertIn(f"threshold {red.THRESHOLD}", result.stdout)
+    def test_the_command_prints_the_threshold(self, redundancy_result):
+        assert f"threshold {red.THRESHOLD}" in redundancy_result.output
 
     def test_an_overridden_threshold_is_the_one_reported(self):
-        """Printing the default while having used an override would be worse
-        than printing nothing."""
-        result = subprocess.run(
-            ["poetry", "run", "d4d", "runs", "redundancy", "--threshold", "0.9"],
-            capture_output=True, text=True, check=False)
-        if result.returncode != 0:
-            self.skipTest("command unavailable here")
-        self.assertIn("threshold 0.9", result.stdout)
+        """The printed threshold must describe the computation actually run."""
+        result = CliRunner().invoke(cli, ["runs", "redundancy", "--threshold", "0.9"])
+        assert result.exit_code == 0, result.output
+        assert "threshold 0.9" in result.output

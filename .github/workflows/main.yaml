@@ -1,11 +1,5 @@
-# Built from:
-# https://docs.github.com/en/actions/guides/building-and-testing-python
-# https://github.com/snok/install-poetry#workflows-and-tips
-#
-# Two lanes (#1203, #1361). A pull request runs all Python tests once, on one
-# interpreter, including the committed corpus: code and data changes can both
-# invalidate its measurements. Merging to `main` — and a manual dispatch —
-# also runs the schema and example builds on every supported interpreter.
+# Every PR runs the complete suite, including the committed corpus (#1361).
+# Four shards shorten feedback without removing tests or interpreter coverage.
 ---
 name: Build and test data_sheets_schema
 
@@ -15,82 +9,27 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Only superseded runs of the same PR are cancelled. Every main commit and
+# manual run retains its own evidence, even when another run starts.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-
-  # Every pull request: the fast lane.
-  test:
-    if: github.event_name == 'pull_request'
+  python-tests:
+    name: Python ${{ matrix.python-version }} / shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
-        with:
-          # Registered check-echo verification compares agent definitions to
-          # their previous versions. A shallow checkout loses that evidence.
-          fetch-depth: 0
-
-      # `fairscape_models` is a git submodule imported by
-      # `src/fairscape_integration`, not a pip dependency (#926).
-      - name: Initialise the FAIRSCAPE models submodule
-        run: git submodule update --init fairscape_models
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1.3
-        with:
-          virtualenvs-in-project: true
-
-      # The environment is a function of the lock file; rebuilding it on every
-      # run is a minute nobody needed to spend.
-      - name: Cache the virtualenv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py3.12-${{ hashFiles('poetry.lock') }}
-
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
-
-      - name: Install project
-        run: poetry install --no-interaction
-
-      # The schema-generation tests build into temporary directories (#1208),
-      # so the parallel suite reads the committed schemas without rebuilding
-      # them first. Keep slow tests visible in the timing report.
-      - name: Run the suite including the corpus walks
-        run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto
-
-      - name: Exercise experimental canary admission offline
-        run: poetry run python -m pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py -q -p no:cacheprovider
-
-      - name: Exercise native canary transport and shutdown offline
-        run: PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls poetry run pytest notes/matched_cborg_2026-09-13/native_controls/test_native_proxy.py notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py -q -p no:cacheprovider
-
-  # Merge to main, or on demand: everything, everywhere.
-  full:
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    # The full suite took ~25 min on a laptop and longer here (#926). Without a
-    # limit of our own the job ran until the runner was shut down, which
-    # reads as an infrastructure failure rather than a slow suite.
-    timeout-minutes: 150
+    timeout-minutes: 45
     strategy:
-      # One interpreter failing must not cancel the others: the cancelled
-      # jobs are exactly the evidence of whether the failure is version-bound.
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.12"]' || '["3.10", "3.11", "3.12"]') }}
+        shard: [1, 2, 3, 4]
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
         with:
-          # The corpus and public report checks also verify the registered
-          # preambles against the preceding agent-definition versions.
+          # Check-echo verification needs preceding agent-definition versions.
           fetch-depth: 0
 
       - name: Initialise the FAIRSCAPE models submodule
@@ -112,11 +51,105 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
 
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
-
-      - name: Install project
+      - name: Install dependencies and project
         run: poetry install --no-interaction
 
-      - name: Run the whole of make test
-        run: make test PYTEST_ARGS="-v -n auto"
+      # Assignment uses the actual pytest collection, including new test files
+      # and both filename conventions. No maintained test allowlist or -m filter.
+      # Two local workers can share expensive schema caches within each shard.
+      - name: Run the suite shard including corpus checks
+        run: >-
+          poetry run python -m pytest tests -v -p no:cacheprovider
+          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/4
+          --durations=25 -n auto --dist worksteal
+          --junitxml=test-results/pytest.xml
+
+      # These independent offline controls run once, outside the tests/ collection.
+      - name: Exercise experimental canary admission offline
+        if: matrix.python-version == '3.12' && matrix.shard == 1
+        run: >-
+          poetry run python -m pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py
+          -q -p no:cacheprovider --junitxml=test-results/budget.xml
+
+      - name: Exercise native canary transport and shutdown offline
+        if: matrix.python-version == '3.12' && matrix.shard == 1
+        env:
+          PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
+        run: >-
+          poetry run python -m pytest
+          notes/matched_cborg_2026-09-13/native_controls/test_native_proxy.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py
+          -q -p no:cacheprovider --junitxml=test-results/native.xml
+
+      - name: Preserve test results and per-test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py${{ matrix.python-version }}-shard${{ matrix.shard }}
+          path: test-results/*.xml
+          retention-days: 14
+
+  # Builds run alongside pytest, in separate checkouts. Their generated schema
+  # cannot replace the committed schema before the corpus checks inspect it.
+  schema-examples:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.3
+        with:
+          virtualenvs-in-project: true
+
+      - name: Cache the virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies and project
+        run: poetry install --no-interaction
+
+      - name: Build and validate the schema products
+        run: time make test-schema
+
+      - name: Build and validate the examples
+        run: time make test-examples
+
+  # Preserve the stable merge check. Failure, cancellation or an unexpected
+  # skip in any shard must make this aggregate fail (#1812).
+  test:
+    if: always()
+    needs: [python-tests, schema-examples]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every applicable job to pass
+        env:
+          PYTHON_RESULT: ${{ needs.python-tests.result }}
+          BUILD_RESULT: ${{ needs.schema-examples.result }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          test "$PYTHON_RESULT" = success
+          if [ "$EVENT_NAME" = pull_request ]; then
+            test "$BUILD_RESULT" = skipped
+          else
+            test "$BUILD_RESULT" = success
+          fi
