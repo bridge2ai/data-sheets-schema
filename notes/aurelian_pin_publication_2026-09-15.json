@@ -1,0 +1,19 @@
+{
+  "published_and_verified_at": "2026-09-15T06:23:19.485157+00:00",
+  "repository": "monarch-initiative/aurelian",
+  "ref": "refs/heads/archive/data-sheets-schema-0574129",
+  "sha": "05741290eb26e88e40dc43440940b228db8741cd",
+  "authorization": "User: Publish the exact archival branch",
+  "reviewed_diff_sha256": "b394c5e1da806ddc3bef57b5929f233cc55f6dcaf9f8a953c892ff3749faa590",
+  "parent_commit": "55327958ecd6e30e3afcf9eae2937f8e6b3a334e",
+  "remote_ref_verified": true,
+  "clean_recursive_submodule_checkout_passed": true,
+  "existing_parent_and_submodule_pins_unchanged": true,
+  "existing_user_status_and_files_unchanged": true,
+  "branch_lifetime": "persistent; do not delete while the parent pins this commit",
+  "publication_scope": "Only the explicitly approved archival branch; no tags or other branches pushed",
+  "verification_basis": "New shallow sparse parent checkout with recursive submodule initialization from upstream objects, without local object references.",
+  "historical_dependency_graph_run": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/34932451907",
+  "historical_run_retry": "GitHub refused: This workflow run cannot be retried",
+  "dependency_graph_followup": "Issue #1814 remains open pending the next automatic run."
+}
