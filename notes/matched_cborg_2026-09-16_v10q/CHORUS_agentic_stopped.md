@@ -37,8 +37,12 @@ binds the launch and the two delivered artifacts.
   scratch file under `/tmp`, and two multi-line `python -c` calls that the
   allow pattern did not match), and a shell append to the receipt — so the
   controller's post-run check would have failed the attempt even had the cap
-  held. The bundle was read in line-offset windows rather than the
-  manifest's chunk units.
+  held. The bundle itself was read correctly: every one of the eight
+  chunks was opened with the file tool exactly at its manifest boundary,
+  in order (c006–c008 re-read once, c002–c003 re-read in halves) — so
+  c007 and c008 were read and simply never receipted, and the
+  `d4d receipts check --strict` gate the playbook prescribes before Phase
+  2 was never run.
 - The controller receipt records `error_type: PermissionError` and no
   reason; the ledger's stop entry is the authoritative cause (#1914).
 

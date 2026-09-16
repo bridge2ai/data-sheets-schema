@@ -171,3 +171,25 @@ class Observe(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StringMessageLines(unittest.TestCase):
+    """Claude Code 2.1.272 stream-json writes some lines whose `message` is a
+    string; the observer crashed on them (#1915) and a native run under that
+    runtime could not be observed at all."""
+
+    def test_a_string_message_line_is_skipped_not_fatal(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            bundle = root / "P_preprocessed.txt"
+            bundle.write_text("\n".join(f"line {i}" for i in range(100)) + "\n")
+            lines = [
+                json.dumps({"timestamp": "2026-09-16T21:52:20Z", "type": "system", "message": "API Error: 402 stopped", "uuid": "a"}),
+                _event("2026-09-16T21:52:21Z", usage={"output_tokens": 5},
+                       tools=[("Read", {"file_path": str(bundle), "offset": 1, "limit": 100})], msg_id="m1"),
+                json.dumps({"timestamp": "2026-09-16T21:52:22Z", "type": "result", "message": "done", "uuid": "b"}),
+            ]
+            t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
+            obs = ao.observe([t], bundle, None, None, None)
+        self.assertEqual(obs["output_tokens"], 5)
+        self.assertEqual(obs["bundle_lines_read"], 100)

@@ -8,6 +8,7 @@ import signal
 import subprocess
 import sys
 import time
+import traceback
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -29,6 +30,34 @@ def verified_executable(overlay):
     if overlay['pinned_files'].get(str(path)) != sha(path):
         raise BudgetStop('native executable bytes differ from the launch pin')
     return str(path)
+
+
+def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
+    """Why a native attempt stopped, from the strongest source available.
+
+    The v10q CHORUS attempt stopped on a ledger refusal, but the receipt
+    recorded only `error_type: PermissionError` with no reason: the proxy
+    keeps the class name of a non-BudgetStop exception and the controller
+    copied a reason only from a BudgetStop it raised itself (#1914). The
+    ledger's own stop entry for this attempt is the authoritative cause
+    whenever it exists; the proxy's recorded failure and the exception's
+    BudgetStop message follow.
+    """
+    out = {}
+    try:
+        state = json.loads(Path(ledger_path).read_bytes()) if Path(ledger_path).exists() else {}
+    except Exception:
+        state = {}
+    entry = (state.get('stopped_attempts') or {}).get(billing_attempt)
+    if isinstance(entry, dict) and entry.get('reason'):
+        out['reason'] = entry['reason']; out['reason_source'] = 'ledger'; out['ledger_stop'] = entry
+    elif isinstance(exc, BudgetStop):
+        out['reason'] = str(exc); out['reason_source'] = 'controller'
+    elif isinstance(proxy_failure, str) and proxy_failure:
+        out['reason'] = proxy_failure; out['reason_source'] = 'proxy'
+    if proxy_failure is not None:
+        out['proxy_failure'] = proxy_failure
+    return out
 
 
 def native_evidence_check(spec):
@@ -201,8 +230,11 @@ def main():
                        status='validation_failed' if problems or not pair or not pair.get('ran') or not pair.get('consistent') else 'completed_pending_independent_review')
         verify_all();verify_history(base)
     except Exception as exc:
-        receipt.update(status='stopped',error_type=type(exc).__name__)
-        if isinstance(exc,BudgetStop): receipt['reason']=str(exc)
+        receipt.update(status='stopped',error_type=type(exc).__name__,
+                       **stop_explanation(exc, ledger.path, billing_attempt, getattr(proxy, 'failure', None)))
+        # The traceback names controller code paths only; provider exception
+        # strings are never copied into the receipt.
+        write_new(attempt/'controller_traceback.txt', {'error_type':type(exc).__name__,'traceback':traceback.format_exc()})
     finally:
         state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}
         admitted=[row for row in state['requests'] if row['attempt']==billing_attempt]

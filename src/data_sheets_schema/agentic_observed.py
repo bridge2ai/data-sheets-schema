@@ -181,6 +181,10 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     first = first or t
                     last = t
                 msg = j.get("message") or {}
+                if not isinstance(msg, dict):
+                    # Claude Code 2.1.272 stream-json writes some lines with a
+                    # string `message` (#1915); they carry no usage or content.
+                    msg = {}
                 usage = msg.get("usage") or {}
                 if usage:
                     mid = msg.get("id") or f"{path}:{j.get('uuid')}"

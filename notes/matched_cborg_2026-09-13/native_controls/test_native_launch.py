@@ -149,3 +149,42 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     receipt = json.loads((tmp_path/'attempts'/job['id']/'started.json').read_bytes())
     assert receipt['provider_context']['requested_headers'] == ({'x-headroom-bypass': 'true'} if bypass else {})
     assert receipt['provider_context']['provider_behavior_independently_observed'] is False
+
+
+def test_stop_explanation_prefers_the_ledger_then_the_controller_then_the_proxy(tmp_path):
+    """#1914: the v10q receipt said PermissionError and nothing else while the
+    ledger held the cause. The ledger's stop entry for this attempt wins;
+    a BudgetStop the controller raised is next; the proxy's recorded failure
+    is last; a bare exception with none of them explains nothing."""
+    from run_native_canary import stop_explanation
+    ledger = tmp_path / 'billing.json'
+    ledger.write_text(json.dumps({'requests': [], 'stopped_attempts': {'reg:job': {'reason': 'request reserve $2.30 exceeds remaining budget', 'paid_request': False}}}))
+    out = stop_explanation(PermissionError('x'), ledger, 'reg:job', 'PermissionError')
+    assert out['reason'].startswith('request reserve') and out['reason_source'] == 'ledger' and out['ledger_stop']['paid_request'] is False
+    assert out['proxy_failure'] == 'PermissionError'
+    out = stop_explanation(BudgetStop('deadline elapsed'), ledger, 'reg:other', None)
+    assert out == {'reason': 'deadline elapsed', 'reason_source': 'controller'}
+    out = stop_explanation(RuntimeError('boom'), ledger, 'reg:other', 'OSError')
+    assert out == {'reason': 'OSError', 'reason_source': 'proxy', 'proxy_failure': 'OSError'}
+    out = stop_explanation(RuntimeError('boom'), tmp_path / 'missing.json', 'reg:other', None)
+    assert out == {}
+
+
+def test_every_command_the_playbook_prescribes_is_allowed(tmp_path):
+    """#1916: the v10q run was denied `d4d prompt render`, which the playbook
+    prescribes in a code block. Every `d4d <group> <command>` inside a code
+    block of the native playbook must have an allow pattern."""
+    import re
+    from prepare_overlay_roster import PLAYBOOK_COMMANDS
+    playbook = Path(__file__).resolve().parents[3] / '.claude/commands/d4d-full-core.md'
+    text = playbook.read_text(encoding='utf-8')
+    blocks = re.findall(r'```[^\n]*\n(.*?)```', text, flags=re.S)
+    prescribed = set()
+    for block in blocks:
+        for m in re.finditer(r'(?<![\w/])d4d\s+([a-z-]+)(?:\s+([a-z-]+))?', block):
+            group, command = m.group(1), m.group(2)
+            if command and not command.startswith('-'):
+                prescribed.add(f'{group} {command}')
+    assert prescribed, 'the playbook prescribes commands in code blocks'
+    missing = sorted(p for p in prescribed if p not in PLAYBOOK_COMMANDS)
+    assert missing == [], f'playbook commands the overlay does not allow: {missing}'

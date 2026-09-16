@@ -344,10 +344,23 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
      already receipted from those chunks;
    - `nothing_relevant` with a `reason`;
    - `duplicate_of: <chunk id>` — the same content as another chunk.
+   Write the entry with the file-writing tool (`Write`, or an edit of the
+   receipt file), never with a shell redirect or `cat >>`: the native
+   allowlist denies the shell form, and a denied append leaves the chunk
+   unreceipted. **Every manifest chunk gets an entry, including the last
+   ones.** The v10q CHORUS run read all eight chunks and wrote entries for
+   six; a chunk you read but never receipted is a chunk the validator
+   counts as unreviewed, and the run fails on it.
 4. Only then extract into the record. Search (`grep`) is for re-finding a
    passage you have already receipted, never a substitute for a chunk entry.
-5. Before Phase 2, run `poetry run d4d receipts check --label {VERSION}
-   --project {PROJECT} --strict`. No provenance record exists yet; the
+   Do not build your own schema digest with ad-hoc scripts or write scratch
+   files outside the run's directories: the schema files named under
+   Inputs and `d4d prompt render` are the instrument, and a scratch script
+   is a denied call that buys nothing.
+5. **Before Phase 2 — not optional, and not deferred to the end of the
+   run** — run `poetry run d4d receipts check --label {VERSION}
+   --project {PROJECT} --strict` and do not begin Phase 2 until it reports
+   every manifest chunk reviewed. No provenance record exists yet; the
    command then reads the bundle named in the full record's `# Source
    bundle:` header as it is on disk (pass `--bundle` if the header is not
    written yet). It is re-run with `--write` after the record step, which
