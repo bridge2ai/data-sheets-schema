@@ -60,7 +60,12 @@ _OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms",
 _RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
     "assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
     "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate",
-    "thinking_tokens", "turns_with_thinking_tokens"})
+    "thinking_tokens", "turns_with_thinking_tokens",
+    # #1931/#1933: how many invocations' totals came from the runtime's own
+    # terminal result rather than per-message snapshots, and how many
+    # assistant/user events were malformed — an observation carrying the
+    # latter is refused by every writer below (#1934).
+    "usage_from_terminal_result", "malformed_message_events"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -1049,11 +1054,17 @@ _RUN_OBSERVED_BASIS = (
     "aggregate totals for the whole run, observed by the orchestrator "
     "from the subagent runner's transcript. One number per run, not per "
     "phase: four-phase project-agent mode runs every phase in one "
-    "context, so the run is the only observable boundary. Not the "
-    "runtime's own accounting, no input/output split, not billing-grade; "
-    "deliberately not shaped like api_usage (#681/#682). total_tokens "
+    "context, so the run is the only observable boundary. No "
+    "input/output split, not billing-grade; deliberately not shaped like "
+    "api_usage (#681/#682). Accounted per invocation: where a transcript "
+    "ends in the runtime's own terminal result and no event of it falls "
+    "outside the observed interval, total_tokens and output_tokens are "
+    "that finalized accounting (usage_from_terminal_result counts such "
+    "invocations, and the reasoning estimate is then the subtraction "
+    "pooled over the session, #1931/#1937); otherwise total_tokens "
     "counts each API message once (a response spans several transcript "
-    "lines); duration_ms sums each invocation's own span, so a resumed "
+    "lines) and the estimate is per message. duration_ms sums each "
+    "invocation's own span, so a resumed "
     "run excludes the gap. bundle_lines_read is the union of the run's "
     "successful file-reading windows over the declared bundle (#700): "
     "lines the run never opened, or opened only in a read that errored, "
@@ -1344,6 +1355,20 @@ def _basis_with(log: dict, keys: set) -> str:
     return _basis_parts(log, keys)[0]
 
 
+def _refuse_malformed_observation(observed: dict) -> None:
+    """An observation that saw malformed measurement events is not evidence
+    of the run (#1930/#1934): the numbers beside the counter were computed
+    over a transcript the observer could not fully read, so no writer
+    records or matches them. The native controller refuses completion on
+    the same key; this is the guard for the provenance commands."""
+    n = observed.get("malformed_message_events")
+    if n:
+        raise click.ClickException(
+            f"refusing: the observation carries malformed_message_events={n} — {n} assistant/user "
+            "transcript event(s) whose message is not a mapping; the totals beside it were measured "
+            "over a transcript the observer could not fully read, so nothing is recorded (#1934)")
+
+
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
                          basis: dict | None = None) -> list[str]:
     """The reviewed route #1010 asked for: a prior observation is extended
@@ -1357,6 +1382,7 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
     `run_observed_basis` gains the sentence that describes them (M3).
     Returns the keys added."""
     from datetime import datetime, timezone
+    _refuse_malformed_observation(observed)
     prior = log["run_observed"]
     differ = {k: (v, observed.get(k)) for k, v in prior.items() if observed.get(k) != v}
     if differ:
@@ -1594,6 +1620,9 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         for ts in sets:
             obs = _observe(ts, tb, until, receipt if receipt.exists() else None, tm if receipt.exists() else None)
             differ = sorted(k for k, v in prior.items() if obs.get(k) != v)
+            if obs.get("malformed_message_events"):
+                # Not evidence, whatever it reproduces (#1934).
+                differ.append("malformed_message_events")
             results.append((ts, obs, differ))
     matches = [(ts, obs) for ts, obs, differ in results if not differ]
     if len(matches) != 1:
@@ -1601,7 +1630,7 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                    + ("; nothing written" if execute else ""))
         for ts, obs, differ in results:
             click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ else
-                       "differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)))
+                       "differs on " + ", ".join(f"{k} {prior.get(k, 'absent')}→{obs.get(k)}" for k in differ)))
         return
     ts, obs = matches[0]
     # What the losing candidates reproduced, so the identification can be
@@ -1701,6 +1730,7 @@ def annotate_observed(project, method, label, run_observed, until, extend):
         raise click.BadParameter(
             f"--run values must be non-negative integers as measured, "
             f"got {bad}")
+    _refuse_malformed_observation(observed)
 
     path = record_path_for(project, method, label)
     if not path.exists():

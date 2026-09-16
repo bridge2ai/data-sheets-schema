@@ -165,10 +165,17 @@ def observe(transcripts: list[Path], bundle: Path | None,
     read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
     failed: set[str] = set()
     malformed = 0
-    terminal_usage: dict | None = None
+    # Accounting is per invocation (#1935): each transcript is one runtime
+    # session, and a session's terminal result describes that session only.
+    # A message id seen in an earlier transcript is not counted again.
+    invocations: list[tuple[set[str], dict | None, bool]] = []
     bundle_name = bundle.name if bundle else None
     for path in transcripts:
         first = last = None
+        own_msgs: set[str] = set()
+        repeated = 0          # usage messages this file re-lists from an earlier one
+        terminal_usage: dict | None = None
+        cut = False
         with path.open(encoding="utf-8") as fh:
             for line in fh:
                 try:
@@ -179,6 +186,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                     if until is not None and t > until:
+                        cut = True
                         continue
                     first = first or t
                     last = t
@@ -203,10 +211,15 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 if usage:
                     mid = msg.get("id") or f"{path}:{j.get('uuid')}"
                     prev = usage_by_msg.get(mid)
-                    if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
+                    if prev is None:
+                        own_msgs.add(mid)
+                    elif mid not in own_msgs:
+                        repeated += 1
+                    if mid in own_msgs and (prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0)):
                         usage_by_msg[mid] = usage
-                    content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
-                    blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
+                    if mid in own_msgs:
+                        content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
+                        blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
                 for c in msg.get("content") or []:
                     if not isinstance(c, dict):
                         continue
@@ -228,22 +241,27 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         searches += 1
         if first and last:
             duration_ms += int((last - first).total_seconds() * 1000)
-    total = sum(_usage_total(u) for u in usage_by_msg.values())
-    out = {"total_tokens": total, "tool_uses": tools, "duration_ms": duration_ms}
-    out.update(reasoning_measure(usage_by_msg, blocks_by_msg))
-    if terminal_usage is not None:
-        # Finalized totals win over the per-message snapshots; the estimate
-        # is the same subtraction over the whole session (#1931).
-        final_output = int(terminal_usage.get("output_tokens", 0) or 0)
-        out["total_tokens"] = _usage_total(terminal_usage)
-        out["output_tokens"] = final_output
-        out["reasoning_tokens_estimate"] = max(
-            0, final_output - (out.get("visible_text_chars", 0) + out.get("tool_input_chars", 0)) // 4)
-        details = terminal_usage.get("output_tokens_details")
-        if isinstance(details, dict) and isinstance(details.get("thinking_tokens"), int):
-            out["thinking_tokens"] = details["thinking_tokens"]
-            out["turns_with_thinking_tokens"] = out.get("assistant_turns", 0)
-        out["usage_from_terminal_result"] = 1
+        # A transcript that only re-lists messages counted where they were
+        # first seen is not a further session: its terminal result would
+        # count them again.
+        if repeated and not own_msgs:
+            terminal_usage = None
+        invocations.append((own_msgs, terminal_usage, cut))
+    out = {"total_tokens": 0, "tool_uses": tools, "duration_ms": duration_ms}
+    measure: dict[str, int] = {}
+    from_terminal = 0
+    for own_msgs, terminal_usage, cut in invocations:
+        sub_usage = {m: usage_by_msg[m] for m in own_msgs if m in usage_by_msg}
+        sub_blocks = {m: blocks_by_msg.get(m, {}) for m in sub_usage}
+        total, m = _invocation_measure(sub_usage, sub_blocks, None if cut else terminal_usage)
+        if terminal_usage is not None and not cut:
+            from_terminal += 1
+        out["total_tokens"] += total
+        for k, v in m.items():
+            measure[k] = measure.get(k, 0) + v
+    out.update(measure)
+    if from_terminal:
+        out["usage_from_terminal_result"] = from_terminal
     if bundle:
         n_lines = sum(1 for _ in bundle.open(encoding="utf-8"))
         covered = set()
@@ -261,6 +279,34 @@ def observe(transcripts: list[Path], bundle: Path | None,
         out["malformed_message_events"] = malformed
     return out
 
+
+def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage: dict | None) -> tuple[int, dict]:
+    """One invocation's totals and reasoning measure. Where the invocation's
+    transcript ends in a terminal ``result`` carrying usage and no event of
+    that transcript fell outside the observed interval, the runtime's own
+    finalized totals stand for the session (#1931): its ``total_tokens`` and
+    ``output_tokens`` replace the per-message snapshot sums, and the
+    estimate is the same subtraction pooled over the session, because the
+    per-message outputs are not final and cannot be subtracted from one by
+    one (#1937). A transcript with any event cut by ``until`` keeps the
+    snapshot accounting: the terminal result describes the whole session,
+    the cut part included (#1936). An invocation without a terminal result
+    keeps the per-message method the API path's log uses."""
+    m = reasoning_measure(usage_by_msg, blocks_by_msg)
+    total = sum(_usage_total(u) for u in usage_by_msg.values())
+    if terminal_usage is None:
+        return total, m
+    final_output = int(terminal_usage.get("output_tokens", 0) or 0)
+    total = _usage_total(terminal_usage)
+    m["output_tokens"] = final_output
+    m["reasoning_tokens_estimate"] = max(
+        0, final_output - (m.get("visible_text_chars", 0) + m.get("tool_input_chars", 0)) // 4)
+    details = terminal_usage.get("output_tokens_details")
+    if isinstance(details, dict) and isinstance(details.get("thinking_tokens"), int) \
+            and not isinstance(details.get("thinking_tokens"), bool):
+        m["thinking_tokens"] = details["thinking_tokens"]
+        m["turns_with_thinking_tokens"] = m.get("assistant_turns", 0)
+    return total, m
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])

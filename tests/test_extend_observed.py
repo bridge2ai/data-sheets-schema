@@ -624,3 +624,49 @@ class Round8(unittest.TestCase):
         self.assertEqual(cli._recorded_additions(
             {"run_observed_extended": [{"basis_added": "  "}, {"basis_added": "real text."}]}),
             ["real text."])
+
+
+class ObserverHandoff(unittest.TestCase):
+    """Codex round 3 on #1920 (#1933/#1934): the observer's two new keys go
+    through annotate-observed, and an observation that saw malformed events
+    is refused by every writer."""
+
+    def _annotate(self, path, run, extra=()):
+        import json
+        import click.testing
+        with mock.patch("data_sheets_schema.provenance.record_path_for",
+                        lambda project, method, label, concat_dir=None: path), \
+             mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None):
+            return click.testing.CliRunner().invoke(cli.provenance, ["annotate-observed", "--project", "P", "--method",
+                                                                     "claudecode_agent", "--label", "L_rep1",
+                                                                     "--run", json.dumps(run), *extra])
+
+    def test_annotate_observed_records_the_terminal_usage_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); del d["phase_log"]["run_observed"]
+            path.write_text("# header\n" + yaml.safe_dump(d))
+            r = self._annotate(path, {**FULL, "usage_from_terminal_result": 1})
+            self.assertEqual(r.exit_code, 0, r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            self.assertEqual(log["run_observed"]["usage_from_terminal_result"], 1)
+            self.assertIn("usage_from_terminal_result", log["run_observed_basis"])
+
+    def test_every_writer_refuses_an_observation_with_malformed_events(self):
+        import click
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            before = path.read_text()
+            r = self._annotate(path, {**PRIOR, "malformed_message_events": 2})
+            self.assertNotEqual(r.exit_code, 0); self.assertIn("malformed_message_events=2", r.output)
+            r = self._annotate(path, {**FULL, "malformed_message_events": 1}, ["--extend"])
+            self.assertNotEqual(r.exit_code, 0); self.assertIn("refusing", r.output)
+            self.assertEqual(path.read_text(), before)
+            with self.assertRaises(click.ClickException):
+                cli._extend_run_observed({"run_observed": dict(PRIOR)}, {**FULL, "malformed_message_events": 1},
+                                         recorded_by="t", instrument="t")
+            # extend-observed: a candidate that reproduces every prior key but saw malformed events is not a match
+            (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**FULL, "malformed_message_events": 1}}, transcripts=[t])
+            self.assertIn("0 of 1", r.output); self.assertIn("malformed_message_events absent→1", r.output)
+            self.assertEqual(path.read_text(), before)

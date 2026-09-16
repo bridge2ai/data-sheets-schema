@@ -3,6 +3,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -262,3 +263,85 @@ class TerminalResultUsage(unittest.TestCase):
             t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
             obs = ao.observe([t], bundle, None, None, None)
         self.assertEqual(obs["malformed_message_events"], 2)
+
+
+class TerminalResultPerInvocation(unittest.TestCase):
+    """Codex round 3 on #1920 (#1935–#1937): a terminal result describes one
+    invocation, not every transcript of a resumed run; an untimestamped one
+    must not defeat `--until`; and the estimate method changes only where
+    the session totals are all there is."""
+
+    @staticmethod
+    def _terminal(output, ts=None):
+        d = {"type": "result", "message": "done", "uuid": f"r{output}",
+             "usage": {"input_tokens": 10, "cache_creation_input_tokens": 0,
+                       "cache_read_input_tokens": 0, "output_tokens": output}}
+        if ts:
+            d["timestamp"] = ts
+        return json.dumps(d)
+
+    def _files(self, root):
+        bundle = root / "P_preprocessed.txt"; bundle.write_text("x\n")
+        a = root / "a.jsonl"
+        a.write_text("\n".join([_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="a1"),
+                                self._terminal(100)]) + "\n")
+        b = root / "b.jsonl"
+        b.write_text("\n".join([_event("2026-09-16T22:00:00Z", usage={"output_tokens": 4}, msg_id="b1"),
+                                self._terminal(200)]) + "\n")
+        c = root / "c.jsonl"   # resumed without a terminal result: snapshot accounting
+        c.write_text("\n".join([_event("2026-09-16T23:00:00Z", usage={"output_tokens": 2}, msg_id="c1"),
+                                _event("2026-09-16T23:00:01Z", usage={"output_tokens": 9}, msg_id="c1")]) + "\n")
+        return bundle, a, b, c
+
+    def test_each_finalized_invocation_counts_once_in_either_order(self):
+        with tempfile.TemporaryDirectory() as d:
+            bundle, a, b, c = self._files(Path(d))
+            ab = ao.observe([a, b], bundle, None, None, None)
+            ba = ao.observe([b, a], bundle, None, None, None)
+        self.assertEqual(ab["output_tokens"], 300); self.assertEqual(ab["total_tokens"], 320)
+        self.assertEqual(ab["usage_from_terminal_result"], 2)
+        self.assertEqual({k: v for k, v in ab.items() if k != "duration_ms"},
+                         {k: v for k, v in ba.items() if k != "duration_ms"})
+
+    def test_a_transcript_without_a_terminal_result_keeps_its_snapshot_maximum(self):
+        with tempfile.TemporaryDirectory() as d:
+            bundle, a, b, c = self._files(Path(d))
+            ac = ao.observe([a, c], bundle, None, None, None)
+            ca = ao.observe([c, a], bundle, None, None, None)
+        self.assertEqual(ac["output_tokens"], 109); self.assertEqual(ac["usage_from_terminal_result"], 1)
+        self.assertEqual(ac["assistant_turns"], 2)
+        self.assertEqual(ca["output_tokens"], 109)
+
+    def test_an_untimestamped_terminal_result_does_not_defeat_until(self):
+        until = datetime.fromisoformat("2026-09-16T20:00:00+00:00")     # before the run
+        with tempfile.TemporaryDirectory() as d:
+            bundle, a, b, c = self._files(Path(d))
+            obs = ao.observe([a, b], bundle, until, None, None)
+            # a cut after the run's only message still uses the finalized totals
+            later = ao.observe([a], bundle, datetime.fromisoformat("2026-09-16T21:30:00+00:00"), None, None)
+            # a timestamped terminal result after the cut is cut like any event
+            t = Path(d) / "t.jsonl"
+            t.write_text("\n".join([_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="t1"),
+                                    self._terminal(100, "2026-09-16T21:40:00Z")]) + "\n")
+            timed = ao.observe([t], bundle, datetime.fromisoformat("2026-09-16T21:30:00+00:00"), None, None)
+        self.assertEqual(obs.get("output_tokens", 0), 0); self.assertEqual(obs["total_tokens"], 0)
+        self.assertEqual(obs["tool_uses"], 0); self.assertNotIn("usage_from_terminal_result", obs)
+        self.assertEqual(later["output_tokens"], 100); self.assertEqual(later["usage_from_terminal_result"], 1)
+        self.assertEqual(timed["output_tokens"], 3); self.assertNotIn("usage_from_terminal_result", timed)
+
+    def test_the_estimate_is_per_message_unless_only_session_totals_exist(self):
+        def text_event(ts, out, chars, mid):
+            msg = {"role": "assistant", "id": mid, "usage": {"output_tokens": out},
+                   "content": [{"type": "text", "text": "v" * chars}]}
+            return json.dumps({"timestamp": ts, "message": msg, "uuid": ts})
+        lines = [text_event("2026-09-16T21:00:00Z", 1, 12, "m1"), text_event("2026-09-16T21:00:01Z", 5, 0, "m2")]
+        with tempfile.TemporaryDirectory() as d:
+            bundle = Path(d) / "P_preprocessed.txt"; bundle.write_text("x\n")
+            snap = Path(d) / "s.jsonl"; snap.write_text("\n".join(lines) + "\n")
+            fin = Path(d) / "f.jsonl"; fin.write_text("\n".join(lines + [self._terminal(6)]) + "\n")
+            per_message = ao.observe([snap], bundle, None, None, None)
+            pooled = ao.observe([fin], bundle, None, None, None)
+            both = ao.observe([snap, fin], bundle, None, None, None)
+        self.assertEqual(per_message["reasoning_tokens_estimate"], 5)   # max(0, 1-3) + max(0, 5-0)
+        self.assertEqual(pooled["reasoning_tokens_estimate"], 3)        # 6 - 12 // 4, over the session
+        self.assertEqual(both["reasoning_tokens_estimate"], 5)          # the second file repeats m1/m2: counted once
