@@ -103,13 +103,13 @@ classes:
         description: A human-readable name for a thing.
         range: string
         annotations:
-          "d4d:docExample": "AI-READI Dataset"
+          "d4d:docExample": "Example Cohort Dataset"
       description:
         slot_uri: schema:description
         description: A human-readable description for a thing.
         range: string
         annotations:
-          "d4d:docExample": "A multimodal dataset of 4,000 participants with Type 2 Diabetes."
+          "d4d:docExample": "A multimodal dataset of 2,500 participants in a longitudinal cohort study."
       notes:
         slot_uri: schema:comment
         range: string
@@ -349,7 +349,7 @@ slots:
     description: The official title of the element.
     slot_uri: dcterms:title
     annotations:
-      "d4d:docExample": "AI-READI: Salutogenesis Study of Type 2 Diabetes"
+      "d4d:docExample": "Example Cohort Study of Chronic Disease: Data Release 1.0"
 
   language:
     description: Language in which the information is expressed.
@@ -375,13 +375,13 @@ slots:
     slot_uri: dcterms:issued
     range: datetime
     annotations:
-      "d4d:docExample": "2024-11-15T00:00:00Z"
+      "d4d:docExample": "2022-06-30T00:00:00Z"
 
   page:
     description: A landing page or web page providing access to or information about the resource.
     slot_uri: dcat:landingPage
     annotations:
-      "d4d:docExample": "https://fairhub.io/datasets/2"
+      "d4d:docExample": "https://example.org/datasets/example-cohort"
 
   dialect:
     description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).
@@ -400,7 +400,7 @@ slots:
     description: The file path or URL where the content is located.
     slot_uri: schema:contentUrl
     annotations:
-      "d4d:docExample": "data/ai_readi/participants.csv"
+      "d4d:docExample": "data/example_cohort/participants.csv"
 
   download_url:
     description: >-
@@ -412,7 +412,7 @@ slots:
     exact_mappings:
       - schema:url
     annotations:
-      "d4d:docExample": "https://fairhub.io/datasets/2/download"
+      "d4d:docExample": "https://example.org/datasets/example-cohort/download"
 
   format:
     description: >-
@@ -559,7 +559,7 @@ slots:
     multivalued: true
     slot_uri: dcat:keyword
     annotations:
-      "d4d:docExample": "diabetes, retinal imaging, multimodal, clinical data"
+      "d4d:docExample": "chronic disease, medical imaging, multimodal, clinical data"
 
   version:
     description: The version identifier of the resource (e.g., "1.0", "2.3.1").
@@ -579,7 +579,7 @@ slots:
     slot_uri: dcterms:created
     range: datetime
     annotations:
-      "d4d:docExample": "2023-07-18T00:00:00Z"
+      "d4d:docExample": "2021-03-01T00:00:00Z"
 
   last_updated_on:
     description: >-
@@ -587,7 +587,7 @@ slots:
     slot_uri: dcterms:modified
     range: datetime
     annotations:
-      "d4d:docExample": "2024-11-15T00:00:00Z"
+      "d4d:docExample": "2022-06-30T00:00:00Z"
 
   modified_by:
     description: A person or organization that contributed to modifying or updating the resource.
@@ -607,7 +607,7 @@ slots:
     exact_mappings:
       - dcterms:source
     annotations:
-      "d4d:docExample": "https://fairhub.io/datasets/2/versions/1"
+      "d4d:docExample": "https://example.org/datasets/example-cohort/versions/1"
 
   doi:
     # Form-only example on purpose: this description is rendered into the
@@ -684,8 +684,8 @@ enums:
       have no stable ontology term this repository can verify, and inventing a
       CURIE that resolves to nothing is worse than leaving the grounding
       absent — it is the exact failure `d4d runs identifiers` exists to find.
-      The `B2AI_STANDARD` prefix is declared and is the natural home for these
-      once the registry carries them; until it does, this is a controlled
+      A declared standards-registry prefix is the natural home for these
+      once such a registry carries them; until one does, this is a controlled
       vocabulary without ontology grounding, and says so.
     permissible_values:
       DICOM:

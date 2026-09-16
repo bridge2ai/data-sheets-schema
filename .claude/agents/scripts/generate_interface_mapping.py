@@ -51,12 +51,12 @@ MAPPINGS: List[Tuple[str, ...]] = [
     # ====================
     # 1. Basic Metadata
     # ====================
-    ('Basic Metadata', 'Dataset.title', 'str', 'd4d:title skos:exactMatch schema:name', '@graph[?@type=\'Dataset\'][\'name\']', 'exactMatch', 'none', '"AI-READI Dataset"', '"AI-READI Dataset"', ''),
-    ('Basic Metadata', 'Dataset.description', 'str', 'd4d:description skos:exactMatch schema:description', '@graph[?@type=\'Dataset\'][\'description\']', 'exactMatch', 'none', '"Diabetes research data..."', '"Diabetes research data..."', ''),
-    ('Basic Metadata', 'Dataset.keywords', 'List[str]', 'd4d:keywords skos:exactMatch schema:keywords', '@graph[?@type=\'Dataset\'][\'keywords\']', 'exactMatch', 'none', '["diabetes", "AI"]', '["diabetes", "AI"]', ''),
+    ('Basic Metadata', 'Dataset.title', 'str', 'd4d:title skos:exactMatch schema:name', '@graph[?@type=\'Dataset\'][\'name\']', 'exactMatch', 'none', '"Example Cohort Dataset"', '"Example Cohort Dataset"', ''),
+    ('Basic Metadata', 'Dataset.description', 'str', 'd4d:description skos:exactMatch schema:description', '@graph[?@type=\'Dataset\'][\'description\']', 'exactMatch', 'none', '"Chronic disease research data..."', '"Chronic disease research data..."', ''),
+    ('Basic Metadata', 'Dataset.keywords', 'List[str]', 'd4d:keywords skos:exactMatch schema:keywords', '@graph[?@type=\'Dataset\'][\'keywords\']', 'exactMatch', 'none', '["chronic disease", "AI"]', '["chronic disease", "AI"]', ''),
     ('Basic Metadata', 'Dataset.language', 'str', 'd4d:language skos:exactMatch schema:inLanguage', '@graph[?@type=\'Dataset\'][\'inLanguage\']', 'exactMatch', 'none', '"en"', '"en"', ''),
-    ('Basic Metadata', 'Dataset.page', 'str', 'd4d:page skos:exactMatch schema:url', '@graph[?@type=\'Dataset\'][\'url\']', 'exactMatch', 'none', '"https://aireadi.org"', '"https://aireadi.org"', ''),
-    ('Basic Metadata', 'Dataset.publisher', 'URI', 'd4d:publisher skos:exactMatch schema:publisher', '@graph[?@type=\'Dataset\'][\'publisher\']', 'exactMatch', 'none', '"UCSD"', '"UCSD"', ''),
+    ('Basic Metadata', 'Dataset.page', 'str', 'd4d:page skos:exactMatch schema:url', '@graph[?@type=\'Dataset\'][\'url\']', 'exactMatch', 'none', '"https://example.org/datasets/example-cohort"', '"https://example.org/datasets/example-cohort"', ''),
+    ('Basic Metadata', 'Dataset.publisher', 'URI', 'd4d:publisher skos:exactMatch schema:publisher', '@graph[?@type=\'Dataset\'][\'publisher\']', 'exactMatch', 'none', '"Example University"', '"Example University"', ''),
     ('Basic Metadata', 'Dataset.version', 'str', 'd4d:version skos:exactMatch schema:version', '@graph[?@type=\'Dataset\'][\'version\']', 'exactMatch', 'none', '"1.0"', '"1.0"', ''),
     ('Basic Metadata', 'Dataset.license', 'str', 'd4d:license skos:exactMatch schema:license', '@graph[?@type=\'Dataset\'][\'license\']', 'exactMatch', 'none', '"CC-BY-4.0"', '"CC-BY-4.0"', ''),
     ('Basic Metadata', 'Dataset.status', 'URI', 'd4d:status skos:exactMatch schema:creativeWorkStatus', '@graph[?@type=\'Dataset\'][\'creativeWorkStatus\']', 'exactMatch', 'none', '"Published"', '"Published"', ''),
@@ -96,7 +96,7 @@ MAPPINGS: List[Tuple[str, ...]] = [
     # 5. Creators & Attribution
     # ====================
     ('Creators & Attribution', 'Dataset.creators', 'str', 'd4d:creators skos:closeMatch schema:author', '@graph[?@type=\'Dataset\'][\'author\']', 'closeMatch', 'minimal', '"John Doe, Jane Smith"', '[{"@type":"Person","name":"John Doe"},{"@type":"Person","name":"Jane Smith"}]', 'String to Person/Organization array'),
-    ('Creators & Attribution', 'Dataset.created_by', 'Creator', 'd4d:created_by skos:closeMatch schema:creator', '@graph[?@type=\'Dataset\'][\'creator\']', 'closeMatch', 'minimal', '"AI-READI Team"', '{"@type":"Organization","name":"AI-READI Team"}', 'String to object transformation'),
+    ('Creators & Attribution', 'Dataset.created_by', 'Creator', 'd4d:created_by skos:closeMatch schema:creator', '@graph[?@type=\'Dataset\'][\'creator\']', 'closeMatch', 'minimal', '"Example Cohort Team"', '{"@type":"Organization","name":"Example Cohort Team"}', 'String to object transformation'),
     ('Creators & Attribution', 'Dataset.funders', 'str', 'd4d:funders skos:exactMatch schema:funder', '@graph[?@type=\'Dataset\'][\'funder\']', 'exactMatch', 'none', '"NIH, NSF"', '"NIH, NSF"', ''),
 
     # ====================
@@ -104,13 +104,13 @@ MAPPINGS: List[Tuple[str, ...]] = [
     # ====================
     ('RAI Use Cases', 'Dataset.purposes', 'str', 'd4d:purposes skos:closeMatch rai:dataUseCases', '@graph[?@type=\'Dataset\'][\'rai:dataUseCases\']', 'closeMatch', 'minimal', '"Research, education"', '"Research, education"', ''),
     ('RAI Use Cases', 'Dataset.tasks', 'str', 'd4d:tasks skos:exactMatch rai:dataUseCases', '@graph[?@type=\'Dataset\'][\'rai:dataUseCases\']', 'exactMatch', 'none', '"Classification, regression"', '"Classification, regression"', ''),
-    ('RAI Use Cases', 'Dataset.intended_uses', 'str', 'd4d:intended_uses skos:exactMatch rai:dataUseCases', '@graph[?@type=\'Dataset\'][\'rai:dataUseCases\']', 'exactMatch', 'none', '"Research on diabetes..."', '"Research on diabetes..."', ''),
-    ('RAI Use Cases', 'Dataset.existing_uses', 'str', 'd4d:existing_uses skos:exactMatch rai:dataUseCases', '@graph[?@type=\'Dataset\'][\'rai:dataUseCases\']', 'exactMatch', 'none', '"Diabetes prediction models"', '"Diabetes prediction models"', ''),
+    ('RAI Use Cases', 'Dataset.intended_uses', 'str', 'd4d:intended_uses skos:exactMatch rai:dataUseCases', '@graph[?@type=\'Dataset\'][\'rai:dataUseCases\']', 'exactMatch', 'none', '"Research on chronic disease..."', '"Research on chronic disease..."', ''),
+    ('RAI Use Cases', 'Dataset.existing_uses', 'str', 'd4d:existing_uses skos:exactMatch rai:dataUseCases', '@graph[?@type=\'Dataset\'][\'rai:dataUseCases\']', 'exactMatch', 'none', '"Disease-risk prediction models"', '"Disease-risk prediction models"', ''),
     ('RAI Use Cases', 'Dataset.other_tasks', 'str', 'd4d:other_tasks skos:exactMatch rai:dataUseCases', '@graph[?@type=\'Dataset\'][\'rai:dataUseCases\']', 'exactMatch', 'none', '"Risk stratification..."', '"Risk stratification..."', ''),
     ('RAI Use Cases', 'Dataset.discouraged_uses', 'str', 'd4d:discouraged_uses skos:exactMatch rai:prohibitedUses', '@graph[?@type=\'Dataset\'][\'rai:prohibitedUses\']', 'exactMatch', 'none', '"Insurance decisions..."', '"Insurance decisions..."', ''),
     ('RAI Use Cases', 'Dataset.prohibited_uses', 'str', 'd4d:prohibited_uses skos:exactMatch rai:prohibitedUses', '@graph[?@type=\'Dataset\'][\'rai:prohibitedUses\']', 'exactMatch', 'none', '"Surveillance, profiling"', '"Surveillance, profiling"', ''),
     ('RAI Use Cases', 'Dataset.future_use_impacts', 'str', 'd4d:future_use_impacts skos:exactMatch rai:dataSocialImpact', '@graph[?@type=\'Dataset\'][\'rai:dataSocialImpact\']', 'exactMatch', 'none', '"Risk of re-identification..."', '"Risk of re-identification..."', ''),
-    ('RAI Use Cases', 'Dataset.addressing_gaps', 'str', 'd4d:addressing_gaps skos:exactMatch d4d:addressingGaps', '@graph[?@type=\'Dataset\'][\'d4d:addressingGaps\']', 'exactMatch', 'none', '"Fill data gap in diabetes..."', '"Fill data gap in diabetes..."', ''),
+    ('RAI Use Cases', 'Dataset.addressing_gaps', 'str', 'd4d:addressing_gaps skos:exactMatch d4d:addressingGaps', '@graph[?@type=\'Dataset\'][\'d4d:addressingGaps\']', 'exactMatch', 'none', '"Fill data gap in chronic-disease cohorts..."', '"Fill data gap in chronic-disease cohorts..."', ''),
 
     # ====================
     # 7. RAI Biases & Limitations
@@ -139,7 +139,7 @@ MAPPINGS: List[Tuple[str, ...]] = [
     ('Data Collection', 'Dataset.collection_timeframes', 'str', 'd4d:collection_timeframes skos:exactMatch d4d:dataCollectionTimeframe', '@graph[?@type=\'Dataset\'][\'d4d:dataCollectionTimeframe\']', 'exactMatch', 'none', '"2023-01 to 2024-06"', '"2023-01 to 2024-06"', ''),
     ('Data Collection', 'Dataset.data_collectors', 'List', 'd4d:data_collectors skos:relatedMatch schema:contributor', '@graph[?@type=\'Dataset\'][\'contributor\']', 'relatedMatch', 'moderate', '[{"name":"Research assistants","compensation":"$20/hr"}]', '{"contributor":[{"@type":"Person","name":"Research assistants"}]}', 'Compensation detail lost'),
     ('Data Collection', 'Dataset.raw_data_sources', 'str', 'd4d:raw_data_sources skos:exactMatch rai:dataCollectionRawData', '@graph[?@type=\'Dataset\'][\'rai:dataCollectionRawData\']', 'exactMatch', 'none', '"Epic EHR, lab LIMS"', '"Epic EHR, lab LIMS"', ''),
-    ('Data Collection', 'Dataset.missing_data_documentation', 'str', 'd4d:missing_data_documentation skos:exactMatch rai:dataCollectionMissingData', '@graph[?@type=\'Dataset\'][\'rai:dataCollectionMissingData\']', 'exactMatch', 'none', '"15% missing in glucose..."', '"15% missing in glucose..."', ''),
+    ('Data Collection', 'Dataset.missing_data_documentation', 'str', 'd4d:missing_data_documentation skos:exactMatch rai:dataCollectionMissingData', '@graph[?@type=\'Dataset\'][\'rai:dataCollectionMissingData\']', 'exactMatch', 'none', '"15% missing in sensor readings..."', '"15% missing in sensor readings..."', ''),
 
     # ====================
     # 10. Preprocessing
@@ -148,7 +148,7 @@ MAPPINGS: List[Tuple[str, ...]] = [
     ('Preprocessing', 'CleaningStrategy.description', 'str', 'd4d:cleaning_strategies[].description', 'rai:dataManipulationProtocol', 'closeMatch', 'moderate', '"Removed duplicates"', 'Flattened into protocol string', 'Array element lost'),
     ('Preprocessing', 'CleaningStrategy.step_type', 'str', 'd4d:cleaning_strategies[].step_type', 'rai:dataManipulationProtocol', 'closeMatch', 'high', '"data_cleaning"', 'Lost in flattening', 'Enumeration lost'),
     ('Preprocessing', 'CleaningStrategy.pipeline_step', 'int', 'd4d:cleaning_strategies[].pipeline_step', 'rai:dataManipulationProtocol', 'closeMatch', 'high', '20', 'Lost in flattening', 'Step order lost'),
-    ('Preprocessing', 'Dataset.preprocessing_strategies', 'List[PreprocessingStrategy]', 'd4d:preprocessing_strategies skos:closeMatch rai:dataPreprocessingProtocol', '@graph[?@type=\'Dataset\'][\'rai:dataPreprocessingProtocol\']', 'closeMatch', 'minimal', '[{"description":"Normalized values","step_type":"normalization"}]', '"Normalized glucose values to 0-1 range"', 'Structured array to string'),
+    ('Preprocessing', 'Dataset.preprocessing_strategies', 'List[PreprocessingStrategy]', 'd4d:preprocessing_strategies skos:closeMatch rai:dataPreprocessingProtocol', '@graph[?@type=\'Dataset\'][\'rai:dataPreprocessingProtocol\']', 'closeMatch', 'minimal', '[{"description":"Normalized values","step_type":"normalization"}]', '"Normalized sensor readings to 0-1 range"', 'Structured array to string'),
     ('Preprocessing', 'PreprocessingStrategy.description', 'str', 'd4d:preprocessing_strategies[].description', 'rai:dataPreprocessingProtocol', 'closeMatch', 'moderate', '"Normalized values"', 'Flattened into protocol string', 'Array element lost'),
     ('Preprocessing', 'PreprocessingStrategy.step_type', 'str', 'd4d:preprocessing_strategies[].step_type', 'rai:dataPreprocessingProtocol', 'closeMatch', 'high', '"normalization"', 'Lost in flattening', 'Enumeration lost'),
     ('Preprocessing', 'PreprocessingStrategy.pipeline_step', 'int', 'd4d:preprocessing_strategies[].pipeline_step', 'rai:dataPreprocessingProtocol', 'closeMatch', 'high', '10', 'Lost in flattening', 'Step order lost'),
@@ -189,7 +189,7 @@ MAPPINGS: List[Tuple[str, ...]] = [
     ('Governance', 'DatasetCollection.data_governance_committee', 'str', 'd4d:data_governance_committee', '@graph[?@type=\'Dataset\'][\'dataGovernanceCommittee\']', 'exactMatch', 'none', '"Data Governance Board"', '"Data Governance Board"', 'D4D-embedded field'),
     ('Governance', 'DatasetCollection.principal_investigator', 'str', 'd4d:principal_investigator', '@graph[?@type=\'Dataset\'][\'principalInvestigator\']', 'exactMatch', 'none', '"Dr. Jane Doe"', '"Dr. Jane Doe"', 'D4D-embedded field'),
     ('Governance', 'Dataset.modified_by', 'Creator', 'd4d:modified_by skos:closeMatch schema:contributor', '@graph[?@type=\'Dataset\'][\'contributor\']', 'closeMatch', 'minimal', '"Data Team"', '{"@type":"Organization","name":"Data Team"}', 'String to object'),
-    ('Governance', 'Dataset.maintainers', 'str', 'd4d:maintainers skos:relatedMatch schema:maintainer', '@graph[?@type=\'Dataset\'][\'maintainer\']', 'relatedMatch', 'minimal', '"Data team at UCSD"', '"Data team at UCSD"', ''),
+    ('Governance', 'Dataset.maintainers', 'str', 'd4d:maintainers skos:relatedMatch schema:maintainer', '@graph[?@type=\'Dataset\'][\'maintainer\']', 'relatedMatch', 'minimal', '"Data team at Example University"', '"Data team at Example University"', ''),
     ('Governance', 'DatasetCollection.contact_email', 'str', 'd4d:contact_email', '@graph[?@type=\'Dataset\'][\'contactEmail\']', 'exactMatch', 'none', '"data@example.org"', '"data@example.org"', 'D4D-embedded field'),
     ('Governance', 'DatasetCollection.data_sharing_agreement', 'str', 'd4d:data_sharing_agreement', '@graph[?@type=\'Dataset\'][\'dataSharingAgreement\']', 'exactMatch', 'none', '"DUA required"', '"DUA required"', 'D4D-embedded field'),
 

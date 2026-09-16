@@ -15,6 +15,7 @@ see_also:
 - https://bridge2ai.github.io/data-sheets-schema
 - src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 id: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+version: 3.0.0
 license: MIT
 prefixes:
   AIO:
@@ -417,9 +418,9 @@ enums:
       ⚠️ **No `meaning:` is asserted on any value.** Several of these standards have
       no stable ontology term this repository can verify, and inventing a CURIE that
       resolves to nothing is worse than leaving the grounding absent — it is the exact
-      failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is
-      declared and is the natural home for these once the registry carries them; until
-      it does, this is a controlled vocabulary without ontology grounding, and says
+      failure `d4d runs identifiers` exists to find. A declared standards-registry
+      prefix is the natural home for these once such a registry carries them; until
+      one does, this is a controlled vocabulary without ontology grounding, and says
       so.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     permissible_values:
@@ -1504,7 +1505,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
+        value: 'Example Cohort Study of Chronic Disease: Data Release 1.0'
     description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     slot_uri: dcterms:title
@@ -1544,7 +1545,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00Z'
+        value: '2022-06-30T00:00:00Z'
     description: Date of formal issuance or publication of the resource. A `datetime`
       renders as RFC 3339 `date-time`, which **requires a UTC offset** — write `2024-11-15T00:00:00Z`,
       not `2024-11-15T00:00:00`. A date alone is also rejected.
@@ -1559,7 +1560,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: https://fairhub.io/datasets/2
+        value: https://example.org/datasets/example-cohort
     description: A landing page or web page providing access to or information about
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -1594,7 +1595,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: data/ai_readi/participants.csv
+        value: data/example_cohort/participants.csv
     description: The file path or URL where the content is located.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     slot_uri: schema:contentUrl
@@ -1605,7 +1606,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: https://fairhub.io/datasets/2/download
+        value: https://example.org/datasets/example-cohort/download
     description: URL from which the data can be downloaded. This is not the same as
       the landing page, which is a page that describes the dataset. Rather, this URL
       points directly to the data itself.
@@ -1817,7 +1818,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: diabetes, retinal imaging, multimodal, clinical data
+        value: chronic disease, medical imaging, multimodal, clinical data
     description: Keywords or tags describing the resource for discovery and classification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     slot_uri: dcat:keyword
@@ -1856,7 +1857,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2023-07-18T00:00:00Z'
+        value: '2021-03-01T00:00:00Z'
     description: The date and time when the resource was created. Requires a UTC offset
       (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -1870,7 +1871,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00Z'
+        value: '2022-06-30T00:00:00Z'
     description: The date and time when the resource was most recently modified or
       updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects
       a naive timestamp.
@@ -1910,7 +1911,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: https://fairhub.io/datasets/2/versions/1
+        value: https://example.org/datasets/example-cohort/versions/1
     description: A resource from which this resource was derived, in whole or in part.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     exact_mappings:
@@ -2063,7 +2064,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
+            value: Example Cohort Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -2151,7 +2152,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
+              study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -3189,7 +3191,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
+            value: Example Cohort Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -3277,7 +3279,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
+              study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -3688,7 +3691,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
+            value: Example Cohort Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -3776,7 +3779,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
+              study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -4193,7 +4197,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -4236,7 +4240,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2/download
+            value: https://example.org/datasets/example-cohort/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -4256,7 +4260,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -4274,7 +4278,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: diabetes, retinal imaging, multimodal, clinical data
+            value: chronic disease, medical imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
         slot_uri: dcat:keyword
@@ -4307,7 +4311,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -4357,7 +4361,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2
+            value: https://example.org/datasets/example-cohort
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -4405,7 +4409,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
+            value: 'Example Cohort Study of Chronic Disease: Data Release 1.0'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
         slot_uri: dcterms:title
@@ -4436,7 +4440,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2/versions/1
+            value: https://example.org/datasets/example-cohort/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -4544,7 +4548,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
+            value: Example Cohort Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -4632,7 +4636,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
+              study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -4956,7 +4961,7 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: Primary purpose is to support hypothesis-agnostic AI/ML analyses
-              of T2DM salutogenesis.
+              of disease progression.
         description: Short explanation describing the primary purpose of creating
           the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
@@ -5480,7 +5485,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Multi-domain biomarker discovery for Type 2 Diabetes mellitus.
+            value: Multi-domain biomarker discovery for a chronic disease.
         description: Short explanation describing the specific task or tasks for which
           this dataset was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
@@ -6006,8 +6011,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Lack of racially diverse T2DM datasets with linked multi-modal
-              clinical data.
+            value: Lack of demographically diverse chronic-disease datasets with linked
+              multi-modal clinical data.
         description: Short explanation of the knowledge or resource gap that this
           dataset was intended to address.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
@@ -7874,7 +7879,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: OT2OD032644
+            value: R01XX000000
         description: The alphanumeric identifier for the grant.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
         broad_mappings:
@@ -7897,8 +7902,8 @@ classes:
       data_topic:
         name: data_topic
         description: 'General topic of each instance, as an ontology term — records
-          use GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms. Where
-          no term is found, prefer omission over a prose topic.
+          use GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry.
+          Where no term is found, prefer omission over a prose topic.
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -7932,7 +7937,7 @@ classes:
         range: string
       data_substrate:
         name: data_substrate
-        description: 'Type of data (e.g., raw text, images) as a term from the Bridge2AI
+        description: 'Type of data (e.g., raw text, images) as a term from the pinned
           standards registry. A *term*, not a description: prose characterising the
           instances — "multimodal per-participant records comprising tabular survey
           and clinical data" — belongs in `instance_type`, which is ranged `string`
@@ -8621,7 +8626,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Triple-balanced by race/ethnicity, sex, and T2DM severity
+            value: Balanced by sex, age band and disease severity
         description: 'One or more sampling strategies used (e.g., deterministic, simple
           random, stratified, cluster, systematic).
 
@@ -9147,7 +9152,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: CGM readings absent for 15% of participants
+            value: Sensor readings absent for 15% of participants
         description: 'Description of the missing data fields or elements.
 
           '
@@ -9166,7 +9171,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Device malfunction or non-compliance during 14-day wear period
+            value: Device malfunction or non-compliance during the sensor wear period
         description: 'Explanation of why each piece of data is missing.
 
           '
@@ -10222,7 +10227,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 70/15/15 train/validation/test split stratified by site and T2DM
+            value: 70/15/15 train/validation/test split stratified by site and disease
               severity
         description: 'Free-text description of the recommended data splits (e.g.,
           80/10/10 train/ validation/test), how they are defined, and the rationale
@@ -10749,7 +10754,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 15% of CGM readings missing due to device malfunction
+            value: 15% of sensor readings missing due to device malfunction
         description: 'Free-text description of errors, noise sources, or redundancies
           in the dataset, including their known causes and estimated prevalence.
 
@@ -11885,7 +11890,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Findings may not generalize to non-diabetic populations
+            value: Findings may not generalize to populations outside the enrolled
+              age range
         description: 'How this limitation affects the scope or applicability of the
           dataset.
 
@@ -13549,7 +13555,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Contains clinical images of diabetic retinopathy
+            value: Contains clinical images that may show visible disease
         description: One or more specific content warnings describing potentially
           offensive, insulting, threatening, or anxiety-provoking content present
           in the dataset (e.g., violence, profanity, explicit imagery, hate speech).
@@ -14099,7 +14105,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'Hispanic participants: 1,023 (25.6% of total)'
+            value: 'Participants aged 65 and over: 1,000 (40.0% of total)'
         description: The distribution of instances across identified subpopulations,
           including counts, percentages, or proportions for each subgroup.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -15723,11 +15729,11 @@ classes:
           URL, or Dataset object" while the range permitted only the first, and LinkML
           cannot express the union: its JSON Schema generator always emits a top-level
           type or $ref from the slot''s range, which ANDs with `any_of`, so whichever
-          branch the range names the other one fails. Verified both ways on VOICE
-          (#297).'
+          branch the range names the other one fails. Verified both ways on a study
+          record (#297).'
         - 'A related dataset with its own DOI, protocol and approval is its own datasheet
           and is referenced from here by identifier. That is the resolution of #292
-          for VOICE, whose pediatric companion has all three.'
+          for a dataset whose companion release has all three.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
         slot_uri: dcterms:relation
         alias: target_dataset
@@ -16261,7 +16267,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Retinal images captured with Heidelberg Spectralis OCT
+            value: Chest radiographs acquired with a portable X-ray unit
         description: 'Free-text description of how data was acquired for each instance,
           including instruments, protocols, and any manual steps involved.
 
@@ -17332,7 +17338,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Certified study coordinators at 3 collection sites
+            value: Certified study coordinators at four collection sites
         description: 'Free-text description of who was involved in data collection
           (e.g., students, crowdworkers, contractors), their training or qualifications,
           and how they were compensated.
@@ -17861,7 +17867,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18'
+            value: '2021-03-01'
         description: Start date of data collection.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
         slot_uri: schema:startDate
@@ -17875,7 +17881,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2026-11-30'
+            value: '2025-02-28'
         description: End date of data collection.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
         slot_uri: schema:endDate
@@ -18955,7 +18961,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: CGM data missing for 15% of participants (device errors)
+            value: Sensor data missing for 15% of participants (device errors)
         description: 'Description of patterns in missing data (e.g., missing completely
           at random, missing at random, missing not at random).
 
@@ -19518,7 +19524,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Electronic health records from UCSF Epic system
+            value: Electronic health records exported from each site's clinical record
+              system
         description: 'Detailed description of where raw data comes from (e.g., sensors,
           databases, web APIs, manual collection).
 
@@ -21232,8 +21239,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Board-certified ophthalmologists graded retinal images using ETDRS
-              scale
+            value: Board-certified radiologists graded chest radiographs using a standard
+              severity scale
         description: 'Free-text description of the labeling or annotation procedures,
           including annotation guidelines, task definitions, and quality control metrics.
 
@@ -22315,7 +22322,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: cgm_mean_glucose, hba1c_percent, bmi
+            value: sensor_mean_reading, biomarker_level, bmi
         description: 'Fields or columns where imputation was applied.
 
           '
@@ -22332,7 +22339,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'MICE with 20 imputations; predictors: age, sex, HbA1c'
+            value: 'MICE with 20 imputations; predictors: age, sex, body mass index'
         description: 'Justification for the imputation approach chosen, including
           assumptions made about missing data mechanisms.
 
@@ -23471,7 +23478,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: DeepDR automated grading system (AUC = 0.94)
+            value: Automated image-grading system (AUC = 0.94)
         description: 'Descriptions of what each tool does in the annotation process
           and what types of annotations it produces. Should correspond to the tools
           list.
@@ -23489,7 +23496,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'DeepDR AUC: 0.94 on EYEPACS validation set'
+            value: 'Automated grading model AUC: 0.94 on an external validation set'
         description: 'One or more known accuracy or performance metrics for the automated
           tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95",
           "GPT-4 Accuracy: 92%").
@@ -24016,7 +24023,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)'
+            value: 'Used in a 2024 journal article on sensor-derived disease patterns
+              (DOI: 10.xxxx/xxxxx)'
         description: List of examples of known/previous uses of the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         slot_uri: schema:example
@@ -24541,7 +24549,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://paperswithcode.com/dataset/ai-readi
+            value: https://example.org/known-uses/example-cohort
         description: URL to a repository of known dataset uses.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         alias: repository_url
@@ -26663,7 +26671,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Training fairness-aware ML models for T2DM prediction
+            value: Training fairness-aware ML models for disease-risk prediction
         description: List of example intended uses for this dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         alias: examples
@@ -28312,7 +28320,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2
+            value: https://example.org/datasets/example-cohort
         description: One or more URLs providing access to the distribution channel(s)
           or format(s).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
@@ -28836,7 +28844,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15'
+            value: '2022-06-30'
         description: 'One or more dates or timeframes for dataset release, in ISO
           8601 format (e.g., "2024-03-15") or as a descriptive string (e.g., "Q2 2024").
           Use multiple values for staged or scheduled releases.
@@ -29917,8 +29925,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'v1.0.1: Corrected mislabeled CGM device serial numbers for 12
-              participants'
+            value: 'v1.0.1: Corrected mislabeled sensor device serial numbers for
+              12 participants'
         description: 'Free-text description of the error, its scope, the affected
           data or records, and the correction applied.
 
@@ -31544,7 +31552,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)
+            value: v1.0 (2021-06), v1.1 (2021-11), v2.0 (2022-06)
         description: List of available versions with metadata.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: d4d:versionsAvailable
@@ -31559,8 +31567,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: All versions available at fairhub.io; older versions archived on
-              Zenodo
+            value: All versions available from the primary repository; older versions
+              archived in a general-purpose archive
         description: 'Free-text description of version support policies, how long
           older versions will be hosted, and how dataset consumers will be notified
           when versions become obsolete.
@@ -32665,7 +32673,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428'
+            value: 'IRB approval: one approval per collection site, each cited by
+              the site''s IRB protocol number'
         description: 'Free-text description of the ethical review process, board decisions,
           outcomes, and any supporting documentation (e.g., IRB approval number, ethics
           committee name).
@@ -37116,8 +37125,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Payment rises across the four annual visits, with a completion
-              bonus at year four, described in the protocol as designed to reduce
+            value: Payment rises across the annual visits, with a completion bonus
+              at the final visit, described in the protocol as designed to reduce
               loss to follow-up.
         description: 'Where the sources describe it, how the incentive structure was
           designed to keep participants enrolled across the study — escalating amounts,
@@ -37693,7 +37702,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: No participants under 18; pregnant women excluded from CGM protocol
+            value: No participants under 18; pregnant women excluded from the wearable-sensor
+              protocol
         description: 'What additional protections were implemented for at-risk populations?
           Include safeguards, modified procedures, or additional oversight.
 
@@ -38816,7 +38826,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Retinal imaging algorithms are subject to pending patent
+            value: Image-analysis algorithms derived from the dataset are subject
+              to a pending patent
         description: One or more explanations of third-party IP restrictions or associated
           fees.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
@@ -39407,9 +39418,9 @@ classes:
         description: 'DEPRECATED — use `DataGovernance.committee_contact` (#503).
           Kept declared so the slot still parses; since #805 it is an inlined Person
           object like its replacement, so the pre-#805 records that populate it with
-          a bare name string (CM4AI v7 rep1 among them) no longer validate against
-          the current schema and keep the verdicts they were pinned with (#426). A
-          new record should not populate it.'
+          a bare name string no longer validate against the current schema and keep
+          the verdicts they were pinned with (#426). A new record should not populate
+          it.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
         broad_mappings:
         - schema:contactPoint
@@ -39940,9 +39951,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Bridge2AI-Voice Data Access Committee (DACO)
+            value: Example Consortium Data Access Committee (DAC)
         description: Name of the body responsible for access decisions, as the source
-          states it (e.g. "AI-READI Data Access Committee", "DACO").
+          states it (e.g. "Data Access Committee", "DAC").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
         slot_uri: d4d:governanceCommitteeName
         alias: committee_name
@@ -40564,7 +40575,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: hba1c_percent
+            value: biomarker_level
         description: The name or identifier of the variable as it appears in the data
           files.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -40731,7 +40742,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Glycated hemoglobin percentage measured at baseline visit
+            value: Serum biomarker concentration measured at the baseline visit
         description: 'The technique or method used to measure this variable. Examples:
           "mass spectrometry", "self-report survey", "GPS coordinates".'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -41364,7 +41375,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: data/ai_readi/participants.csv
+            value: data/example_cohort/participants.csv
         description: The file path or URL where the content is located.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
         slot_uri: schema:contentUrl
@@ -42138,7 +42149,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -42181,7 +42192,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2/download
+            value: https://example.org/datasets/example-cohort/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -42201,7 +42212,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -42219,7 +42230,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: diabetes, retinal imaging, multimodal, clinical data
+            value: chronic disease, medical imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
         slot_uri: dcat:keyword
@@ -42252,7 +42263,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -42302,7 +42313,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2
+            value: https://example.org/datasets/example-cohort
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -42350,7 +42361,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
+            value: 'Example Cohort Study of Chronic Disease: Data Release 1.0'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
         slot_uri: dcterms:title
@@ -42381,7 +42392,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2/versions/1
+            value: https://example.org/datasets/example-cohort/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -42489,7 +42500,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
+            value: Example Cohort Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -42577,7 +42588,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
+              study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -43637,10 +43649,10 @@ classes:
 
           This is the slot `source_manifest.yaml` names in `express_as` for a related-but-distinct
           dataset, so a core record could not express its own declared scope relation:
-          VOICE_PEDIATRIC could be in scope by `id` while a core-only reader had no
-          way to see the distinct adult dataset (#510). Citing a related dataset here
-          is what keeps it out of `resources` and `distribution_formats`, where it
-          would be absorbed into this dataset''s own distribution (#441).'
+          a companion release could be in scope by `id` while a core-only reader had
+          no way to see the distinct related dataset (#510). Citing a related dataset
+          here is what keeps it out of `resources` and `distribution_formats`, where
+          it would be absorbed into this dataset''s own distribution (#441).'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
         broad_mappings:
         - schema:isRelatedTo
@@ -43796,7 +43808,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -43839,7 +43851,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2/download
+            value: https://example.org/datasets/example-cohort/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -43859,7 +43871,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -43877,7 +43889,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: diabetes, retinal imaging, multimodal, clinical data
+            value: chronic disease, medical imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
         slot_uri: dcat:keyword
@@ -43910,7 +43922,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -43960,7 +43972,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2
+            value: https://example.org/datasets/example-cohort
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -44008,7 +44020,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
+            value: 'Example Cohort Study of Chronic Disease: Data Release 1.0'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
         slot_uri: dcterms:title
@@ -44039,7 +44051,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://fairhub.io/datasets/2/versions/1
+            value: https://example.org/datasets/example-cohort/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -44147,7 +44159,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
+            value: Example Cohort Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -44235,7 +44247,8 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
+              study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description

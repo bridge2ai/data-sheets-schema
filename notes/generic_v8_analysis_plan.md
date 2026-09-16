@@ -2696,3 +2696,47 @@ The first CBORG evaluator session completed but did not create an output: bare m
 ### One v9 generation canary passed (2026-09-12)
 
 The CHORUS generic-v9 canary finished through CBORG at 18:26 UTC and passed all 13 registered gates. One bounded repair corrected five validation findings and the report was regenerated afterward. All eight chunks were reviewed, 125 of125 snippets verified, and115 of129 receiptable leaves have a receipt. The one no-token-overlap snippet and two single-leaf entry receipts remain reported; a source spot-check found no new contradiction in those cases. The full/core records, report, provenance, usage, receipts and phase snapshots are retained, with hashes and limits in [the canary review](cborg_canaries_2026-09-12/v9_canary_review.md). This completes the authorized single generation canary, with no download or v9 cohort expansion.
+
+
+### Schema release 3.0.0, and the generation schemas carry no study content (#1874, #1875; 2026-09-16)
+
+A schema-file boundary, registered before any further generation
+condition is frozen. The full schema declares `version: 3.0.0` and the
+core entry point declares the same version for the first time — the core
+is a projection of the full schema's modules and moves with it, and the
+recorder now writes `schema.core_declared_version` beside
+`schema.declared_version` with a note when they disagree. `3.0.0` names
+the definitions the `2.0.0` label had stopped describing after the
+narrative scalarization, Person inlining, DataGovernance, data-standard
+and anchored-DOI changes of August and September; a record valid under
+the August `2.0.0` may fail under it. In the same change every
+model-facing study string left the modules the two generation roots
+import: the AI-READI titles and `fairhub.io` examples, the
+Bridge2AI-Voice committee example, the CM4AI run reference in the
+deprecated contact description, the VOICE_PEDIATRIC example in the core's
+`related_datasets` description, the two vocabulary descriptions that
+named "Bridge2AI standards", and the diabetes/CGM/retina example family
+modelled on one study, three real IRB protocol numbers and one real NIH
+award among it. The digest renders no docExample annotation, no `comments:` field
+and no nested attribute's description, and only the first 300 characters
+of a top-level slot description; the one top-level description edited
+(the core's `related_datasets`) moved text outside that window, so
+**neither profile's `Dataset` digest moved**
+(`6be15822…` study, `94859bbb…` neutral; `CoreDataset` `980ccdaf…` /
+`61c50be6…`) and the inventory ledger gains no entry — the API arm's
+instrument identity is unchanged. The entry points, the merged files and every edited module moved (full
+source `38e19f26…` → `50f2b614…`, merged `ea595c4b…` → `eb543e15…`, core
+source `0cdb2744…` → `1eedd9fb…`, merged core `7fcd7ddd…` → `09907cf8…`),
+so `schema.full_sha256`/`core_sha256` on every new record, the schema
+pins of any registration and the native toolchain's resource hashes move
+with this commit; no earlier registration, record or score is
+re-attested, and the v10p condition keeps its `2.0.0`-labelled files. Of the
+173 validation verdicts that pin a schema hash, 80 are newly STALE (93
+already were, pinning three earlier schema states) until a
+separate `recheck-validation --all --execute` data pass restamps the pin
+where the verdict reproduces and holds the rest for a per-label rerun
+(#1891, #1896). The
+`project/` artifacts and the datamodel were rebuilt. Guards:
+`tests/test_schema_release_identity.py` and
+`tests/test_neutral_generation_schema.py`; the dated account is
+`notes/schema_release_3.0.0_2026-09-16.md`.

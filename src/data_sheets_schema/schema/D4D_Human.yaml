@@ -228,7 +228,7 @@ classes:
         slot_uri: d4d:retentionIncentiveStructure
         range: string
         annotations:
-          "d4d:docExample": "Payment rises across the four annual visits, with a completion bonus at year four, described in the protocol as designed to reduce loss to follow-up."
+          "d4d:docExample": "Payment rises across the annual visits, with a completion bonus at the final visit, described in the protocol as designed to reduce loss to follow-up."
 
       retention_incentive_rationale:
         description: >
@@ -264,7 +264,7 @@ classes:
         range: string
         multivalued: true
         annotations:
-          "d4d:docExample": "No participants under 18; pregnant women excluded from CGM protocol"
+          "d4d:docExample": "No participants under 18; pregnant women excluded from the wearable-sensor protocol"
       assent_procedures:
         description: >
           For research involving minors, what assent procedures were used?

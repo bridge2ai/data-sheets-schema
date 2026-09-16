@@ -6,7 +6,7 @@
     "https://bridge2ai.github.io/data-sheets-schema"
   ],
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "imports": [
     "linkml:types",
     "D4D_Base_import",
@@ -499,7 +499,7 @@
     {
       "name": "DataStandardEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataStandardEnum",
-      "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.",
+      "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. A declared standards-registry prefix is the natural home for these once such a registry carries them; until one does, this is a controlled vocabulary without ontology grounding, and says so.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
@@ -2001,7 +2001,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "AI-READI: Salutogenesis Study of Type 2 Diabetes",
+          "value": "Example Cohort Study of Chronic Disease: Data Release 1.0",
           "@type": "Annotation"
         }
       ],
@@ -2073,7 +2073,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15T00:00:00Z",
+          "value": "2022-06-30T00:00:00Z",
           "@type": "Annotation"
         }
       ],
@@ -2096,7 +2096,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://fairhub.io/datasets/2",
+          "value": "https://example.org/datasets/example-cohort",
           "@type": "Annotation"
         }
       ],
@@ -2165,7 +2165,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "data/ai_readi/participants.csv",
+          "value": "data/example_cohort/participants.csv",
           "@type": "Annotation"
         }
       ],
@@ -2189,7 +2189,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://fairhub.io/datasets/2/download",
+          "value": "https://example.org/datasets/example-cohort/download",
           "@type": "Annotation"
         }
       ],
@@ -2520,7 +2520,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "diabetes, retinal imaging, multimodal, clinical data",
+          "value": "chronic disease, medical imaging, multimodal, clinical data",
           "@type": "Annotation"
         }
       ],
@@ -2590,7 +2590,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2023-07-18T00:00:00Z",
+          "value": "2021-03-01T00:00:00Z",
           "@type": "Annotation"
         }
       ],
@@ -2613,7 +2613,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15T00:00:00Z",
+          "value": "2022-06-30T00:00:00Z",
           "@type": "Annotation"
         }
       ],
@@ -2682,7 +2682,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://fairhub.io/datasets/2/versions/1",
+          "value": "https://example.org/datasets/example-cohort/versions/1",
           "@type": "Annotation"
         }
       ],
@@ -4145,7 +4145,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "AI-READI Dataset",
+          "value": "Example Cohort Dataset",
           "@type": "Annotation"
         }
       ],
@@ -4168,7 +4168,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "A multimodal dataset of 4,000 participants with Type 2 Diabetes.",
+          "value": "A multimodal dataset of 2,500 participants in a longitudinal cohort study.",
           "@type": "Annotation"
         }
       ],
@@ -4626,7 +4626,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of T2DM salutogenesis.",
+          "value": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of disease progression.",
           "@type": "Annotation"
         }
       ],
@@ -4652,7 +4652,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Multi-domain biomarker discovery for Type 2 Diabetes mellitus.",
+          "value": "Multi-domain biomarker discovery for a chronic disease.",
           "@type": "Annotation"
         }
       ],
@@ -4678,7 +4678,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Lack of racially diverse T2DM datasets with linked multi-modal clinical data.",
+          "value": "Lack of demographically diverse chronic-disease datasets with linked multi-modal clinical data.",
           "@type": "Annotation"
         }
       ],
@@ -4883,7 +4883,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "OT2OD032644",
+          "value": "R01XX000000",
           "@type": "Annotation"
         }
       ],
@@ -4906,7 +4906,7 @@
     },
     {
       "name": "instance__data_topic",
-      "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms. Where no term is found, prefer omission over a prose topic.\n",
+      "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry. Where no term is found, prefer omission over a prose topic.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
         "http://www.w3.org/ns/dcat#theme"
@@ -4951,7 +4951,7 @@
     },
     {
       "name": "instance__data_substrate",
-      "description": "Type of data (e.g., raw text, images) as a term from the Bridge2AI standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
+      "description": "Type of data (e.g., raw text, images) as a term from the pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
         "http://purl.org/dc/terms/type"
@@ -5188,7 +5188,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Triple-balanced by race/ethnicity, sex, and T2DM severity",
+          "value": "Balanced by sex, age band and disease severity",
           "@type": "Annotation"
         }
       ],
@@ -5211,7 +5211,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "CGM readings absent for 15% of participants",
+          "value": "Sensor readings absent for 15% of participants",
           "@type": "Annotation"
         }
       ],
@@ -5238,7 +5238,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Device malfunction or non-compliance during 14-day wear period",
+          "value": "Device malfunction or non-compliance during the sensor wear period",
           "@type": "Annotation"
         }
       ],
@@ -5288,7 +5288,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "70/15/15 train/validation/test split stratified by site and T2DM severity",
+          "value": "70/15/15 train/validation/test split stratified by site and disease severity",
           "@type": "Annotation"
         }
       ],
@@ -5311,7 +5311,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "15% of CGM readings missing due to device malfunction",
+          "value": "15% of sensor readings missing due to device malfunction",
           "@type": "Annotation"
         }
       ],
@@ -5462,7 +5462,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Findings may not generalize to non-diabetic populations",
+          "value": "Findings may not generalize to populations outside the enrolled age range",
           "@type": "Annotation"
         }
       ],
@@ -5618,7 +5618,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Contains clinical images of diabetic retinopathy",
+          "value": "Contains clinical images that may show visible disease",
           "@type": "Annotation"
         }
       ],
@@ -5677,7 +5677,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Hispanic participants: 1,023 (25.6% of total)",
+          "value": "Participants aged 65 and over: 1,000 (40.0% of total)",
           "@type": "Annotation"
         }
       ],
@@ -5809,8 +5809,8 @@
       "name": "datasetRelationship__target_dataset",
       "description": "The identifier or URL of the dataset this relationship points to.",
       "comments": [
-        "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on VOICE (#297).",
-        "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for VOICE, whose pediatric companion has all three."
+        "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on a study record (#297).",
+        "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for a dataset whose companion release has all three."
       ],
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -5925,7 +5925,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Retinal images captured with Heidelberg Spectralis OCT",
+          "value": "Chest radiographs acquired with a portable X-ray unit",
           "@type": "Annotation"
         }
       ],
@@ -5994,7 +5994,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Certified study coordinators at 3 collection sites",
+          "value": "Certified study coordinators at four collection sites",
           "@type": "Annotation"
         }
       ],
@@ -6017,7 +6017,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2023-07-18",
+          "value": "2021-03-01",
           "@type": "Annotation"
         }
       ],
@@ -6040,7 +6040,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2026-11-30",
+          "value": "2025-02-28",
           "@type": "Annotation"
         }
       ],
@@ -6125,7 +6125,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "CGM data missing for 15% of participants (device errors)",
+          "value": "Sensor data missing for 15% of participants (device errors)",
           "@type": "Annotation"
         }
       ],
@@ -6194,7 +6194,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Electronic health records from UCSF Epic system",
+          "value": "Electronic health records exported from each site's clinical record system",
           "@type": "Annotation"
         }
       ],
@@ -6447,7 +6447,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Board-certified ophthalmologists graded retinal images using ETDRS scale",
+          "value": "Board-certified radiologists graded chest radiographs using a standard severity scale",
           "@type": "Annotation"
         }
       ],
@@ -6533,7 +6533,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "cgm_mean_glucose, hba1c_percent, bmi",
+          "value": "sensor_mean_reading, biomarker_level, bmi",
           "@type": "Annotation"
         }
       ],
@@ -6557,7 +6557,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "MICE with 20 imputations; predictors: age, sex, HbA1c",
+          "value": "MICE with 20 imputations; predictors: age, sex, body mass index",
           "@type": "Annotation"
         }
       ],
@@ -6705,7 +6705,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "DeepDR automated grading system (AUC = 0.94)",
+          "value": "Automated image-grading system (AUC = 0.94)",
           "@type": "Annotation"
         }
       ],
@@ -6728,7 +6728,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "DeepDR AUC: 0.94 on EYEPACS validation set",
+          "value": "Automated grading model AUC: 0.94 on an external validation set",
           "@type": "Annotation"
         }
       ],
@@ -6752,7 +6752,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)",
+          "value": "Used in a 2024 journal article on sensor-derived disease patterns (DOI: 10.xxxx/xxxxx)",
           "@type": "Annotation"
         }
       ],
@@ -6776,7 +6776,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://paperswithcode.com/dataset/ai-readi",
+          "value": "https://example.org/known-uses/example-cohort",
           "@type": "Annotation"
         }
       ],
@@ -6881,7 +6881,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Training fairness-aware ML models for T2DM prediction",
+          "value": "Training fairness-aware ML models for disease-risk prediction",
           "@type": "Annotation"
         }
       ],
@@ -7048,7 +7048,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://fairhub.io/datasets/2",
+          "value": "https://example.org/datasets/example-cohort",
           "@type": "Annotation"
         }
       ],
@@ -7072,7 +7072,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15",
+          "value": "2022-06-30",
           "@type": "Annotation"
         }
       ],
@@ -7158,7 +7158,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants",
+          "value": "v1.0.1: Corrected mislabeled sensor device serial numbers for 12 participants",
           "@type": "Annotation"
         }
       ],
@@ -7289,7 +7289,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)",
+          "value": "v1.0 (2021-06), v1.1 (2021-11), v2.0 (2022-06)",
           "@type": "Annotation"
         }
       ],
@@ -7313,7 +7313,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "All versions available at fairhub.io; older versions archived on Zenodo",
+          "value": "All versions available from the primary repository; older versions archived in a general-purpose archive",
           "@type": "Annotation"
         }
       ],
@@ -7421,7 +7421,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428",
+          "value": "IRB approval: one approval per collection site, each cited by the site's IRB protocol number",
           "@type": "Annotation"
         }
       ],
@@ -7883,7 +7883,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Payment rises across the four annual visits, with a completion bonus at year four, described in the protocol as designed to reduce loss to follow-up.",
+          "value": "Payment rises across the annual visits, with a completion bonus at the final visit, described in the protocol as designed to reduce loss to follow-up.",
           "@type": "Annotation"
         }
       ],
@@ -7938,7 +7938,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "No participants under 18; pregnant women excluded from CGM protocol",
+          "value": "No participants under 18; pregnant women excluded from the wearable-sensor protocol",
           "@type": "Annotation"
         }
       ],
@@ -8068,7 +8068,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Retinal imaging algorithms are subject to pending patent",
+          "value": "Image-analysis algorithms derived from the dataset are subject to a pending patent",
           "@type": "Annotation"
         }
       ],
@@ -8177,7 +8177,7 @@
     },
     {
       "name": "exportControlRegulatoryRestrictions__governance_committee_contact",
-      "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string (CM4AI v7 rep1 among them) no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it.",
+      "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint"
@@ -8200,11 +8200,11 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Bridge2AI-Voice Data Access Committee (DACO)",
+          "value": "Example Consortium Data Access Committee (DAC)",
           "@type": "Annotation"
         }
       ],
-      "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"AI-READI Data Access Committee\", \"DACO\").",
+      "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DAC\").",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/governanceCommitteeName"
@@ -8351,7 +8351,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "hba1c_percent",
+          "value": "biomarker_level",
           "@type": "Annotation"
         }
       ],
@@ -8598,7 +8598,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Glycated hemoglobin percentage measured at baseline visit",
+          "value": "Serum biomarker concentration measured at the baseline visit",
           "@type": "Annotation"
         }
       ],
@@ -8832,7 +8832,7 @@
       "annotations": {
         "d4d:docExample": {
           "tag": "d4d:docExample",
-          "value": "data/ai_readi/participants.csv",
+          "value": "data/example_cohort/participants.csv",
           "extensions": {},
           "annotations": {}
         }
@@ -9907,7 +9907,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "AI-READI Dataset",
+              "value": "Example Cohort Dataset",
               "@type": "Annotation"
             }
           ],
@@ -9921,7 +9921,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "A multimodal dataset of 4,000 participants with Type 2 Diabetes.",
+              "value": "A multimodal dataset of 2,500 participants in a longitudinal cohort study.",
               "@type": "Annotation"
             }
           ],
@@ -10330,7 +10330,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of T2DM salutogenesis.",
+              "value": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of disease progression.",
               "@type": "Annotation"
             }
           ],
@@ -10368,7 +10368,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Multi-domain biomarker discovery for Type 2 Diabetes mellitus.",
+              "value": "Multi-domain biomarker discovery for a chronic disease.",
               "@type": "Annotation"
             }
           ],
@@ -10406,7 +10406,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Lack of racially diverse T2DM datasets with linked multi-modal clinical data.",
+              "value": "Lack of demographically diverse chronic-disease datasets with linked multi-modal clinical data.",
               "@type": "Annotation"
             }
           ],
@@ -10591,7 +10591,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "OT2OD032644",
+              "value": "R01XX000000",
               "@type": "Annotation"
             }
           ],
@@ -10633,7 +10633,7 @@
       "attributes": [
         {
           "name": "data_topic",
-          "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms. Where no term is found, prefer omission over a prose topic.\n",
+          "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry. Where no term is found, prefer omission over a prose topic.\n",
           "values_from": [
             "B2AI_TOPIC"
           ],
@@ -10660,7 +10660,7 @@
         },
         {
           "name": "data_substrate",
-          "description": "Type of data (e.g., raw text, images) as a term from the Bridge2AI standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
+          "description": "Type of data (e.g., raw text, images) as a term from the pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
           "values_from": [
             "B2AI_SUBSTRATE"
           ],
@@ -10814,7 +10814,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Triple-balanced by race/ethnicity, sex, and T2DM severity",
+              "value": "Balanced by sex, age band and disease severity",
               "@type": "Annotation"
             }
           ],
@@ -10850,7 +10850,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "CGM readings absent for 15% of participants",
+              "value": "Sensor readings absent for 15% of participants",
               "@type": "Annotation"
             }
           ],
@@ -10868,7 +10868,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Device malfunction or non-compliance during 14-day wear period",
+              "value": "Device malfunction or non-compliance during the sensor wear period",
               "@type": "Annotation"
             }
           ],
@@ -10942,7 +10942,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "70/15/15 train/validation/test split stratified by site and T2DM severity",
+              "value": "70/15/15 train/validation/test split stratified by site and disease severity",
               "@type": "Annotation"
             }
           ],
@@ -10977,7 +10977,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "15% of CGM readings missing due to device malfunction",
+              "value": "15% of sensor readings missing due to device malfunction",
               "@type": "Annotation"
             }
           ],
@@ -11119,7 +11119,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Findings may not generalize to non-diabetic populations",
+              "value": "Findings may not generalize to populations outside the enrolled age range",
               "@type": "Annotation"
             }
           ],
@@ -11271,7 +11271,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Contains clinical images of diabetic retinopathy",
+              "value": "Contains clinical images that may show visible disease",
               "@type": "Annotation"
             }
           ],
@@ -11326,7 +11326,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Hispanic participants: 1,023 (25.6% of total)",
+              "value": "Participants aged 65 and over: 1,000 (40.0% of total)",
               "@type": "Annotation"
             }
           ],
@@ -11468,8 +11468,8 @@
           "name": "target_dataset",
           "description": "The identifier or URL of the dataset this relationship points to.",
           "comments": [
-            "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on VOICE (#297).",
-            "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for VOICE, whose pediatric companion has all three."
+            "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on a study record (#297).",
+            "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for a dataset whose companion release has all three."
           ],
           "slot_uri": "dcterms:relation",
           "range": "string",
@@ -11548,7 +11548,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Retinal images captured with Heidelberg Spectralis OCT",
+              "value": "Chest radiographs acquired with a portable X-ray unit",
               "@type": "Annotation"
             }
           ],
@@ -11636,7 +11636,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Certified study coordinators at 3 collection sites",
+              "value": "Certified study coordinators at four collection sites",
               "@type": "Annotation"
             }
           ],
@@ -11676,7 +11676,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "2023-07-18",
+              "value": "2021-03-01",
               "@type": "Annotation"
             }
           ],
@@ -11690,7 +11690,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "2026-11-30",
+              "value": "2025-02-28",
               "@type": "Annotation"
             }
           ],
@@ -11787,7 +11787,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "CGM data missing for 15% of participants (device errors)",
+              "value": "Sensor data missing for 15% of participants (device errors)",
               "@type": "Annotation"
             }
           ],
@@ -11856,7 +11856,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Electronic health records from UCSF Epic system",
+              "value": "Electronic health records exported from each site's clinical record system",
               "@type": "Annotation"
             }
           ],
@@ -12084,7 +12084,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Board-certified ophthalmologists graded retinal images using ETDRS scale",
+              "value": "Board-certified radiologists graded chest radiographs using a standard severity scale",
               "@type": "Annotation"
             }
           ],
@@ -12183,7 +12183,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "cgm_mean_glucose, hba1c_percent, bmi",
+              "value": "sensor_mean_reading, biomarker_level, bmi",
               "@type": "Annotation"
             }
           ],
@@ -12198,7 +12198,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "MICE with 20 imputations; predictors: age, sex, HbA1c",
+              "value": "MICE with 20 imputations; predictors: age, sex, body mass index",
               "@type": "Annotation"
             }
           ],
@@ -12328,7 +12328,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "DeepDR automated grading system (AUC = 0.94)",
+              "value": "Automated image-grading system (AUC = 0.94)",
               "@type": "Annotation"
             }
           ],
@@ -12342,7 +12342,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "DeepDR AUC: 0.94 on EYEPACS validation set",
+              "value": "Automated grading model AUC: 0.94 on an external validation set",
               "@type": "Annotation"
             }
           ],
@@ -12378,7 +12378,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)",
+              "value": "Used in a 2024 journal article on sensor-derived disease patterns (DOI: 10.xxxx/xxxxx)",
               "@type": "Annotation"
             }
           ],
@@ -12415,7 +12415,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "https://paperswithcode.com/dataset/ai-readi",
+              "value": "https://example.org/known-uses/example-cohort",
               "@type": "Annotation"
             }
           ],
@@ -12569,7 +12569,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Training fairness-aware ML models for T2DM prediction",
+              "value": "Training fairness-aware ML models for disease-risk prediction",
               "@type": "Annotation"
             }
           ],
@@ -12726,7 +12726,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "https://fairhub.io/datasets/2",
+              "value": "https://example.org/datasets/example-cohort",
               "@type": "Annotation"
             }
           ],
@@ -12762,7 +12762,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "2024-11-15",
+              "value": "2022-06-30",
               "@type": "Annotation"
             }
           ],
@@ -12856,7 +12856,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants",
+              "value": "v1.0.1: Corrected mislabeled sensor device serial numbers for 12 participants",
               "@type": "Annotation"
             }
           ],
@@ -13003,7 +13003,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)",
+              "value": "v1.0 (2021-06), v1.1 (2021-11), v2.0 (2022-06)",
               "@type": "Annotation"
             }
           ],
@@ -13018,7 +13018,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "All versions available at fairhub.io; older versions archived on Zenodo",
+              "value": "All versions available from the primary repository; older versions archived in a general-purpose archive",
               "@type": "Annotation"
             }
           ],
@@ -13126,7 +13126,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428",
+              "value": "IRB approval: one approval per collection site, each cited by the site's IRB protocol number",
               "@type": "Annotation"
             }
           ],
@@ -13565,7 +13565,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Payment rises across the four annual visits, with a completion bonus at year four, described in the protocol as designed to reduce loss to follow-up.",
+              "value": "Payment rises across the annual visits, with a completion bonus at the final visit, described in the protocol as designed to reduce loss to follow-up.",
               "@type": "Annotation"
             }
           ],
@@ -13617,7 +13617,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "No participants under 18; pregnant women excluded from CGM protocol",
+              "value": "No participants under 18; pregnant women excluded from the wearable-sensor protocol",
               "@type": "Annotation"
             }
           ],
@@ -13737,7 +13737,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Retinal imaging algorithms are subject to pending patent",
+              "value": "Image-analysis algorithms derived from the dataset are subject to a pending patent",
               "@type": "Annotation"
             }
           ],
@@ -13826,7 +13826,7 @@
         },
         {
           "name": "governance_committee_contact",
-          "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string (CM4AI v7 rep1 among them) no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it.",
+          "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
@@ -13871,11 +13871,11 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Bridge2AI-Voice Data Access Committee (DACO)",
+              "value": "Example Consortium Data Access Committee (DAC)",
               "@type": "Annotation"
             }
           ],
-          "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"AI-READI Data Access Committee\", \"DACO\").",
+          "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DAC\").",
           "slot_uri": "d4d:governanceCommitteeName",
           "range": "string",
           "@type": "SlotDefinition"
@@ -13989,7 +13989,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "hba1c_percent",
+              "value": "biomarker_level",
               "@type": "Annotation"
             }
           ],
@@ -14137,7 +14137,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Glycated hemoglobin percentage measured at baseline visit",
+              "value": "Serum biomarker concentration measured at the baseline visit",
               "@type": "Annotation"
             }
           ],
@@ -14336,9 +14336,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-09-09T17:04:03",
-  "source_file_size": 34754,
-  "generation_date": "2026-09-09T17:31:11",
+  "source_file_date": "2026-09-16T11:00:40",
+  "source_file_size": 35275,
+  "generation_date": "2026-09-16T12:20:23",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

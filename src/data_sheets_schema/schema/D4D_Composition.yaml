@@ -50,7 +50,7 @@ classes:
       data_topic:
         description: >
           General topic of each instance, as an ontology term — records use
-          GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms.
+          GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry.
           Where no term is found, prefer omission over a prose topic.
         # Range kept `uriorcurie` (#456), and here the evidence is positive
         # rather than merely structural: half the values in the corpus already
@@ -75,7 +75,7 @@ classes:
           "d4d:docExample": "medical imaging studies"
       data_substrate:
         description: >
-          Type of data (e.g., raw text, images) as a term from the Bridge2AI
+          Type of data (e.g., raw text, images) as a term from the pinned
           standards registry. A *term*, not a description: prose characterising
           the instances — "multimodal per-participant records comprising
           tabular survey and clinical data" — belongs in `instance_type`, which
@@ -177,7 +177,7 @@ classes:
         slot_uri: d4d:strategies
         range: string
         annotations:
-          "d4d:docExample": "Triple-balanced by race/ethnicity, sex, and T2DM severity"
+          "d4d:docExample": "Balanced by sex, age band and disease severity"
 
 
   MissingInfo:
@@ -195,7 +195,7 @@ classes:
         broad_mappings:
           - dcterms:description
         annotations:
-          "d4d:docExample": "CGM readings absent for 15% of participants"
+          "d4d:docExample": "Sensor readings absent for 15% of participants"
       why_missing:
         description: >
           Explanation of why each piece of data is missing.
@@ -205,7 +205,7 @@ classes:
         broad_mappings:
           - dcterms:description
         annotations:
-          "d4d:docExample": "Device malfunction or non-compliance during 14-day wear period"
+          "d4d:docExample": "Device malfunction or non-compliance during the sensor wear period"
 
 
   Relationships:
@@ -238,7 +238,7 @@ classes:
         range: string
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "70/15/15 train/validation/test split stratified by site and T2DM severity"
+          "d4d:docExample": "70/15/15 train/validation/test split stratified by site and disease severity"
 
 
   DataAnomaly:
@@ -255,7 +255,7 @@ classes:
         broad_mappings:
           - dcterms:description
         annotations:
-          "d4d:docExample": "15% of CGM readings missing due to device malfunction"
+          "d4d:docExample": "15% of sensor readings missing due to device malfunction"
 
 
   DatasetBias:
@@ -326,7 +326,7 @@ classes:
         slot_uri: d4d:scopeImpact
         range: string
         annotations:
-          "d4d:docExample": "Findings may not generalize to non-diabetic populations"
+          "d4d:docExample": "Findings may not generalize to populations outside the enrolled age range"
       recommended_mitigation:
         description: >
           Recommended approaches for users to address this limitation.
@@ -414,7 +414,7 @@ classes:
         multivalued: true
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "Contains clinical images of diabetic retinopathy"
+          "d4d:docExample": "Contains clinical images that may show visible disease"
 
 
   Subpopulation:
@@ -444,7 +444,7 @@ classes:
         broad_mappings:
           - dcterms:description
         annotations:
-          "d4d:docExample": "Hispanic participants: 1,023 (25.6% of total)"
+          "d4d:docExample": "Participants aged 65 and over: 1,000 (40.0% of total)"
 
 
   Deidentification:
@@ -513,11 +513,11 @@ classes:
             the first, and LinkML cannot express the union: its JSON Schema
             generator always emits a top-level type or $ref from the slot's
             range, which ANDs with `any_of`, so whichever branch the range names
-            the other one fails. Verified both ways on VOICE (#297).
+            the other one fails. Verified both ways on a study record (#297).
           - >-
             A related dataset with its own DOI, protocol and approval is its own
             datasheet and is referenced from here by identifier. That is the
-            resolution of #292 for VOICE, whose pediatric companion has all
+            resolution of #292 for a dataset whose companion release has all
             three.
         slot_uri: dcterms:relation
         range: string

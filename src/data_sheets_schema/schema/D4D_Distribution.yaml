@@ -97,7 +97,7 @@ classes:
         multivalued: true
         slot_uri: dcat:accessURL
         annotations:
-          "d4d:docExample": "https://fairhub.io/datasets/2"
+          "d4d:docExample": "https://example.org/datasets/example-cohort"
 
 
   DistributionDate:
@@ -114,6 +114,6 @@ classes:
         multivalued: true
         slot_uri: dcterms:available
         annotations:
-          "d4d:docExample": "2024-11-15"
+          "d4d:docExample": "2022-06-30"
 
 

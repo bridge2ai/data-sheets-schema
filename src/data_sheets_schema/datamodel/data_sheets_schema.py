@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-09-09T17:31:12
+# Generation date: 2026-09-16T12:20:25
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -60,7 +60,7 @@ from linkml_runtime.linkml_model.types import Boolean, Date, Datetime, Float, In
 from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDate, XSDDateTime
 
 metamodel_version = "1.7.0"
-version = "2.0.0"
+version = "3.0.0"
 
 # Namespaces
 AIO = CurieNamespace('AIO', 'https://w3id.org/aio/')
@@ -3050,9 +3050,9 @@ class DataStandardEnum(EnumDefinitionImpl):
     label-plus-code pattern and is consistent with the per-slot completeness decision on #501.
     ⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this
     repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent —
-    it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the
-    natural home for these once the registry carries them; until it does, this is a controlled vocabulary without
-    ontology grounding, and says so.
+    it is the exact failure `d4d runs identifiers` exists to find. A declared standards-registry prefix is the natural
+    home for these once such a registry carries them; until one does, this is a controlled vocabulary without ontology
+    grounding, and says so.
     """
     DICOM = PermissibleValue(
         text="DICOM",
@@ -3090,7 +3090,7 @@ class DataStandardEnum(EnumDefinitionImpl):
         description="""Data standards and common data models a dataset's content follows.
 Deliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.
 Free-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard — one verbatim, one normalized — which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.
-⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent — it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.""",
+⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent — it is the exact failure `d4d runs identifiers` exists to find. A declared standards-registry prefix is the natural home for these once such a registry carries them; until one does, this is a controlled vocabulary without ontology grounding, and says so.""",
     )
 
 class FormatEnum(EnumDefinitionImpl):

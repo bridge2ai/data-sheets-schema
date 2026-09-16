@@ -26,6 +26,8 @@ Between April 10 and April 28, the effective full/core classes, root fields and 
 | Permissible values across those enums | 210 | 242 | 191 | 223 |
 | Declared entry-point schema version | unset | 2.0.0 | unset | unset |
 
+The "current" columns describe `a9c8bc05f`; the release that followed this review declares `3.0.0` on both entry points ([schema release 3.0.0](schema_release_3.0.0_2026-09-16.md), #1874).
+
 Both April checkpoints have the same counts. The new class is `DataGovernance`; no existing class or root field was removed. Full adds `conforms_to_standard`, `data_governance`, `notes` and `source_caveats`. Core adds those four plus `related_datasets`. Nested additions and inherited changes are enumerated in the evidence. Imported-class counts include supporting definitions, not just classes reached by a particular record.
 
 Twenty-two schema-directory files changed: seventeen existing source files, two new supporting schemas, a new digest inventory, and the two generated merged schemas. Comparing parsed source files, including that inventory, gives 375 change entries from April 10 to current. An entry can be an entire added definition or a changed property, so this is an inventory size, not a count of independent features. Large line counts in merged schemas mainly reflect generated expansion and should not be reported as thousands of new fields. The existing “95 fields / 284 attributes” prose describes a different historical exchange inventory and is not interchangeable with the measured root-field counts above.

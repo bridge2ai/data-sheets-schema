@@ -1121,7 +1121,7 @@
                     ]
                 },
                 "committee_name": {
-                    "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"AI-READI Data Access Committee\", \"DACO\").",
+                    "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DAC\").",
                     "type": [
                         "string",
                         "null"
@@ -1247,7 +1247,7 @@
             "type": "object"
         },
         "DataStandardEnum": {
-            "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.",
+            "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. A declared standards-registry prefix is the natural home for these once such a registry carries them; until one does, this is a controlled vocabulary without ontology grounding, and says so.",
             "enum": [
                 "DICOM",
                 "BIDS",
@@ -4309,7 +4309,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string (CM4AI v7 rep1 among them) no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it."
+                    "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it."
                 },
                 "hipaa_compliant": {
                     "$ref": "#/$defs/ComplianceStatusEnum",
@@ -5991,14 +5991,14 @@
                     ]
                 },
                 "data_substrate": {
-                    "description": "Type of data (e.g., raw text, images) as a term from the Bridge2AI standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
+                    "description": "Type of data (e.g., raw text, images) as a term from the pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "data_topic": {
-                    "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms. Where no term is found, prefer omission over a prose topic.\n",
+                    "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry. Where no term is found, prefer omission over a prose topic.\n",
                     "type": [
                         "string",
                         "null"
@@ -8613,5 +8613,5 @@
     ],
     "title": "data-sheets-schema",
     "type": "object",
-    "version": "2.0.0"
+    "version": "3.0.0"
 }

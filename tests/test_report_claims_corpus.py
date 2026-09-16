@@ -10,13 +10,36 @@ import yaml
 from data_sheets_schema import backfill_checks as bc, report_claims as rc
 
 
-def assert_measurement_matches(stored, fresh, context, expected_origin):
+RELEASE_HISTORY = Path("src/data_sheets_schema/schema/release_history.yaml")
+
+
+def registered_schema_pairs() -> list[dict]:
+    """The merged-schema hash pairs a checked block may attest (#1874).
+
+    A block records the hashes of the schema files its check ran under. A
+    schema release moves them, and the historical blocks are never rewritten
+    (#1362, #1363), so a block may attest any registered release and a fresh
+    recompute must attest the newest one.
+    """
+    releases = yaml.safe_load(RELEASE_HISTORY.read_text(encoding="utf-8"))["releases"]
+    return [{"full_sha256": r["full_merged_sha256"], "core_sha256": r["core_merged_sha256"]}
+            for r in releases]
+
+
+def assert_measurement_matches(stored, fresh, context, expected_origin, *, schemas=None):
     """Compare measurements without recasting original-run checks as backfills.
 
     The runner omits recorded_by; compute() necessarily adds its own origin.
     Only this documented difference is allowed. The stored origin must match
     the frozen path inventory, and every other value and key must reproduce.
     Work on a copy so even an in-memory comparison preserves the attestation.
+
+    With `schemas` (the registered release pairs, newest last) the `schema`
+    block is compared against the registry instead of byte-for-byte: the
+    stored pair must be a registered release and the fresh pair the newest
+    one, so a registered schema release does not read as a measurement
+    change and an unregistered schema still does. Without it the block is
+    compared exactly, like every other field.
     """
     assert fresh.get("recorded_by") == bc.RECORDED_BY, context
     assert expected_origin in (None, bc.RECORDED_BY), context
@@ -25,7 +48,15 @@ def assert_measurement_matches(stored, fresh, context, expected_origin):
     else:
         assert stored.get("recorded_by") == expected_origin, context
     expected = {**stored, "recorded_by": bc.RECORDED_BY}
-    assert fresh == expected, context
+    if schemas is None:
+        assert fresh == expected, context
+        return
+    assert ("schema" in stored) == ("schema" in fresh), context
+    if "schema" in stored:
+        assert stored["schema"] in schemas, f"{context}: unregistered schema attested"
+        assert fresh["schema"] == schemas[-1], f"{context}: recompute is not under the newest release"
+    expected = {k: v for k, v in expected.items() if k != "schema"}
+    assert {k: v for k, v in fresh.items() if k != "schema"} == expected, context
 
 
 @pytest.mark.parametrize("backfilled", [False, True])
@@ -81,9 +112,67 @@ def test_authorship_handling_does_not_hide_measurement_or_pin_changes(changed):
         assert_measurement_matches(stored, fresh, "synthetic report", None)
 
 
+@pytest.mark.parametrize("stored_pair,fresh_pair,ok", [
+    ("prior", "newest", True),      # a block checked before the 3.0.0 boundary
+    ("newest", "newest", True),     # a block checked after it
+    ("prior", "prior", False),      # a recompute that is not under the newest release
+    ("other", "newest", False),     # a block attesting no registered release
+    ("newest", "other", False),     # a recompute under an unregistered schema
+])
+def test_a_registered_schema_release_is_not_a_measurement_change(stored_pair, fresh_pair, ok):
+    """#1874: the blocks attest the schema hashes they were checked under and
+    are never rewritten; the release history says which pairs are releases."""
+    pairs = {"prior": {"full_sha256": "a" * 64, "core_sha256": "b" * 64},
+             "newest": {"full_sha256": "c" * 64, "core_sha256": "d" * 64},
+             "other": {"full_sha256": "e" * 64, "core_sha256": "f" * 64}}
+    schemas = [pairs["prior"], pairs["newest"]]
+    stored = {"checked": True, "claims_checked": 25, "findings": [], "schema": pairs[stored_pair]}
+    fresh = {**deepcopy(stored), "schema": pairs[fresh_pair], "recorded_by": bc.RECORDED_BY}
+    if ok:
+        assert_measurement_matches(stored, fresh, "synthetic report", None, schemas=schemas)
+    else:
+        with pytest.raises(AssertionError):
+            assert_measurement_matches(stored, fresh, "synthetic report", None, schemas=schemas)
+    # A measurement change is still a failure under the registry comparison.
+    with pytest.raises(AssertionError):
+        assert_measurement_matches(stored, {**fresh, "claims_checked": 26}, "synthetic report", None,
+                                   schemas=schemas)
+
+
+def test_the_release_history_ends_at_the_schema_on_disk():
+    from data_sheets_schema.provenance import (CORE_SCHEMA, CORE_SOURCE_SCHEMA, FULL_SCHEMA,
+                                               declared_schema_version)
+    pairs = registered_schema_pairs()
+    assert len(pairs) >= 2
+    assert pairs[-1] == {"full_sha256": bc._schema_sha(FULL_SCHEMA),
+                         "core_sha256": bc._schema_sha(CORE_SCHEMA)}
+    assert len({json.dumps(p, sort_keys=True) for p in pairs}) == len(pairs)
+    # #1890: a moved schema re-registered under the same label is the #1874
+    # drift with a registry entry blessing it. Labels are unique, strictly
+    # increasing, and the newest is what both entry points declare.
+    releases = yaml.safe_load(RELEASE_HISTORY.read_text(encoding="utf-8"))["releases"]
+    versions = [str(r["version"]) for r in releases]
+    keys = [tuple(int(x) for x in v.split(".")) for v in versions]
+    assert keys == sorted(set(keys)), versions
+    assert versions[-1] == declared_schema_version() == declared_schema_version(CORE_SOURCE_SCHEMA)
+
+
+@pytest.mark.parametrize("side", ["stored", "fresh"])
+def test_a_schema_block_present_on_one_side_only_is_a_mismatch(side):
+    """#1895: the registry comparison never reaches the lookup when one side
+    lacks the block; it fails as any other missing key would."""
+    schemas = [{"full_sha256": "a" * 64, "core_sha256": "b" * 64}]
+    stored = {"checked": True, "claims_checked": 25, "findings": []}
+    fresh = {**stored, "recorded_by": bc.RECORDED_BY}
+    (stored if side == "stored" else fresh)["schema"] = schemas[0]
+    with pytest.raises(AssertionError):
+        assert_measurement_matches(stored, fresh, "synthetic report", None, schemas=schemas)
+
+
 @pytest.mark.corpus
 def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     declared, ranges = rc.declared_slots(), rc.declared_ranges()
+    schemas = registered_schema_pairs()
     # #1363: do not infer an origin from a block whose origin is being checked.
     # Null means the marker was absent in the registered original-run block;
     # it never means a null-valued recorded_by field is allowed.
@@ -100,7 +189,10 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
         assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT_V7
         fresh = bc.compute(path, only={"report_claims"}, declared=declared, ranges=ranges,
                            report_claims_version=7)["report_claims"]
-        assert_measurement_matches(stored, fresh, str(path), origins[str(path)])
+        # #1874: a schema release moves the hashes every checked block attests;
+        # the blocks stay as written and the release history says which pairs
+        # a block may attest. Every measurement must still reproduce exactly.
+        assert_measurement_matches(stored, fresh, str(path), origins[str(path)], schemas=schemas)
         blocks.append(fresh)
         seen.add(str(path))
     assert seen == set(origins), "registered report measurements are missing or unchecked"
