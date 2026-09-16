@@ -1121,7 +1121,7 @@
                     ]
                 },
                 "committee_name": {
-                    "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DACO\").",
+                    "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DAC\").",
                     "type": [
                         "string",
                         "null"

@@ -8204,7 +8204,7 @@
           "@type": "Annotation"
         }
       ],
-      "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DACO\").",
+      "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DAC\").",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/governanceCommitteeName"
@@ -13875,7 +13875,7 @@
               "@type": "Annotation"
             }
           ],
-          "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DACO\").",
+          "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DAC\").",
           "slot_uri": "d4d:governanceCommitteeName",
           "range": "string",
           "@type": "SlotDefinition"
@@ -14338,7 +14338,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-09-16T11:00:40",
   "source_file_size": 35275,
-  "generation_date": "2026-09-16T11:57:50",
+  "generation_date": "2026-09-16T12:20:23",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

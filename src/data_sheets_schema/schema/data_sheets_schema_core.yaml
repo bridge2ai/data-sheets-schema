@@ -9,10 +9,11 @@ description: |-
   The full schema (data_sheets_schema.yaml) is the extended reservoir with
   284 attributes; this core schema is the recommended entry point for
   new datasheets and interoperability use cases.
-# The core schema is a projection of the full schema: every core class and
-# slot is defined in the modules the full schema imports, so the core carries
-# the full schema's version and moves with it (#1874). A core record valid
-# under one version is a full record's projection under the same version.
+# The core schema is a projection of the full schema: its own classes
+# (CoreDataset, CoreDatasetCollection, CoreDistribution, in D4D_Core.yaml)
+# select and restrict slots the shared modules define, and a core record is
+# derived from a full record. By policy the core carries the full schema's
+# version and moves with it (#1874); the two are released together.
 version: 3.0.0
 license: MIT
 see_also:

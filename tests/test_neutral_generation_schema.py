@@ -41,7 +41,7 @@ STUDY_IDENTITY = [
     r"Voice as a Biomarker", r"VOICE_PEDIATRIC", r"fairhub", r"salutogenesis",
     r"Heidelberg Spectralis", r"ETDRS", r"DeepDR", r"EYEPACS", r"UCSF Epic", r"OT2OD032644",
     r"IRB-300010084", r"IRB-811480", r"STUDY00017428", r"paperswithcode\.com/dataset/ai-readi",
-    r"Bridge2AI standards", r"(?-i:\bVOICE\b)",
+    r"Bridge2AI standards", r"(?-i:\bVOICE\b)", r"(?-i:\bDACO\b)",
     # the study's real enrollment dates, participant and site counts (#1883)
     r"2023-07-18", r"2026-11-30", r"4,000 participants", r"3 collection sites",
 ]

@@ -18,10 +18,13 @@ No historical record, score, registration or source download is changed.
 | `src/data_sheets_schema/schema/data_sheets_schema_core.yaml` (core, class `CoreDataset`) | no version | `version: 3.0.0` |
 
 **How the core version relates to full.** The core schema is a projection
-of the full schema: every core class and slot is defined in the modules the
-full schema imports, and a core record is the deterministic derivation of an
-audited full record (since 2026-08-27). The core therefore carries the full
-schema's version and moves with it; it has no independent release line. The
+of the full schema: its own classes (`CoreDataset`, `CoreDatasetCollection`,
+`CoreDistribution`, defined in `D4D_Core.yaml`, which the full schema does
+not import) select and restrict slots the shared modules define, and a core
+record is the deterministic derivation of an audited full record (since
+2026-08-27). By policy the core carries the full schema's version and moves
+with it; it has no independent release line, and the two are released
+together. The
 provenance recorder now reads both declarations (`schema.declared_version`,
 `schema.core_declared_version`, each with where it was read from) and writes
 a `note` when they disagree, so a drift like the one #1874 found would be a
@@ -48,29 +51,41 @@ declarations, the generated artifacts and the recorder's reading of them.
 
 ## Migration implications (no historical record is rewritten)
 
-A record valid under the August `2.0.0` may fail under `3.0.0` for these
-reasons, in decreasing order of how often the April records hit them:
+Two comparisons are easy to conflate. The [April-to-current
+review](schema_changes_since_april_2026-09-16.md) measured the whole distance
+from the April generation (65 attributes lost `multivalued: true` across the
+generation and evaluation-summary modules; Person inlining; anchored DOIs;
+optional Organization and Grant identifiers) and is the migration baseline
+for the April records. The `2.0.0` label was declared on 2026-08-06
+(`52a0e1732`), when most of that distance had already been covered:
+`preprocessing_details: ["step one", "step two"]` already failed the
+generated JSON Schema at that commit, and Organization and Grant identifiers
+were already optional there. What changed **after** the label, and so is the
+`2.0.0`-to-`3.0.0` boundary proper:
 
-- **Narrative lists became scalar strings.** Sixty-five attributes lost
-  `multivalued: true` (sampling strategy, preprocessing and cleaning detail,
-  ethics-board detail, license terms, retention and update detail, and their
-  nested kin). `preprocessing_details: ["step one", "step two"]` is now a
-  validation error; the value is one block scalar. This is a representation
-  change, not permission to omit documented facts.
-- **Person references became inlined objects.** Principal investigator,
-  creator, contact, ethics, license and governance contacts require a
-  `Person` object with its required identifier; a bare name string fails.
-- **DOI values must match the anchored bare form.** A URL-shaped DOI no
-  longer passes by substring; the write-time normaliser rewrites resolver
-  URLs in `uriorcurie` slots, but a record written by hand must state the
-  bare DOI.
-- **`Organization` and `Grant` identifiers became optional.** This direction
-  is permissive: a record that invented an identifier to satisfy the old
-  requirement still validates, and a new record need not invent one.
-- **Additive fields.** `data_governance`, `conforms_to_standard`, `notes`,
-  `source_caveats` (full and core) and `related_datasets` (core) are new
-  places for facts the earlier shapes could not carry; their absence is
-  never an error.
+- **Ten more narrative lists became scalar strings** in the generation
+  import closure: `strategies` (sampling), `identifiers_removed`,
+  `data_use_permission`, `collection_type`, `privacy_techniques`,
+  `assent_procedures`, `erratum_details`, `annotation_quality_details`,
+  `tool_descriptions` and `repository_details`. `privacy_techniques:
+  ["k-anonymity", "date shifting"]` is now a validation error; the value is
+  one block scalar. This is a representation change, not permission to omit
+  documented facts.
+- **Person references became inlined objects** (`816b44025`, 2026-09-03).
+  Principal investigator, creator, contact, ethics, license and governance
+  contacts require a `Person` object with its required identifier; a bare
+  name string fails.
+- **DOI values must match the anchored bare form** (`9f2339746`). A
+  URL-shaped DOI no longer passes by substring; the write-time normaliser
+  rewrites resolver URLs in `uriorcurie` slots, but a record written by
+  hand must state the bare DOI.
+- **`DataGovernance` and the data-standard vocabulary were added**
+  (`d740cc15c`, `ea12521a2`): new places for facts, never an error when
+  absent.
+- **Additive fields since April.** `data_governance`, `conforms_to_standard`,
+  `notes`, `source_caveats` (full and core) and `related_datasets` (core)
+  are new places for facts the earlier shapes could not carry; their absence
+  is never an error.
 
 **Recorded validation verdicts now read STALE.** A validation block pins
 the merged-schema hashes its verdict was computed against, and `d4d runs
@@ -158,9 +173,9 @@ retained: they identify the schema, not a dataset.
 | Identity | Before | After |
 |---|---|---|
 | `data_sheets_schema.yaml` sha256 | `38e19f26a5490fd3…` | `6de786d36f04c27f…` |
-| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `577009df99f53d43…` |
-| `data_sheets_schema_core.yaml` sha256 | `0cdb2744a4025efa…` | `de607a078ede069b…` |
-| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `3f36969ed28db3c8…` |
+| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `eb543e1597b29599…` |
+| `data_sheets_schema_core.yaml` sha256 | `0cdb2744a4025efa…` | `1eedd9fb3a0489cc…` |
+| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `09907cf80a5363aa…` |
 | `Dataset` digest md5, `bridge2ai` | `6be1582236d9320b…` | unchanged |
 | `Dataset` digest md5, `neutral` | `94859bbbe7fa2296…` | unchanged |
 | `CoreDataset` digest md5, `bridge2ai` / `neutral` | `980ccdafe6762d45…` / `61c50be60e601f7d…` | unchanged |

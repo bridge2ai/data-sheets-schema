@@ -28,9 +28,9 @@ releases:
   - version: 3.0.0
     declared: 2026-09-16
     full_source_sha256: 6de786d36f04c27fa4ec46dd59165601919bd8e27a4dbeb39585138f0cbc18de
-    full_merged_sha256: 577009df99f53d43a03038c73c76fc63c6c8bab2b627071c8866e540506814df
-    core_source_sha256: de607a078ede069b7aaee3909c90059b03b9305247eca671fe347285f2f46007
-    core_merged_sha256: 3f36969ed28db3c8ea704196f87ea5fdb768751ffbb355d751c2f279672426ff
+    full_merged_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    core_source_sha256: 1eedd9fb3a0489cccbd241fec688c0f0202571f9477a023822ef8b81b76cfdbb
+    core_merged_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
     note: >-
       Names the definitions the 2.0.0 label had stopped describing; the core
       entry point declares the same version. In the same change every

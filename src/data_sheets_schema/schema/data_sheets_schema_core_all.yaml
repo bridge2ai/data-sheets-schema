@@ -39953,7 +39953,7 @@ classes:
             tag: d4d:docExample
             value: Example Consortium Data Access Committee (DAC)
         description: Name of the body responsible for access decisions, as the source
-          states it (e.g. "Data Access Committee", "DACO").
+          states it (e.g. "Data Access Committee", "DAC").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
         slot_uri: d4d:governanceCommitteeName
         alias: committee_name
