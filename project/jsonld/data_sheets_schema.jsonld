@@ -499,7 +499,7 @@
     {
       "name": "DataStandardEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataStandardEnum",
-      "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.",
+      "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. A declared standards-registry prefix is the natural home for these once such a registry carries them; until one does, this is a controlled vocabulary without ontology grounding, and says so.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
@@ -14338,7 +14338,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-09-16T11:00:40",
   "source_file_size": 35275,
-  "generation_date": "2026-09-16T11:37:17",
+  "generation_date": "2026-09-16T11:41:54",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

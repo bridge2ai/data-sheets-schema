@@ -20,7 +20,7 @@ from typing import Dict, List, Tuple
 # SKOS mapping type rules based on the alignment
 MAPPING_RULES = {
     # Exact matches (direct 1:1, no transformation)
-    'title': ('exactMatch', 'none', 'title', '"AI-READI Dataset"', '"AI-READI Dataset"'),
+    'title': ('exactMatch', 'none', 'title', '"Example Cohort Dataset"', '"Example Cohort Dataset"'),
     'description': ('exactMatch', 'none', 'description', '"Diabetes dataset..."', '"Diabetes dataset..."'),
     'doi': ('exactMatch', 'none', 'doi', '"10.5281/zenodo.123456"', '"10.5281/zenodo.123456"'),
     'keywords': ('exactMatch', 'none', 'keywords', '["diabetes", "AI"]', '["diabetes", "AI"]'),
@@ -82,7 +82,7 @@ MAPPING_RULES = {
 
     # Close matches (require transformation)
     'creators': ('closeMatch', 'minimal', 'creators[].name', '"John Doe, Jane Smith"', '[{"@type":"Person","name":"John Doe"},{"@type":"Person","name":"Jane Smith"}]'),
-    'created_by': ('closeMatch', 'minimal', 'created_by.name', '"AI-READI Team"', '{"@type":"Organization","name":"AI-READI Team"}'),
+    'created_by': ('closeMatch', 'minimal', 'created_by.name', '"Example Cohort Team"', '{"@type":"Organization","name":"Example Cohort Team"}'),
     'modified_by': ('closeMatch', 'minimal', 'modified_by.name', '"Data Team"', '{"@type":"Organization","name":"Data Team"}'),
 
     'cleaning_strategies': ('closeMatch', 'minimal', 'cleaning_strategies[].description', '[{"description":"Removed duplicates","step_type":"data_cleaning"}]', '"Removed duplicate records using MD5 hash"'),

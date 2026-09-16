@@ -684,8 +684,8 @@ enums:
       have no stable ontology term this repository can verify, and inventing a
       CURIE that resolves to nothing is worse than leaving the grounding
       absent — it is the exact failure `d4d runs identifiers` exists to find.
-      The `B2AI_STANDARD` prefix is declared and is the natural home for these
-      once the registry carries them; until it does, this is a controlled
+      A declared standards-registry prefix is the natural home for these
+      once such a registry carries them; until one does, this is a controlled
       vocabulary without ontology grounding, and says so.
     permissible_values:
       DICOM:

@@ -51,7 +51,7 @@ MAPPINGS: List[Tuple[str, ...]] = [
     # ====================
     # 1. Basic Metadata
     # ====================
-    ('Basic Metadata', 'Dataset.title', 'str', 'd4d:title skos:exactMatch schema:name', '@graph[?@type=\'Dataset\'][\'name\']', 'exactMatch', 'none', '"AI-READI Dataset"', '"AI-READI Dataset"', ''),
+    ('Basic Metadata', 'Dataset.title', 'str', 'd4d:title skos:exactMatch schema:name', '@graph[?@type=\'Dataset\'][\'name\']', 'exactMatch', 'none', '"Example Cohort Dataset"', '"Example Cohort Dataset"', ''),
     ('Basic Metadata', 'Dataset.description', 'str', 'd4d:description skos:exactMatch schema:description', '@graph[?@type=\'Dataset\'][\'description\']', 'exactMatch', 'none', '"Diabetes research data..."', '"Diabetes research data..."', ''),
     ('Basic Metadata', 'Dataset.keywords', 'List[str]', 'd4d:keywords skos:exactMatch schema:keywords', '@graph[?@type=\'Dataset\'][\'keywords\']', 'exactMatch', 'none', '["diabetes", "AI"]', '["diabetes", "AI"]', ''),
     ('Basic Metadata', 'Dataset.language', 'str', 'd4d:language skos:exactMatch schema:inLanguage', '@graph[?@type=\'Dataset\'][\'inLanguage\']', 'exactMatch', 'none', '"en"', '"en"', ''),
@@ -96,7 +96,7 @@ MAPPINGS: List[Tuple[str, ...]] = [
     # 5. Creators & Attribution
     # ====================
     ('Creators & Attribution', 'Dataset.creators', 'str', 'd4d:creators skos:closeMatch schema:author', '@graph[?@type=\'Dataset\'][\'author\']', 'closeMatch', 'minimal', '"John Doe, Jane Smith"', '[{"@type":"Person","name":"John Doe"},{"@type":"Person","name":"Jane Smith"}]', 'String to Person/Organization array'),
-    ('Creators & Attribution', 'Dataset.created_by', 'Creator', 'd4d:created_by skos:closeMatch schema:creator', '@graph[?@type=\'Dataset\'][\'creator\']', 'closeMatch', 'minimal', '"AI-READI Team"', '{"@type":"Organization","name":"AI-READI Team"}', 'String to object transformation'),
+    ('Creators & Attribution', 'Dataset.created_by', 'Creator', 'd4d:created_by skos:closeMatch schema:creator', '@graph[?@type=\'Dataset\'][\'creator\']', 'closeMatch', 'minimal', '"Example Cohort Team"', '{"@type":"Organization","name":"Example Cohort Team"}', 'String to object transformation'),
     ('Creators & Attribution', 'Dataset.funders', 'str', 'd4d:funders skos:exactMatch schema:funder', '@graph[?@type=\'Dataset\'][\'funder\']', 'exactMatch', 'none', '"NIH, NSF"', '"NIH, NSF"', ''),
 
     # ====================

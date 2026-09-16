@@ -51,8 +51,14 @@ STUDY_IDENTITY = [
 #: the `bridge2ai` digest is scanned for identity only, everything else for both.
 STUDY_DESIGN = [r"T2DM", r"Type 2 Diabetes", r"diabet", r"retina", r"retinopathy",
                 r"ophthalmolog", r"\bCGM\b", r"HbA1c", r"hba1c"]
+#: The study's registry prefixes are declared (`prefixes:`, `values_from:`)
+#: and rendered into the digest's vocabulary lists by design; what must not
+#: appear is a sentence about them in a description (#1889). Scanned on the
+#: parsed source fields only, never on a whole file or a digest.
+PROSE_ONLY = [r"(?-i:\bB2AI_[A-Z]+)"]
 IDENTITY = re.compile("|".join(STUDY_IDENTITY), re.IGNORECASE)
 PATTERN = re.compile("|".join(STUDY_IDENTITY + STUDY_DESIGN), re.IGNORECASE)
+PROSE = re.compile("|".join(STUDY_IDENTITY + STUDY_DESIGN + PROSE_ONLY), re.IGNORECASE)
 MODEL_FACING_KEYS = {"description", "examples", "annotations", "comments", "title"}
 SCHEMA_LEVEL_KEYS = {"id", "name", "title", "description", "prefixes", "see_also",
                      "default_prefix", "imports", "license", "default_range", "version",
@@ -101,7 +107,7 @@ def _model_facing(path: Path):
 
 def _findings(pairs):
     return [f"{where}: {match.group(0)!r} in {text[:90]!r}"
-            for where, text in pairs for match in [PATTERN.search(text)] if match]
+            for where, text in pairs for match in [PROSE.search(text)] if match]
 
 
 class TestGenerationSchemaSources(unittest.TestCase):
@@ -141,6 +147,7 @@ class TestGenerationSchemaSources(unittest.TestCase):
                 "description": "The Bridge2AI schema-level description is not scanned",
                 "comments": ["a module-level VOICE comment is scanned"],
                 "slots": {"title": {"description": "plain", "annotations": {"d4d:docExample": "AI-READI: title"}},
+                          "topic": {"description": "the B2AI_TOPIC prefix is the natural home"},
                           "notes": {"comments": ["Verified on VOICE"], "examples": [{"value": "fairhub.io/x"}]},
                           "clean": {"description": "nothing here", "title": "CGM-free"}},
                 "classes": {"Thing": {"attributes": {"topic": {"description": "as a term from the Bridge2AI standards registry"}}}},
@@ -156,6 +163,7 @@ class TestGenerationSchemaSources(unittest.TestCase):
             "root.yaml:classes.Root.description",
             "base.yaml:comments[0]",
             "base.yaml:slots.title.annotations.d4d:docExample",
+            "base.yaml:slots.topic.description",
             "base.yaml:slots.notes.comments[0]",
             "base.yaml:slots.notes.examples[0].value",
             "base.yaml:slots.clean.title",

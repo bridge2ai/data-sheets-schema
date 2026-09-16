@@ -140,12 +140,33 @@ def test_a_registered_schema_release_is_not_a_measurement_change(stored_pair, fr
 
 
 def test_the_release_history_ends_at_the_schema_on_disk():
-    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
+    from data_sheets_schema.provenance import (CORE_SCHEMA, CORE_SOURCE_SCHEMA, FULL_SCHEMA,
+                                               declared_schema_version)
     pairs = registered_schema_pairs()
     assert len(pairs) >= 2
     assert pairs[-1] == {"full_sha256": bc._schema_sha(FULL_SCHEMA),
                          "core_sha256": bc._schema_sha(CORE_SCHEMA)}
     assert len({json.dumps(p, sort_keys=True) for p in pairs}) == len(pairs)
+    # #1890: a moved schema re-registered under the same label is the #1874
+    # drift with a registry entry blessing it. Labels are unique, strictly
+    # increasing, and the newest is what both entry points declare.
+    releases = yaml.safe_load(RELEASE_HISTORY.read_text(encoding="utf-8"))["releases"]
+    versions = [str(r["version"]) for r in releases]
+    keys = [tuple(int(x) for x in v.split(".")) for v in versions]
+    assert keys == sorted(set(keys)), versions
+    assert versions[-1] == declared_schema_version() == declared_schema_version(CORE_SOURCE_SCHEMA)
+
+
+@pytest.mark.parametrize("side", ["stored", "fresh"])
+def test_a_schema_block_present_on_one_side_only_is_a_mismatch(side):
+    """#1895: the registry comparison never reaches the lookup when one side
+    lacks the block; it fails as any other missing key would."""
+    schemas = [{"full_sha256": "a" * 64, "core_sha256": "b" * 64}]
+    stored = {"checked": True, "claims_checked": 25, "findings": []}
+    fresh = {**stored, "recorded_by": bc.RECORDED_BY}
+    (stored if side == "stored" else fresh)["schema"] = schemas[0]
+    with pytest.raises(AssertionError):
+        assert_measurement_matches(stored, fresh, "synthetic report", None, schemas=schemas)
 
 
 @pytest.mark.corpus

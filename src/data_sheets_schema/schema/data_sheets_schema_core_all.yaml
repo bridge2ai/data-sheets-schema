@@ -418,9 +418,9 @@ enums:
       ⚠️ **No `meaning:` is asserted on any value.** Several of these standards have
       no stable ontology term this repository can verify, and inventing a CURIE that
       resolves to nothing is worse than leaving the grounding absent — it is the exact
-      failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is
-      declared and is the natural home for these once the registry carries them; until
-      it does, this is a controlled vocabulary without ontology grounding, and says
+      failure `d4d runs identifiers` exists to find. A declared standards-registry
+      prefix is the natural home for these once such a registry carries them; until
+      one does, this is a controlled vocabulary without ontology grounding, and says
       so.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     permissible_values:

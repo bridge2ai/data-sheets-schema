@@ -72,6 +72,20 @@ reasons, in decreasing order of how often the April records hit them:
   places for facts the earlier shapes could not carry; their absence is
   never an error.
 
+**Recorded validation verdicts now read STALE.** A validation block pins
+the merged-schema hashes its verdict was computed against, and `d4d runs
+check` reports a verdict whose pin no longer matches the files on disk as
+STALE (#426). Of the 286 provenance records in the corpus, 279 carry a
+validation block, 173 pin a schema hash, and all 173 read STALE under
+3.0.0; the other 106 predate the pin and are left alone (absent is not
+stale). STALE is reported, never fatal: `runs select` groups it with
+UNVERIFIED and `runs check --strict` does not fail on it. The disposition
+is the one CLAUDE.md prescribes for a schema change: a separate data pass
+with `d4d provenance recheck-validation --all` after this change merges,
+which restamps the pin where the recorded verdict and artifact hashes
+reproduce and re-records the verdict where the schema now reads the
+record differently. It is not part of this change (#1891).
+
 Migrating a historical record is a separately identified derived copy that
 records its source and the migration applied. The April records, the v7/v8
 and v9 arms and every later attempt keep their bytes, their recorded
@@ -90,7 +104,7 @@ written against one study (Type 2 diabetes, continuous glucose monitoring,
 retinal imaging and grading, a triple-balanced design), and three real IRB
 protocol numbers and a real NIH award number sat among the examples.
 
-**What changed.** Fifty-eight model-facing strings in the modules the two
+**What changed.** Fifty-nine model-facing strings in the modules the two
 generation roots import were replaced with neutral forms: the study names,
 the `fairhub.io` platform URLs, the committee description and example, the
 deprecated contact description's run reference, the `related_datasets`
@@ -101,7 +115,9 @@ family, which now describes a fictional cohort with wearable sensors,
 imaging and clinical records, no disease named, and none of the study's
 real enrollment dates, participant count or site count (#1883); two LinkML
 `comments:` fields that named a study and its companion release are
-neutral too (#1882). The one date kept is the RFC 3339 format example in
+neutral too (#1882); the `DataStandardEnum` description no longer names the
+study's registry prefix (#1889), and the two mapping-generator scripts under
+`.claude/agents/scripts/` use the neutral title example (#1894). The one date kept is the RFC 3339 format example in
 the `issued` description, a top-level slot the digest renders: changing
 it moves the study digest, and a format example is not a study fact. The award example is a
 form-only placeholder (`R01XX000000`) and the IRB example names no protocol
@@ -130,9 +146,9 @@ retained: they identify the schema, not a dataset.
 | Identity | Before | After |
 |---|---|---|
 | `data_sheets_schema.yaml` sha256 | `38e19f26a5490fd3…` | `6de786d36f04c27f…` |
-| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `304107fca06fb3ee…` |
+| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `ee2248e14fd90153…` |
 | `data_sheets_schema_core.yaml` sha256 | `0cdb2744a4025efa…` | `de607a078ede069b…` |
-| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `6f95acef5b6f82dc…` |
+| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `f67bcf6a32f09e9d…` |
 | `Dataset` digest md5, `bridge2ai` | `6be1582236d9320b…` | unchanged |
 | `Dataset` digest md5, `neutral` | `94859bbbe7fa2296…` | unchanged |
 | `CoreDataset` digest md5, `bridge2ai` / `neutral` | `980ccdafe6762d45…` / `61c50be60e601f7d…` | unchanged |
