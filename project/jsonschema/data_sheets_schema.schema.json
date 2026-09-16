@@ -1121,7 +1121,7 @@
                     ]
                 },
                 "committee_name": {
-                    "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"AI-READI Data Access Committee\", \"DACO\").",
+                    "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"Data Access Committee\", \"DACO\").",
                     "type": [
                         "string",
                         "null"
@@ -4309,7 +4309,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string (CM4AI v7 rep1 among them) no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it."
+                    "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it."
                 },
                 "hipaa_compliant": {
                     "$ref": "#/$defs/ComplianceStatusEnum",
@@ -5991,14 +5991,14 @@
                     ]
                 },
                 "data_substrate": {
-                    "description": "Type of data (e.g., raw text, images) as a term from the Bridge2AI standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
+                    "description": "Type of data (e.g., raw text, images) as a term from the pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "data_topic": {
-                    "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms. Where no term is found, prefer omission over a prose topic.\n",
+                    "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs and terms from a pinned standards registry. Where no term is found, prefer omission over a prose topic.\n",
                     "type": [
                         "string",
                         "null"
@@ -8613,5 +8613,5 @@
     ],
     "title": "data-sheets-schema",
     "type": "object",
-    "version": "2.0.0"
+    "version": "3.0.0"
 }

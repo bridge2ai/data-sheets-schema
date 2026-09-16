@@ -545,6 +545,14 @@ classes:
       declared_in:
         description: Where that version was read from.
         required: true
+      core_declared_version:
+        description: >-
+          The version the core entry point declares (#1874). The core schema
+          is a projection of the full schema and carries the same version;
+          `note` says so when the two disagree. Absent on records written
+          before the core declared one.
+      core_declared_in:
+        description: Where the core version was read from.
       merged_schema_carries_version:
         description: >-
           Whether the merged schema states the version itself, rather than it

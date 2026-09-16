@@ -219,6 +219,13 @@ class TestTheCliAcceptsAManifestDeclaredDataset(_Offline):
         sent = json.dumps(client.messages.calls)
         self.assertIn("Open Clinical Cohort", sent)
         self.assertNotIn("Bridge2AI", sent)
+        # An external dataset's requests select no study vocabulary and no
+        # study example implicitly (#1875): the registry list, the study
+        # names, its platform and the retired example family are absent.
+        for token in ("B2AI_TOPIC:", "AI-READI", "AI_READI", "CM4AI", "CHORUS", "fairhub",
+                      "salutogenesis", "T2DM", "retinopathy"):
+            self.assertNotIn(token, sent, token)
+        self.assertEqual(record["schema"]["profile"], "neutral")
         result = CliRunner().invoke(cli, ["utils", "status", "--manifest", str(m), "--data-dir", str(data)])
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertIn("custom_method", result.output)

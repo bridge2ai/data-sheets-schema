@@ -43,6 +43,7 @@ FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
 SOURCE_MANIFEST = Path("data/preprocessed/source_manifest.yaml")
 SOURCE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema.yaml")
+CORE_SOURCE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core.yaml")
 
 # The GitHub D4D assistant already centralises model settings here, and hashes
 # its prompts. Both generation paths read this file rather than each declaring
@@ -854,16 +855,19 @@ def refresh_output_sizes(data: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
-def declared_schema_version() -> str | None:
-    """The `version:` declared in the source schema, if any.
+def declared_schema_version(source_schema: Path = SOURCE_SCHEMA) -> str | None:
+    """The `version:` declared in a source schema, if any.
 
-    Read from the source (`data_sheets_schema.yaml`) rather than the merged
-    artefacts, because the merged files are generated and only pick the field
-    up on the next regeneration. The version applies to both, since both derive
-    from this source.
+    Read from the source (`data_sheets_schema.yaml`, or the core entry point
+    `data_sheets_schema_core.yaml`) rather than the merged artefacts, because
+    the merged files are generated and only pick the field up on the next
+    regeneration. Since 3.0.0 (#1874) the core entry point declares its own
+    version, which is the full schema's: the core is a projection of the full
+    schema's modules and moves with it, and `schema_facts` records both so a
+    disagreement is a stated fact rather than an assumption.
     """
     from data_sheets_schema.schema_digest import resolve_schema
-    source = resolve_schema(SOURCE_SCHEMA)
+    source = resolve_schema(source_schema)
     if not source.exists():
         return None
     for line in source.read_text(encoding="utf-8").splitlines():
@@ -891,16 +895,24 @@ def schema_facts() -> dict[str, Any]:
         head = full.read_text(encoding="utf-8", errors="ignore")[:4000]
         merged_carries_version = any(
             l.startswith("version:") for l in head.splitlines())
+    core_version = declared_schema_version(CORE_SOURCE_SCHEMA)
     facts: dict[str, Any] = {
         "declared_version": version,
         "declared_in": str(SOURCE_SCHEMA),
+        "core_declared_version": core_version,
+        "core_declared_in": str(CORE_SOURCE_SCHEMA),
         "full_path": str(FULL_SCHEMA),
         "full_sha256": _sha256(full),
         "core_path": str(CORE_SCHEMA),
         "core_sha256": _sha256(core),
         "merged_schema_carries_version": merged_carries_version,
     }
-    if version and not merged_carries_version:
+    if version and core_version and core_version != version:
+        facts["note"] = (
+            f"The core entry point declares {core_version} while the full "
+            f"schema declares {version}; the core is a projection of the full "
+            "schema and is expected to carry the same version (#1874).")
+    elif version and not merged_carries_version:
         facts["note"] = (
             "The version is declared in the source schema but the merged "
             "artefacts predate it; they will carry it after the next "

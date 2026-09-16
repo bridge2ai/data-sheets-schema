@@ -52,7 +52,7 @@ classes:
         broad_mappings:
           - dcterms:description
         annotations:
-          "d4d:docExample": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of T2DM salutogenesis."
+          "d4d:docExample": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of disease progression."
 
 
   Task:
@@ -66,7 +66,7 @@ classes:
         broad_mappings:
           - dcterms:description
         annotations:
-          "d4d:docExample": "Multi-domain biomarker discovery for Type 2 Diabetes mellitus."
+          "d4d:docExample": "Multi-domain biomarker discovery for a chronic disease."
 
 
   AddressingGap:
@@ -80,7 +80,7 @@ classes:
         broad_mappings:
           - dcterms:description
         annotations:
-          "d4d:docExample": "Lack of racially diverse T2DM datasets with linked multi-modal clinical data."
+          "d4d:docExample": "Lack of demographically diverse chronic-disease datasets with linked multi-modal clinical data."
 
 
   Creator:
@@ -205,4 +205,4 @@ classes:
         broad_mappings:
           - schema:identifier
         annotations:
-          "d4d:docExample": "OT2OD032644"
+          "d4d:docExample": "R01XX000000"

@@ -76,7 +76,7 @@ classes:
         range: string
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428"
+          "d4d:docExample": "IRB approval: one approval per collection site, each cited by the site's IRB protocol number"
 
 
   DataProtectionImpact:

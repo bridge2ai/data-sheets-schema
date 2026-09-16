@@ -135,7 +135,7 @@ classes:
         range: string
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "Board-certified ophthalmologists graded retinal images using ETDRS scale"
+          "d4d:docExample": "Board-certified radiologists graded chest radiographs using a standard severity scale"
 
 
   RawData:
@@ -182,7 +182,7 @@ classes:
         range: string
         multivalued: true
         annotations:
-          "d4d:docExample": "cgm_mean_glucose, hba1c_percent, bmi"
+          "d4d:docExample": "sensor_mean_reading, biomarker_level, bmi"
       imputation_rationale:
         description: >
           Justification for the imputation approach chosen, including
@@ -190,7 +190,7 @@ classes:
         slot_uri: d4d:imputation_rationale
         range: string
         annotations:
-          "d4d:docExample": "MICE with 20 imputations; predictors: age, sex, HbA1c"
+          "d4d:docExample": "MICE with 20 imputations; predictors: age, sex, body mass index"
       imputation_validation:
         description: >
           Methods used to validate imputation quality (if any).
@@ -265,7 +265,7 @@ classes:
         slot_uri: d4d:toolDescriptions
         range: string
         annotations:
-          "d4d:docExample": "DeepDR automated grading system (AUC = 0.94)"
+          "d4d:docExample": "Automated image-grading system (AUC = 0.94)"
       tool_accuracy:
         description: >
           One or more known accuracy or performance metrics for the automated tools (if available).
@@ -274,4 +274,4 @@ classes:
         range: string
         multivalued: true
         annotations:
-          "d4d:docExample": "DeepDR AUC: 0.94 on EYEPACS validation set"
+          "d4d:docExample": "Automated grading model AUC: 0.94 on an external validation set"

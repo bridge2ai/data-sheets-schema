@@ -70,7 +70,7 @@ classes:
         range: string
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "Retinal images captured with Heidelberg Spectralis OCT"
+          "d4d:docExample": "Chest radiographs acquired with a portable X-ray unit"
 
 
   CollectionMechanism:
@@ -181,7 +181,7 @@ classes:
         slot_uri: d4d:missingDataPatterns
         range: string
         annotations:
-          "d4d:docExample": "CGM data missing for 15% of participants (device errors)"
+          "d4d:docExample": "Sensor data missing for 15% of participants (device errors)"
       missing_data_causes:
         description: >
           Known or suspected causes of missing data (e.g., sensor failures,
@@ -216,7 +216,7 @@ classes:
         range: string
         required: true
         annotations:
-          "d4d:docExample": "Electronic health records from UCSF Epic system"
+          "d4d:docExample": "Electronic health records exported from each site's clinical record system"
       source_type:
         description: >
           One or more types of raw source (e.g., sensor, database, user input, web scraping).

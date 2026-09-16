@@ -49,7 +49,7 @@ classes:
         range: string
         multivalued: true
         annotations:
-          "d4d:docExample": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)"
+          "d4d:docExample": "Used in a 2024 journal article on sensor-derived disease patterns (DOI: 10.xxxx/xxxxx)"
 
 
   UseRepository:
@@ -61,7 +61,7 @@ classes:
         description: "URL to a repository of known dataset uses."
         range: uri
         annotations:
-          "d4d:docExample": "https://paperswithcode.com/dataset/ai-readi"
+          "d4d:docExample": "https://example.org/known-uses/example-cohort"
       repository_details:
         description: >
           Free-text description of the repository of known dataset uses, including
@@ -137,7 +137,7 @@ classes:
         range: string
         multivalued: true
         annotations:
-          "d4d:docExample": "Training fairness-aware ML models for T2DM prediction"
+          "d4d:docExample": "Training fairness-aware ML models for disease-risk prediction"
       usage_notes:
         description: >-
           A note or caveat about using the dataset for its intended purposes.

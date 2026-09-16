@@ -1433,6 +1433,29 @@ hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
 the one annotated artifact. New evaluations use the strict exact-file check,
 whose exit status must be 0.
 
+## Schema release identity (#1874) and the neutral generation schema (#1875)
+
+The full schema declares `version: 3.0.0` and the core entry point
+(`data_sheets_schema_core.yaml`) declares the same version: the core is a
+projection of the full schema's modules and moves with it, and the recorder
+writes `schema.core_declared_version` beside `schema.declared_version` with a
+`note` when they disagree. Bump both together on any class, slot or enum
+change. `3.0.0` (2026-09-16) names the definitions the `2.0.0` label had
+stopped describing — a record valid under the August `2.0.0` may fail under
+it (narrative lists, bare-name persons, URL-shaped DOIs); the migration
+implications and what moved are in `notes/schema_release_3.0.0_2026-09-16.md`.
+The modules the two generation roots import carry **no study content** in
+any model-facing field — no study name, platform URL, real IRB or award
+number, or example family modelled on one study — because the native arm
+reads the merged files whole and the playbook's "examples are not facts"
+rule is not a substitute for absence. `tests/test_neutral_generation_schema.py`
+scans the import closure, the resources the native toolchain selects under
+`neutral`, and both profiles' digests; add a study token there before
+adding one anywhere a model reads. Schema namespace URIs and the `B2AI_*`
+prefixes identify the schema and stay. The digest renders none of the
+edited text, so neither profile's digest md5 moved with this change; every
+schema file hash did.
+
 ## Profiles: the study's text and vocabularies (#628, #1302)
 
 What is Bridge2AI's and not the pipeline's lives in `profiles.py`: the

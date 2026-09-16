@@ -76,7 +76,7 @@ classes:
         range: string
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants"
+          "d4d:docExample": "v1.0.1: Corrected mislabeled sensor device serial numbers for 12 participants"
 
 
   UpdatePlan:
@@ -153,7 +153,7 @@ classes:
         range: string
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "All versions available at fairhub.io; older versions archived on Zenodo"
+          "d4d:docExample": "All versions available from the primary repository; older versions archived in a general-purpose archive"
 
 
   ExtensionMechanism:

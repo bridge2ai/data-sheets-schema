@@ -102,7 +102,7 @@ classes:
           - DUO:0000046  # NCU - no commercial use
           - DUO:0000045  # NPU - non-profit use only
         annotations:
-          "d4d:docExample": "Retinal imaging algorithms are subject to pending patent"
+          "d4d:docExample": "Image-analysis algorithms derived from the dataset are subject to a pending patent"
 
 
   ExportControlRegulatoryRestrictions:
@@ -150,8 +150,7 @@ classes:
           DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept
           declared so the slot still parses; since #805 it is an inlined
           Person object like its replacement, so the pre-#805 records that
-          populate it with a bare name string (CM4AI v7 rep1 among them)
-          no longer validate against the current schema and keep the
+          populate it with a bare name string no longer validate against the current schema and keep the
           verdicts they were pinned with (#426). A new record should not
           populate it.
         range: Person
@@ -193,11 +192,11 @@ classes:
       committee_name:
         description: >-
           Name of the body responsible for access decisions, as the source
-          states it (e.g. "AI-READI Data Access Committee", "DACO").
+          states it (e.g. "Data Access Committee", "DACO").
         range: string
         slot_uri: d4d:governanceCommitteeName
         annotations:
-          "d4d:docExample": "Bridge2AI-Voice Data Access Committee (DACO)"
+          "d4d:docExample": "Example Consortium Data Access Committee (DAC)"
       committee_members:
         description: >-
           Members of the governance or data access committee. One entry per

@@ -6,7 +6,15 @@ title: data-sheets-schema
 # version in pyproject.toml. Provenance records read this so a generated D4D
 # record states which schema version produced it, rather than pinning identity
 # by content hash alone. Bump on any change to classes, slots or enums.
-version: 2.0.0
+#
+# 3.0.0 (#1874): the release identity of the definitions as they stand after
+# the changes that kept the 2.0.0 label — narrative lists became scalar
+# strings, Person references became inlined objects, Organization and Grant
+# identifiers became optional, DataGovernance and the data-standard
+# vocabulary were added, and DOI values must match the anchored bare form.
+# A record valid under 2.0.0 as published on 2026-08-06 may not validate
+# under 3.0.0. The core schema declares the same version and moves with it.
+version: 3.0.0
 description: |-
   A LinkML schema for Datasheets for Datasets.
 license: MIT

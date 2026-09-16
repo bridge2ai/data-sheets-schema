@@ -49,7 +49,7 @@ classes:
           - schema:name
           - schema:identifier
         annotations:
-          "d4d:docExample": "hba1c_percent"
+          "d4d:docExample": "biomarker_level"
 
       data_type:
         description: >-
@@ -157,7 +157,7 @@ classes:
         range: string
         slot_uri: schema:measurementTechnique
         annotations:
-          "d4d:docExample": "Glycated hemoglobin percentage measured at baseline visit"
+          "d4d:docExample": "Serum biomarker concentration measured at the baseline visit"
 
       derivation:
         description: >-
