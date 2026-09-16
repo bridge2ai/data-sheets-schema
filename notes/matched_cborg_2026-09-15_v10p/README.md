@@ -5,8 +5,10 @@ passed independent review and required CI, merged, and its branch was deleted.
 The user approved the cumulative budget amendment. Fresh checks and a separate
 hash-bound approval receipt admitted one CHORUS API canary. Initial full/core
 generation completed, but the audit stream disconnected before delivering audit
-text or terminal usage. The attempt is stopped and unaccepted; accounting
-#1865 and transport investigation #1849 remain open. No downstream canary ran.
+text or terminal usage. The attempt is stopped and unaccepted. The user has
+since confirmed the complete audit charge; a separate reconciliation preserves
+the original evidence, releases its reservation and resolves accounting #1865.
+Transport investigation #1849 remains open. No downstream canary ran.
 See the [preserved stopped outcome](CHORUS_api_stopped.md).
 
 The preparation-time registration, native overlay and public JSON views below

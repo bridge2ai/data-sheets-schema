@@ -17,8 +17,10 @@ an initial full/core pair, then
 [stopped during the audit stream](matched_cborg_2026-09-15_v10p/CHORUS_api_stopped.md)
 without audit text or terminal usage. All 24 attempt files are preserved;
 initial structural checks pass, but no final source acceptance exists.
-Interrupted-audit accounting #1865 and transport investigation #1849 remain
-open. No downstream canary launched.
+The user confirmed the complete interrupted-audit charge. A separate bound
+receipt and reconciled ledger preserve the original pending accounting, release
+the reservation and resolve #1865. Transport investigation #1849 remains open.
+No downstream canary launched.
 
 The frozen v10p condition retains renderer 12/evidence v3 for both arms,
 complete source reviews, strict receipt floors and explicit context-bypass
@@ -33,8 +35,8 @@ v2, profiles, schemas, model and evaluator definitions remain fixed. Native
 final validation now selects the matching protocol. Retain the pinned native
 runtime despite an unrelated update to the local alias.
 
-1. Resolve the interrupted v10p audit accounting (#1865) and investigate the
-   transport behavior (#1849). Preserve the stopped attempt without resuming it.
+1. With interrupted-audit accounting #1865 resolved, investigate the transport
+   behavior (#1849). Preserve the stopped attempt without resuming it.
    Source-attribution and applied-status acceptance (#1815/#1782) remains
    outstanding after the merged controls; both controllers enforce the existing
    receipt floors (#1854). The explicit provider-context control (#1852) is
@@ -74,5 +76,5 @@ allocation, combined canary ceiling and per-attempt limits remain binding.
 Unknown charges retain reservations and stop execution; a failed canary stops
 expansion. The v10o API attempt is complete and rejected; the approved v10p API
 attempt stopped during audit. No new paid attempt is admitted by this outcome
-update. Complete accounting, transport investigation and unchanged-canary
-acceptance remain necessary before expansion.
+update. Accounting is now reconciled; transport investigation and independent
+acceptance of a new unchanged canary remain necessary before expansion.
