@@ -1,5 +1,20 @@
 # v10p matched canaries — costed registration, 2026-09-15
 
+**Execution update, 2026-09-15 (America/Los_Angeles):** registration #1864
+passed independent review and required CI, merged, and its branch was deleted.
+The user approved the cumulative budget amendment. Fresh checks and a separate
+hash-bound approval receipt admitted one CHORUS API canary. Initial full/core
+generation completed, but the audit stream disconnected before delivering audit
+text or terminal usage. The attempt is stopped and unaccepted; accounting
+#1865 and transport investigation #1849 remain open. No downstream canary ran.
+See the [preserved stopped outcome](CHORUS_api_stopped.md).
+
+The preparation-time registration, native overlay and public JSON views below
+remain unchanged. Their pending-approval statements describe the state before
+the separate approval and launch receipts; they are not the current run status.
+
+## Original preparation record
+
 This fresh condition follows the source-rejected v10o canary. It pins
 renderer **12**, evidence protocol **v3**, and source-review instrument **v1**
 for both API and native agentic generation. Existing receipt floors, registered
