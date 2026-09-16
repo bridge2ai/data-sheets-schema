@@ -12,6 +12,22 @@ from tests.test_download.test_api_runner import FakeResponse
 from tests.test_evidence_generation_gate import EvidenceFake, run, specification
 
 
+@pytest.mark.parametrize("version", range(1, 13))
+@pytest.mark.parametrize("phase", ["audit", "report"])
+def test_complete_source_review_output_room_preserves_historical_limits(tmp_path, version, phase):
+    spec = replace(specification(tmp_path), render_version=version)
+    expected = 96000 if version == 12 else 24000
+    assert api.phase_max_tokens(spec, phase, 16000, model="claude-opus-5") == expected
+    assert api.phase_max_tokens(spec, "reconcile_full", 16000, model="claude-opus-5") == 96000
+
+
+def test_complete_source_review_output_room_respects_route_limit(tmp_path, monkeypatch):
+    spec = replace(specification(tmp_path), render_version=12)
+    monkeypatch.setitem(api.MODEL_OUTPUT_LIMIT, "small-offline-route", 12000)
+    for phase in ("audit", "report"):
+        assert api.phase_max_tokens(spec, phase, 16000, model="small-offline-route") == 12000
+
+
 @pytest.mark.parametrize("runtime", ["Claude API (direct)", "Claude Code"])
 def test_both_arms_deliver_and_replay_the_complete_contract(tmp_path, runtime):
     spec = replace(specification(tmp_path, runtime), render_version=10)

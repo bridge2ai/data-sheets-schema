@@ -1,0 +1,30 @@
+{
+  "observed_at": "2026-09-16T04:19:26.679454+00:00",
+  "source": "https://api.cborg.lbl.gov/model/info",
+  "models": [
+    {
+      "model_name": "claude-opus-5",
+      "route_model": "vertex_ai/claude-opus-5",
+      "pricing_and_limits": {
+        "max_tokens": 128000,
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 128000,
+        "supports_url_context": null
+      },
+      "registered_capabilities": {
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 128000,
+        "max_tokens": 128000,
+        "supports_prompt_caching": true,
+        "supports_reasoning": true,
+        "supports_tool_choice": true,
+        "supports_function_calling": true,
+        "mode": "chat"
+      }
+    }
+  ],
+  "changed_fields": [],
+  "matches_registered_pricing_observation": true,
+  "scientific_calls": 0,
+  "source_payloads_transmitted": 0
+}

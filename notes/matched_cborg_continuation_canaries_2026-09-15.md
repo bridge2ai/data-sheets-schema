@@ -8,6 +8,17 @@ All 41 originals are preserved. No downstream scientific job has launched. The n
 checker correction #1846 is merged after independent review and required CI.
 The provider interruption itself remains unexplained (#1849).
 
+The fresh [v10p costed registration](matched_cborg_2026-09-15_v10p/README.md)
+pins renderer 12/evidence v3 for both arms, complete source reviews, strict
+receipt floors and explicit context-bypass controls. Offline sizing led to
+96k API audit/report allowances (#1863), preserving historical settings.
+Existing source bundles, profiles, schemas and evaluator definitions are
+unchanged. The proposed four-attempt caps fit the remaining allocation, but
+their cumulative canary ceiling amendment still needs approval. No launch
+receipt or paid attempt is included; exact-registration review, required CI
+and fresh admission checks remain gates. #1815/#1782 remain open for
+independent acceptance of a new unchanged canary.
+
 The [v10o registration](matched_cborg_2026-09-15_v10o/README.md) retains both
 generation arms and all evaluation styles. Source bundles, renderer 11/evidence
 v2, profiles, schemas, model and evaluator definitions remain fixed. Native
