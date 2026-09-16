@@ -16,6 +16,7 @@ from data_sheets_schema.registry import load_registry
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 SERIES = "generalized_v10_2026-09-13"
+DEFAULT_CANARY_ORDER = "CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1"
 PROJECTS = ["CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC"]
 
 
@@ -61,7 +62,14 @@ def main():
     parser.add_argument("--per-job-attempt-caps", type=Path,
                         help="JSON mapping of explicitly approved job IDs to whole-attempt USD caps; preparation grants no launch approval")
     parser.add_argument("--render-only", action="store_true")
+    parser.add_argument("--canary-order", default=DEFAULT_CANARY_ORDER,
+                        help="Comma-separated canary job ids in launch order; each later canary requires "
+                             "independent acceptance of every earlier one. Existing registrations keep "
+                             "the API-first default; a native-first sequence names the agentic job first.")
     args = parser.parse_args()
+    canary_order = [name.strip() for name in args.canary_order.split(",") if name.strip()]
+    if sorted(canary_order) != sorted(DEFAULT_CANARY_ORDER.split(",")):
+        parser.error("canary order must name exactly the four registered canaries once each")
     output = args.output.resolve()
     if (args.prior_billing is None) != (args.prior_cost_usd is None):
         parser.error("prior billing and its registered total must be supplied together")
@@ -214,7 +222,7 @@ def main():
                                            "source_manifest": str(kids / "manifest.yaml"),
                                            "applicability_context": str(kids / "applicability.yaml")},
                        "synthetic_fixture": "offline software checks only; excluded from the scientific canary/cohort",
-                       "canary_order": ["CHORUS_api_rep1", "CHORUS_agentic_rep1", "KIDS_FIRST_api_rep1", "KIDS_FIRST_agentic_rep1"],
+                       "canary_order": canary_order,
                        "rep1_canaries_count_in_cohort_if_unchanged": True,
                        "jobs": jobs},
         "evaluations": {"instruments": instruments, "fitness_specifications": fitness,

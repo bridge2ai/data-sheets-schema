@@ -1,0 +1,40 @@
+{
+  "source_base": "f3c3efcbdb8fb5bf80cbc6be4f3622e6d8d7831f",
+  "registration_base_main": "cdefb9df4699a49b16122ffbbdd7a31e3f3ec03f",
+  "renderer": 12,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Schema release 3.0.0 with no study content in the generation schemas (#1874, #1875; the base branch of this PR) and prepare_registration --canary-order for a native-first sequence (this PR). Renderers, evidence protocol, source-review instrument, prompts, sources and profiles unchanged from v10p.",
+  "merged_controls": [
+    {
+      "pr": 1852,
+      "merge": "5212e90b586759cb7200cf666664f33df52ec4bb",
+      "scope": "explicit provider context-bypass headers"
+    },
+    {
+      "pr": 1855,
+      "merge": "32dacddcf9124ba83c42f3ce17cfa166f67fbb11",
+      "scope": "existing strict receipt floors and registered-source binding"
+    },
+    {
+      "pr": 1857,
+      "merge": "eeac40047ccff3fe4c493e6707b5a5e0cac44eff",
+      "scope": "complete source review with durable API stop/admission",
+      "reviewed_head": "082789d3ef3d6dda7990c36fd8e7e0113a24974c",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35039816575"
+    }
+  ],
+  "native_controller_sha256": "c7236faf528eb98cd020ee7feb5f16b15dee25f452644f0a5ef9e82609f7adbc",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "0086ba0d6b6a81f52012c3171670310ef55482ea088001726a922f098425e621",
+    "CHORUS_source_review_plan.json": "412758c7e6903cc47fc3875453e342277af5f5ee6d4c07bba993a1fb1a9fdc9e"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "launch_authorization": "Combined-ceiling amendment pending (exact figure local); no launch receipt issued. The native CHORUS canary is first in the registered order.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Source acceptance remains independent of software acceptance."
+}
