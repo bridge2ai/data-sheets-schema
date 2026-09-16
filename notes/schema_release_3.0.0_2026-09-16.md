@@ -106,10 +106,11 @@ and are left alone (absent is not stale). Of the 173, 80 pin the 2.0.0
 final state and are newly STALE under 3.0.0; 93 pin three earlier schema
 states (`e3099fdc…` 71, `0389e9c3…` 21, `fc729512…` 1) and already read
 STALE before this release. STALE is reported, never fatal: `runs check --strict` does not fail on it,
-and `runs select` does not read the recorded status at all — it validates
-each candidate afresh against the schema on disk and filters on that live
-result, so a record whose bytes still validate under 3.0.0 stays eligible
-and one that no longer does is rejected until rerun. The disposition
+and `runs select` does not use the recorded status for eligibility — it
+validates each candidate afresh against the schema on disk and filters on
+that live result, reading the recorded status only for its diagnostics —
+so a record whose bytes still validate under 3.0.0 stays eligible and one
+that no longer does is rejected until rerun. The disposition
 is a separate data pass after this change merges, never part of it
 (#1896): `d4d provenance recheck-validation --all` reports by default and
 writes only under `--execute`, and it writes only where the recorded
