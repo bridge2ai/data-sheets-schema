@@ -1,6 +1,6 @@
 {
   "kind": "proposed_workload_inventory_not_a_launch_registration",
-  "source_registration_sha256": "9947a9eaa24f2294ed7ba528eb0acb706556245c9ee568582833ac994ac63f0b",
+  "source_registration_sha256": "70ebfba81129afb2e7dc2e8ac9ad59f458b520520b88e61e88cd37e29c51d14a",
   "provider": "https://api.cborg.lbl.gov",
   "model": "claude-opus-5",
   "status": "generation_canaries_and_evaluator_registrations_pending",
