@@ -76,9 +76,11 @@ reasons, in decreasing order of how often the April records hit them:
 the merged-schema hashes its verdict was computed against, and `d4d runs
 check` reports a verdict whose pin no longer matches the files on disk as
 STALE (#426). Of the 286 provenance records in the corpus, 279 carry a
-validation block, 173 pin a schema hash, and all 173 read STALE under
-3.0.0; the other 106 predate the pin and are left alone (absent is not
-stale). STALE is reported, never fatal: `runs select` groups it with
+validation block and 173 pin a schema hash; the other 106 predate the pin
+and are left alone (absent is not stale). Of the 173, 80 pin the 2.0.0
+final state and are newly STALE under 3.0.0; 93 pin three earlier schema
+states (`e3099fdc…` 71, `0389e9c3…` 21, `fc729512…` 1) and already read
+STALE before this release. STALE is reported, never fatal: `runs select` groups it with
 UNVERIFIED and `runs check --strict` does not fail on it. The disposition
 is a separate data pass after this change merges, never part of it
 (#1896): `d4d provenance recheck-validation --all` reports by default and
@@ -109,8 +111,11 @@ written against one study (Type 2 diabetes, continuous glucose monitoring,
 retinal imaging and grading, a triple-balanced design), and three real IRB
 protocol numbers and a real NIH award number sat among the examples.
 
-**What changed.** Fifty-nine model-facing strings in the modules the two
-generation roots import were replaced with neutral forms: the study names,
+**What changed.** Fifty-seven model-facing strings in the modules the two
+generation roots import (49 examples, six descriptions, two `comments:`
+entries, counted with the guard test's own traversal on base and head)
+were replaced with neutral forms, and two mapping-generator scripts
+beside them: the study names,
 the `fairhub.io` platform URLs, the committee description and example, the
 deprecated contact description's run reference, the `related_datasets`
 description's companion-dataset example, the two vocabulary descriptions
@@ -158,13 +163,18 @@ retained: they identify the schema, not a dataset.
 | `Dataset` digest md5, `neutral` | `94859bbbe7fa2296…` | unchanged |
 | `CoreDataset` digest md5, `bridge2ai` / `neutral` | `980ccdafe6762d45…` / `61c50be60e601f7d…` | unchanged |
 
-The digest renders slot names, ranges, cardinality and the leading window
-of each top-level slot's description, and it does not render the
-descriptions of nested attributes (the edited `data_topic` and
-`data_substrate` descriptions are `Instance` attributes) or any
-`d4d:docExample` annotation; no top-level slot description was edited. So
-**the API arm's instrument identity did not move** and the digest ledger
-gains no entry. The two entry points, both merged files and every edited module moved (unedited modules such as `D4D_FileCollection.yaml` keep their hashes), so `schema.full_sha256` and
+The digest renders slot names, ranges, cardinality and the first 300
+characters of each top-level slot's description
+(`schema_digest.DESCRIPTION_CHARS`); it does not render the descriptions
+of nested attributes (the edited `data_topic` and `data_substrate`
+descriptions are `Instance` attributes), `comments:` fields or any
+`d4d:docExample` annotation. The one top-level description edited, the
+core's `related_datasets`, changed at character 375 of 660, outside the
+rendered window. So **the API arm's instrument identity did not move**
+and the digest ledger gains no entry. The rule for a future edit: text
+inside the first 300 characters of a top-level slot description moves the
+digest; the `issued` slot's format-example date stays for exactly that
+reason. The two entry points, both merged files and every edited module moved (unedited modules such as `D4D_FileCollection.yaml` keep their hashes), so `schema.full_sha256` and
 `schema.core_sha256` on every new record, the schema files a registration
 pins and the native playbook's toolchain hashes all move. That is the
 condition boundary: a generation registered after this change pins

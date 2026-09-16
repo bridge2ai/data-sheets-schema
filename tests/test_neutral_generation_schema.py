@@ -144,7 +144,7 @@ class TestGenerationSchemaSources(unittest.TestCase):
             base = Path(d) / "base.yaml"
             base.write_text(yaml.safe_dump({
                 "id": "https://example.org/base", "name": "base",
-                "description": "The Bridge2AI schema-level description is not scanned",
+                "description": "The AI-READI schema-level description is not scanned",
                 "comments": ["a module-level VOICE comment is scanned"],
                 "slots": {"title": {"description": "plain", "annotations": {"d4d:docExample": "AI-READI: title"}},
                           "topic": {"description": "the B2AI_TOPIC prefix is the natural home"},

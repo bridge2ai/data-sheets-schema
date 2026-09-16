@@ -1453,9 +1453,11 @@ scans the import closure, the resources the native toolchain selects under
 `neutral`, and both profiles' digests; add a study token there before
 adding one anywhere a model reads. Schema namespace URIs and the `B2AI_*`
 prefixes identify the schema and stay. The digest renders no docExample
-annotation and no nested attribute's description, and no top-level slot
-description was edited, so neither profile's digest md5 moved with this
-change; the four entry-point and merged schema files and every edited module moved. Each release's four file hashes are registered in
+annotation, no `comments:` field and no nested attribute's description,
+and only the first 300 characters of a top-level slot description; the
+one top-level description this change edited moved text outside that
+window, so neither profile's digest md5 moved. Text inside that window
+would. The four entry-point and merged schema files and every edited module moved. Each release's four file hashes are registered in
 `src/data_sheets_schema/schema/release_history.yaml`: the checked report
 blocks attest the schema hashes they ran under and are never rewritten, so
 the corpus reproduction test accepts any registered release for a stored

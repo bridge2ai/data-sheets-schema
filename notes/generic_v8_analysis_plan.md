@@ -2717,8 +2717,10 @@ deprecated contact description, the VOICE_PEDIATRIC example in the core's
 `related_datasets` description, the two vocabulary descriptions that
 named "Bridge2AI standards", and the diabetes/CGM/retina example family
 modelled on one study, three real IRB protocol numbers and one real NIH
-award among it. The digest renders no docExample annotation and no nested
-attribute's description, and no top-level slot description was edited, so
+award among it. The digest renders no docExample annotation, no `comments:` field
+and no nested attribute's description, and only the first 300 characters
+of a top-level slot description; the one top-level description edited
+(the core's `related_datasets`) moved text outside that window, so
 **neither profile's `Dataset` digest moved**
 (`6be15822…` study, `94859bbb…` neutral; `CoreDataset` `980ccdaf…` /
 `61c50be6…`) and the inventory ledger gains no entry — the API arm's
@@ -2728,8 +2730,9 @@ source `0cdb2744…` → `de607a07…`, merged core `7fcd7ddd…` → `3f36969e�
 so `schema.full_sha256`/`core_sha256` on every new record, the schema
 pins of any registration and the native toolchain's resource hashes move
 with this commit; no earlier registration, record or score is
-re-attested, and the v10p condition keeps its `2.0.0`-labelled files. The
-173 validation verdicts that pin a schema hash read STALE until a
+re-attested, and the v10p condition keeps its `2.0.0`-labelled files. Of the
+173 validation verdicts that pin a schema hash, 80 are newly STALE (93
+already were, pinning three earlier schema states) until a
 separate `recheck-validation --all --execute` data pass restamps the pin
 where the verdict reproduces and holds the rest for a per-label rerun
 (#1891, #1896). The
