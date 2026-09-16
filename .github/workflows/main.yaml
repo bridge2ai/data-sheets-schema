@@ -35,34 +35,21 @@ jobs:
       - name: Initialise the FAIRSCAPE models submodule
         run: git submodule update --init fairscape_models
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1.3
-        with:
-          virtualenvs-in-project: true
-
-      - name: Cache the virtualenv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-
-      - name: Install dependencies and project
-        run: poetry install --no-interaction
-
       # Assignment uses the actual pytest collection, including new test files
       # and both filename conventions. No maintained test allowlist or -m filter.
-      # Two local workers can share expensive schema caches within each shard.
+      # Use the runner's logical CPUs (up to four); -n auto selected only two
+      # physical cores on the standard four-vCPU public Linux runner.
       - name: Run the suite shard including corpus checks
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
           -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/4
           --ci-shard-timings=utils/ci_test_durations.json
-          --durations=25 -n auto --dist worksteal
+          --durations=25 -n logical --maxprocesses=4 --dist worksteal
           --junitxml=test-results/pytest.xml
 
       # These independent offline controls run once, outside the tests/ collection.
@@ -109,24 +96,10 @@ jobs:
       - name: Initialise the FAIRSCAPE models submodule
         run: git submodule update --init fairscape_models
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1.3
-        with:
-          virtualenvs-in-project: true
-
-      - name: Cache the virtualenv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-
-      - name: Install dependencies and project
-        run: poetry install --no-interaction
 
       - name: Build and validate the schema products
         run: time make test-schema

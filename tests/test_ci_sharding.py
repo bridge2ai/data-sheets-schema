@@ -64,7 +64,7 @@ def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weig
         flags = [f"--ci-shard-timings={timing}"]
     actual = Counter()
     for index in range(1, 5):
-        result = _run(tmp_path, f"--ci-shard={index}/4", "-n", "2",
+        result = _run(tmp_path, f"--ci-shard={index}/4", "-n", "logical", "--maxprocesses=4",
                       *flags, f"--junitxml=shard-{index}.xml")
         assert result.returncode == 0, result.stdout + result.stderr
         actual.update(_cases(tmp_path / f"shard-{index}.xml"))

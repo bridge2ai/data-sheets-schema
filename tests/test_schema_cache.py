@@ -30,10 +30,12 @@ class TheParseCache(unittest.TestCase):
         _write(self.p, "prefixes:\n  doi: https://doi.org/\n", mtime_ns=1_000_000_000)
 
     def test_the_second_read_is_served_without_parsing(self):
-        first = schema_cache.load_schema(self.p)
-        info = schema_cache._parsed.cache_info()
-        schema_cache.load_schema(self.p)
-        self.assertEqual(schema_cache._parsed.cache_info().hits, info.hits + 1)
+        from unittest import mock
+
+        with mock.patch.object(schema_cache.yaml, "safe_load", wraps=schema_cache.yaml.safe_load) as parse:
+            first = schema_cache.load_schema(self.p)
+            schema_cache.load_schema(self.p)
+        self.assertEqual(parse.call_count, 1)
         self.assertEqual(first, {"prefixes": {"doi": "https://doi.org/"}})
 
     def test_an_edit_in_place_is_seen(self):

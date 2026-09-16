@@ -5,6 +5,18 @@ on four Python 3.12 shards. Main and manual runs retain the wider interpreter
 matrix and separate schema/example builds. The aggregate `test` check still
 requires every applicable job to succeed.
 
+Each shard uses `-n logical --maxprocesses=4 --dist worksteal`: up to four
+workers on the standard public Linux runner, rather than the two physical
+cores selected by `-n auto`. The subprocess coverage proof exercises this
+worker configuration. The number of shards and the collected tests are unchanged.
+
+Tests, schema/example builds and both documentation workflows share
+`.github/actions/setup-project`. Poetry 2.4.3 has its own cached environment;
+the project environment is keyed by exact Python version, runner architecture,
+the lockfile, project metadata and setup action. Every job still installs the
+current checkout on cache hits. A cold cache may take longer; use recorded
+Actions timings to assess both cold and warm runs.
+
 The workflow supplies `--ci-shard-timings=utils/ci_test_durations.json` to the
 pytest partition plugin. It assigns the actual collected file set using
 largest estimated durations first, placing each file on the least loaded
