@@ -1,0 +1,61 @@
+{
+  "kind": "public_stopped_attempt_record_not_source_acceptance",
+  "recorded_at": "2026-09-16T22:26:18.454396+00:00",
+  "job": "CHORUS_agentic_rep1",
+  "registration_sha256": "2148adf6727061fec526d0067aae14425bfad2d2f3061ca02cd100a88c849038",
+  "native_overlay_sha256": "cff4d6f016de669f90052083f8811c70f6847d66a24fd026ea47a588bec7e583",
+  "launch_receipt_sha256": "a3478e301577276b833d4ee7e526268f78c4b73f40b9efc7bbd2608c31529705",
+  "launch_commit": "75eae6147b779315794f347c333bc5b565586e3f",
+  "main_after_merge": "e5b2609f5",
+  "runtime": "Claude Code 2.1.272 through CBORG, claude-opus-5",
+  "started_at": "2026-09-16T21:52:17Z",
+  "finished_at": "2026-09-16T22:21:06Z",
+  "status": "stopped_at_registered_whole_attempt_cap",
+  "phases_completed": [
+    "chunk_review_receipt",
+    "full_record"
+  ],
+  "phases_not_run": [
+    "audit",
+    "reconcile",
+    "derive_core",
+    "provenance",
+    "report"
+  ],
+  "model_requests_admitted": 57,
+  "denied_requests": 1,
+  "unresolved_requests": 0,
+  "runtime_turns": 61,
+  "usage": {
+    "input_tokens": 7367,
+    "cache_creation_input_tokens": 212559,
+    "cache_read_input_tokens": 4326307,
+    "output_tokens": 118696,
+    "thinking_tokens": 74283
+  },
+  "artifacts": {
+    "data/d4d_concatenated/claudecode_agent/2026-09-16_claude-opus-5-agentic-generalized-v10q-chorus_rep1/CHORUS_d4d.yaml": "3a4f08ce204158be",
+    "data/d4d_concatenated/claudecode_agent_core/2026-09-16_claude-opus-5-agentic-generalized-v10q-chorus_rep1/CHORUS_coverage_receipt.yaml": "69d69edf1fcd1383"
+  },
+  "artifact_hash_form": "sha256 prefix; full hashes in the private inventory",
+  "receipt_chunks": {
+    "manifest": 8,
+    "receipted": 6,
+    "never_receipted": [
+      "c007",
+      "c008"
+    ]
+  },
+  "tool_permission_denials": 8,
+  "full_record_validates_against_3_0_0": true,
+  "scientific_acceptance": false,
+  "resume_or_retry_authorized": false,
+  "issues": [
+    1914,
+    1915,
+    1916,
+    1917,
+    1918
+  ],
+  "financial_details": "local; settled totals in tracker #1763"
+}
