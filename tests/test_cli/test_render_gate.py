@@ -12,6 +12,7 @@ import hashlib
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
 
@@ -126,17 +127,22 @@ class TestAChangedPromptFileIsNotATamperedInstruction(unittest.TestCase):
         if not (BUNDLE.exists() and self.PROMPT.exists()):
             self.skipTest("corpus not present")
         self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.backup = self.PROMPT.read_bytes()
+        # Each xdist worker must render and mutate its own file. Restoring the
+        # repository prompt in tearDown still exposes changed bytes to readers.
+        self.PROMPT = Path(self.tmp.name) / self.PROMPT.name
+        self.PROMPT.write_bytes(self.backup)
+        from data_sheets_schema.api_runner import CONDITION_PROMPTS
+        prompt_registry = patch.dict(CONDITION_PROMPTS, {"generic_v3": self.PROMPT})
+        prompt_registry.start()
+        self.addCleanup(prompt_registry.stop)
         self.concat = Path(self.tmp.name) / "data/d4d_concatenated"
         (self.concat / f"{self.METHOD}_core" / self.LABEL).mkdir(parents=True)
         self.spec = RunSpec(
             project=self.PROJECT, arm="BASELINE (input documents only)",
             method=self.METHOD, bundle=BUNDLE, label=self.LABEL,
             condition="generic_v3", runtime="Claude Code", provider="Anthropic")
-        self.backup = self.PROMPT.read_bytes()
-
-    def tearDown(self):
-        self.PROMPT.write_bytes(self.backup)
-        self.tmp.cleanup()
 
     def _write(self, text, pin=True):
         from data_sheets_schema.provenance import _sha256
@@ -176,6 +182,29 @@ class TestAChangedPromptFileIsNotATamperedInstruction(unittest.TestCase):
         """So a reader knows the verdict rests on having ruled drift out."""
         self._write(self.spec.instruction + "\nEDITED\n")
         self.assertIn("unchanged prompt file", self._verify()[1])
+
+
+@unittest.skipUnless(BUNDLE.exists() and
+                     TestAChangedPromptFileIsNotATamperedInstruction.PROMPT.exists(),
+                     "corpus not present")
+class TestTheRenderGateTestsLeavePromptsAlone(unittest.TestCase):
+    def test_prompt_drift_is_exercised_without_writing_the_repository_prompt(self):
+        """Catch the shared-file race without allowing a regression to mutate it."""
+        case_type = TestAChangedPromptFileIsNotATamperedInstruction
+        canonical = case_type.PROMPT.resolve()
+        original_open = Path.open
+
+        def guarded_open(path, mode="r", *args, **kwargs):
+            if any(flag in mode for flag in ("w", "a", "x", "+")):
+                self.assertNotEqual(path.resolve(), canonical,
+                                    "prompt-drift tests must write a private copy")
+            return original_open(path, mode, *args, **kwargs)
+
+        result = unittest.TestResult()
+        with patch.object(Path, "open", guarded_open):
+            case_type("test_a_changed_prompt_file_is_unverifiable_not_a_mismatch").run(result)
+        self.assertTrue(result.wasSuccessful(), result.errors + result.failures)
+        self.assertFalse(result.skipped, "the prompt-drift assertion must run")
 
 
 if __name__ == "__main__":

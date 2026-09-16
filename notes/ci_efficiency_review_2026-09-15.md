@@ -1,6 +1,6 @@
 # CI efficiency follow-up — 2026-09-15
 
-Issues: #1868, #1869; review follow-ups #1871, #1872. Starting commit: `f8c13691605e58829b8287b267726699732e8c04`.
+Issues: #1868, #1869; review follow-ups #1871, #1872, #1873. Starting commit: `f8c13691605e58829b8287b267726699732e8c04`.
 
 ## Measured baseline
 
@@ -95,3 +95,15 @@ unchanged. The package cache change must preserve validation and serialization.
   became a file. Both probes failed on the first scoped-cache implementation.
   Such unidentifiable deletions now conservatively clear all parsed entries;
   ordinary output writes retain targeted invalidation. Both probes pass.
+- The six-shard [PR trial](https://github.com/bridge2ai/data-sheets-schema/actions/runs/35063777991)
+  passed in 5:56 with 1,546 seconds across non-skipped jobs, retaining every
+  baseline identity and outcome plus 14 added guards. The paired full matrix
+  exposed an existing prompt-fixture race on Python 3.10 (#1873): drift tests
+  edited and restored the same committed prompt concurrently. Each test now
+  copies its prompt and redirects its process-local rendering registry to that
+  copy. All original drift/mismatch assertions remain; a new behavioral guard
+  rejects any repository-prompt write while executing the drift case. That
+  guard failed on the old fixture without modifying the prompt. All 18 render
+  gate tests pass with the final four-worker scheduling flags. PR and full
+  matrix acceptance must be repeated on this fix; the failed matrix is retained
+  as evidence rather than rerun until green without a change.
