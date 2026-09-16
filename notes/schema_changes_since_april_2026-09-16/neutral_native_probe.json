@@ -1,0 +1,17 @@
+{
+  "profile": "neutral",
+  "schema_resources": {
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": {
+      "sha256": "ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da",
+      "named_example_present": true,
+      "named_description_present": true,
+      "path_in_native_playbook": true
+    },
+    "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml": {
+      "sha256": "7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449",
+      "named_example_present": true,
+      "named_description_present": true,
+      "path_in_native_playbook": true
+    }
+  }
+}
