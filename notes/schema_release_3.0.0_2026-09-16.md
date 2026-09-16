@@ -141,3 +141,13 @@ pins and the native playbook's toolchain hashes all move. That is the
 condition boundary: a generation registered after this change pins
 `3.0.0` and the hashes above, and no earlier registration or record is
 re-attested. The plan note carries the dated amendment.
+
+**The checked report blocks attest the previous hashes, and stay as
+written.** Every `report_claims` block records the merged-schema hashes its
+check ran under, and the corpus reproduction test required a fresh recompute
+to reproduce them byte for byte, which any schema edit breaks; rewriting
+the 278 blocks to today's hashes is what #1362/#1363 forbid. The release
+history `src/data_sheets_schema/schema/release_history.yaml` now registers
+each release's four hashes, and the test accepts a block that attests any
+registered release while requiring the recompute to attest the newest one.
+A future release adds its entry in the same change that moves the hashes.

@@ -1,0 +1,39 @@
+# Schema release history (#1874).
+#
+# One entry per release identity of the full/core definitions, oldest first,
+# with the sha256 of the two source entry points and the two merged files at
+# the last state that carried the label. A record's `schema` block and every
+# checked report block attest the merged-file hashes of the schema the check
+# ran under; a schema release moves those hashes, and the historical blocks
+# are never rewritten to today's (#1362, #1363). The corpus reproduction test
+# therefore accepts a block that attests any registered pair here and
+# requires a fresh recompute to attest the newest one. A new entry is added
+# with the release that moves the hashes, in the same change.
+releases:
+  - version: 2.0.0
+    declared: 2026-08-06
+    declared_in_commit: 52a0e1732
+    final_state_commit: cdefb9df4699a49b16122ffbbdd7a31e3f3ec03f
+    final_state_date: 2026-09-16
+    full_source_sha256: 38e19f26a5490fd30557e17a77f4ce6f3ec151546769f5d5e26249b5cb700976
+    full_merged_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_source_sha256: 0cdb2744a4025efa3723fdf08fc649cf5434db329eead4e028513e85f123293c
+    core_merged_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
+    note: >-
+      The label was kept through the remaining narrative scalarization,
+      DataGovernance, the data-standard vocabulary, anchored DOI validation
+      and Person inlining; the hashes are of its final state, which every
+      checked report block in the corpus attests. The core entry point
+      declared no version.
+  - version: 3.0.0
+    declared: 2026-09-16
+    full_source_sha256: 6de786d36f04c27fa4ec46dd59165601919bd8e27a4dbeb39585138f0cbc18de
+    full_merged_sha256: d723e8e726c0ba5f405cf040ae148ff9fd43705d0a753e7cf54e917d7a28e0c8
+    core_source_sha256: de607a078ede069b7aaee3909c90059b03b9305247eca671fe347285f2f46007
+    core_merged_sha256: 0aba339b4d9da509e7de61d8ed64fd9ad2933f7cc6aa061d777742691bc9aceb
+    note: >-
+      Names the definitions the 2.0.0 label had stopped describing; the core
+      entry point declares the same version. In the same change every
+      model-facing study string left the generation schemas (#1875). Neither
+      profile's digest md5 moved; every schema file hash did. See
+      notes/schema_release_3.0.0_2026-09-16.md.

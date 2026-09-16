@@ -1454,7 +1454,12 @@ scans the import closure, the resources the native toolchain selects under
 adding one anywhere a model reads. Schema namespace URIs and the `B2AI_*`
 prefixes identify the schema and stay. The digest renders none of the
 edited text, so neither profile's digest md5 moved with this change; every
-schema file hash did.
+schema file hash did. Each release's four file hashes are registered in
+`src/data_sheets_schema/schema/release_history.yaml`: the checked report
+blocks attest the schema hashes they ran under and are never rewritten, so
+the corpus reproduction test accepts any registered release for a stored
+block and requires the newest for a recompute. A change that moves the
+merged-schema bytes adds its entry there in the same commit.
 
 ## Profiles: the study's text and vocabularies (#628, #1302)
 
