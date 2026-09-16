@@ -27,9 +27,10 @@ independently establish private accounting or preservation.
   core schemas declare `3.0.0`, and every model-facing study string left
   the modules both generation arms consume (the native arm reads the merged
   files whole; the API arm reads the digest). Neither profile's digest md5
-  nor any fitness specification moved; every schema file hash did, so the
-  registration's schema pins and the native toolchain's resource hashes are
-  new. See [the release note](../schema_release_3.0.0_2026-09-16.md).
+  nor any fitness specification moved; the two entry points, both merged
+  files and every edited module did (unedited modules keep their hashes),
+  so the registration's schema pins and the native toolchain's resource
+  hashes are new. See [the release note](../schema_release_3.0.0_2026-09-16.md).
 - **Canary order.** `prepare_registration.py` takes `--canary-order`; this
   registration names the agentic jobs first. The controllers already read
   the order from the registration; existing registrations keep their

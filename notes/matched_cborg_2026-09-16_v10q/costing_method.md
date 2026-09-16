@@ -51,10 +51,13 @@ generation call. Current prices, source identities and settled accounting must
 be rechecked before a launch receipt. The proposed combined-ceiling amendment
 is still pending; neither this document nor a merged registration approves it.
 
-**v10q.** The API sizing above is carried unchanged: the sources, prompts,
-digests and phase allowances are v10p's, and the only new bytes an API
-request carries are none (the digest did not move with the schema
-release). The native arm runs first under this registration and remains
+**v10q.** The API sizing volumes above carry over: the sources, prompt
+templates, digests, output allowances and carried-record specimens are
+v10p's, and the digest did not move with the schema release. The rendered
+request identities are nevertheless new: every instruction, initial
+request and sizing payload hashes differently because the run date and the
+v10q labels and output paths are rendered into them, and reusing v10p bytes
+under v10q would fail its pins. The native arm runs first under this registration and remains
 unmeasured: no native attempt has completed under any v10 condition, so its
 cap is a ceiling with no empirical basis yet, and the first accepted native
 canary is the first sizing observation for that arm.
