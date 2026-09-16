@@ -74,7 +74,9 @@ def forget(path: Path) -> None:
     Same-size, same-timestamp writes still need explicit invalidation. Both
     the cached and current inode matter when a writer atomically replaces
     the file. A deleted file can also be forgotten using its cached identity.
-    Unrelated schemas and records remain cached.
+    If a missing name has no cached identity, clear all parsed entries because
+    its surviving aliases cannot be identified. Otherwise unrelated files stay
+    cached.
     """
     from data_sheets_schema.resources import resource_path
     p = resource_path(path).resolve()
@@ -83,8 +85,9 @@ def forget(path: Path) -> None:
         identities = {cached[0][:2]} if cached is not None else set()
         try:
             identities.add(_file_state(p)[:2])
-        except FileNotFoundError:
-            pass
+        except (FileNotFoundError, NotADirectoryError):
+            if cached is None:
+                _PARSED.clear()
         for other, (state, _) in list(_PARSED.items()):
             if state[:2] in identities:
                 del _PARSED[other]

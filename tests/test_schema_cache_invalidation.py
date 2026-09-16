@@ -86,6 +86,25 @@ def test_forgetting_a_deleted_file_also_invalidates_its_cached_hardlink(tmp_path
         cache.load_yaml(path)
 
 
+@pytest.mark.parametrize("parent_replaced", [False, True])
+def test_forgetting_an_uncached_missing_alias_cannot_leave_a_stale_read(tmp_path, parent_replaced):
+    parent = tmp_path / "removed"
+    parent.mkdir()
+    path, alias = parent / "record.yaml", tmp_path / "alias.yaml"
+    write(path, "value: 1\n")
+    os.link(path, alias)
+    # Only the surviving alias was read. The deleted name has no cache entry
+    # from which to recover an inode (also possible after LRU eviction).
+    assert cache.load_yaml(alias) == {"value": 1}
+    path.unlink()
+    if parent_replaced:
+        parent.rmdir()
+        parent.write_text("no longer a directory")
+    write(alias, "value: 2\n")
+    cache.forget(path)
+    assert cache.load_yaml(alias) == {"value": 2}
+
+
 def test_invalid_yaml_is_not_retained_as_a_successful_read(tmp_path):
     path = tmp_path / "bad.yaml"
     write(path, "value: [\n")

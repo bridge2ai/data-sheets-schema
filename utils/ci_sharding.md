@@ -1,14 +1,14 @@
 # CI test partitioning
 
 Every pull request runs the complete collected suite, including corpus tests,
-on four Python 3.12 shards. Main and manual runs retain the wider interpreter
+on six Python 3.12 shards. Main and manual runs retain the wider interpreter
 matrix and separate schema/example builds. The aggregate `test` check still
 requires every applicable job to succeed.
 
 Each shard uses `-n logical --maxprocesses=4 --dist load --maxschedchunk=1`: up to four
 workers on the standard public Linux runner, rather than the two physical
 cores selected by `-n auto`. The subprocess coverage proof exercises this
-worker configuration. The number of shards and the collected tests are unchanged.
+worker configuration and six-way partition. Every collected test remains included.
 
 Within a shard, files with the largest estimated time per collected case run
 first. A stable sort keeps the existing order within each file. Small xdist
@@ -46,11 +46,11 @@ runner load and changed tests can affect the actual result.
 The current snapshot was refreshed from successful four-worker run
 [35061852492](https://github.com/bridge2ai/data-sheets-schema/actions/runs/35061852492)
 at `44836e190060fe07b262c948dead269d604c4014`: 5,209 cases in 281 files.
-After the cache optimization, the old assignment accumulated 1,219.9, 1,064.8,
-1,192.5 and 655.7 case seconds; the refreshed assignment estimates 1,033.2 per
-shard. See the [dated review](../notes/ci_efficiency_review_2026-09-15.md).
+After the cache optimization, the old four-shard assignment accumulated 1,219.9,
+1,064.8, 1,192.5 and 655.7 case seconds. The six-shard assignment estimates 688.8
+per shard. See the [dated review](../notes/ci_efficiency_review_2026-09-15.md).
 
-To update after a successful run, download that run's four artifacts for a
+To update after a successful run, download all of that run's shard artifacts for a
 single Python version into a fresh directory. Mixing interpreter versions or
 runs is rejected when their test identities duplicate. For example:
 

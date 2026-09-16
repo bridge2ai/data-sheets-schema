@@ -1,5 +1,5 @@
 # Every PR runs the complete suite, including the committed corpus (#1361).
-# Four shards shorten feedback without removing tests or interpreter coverage.
+# Six shards shorten feedback without removing tests or interpreter coverage.
 ---
 name: Build and test data_sheets_schema
 
@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.12"]' || '["3.10", "3.11", "3.12"]') }}
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6]
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -49,7 +49,7 @@ jobs:
       - name: Run the suite shard including corpus checks
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
-          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/4
+          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/6
           --ci-shard-timings=utils/ci_test_durations.json
           --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
           --junitxml=test-results/pytest.xml

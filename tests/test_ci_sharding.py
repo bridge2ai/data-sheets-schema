@@ -63,8 +63,8 @@ def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weig
         timing.write_text(json.dumps({"schema_version": 1, "file_seconds": weights}))
         flags = [f"--ci-shard-timings={timing}"]
     actual = Counter()
-    for index in range(1, 5):
-        result = _run(tmp_path, f"--ci-shard={index}/4", "-n", "logical", "--maxprocesses=4",
+    for index in range(1, 7):
+        result = _run(tmp_path, f"--ci-shard={index}/6", "-n", "logical", "--maxprocesses=4",
                       "--dist=load", "--maxschedchunk=1", *flags, f"--junitxml=shard-{index}.xml")
         assert result.returncode == 0, result.stdout + result.stderr
         actual.update(_cases(tmp_path / f"shard-{index}.xml"))
@@ -112,12 +112,12 @@ def test_failure_and_empty_selection_cannot_pass(tmp_path, weighted):
 
 def test_measured_partition_is_order_independent_and_reduces_estimated_imbalance():
     weights = read_weights(ROOT / "utils/ci_test_durations.json")
-    assigned = balanced_files(weights, 4, weights)
-    assert assigned == balanced_files(reversed(list(weights)), 4, weights)
+    assigned = balanced_files(weights, 6, weights)
+    assert assigned == balanced_files(reversed(list(weights)), 6, weights)
     assert set(assigned) == set(weights)
-    previous, balanced = [0.0] * 4, [0.0] * 4
+    previous, balanced = [0.0] * 6, [0.0] * 6
     for path, seconds in weights.items():
-        previous[shard_for(path, 4) - 1] += seconds
+        previous[shard_for(path, 6) - 1] += seconds
         balanced[assigned[path] - 1] += seconds
     assert max(balanced) < max(previous) * .8
     assert max(balanced) / min(balanced) < 1.05
