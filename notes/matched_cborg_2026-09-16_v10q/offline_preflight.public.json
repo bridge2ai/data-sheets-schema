@@ -1,8 +1,8 @@
 {
-  "checked_at": "2026-09-16T18:22:13.627458+00:00",
+  "checked_at": "2026-09-16T18:46:32.111756+00:00",
   "kind": "operator_offline_preflight_not_launch_approval",
-  "registration_sha256": "c76cba8dbd76a36404e64edf88b2fa32fc494cfb397d3f2945aef5f5950b1b7a",
-  "native_overlay_sha256": "f98ccf8fefce7b5e18a7128a0d95005ee271946a77b93a992128c02e97bd2cf2",
+  "registration_sha256": "20694953b4f404cbaf66d3e0a99c494f5b57113a4126bca3e8785c1ad63ca255",
+  "native_overlay_sha256": "e4403ccbf8686debf3ff2a1fe8a7a3d106e7fcbfc8b4157c970cd0b933c787f7",
   "registered_pins_verified": 473,
   "native_pins_verified": 8,
   "historical_files_verified": 3241,
@@ -30,6 +30,7 @@
     "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
     "src/data_sheets_schema/schema/data_sheets_schema_core.yaml",
     "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+    "src/data_sheets_schema/schema/digest_inventory.yaml",
     "src/data_sheets_schema/schema_cache.py",
     "notes/matched_cborg_2026-09-13/prepare_registration.py"
   ],
@@ -62,8 +63,8 @@
   "distinct_unused_output_directories": 64,
   "budget_extension_approval": "pending",
   "source_review_plan_hashes": {
-    "KIDS_FIRST_source_review_plan.json": "4302b643de7b9d3f36487bc8c7fd52bd5edc06e453d563521e094a5f96631682",
-    "CHORUS_source_review_plan.json": "779aebb250c61d1f71f9562538028a0de356620d80c034637244977ff194ca1e"
+    "KIDS_FIRST_source_review_plan.json": "5cd79c753edb94cefe12309ea52f8c5d5be4ee978812431a4baccbdcb91eee9d",
+    "CHORUS_source_review_plan.json": "83d400879331890e90959a2b3057650acf05b38c00d94b4e43f80a90b3c7d161"
   },
   "launch_receipts_issued": 0,
   "scientific_requests_from_preparation": 0,
