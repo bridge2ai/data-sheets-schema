@@ -193,3 +193,20 @@ class StringMessageLines(unittest.TestCase):
             obs = ao.observe([t], bundle, None, None, None)
         self.assertEqual(obs["output_tokens"], 5)
         self.assertEqual(obs["bundle_lines_read"], 100)
+        self.assertNotIn("malformed_message_events", obs)
+
+    def test_a_malformed_assistant_or_user_message_is_counted_not_hidden(self):
+        """#1926: a measurement-bearing event whose message is not a mapping
+        must be surfaced, or a broken transcript reads as a clean one."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            bundle = root / "P_preprocessed.txt"
+            bundle.write_text("\n".join(f"line {i}" for i in range(100)) + "\n")
+            lines = [
+                _event("2026-09-16T21:52:21Z", usage={"output_tokens": 5},
+                       tools=[("Read", {"file_path": str(bundle), "offset": 1, "limit": 100})], msg_id="m1"),
+                json.dumps({"timestamp": "2026-09-16T21:52:22Z", "type": "user", "message": ["error"], "uuid": "b"}),
+            ]
+            t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
+            obs = ao.observe([t], bundle, None, None, None)
+        self.assertEqual(obs["malformed_message_events"], 1)

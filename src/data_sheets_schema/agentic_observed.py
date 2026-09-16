@@ -164,6 +164,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
     duration_ms = 0
     read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
     failed: set[str] = set()
+    malformed = 0
     bundle_name = bundle.name if bundle else None
     for path in transcripts:
         first = last = None
@@ -182,8 +183,13 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     last = t
                 msg = j.get("message") or {}
                 if not isinstance(msg, dict):
-                    # Claude Code 2.1.272 stream-json writes some lines with a
-                    # string `message` (#1915); they carry no usage or content.
+                    # Claude Code 2.1.272 stream-json writes informational
+                    # lines (`system`, `result`, …) with a string `message`
+                    # (#1915); they carry no usage or content. An assistant or
+                    # user event whose message is not a mapping is malformed
+                    # and is counted rather than silently skipped (#1926).
+                    if j.get("type") in ("assistant", "user"):
+                        malformed += 1
                     msg = {}
                 usage = msg.get("usage") or {}
                 if usage:
@@ -230,6 +236,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
         out["_bundle_reads_failed"] = sum(1 for t in read_windows if t in failed)
         if receipt is not None and manifest is not None:
             out.update(receipt_cross_check(covered, receipt, manifest))
+    if malformed:
+        out["malformed_message_events"] = malformed
     return out
 
 

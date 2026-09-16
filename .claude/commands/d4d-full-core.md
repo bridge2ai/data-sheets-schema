@@ -348,8 +348,7 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    receipt file), never with a shell redirect or `cat >>`: the native
    allowlist denies the shell form, and a denied append leaves the chunk
    unreceipted. **Every manifest chunk gets an entry, including the last
-   ones.** The v10q CHORUS run read all eight chunks and wrote entries for
-   six; a chunk you read but never receipted is a chunk the validator
+   ones**: a chunk you read but never receipted is a chunk the validator
    counts as unreviewed, and the run fails on it.
 4. Only then extract into the record. Search (`grep`) is for re-finding a
    passage you have already receipted, never a substitute for a chunk entry.

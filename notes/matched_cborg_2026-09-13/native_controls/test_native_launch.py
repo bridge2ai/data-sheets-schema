@@ -170,21 +170,55 @@ def test_stop_explanation_prefers_the_ledger_then_the_controller_then_the_proxy(
     assert out == {}
 
 
-def test_every_command_the_playbook_prescribes_is_allowed(tmp_path):
-    """#1916: the v10q run was denied `d4d prompt render`, which the playbook
-    prescribes in a code block. Every `d4d <group> <command>` inside a code
-    block of the native playbook must have an allow pattern."""
+def prescribed_playbook_commands(text):
+    """Every `d4d <group> <command>[ <subcommand>]` the playbook text names —
+    fenced or inline, with or without `poetry run` — as the roster spells
+    them (`api prompts check` keeps its third token)."""
     import re
-    from prepare_overlay_roster import PLAYBOOK_COMMANDS
+    found = set()
+    for m in re.finditer(r'(?<![\w/.-])d4d\s+([a-z][a-z-]*)\s+([a-z][a-z-]*)(?:\s+([a-z][a-z-]*))?', text):
+        group, command, sub = m.group(1), m.group(2), m.group(3)
+        if command.startswith('-'):
+            continue
+        found.add(f'{group} {command} {sub}' if group == 'api' and command == 'prompts' and sub else f'{group} {command}')
+    return found
+
+
+def test_every_command_the_playbook_prescribes_is_allowed():
+    """#1916/#1927: the v10q run lacked `prompt render`, which the playbook
+    prescribes; the roster must cover every command the whole playbook names
+    (inline text too, since the receipts-check gate is inline), except the
+    ones the playbook mentions only to forbid."""
+    from prepare_overlay_roster import PLAYBOOK_COMMANDS, MENTIONED_NOT_PRESCRIBED
     playbook = Path(__file__).resolve().parents[3] / '.claude/commands/d4d-full-core.md'
-    text = playbook.read_text(encoding='utf-8')
-    blocks = re.findall(r'```[^\n]*\n(.*?)```', text, flags=re.S)
-    prescribed = set()
-    for block in blocks:
-        for m in re.finditer(r'(?<![\w/])d4d\s+([a-z-]+)(?:\s+([a-z-]+))?', block):
-            group, command = m.group(1), m.group(2)
-            if command and not command.startswith('-'):
-                prescribed.add(f'{group} {command}')
-    assert prescribed, 'the playbook prescribes commands in code blocks'
-    missing = sorted(p for p in prescribed if p not in PLAYBOOK_COMMANDS)
+    prescribed = prescribed_playbook_commands(playbook.read_text(encoding='utf-8'))
+    for expected in ('receipts check', 'bundle chunk', 'runs validate', 'download list-projects',
+                     'api prompts check', 'prompt render', 'provenance record', 'derive core'):
+        assert expected in prescribed, f'extraction lost {expected}'
+    missing = sorted(p for p in prescribed - set(MENTIONED_NOT_PRESCRIBED) if p not in PLAYBOOK_COMMANDS)
     assert missing == [], f'playbook commands the overlay does not allow: {missing}'
+    assert 'provenance backfill' not in PLAYBOOK_COMMANDS
+
+
+def test_the_extractor_reads_inline_fenced_and_nested_forms():
+    text = ("Run `poetry run d4d receipts check --label X --strict` first.\n```bash\nd4d bundle chunk --check\n"
+            "d4d api prompts check --strict\n```\nNever `d4d provenance backfill` here. See d4d-agent.md and /d4d-full-core.")
+    assert prescribed_playbook_commands(text) == {'receipts check', 'bundle chunk', 'api prompts check', 'provenance backfill'}
+
+
+def test_the_instruction_module_entry_points_are_allowed():
+    """#1923: renderer 12 prescribes source_review before audit and report."""
+    from prepare_overlay_roster import MODULE_ENTRY_POINTS
+    assert {'source_review', 'evidence_assertions', 'agentic_observed', 'd4d_pair_consistency'} <= set(MODULE_ENTRY_POINTS)
+
+
+def test_stop_explanation_never_raises_on_a_malformed_ledger(tmp_path):
+    """#1925: a diagnostic that fails must not displace the stop it explains."""
+    from run_native_canary import stop_explanation
+    ledger = tmp_path / 'billing.json'
+    ledger.write_text(json.dumps({'requests': [], 'stopped_attempts': ['bad']}))
+    out = stop_explanation(PermissionError('x'), ledger, 'reg:job', 'PermissionError')
+    assert out['reason'] == 'PermissionError' and out['reason_source'] == 'proxy' and 'ledger_stop_note' in out
+    ledger.write_bytes(b'{not json')
+    out = stop_explanation(BudgetStop('deadline'), ledger, 'reg:job', None)
+    assert out['reason'] == 'deadline' and out['ledger_stop_note'].startswith('ledger unreadable')
