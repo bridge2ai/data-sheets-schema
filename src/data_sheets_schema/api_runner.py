@@ -3603,6 +3603,36 @@ def require_evidence_checks(spec: RunSpec, carry: dict[str, str], *, stage: str,
     return out
 
 
+def require_source_reviews(spec: RunSpec, carry: dict[str, str], *, evidence=None) -> None:
+    """Admit a report before any repair/rewrite can replace its source judgment."""
+    if spec.render_version < 12:
+        return
+    out = evidence if evidence is not None else evidence_checks_block(spec, carry, report=True)
+    reviews = [out.get(key) for key in ("source_review_original", "source_review_final")]
+    if (not out.get("checked")
+            or any(not isinstance(review, dict) or review.get("findings") for review in reviews)):
+        require_evidence_checks(spec, carry, stage="report")
+
+
+def _refuse_unusable_source_review(spec: RunSpec, phase: str, problem: str,
+                                   text: str, usage: dict) -> None:
+    """A delivered but unusable v3 review is terminal, including on resume."""
+    if spec.render_version < 12 or phase not in {"audit", "report", "report_regate", "report_after_repair"}:
+        return
+    from data_sheets_schema.evidence_assertions import instrument
+    from data_sheets_schema.usage_ledger import record_evidence_refusal
+    out = {"instrument": instrument(3), "checked": False, "assertions_checked": 0,
+           "phase": phase,
+           "usage_id": usage.get("usage_id"), "response_sha256": hashlib.sha256(text.encode()).hexdigest(),
+           "findings": [{"kind": "source_review_unusable", "detail": problem}]}
+    # Latch first so even a subsequent snapshot failure cannot authorize a retry.
+    stage = "audit" if phase == "audit" else "report"
+    record_evidence_refusal(spec, stage, out)
+    _snapshot(spec, f"{spec.project}_{phase}_rejected_response_{usage['usage_id']}.txt",
+              text, usage_id=usage["usage_id"])
+    _assert_evidence_clean(out, stage)
+
+
 def saved_evidence_checks(spec: RunSpec, record: dict) -> dict:
     """Recheck an already completed run using its attested phase inputs."""
     from data_sheets_schema import snapshot_store
@@ -4962,12 +4992,15 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                       "model": settings["name"], "attempt": 1,
                       **_reasoning_usage(spec, call_usage), **cap.to_dict()})
     if getattr(resp, "stop_reason", None) == "max_tokens":
+        _refuse_unusable_source_review(spec, phase, "report output truncated at max_tokens", text, call_usage)
         return False                # a truncated report is not a report (#967)
     try:
         body = _extract(text, "md")
-    except RuntimeError:
+    except RuntimeError as exc:
+        _refuse_unusable_source_review(spec, phase, str(exc), text, call_usage)
         return False
     spec.report_path.write_text(body, encoding="utf-8")
+    require_source_reviews(spec, carry)
     return True
 
 
@@ -4990,18 +5023,8 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
             block["findings"] = list(block.get("findings") or []) + evidence["findings"]
         return block
 
-    def require_source_review(block):
-        if spec.render_version >= 12:
-            evidence = block.get("evidence_assertions") or {}
-            reviews = [evidence.get(key) for key in ("source_review_original", "source_review_final")]
-            if (not evidence.get("checked")
-                    or any(not isinstance(review, dict) or review.get("findings") for review in reviews)):
-                # A report-only rewrite cannot repair a rejected record. Preserve
-                # this reading and latch refusal before any additional request.
-                require_evidence_checks(spec, carry, stage="report")
-
     before = reading()
-    require_source_review(before)
+    require_source_reviews(spec, carry, evidence=before.get("evidence_assertions"))
     from data_sheets_schema.usage_ledger import report_regate_attempted
     attempted = report_regate_attempted(spec)
     prior = None
@@ -5063,7 +5086,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
                                             contradictions=contradictions)
     out["regeneration_attempted"] = report_regate_attempted(spec)
     after = reading()
-    require_source_review(after)
+    require_source_reviews(spec, carry, evidence=after.get("evidence_assertions"))
     worse = (out["regenerated"] and (
         (before.get("disposition_rows") and not after.get("disposition_rows"))
         or len(after.get("findings") or []) > len(before.get("findings") or [])))
@@ -5475,6 +5498,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                 break
             except RuntimeError as exc:
                 problem = str(exc)
+        _refuse_unusable_source_review(spec, ph, problem, response_text, call_usage)
         # Before the retry, and before the last-attempt raise: the final
         # attempt's body is evidence too, and raising without it loses the
         # one that actually ended the run (#1048).
@@ -5959,6 +5983,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         require_evidence_checks(spec, carry, stage="audit", preserve=False)
     if "reconcile_full" in done:
         require_evidence_checks(spec, carry, stage="reconcile", preserve=False)
+    if "report" in done:
+        require_source_reviews(spec, carry)
 
     core_derivation: dict[str, Any] | None = None
     for ph in PHASES:
@@ -6042,6 +6068,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             require_evidence_checks(spec, carry, stage="audit")
         elif ph == "reconcile_full":
             require_evidence_checks(spec, carry, stage="reconcile")
+        elif ph == "report":
+            require_source_reviews(spec, carry)
 
     _require_resolved_usage(spec)
     rec = build_record(

@@ -14,8 +14,11 @@ documents, source evidence and operational status for every claim. Reject
 missing coverage, unsupported declared attributions, incompatible declared
 statuses and final claims still marked for revision. Link audit revision
 judgments to actionable findings. Keep metadata exemptions narrow and explicit.
-A failed final source review stops the API before a report-only retry and latches
-resume refusal. Native instructions require the same stop; independent native
+A failed final source review stops the API before schema repair or a report-only
+retry and latches resume refusal. Empty, malformed or truncated audit/report
+responses are preserved and stop before a usability retry, including reports
+regenerated after a legitimate repair. Numeric, boolean and date claims must
+quote complete scalar values. Native instructions require the same stop; independent native
 acceptance must inspect actual checker tool results and reject continuation
 after a failure. An ordinary report correction remains possible only with clean
 source reviews and a fresh final inventory.

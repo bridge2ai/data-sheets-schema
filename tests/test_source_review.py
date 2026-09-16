@@ -127,6 +127,18 @@ def test_inventory_preserves_zero_false_dates_and_pointer_escaping():
     with pytest.raises(ValueError): source_review.inventory('notes: one\nnotes: two\n','original_full')
 
 
+@pytest.mark.parametrize('value,fragments',[(12,['1','2']),(1.5,['1.','.5']),
+                                         (False,['fal','se']),(True,['tr','ue'])])
+def test_nontext_scalars_cannot_be_reviewed_as_separate_fragments(value,fragments):
+    raw=yaml.safe_dump({'instances':[{'counts':value}]})
+    review=review_for(raw)
+    assert source_review.check(review,raw=raw,artifact='original_full',chunks=CHUNKS)['findings']==[]
+    claim=first_claim(review)
+    review['values'][0]['claims']=[{**copy.deepcopy(claim),'text':part} for part in fragments]
+    out=source_review.check(review,raw=raw,artifact='original_full',chunks=CHUNKS)
+    assert any('complete scalar value' in f['detail'] for f in out['findings'])
+
+
 def test_passing_declarations_do_not_claim_to_prove_semantic_labels():
     raw='description: Sites follow the procedure.\n'
     review=review_for(raw)
@@ -196,6 +208,81 @@ def test_api_success_and_fresh_report_recheck_use_same_source_protocol(tmp_path,
     planned=api.plan(spec)
     assert 'not a bound' in planned['estimate_basis']
     assert result['validation_problems']==[]
+
+
+def assert_resume_refuses_unchanged(spec, fake, calls):
+    from data_sheets_schema.usage_ledger import evidence_refusal
+    assert len(fake.calls)==calls and evidence_refusal(spec)
+    before={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
+    with pytest.raises(RuntimeError,match='evidence assertions failed'):
+        api.execute(spec,client=SimpleNamespace(messages=fake))
+    assert len(fake.calls)==calls
+    assert before=={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
+
+
+class ShapeRepairFake(SourceReviewFake):
+    def __init__(self, spec, mode='valid'):
+        super().__init__(mode);self.spec=spec;self.repaired=False
+
+    def create(self, **kwargs):
+        terminal=kwargs['messages'][0]['content'][-1]['text']
+        if terminal.startswith('Shape repair.'):
+            self.calls.append(kwargs);self.repaired=True
+            return FakeResponse(self.spec.full_path.read_text().replace('description: d','description: revised'))
+        return super().create(**kwargs)
+
+
+@pytest.mark.parametrize('rejected',[False,True])
+def test_source_review_precedes_shape_repair_and_fresh_report(tmp_path,monkeypatch,rejected):
+    spec=replace(specification(tmp_path),render_version=12)
+    fake=ShapeRepairFake(spec,'final_status' if rejected else 'valid')
+    monkeypatch.setattr(api,'_validator_lines',lambda *args:
+        (['Synthetic shape finding'],None) if not fake.repaired else ([],None))
+    if rejected:
+        with pytest.raises(RuntimeError,match='report evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+        assert not fake.repaired
+        assert_resume_refuses_unchanged(spec,fake,4)
+    else:
+        result=api.execute(spec,client=SimpleNamespace(messages=fake))
+        assert [row['phase'] for row in result['usage']]==[
+            'full','audit','reconcile_full','report','repair_full','report_after_repair']
+        assert fake.repaired and not result['validation_problems']
+        review=api.saved_evidence_checks(spec,yaml.safe_load(spec.provenance_path.read_bytes()))
+        assert review['findings']==[]
+        assert review['source_review_final']['sha256']==hashlib.sha256(spec.full_path.read_bytes()).hexdigest()
+
+
+@pytest.mark.parametrize('phase,kind,calls',[
+    ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+    ('report','empty',4),('report','truncated',4),
+    ('report_regate','empty',5),('report_regate','truncated',5),
+    ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+])
+def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+    spec=replace(specification(tmp_path),render_version=12)
+    class UnusableReviewFake(ShapeRepairFake):
+        def create(self, **kwargs):
+            terminal=kwargs['messages'][0]['content'][-1]['text']
+            target={'audit':'Phase 3.','report':'Phase 4c.',
+                    'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+            if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                self.calls.append(kwargs)
+                response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                if kind=='truncated':response.stop_reason='max_tokens'
+                return response
+            return super().create(**kwargs)
+    fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+    monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+    monkeypatch.setattr(api.time,'sleep',lambda _:None)
+    monkeypatch.setattr(api,'_validator_lines',lambda *args:
+        (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+    with pytest.raises(RuntimeError,match='evidence assertions failed'):
+        api.execute(spec,client=SimpleNamespace(messages=fake))
+    assert_resume_refuses_unchanged(spec,fake,calls)
+    snapshots=list((spec.metadata_dir/'intermediate').glob(f'EXAMPLE_{phase}_rejected_response_*.txt'))
+    assert len(snapshots)==1
+    assert snapshots[0].read_text()==('' if kind=='empty' else '{"source_review":')
 
 
 @pytest.mark.parametrize('runtime',['Claude API (direct)','Claude Code'])

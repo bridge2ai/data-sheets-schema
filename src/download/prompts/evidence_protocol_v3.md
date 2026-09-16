@@ -154,7 +154,8 @@ passage, including governing headings and explicit local changes.
 Audit the entire original full record, including claims you intend to retain.
 The final report reviews the entire final full record anew. The supplied
 source-review inventory enumerates every populated scalar as a JSON Pointer,
-its text and whether record metadata is allowed. It includes zero and false;
+its text, whether record metadata is allowed and whether each claim must quote
+the whole scalar (`whole_value_required`). It includes zero and false;
 null, empty strings and empty containers make no populated claim. For native
 execution, use the specified read-only inventory commands. Never invent a hash.
 
@@ -177,7 +178,7 @@ into atomic factual clauses and review each occurrence, even if a similar claim
 was reviewed elsewhere. Claim `text` quotations together must cover the entire
 value, including punctuation; whitespace wrapping is folded, case and punctuation
 are not. Do not hide an unreviewed clause inside a supported composite claim.
-For a scalar number or boolean, copy its whole inventory text. Separate members
+For a scalar number, boolean or date, copy its whole inventory text. Separate members
 of a prose inventory when their evidence, document identity or status differs.
 
 `attributed_to` lists the exact source filenames the clause explicitly credits,

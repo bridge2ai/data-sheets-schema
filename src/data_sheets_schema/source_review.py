@@ -50,7 +50,8 @@ def inventory(raw: str, artifact: str) -> dict:
                         or (path.endswith("/id") and path != "/id"
                             and isinstance(record.get("id"), str) and record["id"].strip()
                             and isinstance(value, str) and value.startswith(record["id"] + "#")))
-            values.append({"path": path, "text": text, "record_metadata_allowed": bool(metadata)})
+            values.append({"path": path, "text": text, "record_metadata_allowed": bool(metadata),
+                           "whole_value_required": not isinstance(value, str)})
 
     walk(record, "")
     return {"artifact": artifact, "sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
@@ -97,6 +98,8 @@ def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None)
                     if not isinstance(quote, str) or not quote.strip() or _fold(quote) not in text:
                         raise ValueError("claim text must quote this value, retaining case and punctuation")
                     quote = _fold(quote)
+                    if expected[path]["whole_value_required"] and quote != text:
+                        raise ValueError("a numeric, boolean or date claim must quote its complete scalar value")
                     start = text.find(quote)
                     while start >= 0:
                         covered.update(range(start, start + len(quote)))
