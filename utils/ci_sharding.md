@@ -5,10 +5,16 @@ on four Python 3.12 shards. Main and manual runs retain the wider interpreter
 matrix and separate schema/example builds. The aggregate `test` check still
 requires every applicable job to succeed.
 
-Each shard uses `-n logical --maxprocesses=4 --dist worksteal`: up to four
+Each shard uses `-n logical --maxprocesses=4 --dist load --maxschedchunk=1`: up to four
 workers on the standard public Linux runner, rather than the two physical
 cores selected by `-n auto`. The subprocess coverage proof exercises this
 worker configuration. The number of shards and the collected tests are unchanged.
+
+Within a shard, files with the largest estimated time per collected case run
+first. A stable sort keeps the existing order within each file. Small xdist
+scheduling chunks distribute those checks as workers become available, so a
+single worker does not retain a long queue while the others finish. The timing
+file still controls only scheduling, never collection or test outcomes.
 
 Tests, schema/example builds and both documentation workflows share
 `.github/actions/setup-project`. Poetry 2.4.3 has its own cached environment;
@@ -36,6 +42,13 @@ Recorded case times sum to 887.1, 471.5, 999.5 and 431.2 seconds under the hash
 partition, compared with approximately 697.3 seconds per weighted shard.
 These are estimates of test work, not wall-clock predictions; fixture reuse,
 runner load and changed tests can affect the actual result.
+
+The current snapshot was refreshed from successful four-worker run
+[35061852492](https://github.com/bridge2ai/data-sheets-schema/actions/runs/35061852492)
+at `44836e190060fe07b262c948dead269d604c4014`: 5,209 cases in 281 files.
+After the cache optimization, the old assignment accumulated 1,219.9, 1,064.8,
+1,192.5 and 655.7 case seconds; the refreshed assignment estimates 1,033.2 per
+shard. See the [dated review](../notes/ci_efficiency_review_2026-09-15.md).
 
 To update after a successful run, download that run's four artifacts for a
 single Python version into a fresh directory. Mixing interpreter versions or

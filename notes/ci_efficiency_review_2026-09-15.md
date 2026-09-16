@@ -27,7 +27,9 @@ not a wall-time prediction.
    [standard public Linux runner](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
    supplies four CPUs; [xdist `auto`](https://pytest-xdist.readthedocs.io/en/stable/distribution.html)
    selected two physical cores in the measured runs. Verify actual runner
-   behavior and elapsed time before accepting the change.
+   behavior and elapsed time before accepting the change. Refresh the measured
+   weights after the cache change, run the longest estimated individual cases
+   first, and use small xdist scheduling chunks to reduce the final queue.
 3. Share a Linux setup action across tests, builds and both documentation
    workflows. Cache Poetry 2.4.3 separately from the project, key environments
    by exact Python version and dependency inputs, and always install the
@@ -50,11 +52,29 @@ unchanged. The package cache change must preserve validation and serialization.
 ## Validation and results
 
 - The 151 unchanged usage-ledger, resume and profile tests passed before the
-  cache change in 466.71 seconds on local Python 3.13.
+  cache change in 466.71 seconds on local Python 3.13, then in 351.42 seconds
+  afterward (24.7% less). JUnit identities and outcomes are identical.
 - Both new regression probes failed against the original code: unrelated
   schema eviction and stale reads after same-metadata atomic replacement.
   All 28 cache, invalidation and digest tests pass after the change.
-- All 20 partition and aggregate-gate checks pass, including the subprocess
-  proof of complete, disjoint test coverage under the new worker setting.
+- All 21 partition, ordering and aggregate-gate checks pass, including the
+  subprocess proof of complete, disjoint coverage under the exact final worker
+  and scheduler flags. The ordering guard distinguishes one long case from
+  many short cases whose combined file time is larger.
 - Workflow actionlint and diff whitespace checks pass.
-- The local after comparison and real Actions measurements are pending.
+- The first [PR run](https://github.com/bridge2ai/data-sheets-schema/actions/runs/35061852492)
+  passed in 7:09, including both cold caches. It used 1,433 aggregate job seconds,
+  compared with 1,683 and 1,713 in the two baseline PR runs. All 5,285 previous
+  identities and outcomes were retained, including the 85 offline controls;
+  nine cache regression cases were added. The same 15 tests remained skipped.
+  Logs confirm four workers in each shard and successful pinned installation.
+- Review of that run found a remaining imbalance: its suite steps accumulated
+  1,219.9, 1,064.8, 1,192.5 and 655.7 case seconds. The refreshed timing hints
+  estimate 1,033.2 per shard. These are scheduling estimates, not predictions
+  of elapsed time. The final scheduler starts expensive individual checks
+  early and dispatches small chunks instead of initially partitioning queues
+  by test count. No test assertions, corpus inputs or validation paths are bypassed.
+- Final warm-cache PR and full interpreter/build-matrix results are recorded
+  on [PR #1870](https://github.com/bridge2ai/data-sheets-schema/pull/1870), which
+  must pass before merging. New source and timing identities remain in the
+  committed timing snapshot; detailed JUnit reports are Actions artifacts.

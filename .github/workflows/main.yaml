@@ -44,12 +44,14 @@ jobs:
       # and both filename conventions. No maintained test allowlist or -m filter.
       # Use the runner's logical CPUs (up to four); -n auto selected only two
       # physical cores on the standard four-vCPU public Linux runner.
+      # Long checks start first; small scheduling chunks keep each worker
+      # available instead of leaving one with a queue of expensive tests.
       - name: Run the suite shard including corpus checks
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
           -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/4
           --ci-shard-timings=utils/ci_test_durations.json
-          --durations=25 -n logical --maxprocesses=4 --dist worksteal
+          --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
           --junitxml=test-results/pytest.xml
 
       # These independent offline controls run once, outside the tests/ collection.

@@ -65,11 +65,26 @@ def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weig
     actual = Counter()
     for index in range(1, 5):
         result = _run(tmp_path, f"--ci-shard={index}/4", "-n", "logical", "--maxprocesses=4",
-                      *flags, f"--junitxml=shard-{index}.xml")
+                      "--dist=load", "--maxschedchunk=1", *flags, f"--junitxml=shard-{index}.xml")
         assert result.returncode == 0, result.stdout + result.stderr
         actual.update(_cases(tmp_path / f"shard-{index}.xml"))
     assert actual == expected
     assert set(actual.values()) == {1}
+
+
+def test_one_long_case_starts_before_a_file_with_many_short_cases(tmp_path):
+    (tmp_path / "test_many.py").write_text("\n".join(
+        f"def test_{i}(): pass" for i in range(12)))
+    (tmp_path / "test_single.py").write_text("def test_expensive(): pass\n")
+    (tmp_path / "timings.json").write_text(json.dumps({
+        "schema_version": 1,
+        "file_seconds": {"test_many.py": 12, "test_single.py": 10}}))
+    result = _run(tmp_path, "--collect-only", "--ci-shard=1/1",
+                  "--ci-shard-timings=timings.json")
+    assert result.returncode == 0, result.stdout + result.stderr
+    collected = [line for line in result.stdout.splitlines() if "::test_" in line]
+    assert collected[0] == "test_single.py::test_expensive"
+    assert collected[1:] == [f"test_many.py::test_{i}" for i in range(12)]
 
 
 @pytest.mark.parametrize("value", ["0/4", "5/4", "1/0", "1", "one/four", "1/4/5"])
