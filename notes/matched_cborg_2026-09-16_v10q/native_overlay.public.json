@@ -1,12 +1,12 @@
 {
   "kind": "public_scientific_review_view_not_executable",
-  "original_sha256": "e4403ccbf8686debf3ff2a1fe8a7a3d106e7fcbfc8b4157c970cd0b933c787f7",
+  "original_sha256": "03bafbbb740607d42aa97d2a2c2d8a23236e660e116166d8034e6e1a451dccc0",
   "transform": "Machine bindings replaced; no launch approval.",
   "view": {
-    "registered_at": "2026-09-16T18:46:25.801942+00:00",
+    "registered_at": "2026-09-16T19:10:25.330918+00:00",
     "status": "prepared_awaiting_independent_review_CI_and_budget_approval",
     "registration": "<repository>/notes/matched_cborg_2026-09-16_v10q/registration.json",
-    "registration_sha256": "20694953b4f404cbaf66d3e0a99c494f5b57113a4126bca3e8785c1ad63ca255",
+    "registration_sha256": "9947a9eaa24f2294ed7ba528eb0acb706556245c9ee568582833ac994ac63f0b",
     "allowed_jobs": [
       "CHORUS_agentic_rep1",
       "KIDS_FIRST_agentic_rep1"
