@@ -1,8 +1,8 @@
 {
-  "checked_at": "2026-09-16T19:22:39.674787+00:00",
+  "checked_at": "2026-09-16T19:33:09.457769+00:00",
   "kind": "operator_offline_preflight_not_launch_approval",
-  "registration_sha256": "70ebfba81129afb2e7dc2e8ac9ad59f458b520520b88e61e88cd37e29c51d14a",
-  "native_overlay_sha256": "bb6effb479f3191c8f12513839dffc49b8355b5aaafca6aed68b66c182d91f84",
+  "registration_sha256": "2148adf6727061fec526d0067aae14425bfad2d2f3061ca02cd100a88c849038",
+  "native_overlay_sha256": "cff4d6f016de669f90052083f8811c70f6847d66a24fd026ea47a588bec7e583",
   "registered_pins_verified": 473,
   "native_pins_verified": 8,
   "historical_files_verified": 3241,
@@ -62,8 +62,8 @@
   "distinct_unused_output_directories": 64,
   "budget_extension_approval": "pending",
   "source_review_plan_hashes": {
-    "KIDS_FIRST_source_review_plan.json": "1ab66db52d513860ee7896d2cc6251359e3bdfea2d1923a439a22876d4ad28b5",
-    "CHORUS_source_review_plan.json": "22ec42e0c954139041f17493235fd4fb244a7b164b17006c01cd34f0a6a6ddc6"
+    "KIDS_FIRST_source_review_plan.json": "0086ba0d6b6a81f52012c3171670310ef55482ea088001726a922f098425e621",
+    "CHORUS_source_review_plan.json": "412758c7e6903cc47fc3875453e342277af5f5ee6d4c07bba993a1fb1a9fdc9e"
   },
   "launch_receipts_issued": 0,
   "scientific_requests_from_preparation": 0,
