@@ -63,14 +63,24 @@ generated JSON Schema at that commit, and Organization and Grant identifiers
 were already optional there. What changed **after** the label, and so is the
 `2.0.0`-to-`3.0.0` boundary proper:
 
-- **Ten more narrative lists became scalar strings** in the generation
+- **Eight more narrative lists became scalar strings** in the generation
   import closure: `strategies` (sampling), `identifiers_removed`,
-  `data_use_permission`, `collection_type`, `privacy_techniques`,
-  `assent_procedures`, `erratum_details`, `annotation_quality_details`,
-  `tool_descriptions` and `repository_details`. `privacy_techniques:
-  ["k-anonymity", "date shifting"]` is now a validation error; the value is
-  one block scalar. This is a representation change, not permission to omit
+  `privacy_techniques`, `assent_procedures`, `erratum_details`,
+  `annotation_quality_details`, `tool_descriptions` and
+  `repository_details`. `privacy_techniques: ["k-anonymity", "date
+  shifting"]` is now a validation error; the value is one block scalar
+  naming both. This is a representation change, not permission to omit
   documented facts.
+- **Two enum-ranged slots became single-valued**: `data_use_permission`
+  and `collection_type`. A record that carried several values
+  (`data_use_permission: [health_medical_biomedical_research,
+  no_commercial_use]`; `collection_type: [raw_data, processed_data]`) now
+  fails as a list and cannot become a block string of both. This is a
+  loss of expressiveness, not a representation change: keep the value
+  that names the governing permission or the collection's primary form,
+  and record the others in `notes` (or, for a use restriction the source
+  states, in `prohibited_uses` / `license_and_use_terms`), so the fact is
+  not dropped.
 - **Person references became inlined objects** (`816b44025`, 2026-09-03).
   Principal investigator, creator, contact, ethics, license and governance
   contacts require a `Person` object with its required identifier; a bare
@@ -95,8 +105,11 @@ validation block and 173 pin a schema hash; the other 106 predate the pin
 and are left alone (absent is not stale). Of the 173, 80 pin the 2.0.0
 final state and are newly STALE under 3.0.0; 93 pin three earlier schema
 states (`e3099fdc…` 71, `0389e9c3…` 21, `fc729512…` 1) and already read
-STALE before this release. STALE is reported, never fatal: `runs select` groups it with
-UNVERIFIED and `runs check --strict` does not fail on it. The disposition
+STALE before this release. STALE is reported, never fatal: `runs check --strict` does not fail on it,
+and `runs select` does not read the recorded status at all — it validates
+each candidate afresh against the schema on disk and filters on that live
+result, so a record whose bytes still validate under 3.0.0 stays eligible
+and one that no longer does is rejected until rerun. The disposition
 is a separate data pass after this change merges, never part of it
 (#1896): `d4d provenance recheck-validation --all` reports by default and
 writes only under `--execute`, and it writes only where the recorded
@@ -172,7 +185,7 @@ retained: they identify the schema, not a dataset.
 
 | Identity | Before | After |
 |---|---|---|
-| `data_sheets_schema.yaml` sha256 | `38e19f26a5490fd3…` | `6de786d36f04c27f…` |
+| `data_sheets_schema.yaml` sha256 | `38e19f26a5490fd3…` | `50f2b6141d5ecceb…` |
 | `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `eb543e1597b29599…` |
 | `data_sheets_schema_core.yaml` sha256 | `0cdb2744a4025efa…` | `1eedd9fb3a0489cc…` |
 | `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `09907cf80a5363aa…` |

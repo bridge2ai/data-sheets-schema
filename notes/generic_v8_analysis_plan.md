@@ -2725,7 +2725,7 @@ of a top-level slot description; the one top-level description edited
 (`6be15822…` study, `94859bbb…` neutral; `CoreDataset` `980ccdaf…` /
 `61c50be6…`) and the inventory ledger gains no entry — the API arm's
 instrument identity is unchanged. The entry points, the merged files and every edited module moved (full
-source `38e19f26…` → `6de786d3…`, merged `ea595c4b…` → `eb543e15…`, core
+source `38e19f26…` → `50f2b614…`, merged `ea595c4b…` → `eb543e15…`, core
 source `0cdb2744…` → `1eedd9fb…`, merged core `7fcd7ddd…` → `09907cf8…`),
 so `schema.full_sha256`/`core_sha256` on every new record, the schema
 pins of any registration and the native toolchain's resource hashes move
