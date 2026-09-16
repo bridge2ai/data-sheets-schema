@@ -8,6 +8,7 @@ Keeping a file together avoids multiplying its module/class fixture setup.
 import hashlib
 import json
 import math
+from collections import Counter
 from pathlib import Path
 from statistics import median
 
@@ -68,15 +69,19 @@ def read_weights(path):
         raise pytest.UsageError(f"invalid --ci-shard-timings: {exc}") from exc
 
 
-def balanced_files(paths, total, weights):
-    """Schedule actual collected files; timing keys never select coverage."""
+def _estimates(paths, weights):
     paths = set(paths)
     known = [weights[path] for path in paths if path in weights]
     fallback = median(known) if known else 1.0
-    estimates = {path: weights.get(path, fallback) for path in paths}
+    return {path: weights.get(path, fallback) for path in paths}
+
+
+def balanced_files(paths, total, weights):
+    """Schedule actual collected files; timing keys never select coverage."""
+    estimates = _estimates(paths, weights)
     loads, counts = [0.0] * total, [0] * total
     assignments = {}
-    for path in sorted(paths, key=lambda path: (-estimates[path], path)):
+    for path in sorted(estimates, key=lambda path: (-estimates[path], path)):
         index = min(range(total), key=lambda index: (loads[index], counts[index], index))
         assignments[path] = index + 1
         loads[index] += estimates[path]
@@ -103,6 +108,14 @@ def pytest_collection_modifyitems(config, items):
         owner = (assignments[item.nodeid.split("::", 1)[0]] if assignments is not None
                  else shard_for(item.nodeid, total))
         (selected if owner == index else deselected).append(item)
+    if weights is not None:
+        counts = Counter(item.nodeid.split("::", 1)[0] for item in selected)
+        estimates = _estimates(counts, weights)
+        # Start expensive individual checks early. A file's total time alone
+        # would put hundreds of cheap cases ahead of a single long corpus
+        # check. Stable sorting retains the existing order within each file.
+        selected.sort(key=lambda item: -estimates[item.nodeid.split("::", 1)[0]]
+                      / counts[item.nodeid.split("::", 1)[0]])
     items[:] = selected
     config.hook.pytest_deselected(items=deselected)
     # Preserve pytest's NO_TESTS_COLLECTED exit status for an empty shard.

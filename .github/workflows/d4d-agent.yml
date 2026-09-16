@@ -25,6 +25,14 @@ on:
 
 jobs:
   check-mention:
+    # Most issue/PR edits are bookkeeping. Avoid allocating a runner when
+    # the relevant body has no mention; the existing script still authorizes
+    # the actor and parses the request. Manual dispatch still searches comments.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@d4dassistant')) ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '@d4dassistant')) ||
+      ((github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') && contains(github.event.comment.body, '@d4dassistant'))
     runs-on: ubuntu-latest
     outputs:
       qualified-mention: ${{ steps.detect.outputs.qualified-mention }}

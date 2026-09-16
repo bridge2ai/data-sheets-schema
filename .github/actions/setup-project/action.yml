@@ -1,0 +1,48 @@
+name: Set up the CI Python environment
+description: Reuse pinned Poetry and locked project environments on Linux runners
+inputs:
+  python-version:
+    description: Python version to test or build with
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      id: python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    # Poetry itself used to be installed from scratch in every matrix job.
+    # Keep it separate from the project so its dependencies cannot leak in.
+    - name: Cache Poetry
+      id: poetry
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/d4d-poetry
+        key: poetry-v1-${{ runner.os }}-${{ runner.arch }}-py${{ steps.python.outputs.python-version }}-2.4.3
+
+    - name: Install pinned Poetry
+      if: steps.poetry.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        python -m venv "$RUNNER_TEMP/d4d-poetry"
+        "$RUNNER_TEMP/d4d-poetry/bin/python" -m pip install --disable-pip-version-check poetry==2.4.3
+
+    - name: Make Poetry available
+      shell: bash
+      run: echo "$RUNNER_TEMP/d4d-poetry/bin" >> "$GITHUB_PATH"
+
+    - name: Cache the project environment
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-v2-${{ runner.os }}-${{ runner.arch }}-py${{ steps.python.outputs.python-version }}-poetry2.4.3-${{ hashFiles('poetry.lock', 'pyproject.toml', '.github/actions/setup-project/action.yml') }}
+
+    # Always install the current checkout, including on a cache hit. Caches
+    # accelerate installation; they do not substitute an older project build.
+    - name: Install dependencies and project
+      shell: bash
+      env:
+        POETRY_VIRTUALENVS_IN_PROJECT: "true"
+      run: poetry install --with dev --no-interaction

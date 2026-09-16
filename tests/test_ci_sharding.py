@@ -32,8 +32,7 @@ def _cases(path):
                    for case in ET.parse(path).iter("testcase"))
 
 
-@pytest.mark.parametrize("weighted", [False, True])
-def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weighted):
+def _assert_complete_partition(tmp_path, weighted, total):
     # Include both pytest filename conventions, classes, parameterization,
     # a corpus marker and a skip. Assignment must not depend on worker ID.
     (tmp_path / "pytest.ini").write_text("[pytest]\nmarkers = corpus: corpus check\n")
@@ -63,13 +62,38 @@ def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weig
         timing.write_text(json.dumps({"schema_version": 1, "file_seconds": weights}))
         flags = [f"--ci-shard-timings={timing}"]
     actual = Counter()
-    for index in range(1, 5):
-        result = _run(tmp_path, f"--ci-shard={index}/4", "-n", "2",
-                      *flags, f"--junitxml=shard-{index}.xml")
+    for index in range(1, total + 1):
+        result = _run(tmp_path, f"--ci-shard={index}/{total}", "-n", "logical", "--maxprocesses=4",
+                      "--dist=load", "--maxschedchunk=1", *flags, f"--junitxml=shard-{index}.xml")
         assert result.returncode == 0, result.stdout + result.stderr
         actual.update(_cases(tmp_path / f"shard-{index}.xml"))
     assert actual == expected
     assert set(actual.values()) == {1}
+
+
+@pytest.mark.parametrize("weighted", [False, True])
+def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weighted):
+    _assert_complete_partition(tmp_path, weighted, 6)
+
+
+@pytest.mark.parametrize("weighted", [False, True])
+def test_main_shards_retain_the_same_complete_collection(tmp_path, weighted):
+    _assert_complete_partition(tmp_path, weighted, 4)
+
+
+def test_one_long_case_starts_before_a_file_with_many_short_cases(tmp_path):
+    (tmp_path / "test_many.py").write_text("\n".join(
+        f"def test_{i}(): pass" for i in range(12)))
+    (tmp_path / "test_single.py").write_text("def test_expensive(): pass\n")
+    (tmp_path / "timings.json").write_text(json.dumps({
+        "schema_version": 1,
+        "file_seconds": {"test_many.py": 12, "test_single.py": 10}}))
+    result = _run(tmp_path, "--collect-only", "--ci-shard=1/1",
+                  "--ci-shard-timings=timings.json")
+    assert result.returncode == 0, result.stdout + result.stderr
+    collected = [line for line in result.stdout.splitlines() if "::test_" in line]
+    assert collected[0] == "test_single.py::test_expensive"
+    assert collected[1:] == [f"test_many.py::test_{i}" for i in range(12)]
 
 
 @pytest.mark.parametrize("value", ["0/4", "5/4", "1/0", "1", "one/four", "1/4/5"])
@@ -97,12 +121,12 @@ def test_failure_and_empty_selection_cannot_pass(tmp_path, weighted):
 
 def test_measured_partition_is_order_independent_and_reduces_estimated_imbalance():
     weights = read_weights(ROOT / "utils/ci_test_durations.json")
-    assigned = balanced_files(weights, 4, weights)
-    assert assigned == balanced_files(reversed(list(weights)), 4, weights)
+    assigned = balanced_files(weights, 6, weights)
+    assert assigned == balanced_files(reversed(list(weights)), 6, weights)
     assert set(assigned) == set(weights)
-    previous, balanced = [0.0] * 4, [0.0] * 4
+    previous, balanced = [0.0] * 6, [0.0] * 6
     for path, seconds in weights.items():
-        previous[shard_for(path, 4) - 1] += seconds
+        previous[shard_for(path, 6) - 1] += seconds
         balanced[assigned[path] - 1] += seconds
     assert max(balanced) < max(previous) * .8
     assert max(balanced) / min(balanced) < 1.05
