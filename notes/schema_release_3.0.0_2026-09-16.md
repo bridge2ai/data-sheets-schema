@@ -90,7 +90,7 @@ written against one study (Type 2 diabetes, continuous glucose monitoring,
 retinal imaging and grading, a triple-balanced design), and three real IRB
 protocol numbers and a real NIH award number sat among the examples.
 
-**What changed.** Forty-six model-facing strings in the modules the two
+**What changed.** Fifty-eight model-facing strings in the modules the two
 generation roots import were replaced with neutral forms: the study names,
 the `fairhub.io` platform URLs, the committee description and example, the
 deprecated contact description's run reference, the `related_datasets`
@@ -98,7 +98,12 @@ description's companion-dataset example, the two vocabulary descriptions
 that said "Bridge2AI standards" (they now say "a pinned standards
 registry", which is what the profile mechanism supplies), and the example
 family, which now describes a fictional cohort with wearable sensors,
-imaging and clinical records, no disease named. The award example is a
+imaging and clinical records, no disease named, and none of the study's
+real enrollment dates, participant count or site count (#1883); two LinkML
+`comments:` fields that named a study and its companion release are
+neutral too (#1882). The one date kept is the RFC 3339 format example in
+the `issued` description, a top-level slot the digest renders: changing
+it moves the study digest, and a format example is not a study fact. The award example is a
 form-only placeholder (`R01XX000000`) and the IRB example names no protocol
 number. Comments in the source files were left alone: the generators drop
 them, so they reach no model. The evaluation-summary schema, the generation
@@ -125,17 +130,20 @@ retained: they identify the schema, not a dataset.
 | Identity | Before | After |
 |---|---|---|
 | `data_sheets_schema.yaml` sha256 | `38e19f26a5490fd3…` | `6de786d36f04c27f…` |
-| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `d723e8e726c0ba5f…` |
+| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `304107fca06fb3ee…` |
 | `data_sheets_schema_core.yaml` sha256 | `0cdb2744a4025efa…` | `de607a078ede069b…` |
-| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `0aba339b4d9da509…` |
+| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `6f95acef5b6f82dc…` |
 | `Dataset` digest md5, `bridge2ai` | `6be1582236d9320b…` | unchanged |
 | `Dataset` digest md5, `neutral` | `94859bbbe7fa2296…` | unchanged |
 | `CoreDataset` digest md5, `bridge2ai` / `neutral` | `980ccdafe6762d45…` / `61c50be60e601f7d…` | unchanged |
 
 The digest renders slot names, ranges, cardinality and the leading window
-of each description, and none of the edited text sits in that window, so
+of each top-level slot's description, and it does not render the
+descriptions of nested attributes (the edited `data_topic` and
+`data_substrate` descriptions are `Instance` attributes) or any
+`d4d:docExample` annotation; no top-level slot description was edited. So
 **the API arm's instrument identity did not move** and the digest ledger
-gains no entry. Every schema file hash moved, so `schema.full_sha256` and
+gains no entry. The two entry points, both merged files and every edited module moved (unedited modules such as `D4D_FileCollection.yaml` keep their hashes), so `schema.full_sha256` and
 `schema.core_sha256` on every new record, the schema files a registration
 pins and the native playbook's toolchain hashes all move. That is the
 condition boundary: a generation registered after this change pins

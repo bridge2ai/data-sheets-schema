@@ -109,7 +109,7 @@ classes:
         description: A human-readable description for a thing.
         range: string
         annotations:
-          "d4d:docExample": "A multimodal dataset of 4,000 participants in a longitudinal cohort study."
+          "d4d:docExample": "A multimodal dataset of 2,500 participants in a longitudinal cohort study."
       notes:
         slot_uri: schema:comment
         range: string
@@ -375,7 +375,7 @@ slots:
     slot_uri: dcterms:issued
     range: datetime
     annotations:
-      "d4d:docExample": "2024-11-15T00:00:00Z"
+      "d4d:docExample": "2022-06-30T00:00:00Z"
 
   page:
     description: A landing page or web page providing access to or information about the resource.
@@ -579,7 +579,7 @@ slots:
     slot_uri: dcterms:created
     range: datetime
     annotations:
-      "d4d:docExample": "2023-07-18T00:00:00Z"
+      "d4d:docExample": "2021-03-01T00:00:00Z"
 
   last_updated_on:
     description: >-
@@ -587,7 +587,7 @@ slots:
     slot_uri: dcterms:modified
     range: datetime
     annotations:
-      "d4d:docExample": "2024-11-15T00:00:00Z"
+      "d4d:docExample": "2022-06-30T00:00:00Z"
 
   modified_by:
     description: A person or organization that contributed to modifying or updating the resource.

@@ -112,7 +112,7 @@ classes:
         range: string
         slot_uri: dcterms:description
         annotations:
-          "d4d:docExample": "Certified study coordinators at 3 collection sites"
+          "d4d:docExample": "Certified study coordinators at four collection sites"
 
 
   CollectionTimeframe:
@@ -128,13 +128,13 @@ classes:
         slot_uri: schema:startDate
         range: date
         annotations:
-          "d4d:docExample": "2023-07-18"
+          "d4d:docExample": "2021-03-01"
       end_date:
         description: End date of data collection.
         slot_uri: schema:endDate
         range: date
         annotations:
-          "d4d:docExample": "2026-11-30"
+          "d4d:docExample": "2025-02-28"
       timeframe_details:
         description: >
           Free-text description of the data collection period and whether this timeframe

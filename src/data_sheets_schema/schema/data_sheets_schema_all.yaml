@@ -1674,7 +1674,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00Z'
+        value: '2022-06-30T00:00:00Z'
     description: Date of formal issuance or publication of the resource. A `datetime`
       renders as RFC 3339 `date-time`, which **requires a UTC offset** — write `2024-11-15T00:00:00Z`,
       not `2024-11-15T00:00:00`. A date alone is also rejected.
@@ -2023,7 +2023,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2023-07-18T00:00:00Z'
+        value: '2021-03-01T00:00:00Z'
     description: The date and time when the resource was created. Requires a UTC offset
       (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2040,7 +2040,7 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00Z'
+        value: '2022-06-30T00:00:00Z'
     description: The date and time when the resource was most recently modified or
       updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects
       a naive timestamp.
@@ -2339,7 +2339,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2411,7 +2411,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -2471,7 +2471,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -2826,7 +2826,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -4330,7 +4330,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -4402,7 +4402,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -4462,7 +4462,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -4818,7 +4818,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -6260,7 +6260,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -6332,7 +6332,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -6392,7 +6392,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -6748,7 +6748,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -7204,7 +7204,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -8372,7 +8372,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -8882,7 +8882,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -9322,7 +9322,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -9394,7 +9394,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -9454,7 +9454,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -9810,7 +9810,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -21113,11 +21113,11 @@ classes:
           URL, or Dataset object" while the range permitted only the first, and LinkML
           cannot express the union: its JSON Schema generator always emits a top-level
           type or $ref from the slot''s range, which ANDs with `any_of`, so whichever
-          branch the range names the other one fails. Verified both ways on VOICE
-          (#297).'
+          branch the range names the other one fails. Verified both ways on a study
+          record (#297).'
         - 'A related dataset with its own DOI, protocol and approval is its own datasheet
           and is referenced from here by identifier. That is the resolution of #292
-          for VOICE, whose pediatric companion has all three.'
+          for a dataset whose companion release has all three.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
         slot_uri: dcterms:relation
         alias: target_dataset
@@ -22750,7 +22750,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: Certified study coordinators at 3 collection sites
+            value: Certified study coordinators at four collection sites
         description: 'Free-text description of who was involved in data collection
           (e.g., students, crowdworkers, contractors), their training or qualifications,
           and how they were compensated.
@@ -23288,7 +23288,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18'
+            value: '2021-03-01'
         description: Start date of data collection.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
         slot_uri: schema:startDate
@@ -23302,7 +23302,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2026-11-30'
+            value: '2025-02-28'
         description: End date of data collection.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
         slot_uri: schema:endDate
@@ -34448,7 +34448,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15'
+            value: '2022-06-30'
         description: 'One or more dates or timeframes for dataset release, in ISO
           8601 format (e.g., "2024-03-15") or as a descriptive string (e.g., "Q2 2024").
           Use multiple values for staged or scheduled releases.
@@ -37201,7 +37201,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)
+            value: v1.0 (2021-06), v1.1 (2021-11), v2.0 (2022-06)
         description: List of available versions with metadata.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: d4d:versionsAvailable
@@ -47406,7 +47406,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -47478,7 +47478,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -47538,7 +47538,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -47894,7 +47894,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -48443,7 +48443,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00Z'
+            value: '2021-03-01T00:00:00Z'
         description: The date and time when the resource was created. Requires a UTC
           offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -48515,7 +48515,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: Date of formal issuance or publication of the resource. A `datetime`
           renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
           `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
@@ -48575,7 +48575,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00Z'
+            value: '2022-06-30T00:00:00Z'
         description: The date and time when the resource was most recently modified
           or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
           rejects a naive timestamp.
@@ -48931,7 +48931,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants in a longitudinal cohort
+            value: A multimodal dataset of 2,500 participants in a longitudinal cohort
               study.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base

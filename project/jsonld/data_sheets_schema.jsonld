@@ -2073,7 +2073,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15T00:00:00Z",
+          "value": "2022-06-30T00:00:00Z",
           "@type": "Annotation"
         }
       ],
@@ -2590,7 +2590,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2023-07-18T00:00:00Z",
+          "value": "2021-03-01T00:00:00Z",
           "@type": "Annotation"
         }
       ],
@@ -2613,7 +2613,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15T00:00:00Z",
+          "value": "2022-06-30T00:00:00Z",
           "@type": "Annotation"
         }
       ],
@@ -4168,7 +4168,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "A multimodal dataset of 4,000 participants in a longitudinal cohort study.",
+          "value": "A multimodal dataset of 2,500 participants in a longitudinal cohort study.",
           "@type": "Annotation"
         }
       ],
@@ -5809,8 +5809,8 @@
       "name": "datasetRelationship__target_dataset",
       "description": "The identifier or URL of the dataset this relationship points to.",
       "comments": [
-        "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on VOICE (#297).",
-        "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for VOICE, whose pediatric companion has all three."
+        "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on a study record (#297).",
+        "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for a dataset whose companion release has all three."
       ],
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -5994,7 +5994,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Certified study coordinators at 3 collection sites",
+          "value": "Certified study coordinators at four collection sites",
           "@type": "Annotation"
         }
       ],
@@ -6017,7 +6017,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2023-07-18",
+          "value": "2021-03-01",
           "@type": "Annotation"
         }
       ],
@@ -6040,7 +6040,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2026-11-30",
+          "value": "2025-02-28",
           "@type": "Annotation"
         }
       ],
@@ -7072,7 +7072,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15",
+          "value": "2022-06-30",
           "@type": "Annotation"
         }
       ],
@@ -7289,7 +7289,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)",
+          "value": "v1.0 (2021-06), v1.1 (2021-11), v2.0 (2022-06)",
           "@type": "Annotation"
         }
       ],
@@ -9921,7 +9921,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "A multimodal dataset of 4,000 participants in a longitudinal cohort study.",
+              "value": "A multimodal dataset of 2,500 participants in a longitudinal cohort study.",
               "@type": "Annotation"
             }
           ],
@@ -11468,8 +11468,8 @@
           "name": "target_dataset",
           "description": "The identifier or URL of the dataset this relationship points to.",
           "comments": [
-            "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on VOICE (#297).",
-            "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for VOICE, whose pediatric companion has all three."
+            "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on a study record (#297).",
+            "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for a dataset whose companion release has all three."
           ],
           "slot_uri": "dcterms:relation",
           "range": "string",
@@ -11636,7 +11636,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Certified study coordinators at 3 collection sites",
+              "value": "Certified study coordinators at four collection sites",
               "@type": "Annotation"
             }
           ],
@@ -11676,7 +11676,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "2023-07-18",
+              "value": "2021-03-01",
               "@type": "Annotation"
             }
           ],
@@ -11690,7 +11690,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "2026-11-30",
+              "value": "2025-02-28",
               "@type": "Annotation"
             }
           ],
@@ -12762,7 +12762,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "2024-11-15",
+              "value": "2022-06-30",
               "@type": "Annotation"
             }
           ],
@@ -13003,7 +13003,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)",
+              "value": "v1.0 (2021-06), v1.1 (2021-11), v2.0 (2022-06)",
               "@type": "Annotation"
             }
           ],
@@ -14338,7 +14338,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-09-16T11:00:40",
   "source_file_size": 35275,
-  "generation_date": "2026-09-16T11:04:21",
+  "generation_date": "2026-09-16T11:37:17",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

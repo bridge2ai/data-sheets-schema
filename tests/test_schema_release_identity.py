@@ -79,6 +79,20 @@ class TestReleaseIdentity(unittest.TestCase):
         self.assertEqual(facts["core_declared_version"], "2.0.0")
         self.assertIn("core entry point declares 2.0.0", facts["note"])
 
+    def test_a_core_that_declares_nothing_is_a_stated_fact_too(self):
+        """The pre-3.0.0 condition: full declared, core silent. A note that
+        only fires on two present values would pass it silently (#1885)."""
+        from unittest import mock
+        from data_sheets_schema import provenance
+        real = provenance.declared_schema_version
+
+        def fake(source=provenance.SOURCE_SCHEMA):
+            return None if source == provenance.CORE_SOURCE_SCHEMA else real(source)
+        with mock.patch.object(provenance, "declared_schema_version", side_effect=fake):
+            facts = provenance.schema_facts()
+        self.assertIsNone(facts["core_declared_version"])
+        self.assertIn("core entry point declares no version", facts["note"])
+
     def test_the_record_contract_declares_the_core_version(self):
         doc = yaml.safe_load((SCHEMA / "d4d_generation_record.yaml").read_text(encoding="utf-8"))
         attrs = doc["classes"]["SchemaFacts"]["attributes"]

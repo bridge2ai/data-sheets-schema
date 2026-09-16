@@ -28,12 +28,13 @@ releases:
   - version: 3.0.0
     declared: 2026-09-16
     full_source_sha256: 6de786d36f04c27fa4ec46dd59165601919bd8e27a4dbeb39585138f0cbc18de
-    full_merged_sha256: d723e8e726c0ba5f405cf040ae148ff9fd43705d0a753e7cf54e917d7a28e0c8
+    full_merged_sha256: 304107fca06fb3eede7bcba65e30c445d969838a9d5ec90f7a72b8dbd8cab0bd
     core_source_sha256: de607a078ede069b7aaee3909c90059b03b9305247eca671fe347285f2f46007
-    core_merged_sha256: 0aba339b4d9da509e7de61d8ed64fd9ad2933f7cc6aa061d777742691bc9aceb
+    core_merged_sha256: 6f95acef5b6f82dc95a065b47ff5097cf87138030341787c0605b8c0a0a48d2b
     note: >-
       Names the definitions the 2.0.0 label had stopped describing; the core
       entry point declares the same version. In the same change every
       model-facing study string left the generation schemas (#1875). Neither
-      profile's digest md5 moved; every schema file hash did. See
+      profile's digest md5 moved; the entry points, merged files and edited
+      modules did. See
       notes/schema_release_3.0.0_2026-09-16.md.

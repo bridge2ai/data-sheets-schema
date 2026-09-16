@@ -2717,13 +2717,14 @@ deprecated contact description, the VOICE_PEDIATRIC example in the core's
 `related_datasets` description, the two vocabulary descriptions that
 named "Bridge2AI standards", and the diabetes/CGM/retina example family
 modelled on one study, three real IRB protocol numbers and one real NIH
-award among it. The digest renders none of the edited text inside its
-description window, so **neither profile's `Dataset` digest moved**
+award among it. The digest renders no docExample annotation and no nested
+attribute's description, and no top-level slot description was edited, so
+**neither profile's `Dataset` digest moved**
 (`6be15822…` study, `94859bbb…` neutral; `CoreDataset` `980ccdaf…` /
 `61c50be6…`) and the inventory ledger gains no entry — the API arm's
-instrument identity is unchanged. Every schema file's sha256 moved (full
-source `38e19f26…` → `6de786d3…`, merged `ea595c4b…` → `d723e8e7…`, core
-source `0cdb2744…` → `de607a07…`, merged core `7fcd7ddd…` → `0aba339b…`),
+instrument identity is unchanged. The entry points, the merged files and every edited module moved (full
+source `38e19f26…` → `6de786d3…`, merged `ea595c4b…` → `304107fc…`, core
+source `0cdb2744…` → `de607a07…`, merged core `7fcd7ddd…` → `6f95acef…`),
 so `schema.full_sha256`/`core_sha256` on every new record, the schema
 pins of any registration and the native toolchain's resource hashes move
 with this commit; no earlier registration, record or score is

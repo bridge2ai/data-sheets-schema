@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import os
 import re
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -40,7 +41,9 @@ STUDY_IDENTITY = [
     r"Voice as a Biomarker", r"VOICE_PEDIATRIC", r"fairhub", r"salutogenesis",
     r"Heidelberg Spectralis", r"ETDRS", r"DeepDR", r"EYEPACS", r"UCSF Epic", r"OT2OD032644",
     r"IRB-300010084", r"IRB-811480", r"STUDY00017428", r"paperswithcode\.com/dataset/ai-readi",
-    r"Bridge2AI standards",
+    r"Bridge2AI standards", r"(?-i:\bVOICE\b)",
+    # the study's real enrollment dates, participant and site counts (#1883)
+    r"2023-07-18", r"2026-11-30", r"4,000 participants", r"3 collection sites",
 ]
 #: The design hallmarks of the study the example family was modelled on.
 #: These are ordinary biomedical words too: the study profile's pinned
@@ -57,11 +60,15 @@ SCHEMA_LEVEL_KEYS = {"id", "name", "title", "description", "prefixes", "see_also
 
 
 def _closure(root: Path) -> list[Path]:
+    """Every module the root imports, transitively. An unresolved file is an
+    error: a scan that silently drops a module proves nothing (#1884)."""
     seen, todo = [], [root]
     while todo:
         path = todo.pop()
-        if path in seen or not path.exists():
+        if path in seen:
             continue
+        if not path.exists():
+            raise FileNotFoundError(f"schema module not found: {path}")
         seen.append(path)
         doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         for name in doc.get("imports") or []:
@@ -88,7 +95,7 @@ def _model_facing(path: Path):
     for key, value in doc.items():
         if key in SCHEMA_LEVEL_KEYS:
             continue
-        walk(value, f"{path.name}:{key}", False)
+        walk(value, f"{path.name}:{key}", key in MODEL_FACING_KEYS)
     return out
 
 
@@ -99,11 +106,23 @@ def _findings(pairs):
 
 class TestGenerationSchemaSources(unittest.TestCase):
     def test_the_generation_closure_is_the_modules_the_roots_import(self):
-        names = {p.name for root in GENERATION_ROOTS for p in _closure(SCHEMA / root)}
-        self.assertIn("D4D_Base_import.yaml", names)
-        self.assertIn("D4D_Data_Governance.yaml", names)
+        closures = {root: [p.name for p in _closure(SCHEMA / root)] for root in GENERATION_ROOTS}
+        self.assertEqual(len(closures["data_sheets_schema.yaml"]), 14)
+        self.assertEqual(len(closures["data_sheets_schema_core.yaml"]), 14)
+        names = {n for c in closures.values() for n in c}
+        self.assertEqual(len(names), 16)
+        for expected in ("D4D_Base_import.yaml", "D4D_Data_Governance.yaml", "D4D_Core.yaml",
+                         "D4D_Human.yaml", "D4D_Composition.yaml", "D4D_FileCollection.yaml"):
+            self.assertIn(expected, names)
         self.assertNotIn("D4D_Evaluation_Summary.yaml", names)
         self.assertNotIn("d4d_generation_record.yaml", names)
+
+    def test_an_unresolved_import_fails_the_scan(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "root.yaml"
+            root.write_text("id: x\nname: x\nimports:\n  - linkml:types\n  - missing_module\n")
+            with self.assertRaises(FileNotFoundError):
+                _closure(root)
 
     def test_no_model_facing_text_names_the_study(self):
         pairs = [pair for root in GENERATION_ROOTS for p in _closure(SCHEMA / root)
@@ -112,12 +131,38 @@ class TestGenerationSchemaSources(unittest.TestCase):
         self.assertEqual(_findings(pairs), [])
 
     def test_the_scanner_sees_what_it_scans(self):
-        """A guard that cannot fail proves nothing."""
-        pairs = [("x", 'annotations d4d:docExample "AI-READI Dataset"'),
-                 ("y", "description: as a term from the Bridge2AI standards registry"),
-                 ("z", "a plain description")]
+        """A guard that cannot fail proves nothing: seeded modules go through
+        the real closure and traversal, and every planted string is found
+        where it was planted (#1884)."""
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d) / "base.yaml"
+            base.write_text(yaml.safe_dump({
+                "id": "https://example.org/base", "name": "base",
+                "description": "The Bridge2AI schema-level description is not scanned",
+                "comments": ["a module-level VOICE comment is scanned"],
+                "slots": {"title": {"description": "plain", "annotations": {"d4d:docExample": "AI-READI: title"}},
+                          "notes": {"comments": ["Verified on VOICE"], "examples": [{"value": "fairhub.io/x"}]},
+                          "clean": {"description": "nothing here", "title": "CGM-free"}},
+                "classes": {"Thing": {"attributes": {"topic": {"description": "as a term from the Bridge2AI standards registry"}}}},
+            }, sort_keys=False))
+            root = Path(d) / "root.yaml"
+            root.write_text(yaml.safe_dump({"id": "https://example.org/root", "name": "root",
+                                            "imports": ["linkml:types", "base"],
+                                            "classes": {"Root": {"description": "Type 2 Diabetes cohort"}}}, sort_keys=False))
+            pairs = [pair for p in _closure(root) for pair in _model_facing(p)]
         found = _findings(pairs)
-        self.assertEqual([f.split(":")[0] for f in found], ["x", "y"])
+        where = sorted(f.split(": ")[0] for f in found)
+        self.assertEqual(where, sorted([
+            "root.yaml:classes.Root.description",
+            "base.yaml:comments[0]",
+            "base.yaml:slots.title.annotations.d4d:docExample",
+            "base.yaml:slots.notes.comments[0]",
+            "base.yaml:slots.notes.examples[0].value",
+            "base.yaml:slots.clean.title",
+            "base.yaml:classes.Thing.attributes.topic.description",
+        ]))
+        # lower-case "voice" is an ordinary word; the alias is uppercase only
+        self.assertEqual(_findings([("v", "the voice of the participant")]), [])
 
     def test_examples_are_placeholders_not_real_identifiers(self):
         """The award and IRB examples were a real NIH award and three real

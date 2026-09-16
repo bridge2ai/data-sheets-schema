@@ -912,6 +912,11 @@ def schema_facts() -> dict[str, Any]:
             f"The core entry point declares {core_version} while the full "
             f"schema declares {version}; the core is a projection of the full "
             "schema and is expected to carry the same version (#1874).")
+    elif version and not core_version:
+        facts["note"] = (
+            f"The full schema declares {version} but the core entry point "
+            "declares no version; the core is a projection of the full schema "
+            "and is expected to carry the same version (#1874).")
     elif version and not merged_carries_version:
         facts["note"] = (
             "The version is declared in the source schema but the merged "
