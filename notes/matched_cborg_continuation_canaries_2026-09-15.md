@@ -4,20 +4,28 @@ The user resolved the interrupted v10n charge confirmation. Reconciliation
 preserves the original pending ledger and stopped artifacts. The subsequent
 v10o CHORUS API canary completed with settled accounting but was
 [rejected by source review](matched_cborg_2026-09-15_v10o/CHORUS_api_source_rejected.md).
-All 41 originals are preserved. No downstream scientific job has launched. The native final
-checker correction #1846 is merged after independent review and required CI.
+All 41 originals are preserved. No native, external, evaluation or production
+job launched from that condition. The native final checker correction #1846
+is merged after independent review and required CI.
 The provider interruption itself remains unexplained (#1849).
 
-The fresh [v10p costed registration](matched_cborg_2026-09-15_v10p/README.md)
-pins renderer 12/evidence v3 for both arms, complete source reviews, strict
-receipt floors and explicit context-bypass controls. Offline sizing led to
-96k API audit/report allowances (#1863), preserving historical settings.
-Existing source bundles, profiles, schemas and evaluator definitions are
-unchanged. The proposed four-attempt caps fit the remaining allocation, but
-their cumulative canary ceiling amendment still needs approval. No launch
-receipt or paid attempt is included; exact-registration review, required CI
-and fresh admission checks remain gates. #1815/#1782 remain open for
-independent acceptance of a new unchanged canary.
+The [v10p costed registration](matched_cborg_2026-09-15_v10p/README.md)
+passed independent review and required CI, merged as #1864, and its branch was
+deleted. The user approved its cumulative budget amendment. A separate bound
+approval receipt and fresh checks admitted one CHORUS API canary. It produced
+an initial full/core pair, then
+[stopped during the audit stream](matched_cborg_2026-09-15_v10p/CHORUS_api_stopped.md)
+without audit text or terminal usage. All 24 attempt files are preserved;
+initial structural checks pass, but no final source acceptance exists.
+Interrupted-audit accounting #1865 and transport investigation #1849 remain
+open. No downstream canary launched.
+
+The frozen v10p condition retains renderer 12/evidence v3 for both arms,
+complete source reviews, strict receipt floors and explicit context-bypass
+controls. Its 96k API audit/report allowance preserves historical settings;
+this interrupted attempt does not establish sufficient output capacity.
+Existing sources, profiles, schemas and evaluator definitions are unchanged.
+#1815/#1782 remain open for independent acceptance of a new unchanged canary.
 
 The [v10o registration](matched_cborg_2026-09-15_v10o/README.md) retains both
 generation arms and all evaluation styles. Source bundles, renderer 11/evidence
@@ -25,9 +33,12 @@ v2, profiles, schemas, model and evaluator definitions remain fixed. Native
 final validation now selects the matching protocol. Retain the pinned native
 runtime despite an unrelated update to the local alias.
 
-1. Resolve the source-attribution and applied-status failures (#1815/#1782) and
-   enforce the existing receipt floors in both controllers (#1854). The explicit
-   provider-context control (#1852) is merged after independent review and CI. Register
+1. Resolve the interrupted v10p audit accounting (#1865) and investigate the
+   transport behavior (#1849). Preserve the stopped attempt without resuming it.
+   Source-attribution and applied-status acceptance (#1815/#1782) remains
+   outstanding after the merged controls; both controllers enforce the existing
+   receipt floors (#1854). The explicit provider-context control (#1852) is
+   merged after independent review and CI. Register
    any new condition with both-arm controls, current code and unchanged source
    identities; review it and recheck historical preservation, provider settings,
    accounting, limits and unused paths before any new paid attempt. No
@@ -61,6 +72,7 @@ CBORG and does not depend on Aurelian.
 Detailed accounting and provider identifiers remain local. The existing
 allocation, combined canary ceiling and per-attempt limits remain binding.
 Unknown charges retain reservations and stop execution; a failed canary stops
-expansion. The v10o API attempt is complete and rejected; no new paid attempt
-is admitted by this plan update. Source corrections and unchanged-canary
-acceptance remain necessary after the mechanical fixes.
+expansion. The v10o API attempt is complete and rejected; the approved v10p API
+attempt stopped during audit. No new paid attempt is admitted by this outcome
+update. Complete accounting, transport investigation and unchanged-canary
+acceptance remain necessary before expansion.

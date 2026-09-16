@@ -1,0 +1,54 @@
+{
+  "kind": "public_stopped_execution_summary_not_scientific_acceptance",
+  "date_local": "2026-09-15",
+  "timezone": "America/Los_Angeles",
+  "registration_sha256": "1fa7e4c121b4e5303c08b9a4b2fd69771ccefd8c5d650b9128a705245dab9af2",
+  "native_overlay_sha256": "2c77efb51ad9d39f2d5659a38f0cfb5bb4155d1be9e5fde724e69bdfe110dc8b",
+  "launch_commit": "5f94e279cf6b7efc35edee172bd3a0d342b9eb37",
+  "registration_pr": 1864,
+  "registration_ci": 35055599588,
+  "user_budget_amendment": "approved before launch; separate local bound receipt",
+  "job": "CHORUS_api_rep1",
+  "execution_status": "stopped",
+  "interrupted_phase": "audit",
+  "error_type": "RemoteProtocolError",
+  "audit_text_delivered": false,
+  "terminal_audit_usage_received": false,
+  "scientific_verdict": "not_accepted_incomplete_audit",
+  "downstream_launched": false,
+  "retry_or_resume_authorized_by_this_record": false,
+  "accounting_issue": 1865,
+  "transport_issue": 1849,
+  "source_acceptance_issues_remain_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "preserved_attempt_files": 24,
+  "prior_originals_verified": 445,
+  "historical_files_verified": 3241,
+  "initial_artifacts": {
+    "full": {
+      "path": "data/d4d_concatenated/claudecode_api/2026-09-15_claude-opus-5-api-generalized-v10p-chorus_rep1/CHORUS_d4d.yaml",
+      "sha256": "5533f4b92c42f04ed850ad3699c1688f2cc997fbddd279006a95efb3f64ed928"
+    },
+    "core": {
+      "path": "data/d4d_concatenated/claudecode_api_core/2026-09-15_claude-opus-5-api-generalized-v10p-chorus_rep1/CHORUS_d4d_core.yaml",
+      "sha256": "ecd32ec5b715e431bec61be14fdb34550e5cac1526179c1c2b925e4749cc5c96"
+    }
+  },
+  "initial_checks": {
+    "schema_and_duplicate_key_problems": [],
+    "pair": {
+      "passed": true,
+      "errors": []
+    },
+    "exact_core_derivation": true
+  },
+  "complete_audit": false,
+  "complete_reconciliation_report": false,
+  "final_provenance": false,
+  "privacy": "Detailed provider identifiers, usage, spending, exact financial controls and accounting evidence remain in the local preserved attempt archive.",
+  "evidence_limit": "Public summary of operator checks; private original bytes and accounting are not independently verifiable from this view. Initial structural validity is not scientific source acceptance."
+}
