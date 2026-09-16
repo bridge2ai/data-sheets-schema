@@ -392,6 +392,11 @@ RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
                      model: str | None = None) -> int:
     value = PHASE_MAX_TOKENS.get(ph, default)
+    # Complete source reviews repeat every scalar plus its quotations and
+    # judgments. The opt-in v3 audit/report needs room beyond the historical
+    # finding-only response. Keep earlier renderers' recorded limits intact.
+    if spec.render_version >= 12 and ph in {"audit", "report"}:
+        value = 96000
     if spec.condition in RECEIPT_CONDITIONS and ph in RECEIPT_PHASE_MAX_TOKENS:
         # Env-overridable (#777): three consecutive full-phase stalls on the
         # AI_READI v7 re-canary followed the raise to 128k, where two runs at
