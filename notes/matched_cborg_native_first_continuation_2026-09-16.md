@@ -26,6 +26,15 @@ and, if accepted, proceed to Kids First.
   condition, so the provider interruptions observed on the API stream have
   no native counterpart yet.
 
+## Outcome of the first native canary (2026-09-16)
+
+The CHORUS native canary launched after both merges and the budget approval
+and [stopped at its registered $10 cap](matched_cborg_2026-09-16_v10q/CHORUS_agentic_stopped.md)
+after the coverage receipt and the full record, before the audit; it is
+stopped and unaccepted, with settled accounting and no retry. It exposed
+#1914–#1918 (controller receipt, observer, allowlist/playbook, native
+sizing, the run's protocol deviations), which precede any fresh registration.
+
 ## Sequence
 
 1. Independent review of PR #1880 and of this registration's PR, required
