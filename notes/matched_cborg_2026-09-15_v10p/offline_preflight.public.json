@@ -1,0 +1,50 @@
+{
+  "checked_at": "2026-09-16T04:25:00.103271+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "1fa7e4c121b4e5303c08b9a4b2fd69771ccefd8c5d650b9128a705245dab9af2",
+  "native_overlay_sha256": "2c77efb51ad9d39f2d5659a38f0cfb5bb4155d1be9e5fde724e69bdfe110dc8b",
+  "registered_pins_verified": 471,
+  "native_pins_verified": 8,
+  "historical_files_verified": 3241,
+  "prior_original_files_verified": 445,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/evidence_assertions.py",
+    "src/data_sheets_schema/usage_ledger.py",
+    "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+    "notes/matched_cborg_2026-09-13/run_api_canary.py",
+    "notes/matched_cborg_2026-09-13/prepare_registration.py"
+  ],
+  "new_pinned_implementation_files": [
+    "src/data_sheets_schema/source_review.py",
+    "src/download/prompts/evidence_protocol_v3.md"
+  ],
+  "evaluation_instrument_changes_from_v10o": false,
+  "generation_renderers": {
+    "api": 12,
+    "agentic": 12
+  },
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "effort_policy_unchanged": true,
+  "api_output_allowance_change": {
+    "audit": 96000,
+    "report": 96000
+  },
+  "native_runtime_output_limit": 64000,
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "budget_extension_approval": "pending",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "96e4107c3539746c4ea3e4dc3ce26ec3e8439d3530db9085f199f8a436e774b1",
+    "CHORUS_source_review_plan.json": "abf1db87cec9bcc185a2cfc0dd3a2bf3851736c8831fba637c08e7f430a139a8"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks do not establish source quality or independent verification of unpublished originals/accounting. Source review, paid token counting, native tool turns and repeatability remain unmeasured. Approval of the combined budget extension, exact-commit CI and independently reviewed registration are required before a launch receipt.",
+  "accounting_resolved": true,
+  "proposed_caps_checked_locally": true,
+  "private_accounting_independently_reviewed": false
+}

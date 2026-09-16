@@ -1,0 +1,681 @@
+{
+  "kind": "offline_sizing_sensitivity_not_forecast_or_tokenizer_bound",
+  "prepared_at": "2026-09-16T04:21:45.831208+00:00",
+  "original_sha256": "4d0132026c8731b5a86eb5d3df63df90b3293eefe2d15c676ddd8b69a649dd1c",
+  "output_specimens": [
+    {
+      "artifact": "original_full",
+      "values": 183,
+      "exact_artifact_sha256": "e1f476e0bf7e3f0cd4f58aa67fac206306938fe963a9455631874368af8a82af",
+      "inventory_utf8_bytes": 41697,
+      "one_claim_compact_utf8_bytes": 124604,
+      "one_claim_pretty_utf8_bytes": 165242,
+      "tokens_scenarios_without_reasoning": {
+        "3": 55081,
+        "4": 41311,
+        "5": 33049
+      },
+      "placeholder_evidence_characters_per_value": 160,
+      "placeholder_reason_characters_per_value": 120,
+      "basis": "Sizing specimen only; source/status assertions are NOT scientific judgments and must never be used as generation carry or evaluation evidence."
+    },
+    {
+      "artifact": "final_full",
+      "values": 188,
+      "exact_artifact_sha256": "69a87d42c7eecf03e71dc59fa00794288c42e74d20e8070855f75e0fd7c22ae6",
+      "inventory_utf8_bytes": 44516,
+      "one_claim_compact_utf8_bytes": 129688,
+      "one_claim_pretty_utf8_bytes": 171436,
+      "tokens_scenarios_without_reasoning": {
+        "3": 57146,
+        "4": 42859,
+        "5": 34288
+      },
+      "placeholder_evidence_characters_per_value": 160,
+      "placeholder_reason_characters_per_value": 120,
+      "basis": "Sizing specimen only; source/status assertions are NOT scientific judgments and must never be used as generation carry or evaluation evidence."
+    }
+  ],
+  "api_scenarios": [
+    {
+      "project": "CHORUS",
+      "carry_basis": "Exact preserved v10o full/core record bytes, with a synthetic one-claim-per-value v3 audit volume specimen. Historical rejected facts are sizing references only.",
+      "phases": [
+        {
+          "phase": "full",
+          "payload_utf8_bytes": 137225,
+          "payload_characters": 136558,
+          "payload_sha256": "dff1a25558a41483bb9fcc2b1fd0e39a7fac6d7ac58ac75c9b34f5b1ea2a43bc",
+          "output_ceiling": 128000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 45520
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 34140
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 27312
+            }
+          ]
+        },
+        {
+          "phase": "audit",
+          "payload_utf8_bytes": 209993,
+          "payload_characters": 209330,
+          "payload_sha256": "d7d784e588f13595078de274845ee753823a88484916f7735f875c278b96dcdb",
+          "output_ceiling": 96000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 69777
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 52333
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 41866
+            }
+          ]
+        },
+        {
+          "phase": "reconcile_full",
+          "payload_utf8_bytes": 308847,
+          "payload_characters": 308164,
+          "payload_sha256": "08ba3842cb79662929d3a4515a88419e5ed61e63111e0039f7d0031fac79c974",
+          "output_ceiling": 96000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 102722
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 77041
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 61633
+            }
+          ]
+        },
+        {
+          "phase": "report",
+          "payload_utf8_bytes": 437300,
+          "payload_characters": 436611,
+          "payload_sha256": "2eae8a41c0ad43d911fc2b1b4513d975aa53bbd64afaa5a8634754a614e0108f",
+          "output_ceiling": 96000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 145537
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 109153
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 87323
+            }
+          ]
+        }
+      ],
+      "conditional_calls": "Not included in four-call sums: receipt readdress, usable-response retries, ordinary report correction and legitimate shape repairs. Every call shares the whole-attempt cap. Rejected/unusable source reviews cannot be retried."
+    },
+    {
+      "project": "KIDS_FIRST",
+      "carry_basis": "Same CHORUS carry-volume specimen with the actual complete Kids First source/prompt/schema input. No Kids First generation exists in the inspected corpus (including ignored files); output complexity is unmeasured.",
+      "phases": [
+        {
+          "phase": "full",
+          "payload_utf8_bytes": 648578,
+          "payload_characters": 647480,
+          "payload_sha256": "5a197d62fee6dabfc1bdab6da04cdfa5e2490b4925a63ad9a025b30b9b63d1b0",
+          "output_ceiling": 128000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 215827
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 161870
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 129496
+            }
+          ]
+        },
+        {
+          "phase": "audit",
+          "payload_utf8_bytes": 721346,
+          "payload_characters": 720252,
+          "payload_sha256": "17e96c648663183abad0d103b8664ceef5197d7c5a8b5781cabdbaa2cedf2f84",
+          "output_ceiling": 96000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 240084
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 180063
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 144051
+            }
+          ]
+        },
+        {
+          "phase": "reconcile_full",
+          "payload_utf8_bytes": 820200,
+          "payload_characters": 819086,
+          "payload_sha256": "399559b214bcd2fc6b02d73dc00917e869a789547a599eb365efa9741fc5e42b",
+          "output_ceiling": 96000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 273029
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 204772
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 163818
+            }
+          ]
+        },
+        {
+          "phase": "report",
+          "payload_utf8_bytes": 948653,
+          "payload_characters": 947533,
+          "payload_sha256": "40d268edb1458e88920dbb297e3d95b7afa936750669aeb99821c9c9189305b6",
+          "output_ceiling": 96000,
+          "input_and_full_output_scenarios": [
+            {
+              "characters_per_token": 3,
+              "input_tokens_scenario": 315845
+            },
+            {
+              "characters_per_token": 4,
+              "input_tokens_scenario": 236884
+            },
+            {
+              "characters_per_token": 5,
+              "input_tokens_scenario": 189507
+            }
+          ]
+        }
+      ],
+      "conditional_calls": "Not included in four-call sums: receipt readdress, usable-response retries, ordinary report correction and legitimate shape repairs. Every call shares the whole-attempt cap. Rejected/unusable source reviews cannot be retried."
+    }
+  ],
+  "response_volume_scenarios": [
+    {
+      "project": "CHORUS",
+      "characters_per_token": 3,
+      "assumed_reasoning_per_review": 8000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 67081,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 71146,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "CHORUS",
+      "characters_per_token": 3,
+      "assumed_reasoning_per_review": 16000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 75081,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 79146,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "CHORUS",
+      "characters_per_token": 4,
+      "assumed_reasoning_per_review": 8000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 53311,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 56859,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "CHORUS",
+      "characters_per_token": 4,
+      "assumed_reasoning_per_review": 16000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 61311,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 64859,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "CHORUS",
+      "characters_per_token": 5,
+      "assumed_reasoning_per_review": 8000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 45049,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 48288,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "CHORUS",
+      "characters_per_token": 5,
+      "assumed_reasoning_per_review": 16000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 53049,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 56288,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "KIDS_FIRST",
+      "characters_per_token": 3,
+      "assumed_reasoning_per_review": 8000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 67081,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 71146,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "KIDS_FIRST",
+      "characters_per_token": 3,
+      "assumed_reasoning_per_review": 16000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 75081,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 79146,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "KIDS_FIRST",
+      "characters_per_token": 4,
+      "assumed_reasoning_per_review": 8000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 53311,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 56859,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "KIDS_FIRST",
+      "characters_per_token": 4,
+      "assumed_reasoning_per_review": 16000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 61311,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 64859,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "KIDS_FIRST",
+      "characters_per_token": 5,
+      "assumed_reasoning_per_review": 8000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 45049,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 48288,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    },
+    {
+      "project": "KIDS_FIRST",
+      "characters_per_token": 5,
+      "assumed_reasoning_per_review": 16000,
+      "phases": [
+        {
+          "phase": "full",
+          "assumed_output_tokens": 50276,
+          "output_ceiling": 128000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed full output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "audit",
+          "assumed_output_tokens": 53049,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        },
+        {
+          "phase": "reconcile_full",
+          "assumed_output_tokens": 9191,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "v10o observed reconcile output including reasoning, held fixed only for sensitivity"
+        },
+        {
+          "phase": "report",
+          "assumed_output_tokens": 56288,
+          "output_ceiling": 96000,
+          "output_scenario_exceeds_ceiling": false,
+          "basis": "pretty-JSON one-claim volume plus assumed reasoning and finding/report prose tokens; not measured output"
+        }
+      ],
+      "completion_supported_by_output_scenario": true,
+      "conditional_calls_excluded": true
+    }
+  ],
+  "native_sizing": {
+    "runtime_max_output_tokens_per_call": 64000,
+    "projects": {
+      "CHORUS": {},
+      "KIDS_FIRST": {}
+    },
+    "basis": "Native tool turns, context rereads, compaction and output complexity are unmeasured. API phase costs cannot forecast native totals. All provider/auxiliary turns use serial live admission under the whole-attempt cap. Each native output has a 64k runtime ceiling; a failed checker stops and the independent reviewer verifies actual tool history."
+  },
+  "limits": "Character/token ratios and filler lengths are sensitivity assumptions. Full inventories are measured; emitted records, atomic-clause count and reasoning are unknown. Even 96k can truncate; no completion guarantee. Live counting, conservative reservation, whole-attempt limits and acceptance gates remain mandatory. No paid token counting occurred.",
+  "response_volume_warning": "Costs in scenarios exceeding the output ceiling do not describe a complete attempt; the output would truncate and source-review admission would stop. A successful canary is the first empirical sizing observation for v3. Additional atomic claims, retries and native tool turns can increase cost. API audit/report have 96k allowances; native keeps its distinct 64k-per-turn limit, observed separately. There is no claim of matched realized effort or output ceilings.",
+  "scientific_calls": 0,
+  "remote_token_count_requests": 0
+}
