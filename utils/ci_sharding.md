@@ -1,14 +1,15 @@
 # CI test partitioning
 
 Every pull request runs the complete collected suite, including corpus tests,
-on six Python 3.12 shards. Main and manual runs retain the wider interpreter
-matrix and separate schema/example builds. The aggregate `test` check still
+on six Python 3.12 shards. Main and manual runs retain four shards per version
+in the wider interpreter matrix and separate schema/example builds. This keeps
+the compatibility matrix from consuming the entire runner pool. The aggregate `test` check still
 requires every applicable job to succeed.
 
 Each shard uses `-n logical --maxprocesses=4 --dist load --maxschedchunk=1`: up to four
 workers on the standard public Linux runner, rather than the two physical
 cores selected by `-n auto`. The subprocess coverage proof exercises this
-worker configuration and six-way partition. Every collected test remains included.
+worker configuration and both partition sizes. Every collected test remains included.
 
 Within a shard, files with the largest estimated time per collected case run
 first. A stable sort keeps the existing order within each file. Small xdist

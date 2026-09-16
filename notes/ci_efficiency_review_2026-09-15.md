@@ -1,6 +1,6 @@
 # CI efficiency follow-up — 2026-09-15
 
-Issues: #1868, #1869; review follow-up #1871. Starting commit: `f8c13691605e58829b8287b267726699732e8c04`.
+Issues: #1868, #1869; review follow-ups #1871, #1872. Starting commit: `f8c13691605e58829b8287b267726699732e8c04`.
 
 ## Measured baseline
 
@@ -59,7 +59,7 @@ unchanged. The package cache change must preserve validation and serialization.
 - Both new regression probes failed against the original code: unrelated
   schema eviction and stale reads after same-metadata atomic replacement.
   All 30 cache, invalidation and digest tests pass after the change and review fix.
-- All 21 partition, ordering and aggregate-gate checks pass, including the
+- All 23 partition, ordering and aggregate-gate checks pass, including the
   subprocess proof of complete, disjoint coverage under the exact final worker
   and scheduler flags. The ordering guard distinguishes one long case from
   many short cases whose combined file time is larger.
@@ -83,9 +83,12 @@ unchanged. The package cache change must preserve validation and serialization.
 - The [warm four-shard trial](https://github.com/bridge2ai/data-sheets-schema/actions/runs/35062642753)
   passed in 6:27 with 1,141 aggregate job seconds (32% less than the mean baseline).
   All previous outcomes remained identical, with ten added guards in total.
-  Six shards are the final latency optimization, with the same full collection,
-  interpreter coverage and gate. Their timing hints estimate 688.8 seconds of
-  case work each. Two extra jobs per interpreter add setup overhead; the final
+- Six PR shards are the final latency optimization, with the same full collection
+  and gate. Main/manual retain four shards per interpreter. Six for every
+  interpreter created 21 concurrent jobs and filled the observed 20-runner pool (#1872),
+  queueing the entire PR check; that experiment was stopped. Both partition
+  sizes have complete-collection subprocess guards. PR timing hints estimate
+  688.8 seconds of case work per shard. Two extra PR jobs add setup overhead; the final
   PR records actual elapsed and aggregate job time rather than assuming a gain.
 - Adversarial review found #1871: a missing filename with no cached identity
   could leave a surviving hard-link alias stale, or raise when its parent

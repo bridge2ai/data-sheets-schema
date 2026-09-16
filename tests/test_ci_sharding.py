@@ -32,8 +32,7 @@ def _cases(path):
                    for case in ET.parse(path).iter("testcase"))
 
 
-@pytest.mark.parametrize("weighted", [False, True])
-def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weighted):
+def _assert_complete_partition(tmp_path, weighted, total):
     # Include both pytest filename conventions, classes, parameterization,
     # a corpus marker and a skip. Assignment must not depend on worker ID.
     (tmp_path / "pytest.ini").write_text("[pytest]\nmarkers = corpus: corpus check\n")
@@ -63,13 +62,23 @@ def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weig
         timing.write_text(json.dumps({"schema_version": 1, "file_seconds": weights}))
         flags = [f"--ci-shard-timings={timing}"]
     actual = Counter()
-    for index in range(1, 7):
-        result = _run(tmp_path, f"--ci-shard={index}/6", "-n", "logical", "--maxprocesses=4",
+    for index in range(1, total + 1):
+        result = _run(tmp_path, f"--ci-shard={index}/{total}", "-n", "logical", "--maxprocesses=4",
                       "--dist=load", "--maxschedchunk=1", *flags, f"--junitxml=shard-{index}.xml")
         assert result.returncode == 0, result.stdout + result.stderr
         actual.update(_cases(tmp_path / f"shard-{index}.xml"))
     assert actual == expected
     assert set(actual.values()) == {1}
+
+
+@pytest.mark.parametrize("weighted", [False, True])
+def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weighted):
+    _assert_complete_partition(tmp_path, weighted, 6)
+
+
+@pytest.mark.parametrize("weighted", [False, True])
+def test_main_shards_retain_the_same_complete_collection(tmp_path, weighted):
+    _assert_complete_partition(tmp_path, weighted, 4)
 
 
 def test_one_long_case_starts_before_a_file_with_many_short_cases(tmp_path):
