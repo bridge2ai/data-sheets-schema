@@ -1,5 +1,14 @@
 # CHORUS API v10p stopped outcome — 2026-09-15
 
+**Accounting update, 2026-09-15:** the user confirmed the complete interrupted-audit
+charge. A separate reconciliation receipt and ledger settle it while preserving
+the original pending ledger and all stopped-attempt evidence. The reservation is
+released and accounting #1865 is resolved. Final audit usage remains unobserved;
+the run remains stopped and unaccepted, with no retry or downstream launch.
+Transport investigation #1849 remains open. The original stop-time record follows.
+
+## Original stop-time record
+
 The approved CHORUS API canary produced an initial full D4D, its derived core
 and a coverage receipt. Its subsequent audit stream ended with an incomplete
 response (`RemoteProtocolError`) before delivering any audit text or terminal
