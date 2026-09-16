@@ -43,6 +43,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
+from data_sheets_schema.stream_evidence import StreamTrace
 from data_sheets_schema.corpus import AUTO as SOURCE_MANIFEST_AUTO
 from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest, manifest_declared_unused
 from data_sheets_schema.usage_ledger import (
@@ -4742,6 +4743,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     incomplete = 0
     for attempt in range(1, MAX_ATTEMPTS + 1):
         t_call = time.monotonic()
+        trace = StreamTrace(t_call)
+        holder: dict[str, Any] = {}
         try:
             # Streamed, not because we consume tokens incrementally but because
             # the SDK refuses a non-streaming request whose max_tokens implies a
@@ -4765,13 +4768,13 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             import threading
             budget = PHASE_WALL_CLOCK_SECONDS if wall_clock is None else wall_clock
             box: dict[str, Any] = {}
-            holder: dict[str, Any] = {}
 
             # Bound per attempt, not closed over (#747): an abandoned worker
             # that completes late must land in *its* box, never in the live
             # attempt's, where an error checked before the result would
             # discard a good response.
-            def _run(box: dict[str, Any] = box, holder: dict[str, Any] = holder) -> None:
+            def _run(box: dict[str, Any] = box, holder: dict[str, Any] = holder,
+                     trace: StreamTrace = trace) -> None:
                 try:
                     with client.messages.stream(**kwargs) as stream:
                         holder["stream"] = stream
@@ -4781,10 +4784,12 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                         # hand it to the message the callers see.
                         details = None
                         iterable = hasattr(stream, "__iter__")
+                        trace.enter(stream, iterable=iterable)
                         saw_stop = False
                         events = 0
                         t_stream = time.monotonic()
                         for ev in (stream if iterable else ()):
+                            trace.observe(ev)
                             events += 1
                             kind = getattr(ev, "type", None)
                             if kind == "message_stop":
@@ -4820,7 +4825,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                             raise IncompleteStreamError(
                                 f"stream closed with no stop_reason on the final message after "
                                 f"{events} event(s) and {time.monotonic() - t_stream:.0f}s (#1013)",
-                                _stream_evidence(stream, events, time.monotonic() - t_stream))
+                                {**_stream_evidence(stream, events, time.monotonic() - t_stream),
+                                 "outcome": "stream closed with no stop_reason (#1013)"})
                         if details is not None:
                             _attach_output_tokens_details(msg, details)
                         box["result"] = msg
@@ -4845,6 +4851,10 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 raise box["error"]
             return box["result"]
         except Exception as exc:                      # noqa: BLE001 - re-raised
+            # Freeze metadata once, before snapshot/recorder work. A watchdog's
+            # abandoned worker may still deliver events after this point.
+            trace.response(getattr(exc, "response", None))
+            stream_trace = trace.snapshot(exception=exc, provider_error_type=_declared_error_type(exc))
             transient = isinstance(exc, (
                 getattr(anthropic, "RateLimitError", ()),
                 getattr(anthropic, "APIConnectionError", ()),
@@ -4880,7 +4890,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             # a silent retry made a stalled phase look like a slow one (#779).
             if not transient and "wall clock" in str(exc) and "#664" in str(exc):
                 transient = True
-                print(f"   attempt {attempt} abandoned by the watchdog after the wall clock; retrying")
+                print(f"   attempt {attempt} abandoned by the watchdog after the wall clock"
+                      + ("; retrying" if attempt < MAX_ATTEMPTS else "; giving up"))
             if isinstance(exc, IncompleteStreamError):
                 # Bounded below MAX_ATTEMPTS: two clean early closes in one
                 # call are a systemic problem, not noise, and a 15-minute
@@ -4889,19 +4900,26 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 transient = incomplete <= INCOMPLETE_STREAM_ATTEMPTS
                 evidence = {"attempt": attempt, "incomplete": incomplete,
                             "outcome": "stream ended without message_stop (#1013)", **exc.evidence}
-            elif transient:
+            elif transient or holder.get("stream") is not None:
                 # A transport error mid-stream (`RemoteProtocolError`, a
                 # rate limit, a 5xx) abandons a billed request too (#1038
                 # second pass): whatever the stream had delivered is read
                 # off the SDK's snapshot the same way.
                 stream = holder.get("stream")
+                event_count = stream_trace["events"]
                 evidence = {"attempt": attempt, "incomplete": incomplete,
-                            "outcome": f"transport error: {type(exc).__name__} (#1017)",
-                            **(_stream_evidence(stream, None, time.monotonic() - t_call) if stream is not None
+                            "outcome": f"{'transport' if transient else 'stream'} error: {type(exc).__name__} (#1017)",
+                            **(_stream_evidence(stream, event_count, time.monotonic() - t_call) if stream is not None
                                else {"events": None, "seconds": round(time.monotonic() - t_call, 1),
                                      "content_chars": 0, "content_sha256": None, "tail": "", "usage": None})}
             else:
                 evidence = None
+            if evidence is not None:
+                # SDK errors can carry response metadata even if opening the
+                # stream failed. Keep declared errors as well as successful HTTP
+                # headers; neither establishes completion or final usage (#1849).
+                evidence["stream_trace"] = stream_trace
+                evidence["events"] = stream_trace["events"]
             if evidence is not None and on_incomplete is not None:
                 # The caller keeps the evidence (#1017); a failure to
                 # record it must not turn a transient into a fatal.
@@ -5325,6 +5343,8 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
             f"# events: {info.get('events')}  seconds: {info.get('seconds')}  "
             f"content_chars: {info.get('content_chars')}  content_sha256: {info.get('content_sha256')}\n"
             f"# usage snapshot: {info.get('usage')}\n"
+            + (f"# stream trace: {json.dumps(info['stream_trace'], ensure_ascii=True)}\n"
+               if "stream_trace" in info else "") +
             f"# last {INCOMPLETE_TAIL_CHARS} characters as delivered:\n" + (info.get("tail") or ""))
     path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
     snap_usage = info.get("usage") or {}
@@ -5346,6 +5366,8 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
                   "cache_read": snap_usage.get("cache_read_input_tokens"),
                   "cache_write": snap_usage.get("cache_creation_input_tokens"),
                   "snapshot": str(path)}
+    if "stream_trace" in info:
+        row["stream_trace"] = info["stream_trace"]
     generation = _usage_generation(spec)
     if generation is not None:
         row["generation_id"] = generation

@@ -320,7 +320,7 @@ class TestTransportErrorEvidence(unittest.TestCase):
         (info,) = seen
         self.assertEqual((info["attempt"], info["incomplete"], info["content_chars"]), (1, 0, 40000))
         self.assertTrue(info["outcome"].startswith("transport error: RemoteProtocolError"))
-        self.assertIsNone(info["events"])                  # held by the worker; not counted (#1040)
+        self.assertEqual(info["events"], 1)                # observed even when iteration raises (#1849)
         self.assertEqual(info["usage"]["output_tokens"], 5)
         self.assertIsInstance(info["seconds"], float)
 
