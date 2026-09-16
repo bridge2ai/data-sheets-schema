@@ -380,7 +380,7 @@
 <p><em>Data standards and common data models a dataset's content follows.</em></p>
 <p><em>Deliberately <strong>not</strong> merged into <code>FormatEnum</code> (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening <code>FormatEnum</code> to absorb DICOM would conflate them and make <code>format</code> unanswerable.</em></p>
 <p><em>Free-text <code>conforms_to</code> records what a source <em>says</em>; this records which registered standard that is, where one applies. Both may be populated for the same standard — one verbatim, one normalized — which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.</em></p>
-<p><em>⚠️ <strong>No <code>meaning:</code> is asserted on any value.</strong> Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent — it is the exact failure <code>d4d runs identifiers</code> exists to find. The <code>B2AI_STANDARD</code> prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.</em></p>
+<p><em>⚠️ <strong>No <code>meaning:</code> is asserted on any value.</strong> Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent — it is the exact failure <code>d4d runs identifiers</code> exists to find. A declared standards-registry prefix is the natural home for these once such a registry carries them; until one does, this is a controlled vocabulary without ontology grounding, and says so.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/DataStandardEnum">data_sheets_schema:DataStandardEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
@@ -483,9 +483,9 @@ description: 'Data standards and common data models a dataset''s content follows
   ⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no
   stable ontology term this repository can verify, and inventing a CURIE that resolves
   to nothing is worse than leaving the grounding absent — it is the exact failure
-  `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and
-  is the natural home for these once the registry carries them; until it does, this
-  is a controlled vocabulary without ontology grounding, and says so.'
+  `d4d runs identifiers` exists to find. A declared standards-registry prefix is the
+  natural home for these once such a registry carries them; until one does, this is
+  a controlled vocabulary without ontology grounding, and says so.'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
