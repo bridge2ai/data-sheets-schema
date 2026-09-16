@@ -4841,7 +4841,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 # the same lock the reader holds, and the caller must not.
                 stream = holder.get("stream")
                 if stream is not None:
-                    threading.Thread(target=lambda: getattr(stream, "close", lambda: None)(),
+                    threading.Thread(target=lambda stream=stream: getattr(stream, "close", lambda: None)(),
                                      daemon=True).start()
                 raise RuntimeError(
                     f"phase call exceeded the {budget:.0f}s wall clock and was "

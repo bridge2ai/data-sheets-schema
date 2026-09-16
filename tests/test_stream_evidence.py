@@ -243,3 +243,44 @@ def test_trace_survives_snapshot_journal_and_record_merge(tmp_path):
     assert json.loads(line.removeprefix("# stream trace: ")) == trace
     assert runner.merge_abandoned_rows(spec, [])[0]["stream_trace"] == trace
     assert persisted["output_tokens"] == 7  # A partial snapshot, never promoted to final usage.
+
+
+def test_delayed_watchdog_close_targets_its_original_stream(monkeypatch):
+    """Delay close-thread scheduling until two abandoned attempts have unwound."""
+    real_thread = threading.Thread
+    callbacks = []
+    closed = []
+    opened = []
+    release = threading.Event()
+
+    def thread_factory(*args, **kwargs):
+        if kwargs.get("name", "").startswith("phase-call-"):
+            return real_thread(*args, **kwargs)
+        return SimpleNamespace(start=lambda: callbacks.append(kwargs["target"]))
+
+    class Stream:
+        def __init__(self, number): self.number = number
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def __iter__(self):
+            yield SimpleNamespace(type="message_start")
+            release.wait(5)
+            yield SimpleNamespace(type="message_stop")
+        def close(self): closed.append(self.number)
+        def get_final_message(self): return SimpleNamespace(stop_reason="end_turn")
+
+    def stream(**kwargs):
+        opened.append(1)
+        return Stream(len(opened))
+
+    monkeypatch.setattr(threading, "Thread", thread_factory)
+    monkeypatch.setattr(runner, "MAX_ATTEMPTS", 2)
+    try:
+        with pytest.raises(RuntimeError, match="watchdog"):
+            call(SimpleNamespace(messages=SimpleNamespace(stream=stream)), [], wall_clock=0.3)
+        assert len(callbacks) == len(opened) == 2
+        for close in callbacks:
+            close()
+        assert closed == [1, 2]
+    finally:
+        release.set()
