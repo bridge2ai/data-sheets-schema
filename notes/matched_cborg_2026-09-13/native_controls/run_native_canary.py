@@ -66,6 +66,18 @@ def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
     return out
 
 
+def observation_problems(observed):
+    """What in a transcript observation refuses completion (#1930): a
+    malformed measurement-bearing event means the coverage and totals are
+    not evidence, whatever the current-file checks say."""
+    if not isinstance(observed, dict):
+        return ['transcript observation unavailable']
+    problems = []
+    if observed.get('malformed_message_events'):
+        problems.append(f"transcript carries {observed['malformed_message_events']} malformed measurement events")
+    return problems
+
+
 def retain_traceback(attempt, exc):
     """Append the controller traceback under the attempt; never raise."""
     try:
@@ -239,8 +251,10 @@ def main():
             receipt['evidence_assertions'] = evidence
             if not evidence['checked'] or evidence['findings']:
                 problems = list(problems) + ['explicit evidence assertions failed']
+        observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
+        problems=list(problems)+observation_problems(observed)
         receipt.update(validation_problems=problems,pair_consistency=pair,
-                       native_observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle'])),
+                       native_observed=observed,
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),
                        status='validation_failed' if problems or not pair or not pair.get('ran') or not pair.get('consistent') else 'completed_pending_independent_review')
         verify_all();verify_history(base)
@@ -255,8 +269,8 @@ def main():
             state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}
             admitted=[row for row in state.get('requests',[]) if isinstance(row,dict) and row.get('attempt')==billing_attempt]
         except Exception as read_error:
-            admitted=[]; receipt['ledger_read_note']=f'ledger unreadable at freeze: {type(read_error).__name__}'
-        receipt.update(finished_at=now(),model_requests_admitted=len(admitted),
+            admitted=None; receipt['ledger_read_note']=f'ledger unreadable at freeze: {type(read_error).__name__}'
+        receipt.update(finished_at=now(),model_requests_admitted=None if admitted is None else len(admitted),
             unfinished_handlers_at_freeze=proxy.unfinished_handlers,
             artifacts={str(p):sha(p) for folder in job['output_directories'] for p in sorted(Path(folder).rglob('*')) if p.is_file()})
         write_new(attempt/'result.json',receipt)

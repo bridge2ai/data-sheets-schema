@@ -222,3 +222,12 @@ def test_stop_explanation_never_raises_on_a_malformed_ledger(tmp_path):
     ledger.write_bytes(b'{not json')
     out = stop_explanation(BudgetStop('deadline'), ledger, 'reg:job', None)
     assert out['reason'] == 'deadline' and out['ledger_stop_note'].startswith('ledger unreadable')
+
+
+def test_a_malformed_observation_refuses_completion():
+    """#1930: the observer's malformed-event count must reach the completion
+    decision, not only the receipt's observation block."""
+    from run_native_canary import observation_problems
+    assert observation_problems({'output_tokens': 5}) == []
+    assert observation_problems({'malformed_message_events': 2}) == ['transcript carries 2 malformed measurement events']
+    assert observation_problems(None) == ['transcript observation unavailable']

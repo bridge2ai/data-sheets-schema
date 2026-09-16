@@ -210,3 +210,55 @@ class StringMessageLines(unittest.TestCase):
             t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
             obs = ao.observe([t], bundle, None, None, None)
         self.assertEqual(obs["malformed_message_events"], 1)
+
+
+class TerminalResultUsage(unittest.TestCase):
+    """Claude Code 2.1.272 stream-json: assistant events carry initial usage
+    snapshots only; the terminal `result` event carries the session's
+    finalized usage (#1931). Without it the retained v10q transcript read
+    344 output tokens against the runtime's 118,696."""
+
+    def test_finalized_usage_from_the_terminal_result_wins(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            bundle = root / "P_preprocessed.txt"
+            bundle.write_text("\n".join(f"line {i}" for i in range(100)) + "\n")
+            lines = [
+                _event("2026-09-16T21:52:21Z", usage={"output_tokens": 3},
+                       tools=[("Read", {"file_path": str(bundle), "offset": 1, "limit": 100})], msg_id="m1"),
+                _event("2026-09-16T21:52:25Z", usage={"output_tokens": 17}, msg_id="m2"),
+                json.dumps({"timestamp": "2026-09-16T22:21:00Z", "type": "result", "message": "done", "uuid": "r",
+                            "usage": {"input_tokens": 7367, "cache_creation_input_tokens": 212559,
+                                      "cache_read_input_tokens": 4326307, "output_tokens": 118696,
+                                      "output_tokens_details": {"thinking_tokens": 74283}}}),
+            ]
+            t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
+            obs = ao.observe([t], bundle, None, None, None)
+        self.assertEqual(obs["output_tokens"], 118696)
+        self.assertEqual(obs["thinking_tokens"], 74283)
+        self.assertEqual(obs["total_tokens"], 7367 + 212559 + 4326307 + 118696)
+        self.assertEqual(obs["usage_from_terminal_result"], 1)
+        self.assertGreater(obs["reasoning_tokens_estimate"], 100000)
+        self.assertEqual(obs["bundle_lines_read"], 100)
+
+    def test_without_a_terminal_result_the_snapshot_maximum_stands(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            bundle = root / "P_preprocessed.txt"; bundle.write_text("x\n")
+            lines = [_event("2026-09-16T21:52:21Z", usage={"output_tokens": 3}, msg_id="m1"),
+                     _event("2026-09-16T21:52:22Z", usage={"output_tokens": 9}, msg_id="m1")]
+            t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
+            obs = ao.observe([t], bundle, None, None, None)
+        self.assertEqual(obs["output_tokens"], 9)
+        self.assertNotIn("usage_from_terminal_result", obs)
+
+    def test_an_empty_message_on_a_measurement_event_is_malformed_too(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            bundle = root / "P_preprocessed.txt"; bundle.write_text("x\n")
+            lines = [json.dumps({"timestamp": "2026-09-16T21:52:21Z", "type": "assistant", "message": "", "uuid": "a"}),
+                     json.dumps({"timestamp": "2026-09-16T21:52:22Z", "type": "user", "message": [], "uuid": "b"}),
+                     json.dumps({"timestamp": "2026-09-16T21:52:23Z", "type": "system", "message": "", "uuid": "c"})]
+            t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
+            obs = ao.observe([t], bundle, None, None, None)
+        self.assertEqual(obs["malformed_message_events"], 2)

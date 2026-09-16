@@ -165,6 +165,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
     read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
     failed: set[str] = set()
     malformed = 0
+    terminal_usage: dict | None = None
     bundle_name = bundle.name if bundle else None
     for path in transcripts:
         first = last = None
@@ -181,16 +182,23 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         continue
                     first = first or t
                     last = t
-                msg = j.get("message") or {}
-                if not isinstance(msg, dict):
+                raw = j.get("message")
+                msg = raw if isinstance(raw, dict) else {}
+                if "message" in j and not isinstance(raw, dict):
                     # Claude Code 2.1.272 stream-json writes informational
                     # lines (`system`, `result`, …) with a string `message`
                     # (#1915); they carry no usage or content. An assistant or
-                    # user event whose message is not a mapping is malformed
-                    # and is counted rather than silently skipped (#1926).
+                    # user event whose message is not a mapping — a string, a
+                    # list, an empty value — is malformed and is counted, and
+                    # every consumer treats the observation as invalid (#1930).
                     if j.get("type") in ("assistant", "user"):
                         malformed += 1
-                    msg = {}
+                if j.get("type") == "result" and isinstance(j.get("usage"), dict):
+                    # The runtime's own finalized accounting for the whole
+                    # session: assistant events in stream-json carry only
+                    # initial usage snapshots, so the per-message maximum
+                    # undercounts by two orders of magnitude (#1931).
+                    terminal_usage = j["usage"]
                 usage = msg.get("usage") or {}
                 if usage:
                     mid = msg.get("id") or f"{path}:{j.get('uuid')}"
@@ -223,6 +231,19 @@ def observe(transcripts: list[Path], bundle: Path | None,
     total = sum(_usage_total(u) for u in usage_by_msg.values())
     out = {"total_tokens": total, "tool_uses": tools, "duration_ms": duration_ms}
     out.update(reasoning_measure(usage_by_msg, blocks_by_msg))
+    if terminal_usage is not None:
+        # Finalized totals win over the per-message snapshots; the estimate
+        # is the same subtraction over the whole session (#1931).
+        final_output = int(terminal_usage.get("output_tokens", 0) or 0)
+        out["total_tokens"] = _usage_total(terminal_usage)
+        out["output_tokens"] = final_output
+        out["reasoning_tokens_estimate"] = max(
+            0, final_output - (out.get("visible_text_chars", 0) + out.get("tool_input_chars", 0)) // 4)
+        details = terminal_usage.get("output_tokens_details")
+        if isinstance(details, dict) and isinstance(details.get("thinking_tokens"), int):
+            out["thinking_tokens"] = details["thinking_tokens"]
+            out["turns_with_thinking_tokens"] = out.get("assistant_turns", 0)
+        out["usage_from_terminal_result"] = 1
     if bundle:
         n_lines = sum(1 for _ in bundle.open(encoding="utf-8"))
         covered = set()
