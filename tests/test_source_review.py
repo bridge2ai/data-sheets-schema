@@ -285,6 +285,94 @@ def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,
     assert snapshots[0].read_text()==('' if kind=='empty' else '{"source_review":')
 
 
+@pytest.mark.parametrize('writer',['reasoning','progress','phase_snapshot'])
+@pytest.mark.parametrize('mode,calls',[('empty_audit',2),('final_status',4)])
+def test_rejected_response_is_latched_before_ancillary_write_failures(tmp_path,monkeypatch,writer,mode,calls):
+    spec=replace(specification(tmp_path),render_version=12)
+    class FailingReviewFake(SourceReviewFake):
+        def create(self, **kwargs):
+            if mode=='empty_audit' and kwargs['messages'][0]['content'][-1]['text'].startswith('Phase 3.'):
+                self.calls.append(kwargs);return FakeResponse('')
+            return super().create(**kwargs)
+    fake=FailingReviewFake('final_status' if mode=='final_status' else 'valid')
+    target='audit' if mode=='empty_audit' else 'report'
+    reached=[]
+    def fail():
+        reached.append(writer)
+        raise OSError('Synthetic ancillary write failure')
+    if writer=='reasoning':
+        original=api.reasoning.append
+        def write(path,entry):
+            if entry['phase']==target:fail()
+            return original(path,entry)
+        monkeypatch.setattr(api.reasoning,'append',write)
+    elif writer=='progress':
+        original=api._save_progress
+        def write(spec,completed,*args,**kwargs):
+            if target in completed:fail()
+            return original(spec,completed,*args,**kwargs)
+        monkeypatch.setattr(api,'_save_progress',write)
+    else:
+        original=api._snapshot
+        def write(spec,name,*args,**kwargs):
+            if name==f'EXAMPLE_{target}.'+('json' if target=='audit' else 'md'):fail()
+            return original(spec,name,*args,**kwargs)
+        monkeypatch.setattr(api,'_snapshot',write)
+    with pytest.raises(RuntimeError,match='evidence assertions failed'):
+        run(spec,fake,monkeypatch)
+    assert reached==[]  # rejection precedes the failing write, rather than relying on it
+    fake.mode='valid'
+    assert_resume_refuses_unchanged(spec,fake,calls)
+
+
+def test_refusal_survives_failure_to_preserve_its_response_snapshot(tmp_path,monkeypatch):
+    spec=replace(specification(tmp_path),render_version=12)
+    fake=SourceReviewFake('final_status')
+    original=api._snapshot
+    def fail(spec,name,*args,**kwargs):
+        if '_rejected_response_' in name:raise OSError('Synthetic refusal snapshot failure')
+        return original(spec,name,*args,**kwargs)
+    monkeypatch.setattr(api,'_snapshot',fail)
+    with pytest.raises(OSError,match='refusal snapshot failure'):run(spec,fake,monkeypatch)
+    from data_sheets_schema.usage_ledger import evidence_refusal
+    refusal=evidence_refusal(spec)
+    assert refusal['reading']['response_sha256']
+    assert refusal['reading']['source_review_final']['findings']
+    fake.mode='valid'
+    assert_resume_refuses_unchanged(spec,fake,4)
+
+
+@pytest.mark.parametrize('phase,calls',[('audit',2),('report',4),
+                                      ('report_regate',5),('report_after_repair',6)])
+def test_interruption_between_accounting_and_review_blocks_resume_and_direct_calls(tmp_path,monkeypatch,phase,calls):
+    spec=replace(specification(tmp_path),render_version=12)
+    fake=ShapeRepairFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+    monkeypatch.setattr(api,'_validator_lines',lambda *args:
+        (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+    admit=api._admit_source_response
+    def interrupt(spec,actual,*args,**kwargs):
+        if actual==phase:raise SystemExit('Synthetic process interruption after durable usage')
+        return admit(spec,actual,*args,**kwargs)
+    with monkeypatch.context() as interrupted:
+        interrupted.setattr(api,'_admit_source_response',interrupt)
+        with pytest.raises(SystemExit,match='process interruption'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+    from data_sheets_schema import usage_ledger
+    rows=usage_ledger.merge_usage(spec,[])
+    assert rows[-1]['phase']==phase
+    assert rows[-1]['source_review_admission']['state']=='pending'
+    assert rows[-1]['source_review_admission']['response_sha256']
+    assert len(fake.calls)==calls
+    generation=usage_ledger.generation_id(spec)
+    before={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
+    with pytest.raises(api.UsageLedgerError,match='source-review admission'):
+        api.execute(spec,client=SimpleNamespace(messages=fake))
+    with pytest.raises(api.UsageLedgerError,match='source-review admission'):
+        usage_ledger.begin_call(spec,'report',2,'2026-09-15T00:00:00Z')
+    assert usage_ledger.generation_id(spec)==generation and len(fake.calls)==calls
+    assert before=={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
+
+
 @pytest.mark.parametrize('runtime',['Claude API (direct)','Claude Code'])
 def test_both_arms_share_protocol_and_native_commands_pin_version(tmp_path,runtime):
     spec=replace(specification(tmp_path,runtime),render_version=12)

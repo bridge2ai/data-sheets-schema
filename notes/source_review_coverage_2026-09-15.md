@@ -23,6 +23,16 @@ acceptance must inspect actual checker tool results and reject continuation
 after a failure. An ordinary report correction remains possible only with clean
 source reviews and a fresh final inventory.
 
+Admit a delivered audit/report against its actual input payload immediately
+after durable usage accounting, before reasoning logs, phase snapshots, output
+or progress writes. A local write failure must not hide a rejected review and
+permit a replacement response on resume. Record refusal before preserving its
+response snapshot so even a snapshot failure retains the stop and response hash.
+Commit pending admission and the response hash atomically with completed usage;
+only successful checking can mark admission accepted. Resume and direct call
+admission refuse a pending or invalid entry, covering interruption before the
+checker runs. Historical protocols retain their existing behavior.
+
 Use neutral synthetic documents to reproduce wrong-document attribution,
 instruction-to-applied inference, lost prospective deployment qualification,
 mixed-status prose and omissions in repeated/nested values. Test real API

@@ -3614,23 +3614,73 @@ def require_source_reviews(spec: RunSpec, carry: dict[str, str], *, evidence=Non
         require_evidence_checks(spec, carry, stage="report")
 
 
-def _refuse_unusable_source_review(spec: RunSpec, phase: str, problem: str,
-                                   text: str, usage: dict) -> None:
-    """A delivered but unusable v3 review is terminal, including on resume."""
-    if spec.render_version < 12 or phase not in {"audit", "report", "report_regate", "report_after_repair"}:
-        return
-    from data_sheets_schema.evidence_assertions import instrument
+def _reject_source_response(spec: RunSpec, phase: str, text: str, usage: dict, out: dict) -> None:
+    """Latch rejection before fallible preservation, reasoning or progress writes."""
     from data_sheets_schema.usage_ledger import record_evidence_refusal
-    out = {"instrument": instrument(3), "checked": False, "assertions_checked": 0,
-           "phase": phase,
-           "usage_id": usage.get("usage_id"), "response_sha256": hashlib.sha256(text.encode()).hexdigest(),
-           "findings": [{"kind": "source_review_unusable", "detail": problem}]}
+    out = {**out, "phase": phase, "usage_id": usage["usage_id"],
+           "response_sha256": hashlib.sha256(text.encode()).hexdigest()}
     # Latch first so even a subsequent snapshot failure cannot authorize a retry.
     stage = "audit" if phase == "audit" else "report"
     record_evidence_refusal(spec, stage, out)
     _snapshot(spec, f"{spec.project}_{phase}_rejected_response_{usage['usage_id']}.txt",
               text, usage_id=usage["usage_id"])
     _assert_evidence_clean(out, stage)
+
+
+def _refuse_unusable_source_review(spec: RunSpec, phase: str, problem: str,
+                                   text: str, usage: dict) -> None:
+    """A delivered but unusable v3 review is terminal, including on resume."""
+    if spec.render_version < 12 or phase not in {"audit", "report", "report_regate", "report_after_repair"}:
+        return
+    from data_sheets_schema.evidence_assertions import instrument
+    out = {"instrument": instrument(3), "checked": False, "assertions_checked": 0,
+           "findings": [{"kind": "source_review_unusable", "detail": problem}]}
+    _reject_source_response(spec, phase, text, usage, out)
+
+
+def _admit_source_response(spec: RunSpec, phase: str, text: str, stop_reason,
+                           usage: dict, needed: dict[str, str]) -> None:
+    """Check the delivered review against its actual payload before ancillary IO."""
+    if spec.render_version < 12 or phase not in {"audit", "report", "report_regate", "report_after_repair"}:
+        return
+    from data_sheets_schema import evidence_assertions as evidence
+    try:
+        if stop_reason == "max_tokens":
+            raise ValueError("source-review output truncated at max_tokens")
+        body = _extract(text, "json" if phase == "audit" else "md")
+        chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
+        if phase == "audit":
+            out = evidence.check_audit(evidence.load_json(body),
+                artifacts={"original_full": needed["Completed full record"]},
+                chunks=chunks, protocol_version=3)
+        else:
+            artifacts = {"original_full": needed["Original full record"],
+                         "original_core": needed["Original core record"],
+                         "final_full": needed["Reconciled full record"],
+                         "final_core": needed["Completed core record"]}
+            review = evidence.check_report(body, artifacts=artifacts, chunks=chunks,
+                                            protocol_version=3)["source_review_final"]
+            # Ordinary report assertions can still use the single re-check;
+            # the source judgment must already pass before any local writes.
+            out = {"instrument": evidence.instrument(3), "checked": True,
+                   "source_review_final": review, "findings": review["findings"]}
+        out["source_sha256"] = pins
+    except (OSError, ValueError, KeyError, TypeError, RuntimeError, yaml.YAMLError) as exc:
+        _refuse_unusable_source_review(spec, phase, str(exc), text, usage)
+        return
+    if not out["checked"] or out["findings"]:
+        _reject_source_response(spec, phase, text, usage, out)
+    usage["source_review_admission"]["state"] = "accepted"
+    _persist_usage(spec, usage)
+
+
+def _pending_source_review(spec: RunSpec, phase: str, response) -> dict:
+    """Commit pending admission and exact response identity with completed usage."""
+    if spec.render_version < 12 or phase not in {"audit", "report", "report_regate", "report_after_repair"}:
+        return {}
+    text = "".join(block.text for block in response.content if getattr(block, "type", "") == "text")
+    return {"source_review_admission": {"state": "pending",
+            "response_sha256": hashlib.sha256(text.encode()).hexdigest()}}
 
 
 def saved_evidence_checks(spec: RunSpec, record: dict) -> dict:
@@ -4974,6 +5024,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     except Exception:                                          # noqa: BLE001
         return False                # a stale report is better than none
     call_usage = _append_usage(spec, usage, {"usage_id": call_id, "phase": phase, "attempt": 1, "started_at": started,
+                  **_pending_source_review(spec, phase, resp),
                   "seconds": round(time.monotonic() - t0, 3),
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
@@ -4986,6 +5037,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "stop_reason": getattr(resp, "stop_reason", None)})
     text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
                    if getattr(b, "type", None) == "text")
+    _admit_source_response(spec, phase, text, getattr(resp, "stop_reason", None), call_usage, needed)
     cap = reasoning.capture(resp)
     reasoning.append(_reasoning_path(spec),
                      {"phase": phase, "label": spec.label, "project": spec.project,
@@ -5435,6 +5487,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         # Durable before reasoning, parsing, snapshots or progress writes:
         # any of those can fail after the completed call was already billed.
         call_usage = _append_usage(spec, usage, {
+            **_pending_source_review(spec, ph, resp),
             "usage_id": call_id,
             "phase": ph,
             "attempt": attempt,
@@ -5451,6 +5504,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
+        _admit_source_response(spec, ph, text, getattr(resp, "stop_reason", None), call_usage, needed)
         # Preserve the entire delivered body before split_receipt (#1048).
         response_text = text
         if ph == "full" and spec.condition in RECEIPT_CONDITIONS:
@@ -5689,6 +5743,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if refusal is not None:
             # Before artifact drift can invalidate paid phases (#1820).
             _assert_evidence_clean(refusal["reading"], refusal["stage"])
+        from data_sheets_schema.usage_ledger import require_source_review_admission
+        require_source_review_admission(spec)
     progress = _load_progress(spec) if resume else {}
     skipped: list[str] = []
     carry: dict[str, str] = {}
