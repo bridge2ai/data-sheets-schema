@@ -373,6 +373,35 @@ def test_interruption_between_accounting_and_review_blocks_resume_and_direct_cal
     assert before=={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
 
 
+@pytest.mark.parametrize('resume',[False,True])
+def test_existing_crlf_bytes_survive_report_regeneration_and_resume(tmp_path,monkeypatch,resume):
+    spec=replace(specification(tmp_path),render_version=12)
+    fake=SourceReviewFake('valid' if resume else 'header_fix')
+    generate=api._generate_phase
+    saved={}
+    def prepare(spec,phase,needed,*args,**kwargs):
+        if phase=='report' and not saved:
+            # Fixture a legitimately pinned CRLF final record before reporting.
+            raw=spec.full_path.read_bytes().replace(b'\n',b'\r\n')
+            spec.full_path.write_bytes(raw);saved['full']=raw
+            progress=api._load_progress(spec)
+            api._save_progress(spec,progress['completed'],progress['Audit findings'])
+            if resume:raise RuntimeError('Synthetic pause before the report request')
+            needed={**needed,'Reconciled full record':raw.decode('utf-8')}
+        return generate(spec,phase,needed,*args,**kwargs)
+    monkeypatch.setattr(api,'_generate_phase',prepare)
+    if resume:
+        with pytest.raises(RuntimeError,match='pause before the report'):run(spec,fake,monkeypatch)
+        assert len(fake.calls)==3
+    result=run(spec,fake,monkeypatch)
+    assert len(fake.calls)==(4 if resume else 5)
+    assert not result['validation_problems']
+    assert spec.full_path.read_bytes()==saved['full'] and b'\r\n' in saved['full']
+    checked=api.saved_evidence_checks(spec,yaml.safe_load(spec.provenance_path.read_bytes()))
+    assert checked['findings']==[]
+    assert checked['source_review_final']['sha256']==hashlib.sha256(saved['full']).hexdigest()
+
+
 @pytest.mark.parametrize('runtime',['Claude API (direct)','Claude Code'])
 def test_both_arms_share_protocol_and_native_commands_pin_version(tmp_path,runtime):
     spec=replace(specification(tmp_path,runtime),render_version=12)

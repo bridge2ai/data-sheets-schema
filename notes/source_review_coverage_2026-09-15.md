@@ -32,6 +32,8 @@ Commit pending admission and the response hash atomically with completed usage;
 only successful checking can mark admission accepted. Resume and direct call
 admission refuse a pending or invalid entry, covering interruption before the
 checker runs. Historical protocols retain their existing behavior.
+Resume and report regeneration preserve existing record line endings when
+building v3 inventories, so their hashes refer to the exact on-disk bytes.
 
 Use neutral synthetic documents to reproduce wrong-document attribution,
 instruction-to-applied inference, lost prospective deployment qualification,

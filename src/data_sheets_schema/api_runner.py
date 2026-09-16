@@ -4974,6 +4974,12 @@ def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float |
     return max(1.0, min((reset - current).total_seconds() + 2, RATE_LIMIT_MAX_PAUSE))
 
 
+def _carried_record_text(spec: RunSpec, path: Path) -> str:
+    """Keep the bytes used by v3 inventory hashes, including existing CRLFs."""
+    return (path.read_bytes().decode("utf-8") if spec.render_version >= 12
+            else path.read_text(encoding="utf-8"))
+
+
 def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                        usage: list[dict[str, Any]],
                        carry: dict[str, str], *, phase: str = "report_after_repair",
@@ -4989,11 +4995,9 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     """
     fresh = dict(carry)
     if spec.full_path.exists():
-        fresh["Reconciled full record"] = spec.full_path.read_text(
-            encoding="utf-8")
+        fresh["Reconciled full record"] = _carried_record_text(spec, spec.full_path)
     if spec.core_path.exists():
-        fresh["Completed core record"] = spec.core_path.read_text(
-            encoding="utf-8")
+        fresh["Completed core record"] = _carried_record_text(spec, spec.core_path)
     needed = {k: fresh[k] for k in PHASE_NEEDS["report"] if k in fresh}
     if len(needed) != len(PHASE_NEEDS["report"]):
         return False                # cannot rebuild it honestly; leave it
@@ -5961,7 +5965,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         path = _artifact_path(spec, artifact)
         if not path.exists():
             continue
-        body = path.read_text(encoding="utf-8")
+        body = _carried_record_text(spec, path)
         schema_path, class_name = PHASE_SCHEMA[artifact]
         try:
             parsed = yaml.safe_load(body)
