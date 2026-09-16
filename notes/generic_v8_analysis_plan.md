@@ -2723,14 +2723,16 @@ attribute's description, and no top-level slot description was edited, so
 (`6be15822…` study, `94859bbb…` neutral; `CoreDataset` `980ccdaf…` /
 `61c50be6…`) and the inventory ledger gains no entry — the API arm's
 instrument identity is unchanged. The entry points, the merged files and every edited module moved (full
-source `38e19f26…` → `6de786d3…`, merged `ea595c4b…` → `ee2248e1…`, core
-source `0cdb2744…` → `de607a07…`, merged core `7fcd7ddd…` → `f67bcf6a…`),
+source `38e19f26…` → `6de786d3…`, merged `ea595c4b…` → `577009df…`, core
+source `0cdb2744…` → `de607a07…`, merged core `7fcd7ddd…` → `3f36969e…`),
 so `schema.full_sha256`/`core_sha256` on every new record, the schema
 pins of any registration and the native toolchain's resource hashes move
 with this commit; no earlier registration, record or score is
 re-attested, and the v10p condition keeps its `2.0.0`-labelled files. The
 173 validation verdicts that pin a schema hash read STALE until a
-separate `recheck-validation --all` data pass restamps them (#1891). The
+separate `recheck-validation --all --execute` data pass restamps the pin
+where the verdict reproduces and holds the rest for a per-label rerun
+(#1891, #1896). The
 `project/` artifacts and the datamodel were rebuilt. Guards:
 `tests/test_schema_release_identity.py` and
 `tests/test_neutral_generation_schema.py`; the dated account is

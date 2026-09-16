@@ -5677,7 +5677,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Participants aged 65 and over: 1,023 (25.6% of total)",
+          "value": "Participants aged 65 and over: 1,000 (40.0% of total)",
           "@type": "Annotation"
         }
       ],
@@ -11326,7 +11326,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Participants aged 65 and over: 1,023 (25.6% of total)",
+              "value": "Participants aged 65 and over: 1,000 (40.0% of total)",
               "@type": "Annotation"
             }
           ],
@@ -14338,7 +14338,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-09-16T11:00:40",
   "source_file_size": 35275,
-  "generation_date": "2026-09-16T11:41:54",
+  "generation_date": "2026-09-16T11:57:50",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

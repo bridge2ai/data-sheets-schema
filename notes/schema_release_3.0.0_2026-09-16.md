@@ -80,11 +80,16 @@ validation block, 173 pin a schema hash, and all 173 read STALE under
 3.0.0; the other 106 predate the pin and are left alone (absent is not
 stale). STALE is reported, never fatal: `runs select` groups it with
 UNVERIFIED and `runs check --strict` does not fail on it. The disposition
-is the one CLAUDE.md prescribes for a schema change: a separate data pass
-with `d4d provenance recheck-validation --all` after this change merges,
-which restamps the pin where the recorded verdict and artifact hashes
-reproduce and re-records the verdict where the schema now reads the
-record differently. It is not part of this change (#1891).
+is a separate data pass after this change merges, never part of it
+(#1896): `d4d provenance recheck-validation --all` reports by default and
+writes only under `--execute`, and it writes only where the recorded
+verdict, the artifacts' recorded hashes and each problem's shape
+reproduce under 3.0.0, restamping the schema pin in place; a record whose
+verdict or problems would move (a narrative list, a bare-name person, a
+URL-shaped DOI) is **held** and reported, and is re-verdicted only by a
+deliberate per-label rerun, which replaces the validation block. The
+prior verdict is then in git history, not beside the new one; the pass's
+report is the record of what held and what moved.
 
 Migrating a historical record is a separately identified derived copy that
 records its source and the migration applied. The April records, the v7/v8
@@ -146,9 +151,9 @@ retained: they identify the schema, not a dataset.
 | Identity | Before | After |
 |---|---|---|
 | `data_sheets_schema.yaml` sha256 | `38e19f26a5490fd3…` | `6de786d36f04c27f…` |
-| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `ee2248e14fd90153…` |
+| `data_sheets_schema_all.yaml` sha256 | `ea595c4bd45c54c1…` | `577009df99f53d43…` |
 | `data_sheets_schema_core.yaml` sha256 | `0cdb2744a4025efa…` | `de607a078ede069b…` |
-| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `f67bcf6a32f09e9d…` |
+| `data_sheets_schema_core_all.yaml` sha256 | `7fcd7ddda719236…` | `3f36969ed28db3c8…` |
 | `Dataset` digest md5, `bridge2ai` | `6be1582236d9320b…` | unchanged |
 | `Dataset` digest md5, `neutral` | `94859bbbe7fa2296…` | unchanged |
 | `CoreDataset` digest md5, `bridge2ai` / `neutral` | `980ccdafe6762d45…` / `61c50be60e601f7d…` | unchanged |
