@@ -68,7 +68,7 @@ MAPPING_RULES = {
     'known_biases': ('exactMatch', 'none', 'known_biases', '"Sampling bias toward..."', '"Sampling bias toward..."'),
     'known_limitations': ('exactMatch', 'none', 'known_limitations', '"Small sample size..."', '"Small sample size..."'),
     'imputation_protocols': ('exactMatch', 'none', 'imputation_protocols', '"MICE for missing values"', '"MICE for missing values"'),
-    'missing_data_documentation': ('exactMatch', 'none', 'missing_data_documentation', '"15% missing in glucose..."', '"15% missing in glucose..."'),
+    'missing_data_documentation': ('exactMatch', 'none', 'missing_data_documentation', '"15% missing in sensor readings..."', '"15% missing in sensor readings..."'),
     'raw_data_sources': ('exactMatch', 'none', 'raw_data_sources', '"Epic EHR, lab LIMS"', '"Epic EHR, lab LIMS"'),
     'raw_sources': ('exactMatch', 'none', 'raw_sources', '"Epic EHR, lab LIMS"', '"Epic EHR, lab LIMS"'),
     'updates': ('exactMatch', 'none', 'updates', '"Quarterly updates planned"', '"Quarterly updates planned"'),
@@ -86,7 +86,7 @@ MAPPING_RULES = {
     'modified_by': ('closeMatch', 'minimal', 'modified_by.name', '"Data Team"', '{"@type":"Organization","name":"Data Team"}'),
 
     'cleaning_strategies': ('closeMatch', 'minimal', 'cleaning_strategies[].description', '[{"description":"Removed duplicates","step_type":"data_cleaning"}]', '"Removed duplicate records using MD5 hash"'),
-    'preprocessing_strategies': ('closeMatch', 'minimal', 'preprocessing_strategies[].description', '[{"description":"Normalized values","step_type":"normalization"}]', '"Normalized glucose values to 0-1 range"'),
+    'preprocessing_strategies': ('closeMatch', 'minimal', 'preprocessing_strategies[].description', '[{"description":"Normalized values","step_type":"normalization"}]', '"Normalized sensor readings to 0-1 range"'),
     'labeling_strategies': ('closeMatch', 'minimal', 'labeling_strategies[].description', '[{"description":"Manual annotation","annotator_type":"expert"}]', '"Expert clinicians labeled diagnoses"'),
     'annotation_analyses': ('closeMatch', 'minimal', 'annotation_analyses[].description', '[{"description":"Inter-rater reliability 0.89"}]', '"Inter-rater reliability: 0.89 (Cohen\'s kappa)"'),
     'machine_annotation_analyses': ('closeMatch', 'minimal', 'machine_annotation_analyses[].tool_name', '[{"tool_name":"spaCy","version":"3.5"}]', '"spaCy v3.5 for NER"'),

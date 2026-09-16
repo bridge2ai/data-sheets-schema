@@ -96,9 +96,11 @@ report is the record of what held and what moved.
 Migrating a historical record is a separately identified derived copy that
 records its source and the migration applied. The April records, the v7/v8
 and v9 arms and every later attempt keep their bytes, their recorded
-validation verdicts and their scores; a verdict recorded under an earlier
-schema is a fact about that schema, and re-validating under `3.0.0` reports
-the current reading beside it (`d4d provenance recheck-validation`).
+validation verdicts and their scores in this change; a verdict recorded
+under an earlier schema is a fact about that schema. The report-only
+`d4d provenance recheck-validation` shows the current reading without
+writing; an executed per-label rerun replaces the block, as the previous
+paragraph says, and the prior verdict is then in git history.
 
 ## Neutral generation schema (#1875)
 
