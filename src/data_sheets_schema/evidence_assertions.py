@@ -3,8 +3,10 @@
 Version 1 binds quotations to an artifact/path or document/chunk and checks
 removal of relationships an audit explicitly rejected. Opt-in version 2 also
 proves child removals in uniquely matched anonymous objects and validates
-actions at audit admission. Neither version discovers unreported claims or
-certifies semantic conclusions. All inputs are read only.
+actions at audit admission. Opt-in version 3 requires complete scalar-value
+source reviews and checks declared attribution/status consistency. No version
+independently classifies prose or certifies semantic conclusions. All inputs
+are read only.
 """
 from __future__ import annotations
 
@@ -29,9 +31,14 @@ NARRATIVE_FIELDS = frozenset({"description", "notes", "source_caveats"})
 
 
 def instrument(protocol_version: int = 1) -> str:
-    if type(protocol_version) is not int or protocol_version not in (1, 2):
+    if type(protocol_version) is not int or protocol_version not in (1, 2, 3):
         raise ValueError("unsupported evidence protocol version")
-    return INSTRUMENT if protocol_version == 1 else "evidence_assertions v2 (#1839)"
+    return {1: INSTRUMENT, 2: "evidence_assertions v2 (#1839)",
+            3: "evidence_assertions v3 / source_review v1 (#1815, #1782)"}[protocol_version]
+
+
+def protocol_for_renderer(render_version: int) -> int:
+    return 3 if render_version >= 12 else 2 if render_version >= 11 else 1
 
 
 def load_json(raw: str | bytes):
@@ -180,7 +187,7 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict,
             count += len(claims)
             problems += [{**f, "finding": index} for f in
                          check_assertions(claims, artifacts=artifacts, chunks=chunks)]
-    if protocol_version == 2 and isinstance(audit, dict) and isinstance(audit.get("findings"), list):
+    if protocol_version >= 2 and isinstance(audit, dict) and isinstance(audit.get("findings"), list):
         # Check whether declarations are actionable before a paid reconciliation.
         # With identical inputs a valid action is retained, which is expected here.
         try:
@@ -196,8 +203,16 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict,
                 problems += check_relationship_removals(audit, original, projected, protocol_version=2)
         except (ValueError, KeyError, yaml.YAMLError) as exc:
             problems.append(_problem("evidence_contract", str(exc)))
-    return {"instrument": instrument(protocol_version), "checked": True,
-            "assertions_checked": count, "findings": problems}
+    out = {"instrument": instrument(protocol_version), "checked": True,
+           "assertions_checked": count, "findings": problems}
+    if protocol_version >= 3:
+        from data_sheets_schema import source_review
+        review = source_review.check(audit.get("source_review") if isinstance(audit, dict) else None,
+            raw=artifacts["original_full"], artifact="original_full", chunks=chunks,
+            audit_findings=audit.get("findings") if isinstance(audit, dict) else None)
+        out["source_review_original"] = review
+        problems.extend(review["findings"])
+    return out
 
 
 def _identity_paths(declared=None):
@@ -411,7 +426,7 @@ def _relationship_after(original, final, tokens, declared, *, protocol_version=1
         if isinstance(old, list):
             index = int(token)
             identity = declared if offset == len(tokens) - 1 else None
-            if (protocol_version == 2 and offset < len(tokens) - 1
+            if (protocol_version >= 2 and offset < len(tokens) - 1
                     and any(isinstance(member, dict) and not IDENTITY_FIELDS.intersection(member)
                             for member in old)):
                 current = _matched_anonymous_ancestor(
@@ -444,7 +459,7 @@ def check_relationship_removals(audit, original: dict, final: dict, *,
     """
     instrument(protocol_version)
     findings, removal_paths = [], []
-    if protocol_version == 2:
+    if protocol_version >= 2:
         for finding in audit.get("findings", []):
             try:
                 removal_paths.append(_tokens(finding["remove_relationship"]["path"]))
@@ -484,7 +499,7 @@ def check_relationship_removals(audit, original: dict, final: dict, *,
     return findings
 
 
-def report_assertions(text: str) -> list:
+def report_payload(text: str, *, protocol_version: int = 1) -> dict:
     """Read one JSON appendix; never infer coverage of free prose."""
     headings = list(re.finditer(r"(?m)^## Evidence assertions[ \t]*$", text))
     if len(headings) != 1:
@@ -495,9 +510,28 @@ def report_assertions(text: str) -> list:
     if not match:
         raise ValueError("evidence appendix must contain exactly one JSON code block")
     value = load_json(match.group(1))
-    if not isinstance(value, dict) or set(value) != {"claims"} or not isinstance(value["claims"], list):
+    keys = {"claims", "source_review"} if protocol_version >= 3 else {"claims"}
+    if not isinstance(value, dict) or set(value) != keys or not isinstance(value["claims"], list):
         raise ValueError("evidence appendix must be an object with a claims array")
-    return value["claims"]
+    return value
+
+
+def report_assertions(text: str) -> list:
+    return report_payload(text)["claims"]
+
+
+def check_report(text: str, *, artifacts: dict, chunks: dict, protocol_version: int = 1) -> dict:
+    payload = report_payload(text, protocol_version=protocol_version)
+    claims = payload["claims"]
+    out = {"assertions_checked": len(claims),
+           "findings": check_assertions(claims, artifacts=artifacts, chunks=chunks)}
+    if protocol_version >= 3:
+        from data_sheets_schema import source_review
+        review = source_review.check(payload["source_review"], raw=artifacts["final_full"],
+                                     artifact="final_full", chunks=chunks)
+        out["source_review_final"] = review
+        out["findings"].extend(review["findings"])
+    return out
 
 
 def source_chunks(bundle: Path, manifest: Path) -> tuple[dict, dict]:
@@ -539,9 +573,12 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
         raw = report.read_bytes()
         pins["report"] = hashlib.sha256(raw).hexdigest()
         try:
-            claims = report_assertions(raw.decode("utf-8"))
-            out["assertions_checked"] += len(claims)
-            out["findings"] += check_assertions(claims, artifacts=texts, chunks=chunks)
+            report_check = check_report(raw.decode("utf-8"), artifacts=texts, chunks=chunks,
+                                        protocol_version=protocol_version)
+            out["assertions_checked"] += report_check["assertions_checked"]
+            out["findings"] += report_check["findings"]
+            if "source_review_final" in report_check:
+                out["source_review_final"] = report_check["source_review_final"]
         except (ValueError, UnicodeError) as exc:
             out["findings"].append(_problem("evidence_contract", str(exc)))
     out["artifact_sha256"] = pins
@@ -551,7 +588,7 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--protocol-version", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--protocol-version", type=int, choices=(1, 2, 3), default=1)
     for name in ("audit", "bundle", "manifest", "original-full"):
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("original-core", "final-full", "final-core", "report"):

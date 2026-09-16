@@ -282,6 +282,7 @@ def require_resolved(spec) -> None:
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     """Commit intent before a request so response persistence can fail safely."""
     require_resolved(spec)
+    require_source_review_admission(spec)
     data = _read(spec)
     if data.get("evidence_refusal") is not None:
         raise UsageLedgerError("this generation has a terminal evidence refusal; no further calls are allowed")
@@ -328,6 +329,19 @@ def record_evidence_refusal(spec, stage: str, reading: dict) -> None:
     if data.get("evidence_refusal") is None:
         data["evidence_refusal"] = {"stage": stage, "reading": reading}
         _write(spec, data)
+
+
+def require_source_review_admission(spec) -> None:
+    """A delivered review interrupted before acceptance cannot authorize another call."""
+    for row in _read(spec)["rows"]:
+        if "source_review_admission" not in row:
+            continue  # historical protocols and phases that do not produce reviews
+        admission = row["source_review_admission"]
+        if (not isinstance(admission, dict)
+                or set(admission) != {"state", "response_sha256"}
+                or admission.get("state") != "accepted"
+                or not re.fullmatch(r"[a-f0-9]{64}", str(admission.get("response_sha256", "")))):
+            raise UsageLedgerError("source-review admission is incomplete or invalid; no further calls are allowed")
 
 
 def cancel_call(spec, identifier: str) -> None:

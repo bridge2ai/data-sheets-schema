@@ -67,6 +67,7 @@ def test_assembly_identity_binds_the_selected_contract_without_changing_v9(monke
 @pytest.mark.parametrize("version,digest", [
     (9, "9e050248abda069ce3ceb4b5a343baae4c8bf7f04d7b61778ea2179d9c3307ac"),
     (10, "6320736dbdb48a20be3c808fabb642bb0e0f359c63879dc031545b743ea2083d"),
+    (11, "2adb35bc2336aa0b5fd6e8f2aa3b617af925f2bb7c9d08b2cd17604213571320"),
 ])
 def test_historical_renderer_replays_its_pre_fix_instruction_bytes(version, digest):
     recorded = {"condition": "generic_v9", "arm": "baseline", "bundle": "/input/demo.txt",
@@ -79,6 +80,7 @@ def test_historical_renderer_replays_its_pre_fix_instruction_bytes(version, dige
         method="external_api", label="synthetic")
     assert hashlib.sha256(replay.instruction.encode()).hexdigest() == digest
     assert api.assembly_digest(10)["sha256"] == "efd42e290b8fa347d663fd7953d896d45a12827bca0049df64d9b74dd48c4eba"
+    assert api.assembly_digest(11)["sha256"] == "b7e2f4dcd2db81121c03204f1ce1171682f5e1894b7164f9e37a4d2e6810578d"
 
 
 class PhaseContractFake(EvidenceFake):
