@@ -230,4 +230,5 @@ def test_a_malformed_observation_refuses_completion():
     from run_native_canary import observation_problems
     assert observation_problems({'output_tokens': 5}) == []
     assert observation_problems({'malformed_message_events': 2}) == ['transcript carries 2 malformed measurement events']
+    assert observation_problems({'overlapping_evidence': 1}) == ['transcript carries 1 overlapping evidence events (#1972)']
     assert observation_problems(None) == ['transcript observation unavailable']

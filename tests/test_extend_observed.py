@@ -686,27 +686,10 @@ class AccountingKeysExtend(unittest.TestCase):
 
 
 class EquivalentCandidates(unittest.TestCase):
-    """#1954–#1957: equivalent candidate sets collapse; a record carrying every
-    reasoning key still gains the accounting keys; preview and execution
-    add the same keys; the basis explains the accounting keys."""
-
-    def test_identical_observations_collapse_to_the_smallest_set(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = _record(tmp); t1, t2 = _transcripts(tmp, ["agent-av6-P-rep1", "agent-av6-P-rep1x"])
-            obs = {**FULL, "usage_from_terminal_result": 1}
-            # t1 is a copy cut short: alone it does not reproduce, beside t2 it adds nothing
-            r = Extension()._run(tmp, path, {"agent-av6-P-rep1x": obs, "agent-av6-P-rep1+agent-av6-P-rep1x": obs},
-                                 transcripts=[t1, t2])
-            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
-            self.assertIn("usage_from_terminal_result", r.output)
-            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
-            (ext,) = log["run_observed_extended"]
-            self.assertEqual(ext["transcripts"], [t2.name])
-            (eq,) = ext["identification"]["equivalent_sets"]
-            self.assertEqual([e["name"] for e in eq], [t1.name, t2.name]); self.assertTrue(all(len(e["sha256"]) == 64 for e in eq))
-            self.assertIn("usage_from_terminal_result", ext["keys_added"])
-            self.assertIn("usage_from_terminal_result counts", log["run_observed_basis"])
-            self.assertIn("usage_from_terminal_result counts", ext["basis_added"])
+    """#1955–#1957: a record carrying every reasoning key still gains the
+    accounting keys; preview and execution add the same keys; the basis
+    explains the accounting keys. (The equivalent-set collapse of #1954 was
+    replaced by refusing overlapping evidence, #1972.)"""
 
     def test_a_record_with_every_reasoning_key_still_gains_the_accounting_keys(self):
         every = {**PRIOR, **{k: 1 for k in cli._REASONING_KEYS}}
@@ -737,7 +720,7 @@ class Round6(unittest.TestCase):
             obs = dict(FULL)
             key = "+".join(t.name.rsplit("-", 1)[0] for t in (t1, t2))
             r = Extension()._run(tmp, path, {"agent-av6-P-rep1": obs, key: obs}, transcripts=[t1, t2])
-            self.assertIn("2 of 3 candidate", r.output); self.assertNotIn("wrote", r.output)
+            self.assertIn("of 3 candidate", r.output); self.assertNotIn("wrote", r.output)   # ambiguous either way (#1959)
 
     def test_the_exclusion_marker_needs_a_cut(self):
         import json

@@ -75,6 +75,8 @@ def observation_problems(observed):
     problems = []
     if observed.get('malformed_message_events'):
         problems.append(f"transcript carries {observed['malformed_message_events']} malformed measurement events")
+    if observed.get('overlapping_evidence'):
+        problems.append(f"transcript carries {observed['overlapping_evidence']} overlapping evidence events (#1972)")
     return problems
 
 

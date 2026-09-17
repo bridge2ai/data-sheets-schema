@@ -65,7 +65,8 @@ _RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
     # terminal result rather than per-message snapshots, and how many
     # assistant/user events were malformed — an observation carrying the
     # latter is refused by every writer below (#1934).
-    "usage_from_terminal_result", "terminal_results_excluded_by_cut", "malformed_message_events"})
+    "usage_from_terminal_result", "terminal_results_excluded_by_cut", "malformed_message_events",
+    "overlapping_evidence"})
 #: Accounting metadata the observer writes beside the reasoning keys (#1947):
 #: how many sessions' totals are the runtime's own terminal result, and how
 #: many such results the cut excluded. An extension carries them with the
@@ -1061,19 +1062,19 @@ _RUN_OBSERVED_BASIS = (
     "phase: four-phase project-agent mode runs every phase in one "
     "context, so the run is the only observable boundary. No "
     "input/output split, not billing-grade; deliberately not shaped like "
-    "api_usage (#681/#682). Accounted per session, transcripts sharing "
-    "a message id being one: where a transcript carries the runtime's own "
-    "terminal result inside the observed interval and no measurement event "
-    "before that result falls outside it, the messages recorded since the "
-    "previous result take its finalized total_tokens and output_tokens, with the estimate "
-    "the subtraction pooled over them (usage_from_terminal_result counts "
-    "such sessions; terminal_results_excluded_by_cut those with a result "
-    "the cut set aside while messages still rest on snapshots, "
+    "api_usage (#681/#682). Accounted per invocation, one transcript "
+    "each: where a transcript ends in the runtime's own terminal result "
+    "inside the observed interval and no measurement event before that "
+    "result falls outside it, its messages take the finalized "
+    "total_tokens and output_tokens, with the estimate the subtraction "
+    "pooled over them (usage_from_terminal_result counts such "
+    "invocations; terminal_results_excluded_by_cut those with a result "
+    "the cut set aside while their messages rest on snapshots, "
     "#1931/#1937/#1945/#1962); every other message counts once at its "
     "largest snapshot (a response spans several transcript lines) with a "
-    "per-message estimate. duration_ms is each invocation's own span, a "
-    "copy cut short spanning nothing and a resumed transcript only the "
-    "events left to it. bundle_lines_read is the union of the run's "
+    "per-message estimate; evidence two transcripts share is refused, not "
+    "reconciled (#1972). duration_ms sums each invocation's own span, so a "
+    "resumed run excludes the gap. bundle_lines_read is the union of the run's "
     "successful file-reading windows over the declared bundle (#700): "
     "lines the run never opened, or opened only in a read that errored, "
     "may have been reached by search, but nothing attests that.")
@@ -1277,7 +1278,11 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
             parts.append(" reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of "
                          "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
     thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
-    if thinking:
+    if thinking == ["thinking_tokens"] and "usage_from_terminal_result" in keys:
+        parts.append(" thinking_tokens is the runtime's own session total, read from the terminal result "
+                     "of each finalized invocation rather than from per-turn counts, so no turn coverage "
+                     "is claimed for it (#1978).")
+    elif thinking:
         parts.append(
             " " + " and ".join(thinking) + (" are" if len(thinking) > 1 else " is")
             + " the runtime's own count on the turns whose transcript line carries "
@@ -1405,6 +1410,12 @@ def _refuse_malformed_observation(observed: dict) -> None:
             f"refusing: the observation carries malformed_message_events={n} — {n} assistant/user "
             "transcript event(s) whose message is not a mapping; the totals beside it were measured "
             "over a transcript the observer could not fully read, so nothing is recorded (#1934)")
+    n = observed.get("overlapping_evidence")
+    if n:
+        raise click.ClickException(
+            f"refusing: the observation carries overlapping_evidence={n} — a message id carried by two "
+            "transcripts, a message after a transcript's result, or a repeated result; the files given are "
+            "not one invocation each, so nothing is recorded: name one file per invocation (#1972)")
 
 
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
@@ -1664,29 +1675,12 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         for ts in sets:
             obs = _observe(ts, tb, until, receipt if receipt.exists() else None, tm if receipt.exists() else None)
             differ = sorted(k for k, v in prior.items() if obs.get(k) != v)
-            if obs.get("malformed_message_events"):
-                # Not evidence, whatever it reproduces (#1934).
-                differ.append("malformed_message_events")
+            for bad in ("malformed_message_events", "overlapping_evidence"):
+                if obs.get(bad):
+                    # Not evidence, whatever it reproduces (#1934/#1972).
+                    differ.append(bad)
             results.append((ts, obs, differ))
     matches = [(ts, obs) for ts, obs, differ in results if not differ]
-    equivalent: list = []
-    if len(matches) > 1:
-        # A copy cut short beside the complete transcript makes [full] and
-        # [prefix, full] the same evidence (#1944/#1954): a candidate set
-        # that is a strict superset of another and observes exactly the
-        # same thing adds no evidence and collapses onto the smaller set,
-        # named in the record. Two distinct transcripts that each reproduce
-        # the record stay ambiguous: neither contains the other.
-        import json as _json
-        keep = []
-        for cand, o in matches:
-            ident = {str(Path(t).resolve()) for t in cand}
-            subsumed = any({str(Path(t).resolve()) for t in other} < ident
-                           and _json.dumps(oo, sort_keys=True) == _json.dumps(o, sort_keys=True)
-                           for other, oo in matches)
-            (equivalent if subsumed else keep).append((cand, o))
-        equivalent = [cand for cand, _o in equivalent]
-        matches = keep
     if len(matches) != 1:
         click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
                    + ("; nothing written" if execute else ""))
@@ -1719,10 +1713,8 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         if key not in digests:
             digests[key] = _h.sha256(t.read_bytes()).hexdigest()
         return digests[key]
-    equivalent = [[{"name": t.name, "sha256": _digest(t)} for t in cand] for cand in equivalent]
     identification = {"sets_tried": len(results), "prior_keys": len(prior),
                       "discriminating_keys": disc,
-                      **({"equivalent_sets": equivalent} if equivalent else {}),
                       "best_other_reproduces": max(others) if others else None,
                       "best_other_reproduces_discriminating": max(others_disc) if others_disc else None}
     added = sorted((set(obs) - set(prior)) & (_REASONING_KEYS | _ACCOUNTING_KEYS))   # the set --execute writes (round 2, S4; #1956)
@@ -2055,8 +2047,8 @@ def reasoning_cmd(method, project, label, path):
             if obs.get("usage_from_terminal_result"):
                 parts.append(f"finalized by the runtime for {obs['usage_from_terminal_result']} session(s)")
             if obs.get("terminal_results_excluded_by_cut"):
-                parts.append(f"⚠️  {obs['terminal_results_excluded_by_cut']} finalized result(s) excluded by the "
-                             "cut: snapshot totals, incomplete")
+                parts.append(f"⚠️  {obs['terminal_results_excluded_by_cut']} finalized result(s) set aside by the "
+                             "cut: the messages they would have covered rest on snapshots")
             if counted is not None:
                 parts.append(f"thinking_tokens {counted} ({obs.get('turns_with_thinking_tokens')} turn(s) counted)")
             elif obs.get("reasoning_tokens_estimate") is not None:
@@ -2067,8 +2059,9 @@ def reasoning_cmd(method, project, label, path):
             click.echo("No reasoning logs found for the selection.")
         if why[_r.OBSERVATION_INVALID]:
             click.echo(f"   ⚠️  {why[_r.OBSERVATION_INVALID]} run(s): the recorded observation saw "
-                       "malformed transcript events (malformed_message_events); its numbers are not a "
-                       "measure of the run and are not reported (#1948).")
+                       "malformed or overlapping transcript events (malformed_message_events, "
+                       "overlapping_evidence); its numbers are not a measure of the run and are not "
+                       "reported (#1948/#1972).")
         if why[_r.NO_LOG_RUNTIME]:
             click.echo(f"   {why[_r.NO_LOG_RUNTIME]} run(s): a Claude Code "
                        "run with no transcript-derived measure recorded — the "

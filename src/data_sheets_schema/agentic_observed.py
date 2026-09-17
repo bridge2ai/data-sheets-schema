@@ -138,47 +138,60 @@ def receipt_cross_check(covered: set[int], receipt: Path, manifest: Path) -> dic
 def observe(transcripts: list[Path], bundle: Path | None,
             until: datetime | None = None, receipt: Path | None = None,
             manifest: Path | None = None) -> dict:
-    """Sum across transcripts. Two traps the first version fell into (#701):
+    """Sum across transcripts, one invocation per file.
 
-    - one API response is written as several JSONL lines sharing a
-      ``message.id``, each repeating the input/cache counts with a running
-      ``output_tokens`` — summing per line roughly doubles the total. Usage is
-      taken once per message id (max output seen);
-    - a file-reading call can fail (the tool caps a response at ~25k tokens)
-      and return nothing; its window must not count as read. Windows are
-      kept only when their ``tool_result`` is not an error.
+    Two traps the first version fell into (#701): one API response is
+    written as several JSONL lines sharing a ``message.id``, each repeating
+    the input/cache counts with a running ``output_tokens`` — summing per
+    line roughly doubles the total, so usage is taken once per message id
+    (max output seen); and a file-reading call can fail (the tool caps a
+    response at ~25k tokens) and return nothing, so a window counts only
+    when its ``tool_result`` is not an error.
 
-    ``duration_ms`` is the sum of each transcript's own first-to-last span, so
-    a killed-and-resumed run excludes the gap between invocations.
+    A file is one invocation. Where it ends in the runtime's own terminal
+    ``result`` carrying usage (stream-json, #1931) and no measurement event
+    before that result fell outside the observed interval, the file's
+    messages take the finalized ``total_tokens`` and ``output_tokens`` and
+    the estimate is the subtraction pooled over them, because per-message
+    snapshots in stream-json are not final (#1937); a file without a usable
+    result keeps the per-message method the API path's log uses. A result
+    the cut excluded, or preceded by an excluded measurement event, is set
+    aside and counted under ``terminal_results_excluded_by_cut`` while the
+    file's messages rest on snapshots (#1945/#1953).
 
-    ``until`` cuts the observation at a timestamp: an agent that keeps acting
-    after its run completed (stray re-invocations did this to one 2026-08-24
-    agent) is not the run, and the record describes the run.
+    Evidence that does not fit that model is refused rather than
+    reconciled (#1972–#1976, after rounds of reconciliation each of which
+    another synthetic shape defeated): a message id carried by two files, a
+    usage-bearing message after a file's result, a second result in one
+    file, or a result repeated under one identity is counted under
+    ``overlapping_evidence``, and every consumer treats such an observation
+    as invalid, like one with malformed events. Name one file per
+    invocation: a copy cut short beside the complete transcript is not two
+    pieces of evidence.
+
+    ``duration_ms`` is the sum of each file's own first-to-last span, so a
+    killed-and-resumed run excludes the gap between invocations. ``until``
+    cuts the observation at a timestamp: an agent that keeps acting after
+    its run completed is not the run, and the record describes the run.
     """
-    # Per transcript first (#1935/#1944): a file is one runtime invocation's
-    # record, but two files can describe one session — a copy cut short and
-    # the complete file, or a resumed session whose second file re-lists the
-    # first's messages — so files sharing a message id are reconciled into
-    # one session before any total is chosen. Within a session usage is the
-    # maximum snapshot per message id (#701), blocks and tool ids are unions,
-    # and the terminal result is the one carried by the file that saw the
-    # most messages.
-    files: list[dict] = []
-    segments: list[dict] = []
     bundle_name = bundle.name if bundle else None
-    malformed = 0
-
-    def _segment(path, index):
-        # A file is split at each terminal result (#1967): a result covers
-        # the messages recorded since the previous result and none after it,
-        # so a continuation appended to the same file is its own segment.
-        return {"path": path, "index": index, "usage": {}, "blocks": {}, "terminal": None,
-                "terminal_excluded": False, "cut_before_terminal": False}
-
+    malformed = overlapping = 0
+    owner: dict[str, Path] = {}          # message id -> the file that carries it
+    result_ids: set[str] = set()
+    tools: set[str] = set()
+    searches: set[str] = set()
+    read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
+    failed: set[str] = set()
+    duration_ms = total_tokens = 0
+    measure: dict[str, int] = {}
+    from_terminal = excluded = 0
     for path in transcripts:
-        f = {"path": path, "tools": {}, "searches": set(), "reads": {}, "failed": set(), "events": {},
-             "segments": []}
-        seg = _segment(path, 0)
+        usage_by_msg: dict[str, dict] = {}
+        blocks_by_msg: dict[str, dict] = {}
+        first = last = None
+        terminal: dict | None = None
+        terminal_excluded = cut_before_terminal = False
+        results = 0
         with path.open(encoding="utf-8") as fh:
             for n, line in enumerate(fh):
                 try:
@@ -188,28 +201,29 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 raw = j.get("message")
                 msg = raw if isinstance(raw, dict) else {}
                 measurement = j.get("type") in ("assistant", "user") or isinstance(raw, dict)
+                is_result = j.get("type") == "result" and isinstance(j.get("usage"), dict)
                 ts = j.get("timestamp")
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                     if until is not None and t > until:
-                        # An excluded measurement event that precedes the
-                        # file's terminal result means that result describes
-                        # more than the interval; one after it — the
-                        # orchestrator's trailing events — does not (#1953),
-                        # and an excluded informational line never does
-                        # (#1936/#1945). A terminal result the cut itself
-                        # excludes is recorded before it is skipped, so the
-                        # observation can say a finalized result was set
-                        # aside (#1952).
-                        if measurement:
-                            seg["cut_before_terminal"] = True
-                        elif j.get("type") == "result" and isinstance(j.get("usage"), dict):
-                            seg["terminal_excluded"] = True
-                            f["segments"].append(seg); seg = _segment(path, len(f["segments"]))
+                        # An excluded measurement event before the file's
+                        # result means the result describes more than the
+                        # interval; one after it — the orchestrator's trailing
+                        # events — does not (#1953); an excluded informational
+                        # line never does. A result the cut itself excludes is
+                        # recorded before it is skipped (#1952).
+                        if measurement and terminal is None:
+                            cut_before_terminal = True
+                        elif is_result:
+                            results += 1
+                            ident = j.get("uuid") or line.strip()
+                            if ident in result_ids:
+                                overlapping += 1
+                            result_ids.add(ident)
+                            terminal_excluded = True
                         continue
-                    # The event's identity, for telling a replayed line from
-                    # a new one (#1951): the runtime's uuid, else the line.
-                    f["events"][j.get("uuid") or line.strip()] = t
+                    first = first or t
+                    last = t
                 if j.get("type") in ("assistant", "user") and not isinstance(raw, dict):
                     # Claude Code 2.1.272 stream-json writes informational
                     # lines (`system`, `result`, …) with a string `message`
@@ -219,31 +233,41 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     # malformed and is counted, and every consumer treats the
                     # observation as invalid (#1930).
                     malformed += 1
-                if j.get("type") == "result" and isinstance(j.get("usage"), dict):
+                if is_result:
                     # The runtime's own finalized accounting for the whole
                     # session: assistant events in stream-json carry only
                     # initial usage snapshots, so the per-message maximum
                     # undercounts by two orders of magnitude (#1931).
-                    seg["terminal"] = j["usage"]
-                    f["segments"].append(seg); seg = _segment(path, len(f["segments"]))
+                    results += 1
+                    ident = j.get("uuid") or line.strip()
+                    if ident in result_ids or results > 1:
+                        overlapping += 1
+                    result_ids.add(ident)
+                    terminal = j["usage"]
                 usage = msg.get("usage") or {}
                 if usage:
                     mid = msg.get("id") or f"{path}:{j.get('uuid')}"
-                    prev = seg["usage"].get(mid)
-                    if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
-                        seg["usage"][mid] = usage
-                    content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
-                    seg["blocks"].setdefault(mid, {}).update(_block_parts(content))
+                    holder = owner.setdefault(mid, path)
+                    if holder != path or terminal is not None:
+                        # Carried by another file, or appended after this
+                        # file's result: not this invocation's evidence.
+                        overlapping += 1
+                    else:
+                        prev = usage_by_msg.get(mid)
+                        if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
+                            usage_by_msg[mid] = usage
+                        content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
+                        blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
                 for k, c in enumerate(msg.get("content") or []):
                     if not isinstance(c, dict):
                         continue
                     if c.get("type") == "tool_result" and c.get("is_error"):
-                        f["failed"].add(c.get("tool_use_id"))
+                        failed.add(c.get("tool_use_id"))
                         continue
                     if c.get("type") != "tool_use":
                         continue
                     tid = c.get("id") or f"{path}:{n}:{k}"
-                    f["tools"][tid] = True
+                    tools.add(tid)
                     inp = c.get("input") or {}
                     if not bundle_name:
                         continue
@@ -251,81 +275,27 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         start = int(inp.get("offset") or 0)
                         # offset is 1-indexed; 0/absent means from the top.
                         start = max(start - 1, 0) if start else 0
-                        f["reads"][tid] = (start, start + int(inp.get("limit") or READ_DEFAULT_LINES))
+                        read_windows[tid] = (start, start + int(inp.get("limit") or READ_DEFAULT_LINES))
                     elif bundle_name in json.dumps(inp):
-                        f["searches"].add(tid)
-        if seg["usage"] or seg["terminal"] is not None or not f["segments"]:
-            f["segments"].append(seg)
-        f["complete"] = any(s["terminal"] is not None for s in f["segments"])
-        files.append(f); segments.extend(f["segments"])
-    sessions = _sessions(segments)
-    tools: set = set()
-    searches: set = set()
-    read_windows: dict[str, tuple[int, int]] = {}
-    failed: set[str] = set()
-    for f in files:
-        tools.update(f["tools"]); searches.update(f["searches"])
-        read_windows.update(f["reads"]); failed.update(f["failed"])
-    spans = _spans(files)
-    out = {"total_tokens": 0, "tool_uses": len(tools)}
-    measure: dict[str, int] = {}
-    from_terminal = excluded = 0
-    for members in sessions:
-        usage_by_msg: dict[str, dict] = {}
-        blocks_by_msg: dict[str, dict] = {}
-        for f in members:
-            for mid, u in f["usage"].items():
-                prev = usage_by_msg.get(mid)
-                if prev is None or u.get("output_tokens", 0) >= prev.get("output_tokens", 0):
-                    usage_by_msg[mid] = u
-            for mid, parts in f["blocks"].items():
-                blocks_by_msg.setdefault(mid, {}).update(parts)
-        # A terminal result covers the messages of its own file and no
-        # others (#1950): the file chosen is the usable one that saw the
-        # most messages, then the larger finalized output, then the name —
-        # never the order given — and messages outside it keep snapshot
-        # accounting. A terminal result the cut set aside, or that an
-        # excluded measurement event preceded, is not usable.
-        usable = [f for f in members if f["terminal"] is not None
-                  and not f["terminal_excluded"] and not f["cut_before_terminal"]]
-        set_aside = [f for f in members if f["terminal_excluded"] or (f["terminal"] is not None and f not in usable)]
-        # Then the richer compatible evidence — the larger snapshots and
-        # the more content blocks — before the name (#1965).
-        chosen = max(usable, key=lambda f: (len(f["usage"]), int(f["terminal"].get("output_tokens", 0) or 0),
-                                            sum(int(u.get("output_tokens", 0) or 0) for u in f["usage"].values()),
-                                            sum(len(b) for b in f["blocks"].values()),
-                                            str(f["path"]), -f["index"])) if usable else None
-        # The covered messages are taken as the chosen file recorded them
-        # (#1964): its terminal result finalizes that file's own view, and
-        # another file's larger snapshot of the same message is evidence of
-        # a different measurement, not of this session's totals.
-        covered = set(chosen["usage"]) if chosen else set()
-        total, m = _invocation_measure(dict(chosen["usage"]) if chosen else {},
-                                       dict(chosen["blocks"]) if chosen else {},
-                                       chosen["terminal"] if chosen else None)
-        rest_total, rest = _invocation_measure({k: v for k, v in usage_by_msg.items() if k not in covered},
-                                               {k: v for k, v in blocks_by_msg.items() if k not in covered}, None)
-        total += rest_total
-        for k, v in rest.items():
-            m[k] = m.get(k, 0) + v
-        if chosen is not None:
+                        searches.add(tid)
+        if first and last:
+            duration_ms += int((last - first).total_seconds() * 1000)
+        usable = terminal is not None and not cut_before_terminal
+        total, m = _invocation_measure(usage_by_msg, blocks_by_msg, terminal if usable else None)
+        if usable:
             from_terminal += 1
-        if set_aside and usage_by_msg and (chosen is None or any(k not in covered for k in usage_by_msg)):
-            # A result the cut set aside still qualifies the messages no
-            # usable result covers (#1961); a session with no retained
-            # message qualifies nothing (#1968).
+        elif (terminal is not None or terminal_excluded) and usage_by_msg:
+            # A set-aside result qualifies the file's retained messages; a
+            # file with none retained qualifies nothing (#1968).
             excluded += 1
-        out["total_tokens"] += total
+        total_tokens += total
         for k, v in m.items():
             measure[k] = measure.get(k, 0) + v
-    out["duration_ms"] = _active_ms(spans)
+    out = {"total_tokens": total_tokens, "tool_uses": len(tools), "duration_ms": duration_ms}
     out.update(measure)
     if from_terminal:
         out["usage_from_terminal_result"] = from_terminal
     if excluded:
-        # The session's finalized totals exist but describe events past the
-        # cut, so the snapshot accounting stands and the observation says so
-        # rather than passing as complete (#1945).
         out["terminal_results_excluded_by_cut"] = excluded
     if bundle:
         n_lines = sum(1 for _ in bundle.open(encoding="utf-8"))
@@ -342,93 +312,19 @@ def observe(transcripts: list[Path], bundle: Path | None,
             out.update(receipt_cross_check(covered, receipt, manifest))
     if malformed:
         out["malformed_message_events"] = malformed
+    if overlapping:
+        out["overlapping_evidence"] = overlapping
     return out
 
 
-def _spans(files: list[dict]) -> list:
-    """Each invocation's active span, with replays told apart (#1951): a
-    file whose timestamped events all appear in another file is a copy cut
-    short and spans nothing of its own; among the rest, the invocation that
-    ended first owns the events it shares with a later one, and the later
-    file — a resumed session re-listing history with its original
-    timestamps — spans only the events left to it, so the gap before its
-    own first event is not active time."""
-    real = []
-    for f in files:
-        ids = set(f["events"])
-        if not ids:
-            continue
-        # A file carrying a usable terminal result of its own is a completed
-        # invocation whatever another file replays of it (#1960); a file
-        # without one, whose events another file all carries, is a copy cut
-        # short — an excluded result does not make it an invocation (#1966).
-        complete = f["complete"]
-        if not complete and any(g is not f and (ids < set(g["events"])
-                                                or (ids == set(g["events"]) and str(g["path"]) < str(f["path"])))
-                                for g in files if g["events"]):
-            continue
-        real.append(f)
-    real.sort(key=lambda f: (max(f["events"].values()), str(f["path"])))
-    claimed: set = set()
-    spans = []
-    for f in real:
-        own = [t for i, t in f["events"].items() if i not in claimed]
-        claimed.update(f["events"])
-        if own:
-            spans.append((min(own), max(own)))
-    return sorted(spans)
-
-
-def _active_ms(spans: list) -> int:
-    """Milliseconds covered by the union of the (first, last) spans."""
-    total = 0
-    end = None
-    for a, b in spans:
-        if end is not None and a <= end:
-            end = max(end, b)
-            continue
-        if end is not None:
-            total += int((end - start).total_seconds() * 1000)
-        start, end = a, b
-    if end is not None:
-        total += int((end - start).total_seconds() * 1000)
-    return total
-
-
-def _sessions(files: list[dict]) -> list[list[dict]]:
-    """Group transcript segments that share a message id into one session
-    (#1944); a segment sharing none is a session of its own, so a killed-
-    and-resumed run whose second file starts afresh stays two invocations,
-    and so does a continuation appended after a result (#1967)."""
-    parent = list(range(len(files)))
-    def find(i):
-        while parent[i] != i:
-            parent[i] = parent[parent[i]]; i = parent[i]
-        return i
-    owner: dict[str, int] = {}
-    for i, f in enumerate(files):
-        for mid in f["usage"]:
-            if mid in owner:
-                parent[find(i)] = find(owner[mid])
-            else:
-                owner[mid] = i
-    groups: dict[int, list[dict]] = {}
-    for i, f in enumerate(files):
-        groups.setdefault(find(i), []).append(f)
-    return [groups[k] for k in sorted(groups)]
-
 def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage: dict | None) -> tuple[int, dict]:
-    """One invocation's totals and reasoning measure. Where the invocation's
-    transcript ends in a terminal ``result`` carrying usage and no event of
-    that transcript fell outside the observed interval, the runtime's own
-    finalized totals stand for the session (#1931): its ``total_tokens`` and
-    ``output_tokens`` replace the per-message snapshot sums, and the
-    estimate is the same subtraction pooled over the session, because the
-    per-message outputs are not final and cannot be subtracted from one by
-    one (#1937). A transcript with any event cut by ``until`` keeps the
-    snapshot accounting: the terminal result describes the whole session,
-    the cut part included (#1936). An invocation without a terminal result
-    keeps the per-message method the API path's log uses."""
+    """One invocation's totals and reasoning measure. With a usable terminal
+    ``result`` the runtime's own finalized totals stand for the file
+    (#1931): ``total_tokens`` and ``output_tokens`` replace the per-message
+    snapshot sums, the estimate is the same subtraction pooled over the
+    file's messages, because the per-message outputs are not final (#1937),
+    and ``thinking_tokens`` is the session total the result carries.
+    Without one the per-message method the API path's log uses stands."""
     m = reasoning_measure(usage_by_msg, blocks_by_msg)
     total = sum(_usage_total(u) for u in usage_by_msg.values())
     if terminal_usage is None:
@@ -441,8 +337,10 @@ def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage:
     details = terminal_usage.get("output_tokens_details")
     if isinstance(details, dict) and isinstance(details.get("thinking_tokens"), int) \
             and not isinstance(details.get("thinking_tokens"), bool):
+        # The runtime's session total, not a per-turn count: no turn
+        # coverage is claimed for it (#1978).
         m["thinking_tokens"] = details["thinking_tokens"]
-        m["turns_with_thinking_tokens"] = m.get("assistant_turns", 0)
+        m.pop("turns_with_thinking_tokens", None)
     return total, m
 
 def main() -> int:
