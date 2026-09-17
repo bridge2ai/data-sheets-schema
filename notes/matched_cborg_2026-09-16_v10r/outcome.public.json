@@ -1,0 +1,45 @@
+{
+  "kind": "public_attempt_outcome",
+  "attempt": "CHORUS_agentic_rep1",
+  "registration": "v10r",
+  "registration_sha256_prefix": "128d6708",
+  "native_overlay_sha256_prefix": "883a6892",
+  "launch_commit": "372b5823b77ab1b4f43e0ceb36bb3eca46e73176",
+  "launch_receipt_sha256_prefix": "d453a44f",
+  "started_at": "2026-09-17T06:12:39Z",
+  "finished_at": "2026-09-17T06:42:41Z",
+  "status": "stopped",
+  "stop_reason": "native attempt deadline elapsed (agentic_attempt_deadline_seconds 1800)",
+  "reason_source": "controller",
+  "model_requests_admitted": 83,
+  "phase_at_stop": "source review inventory (Phase 3)",
+  "artifacts_written": [
+    "coverage receipt (8/8 chunks)",
+    "full record",
+    "derived core",
+    "evidence originals"
+  ],
+  "receipt_check_final": "chunks 8/8 reviewed; snippets 96/96 verified; slots 80/140 with a receipt (24 exempt)",
+  "tool_history_checks": {
+    "receipt_entry_per_chunk_with_file_tool": "held",
+    "receipts_check_before_phase_2": "failed",
+    "permission_denials": 5,
+    "ledger_reason_on_stopped_receipt": "not applicable (controller deadline)"
+  },
+  "transcript_observation": {
+    "tool_uses": 98,
+    "bundle_lines_read": 1698,
+    "bundle_lines_total": 1698,
+    "receipt_chunks_unopened": 0,
+    "terminal_result": "absent (child stopped at the deadline); token figures are snapshots, not the run's accounting"
+  },
+  "accounting": "settled in the private ledger; one interrupted reservation retained; figures private",
+  "disposition": "not accepted; never resumed; preserved privately; expansion stopped",
+  "issues": [
+    2010,
+    2011,
+    2012,
+    2013,
+    2014
+  ]
+}
