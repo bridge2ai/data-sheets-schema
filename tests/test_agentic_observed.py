@@ -572,3 +572,35 @@ class Round11(unittest.TestCase):
         self.assertEqual(obs["usage_from_terminal_result"], 2); self.assertNotIn("turns_with_thinking_tokens", obs)
         only_b = ao.observe([b], self.bundle, None, None, None)
         self.assertNotIn("thinking_from_terminal_results", only_b); self.assertEqual(only_b["turns_with_thinking_tokens"], 1)
+
+
+class Round12(unittest.TestCase):
+    """#1996: a tool result belongs to the file that made the call."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("\n".join(f"l{i}" for i in range(10)) + "\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_a_foreign_error_result_is_refused_and_does_not_fail_the_window(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1",
+                                          tools=[("Read", {"file_path": str(self.bundle), "offset": 1, "limit": 3})], ids=["read-a"]),
+                                   json.dumps({"timestamp": "2026-09-16T21:00:01Z", "type": "user", "uuid": "ua",
+                                               "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "read-a", "content": "ok"}]}}),
+                                   json.dumps({"type": "result", "message": "done", "uuid": "ra", "usage": {"input_tokens": 1, "output_tokens": 100}})])
+        b = self._file("b.jsonl", [_event("2026-09-16T22:00:00Z", usage={"output_tokens": 4}, msg_id="m2"),
+                                   json.dumps({"timestamp": "2026-09-16T22:00:01Z", "type": "user", "uuid": "ub",
+                                               "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "read-a", "is_error": True, "content": "x"}]}}),
+                                   json.dumps({"type": "result", "message": "done", "uuid": "rb", "usage": {"input_tokens": 1, "output_tokens": 50}})])
+        alone = ao.observe([a], self.bundle, None, None, None); self.assertEqual(alone["bundle_lines_read"], 3)
+        for order in ([a, b], [b, a]):
+            obs = ao.observe(order, self.bundle, None, None, None)
+            self.assertEqual(obs["overlapping_evidence"], 1); self.assertEqual(obs["bundle_lines_read"], 3)
+        own_error = self._file("c.jsonl", [_event("2026-09-16T23:00:00Z", usage={"output_tokens": 3}, msg_id="m3",
+                                                  tools=[("Read", {"file_path": str(self.bundle), "offset": 1, "limit": 3})], ids=["read-c"]),
+                                           json.dumps({"timestamp": "2026-09-16T23:00:01Z", "type": "user", "uuid": "uc",
+                                                       "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "read-c", "is_error": True, "content": "x"}]}})])
+        self.assertEqual(ao.observe([own_error], self.bundle, None, None, None)["bundle_lines_read"], 0)

@@ -772,3 +772,15 @@ class Round9Identification(unittest.TestCase):
             log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
             (ext,) = log["run_observed_extended"]
             self.assertEqual(ext["identification"]["best_other_reproduces"], len(PRIOR))
+
+
+class Round12Guards(unittest.TestCase):
+    """#1998: a zero accounting marker and terminal thinking beside turn coverage are refused."""
+
+    def test_zero_markers_and_the_contradictory_pair_are_refused(self):
+        import click
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "thinking_from_terminal_results": 0})
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "thinking_tokens": 80, "turns_with_thinking_tokens": 1, "thinking_from_terminal_results": 1})
+        cli._refuse_malformed_observation({**PRIOR, "thinking_tokens": 80, "thinking_from_terminal_results": 1, "usage_from_terminal_result": 1})

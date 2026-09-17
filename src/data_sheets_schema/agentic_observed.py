@@ -183,7 +183,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
     tools: set[str] = set()
     searches: set[str] = set()
     read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
-    failed: set[str] = set()
+    result_refs: list[tuple[Path, str, bool]] = []  # (file, tool_use_id, is_error) of every tool_result (#1996)
     duration_ms = total_tokens = 0
     measure: dict[str, int] = {}
     from_terminal = excluded = 0
@@ -281,8 +281,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 for k, c in enumerate(msg.get("content") or []):
                     if not isinstance(c, dict):
                         continue
-                    if c.get("type") == "tool_result" and c.get("is_error"):
-                        failed.add(c.get("tool_use_id"))
+                    if c.get("type") == "tool_result":
+                        result_refs.append((path, c.get("tool_use_id"), bool(c.get("is_error"))))
                         continue
                     if c.get("type") != "tool_use":
                         continue
@@ -323,6 +323,16 @@ def observe(transcripts: list[Path], bundle: Path | None,
         total_tokens += total
         for k, v in m.items():
             measure[k] = measure.get(k, 0) + v
+    # A tool result belongs to the file that made the call (#1996): one
+    # that answers another file's call is foreign evidence and is refused,
+    # and only a same-file error marks the window failed.
+    failed: set[str] = set()
+    for ref_path, tid, is_error in result_refs:
+        owner_path = tool_owner.get(tid)
+        if owner_path is not None and owner_path != ref_path:
+            overlapping += 1
+        elif is_error:
+            failed.add(tid)
     out = {"total_tokens": total_tokens, "tool_uses": len(tools), "duration_ms": duration_ms}
     out.update(measure)
     if from_terminal:

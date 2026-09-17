@@ -1281,8 +1281,9 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
     thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
     if "thinking_from_terminal_results" in keys and "thinking_tokens" in keys:
         parts.append(" thinking_tokens is the runtime's own count: the session total from the terminal result "
-                     "of each invocation thinking_from_terminal_results counts, plus per-turn counts from every "
-                     "other invocation; no turn coverage is claimed for it (#1978/#1982/#1994).")
+                     "of each invocation thinking_from_terminal_results counts, plus whatever per-turn counts the "
+                     "other invocations carry, which may be none; thinking no invocation reported stays unmeasured, "
+                     "and no turn coverage is claimed (#1978/#1982/#1994/#1997).")
     elif thinking:
         parts.append(
             " " + " and ".join(thinking) + (" are" if len(thinking) > 1 else " is")
@@ -1417,6 +1418,16 @@ def _refuse_malformed_observation(observed: dict) -> None:
             f"refusing: the observation carries overlapping_evidence={n} — a message id carried by two "
             "transcripts, a message after a transcript's result, or a repeated result; the files given are "
             "not one invocation each, so nothing is recorded: name one file per invocation (#1972)")
+    zero = sorted(k for k in _ACCOUNTING_KEYS | {"malformed_message_events", "overlapping_evidence"}
+                  if k in observed and not observed[k])
+    if zero:
+        raise click.ClickException(
+            f"refusing: {zero} at zero — the observer omits a counter that counts nothing, and a written zero "
+            "would be read as a claim the account then contradicts (#1998)")
+    if observed.get("thinking_from_terminal_results") and "turns_with_thinking_tokens" in observed:
+        raise click.ClickException(
+            "refusing: thinking_from_terminal_results beside turns_with_thinking_tokens — a session total from a "
+            "terminal result claims no turn coverage, so the observer never writes both (#1998)")
 
 
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
