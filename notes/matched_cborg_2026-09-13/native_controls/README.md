@@ -6,8 +6,9 @@ Every launch requires an immutable source/instrument registration, a reviewed
 native overlay, exact-commit CI and acceptance of preceding canaries in that
 registration's order. The older observations below describe the initial
 implementation. Native v10q and v10r subsequently ran and stopped; neither was
-accepted. The merged [v10s registration](../../matched_cborg_2026-09-17_v10s/README.md)
-has not launched and retains its original controls in its pinned checkout.
+accepted. The [v10s registration](../../matched_cborg_2026-09-17_v10s/README.md)
+retains its original controls in its pinned checkout. v10v subsequently stopped
+on the unregistered file read tracked in #2061; its original evidence is preserved.
 
 The #2035/#2041 follow-up replaces global Bash rules with a policy for each
 registered native job. Root `--manifest` rules name the selected manifest and
@@ -33,9 +34,8 @@ PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/nat
 
 The probe uses synthetic sources and stub validator/CLI modules, makes no real
 provider requests, and tests real exclusive writes for the original freeze.
-It establishes permission behavior, not scientific quality. Broad `Read` and
-`Write` grants and argument-bearing CLI/module rules remain: these controls
-are not a filesystem sandbox. Actual tool history still needs acceptance
+It establishes permission behavior, not scientific quality. Argument-bearing
+CLI/module rules remain: these controls are not a filesystem sandbox. Actual tool history still needs acceptance
 review. The new policy requires a fresh registration and overlay; it does not
 rewrite or authorize any historical condition.
 
@@ -43,7 +43,7 @@ The listed rules are not the complete effective Bash permissions. Claude Code
 also admits built-in read-only shell commands, including `grep`, `head` and
 `wc`, under `dontAsk`, as its [permission documentation](https://code.claude.com/docs/en/permissions#read-only-commands)
 explains. The registered instruction is a behavioral requirement; it does not
-remove those runtime permissions. Policy version 3 retains the small
+remove those runtime permissions. Policy version 4 retains the small
 read-only lookup grammar for registered inputs and this job's output files.
 It allows `cat`, `grep`, `head`, `tail`, `wc` and numeric `sed -n` line windows,
 including pipes among these commands. The appended command guidance lists
@@ -57,6 +57,23 @@ than the lookup grammar. Before each Bash execution, a parent `PreToolUse`
 callback now applies the same classifier used by the terminal audit (#2055).
 It denies commands outside the registered grammar without changing them.
 Prescribed commands still pass through the runtime's own permission check.
+
+The same callback now checks `Read` and `Write` targets (#2061). File reads are
+limited to the registered input/playbook closure and this job's output files;
+writes are limited to output files. The provenance inventory of other agent
+definitions does not grant read access. Paths are resolved against the registered
+repository, including the runtime's conversion of relative paths to absolute
+ones; other call arguments must match exactly. Links cannot escape the frozen
+output roots, and hard-linked output files cannot alias pre-existing inputs.
+
+Large Bash output may be saved by the runtime in its isolated configuration.
+The parent permits Read of that exact file only after observing a prescribed
+call and matching native result metadata in the current session's
+tool-results directory. Its size and hash are recorded, checked before reading
+and reconciled at completion. Source text mentioning a filename grants nothing.
+The configuration directory itself is never made generally readable or writable.
+This includes diagnostics from a helper's nonzero exit; the helper's success and
+the procedure's stop rules are judged separately from file identity.
 
 The callback uses the native SDK control protocol over JSONL stdin/stdout;
 it does not load an SDK package or an ordinary settings hook. The pinned
@@ -76,14 +93,16 @@ The terminal audit still checks every observed Bash execution. A nonzero exit
 does not prove that nothing executed, so those calls are included. Every denial
 is listed; a denied prescribed command disqualifies, while denial of an
 unprescribed or blank command does not do so on its own. Missing or ambiguous
-execution evidence prevents acceptance. Helper arguments and `Read`/`Write`
-grants remain broad: this is not a filesystem sandbox. Actual manifests and
+execution evidence prevents acceptance. File calls also require matching
+callbacks, decisions and results. Stopped receipts preserve their available
+control audit. Helper arguments still require review: this is not a filesystem
+sandbox. Actual manifests and
 artifact targets, file-tool paths, phase ordering and source entailment still
 require independent review. Historical registrations retain their original
 policies and verdicts; these controls require a new condition.
 
-The probe includes
-read-only shell cases alongside the helper and denied Python/manifest cases.
+The probe includes file reads/writes, symlink escapes and persisted-output
+provenance alongside read-only shell, helper and denied Python/manifest cases.
 Run it with `--project-settings-mode absent` to observe admission without
 project settings, and with the default `broad` mode to check that broad
 project grants do not widen the tested Python/manifest permissions. Use a new

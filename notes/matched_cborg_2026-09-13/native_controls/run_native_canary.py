@@ -586,7 +586,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             if command_policy is not None:
                 if '--input-format' not in argv or argv[argv.index('--input-format') + 1] != 'stream-json':
                     raise BudgetStop('native control requires registered stream-json input')
-                control = NativeControl(command_policy, _classify_command)
+                control = NativeControl(command_policy, _classify_command, env.get('CLAUDE_CONFIG_DIR'))
                 evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
             verify_launch()  # Bind the executable immediately before Popen.
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
@@ -704,10 +704,11 @@ def main():
              'native_control_policy_sha256':control_digest(command_policy),
              'native_effective_system_sha256':hashlib.sha256(system_prompt.encode('utf-8')).hexdigest()}
     write_new(attempt/'started.json',receipt)
+    runtime_reads = []
     def classify(denials):
         return classify_denials(denials, instruction_text=Path(job['instruction']).read_text(encoding='utf-8'),
             python=base.get('python'), repository=base['repository'],
-            output_directories=job['output_directories'], readable_inputs=registered_reads(job), command_policy=command_policy)
+            output_directories=job['output_directories'], readable_inputs=registered_reads(job) + runtime_reads, command_policy=command_policy)
     try:
         with proxy.running() as url:
             env['ANTHROPIC_BASE_URL']=url
@@ -733,9 +734,10 @@ def main():
         # Every denial is listed and classified; only a denied prescribed
         # command (or an unclassifiable record) disqualifies, and it does so
         # after every other check has run (#2026).
+        receipt['pretool_control']=check_control_history(events,attempt/'control.jsonl',command_policy,_classify_command,config)
+        runtime_reads[:] = receipt['pretool_control'].get('persisted_output_paths', [])
         receipt['permission_denials']=classify(terminal.get('permission_denials'))
         receipt['command_history']=command_history(events, command_policy, receipt['permission_denials'])
-        receipt['pretool_control']=check_control_history(events,attempt/'control.jsonl',command_policy,_classify_command)
         if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
             raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
@@ -784,6 +786,15 @@ def main():
         receipt.update(status='stopped',error_type=type(exc).__name__)
         receipt.update(stop_explanation(exc, ledger.path, billing_attempt, getattr(proxy, 'failure', None)))
         receipt.update(transcript_terminal_state(attempt/'transcript.jsonl'))
+        if 'pretool_control' not in receipt:
+            try:
+                with (attempt/'transcript.jsonl').open(encoding='utf-8') as stream:
+                    stopped_events = [json.loads(line) for line in stream if line.strip()]
+                receipt['pretool_control'] = check_control_history(
+                    stopped_events, attempt/'control.jsonl', command_policy, _classify_command, config)
+                runtime_reads[:] = receipt['pretool_control'].get('persisted_output_paths', [])
+            except (OSError, ValueError, TypeError):
+                receipt['pretool_control'] = {'checked': False, 'problems': ['stopped native transcript is unreadable']}
         if 'permission_denials' in receipt:
             # Classified before the stop: name what would disqualify (#2037).
             receipt['disqualifying_denials'] = denial_problems(receipt['permission_denials'])

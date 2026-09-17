@@ -18,7 +18,7 @@ from native_readonly import PROGRAMS, lookup_policy, lookup_guidance
 from native_control import CONTRACT
 
 
-POLICY_VERSION = 3
+POLICY_VERSION = 4
 
 
 def program_key(program):
@@ -142,7 +142,8 @@ def build_command_policy(job, python, repository):
     # Built-in read-only admission varies with the pattern (#2052). These
     # grants provide the named capabilities. The parent PreToolUse callback
     # checks the same grammar before execution; command_history checks again.
-    # Helper arguments and Read/Write still need independent review.
+    # The parent also enforces Read/Write targets. Helper arguments, receipt
+    # timing and source support still need independent review.
     for program in PROGRAMS:
         rules.append(_literal_rule('sed -n' if program == 'sed' else program, arguments=True))
     for command in PLAYBOOK_COMMANDS:
@@ -173,7 +174,17 @@ def command_guidance(policy):
         'instruction\'s arguments; a root --manifest option must name this job\'s '
         'registered manifest.\n\n' +
         '\n\n'.join('```bash\n' + command + '\n```' for command in policy['command_examples']) + '\n' +
-        lookup_guidance())
+        lookup_guidance() +
+        '\n\n## File tools\n\n'
+        'The parent checks every Read and Write target before execution. Read '
+        'only the registered inputs below, your files inside the output directories, '
+        'or an unchanged persisted tool output advertised by this native session. '
+        'A provenance hash inventory is not a list of files to consult. Write '
+        'only inside the output directories; never overwrite an input. Do not '
+        'consult other agent definitions or prior records.\n\n' +
+        '\n'.join('- ' + path for path in policy['readonly_lookups']['inputs']) +
+        '\n\nOutput directories:\n' +
+        '\n'.join('- ' + path for path in policy['readonly_lookups']['output_directories']) + '\n')
 
 
 def validated_command_policy(overlay, base, job):

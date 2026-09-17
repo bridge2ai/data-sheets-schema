@@ -127,7 +127,8 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     monkeypatch.setattr(runner, 'verify_history', lambda *args: None)
     # This fixture isolates budget propagation from source/policy preparation.
     monkeypatch.setattr(runner, 'validated_command_policy', lambda *args: {
-        'allowed_tools': ['Read'], 'command_examples': [], 'programs': [], 'manifest_paths': []})
+        'allowed_tools': ['Read'], 'command_examples': [], 'programs': [], 'manifest_paths': [],
+        'readonly_lookups': {'repository': str(tmp_path), 'inputs': [], 'output_directories': []}})
     monkeypatch.setattr(runner, 'verified_executable', lambda *args: sys.executable)
     monkeypatch.setattr(runner.subprocess, 'check_output', lambda *args, **kwargs: 'test-version')
     monkeypatch.setattr(runner, 'spec_for', lambda *args: SimpleNamespace(

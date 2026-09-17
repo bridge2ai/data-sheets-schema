@@ -1,7 +1,7 @@
 """A pinned SDK control callback for the isolated native CLI (#2055).
 
 Ordinary settings hooks are disabled by safe mode. The SDK control channel
-remains available. It checks Bash input without rewriting commands or
+remains available. It checks tool inputs without rewriting commands or
 overriding the runtime's own permissions. No SDK package is needed: retain
 the original CLI JSONL and implement only initialization and this callback.
 """
@@ -17,10 +17,12 @@ import threading
 import time
 
 from budgeted_cborg import BudgetStop
+from native_file_policy import FileAccess
 
 
-CONTRACT = {'version': 1, 'event': 'PreToolUse', 'matcher': 'Bash',
-            'callback_id': 'd4d_command_policy_v1', 'initialize_timeout_seconds': 30,
+TOOLS = frozenset({'Bash', 'Read', 'Write'})
+CONTRACT = {'version': 2, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
+            'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 30,
             'callback_timeout_seconds': 2, 'runtime_callback_timeout_seconds': 3}
 INIT_ID = 'd4d_initialize_v1'
 MAX_FRAME_BYTES = 16 * 1024 * 1024
@@ -41,14 +43,16 @@ def hook_output(classification, basis):
     # A prescribed command still goes through the runtime permission check.
     return {} if classification == 'prescribed' else {'hookSpecificOutput': {
         'hookEventName': CONTRACT['event'], 'permissionDecision': 'deny',
-        'permissionDecisionReason': 'Outside the registered command policy: ' + basis}}
+        'permissionDecisionReason': 'Outside the registered tool policy: ' + basis}}
 
 
 class NativeControl:
-    def __init__(self, policy, classify):
+    def __init__(self, policy, classify, config_root=None):
         if policy.get('pretool_control') != CONTRACT:
             raise BudgetStop('missing or changed native control contract')
         self.policy, self.classify = policy, classify
+        self.files = FileAccess(policy, config_root)
+        self.classifications = {}
         self.selector = selectors.DefaultSelector()
         self.buffer, self.outgoing = b'', b''
         self.initialized = self.terminal = self.stdout_closed = False
@@ -104,14 +108,19 @@ class NativeControl:
         message = event.get('message')
         if isinstance(message, dict) and isinstance(message.get('content'), list):
             for block in message['content']:
-                if isinstance(block, dict) and block.get('type') == 'tool_use' and block.get('name') == 'Bash':
+                if isinstance(block, dict) and block.get('type') == 'tool_use':
+                    if block.get('name') not in TOOLS:
+                        raise BudgetStop('native call uses an unregistered tool')
                     identity = block.get('id')
                     if not isinstance(identity, str) or not identity or identity in self.calls:
-                        raise BudgetStop('native Bash call has a missing or duplicate identity')
+                        raise BudgetStop('native tool call has a missing or duplicate identity')
                     payload = block.get('input')
                     if not isinstance(payload, dict):
-                        raise BudgetStop('native Bash call has malformed input')
-                    self.calls[identity] = payload.get('command')
+                        raise BudgetStop('native tool call has malformed input')
+                    self.calls[identity] = block
+        observed = self.files.observe(event, self.calls, self.classifications)
+        if observed is not None:
+            self.record(observed)
 
     def callback(self, frame):
         request = frame.get('request')
@@ -124,23 +133,31 @@ class NativeControl:
             request.get('subtype') != 'hook_callback' or
             request.get('callback_id') != CONTRACT['callback_id'] or
             not isinstance(data, dict) or data.get('hook_event_name') != CONTRACT['event'] or
-            data.get('tool_name') != 'Bash' or not isinstance(data.get('tool_input'), dict)):
+            data.get('tool_name') not in TOOLS or not isinstance(data.get('tool_input'), dict)):
             raise BudgetStop('native callback is malformed or unregistered')
         identity = data.get('tool_use_id')
-        command = data['tool_input'].get('command')
-        if (not isinstance(command, str) or
-            not isinstance(identity, str) or identity not in self.calls or
-            self.calls[identity] != command or
+        payload, tool = data['tool_input'], data['tool_name']
+        if (not isinstance(identity, str) or identity not in self.calls or
+            self.calls[identity]['name'] != tool or
+            (tool == 'Bash' and self.calls[identity]['input'] != payload) or
             request.get('tool_use_id') not in (None, identity) or identity in self.decided_tools or
             data.get('cwd') != self.policy['readonly_lookups']['repository']):
-            raise BudgetStop('native callback does not match an observed Bash call')
+            raise BudgetStop('native callback does not match an observed tool call')
         if identity in {item[1]['request']['input']['tool_use_id'] for item in self.pending.values()}:
             raise BudgetStop('duplicate native callback for one tool call')
         self.pending[request_id] = (time.monotonic(), frame)
 
         def evaluate():
             try:
-                value = self.classify(command, self.policy['python'], set(), self.policy)
+                if tool != 'Bash' and not self.files.matches(tool, self.calls[identity]['input'], payload):
+                    raise BudgetStop('native callback does not match an observed tool call')
+                if tool == 'Bash':
+                    command = payload.get('command')
+                    if not isinstance(command, str):
+                        raise ValueError('Bash command is not text')
+                    value = self.classify(command, self.policy['python'], set(), self.policy)
+                else:
+                    value = self.files.classify(tool, payload)
             except BaseException as error:
                 value = error
             self.replies.put((request_id, value))
@@ -159,6 +176,8 @@ class NativeControl:
                 request_id, value = self.replies.get_nowait()
             except queue.Empty:
                 break
+            if isinstance(value, BudgetStop):
+                raise value
             if isinstance(value, BaseException):
                 raise BudgetStop('native command classification failed before execution') from value
             if (not isinstance(value, tuple) or len(value) != 2 or
@@ -172,6 +191,7 @@ class NativeControl:
                          'classification': classification, 'basis': basis})
             self.decided.add(request_id)
             self.decided_tools.add(request['request']['input']['tool_use_id'])
+            self.classifications[request['request']['input']['tool_use_id']] = classification
             self.send(response)
         for key, _ in self.selector.select(.05):
             if key.data == 'stdin':
@@ -241,13 +261,13 @@ class NativeControl:
                     stream.write(raw)
 
 
-def check_control_history(events, path, policy, classify):
-    """Reconcile parent decisions against the unchanged native transcript."""
+def check_control_history(events, path, policy, classify, config_root=None):
+    """Reconcile every tool with parent decisions in native event order."""
     problems = []
     try:
         with Path(path).open() as stream:
             records = [json.loads(line) for line in stream if line.strip()]
-        if any(r.get('kind') not in ('initialize_sent', 'initialize_ack', 'decision') for r in records):
+        if any(r.get('kind') not in ('initialize_sent', 'initialize_ack', 'decision', 'persisted_output') for r in records):
             problems.append('native control evidence contains an unrecognized record')
         sent = [r for r in records if r.get('kind') == 'initialize_sent']
         ack = [r for r in records if r.get('kind') == 'initialize_ack']
@@ -257,49 +277,75 @@ def check_control_history(events, path, policy, classify):
             ack[0]['frame'].get('response', {}).get('subtype') != 'success' or
             ack[0]['frame'].get('response', {}).get('request_id') != INIT_ID):
             problems.append('native control has no unique successful initialization evidence')
-        calls, results, callbacks = {}, {}, {}
+        decisions = {}
+        for record in (r for r in records if r['kind'] == 'decision'):
+            decisions.setdefault(record['request']['request_id'], []).append(record)
+        files = FileAccess(policy, config_root)
+        calls, results, callbacks, classifications = {}, {}, {}, {}
+        observed_files = []
         for line, event in enumerate(events, 1):
-            if event.get('type') == 'control_request':
-                callbacks.setdefault(event.get('request_id'), []).append((line, event))
             message = event.get('message')
-            if not isinstance(message, dict) or not isinstance(message.get('content'), list):
-                continue
-            for block in message['content']:
-                if not isinstance(block, dict):
+            if isinstance(message, dict) and isinstance(message.get('content'), list):
+                for block in message['content']:
+                    if not isinstance(block, dict):
+                        continue
+                    if block.get('type') == 'tool_use':
+                        if block.get('name') not in TOOLS:
+                            problems.append('native transcript uses an unregistered tool')
+                        identity = block.get('id')
+                        if not isinstance(identity, str) or not identity or identity in calls:
+                            problems.append('native tool call lacks a unique identity')
+                        calls[identity] = (line, block)
+                    elif block.get('type') == 'tool_result':
+                        results.setdefault(block.get('tool_use_id'), []).append((line, block))
+            if event.get('type') == 'control_request':
+                request = event['request']; data = request['input']
+                identity = data['tool_use_id']; request_id = event['request_id']
+                callbacks.setdefault(identity, []).append((line, request_id))
+                matches = decisions.get(request_id, [])
+                if identity not in calls or len(matches) != 1:
+                    problems.append('native callback lacks one preceding call and parent decision')
                     continue
-                if block.get('type') == 'tool_use' and block.get('name') == 'Bash':
-                    calls.setdefault(block.get('id'), []).append((line, block))
-                elif block.get('type') == 'tool_result':
-                    results.setdefault(block.get('tool_use_id'), []).append((line, block))
-        seen_ids, seen_requests = [], []
-        for record in (r for r in records if r.get('kind') == 'decision'):
-            frame = record['request']; request = frame['request']; data = request['input']
-            identity = data['tool_use_id']; request_id = frame['request_id']
-            seen_ids.append(identity); seen_requests.append(request_id)
-            observed_calls, observed_callbacks = calls.get(identity, []), callbacks.get(request_id, [])
-            observed_results = results.get(identity, [])
-            if len(observed_calls) != 1 or len(observed_callbacks) != 1 or len(observed_results) != 1:
-                problems.append('native control decision lacks unique call, callback and result evidence')
-                continue
-            call_line, call = observed_calls[0]; callback_line, callback = observed_callbacks[0]
-            result_line, result = observed_results[0]
-            command = call['input']['command']
-            classification, basis = classify(command, policy['python'], set(), policy)
-            expected = {'type': 'control_response', 'response': {'subtype': 'success',
-                        'request_id': request_id, 'response': hook_output(classification, basis)}}
-            if (callback != frame or not call_line < callback_line < result_line or
-                request.get('subtype') != 'hook_callback' or request.get('callback_id') != CONTRACT['callback_id'] or
-                data.get('hook_event_name') != CONTRACT['event'] or data.get('tool_name') != 'Bash' or
-                data.get('cwd') != policy['readonly_lookups']['repository'] or
-                data['tool_input'].get('command') != command or record.get('classification') != classification or
-                record.get('basis') != basis or record.get('response') != expected):
-                problems.append('native control decision disagrees with its observed command or registered policy')
-            if classification != 'prescribed' and result.get('is_error') is not True:
-                problems.append('native denied command has a successful tool result')
-        if Counter(seen_ids) != Counter({identity: 1 for identity in calls}):
-            problems.append('native Bash calls lack exactly one control decision each')
-        if Counter(seen_requests) != Counter({identity: 1 for identity in callbacks}):
+                call_line, call = calls[identity]
+                tool, payload = call['name'], call['input']
+                if tool == 'Bash':
+                    classification, basis = classify(payload['command'], policy['python'], set(), policy)
+                elif tool in ('Read', 'Write'):
+                    classification, basis = files.classify(tool, payload)
+                else:
+                    raise ValueError('unregistered tool')
+                classifications[identity] = classification
+                record = matches[0]
+                expected = {'type': 'control_response', 'response': {'subtype': 'success',
+                            'request_id': request_id, 'response': hook_output(classification, basis)}}
+                if (record['request'] != event or not call_line < line or
+                    request.get('subtype') != 'hook_callback' or request.get('callback_id') != CONTRACT['callback_id'] or
+                    data.get('hook_event_name') != CONTRACT['event'] or data.get('tool_name') != tool or
+                    data.get('cwd') != policy['readonly_lookups']['repository'] or
+                    not files.matches(tool, payload, data.get('tool_input', {})) or request.get('tool_use_id') not in (None, identity) or
+                    record.get('classification') != classification or record.get('basis') != basis or
+                    record.get('response') != expected):
+                    problems.append('native control decision disagrees with its observed tool or registered policy')
+            observed = files.observe(event, {key: value[1] for key, value in calls.items()}, classifications)
+            if observed is not None:
+                observed_files.append(observed)
+        for identity, (call_line, call) in calls.items():
+            matches, replies = callbacks.get(identity, []), results.get(identity, [])
+            if (len(matches) != 1 or len(replies) != 1 or
+                not call_line < matches[0][0] < replies[0][0]):
+                problems.append('native tool call lacks unique subsequent callback and result evidence')
+            elif classifications.get(identity) != 'prescribed' and replies[0][1].get('is_error') is not True:
+                problems.append('native denied tool has a successful result')
+        if set(results) - set(calls):
+            problems.append('native tool result has no observed call')
+        if Counter(rid for values in callbacks.values() for _, rid in values) != Counter({rid: 1 for rid in decisions}):
             problems.append('native callbacks lack exactly one control response each')
-        return {'checked': True, 'bash_calls': len(calls), 'decisions': len(seen_ids), 'problems': problems}
-    except (OSError, ValueError, TypeError, KeyError, AttributeError, IndexError) as error:
+        recorded_files = [{k: v for k, v in r.items() if k != 'at'} for r in records if r['kind'] == 'persisted_output']
+        if recorded_files != observed_files:
+            problems.append('native persisted-output evidence differs from its observed origin or current bytes')
+        return {'checked': True, 'bash_calls': sum(call['name'] == 'Bash' for _, call in calls.values()),
+                'file_calls': sum(call['name'] in ('Read', 'Write') for _, call in calls.values()),
+                'decisions': sum(map(len, decisions.values())),
+                'persisted_output_paths': list(files.persisted), 'problems': problems}
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, IndexError, BudgetStop) as error:
         return {'checked': False, 'problems': [f'native control evidence is missing or malformed ({type(error).__name__})']}
