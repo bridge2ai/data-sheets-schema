@@ -1,6 +1,7 @@
 """Draft single native generation canary, requiring a separately reviewed overlay."""
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,7 @@ from native_proxy import NativeProxy
 from prepare_registration import spec_for
 from run_api_canary import verify, verify_history, sha, check_canary_receipts
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
+from native_command_policy import command_guidance, permission_arguments, program_key, validated_command_policy
 
 
 def now():
@@ -162,7 +164,7 @@ def prescribed_programs(instruction_text, python):
         start = at + 1
 
 
-def _classify_command(command, python, programs):
+def _classify_command(command, python, programs, command_policy=None):
     tokens, reason = _simple_command(command)
     if tokens is None:
         return 'not_prescribed', reason
@@ -172,6 +174,17 @@ def _classify_command(command, python, programs):
     if any(t in ('--help', '-h') for t in rest):
         return 'not_prescribed', '--help exploration the system prompt forbids'
     if tokens[1] == '-c':
+        if command_policy is not None:
+            try:
+                key = program_key(tokens[2])
+            except (SyntaxError, ValueError, TypeError):
+                return 'not_prescribed', 'an invalid inline Python program'
+            for program in command_policy['programs']:
+                if key == program_key(program['code']):
+                    if tokens[3:] and not program['arguments']:
+                        return 'not_prescribed', 'extra arguments to a fixed registered program'
+                    return 'prescribed', 'a Python program from the registered instruction or selected playbook'
+            return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
         if tokens[2].strip() in programs:
             return 'prescribed', 'a -c program the instruction prescribes verbatim'
         return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
@@ -181,6 +194,8 @@ def _classify_command(command, python, programs):
     if module == 'data_sheets_schema.cli':
         args = tokens[3:]
         if args[:1] == ['--manifest']:
+            if command_policy is not None and (len(args) < 2 or args[1] not in command_policy['manifest_paths']):
+                return 'not_prescribed', 'a manifest outside the registered job'
             args = args[2:]
         roster = _roster_command(args)
         if roster:
@@ -206,14 +221,15 @@ def _classify_path(tool, path, repository, output_directories, readable_inputs):
     return 'not_prescribed', 'a path outside the registered inputs and outputs'
 
 
-def classify_denials(denials, *, instruction_text, python, repository, output_directories, readable_inputs):
+def classify_denials(denials, *, instruction_text, python, repository, output_directories, readable_inputs,
+                    command_policy=None):
     """Every tool-permission denial, listed and classified (#2012, #2026).
 
     The maintainer ruled (2026-09-17) that a denied prescribed command
     disqualifies a run while denials of forbidden commands are listed and do
     not disqualify it on their own. A denial is prescribed when the controls
     should have allowed it: a roster CLI command, a registered module entry
-    point, one of the instruction's own `-c` programs, or a file operation
+    point, one of the registered instruction/playbook's `-c` programs, or a file operation
     inside the registered outputs (or a Read of a registered input), with no
     shell operator and no --help. A denial record the runtime wrote in an
     unexpected shape (no tool name, a Bash record without a command, a file
@@ -245,7 +261,7 @@ def classify_denials(denials, *, instruction_text, python, repository, output_di
                 entry['classification'], entry['basis'] = 'not_prescribed', 'an empty command'
             else:
                 entry['command'] = command[:1000]
-                entry['classification'], entry['basis'] = _classify_command(command, python, programs)
+                entry['classification'], entry['basis'] = _classify_command(command, python, programs, command_policy)
         elif tool in ('Read', 'Write', 'Edit'):
             path = tool_input.get('file_path')
             if not isinstance(path, str) or not path:
@@ -578,6 +594,10 @@ def main():
         raise BudgetStop('native generation instruction or input identity changed')
     if spec.render_version >= 9 and overlay['per_job_environment'][job['id']].get('D4D_LAUNCH_INSTRUCTION') != job['instruction']:
         raise BudgetStop('native provenance must read the exact registered launch instruction')
+    try:
+        command_policy=validated_command_policy(overlay,base,job)
+    except (KeyError, OSError, ValueError, TypeError, SyntaxError) as error:
+        raise BudgetStop(f'native command policy is invalid: {error}') from error
     key=os.environ.get('CBORG_API_KEY')
     if not key: raise BudgetStop('CBORG_API_KEY is required')
     executable=verified_executable(overlay)
@@ -598,20 +618,23 @@ def main():
     env.update(overlay['per_job_environment'][job['id']])
     env.update(CLAUDE_CONFIG_DIR=str(config),ANTHROPIC_API_KEY=proxy.token,
                PYTHONPATH=str(Path(base['repository'])/'src'),VIRTUAL_ENV=sys.prefix)
+    system_prompt=Path(overlay['system_prompt']).read_text()+command_guidance(command_policy)
     argv=[executable,*overlay['cli_flags'],'--model',base['model']['model'],'--name',job['id'],
           '--max-budget-usd',str(ledger.limit_for_attempt(billing_attempt)),
-          '--allowedTools',*overlay['allowed_tools'],'--system-prompt',Path(overlay['system_prompt']).read_text()]
+          *permission_arguments(command_policy),
+          '--system-prompt',system_prompt]
     receipt={'job':job['id'],'registration_sha256':registration_sha,'overlay_sha256':overlay_sha,
              'provider_context':provider_context_evidence(base),
              'review_sha256':sha(args.review),'started_at':now(),'status':'incomplete',
              'launch_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
              'provider':base['provider_base_url'],'model':base['model']['model'],
-             'instruction_sha256':sha(job['instruction']),'native_system_sha256':sha(overlay['system_prompt'])}
+             'instruction_sha256':sha(job['instruction']),'native_system_sha256':sha(overlay['system_prompt']),
+             'native_effective_system_sha256':hashlib.sha256(system_prompt.encode('utf-8')).hexdigest()}
     write_new(attempt/'started.json',receipt)
     def classify(denials):
         return classify_denials(denials, instruction_text=Path(job['instruction']).read_text(encoding='utf-8'),
             python=base.get('python'), repository=base['repository'],
-            output_directories=job['output_directories'], readable_inputs=registered_reads(job))
+            output_directories=job['output_directories'], readable_inputs=registered_reads(job), command_policy=command_policy)
     try:
         with proxy.running() as url:
             env['ANTHROPIC_BASE_URL']=url
