@@ -120,3 +120,31 @@ per native attempt, and keeps the API caps unchanged.
    resumed or overwritten.
 4. Evaluation canaries on exact accepted inputs, then a costed production
    cohort for both arms, as the retained proposal describes.
+
+## v10t sequence (2026-09-17, supersedes the unlaunched v10s plan)
+
+The user explicitly reaffirmed native first for the new condition on
+2026-09-17. The [v10t registration](matched_cborg_2026-09-17_v10t/README.md)
+pins that answer and the merged #2035/#2041 permission fixes from #2046,
+including review corrections #2045/#2047. It preserves v10s unchanged.
+Sources, schemas, profiles, evaluators and the existing allocation carry
+forward; command policies, exact native guidance and output identities move.
+
+1. Review and merge the new registration with required CI. Bind readiness
+   to its merged head, exact registration and overlay. The explicit
+   post-merge launch-instruction gate remains; the order confirmation does
+   not serve as that instruction.
+2. Admit only CHORUS native, then independently inspect its unchanged
+   originals and complete tool history against the registered acceptance
+   checks. A failed or stopped canary stops expansion.
+3. After acceptance, Kids First native under the neutral profile, then
+   CHORUS API and Kids First API, accepting each before the next. The API
+   transport issue is still unresolved; retain separate evidence per arm.
+4. Register every applicable evaluation style on accepted exact inputs:
+   semantic rubrics 10/20 with repeats, direct API and field-agent canaries,
+   presence, schema/pair, receipts/provenance/report claims, grounding and
+   applicable fitness/subtype checks. Preserve old scores and adjudicate
+   disputed historical judgments separately.
+5. Use measured canary costs and reviewed outputs to decide production
+   expansion for both arms. The proposed 32 full/core pairs, 256 rubric
+   ratings and 128 presence scores are an inventory, not an automatic batch.

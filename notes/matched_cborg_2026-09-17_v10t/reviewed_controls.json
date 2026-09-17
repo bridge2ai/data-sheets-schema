@@ -1,0 +1,50 @@
+{
+  "source_base": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+  "registration_base_main": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+  "renderer": 12,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Job-specific manifest and exact inline-Python policies replace global Bash grants; delegated term, grounding and report programs are recognized; policies rebuild before credentials; inline JSON settings preserve complex permission rules; exact command guidance is included in the effective system-prompt hash (#2035/#2041/#2045, PR #2046). Receipt integration fixtures now exercise the actual policy (#2047). The grounding display uses explicit arguments with identical output. Sources, schemas, profiles, renderers, evidence/source-review instruments and evaluator definitions are unchanged from v10s. Native instruction hashes and execution guidance change, so both arms receive a fresh condition and output identities.",
+  "merged_controls": [
+    {
+      "pr": 2017,
+      "merge": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "scope": "v10s native controller, receipt and stop behavior"
+    },
+    {
+      "pr": 2046,
+      "merge": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+      "reviewed_head": "22741810b284613701a111f1d1db444c68cbe2c7",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35260365143",
+      "scope": "job-bound command policy and denial classification; exact JSON delivery"
+    }
+  ],
+  "native_controller_sha256": "31530c84adf04e131ee7942f8b309dfccc2d43904264763aa40b7d836db3721f",
+  "command_policy_sha256": "ff882f1d550181ac73094a2af781301a7ab2fb8c0912e0f3dfa66d520472775c",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "1140bfcaac8278dad43457a32041c074906483e8c64ae19da7a0c824e482677f",
+    "CHORUS_source_review_plan.json": "3a38f90507e306f85da7990a615cceb5302e2e515542645a0764248e80a56502"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "canary_order_confirmation": {
+    "kind": "user_canary_order_confirmation",
+    "recorded_at": "2026-09-17T18:38:46.571596+00:00",
+    "source": "User message in the active Codex conversation on 2026-09-17",
+    "question": "For the new condition, should I retain the later approved v10s native-first order, or return to the active goal\u2019s API-first order? The API transport issue remains unresolved.",
+    "user_response": "Retain native first (recommended)",
+    "canary_order": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1",
+      "CHORUS_api_rep1",
+      "KIDS_FIRST_api_rep1"
+    ],
+    "scope": "Order confirmation. Each later canary requires independent acceptance of every prior one. This is not a launch receipt."
+  },
+  "launch_authorization": "No launch receipt issued. After registration review and merge, launch requires an explicit maintainer instruction, exact merged-head CI and fresh checks. Prior funding and order confirmation are not a launch instruction. Existing funding and deadline controls remain. CHORUS native is first.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Software checks do not establish independent scientific acceptance. Broad file-tool grants and CLI/module arguments remain; actual successful tool history needs review."
+}
