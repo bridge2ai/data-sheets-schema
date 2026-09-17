@@ -630,8 +630,8 @@ the repair of what the checkers find.
        print('NOT CHECKED:', r['reason'])
    else:
        print(r['distinct'])
-       for f in {(x['kind'], x['identifier']) for x in r['findings']}:
-           print(*f)"
+       for kind, identifier in {(x['kind'], x['identifier']) for x in r['findings']}:
+           print(kind, identifier)"
    ```
    Any identifier reported `absent` is one this record states and the bundle
    does not (#547). Correct it or remove it — a correct identifier the evidence

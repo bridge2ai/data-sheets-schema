@@ -1,4 +1,45 @@
-# Native generation controls — unexecuted draft
+# Native generation controls
+
+## Current controls, 2026-09-17
+
+Every launch requires an immutable source/instrument registration, a reviewed
+native overlay, exact-commit CI and acceptance of preceding canaries in that
+registration's order. The older observations below describe the initial
+implementation. Native v10q and v10r subsequently ran and stopped; neither was
+accepted. The merged [v10s registration](../../matched_cborg_2026-09-17_v10s/README.md)
+has not launched and retains its original controls in its pinned checkout.
+
+The #2035/#2041 follow-up replaces global Bash rules with a policy for each
+registered native job. Root `--manifest` rules name the selected manifest and
+a roster command; inline Python rules name only programs from the registered
+instruction and its executable playbook, with artifact placeholders bound to
+that job. This includes schema and term validation, grounding, report checks
+and the original freeze. The controller rebuilds the policy before credential
+access, uses that same policy to classify denials, and supplies the exact
+command spellings as registered execution guidance. Its receipt hashes the
+effective system prompt including that guidance.
+
+Permissions are passed as an inline JSON settings array. The pinned CLI's
+`--allowedTools` list parser splits complex Python rules (#2045). A scripted
+local-provider probe exercises the actual runtime, successful required
+commands and forbidden programs/manifest selections:
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls \
+  python notes/matched_cborg_2026-09-13/native_controls/probe_native_permissions.py \
+  --claude-executable /absolute/path/to/the/pinned/claude \
+  --output /absolute/path/to/a/new/probe-directory
+```
+
+The probe uses synthetic sources and stub validator/CLI modules, makes no real
+provider requests, and tests real exclusive writes for the original freeze.
+It establishes permission behavior, not scientific quality. Broad `Read` and
+`Write` grants and argument-bearing CLI/module rules remain: these controls
+are not a filesystem sandbox. Actual tool history still needs acceptance
+review. The new policy requires a fresh registration and overlay; it does not
+rewrite or authorize any historical condition.
+
+## Initial observations, 2026-09-13
 
 These files are preparation for the agentic canaries. They are not part of the
 approved API transport. The former draft overlay is preserved in Git at
@@ -6,7 +47,7 @@ approved API transport. The former draft overlay is preserved in Git at
 The first API canary
 failed; no launchable native overlay is supplied for that condition. A fresh
 source/instrument registration is required before freezing another overlay.
-No scientific native generation has run. The controller refuses to start
+At that date no scientific native generation had run. The controller refuses to start
 without a separate immutable overlay, exact review/CI receipt and acceptance
 of all preceding canaries from the base registration.
 

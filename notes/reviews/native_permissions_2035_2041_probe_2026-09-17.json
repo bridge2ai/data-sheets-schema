@@ -1,0 +1,127 @@
+{
+  "exit_code": 0,
+  "passed": true,
+  "cases": [
+    {
+      "id": "program_0",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "program_1",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "program_2",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "program_3",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "program_4",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "program_5",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "manifest_0",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "manifest_1",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "roster_without_manifest",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "module",
+      "allow": true,
+      "denied": false,
+      "tool_result_error": false,
+      "passed": true
+    },
+    {
+      "id": "outside_roster",
+      "allow": false,
+      "denied": true,
+      "tool_result_error": true,
+      "passed": true
+    },
+    {
+      "id": "other_manifest",
+      "allow": false,
+      "denied": true,
+      "tool_result_error": true,
+      "passed": true
+    },
+    {
+      "id": "arbitrary_python",
+      "allow": false,
+      "denied": true,
+      "tool_result_error": true,
+      "passed": true
+    },
+    {
+      "id": "modified_program",
+      "allow": false,
+      "denied": true,
+      "tool_result_error": true,
+      "passed": true
+    },
+    {
+      "id": "other_record",
+      "allow": false,
+      "denied": true,
+      "tool_result_error": true,
+      "passed": true
+    }
+  ],
+  "scripted_requests": 16,
+  "real_provider_requests": 0,
+  "proxy_failure": null,
+  "unfinished_handlers": 0,
+  "runtime": {
+    "claude_executable": "/Users/marcin/.local/share/claude/versions/2.1.272",
+    "pinned_files": {
+      "/Users/marcin/.local/share/claude/versions/2.1.272": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75"
+    }
+  },
+  "project_settings_contamination_probe": true,
+  "policy_sha256": "bb7c4e8f715101d04de16d7e87ce69e286bbd8de92029a60ad2d722fb5803bc8",
+  "transcript_sha256": "601e8da77deb6178f8934c371dac7848130bda3fcff14200eac2dc7fa29e47f6",
+  "scope": "Actual pinned runtime; local scripted provider; synthetic external cohort; stub CLI/validator modules; actual exclusive-write freeze. No scientific canary or actual provider usage.",
+  "controller_delivery": "inline JSON --settings permissions.allow; exact program rules and job-specific manifest rules",
+  "fixture_and_policy_are_private": "Hashes bind the local complete evidence; public summary omits machine paths."
+}
