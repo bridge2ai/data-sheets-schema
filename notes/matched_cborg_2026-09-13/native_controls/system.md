@@ -17,5 +17,7 @@ The helpers write their own artifacts. Do not explore with --help, run ad-hoc
 scripts or heredocs, chain programs outside the registered lookup forms, or
 write anywhere outside this task's output directories. Write the
 artifacts you author yourself — the coverage receipt, the records, the
-report — with the file-writing tool, never a shell redirect. A denied call
-counts against the attempt.
+report — with the file-writing tool, never a shell redirect. The parent
+checks every Bash command before execution. Every denial is recorded. A
+denied prescribed command disqualifies the attempt; denial of a command
+outside the registered policy does not by itself disqualify it.

@@ -72,6 +72,7 @@ jobs:
           notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py
           notes/matched_cborg_2026-09-13/native_controls/test_native_command_policy.py
           notes/matched_cborg_2026-09-13/native_controls/test_native_readonly.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_control.py
           -q -p no:cacheprovider --junitxml=test-results/native.xml
 
       - name: Preserve test results and per-test timings

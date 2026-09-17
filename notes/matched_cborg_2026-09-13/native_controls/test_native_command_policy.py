@@ -55,8 +55,8 @@ def test_actual_instruction_and_delegated_playbook_have_five_programs(registered
     for argv in python_commands(Path(job['instruction']).read_text(), base['python']):
         assert any(item['code'] == argv[2] for item in policy['programs'])
     delivered = permission_arguments(policy)
-    assert delivered[0] == '--settings' and len(delivered) == 2
-    assert json.loads(delivered[1]) == {'permissions': {'allow': policy['allowed_tools']}}
+    assert delivered[:3] == ['--input-format', 'stream-json', '--settings'] and len(delivered) == 4
+    assert json.loads(delivered[3]) == {'permissions': {'allow': policy['allowed_tools']}}
 
 
 def test_arbitrary_modified_and_other_jobs_programs_are_not_prescribed(registered):
