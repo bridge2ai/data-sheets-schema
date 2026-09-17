@@ -2,7 +2,8 @@
   "date": "2026-09-17",
   "issues": [
     2055,
-    2056
+    2056,
+    2058
   ],
   "runtime_version": "2.1.272",
   "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
@@ -679,7 +680,8 @@
     }
   ],
   "focused_tests": {
-    "passed": 215,
-    "duration_seconds": 32.15
+    "passed": 260,
+    "skipped": 19,
+    "duration_seconds": 34.27
   }
 }

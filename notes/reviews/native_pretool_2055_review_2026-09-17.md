@@ -23,6 +23,12 @@ freezing the transcript. The final pass also rejects a terminal event before
 initialization, preventing a subsequent acknowledgement from sending a prompt.
 Regression tests exercise each correction with local child processes.
 
+The first CI run also exposed four old controller fixtures that bypass native
+execution without supplying its new control evidence (#2058). They now retain
+coherent calls, callbacks and decisions. Two additional controller cases verify
+that missing or contradictory control evidence rejects otherwise valid output.
+The production acceptance rule was retained.
+
 The initialization and decision records bind the policy hash and retain the
 exact native callback and parent response. A missing, duplicate, malformed,
 contradictory or timed-out decision prevents completion. The terminal audit
@@ -31,8 +37,8 @@ classification deadline precedes the three-second native callback timeout.
 
 ## Verification
 
-- 215 focused tests passed in 32.15 seconds, covering native launch, proxy,
-  evidence, command policy, lookup grammar, control channel and CI sharding.
+- 260 focused tests passed in 34.27 seconds (19 inapplicable API cases skipped), covering native launch, proxy,
+  evidence, command policy, lookup grammar, control channel, receipt-controller integration and CI sharding.
 - The actual pinned Claude Code 2.1.272 executable passed all 27 scripted
   command cases with broad project settings present and with settings absent.
   Its SHA-256 is

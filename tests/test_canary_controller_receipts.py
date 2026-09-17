@@ -152,7 +152,8 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
 NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed_denial', 'late_stop_denial',
                'init_mismatch_denial', 'evidence_unreadable', 'manifest_read_denial', 'interrupted',
                'unicode_jsonl', 'playbook_term_denial', 'playbook_grounding_denial', 'playbook_report_denial',
-               'allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error')
+               'allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error',
+               'control_missing', 'control_tampered')
 
 
 @pytest.mark.parametrize('arm', ['api','agentic'])
@@ -165,7 +166,8 @@ NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed
                                        ('playbook_term_denial',False), ('playbook_grounding_denial',False),
                                        ('playbook_report_denial',False), ('allowed_lookup',True),
                                        ('lookup_denial',False), ('unregistered_execution',False),
-                                       ('unregistered_error',False)])
+                                       ('unregistered_error',False), ('control_missing',False),
+                                       ('control_tampered',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
@@ -225,6 +227,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     else:
         from data_sheets_schema import agentic_observed
         from native_command_policy import build_command_policy
+        from native_control import INIT_ID, digest, initialize_frame, hook_output
         policy = build_command_policy(job, sys.executable, tmp_path)
         overlay = tmp_path/'overlay.json'
         overlay.write_text(json.dumps({'registration':str(registration), 'registration_sha256':api.sha(registration),
@@ -247,6 +250,8 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             # settings; the native CLI list parser loses complex Python rules.
             argv = args[0]
             assert '--allowedTools' not in argv
+            assert argv[argv.index('--input-format') + 1] == 'stream-json'
+            assert kwargs['command_policy'] == policy
             assert json.loads(argv[argv.index('--settings') + 1]) == {'permissions': {'allow': policy['allowed_tools']}}
             terminal={'type':'result','terminal_reason':'completed','stop_reason':'end_turn',
                       'modelUsage':{'offline-model':{'contextWindow':1000,'maxOutputTokens':100}}}
@@ -280,8 +285,9 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 terminal['result'] = 'source text\u0085next\u2028line\u2029paragraph'
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
                      'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
-            if case in ('allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error'):
-                command = shlex.join(['cat', str(run.bundle)]) if 'lookup' in case else 'echo unregistered'
+            if case in ('allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error',
+                        'control_tampered'):
+                command = 'echo unregistered' if case.startswith('unregistered_') else shlex.join(['cat', str(run.bundle)])
                 events[1:1] = [
                     {'type':'assistant', 'message':{'content':[{'type':'tool_use', 'name':'Bash',
                         'id':'observed', 'input':{'command':command}}]}},
@@ -292,6 +298,42 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                         'tool_input':{'command':command}}]
             if case == 'init_mismatch_denial':
                 events[0]['model'] = 'another-model'   # stops before the classification (#2037)
+            # Supply the native call/result records for terminal-only denial
+            # fixtures, then record the SDK callback exchange that main audits.
+            observed_ids = {block['id'] for event in events for block in event.get('message', {}).get('content', [])
+                            if block.get('type') == 'tool_use'}
+            for denial in terminal.get('permission_denials', []):
+                if denial['tool_name'] == 'Bash' and denial['tool_use_id'] not in observed_ids:
+                    events[-1:-1] = [
+                        {'type':'assistant','message':{'content':[{'type':'tool_use','name':'Bash',
+                            'id':denial['tool_use_id'],'input':denial['tool_input']}]}},
+                        {'type':'user','message':{'content':[{'type':'tool_result',
+                            'tool_use_id':denial['tool_use_id'],'is_error':True,'content':'offline denial'}]}}]
+            ack = {'type':'control_response','response':{'subtype':'success','request_id':INIT_ID,'response':{}}}
+            controls = [{'kind':'initialize_sent','policy_sha256':digest(policy),'frame':initialize_frame()},
+                        {'kind':'initialize_ack','frame':ack}]
+            native_events = [ack]
+            for event in events:
+                native_events.append(event)
+                for block in event.get('message', {}).get('content', []):
+                    if block.get('type') != 'tool_use' or block.get('name') != 'Bash':
+                        continue
+                    request_id = 'callback_' + block['id']
+                    callback = {'type':'control_request','request_id':request_id,'request':{
+                        'subtype':'hook_callback','callback_id':policy['pretool_control']['callback_id'],
+                        'input':{'hook_event_name':'PreToolUse','tool_name':'Bash','tool_use_id':block['id'],
+                                 'cwd':str(tmp_path),'tool_input':block['input']}}}
+                    classification, basis = runner._classify_command(block['input']['command'],sys.executable,set(),policy)
+                    response = {'type':'control_response','response':{'subtype':'success','request_id':request_id,
+                                'response':hook_output(classification,basis)}}
+                    controls.append({'kind':'decision','request':callback,'response':response,
+                                     'classification':classification,'basis':basis})
+                    native_events.append(callback)
+            events = native_events
+            if case == 'control_tampered':
+                controls[-1]['response']['response']['response'] = {'hookSpecificOutput':{'permissionDecision':'allow'}}
+            if case != 'control_missing':
+                (kwargs['attempt']/'control.jsonl').write_text(''.join(json.dumps(row)+'\n' for row in controls))
             if case == 'interrupted':
                 (kwargs['attempt']/'transcript.jsonl').write_text(json.dumps(events[0])+'\n')
                 raise KeyboardInterrupt
@@ -379,6 +421,12 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         return
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
+    if case in ('control_missing', 'control_tampered'):
+        assert check['passed'] and not result['command_history']['problems']
+        assert result['pretool_control']['problems']
+        assert all('native control' in problem for problem in result['validation_problems'])
+        assert before == {p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}
+        return
     if case in ('allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error'):
         assert check['passed']
         assert bool(result['command_history']['problems']) == case.startswith('unregistered_')
