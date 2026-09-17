@@ -1,0 +1,52 @@
+{
+  "source_base": "ed338417f8d81e108de73d11152940c0a14b8146",
+  "registration_base_main": "8d1cbb96e",
+  "renderer": 12,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Native controls after the stopped v10r canary (#2010, #2013, #2014, #2018, #2023, #2026, #2029, #2031\u2013#2033, #2036\u2013#2039, #2041; PR #2017, the base of this registration): a registered 10800 s attempt deadline; a stopped receipt that states whether the transcript reached its result line; every controller stop recorded in the ledger, the deadline under the proxy state lock before admission closes; playbook guidance to double-quote receipt snippets and reasons and to read a file before rewriting it; and controller enforcement of the maintainer ruling of 2026-09-17: every permission denial the runtime result line records is listed with its classification, each command read as bash reads it, on a completed or a stopped attempt; a denied prescribed command, or a denial record the controller cannot classify, disqualifies; a receipt whose transcript holds no single result line says it classified nothing; unusable evidence inputs fail validation, and every stop is named with its source (#2031\u2013#2033, #2036\u2013#2039). Carried from v10r (#1914\u2013#1916, #1918, #1922\u2013#2009): stop reason on the controller receipt with the traceback kept beside it, the observer refusal model, the allowlist roster tested against the playbook, the prescribed-commands-only shell rule, Phase 1 receipt-per-chunk with the file tool and the receipts-check gate before Phase 2. No per-attempt cap on the agentic arm, by user direction (#1917); API caps unchanged. Renderers, evidence protocol, source-review instrument, prompts, sources, schemas and profiles unchanged from v10r. Codex continuation fixes #2042 (pre-close interrupt causes) and #2043 (physical JSONL line parsing), without changing scientific inputs or permission rules.",
+  "merged_controls": [
+    {
+      "pr": 1852,
+      "merge": "5212e90b586759cb7200cf666664f33df52ec4bb",
+      "scope": "explicit provider context-bypass headers"
+    },
+    {
+      "pr": 1855,
+      "merge": "32dacddcf9124ba83c42f3ce17cfa166f67fbb11",
+      "scope": "existing strict receipt floors and registered-source binding"
+    },
+    {
+      "pr": 1857,
+      "merge": "eeac40047ccff3fe4c493e6707b5a5e0cac44eff",
+      "scope": "complete source review with durable API stop/admission",
+      "reviewed_head": "082789d3ef3d6dda7990c36fd8e7e0113a24974c",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35039816575"
+    },
+    {
+      "pr": 2017,
+      "merge": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "reviewed_head": "99dd52abd7635e7b7b19264376358ba1a88e4438",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35244680007",
+      "scope": "Registered native deadline, denial classification and stop evidence; continuation fixes #2042/#2043"
+    }
+  ],
+  "native_controller_sha256": "3685495d8cf6692faf14a1a84bf6a99971251e174bedf7ab23f889bfbdef6d33",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "e453d03e70893bd42e51aa11ec64dcce04f50afec2003feff05abb91b020eced",
+    "CHORUS_source_review_plan.json": "2c5bc1b07a553a3a3054c66a4a0bb3c82b83f987f9c46747cfcac7caa09837f4"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "launch_authorization": "No launch receipt issued; the launch requires the maintainer's explicit launch instruction after merge (the funding answer is not one). Agentic attempts are bounded by the remaining additional allocation alone (user direction 2026-09-16); API caps unchanged; no combined-ceiling amendment applies. The native CHORUS canary is first in the registered order.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Source acceptance remains independent of software acceptance.",
+  "launch_preparation_review": {
+    "issue": 2044,
+    "separate_post_merge_instruction_required": true,
+    "launch_receipt_issued": false
+  }
+}

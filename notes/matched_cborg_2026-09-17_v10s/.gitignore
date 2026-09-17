@@ -1,0 +1,8 @@
+*
+!.gitignore
+!README.md
+!*.public.json
+!reviewed_controls.json
+!costing_method.md
+!budget_authorization_2026-09-17.json
+!review_2026-09-17.md

@@ -1,0 +1,26 @@
+{
+  "kind": "explicit_user_budget_authorization",
+  "recorded_at": "2026-09-17T10:05:24.463734+00:00",
+  "source": "Two maintainer messages in this Claude Code conversation on 2026-09-17, replying to the v10r outcome report and to the two questions that followed it",
+  "quoted_proposal": "Whether to fund a v10s native attempt: a new registration with the attempt deadline sized deliberately (I would propose 3 hours), an enforceable Phase 1 gate, and a ruling on whether denials of forbidden commands disqualify a run. This is new spend against the remaining allocation and does not start without your explicit approval.",
+  "user_response": "2 yes",
+  "quoted_denial_question": "The permission-denial criterion. The README currently requires zero denials. The v10r run's five denials were all attempts at commands the system prompt forbids, and the allowlist stopped each one. I propose that a denied prescribed command disqualifies a run, while denials of forbidden commands are listed and do not disqualify it on their own. The alternative is to keep zero denials as written.",
+  "user_denial_ruling": "denied prescribed command disqualifies a run, while denials of forbidden commands are listed and do not disqualify it on their own.",
+  "quoted_merge_question": "Next steps: 1. Apply the fixes to #2017 and run a multi-agent adversarial review. 2. Stage v10s stacked on #2017 and review it from a public clone. 3. Ask you to merge. The launch will still wait for your word.",
+  "user_merge_response": "1 -yes / 2 - go / 3 - you are approved to merge",
+  "merge_approval_scope": "Merging PR #2017 (native controls) and the v10s registration PR, each once its reviews are clean. It is not a launch instruction and not a standing approval for any other pull request.",
+  "launch_instruction": "Not given. No launch receipt may be issued until the maintainer gives an explicit launch instruction in the conversation after merge; the funding answer ('2 yes') is not one.",
+  "charge_confirmation": "The maintainer confirmed the complete charge of the request the v10r attempt had in flight at its stop; the exact figure and the provider observation stay in the private accounting.",
+  "standing_direction": "the agentic arm does not need a cap (2026-09-16)",
+  "interpretation": "A fresh native-first registration (v10s) is authorized. Each agentic attempt carries no per-attempt cost cap (its limit is the whole additional allocation, so the sequence ledger is its only cost bound) and a registered 10800 s wall-clock deadline; every request is still counted and reserved before it is sent, and an unknown charge still stops the attempt. The API canary caps stay at $10 (CHORUS) and $15 (Kids First). The enforceable Phase 1 gate in the proposal was not added: the review of the v10r outcome (#2016) established that the v10r run did pass the receipts check before its first Phase 2 command, so the gate stays instructed and is verified from the tool history.",
+  "approved_whole_attempt_caps_usd": {
+    "CHORUS_agentic_rep1": 200,
+    "KIDS_FIRST_agentic_rep1": 200,
+    "CHORUS_api_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15
+  },
+  "agentic_attempt_deadline_seconds": 10800,
+  "additional_allocation_cap_usd": "200.00",
+  "automatic_whole_attempt_retries": 0,
+  "scope": "Native-first sequence; independent acceptance of each unchanged original before the next canary; failed canary stops expansion; no evaluation or production batch. Merging this registration is not launch approval."
+}
