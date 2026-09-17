@@ -1422,12 +1422,19 @@ def _refuse_malformed_observation(observed: dict) -> None:
                   if k in observed and not observed[k])
     if zero:
         raise click.ClickException(
-            f"refusing: {zero} at zero — the observer omits a counter that counts nothing, and a written zero "
-            "would be read as a claim the account then contradicts (#1998)")
-    if observed.get("thinking_from_terminal_results") and "turns_with_thinking_tokens" in observed:
-        raise click.ClickException(
-            "refusing: thinking_from_terminal_results beside turns_with_thinking_tokens — a session total from a "
-            "terminal result claims no turn coverage, so the observer never writes both (#1998)")
+            f"refusing: {zero} at zero — these optional counters are omitted when they count nothing; "
+            "leave them out rather than writing 0 (#1998/#2001)")
+    tft = observed.get("thinking_from_terminal_results")
+    if tft:
+        if "turns_with_thinking_tokens" in observed:
+            raise click.ClickException(
+                "refusing: thinking_from_terminal_results beside turns_with_thinking_tokens — a session total from a "
+                "terminal result claims no turn coverage, so the observer never writes both (#1998)")
+        if "thinking_tokens" not in observed or tft > (observed.get("usage_from_terminal_result") or 0):
+            raise click.ClickException(
+                "refusing: thinking_from_terminal_results needs thinking_tokens and cannot exceed "
+                "usage_from_terminal_result — an invocation's thinking comes from its terminal result only where "
+                "that result finalized its usage (#2000)")
 
 
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,

@@ -784,3 +784,19 @@ class Round12Guards(unittest.TestCase):
         with self.assertRaises(click.ClickException):
             cli._refuse_malformed_observation({**PRIOR, "thinking_tokens": 80, "turns_with_thinking_tokens": 1, "thinking_from_terminal_results": 1})
         cli._refuse_malformed_observation({**PRIOR, "thinking_tokens": 80, "thinking_from_terminal_results": 1, "usage_from_terminal_result": 1})
+
+
+class Round13Guards(unittest.TestCase):
+    """#2000: the terminal-thinking marker's dependencies."""
+
+    def test_impossible_terminal_thinking_markers_are_refused(self):
+        import click
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "output_tokens": 100, "thinking_tokens": 80,
+                                               "usage_from_terminal_result": 1, "thinking_from_terminal_results": 2})
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "output_tokens": 100, "thinking_from_terminal_results": 1,
+                                               "usage_from_terminal_result": 1})
+        with self.assertRaises(click.ClickException) as ctx:
+            cli._refuse_malformed_observation({**PRIOR, "malformed_message_events": 0})
+        self.assertIn("omitted when they count nothing", str(ctx.exception))

@@ -604,3 +604,28 @@ class Round12(unittest.TestCase):
                                            json.dumps({"timestamp": "2026-09-16T23:00:01Z", "type": "user", "uuid": "uc",
                                                        "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "read-c", "is_error": True, "content": "x"}]}})])
         self.assertEqual(ao.observe([own_error], self.bundle, None, None, None)["bundle_lines_read"], 0)
+
+
+class Round13(unittest.TestCase):
+    """#1999: a result is a boundary whatever it carries; incomplete terminal accounting is malformed."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("x\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_a_result_with_empty_or_missing_usage_is_malformed_and_still_a_boundary(self):
+        empty = self._file("e.jsonl", [_event("2026-09-16T21:00:00Z", usage={"input_tokens": 10, "output_tokens": 3}, msg_id="m1"),
+                                       json.dumps({"type": "result", "message": "done", "uuid": "r", "usage": {}})])
+        obs = ao.observe([empty], self.bundle, None, None, None)
+        self.assertEqual(obs["output_tokens"], 3); self.assertNotIn("usage_from_terminal_result", obs)
+        self.assertEqual(obs["malformed_message_events"], 1)
+        missing = self._file("m.jsonl", [_event("2026-09-16T21:00:00Z", usage={"input_tokens": 10, "output_tokens": 3}, msg_id="m1"),
+                                         json.dumps({"type": "result", "message": "done", "uuid": "r"}),
+                                         _event("2026-09-16T21:05:00Z", usage={"output_tokens": 70}, msg_id="m2")])
+        obs = ao.observe([missing], self.bundle, None, None, None)
+        self.assertNotIn("malformed_message_events", obs); self.assertEqual(obs["overlapping_evidence"], 1)
+        self.assertEqual(obs["output_tokens"], 3); self.assertNotIn("usage_from_terminal_result", obs)

@@ -218,7 +218,15 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 raw = j.get("message")
                 msg = raw if isinstance(raw, dict) else {}
                 measurement = j.get("type") in ("assistant", "user") or isinstance(raw, dict)
-                is_result = j.get("type") == "result" and isinstance(j.get("usage"), dict)
+                # A result line is an invocation boundary whatever it carries
+                # (#1999). One with no usage at all finalizes nothing and the
+                # snapshots stand; one whose usage is present but not complete
+                # accounting is malformed and refused rather than read as zeros.
+                is_result = j.get("type") == "result"
+                has_usage = "usage" in j
+                usage_ok = isinstance(j.get("usage"), dict) and all(
+                    isinstance(j["usage"].get(k), int) and not isinstance(j["usage"].get(k), bool)
+                    for k in ("input_tokens", "output_tokens"))
                 ts = j.get("timestamp")
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
@@ -236,7 +244,9 @@ def observe(transcripts: list[Path], bundle: Path | None,
                             if ident in result_ids or results > 1:
                                 overlapping += 1        # a repeated or second result (#1981)
                             result_ids.add(ident)
-                            terminal_excluded = True; result_seen = True
+                            if has_usage and not usage_ok:
+                                malformed += 1
+                            terminal_excluded = usage_ok; result_seen = True
                         elif measurement and not result_seen:
                             cut_before_terminal = True
                         continue
@@ -261,7 +271,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     if ident in result_ids or results > 1:
                         overlapping += 1
                     result_ids.add(ident)
-                    terminal = j["usage"]; result_seen = True
+                    if usage_ok:
+                        terminal = j["usage"]
+                    elif has_usage:
+                        malformed += 1
+                    result_seen = True
                     # A result line is a result, whatever its envelope
                     # carries (#1993): it is not also a message.
                     continue
