@@ -1,5 +1,16 @@
 # v10s matched canaries — native-first registration after the v10r stop, 2026-09-17
 
+**Codex continuation, 2026-09-17:** the last Opus review workflow exhausted
+its credits before any of its three reviews completed. Codex completed the
+review and merged the corrected controls in #2017. The native overlay now
+pins those bytes: controller interrupts retain their original cause before
+shutdown (#2042), and valid Unicode text no longer breaks JSONL parsing
+(#2043). The scientific registration remains `30d6d5a4…`; the updated overlay
+is `8678ed09…`. All registered input, history and instruction checks were
+repeated offline. See the [continuation review](review_2026-09-17.md).
+The private launch preparer now requires a separate post-merge instruction
+(#2044). No launch receipt has been issued and no generation has started.
+
 This fresh condition follows the [stopped v10r CHORUS native canary](../matched_cborg_2026-09-16_v10r/CHORUS_agentic_stopped.md),
 which read all eight chunks, wrote its coverage receipt, full record and
 derived core, passed the receipts check before core derivation, and was

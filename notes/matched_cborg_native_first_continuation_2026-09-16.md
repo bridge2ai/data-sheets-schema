@@ -85,6 +85,12 @@ ceilings, not funding.
 
 ## v10s sequence (2026-09-17, supersedes the v10r section)
 
+The [Codex continuation review](matched_cborg_2026-09-17_v10s/review_2026-09-17.md)
+records completion of the interrupted Opus review, merged controls #2017,
+and the updated native overlay `8678ed09…` on registration `30d6d5a4…`.
+The launch preparer requires the separate post-merge instruction; merge
+readiness grants no launch approval (#2044).
+
 The v10r CHORUS native canary read all eight chunks, wrote its receipt, full
 record and derived core, passed the receipts check before core derivation,
 and was stopped by the controller at the registration's hardcoded

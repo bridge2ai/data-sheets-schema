@@ -1,6 +1,6 @@
 {
   "kind": "public_scientific_review_view_not_executable",
-  "original_sha256": "4df4a059feac8e33263e329b21d6ba84a17efccfbef983d10571ee7e045183cd",
+  "original_sha256": "8678ed0924b4571be3d1de9a792eb2746af5627574eacd2bf9b63415972b493e",
   "transform": "Machine bindings replaced; no launch approval.",
   "view": {
     "registered_at": "2026-09-17T10:05:18.531405+00:00",
@@ -90,7 +90,7 @@
     "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
     "pinned_files": {
       "<repository>/notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": "177833c6279087d35fc31dba013860acc3e0c55922275d8b55ff8800d2436671",
-      "<repository>/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "0d3d2f917983650f16c439c2d70dfe5ef467e5219f62362ded8e18de0a80eeaf",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "3685495d8cf6692faf14a1a84bf6a99971251e174bedf7ab23f889bfbdef6d33",
       "<repository>/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "afb684d54aa90a1e30180bb715e9e6dae908baa3809ef8dc2904a0d90832ec18",
       "<repository>/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819",
       "<repository>/notes/matched_cborg_2026-09-13/native_controls/system.md": "a611097fdeafc68675f0c114626ee07be4eff0b54043a52a8cbaa32019a07a01",
@@ -99,6 +99,18 @@
       "<repository>/notes/matched_cborg_2026-09-13/prepare_registration.py": "225e3ca932af50a80feb171c4e83271c7d05f2612657ae262f0f0e04c66fa4c5",
       "<claude-binaries>/2.1.272": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75"
     },
-    "runtime_selection_basis": "Exact previously pinned 2.1.272 binary retained (the runtime the offline native probes and every prior native overlay pinned); the current alias resolves to a newer binary and is not used. Neither global installation nor alias was changed."
+    "runtime_selection_basis": "Exact previously pinned 2.1.272 binary retained (the runtime the offline native probes and every prior native overlay pinned); the current alias resolves to a newer binary and is not used. Neither global installation nor alias was changed.",
+    "continuation_review": {
+      "reviewer": "Codex",
+      "date": "2026-09-17",
+      "controls_pr": 2017,
+      "controls_merge_commit": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "fixed_findings": [
+        2042,
+        2043
+      ],
+      "scientific_inputs_changed": false,
+      "launch_authorized": false
+    }
   }
 }

@@ -1,8 +1,8 @@
 {
-  "checked_at": "2026-09-17T10:05:24.265161+00:00",
+  "checked_at": "2026-09-17T16:14:33.652212+00:00",
   "kind": "operator_offline_preflight_not_launch_approval",
   "registration_sha256": "30d6d5a49a2c96518bbe6363b59ae834e64241f4cf1062048a907ee67ba07cc5",
-  "native_overlay_sha256": "4df4a059feac8e33263e329b21d6ba84a17efccfbef983d10571ee7e045183cd",
+  "native_overlay_sha256": "8678ed0924b4571be3d1de9a792eb2746af5627574eacd2bf9b63415972b493e",
   "registered_pins_verified": 473,
   "native_pins_verified": 9,
   "historical_files_verified": 3241,
@@ -29,7 +29,9 @@
     2037,
     2038,
     2039,
-    2041
+    2041,
+    2042,
+    2043
   ],
   "agentic_attempt_deadline_seconds": 10800,
   "native_denial_policy": "denied prescribed command disqualifies a run, while denials of forbidden commands are listed and do not disqualify it on their own.",
@@ -66,5 +68,11 @@
   "limitations": "Operator checks do not establish source quality or independent verification of unpublished originals/accounting. Source review, native tool turns, compaction and repeatability remain unmeasured; no native run has completed under any v10 condition. An explicit launch instruction from the maintainer, exact-commit CI, an independently reviewed registration and fresh checks are required before a launch receipt; the sequence cap of the ledger, not any amendment, bounds agentic spend.",
   "accounting_resolved": true,
   "proposed_caps_checked_locally": true,
-  "private_accounting_independently_reviewed": false
+  "private_accounting_independently_reviewed": false,
+  "continuation_review": {
+    "reviewer": "Codex",
+    "controls_merge_commit": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+    "all_original_checks_repeated_offline": true,
+    "launch_receipts_issued": 0
+  }
 }
