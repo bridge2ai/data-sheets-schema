@@ -1,0 +1,63 @@
+{
+  "source_base": "7f394cc002c0002707006e2c5577ea0a0a7cd833",
+  "registration_base_main": "7f394cc002c0002707006e2c5577ea0a0a7cd833",
+  "renderer": 12,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Native policy version 2 defines read-only lookup forms for registered files, supplies explicit capability grants, and checks executed Bash commands with the same classifier used for denials (#2051/#2052, PR #2053). These grants do not enforce filesystem boundaries before execution. Broad file-tool grants and helper arguments remain; independent review still inspects paths, targets, phase ordering and source support. Sources, schemas, profiles, renderers and evaluation instruments are unchanged from v10t. Both arms receive a new condition and unused output paths. Historical v10t retains its original policy and stopped verdict.",
+  "merged_controls": [
+    {
+      "pr": 2017,
+      "merge": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "scope": "v10s native controller, receipt and stop behavior"
+    },
+    {
+      "pr": 2046,
+      "merge": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+      "reviewed_head": "22741810b284613701a111f1d1db444c68cbe2c7",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35260365143",
+      "scope": "job-bound helper policy and denial classification; exact JSON delivery"
+    },
+    {
+      "pr": 2050,
+      "merge": "df78bb6b8fef18ad072fb21cad93e658c0381757",
+      "scope": "vendor-documented built-in lookup behavior and synthetic probes"
+    },
+    {
+      "pr": 2053,
+      "merge": "7f394cc002c0002707006e2c5577ea0a0a7cd833",
+      "reviewed_head": "43ce73e7c2d57499807cae5be88f161a684c187a",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35266480855",
+      "scope": "registered lookup grammar and executed-command review"
+    }
+  ],
+  "native_controller_sha256": "51a5d3e3726c4ac96e08c3c0d34ffbc9a54543b21d95752b2357c8cf66bd0af9",
+  "command_policy_sha256": "0eab59dc9b3b7d845e3b661e8835d46d7a5a95ab8f054d5eac70f37f76d4cc95",
+  "lookup_contract_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "35da995b60e500f522247bf4659e1f490271f3b0950098a3c33cc465459537ac",
+    "CHORUS_source_review_plan.json": "7623a87998a99c0d9876ac601a3ffee7b7048c1468fa3f1b7657fd89654e593e"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "canary_order_confirmation": {
+    "kind": "user_canary_order_confirmation",
+    "recorded_at": "2026-09-17T18:38:46.571596+00:00",
+    "source": "User message in the active Codex conversation on 2026-09-17",
+    "question": "For the new condition, should I retain the later approved v10s native-first order, or return to the active goal\u2019s API-first order? The API transport issue remains unresolved.",
+    "user_response": "Retain native first (recommended)",
+    "canary_order": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1",
+      "CHORUS_api_rep1",
+      "KIDS_FIRST_api_rep1"
+    ],
+    "scope": "Order confirmation. Each later canary requires independent acceptance of every prior one. This is not a launch receipt."
+  },
+  "launch_authorization": "No launch receipt issued. The prior v10t launch instruction was consumed. After registration review and merge, launch requires a new explicit maintainer instruction, exact merged-head CI and fresh checks. Existing funding and native-first order persist; no new allocation is requested. CHORUS native is first.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Software checks do not establish independent scientific acceptance. Actual helper arguments, file-tool paths, source support and step ordering still require review."
+}

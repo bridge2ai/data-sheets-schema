@@ -148,3 +148,35 @@ forward; command policies, exact native guidance and output identities move.
 5. Use measured canary costs and reviewed outputs to decide production
    expansion for both arms. The proposed 32 full/core pairs, 256 rubric
    ratings and 128 presence scores are an inventory, not an automatic batch.
+
+## v10u sequence (2026-09-17, follows the stopped v10t attempt)
+
+The authorized v10t CHORUS native attempt stopped during source/schema
+inspection because executed shell lookups departed from its frozen instruction.
+Its accounting settled; its receipts, complete trace and procedure remain
+preserved. It produced no complete D4D, core, audit or report and was not
+accepted. The later permission contract does not change that verdict.
+
+The [v10u registration](matched_cborg_2026-09-17_v10u/README.md) uses merged
+controls #2053 for #2051/#2052. Policy version 2 defines permitted read-only
+lookups and checks executed Bash calls as well as denials. Grants remain
+broader than the instruction grammar, so actual paths, helper arguments,
+phase ordering and source support still need review. Source bundles, schemas,
+profiles and evaluation instruments are unchanged.
+
+1. Review and merge v10u, require successful CI on its exact merged head,
+   verify fresh inputs/runtime/model/accounting, then bind the new explicit
+   launch instruction to the first CHORUS native canary. The prior launch
+   instruction was consumed; funding and the native-first order persist.
+2. Accept unchanged CHORUS native, then Kids First native, then CHORUS API and
+   Kids First API in that order. A failed canary stops expansion. Preserve
+   every prior output and score; continue with existing downloads.
+3. Register all applicable evaluation canaries on accepted exact inputs:
+   semantic rubrics 10/20 with repeat ratings, direct API and field-agent
+   styles, presence, schema/pair, receipts/provenance, grounding, report claims
+   and applicable fitness/subtype checks. Verify definition hashes and
+   check-echo; semantic numeric ratings use CBORG.
+4. Use accepted canaries and measured costs for the separate production
+   decision covering both arms, all five Bridge2AI datasets including
+   VOICE-pediatric, and the external Kids First example. Retain the separate
+   24-record v7/v8 reference rescore and separate historical adjudication.
