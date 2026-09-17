@@ -342,10 +342,12 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
      short common word does not, and fails the check);
    - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
      already receipted from those chunks;
-   - `nothing_relevant` with a `reason` (quote every free-text value — a
-     reason containing `: ` is otherwise read as a mapping and the whole
-     receipt fails to parse);
+   - `nothing_relevant` with a `reason`;
    - `duplicate_of: <chunk id>` — the same content as another chunk.
+   Write every `snippet` and `reason` as a double-quoted YAML string,
+   escaping `"` and `\` inside it: source text often holds `: `, a
+   trailing colon or ` #`, which unquoted YAML reads as a mapping or a
+   comment, and the whole receipt then fails to parse.
    Write the entry with the file-writing tool (`Write`, or an edit of the
    receipt file; read a file before rewriting it whole, as the tool
    requires), never with a shell redirect or `cat >>`: the native
@@ -569,9 +571,10 @@ allowed to prefer a value merely because the full record already states it.
    Keep a supported plan or in-progress fact qualified in its own value where
    that field permits it, with evidence commentary in `source_caveats`.
    **Every back-ported or repaired value gets its receipt**:
-   add the `{slot, snippet}` pair to the *existing* entry of the chunk the
-   passage sits in (edit that entry in place — a second entry for the same
-   chunk is a finding), and re-run `d4d receipts check`. A value you cannot
+   add the `{slot, snippet}` pair, the snippet double-quoted as in Phase 1,
+   to the *existing* entry of the chunk the passage sits in (edit that entry
+   in place — a second entry for the same chunk is a finding), and re-run
+   `d4d receipts check`. A value you cannot
    receipt from a chunk is not source-supported.
 5. Re-validate the full record after every correction and record the
    source and provenance findings for the reconciliation report. Nothing is

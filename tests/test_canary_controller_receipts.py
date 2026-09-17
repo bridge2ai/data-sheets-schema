@@ -229,7 +229,9 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 # undecodable trailing bytes (#2019).
                 (kwargs['attempt']/'transcript.jsonl').write_bytes(
                     (json.dumps(events[0])+'\n').encode() + b'{"type":"assistant","message":{"id":"m1","content":"\xff\xfe')
-                raise runner.BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
+                reason = 'native attempt deadline elapsed; retain all incomplete charge reservations'
+                kwargs['record_stop'](reason)   # as execute_child does before closing admission (#2023)
+                raise runner.BudgetStop(reason)
             (kwargs['attempt']/'transcript.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
             return 0
         monkeypatch.setattr(runner, 'execute_child', child)

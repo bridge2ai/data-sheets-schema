@@ -280,8 +280,9 @@ def test_the_transcript_diagnostic_never_raises(tmp_path):
 
 
 def test_a_controller_stop_is_recorded_in_the_ledger(tmp_path):
-    """#2018: a deadline stop marks the attempt stopped in the ledger; a
-    ledger stop is left as the ledger recorded it."""
+    """#2018/#2023: a deadline stop marks the attempt stopped in the ledger; a
+    ledger stop is left as the ledger recorded it; an entry the ledger already
+    holds is reported, not overwritten."""
     from run_native_canary import record_controller_stop
     from budgeted_cborg import Ledger
     ledger = Ledger(tmp_path / 'billing.json', manifest_sha256='m', total_cap=200, attempt_cap=5)
@@ -289,7 +290,72 @@ def test_a_controller_stop_is_recorded_in_the_ledger(tmp_path):
     state = json.loads((tmp_path / 'billing.json').read_bytes())
     assert state['stopped_attempts']['m:job']['reason'] == 'controller: native attempt deadline elapsed'
     assert out == {'ledger_stop_recorded': 'controller: native attempt deadline elapsed'}
+    # recording again (the except path after a pre-close record) is idempotent
+    assert record_controller_stop(ledger, 'm:job', {'reason': 'native attempt deadline elapsed'}) == out
     assert record_controller_stop(ledger, 'm:job', {'reason': 'x', 'reason_source': 'ledger'}) == {}
+    ledger.stop_attempt('m:other', 'attempt cap reached')
+    note = record_controller_stop(ledger, 'm:other', {'reason': 'native attempt deadline elapsed'})
+    assert note == {'ledger_stop_record_note': 'the ledger already held a stop entry: attempt cap reached'}
     class Broken:
+        path = tmp_path / 'none.json'
         def stop_attempt(self, *a): raise OSError('disk')
-    assert 'could not record' in record_controller_stop(Broken(), 'm:other', {'reason': 'x'})['ledger_stop_record_note']
+    assert 'could not record' in record_controller_stop(Broken(), 'm:x', {'reason': 'x'})['ledger_stop_record_note']
+
+
+def _deadline_while_counting(tmp_path, *, record_first):
+    """The real NativeProxy.running() and execute_child: the deadline fires
+    while a /v1/messages handler is still counting tokens, so the handler
+    meets the admission the controller has just closed (#2023/#2024)."""
+    import threading, time
+    from types import SimpleNamespace
+    from test_native_proxy import fixture_proxy, REQUEST
+    import run_native_canary as rnc
+    proxy, ledger, calls = fixture_proxy(tmp_path)
+    counting = threading.Event()
+    def count(**kw):
+        counting.set()
+        while not proxy.closed:
+            time.sleep(0.01)
+        time.sleep(0.2)   # returns inside running()'s cleanup window
+        return SimpleNamespace(input_tokens=100)
+    proxy.messages.client.messages.count_tokens = count
+    attempt = tmp_path / 'attempt'; attempt.mkdir()
+    instruction = tmp_path / 'instruction.txt'; instruction.write_text('offline')
+    child = ("import json,os,time,urllib.request\n"
+             "req=urllib.request.Request(os.environ['URL']+'/v1/messages?beta=true',data=json.dumps(%r).encode(),"
+             "headers={'x-api-key':os.environ['TOKEN'],'content-type':'application/json'})\n"
+             "print(json.dumps({'type':'system','subtype':'init'}),flush=True)\n"
+             "try:\n urllib.request.urlopen(req,timeout=30)\nexcept Exception: pass\n"
+             "time.sleep(30)\n") % (REQUEST,)
+    record = (lambda reason: rnc.record_controller_stop(ledger, 'native-offline', {'reason': reason})) if record_first else None
+    receipt = {}
+    try:
+        with proxy.running() as url:
+            env = dict(os.environ, URL=url, TOKEN=proxy.token)
+            rnc.execute_child([sys.executable, '-c', child], proxy=proxy, instruction=instruction, attempt=attempt,
+                              cwd=tmp_path, env=env, deadline_seconds=1.0, verify_launch=lambda: None, record_stop=record)
+    except Exception as exc:
+        receipt.update(status='stopped', error_type=type(exc).__name__)
+        receipt.update(rnc.stop_explanation(exc, ledger.path, 'native-offline', getattr(proxy, 'failure', None)))
+        receipt.update(rnc.transcript_terminal_state(attempt / 'transcript.jsonl'))
+        receipt.update(rnc.record_controller_stop(ledger, 'native-offline', receipt))
+    assert counting.is_set() and calls == []
+    return receipt, json.loads(ledger.path.read_bytes()).get('stopped_attempts')
+
+
+def test_a_deadline_during_an_in_flight_request_is_recorded_as_the_deadline(tmp_path):
+    receipt, stops = _deadline_while_counting(tmp_path, record_first=True)
+    assert receipt['status'] == 'stopped' and receipt['reason_source'] == 'controller'
+    assert receipt['reason'].startswith('native attempt deadline elapsed')
+    assert stops['native-offline']['reason'].startswith('controller: native attempt deadline elapsed')
+    assert receipt['ledger_stop_recorded'] == stops['native-offline']['reason']
+
+
+def test_the_admission_closed_consequence_never_masks_a_controller_stop(tmp_path):
+    """Even when the pre-close record did not happen, the entry the refused
+    handler wrote is reported as a consequence, not as the cause."""
+    receipt, stops = _deadline_while_counting(tmp_path, record_first=False)
+    assert stops['native-offline']['reason'] == 'native admission is closed'
+    assert receipt['reason_source'] == 'controller' and receipt['reason'].startswith('native attempt deadline elapsed')
+    assert 'consequence' not in receipt['reason'] and 'refused after the controller closed admission' in receipt['ledger_stop_note']
+    assert receipt['ledger_stop_record_note'] == 'the ledger already held a stop entry: native admission is closed'

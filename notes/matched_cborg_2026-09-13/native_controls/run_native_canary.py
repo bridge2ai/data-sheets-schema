@@ -68,12 +68,18 @@ def record_controller_stop(ledger, billing_attempt, receipt):
     cause (Ledger.stop_attempt never overwrites one). Never raises."""
     if receipt.get('reason_source') == 'ledger':
         return {}
-    reason = 'controller: ' + str(receipt.get('reason') or receipt.get('error_type') or 'stopped')
+    reason = str(receipt.get('reason') or receipt.get('error_type') or 'stopped')
+    reason = reason if reason.startswith(CONTROLLER_PREFIX) else CONTROLLER_PREFIX + reason
     try:
         ledger.stop_attempt(billing_attempt, reason)
-        return {'ledger_stop_recorded': reason}
+        state = json.loads(Path(ledger.path).read_bytes())
+        held = ((state.get('stopped_attempts') or {}).get(billing_attempt) or {}).get('reason')
     except Exception as error:
         return {'ledger_stop_record_note': f'could not record the stop in the ledger: {type(error).__name__}'}
+    if held == reason:
+        return {'ledger_stop_recorded': reason}
+    # Ledger.stop_attempt keeps the first entry; say what it holds instead.
+    return {'ledger_stop_record_note': f'the ledger already held a stop entry: {held}'}
 
 
 def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
@@ -99,8 +105,18 @@ def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
             out['ledger_stop_note'] = 'stopped_attempts is not a mapping'
     except Exception as read_error:
         out['ledger_stop_note'] = f'ledger unreadable: {type(read_error).__name__}'
-    if isinstance(entry, dict) and isinstance(entry.get('reason'), str) and entry['reason']:
-        out['reason'] = entry['reason']; out['reason_source'] = 'ledger'; out['ledger_stop'] = entry
+    entry_reason = entry.get('reason') if isinstance(entry, dict) else None
+    if isinstance(entry_reason, str) and entry_reason.startswith(CONTROLLER_PREFIX):
+        # The controller recorded its own stop before closing admission (#2023).
+        out['reason'] = entry_reason[len(CONTROLLER_PREFIX):]; out['reason_source'] = 'controller'; out['ledger_stop'] = entry
+    elif (isinstance(entry_reason, str) and entry_reason == ADMISSION_CLOSED
+          and isinstance(exc, BudgetStop) and str(exc) != ADMISSION_CLOSED and proxy_failure in (None, ADMISSION_CLOSED)):
+        # A handler met the admission the controller had already closed: the
+        # entry is a consequence of the controller's stop, not its cause.
+        out['reason'] = str(exc); out['reason_source'] = 'controller'; out['ledger_stop'] = entry
+        out['ledger_stop_note'] = 'the ledger entry records a request refused after the controller closed admission'
+    elif isinstance(entry_reason, str) and entry_reason:
+        out['reason'] = entry_reason; out['reason_source'] = 'ledger'; out['ledger_stop'] = entry
     elif isinstance(exc, BudgetStop):
         out['reason'] = str(exc); out['reason_source'] = 'controller'
     elif isinstance(proxy_failure, str) and proxy_failure:
@@ -168,7 +184,13 @@ def terminate_group(process):
     process.wait(timeout=2)
 
 
-def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch):
+#: What an in-flight handler raises when the controller closed admission:
+#: a consequence of a controller stop, never its cause (#2023).
+ADMISSION_CLOSED = 'native admission is closed'
+CONTROLLER_PREFIX = 'controller: '
+
+
+def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None):
     process = None
     deadline = time.monotonic() + deadline_seconds
     try:
@@ -180,7 +202,13 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 if proxy.failed.is_set():
                     raise BudgetStop(proxy.failure)
                 if time.monotonic() >= deadline:
-                    raise BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
+                    stop = BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
+                    # Recorded before admission closes (the finally below), so
+                    # the ledger names the deadline and not the refusals an
+                    # in-flight handler meets afterwards (#2023).
+                    if record_stop is not None:
+                        record_stop(str(stop))
+                    raise stop
                 time.sleep(0.05)
         if proxy.failed.is_set():
             raise BudgetStop(proxy.failure)
@@ -264,7 +292,8 @@ def main():
             env['ANTHROPIC_BASE_URL']=url
             receipt['exit_code']=execute_child(argv,proxy=proxy,instruction=job['instruction'],attempt=attempt,
                 cwd=base['repository'],env=env,deadline_seconds=base['generation']['agentic_attempt_deadline_seconds'],
-                verify_launch=lambda: verified_executable(overlay))
+                verify_launch=lambda: verified_executable(overlay),
+                record_stop=lambda reason: record_controller_stop(ledger, billing_attempt, {'reason': reason}))
         if proxy.failed.is_set() or proxy.unfinished_handlers:
             raise BudgetStop(proxy.failure or 'native handlers did not finish before evidence freeze')
         events=[json.loads(line) for line in (attempt/'transcript.jsonl').read_text().splitlines() if line.strip()]
