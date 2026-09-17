@@ -187,13 +187,19 @@ def observe(transcripts: list[Path], bundle: Path | None,
     duration_ms = total_tokens = 0
     measure: dict[str, int] = {}
     from_terminal = excluded = 0
+    terminal_thinking = 0
     for path in transcripts:
-        ident_path = str(Path(path).resolve())
-        if ident_path in seen_paths:
-            # The same file again is the same evidence again (#1979).
+        # The same file again — by path, by inode or by bytes — is the same
+        # evidence again (#1979/#1986): a copy whose lines carry no id at
+        # all cannot be told apart by its events, only by its identity.
+        st = Path(path).stat()
+        raw_bytes = Path(path).read_bytes()
+        import hashlib as _hl
+        idents = {str(Path(path).resolve()), f"inode:{st.st_dev}:{st.st_ino}", f"sha256:{_hl.sha256(raw_bytes).hexdigest()}"}
+        if idents & seen_paths:
             overlapping += 1
             continue
-        seen_paths.add(ident_path)
+        seen_paths |= idents
         usage_by_msg: dict[str, dict] = {}
         blocks_by_msg: dict[str, dict] = {}
         first = last = None
@@ -214,21 +220,22 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                     if until is not None and t > until:
-                        # An excluded measurement event before the file's
-                        # result means the result describes more than the
-                        # interval; one after it — the orchestrator's trailing
-                        # events — does not (#1953); an excluded informational
-                        # line never does. A result the cut itself excludes is
-                        # recorded before it is skipped (#1952).
-                        if measurement and terminal is None:
-                            cut_before_terminal = True
-                        elif is_result:
+                        # A result the cut itself excludes is recorded before
+                        # it is skipped (#1952), whatever envelope it carries
+                        # (#1989); an excluded measurement event before the
+                        # file's result means the result describes more than
+                        # the interval, one after it — the orchestrator's
+                        # trailing events — does not (#1953), and an excluded
+                        # informational line never does.
+                        if is_result:
                             results += 1
                             ident = j.get("uuid") or line.strip()
                             if ident in result_ids or results > 1:
                                 overlapping += 1        # a repeated or second result (#1981)
                             result_ids.add(ident)
                             terminal_excluded = True
+                        elif measurement and terminal is None:
+                            cut_before_terminal = True
                         continue
                     first = first or t
                     last = t
@@ -276,6 +283,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         continue
                     if c.get("type") != "tool_use":
                         continue
+                    if terminal is not None:
+                        # A tool call after the file's result is outside the
+                        # invocation the result finalized (#1988).
+                        overlapping += 1
+                        continue
                     tid = c.get("id") or f"{path}:{n}:{k}"
                     if tool_owner.setdefault(tid, path) != path:
                         # A tool call carried by another file: the same
@@ -299,6 +311,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
         total, m = _invocation_measure(usage_by_msg, blocks_by_msg, terminal if usable else None)
         if usable:
             from_terminal += 1
+            if _terminal_thinking(terminal) is not None:
+                terminal_thinking += 1
         elif (terminal is not None or terminal_excluded) and usage_by_msg:
             # A set-aside result qualifies the file's retained messages; a
             # file with none retained qualifies nothing (#1968).
@@ -310,11 +324,13 @@ def observe(transcripts: list[Path], bundle: Path | None,
     out.update(measure)
     if from_terminal:
         out["usage_from_terminal_result"] = from_terminal
+    if terminal_thinking and "thinking_tokens" in out:
         # Where any invocation's thinking is a session total from its
         # terminal result, no turn coverage is claimed for the aggregate,
-        # whatever per-turn counts another invocation contributed (#1982).
-        if "thinking_tokens" in out:
-            out.pop("turns_with_thinking_tokens", None)
+        # whatever per-turn counts another invocation contributed (#1982);
+        # a terminal result carrying no thinking detail leaves the per-turn
+        # coverage as measured (#1987).
+        out.pop("turns_with_thinking_tokens", None)
     if excluded:
         out["terminal_results_excluded_by_cut"] = excluded
     if bundle:
@@ -354,14 +370,22 @@ def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage:
     m["output_tokens"] = final_output
     m["reasoning_tokens_estimate"] = max(
         0, final_output - (m.get("visible_text_chars", 0) + m.get("tool_input_chars", 0)) // 4)
+    thinking = _terminal_thinking(terminal_usage)
+    if thinking is not None:
+        # The runtime's session total, not a per-turn count: no turn
+        # coverage is claimed for it (#1978).
+        m["thinking_tokens"] = thinking
+        m.pop("turns_with_thinking_tokens", None)
+    return total, m
+
+
+def _terminal_thinking(terminal_usage: dict) -> int | None:
+    """The thinking count a terminal result carries, if any."""
     details = terminal_usage.get("output_tokens_details")
     if isinstance(details, dict) and isinstance(details.get("thinking_tokens"), int) \
             and not isinstance(details.get("thinking_tokens"), bool):
-        # The runtime's session total, not a per-turn count: no turn
-        # coverage is claimed for it (#1978).
-        m["thinking_tokens"] = details["thinking_tokens"]
-        m.pop("turns_with_thinking_tokens", None)
-    return total, m
+        return details["thinking_tokens"]
+    return None
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])

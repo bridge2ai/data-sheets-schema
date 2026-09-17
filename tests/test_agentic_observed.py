@@ -477,3 +477,50 @@ class Round9(unittest.TestCase):
         a = self._file("a.jsonl", [line]); b = self._file("b.jsonl", [line])
         self.assertEqual(ao.observe([a], self.bundle, None, None, None)["output_tokens"], 30)
         self.assertEqual(ao.observe([a, b], self.bundle, None, None, None)["overlapping_evidence"], 1)
+
+
+class Round10(unittest.TestCase):
+    """#1986–#1989: byte-identical and hard-linked copies, terminal results
+    without thinking detail, tool calls after a result, and a result event
+    carrying a mapping message."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("\n".join(f"l{i}" for i in range(10)) + "\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_a_copy_with_no_ids_at_all_and_a_hard_link_are_refused(self):
+        lines = [json.dumps({"timestamp": "2026-09-16T21:00:00Z", "message": {"role": "assistant", "usage": {"output_tokens": 30}, "content": []}}),
+                 json.dumps({"timestamp": "2026-09-16T21:01:00Z", "message": {"role": "assistant", "usage": {"output_tokens": 40}, "content": []}})]
+        a = self._file("a.jsonl", lines); b = self._file("b.jsonl", lines)
+        self.assertEqual(ao.observe([a], self.bundle, None, None, None)["output_tokens"], 70)
+        self.assertEqual(ao.observe([a, b], self.bundle, None, None, None)["overlapping_evidence"], 1)
+        link = self.root / "link.jsonl"; import os; os.link(a, link)
+        self.assertEqual(ao.observe([a, link], self.bundle, None, None, None)["overlapping_evidence"], 1)
+
+    def test_a_terminal_result_without_thinking_detail_keeps_per_turn_coverage(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3, "output_tokens_details": {"thinking_tokens": 7}}, msg_id="m1"),
+                                   json.dumps({"type": "result", "message": "done", "uuid": "r", "usage": {"input_tokens": 1, "output_tokens": 100}})])
+        obs = ao.observe([t], self.bundle, None, None, None)
+        self.assertEqual(obs["thinking_tokens"], 7); self.assertEqual(obs["turns_with_thinking_tokens"], 1)
+        self.assertEqual(obs["usage_from_terminal_result"], 1)
+
+    def test_a_tool_call_after_the_result_is_refused(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   json.dumps({"type": "result", "message": "done", "uuid": "r", "usage": {"input_tokens": 1, "output_tokens": 100}}),
+                                   json.dumps({"timestamp": "2026-09-16T21:02:00Z", "type": "assistant", "uuid": "late",
+                                               "message": {"role": "assistant", "content": [{"type": "tool_use", "name": "Read", "id": "tu-late",
+                                                                                              "input": {"file_path": str(self.bundle), "offset": 1, "limit": 3}}]}})])
+        obs = ao.observe([t], self.bundle, None, None, None)
+        self.assertEqual(obs["overlapping_evidence"], 1); self.assertEqual(obs["tool_uses"], 0); self.assertEqual(obs["bundle_lines_read"], 0)
+
+    def test_an_excluded_result_with_a_mapping_message_is_still_a_result(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   json.dumps({"timestamp": "2026-09-16T22:00:00Z", "type": "result", "message": {}, "uuid": "r1", "usage": {"input_tokens": 1, "output_tokens": 100}}),
+                                   json.dumps({"timestamp": "2026-09-16T22:01:00Z", "type": "result", "message": {}, "uuid": "r2", "usage": {"input_tokens": 1, "output_tokens": 100}})])
+        obs = ao.observe([t], self.bundle, datetime.fromisoformat("2026-09-16T21:30:00+00:00"), None, None)
+        self.assertEqual(obs["output_tokens"], 3); self.assertEqual(obs["terminal_results_excluded_by_cut"], 1)
+        self.assertEqual(obs["overlapping_evidence"], 1)

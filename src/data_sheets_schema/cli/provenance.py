@@ -2052,8 +2052,10 @@ def reasoning_cmd(method, project, label, path):
                              "cut: the messages they would have covered rest on snapshots")
             if counted is not None:
                 turns = obs.get("turns_with_thinking_tokens")
-                parts.append(f"thinking_tokens {counted} (" + (f"{turns} turn(s) counted" if turns is not None else
-                                                                 "session total from the terminal result") + ")")
+                parts.append(f"thinking_tokens {counted} (" + (
+                    f"{turns} turn(s) counted" if turns is not None else
+                    "includes a terminal session total; no turn coverage" if obs.get("usage_from_terminal_result") else
+                    "no turn coverage recorded") + ")")
             elif obs.get("reasoning_tokens_estimate") is not None:
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
             click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
