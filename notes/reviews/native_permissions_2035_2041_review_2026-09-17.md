@@ -39,6 +39,12 @@ The source manifest contains a space and apostrophe. CLI and validator
 modules are synthetic stubs; the freeze performs actual exclusive writes.
 This tests admission, not the scientific behavior of the validators.
 
+A final 15-case probe also put an unrestricted `Bash` grant in both project
+settings files. All required calls still ran and all five negative calls
+were denied under the pinned runtime's safe/restricted mode and inline
+settings. The public summary records this final probe. This observation is
+specific to the pinned runtime and its registered invocation.
+
 The [public probe summary](native_permissions_2035_2041_probe_2026-09-17.json)
 binds the complete local policy and transcript. The probe made **zero real
 provider requests**. Reported runtime token/cost fields in the private

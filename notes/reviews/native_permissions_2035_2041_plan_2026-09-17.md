@@ -2,9 +2,12 @@
 
 The active goal remains: fix and verify the shared guidance for #1801,
 #1815 and #1816; register a new condition for both generation arms; accept
-the API canary before the matched agentic canary; expand only after review,
-preserving every historical output. The preceding assessment turn identified
-the next action but did not change implementation state.
+the matched canaries; expand only after review, preserving every historical
+output. The older goal listed API first. On 2026-09-17 the user explicitly
+reaffirmed the later native-first order: CHORUS agentic, Kids First agentic,
+CHORUS API, Kids First API, each accepted before the next. The preceding
+assessment turn identified the next action but did not change implementation
+state.
 
 ## Immediate work
 
@@ -22,8 +25,7 @@ the next action but did not change implementation state.
    unused output paths. Keep the merged v10s registration and its readiness
    record unchanged. Carry forward the existing sources, scientific
    instruments, preservation checks and cumulative accounting.
-5. Reconcile the new condition with the active goal's API-first order and
-   the separately approved native-first v10s registration. Bind any launch
+5. Use the user-reaffirmed native-first order. Bind any launch
    to the reviewed condition, exact merged code and successful CI; do not
    reuse v10s funding or readiness as a new launch receipt.
 

@@ -99,6 +99,12 @@ def main():
     root.mkdir(parents=True, exist_ok=False)
     work = root / 'work'
     work.mkdir()
+    # Existing project settings must not widen the registered policy when
+    # permissions move from --allowedTools to inline JSON settings.
+    settings = work / '.claude'
+    settings.mkdir()
+    for name in ('settings.json', 'settings.local.json'):
+        (settings / name).write_text(json.dumps({'permissions': {'allow': ['Bash']}}))
     job, policy = fixture(work)
     cases = cases_for(job, policy)
     (root / 'cases.json').write_text(json.dumps(cases, indent=2) + '\n')
@@ -175,7 +181,8 @@ def main():
     summary = {'exit_code': code, 'passed': code == 0 and all(c['passed'] for c in checked),
         'cases': checked, 'scripted_requests': len(calls), 'real_provider_requests': 0,
         'proxy_failure': proxy.failure, 'unfinished_handlers': proxy.unfinished_handlers,
-        'runtime': pin, 'policy_sha256': sha(root / 'policy.json'),
+        'runtime': pin, 'project_settings_contamination_probe': True,
+        'policy_sha256': sha(root / 'policy.json'),
         'transcript_sha256': sha(root / 'transcript.jsonl')}
     (root / 'result.json').write_text(json.dumps(summary, indent=2) + '\n')
     print(json.dumps({**{k: v for k, v in summary.items() if k != 'cases'},
