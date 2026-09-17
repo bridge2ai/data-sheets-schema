@@ -236,8 +236,13 @@ def classify_denials(denials, *, instruction_text, python, repository, output_di
         entry = {'tool': tool, 'tool_use_id': item.get('tool_use_id')}
         if tool == 'Bash':
             command = tool_input.get('command')
-            if not isinstance(command, str) or not command.strip():
+            if not isinstance(command, str):
                 entry['classification'], entry['basis'] = 'unclassifiable', 'a Bash denial without a command'
+            elif not command.strip():
+                # A blank command is well formed and harmless, and no
+                # instruction prescribes it (#2036).
+                entry['command'] = command
+                entry['classification'], entry['basis'] = 'not_prescribed', 'an empty command'
             else:
                 entry['command'] = command[:1000]
                 entry['classification'], entry['basis'] = _classify_command(command, python, programs)
@@ -260,18 +265,58 @@ def classify_denials(denials, *, instruction_text, python, repository, output_di
 
 def registered_reads(job):
     """The files the job's instruction has the run read: the bundle, the
-    chunk map, the source manifest, the instruction itself and the
-    toolchain resources (schemas, playbooks, agent definitions)."""
+    chunk map, the source manifest, the instruction itself, the two schemas
+    and the playbooks the instruction reaches (the guard, the playbook, the
+    uniform rules and the agent file; provenance.AGENT_PLAYBOOKS, which a
+    test holds equal to that closure). The toolchain's resource map also
+    inventories every other agent definition, evaluation rubrics included;
+    those are hashed, not read, so they are not registered reads (#2039)."""
+    from data_sheets_schema.agentic_runtime import SCHEMAS
+    from data_sheets_schema.provenance import AGENT_PLAYBOOKS
+    readable = set(SCHEMAS) | {str(p) for p in AGENT_PLAYBOOKS}
     identity = job.get('input_identity') or {}
     paths = [job.get('bundle'), job.get('chunks'), job.get('manifest'), job.get('instruction')]
     paths += [(identity.get(k) or {}).get('path') for k in ('bundle', 'source_manifest', 'chunks')]
     spec = (identity.get('instruction') or {}).get('spec') or {}
-    paths += list(((spec.get('agentic_toolchain') or {}).get('resources') or {}).values())
+    resources = (spec.get('agentic_toolchain') or {}).get('resources') or {}
+    paths += [value for key, value in resources.items() if key in readable]
     return [x for x in paths if isinstance(x, str) and x]
 
 
-STOPPED_DENIALS_NOTE = ('not classified: the attempt stopped before the controller classified the '
-                        "runtime result line's permission denials; the transcript's tool history is the source")
+STOPPED_DENIALS_NOTE = ('not classified: the transcript holds no single readable runtime result line; '
+                        "the transcript's tool history is the source")
+
+
+def stopped_denials(path, classify):
+    """The denial classification for a stopped attempt (#2032, #2037).
+
+    The completed path classifies the result line it has already read. A
+    stopped attempt may still have one: a ledger or proxy refusal ends in the
+    runtime's error result, and an init mismatch stops before classification.
+    So the stop path reads the transcript itself and classifies the one
+    result line it holds; with none (a deadline stop) or more than one, it
+    says it classified nothing. Never raises: a diagnostic must not displace
+    the stop it describes."""
+    try:
+        results = []
+        with Path(path).open('rb') as fh:
+            for raw in fh:
+                try:
+                    event = json.loads(raw.decode('utf-8'))
+                except (UnicodeDecodeError, ValueError):
+                    continue
+                if isinstance(event, dict) and event.get('type') == 'result':
+                    results.append(event)
+        if len(results) != 1:
+            note = STOPPED_DENIALS_NOTE if not results else (
+                f'not classified: the transcript holds {len(results)} runtime result lines; '
+                "the transcript's tool history is the source")
+            return {'permission_denials_note': note}
+        classified = classify(results[0].get('permission_denials'))
+        return {'permission_denials': classified, 'disqualifying_denials': denial_problems(classified)}
+    except Exception as error:
+        return {'permission_denials_note': f'not classified: {type(error).__name__} while reading the transcript; '
+                                           "the transcript's tool history is the source"}
 
 
 def denial_problems(classified):
@@ -366,9 +411,16 @@ def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
     elif isinstance(entry_reason, str) and entry_reason:
         out['reason'] = entry_reason; out['reason_source'] = 'ledger'; out['ledger_stop'] = entry
     elif isinstance(exc, BudgetStop):
-        out['reason'] = str(exc); out['reason_source'] = 'controller'
+        # The controller re-raises the proxy's recorded failure as a
+        # BudgetStop; its source is the proxy (#2038).
+        out['reason'] = str(exc)
+        out['reason_source'] = 'proxy' if isinstance(proxy_failure, str) and proxy_failure and str(exc) == proxy_failure else 'controller'
     elif isinstance(proxy_failure, str) and proxy_failure:
         out['reason'] = proxy_failure; out['reason_source'] = 'proxy'
+    else:
+        # An exception nothing else explains still has a named stop (#2038).
+        # Only its type is recorded; the traceback is kept beside the receipt.
+        out['reason'] = f'unexpected {type(exc).__name__}'; out['reason_source'] = 'controller'
     if proxy_failure is not None:
         out['proxy_failure'] = proxy_failure
     return out
@@ -548,6 +600,10 @@ def main():
              'provider':base['provider_base_url'],'model':base['model']['model'],
              'instruction_sha256':sha(job['instruction']),'native_system_sha256':sha(overlay['system_prompt'])}
     write_new(attempt/'started.json',receipt)
+    def classify(denials):
+        return classify_denials(denials, instruction_text=Path(job['instruction']).read_text(encoding='utf-8'),
+            python=base.get('python'), repository=base['repository'],
+            output_directories=job['output_directories'], readable_inputs=registered_reads(job))
     try:
         with proxy.running() as url:
             env['ANTHROPIC_BASE_URL']=url
@@ -569,10 +625,7 @@ def main():
         # Every denial is listed and classified; only a denied prescribed
         # command (or an unclassifiable record) disqualifies, and it does so
         # after every other check has run (#2026).
-        receipt['permission_denials']=classify_denials(terminal.get('permission_denials'),
-            instruction_text=Path(job['instruction']).read_text(encoding='utf-8'), python=base.get('python'),
-            repository=base['repository'], output_directories=job['output_directories'],
-            readable_inputs=registered_reads(job))
+        receipt['permission_denials']=classify(terminal.get('permission_denials'))
         if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
             raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
@@ -595,10 +648,18 @@ def main():
         if not receipt_check['passed']:
             problems=list(problems)+['coverage receipt acceptance failed']
         if spec.render_version >= 9:
-            evidence = native_evidence_check(spec)
+            try:
+                evidence = native_evidence_check(spec)
+                evidence_problem = None if evidence['checked'] and not evidence['findings'] else 'explicit evidence assertions failed'
+            except Exception as error:
+                # Missing or malformed evidence inputs are the run's defect,
+                # checked like any other, not a controller stop (#2038); the
+                # prescribed evidence CLI reports them the same way.
+                evidence = {'checked': False, 'error_type': type(error).__name__}
+                evidence_problem = f'explicit evidence assertions could not be checked ({type(error).__name__})'
             receipt['evidence_assertions'] = evidence
-            if not evidence['checked'] or evidence['findings']:
-                problems = list(problems) + ['explicit evidence assertions failed']
+            if evidence_problem:
+                problems = list(problems) + [evidence_problem]
         observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
         problems=list(problems)+observation_problems(observed)+denial_problems(receipt['permission_denials'])
         receipt.update(validation_problems=problems,pair_consistency=pair,
@@ -606,14 +667,17 @@ def main():
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),
                        status='validation_failed' if problems or not pair or not pair.get('ran') or not pair.get('consistent') else 'completed_pending_independent_review')
         verify_all();verify_history(base)
-    except Exception as exc:
+    except BaseException as exc:
+        # BaseException: an interrupted controller records its stop like any
+        # other (#2018, #2038) and exits non-zero.
         receipt.update(status='stopped',error_type=type(exc).__name__)
         receipt.update(stop_explanation(exc, ledger.path, billing_attempt, getattr(proxy, 'failure', None)))
         receipt.update(transcript_terminal_state(attempt/'transcript.jsonl'))
-        if 'permission_denials' not in receipt:
-            # The controller classifies denials from the runtime's result
-            # line, which a stopped attempt usually lacks (#2032).
-            receipt['permission_denials_note'] = STOPPED_DENIALS_NOTE
+        if 'permission_denials' in receipt:
+            # Classified before the stop: name what would disqualify (#2037).
+            receipt['disqualifying_denials'] = denial_problems(receipt['permission_denials'])
+        else:
+            receipt.update(stopped_denials(attempt/'transcript.jsonl', classify))
         # The traceback names controller code paths only; provider exception
         # strings are never copied into the receipt.
         retain_traceback(attempt, exc)

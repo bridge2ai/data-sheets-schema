@@ -155,7 +155,9 @@ def test_stop_explanation_prefers_the_ledger_then_the_controller_then_the_proxy(
     """#1914: the v10q receipt said PermissionError and nothing else while the
     ledger held the cause. The ledger's stop entry for this attempt wins;
     a BudgetStop the controller raised is next; the proxy's recorded failure
-    is last; a bare exception with none of them explains nothing."""
+    is last. A BudgetStop carrying the proxy's recorded failure is the
+    proxy's, and a bare exception with none of them is named by its type
+    (#2038)."""
     from run_native_canary import stop_explanation
     ledger = tmp_path / 'billing.json'
     ledger.write_text(json.dumps({'requests': [], 'stopped_attempts': {'reg:job': {'reason': 'request reserve $2.30 exceeds remaining budget', 'paid_request': False}}}))
@@ -167,7 +169,12 @@ def test_stop_explanation_prefers_the_ledger_then_the_controller_then_the_proxy(
     out = stop_explanation(RuntimeError('boom'), ledger, 'reg:other', 'OSError')
     assert out == {'reason': 'OSError', 'reason_source': 'proxy', 'proxy_failure': 'OSError'}
     out = stop_explanation(RuntimeError('boom'), tmp_path / 'missing.json', 'reg:other', None)
-    assert out == {}
+    assert out == {'reason': 'unexpected RuntimeError', 'reason_source': 'controller'}
+    out = stop_explanation(BudgetStop('unregistered upstream response format'), tmp_path / 'missing.json', 'reg:other',
+                           'unregistered upstream response format')
+    assert out['reason_source'] == 'proxy' and out['reason'] == 'unregistered upstream response format'
+    out = stop_explanation(BudgetStop('native attempt deadline elapsed'), tmp_path / 'missing.json', 'reg:other', 'OSError')
+    assert out['reason_source'] == 'controller' and out['proxy_failure'] == 'OSError'
 
 
 def prescribed_playbook_commands(text):
@@ -528,22 +535,92 @@ def test_malformed_denial_records_are_unclassifiable(tmp_path):
     assert surrogate[0]['classification'] == 'unclassifiable', surrogate
 
 
-def test_reads_of_the_registered_instruction_and_toolchain_are_prescribed():
+def test_reads_of_the_registered_instruction_schemas_and_playbooks_are_prescribed():
+    """#2033/#2039: the manifest, the instruction, the two schemas and the
+    playbook closure are registered reads; the other agent definitions the
+    toolchain inventories (evaluation rubrics among them) are not."""
     from run_native_canary import classify_denials, registered_reads
+    resources = {
+        'src/data_sheets_schema/schema/data_sheets_schema_all.yaml': '/repo/src/schema_all.yaml',
+        'src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml': '/repo/src/schema_core_all.yaml',
+        '.claude/commands/d4d-full-core.md': '/repo/.claude/commands/d4d-full-core.md',
+        '.claude/commands/d4d-uniform-rules.md': '/repo/.claude/commands/d4d-uniform-rules.md',
+        '.claude/commands/d4d-agent.md': '/repo/.claude/commands/d4d-agent.md',
+        '.claude/agents/d4d-provenance-guard.md': '/repo/.claude/agents/d4d-provenance-guard.md',
+        '.claude/agents/d4d-rubric10.md': '/repo/.claude/agents/d4d-rubric10.md',
+        '.claude/commands/d4d-webfetch.md': '/repo/.claude/commands/d4d-webfetch.md',
+    }
     job = {'bundle': 'data/b.txt', 'chunks': 'data/c.yaml', 'manifest': '/repo/m.yaml',
            'instruction': '/repo/prompts/job.md',
            'input_identity': {'source_manifest': {'path': '/repo/m2.yaml'},
-                              'instruction': {'spec': {'agentic_toolchain': {'resources': {
-                                  'schema': '/repo/src/schema_all.yaml', 'playbook': '/repo/.claude/commands/p.md'}}}}}}
+                              'instruction': {'spec': {'agentic_toolchain': {'resources': resources}}}}}
     reads = registered_reads(job)
     def read(path):
         return {'tool_name': 'Read', 'tool_use_id': 'r', 'tool_input': {'file_path': path}}
-    paths = ['/repo/m.yaml', '/repo/m2.yaml', '/repo/prompts/job.md', '/repo/src/schema_all.yaml',
-             '/repo/.claude/commands/p.md', 'data/c.yaml', '/repo/data/prior_record.yaml']
-    classified = classify_denials([read(p) for p in paths], instruction_text='', python=PY, repository='/repo',
-                                  output_directories=[], readable_inputs=reads)
-    assert [d['classification'] for d in classified] == ['prescribed'] * 6 + ['not_prescribed']
+    registered = ['/repo/m.yaml', '/repo/m2.yaml', '/repo/prompts/job.md', 'data/c.yaml',
+                  *[v for k, v in resources.items() if 'rubric' not in k and 'webfetch' not in k]]
+    other = ['/repo/.claude/agents/d4d-rubric10.md', '/repo/.claude/commands/d4d-webfetch.md',
+             '/repo/data/prior_record.yaml']
+    classified = classify_denials([read(p) for p in registered + other], instruction_text='', python=PY,
+                                  repository='/repo', output_directories=[], readable_inputs=reads)
+    assert [d['classification'] for d in classified] == ['prescribed'] * len(registered) + ['not_prescribed'] * len(other)
     assert registered_reads({}) == []
+
+
+def test_a_blank_command_is_listed_and_not_disqualifying():
+    """#2036: the runtime accepts an empty or whitespace command and would
+    deny it; it is harmless and prescribed by nothing."""
+    from run_native_canary import denial_problems
+    classified = _classify(*[_bash(c) for c in ('', ' ', '\n', '\t')])
+    assert [(d['classification'], d['basis']) for d in classified] == [('not_prescribed', 'an empty command')] * 4
+    assert denial_problems(classified) == []
+
+
+def test_each_bash_reading_rule_decides_a_classification():
+    """#2040: each rule of the scan changes a classification when removed."""
+    from run_native_canary import FORBIDDEN_SHELL
+    cases = [
+        # an unquoted parenthesis is an operator on its own
+        (f'{ROSTER} runs list (x)', 'not_prescribed', FORBIDDEN_SHELL),
+        (f'{ROSTER} runs list x)', 'not_prescribed', FORBIDDEN_SHELL),
+        # a # inside a word is part of the word, never a comment
+        (f'{ROSTER} agents playbook#x', 'not_prescribed', 'a CLI command outside the prescribed roster'),
+        (f"{PY} -c '{VALIDATE}'#x -s s -C Dataset out/full.yaml", 'not_prescribed',
+         'an ad-hoc -c script the system prompt forbids'),
+        # an escaped character ends the start of a word, so a following # is not a comment
+        (f'{ROSTER} agents playbook \\x#; rm -rf data', 'not_prescribed', FORBIDDEN_SHELL),
+        # a backslash-newline joins lines anywhere, before the roster words included
+        (f'{ROSTER} \\\nreceipts check --label L', 'prescribed', "the roster command 'receipts check'"),
+        (f'{PY} \\\n-m data_sheets_schema.cli runs list', 'prescribed', "the roster command 'runs list'"),
+        (f'{ROSTER} run\\\ns list', 'prescribed', "the roster command 'runs list'"),
+    ]
+    classified = _classify(*[_bash(c) for c, _, _ in cases])
+    assert [(d['classification'], d['basis']) for d in classified] == [(c, b) for _, c, b in cases]
+
+
+def test_a_stopped_attempt_classifies_its_single_result_line(tmp_path):
+    """#2037: a stopped attempt that holds one result line is classified from
+    it; with none, or with two, the receipt says it classified nothing."""
+    from run_native_canary import stopped_denials, STOPPED_DENIALS_NOTE, classify_denials
+    def classify(denials):
+        return classify_denials(denials, instruction_text=_instruction(), python=PY, repository='/repo',
+                                output_directories=['out'], readable_inputs=[])
+    prescribed = _bash(f'{ROSTER} receipts check --label L')
+    forbidden = _bash(f'{ROSTER} --help')
+    path = tmp_path / 'transcript.jsonl'
+    init = json.dumps({'type': 'system', 'subtype': 'init'}) + '\n'
+    result = json.dumps({'type': 'result', 'is_error': True, 'permission_denials': [prescribed, forbidden]}) + '\n'
+    path.write_bytes(init.encode() + b'\xff\xfe not json\n' + result.encode())
+    out = stopped_denials(path, classify)
+    assert [d['classification'] for d in out['permission_denials']] == ['prescribed', 'not_prescribed']
+    assert len(out['disqualifying_denials']) == 1 and 'permission_denials_note' not in out
+    path.write_text(init)
+    assert stopped_denials(path, classify) == {'permission_denials_note': STOPPED_DENIALS_NOTE}
+    path.write_text(init + result + result)
+    assert '2 runtime result lines' in stopped_denials(path, classify)['permission_denials_note']
+    assert 'FileNotFoundError' in stopped_denials(tmp_path / 'missing.jsonl', classify)['permission_denials_note']
+    path.write_text(init + result)
+    assert 'ZeroDivisionError' in stopped_denials(path, lambda denials: 1 / 0)['permission_denials_note']
 
 
 def test_the_pre_close_record_waits_for_a_handler_holding_the_proxy_state(tmp_path):

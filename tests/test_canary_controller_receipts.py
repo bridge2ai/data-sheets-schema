@@ -147,21 +147,27 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
     assert before == {p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
 
 
+NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed_denial', 'late_stop_denial',
+               'init_mismatch_denial', 'evidence_unreadable', 'manifest_read_denial', 'interrupted')
+
+
 @pytest.mark.parametrize('arm', ['api','agentic'])
 @pytest.mark.parametrize('case, passed', [('valid',True), ('false_date',False), ('missing',False),
                                        ('redirected_provenance',False), ('usage_missing',False),
-                                       ('deadline_stop',False), ('forbidden_denial',True), ('prescribed_denial',False)])
+                                       ('deadline_stop',False), ('forbidden_denial',True), ('prescribed_denial',False),
+                                       ('late_stop_denial',False), ('init_mismatch_denial',False),
+                                       ('evidence_unreadable',False), ('manifest_read_denial',False),
+                                       ('interrupted',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
-    if case in ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed_denial') and arm == 'api':
+    if case in NATIVE_ONLY and arm == 'api':
         pytest.skip('a terminal result and the attempt deadline are the native runtime\'s')
     # main() configures process globals; keep the synthetic launch isolated.
     monkeypatch.setattr(runner.os, 'environ', dict(runner.os.environ))
     monkeypatch.setattr(api_runner, 'MAX_ATTEMPTS', api_runner.MAX_ATTEMPTS)
-    run = fixture_record(tmp_path, {'redirected_provenance': 'false_date', 'usage_missing': 'valid',
-                                    'deadline_stop': 'valid', 'forbidden_denial': 'valid',
-                                    'prescribed_denial': 'valid'}.get(case, case))
+    run = fixture_record(tmp_path, 'false_date' if case == 'redirected_provenance'
+                         else 'valid' if case in NATIVE_ONLY else case)
     registered_inputs = run.input_identity()
     pinned = {p:p.read_bytes() for p in (run.bundle,run.chunk_manifest)}
     lookups = redirect_to_historical_bytes(run, monkeypatch) if case == 'redirected_provenance' else []
@@ -172,6 +178,8 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     job = {'id':'example_'+arm, 'canary':True, 'execution_arm':arm, 'render_spec':{},
            'input_identity':registered_inputs, 'output_directories':[], 'outputs':{},
            'instruction':str(instruction), 'initial_request':str(initial), 'bundle':str(run.bundle)}
+    if case == 'manifest_read_denial':
+        job['manifest'] = str(tmp_path/'source_manifest.yaml')
     base = {'repository':str(tmp_path), 'claude_version':'offline', 'python':sys.executable,
             'provider_base_url':'https://api.cborg.lbl.gov', 'model':{'model':'offline-model'},
             'budget':{'additional_usd':200, 'per_attempt_usd':5,
@@ -226,11 +234,24 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             if case == 'forbidden_denial':
                 terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d1',
                     'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli --help'}}]
-            if case == 'prescribed_denial':
+            if case in ('prescribed_denial', 'late_stop_denial'):
                 terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d2',
                     'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli receipts check --label L'}}]
+            if case == 'late_stop_denial':
+                terminal['is_error'] = True     # stops after the classification (#2037)
+            if case == 'init_mismatch_denial':
+                terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d3',
+                    'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli --help'}}]
+            if case == 'manifest_read_denial':
+                terminal['permission_denials']=[{'tool_name':'Read','tool_use_id':'d4',
+                    'tool_input':{'file_path':job['manifest']}}]
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
                      'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
+            if case == 'init_mismatch_denial':
+                events[0]['model'] = 'another-model'   # stops before the classification (#2037)
+            if case == 'interrupted':
+                (kwargs['attempt']/'transcript.jsonl').write_text(json.dumps(events[0])+'\n')
+                raise KeyboardInterrupt
             if case == 'deadline_stop':
                 # A child killed at the deadline mid-write: no result line and
                 # undecodable trailing bytes (#2019).
@@ -248,6 +269,11 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         monkeypatch.setattr(api_runner, 'validate_outputs', lambda *args: [])
         monkeypatch.setattr(api_runner, 'pair_consistency', lambda *args: {'ran':True,'consistent':True})
         monkeypatch.setattr(runner, 'native_evidence_check', lambda *args: {'checked':True,'findings':[]})
+        if case == 'evidence_unreadable':
+            def unreadable(*args):
+                raise FileNotFoundError('evidence/audit.json')
+            monkeypatch.setattr(runner, 'native_evidence_check', unreadable)
+            monkeypatch.setattr(run, 'render_version', 12)   # the renderer that checks evidence (>= 9)
         argv=['run_native_canary','--overlay',str(overlay),'--review',str(review),'--job',job['id']]
     review.write_text(json.dumps(verdict));monkeypatch.setattr(sys,'argv',argv)
     before={p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}
@@ -268,6 +294,45 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         # Nothing was classified, and the receipt says so (#2032).
         assert 'permission_denials' not in result
         assert result['permission_denials_note'] == runner.STOPPED_DENIALS_NOTE
+        return
+    if case in ('late_stop_denial', 'init_mismatch_denial'):
+        # A stop with a result line still classifies it and names what would
+        # disqualify (#2037), whether the stop came after the classification
+        # or before it.
+        assert result['status'] == 'stopped' and result['transcript_terminal_result'] == 'present'
+        assert 'permission_denials_note' not in result and 'validation_problems' not in result
+        (denial,) = result['permission_denials']
+        if case == 'late_stop_denial':
+            assert result['reason'] == 'native attempt failed or stopped before completion'
+            assert denial['classification'] == 'prescribed' and len(result['disqualifying_denials']) == 1
+        else:
+            assert result['reason'] == 'native runtime initialization differs from registration'
+            assert denial['classification'] == 'not_prescribed' and result['disqualifying_denials'] == []
+        return
+    if case == 'interrupted':
+        # An interrupted controller names its stop, says it classified
+        # nothing and records the stop in the ledger (#2038).
+        assert result['status'] == 'stopped' and result['error_type'] == 'KeyboardInterrupt'
+        assert result['reason'] == 'unexpected KeyboardInterrupt' and result['reason_source'] == 'controller'
+        assert result['permission_denials_note'] == runner.STOPPED_DENIALS_NOTE
+        (stop,) = json.loads((tmp_path/'billing.json').read_bytes())['stopped_attempts'].values()
+        assert stop['reason'] == 'controller: unexpected KeyboardInterrupt' == result['ledger_stop_recorded']
+        return
+    if case == 'evidence_unreadable':
+        # Unusable evidence inputs fail validation after every other check;
+        # they do not stop the attempt (#2038).
+        assert result['status'] == 'validation_failed'
+        assert result['evidence_assertions'] == {'checked': False, 'error_type': 'FileNotFoundError'}
+        assert 'explicit evidence assertions could not be checked (FileNotFoundError)' in result['validation_problems']
+        assert result['native_observed'] and result['permission_denials'] == []
+        return
+    if case == 'manifest_read_denial':
+        # main() classifies with the registered reads, the manifest included (#2033).
+        assert result['status'] == 'validation_failed'
+        (denial,) = result['permission_denials']
+        assert denial['classification'] == 'prescribed'
+        assert [p for p in result['validation_problems'] if p.startswith('denied ')] == [
+            'denied prescribed call (Read): a registered input the instruction reads']
         return
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']

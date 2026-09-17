@@ -139,8 +139,9 @@ or override structure.
 - Phase 1 must not read any prior generated full or core D4D.
 - Phase 2 may read only the exact Phase 1 full D4D from the same version label.
 - Phase 2 must not read an older core, even as a template.
-- Phase 3 may read only the current source bundle, manifest, schemas, and the
-  same-run full/core pair.
+- Phase 3 may read only the current source bundle, manifest, schemas, the
+  same-run full/core pair, and that run's coverage receipt, whose entries a
+  Phase 3 back-port edits in place.
 - Phase 4 may read only the same Phase 3 inputs plus the Phase 3 audit findings
   for that exact pair.
 - A fact found only in older generated YAML must be omitted.
