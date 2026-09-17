@@ -223,7 +223,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         monkeypatch.setattr(api_runner, 'validate_outputs', lambda *args: [])
         monkeypatch.setattr(api_runner, 'pair_consistency', lambda *args: {'ran':True,'consistent':True})
         monkeypatch.setattr(runner, 'native_evidence_check', lambda *args: {'checked':True,'findings':[]})
-        monkeypatch.setattr(agentic_observed, 'observe', lambda *args: {})
+        monkeypatch.setattr(agentic_observed, 'observe', lambda *args: {'usage_from_terminal_result': 1})   # the runtime's result carried usage (#2002)
         argv=['run_native_canary','--overlay',str(overlay),'--review',str(review),'--job',job['id']]
     review.write_text(json.dumps(verdict));monkeypatch.setattr(sys,'argv',argv)
     before={p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}
