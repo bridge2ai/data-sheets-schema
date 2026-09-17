@@ -1,0 +1,70 @@
+{
+  "checked_at": "2026-09-17T19:51:58.980083+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "08e9c64396267f21ecf17e8ca06c29462dc1c4b313cc9967f47c82c46d4eef83",
+  "native_overlay_sha256": "2b5b76519731cd4a656e41b206931188da2d98002d7092db101022ea1a93b439",
+  "registered_pins_verified": 475,
+  "native_pins_verified": 11,
+  "historical_files_verified": 3241,
+  "prior_attempt_files_verified": 1153,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [],
+  "new_pinned_implementation_files": [],
+  "evaluation_instrument_changes_from_v10t": false,
+  "native_job_policies_rebuilt": {
+    "CHORUS_agentic_rep1": {
+      "programs": 5,
+      "command_examples": 6,
+      "allowed_rules": 71,
+      "effective_system_sha256": "efb9e23de188fa15ab56f93e599773c7f2e95344c01b5d7a3c22f5d0081a20fc",
+      "effective_system_bytes": 6960
+    },
+    "KIDS_FIRST_agentic_rep1": {
+      "programs": 5,
+      "command_examples": 6,
+      "allowed_rules": 71,
+      "effective_system_sha256": "0b83bd4bd2ef7bfb08a68b979d57efb34310deb71e539b0fca1b309b283cac37",
+      "effective_system_bytes": 7970
+    }
+  },
+  "native_controls_changed": [
+    2051,
+    2052
+  ],
+  "agentic_attempt_deadline_seconds": 10800,
+  "native_denial_policy": "denied prescribed command disqualifies a run, while denials of forbidden commands are listed and do not disqualify it on their own.",
+  "agentic_attempt_limit": "additional allocation (no per-attempt cap, user direction 2026-09-16)",
+  "schema_release": "3.0.0, unchanged from v10t; both merged schema hashes, profile digests and fitness specifications preserved",
+  "canary_order": [
+    "CHORUS_agentic_rep1",
+    "KIDS_FIRST_agentic_rep1",
+    "CHORUS_api_rep1",
+    "KIDS_FIRST_api_rep1"
+  ],
+  "generation_renderers": {
+    "api": 12,
+    "agentic": 12
+  },
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "effort_policy_unchanged": true,
+  "api_output_allowance_unchanged": {
+    "audit": 96000,
+    "report": 96000
+  },
+  "native_runtime_output_limit": 64000,
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "budget_extension_approval": "not_applicable_agentic_attempts_uncapped_by_user_direction_2026-09-16",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "35da995b60e500f522247bf4659e1f490271f3b0950098a3c33cc465459537ac",
+    "CHORUS_source_review_plan.json": "7623a87998a99c0d9876ac601a3ffee7b7048c1468fa3f1b7657fd89654e593e"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks do not establish source quality or independent verification of unpublished originals/accounting. Source review, native tool turns, compaction and repeatability remain unmeasured; v10t stopped without a full D4D or scientific acceptance; v10u has not launched. An explicit launch instruction from the maintainer, exact-commit CI, an independently reviewed registration and fresh checks are required before a launch receipt; the sequence cap of the ledger, not any amendment, bounds agentic spend.",
+  "accounting_resolved": true,
+  "proposed_caps_checked_locally": true,
+  "private_accounting_independently_reviewed": false
+}
