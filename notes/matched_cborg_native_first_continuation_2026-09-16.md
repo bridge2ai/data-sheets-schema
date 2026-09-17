@@ -38,7 +38,8 @@ sizing, the run's protocol deviations), which precede any fresh registration.
 ## Sequence
 
 *Historical (v10q registration). Step 2 below described a budget amendment
-that the v10r section at the end supersedes; nothing in it is a live gate.*
+that the "v10r sequence" section below supersedes, as the v10s section
+supersedes that one; nothing in it is a live gate.*
 
 1. Independent review of PR #1880 and of this registration's PR, required
    CI on the exact head, then merge (the maintainer's call). Fresh pin,
@@ -55,6 +56,8 @@ that the v10r section at the end supersedes; nothing in it is a live gate.*
    cohort for both arms, as the retained proposal describes.
 
 ## v10r sequence (2026-09-16, supersedes step 2 above)
+
+*Historical (v10r registration). The v10s section at the end supersedes it.*
 
 The v10q CHORUS native canary stopped at its whole-attempt cap after the
 receipt and the full record (#1914–#1918; `notes/matched_cborg_2026-09-16_v10q/CHORUS_agentic_stopped.md`).
@@ -77,5 +80,37 @@ ceilings, not funding.
    then the two API canaries, each accepted before the next. A failure
    stops expansion; no stopped or rejected identity is resumed or
    overwritten.
+4. Evaluation canaries on exact accepted inputs, then a costed production
+   cohort for both arms, as the retained proposal describes.
+
+## v10s sequence (2026-09-17, supersedes the v10r section)
+
+The v10r CHORUS native canary read all eight chunks, wrote its receipt, full
+record and derived core, passed the receipts check before core derivation,
+and was stopped by the controller at the registration's hardcoded
+1,800-second attempt deadline in Phase 3
+(`notes/matched_cborg_2026-09-16_v10r/CHORUS_agentic_stopped.md`; #2010,
+#2012–#2014, #2016). The maintainer approved a fresh native registration,
+confirmed the complete charge of the request that attempt had in flight, and
+ruled that a denied prescribed command disqualifies a run while denials of
+forbidden commands are listed and do not disqualify it on their own. The
+v10s registration (`notes/matched_cborg_2026-09-17_v10s/`) keeps the
+native-first order and the no-cap direction for the agentic arm (the
+sequence ledger is its only cost bound), registers a 10,800-second deadline
+per native attempt, and keeps the API caps unchanged.
+
+1. Independent review of the native-controls PR (#2017) and of the v10s
+   registration PR, required CI on the exact head, then merge (the
+   maintainer's call; given in the conversation on 2026-09-17 for these two
+   pull requests only, as the registration's decision record quotes, and
+   not a standing approval for any other).
+2. Fresh pin, runtime, model-route and accounting checks immediately
+   before launch, then a hash-bound launch receipt for `CHORUS_agentic_rep1`
+   — only on the maintainer's explicit launch instruction.
+3. Review the unchanged originals and the actual tool history, the four
+   acceptance checks of the v10s README included, before any later canary;
+   then Kids First native, then the two API canaries, each accepted before
+   the next. A failure stops expansion; no stopped or rejected identity is
+   resumed or overwritten.
 4. Evaluation canaries on exact accepted inputs, then a costed production
    cohort for both arms, as the retained proposal describes.
