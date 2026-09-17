@@ -342,10 +342,13 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
      short common word does not, and fails the check);
    - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
      already receipted from those chunks;
-   - `nothing_relevant` with a `reason`;
+   - `nothing_relevant` with a `reason` (quote every free-text value — a
+     reason containing `: ` is otherwise read as a mapping and the whole
+     receipt fails to parse);
    - `duplicate_of: <chunk id>` — the same content as another chunk.
    Write the entry with the file-writing tool (`Write`, or an edit of the
-   receipt file), never with a shell redirect or `cat >>`: the native
+   receipt file; read a file before rewriting it whole, as the tool
+   requires), never with a shell redirect or `cat >>`: the native
    allowlist denies the shell form, and a denied append leaves the chunk
    unreceipted. **Every manifest chunk gets an entry, including the last
    ones**: a chunk you read but never receipted is a chunk the validator

@@ -32,6 +32,27 @@ def verified_executable(overlay):
     return str(path)
 
 
+def transcript_terminal_state(path):
+    """Whether the runtime's stream-json transcript reached its terminal
+    result line (#2014). A child stopped at the deadline never writes one, so
+    the transcript's token figures are per-message snapshots and the ledger is
+    the attempt's accounting; the receipt says so rather than leaving it to be
+    inferred."""
+    try:
+        with Path(path).open(encoding='utf-8') as fh:
+            for line in fh:
+                try:
+                    if json.loads(line).get('type') == 'result':
+                        return {'transcript_terminal_result': 'present'}
+                except (json.JSONDecodeError, AttributeError):
+                    continue
+    except OSError as error:
+        return {'transcript_terminal_result': 'unreadable', 'transcript_read_note': type(error).__name__}
+    return {'transcript_terminal_result': 'absent',
+            'transcript_accounting_note': 'no runtime result line: transcript token figures are per-message '
+                                          'snapshots; the ledger is this attempt\'s accounting'}
+
+
 def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
     """Why a native attempt stopped, from the strongest source available.
 
@@ -267,6 +288,7 @@ def main():
     except Exception as exc:
         receipt.update(status='stopped',error_type=type(exc).__name__)
         receipt.update(stop_explanation(exc, ledger.path, billing_attempt, getattr(proxy, 'failure', None)))
+        receipt.update(transcript_terminal_state(attempt/'transcript.jsonl'))
         # The traceback names controller code paths only; provider exception
         # strings are never copied into the receipt.
         retain_traceback(attempt, exc)

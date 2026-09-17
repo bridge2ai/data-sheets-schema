@@ -62,6 +62,9 @@ def main():
     parser.add_argument("--per-job-attempt-caps", type=Path,
                         help="JSON mapping of explicitly approved job IDs to whole-attempt USD caps; preparation grants no launch approval")
     parser.add_argument("--render-only", action="store_true")
+    parser.add_argument("--agentic-deadline-seconds", type=int, default=1800,
+                        help="wall-clock limit of one native attempt; 1800 is what v10q and v10r "
+                             "registered, and it stopped the v10r CHORUS attempt in Phase 3 (#2010)")
     parser.add_argument("--canary-order", default=DEFAULT_CANARY_ORDER,
                         help="Comma-separated canary job ids in launch order; each later canary requires "
                              "independent acceptance of every earlier one. Existing registrations keep "
@@ -209,7 +212,7 @@ def main():
         "generation": {"template_condition": "generic_v9", "cohort_version": args.cohort,
                        "api_max_attempts": 1, "sdk_max_retries": 0,
                        "api_phase_deadline_seconds": api_runner.PHASE_WALL_CLOCK_SECONDS,
-                       "agentic_attempt_deadline_seconds": 1800,
+                       "agentic_attempt_deadline_seconds": args.agentic_deadline_seconds,
                        "agentic_cli_budget_flag_default_usd": 5,
                        "agentic_cli_budget_flag_basis": "The CLI and transport both use the registration-qualified attempt's effective ledger cap, including any approved per-job exception.",
                        "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",

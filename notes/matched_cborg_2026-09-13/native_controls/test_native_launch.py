@@ -234,3 +234,25 @@ def test_a_malformed_observation_refuses_completion():
     assert observation_problems({'output_tokens': 3}) == ['transcript carries no terminal result with complete usage']
     assert observation_problems({'output_tokens': 3, 'usage_from_terminal_result': 1}) == []
     assert observation_problems(None) == ['transcript observation unavailable']
+
+
+def test_a_stopped_attempt_records_whether_the_transcript_reached_its_result(tmp_path):
+    """#2014: a deadline stop leaves no runtime result line; the receipt says so."""
+    from run_native_canary import transcript_terminal_state
+    t = tmp_path / 'transcript.jsonl'
+    t.write_text('{"type":"system","subtype":"init"}\n{"type":"assistant","message":{"id":"m1"}}\n')
+    state = transcript_terminal_state(t)
+    assert state['transcript_terminal_result'] == 'absent' and 'ledger' in state['transcript_accounting_note']
+    t.write_text(t.read_text() + '{"type":"result","usage":{"input_tokens":1,"output_tokens":1}}\n')
+    assert transcript_terminal_state(t) == {'transcript_terminal_result': 'present'}
+    assert transcript_terminal_state(tmp_path / 'missing.jsonl')['transcript_terminal_result'] == 'unreadable'
+
+
+def test_the_attempt_deadline_is_a_registration_parameter():
+    """#2010: the deadline is chosen per registration, not hardcoded."""
+    import ast
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / 'prepare_registration.py').read_text()
+    assert '"agentic_attempt_deadline_seconds": args.agentic_deadline_seconds' in src
+    assert '--agentic-deadline-seconds' in src
+    ast.parse(src)
