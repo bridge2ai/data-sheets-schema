@@ -19,7 +19,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from budgeted_cborg import Ledger
 from native_proxy import NativeProxy
-from run_native_canary import execute_child, verified_executable, sha
+from run_native_canary import execute_child, verified_executable, sha, command_history
 from native_command_policy import build_command_policy, command_guidance, permission_arguments
 from data_sheets_schema import api_runner, chunking
 
@@ -40,6 +40,7 @@ def fixture(work):
     instruction.write_text(spec.instruction)
     job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
         'manifest': str(manifest), 'bundle': str(bundle), 'render_spec': spec.render_spec(),
+        'output_directories': [str(spec.full_path.parent), str(spec.core_path.parent)],
         'outputs': {'full': str(spec.full_path), 'core': str(spec.core_path), 'report': str(spec.report_path)}}
     for path in (spec.full_path, spec.core_path):
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -85,6 +86,18 @@ def cases_for(job, policy):
          'command': shlex.join(['grep', '-n', 'Synthetic', job['bundle']]) + ' | head -1'},
         {'id': 'builtin_readonly_count', 'allow': True,
          'command': shlex.join(['wc', '-l', job['bundle']])},
+        {'id': 'readonly_quoted_manifest', 'allow': True,
+         'command': shlex.join(['grep', '-n', 'EXTERNAL', job['manifest']])},
+        {'id': 'readonly_sed_window', 'allow': True,
+         'command': shlex.join(['sed', '-n', '1,2p', job['bundle']])},
+        {'id': 'readonly_head_tail', 'allow': True,
+         'command': shlex.join(['head', '-n', '2', job['bundle']]) + ' | tail -n 1'},
+        {'id': 'readonly_cat', 'allow': True,
+         'command': shlex.join(['cat', job['bundle']])},
+        {'id': 'readonly_regex', 'allow': True,
+         'command': shlex.join(['grep', '-n', r'^Synthetic.*\.$', job['bundle']])},
+        {'id': 'readonly_no_match', 'allow': True,
+         'command': shlex.join(['grep', '-n', 'NOT_PRESENT_IN_FIXTURE', job['bundle']])},
     ])
     bad = {
         'outside_roster': [*cli, '--manifest', job['manifest'], 'runs', 'select'],
@@ -189,7 +202,9 @@ def main():
                 'tool_result_error': results.get(case['id'], {}).get('is_error'),
                 'passed': case['id'] in results and ((case['id'] not in denied) == case['allow'])
                           and (not case['allow'] or results[case['id']].get('is_error') is False)} for case in cases]
-    summary = {'exit_code': code, 'passed': code == 0 and all(c['passed'] for c in checked),
+    conformance = command_history(events, policy, terminals[0].get('permission_denials', []))
+    summary = {'exit_code': code, 'passed': code == 0 and all(c['passed'] for c in checked)
+               and not conformance['problems'], 'command_history': conformance,
         'cases': checked, 'scripted_requests': len(calls), 'real_provider_requests': 0,
         'proxy_failure': proxy.failure, 'unfinished_handlers': proxy.unfinished_handlers,
         'runtime': pin, 'project_settings_contamination_probe': args.project_settings_mode == 'broad',

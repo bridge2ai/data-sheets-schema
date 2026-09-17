@@ -21,6 +21,7 @@ from prepare_registration import spec_for
 from run_api_canary import verify, verify_history, sha, check_canary_receipts
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 from native_command_policy import command_guidance, permission_arguments, program_key, validated_command_policy
+from native_readonly import lookup_command, registered_input_paths
 
 
 def now():
@@ -165,6 +166,8 @@ def prescribed_programs(instruction_text, python):
 
 
 def _classify_command(command, python, programs, command_policy=None):
+    if lookup_command(command, (command_policy or {}).get('readonly_lookups'), _simple_command):
+        return 'prescribed', 'a registered read-only lookup of this job\'s inputs or outputs'
     tokens, reason = _simple_command(command)
     if tokens is None:
         return 'not_prescribed', reason
@@ -231,7 +234,8 @@ def classify_denials(denials, *, instruction_text, python, repository, output_di
     should have allowed it: a roster CLI command, a registered module entry
     point, one of the registered instruction/playbook's `-c` programs, or a file operation
     inside the registered outputs (or a Read of a registered input), with no
-    shell operator and no --help. A denial record the runtime wrote in an
+    shell operator and no --help, or a bounded read-only lookup including its
+    permitted pipes. A denial record the runtime wrote in an
     unexpected shape (no tool name, a Bash record without a command, a file
     record without a path, a path that cannot be resolved) is unclassifiable
     and disqualifies like a prescribed one: nothing shows it was harmless."""
@@ -287,16 +291,60 @@ def registered_reads(job):
     test holds equal to that closure). The toolchain's resource map also
     inventories every other agent definition, evaluation rubrics included;
     those are hashed, not read, so they are not registered reads (#2039)."""
-    from data_sheets_schema.agentic_runtime import SCHEMAS
-    from data_sheets_schema.provenance import AGENT_PLAYBOOKS
-    readable = set(SCHEMAS) | {str(p) for p in AGENT_PLAYBOOKS}
-    identity = job.get('input_identity') or {}
-    paths = [job.get('bundle'), job.get('chunks'), job.get('manifest'), job.get('instruction')]
-    paths += [(identity.get(k) or {}).get('path') for k in ('bundle', 'source_manifest', 'chunks')]
-    spec = (identity.get('instruction') or {}).get('spec') or {}
-    resources = (spec.get('agentic_toolchain') or {}).get('resources') or {}
-    paths += [value for key, value in resources.items() if key in readable]
-    return [x for x in paths if isinstance(x, str) and x]
+    return registered_input_paths(job)
+
+
+def command_history(events, command_policy, denials):
+    """Check every observed Bash call, including nonzero command exits.
+
+    A denied call did not execute and retains the maintainer's separate denial
+    policy. A tool error by itself does not prove denial or lack of side effects.
+    This audit checks command conformance, not whether required steps happened.
+    """
+    denied = {d.get('tool_use_id') for d in denials if isinstance(d, dict)}
+    calls = []
+    results = {}
+    result_errors = {}
+    problems = []
+    for line, event in enumerate(events, 1):
+        message = event.get('message')
+        if not isinstance(message, dict) or not isinstance(message.get('content'), list):
+            continue
+        for block in message['content']:
+            if not isinstance(block, dict):
+                continue
+            if block.get('type') == 'tool_use' and block.get('name') == 'Bash':
+                calls.append((line, block))
+            elif block.get('type') == 'tool_result':
+                results.setdefault(block.get('tool_use_id'), []).append(line)
+                result_errors.setdefault(block.get('tool_use_id'), []).append(block.get('is_error'))
+    checked = []
+    seen = set()
+    for line, call in calls:
+        identity = call.get('id')
+        if not isinstance(identity, str) or not identity or identity in seen:
+            problems.append(f'Bash call at transcript line {line} has missing or duplicate identity')
+            continue
+        seen.add(identity)
+        entry = {'tool_use_id': identity, 'call_line': line, 'result_lines': results.get(identity, [])}
+        if identity in denied:
+            entry['classification'] = 'denied_not_executed'
+            if result_errors.get(identity) != [True]:
+                problems.append(f'Bash denial at transcript line {line} lacks one matching error result')
+        else:
+            payload = call.get('input')
+            command = payload.get('command') if isinstance(payload, dict) else None
+            if not isinstance(command, str) or not command.strip():
+                entry.update(classification='unclassifiable', basis='missing or empty Bash command')
+            else:
+                classification, basis = _classify_command(command, command_policy['python'], set(), command_policy)
+                entry.update(classification=classification, basis=basis, command=command[:1000])
+            if entry['classification'] != 'prescribed':
+                problems.append(f'nonconforming executed Bash call at transcript line {line}: {entry["basis"]}')
+        if len(entry['result_lines']) != 1 or entry['result_lines'][0] <= line:
+            problems.append(f'Bash call at transcript line {line} lacks one subsequent tool result')
+        checked.append(entry)
+    return {'checked': True, 'calls': checked, 'problems': problems}
 
 
 STOPPED_DENIALS_NOTE = ('not classified: the transcript holds no single readable runtime result line; '
@@ -660,6 +708,7 @@ def main():
         # command (or an unclassifiable record) disqualifies, and it does so
         # after every other check has run (#2026).
         receipt['permission_denials']=classify(terminal.get('permission_denials'))
+        receipt['command_history']=command_history(events, command_policy, receipt['permission_denials'])
         if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
             raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
@@ -695,7 +744,8 @@ def main():
             if evidence_problem:
                 problems = list(problems) + [evidence_problem]
         observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
-        problems=list(problems)+observation_problems(observed)+denial_problems(receipt['permission_denials'])
+        problems=(list(problems)+observation_problems(observed)+denial_problems(receipt['permission_denials'])
+                  +receipt['command_history']['problems'])
         receipt.update(validation_problems=problems,pair_consistency=pair,
                        native_observed=observed,
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),

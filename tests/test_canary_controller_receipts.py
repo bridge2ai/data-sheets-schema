@@ -4,6 +4,7 @@ import importlib
 import hashlib
 import json
 from pathlib import Path
+import shlex
 import sys
 import threading
 from types import SimpleNamespace
@@ -150,7 +151,8 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
 
 NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed_denial', 'late_stop_denial',
                'init_mismatch_denial', 'evidence_unreadable', 'manifest_read_denial', 'interrupted',
-               'unicode_jsonl', 'playbook_term_denial', 'playbook_grounding_denial', 'playbook_report_denial')
+               'unicode_jsonl', 'playbook_term_denial', 'playbook_grounding_denial', 'playbook_report_denial',
+               'allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error')
 
 
 @pytest.mark.parametrize('arm', ['api','agentic'])
@@ -161,7 +163,9 @@ NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed
                                        ('evidence_unreadable',False), ('manifest_read_denial',False),
                                        ('interrupted',False), ('unicode_jsonl',True),
                                        ('playbook_term_denial',False), ('playbook_grounding_denial',False),
-                                       ('playbook_report_denial',False)])
+                                       ('playbook_report_denial',False), ('allowed_lookup',True),
+                                       ('lookup_denial',False), ('unregistered_execution',False),
+                                       ('unregistered_error',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
@@ -276,6 +280,16 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 terminal['result'] = 'source text\u0085next\u2028line\u2029paragraph'
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
                      'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
+            if case in ('allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error'):
+                command = shlex.join(['cat', str(run.bundle)]) if 'lookup' in case else 'echo unregistered'
+                events[1:1] = [
+                    {'type':'assistant', 'message':{'content':[{'type':'tool_use', 'name':'Bash',
+                        'id':'observed', 'input':{'command':command}}]}},
+                    {'type':'user', 'message':{'content':[{'type':'tool_result', 'tool_use_id':'observed',
+                        'is_error':case in ('lookup_denial', 'unregistered_error'), 'content':'offline'}]}}]
+                if case == 'lookup_denial':
+                    terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'observed',
+                        'tool_input':{'command':command}}]
             if case == 'init_mismatch_denial':
                 events[0]['model'] = 'another-model'   # stops before the classification (#2037)
             if case == 'interrupted':
@@ -365,6 +379,13 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         return
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
+    if case in ('allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error'):
+        assert check['passed']
+        assert bool(result['command_history']['problems']) == case.startswith('unregistered_')
+        if case == 'lookup_denial':
+            assert result['permission_denials'][0]['classification'] == 'prescribed'
+        assert before == {p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}
+        return
     if case in ('forbidden_denial', 'prescribed_denial') or case.startswith('playbook_'):
         # Every denial is listed and classified; only the prescribed one disqualifies (#2026).
         (denial,) = result['permission_denials']
