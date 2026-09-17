@@ -702,7 +702,8 @@ class EquivalentCandidates(unittest.TestCase):
             log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
             (ext,) = log["run_observed_extended"]
             self.assertEqual(ext["transcripts"], [t2.name])
-            self.assertEqual(ext["identification"]["equivalent_sets"], [[t1.name, t2.name]])
+            (eq,) = ext["identification"]["equivalent_sets"]
+            self.assertEqual([e["name"] for e in eq], [t1.name, t2.name]); self.assertTrue(all(len(e["sha256"]) == 64 for e in eq))
             self.assertIn("usage_from_terminal_result", ext["keys_added"])
             self.assertIn("usage_from_terminal_result counts", log["run_observed_basis"])
             self.assertIn("usage_from_terminal_result counts", ext["basis_added"])
@@ -723,3 +724,33 @@ class EquivalentCandidates(unittest.TestCase):
         own = cli._own_sentences()
         for s in cli._split_sentences(cli._reasoning_basis({"usage_from_terminal_result", "terminal_results_excluded_by_cut"})):
             self.assertIn(s, own)
+
+
+class Round6(unittest.TestCase):
+    """#1959: identities, not basenames; #1963: the exclusion marker needs a cut."""
+
+    def test_a_basename_collision_does_not_collapse_distinct_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); (t1,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            other = Path(tmp) / "elsewhere" / "subagents"; other.mkdir(parents=True)
+            t2 = other / t1.name; t2.write_text("another run\n")
+            obs = dict(FULL)
+            key = "+".join(t.name.rsplit("-", 1)[0] for t in (t1, t2))
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": obs, key: obs}, transcripts=[t1, t2])
+            self.assertIn("2 of 3 candidate", r.output); self.assertNotIn("wrote", r.output)
+
+    def test_the_exclusion_marker_needs_a_cut(self):
+        import json
+        import click.testing
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); del d["phase_log"]["run_observed"]; del d["phase_log"]["run_observed_until"]
+            path.write_text("# header\n" + yaml.safe_dump(d))
+            with mock.patch("data_sheets_schema.provenance.record_path_for", lambda project, method, label, concat_dir=None: path), \
+                 mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None):
+                base = ["annotate-observed", "--project", "P", "--method", "claudecode_agent", "--label", "L_rep1",
+                        "--run", json.dumps({**PRIOR, "terminal_results_excluded_by_cut": 1})]
+                r = click.testing.CliRunner().invoke(cli.provenance, base)
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("no cut is given or recorded", r.output)
+                r = click.testing.CliRunner().invoke(cli.provenance, base + ["--until", "2026-08-28T10:00:00+00:00"])
+                self.assertEqual(r.exit_code, 0, r.output)

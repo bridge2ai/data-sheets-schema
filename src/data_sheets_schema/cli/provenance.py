@@ -1061,17 +1061,19 @@ _RUN_OBSERVED_BASIS = (
     "phase: four-phase project-agent mode runs every phase in one "
     "context, so the run is the only observable boundary. No "
     "input/output split, not billing-grade; deliberately not shaped like "
-    "api_usage (#681/#682). Accounted per invocation: where a transcript "
-    "ends in the runtime's own terminal result and no event of it falls "
-    "outside the observed interval, total_tokens and output_tokens are "
-    "that finalized accounting (usage_from_terminal_result counts such "
-    "invocations, terminal_results_excluded_by_cut those whose result the "
-    "cut set aside, and the reasoning estimate is then the subtraction "
-    "pooled over the session, #1931/#1937/#1945); otherwise total_tokens "
-    "counts each API message once (a response spans several transcript "
-    "lines) and the estimate is per message. duration_ms sums each "
-    "invocation's own span, so a resumed "
-    "run excludes the gap. bundle_lines_read is the union of the run's "
+    "api_usage (#681/#682). Accounted per session, transcripts sharing "
+    "a message id being one: where a transcript carries the runtime's own "
+    "terminal result and no measurement event before that result falls "
+    "outside the observed interval, the messages that transcript recorded "
+    "take its finalized total_tokens and output_tokens, with the estimate "
+    "the subtraction pooled over them (usage_from_terminal_result counts "
+    "such sessions; terminal_results_excluded_by_cut those with a result "
+    "the cut set aside while messages still rest on snapshots, "
+    "#1931/#1937/#1945/#1962); every other message counts once at its "
+    "largest snapshot (a response spans several transcript lines) with a "
+    "per-message estimate. duration_ms is each invocation's own span, a "
+    "copy cut short spanning nothing and a resumed transcript only the "
+    "events left to it. bundle_lines_read is the union of the run's "
     "successful file-reading windows over the declared bundle (#700): "
     "lines the run never opened, or opened only in a read that errored, "
     "may have been reached by search, but nothing attests that.")
@@ -1274,9 +1276,10 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
         parts.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
                      "measured for this run.")
     if "usage_from_terminal_result" in keys:
-        parts.append(" usage_from_terminal_result counts the sessions whose total_tokens and output_tokens are the "
-                     "runtime's own finalized accounting, its terminal result, where the estimate is the subtraction "
-                     "pooled over the session (#1931/#1957).")
+        parts.append(" usage_from_terminal_result counts the sessions in which a transcript's own terminal result "
+                     "finalizes the total_tokens and output_tokens of the messages that transcript recorded, with "
+                     "the estimate for those messages the subtraction pooled over them; a message no result covers "
+                     "keeps per-message accounting (#1931/#1957/#1962).")
     if "terminal_results_excluded_by_cut" in keys:
         parts.append(" terminal_results_excluded_by_cut counts the sessions whose finalized result the "
                      "run_observed_until cut set aside, so their totals are per-message snapshots and incomplete "
@@ -1654,11 +1657,15 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         import json as _json
         keep = []
         for cand, o in matches:
-            names = {t.name for t in cand}
-            subsumed = any({t.name for t in other} < names and _json.dumps(oo, sort_keys=True) == _json.dumps(o, sort_keys=True)
+            ident = {str(Path(t).resolve()) for t in cand}
+            subsumed = any({str(Path(t).resolve()) for t in other} < ident
+                           and _json.dumps(oo, sort_keys=True) == _json.dumps(o, sort_keys=True)
                            for other, oo in matches)
             (equivalent if subsumed else keep).append((cand, o))
-        equivalent = [[t.name for t in cand] for cand, _o in equivalent]
+        # Identities, not basenames (#1959): a name is the same under both
+        # config roots and identifies no bytes.
+        equivalent = [[{"name": t.name, "sha256": _h.sha256(t.read_bytes()).hexdigest()} for t in cand]
+                      for cand, _o in equivalent]
         matches = keep
     if len(matches) != 1:
         click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
@@ -1794,6 +1801,11 @@ def annotate_observed(project, method, label, run_observed, until, extend):
             "run re-record with --phase first (an agentic run; an API "
             "record would have been refused above).")
     prior = log.get("run_observed")
+    if observed.get("terminal_results_excluded_by_cut") and not (until or log.get("run_observed_until")):
+        raise click.ClickException(
+            "terminal_results_excluded_by_cut is positive but no cut is given or recorded: the marker says a "
+            "finalized result fell outside run_observed_until, so pass --until or annotate a record that carries "
+            "one (#1963)")
     if extend and prior is not None and until and until != log.get("run_observed_until"):
         raise click.ClickException(
             f"--until {until} is not the record's own cut ({log.get('run_observed_until') or 'none'}); an "

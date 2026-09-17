@@ -279,9 +279,13 @@ def observe(transcripts: list[Path], bundle: Path | None,
         set_aside = [f for f in members if f["terminal_excluded"] or (f["terminal"] is not None and f not in usable)]
         chosen = max(usable, key=lambda f: (len(f["usage"]), int(f["terminal"].get("output_tokens", 0) or 0),
                                             str(f["path"]))) if usable else None
+        # The covered messages are taken as the chosen file recorded them
+        # (#1964): its terminal result finalizes that file's own view, and
+        # another file's larger snapshot of the same message is evidence of
+        # a different measurement, not of this session's totals.
         covered = set(chosen["usage"]) if chosen else set()
-        total, m = _invocation_measure({k: v for k, v in usage_by_msg.items() if k in covered},
-                                       {k: v for k, v in blocks_by_msg.items() if k in covered},
+        total, m = _invocation_measure(dict(chosen["usage"]) if chosen else {},
+                                       dict(chosen["blocks"]) if chosen else {},
                                        chosen["terminal"] if chosen else None)
         rest_total, rest = _invocation_measure({k: v for k, v in usage_by_msg.items() if k not in covered},
                                                {k: v for k, v in blocks_by_msg.items() if k not in covered}, None)
@@ -290,7 +294,9 @@ def observe(transcripts: list[Path], bundle: Path | None,
             m[k] = m.get(k, 0) + v
         if chosen is not None:
             from_terminal += 1
-        elif set_aside:
+        if set_aside and (chosen is None or any(k not in covered for k in usage_by_msg)):
+            # A result the cut set aside still qualifies the messages no
+            # usable result covers (#1961).
             excluded += 1
         out["total_tokens"] += total
         for k, v in m.items():
@@ -335,8 +341,14 @@ def _spans(files: list[dict]) -> list:
         ids = set(f["events"])
         if not ids:
             continue
-        if any(g is not f and (ids < set(g["events"]) or (ids == set(g["events"]) and str(g["path"]) < str(f["path"])))
-               for g in files if g["events"]):
+        # A file that ends in its own terminal result is a completed
+        # invocation whatever another file replays of it (#1960); only a
+        # file without one, whose events another file all carries, is a
+        # copy cut short.
+        complete = f["terminal"] is not None or f["terminal_excluded"]
+        if not complete and any(g is not f and (ids < set(g["events"])
+                                                or (ids == set(g["events"]) and str(g["path"]) < str(f["path"])))
+                                for g in files if g["events"]):
             continue
         real.append(f)
     real.sort(key=lambda f: (max(f["events"].values()), str(f["path"])))
