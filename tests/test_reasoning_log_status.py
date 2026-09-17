@@ -113,3 +113,11 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
                 if log_status(runtime, run.label, log.exists()) == NO_LOG_MISSING:
                     missing.append(f"{run.label}/{project}")
         self.assertEqual(missing, [])
+
+
+class InvalidObservation(unittest.TestCase):
+    def test_a_malformed_observation_is_not_recovered(self):
+        from data_sheets_schema.reasoning import OBSERVATION_INVALID, RECOVERED, log_status
+        self.assertEqual(log_status("Claude Code", "2026-09-16_x_rep1", False,
+                                    {"output_tokens": 100, "malformed_message_events": 2}), OBSERVATION_INVALID)
+        self.assertEqual(log_status("Claude Code", "2026-09-16_x_rep1", False, {"output_tokens": 100}), RECOVERED)

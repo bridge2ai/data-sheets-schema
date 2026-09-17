@@ -257,6 +257,10 @@ HAS_LOG = "present"
 #: the orchestrator read the subagent's transcript, which records usage per
 #: turn and, from recent runtimes, the thinking token count.
 RECOVERED = "recovered_from_transcript"
+#: An agentic run whose recorded observation counts malformed transcript
+#: events (#1930/#1948): the numbers beside the counter were measured over a
+#: transcript the observer could not fully read, so they are not a measure.
+OBSERVATION_INVALID = "transcript_observation_invalid"
 
 #: The `run_observed` keys that make up that measure, written by
 #: `scripts/agentic_observed.py` and `d4d provenance annotate-observed`.
@@ -279,6 +283,10 @@ def log_status(runtime: str | None, label: str, log_exists: bool,
       records usage per turn, signed (empty) thinking blocks, and — from
       recent runtimes — ``thinking_tokens``. Cache-inclusive runner
       accounting, one number per run: never averaged with ``api_usage``.
+    - ``transcript_observation_invalid`` — a Claude Code agentic run whose
+      recorded observation counts ``malformed_message_events`` or
+      ``overlapping_evidence``: not a measure, whatever numbers sit beside
+      the counter (#1948/#1972).
     - ``runtime_cannot_capture`` — a Claude Code agentic run with no such
       measure recorded. Writing a log carrying only the effort level would be
       *worse* than writing none: it would look comparable with the API
@@ -295,6 +303,9 @@ def log_status(runtime: str | None, label: str, log_exists: bool,
     if log_exists:
         return HAS_LOG
     if (runtime or "").strip().lower() == "claude code":
+        if isinstance(observed, dict) and (observed.get("malformed_message_events")
+                                           or observed.get("overlapping_evidence")):
+            return OBSERVATION_INVALID
         if isinstance(observed, dict) and observed.get("output_tokens") is not None:
             return RECOVERED
         return NO_LOG_RUNTIME

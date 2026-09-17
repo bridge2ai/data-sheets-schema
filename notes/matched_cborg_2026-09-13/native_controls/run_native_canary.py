@@ -8,6 +8,7 @@ import signal
 import subprocess
 import sys
 import time
+import traceback
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -29,6 +30,67 @@ def verified_executable(overlay):
     if overlay['pinned_files'].get(str(path)) != sha(path):
         raise BudgetStop('native executable bytes differ from the launch pin')
     return str(path)
+
+
+def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
+    """Why a native attempt stopped, from the strongest source available.
+
+    The v10q CHORUS attempt stopped on a ledger refusal, but the receipt
+    recorded only `error_type: PermissionError` with no reason: the proxy
+    keeps the class name of a non-BudgetStop exception and the controller
+    copied a reason only from a BudgetStop it raised itself (#1914). The
+    ledger's own stop entry for this attempt is the authoritative cause
+    whenever it exists; the proxy's recorded failure and the exception's
+    BudgetStop message follow. Never raises: a diagnostic that fails must
+    not displace the stop it explains (#1925), so a malformed or unreadable
+    ledger is reported as such and the other sources still apply.
+    """
+    out = {}
+    entry = None
+    try:
+        state = json.loads(Path(ledger_path).read_bytes()) if Path(ledger_path).exists() else {}
+        stops = state.get('stopped_attempts') if isinstance(state, dict) else None
+        entry = stops.get(billing_attempt) if isinstance(stops, dict) else None
+        if stops is not None and not isinstance(stops, dict):
+            out['ledger_stop_note'] = 'stopped_attempts is not a mapping'
+    except Exception as read_error:
+        out['ledger_stop_note'] = f'ledger unreadable: {type(read_error).__name__}'
+    if isinstance(entry, dict) and isinstance(entry.get('reason'), str) and entry['reason']:
+        out['reason'] = entry['reason']; out['reason_source'] = 'ledger'; out['ledger_stop'] = entry
+    elif isinstance(exc, BudgetStop):
+        out['reason'] = str(exc); out['reason_source'] = 'controller'
+    elif isinstance(proxy_failure, str) and proxy_failure:
+        out['reason'] = proxy_failure; out['reason_source'] = 'proxy'
+    if proxy_failure is not None:
+        out['proxy_failure'] = proxy_failure
+    return out
+
+
+def observation_problems(observed):
+    """What in a transcript observation refuses completion (#1930): a
+    malformed measurement-bearing event means the coverage and totals are
+    not evidence, whatever the current-file checks say."""
+    if not isinstance(observed, dict):
+        return ['transcript observation unavailable']
+    problems = []
+    if observed.get('malformed_message_events'):
+        problems.append(f"transcript carries {observed['malformed_message_events']} malformed measurement events")
+    if observed.get('overlapping_evidence'):
+        problems.append(f"transcript carries {observed['overlapping_evidence']} overlapping evidence events (#1972)")
+    if not observed.get('usage_from_terminal_result'):
+        # The native runtime's stream-json ends in a result carrying usage;
+        # an attempt whose transcript finalizes nothing is not complete (#2002).
+        problems.append('transcript carries no terminal result with complete usage')
+    return problems
+
+
+def retain_traceback(attempt, exc):
+    """Append the controller traceback under the attempt; never raise."""
+    try:
+        with (attempt / 'controller_traceback.txt').open('a', encoding='utf-8') as handle:
+            handle.write(json.dumps({'at': now(), 'error_type': type(exc).__name__}) + '\n' + traceback.format_exc() + '\n')
+    except Exception:
+        pass
 
 
 def native_evidence_check(spec):
@@ -195,18 +257,26 @@ def main():
             receipt['evidence_assertions'] = evidence
             if not evidence['checked'] or evidence['findings']:
                 problems = list(problems) + ['explicit evidence assertions failed']
+        observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
+        problems=list(problems)+observation_problems(observed)
         receipt.update(validation_problems=problems,pair_consistency=pair,
-                       native_observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle'])),
+                       native_observed=observed,
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),
                        status='validation_failed' if problems or not pair or not pair.get('ran') or not pair.get('consistent') else 'completed_pending_independent_review')
         verify_all();verify_history(base)
     except Exception as exc:
         receipt.update(status='stopped',error_type=type(exc).__name__)
-        if isinstance(exc,BudgetStop): receipt['reason']=str(exc)
+        receipt.update(stop_explanation(exc, ledger.path, billing_attempt, getattr(proxy, 'failure', None)))
+        # The traceback names controller code paths only; provider exception
+        # strings are never copied into the receipt.
+        retain_traceback(attempt, exc)
     finally:
-        state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}
-        admitted=[row for row in state['requests'] if row['attempt']==billing_attempt]
-        receipt.update(finished_at=now(),model_requests_admitted=len(admitted),
+        try:
+            state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}
+            admitted=[row for row in state.get('requests',[]) if isinstance(row,dict) and row.get('attempt')==billing_attempt]
+        except Exception as read_error:
+            admitted=None; receipt['ledger_read_note']=f'ledger unreadable at freeze: {type(read_error).__name__}'
+        receipt.update(finished_at=now(),model_requests_admitted=None if admitted is None else len(admitted),
             unfinished_handlers_at_freeze=proxy.unfinished_handlers,
             artifacts={str(p):sha(p) for folder in job['output_directories'] for p in sorted(Path(folder).rglob('*')) if p.is_file()})
         write_new(attempt/'result.json',receipt)

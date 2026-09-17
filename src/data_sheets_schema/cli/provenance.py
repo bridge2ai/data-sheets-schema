@@ -60,7 +60,19 @@ _OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms",
 _RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
     "assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
     "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate",
-    "thinking_tokens", "turns_with_thinking_tokens"})
+    "thinking_tokens", "turns_with_thinking_tokens",
+    # #1931/#1933: how many invocations' totals came from the runtime's own
+    # terminal result rather than per-message snapshots, and how many
+    # assistant/user events were malformed — an observation carrying the
+    # latter is refused by every writer below (#1934).
+    "usage_from_terminal_result", "terminal_results_excluded_by_cut", "malformed_message_events",
+    "overlapping_evidence", "thinking_from_terminal_results", "terminal_results_without_usage"})
+#: Accounting metadata the observer writes beside the reasoning keys (#1947):
+#: how many sessions' totals are the runtime's own terminal result, and how
+#: many such results the cut excluded. An extension carries them with the
+#: values they qualify.
+_ACCOUNTING_KEYS = frozenset({"usage_from_terminal_result", "terminal_results_excluded_by_cut",
+                              "thinking_from_terminal_results", "terminal_results_without_usage"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -1049,6 +1061,30 @@ _RUN_OBSERVED_BASIS = (
     "aggregate totals for the whole run, observed by the orchestrator "
     "from the subagent runner's transcript. One number per run, not per "
     "phase: four-phase project-agent mode runs every phase in one "
+    "context, so the run is the only observable boundary. No "
+    "input/output split, not billing-grade; deliberately not shaped like "
+    "api_usage (#681/#682). Accounted per invocation, one transcript "
+    "each: where a transcript ends in the runtime's own terminal result "
+    "carrying complete usage, inside the observed interval, and no measurement event before that "
+    "result falls outside it, its messages take the finalized "
+    "total_tokens and output_tokens, with the estimate the subtraction "
+    "pooled over them (usage_from_terminal_result counts such "
+    "invocations; terminal_results_excluded_by_cut those with a result "
+    "the cut set aside while their messages rest on snapshots, "
+    "#1931/#1937/#1945/#1962); every other message counts once at its "
+    "largest snapshot (a response spans several transcript lines) with a "
+    "per-message estimate; evidence two transcripts share is refused, not "
+    "reconciled (#1972). duration_ms sums each invocation's own span, so a "
+    "resumed run excludes the gap. bundle_lines_read is the union of the run's "
+    "successful file-reading windows over the declared bundle (#700): "
+    "lines the run never opened, or opened only in a read that errored, "
+    "may have been reached by search, but nothing attests that.")
+#: The opening paragraph records extended before #1931 carry; recognised
+#: whole and replaced by the current one on extension (#1970).
+_LEGACY_RUN_OBSERVED_BASIS = (
+    "aggregate totals for the whole run, observed by the orchestrator "
+    "from the subagent runner's transcript. One number per run, not per "
+    "phase: four-phase project-agent mode runs every phase in one "
     "context, so the run is the only observable boundary. Not the "
     "runtime's own accounting, no input/output split, not billing-grade; "
     "deliberately not shaped like api_usage (#681/#682). total_tokens "
@@ -1178,7 +1214,7 @@ def _own_sentences() -> frozenset:
     never changes within a process (#1191 round 5, NOTES)."""
     import itertools
     out = set(_LEGACY_REASONING_SENTENCES)
-    keys = list(_REASONING_KEYS)
+    keys = list(_REASONING_KEYS | _ACCOUNTING_KEYS)
     for n in range(len(keys) + 1):
         for combo in itertools.combinations(keys, n):
             # `named` is `extended ∩ keys`, so a superset of `combo` yields the
@@ -1243,7 +1279,12 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
             parts.append(" reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of "
                          "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
     thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
-    if thinking:
+    if "thinking_from_terminal_results" in keys and "thinking_tokens" in keys:
+        parts.append(" thinking_tokens is the runtime's own count: the session total from the terminal result "
+                     "of each invocation thinking_from_terminal_results counts, plus whatever per-turn counts the "
+                     "other invocations carry, which may be none; thinking no invocation reported stays unmeasured, "
+                     "and no turn coverage is claimed (#1978/#1982/#1994/#1997).")
+    elif thinking:
         parts.append(
             " " + " and ".join(thinking) + (" are" if len(thinking) > 1 else " is")
             + " the runtime's own count on the turns whose transcript line carries "
@@ -1256,6 +1297,18 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
     elif present:
         parts.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
                      "measured for this run.")
+    if "usage_from_terminal_result" in keys:
+        parts.append(" usage_from_terminal_result counts the sessions in which a transcript's own terminal result "
+                     "finalizes the total_tokens and output_tokens of the messages that transcript recorded, with "
+                     "the estimate for those messages the subtraction pooled over them; a message no result covers "
+                     "keeps per-message accounting (#1931/#1957/#1962).")
+    if "terminal_results_without_usage" in keys:
+        parts.append(" terminal_results_without_usage counts the invocations whose terminal result carried no "
+                     "usage, so their totals are per-message snapshots with no finalized accounting (#2002).")
+    if "terminal_results_excluded_by_cut" in keys:
+        parts.append(" terminal_results_excluded_by_cut counts the sessions with a finalized result the "
+                     "run_observed_until cut set aside while messages no surviving result covers rest on "
+                     "per-message snapshots, so the totals are incomplete (#1945).")
     named = sorted(k for k in (extended or ()) if k in keys)
     if parts and named:
         # No clause where the extension names no key the observation still
@@ -1309,6 +1362,12 @@ def _basis_parts(log: dict, keys: set) -> tuple:
     written before that text was recorded, which is a bounded set that
     shrinks to nothing as they are re-extended."""
     b = str(log.get("run_observed_basis") or "").rstrip() or _RUN_OBSERVED_BASIS
+    if b.startswith(_LEGACY_RUN_OBSERVED_BASIS):
+        # This module's own earlier opening paragraph, which said the values
+        # are not the runtime's accounting; replaced whole, so an extension
+        # that adds the finalized-accounting keys does not contradict its own
+        # opening (#1970). A curator's text never starts with it.
+        b = _RUN_OBSERVED_BASIS + b[len(_LEGACY_RUN_OBSERVED_BASIS):]
     recorded = _recorded_additions(log)
     edited = False
     for prior in recorded:
@@ -1344,6 +1403,44 @@ def _basis_with(log: dict, keys: set) -> str:
     return _basis_parts(log, keys)[0]
 
 
+def _refuse_malformed_observation(observed: dict) -> None:
+    """An observation that saw malformed measurement events is not evidence
+    of the run (#1930/#1934): the numbers beside the counter were computed
+    over a transcript the observer could not fully read, so no writer
+    records or matches them. The native controller refuses completion on
+    the same key; this is the guard for the provenance commands."""
+    n = observed.get("malformed_message_events")
+    if n:
+        raise click.ClickException(
+            f"refusing: the observation carries malformed_message_events={n} — {n} assistant/user "
+            "transcript event(s) whose message is not a mapping, or result event(s) whose usage is not "
+            "complete accounting; the totals beside it were measured over a transcript the observer could "
+            "not fully read, so nothing is recorded (#1934/#2004)")
+    n = observed.get("overlapping_evidence")
+    if n:
+        raise click.ClickException(
+            f"refusing: the observation carries overlapping_evidence={n} — a message id carried by two "
+            "transcripts, a message after a transcript's result, or a repeated result; the files given are "
+            "not one invocation each, so nothing is recorded: name one file per invocation (#1972)")
+    zero = sorted(k for k in _ACCOUNTING_KEYS | {"malformed_message_events", "overlapping_evidence"}
+                  if k in observed and not observed[k])
+    if zero:
+        raise click.ClickException(
+            f"refusing: {zero} at zero — these optional counters are omitted when they count nothing; "
+            "leave them out rather than writing 0 (#1998/#2001)")
+    tft = observed.get("thinking_from_terminal_results")
+    if tft:
+        if "turns_with_thinking_tokens" in observed:
+            raise click.ClickException(
+                "refusing: thinking_from_terminal_results beside turns_with_thinking_tokens — a session total from a "
+                "terminal result claims no turn coverage, so the observer never writes both (#1998)")
+        if "thinking_tokens" not in observed or tft > (observed.get("usage_from_terminal_result") or 0):
+            raise click.ClickException(
+                "refusing: thinking_from_terminal_results needs thinking_tokens and cannot exceed "
+                "usage_from_terminal_result — an invocation's thinking comes from its terminal result only where "
+                "that result finalized its usage (#2000)")
+
+
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
                          basis: dict | None = None) -> list[str]:
     """The reviewed route #1010 asked for: a prior observation is extended
@@ -1357,6 +1454,7 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
     `run_observed_basis` gains the sentence that describes them (M3).
     Returns the keys added."""
     from datetime import datetime, timezone
+    _refuse_malformed_observation(observed)
     prior = log["run_observed"]
     differ = {k: (v, observed.get(k)) for k, v in prior.items() if observed.get(k) != v}
     if differ:
@@ -1364,10 +1462,11 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
             "refusing to extend: the recomputed observation disagrees with the "
             f"record on {sorted(differ)} ({differ}); a value that does not "
             "reproduce is not the same observation, so nothing is added")
-    added = sorted((set(observed) - set(prior)) & _REASONING_KEYS)
-    ignored = sorted((set(observed) - set(prior)) - _REASONING_KEYS)
+    added = sorted((set(observed) - set(prior)) & (_REASONING_KEYS | _ACCOUNTING_KEYS))
+    ignored = sorted((set(observed) - set(prior)) - _REASONING_KEYS - _ACCOUNTING_KEYS)
     if not added:
-        raise click.ClickException("nothing to extend: the recomputation carries no reasoning key the record lacks"
+        raise click.ClickException("nothing to extend: the recomputation carries no reasoning or accounting key "
+                                   "the record lacks"
                                    + (f" (not added, another instrument's: {ignored})" if ignored else ""))
     log["run_observed"] = {**prior, **{k: observed[k] for k in added}}
     entries = log.get("run_observed_extended")
@@ -1377,7 +1476,7 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
              "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat()}
     entries.append(entry)
     log["run_observed_extended"] = entries
-    text, appended, terminated, edited = _basis_parts(log, set(log["run_observed"]) & _REASONING_KEYS)
+    text, appended, terminated, edited = _basis_parts(log, set(log["run_observed"]) & (_REASONING_KEYS | _ACCOUNTING_KEYS))
     # What this extension appended, so the next one removes this text and
     # not a sentence that merely reads like it (#1195 M2).
     entry["basis_added"] = appended
@@ -1526,11 +1625,14 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
     # only two of the estimate keys skipped a record for good while it still
     # lacked assistant_turns, thinking_blocks and the character counts
     # (#1195 M4).
+    # (#1955: such a record is still observed, because the accounting keys —
+    # usage_from_terminal_result, terminal_results_excluded_by_cut — may be
+    # what the observation adds; when it adds nothing the command says so.)
     if _REASONING_KEYS <= set(prior) or (
             set(_ESTIMATE_KEYS) <= set(prior) and "thinking_tokens" not in prior
             and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or []) and
                     "transcripts" in e for e in (log.get("run_observed_extended") or []))):
-        click.echo(f"{tag}: already carries the reasoning measure"); return
+        click.echo(f"{tag}: already carries the reasoning measure; observing for the accounting keys")
     inputs = data.get("inputs") or {}
     bpath, md5 = inputs.get("bundle_path"), inputs.get("bundle_md5")
     if not bpath or not md5:
@@ -1550,7 +1652,9 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                                   "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
     rule = ((inputs.get("chunks") or {}).get("rule")) or None
     from data_sheets_schema.profiles import for_record
-    candidates = list(given) or _transcript_candidates(proj, label, profile=for_record(data))
+    # One file under two spellings is one candidate (#1969).
+    candidates = list({str(Path(t).resolve()): t for t in given}.values()) if given \
+        else _transcript_candidates(proj, label, profile=for_record(data))
     if not candidates:
         click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
     # A killed-and-resumed run has two transcripts under one name and
@@ -1594,16 +1698,21 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         for ts in sets:
             obs = _observe(ts, tb, until, receipt if receipt.exists() else None, tm if receipt.exists() else None)
             differ = sorted(k for k, v in prior.items() if obs.get(k) != v)
-            results.append((ts, obs, differ))
-    matches = [(ts, obs) for ts, obs, differ in results if not differ]
+            # Not evidence, whatever it reproduces (#1934/#1972); kept apart
+            # from the prior-field mismatches the statistics count (#1985).
+            refused = [bad for bad in ("malformed_message_events", "overlapping_evidence") if obs.get(bad)]
+            results.append((ts, obs, differ, refused))
+    matches = [(ts, obs) for ts, obs, differ, refused in results if not differ and not refused]
     if len(matches) != 1:
         click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
                    + ("; nothing written" if execute else ""))
-        for ts, obs, differ in results:
-            click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ else
-                       "differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)))
+        for ts, obs, differ, refused in results:
+            click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ and not refused else
+                       ", ".join(([f"refused: {', '.join(f'{k}={obs[k]}' for k in refused)}"] if refused else [])
+                                 + (["differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)] if differ else []))))
         return
     ts, obs = matches[0]
+    results = [(cand, o, differ) for cand, o, differ, _refused in results]
     # What the losing candidates reproduced, so the identification can be
     # audited from the record rather than by replaying a candidate pool that
     # has since changed (#1195 S8). `best_other_reproduces` is how many of the
@@ -1619,11 +1728,24 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                   if len({str(o.get(k)) for _c, o, _d in results}) > 1) if len(results) > 1 else []
     others_disc = [sum(1 for k in disc if o.get(k) == prior[k])
                    for cand, o, _d in results if cand is not ts]
+    # Identities, not basenames (#1959): a name is the same under both
+    # config roots and identifies no bytes. Hashed once per file and only
+    # now that a unique candidate survives (#1971).
+    digests: dict = {}
+    def _digest(t):
+        key = str(Path(t).resolve())
+        if key not in digests:
+            digests[key] = _h.sha256(t.read_bytes()).hexdigest()
+        return digests[key]
     identification = {"sets_tried": len(results), "prior_keys": len(prior),
                       "discriminating_keys": disc,
                       "best_other_reproduces": max(others) if others else None,
                       "best_other_reproduces_discriminating": max(others_disc) if others_disc else None}
-    added = sorted((set(obs) - set(prior)) & _REASONING_KEYS)          # the set --execute writes (round 2, S4)
+    added = sorted((set(obs) - set(prior)) & (_REASONING_KEYS | _ACCOUNTING_KEYS))   # the set --execute writes (round 2, S4; #1956)
+    if not added:
+        click.echo(f"{tag}: nothing to extend: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s) "
+                   "and adds nothing; the record already carries every reasoning and accounting key the observation has")
+        return
     click.echo(f"{tag}: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s); adds {added}")
     if not execute:
         click.echo("   (report only; --execute writes the extension)"); return
@@ -1641,7 +1763,7 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                          # later edit (#1195 M6).
                          basis={"identification": identification,
                                 "transcripts": [t.name for t in ts],
-                                "transcript_sha256": {t.name: _h.sha256(t.read_bytes()).hexdigest() for t in ts},
+                                "transcript_sha256": {t.name: _digest(t) for t in ts},
                                 "observer_sha256": observer, **basis})
     ProvenanceRecord(data=data).write(path)
     click.echo(f"   wrote {path}")
@@ -1701,6 +1823,7 @@ def annotate_observed(project, method, label, run_observed, until, extend):
         raise click.BadParameter(
             f"--run values must be non-negative integers as measured, "
             f"got {bad}")
+    _refuse_malformed_observation(observed)
 
     path = record_path_for(project, method, label)
     if not path.exists():
@@ -1724,6 +1847,11 @@ def annotate_observed(project, method, label, run_observed, until, extend):
             "run re-record with --phase first (an agentic run; an API "
             "record would have been refused above).")
     prior = log.get("run_observed")
+    if observed.get("terminal_results_excluded_by_cut") and not (until or log.get("run_observed_until")):
+        raise click.ClickException(
+            "terminal_results_excluded_by_cut is positive but no cut is given or recorded: the marker says a "
+            "finalized result fell outside run_observed_until, so pass --until or annotate a record that carries "
+            "one (#1963)")
     if extend and prior is not None and until and until != log.get("run_observed_until"):
         raise click.ClickException(
             f"--until {until} is not the record's own cut ({log.get('run_observed_until') or 'none'}); an "
@@ -1756,7 +1884,7 @@ def annotate_observed(project, method, label, run_observed, until, extend):
     # A cut the record carries is never removed by a call that did not name
     # one (#1191 rounds 1 and 2, M1): the cut is part of the observation.
     log["run_observed_basis"] = (_RUN_OBSERVED_BASIS + (_CUT_BASIS if log.get("run_observed_until") else "")
-                                 + _reasoning_basis(set(observed) & _REASONING_KEYS,
+                                 + _reasoning_basis(set(observed) & (_REASONING_KEYS | _ACCOUNTING_KEYS),
                                                     extended={k for e in (log.get("run_observed_extended") or [])
                                                               if isinstance(e, dict) for k in (e.get("keys_added") or [])}))
     rec = ProvenanceRecord(data=data)
@@ -1934,19 +2062,38 @@ def reasoning_cmd(method, project, label, path):
         # otherwise. Cache-inclusive runner accounting — reported apart from
         # the API path's billed log, never averaged with it.
         click.echo(f"{len(recovered)} agentic run(s) with a transcript-derived reasoning measure "
-                   "(run_observed; not the runtime's own accounting):")
+                   "(run_observed; the runtime's own finalized accounting where the row says so, "
+                   "per-message snapshots otherwise):")
         for proj, run_label, obs in recovered:
             counted = obs.get("thinking_tokens")
             parts = [f"{k} {obs[k]}" for k in ("assistant_turns", "output_tokens", "thinking_blocks")
                      if obs.get(k) is not None]
+            if obs.get("usage_from_terminal_result"):
+                parts.append(f"finalized by the runtime for {obs['usage_from_terminal_result']} session(s)")
+            if obs.get("terminal_results_without_usage"):
+                parts.append(f"⚠️  {obs['terminal_results_without_usage']} terminal result(s) without usage: those "
+                             "invocations rest on snapshots, unfinalized")
+            if obs.get("terminal_results_excluded_by_cut"):
+                parts.append(f"⚠️  {obs['terminal_results_excluded_by_cut']} finalized result(s) set aside by the "
+                             "cut: the messages they would have covered rest on snapshots")
             if counted is not None:
-                parts.append(f"thinking_tokens {counted} ({obs.get('turns_with_thinking_tokens')} turn(s) counted)")
+                turns = obs.get("turns_with_thinking_tokens")
+                parts.append(f"thinking_tokens {counted} (" + (
+                    f"{turns} turn(s) counted" if turns is not None else
+                    f"includes the terminal session total of {obs['thinking_from_terminal_results']} invocation(s); no turn coverage"
+                    if obs.get("thinking_from_terminal_results") else
+                    "no turn coverage recorded") + ")")
             elif obs.get("reasoning_tokens_estimate") is not None:
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
             click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
     if not logs:
         if not recovered:
             click.echo("No reasoning logs found for the selection.")
+        if why[_r.OBSERVATION_INVALID]:
+            click.echo(f"   ⚠️  {why[_r.OBSERVATION_INVALID]} run(s): the recorded observation saw "
+                       "malformed or overlapping transcript events (malformed_message_events, "
+                       "overlapping_evidence); its numbers are not a measure of the run and are not "
+                       "reported (#1948/#1972).")
         if why[_r.NO_LOG_RUNTIME]:
             click.echo(f"   {why[_r.NO_LOG_RUNTIME]} run(s): a Claude Code "
                        "run with no transcript-derived measure recorded — the "
@@ -1964,9 +2111,11 @@ def reasoning_cmd(method, project, label, path):
                        "after capture existed, with no log. That is a defect, "
                        "not a limitation.")
         return
-    if why[_r.NO_LOG_RUNTIME] or why[_r.NO_LOG_PREDATES] or why[_r.NO_LOG_MISSING] or recovered:
+    if why[_r.NO_LOG_RUNTIME] or why[_r.NO_LOG_PREDATES] or why[_r.NO_LOG_MISSING] or recovered \
+            or why[_r.OBSERVATION_INVALID]:
         click.echo(f"{len(logs)} log(s); {len(recovered)} agentic run(s) recovered from "
-                   f"transcripts, {why[_r.NO_LOG_RUNTIME]} agentic with no measure, "
+                   f"transcripts, {why[_r.OBSERVATION_INVALID]} with an invalid observation, "
+                   f"{why[_r.NO_LOG_RUNTIME]} agentic with no measure, "
                    f"{why[_r.NO_LOG_PREDATES]} predating capture, "
                    f"{why[_r.NO_LOG_MISSING]} missing.")
         click.echo("   A run with no log has not spent zero reasoning; it has "

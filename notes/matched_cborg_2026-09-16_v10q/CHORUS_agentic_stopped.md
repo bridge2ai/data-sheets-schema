@@ -32,13 +32,18 @@ binds the launch and the two delivered artifacts.
   c001–c006 (five extracted, one nothing-relevant); **c007 and c008 were never
   receipted**, and the run went on to write the full record anyway. The
   strict receipt floor would have rejected the attempt on that alone.
-- The runtime recorded **eight tool-permission denials** — `--help`
-  exploration, `agents digest`, ad-hoc schema-digest scripts (a heredoc, a
-  scratch file under `/tmp`, and two multi-line `python -c` calls that the
-  allow pattern did not match), and a shell append to the receipt — so the
+- The runtime recorded **eight tool-permission denials** — two `--help`
+  explorations, `schema --help`, `agents digest`, a heredoc script, a
+  scratch file under `/tmp`, one `python -c` chained with a redirect and
+  `wc`, and a shell append to the receipt (other multi-line `python -c`
+  calls ran) — so the
   controller's post-run check would have failed the attempt even had the cap
-  held. The bundle was read in line-offset windows rather than the
-  manifest's chunk units.
+  held. The bundle itself was read correctly: every one of the eight
+  chunks was opened with the file tool exactly at its manifest boundary,
+  in order (c002 and c006–c008 re-read whole, c003 re-read in halves) — so
+  c007 and c008 were read and simply never receipted, and the
+  `d4d receipts check --strict` gate the playbook prescribes before Phase
+  2 was never run.
 - The controller receipt records `error_type: PermissionError` and no
   reason; the ledger's stop entry is the authoritative cause (#1914).
 

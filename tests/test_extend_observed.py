@@ -624,3 +624,179 @@ class Round8(unittest.TestCase):
         self.assertEqual(cli._recorded_additions(
             {"run_observed_extended": [{"basis_added": "  "}, {"basis_added": "real text."}]}),
             ["real text."])
+
+
+class ObserverHandoff(unittest.TestCase):
+    """Codex round 3 on #1920 (#1933/#1934): the observer's two new keys go
+    through annotate-observed, and an observation that saw malformed events
+    is refused by every writer."""
+
+    def _annotate(self, path, run, extra=()):
+        import json
+        import click.testing
+        with mock.patch("data_sheets_schema.provenance.record_path_for",
+                        lambda project, method, label, concat_dir=None: path), \
+             mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None):
+            return click.testing.CliRunner().invoke(cli.provenance, ["annotate-observed", "--project", "P", "--method",
+                                                                     "claudecode_agent", "--label", "L_rep1",
+                                                                     "--run", json.dumps(run), *extra])
+
+    def test_annotate_observed_records_the_terminal_usage_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); del d["phase_log"]["run_observed"]
+            path.write_text("# header\n" + yaml.safe_dump(d))
+            r = self._annotate(path, {**FULL, "usage_from_terminal_result": 1})
+            self.assertEqual(r.exit_code, 0, r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            self.assertEqual(log["run_observed"]["usage_from_terminal_result"], 1)
+            self.assertIn("usage_from_terminal_result", log["run_observed_basis"])
+
+    def test_every_writer_refuses_an_observation_with_malformed_events(self):
+        import click
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            before = path.read_text()
+            r = self._annotate(path, {**PRIOR, "malformed_message_events": 2})
+            self.assertNotEqual(r.exit_code, 0); self.assertIn("malformed_message_events=2", r.output)
+            r = self._annotate(path, {**FULL, "malformed_message_events": 1}, ["--extend"])
+            self.assertNotEqual(r.exit_code, 0); self.assertIn("refusing", r.output)
+            self.assertEqual(path.read_text(), before)
+            with self.assertRaises(click.ClickException):
+                cli._extend_run_observed({"run_observed": dict(PRIOR)}, {**FULL, "malformed_message_events": 1},
+                                         recorded_by="t", instrument="t")
+            # extend-observed: a candidate that reproduces every prior key but saw malformed events is not a match
+            (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**FULL, "malformed_message_events": 1}}, transcripts=[t])
+            self.assertIn("0 of 1", r.output); self.assertIn("refused: malformed_message_events=1", r.output)
+            self.assertEqual(path.read_text(), before)
+
+
+class AccountingKeysExtend(unittest.TestCase):
+    """#1947: the terminal-accounting count travels with the values it qualifies."""
+
+    def test_extension_keeps_usage_from_terminal_result(self):
+        log = {"run_observed": dict(PRIOR)}
+        added = cli._extend_run_observed(log, {**FULL, "usage_from_terminal_result": 1}, recorded_by="t", instrument="t")
+        self.assertIn("usage_from_terminal_result", added)
+        self.assertEqual(log["run_observed"]["usage_from_terminal_result"], 1)
+        log2 = {"run_observed": dict(FULL)}
+        added = cli._extend_run_observed(log2, {**FULL, "terminal_results_excluded_by_cut": 1}, recorded_by="t", instrument="t")
+        self.assertEqual(added, ["terminal_results_excluded_by_cut"])
+
+
+class EquivalentCandidates(unittest.TestCase):
+    """#1955–#1957: a record carrying every reasoning key still gains the
+    accounting keys; preview and execution add the same keys; the basis
+    explains the accounting keys. (The equivalent-set collapse of #1954 was
+    replaced by refusing overlapping evidence, #1972.)"""
+
+    def test_a_record_with_every_reasoning_key_still_gains_the_accounting_keys(self):
+        every = {**PRIOR, **{k: 1 for k in cli._REASONING_KEYS}}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp, prior=every); (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**every, "terminal_results_excluded_by_cut": 1}}, transcripts=[t])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            self.assertEqual(log["run_observed"]["terminal_results_excluded_by_cut"], 1)
+            self.assertIn("set aside", log["run_observed_basis"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**every, "terminal_results_excluded_by_cut": 1}}, transcripts=[t])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("adds nothing", r.output)
+
+    def test_accounting_sentences_are_recognised_for_stripping(self):
+        own = cli._own_sentences()
+        for s in cli._split_sentences(cli._reasoning_basis({"usage_from_terminal_result", "terminal_results_excluded_by_cut"})):
+            self.assertIn(s, own)
+
+
+class Round6(unittest.TestCase):
+    """#1959: identities, not basenames; #1963: the exclusion marker needs a cut."""
+
+    def test_a_basename_collision_does_not_collapse_distinct_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); (t1,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            other = Path(tmp) / "elsewhere" / "subagents"; other.mkdir(parents=True)
+            t2 = other / t1.name; t2.write_text("another run\n")
+            obs = dict(FULL)
+            key = "+".join(t.name.rsplit("-", 1)[0] for t in (t1, t2))
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": obs, key: obs}, transcripts=[t1, t2])
+            self.assertIn("of 3 candidate", r.output); self.assertNotIn("wrote", r.output)   # ambiguous either way (#1959)
+
+    def test_the_exclusion_marker_needs_a_cut(self):
+        import json
+        import click.testing
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); del d["phase_log"]["run_observed"]; del d["phase_log"]["run_observed_until"]
+            path.write_text("# header\n" + yaml.safe_dump(d))
+            with mock.patch("data_sheets_schema.provenance.record_path_for", lambda project, method, label, concat_dir=None: path), \
+                 mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None):
+                base = ["annotate-observed", "--project", "P", "--method", "claudecode_agent", "--label", "L_rep1",
+                        "--run", json.dumps({**PRIOR, "terminal_results_excluded_by_cut": 1})]
+                r = click.testing.CliRunner().invoke(cli.provenance, base)
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("no cut is given or recorded", r.output)
+                r = click.testing.CliRunner().invoke(cli.provenance, base + ["--until", "2026-08-28T10:00:00+00:00"])
+                self.assertEqual(r.exit_code, 0, r.output)
+
+
+class Round7(unittest.TestCase):
+    """#1969: one file under two spellings is one candidate; #1970: the
+    legacy opening paragraph is replaced on extension."""
+
+    def test_aliases_of_one_transcript_are_one_candidate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            alias_dir = Path(tmp) / "alias"; alias_dir.symlink_to(t.parent)
+            alias = alias_dir / t.name
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t, alias])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+
+    def test_the_legacy_opening_paragraph_is_replaced(self):
+        log = {"run_observed": dict(PRIOR), "run_observed_basis": cli._LEGACY_RUN_OBSERVED_BASIS}
+        cli._extend_run_observed(log, {**FULL, "usage_from_terminal_result": 1}, recorded_by="t", instrument="t")
+        self.assertNotIn("Not the runtime's own accounting", log["run_observed_basis"])
+        self.assertTrue(log["run_observed_basis"].startswith(cli._RUN_OBSERVED_BASIS))
+        self.assertIn("usage_from_terminal_result counts", log["run_observed_basis"])
+
+
+class Round9Identification(unittest.TestCase):
+    """#1985: refusal reasons are not prior-field mismatches."""
+
+    def test_a_refused_candidate_that_reproduces_every_field_counts_as_such(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); t1, t2 = _transcripts(tmp, ["agent-av6-P-rep1", "agent-av6-P-rep1x"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1x": FULL,
+                                             "agent-av6-P-rep1+agent-av6-P-rep1x": {**FULL, "overlapping_evidence": 3}},
+                                 transcripts=[t1, t2])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            (ext,) = log["run_observed_extended"]
+            self.assertEqual(ext["identification"]["best_other_reproduces"], len(PRIOR))
+
+
+class Round12Guards(unittest.TestCase):
+    """#1998: a zero accounting marker and terminal thinking beside turn coverage are refused."""
+
+    def test_zero_markers_and_the_contradictory_pair_are_refused(self):
+        import click
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "thinking_from_terminal_results": 0})
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "thinking_tokens": 80, "turns_with_thinking_tokens": 1, "thinking_from_terminal_results": 1})
+        cli._refuse_malformed_observation({**PRIOR, "thinking_tokens": 80, "thinking_from_terminal_results": 1, "usage_from_terminal_result": 1})
+
+
+class Round13Guards(unittest.TestCase):
+    """#2000: the terminal-thinking marker's dependencies."""
+
+    def test_impossible_terminal_thinking_markers_are_refused(self):
+        import click
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "output_tokens": 100, "thinking_tokens": 80,
+                                               "usage_from_terminal_result": 1, "thinking_from_terminal_results": 2})
+        with self.assertRaises(click.ClickException):
+            cli._refuse_malformed_observation({**PRIOR, "output_tokens": 100, "thinking_from_terminal_results": 1,
+                                               "usage_from_terminal_result": 1})
+        with self.assertRaises(click.ClickException) as ctx:
+            cli._refuse_malformed_observation({**PRIOR, "malformed_message_events": 0})
+        self.assertIn("omitted when they count nothing", str(ctx.exception))

@@ -8,3 +8,11 @@ agent. Use the provided local helpers for validation, deterministic core
 derivation, receipts and provenance. Preserve the declared input bytes and
 all pre-existing records. Retain uncertainty and source disagreements. Produce
 the requested full record, derived core, report and required evidence artifacts.
+Run only the registered helper commands the instruction names and the
+commands the instruction prescribes verbatim, including its multi-line
+snapshot command; the helpers write their own artifacts. Do not explore with
+--help, run ad-hoc scripts or heredocs, chain programs the allowlist does not
+name, or write anywhere outside this task's output directories. Write the
+artifacts you author yourself — the coverage receipt, the records, the
+report — with the file-writing tool, never a shell redirect. A denied call
+counts against the attempt.
