@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import shlex
 import signal
 import subprocess
 import sys
@@ -17,6 +18,7 @@ from budgeted_cborg import cborg_client, provider_context_headers, provider_cont
 from native_proxy import NativeProxy
 from prepare_registration import spec_for
 from run_api_canary import verify, verify_history, sha, check_canary_receipts
+from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 
 
 def now():
@@ -30,6 +32,133 @@ def verified_executable(overlay):
     if overlay['pinned_files'].get(str(path)) != sha(path):
         raise BudgetStop('native executable bytes differ from the launch pin')
     return str(path)
+
+
+#: Shell control and redirection tokens. The system prompt forbids chaining
+#: unlisted programs, heredocs and writes outside the output directories, and
+#: no command the instruction prescribes uses any of them.
+SHELL_OPERATORS = frozenset({'|', '||', '&&', ';', ';;', '&', '|&', '<', '<<', '<<<', '>', '>>', '>&', '<&', '&>', '(', ')'})
+
+
+def _shell_tokens(command):
+    try:
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
+        lexer.whitespace_split = True
+        return list(lexer)
+    except ValueError:
+        return None
+
+
+def prescribed_programs(instruction_text, python):
+    """The `python -c` programs the rendered instruction prescribes verbatim
+    (the validators and the multi-line original-freeze command). A command
+    spanning several lines is read until its quoting closes."""
+    programs = set()
+    head = f'{python} -c '
+    start = 0
+    while True:
+        at = instruction_text.find(head, start)
+        if at < 0:
+            return programs
+        end = instruction_text.find('\n', at)
+        tokens = None
+        while True:
+            tokens = _shell_tokens(instruction_text[at:end if end >= 0 else len(instruction_text)])
+            if tokens is not None or end < 0:
+                break
+            end = instruction_text.find('\n', end + 1)
+        if tokens and len(tokens) > 2:
+            programs.add(tokens[2].strip())
+        start = at + 1
+
+
+def _classify_command(command, python, programs):
+    tokens = _shell_tokens(command)
+    if not tokens:
+        return 'not_prescribed', 'shell text that does not parse'
+    if tokens[0] != python or len(tokens) < 3:
+        return 'not_prescribed', 'a program the instruction does not prescribe'
+    rest = tokens[3:] if tokens[1] == '-c' else tokens[1:]
+    if any(t in SHELL_OPERATORS or '`' in t or '$(' in t for t in rest):
+        return 'not_prescribed', 'shell operators, redirection or substitution the system prompt forbids'
+    if any(t in ('--help', '-h') for t in rest):
+        return 'not_prescribed', '--help exploration the system prompt forbids'
+    if tokens[1] == '-c':
+        if tokens[2].strip() in programs:
+            return 'prescribed', 'a -c program the instruction prescribes verbatim'
+        return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
+    if tokens[1] != '-m':
+        return 'not_prescribed', 'an interpreter form the instruction does not prescribe'
+    module = tokens[2]
+    if module == 'data_sheets_schema.cli':
+        args = tokens[3:]
+        if args[:1] == ['--manifest']:
+            args = args[2:]
+        if ' '.join(args[:2]) in PLAYBOOK_COMMANDS:
+            return 'prescribed', f"the roster command '{' '.join(args[:2])}'"
+        return 'not_prescribed', 'a CLI command outside the prescribed roster'
+    if module.startswith('data_sheets_schema.') and module.split('.', 1)[1] in MODULE_ENTRY_POINTS:
+        return 'prescribed', f"the registered module entry point '{module}'"
+    return 'not_prescribed', 'a module the instruction does not prescribe'
+
+
+def _classify_path(tool, path, repository, output_directories, readable_inputs):
+    if not path:
+        return 'not_prescribed', 'a file operation without a path'
+    def resolved(value):
+        candidate = Path(value)
+        return (candidate if candidate.is_absolute() else Path(repository) / candidate).resolve()
+    target = resolved(path)
+    for folder in output_directories or ():
+        if target == resolved(folder) or resolved(folder) in target.parents:
+            return 'prescribed', 'a file inside the registered output directories'
+    if tool == 'Read' and any(target == resolved(x) for x in readable_inputs or () if x):
+        return 'prescribed', 'a registered input the instruction reads'
+    return 'not_prescribed', 'a path outside the registered inputs and outputs'
+
+
+def classify_denials(denials, *, instruction_text, python, repository, output_directories, readable_inputs):
+    """Every tool-permission denial, listed and classified (#2012, #2026).
+
+    The maintainer ruled (2026-09-17) that a denied prescribed command
+    disqualifies a run while denials of forbidden commands are listed and do
+    not disqualify it on their own. A denial is prescribed when the controls
+    should have allowed it: a roster CLI command, a registered module entry
+    point, one of the instruction's own `-c` programs, or a file operation
+    inside the registered outputs (or a Read of a registered input), with no
+    shell operator and no --help. A denial record the runtime wrote in an
+    unexpected shape is unclassifiable and disqualifies like a prescribed one:
+    nothing shows it was harmless."""
+    if denials in (None, []):
+        return []
+    if not isinstance(denials, list):
+        return [{'classification': 'unclassifiable', 'basis': 'permission_denials is not a list'}]
+    programs = prescribed_programs(instruction_text, python)
+    out = []
+    for item in denials:
+        if not isinstance(item, dict) or not isinstance(item.get('tool_input'), dict):
+            out.append({'classification': 'unclassifiable', 'basis': 'a denial record without tool_input'})
+            continue
+        tool = item.get('tool_name'); tool_input = item['tool_input']
+        entry = {'tool': tool, 'tool_use_id': item.get('tool_use_id')}
+        if tool == 'Bash':
+            command = str(tool_input.get('command') or '')
+            entry['command'] = command[:1000]
+            entry['classification'], entry['basis'] = _classify_command(command, python, programs)
+        elif tool in ('Read', 'Write', 'Edit'):
+            path = str(tool_input.get('file_path') or '')
+            entry['path'] = path
+            entry['classification'], entry['basis'] = _classify_path(tool, path, repository, output_directories, readable_inputs)
+        else:
+            entry['classification'], entry['basis'] = 'not_prescribed', 'a tool the registration does not grant'
+        out.append(entry)
+    return out
+
+
+def denial_problems(classified):
+    """The denials that disqualify a run under the maintainer's ruling."""
+    return [f"denied {d['classification']} call ({d.get('tool') or 'unknown tool'}): {d['basis']}"
+            for d in classified if d.get('classification') in ('prescribed', 'unclassifiable')]
 
 
 def transcript_terminal_state(path):
@@ -190,6 +319,23 @@ ADMISSION_CLOSED = 'native admission is closed'
 CONTROLLER_PREFIX = 'controller: '
 
 
+def record_then_close(proxy, record_stop, reason):
+    """Record the controller's stop and close admission as one step (#2023,
+    #2029). Handlers write the ledger only under proxy.state, and the ledger's
+    file lock does not wait, so the record takes that same (reentrant) lock:
+    it neither collides with a handler's write nor lets a handler refused at
+    the closed admission write the first stop entry. Never raises."""
+    from contextlib import nullcontext
+    guard = getattr(proxy, 'state', None) or nullcontext()
+    with guard:
+        if record_stop is not None:
+            try:
+                record_stop(reason)
+            except Exception:
+                pass
+        proxy.close_admission()
+
+
 def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None):
     process = None
     deadline = time.monotonic() + deadline_seconds
@@ -203,11 +349,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                     raise BudgetStop(proxy.failure)
                 if time.monotonic() >= deadline:
                     stop = BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
-                    # Recorded before admission closes (the finally below), so
-                    # the ledger names the deadline and not the refusals an
-                    # in-flight handler meets afterwards (#2023).
-                    if record_stop is not None:
-                        record_stop(str(stop))
+                    record_then_close(proxy, record_stop, str(stop))
                     raise stop
                 time.sleep(0.05)
         if proxy.failed.is_set():
@@ -293,7 +435,8 @@ def main():
             receipt['exit_code']=execute_child(argv,proxy=proxy,instruction=job['instruction'],attempt=attempt,
                 cwd=base['repository'],env=env,deadline_seconds=base['generation']['agentic_attempt_deadline_seconds'],
                 verify_launch=lambda: verified_executable(overlay),
-                record_stop=lambda reason: record_controller_stop(ledger, billing_attempt, {'reason': reason}))
+                record_stop=lambda reason: receipt.update(
+                    pre_close_ledger_stop=record_controller_stop(ledger, billing_attempt, {'reason': reason})))
         if proxy.failed.is_set() or proxy.unfinished_handlers:
             raise BudgetStop(proxy.failure or 'native handlers did not finish before evidence freeze')
         events=[json.loads(line) for line in (attempt/'transcript.jsonl').read_text().splitlines() if line.strip()]
@@ -304,8 +447,15 @@ def main():
         init,terminal=initializers[0],finals[0]
         if init.get('model')!=base['model']['model'] or init.get('apiKeySource')!='ANTHROPIC_API_KEY' or init.get('claude_code_version')!=base['claude_version'].split()[0] or set(init.get('tools',[]))!={'Read','Write','Bash'}:
             raise BudgetStop('native runtime initialization differs from registration')
-        if receipt['exit_code'] or terminal.get('is_error') or terminal.get('permission_denials') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
-            raise BudgetStop('native attempt failed, stopped, or had a tool permission denial')
+        # Every denial is listed and classified; only a denied prescribed
+        # command (or an unclassifiable record) disqualifies, and it does so
+        # after every other check has run (#2026).
+        receipt['permission_denials']=classify_denials(terminal.get('permission_denials'),
+            instruction_text=Path(job['instruction']).read_text(encoding='utf-8'), python=base.get('python'),
+            repository=base['repository'], output_directories=job['output_directories'],
+            readable_inputs=[job.get('bundle'), job.get('chunks')])
+        if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
+            raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
             raise BudgetStop('native terminal model accounting differs from registration')
         observed=terminal['modelUsage'][base['model']['model']]
@@ -331,7 +481,7 @@ def main():
             if not evidence['checked'] or evidence['findings']:
                 problems = list(problems) + ['explicit evidence assertions failed']
         observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
-        problems=list(problems)+observation_problems(observed)
+        problems=list(problems)+observation_problems(observed)+denial_problems(receipt['permission_denials'])
         receipt.update(validation_problems=problems,pair_consistency=pair,
                        native_observed=observed,
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),

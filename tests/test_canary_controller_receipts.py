@@ -150,17 +150,18 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
 @pytest.mark.parametrize('arm', ['api','agentic'])
 @pytest.mark.parametrize('case, passed', [('valid',True), ('false_date',False), ('missing',False),
                                        ('redirected_provenance',False), ('usage_missing',False),
-                                       ('deadline_stop',False)])
+                                       ('deadline_stop',False), ('forbidden_denial',True), ('prescribed_denial',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
-    if case in ('usage_missing', 'deadline_stop') and arm == 'api':
+    if case in ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed_denial') and arm == 'api':
         pytest.skip('a terminal result and the attempt deadline are the native runtime\'s')
     # main() configures process globals; keep the synthetic launch isolated.
     monkeypatch.setattr(runner.os, 'environ', dict(runner.os.environ))
     monkeypatch.setattr(api_runner, 'MAX_ATTEMPTS', api_runner.MAX_ATTEMPTS)
     run = fixture_record(tmp_path, {'redirected_provenance': 'false_date', 'usage_missing': 'valid',
-                                    'deadline_stop': 'valid'}.get(case, case))
+                                    'deadline_stop': 'valid', 'forbidden_denial': 'valid',
+                                    'prescribed_denial': 'valid'}.get(case, case))
     registered_inputs = run.input_identity()
     pinned = {p:p.read_bytes() for p in (run.bundle,run.chunk_manifest)}
     lookups = redirect_to_historical_bytes(run, monkeypatch) if case == 'redirected_provenance' else []
@@ -171,7 +172,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     job = {'id':'example_'+arm, 'canary':True, 'execution_arm':arm, 'render_spec':{},
            'input_identity':registered_inputs, 'output_directories':[], 'outputs':{},
            'instruction':str(instruction), 'initial_request':str(initial), 'bundle':str(run.bundle)}
-    base = {'repository':str(tmp_path), 'claude_version':'offline',
+    base = {'repository':str(tmp_path), 'claude_version':'offline', 'python':sys.executable,
             'provider_base_url':'https://api.cborg.lbl.gov', 'model':{'model':'offline-model'},
             'budget':{'additional_usd':200, 'per_attempt_usd':5,
                       'ledger_path':str(tmp_path/'billing.json'), 'prices_per_token':{}},
@@ -222,6 +223,12 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             if case != 'usage_missing':
                 # The runtime's finalized accounting, which the completion gate requires (#2002/#2008).
                 terminal['usage']={'input_tokens':1,'output_tokens':1}
+            if case == 'forbidden_denial':
+                terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d1',
+                    'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli --help'}}]
+            if case == 'prescribed_denial':
+                terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d2',
+                    'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli receipts check --label L'}}]
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
                      'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
             if case == 'deadline_stop':
@@ -231,6 +238,9 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                     (json.dumps(events[0])+'\n').encode() + b'{"type":"assistant","message":{"id":"m1","content":"\xff\xfe')
                 reason = 'native attempt deadline elapsed; retain all incomplete charge reservations'
                 kwargs['record_stop'](reason)   # as execute_child does before closing admission (#2023)
+                # main()'s wiring must really write the ledger here, not later (#2030)
+                held = json.loads((tmp_path/'billing.json').read_bytes()).get('stopped_attempts') or {}
+                assert [v['reason'] for v in held.values()] == ['controller: ' + reason]
                 raise runner.BudgetStop(reason)
             (kwargs['attempt']/'transcript.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
             return 0
@@ -254,9 +264,19 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         (stop,) = state['stopped_attempts'].values()
         assert stop['reason'].startswith('controller: native attempt deadline elapsed')
         assert result['ledger_stop_recorded'] == stop['reason']
+        assert result['pre_close_ledger_stop'] == {'ledger_stop_recorded': stop['reason']}
         return
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
+    if case in ('forbidden_denial', 'prescribed_denial'):
+        # Every denial is listed and classified; only the prescribed one disqualifies (#2026).
+        (denial,) = result['permission_denials']
+        assert denial['classification'] == ('not_prescribed' if case == 'forbidden_denial' else 'prescribed')
+        assert result['receipt_acceptance']['passed'] is True
+        problems = [p for p in result['validation_problems'] if p.startswith('denied ')]
+        assert len(problems) == (0 if case == 'forbidden_denial' else 1)
+        assert 'stopped' != result['status']
+        return
     if case == 'usage_missing':
         # The receipt passed; the transcript's missing finalized accounting is what refused completion (#2002).
         assert check['passed'] is True

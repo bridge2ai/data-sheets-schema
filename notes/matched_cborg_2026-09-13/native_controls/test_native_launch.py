@@ -319,6 +319,14 @@ def _deadline_while_counting(tmp_path, *, record_first):
         time.sleep(0.2)   # returns inside running()'s cleanup window
         return SimpleNamespace(input_tokens=100)
     proxy.messages.client.messages.count_tokens = count
+    at_close = {}
+    original_close = proxy.close_admission
+    def close_and_snapshot():
+        # What the ledger holds at the moment admission first closes (#2029).
+        if 'stops' not in at_close:
+            at_close['stops'] = json.loads(ledger.path.read_bytes()).get('stopped_attempts') if ledger.path.exists() else None
+        original_close()
+    proxy.close_admission = close_and_snapshot
     attempt = tmp_path / 'attempt'; attempt.mkdir()
     instruction = tmp_path / 'instruction.txt'; instruction.write_text('offline')
     child = ("import json,os,time,urllib.request\n"
@@ -340,6 +348,7 @@ def _deadline_while_counting(tmp_path, *, record_first):
         receipt.update(rnc.transcript_terminal_state(attempt / 'transcript.jsonl'))
         receipt.update(rnc.record_controller_stop(ledger, 'native-offline', receipt))
     assert counting.is_set() and calls == []
+    receipt['stops_at_close'] = at_close.get('stops')
     return receipt, json.loads(ledger.path.read_bytes()).get('stopped_attempts')
 
 
@@ -349,6 +358,8 @@ def test_a_deadline_during_an_in_flight_request_is_recorded_as_the_deadline(tmp_
     assert receipt['reason'].startswith('native attempt deadline elapsed')
     assert stops['native-offline']['reason'].startswith('controller: native attempt deadline elapsed')
     assert receipt['ledger_stop_recorded'] == stops['native-offline']['reason']
+    # the deadline was already in the ledger when admission closed (#2029)
+    assert receipt['stops_at_close']['native-offline']['reason'].startswith('controller: native attempt deadline elapsed')
 
 
 def test_the_admission_closed_consequence_never_masks_a_controller_stop(tmp_path):
@@ -359,3 +370,114 @@ def test_the_admission_closed_consequence_never_masks_a_controller_stop(tmp_path
     assert receipt['reason_source'] == 'controller' and receipt['reason'].startswith('native attempt deadline elapsed')
     assert 'consequence' not in receipt['reason'] and 'refused after the controller closed admission' in receipt['ledger_stop_note']
     assert receipt['ledger_stop_record_note'] == 'the ledger already held a stop entry: native admission is closed'
+
+
+PY = '/opt/env/bin/python'
+SNAPSHOT = ("from pathlib import Path\nimport hashlib, json\npairs = [('out/full.yaml', 'out/evidence/original_full.yaml')]\n"
+            "pins = {}\nfor src, dst in pairs:\n    raw = Path(src).read_bytes()\n    pins[dst] = hashlib.sha256(raw).hexdigest()\n"
+            "print(json.dumps({'original_sha256': pins}, sort_keys=True))\n")
+VALIDATE = 'from linkml.validator.cli import cli; cli()'
+
+
+def _instruction():
+    import shlex
+    return (f"VALIDATE both files:\n\n    {PY} -c '{VALIDATE}' -s /repo/schema_all.yaml -C Dataset <full>\n\n"
+            f"Freeze the originals:\n\n{PY} -c {shlex.quote(SNAPSHOT)}\n\nThen run {PY} -m data_sheets_schema.cli derive core --full x\n")
+
+
+def _classify(*denials):
+    from run_native_canary import classify_denials
+    return classify_denials(list(denials), instruction_text=_instruction(), python=PY, repository='/repo',
+                            output_directories=['out', 'out_core'], readable_inputs=['data/bundle.txt', 'data/chunks.yaml'])
+
+
+def _bash(command):
+    return {'tool_name': 'Bash', 'tool_use_id': 't', 'tool_input': {'command': command, 'description': 'x'}}
+
+
+def test_the_instruction_programs_are_read_verbatim_including_the_multi_line_one():
+    from run_native_canary import prescribed_programs
+    assert prescribed_programs(_instruction(), PY) == {VALIDATE, SNAPSHOT.strip()}
+
+
+def test_denials_of_forbidden_commands_are_listed_and_not_disqualifying():
+    """#2026: the shapes the v10q and v10r runs were denied, all forbidden by the system prompt."""
+    import shlex
+    from run_native_canary import denial_problems
+    forbidden = [
+        _bash(f'{PY} -m data_sheets_schema.cli --help 2>&1 | head -60'),
+        _bash(f'{PY} -m data_sheets_schema.cli --help'),
+        _bash(f'{PY} -m data_sheets_schema.cli schema --help'),
+        _bash(f'{PY} -m data_sheets_schema.cli agents digest 2>&1 | head -30'),
+        _bash(f"{PY} - <<'PY' > /tmp/digest.txt\nprint(1)\nPY"),
+        _bash(f'{PY} -c {shlex.quote("import sys; print(sys.argv)")}'),
+        _bash("cat >> out/receipt.yaml <<'EOF'\n- id: c002\nEOF"),
+        _bash('grep -o "python -c" /repo/cli_config/projects/session.jsonl'),
+        _bash('grep -n "Leadership" data/bundle.txt | head -20; grep -n "Cohort" data/bundle.txt'),
+        {'tool_name': 'Write', 'tool_use_id': 'w', 'tool_input': {'file_path': '/tmp/scratch/digest.py', 'content': 'x'}},
+        {'tool_name': 'WebFetch', 'tool_use_id': 'f', 'tool_input': {'url': 'https://example.org'}},
+    ]
+    classified = _classify(*forbidden)
+    assert [d['classification'] for d in classified] == ['not_prescribed'] * len(forbidden)
+    assert all(d['basis'] for d in classified) and denial_problems(classified) == []
+
+
+def test_a_denied_prescribed_command_disqualifies():
+    import shlex
+    from run_native_canary import denial_problems
+    prescribed = [
+        _bash(f'{PY} -m data_sheets_schema.cli receipts check --label L --project P --strict'),
+        _bash(f'{PY} -m data_sheets_schema.cli --manifest /repo/manifest.yaml download priority --project P'),
+        _bash(f'{PY} -m data_sheets_schema.agentic_observed --bundle data/bundle.txt t.jsonl'),
+        _bash(f"{PY} -c '{VALIDATE}' -s /repo/schema_all.yaml -C Dataset out/full.yaml"),
+        _bash(f'{PY} -c {shlex.quote(SNAPSHOT)}'),
+        {'tool_name': 'Write', 'tool_use_id': 'w', 'tool_input': {'file_path': '/repo/out/full.yaml', 'content': 'x'}},
+        {'tool_name': 'Read', 'tool_use_id': 'r', 'tool_input': {'file_path': 'data/bundle.txt'}},
+    ]
+    classified = _classify(*prescribed)
+    assert [d['classification'] for d in classified] == ['prescribed'] * len(prescribed), classified
+    assert len(denial_problems(classified)) == len(prescribed)
+    # a roster command whose form the system prompt forbids is not the prescribed command
+    assert _classify(_bash(f'{PY} -m data_sheets_schema.cli receipts check --label L; ls'))[0]['classification'] == 'not_prescribed'
+    # a command outside the roster, and the mentioned-not-prescribed backfill, are not prescribed
+    assert _classify(_bash(f'{PY} -m data_sheets_schema.cli provenance backfill --label L'))[0]['classification'] == 'not_prescribed'
+
+
+def test_an_unreadable_denial_record_disqualifies():
+    from run_native_canary import classify_denials, denial_problems
+    kw = dict(instruction_text='', python=PY, repository='/repo', output_directories=[], readable_inputs=[])
+    assert classify_denials(None, **kw) == [] and classify_denials([], **kw) == []
+    odd = classify_denials({'tool_name': 'Bash'}, **kw)
+    assert odd[0]['classification'] == 'unclassifiable' and denial_problems(odd)
+    assert classify_denials(['Bash'], **kw)[0]['classification'] == 'unclassifiable'
+
+
+def test_the_pre_close_record_waits_for_a_handler_holding_the_proxy_state(tmp_path):
+    """#2029: the controller's record takes proxy.state, so a handler writing
+    the ledger under it is not interrupted by a lock Timeout, and the
+    controller's entry still lands before admission closes."""
+    import threading, time
+    from test_native_proxy import fixture_proxy
+    from run_native_canary import record_then_close, record_controller_stop
+    proxy, ledger, calls = fixture_proxy(tmp_path)
+    ready, outcome = threading.Event(), {}
+    def handler():
+        with proxy.state:
+            with ledger.transaction() as state:
+                ready.set(); time.sleep(0.3)
+                state.setdefault('handler_note', 'written')
+        outcome['handler'] = 'ok'
+    thread = threading.Thread(target=handler); thread.start(); ready.wait(5)
+    seen = {}
+    record_then_close(proxy, lambda reason: seen.update(r=record_controller_stop(ledger, 'native-offline', {'reason': reason})),
+                      'native attempt deadline elapsed')
+    thread.join(5)
+    state = json.loads(ledger.path.read_bytes())
+    assert outcome == {'handler': 'ok'} and state['handler_note'] == 'written'
+    assert seen['r'] == {'ledger_stop_recorded': 'controller: native attempt deadline elapsed'}
+    assert state['stopped_attempts']['native-offline']['reason'] == 'controller: native attempt deadline elapsed'
+    assert proxy.closed
+    # a record that raises never prevents admission from closing
+    proxy2, _, _ = fixture_proxy(tmp_path / 'second')
+    record_then_close(proxy2, lambda reason: 1 / 0, 'x')
+    assert proxy2.closed
