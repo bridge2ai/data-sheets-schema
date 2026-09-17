@@ -1195,7 +1195,7 @@ def _own_sentences() -> frozenset:
     never changes within a process (#1191 round 5, NOTES)."""
     import itertools
     out = set(_LEGACY_REASONING_SENTENCES)
-    keys = list(_REASONING_KEYS)
+    keys = list(_REASONING_KEYS | _ACCOUNTING_KEYS)
     for n in range(len(keys) + 1):
         for combo in itertools.combinations(keys, n):
             # `named` is `extended ∩ keys`, so a superset of `combo` yields the
@@ -1273,6 +1273,14 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
     elif present:
         parts.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
                      "measured for this run.")
+    if "usage_from_terminal_result" in keys:
+        parts.append(" usage_from_terminal_result counts the sessions whose total_tokens and output_tokens are the "
+                     "runtime's own finalized accounting, its terminal result, where the estimate is the subtraction "
+                     "pooled over the session (#1931/#1957).")
+    if "terminal_results_excluded_by_cut" in keys:
+        parts.append(" terminal_results_excluded_by_cut counts the sessions whose finalized result the "
+                     "run_observed_until cut set aside, so their totals are per-message snapshots and incomplete "
+                     "(#1945).")
     named = sorted(k for k in (extended or ()) if k in keys)
     if parts and named:
         # No clause where the extension names no key the observation still
@@ -1410,7 +1418,7 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
              "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat()}
     entries.append(entry)
     log["run_observed_extended"] = entries
-    text, appended, terminated, edited = _basis_parts(log, set(log["run_observed"]) & _REASONING_KEYS)
+    text, appended, terminated, edited = _basis_parts(log, set(log["run_observed"]) & (_REASONING_KEYS | _ACCOUNTING_KEYS))
     # What this extension appended, so the next one removes this text and
     # not a sentence that merely reads like it (#1195 M2).
     entry["basis_added"] = appended
@@ -1559,11 +1567,14 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
     # only two of the estimate keys skipped a record for good while it still
     # lacked assistant_turns, thinking_blocks and the character counts
     # (#1195 M4).
+    # (#1955: such a record is still observed, because the accounting keys —
+    # usage_from_terminal_result, terminal_results_excluded_by_cut — may be
+    # what the observation adds; when it adds nothing the command says so.)
     if _REASONING_KEYS <= set(prior) or (
             set(_ESTIMATE_KEYS) <= set(prior) and "thinking_tokens" not in prior
             and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or []) and
                     "transcripts" in e for e in (log.get("run_observed_extended") or []))):
-        click.echo(f"{tag}: already carries the reasoning measure"); return
+        click.echo(f"{tag}: already carries the reasoning measure; observing for the accounting keys")
     inputs = data.get("inputs") or {}
     bpath, md5 = inputs.get("bundle_path"), inputs.get("bundle_md5")
     if not bpath or not md5:
@@ -1632,6 +1643,23 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                 differ.append("malformed_message_events")
             results.append((ts, obs, differ))
     matches = [(ts, obs) for ts, obs, differ in results if not differ]
+    equivalent: list = []
+    if len(matches) > 1:
+        # A copy cut short beside the complete transcript makes [full] and
+        # [prefix, full] the same evidence (#1944/#1954): a candidate set
+        # that is a strict superset of another and observes exactly the
+        # same thing adds no evidence and collapses onto the smaller set,
+        # named in the record. Two distinct transcripts that each reproduce
+        # the record stay ambiguous: neither contains the other.
+        import json as _json
+        keep = []
+        for cand, o in matches:
+            names = {t.name for t in cand}
+            subsumed = any({t.name for t in other} < names and _json.dumps(oo, sort_keys=True) == _json.dumps(o, sort_keys=True)
+                           for other, oo in matches)
+            (equivalent if subsumed else keep).append((cand, o))
+        equivalent = [[t.name for t in cand] for cand, _o in equivalent]
+        matches = keep
     if len(matches) != 1:
         click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
                    + ("; nothing written" if execute else ""))
@@ -1657,9 +1685,14 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                    for cand, o, _d in results if cand is not ts]
     identification = {"sets_tried": len(results), "prior_keys": len(prior),
                       "discriminating_keys": disc,
+                      **({"equivalent_sets": equivalent} if equivalent else {}),
                       "best_other_reproduces": max(others) if others else None,
                       "best_other_reproduces_discriminating": max(others_disc) if others_disc else None}
-    added = sorted((set(obs) - set(prior)) & _REASONING_KEYS)          # the set --execute writes (round 2, S4)
+    added = sorted((set(obs) - set(prior)) & (_REASONING_KEYS | _ACCOUNTING_KEYS))   # the set --execute writes (round 2, S4; #1956)
+    if not added:
+        click.echo(f"{tag}: nothing to extend: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s) "
+                   "and adds nothing; the record already carries every reasoning and accounting key the observation has")
+        return
     click.echo(f"{tag}: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s); adds {added}")
     if not execute:
         click.echo("   (report only; --execute writes the extension)"); return
@@ -1793,7 +1826,7 @@ def annotate_observed(project, method, label, run_observed, until, extend):
     # A cut the record carries is never removed by a call that did not name
     # one (#1191 rounds 1 and 2, M1): the cut is part of the observation.
     log["run_observed_basis"] = (_RUN_OBSERVED_BASIS + (_CUT_BASIS if log.get("run_observed_until") else "")
-                                 + _reasoning_basis(set(observed) & _REASONING_KEYS,
+                                 + _reasoning_basis(set(observed) & (_REASONING_KEYS | _ACCOUNTING_KEYS),
                                                     extended={k for e in (log.get("run_observed_extended") or [])
                                                               if isinstance(e, dict) for k in (e.get("keys_added") or [])}))
     rec = ProvenanceRecord(data=data)

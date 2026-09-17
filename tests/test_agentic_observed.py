@@ -410,3 +410,65 @@ class OverlappingTranscripts(unittest.TestCase):
                                     json.dumps({"timestamp": "2026-09-16T21:00:02Z", "type": "system", "uuid": "s"})]) + "\n")
             obs = ao.observe([t], bundle, None, None, None)
         self.assertEqual(obs["malformed_message_events"], 2)
+
+
+class TerminalCoverage(unittest.TestCase):
+    """Codex round 5 on #1920 (#1950–#1953): a terminal result covers its own
+    file's messages; active time is the union of the files' spans; a
+    finalized result the cut excludes is marked; and events after a
+    completed result do not invalidate it."""
+
+    @staticmethod
+    def _terminal(output, ts=None, uuid="r"):
+        d = {"type": "result", "message": "done", "uuid": uuid,
+             "usage": {"input_tokens": 10, "cache_creation_input_tokens": 0,
+                       "cache_read_input_tokens": 0, "output_tokens": output}}
+        if ts:
+            d["timestamp"] = ts
+        return json.dumps(d)
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("x\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_a_continuation_beyond_the_finalized_file_keeps_snapshot_accounting(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(100)])
+        b = self._file("b.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   _event("2026-09-16T21:00:30Z", usage={"output_tokens": 9}, msg_id="m2")])
+        ab = ao.observe([a, b], self.bundle, None, None, None); ba = ao.observe([b, a], self.bundle, None, None, None)
+        self.assertEqual(ab["output_tokens"], 109); self.assertEqual(ab["assistant_turns"], 2)
+        self.assertEqual(ab["usage_from_terminal_result"], 1); self.assertEqual(ab, ba)
+
+    def test_two_overlapping_finalized_files_choose_deterministically(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(100)])
+        b = self._file("b.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(200)])
+        ab = ao.observe([a, b], self.bundle, None, None, None); ba = ao.observe([b, a], self.bundle, None, None, None)
+        self.assertEqual(ab["output_tokens"], 200); self.assertEqual(ab, ba)
+
+    def test_active_time_is_the_union_of_the_files_spans(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   _event("2026-09-16T21:01:00Z", usage={"output_tokens": 3}, msg_id="m1")])
+        b = self._file("b.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   _event("2026-09-16T22:00:00Z", usage={"output_tokens": 4}, msg_id="m2"),
+                                   _event("2026-09-16T22:01:00Z", usage={"output_tokens": 4}, msg_id="m2")])
+        self.assertEqual(ao.observe([a, b], self.bundle, None, None, None)["duration_ms"], 120_000)
+        self.assertEqual(ao.observe([b, a], self.bundle, None, None, None)["duration_ms"], 120_000)
+
+    def test_a_finalized_result_the_cut_excludes_is_marked(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   self._terminal(100, ts="2026-09-16T21:05:00Z")])
+        obs = ao.observe([t], self.bundle, datetime.fromisoformat("2026-09-16T21:02:00+00:00"), None, None)
+        self.assertEqual(obs["output_tokens"], 3); self.assertEqual(obs["terminal_results_excluded_by_cut"], 1)
+
+    def test_events_after_a_completed_result_do_not_invalidate_it(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   self._terminal(100, ts="2026-09-16T21:01:00Z"),
+                                   json.dumps({"timestamp": "2026-09-16T21:02:00Z", "type": "user", "uuid": "u",
+                                               "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "x", "content": "late"}]}})])
+        obs = ao.observe([t], self.bundle, datetime.fromisoformat("2026-09-16T21:01:00+00:00"), None, None)
+        self.assertEqual(obs["output_tokens"], 100); self.assertEqual(obs["usage_from_terminal_result"], 1)
+        self.assertNotIn("terminal_results_excluded_by_cut", obs)

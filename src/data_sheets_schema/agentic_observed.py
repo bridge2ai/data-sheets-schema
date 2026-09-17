@@ -168,7 +168,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
     malformed = 0
     for path in transcripts:
         f = {"path": path, "usage": {}, "blocks": {}, "tools": {}, "searches": set(), "reads": {},
-             "failed": set(), "first": None, "last": None, "terminal": None, "cut": False}
+             "failed": set(), "events": {}, "terminal": None, "terminal_line": None,
+             "cut_before_terminal": False, "terminal_excluded": False, "excluded_measurements": []}
         with path.open(encoding="utf-8") as fh:
             for n, line in enumerate(fh):
                 try:
@@ -182,15 +183,23 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                     if until is not None and t > until:
-                        # An excluded measurement event means a terminal
-                        # result of this file describes more than the
-                        # interval; an excluded informational line does not
-                        # (#1936/#1945).
+                        # An excluded measurement event that precedes the
+                        # file's terminal result means that result describes
+                        # more than the interval; one after it — the
+                        # orchestrator's trailing events — does not (#1953),
+                        # and an excluded informational line never does
+                        # (#1936/#1945). A terminal result the cut itself
+                        # excludes is recorded before it is skipped, so the
+                        # observation can say a finalized result was set
+                        # aside (#1952).
                         if measurement:
-                            f["cut"] = True
+                            f["excluded_measurements"].append(n)
+                        elif j.get("type") == "result" and isinstance(j.get("usage"), dict):
+                            f["terminal_excluded"] = True
                         continue
-                    f["first"] = f["first"] or t
-                    f["last"] = t
+                    # The event's identity, for telling a replayed line from
+                    # a new one (#1951): the runtime's uuid, else the line.
+                    f["events"][j.get("uuid") or line.strip()] = t
                 if j.get("type") in ("assistant", "user") and not isinstance(raw, dict):
                     # Claude Code 2.1.272 stream-json writes informational
                     # lines (`system`, `result`, …) with a string `message`
@@ -205,7 +214,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     # session: assistant events in stream-json carry only
                     # initial usage snapshots, so the per-message maximum
                     # undercounts by two orders of magnitude (#1931).
-                    f["terminal"] = j["usage"]
+                    f["terminal"] = j["usage"]; f["terminal_line"] = n
                 usage = msg.get("usage") or {}
                 if usage:
                     mid = msg.get("id") or f"{path}:{j.get('uuid')}"
@@ -234,6 +243,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         f["reads"][tid] = (start, start + int(inp.get("limit") or READ_DEFAULT_LINES))
                     elif bundle_name in json.dumps(inp):
                         f["searches"].add(tid)
+        if f["terminal_line"] is not None:
+            f["cut_before_terminal"] = any(i < f["terminal_line"] for i in f["excluded_measurements"])
         files.append(f)
     sessions = _sessions(files)
     tools: set = set()
@@ -243,7 +254,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
     for f in files:
         tools.update(f["tools"]); searches.update(f["searches"])
         read_windows.update(f["reads"]); failed.update(f["failed"])
-    duration_ms = 0
+    spans = _spans(files)
     out = {"total_tokens": 0, "tool_uses": len(tools)}
     measure: dict[str, int] = {}
     from_terminal = excluded = 0
@@ -257,23 +268,34 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     usage_by_msg[mid] = u
             for mid, parts in f["blocks"].items():
                 blocks_by_msg.setdefault(mid, {}).update(parts)
-        firsts = [f["first"] for f in members if f["first"]]
-        lasts = [f["last"] for f in members if f["last"]]
-        if firsts and lasts:
-            duration_ms += int((max(lasts) - min(firsts)).total_seconds() * 1000)
-        cut = any(f["cut"] for f in members)
-        carriers = sorted((f for f in members if f["terminal"] is not None), key=lambda f: len(f["usage"]))
-        terminal = carriers[-1]["terminal"] if carriers else None
-        total, m = _invocation_measure(usage_by_msg, blocks_by_msg, None if cut else terminal)
-        if terminal is not None:
-            if cut:
-                excluded += 1
-            else:
-                from_terminal += 1
+        # A terminal result covers the messages of its own file and no
+        # others (#1950): the file chosen is the usable one that saw the
+        # most messages, then the larger finalized output, then the name —
+        # never the order given — and messages outside it keep snapshot
+        # accounting. A terminal result the cut set aside, or that an
+        # excluded measurement event preceded, is not usable.
+        usable = [f for f in members if f["terminal"] is not None
+                  and not f["terminal_excluded"] and not f["cut_before_terminal"]]
+        set_aside = [f for f in members if f["terminal_excluded"] or (f["terminal"] is not None and f not in usable)]
+        chosen = max(usable, key=lambda f: (len(f["usage"]), int(f["terminal"].get("output_tokens", 0) or 0),
+                                            str(f["path"]))) if usable else None
+        covered = set(chosen["usage"]) if chosen else set()
+        total, m = _invocation_measure({k: v for k, v in usage_by_msg.items() if k in covered},
+                                       {k: v for k, v in blocks_by_msg.items() if k in covered},
+                                       chosen["terminal"] if chosen else None)
+        rest_total, rest = _invocation_measure({k: v for k, v in usage_by_msg.items() if k not in covered},
+                                               {k: v for k, v in blocks_by_msg.items() if k not in covered}, None)
+        total += rest_total
+        for k, v in rest.items():
+            m[k] = m.get(k, 0) + v
+        if chosen is not None:
+            from_terminal += 1
+        elif set_aside:
+            excluded += 1
         out["total_tokens"] += total
         for k, v in m.items():
             measure[k] = measure.get(k, 0) + v
-    out["duration_ms"] = duration_ms
+    out["duration_ms"] = _active_ms(spans)
     out.update(measure)
     if from_terminal:
         out["usage_from_terminal_result"] = from_terminal
@@ -298,6 +320,50 @@ def observe(transcripts: list[Path], bundle: Path | None,
     if malformed:
         out["malformed_message_events"] = malformed
     return out
+
+
+def _spans(files: list[dict]) -> list:
+    """Each invocation's active span, with replays told apart (#1951): a
+    file whose timestamped events all appear in another file is a copy cut
+    short and spans nothing of its own; among the rest, the invocation that
+    ended first owns the events it shares with a later one, and the later
+    file — a resumed session re-listing history with its original
+    timestamps — spans only the events left to it, so the gap before its
+    own first event is not active time."""
+    real = []
+    for f in files:
+        ids = set(f["events"])
+        if not ids:
+            continue
+        if any(g is not f and (ids < set(g["events"]) or (ids == set(g["events"]) and str(g["path"]) < str(f["path"])))
+               for g in files if g["events"]):
+            continue
+        real.append(f)
+    real.sort(key=lambda f: (max(f["events"].values()), str(f["path"])))
+    claimed: set = set()
+    spans = []
+    for f in real:
+        own = [t for i, t in f["events"].items() if i not in claimed]
+        claimed.update(f["events"])
+        if own:
+            spans.append((min(own), max(own)))
+    return sorted(spans)
+
+
+def _active_ms(spans: list) -> int:
+    """Milliseconds covered by the union of the (first, last) spans."""
+    total = 0
+    end = None
+    for a, b in spans:
+        if end is not None and a <= end:
+            end = max(end, b)
+            continue
+        if end is not None:
+            total += int((end - start).total_seconds() * 1000)
+        start, end = a, b
+    if end is not None:
+        total += int((end - start).total_seconds() * 1000)
+    return total
 
 
 def _sessions(files: list[dict]) -> list[list[dict]]:

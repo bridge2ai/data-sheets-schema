@@ -683,3 +683,43 @@ class AccountingKeysExtend(unittest.TestCase):
         log2 = {"run_observed": dict(FULL)}
         added = cli._extend_run_observed(log2, {**FULL, "terminal_results_excluded_by_cut": 1}, recorded_by="t", instrument="t")
         self.assertEqual(added, ["terminal_results_excluded_by_cut"])
+
+
+class EquivalentCandidates(unittest.TestCase):
+    """#1954–#1957: equivalent candidate sets collapse; a record carrying every
+    reasoning key still gains the accounting keys; preview and execution
+    add the same keys; the basis explains the accounting keys."""
+
+    def test_identical_observations_collapse_to_the_smallest_set(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); t1, t2 = _transcripts(tmp, ["agent-av6-P-rep1", "agent-av6-P-rep1x"])
+            obs = {**FULL, "usage_from_terminal_result": 1}
+            # t1 is a copy cut short: alone it does not reproduce, beside t2 it adds nothing
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1x": obs, "agent-av6-P-rep1+agent-av6-P-rep1x": obs},
+                                 transcripts=[t1, t2])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+            self.assertIn("usage_from_terminal_result", r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            (ext,) = log["run_observed_extended"]
+            self.assertEqual(ext["transcripts"], [t2.name])
+            self.assertEqual(ext["identification"]["equivalent_sets"], [[t1.name, t2.name]])
+            self.assertIn("usage_from_terminal_result", ext["keys_added"])
+            self.assertIn("usage_from_terminal_result counts", log["run_observed_basis"])
+            self.assertIn("usage_from_terminal_result counts", ext["basis_added"])
+
+    def test_a_record_with_every_reasoning_key_still_gains_the_accounting_keys(self):
+        every = {**PRIOR, **{k: 1 for k in cli._REASONING_KEYS}}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp, prior=every); (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**every, "terminal_results_excluded_by_cut": 1}}, transcripts=[t])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            self.assertEqual(log["run_observed"]["terminal_results_excluded_by_cut"], 1)
+            self.assertIn("set aside", log["run_observed_basis"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**every, "terminal_results_excluded_by_cut": 1}}, transcripts=[t])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("adds nothing", r.output)
+
+    def test_accounting_sentences_are_recognised_for_stripping(self):
+        own = cli._own_sentences()
+        for s in cli._split_sentences(cli._reasoning_basis({"usage_from_terminal_result", "terminal_results_excluded_by_cut"})):
+            self.assertIn(s, own)
