@@ -12,14 +12,16 @@ lifted (#1917). A time cap had replaced the cost cap (#2010).
 
 ## What the run produced before the stop
 
-- Phase 1: the coverage receipt for all **8 of 8 chunks**, each chunk read
-  with the file tool and its receipt entry written before the next chunk
-  (the #1918 protocol held); **1,698 of 1,698 bundle lines** read, 0 chunks
-  unopened; 10 bundle searches, counted separately.
-- Phase 2: the full record (validated after a repair of date-typed values the
-  first draft wrote unquoted), the derived core, and the evidence originals of
-  both. The receipts check on the final receipt read
+- Phase 1 (chunk review, receipt, full record, receipts-check gate): the
+  coverage receipt for all **8 of 8 chunks**, each chunk read with the file
+  tool and its receipt entry written before the next chunk (the per-chunk
+  ordering held); **1,698 of 1,698 bundle lines** read, 0 chunks unopened;
+  10 bundle searches, counted separately; the full record, validated after
+  a repair of date-typed values the first draft wrote unquoted; the receipts
+  check on the final receipt read
   `chunks 8/8 reviewed · snippets 96/96 verified · slots 80/140 with a receipt (24 exempt)`.
+- Phase 2 (core derivation): the derived core and the evidence originals of
+  both records.
 - Phase 3 (source review inventory) was in progress at the stop. No audit,
   no provenance record, no report.
 
@@ -28,9 +30,9 @@ lifted (#1917). A time cap had replaced the cost cap (#2010).
 | check | result |
 |---|---|
 | receipt entry per chunk with the file tool before the next chunk | held, 8/8 |
-| receipts check passed before any Phase 2 command | **failed**: the full record was written at 06:28; the first receipts check ran at 06:35 and read the receipt as unreadable YAML; the receipt was rewritten and the check passed at 06:37 (#2011) |
+| receipts check passed before any Phase 2 command | held: the first receipts check at 06:35 read the receipt as unreadable YAML, the receipt was rewritten, the check passed at 06:37:10, and the first Phase 2 command (core derivation) ran at 06:37:18 (#2013 for the unreadable first draft) |
 | zero permission denials | **failed**: 5 denials, every one an attempt at a command the pinned system prompt forbids — `--help` on the CLI, a python heredoc, two greps over the runtime's own session file, a chained `grep | head; grep` over the bundle (#2012); the allowlist held |
-| ledger reason on a stopped receipt | not applicable: the stop was the controller's deadline, recorded on the receipt with `reason_source: controller`; no ledger stop occurred |
+| ledger reason on a stopped receipt | **not met as written**: the receipt carries the controller's deadline reason with `reason_source: controller`, not a ledger reason, because no ledger stop occurred; the criterion as the README states it admits no controller-stop case, a wording limitation of the registration |
 
 Other errors in the history: `download priority` invoked with an option the
 command does not take, and one Write refused because the file had not been
@@ -42,8 +44,9 @@ accounting is the ledger's.
 
 ## Accounting and disposition
 
-Every admitted request settled in the private ledger; the one request in
-flight at the stop keeps its reservation, as the policy requires. Settled
+Every completed request settled in the private ledger; the one admitted
+request interrupted by the stop remains reserved and unsettled, as the policy
+requires. Settled
 totals, the reservation and the remaining allocation stay in the private
 accounting.
 
@@ -56,5 +59,7 @@ registration in which the attempt deadline is sized deliberately, the Phase 1
 gate is enforced rather than instructed, and the denial policy is decided —
 and the maintainer's explicit approval to spend again.
 
-Issues: #2010 (deadline), #2011 (gate ordering), #2012 (denials), #2013
-(command errors), #2014 (no terminal result on a deadline stop).
+Issues: #2010 (deadline), #2012 (denials), #2013 (command errors and the
+unreadable first receipt), #2014 (no terminal result on a deadline stop);
+#2011 was withdrawn (filed on a wrong phase assignment) and #2016 records the
+corrections to this note.

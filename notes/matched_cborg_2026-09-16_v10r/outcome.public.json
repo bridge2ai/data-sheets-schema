@@ -14,17 +14,17 @@
   "model_requests_admitted": 83,
   "phase_at_stop": "source review inventory (Phase 3)",
   "artifacts_written": [
-    "coverage receipt (8/8 chunks)",
-    "full record",
-    "derived core",
+    "coverage receipt (8/8 chunks), Phase 1",
+    "full record, Phase 1",
+    "derived core, Phase 2",
     "evidence originals"
   ],
   "receipt_check_final": "chunks 8/8 reviewed; snippets 96/96 verified; slots 80/140 with a receipt (24 exempt)",
   "tool_history_checks": {
     "receipt_entry_per_chunk_with_file_tool": "held",
-    "receipts_check_before_phase_2": "failed",
+    "receipts_check_before_phase_2": "held (check passed 06:37:10; core derivation 06:37:18)",
     "permission_denials": 5,
-    "ledger_reason_on_stopped_receipt": "not applicable (controller deadline)"
+    "ledger_reason_on_stopped_receipt": "not met as written (controller deadline reason, reason_source controller; no ledger stop occurred)"
   },
   "transcript_observation": {
     "tool_uses": 98,
@@ -33,13 +33,16 @@
     "receipt_chunks_unopened": 0,
     "terminal_result": "absent (child stopped at the deadline); token figures are snapshots, not the run's accounting"
   },
-  "accounting": "settled in the private ledger; one interrupted reservation retained; figures private",
+  "accounting": "completed requests settled in the private ledger; the interrupted admitted request remains reserved and unsettled; figures private",
   "disposition": "not accepted; never resumed; preserved privately; expansion stopped",
   "issues": [
     2010,
-    2011,
     2012,
     2013,
-    2014
+    2014,
+    2016
+  ],
+  "withdrawn_issues": [
+    2011
   ]
 }
