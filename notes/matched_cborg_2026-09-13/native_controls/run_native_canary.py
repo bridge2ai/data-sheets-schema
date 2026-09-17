@@ -519,13 +519,21 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 if proxy.failed.is_set():
                     raise BudgetStop(proxy.failure)
                 if time.monotonic() >= deadline:
-                    stop = BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
-                    record_then_close(proxy, record_stop, str(stop))
-                    raise stop
+                    raise BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
                 time.sleep(0.05)
         if proxy.failed.is_set():
             raise BudgetStop(proxy.failure)
         return process.returncode
+    except BaseException as exc:
+        # Record every controller-originated failure before shutdown (#2042). An
+        # in-flight counter can otherwise write "admission is closed" first
+        # and hide an interrupt or unexpected exception behind that symptom.
+        # A proxy failure already has its own cause; preserve it unchanged.
+        failed = getattr(proxy, 'failed', None)
+        if failed is None or not failed.is_set():
+            reason = str(exc) if isinstance(exc, BudgetStop) else f'unexpected {type(exc).__name__}'
+            record_then_close(proxy, record_stop, reason)
+        raise
     finally:
         # This runs INSIDE proxy.running(), before server/pool cleanup.
         proxy.close_admission()
@@ -614,7 +622,10 @@ def main():
                     pre_close_ledger_stop=record_controller_stop(ledger, billing_attempt, {'reason': reason})))
         if proxy.failed.is_set() or proxy.unfinished_handlers:
             raise BudgetStop(proxy.failure or 'native handlers did not finish before evidence freeze')
-        events=[json.loads(line) for line in (attempt/'transcript.jsonl').read_text().splitlines() if line.strip()]
+        # JSONL separates records with physical newlines (#2043). Unicode NEL/line/
+        # paragraph separators can appear literally inside valid JSON strings.
+        with (attempt/'transcript.jsonl').open(encoding='utf-8') as transcript:
+            events=[json.loads(line) for line in transcript if line.strip()]
         initializers=[e for e in events if e.get('type')=='system' and e.get('subtype')=='init']
         finals=[e for e in events if e.get('type')=='result']
         if len(initializers)!=1 or len(finals)!=1:

@@ -148,7 +148,8 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
 
 
 NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed_denial', 'late_stop_denial',
-               'init_mismatch_denial', 'evidence_unreadable', 'manifest_read_denial', 'interrupted')
+               'init_mismatch_denial', 'evidence_unreadable', 'manifest_read_denial', 'interrupted',
+               'unicode_jsonl')
 
 
 @pytest.mark.parametrize('arm', ['api','agentic'])
@@ -157,7 +158,7 @@ NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed
                                        ('deadline_stop',False), ('forbidden_denial',True), ('prescribed_denial',False),
                                        ('late_stop_denial',False), ('init_mismatch_denial',False),
                                        ('evidence_unreadable',False), ('manifest_read_denial',False),
-                                       ('interrupted',False)])
+                                       ('interrupted',False), ('unicode_jsonl',True)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
@@ -245,6 +246,10 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             if case == 'manifest_read_denial':
                 terminal['permission_denials']=[{'tool_name':'Read','tool_use_id':'d4',
                     'tool_input':{'file_path':job['manifest']}}]
+            if case == 'unicode_jsonl':
+                # JSON.stringify emits these literal characters inside JSON
+                # strings. They are data, not JSONL record separators.
+                terminal['result'] = 'source text\u0085next\u2028line\u2029paragraph'
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
                      'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
             if case == 'init_mismatch_denial':
@@ -263,7 +268,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 held = json.loads((tmp_path/'billing.json').read_bytes()).get('stopped_attempts') or {}
                 assert [v['reason'] for v in held.values()] == ['controller: ' + reason]
                 raise runner.BudgetStop(reason)
-            (kwargs['attempt']/'transcript.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
+            (kwargs['attempt']/'transcript.jsonl').write_text(''.join(json.dumps(e, ensure_ascii=False)+'\n' for e in events))
             return 0
         monkeypatch.setattr(runner, 'execute_child', child)
         monkeypatch.setattr(api_runner, 'validate_outputs', lambda *args: [])

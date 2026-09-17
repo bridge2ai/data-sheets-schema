@@ -309,7 +309,7 @@ def test_a_controller_stop_is_recorded_in_the_ledger(tmp_path):
     assert 'could not record' in record_controller_stop(Broken(), 'm:x', {'reason': 'x'})['ledger_stop_record_note']
 
 
-def _deadline_while_counting(tmp_path, *, record_first):
+def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, monkeypatch=None):
     """The real NativeProxy.running() and execute_child: the deadline fires
     while a /v1/messages handler is still counting tokens, so the handler
     meets the admission the controller has just closed (#2023/#2024)."""
@@ -326,6 +326,12 @@ def _deadline_while_counting(tmp_path, *, record_first):
         time.sleep(0.2)   # returns inside running()'s cleanup window
         return SimpleNamespace(input_tokens=100)
     proxy.messages.client.messages.count_tokens = count
+    if interrupt is not None:
+        def interrupted_sleep(seconds):
+            if counting.is_set():
+                raise interrupt('private exception detail')
+            time.sleep(seconds)
+        monkeypatch.setattr(rnc, 'time', SimpleNamespace(monotonic=time.monotonic, sleep=interrupted_sleep))
     at_close = {}
     original_close = proxy.close_admission
     def close_and_snapshot():
@@ -349,7 +355,7 @@ def _deadline_while_counting(tmp_path, *, record_first):
             env = dict(os.environ, URL=url, TOKEN=proxy.token)
             rnc.execute_child([sys.executable, '-c', child], proxy=proxy, instruction=instruction, attempt=attempt,
                               cwd=tmp_path, env=env, deadline_seconds=1.0, verify_launch=lambda: None, record_stop=record)
-    except Exception as exc:
+    except BaseException as exc:
         receipt.update(status='stopped', error_type=type(exc).__name__)
         receipt.update(rnc.stop_explanation(exc, ledger.path, 'native-offline', getattr(proxy, 'failure', None)))
         receipt.update(rnc.transcript_terminal_state(attempt / 'transcript.jsonl'))
@@ -357,6 +363,31 @@ def _deadline_while_counting(tmp_path, *, record_first):
     assert counting.is_set() and calls == []
     receipt['stops_at_close'] = at_close.get('stops')
     return receipt, json.loads(ledger.path.read_bytes()).get('stopped_attempts')
+
+
+@pytest.mark.parametrize('interrupt', [KeyboardInterrupt, RuntimeError])
+def test_controller_interrupt_is_recorded_before_in_flight_admission_closes(tmp_path, monkeypatch, interrupt):
+    receipt, stops = _deadline_while_counting(
+        tmp_path, record_first=True, interrupt=interrupt, monkeypatch=monkeypatch)
+    reason = f'unexpected {interrupt.__name__}'
+    assert receipt['reason_source'] == 'controller' and receipt['reason'] == reason
+    assert stops['native-offline']['reason'] == 'controller: ' + reason
+    assert receipt['stops_at_close']['native-offline']['reason'] == 'controller: ' + reason
+    assert 'private exception detail' not in json.dumps(receipt)
+
+
+def test_proxy_failure_is_not_recorded_as_a_controller_failure(tmp_path):
+    instruction = tmp_path / 'instruction.txt'
+    instruction.write_text('offline')
+    failed = threading.Event()
+    failed.set()
+    proxy = SimpleNamespace(failed=failed, failure='upstream stream interrupted', close_admission=lambda: None)
+    recorded = []
+    with pytest.raises(BudgetStop, match='upstream stream interrupted'):
+        execute_child([sys.executable, '-c', 'import time; time.sleep(30)'], proxy=proxy,
+                      instruction=instruction, attempt=tmp_path, cwd=tmp_path, env=dict(os.environ),
+                      deadline_seconds=5, verify_launch=lambda: None, record_stop=recorded.append)
+    assert recorded == []
 
 
 def test_a_deadline_during_an_in_flight_request_is_recorded_as_the_deadline(tmp_path):
