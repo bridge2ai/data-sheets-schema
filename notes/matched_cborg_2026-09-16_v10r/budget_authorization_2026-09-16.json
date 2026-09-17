@@ -1,0 +1,19 @@
+{
+  "kind": "explicit_user_budget_authorization",
+  "recorded_at": "2026-09-17T04:42:12.412296+00:00",
+  "source": "Two user messages in this Claude Code conversation on 2026-09-16, replying to the v10q outcome report",
+  "quoted_proposal": "Whether to fund a fresh native registration after #1914\u2013#1916 and #1918 are fixed. Phase 1 plus the full record alone cost [the v10q attempt's settled figure, kept in the private accounting]; the remaining phases are unmeasured, so a CHORUS native cap near [a figure, superseded] is the honest proposal.",
+  "quotation_note": "The assistant's proposal is quoted with its two figures redacted: settled charges and proposed caps stay in the private accounting (#1938). The exact text is retained locally. The per-attempt cap it proposed is historical and applies to nothing here: the user's later direction below superseded it.",
+  "user_response": "2 - yes and approved",
+  "subsequent_user_direction": "the agentic arm does not need a cap",
+  "interpretation": "A fresh native-first registration is authorized. Agentic attempts carry no per-attempt cap: their limit is the whole additional allocation, so the sequence ledger is their only bound; every request is still counted and reserved before it is sent, and an unknown charge still stops the attempt. The API canary caps stay at $10 (CHORUS) and $15 (Kids First).",
+  "approved_whole_attempt_caps_usd": {
+    "CHORUS_agentic_rep1": 200,
+    "KIDS_FIRST_agentic_rep1": 200,
+    "CHORUS_api_rep1": 10,
+    "KIDS_FIRST_api_rep1": 15
+  },
+  "additional_allocation_cap_usd": "200.00",
+  "automatic_whole_attempt_retries": 0,
+  "scope": "Native-first sequence; independent acceptance of each unchanged original before the next canary; failed canary stops expansion; no evaluation or production batch."
+}
