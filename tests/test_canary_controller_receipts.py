@@ -149,14 +149,16 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
 
 @pytest.mark.parametrize('arm', ['api','agentic'])
 @pytest.mark.parametrize('case, passed', [('valid',True), ('false_date',False), ('missing',False),
-                                       ('redirected_provenance',False)])
+                                       ('redirected_provenance',False), ('usage_missing',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
+    if case == 'usage_missing' and arm == 'api':
+        pytest.skip('a terminal result is the native runtime\'s')
     # main() configures process globals; keep the synthetic launch isolated.
     monkeypatch.setattr(runner.os, 'environ', dict(runner.os.environ))
     monkeypatch.setattr(api_runner, 'MAX_ATTEMPTS', api_runner.MAX_ATTEMPTS)
-    run = fixture_record(tmp_path, 'false_date' if case == 'redirected_provenance' else case)
+    run = fixture_record(tmp_path, {'redirected_provenance': 'false_date', 'usage_missing': 'valid'}.get(case, case))
     registered_inputs = run.input_identity()
     pinned = {p:p.read_bytes() for p in (run.bundle,run.chunk_manifest)}
     lookups = redirect_to_historical_bytes(run, monkeypatch) if case == 'redirected_provenance' else []
@@ -213,17 +215,19 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             def running(self): yield 'http://127.0.0.1:1'
         monkeypatch.setattr(runner, 'NativeProxy', OfflineProxy)
         def child(*args, **kwargs):
+            terminal={'type':'result','terminal_reason':'completed','stop_reason':'end_turn',
+                      'modelUsage':{'offline-model':{'contextWindow':1000,'maxOutputTokens':100}}}
+            if case != 'usage_missing':
+                # The runtime's finalized accounting, which the completion gate requires (#2002/#2008).
+                terminal['usage']={'input_tokens':1,'output_tokens':1}
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
-                     'claude_code_version':'offline','tools':['Read','Write','Bash']},
-                    {'type':'result','terminal_reason':'completed','stop_reason':'end_turn',
-                     'modelUsage':{'offline-model':{'contextWindow':1000,'maxOutputTokens':100}}}]
+                     'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
             (kwargs['attempt']/'transcript.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
             return 0
         monkeypatch.setattr(runner, 'execute_child', child)
         monkeypatch.setattr(api_runner, 'validate_outputs', lambda *args: [])
         monkeypatch.setattr(api_runner, 'pair_consistency', lambda *args: {'ran':True,'consistent':True})
         monkeypatch.setattr(runner, 'native_evidence_check', lambda *args: {'checked':True,'findings':[]})
-        monkeypatch.setattr(agentic_observed, 'observe', lambda *args: {'usage_from_terminal_result': 1})   # the runtime's result carried usage (#2002)
         argv=['run_native_canary','--overlay',str(overlay),'--review',str(review),'--job',job['id']]
     review.write_text(json.dumps(verdict));monkeypatch.setattr(sys,'argv',argv)
     before={p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}
@@ -231,7 +235,13 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     result=json.loads((tmp_path/'attempts'/job['id']/'result.json').read_bytes())
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
-    assert check['passed'] is passed
+    if case == 'usage_missing':
+        # The receipt passed; the transcript's missing finalized accounting is what refused completion (#2002).
+        assert check['passed'] is True
+        assert 'transcript carries no terminal result with complete usage' in result['validation_problems']
+        assert result['native_observed'].get('terminal_results_without_usage') == 1
+    else:
+        assert check['passed'] is passed
     assert pinned == {p:p.read_bytes() for p in pinned}
     assert len(lookups) == (1 if case == 'redirected_provenance' else 0)
     assert before == {p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}

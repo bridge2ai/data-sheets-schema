@@ -253,8 +253,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     if not result_seen:
                         # The invocation ends at its result: trailing
                         # orchestrator events do not extend its span (#2005).
-                        first = first or t
-                        last = t
+                        # Bounds, not the last line seen: a result stamped
+                        # before an earlier event cannot shrink the span or
+                        # turn it negative (#2007).
+                        first = t if first is None else min(first, t)
+                        last = t if last is None else max(last, t)
                 if j.get("type") in ("assistant", "user") and not isinstance(raw, dict):
                     # Claude Code 2.1.272 stream-json writes informational
                     # lines (`system`, `result`, …) with a string `message`

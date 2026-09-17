@@ -676,3 +676,19 @@ class Round15(unittest.TestCase):
             obs = ao.observe([t], bundle, None, None, None)
         self.assertEqual(obs["bundle_lines_read"], 3); self.assertEqual(obs["duration_ms"], 2000)
         self.assertEqual(obs["usage_from_terminal_result"], 1); self.assertNotIn("overlapping_evidence", obs)
+
+
+class Round16(unittest.TestCase):
+    """#2007: the span is bounded, so a result stamped early cannot shrink it."""
+
+    def test_a_result_stamped_before_earlier_events_keeps_the_span(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); bundle = root / "P_preprocessed.txt"; bundle.write_text("x\n")
+            for stamp, expected in (("2026-09-16T21:00:02Z", 10_000), ("2026-09-16T20:59:59Z", 11_000)):
+                t = root / "t.jsonl"
+                t.write_text("\n".join([_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                        _event("2026-09-16T21:00:10Z", usage={"output_tokens": 4}, msg_id="m2"),
+                                        json.dumps({"timestamp": stamp, "type": "result", "message": "done", "uuid": "r",
+                                                    "usage": {"input_tokens": 1, "output_tokens": 100}})]) + "\n")
+                obs = ao.observe([t], bundle, None, None, None)
+                self.assertEqual(obs["duration_ms"], expected); self.assertEqual(obs["usage_from_terminal_result"], 1)
