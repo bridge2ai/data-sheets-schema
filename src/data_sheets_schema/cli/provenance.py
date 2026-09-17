@@ -66,13 +66,13 @@ _RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
     # assistant/user events were malformed — an observation carrying the
     # latter is refused by every writer below (#1934).
     "usage_from_terminal_result", "terminal_results_excluded_by_cut", "malformed_message_events",
-    "overlapping_evidence", "thinking_from_terminal_results"})
+    "overlapping_evidence", "thinking_from_terminal_results", "terminal_results_without_usage"})
 #: Accounting metadata the observer writes beside the reasoning keys (#1947):
 #: how many sessions' totals are the runtime's own terminal result, and how
 #: many such results the cut excluded. An extension carries them with the
 #: values they qualify.
 _ACCOUNTING_KEYS = frozenset({"usage_from_terminal_result", "terminal_results_excluded_by_cut",
-                              "thinking_from_terminal_results"})
+                              "thinking_from_terminal_results", "terminal_results_without_usage"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -1065,7 +1065,7 @@ _RUN_OBSERVED_BASIS = (
     "input/output split, not billing-grade; deliberately not shaped like "
     "api_usage (#681/#682). Accounted per invocation, one transcript "
     "each: where a transcript ends in the runtime's own terminal result "
-    "inside the observed interval and no measurement event before that "
+    "carrying complete usage, inside the observed interval, and no measurement event before that "
     "result falls outside it, its messages take the finalized "
     "total_tokens and output_tokens, with the estimate the subtraction "
     "pooled over them (usage_from_terminal_result counts such "
@@ -1302,6 +1302,9 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
                      "finalizes the total_tokens and output_tokens of the messages that transcript recorded, with "
                      "the estimate for those messages the subtraction pooled over them; a message no result covers "
                      "keeps per-message accounting (#1931/#1957/#1962).")
+    if "terminal_results_without_usage" in keys:
+        parts.append(" terminal_results_without_usage counts the invocations whose terminal result carried no "
+                     "usage, so their totals are per-message snapshots with no finalized accounting (#2002).")
     if "terminal_results_excluded_by_cut" in keys:
         parts.append(" terminal_results_excluded_by_cut counts the sessions with a finalized result the "
                      "run_observed_until cut set aside while messages no surviving result covers rest on "
@@ -1410,8 +1413,9 @@ def _refuse_malformed_observation(observed: dict) -> None:
     if n:
         raise click.ClickException(
             f"refusing: the observation carries malformed_message_events={n} — {n} assistant/user "
-            "transcript event(s) whose message is not a mapping; the totals beside it were measured "
-            "over a transcript the observer could not fully read, so nothing is recorded (#1934)")
+            "transcript event(s) whose message is not a mapping, or result event(s) whose usage is not "
+            "complete accounting; the totals beside it were measured over a transcript the observer could "
+            "not fully read, so nothing is recorded (#1934/#2004)")
     n = observed.get("overlapping_evidence")
     if n:
         raise click.ClickException(

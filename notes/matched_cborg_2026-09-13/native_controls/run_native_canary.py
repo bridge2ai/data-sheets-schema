@@ -77,6 +77,10 @@ def observation_problems(observed):
         problems.append(f"transcript carries {observed['malformed_message_events']} malformed measurement events")
     if observed.get('overlapping_evidence'):
         problems.append(f"transcript carries {observed['overlapping_evidence']} overlapping evidence events (#1972)")
+    if not observed.get('usage_from_terminal_result'):
+        # The native runtime's stream-json ends in a result carrying usage;
+        # an attempt whose transcript finalizes nothing is not complete (#2002).
+        problems.append('transcript carries no terminal result with complete usage')
     return problems
 
 

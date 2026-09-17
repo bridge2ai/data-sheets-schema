@@ -629,3 +629,31 @@ class Round13(unittest.TestCase):
         obs = ao.observe([missing], self.bundle, None, None, None)
         self.assertNotIn("malformed_message_events", obs); self.assertEqual(obs["overlapping_evidence"], 1)
         self.assertEqual(obs["output_tokens"], 3); self.assertNotIn("usage_from_terminal_result", obs)
+
+
+class Round14(unittest.TestCase):
+    """#2002/#2003: a result without usage is marked; negative or boolean counts are malformed."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("x\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_a_result_without_usage_is_marked(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   json.dumps({"type": "result", "message": "done", "uuid": "r"})])
+        obs = ao.observe([t], self.bundle, None, None, None)
+        self.assertEqual(obs["terminal_results_without_usage"], 1); self.assertNotIn("usage_from_terminal_result", obs)
+
+    def test_negative_or_boolean_counts_are_malformed(self):
+        for usage in ({"input_tokens": -4, "output_tokens": 5}, {"input_tokens": 1, "output_tokens": -5},
+                      {"input_tokens": 1, "output_tokens": 5, "cache_read_input_tokens": True},
+                      {"input_tokens": 1, "output_tokens": 5, "output_tokens_details": {"thinking_tokens": -1}}):
+            t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                       json.dumps({"type": "result", "message": "done", "uuid": "r", "usage": usage})])
+            obs = ao.observe([t], self.bundle, None, None, None)
+            self.assertEqual(obs["malformed_message_events"], 1, usage); self.assertNotIn("usage_from_terminal_result", obs)
+            self.assertEqual(obs["output_tokens"], 3)

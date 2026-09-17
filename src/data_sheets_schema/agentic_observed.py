@@ -187,7 +187,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
     duration_ms = total_tokens = 0
     measure: dict[str, int] = {}
     from_terminal = excluded = 0
-    terminal_thinking = 0
+    terminal_thinking = without_usage = 0
     for path in transcripts:
         # The same file again — by path, by inode or by bytes — is the same
         # evidence again (#1979/#1986): a copy whose lines carry no id at
@@ -224,9 +224,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 # accounting is malformed and refused rather than read as zeros.
                 is_result = j.get("type") == "result"
                 has_usage = "usage" in j
-                usage_ok = isinstance(j.get("usage"), dict) and all(
-                    isinstance(j["usage"].get(k), int) and not isinstance(j["usage"].get(k), bool)
-                    for k in ("input_tokens", "output_tokens"))
+                usage_ok = _usage_complete(j.get("usage"))
                 ts = j.get("timestamp")
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
@@ -246,6 +244,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
                             result_ids.add(ident)
                             if has_usage and not usage_ok:
                                 malformed += 1
+                            elif not has_usage:
+                                without_usage += 1
                             terminal_excluded = usage_ok; result_seen = True
                         elif measurement and not result_seen:
                             cut_before_terminal = True
@@ -275,6 +275,10 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         terminal = j["usage"]
                     elif has_usage:
                         malformed += 1
+                    else:
+                        # A result that finalizes nothing: the snapshots
+                        # stand and the observation says so (#2002).
+                        without_usage += 1
                     result_seen = True
                     # A result line is a result, whatever its envelope
                     # carries (#1993): it is not also a message.
@@ -351,6 +355,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
     out.update(measure)
     if from_terminal:
         out["usage_from_terminal_result"] = from_terminal
+    if without_usage:
+        out["terminal_results_without_usage"] = without_usage
     if terminal_thinking and "thinking_tokens" in out:
         # Where any invocation's thinking is a session total from its
         # terminal result, no turn coverage is claimed for the aggregate,
@@ -406,6 +412,31 @@ def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage:
         m["thinking_tokens"] = thinking
         m.pop("turns_with_thinking_tokens", None)
     return total, m
+
+
+def _count_ok(v) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool) and v >= 0
+
+
+def _usage_complete(usage) -> bool:
+    """Is a terminal result's usage complete accounting (#1999/#2003)?
+    input_tokens and output_tokens present, every count present a
+    non-negative integer that is not a boolean, thinking detail included."""
+    if not isinstance(usage, dict):
+        return False
+    for k in ("input_tokens", "output_tokens"):
+        if not _count_ok(usage.get(k)):
+            return False
+    for k in ("cache_read_input_tokens", "cache_creation_input_tokens"):
+        if k in usage and not _count_ok(usage[k]):
+            return False
+    details = usage.get("output_tokens_details")
+    if details is not None:
+        if not isinstance(details, dict):
+            return False
+        if "thinking_tokens" in details and not _count_ok(details["thinking_tokens"]):
+            return False
+    return True
 
 
 def _file_digest(path: Path) -> str:
