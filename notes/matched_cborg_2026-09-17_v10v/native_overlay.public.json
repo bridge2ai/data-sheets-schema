@@ -1,0 +1,359 @@
+{
+  "kind": "public_scientific_review_view_not_executable",
+  "original_sha256": "cfd142dc1ca3a43636c697f97079f138e50596e42872116115f7d628f31abf07",
+  "transform": "Machine bindings replaced; no launch approval.",
+  "view": {
+    "registered_at": "2026-09-17T22:07:59.343502+00:00",
+    "status": "draft_awaiting_independent_review_and_prior_canary_acceptance",
+    "registration": "<repository>/notes/matched_cborg_2026-09-17_v10v/registration.json",
+    "registration_sha256": "69835486ee62f1cb5432909890654be16dde40f9cee0df6b52ee93d430a108c0",
+    "allowed_jobs": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1"
+    ],
+    "condition_boundary": "Native execution controls supplement the immutable source/instrument registration. They do not alter its source bytes, prompt files, schemas, profiles, cohort labels or budget ledger identity.",
+    "shell_rule": "Only the registered helpers and the instruction-prescribed commands; no --help exploration, heredocs, ad-hoc scripts, programs the allowlist does not name chained into a command, or writes outside the run directories (#1916, #1929).",
+    "claude_executable": "<claude-binaries>/2.1.272",
+    "observed_cli_alias": "<claude-binaries>/2.1.272",
+    "claude_version": "2.1.272 (Claude Code)",
+    "system_prompt": "<repository>/notes/matched_cborg_2026-09-13/native_controls/system.md",
+    "cli_flags": [
+      "--print",
+      "--safe-mode",
+      "--restricted",
+      "--strict-mcp-config",
+      "--disable-slash-commands",
+      "--no-session-persistence",
+      "--prompt-suggestions",
+      "false",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--permission-mode",
+      "dontAsk",
+      "--tools",
+      "Read,Write,Bash"
+    ],
+    "per_job_command_policy": {
+      "CHORUS_agentic_rep1": {
+        "version": 3,
+        "pretool_control": {
+          "version": 1,
+          "event": "PreToolUse",
+          "matcher": "Bash",
+          "callback_id": "d4d_command_policy_v1",
+          "initialize_timeout_seconds": 30,
+          "callback_timeout_seconds": 2,
+          "runtime_callback_timeout_seconds": 3
+        },
+        "python": "<registered-python>",
+        "manifest_paths": [
+          "<repository>/data/preprocessed/source_manifest.yaml",
+          "data/preprocessed/source_manifest.yaml"
+        ],
+        "programs": [
+          {
+            "code": "from linkml.validator.cli import cli; cli()",
+            "arguments": true
+          },
+          {
+            "code": "from linkml_term_validator.cli import main; main()",
+            "arguments": true
+          },
+          {
+            "code": "from pathlib import Path\nfrom data_sheets_schema.grounding import check_run\nfrom data_sheets_schema.identifiers import uriorcurie_slots\nr = check_run(Path('data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml'), Path('data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml'), Path('data/preprocessed/concatenated/CHORUS_preprocessed.txt'), uriorcurie_slots())\nif not r.get('checked'):\n    print('NOT CHECKED:', r['reason'])\nelse:\n    print(r['distinct'])\n    for kind, identifier in {(x['kind'], x['identifier']) for x in r['findings']}:\n        print(kind, identifier)",
+            "arguments": false
+          },
+          {
+            "code": "from pathlib import Path\nfrom data_sheets_schema.report_claims import check_report, declared_slots\nimport yaml\nfull = yaml.safe_load(Path('data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml').read_text())\ncore = yaml.safe_load(Path('data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml').read_text())\nout = check_report(Path('data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_reconciliation.md'), full, core, declared_slots())\n[print(f) for f in out['findings']]",
+            "arguments": false
+          },
+          {
+            "code": "from pathlib import Path\nimport hashlib, json\npairs = [('data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml', 'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/evidence/original_full.yaml'), ('data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml', 'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/evidence/original_core.yaml')]\npins = {}\nfor src, dst in pairs:\n    raw = Path(src).read_bytes()\n    Path(dst).parent.mkdir(parents=True, exist_ok=True)\n    with Path(dst).open('xb') as stream:\n        stream.write(raw)\n    pins[dst] = hashlib.sha256(raw).hexdigest()\nprint(json.dumps({'original_sha256': pins}, sort_keys=True))\n",
+            "arguments": false
+          }
+        ],
+        "command_examples": [
+          "<registered-python> -c 'from linkml.validator.cli import cli; cli()' -s <repository>/src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml",
+          "<registered-python> -c 'from linkml.validator.cli import cli; cli()' -s <repository>/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml",
+          "<registered-python> -c 'from linkml_term_validator.cli import main; main()' validate-data data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml --schema <repository>/src/data_sheets_schema/schema/data_sheets_schema_all.yaml --target-class Dataset",
+          "<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.grounding import check_run\nfrom data_sheets_schema.identifiers import uriorcurie_slots\nr = check_run(Path('\"'\"'data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml'\"'\"'), Path('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml'\"'\"'), Path('\"'\"'data/preprocessed/concatenated/CHORUS_preprocessed.txt'\"'\"'), uriorcurie_slots())\nif not r.get('\"'\"'checked'\"'\"'):\n    print('\"'\"'NOT CHECKED:'\"'\"', r['\"'\"'reason'\"'\"'])\nelse:\n    print(r['\"'\"'distinct'\"'\"'])\n    for kind, identifier in {(x['\"'\"'kind'\"'\"'], x['\"'\"'identifier'\"'\"']) for x in r['\"'\"'findings'\"'\"']}:\n        print(kind, identifier)'",
+          "<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.report_claims import check_report, declared_slots\nimport yaml\nfull = yaml.safe_load(Path('\"'\"'data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml'\"'\"').read_text())\ncore = yaml.safe_load(Path('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml'\"'\"').read_text())\nout = check_report(Path('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_reconciliation.md'\"'\"'), full, core, declared_slots())\n[print(f) for f in out['\"'\"'findings'\"'\"']]'",
+          "<registered-python> -c 'from pathlib import Path\nimport hashlib, json\npairs = [('\"'\"'data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml'\"'\"', '\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/evidence/original_full.yaml'\"'\"'), ('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml'\"'\"', '\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/evidence/original_core.yaml'\"'\"')]\npins = {}\nfor src, dst in pairs:\n    raw = Path(src).read_bytes()\n    Path(dst).parent.mkdir(parents=True, exist_ok=True)\n    with Path(dst).open('\"'\"'xb'\"'\"') as stream:\n        stream.write(raw)\n    pins[dst] = hashlib.sha256(raw).hexdigest()\nprint(json.dumps({'\"'\"'original_sha256'\"'\"': pins}, sort_keys=True))\n'"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Write",
+          "Bash(cat *)",
+          "Bash(grep *)",
+          "Bash(head *)",
+          "Bash(tail *)",
+          "Bash(wc *)",
+          "Bash(sed -n *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli agents playbook *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml agents playbook *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml agents playbook *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli agents digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml agents digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml agents digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli bundle chunk *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml bundle chunk *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml bundle chunk *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli download scope *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml download scope *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml download scope *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli download priority *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml download priority *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml download priority *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli download list-projects *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml download list-projects *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml download list-projects *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli receipts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml receipts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml receipts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli derive core *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml derive core *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml derive core *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli provenance record *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml provenance record *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml provenance record *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli provenance annotate-observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml provenance annotate-observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml provenance annotate-observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli provenance backfill-checks *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml provenance backfill-checks *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml provenance backfill-checks *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli runs check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml runs check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml runs check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli runs validate *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml runs validate *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml runs validate *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli runs list *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml runs list *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml runs list *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli prompt render *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml prompt render *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml prompt render *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli api render-prompt *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml api render-prompt *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml api render-prompt *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli api prompts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml api prompts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml api prompts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli schema check-digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/data/preprocessed/source_manifest.yaml schema check-digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest data/preprocessed/source_manifest.yaml schema check-digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.d4d_pair_consistency *)",
+          "Bash(<registered-python> -m data_sheets_schema.agentic_observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.evidence_assertions *)",
+          "Bash(<registered-python> -m data_sheets_schema.source_review *)",
+          "Bash(<registered-python> -c 'from linkml.validator.cli import cli; cli\\(\\)' *)",
+          "Bash(<registered-python> -c 'from linkml_term_validator.cli import main; main\\(\\)' *)",
+          "Bash(<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.grounding import check_run\nfrom data_sheets_schema.identifiers import uriorcurie_slots\nr = check_run\\(Path\\('\"'\"'data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml'\"'\"'\\), Path\\('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml'\"'\"'\\), Path\\('\"'\"'data/preprocessed/concatenated/CHORUS_preprocessed.txt'\"'\"'\\), uriorcurie_slots\\(\\)\\)\nif not r.get\\('\"'\"'checked'\"'\"'\\):\n    print\\('\"'\"'NOT CHECKED:'\"'\"', r['\"'\"'reason'\"'\"']\\)\nelse:\n    print\\(r['\"'\"'distinct'\"'\"']\\)\n    for kind, identifier in {\\(x['\"'\"'kind'\"'\"'], x['\"'\"'identifier'\"'\"']\\) for x in r['\"'\"'findings'\"'\"']}:\n        print\\(kind, identifier\\)')",
+          "Bash(<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.report_claims import check_report, declared_slots\nimport yaml\nfull = yaml.safe_load\\(Path\\('\"'\"'data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml'\"'\"'\\).read_text\\(\\)\\)\ncore = yaml.safe_load\\(Path\\('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml'\"'\"'\\).read_text\\(\\)\\)\nout = check_report\\(Path\\('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_reconciliation.md'\"'\"'\\), full, core, declared_slots\\(\\)\\)\n[print\\(f\\) for f in out['\"'\"'findings'\"'\"']]')",
+          "Bash(<registered-python> -c 'from pathlib import Path\nimport hashlib, json\npairs = [\\('\"'\"'data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d.yaml'\"'\"', '\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/evidence/original_full.yaml'\"'\"'\\), \\('\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/CHORUS_d4d_core.yaml'\"'\"', '\"'\"'data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1/evidence/original_core.yaml'\"'\"'\\)]\npins = {}\nfor src, dst in pairs:\n    raw = Path\\(src\\).read_bytes\\(\\)\n    Path\\(dst\\).parent.mkdir\\(parents=True, exist_ok=True\\)\n    with Path\\(dst\\).open\\('\"'\"'xb'\"'\"'\\) as stream:\n        stream.write\\(raw\\)\n    pins[dst] = hashlib.sha256\\(raw\\).hexdigest\\(\\)\nprint\\(json.dumps\\({'\"'\"'original_sha256'\"'\"': pins}, sort_keys=True\\)\\)\n')"
+        ],
+        "readonly_lookups": {
+          "version": 1,
+          "repository": "<repository>",
+          "inputs": [
+            "<repository>/.claude/agents/d4d-provenance-guard.md",
+            "<repository>/.claude/commands/d4d-agent.md",
+            "<repository>/.claude/commands/d4d-full-core.md",
+            "<repository>/.claude/commands/d4d-uniform-rules.md",
+            "<repository>/data/preprocessed/chunks/CHORUS_chunks.yaml",
+            "<repository>/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+            "<repository>/data/preprocessed/source_manifest.yaml",
+            "<repository>/notes/matched_cborg_2026-09-17_v10v/prompts/CHORUS_agentic_rep1.md",
+            "<repository>/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "<repository>/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+          ],
+          "output_directories": [
+            "<repository>/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1",
+            "<repository>/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-chorus_rep1"
+          ]
+        }
+      },
+      "KIDS_FIRST_agentic_rep1": {
+        "version": 3,
+        "pretool_control": {
+          "version": 1,
+          "event": "PreToolUse",
+          "matcher": "Bash",
+          "callback_id": "d4d_command_policy_v1",
+          "initialize_timeout_seconds": 30,
+          "callback_timeout_seconds": 2,
+          "runtime_callback_timeout_seconds": 3
+        },
+        "python": "<registered-python>",
+        "manifest_paths": [
+          "<repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml",
+          "notes/matched_cborg_2026-09-13/kids_first/manifest.yaml"
+        ],
+        "programs": [
+          {
+            "code": "from linkml.validator.cli import cli; cli()",
+            "arguments": true
+          },
+          {
+            "code": "from linkml_term_validator.cli import main; main()",
+            "arguments": true
+          },
+          {
+            "code": "from pathlib import Path\nfrom data_sheets_schema.grounding import check_run\nfrom data_sheets_schema.identifiers import uriorcurie_slots\nr = check_run(Path('<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml'), Path('<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml'), Path('<repository>/notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt'), uriorcurie_slots())\nif not r.get('checked'):\n    print('NOT CHECKED:', r['reason'])\nelse:\n    print(r['distinct'])\n    for kind, identifier in {(x['kind'], x['identifier']) for x in r['findings']}:\n        print(kind, identifier)",
+            "arguments": false
+          },
+          {
+            "code": "from pathlib import Path\nfrom data_sheets_schema.report_claims import check_report, declared_slots\nimport yaml\nfull = yaml.safe_load(Path('<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml').read_text())\ncore = yaml.safe_load(Path('<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml').read_text())\nout = check_report(Path('<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_reconciliation.md'), full, core, declared_slots())\n[print(f) for f in out['findings']]",
+            "arguments": false
+          },
+          {
+            "code": "from pathlib import Path\nimport hashlib, json\npairs = [('<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml', '<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/evidence/original_full.yaml'), ('<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml', '<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/evidence/original_core.yaml')]\npins = {}\nfor src, dst in pairs:\n    raw = Path(src).read_bytes()\n    Path(dst).parent.mkdir(parents=True, exist_ok=True)\n    with Path(dst).open('xb') as stream:\n        stream.write(raw)\n    pins[dst] = hashlib.sha256(raw).hexdigest()\nprint(json.dumps({'original_sha256': pins}, sort_keys=True))\n",
+            "arguments": false
+          }
+        ],
+        "command_examples": [
+          "<registered-python> -c 'from linkml.validator.cli import cli; cli()' -s <repository>/src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset <repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml",
+          "<registered-python> -c 'from linkml.validator.cli import cli; cli()' -s <repository>/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset <repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml",
+          "<registered-python> -c 'from linkml_term_validator.cli import main; main()' validate-data <repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml --schema <repository>/src/data_sheets_schema/schema/data_sheets_schema_all.yaml --target-class Dataset",
+          "<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.grounding import check_run\nfrom data_sheets_schema.identifiers import uriorcurie_slots\nr = check_run(Path('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml'\"'\"'), Path('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml'\"'\"'), Path('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt'\"'\"'), uriorcurie_slots())\nif not r.get('\"'\"'checked'\"'\"'):\n    print('\"'\"'NOT CHECKED:'\"'\"', r['\"'\"'reason'\"'\"'])\nelse:\n    print(r['\"'\"'distinct'\"'\"'])\n    for kind, identifier in {(x['\"'\"'kind'\"'\"'], x['\"'\"'identifier'\"'\"']) for x in r['\"'\"'findings'\"'\"']}:\n        print(kind, identifier)'",
+          "<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.report_claims import check_report, declared_slots\nimport yaml\nfull = yaml.safe_load(Path('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml'\"'\"').read_text())\ncore = yaml.safe_load(Path('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml'\"'\"').read_text())\nout = check_report(Path('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_reconciliation.md'\"'\"'), full, core, declared_slots())\n[print(f) for f in out['\"'\"'findings'\"'\"']]'",
+          "<registered-python> -c 'from pathlib import Path\nimport hashlib, json\npairs = [('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml'\"'\"', '\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/evidence/original_full.yaml'\"'\"'), ('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml'\"'\"', '\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/evidence/original_core.yaml'\"'\"')]\npins = {}\nfor src, dst in pairs:\n    raw = Path(src).read_bytes()\n    Path(dst).parent.mkdir(parents=True, exist_ok=True)\n    with Path(dst).open('\"'\"'xb'\"'\"') as stream:\n        stream.write(raw)\n    pins[dst] = hashlib.sha256(raw).hexdigest()\nprint(json.dumps({'\"'\"'original_sha256'\"'\"': pins}, sort_keys=True))\n'"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Write",
+          "Bash(cat *)",
+          "Bash(grep *)",
+          "Bash(head *)",
+          "Bash(tail *)",
+          "Bash(wc *)",
+          "Bash(sed -n *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli agents playbook *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml agents playbook *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml agents playbook *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli agents digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml agents digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml agents digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli bundle chunk *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml bundle chunk *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml bundle chunk *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli download scope *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml download scope *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml download scope *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli download priority *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml download priority *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml download priority *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli download list-projects *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml download list-projects *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml download list-projects *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli receipts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml receipts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml receipts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli derive core *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml derive core *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml derive core *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli provenance record *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml provenance record *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml provenance record *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli provenance annotate-observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml provenance annotate-observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml provenance annotate-observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli provenance backfill-checks *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml provenance backfill-checks *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml provenance backfill-checks *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli runs check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml runs check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml runs check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli runs validate *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml runs validate *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml runs validate *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli runs list *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml runs list *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml runs list *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli prompt render *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml prompt render *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml prompt render *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli api render-prompt *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml api render-prompt *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml api render-prompt *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli api prompts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml api prompts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml api prompts check *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli schema check-digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest <repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml schema check-digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.cli --manifest notes/matched_cborg_2026-09-13/kids_first/manifest.yaml schema check-digest *)",
+          "Bash(<registered-python> -m data_sheets_schema.d4d_pair_consistency *)",
+          "Bash(<registered-python> -m data_sheets_schema.agentic_observed *)",
+          "Bash(<registered-python> -m data_sheets_schema.evidence_assertions *)",
+          "Bash(<registered-python> -m data_sheets_schema.source_review *)",
+          "Bash(<registered-python> -c 'from linkml.validator.cli import cli; cli\\(\\)' *)",
+          "Bash(<registered-python> -c 'from linkml_term_validator.cli import main; main\\(\\)' *)",
+          "Bash(<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.grounding import check_run\nfrom data_sheets_schema.identifiers import uriorcurie_slots\nr = check_run\\(Path\\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml'\"'\"'\\), Path\\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml'\"'\"'\\), Path\\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt'\"'\"'\\), uriorcurie_slots\\(\\)\\)\nif not r.get\\('\"'\"'checked'\"'\"'\\):\n    print\\('\"'\"'NOT CHECKED:'\"'\"', r['\"'\"'reason'\"'\"']\\)\nelse:\n    print\\(r['\"'\"'distinct'\"'\"']\\)\n    for kind, identifier in {\\(x['\"'\"'kind'\"'\"'], x['\"'\"'identifier'\"'\"']\\) for x in r['\"'\"'findings'\"'\"']}:\n        print\\(kind, identifier\\)')",
+          "Bash(<registered-python> -c 'from pathlib import Path\nfrom data_sheets_schema.report_claims import check_report, declared_slots\nimport yaml\nfull = yaml.safe_load\\(Path\\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml'\"'\"'\\).read_text\\(\\)\\)\ncore = yaml.safe_load\\(Path\\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml'\"'\"'\\).read_text\\(\\)\\)\nout = check_report\\(Path\\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_reconciliation.md'\"'\"'\\), full, core, declared_slots\\(\\)\\)\n[print\\(f\\) for f in out['\"'\"'findings'\"'\"']]')",
+          "Bash(<registered-python> -c 'from pathlib import Path\nimport hashlib, json\npairs = [\\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d.yaml'\"'\"', '\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/evidence/original_full.yaml'\"'\"'\\), \\('\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/KIDS_FIRST_d4d_core.yaml'\"'\"', '\"'\"'<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1/evidence/original_core.yaml'\"'\"'\\)]\npins = {}\nfor src, dst in pairs:\n    raw = Path\\(src\\).read_bytes\\(\\)\n    Path\\(dst\\).parent.mkdir\\(parents=True, exist_ok=True\\)\n    with Path\\(dst\\).open\\('\"'\"'xb'\"'\"'\\) as stream:\n        stream.write\\(raw\\)\n    pins[dst] = hashlib.sha256\\(raw\\).hexdigest\\(\\)\nprint\\(json.dumps\\({'\"'\"'original_sha256'\"'\"': pins}, sort_keys=True\\)\\)\n')"
+        ],
+        "readonly_lookups": {
+          "version": 1,
+          "repository": "<repository>",
+          "inputs": [
+            "<repository>/.claude/agents/d4d-provenance-guard.md",
+            "<repository>/.claude/commands/d4d-agent.md",
+            "<repository>/.claude/commands/d4d-full-core.md",
+            "<repository>/.claude/commands/d4d-uniform-rules.md",
+            "<repository>/notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt",
+            "<repository>/notes/matched_cborg_2026-09-13/kids_first/chunks.yaml",
+            "<repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml",
+            "<repository>/notes/matched_cborg_2026-09-17_v10v/prompts/KIDS_FIRST_agentic_rep1.md",
+            "<repository>/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "<repository>/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+          ],
+          "output_directories": [
+            "<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1",
+            "<repository>/notes/matched_cborg_2026-09-13/kids_first/data/d4d_concatenated/claudecode_agent_core/2026-09-17_claude-opus-5-agentic-generalized-v10v-kids_first_rep1"
+          ]
+        }
+      }
+    },
+    "environment": {
+      "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1",
+      "DISABLE_TELEMETRY": "1",
+      "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+    },
+    "per_job_environment": {
+      "CHORUS_agentic_rep1": {
+        "D4D_MANIFEST": "<repository>/data/preprocessed/source_manifest.yaml",
+        "D4D_PROFILE": "bridge2ai",
+        "D4D_LAUNCH_INSTRUCTION": "<repository>/notes/matched_cborg_2026-09-17_v10v/prompts/CHORUS_agentic_rep1.md"
+      },
+      "KIDS_FIRST_agentic_rep1": {
+        "D4D_MANIFEST": "<repository>/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml",
+        "D4D_PROFILE": "neutral",
+        "D4D_LAUNCH_INSTRUCTION": "<repository>/notes/matched_cborg_2026-09-17_v10v/prompts/KIDS_FIRST_agentic_rep1.md"
+      }
+    },
+    "credential_boundary": "Only the parent transport receives CBORG_API_KEY. The child receives an ephemeral local transport token and has no inherited provider, GitHub or OAuth credentials.",
+    "accounting": "All native model calls, including auxiliary calls, pass serial admission against the same cumulative attempt and sequence ledger as the API arm. A fixed session name suppressed auxiliary title generation in the offline probe; the guard does not rely on that suppression.",
+    "native_limits_observed_offline": {
+      "context_window": 200000,
+      "max_output_tokens": 64000
+    },
+    "limit_basis": "Installed CLI declaration during a scripted offline probe; distinct from CBORG route maxima (1M input, 128k output). Confirm runtime declaration, actual request ceilings and any compaction in the scientific trace.",
+    "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",
+    "pinned_files": {
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": "177833c6279087d35fc31dba013860acc3e0c55922275d8b55ff8800d2436671",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "d56c668c7717dec24ffd14ceac26818b8daaac26f00170403110389157bbe52f",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "3fcd028b2c4f0ce4b9f6e20f0459a5cf631a27a4b3fb74bbdc4b042a7370a46d",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py": "97ef302d58422b0397fefb1559b4f303a30ba09ad5a4a6dff912ae758375488a",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/native_readonly.py": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/native_control.py": "6b4088fa917b1bbe057ca2d5d1a132b27e5eba93b57024df1bac23c4d2b226e4",
+      "<repository>/notes/matched_cborg_2026-09-13/native_controls/system.md": "f61e8b9682e7745148ff4064baec92e997fbe486b0bb30394162ba2fc7d20ca9",
+      "<repository>/notes/matched_cborg_2026-09-13/budgeted_cborg.py": "97a2da43ce7bbc6389609d00ddb80150a42a33d930f532b6e5be05248b86012b",
+      "<repository>/notes/matched_cborg_2026-09-13/run_api_canary.py": "cb4e9bb3797c9795805ee0eae8562dea981b75d5508f827bc9992aa0906d31eb",
+      "<repository>/notes/matched_cborg_2026-09-13/prepare_registration.py": "225e3ca932af50a80feb171c4e83271c7d05f2612657ae262f0f0e04c66fa4c5",
+      "<claude-binaries>/2.1.272": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75"
+    }
+  }
+}

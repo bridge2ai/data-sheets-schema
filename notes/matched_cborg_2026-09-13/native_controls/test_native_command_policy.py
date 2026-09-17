@@ -2,8 +2,10 @@
 from copy import deepcopy
 from dataclasses import replace
 import json
+import os
 from pathlib import Path
 import shlex
+import subprocess
 import sys
 from types import SimpleNamespace
 
@@ -57,6 +59,29 @@ def test_actual_instruction_and_delegated_playbook_have_five_programs(registered
     delivered = permission_arguments(policy)
     assert delivered[:3] == ['--input-format', 'stream-json', '--settings'] and len(delivered) == 4
     assert json.loads(delivered[3]) == {'permissions': {'allow': policy['allowed_tools']}}
+
+
+def test_standalone_overlay_preparer_without_test_import_paths(registered, tmp_path):
+    base, job, _ = registered
+    controls = Path(__file__).resolve().parent
+    repository = controls.parents[2]
+    # Python stands in only for the version-reporting executable; no model or
+    # native CLI is invoked. The actual preparer must build and pin the policy.
+    base.update(repository=str(repository),
+                claude_version=subprocess.check_output([sys.executable, '--version'], text=True).strip(),
+                generation={'jobs':[{**job, 'canary':True, 'execution_arm':'agentic', 'profile':'neutral'}],
+                            'effort_policy':{'fixture':'offline'}})
+    registration = tmp_path/'registration.json'
+    registration.write_text(json.dumps(base))
+    overlay = tmp_path/'overlay.json'
+    result = subprocess.run([sys.executable, str(controls/'prepare_overlay.py'),
+        '--registration', str(registration), '--output', str(overlay), '--claude-executable', sys.executable],
+        cwd=tmp_path, env={'PATH':os.environ.get('PATH',''), 'PYTHONPATH':str(repository/'src')},
+        capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    value = json.loads(overlay.read_text())
+    assert value['per_job_command_policy'][job['id']]['pretool_control']['event'] == 'PreToolUse'
+    assert str(controls/'native_control.py') in value['pinned_files']
 
 
 def test_arbitrary_modified_and_other_jobs_programs_are_not_prescribed(registered):

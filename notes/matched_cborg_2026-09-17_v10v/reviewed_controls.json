@@ -1,0 +1,76 @@
+{
+  "source_base": "6e43ed9ba017436e4a71b80aaca074492b55e7cc",
+  "registration_base_main": "c800d69f95faf4de1f976058efcda8f1a55546fc",
+  "renderer": 12,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Native policy version 3 applies the same command classifier in a parent PreToolUse callback before execution and in the terminal audit (#2055/#2056, PR #2057). It retains isolated runtime settings, binds control evidence and stops on missing, malformed or timed-out decisions. Broad file-tool grants and helper arguments remain; independent review still inspects paths, targets, phase ordering and source support. Sources, schemas, profiles, renderers and evaluation instruments are unchanged from v10u. Both arms receive a new condition and unused output paths. Historical v10u retains its original policy and stopped verdict.",
+  "merged_controls": [
+    {
+      "pr": 2017,
+      "merge": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "scope": "v10s native controller, receipt and stop behavior"
+    },
+    {
+      "pr": 2046,
+      "merge": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+      "reviewed_head": "22741810b284613701a111f1d1db444c68cbe2c7",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35260365143",
+      "scope": "job-bound helper policy and denial classification; exact JSON delivery"
+    },
+    {
+      "pr": 2050,
+      "merge": "df78bb6b8fef18ad072fb21cad93e658c0381757",
+      "scope": "vendor-documented built-in lookup behavior and synthetic probes"
+    },
+    {
+      "pr": 2053,
+      "merge": "7f394cc002c0002707006e2c5577ea0a0a7cd833",
+      "reviewed_head": "43ce73e7c2d57499807cae5be88f161a684c187a",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35266480855",
+      "scope": "registered lookup grammar and executed-command review"
+    },
+    {
+      "pr": 2057,
+      "merge": "c800d69f95faf4de1f976058efcda8f1a55546fc",
+      "reviewed_head": "050fa5a1c7c16bebe75385763b538e8c44796c3c",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35279412649",
+      "scope": "parent command-policy callback and recorded decision reconciliation"
+    }
+  ],
+  "preparer_followup": {
+    "issue": 2059,
+    "commit": "6e43ed9ba017436e4a71b80aaca074492b55e7cc",
+    "scope": "Resolve the standalone preparer shared import path; clean-subprocess regression fails before and passes after; 14 policy tests passed. No generation semantics change."
+  },
+  "native_controller_sha256": "d56c668c7717dec24ffd14ceac26818b8daaac26f00170403110389157bbe52f",
+  "command_policy_sha256": "97ef302d58422b0397fefb1559b4f303a30ba09ad5a4a6dff912ae758375488a",
+  "pretool_control_sha256": "6b4088fa917b1bbe057ca2d5d1a132b27e5eba93b57024df1bac23c4d2b226e4",
+  "lookup_contract_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "aee5718966bd1bbea4db1d704e7ff3f20ccb654a6055393ad84f859cdd17a389",
+    "CHORUS_source_review_plan.json": "178eda75c6a2727c433de7ad84141eaae6ed54e6818ae1a12f3e3d7a39fdf4c8"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "canary_order_confirmation": {
+    "kind": "user_canary_order_confirmation",
+    "recorded_at": "2026-09-17T18:38:46.571596+00:00",
+    "source": "User message in the active Codex conversation on 2026-09-17",
+    "question": "For the new condition, should I retain the later approved v10s native-first order, or return to the active goal\u2019s API-first order? The API transport issue remains unresolved.",
+    "user_response": "Retain native first (recommended)",
+    "canary_order": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1",
+      "CHORUS_api_rep1",
+      "KIDS_FIRST_api_rep1"
+    ],
+    "scope": "Order confirmation. Each later canary requires independent acceptance of every prior one. This is not a launch receipt."
+  },
+  "launch_authorization": "No launch receipt issued. The prior v10u launch instruction was consumed. After registration review and merge, launch requires a new explicit maintainer instruction, exact merged-head CI and fresh checks. Existing funding and native-first order persist; no new allocation is requested. CHORUS native is first.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Software checks do not establish independent scientific acceptance. Actual helper arguments, file-tool paths, source support and step ordering still require review."
+}
