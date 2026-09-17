@@ -344,4 +344,69 @@ class TerminalResultPerInvocation(unittest.TestCase):
             both = ao.observe([snap, fin], bundle, None, None, None)
         self.assertEqual(per_message["reasoning_tokens_estimate"], 5)   # max(0, 1-3) + max(0, 5-0)
         self.assertEqual(pooled["reasoning_tokens_estimate"], 3)        # 6 - 12 // 4, over the session
-        self.assertEqual(both["reasoning_tokens_estimate"], 5)          # the second file repeats m1/m2: counted once
+        self.assertEqual(both["reasoning_tokens_estimate"], 3)          # one session: the file with the terminal result decides (#1944)
+
+
+class OverlappingTranscripts(unittest.TestCase):
+    """Codex round 4 on #1920 (#1944–#1946): two files describing one
+    session are reconciled before totals are chosen; a cut that excludes
+    only informational lines keeps the finalized totals while one that
+    excludes a measurement event marks them set aside; and an event with no
+    `message` key at all is malformed."""
+
+    @staticmethod
+    def _terminal(output, ts=None):
+        d = {"type": "result", "message": "done", "uuid": f"r{output}",
+             "usage": {"input_tokens": 10, "cache_creation_input_tokens": 0,
+                       "cache_read_input_tokens": 0, "output_tokens": output}}
+        if ts:
+            d["timestamp"] = ts
+        return json.dumps(d)
+
+    def _session(self, root):
+        bundle = root / "P_preprocessed.txt"; bundle.write_text("\n".join(f"line {i}" for i in range(20)) + "\n")
+        lines = [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3},
+                        tools=[("Read", {"file_path": str(bundle), "offset": 1, "limit": 10})], msg_id="m1", ids=["t1"]),
+                 _event("2026-09-16T21:05:00Z", usage={"output_tokens": 5}, msg_id="m2"),
+                 _event("2026-09-16T21:09:00Z", usage={"output_tokens": 0}, msg_id="m3"),
+                 self._terminal(1000)]
+        prefix = root / "prefix.jsonl"; prefix.write_text("\n".join(lines[:2]) + "\n")
+        full = root / "full.jsonl"; full.write_text("\n".join(lines) + "\n")
+        return bundle, prefix, full, lines
+
+    def test_a_copy_cut_short_beside_the_complete_file_reads_as_the_complete_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            bundle, prefix, full, _ = self._session(Path(d))
+            alone = ao.observe([full], bundle, None, None, None)
+            pf = ao.observe([prefix, full], bundle, None, None, None)
+            fp = ao.observe([full, prefix], bundle, None, None, None)
+        self.assertEqual(alone["output_tokens"], 1000); self.assertEqual(alone["usage_from_terminal_result"], 1)
+        self.assertEqual(pf, alone); self.assertEqual(fp, alone)
+        self.assertEqual(alone["tool_uses"], 1); self.assertEqual(alone["duration_ms"], 9 * 60 * 1000)
+        self.assertEqual(alone["bundle_lines_read"], 10)
+
+    def test_a_cut_on_a_measurement_event_sets_the_finalized_result_aside_and_says_so(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); bundle, prefix, full, lines = self._session(root)
+            # excludes only m3, a zero-usage assistant event: the terminal result describes more than the interval
+            cut = ao.observe([full], bundle, datetime.fromisoformat("2026-09-16T21:07:00+00:00"), None, None)
+            # excludes only a timestamped informational line: the terminal result still describes the interval
+            info = root / "info.jsonl"
+            info.write_text("\n".join(lines[:2] + [json.dumps({"timestamp": "2026-09-16T21:08:00Z", "type": "system",
+                                                                "message": "compacting", "uuid": "s"}),
+                                                   self._terminal(1000)]) + "\n")
+            kept = ao.observe([info], bundle, datetime.fromisoformat("2026-09-16T21:07:00+00:00"), None, None)
+        self.assertEqual(cut["output_tokens"], 8); self.assertNotIn("usage_from_terminal_result", cut)
+        self.assertEqual(cut["terminal_results_excluded_by_cut"], 1)
+        self.assertEqual(kept["output_tokens"], 1000); self.assertEqual(kept["usage_from_terminal_result"], 1)
+        self.assertNotIn("terminal_results_excluded_by_cut", kept)
+
+    def test_an_event_with_no_message_key_is_malformed(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); bundle = root / "P_preprocessed.txt"; bundle.write_text("x\n")
+            t = root / "t.jsonl"
+            t.write_text("\n".join([json.dumps({"timestamp": "2026-09-16T21:00:00Z", "type": "user", "uuid": "u"}),
+                                    json.dumps({"timestamp": "2026-09-16T21:00:01Z", "type": "assistant", "uuid": "a"}),
+                                    json.dumps({"timestamp": "2026-09-16T21:00:02Z", "type": "system", "uuid": "s"})]) + "\n")
+            obs = ao.observe([t], bundle, None, None, None)
+        self.assertEqual(obs["malformed_message_events"], 2)

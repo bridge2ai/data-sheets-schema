@@ -670,3 +670,16 @@ class ObserverHandoff(unittest.TestCase):
             r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**FULL, "malformed_message_events": 1}}, transcripts=[t])
             self.assertIn("0 of 1", r.output); self.assertIn("malformed_message_events absent→1", r.output)
             self.assertEqual(path.read_text(), before)
+
+
+class AccountingKeysExtend(unittest.TestCase):
+    """#1947: the terminal-accounting count travels with the values it qualifies."""
+
+    def test_extension_keeps_usage_from_terminal_result(self):
+        log = {"run_observed": dict(PRIOR)}
+        added = cli._extend_run_observed(log, {**FULL, "usage_from_terminal_result": 1}, recorded_by="t", instrument="t")
+        self.assertIn("usage_from_terminal_result", added)
+        self.assertEqual(log["run_observed"]["usage_from_terminal_result"], 1)
+        log2 = {"run_observed": dict(FULL)}
+        added = cli._extend_run_observed(log2, {**FULL, "terminal_results_excluded_by_cut": 1}, recorded_by="t", instrument="t")
+        self.assertEqual(added, ["terminal_results_excluded_by_cut"])

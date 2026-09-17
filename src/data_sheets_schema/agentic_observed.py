@@ -155,80 +155,75 @@ def observe(transcripts: list[Path], bundle: Path | None,
     after its run completed (stray re-invocations did this to one 2026-08-24
     agent) is not the run, and the record describes the run.
     """
-    usage_by_msg: dict[str, dict] = {}
-    # Per API message, deduplicated like usage (#1000): thinking blocks,
-    # their text length (0 through CBORG and this runtime alike), and the
-    # visible text length the estimate subtracts.
-    blocks_by_msg: dict[str, dict] = {}
-    tools = searches = 0
-    duration_ms = 0
-    read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
-    failed: set[str] = set()
-    malformed = 0
-    # Accounting is per invocation (#1935): each transcript is one runtime
-    # session, and a session's terminal result describes that session only.
-    # A message id seen in an earlier transcript is not counted again.
-    invocations: list[tuple[set[str], dict | None, bool]] = []
+    # Per transcript first (#1935/#1944): a file is one runtime invocation's
+    # record, but two files can describe one session — a copy cut short and
+    # the complete file, or a resumed session whose second file re-lists the
+    # first's messages — so files sharing a message id are reconciled into
+    # one session before any total is chosen. Within a session usage is the
+    # maximum snapshot per message id (#701), blocks and tool ids are unions,
+    # and the terminal result is the one carried by the file that saw the
+    # most messages.
+    files: list[dict] = []
     bundle_name = bundle.name if bundle else None
+    malformed = 0
     for path in transcripts:
-        first = last = None
-        own_msgs: set[str] = set()
-        repeated = 0          # usage messages this file re-lists from an earlier one
-        terminal_usage: dict | None = None
-        cut = False
+        f = {"path": path, "usage": {}, "blocks": {}, "tools": {}, "searches": set(), "reads": {},
+             "failed": set(), "first": None, "last": None, "terminal": None, "cut": False}
         with path.open(encoding="utf-8") as fh:
-            for line in fh:
+            for n, line in enumerate(fh):
                 try:
                     j = json.loads(line)
                 except json.JSONDecodeError:
                     continue
+                raw = j.get("message")
+                msg = raw if isinstance(raw, dict) else {}
+                measurement = j.get("type") in ("assistant", "user") or isinstance(raw, dict)
                 ts = j.get("timestamp")
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                     if until is not None and t > until:
-                        cut = True
+                        # An excluded measurement event means a terminal
+                        # result of this file describes more than the
+                        # interval; an excluded informational line does not
+                        # (#1936/#1945).
+                        if measurement:
+                            f["cut"] = True
                         continue
-                    first = first or t
-                    last = t
-                raw = j.get("message")
-                msg = raw if isinstance(raw, dict) else {}
-                if "message" in j and not isinstance(raw, dict):
+                    f["first"] = f["first"] or t
+                    f["last"] = t
+                if j.get("type") in ("assistant", "user") and not isinstance(raw, dict):
                     # Claude Code 2.1.272 stream-json writes informational
                     # lines (`system`, `result`, …) with a string `message`
                     # (#1915); they carry no usage or content. An assistant or
                     # user event whose message is not a mapping — a string, a
-                    # list, an empty value — is malformed and is counted, and
-                    # every consumer treats the observation as invalid (#1930).
-                    if j.get("type") in ("assistant", "user"):
-                        malformed += 1
+                    # list, an empty value, or no key at all (#1946) — is
+                    # malformed and is counted, and every consumer treats the
+                    # observation as invalid (#1930).
+                    malformed += 1
                 if j.get("type") == "result" and isinstance(j.get("usage"), dict):
                     # The runtime's own finalized accounting for the whole
                     # session: assistant events in stream-json carry only
                     # initial usage snapshots, so the per-message maximum
                     # undercounts by two orders of magnitude (#1931).
-                    terminal_usage = j["usage"]
+                    f["terminal"] = j["usage"]
                 usage = msg.get("usage") or {}
                 if usage:
                     mid = msg.get("id") or f"{path}:{j.get('uuid')}"
-                    prev = usage_by_msg.get(mid)
-                    if prev is None:
-                        own_msgs.add(mid)
-                    elif mid not in own_msgs:
-                        repeated += 1
-                    if mid in own_msgs and (prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0)):
-                        usage_by_msg[mid] = usage
-                    if mid in own_msgs:
-                        content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
-                        blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
-                for c in msg.get("content") or []:
+                    prev = f["usage"].get(mid)
+                    if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
+                        f["usage"][mid] = usage
+                    content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
+                    f["blocks"].setdefault(mid, {}).update(_block_parts(content))
+                for k, c in enumerate(msg.get("content") or []):
                     if not isinstance(c, dict):
                         continue
                     if c.get("type") == "tool_result" and c.get("is_error"):
-                        failed.add(c.get("tool_use_id"))
+                        f["failed"].add(c.get("tool_use_id"))
                         continue
                     if c.get("type") != "tool_use":
                         continue
-                    tools += 1
+                    tid = c.get("id") or f"{path}:{n}:{k}"
+                    f["tools"][tid] = True
                     inp = c.get("input") or {}
                     if not bundle_name:
                         continue
@@ -236,32 +231,57 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         start = int(inp.get("offset") or 0)
                         # offset is 1-indexed; 0/absent means from the top.
                         start = max(start - 1, 0) if start else 0
-                        read_windows[c.get("id")] = (start, start + int(inp.get("limit") or READ_DEFAULT_LINES))
+                        f["reads"][tid] = (start, start + int(inp.get("limit") or READ_DEFAULT_LINES))
                     elif bundle_name in json.dumps(inp):
-                        searches += 1
-        if first and last:
-            duration_ms += int((last - first).total_seconds() * 1000)
-        # A transcript that only re-lists messages counted where they were
-        # first seen is not a further session: its terminal result would
-        # count them again.
-        if repeated and not own_msgs:
-            terminal_usage = None
-        invocations.append((own_msgs, terminal_usage, cut))
-    out = {"total_tokens": 0, "tool_uses": tools, "duration_ms": duration_ms}
+                        f["searches"].add(tid)
+        files.append(f)
+    sessions = _sessions(files)
+    tools: set = set()
+    searches: set = set()
+    read_windows: dict[str, tuple[int, int]] = {}
+    failed: set[str] = set()
+    for f in files:
+        tools.update(f["tools"]); searches.update(f["searches"])
+        read_windows.update(f["reads"]); failed.update(f["failed"])
+    duration_ms = 0
+    out = {"total_tokens": 0, "tool_uses": len(tools)}
     measure: dict[str, int] = {}
-    from_terminal = 0
-    for own_msgs, terminal_usage, cut in invocations:
-        sub_usage = {m: usage_by_msg[m] for m in own_msgs if m in usage_by_msg}
-        sub_blocks = {m: blocks_by_msg.get(m, {}) for m in sub_usage}
-        total, m = _invocation_measure(sub_usage, sub_blocks, None if cut else terminal_usage)
-        if terminal_usage is not None and not cut:
-            from_terminal += 1
+    from_terminal = excluded = 0
+    for members in sessions:
+        usage_by_msg: dict[str, dict] = {}
+        blocks_by_msg: dict[str, dict] = {}
+        for f in members:
+            for mid, u in f["usage"].items():
+                prev = usage_by_msg.get(mid)
+                if prev is None or u.get("output_tokens", 0) >= prev.get("output_tokens", 0):
+                    usage_by_msg[mid] = u
+            for mid, parts in f["blocks"].items():
+                blocks_by_msg.setdefault(mid, {}).update(parts)
+        firsts = [f["first"] for f in members if f["first"]]
+        lasts = [f["last"] for f in members if f["last"]]
+        if firsts and lasts:
+            duration_ms += int((max(lasts) - min(firsts)).total_seconds() * 1000)
+        cut = any(f["cut"] for f in members)
+        carriers = sorted((f for f in members if f["terminal"] is not None), key=lambda f: len(f["usage"]))
+        terminal = carriers[-1]["terminal"] if carriers else None
+        total, m = _invocation_measure(usage_by_msg, blocks_by_msg, None if cut else terminal)
+        if terminal is not None:
+            if cut:
+                excluded += 1
+            else:
+                from_terminal += 1
         out["total_tokens"] += total
         for k, v in m.items():
             measure[k] = measure.get(k, 0) + v
+    out["duration_ms"] = duration_ms
     out.update(measure)
     if from_terminal:
         out["usage_from_terminal_result"] = from_terminal
+    if excluded:
+        # The session's finalized totals exist but describe events past the
+        # cut, so the snapshot accounting stands and the observation says so
+        # rather than passing as complete (#1945).
+        out["terminal_results_excluded_by_cut"] = excluded
     if bundle:
         n_lines = sum(1 for _ in bundle.open(encoding="utf-8"))
         covered = set()
@@ -271,7 +291,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
             covered.update(range(a, min(b, n_lines)))
         out["bundle_lines_read"] = len(covered)
         out["bundle_lines_total"] = n_lines
-        out["_bundle_search_touches"] = searches          # informational; not an observed field
+        out["_bundle_search_touches"] = len(searches)     # informational; not an observed field
         out["_bundle_reads_failed"] = sum(1 for t in read_windows if t in failed)
         if receipt is not None and manifest is not None:
             out.update(receipt_cross_check(covered, receipt, manifest))
@@ -279,6 +299,27 @@ def observe(transcripts: list[Path], bundle: Path | None,
         out["malformed_message_events"] = malformed
     return out
 
+
+def _sessions(files: list[dict]) -> list[list[dict]]:
+    """Group transcripts that share a message id into one session (#1944);
+    a transcript sharing none is a session of its own, so a killed-and-
+    resumed run whose second file starts afresh stays two invocations."""
+    parent = list(range(len(files)))
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]; i = parent[i]
+        return i
+    owner: dict[str, int] = {}
+    for i, f in enumerate(files):
+        for mid in f["usage"]:
+            if mid in owner:
+                parent[find(i)] = find(owner[mid])
+            else:
+                owner[mid] = i
+    groups: dict[int, list[dict]] = {}
+    for i, f in enumerate(files):
+        groups.setdefault(find(i), []).append(f)
+    return [groups[k] for k in sorted(groups)]
 
 def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage: dict | None) -> tuple[int, dict]:
     """One invocation's totals and reasoning measure. Where the invocation's

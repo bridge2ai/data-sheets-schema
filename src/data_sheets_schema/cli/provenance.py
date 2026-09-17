@@ -65,7 +65,12 @@ _RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
     # terminal result rather than per-message snapshots, and how many
     # assistant/user events were malformed — an observation carrying the
     # latter is refused by every writer below (#1934).
-    "usage_from_terminal_result", "malformed_message_events"})
+    "usage_from_terminal_result", "terminal_results_excluded_by_cut", "malformed_message_events"})
+#: Accounting metadata the observer writes beside the reasoning keys (#1947):
+#: how many sessions' totals are the runtime's own terminal result, and how
+#: many such results the cut excluded. An extension carries them with the
+#: values they qualify.
+_ACCOUNTING_KEYS = frozenset({"usage_from_terminal_result", "terminal_results_excluded_by_cut"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -1060,8 +1065,9 @@ _RUN_OBSERVED_BASIS = (
     "ends in the runtime's own terminal result and no event of it falls "
     "outside the observed interval, total_tokens and output_tokens are "
     "that finalized accounting (usage_from_terminal_result counts such "
-    "invocations, and the reasoning estimate is then the subtraction "
-    "pooled over the session, #1931/#1937); otherwise total_tokens "
+    "invocations, terminal_results_excluded_by_cut those whose result the "
+    "cut set aside, and the reasoning estimate is then the subtraction "
+    "pooled over the session, #1931/#1937/#1945); otherwise total_tokens "
     "counts each API message once (a response spans several transcript "
     "lines) and the estimate is per message. duration_ms sums each "
     "invocation's own span, so a resumed "
@@ -1390,10 +1396,11 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
             "refusing to extend: the recomputed observation disagrees with the "
             f"record on {sorted(differ)} ({differ}); a value that does not "
             "reproduce is not the same observation, so nothing is added")
-    added = sorted((set(observed) - set(prior)) & _REASONING_KEYS)
-    ignored = sorted((set(observed) - set(prior)) - _REASONING_KEYS)
+    added = sorted((set(observed) - set(prior)) & (_REASONING_KEYS | _ACCOUNTING_KEYS))
+    ignored = sorted((set(observed) - set(prior)) - _REASONING_KEYS - _ACCOUNTING_KEYS)
     if not added:
-        raise click.ClickException("nothing to extend: the recomputation carries no reasoning key the record lacks"
+        raise click.ClickException("nothing to extend: the recomputation carries no reasoning or accounting key "
+                                   "the record lacks"
                                    + (f" (not added, another instrument's: {ignored})" if ignored else ""))
     log["run_observed"] = {**prior, **{k: observed[k] for k in added}}
     entries = log.get("run_observed_extended")
@@ -1964,11 +1971,17 @@ def reasoning_cmd(method, project, label, path):
         # otherwise. Cache-inclusive runner accounting — reported apart from
         # the API path's billed log, never averaged with it.
         click.echo(f"{len(recovered)} agentic run(s) with a transcript-derived reasoning measure "
-                   "(run_observed; not the runtime's own accounting):")
+                   "(run_observed; the runtime's own finalized accounting where the row says so, "
+                   "per-message snapshots otherwise):")
         for proj, run_label, obs in recovered:
             counted = obs.get("thinking_tokens")
             parts = [f"{k} {obs[k]}" for k in ("assistant_turns", "output_tokens", "thinking_blocks")
                      if obs.get(k) is not None]
+            if obs.get("usage_from_terminal_result"):
+                parts.append(f"finalized by the runtime for {obs['usage_from_terminal_result']} session(s)")
+            if obs.get("terminal_results_excluded_by_cut"):
+                parts.append(f"⚠️  {obs['terminal_results_excluded_by_cut']} finalized result(s) excluded by the "
+                             "cut: snapshot totals, incomplete")
             if counted is not None:
                 parts.append(f"thinking_tokens {counted} ({obs.get('turns_with_thinking_tokens')} turn(s) counted)")
             elif obs.get("reasoning_tokens_estimate") is not None:
@@ -1977,6 +1990,10 @@ def reasoning_cmd(method, project, label, path):
     if not logs:
         if not recovered:
             click.echo("No reasoning logs found for the selection.")
+        if why[_r.OBSERVATION_INVALID]:
+            click.echo(f"   ⚠️  {why[_r.OBSERVATION_INVALID]} run(s): the recorded observation saw "
+                       "malformed transcript events (malformed_message_events); its numbers are not a "
+                       "measure of the run and are not reported (#1948).")
         if why[_r.NO_LOG_RUNTIME]:
             click.echo(f"   {why[_r.NO_LOG_RUNTIME]} run(s): a Claude Code "
                        "run with no transcript-derived measure recorded — the "
@@ -1994,9 +2011,11 @@ def reasoning_cmd(method, project, label, path):
                        "after capture existed, with no log. That is a defect, "
                        "not a limitation.")
         return
-    if why[_r.NO_LOG_RUNTIME] or why[_r.NO_LOG_PREDATES] or why[_r.NO_LOG_MISSING] or recovered:
+    if why[_r.NO_LOG_RUNTIME] or why[_r.NO_LOG_PREDATES] or why[_r.NO_LOG_MISSING] or recovered \
+            or why[_r.OBSERVATION_INVALID]:
         click.echo(f"{len(logs)} log(s); {len(recovered)} agentic run(s) recovered from "
-                   f"transcripts, {why[_r.NO_LOG_RUNTIME]} agentic with no measure, "
+                   f"transcripts, {why[_r.OBSERVATION_INVALID]} with an invalid observation, "
+                   f"{why[_r.NO_LOG_RUNTIME]} agentic with no measure, "
                    f"{why[_r.NO_LOG_PREDATES]} predating capture, "
                    f"{why[_r.NO_LOG_MISSING]} missing.")
         click.echo("   A run with no log has not spent zero reasoning; it has "
