@@ -23,7 +23,9 @@ if Path(r['repository']).resolve()!=BASE.parents[1].resolve():
 # under /tmp and a `cat >>` on the receipt; it never called `prompt render`,
 # which the playbook prescribes and the roster lacked, and `source_review`,
 # which the instruction prescribes, was missing too.
-import sys as _sys; _sys.path.insert(0, str(HERE))
+import sys as _sys
+_sys.path.insert(0, str(BASE))
+_sys.path.insert(0, str(HERE))
 from native_command_policy import build_command_policy
 cli_alias=args.claude_executable
 cli=cli_alias.resolve(strict=True)
