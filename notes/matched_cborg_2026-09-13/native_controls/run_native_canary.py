@@ -34,19 +34,109 @@ def verified_executable(overlay):
     return str(path)
 
 
-#: Shell control and redirection tokens. The system prompt forbids chaining
-#: unlisted programs, heredocs and writes outside the output directories, and
-#: no command the instruction prescribes uses any of them.
-SHELL_OPERATORS = frozenset({'|', '||', '&&', ';', ';;', '&', '|&', '<', '<<', '<<<', '>', '>>', '>&', '<&', '&>', '(', ')'})
+#: Characters bash reads as control or redirection operators when they are
+#: unquoted, alone or merged (`>|`, `&>>`, `<>`, `)|`). The system prompt
+#: forbids chaining unlisted programs, heredocs and writes outside the output
+#: directories, and no command the instruction prescribes uses any of them.
+OPERATOR_CHARS = frozenset(';&|<>()')
 
 
-def _shell_tokens(command):
+def _shell_tokens(command, bash_words=False):
+    """shlex words. With bash_words, for text `_simple_command` has already
+    scanned: no comment character, and only a space or tab separates words
+    (bash keeps a carriage return inside the word)."""
     try:
         lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
         lexer.whitespace_split = True
+        if bash_words:
+            lexer.commenters = ''
+            lexer.whitespace = ' \t'
         return list(lexer)
     except ValueError:
         return None
+
+
+FORBIDDEN_SHELL = 'shell operators, redirection or substitution the system prompt forbids'
+
+
+def _simple_command(command):
+    """The command's words when bash would read one simple command, else
+    (None, reason).
+
+    shlex alone does not see how bash splits a command line (#2031): with
+    whitespace_split a newline is whitespace, a run of operator characters is
+    one token, and a `#` inside a word hides the rest of the line. So the
+    text is scanned first with bash's quoting. A backslash-newline joins two
+    lines. A `#` starts a comment only at the start of a word. A newline
+    ends the command, so any word after it, outside a comment, is a second
+    command. An unquoted operator character, a backtick or `$(` (also inside
+    double quotes) means the text is not one simple command."""
+    out = []
+    quote = None
+    word_start = True
+    ended = False
+    i, n = 0, len(command)
+    while i < n:
+        ch = command[i]
+        if quote == "'":
+            out.append(ch)
+            quote = None if ch == "'" else quote
+            i += 1
+            continue
+        if ch == '\\' and command[i + 1:i + 2] == '\n':
+            i += 2
+            continue
+        if quote is None:
+            if ch in ' \t':
+                out.append(ch)
+                word_start = True
+                i += 1
+                continue
+            if ch == '\n':
+                ended = ended or bool(''.join(out).strip())
+                out.append(' ')
+                word_start = True
+                i += 1
+                continue
+            if ch == '#' and word_start:
+                end = command.find('\n', i)
+                i = n if end < 0 else end
+                continue
+            if ended:
+                return None, FORBIDDEN_SHELL
+        if ch == '`' or command.startswith('$(', i):
+            return None, FORBIDDEN_SHELL
+        if ch == '\\':
+            out.append(command[i:i + 2])
+            word_start = False
+            i += 2
+            continue
+        if quote == '"':
+            out.append(ch)
+            quote = None if ch == '"' else quote
+            i += 1
+            continue
+        if ch in OPERATOR_CHARS:
+            return None, FORBIDDEN_SHELL
+        if ch in '\'"':
+            quote = ch
+        out.append(ch)
+        word_start = False
+        i += 1
+    tokens = None if quote else _shell_tokens(''.join(out), bash_words=True)
+    if not tokens:
+        return None, 'shell text that does not parse'
+    return tokens, None
+
+
+def _roster_command(args):
+    """The roster command `args` begins with, matched word by word (a roster
+    command may have three words: `api prompts check`)."""
+    for command in sorted(PLAYBOOK_COMMANDS, key=lambda c: -len(c.split())):
+        words = command.split()
+        if args[:len(words)] == words:
+            return command
+    return None
 
 
 def prescribed_programs(instruction_text, python):
@@ -73,14 +163,12 @@ def prescribed_programs(instruction_text, python):
 
 
 def _classify_command(command, python, programs):
-    tokens = _shell_tokens(command)
-    if not tokens:
-        return 'not_prescribed', 'shell text that does not parse'
+    tokens, reason = _simple_command(command)
+    if tokens is None:
+        return 'not_prescribed', reason
     if tokens[0] != python or len(tokens) < 3:
         return 'not_prescribed', 'a program the instruction does not prescribe'
     rest = tokens[3:] if tokens[1] == '-c' else tokens[1:]
-    if any(t in SHELL_OPERATORS or '`' in t or '$(' in t for t in rest):
-        return 'not_prescribed', 'shell operators, redirection or substitution the system prompt forbids'
     if any(t in ('--help', '-h') for t in rest):
         return 'not_prescribed', '--help exploration the system prompt forbids'
     if tokens[1] == '-c':
@@ -94,8 +182,9 @@ def _classify_command(command, python, programs):
         args = tokens[3:]
         if args[:1] == ['--manifest']:
             args = args[2:]
-        if ' '.join(args[:2]) in PLAYBOOK_COMMANDS:
-            return 'prescribed', f"the roster command '{' '.join(args[:2])}'"
+        roster = _roster_command(args)
+        if roster:
+            return 'prescribed', f"the roster command '{roster}'"
         return 'not_prescribed', 'a CLI command outside the prescribed roster'
     if module.startswith('data_sheets_schema.') and module.split('.', 1)[1] in MODULE_ENTRY_POINTS:
         return 'prescribed', f"the registered module entry point '{module}'"
@@ -127,8 +216,9 @@ def classify_denials(denials, *, instruction_text, python, repository, output_di
     point, one of the instruction's own `-c` programs, or a file operation
     inside the registered outputs (or a Read of a registered input), with no
     shell operator and no --help. A denial record the runtime wrote in an
-    unexpected shape is unclassifiable and disqualifies like a prescribed one:
-    nothing shows it was harmless."""
+    unexpected shape (no tool name, a Bash record without a command, a file
+    record without a path, a path that cannot be resolved) is unclassifiable
+    and disqualifies like a prescribed one: nothing shows it was harmless."""
     if denials in (None, []):
         return []
     if not isinstance(denials, list):
@@ -140,19 +230,48 @@ def classify_denials(denials, *, instruction_text, python, repository, output_di
             out.append({'classification': 'unclassifiable', 'basis': 'a denial record without tool_input'})
             continue
         tool = item.get('tool_name'); tool_input = item['tool_input']
+        if not isinstance(tool, str) or not tool:
+            out.append({'classification': 'unclassifiable', 'basis': 'a denial record without a tool name'})
+            continue
         entry = {'tool': tool, 'tool_use_id': item.get('tool_use_id')}
         if tool == 'Bash':
-            command = str(tool_input.get('command') or '')
-            entry['command'] = command[:1000]
-            entry['classification'], entry['basis'] = _classify_command(command, python, programs)
+            command = tool_input.get('command')
+            if not isinstance(command, str) or not command.strip():
+                entry['classification'], entry['basis'] = 'unclassifiable', 'a Bash denial without a command'
+            else:
+                entry['command'] = command[:1000]
+                entry['classification'], entry['basis'] = _classify_command(command, python, programs)
         elif tool in ('Read', 'Write', 'Edit'):
-            path = str(tool_input.get('file_path') or '')
-            entry['path'] = path
-            entry['classification'], entry['basis'] = _classify_path(tool, path, repository, output_directories, readable_inputs)
+            path = tool_input.get('file_path')
+            if not isinstance(path, str) or not path:
+                entry['classification'], entry['basis'] = 'unclassifiable', f'a {tool} denial without a file path'
+            else:
+                entry['path'] = path
+                try:
+                    entry['classification'], entry['basis'] = _classify_path(
+                        tool, path, repository, output_directories, readable_inputs)
+                except (OSError, ValueError, UnicodeError):
+                    entry['classification'], entry['basis'] = 'unclassifiable', 'a path the controller cannot resolve'
         else:
             entry['classification'], entry['basis'] = 'not_prescribed', 'a tool the registration does not grant'
         out.append(entry)
     return out
+
+
+def registered_reads(job):
+    """The files the job's instruction has the run read: the bundle, the
+    chunk map, the source manifest, the instruction itself and the
+    toolchain resources (schemas, playbooks, agent definitions)."""
+    identity = job.get('input_identity') or {}
+    paths = [job.get('bundle'), job.get('chunks'), job.get('manifest'), job.get('instruction')]
+    paths += [(identity.get(k) or {}).get('path') for k in ('bundle', 'source_manifest', 'chunks')]
+    spec = (identity.get('instruction') or {}).get('spec') or {}
+    paths += list(((spec.get('agentic_toolchain') or {}).get('resources') or {}).values())
+    return [x for x in paths if isinstance(x, str) and x]
+
+
+STOPPED_DENIALS_NOTE = ('not classified: the attempt stopped before the controller classified the '
+                        "runtime result line's permission denials; the transcript's tool history is the source")
 
 
 def denial_problems(classified):
@@ -453,7 +572,7 @@ def main():
         receipt['permission_denials']=classify_denials(terminal.get('permission_denials'),
             instruction_text=Path(job['instruction']).read_text(encoding='utf-8'), python=base.get('python'),
             repository=base['repository'], output_directories=job['output_directories'],
-            readable_inputs=[job.get('bundle'), job.get('chunks')])
+            readable_inputs=registered_reads(job))
         if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
             raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
@@ -491,6 +610,10 @@ def main():
         receipt.update(status='stopped',error_type=type(exc).__name__)
         receipt.update(stop_explanation(exc, ledger.path, billing_attempt, getattr(proxy, 'failure', None)))
         receipt.update(transcript_terminal_state(attempt/'transcript.jsonl'))
+        if 'permission_denials' not in receipt:
+            # The controller classifies denials from the runtime's result
+            # line, which a stopped attempt usually lacks (#2032).
+            receipt['permission_denials_note'] = STOPPED_DENIALS_NOTE
         # The traceback names controller code paths only; provider exception
         # strings are never copied into the receipt.
         retain_traceback(attempt, exc)

@@ -452,6 +452,100 @@ def test_an_unreadable_denial_record_disqualifies():
     assert classify_denials(['Bash'], **kw)[0]['classification'] == 'unclassifiable'
 
 
+ROSTER = f'{PY} -m data_sheets_schema.cli'
+
+
+def test_commands_bash_would_split_or_redirect_are_not_the_prescribed_command():
+    """#2031: shlex reads a newline as whitespace, merges operator runs into
+    one token and treats a `#` inside a word as a comment. Bash reads each of
+    these as a second command, a redirection or a substitution."""
+    from run_native_canary import FORBIDDEN_SHELL, denial_problems
+    shapes = [
+        f'{ROSTER} runs list\nrm -rf data/d4d_concatenated',
+        f'{ROSTER} derive core --full a --out b\ncp a /tmp/b',
+        f'{ROSTER} runs list >| /tmp/x.txt',
+        f'{ROSTER} runs list &>> /tmp/x.txt',
+        f'{ROSTER} runs list <> /tmp/x.txt',
+        f'{ROSTER} runs check <(cat /etc/hosts)|tee /tmp/y',
+        f"{PY} -c '{VALIDATE}' -s x -C Dataset out/full.yaml\ncurl http://example.org",
+        f'{ROSTER} runs list #x\nls /',
+        f"{ROSTER} runs list # don't\nrm -rf x",
+        f'{ROSTER} runs list --label a#b; rm x',
+        f'{ROSTER} runs list --label "$(cat /etc/hosts)"',
+        f'{ROSTER} runs list --label "`id`"',
+        f'{ROSTER} runs list\r\nls',
+        f'{ROSTER} runs list \\\n\nls',
+    ]
+    classified = _classify(*[_bash(c) for c in shapes])
+    assert [(d['classification'], d['basis']) for d in classified] == [('not_prescribed', FORBIDDEN_SHELL)] * len(shapes)
+    assert denial_problems(classified) == []
+
+
+def test_forms_bash_reads_as_one_prescribed_command_stay_prescribed():
+    """A continuation line, a comment, surrounding newlines and quoted
+    operator characters leave one simple command (#2031); a three-word roster
+    command is matched word by word."""
+    shapes = {
+        f'{ROSTER} receipts check \\\n  --label L --project P': 'receipts check',
+        f'{ROSTER} runs list  # just the list': 'runs list',
+        f'{ROSTER} runs list\n# a note\n': 'runs list',
+        f'\n{ROSTER} runs list\n': 'runs list',
+        f"{ROSTER} runs list --label 'a;b|c>d'": 'runs list',
+        f'{ROSTER} runs list --label "x(y)"': 'runs list',
+        f'{ROSTER} api prompts check --strict': 'api prompts check',
+        f'{ROSTER} api prompts check': 'api prompts check',
+        f'{ROSTER} --manifest /repo/m.yaml api prompts check': 'api prompts check',
+        f"{PY} -c '{VALIDATE}' -s x -C Dataset out/full.yaml  # validate": None,
+    }
+    classified = _classify(*[_bash(c) for c in shapes])
+    assert [d['classification'] for d in classified] == ['prescribed'] * len(shapes), classified
+    for d, roster in zip(classified, shapes.values()):
+        assert roster is None or d['basis'] == f"the roster command '{roster}'"
+    others = _classify(*[_bash(c) for c in (f'{ROSTER} api prompts pin --file x', f'{ROSTER} api prompts',
+                                              f'{ROSTER} runs\rlist', f'{ROSTER} runs lister')])
+    assert [d['classification'] for d in others] == ['not_prescribed'] * 4
+
+
+def test_malformed_denial_records_are_unclassifiable(tmp_path):
+    from run_native_canary import classify_denials, denial_problems
+    odd = [
+        {'tool_name': None, 'tool_use_id': 'a', 'tool_input': {'command': 'ls'}},
+        {'tool_use_id': 'b', 'tool_input': {'command': 'ls'}},
+        {'tool_name': 'Bash', 'tool_use_id': 'c', 'tool_input': {}},
+        {'tool_name': 'Bash', 'tool_use_id': 'd', 'tool_input': {'command': ['ls']}},
+        {'tool_name': 'Write', 'tool_use_id': 'e', 'tool_input': {'path': 'out/x.yaml'}},
+        {'tool_name': 'Read', 'tool_use_id': 'f', 'tool_input': {'file_path': ''}},
+        {'tool_name': 'Write', 'tool_use_id': 'g', 'tool_input': {'file_path': 'out/x\x00y'}},
+    ]
+    classified = _classify(*odd)
+    assert [d['classification'] for d in classified] == ['unclassifiable'] * len(odd), classified
+    assert len(denial_problems(classified)) == len(odd)
+    # a path the filesystem cannot encode, under a directory that exists
+    (tmp_path / 'out').mkdir()
+    surrogate = classify_denials([{'tool_name': 'Write', 'tool_use_id': 'h', 'tool_input': {'file_path': 'out/x\ud800y'}}],
+                                 instruction_text='', python=PY, repository=str(tmp_path),
+                                 output_directories=['out'], readable_inputs=[])
+    assert surrogate[0]['classification'] == 'unclassifiable', surrogate
+
+
+def test_reads_of_the_registered_instruction_and_toolchain_are_prescribed():
+    from run_native_canary import classify_denials, registered_reads
+    job = {'bundle': 'data/b.txt', 'chunks': 'data/c.yaml', 'manifest': '/repo/m.yaml',
+           'instruction': '/repo/prompts/job.md',
+           'input_identity': {'source_manifest': {'path': '/repo/m2.yaml'},
+                              'instruction': {'spec': {'agentic_toolchain': {'resources': {
+                                  'schema': '/repo/src/schema_all.yaml', 'playbook': '/repo/.claude/commands/p.md'}}}}}}
+    reads = registered_reads(job)
+    def read(path):
+        return {'tool_name': 'Read', 'tool_use_id': 'r', 'tool_input': {'file_path': path}}
+    paths = ['/repo/m.yaml', '/repo/m2.yaml', '/repo/prompts/job.md', '/repo/src/schema_all.yaml',
+             '/repo/.claude/commands/p.md', 'data/c.yaml', '/repo/data/prior_record.yaml']
+    classified = classify_denials([read(p) for p in paths], instruction_text='', python=PY, repository='/repo',
+                                  output_directories=[], readable_inputs=reads)
+    assert [d['classification'] for d in classified] == ['prescribed'] * 6 + ['not_prescribed']
+    assert registered_reads({}) == []
+
+
 def test_the_pre_close_record_waits_for_a_handler_holding_the_proxy_state(tmp_path):
     """#2029: the controller's record takes proxy.state, so a handler writing
     the ledger under it is not interrupted by a lock Timeout, and the

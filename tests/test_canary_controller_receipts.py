@@ -265,6 +265,9 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         assert stop['reason'].startswith('controller: native attempt deadline elapsed')
         assert result['ledger_stop_recorded'] == stop['reason']
         assert result['pre_close_ledger_stop'] == {'ledger_stop_recorded': stop['reason']}
+        # Nothing was classified, and the receipt says so (#2032).
+        assert 'permission_denials' not in result
+        assert result['permission_denials_note'] == runner.STOPPED_DENIALS_NOTE
         return
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
@@ -275,7 +278,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         assert result['receipt_acceptance']['passed'] is True
         problems = [p for p in result['validation_problems'] if p.startswith('denied ')]
         assert len(problems) == (0 if case == 'forbidden_denial' else 1)
-        assert 'stopped' != result['status']
+        assert 'stopped' != result['status'] and 'permission_denials_note' not in result
         return
     if case == 'usage_missing':
         # The receipt passed; the transcript's missing finalized accounting is what refused completion (#2002).
