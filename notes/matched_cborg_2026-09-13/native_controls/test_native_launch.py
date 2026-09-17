@@ -245,14 +245,51 @@ def test_a_stopped_attempt_records_whether_the_transcript_reached_its_result(tmp
     assert state['transcript_terminal_result'] == 'absent' and 'ledger' in state['transcript_accounting_note']
     t.write_text(t.read_text() + '{"type":"result","usage":{"input_tokens":1,"output_tokens":1}}\n')
     assert transcript_terminal_state(t) == {'transcript_terminal_result': 'present'}
-    assert transcript_terminal_state(tmp_path / 'missing.jsonl')['transcript_terminal_result'] == 'unreadable'
+    assert transcript_terminal_state(tmp_path / 'missing.jsonl')['transcript_terminal_result'] == 'missing'
 
 
 def test_the_attempt_deadline_is_a_registration_parameter():
-    """#2010: the deadline is chosen per registration, not hardcoded."""
-    import ast
-    from pathlib import Path
-    src = (Path(__file__).resolve().parents[1] / 'prepare_registration.py').read_text()
-    assert '"agentic_attempt_deadline_seconds": args.agentic_deadline_seconds' in src
-    assert '--agentic-deadline-seconds' in src
-    ast.parse(src)
+    """#2010/#2020/#2021: the deadline is parsed as a positive whole number,
+    defaults to what v10q and v10r registered, and is what the generation
+    block records."""
+    import pytest
+    from types import SimpleNamespace
+    import prepare_registration as prep
+    parser = prep.build_parser()
+    assert parser.parse_args([]).agentic_deadline_seconds == 1800
+    explicit = parser.parse_args(['--agentic-deadline-seconds', '10800'])
+    assert explicit.agentic_deadline_seconds == 10800 and isinstance(explicit.agentic_deadline_seconds, int)
+    for bad in ('0', '-1', '1.5', 'soon'):
+        with pytest.raises(SystemExit):
+            parser.parse_args(['--agentic-deadline-seconds', bad])
+    assert prep.generation_deadline(SimpleNamespace(agentic_deadline_seconds=10800)) == 10800
+    import inspect
+    assert '"agentic_attempt_deadline_seconds": generation_deadline(args)' in inspect.getsource(prep.main)
+
+
+def test_the_transcript_diagnostic_never_raises(tmp_path):
+    """#2019: undecodable bytes and a missing file are reported, not raised."""
+    from run_native_canary import transcript_terminal_state
+    t = tmp_path / 'transcript.jsonl'
+    t.write_bytes(b'{"type":"system"}\n\xff\xfe\x80 cut mid-write')
+    assert transcript_terminal_state(t)['transcript_terminal_result'] == 'absent'
+    t.write_bytes(b'\xff\n{"type":"result","usage":{"input_tokens":1,"output_tokens":1}}\n')
+    assert transcript_terminal_state(t) == {'transcript_terminal_result': 'present'}
+    assert transcript_terminal_state(tmp_path / 'none.jsonl')['transcript_terminal_result'] == 'missing'
+    assert transcript_terminal_state(tmp_path)['transcript_terminal_result'] == 'unreadable'
+
+
+def test_a_controller_stop_is_recorded_in_the_ledger(tmp_path):
+    """#2018: a deadline stop marks the attempt stopped in the ledger; a
+    ledger stop is left as the ledger recorded it."""
+    from run_native_canary import record_controller_stop
+    from budgeted_cborg import Ledger
+    ledger = Ledger(tmp_path / 'billing.json', manifest_sha256='m', total_cap=200, attempt_cap=5)
+    out = record_controller_stop(ledger, 'm:job', {'reason': 'native attempt deadline elapsed', 'reason_source': 'controller'})
+    state = json.loads((tmp_path / 'billing.json').read_bytes())
+    assert state['stopped_attempts']['m:job']['reason'] == 'controller: native attempt deadline elapsed'
+    assert out == {'ledger_stop_recorded': 'controller: native attempt deadline elapsed'}
+    assert record_controller_stop(ledger, 'm:job', {'reason': 'x', 'reason_source': 'ledger'}) == {}
+    class Broken:
+        def stop_attempt(self, *a): raise OSError('disk')
+    assert 'could not record' in record_controller_stop(Broken(), 'm:other', {'reason': 'x'})['ledger_stop_record_note']

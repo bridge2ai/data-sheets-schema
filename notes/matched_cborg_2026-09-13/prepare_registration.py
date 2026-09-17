@@ -48,7 +48,20 @@ def spec_for(job):
         runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)")
 
 
-def main():
+def positive_seconds(text):
+    """A wall-clock limit in whole seconds, above zero (#2020): a zero or
+    negative deadline would start the child and stop it at once, consuming
+    the attempt identity."""
+    try:
+        value = int(text)
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError(f"not a whole number of seconds: {text!r}")
+    if value <= 0:
+        raise argparse.ArgumentTypeError(f"the attempt deadline must be positive, got {value}")
+    return value
+
+
+def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=HERE)
     parser.add_argument("--cohort", default="generalized_v10")
@@ -62,13 +75,23 @@ def main():
     parser.add_argument("--per-job-attempt-caps", type=Path,
                         help="JSON mapping of explicitly approved job IDs to whole-attempt USD caps; preparation grants no launch approval")
     parser.add_argument("--render-only", action="store_true")
-    parser.add_argument("--agentic-deadline-seconds", type=int, default=1800,
+    parser.add_argument("--agentic-deadline-seconds", type=positive_seconds, default=1800,
                         help="wall-clock limit of one native attempt; 1800 is what v10q and v10r "
                              "registered, and it stopped the v10r CHORUS attempt in Phase 3 (#2010)")
     parser.add_argument("--canary-order", default=DEFAULT_CANARY_ORDER,
                         help="Comma-separated canary job ids in launch order; each later canary requires "
                              "independent acceptance of every earlier one. Existing registrations keep "
                              "the API-first default; a native-first sequence names the agentic job first.")
+    return parser
+
+
+def generation_deadline(args):
+    """The registered wall-clock limit of one native attempt (#2010)."""
+    return args.agentic_deadline_seconds
+
+
+def main():
+    parser = build_parser()
     args = parser.parse_args()
     canary_order = [name.strip() for name in args.canary_order.split(",") if name.strip()]
     if sorted(canary_order) != sorted(DEFAULT_CANARY_ORDER.split(",")):
@@ -212,7 +235,7 @@ def main():
         "generation": {"template_condition": "generic_v9", "cohort_version": args.cohort,
                        "api_max_attempts": 1, "sdk_max_retries": 0,
                        "api_phase_deadline_seconds": api_runner.PHASE_WALL_CLOCK_SECONDS,
-                       "agentic_attempt_deadline_seconds": args.agentic_deadline_seconds,
+                       "agentic_attempt_deadline_seconds": generation_deadline(args),
                        "agentic_cli_budget_flag_default_usd": 5,
                        "agentic_cli_budget_flag_basis": "The CLI and transport both use the registration-qualified attempt's effective ledger cap, including any approved per-job exception.",
                        "effort_policy": "API adaptive provider default; agentic runtime default, observed separately. No claim of matched realized reasoning effort.",

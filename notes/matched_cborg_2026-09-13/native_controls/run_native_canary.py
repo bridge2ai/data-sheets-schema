@@ -37,20 +37,43 @@ def transcript_terminal_state(path):
     result line (#2014). A child stopped at the deadline never writes one, so
     the transcript's token figures are per-message snapshots and the ledger is
     the attempt's accounting; the receipt says so rather than leaving it to be
-    inferred."""
+    inferred. Never raises (#2019): a transcript cut mid-write can hold
+    undecodable bytes, and a diagnostic must not displace the stop it
+    describes."""
     try:
-        with Path(path).open(encoding='utf-8') as fh:
-            for line in fh:
+        with Path(path).open('rb') as fh:
+            for raw in fh:
                 try:
-                    if json.loads(line).get('type') == 'result':
-                        return {'transcript_terminal_result': 'present'}
-                except (json.JSONDecodeError, AttributeError):
+                    event = json.loads(raw.decode('utf-8'))
+                except (UnicodeDecodeError, ValueError):
                     continue
-    except OSError as error:
+                if isinstance(event, dict) and event.get('type') == 'result':
+                    return {'transcript_terminal_result': 'present'}
+    except FileNotFoundError:
+        return {'transcript_terminal_result': 'missing',
+                'transcript_accounting_note': 'no transcript was written; the ledger is this attempt\'s accounting'}
+    except Exception as error:
         return {'transcript_terminal_result': 'unreadable', 'transcript_read_note': type(error).__name__}
     return {'transcript_terminal_result': 'absent',
             'transcript_accounting_note': 'no runtime result line: transcript token figures are per-message '
                                           'snapshots; the ledger is this attempt\'s accounting'}
+
+
+def record_controller_stop(ledger, billing_attempt, receipt):
+    """Record the stop in the ledger whatever stopped the attempt (#2018).
+
+    Only the capped client and the ledger itself wrote stopped_attempts, so a
+    deadline or proxy stop left the attempt identity unmarked. Called after
+    stop_explanation, so an existing ledger entry stays the authoritative
+    cause (Ledger.stop_attempt never overwrites one). Never raises."""
+    if receipt.get('reason_source') == 'ledger':
+        return {}
+    reason = 'controller: ' + str(receipt.get('reason') or receipt.get('error_type') or 'stopped')
+    try:
+        ledger.stop_attempt(billing_attempt, reason)
+        return {'ledger_stop_recorded': reason}
+    except Exception as error:
+        return {'ledger_stop_record_note': f'could not record the stop in the ledger: {type(error).__name__}'}
 
 
 def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
@@ -292,6 +315,7 @@ def main():
         # The traceback names controller code paths only; provider exception
         # strings are never copied into the receipt.
         retain_traceback(attempt, exc)
+        receipt.update(record_controller_stop(ledger, billing_attempt, receipt))
     finally:
         try:
             state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}

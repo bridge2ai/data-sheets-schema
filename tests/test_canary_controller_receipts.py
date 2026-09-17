@@ -149,16 +149,18 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
 
 @pytest.mark.parametrize('arm', ['api','agentic'])
 @pytest.mark.parametrize('case, passed', [('valid',True), ('false_date',False), ('missing',False),
-                                       ('redirected_provenance',False), ('usage_missing',False)])
+                                       ('redirected_provenance',False), ('usage_missing',False),
+                                       ('deadline_stop',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
-    if case == 'usage_missing' and arm == 'api':
-        pytest.skip('a terminal result is the native runtime\'s')
+    if case in ('usage_missing', 'deadline_stop') and arm == 'api':
+        pytest.skip('a terminal result and the attempt deadline are the native runtime\'s')
     # main() configures process globals; keep the synthetic launch isolated.
     monkeypatch.setattr(runner.os, 'environ', dict(runner.os.environ))
     monkeypatch.setattr(api_runner, 'MAX_ATTEMPTS', api_runner.MAX_ATTEMPTS)
-    run = fixture_record(tmp_path, {'redirected_provenance': 'false_date', 'usage_missing': 'valid'}.get(case, case))
+    run = fixture_record(tmp_path, {'redirected_provenance': 'false_date', 'usage_missing': 'valid',
+                                    'deadline_stop': 'valid'}.get(case, case))
     registered_inputs = run.input_identity()
     pinned = {p:p.read_bytes() for p in (run.bundle,run.chunk_manifest)}
     lookups = redirect_to_historical_bytes(run, monkeypatch) if case == 'redirected_provenance' else []
@@ -222,6 +224,12 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 terminal['usage']={'input_tokens':1,'output_tokens':1}
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
                      'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
+            if case == 'deadline_stop':
+                # A child killed at the deadline mid-write: no result line and
+                # undecodable trailing bytes (#2019).
+                (kwargs['attempt']/'transcript.jsonl').write_bytes(
+                    (json.dumps(events[0])+'\n').encode() + b'{"type":"assistant","message":{"id":"m1","content":"\xff\xfe')
+                raise runner.BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
             (kwargs['attempt']/'transcript.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
             return 0
         monkeypatch.setattr(runner, 'execute_child', child)
@@ -233,6 +241,18 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     before={p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}
     assert runner.main() == (0 if passed else 1)
     result=json.loads((tmp_path/'attempts'/job['id']/'result.json').read_bytes())
+    if case == 'deadline_stop':
+        # The original stop survives the diagnostics (#2019), the transcript
+        # state is stated (#2014) and the ledger records the stop (#2018).
+        assert result['status'] == 'stopped' and result['error_type'] == 'BudgetStop'
+        assert result['reason_source'] == 'controller' and 'deadline' in result['reason']
+        assert result['transcript_terminal_result'] == 'absent' and 'ledger' in result['transcript_accounting_note']
+        assert (tmp_path/'attempts'/job['id']/'controller_traceback.txt').is_file()
+        state = json.loads((tmp_path/'billing.json').read_bytes())
+        (stop,) = state['stopped_attempts'].values()
+        assert stop['reason'].startswith('controller: native attempt deadline elapsed')
+        assert result['ledger_stop_recorded'] == stop['reason']
+        return
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
     if case == 'usage_missing':
