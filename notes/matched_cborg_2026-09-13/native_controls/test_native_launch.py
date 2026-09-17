@@ -229,7 +229,7 @@ def test_a_malformed_observation_refuses_completion():
     decision, not only the receipt's observation block."""
     from run_native_canary import observation_problems
     assert observation_problems({'output_tokens': 5, 'usage_from_terminal_result': 1}) == []
-    assert observation_problems({'malformed_message_events': 2}) == ['transcript carries 2 malformed measurement events']
+    assert observation_problems({'malformed_message_events': 2, 'usage_from_terminal_result': 1}) == ['transcript carries 2 malformed measurement events']
     assert observation_problems({'overlapping_evidence': 1, 'usage_from_terminal_result': 1}) == ['transcript carries 1 overlapping evidence events (#1972)']
     assert observation_problems({'output_tokens': 3}) == ['transcript carries no terminal result with complete usage']
     assert observation_problems({'output_tokens': 3, 'usage_from_terminal_result': 1}) == []
