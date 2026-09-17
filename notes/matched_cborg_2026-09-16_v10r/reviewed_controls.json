@@ -1,0 +1,40 @@
+{
+  "source_base": "86a6fef40a55607c37392b2dbb001bcc72f74220",
+  "registration_base_main": "09cb25013",
+  "renderer": 12,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Native controls after the stopped v10q canary (#1914, #1915, #1916, #1918; PR #1920, the base of this registration): ledger stop reason and traceback on the controller receipt, observer guard, allowlist roster tested against the playbook, a prescribed-commands-only shell rule (registered helpers and the commands the instruction itself prescribes, the multi-line snapshot command included; no --help, heredocs, ad-hoc scripts or unlisted programs), Phase 1 receipt-per-chunk with the file tool and the receipts-check gate before Phase 2. No per-attempt cap on the agentic arm, by user direction after the v10q sizing point (#1917); API caps unchanged. Renderers, evidence protocol, source-review instrument, prompts, sources, schemas and profiles unchanged from v10q.",
+  "merged_controls": [
+    {
+      "pr": 1852,
+      "merge": "5212e90b586759cb7200cf666664f33df52ec4bb",
+      "scope": "explicit provider context-bypass headers"
+    },
+    {
+      "pr": 1855,
+      "merge": "32dacddcf9124ba83c42f3ce17cfa166f67fbb11",
+      "scope": "existing strict receipt floors and registered-source binding"
+    },
+    {
+      "pr": 1857,
+      "merge": "eeac40047ccff3fe4c493e6707b5a5e0cac44eff",
+      "scope": "complete source review with durable API stop/admission",
+      "reviewed_head": "082789d3ef3d6dda7990c36fd8e7e0113a24974c",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35039816575"
+    }
+  ],
+  "native_controller_sha256": "697ae1320346a92086c7503aab3a8e18a5f19a18598501e1d913d336c4f341d8",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "706f7a79927941500c78d6567bb2bfc8b1c98fb447394c5456796ce8cbf30798",
+    "CHORUS_source_review_plan.json": "ca0ab565e86a4f4221e731dfdf32137f4605558870f00146aa125613e26f104b"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "launch_authorization": "No launch receipt issued. Agentic attempts are bounded by the remaining additional allocation alone (user direction 2026-09-16); API caps unchanged; no combined-ceiling amendment applies. The native CHORUS canary is first in the registered order.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Source acceptance remains independent of software acceptance."
+}

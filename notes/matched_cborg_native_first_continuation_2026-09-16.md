@@ -37,6 +37,9 @@ sizing, the run's protocol deviations), which precede any fresh registration.
 
 ## Sequence
 
+*Historical (v10q registration). Step 2 below described a budget amendment
+that the v10r section at the end supersedes; nothing in it is a live gate.*
+
 1. Independent review of PR #1880 and of this registration's PR, required
    CI on the exact head, then merge (the maintainer's call). Fresh pin,
    runtime, model-route and accounting checks immediately before launch.
@@ -48,5 +51,31 @@ sizing, the run's protocol deviations), which precede any fresh registration.
    later canary; then Kids First native, then the two API canaries, each
    accepted before the next. A failure stops expansion; no stopped or
    rejected identity is resumed or overwritten.
+4. Evaluation canaries on exact accepted inputs, then a costed production
+   cohort for both arms, as the retained proposal describes.
+
+## v10r sequence (2026-09-16, supersedes step 2 above)
+
+The v10q CHORUS native canary stopped at its whole-attempt cap after the
+receipt and the full record (#1914–#1918; `notes/matched_cborg_2026-09-16_v10q/CHORUS_agentic_stopped.md`).
+The user then approved a fresh native registration and directed that the
+agentic arm needs no per-attempt cap, so the v10r registration
+(`notes/matched_cborg_2026-09-16_v10r/`) gives each agentic attempt a limit
+equal to the additional allocation: the sequence ledger, the allocation
+less every settled charge, is its only bound; the API caps are unchanged;
+no combined-ceiling amendment applies, and the limits are conditional
+ceilings, not funding.
+
+1. Independent review of the native-controls PR (#1920) and of the v10r
+   registration PR (#1921), required CI on the exact head, then merge (the
+   maintainer's call).
+2. Fresh pin, runtime, model-route and accounting checks immediately
+   before launch, then a hash-bound launch receipt for `CHORUS_agentic_rep1`.
+   No budget amendment is a prerequisite.
+3. Review the unchanged originals and the actual tool history, the four
+   #1918 checks included, before any later canary; then Kids First native,
+   then the two API canaries, each accepted before the next. A failure
+   stops expansion; no stopped or rejected identity is resumed or
+   overwritten.
 4. Evaluation canaries on exact accepted inputs, then a costed production
    cohort for both arms, as the retained proposal describes.
