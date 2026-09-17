@@ -139,8 +139,9 @@ or override structure.
 - Phase 1 must not read any prior generated full or core D4D.
 - Phase 2 may read only the exact Phase 1 full D4D from the same version label.
 - Phase 2 must not read an older core, even as a template.
-- Phase 3 may read only the current source bundle, manifest, schemas, and the
-  same-run full/core pair.
+- Phase 3 may read only the current source bundle, manifest, schemas, the
+  same-run full/core pair, and that run's coverage receipt, whose entries a
+  Phase 3 back-port edits in place.
 - Phase 4 may read only the same Phase 3 inputs plus the Phase 3 audit findings
   for that exact pair.
 - A fact found only in older generated YAML must be omitted.
@@ -344,8 +345,13 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
      already receipted from those chunks;
    - `nothing_relevant` with a `reason`;
    - `duplicate_of: <chunk id>` — the same content as another chunk.
+   Write every `snippet` and `reason` as a double-quoted YAML string,
+   escaping `"` and `\` inside it: source text often holds `: `, a
+   trailing colon or ` #`, which unquoted YAML reads as a mapping or a
+   comment, and the whole receipt then fails to parse.
    Write the entry with the file-writing tool (`Write`, or an edit of the
-   receipt file), never with a shell redirect or `cat >>`: the native
+   receipt file; read a file before rewriting it whole, as the tool
+   requires), never with a shell redirect or `cat >>`: the native
    allowlist denies the shell form, and a denied append leaves the chunk
    unreceipted. **Every manifest chunk gets an entry, including the last
    ones**: a chunk you read but never receipted is a chunk the validator
@@ -566,9 +572,10 @@ allowed to prefer a value merely because the full record already states it.
    Keep a supported plan or in-progress fact qualified in its own value where
    that field permits it, with evidence commentary in `source_caveats`.
    **Every back-ported or repaired value gets its receipt**:
-   add the `{slot, snippet}` pair to the *existing* entry of the chunk the
-   passage sits in (edit that entry in place — a second entry for the same
-   chunk is a finding), and re-run `d4d receipts check`. A value you cannot
+   add the `{slot, snippet}` pair, the snippet double-quoted as in Phase 1,
+   to the *existing* entry of the chunk the passage sits in (edit that entry
+   in place — a second entry for the same chunk is a finding), and re-run
+   `d4d receipts check`. A value you cannot
    receipt from a chunk is not source-supported.
 5. Re-validate the full record after every correction and record the
    source and provenance findings for the reconciliation report. Nothing is

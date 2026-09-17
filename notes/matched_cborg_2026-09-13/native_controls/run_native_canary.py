@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import shlex
 import signal
 import subprocess
 import sys
@@ -17,6 +18,7 @@ from budgeted_cborg import cborg_client, provider_context_headers, provider_cont
 from native_proxy import NativeProxy
 from prepare_registration import spec_for
 from run_api_canary import verify, verify_history, sha, check_canary_receipts
+from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 
 
 def now():
@@ -30,6 +32,347 @@ def verified_executable(overlay):
     if overlay['pinned_files'].get(str(path)) != sha(path):
         raise BudgetStop('native executable bytes differ from the launch pin')
     return str(path)
+
+
+#: Characters bash reads as control or redirection operators when they are
+#: unquoted, alone or merged (`>|`, `&>>`, `<>`, `)|`). The system prompt
+#: forbids chaining unlisted programs, heredocs and writes outside the output
+#: directories, and no command the instruction prescribes uses any of them.
+OPERATOR_CHARS = frozenset(';&|<>()')
+
+
+def _shell_tokens(command, bash_words=False):
+    """shlex words. With bash_words, for text `_simple_command` has already
+    scanned: no comment character, and only a space or tab separates words
+    (bash keeps a carriage return inside the word)."""
+    try:
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
+        lexer.whitespace_split = True
+        if bash_words:
+            lexer.commenters = ''
+            lexer.whitespace = ' \t'
+        return list(lexer)
+    except ValueError:
+        return None
+
+
+FORBIDDEN_SHELL = 'shell operators, redirection or substitution the system prompt forbids'
+
+
+def _simple_command(command):
+    """The command's words when bash would read one simple command, else
+    (None, reason).
+
+    shlex alone does not see how bash splits a command line (#2031): with
+    whitespace_split a newline is whitespace, a run of operator characters is
+    one token, and a `#` inside a word hides the rest of the line. So the
+    text is scanned first with bash's quoting. A backslash-newline joins two
+    lines. A `#` starts a comment only at the start of a word. A newline
+    ends the command, so any word after it, outside a comment, is a second
+    command. An unquoted operator character, a backtick or `$(` (also inside
+    double quotes) means the text is not one simple command."""
+    out = []
+    quote = None
+    word_start = True
+    ended = False
+    i, n = 0, len(command)
+    while i < n:
+        ch = command[i]
+        if quote == "'":
+            out.append(ch)
+            quote = None if ch == "'" else quote
+            i += 1
+            continue
+        if ch == '\\' and command[i + 1:i + 2] == '\n':
+            i += 2
+            continue
+        if quote is None:
+            if ch in ' \t':
+                out.append(ch)
+                word_start = True
+                i += 1
+                continue
+            if ch == '\n':
+                ended = ended or bool(''.join(out).strip())
+                out.append(' ')
+                word_start = True
+                i += 1
+                continue
+            if ch == '#' and word_start:
+                end = command.find('\n', i)
+                i = n if end < 0 else end
+                continue
+            if ended:
+                return None, FORBIDDEN_SHELL
+        if ch == '`' or command.startswith('$(', i):
+            return None, FORBIDDEN_SHELL
+        if ch == '\\':
+            out.append(command[i:i + 2])
+            word_start = False
+            i += 2
+            continue
+        if quote == '"':
+            out.append(ch)
+            quote = None if ch == '"' else quote
+            i += 1
+            continue
+        if ch in OPERATOR_CHARS:
+            return None, FORBIDDEN_SHELL
+        if ch in '\'"':
+            quote = ch
+        out.append(ch)
+        word_start = False
+        i += 1
+    tokens = None if quote else _shell_tokens(''.join(out), bash_words=True)
+    if not tokens:
+        return None, 'shell text that does not parse'
+    return tokens, None
+
+
+def _roster_command(args):
+    """The roster command `args` begins with, matched word by word (a roster
+    command may have three words: `api prompts check`)."""
+    for command in sorted(PLAYBOOK_COMMANDS, key=lambda c: -len(c.split())):
+        words = command.split()
+        if args[:len(words)] == words:
+            return command
+    return None
+
+
+def prescribed_programs(instruction_text, python):
+    """The `python -c` programs the rendered instruction prescribes verbatim
+    (the validators and the multi-line original-freeze command). A command
+    spanning several lines is read until its quoting closes."""
+    programs = set()
+    head = f'{python} -c '
+    start = 0
+    while True:
+        at = instruction_text.find(head, start)
+        if at < 0:
+            return programs
+        end = instruction_text.find('\n', at)
+        tokens = None
+        while True:
+            tokens = _shell_tokens(instruction_text[at:end if end >= 0 else len(instruction_text)])
+            if tokens is not None or end < 0:
+                break
+            end = instruction_text.find('\n', end + 1)
+        if tokens and len(tokens) > 2:
+            programs.add(tokens[2].strip())
+        start = at + 1
+
+
+def _classify_command(command, python, programs):
+    tokens, reason = _simple_command(command)
+    if tokens is None:
+        return 'not_prescribed', reason
+    if tokens[0] != python or len(tokens) < 3:
+        return 'not_prescribed', 'a program the instruction does not prescribe'
+    rest = tokens[3:] if tokens[1] == '-c' else tokens[1:]
+    if any(t in ('--help', '-h') for t in rest):
+        return 'not_prescribed', '--help exploration the system prompt forbids'
+    if tokens[1] == '-c':
+        if tokens[2].strip() in programs:
+            return 'prescribed', 'a -c program the instruction prescribes verbatim'
+        return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
+    if tokens[1] != '-m':
+        return 'not_prescribed', 'an interpreter form the instruction does not prescribe'
+    module = tokens[2]
+    if module == 'data_sheets_schema.cli':
+        args = tokens[3:]
+        if args[:1] == ['--manifest']:
+            args = args[2:]
+        roster = _roster_command(args)
+        if roster:
+            return 'prescribed', f"the roster command '{roster}'"
+        return 'not_prescribed', 'a CLI command outside the prescribed roster'
+    if module.startswith('data_sheets_schema.') and module.split('.', 1)[1] in MODULE_ENTRY_POINTS:
+        return 'prescribed', f"the registered module entry point '{module}'"
+    return 'not_prescribed', 'a module the instruction does not prescribe'
+
+
+def _classify_path(tool, path, repository, output_directories, readable_inputs):
+    if not path:
+        return 'not_prescribed', 'a file operation without a path'
+    def resolved(value):
+        candidate = Path(value)
+        return (candidate if candidate.is_absolute() else Path(repository) / candidate).resolve()
+    target = resolved(path)
+    for folder in output_directories or ():
+        if target == resolved(folder) or resolved(folder) in target.parents:
+            return 'prescribed', 'a file inside the registered output directories'
+    if tool == 'Read' and any(target == resolved(x) for x in readable_inputs or () if x):
+        return 'prescribed', 'a registered input the instruction reads'
+    return 'not_prescribed', 'a path outside the registered inputs and outputs'
+
+
+def classify_denials(denials, *, instruction_text, python, repository, output_directories, readable_inputs):
+    """Every tool-permission denial, listed and classified (#2012, #2026).
+
+    The maintainer ruled (2026-09-17) that a denied prescribed command
+    disqualifies a run while denials of forbidden commands are listed and do
+    not disqualify it on their own. A denial is prescribed when the controls
+    should have allowed it: a roster CLI command, a registered module entry
+    point, one of the instruction's own `-c` programs, or a file operation
+    inside the registered outputs (or a Read of a registered input), with no
+    shell operator and no --help. A denial record the runtime wrote in an
+    unexpected shape (no tool name, a Bash record without a command, a file
+    record without a path, a path that cannot be resolved) is unclassifiable
+    and disqualifies like a prescribed one: nothing shows it was harmless."""
+    if denials in (None, []):
+        return []
+    if not isinstance(denials, list):
+        return [{'classification': 'unclassifiable', 'basis': 'permission_denials is not a list'}]
+    programs = prescribed_programs(instruction_text, python)
+    out = []
+    for item in denials:
+        if not isinstance(item, dict) or not isinstance(item.get('tool_input'), dict):
+            out.append({'classification': 'unclassifiable', 'basis': 'a denial record without tool_input'})
+            continue
+        tool = item.get('tool_name'); tool_input = item['tool_input']
+        if not isinstance(tool, str) or not tool:
+            out.append({'classification': 'unclassifiable', 'basis': 'a denial record without a tool name'})
+            continue
+        entry = {'tool': tool, 'tool_use_id': item.get('tool_use_id')}
+        if tool == 'Bash':
+            command = tool_input.get('command')
+            if not isinstance(command, str):
+                entry['classification'], entry['basis'] = 'unclassifiable', 'a Bash denial without a command'
+            elif not command.strip():
+                # A blank command is well formed and harmless, and no
+                # instruction prescribes it (#2036).
+                entry['command'] = command
+                entry['classification'], entry['basis'] = 'not_prescribed', 'an empty command'
+            else:
+                entry['command'] = command[:1000]
+                entry['classification'], entry['basis'] = _classify_command(command, python, programs)
+        elif tool in ('Read', 'Write', 'Edit'):
+            path = tool_input.get('file_path')
+            if not isinstance(path, str) or not path:
+                entry['classification'], entry['basis'] = 'unclassifiable', f'a {tool} denial without a file path'
+            else:
+                entry['path'] = path
+                try:
+                    entry['classification'], entry['basis'] = _classify_path(
+                        tool, path, repository, output_directories, readable_inputs)
+                except (OSError, ValueError, UnicodeError):
+                    entry['classification'], entry['basis'] = 'unclassifiable', 'a path the controller cannot resolve'
+        else:
+            entry['classification'], entry['basis'] = 'not_prescribed', 'a tool the registration does not grant'
+        out.append(entry)
+    return out
+
+
+def registered_reads(job):
+    """The files the job's instruction has the run read: the bundle, the
+    chunk map, the source manifest, the instruction itself, the two schemas
+    and the playbooks the instruction reaches (the guard, the playbook, the
+    uniform rules and the agent file; provenance.AGENT_PLAYBOOKS, which a
+    test holds equal to that closure). The toolchain's resource map also
+    inventories every other agent definition, evaluation rubrics included;
+    those are hashed, not read, so they are not registered reads (#2039)."""
+    from data_sheets_schema.agentic_runtime import SCHEMAS
+    from data_sheets_schema.provenance import AGENT_PLAYBOOKS
+    readable = set(SCHEMAS) | {str(p) for p in AGENT_PLAYBOOKS}
+    identity = job.get('input_identity') or {}
+    paths = [job.get('bundle'), job.get('chunks'), job.get('manifest'), job.get('instruction')]
+    paths += [(identity.get(k) or {}).get('path') for k in ('bundle', 'source_manifest', 'chunks')]
+    spec = (identity.get('instruction') or {}).get('spec') or {}
+    resources = (spec.get('agentic_toolchain') or {}).get('resources') or {}
+    paths += [value for key, value in resources.items() if key in readable]
+    return [x for x in paths if isinstance(x, str) and x]
+
+
+STOPPED_DENIALS_NOTE = ('not classified: the transcript holds no single readable runtime result line; '
+                        "the transcript's tool history is the source")
+
+
+def stopped_denials(path, classify):
+    """The denial classification for a stopped attempt (#2032, #2037).
+
+    The completed path classifies the result line it has already read. A
+    stopped attempt may still have one: a ledger or proxy refusal ends in the
+    runtime's error result, and an init mismatch stops before classification.
+    So the stop path reads the transcript itself and classifies the one
+    result line it holds; with none (a deadline stop) or more than one, it
+    says it classified nothing. Never raises: a diagnostic must not displace
+    the stop it describes."""
+    try:
+        results = []
+        with Path(path).open('rb') as fh:
+            for raw in fh:
+                try:
+                    event = json.loads(raw.decode('utf-8'))
+                except (UnicodeDecodeError, ValueError):
+                    continue
+                if isinstance(event, dict) and event.get('type') == 'result':
+                    results.append(event)
+        if len(results) != 1:
+            note = STOPPED_DENIALS_NOTE if not results else (
+                f'not classified: the transcript holds {len(results)} runtime result lines; '
+                "the transcript's tool history is the source")
+            return {'permission_denials_note': note}
+        classified = classify(results[0].get('permission_denials'))
+        return {'permission_denials': classified, 'disqualifying_denials': denial_problems(classified)}
+    except Exception as error:
+        return {'permission_denials_note': f'not classified: {type(error).__name__} while reading the transcript; '
+                                           "the transcript's tool history is the source"}
+
+
+def denial_problems(classified):
+    """The denials that disqualify a run under the maintainer's ruling."""
+    return [f"denied {d['classification']} call ({d.get('tool') or 'unknown tool'}): {d['basis']}"
+            for d in classified if d.get('classification') in ('prescribed', 'unclassifiable')]
+
+
+def transcript_terminal_state(path):
+    """Whether the runtime's stream-json transcript reached its terminal
+    result line (#2014). A child stopped at the deadline never writes one, so
+    the transcript's token figures are per-message snapshots and the ledger is
+    the attempt's accounting; the receipt says so rather than leaving it to be
+    inferred. Never raises (#2019): a transcript cut mid-write can hold
+    undecodable bytes, and a diagnostic must not displace the stop it
+    describes."""
+    try:
+        with Path(path).open('rb') as fh:
+            for raw in fh:
+                try:
+                    event = json.loads(raw.decode('utf-8'))
+                except (UnicodeDecodeError, ValueError):
+                    continue
+                if isinstance(event, dict) and event.get('type') == 'result':
+                    return {'transcript_terminal_result': 'present'}
+    except FileNotFoundError:
+        return {'transcript_terminal_result': 'missing',
+                'transcript_accounting_note': 'no transcript was written; the ledger is this attempt\'s accounting'}
+    except Exception as error:
+        return {'transcript_terminal_result': 'unreadable', 'transcript_read_note': type(error).__name__}
+    return {'transcript_terminal_result': 'absent',
+            'transcript_accounting_note': 'no runtime result line: transcript token figures are per-message '
+                                          'snapshots; the ledger is this attempt\'s accounting'}
+
+
+def record_controller_stop(ledger, billing_attempt, receipt):
+    """Record the stop in the ledger whatever stopped the attempt (#2018).
+
+    Only the capped client and the ledger itself wrote stopped_attempts, so a
+    deadline or proxy stop left the attempt identity unmarked. Called after
+    stop_explanation, so an existing ledger entry stays the authoritative
+    cause (Ledger.stop_attempt never overwrites one). Never raises."""
+    if receipt.get('reason_source') == 'ledger':
+        return {}
+    reason = str(receipt.get('reason') or receipt.get('error_type') or 'stopped')
+    reason = reason if reason.startswith(CONTROLLER_PREFIX) else CONTROLLER_PREFIX + reason
+    try:
+        ledger.stop_attempt(billing_attempt, reason)
+        state = json.loads(Path(ledger.path).read_bytes())
+        held = ((state.get('stopped_attempts') or {}).get(billing_attempt) or {}).get('reason')
+    except Exception as error:
+        return {'ledger_stop_record_note': f'could not record the stop in the ledger: {type(error).__name__}'}
+    if held == reason:
+        return {'ledger_stop_recorded': reason}
+    # Ledger.stop_attempt keeps the first entry; say what it holds instead.
+    return {'ledger_stop_record_note': f'the ledger already held a stop entry: {held}'}
 
 
 def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
@@ -55,12 +398,29 @@ def stop_explanation(exc, ledger_path, billing_attempt, proxy_failure):
             out['ledger_stop_note'] = 'stopped_attempts is not a mapping'
     except Exception as read_error:
         out['ledger_stop_note'] = f'ledger unreadable: {type(read_error).__name__}'
-    if isinstance(entry, dict) and isinstance(entry.get('reason'), str) and entry['reason']:
-        out['reason'] = entry['reason']; out['reason_source'] = 'ledger'; out['ledger_stop'] = entry
+    entry_reason = entry.get('reason') if isinstance(entry, dict) else None
+    if isinstance(entry_reason, str) and entry_reason.startswith(CONTROLLER_PREFIX):
+        # The controller recorded its own stop before closing admission (#2023).
+        out['reason'] = entry_reason[len(CONTROLLER_PREFIX):]; out['reason_source'] = 'controller'; out['ledger_stop'] = entry
+    elif (isinstance(entry_reason, str) and entry_reason == ADMISSION_CLOSED
+          and isinstance(exc, BudgetStop) and str(exc) != ADMISSION_CLOSED and proxy_failure in (None, ADMISSION_CLOSED)):
+        # A handler met the admission the controller had already closed: the
+        # entry is a consequence of the controller's stop, not its cause.
+        out['reason'] = str(exc); out['reason_source'] = 'controller'; out['ledger_stop'] = entry
+        out['ledger_stop_note'] = 'the ledger entry records a request refused after the controller closed admission'
+    elif isinstance(entry_reason, str) and entry_reason:
+        out['reason'] = entry_reason; out['reason_source'] = 'ledger'; out['ledger_stop'] = entry
     elif isinstance(exc, BudgetStop):
-        out['reason'] = str(exc); out['reason_source'] = 'controller'
+        # The controller re-raises the proxy's recorded failure as a
+        # BudgetStop; its source is the proxy (#2038).
+        out['reason'] = str(exc)
+        out['reason_source'] = 'proxy' if isinstance(proxy_failure, str) and proxy_failure and str(exc) == proxy_failure else 'controller'
     elif isinstance(proxy_failure, str) and proxy_failure:
         out['reason'] = proxy_failure; out['reason_source'] = 'proxy'
+    else:
+        # An exception nothing else explains still has a named stop (#2038).
+        # Only its type is recorded; the traceback is kept beside the receipt.
+        out['reason'] = f'unexpected {type(exc).__name__}'; out['reason_source'] = 'controller'
     if proxy_failure is not None:
         out['proxy_failure'] = proxy_failure
     return out
@@ -124,7 +484,30 @@ def terminate_group(process):
     process.wait(timeout=2)
 
 
-def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch):
+#: What an in-flight handler raises when the controller closed admission:
+#: a consequence of a controller stop, never its cause (#2023).
+ADMISSION_CLOSED = 'native admission is closed'
+CONTROLLER_PREFIX = 'controller: '
+
+
+def record_then_close(proxy, record_stop, reason):
+    """Record the controller's stop and close admission as one step (#2023,
+    #2029). Handlers write the ledger only under proxy.state, and the ledger's
+    file lock does not wait, so the record takes that same (reentrant) lock:
+    it neither collides with a handler's write nor lets a handler refused at
+    the closed admission write the first stop entry. Never raises."""
+    from contextlib import nullcontext
+    guard = getattr(proxy, 'state', None) or nullcontext()
+    with guard:
+        if record_stop is not None:
+            try:
+                record_stop(reason)
+            except Exception:
+                pass
+        proxy.close_admission()
+
+
+def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None):
     process = None
     deadline = time.monotonic() + deadline_seconds
     try:
@@ -141,6 +524,16 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
         if proxy.failed.is_set():
             raise BudgetStop(proxy.failure)
         return process.returncode
+    except BaseException as exc:
+        # Record every controller-originated failure before shutdown (#2042). An
+        # in-flight counter can otherwise write "admission is closed" first
+        # and hide an interrupt or unexpected exception behind that symptom.
+        # A proxy failure already has its own cause; preserve it unchanged.
+        failed = getattr(proxy, 'failed', None)
+        if failed is None or not failed.is_set():
+            reason = str(exc) if isinstance(exc, BudgetStop) else f'unexpected {type(exc).__name__}'
+            record_then_close(proxy, record_stop, reason)
+        raise
     finally:
         # This runs INSIDE proxy.running(), before server/pool cleanup.
         proxy.close_admission()
@@ -215,15 +608,24 @@ def main():
              'provider':base['provider_base_url'],'model':base['model']['model'],
              'instruction_sha256':sha(job['instruction']),'native_system_sha256':sha(overlay['system_prompt'])}
     write_new(attempt/'started.json',receipt)
+    def classify(denials):
+        return classify_denials(denials, instruction_text=Path(job['instruction']).read_text(encoding='utf-8'),
+            python=base.get('python'), repository=base['repository'],
+            output_directories=job['output_directories'], readable_inputs=registered_reads(job))
     try:
         with proxy.running() as url:
             env['ANTHROPIC_BASE_URL']=url
             receipt['exit_code']=execute_child(argv,proxy=proxy,instruction=job['instruction'],attempt=attempt,
                 cwd=base['repository'],env=env,deadline_seconds=base['generation']['agentic_attempt_deadline_seconds'],
-                verify_launch=lambda: verified_executable(overlay))
+                verify_launch=lambda: verified_executable(overlay),
+                record_stop=lambda reason: receipt.update(
+                    pre_close_ledger_stop=record_controller_stop(ledger, billing_attempt, {'reason': reason})))
         if proxy.failed.is_set() or proxy.unfinished_handlers:
             raise BudgetStop(proxy.failure or 'native handlers did not finish before evidence freeze')
-        events=[json.loads(line) for line in (attempt/'transcript.jsonl').read_text().splitlines() if line.strip()]
+        # JSONL separates records with physical newlines (#2043). Unicode NEL/line/
+        # paragraph separators can appear literally inside valid JSON strings.
+        with (attempt/'transcript.jsonl').open(encoding='utf-8') as transcript:
+            events=[json.loads(line) for line in transcript if line.strip()]
         initializers=[e for e in events if e.get('type')=='system' and e.get('subtype')=='init']
         finals=[e for e in events if e.get('type')=='result']
         if len(initializers)!=1 or len(finals)!=1:
@@ -231,8 +633,12 @@ def main():
         init,terminal=initializers[0],finals[0]
         if init.get('model')!=base['model']['model'] or init.get('apiKeySource')!='ANTHROPIC_API_KEY' or init.get('claude_code_version')!=base['claude_version'].split()[0] or set(init.get('tools',[]))!={'Read','Write','Bash'}:
             raise BudgetStop('native runtime initialization differs from registration')
-        if receipt['exit_code'] or terminal.get('is_error') or terminal.get('permission_denials') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
-            raise BudgetStop('native attempt failed, stopped, or had a tool permission denial')
+        # Every denial is listed and classified; only a denied prescribed
+        # command (or an unclassifiable record) disqualifies, and it does so
+        # after every other check has run (#2026).
+        receipt['permission_denials']=classify(terminal.get('permission_denials'))
+        if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
+            raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
             raise BudgetStop('native terminal model accounting differs from registration')
         observed=terminal['modelUsage'][base['model']['model']]
@@ -253,23 +659,40 @@ def main():
         if not receipt_check['passed']:
             problems=list(problems)+['coverage receipt acceptance failed']
         if spec.render_version >= 9:
-            evidence = native_evidence_check(spec)
+            try:
+                evidence = native_evidence_check(spec)
+                evidence_problem = None if evidence['checked'] and not evidence['findings'] else 'explicit evidence assertions failed'
+            except Exception as error:
+                # Missing or malformed evidence inputs are the run's defect,
+                # checked like any other, not a controller stop (#2038); the
+                # prescribed evidence CLI reports them the same way.
+                evidence = {'checked': False, 'error_type': type(error).__name__}
+                evidence_problem = f'explicit evidence assertions could not be checked ({type(error).__name__})'
             receipt['evidence_assertions'] = evidence
-            if not evidence['checked'] or evidence['findings']:
-                problems = list(problems) + ['explicit evidence assertions failed']
+            if evidence_problem:
+                problems = list(problems) + [evidence_problem]
         observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
-        problems=list(problems)+observation_problems(observed)
+        problems=list(problems)+observation_problems(observed)+denial_problems(receipt['permission_denials'])
         receipt.update(validation_problems=problems,pair_consistency=pair,
                        native_observed=observed,
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),
                        status='validation_failed' if problems or not pair or not pair.get('ran') or not pair.get('consistent') else 'completed_pending_independent_review')
         verify_all();verify_history(base)
-    except Exception as exc:
+    except BaseException as exc:
+        # BaseException: an interrupted controller records its stop like any
+        # other (#2018, #2038) and exits non-zero.
         receipt.update(status='stopped',error_type=type(exc).__name__)
         receipt.update(stop_explanation(exc, ledger.path, billing_attempt, getattr(proxy, 'failure', None)))
+        receipt.update(transcript_terminal_state(attempt/'transcript.jsonl'))
+        if 'permission_denials' in receipt:
+            # Classified before the stop: name what would disqualify (#2037).
+            receipt['disqualifying_denials'] = denial_problems(receipt['permission_denials'])
+        else:
+            receipt.update(stopped_denials(attempt/'transcript.jsonl', classify))
         # The traceback names controller code paths only; provider exception
         # strings are never copied into the receipt.
         retain_traceback(attempt, exc)
+        receipt.update(record_controller_stop(ledger, billing_attempt, receipt))
     finally:
         try:
             state=json.loads(ledger.path.read_bytes()) if ledger.path.exists() else {'requests':[]}
