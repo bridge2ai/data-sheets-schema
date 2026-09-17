@@ -66,12 +66,13 @@ _RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
     # assistant/user events were malformed — an observation carrying the
     # latter is refused by every writer below (#1934).
     "usage_from_terminal_result", "terminal_results_excluded_by_cut", "malformed_message_events",
-    "overlapping_evidence"})
+    "overlapping_evidence", "thinking_from_terminal_results"})
 #: Accounting metadata the observer writes beside the reasoning keys (#1947):
 #: how many sessions' totals are the runtime's own terminal result, and how
 #: many such results the cut excluded. An extension carries them with the
 #: values they qualify.
-_ACCOUNTING_KEYS = frozenset({"usage_from_terminal_result", "terminal_results_excluded_by_cut"})
+_ACCOUNTING_KEYS = frozenset({"usage_from_terminal_result", "terminal_results_excluded_by_cut",
+                              "thinking_from_terminal_results"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -1278,10 +1279,10 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
             parts.append(" reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of "
                          "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
     thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
-    if thinking == ["thinking_tokens"] and "usage_from_terminal_result" in keys:
+    if "thinking_from_terminal_results" in keys and "thinking_tokens" in keys:
         parts.append(" thinking_tokens is the runtime's own count: the session total from the terminal result "
-                     "of each finalized invocation, plus per-turn counts where an invocation without one carries "
-                     "them; no turn coverage is claimed for it (#1978/#1982).")
+                     "of each invocation thinking_from_terminal_results counts, plus per-turn counts from every "
+                     "other invocation; no turn coverage is claimed for it (#1978/#1982/#1994).")
     elif thinking:
         parts.append(
             " " + " and ".join(thinking) + (" are" if len(thinking) > 1 else " is")
@@ -2054,7 +2055,8 @@ def reasoning_cmd(method, project, label, path):
                 turns = obs.get("turns_with_thinking_tokens")
                 parts.append(f"thinking_tokens {counted} (" + (
                     f"{turns} turn(s) counted" if turns is not None else
-                    "includes a terminal session total; no turn coverage" if obs.get("usage_from_terminal_result") else
+                    f"includes the terminal session total of {obs['thinking_from_terminal_results']} invocation(s); no turn coverage"
+                    if obs.get("thinking_from_terminal_results") else
                     "no turn coverage recorded") + ")")
             elif obs.get("reasoning_tokens_estimate") is not None:
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")

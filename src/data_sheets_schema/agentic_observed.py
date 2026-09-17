@@ -192,14 +192,17 @@ def observe(transcripts: list[Path], bundle: Path | None,
         # The same file again — by path, by inode or by bytes — is the same
         # evidence again (#1979/#1986): a copy whose lines carry no id at
         # all cannot be told apart by its events, only by its identity.
+        # Cheap identities first, the byte digest streamed only for a file
+        # the cheap ones do not already know (#1995).
         st = Path(path).stat()
-        raw_bytes = Path(path).read_bytes()
-        import hashlib as _hl
-        idents = {str(Path(path).resolve()), f"inode:{st.st_dev}:{st.st_ino}", f"sha256:{_hl.sha256(raw_bytes).hexdigest()}"}
+        idents = {str(Path(path).resolve()), f"inode:{st.st_dev}:{st.st_ino}"}
+        if not idents & seen_paths:
+            idents.add("sha256:" + _file_digest(path))
         if idents & seen_paths:
             overlapping += 1
             continue
         seen_paths |= idents
+        result_seen = False              # a result occurred, usable or not (#1991)
         usage_by_msg: dict[str, dict] = {}
         blocks_by_msg: dict[str, dict] = {}
         first = last = None
@@ -233,8 +236,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
                             if ident in result_ids or results > 1:
                                 overlapping += 1        # a repeated or second result (#1981)
                             result_ids.add(ident)
-                            terminal_excluded = True
-                        elif measurement and terminal is None:
+                            terminal_excluded = True; result_seen = True
+                        elif measurement and not result_seen:
                             cut_before_terminal = True
                         continue
                     first = first or t
@@ -258,23 +261,23 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     if ident in result_ids or results > 1:
                         overlapping += 1
                     result_ids.add(ident)
-                    terminal = j["usage"]
+                    terminal = j["usage"]; result_seen = True
+                    # A result line is a result, whatever its envelope
+                    # carries (#1993): it is not also a message.
+                    continue
                 usage = msg.get("usage") or {}
-                if usage:
-                    # An id-less message is identified by its event uuid alone,
-                    # so a byte-identical copy in another file overlaps (#1983).
-                    mid = msg.get("id") or j.get("uuid") or f"{path}:{n}"
-                    holder = owner.setdefault(mid, path)
-                    if holder != path or terminal is not None:
-                        # Carried by another file, or appended after this
-                        # file's result: not this invocation's evidence.
-                        overlapping += 1
-                    else:
-                        prev = usage_by_msg.get(mid)
-                        if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
-                            usage_by_msg[mid] = usage
-                        content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
-                        blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
+                # A message's identity is checked whether or not it carries
+                # usage (#1992): the same message in two files, or one after
+                # this file's result, is not this invocation's evidence.
+                mid = (msg.get("id") or j.get("uuid") or f"{path}:{n}") if (msg.get("id") or usage) else None
+                if mid is not None and (owner.setdefault(mid, path) != path or result_seen):
+                    overlapping += 1
+                elif usage:
+                    prev = usage_by_msg.get(mid)
+                    if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
+                        usage_by_msg[mid] = usage
+                    content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
+                    blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
                 for k, c in enumerate(msg.get("content") or []):
                     if not isinstance(c, dict):
                         continue
@@ -283,9 +286,9 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         continue
                     if c.get("type") != "tool_use":
                         continue
-                    if terminal is not None:
-                        # A tool call after the file's result is outside the
-                        # invocation the result finalized (#1988).
+                    if result_seen:
+                        # A tool call after the file's result, usable or not,
+                        # is outside the invocation (#1988/#1991).
                         overlapping += 1
                         continue
                     tid = c.get("id") or f"{path}:{n}:{k}"
@@ -329,8 +332,10 @@ def observe(transcripts: list[Path], bundle: Path | None,
         # terminal result, no turn coverage is claimed for the aggregate,
         # whatever per-turn counts another invocation contributed (#1982);
         # a terminal result carrying no thinking detail leaves the per-turn
-        # coverage as measured (#1987).
+        # coverage as measured (#1987). The provenance is recorded, so a
+        # consumer never infers it from the other keys (#1994).
         out.pop("turns_with_thinking_tokens", None)
+        out["thinking_from_terminal_results"] = terminal_thinking
     if excluded:
         out["terminal_results_excluded_by_cut"] = excluded
     if bundle:
@@ -377,6 +382,16 @@ def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage:
         m["thinking_tokens"] = thinking
         m.pop("turns_with_thinking_tokens", None)
     return total, m
+
+
+def _file_digest(path: Path) -> str:
+    """sha256 of a file, streamed (#1995)."""
+    import hashlib
+    h = hashlib.sha256()
+    with Path(path).open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def _terminal_thinking(terminal_usage: dict) -> int | None:

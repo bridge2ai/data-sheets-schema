@@ -524,3 +524,51 @@ class Round10(unittest.TestCase):
         obs = ao.observe([t], self.bundle, datetime.fromisoformat("2026-09-16T21:30:00+00:00"), None, None)
         self.assertEqual(obs["output_tokens"], 3); self.assertEqual(obs["terminal_results_excluded_by_cut"], 1)
         self.assertEqual(obs["overlapping_evidence"], 1)
+
+
+class Round11(unittest.TestCase):
+    """#1991–#1994: an excluded result still bounds the invocation; a shared
+    message id without usage is refused; a retained result with nested
+    usage is one result; thinking provenance is recorded."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("\n".join(f"l{i}" for i in range(10)) + "\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_an_excluded_result_still_bounds_the_invocation(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   json.dumps({"timestamp": "2026-09-16T22:00:00Z", "type": "result", "message": "done", "uuid": "r", "usage": {"input_tokens": 1, "output_tokens": 100}}),
+                                   json.dumps({"type": "assistant", "uuid": "late", "message": {"role": "assistant", "id": "m9", "usage": {"output_tokens": 70},
+                                               "content": [{"type": "tool_use", "name": "Read", "id": "tu-late", "input": {"file_path": str(self.bundle), "offset": 1, "limit": 3}}]}})])
+        obs = ao.observe([t], self.bundle, datetime.fromisoformat("2026-09-16T21:30:00+00:00"), None, None)
+        self.assertEqual(obs["output_tokens"], 3); self.assertEqual(obs["tool_uses"], 0); self.assertEqual(obs["bundle_lines_read"], 0)
+        self.assertGreaterEqual(obs["overlapping_evidence"], 1)
+
+    def test_a_shared_message_id_without_usage_is_refused(self):
+        shared = json.dumps({"timestamp": "2026-09-16T21:00:00Z", "type": "assistant", "uuid": "u-shared",
+                             "message": {"role": "assistant", "id": "m-shared", "content": [{"type": "text", "text": "hi"}]}})
+        a = self._file("a.jsonl", [shared, json.dumps({"type": "result", "message": "done", "uuid": "ra", "usage": {"input_tokens": 1, "output_tokens": 100}})])
+        b = self._file("b.jsonl", [shared, json.dumps({"type": "result", "message": "done", "uuid": "rb", "usage": {"input_tokens": 1, "output_tokens": 200}})])
+        self.assertEqual(ao.observe([a, b], self.bundle, None, None, None)["overlapping_evidence"], 1)
+
+    def test_a_retained_result_with_nested_usage_is_one_result(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   json.dumps({"type": "result", "uuid": "r", "usage": {"input_tokens": 1, "output_tokens": 100},
+                                               "message": {"role": "assistant", "id": "m1", "usage": {"output_tokens": 100}}})])
+        obs = ao.observe([t], self.bundle, None, None, None)
+        self.assertEqual(obs["output_tokens"], 100); self.assertNotIn("overlapping_evidence", obs); self.assertEqual(obs["assistant_turns"], 1)
+
+    def test_thinking_provenance_is_recorded(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   json.dumps({"type": "result", "message": "done", "uuid": "ra", "usage": {"input_tokens": 1, "output_tokens": 100, "output_tokens_details": {"thinking_tokens": 80}}})])
+        b = self._file("b.jsonl", [_event("2026-09-16T22:00:00Z", usage={"output_tokens": 4, "output_tokens_details": {"thinking_tokens": 7}}, msg_id="m2"),
+                                   json.dumps({"type": "result", "message": "done", "uuid": "rb", "usage": {"input_tokens": 1, "output_tokens": 50}})])
+        obs = ao.observe([a, b], self.bundle, None, None, None)
+        self.assertEqual(obs["thinking_tokens"], 87); self.assertEqual(obs["thinking_from_terminal_results"], 1)
+        self.assertEqual(obs["usage_from_terminal_result"], 2); self.assertNotIn("turns_with_thinking_tokens", obs)
+        only_b = ao.observe([b], self.bundle, None, None, None)
+        self.assertNotIn("thinking_from_terminal_results", only_b); self.assertEqual(only_b["turns_with_thinking_tokens"], 1)
