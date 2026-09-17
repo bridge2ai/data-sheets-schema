@@ -14,9 +14,10 @@ import textwrap
 
 from data_sheets_schema.agentic_runtime import playbook_text, validate_toolchain
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
+from native_readonly import PROGRAMS, lookup_policy, lookup_guidance
 
 
-POLICY_VERSION = 1
+POLICY_VERSION = 2
 
 
 def program_key(program):
@@ -137,6 +138,11 @@ def build_command_policy(job, python, repository):
         manifests.add(str(absolute.relative_to(root)))
     cli = [python, '-m', 'data_sheets_schema.cli']
     rules = ['Read', 'Write']
+    # Built-in read-only admission varies with the pattern (#2052). These
+    # grants provide the named capabilities; command_history checks operands
+    # and syntax. Like Read/Write, they are not a filesystem sandbox.
+    for program in PROGRAMS:
+        rules.append(_literal_rule('sed -n' if program == 'sed' else program, arguments=True))
     for command in PLAYBOOK_COMMANDS:
         rules.append(_literal_rule(shlex.join([*cli, *command.split()]), arguments=True))
         for path in sorted(manifests):
@@ -147,7 +153,8 @@ def build_command_policy(job, python, repository):
         rules.append(_literal_rule(shlex.join([python, '-c', program]), arguments=arguments))
     return {'version': POLICY_VERSION, 'python': python, 'manifest_paths': sorted(manifests),
             'programs': [{'code': code, 'arguments': arguments} for code, arguments in sorted(programs.items())],
-            'command_examples': sorted(examples), 'allowed_tools': rules}
+            'command_examples': sorted(examples), 'allowed_tools': rules,
+            'readonly_lookups': lookup_policy(job, repository)}
 
 
 def command_guidance(policy):
@@ -162,7 +169,8 @@ def command_guidance(policy):
         'Python programs are not permitted. CLI roster commands retain the '
         'instruction\'s arguments; a root --manifest option must name this job\'s '
         'registered manifest.\n\n' +
-        '\n\n'.join('```bash\n' + command + '\n```' for command in policy['command_examples']) + '\n')
+        '\n\n'.join('```bash\n' + command + '\n```' for command in policy['command_examples']) + '\n' +
+        lookup_guidance())
 
 
 def validated_command_policy(overlay, base, job):
