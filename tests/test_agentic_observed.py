@@ -422,3 +422,58 @@ class AmbiguousEvidence(unittest.TestCase):
         both = ao.observe([t, late], self.bundle, datetime.fromisoformat("2026-09-16T22:00:00+00:00"), None, None)
         self.assertEqual(both, ao.observe([t], self.bundle, datetime.fromisoformat("2026-09-16T22:00:00+00:00"), None, None))
 
+
+
+class Round9(unittest.TestCase):
+    """#1979–#1983: repeated paths, shared tool ids, excluded second results,
+    mixed thinking sources and id-less copies."""
+
+    @staticmethod
+    def _terminal(output, ts=None, uuid=None, thinking=None):
+        u = {"input_tokens": 10, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "output_tokens": output}
+        if thinking is not None:
+            u["output_tokens_details"] = {"thinking_tokens": thinking}
+        d = {"type": "result", "message": "done", "uuid": uuid or f"r{output}", "usage": u}
+        if ts:
+            d["timestamp"] = ts
+        return json.dumps(d)
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("\n".join(f"l{i}" for i in range(10)) + "\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_the_same_path_twice_is_refused(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1")])
+        once = ao.observe([t], self.bundle, None, None, None); twice = ao.observe([t, t], self.bundle, None, None, None)
+        self.assertEqual(twice["output_tokens"], once["output_tokens"]); self.assertEqual(twice["overlapping_evidence"], 1)
+
+    def test_a_tool_id_shared_by_two_files_is_refused(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1",
+                                          tools=[("Read", {"file_path": str(self.bundle), "offset": 1, "limit": 1})], ids=["shared"])])
+        b = self._file("b.jsonl", [_event("2026-09-16T22:00:00Z", usage={"output_tokens": 4}, msg_id="m2",
+                                          tools=[("Read", {"file_path": str(self.bundle), "offset": 1, "limit": 2})], ids=["shared"])])
+        for order in ([a, b], [b, a]):
+            self.assertEqual(ao.observe(order, self.bundle, None, None, None)["overlapping_evidence"], 1)
+
+    def test_a_cut_excluded_second_result_is_refused(self):
+        t = self._file("t.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(100),
+                                   self._terminal(200, ts="2026-09-16T22:00:00Z", uuid="r-late")])
+        obs = ao.observe([t], self.bundle, datetime.fromisoformat("2026-09-16T21:30:00+00:00"), None, None)
+        self.assertEqual(obs["overlapping_evidence"], 1)
+
+    def test_mixed_thinking_sources_claim_no_turn_coverage(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(100, thinking=80)])
+        b = self._file("b.jsonl", [_event("2026-09-16T22:00:00Z", usage={"output_tokens": 4, "output_tokens_details": {"thinking_tokens": 7}}, msg_id="m2")])
+        obs = ao.observe([a, b], self.bundle, None, None, None)
+        self.assertEqual(obs["thinking_tokens"], 87); self.assertNotIn("turns_with_thinking_tokens", obs)
+        self.assertEqual(ao.observe([b], self.bundle, None, None, None)["turns_with_thinking_tokens"], 1)
+
+    def test_an_id_less_byte_identical_copy_is_refused(self):
+        line = json.dumps({"timestamp": "2026-09-16T21:00:00Z", "uuid": "u1", "message": {"role": "assistant", "usage": {"output_tokens": 30}, "content": []}})
+        a = self._file("a.jsonl", [line]); b = self._file("b.jsonl", [line])
+        self.assertEqual(ao.observe([a], self.bundle, None, None, None)["output_tokens"], 30)
+        self.assertEqual(ao.observe([a, b], self.bundle, None, None, None)["overlapping_evidence"], 1)

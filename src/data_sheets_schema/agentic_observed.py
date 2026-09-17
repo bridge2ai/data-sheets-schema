@@ -177,6 +177,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
     bundle_name = bundle.name if bundle else None
     malformed = overlapping = 0
     owner: dict[str, Path] = {}          # message id -> the file that carries it
+    tool_owner: dict[str, Path] = {}     # tool_use id -> the file that carries it (#1980)
+    seen_paths: set[str] = set()
     result_ids: set[str] = set()
     tools: set[str] = set()
     searches: set[str] = set()
@@ -186,6 +188,12 @@ def observe(transcripts: list[Path], bundle: Path | None,
     measure: dict[str, int] = {}
     from_terminal = excluded = 0
     for path in transcripts:
+        ident_path = str(Path(path).resolve())
+        if ident_path in seen_paths:
+            # The same file again is the same evidence again (#1979).
+            overlapping += 1
+            continue
+        seen_paths.add(ident_path)
         usage_by_msg: dict[str, dict] = {}
         blocks_by_msg: dict[str, dict] = {}
         first = last = None
@@ -217,8 +225,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         elif is_result:
                             results += 1
                             ident = j.get("uuid") or line.strip()
-                            if ident in result_ids:
-                                overlapping += 1
+                            if ident in result_ids or results > 1:
+                                overlapping += 1        # a repeated or second result (#1981)
                             result_ids.add(ident)
                             terminal_excluded = True
                         continue
@@ -246,7 +254,9 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     terminal = j["usage"]
                 usage = msg.get("usage") or {}
                 if usage:
-                    mid = msg.get("id") or f"{path}:{j.get('uuid')}"
+                    # An id-less message is identified by its event uuid alone,
+                    # so a byte-identical copy in another file overlaps (#1983).
+                    mid = msg.get("id") or j.get("uuid") or f"{path}:{n}"
                     holder = owner.setdefault(mid, path)
                     if holder != path or terminal is not None:
                         # Carried by another file, or appended after this
@@ -267,6 +277,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     if c.get("type") != "tool_use":
                         continue
                     tid = c.get("id") or f"{path}:{n}:{k}"
+                    if tool_owner.setdefault(tid, path) != path:
+                        # A tool call carried by another file: the same
+                        # refusal as a shared message (#1980).
+                        overlapping += 1
+                        continue
                     tools.add(tid)
                     inp = c.get("input") or {}
                     if not bundle_name:
@@ -295,6 +310,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
     out.update(measure)
     if from_terminal:
         out["usage_from_terminal_result"] = from_terminal
+        # Where any invocation's thinking is a session total from its
+        # terminal result, no turn coverage is claimed for the aggregate,
+        # whatever per-turn counts another invocation contributed (#1982).
+        if "thinking_tokens" in out:
+            out.pop("turns_with_thinking_tokens", None)
     if excluded:
         out["terminal_results_excluded_by_cut"] = excluded
     if bundle:

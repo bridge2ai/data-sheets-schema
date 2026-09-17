@@ -668,7 +668,7 @@ class ObserverHandoff(unittest.TestCase):
             # extend-observed: a candidate that reproduces every prior key but saw malformed events is not a match
             (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
             r = Extension()._run(tmp, path, {"agent-av6-P-rep1": {**FULL, "malformed_message_events": 1}}, transcripts=[t])
-            self.assertIn("0 of 1", r.output); self.assertIn("malformed_message_events absent→1", r.output)
+            self.assertIn("0 of 1", r.output); self.assertIn("refused: malformed_message_events=1", r.output)
             self.assertEqual(path.read_text(), before)
 
 
@@ -757,3 +757,18 @@ class Round7(unittest.TestCase):
         self.assertNotIn("Not the runtime's own accounting", log["run_observed_basis"])
         self.assertTrue(log["run_observed_basis"].startswith(cli._RUN_OBSERVED_BASIS))
         self.assertIn("usage_from_terminal_result counts", log["run_observed_basis"])
+
+
+class Round9Identification(unittest.TestCase):
+    """#1985: refusal reasons are not prior-field mismatches."""
+
+    def test_a_refused_candidate_that_reproduces_every_field_counts_as_such(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); t1, t2 = _transcripts(tmp, ["agent-av6-P-rep1", "agent-av6-P-rep1x"])
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1x": FULL,
+                                             "agent-av6-P-rep1+agent-av6-P-rep1x": {**FULL, "overlapping_evidence": 3}},
+                                 transcripts=[t1, t2])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            (ext,) = log["run_observed_extended"]
+            self.assertEqual(ext["identification"]["best_other_reproduces"], len(PRIOR))

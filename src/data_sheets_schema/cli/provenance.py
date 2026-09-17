@@ -1279,9 +1279,9 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
                          "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
     thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
     if thinking == ["thinking_tokens"] and "usage_from_terminal_result" in keys:
-        parts.append(" thinking_tokens is the runtime's own session total, read from the terminal result "
-                     "of each finalized invocation rather than from per-turn counts, so no turn coverage "
-                     "is claimed for it (#1978).")
+        parts.append(" thinking_tokens is the runtime's own count: the session total from the terminal result "
+                     "of each finalized invocation, plus per-turn counts where an invocation without one carries "
+                     "them; no turn coverage is claimed for it (#1978/#1982).")
     elif thinking:
         parts.append(
             " " + " and ".join(thinking) + (" are" if len(thinking) > 1 else " is")
@@ -1675,20 +1675,21 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         for ts in sets:
             obs = _observe(ts, tb, until, receipt if receipt.exists() else None, tm if receipt.exists() else None)
             differ = sorted(k for k, v in prior.items() if obs.get(k) != v)
-            for bad in ("malformed_message_events", "overlapping_evidence"):
-                if obs.get(bad):
-                    # Not evidence, whatever it reproduces (#1934/#1972).
-                    differ.append(bad)
-            results.append((ts, obs, differ))
-    matches = [(ts, obs) for ts, obs, differ in results if not differ]
+            # Not evidence, whatever it reproduces (#1934/#1972); kept apart
+            # from the prior-field mismatches the statistics count (#1985).
+            refused = [bad for bad in ("malformed_message_events", "overlapping_evidence") if obs.get(bad)]
+            results.append((ts, obs, differ, refused))
+    matches = [(ts, obs) for ts, obs, differ, refused in results if not differ and not refused]
     if len(matches) != 1:
         click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
                    + ("; nothing written" if execute else ""))
-        for ts, obs, differ in results:
-            click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ else
-                       "differs on " + ", ".join(f"{k} {prior.get(k, 'absent')}→{obs.get(k)}" for k in differ)))
+        for ts, obs, differ, refused in results:
+            click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ and not refused else
+                       ", ".join(([f"refused: {', '.join(f'{k}={obs[k]}' for k in refused)}"] if refused else [])
+                                 + (["differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)] if differ else []))))
         return
     ts, obs = matches[0]
+    results = [(cand, o, differ) for cand, o, differ, _refused in results]
     # What the losing candidates reproduced, so the identification can be
     # audited from the record rather than by replaying a candidate pool that
     # has since changed (#1195 S8). `best_other_reproduces` is how many of the
@@ -2050,7 +2051,9 @@ def reasoning_cmd(method, project, label, path):
                 parts.append(f"⚠️  {obs['terminal_results_excluded_by_cut']} finalized result(s) set aside by the "
                              "cut: the messages they would have covered rest on snapshots")
             if counted is not None:
-                parts.append(f"thinking_tokens {counted} ({obs.get('turns_with_thinking_tokens')} turn(s) counted)")
+                turns = obs.get("turns_with_thinking_tokens")
+                parts.append(f"thinking_tokens {counted} (" + (f"{turns} turn(s) counted" if turns is not None else
+                                                                 "session total from the terminal result") + ")")
             elif obs.get("reasoning_tokens_estimate") is not None:
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
             click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
