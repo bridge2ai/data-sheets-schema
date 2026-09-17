@@ -657,3 +657,22 @@ class Round14(unittest.TestCase):
             obs = ao.observe([t], self.bundle, None, None, None)
             self.assertEqual(obs["malformed_message_events"], 1, usage); self.assertNotIn("usage_from_terminal_result", obs)
             self.assertEqual(obs["output_tokens"], 3)
+
+
+class Round15(unittest.TestCase):
+    """#2005: nothing after the result boundary alters coverage or span."""
+
+    def test_a_trailing_error_result_and_timestamp_do_not_alter_coverage_or_span(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); bundle = root / "P_preprocessed.txt"; bundle.write_text("\n".join(f"l{i}" for i in range(10)) + "\n")
+            lines = [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1",
+                            tools=[("Read", {"file_path": str(bundle), "offset": 1, "limit": 3})], ids=["read-1"]),
+                     json.dumps({"timestamp": "2026-09-16T21:00:02Z", "type": "user", "uuid": "u1",
+                                 "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "read-1", "content": "ok"}]}}),
+                     json.dumps({"timestamp": "2026-09-16T21:00:02Z", "type": "result", "message": "done", "uuid": "r", "usage": {"input_tokens": 1, "output_tokens": 100}}),
+                     json.dumps({"timestamp": "2026-09-16T22:00:00Z", "type": "user", "uuid": "u2",
+                                 "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "read-1", "is_error": True, "content": "late"}]}})]
+            t = root / "t.jsonl"; t.write_text("\n".join(lines) + "\n")
+            obs = ao.observe([t], bundle, None, None, None)
+        self.assertEqual(obs["bundle_lines_read"], 3); self.assertEqual(obs["duration_ms"], 2000)
+        self.assertEqual(obs["usage_from_terminal_result"], 1); self.assertNotIn("overlapping_evidence", obs)

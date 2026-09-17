@@ -250,8 +250,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         elif measurement and not result_seen:
                             cut_before_terminal = True
                         continue
-                    first = first or t
-                    last = t
+                    if not result_seen:
+                        # The invocation ends at its result: trailing
+                        # orchestrator events do not extend its span (#2005).
+                        first = first or t
+                        last = t
                 if j.get("type") in ("assistant", "user") and not isinstance(raw, dict):
                     # Claude Code 2.1.272 stream-json writes informational
                     # lines (`system`, `result`, …) with a string `message`
@@ -300,7 +303,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     if not isinstance(c, dict):
                         continue
                     if c.get("type") == "tool_result":
-                        result_refs.append((path, c.get("tool_use_id"), bool(c.get("is_error"))))
+                        # A tool result after the result boundary is the
+                        # orchestrator's trailing traffic (#1953): accepted,
+                        # but it alters no coverage (#2005).
+                        if not result_seen:
+                            result_refs.append((path, c.get("tool_use_id"), bool(c.get("is_error"))))
                         continue
                     if c.get("type") != "tool_use":
                         continue

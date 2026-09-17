@@ -2070,6 +2070,9 @@ def reasoning_cmd(method, project, label, path):
                      if obs.get(k) is not None]
             if obs.get("usage_from_terminal_result"):
                 parts.append(f"finalized by the runtime for {obs['usage_from_terminal_result']} session(s)")
+            if obs.get("terminal_results_without_usage"):
+                parts.append(f"⚠️  {obs['terminal_results_without_usage']} terminal result(s) without usage: those "
+                             "invocations rest on snapshots, unfinalized")
             if obs.get("terminal_results_excluded_by_cut"):
                 parts.append(f"⚠️  {obs['terminal_results_excluded_by_cut']} finalized result(s) set aside by the "
                              "cut: the messages they would have covered rest on snapshots")
