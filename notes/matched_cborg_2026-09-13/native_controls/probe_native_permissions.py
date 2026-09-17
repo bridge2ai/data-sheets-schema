@@ -78,6 +78,14 @@ def cases_for(job, policy):
                   'command': shlex.join([*cli, 'agents', 'playbook'])})
     cases.append({'id': 'module', 'allow': True, 'command': shlex.join([
         policy['python'], '-m', 'data_sheets_schema.source_review', '--record', job['outputs']['full']])})
+    # dontAsk also admits the runtime's built-in read-only commands, even
+    # when no explicit Bash grant names them (#2049).
+    cases.extend([
+        {'id': 'builtin_readonly_pipeline', 'allow': True,
+         'command': shlex.join(['grep', '-n', 'Synthetic', job['bundle']]) + ' | head -1'},
+        {'id': 'builtin_readonly_count', 'allow': True,
+         'command': shlex.join(['wc', '-l', job['bundle']])},
+    ])
     bad = {
         'outside_roster': [*cli, '--manifest', job['manifest'], 'runs', 'select'],
         'other_manifest': [*cli, '--manifest', '/another/manifest.yaml', 'runs', 'list'],
@@ -94,6 +102,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--claude-executable', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--project-settings-mode', choices=('broad', 'absent'), default='broad',
+                        help='Probe with broad project grants (default) or without project settings')
     args = parser.parse_args()
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=False)
@@ -101,10 +111,11 @@ def main():
     work.mkdir()
     # Existing project settings must not widen the registered policy when
     # permissions move from --allowedTools to inline JSON settings.
-    settings = work / '.claude'
-    settings.mkdir()
-    for name in ('settings.json', 'settings.local.json'):
-        (settings / name).write_text(json.dumps({'permissions': {'allow': ['Bash']}}))
+    if args.project_settings_mode == 'broad':
+        settings = work / '.claude'
+        settings.mkdir()
+        for name in ('settings.json', 'settings.local.json'):
+            (settings / name).write_text(json.dumps({'permissions': {'allow': ['Bash']}}))
     job, policy = fixture(work)
     cases = cases_for(job, policy)
     (root / 'cases.json').write_text(json.dumps(cases, indent=2) + '\n')
@@ -181,7 +192,7 @@ def main():
     summary = {'exit_code': code, 'passed': code == 0 and all(c['passed'] for c in checked),
         'cases': checked, 'scripted_requests': len(calls), 'real_provider_requests': 0,
         'proxy_failure': proxy.failure, 'unfinished_handlers': proxy.unfinished_handlers,
-        'runtime': pin, 'project_settings_contamination_probe': True,
+        'runtime': pin, 'project_settings_contamination_probe': args.project_settings_mode == 'broad',
         'policy_sha256': sha(root / 'policy.json'),
         'transcript_sha256': sha(root / 'transcript.jsonl')}
     (root / 'result.json').write_text(json.dumps(summary, indent=2) + '\n')

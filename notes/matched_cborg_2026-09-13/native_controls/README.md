@@ -39,6 +39,19 @@ are not a filesystem sandbox. Actual tool history still needs acceptance
 review. The new policy requires a fresh registration and overlay; it does not
 rewrite or authorize any historical condition.
 
+The listed rules are not the complete effective Bash permissions. Claude Code
+also admits built-in read-only shell commands, including `grep`, `head` and
+`wc`, under `dontAsk`, as its [permission documentation](https://code.claude.com/docs/en/permissions#read-only-commands)
+explains. The generator's prescribed-command instruction is a behavioral
+requirement; it does not remove those runtime permissions. The probe includes
+read-only shell cases alongside the helper and denied Python/manifest cases.
+Run it with `--project-settings-mode absent` to observe admission without
+project settings, and with the default `broad` mode to check that broad
+project grants do not widen the tested Python/manifest permissions. Use a new
+output directory for each run. Scientific acceptance still inspects actual
+successful calls, read targets and denied calls; a permission grant alone
+does not establish instruction adherence (#2049).
+
 ## Initial observations, 2026-09-13
 
 These files are preparation for the agentic canaries. They are not part of the
