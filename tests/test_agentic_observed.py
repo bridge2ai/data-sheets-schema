@@ -523,3 +523,64 @@ class CompletedInvocations(unittest.TestCase):
             obs = ao.observe(order, self.bundle, None, None, None)
             self.assertEqual(obs["output_tokens"], 100); self.assertNotIn("thinking_tokens", obs)
             self.assertEqual(obs["reasoning_tokens_estimate"], 100); self.assertEqual(obs["assistant_turns"], 1)
+
+
+class SegmentsAndCopies(unittest.TestCase):
+    """Codex round 7 on #1920 (#1965–#1968)."""
+
+    @staticmethod
+    def _terminal(output, ts=None, uuid=None):
+        d = {"type": "result", "message": "done", "uuid": uuid or f"r{output}",
+             "usage": {"input_tokens": 10, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "output_tokens": output}}
+        if ts:
+            d["timestamp"] = ts
+        return json.dumps(d)
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bundle = self.root / "P_preprocessed.txt"; self.bundle.write_text("x\n")
+
+    def _file(self, name, lines):
+        p = self.root / name; p.write_text("\n".join(lines) + "\n"); return p
+
+    def test_a_result_covers_only_the_messages_recorded_before_it(self):
+        one = self._file("one.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(100),
+                                       _event("2026-09-16T21:10:00Z", usage={"output_tokens": 9}, msg_id="m2")])
+        self.assertEqual(ao.observe([one], self.bundle, None, None, None)["output_tokens"], 109)
+        two = self._file("two.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(100),
+                                       _event("2026-09-16T21:10:00Z", usage={"output_tokens": 9}, msg_id="m2"),
+                                       self._terminal(200, ts="2026-09-16T21:20:00Z", uuid="r2")])
+        obs = ao.observe([two], self.bundle, datetime.fromisoformat("2026-09-16T21:15:00+00:00"), None, None)
+        self.assertEqual(obs["output_tokens"], 109); self.assertEqual(obs["usage_from_terminal_result"], 1)
+        self.assertEqual(obs["terminal_results_excluded_by_cut"], 1)
+
+    def test_the_richer_compatible_evidence_wins_before_the_name(self):
+        base = [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1")]
+        later = {"role": "assistant", "id": "m1", "usage": {"output_tokens": 80, "output_tokens_details": {"thinking_tokens": 60}},
+                 "content": [{"type": "thinking", "thinking": "", "signature": "s"}, {"type": "text", "text": "v" * 80}]}
+        older = self._file("older-z.jsonl", base + [self._terminal(100)])
+        newer = self._file("newer-a.jsonl", base + [json.dumps({"timestamp": "2026-09-16T21:00:05Z", "message": later, "uuid": "l"}),
+                                                    self._terminal(100)])
+        for order in ([older, newer], [newer, older]):
+            obs = ao.observe(order, self.bundle, None, None, None)
+            self.assertEqual(obs["thinking_blocks"], 1); self.assertEqual(obs["thinking_tokens"], 60)
+            self.assertEqual(obs["reasoning_tokens_estimate"], 80)
+
+    def test_a_partial_copy_with_an_excluded_result_spans_nothing(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   self._terminal(100, ts="2026-09-16T21:01:00Z")])
+        b = self._file("b.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"),
+                                   self._terminal(100, ts="2026-09-16T21:05:00Z", uuid="rb")])
+        cut = datetime.fromisoformat("2026-09-16T21:02:00+00:00")
+        self.assertEqual(ao.observe([a], self.bundle, cut, None, None)["duration_ms"], 60_000)
+        for order in ([a, b], [b, a]):
+            obs = ao.observe(order, self.bundle, cut, None, None)
+            self.assertEqual(obs["duration_ms"], 60_000); self.assertEqual(obs["output_tokens"], 100)
+
+    def test_a_wholly_post_cut_invocation_marks_nothing(self):
+        a = self._file("a.jsonl", [_event("2026-09-16T21:00:00Z", usage={"output_tokens": 3}, msg_id="m1"), self._terminal(100)])
+        late = self._file("late.jsonl", [_event("2026-09-16T23:00:00Z", usage={"output_tokens": 5}, msg_id="m9"),
+                                         self._terminal(50, ts="2026-09-16T23:01:00Z")])
+        cut = datetime.fromisoformat("2026-09-16T22:00:00+00:00")
+        self.assertEqual(ao.observe([a, late], self.bundle, cut, None, None), ao.observe([a], self.bundle, cut, None, None))

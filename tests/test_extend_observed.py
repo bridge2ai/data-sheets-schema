@@ -754,3 +754,23 @@ class Round6(unittest.TestCase):
                 self.assertNotEqual(r.exit_code, 0); self.assertIn("no cut is given or recorded", r.output)
                 r = click.testing.CliRunner().invoke(cli.provenance, base + ["--until", "2026-08-28T10:00:00+00:00"])
                 self.assertEqual(r.exit_code, 0, r.output)
+
+
+class Round7(unittest.TestCase):
+    """#1969: one file under two spellings is one candidate; #1970: the
+    legacy opening paragraph is replaced on extension."""
+
+    def test_aliases_of_one_transcript_are_one_candidate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            alias_dir = Path(tmp) / "alias"; alias_dir.symlink_to(t.parent)
+            alias = alias_dir / t.name
+            r = Extension()._run(tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t, alias])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+
+    def test_the_legacy_opening_paragraph_is_replaced(self):
+        log = {"run_observed": dict(PRIOR), "run_observed_basis": cli._LEGACY_RUN_OBSERVED_BASIS}
+        cli._extend_run_observed(log, {**FULL, "usage_from_terminal_result": 1}, recorded_by="t", instrument="t")
+        self.assertNotIn("Not the runtime's own accounting", log["run_observed_basis"])
+        self.assertTrue(log["run_observed_basis"].startswith(cli._RUN_OBSERVED_BASIS))
+        self.assertIn("usage_from_terminal_result counts", log["run_observed_basis"])

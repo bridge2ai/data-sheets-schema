@@ -1063,9 +1063,9 @@ _RUN_OBSERVED_BASIS = (
     "input/output split, not billing-grade; deliberately not shaped like "
     "api_usage (#681/#682). Accounted per session, transcripts sharing "
     "a message id being one: where a transcript carries the runtime's own "
-    "terminal result and no measurement event before that result falls "
-    "outside the observed interval, the messages that transcript recorded "
-    "take its finalized total_tokens and output_tokens, with the estimate "
+    "terminal result inside the observed interval and no measurement event "
+    "before that result falls outside it, the messages recorded since the "
+    "previous result take its finalized total_tokens and output_tokens, with the estimate "
     "the subtraction pooled over them (usage_from_terminal_result counts "
     "such sessions; terminal_results_excluded_by_cut those with a result "
     "the cut set aside while messages still rest on snapshots, "
@@ -1074,6 +1074,21 @@ _RUN_OBSERVED_BASIS = (
     "per-message estimate. duration_ms is each invocation's own span, a "
     "copy cut short spanning nothing and a resumed transcript only the "
     "events left to it. bundle_lines_read is the union of the run's "
+    "successful file-reading windows over the declared bundle (#700): "
+    "lines the run never opened, or opened only in a read that errored, "
+    "may have been reached by search, but nothing attests that.")
+#: The opening paragraph records extended before #1931 carry; recognised
+#: whole and replaced by the current one on extension (#1970).
+_LEGACY_RUN_OBSERVED_BASIS = (
+    "aggregate totals for the whole run, observed by the orchestrator "
+    "from the subagent runner's transcript. One number per run, not per "
+    "phase: four-phase project-agent mode runs every phase in one "
+    "context, so the run is the only observable boundary. Not the "
+    "runtime's own accounting, no input/output split, not billing-grade; "
+    "deliberately not shaped like api_usage (#681/#682). total_tokens "
+    "counts each API message once (a response spans several transcript "
+    "lines); duration_ms sums each invocation's own span, so a resumed "
+    "run excludes the gap. bundle_lines_read is the union of the run's "
     "successful file-reading windows over the declared bundle (#700): "
     "lines the run never opened, or opened only in a read that errored, "
     "may have been reached by search, but nothing attests that.")
@@ -1281,9 +1296,9 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
                      "the estimate for those messages the subtraction pooled over them; a message no result covers "
                      "keeps per-message accounting (#1931/#1957/#1962).")
     if "terminal_results_excluded_by_cut" in keys:
-        parts.append(" terminal_results_excluded_by_cut counts the sessions whose finalized result the "
-                     "run_observed_until cut set aside, so their totals are per-message snapshots and incomplete "
-                     "(#1945).")
+        parts.append(" terminal_results_excluded_by_cut counts the sessions with a finalized result the "
+                     "run_observed_until cut set aside while messages no surviving result covers rest on "
+                     "per-message snapshots, so the totals are incomplete (#1945).")
     named = sorted(k for k in (extended or ()) if k in keys)
     if parts and named:
         # No clause where the extension names no key the observation still
@@ -1337,6 +1352,12 @@ def _basis_parts(log: dict, keys: set) -> tuple:
     written before that text was recorded, which is a bounded set that
     shrinks to nothing as they are re-extended."""
     b = str(log.get("run_observed_basis") or "").rstrip() or _RUN_OBSERVED_BASIS
+    if b.startswith(_LEGACY_RUN_OBSERVED_BASIS):
+        # This module's own earlier opening paragraph, which said the values
+        # are not the runtime's accounting; replaced whole, so an extension
+        # that adds the finalized-accounting keys does not contradict its own
+        # opening (#1970). A curator's text never starts with it.
+        b = _RUN_OBSERVED_BASIS + b[len(_LEGACY_RUN_OBSERVED_BASIS):]
     recorded = _recorded_additions(log)
     edited = False
     for prior in recorded:
@@ -1597,7 +1618,9 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                                   "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
     rule = ((inputs.get("chunks") or {}).get("rule")) or None
     from data_sheets_schema.profiles import for_record
-    candidates = list(given) or _transcript_candidates(proj, label, profile=for_record(data))
+    # One file under two spellings is one candidate (#1969).
+    candidates = list({str(Path(t).resolve()): t for t in given}.values()) if given \
+        else _transcript_candidates(proj, label, profile=for_record(data))
     if not candidates:
         click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
     # A killed-and-resumed run has two transcripts under one name and
@@ -1662,10 +1685,7 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                            and _json.dumps(oo, sort_keys=True) == _json.dumps(o, sort_keys=True)
                            for other, oo in matches)
             (equivalent if subsumed else keep).append((cand, o))
-        # Identities, not basenames (#1959): a name is the same under both
-        # config roots and identifies no bytes.
-        equivalent = [[{"name": t.name, "sha256": _h.sha256(t.read_bytes()).hexdigest()} for t in cand]
-                      for cand, _o in equivalent]
+        equivalent = [cand for cand, _o in equivalent]
         matches = keep
     if len(matches) != 1:
         click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
@@ -1690,6 +1710,16 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                   if len({str(o.get(k)) for _c, o, _d in results}) > 1) if len(results) > 1 else []
     others_disc = [sum(1 for k in disc if o.get(k) == prior[k])
                    for cand, o, _d in results if cand is not ts]
+    # Identities, not basenames (#1959): a name is the same under both
+    # config roots and identifies no bytes. Hashed once per file and only
+    # now that a unique candidate survives (#1971).
+    digests: dict = {}
+    def _digest(t):
+        key = str(Path(t).resolve())
+        if key not in digests:
+            digests[key] = _h.sha256(t.read_bytes()).hexdigest()
+        return digests[key]
+    equivalent = [[{"name": t.name, "sha256": _digest(t)} for t in cand] for cand in equivalent]
     identification = {"sets_tried": len(results), "prior_keys": len(prior),
                       "discriminating_keys": disc,
                       **({"equivalent_sets": equivalent} if equivalent else {}),
@@ -1717,7 +1747,7 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                          # later edit (#1195 M6).
                          basis={"identification": identification,
                                 "transcripts": [t.name for t in ts],
-                                "transcript_sha256": {t.name: _h.sha256(t.read_bytes()).hexdigest() for t in ts},
+                                "transcript_sha256": {t.name: _digest(t) for t in ts},
                                 "observer_sha256": observer, **basis})
     ProvenanceRecord(data=data).write(path)
     click.echo(f"   wrote {path}")

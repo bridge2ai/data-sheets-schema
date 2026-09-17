@@ -164,12 +164,21 @@ def observe(transcripts: list[Path], bundle: Path | None,
     # and the terminal result is the one carried by the file that saw the
     # most messages.
     files: list[dict] = []
+    segments: list[dict] = []
     bundle_name = bundle.name if bundle else None
     malformed = 0
+
+    def _segment(path, index):
+        # A file is split at each terminal result (#1967): a result covers
+        # the messages recorded since the previous result and none after it,
+        # so a continuation appended to the same file is its own segment.
+        return {"path": path, "index": index, "usage": {}, "blocks": {}, "terminal": None,
+                "terminal_excluded": False, "cut_before_terminal": False}
+
     for path in transcripts:
-        f = {"path": path, "usage": {}, "blocks": {}, "tools": {}, "searches": set(), "reads": {},
-             "failed": set(), "events": {}, "terminal": None, "terminal_line": None,
-             "cut_before_terminal": False, "terminal_excluded": False, "excluded_measurements": []}
+        f = {"path": path, "tools": {}, "searches": set(), "reads": {}, "failed": set(), "events": {},
+             "segments": []}
+        seg = _segment(path, 0)
         with path.open(encoding="utf-8") as fh:
             for n, line in enumerate(fh):
                 try:
@@ -193,9 +202,10 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         # observation can say a finalized result was set
                         # aside (#1952).
                         if measurement:
-                            f["excluded_measurements"].append(n)
+                            seg["cut_before_terminal"] = True
                         elif j.get("type") == "result" and isinstance(j.get("usage"), dict):
-                            f["terminal_excluded"] = True
+                            seg["terminal_excluded"] = True
+                            f["segments"].append(seg); seg = _segment(path, len(f["segments"]))
                         continue
                     # The event's identity, for telling a replayed line from
                     # a new one (#1951): the runtime's uuid, else the line.
@@ -214,15 +224,16 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     # session: assistant events in stream-json carry only
                     # initial usage snapshots, so the per-message maximum
                     # undercounts by two orders of magnitude (#1931).
-                    f["terminal"] = j["usage"]; f["terminal_line"] = n
+                    seg["terminal"] = j["usage"]
+                    f["segments"].append(seg); seg = _segment(path, len(f["segments"]))
                 usage = msg.get("usage") or {}
                 if usage:
                     mid = msg.get("id") or f"{path}:{j.get('uuid')}"
-                    prev = f["usage"].get(mid)
+                    prev = seg["usage"].get(mid)
                     if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
-                        f["usage"][mid] = usage
+                        seg["usage"][mid] = usage
                     content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
-                    f["blocks"].setdefault(mid, {}).update(_block_parts(content))
+                    seg["blocks"].setdefault(mid, {}).update(_block_parts(content))
                 for k, c in enumerate(msg.get("content") or []):
                     if not isinstance(c, dict):
                         continue
@@ -243,10 +254,11 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         f["reads"][tid] = (start, start + int(inp.get("limit") or READ_DEFAULT_LINES))
                     elif bundle_name in json.dumps(inp):
                         f["searches"].add(tid)
-        if f["terminal_line"] is not None:
-            f["cut_before_terminal"] = any(i < f["terminal_line"] for i in f["excluded_measurements"])
-        files.append(f)
-    sessions = _sessions(files)
+        if seg["usage"] or seg["terminal"] is not None or not f["segments"]:
+            f["segments"].append(seg)
+        f["complete"] = any(s["terminal"] is not None for s in f["segments"])
+        files.append(f); segments.extend(f["segments"])
+    sessions = _sessions(segments)
     tools: set = set()
     searches: set = set()
     read_windows: dict[str, tuple[int, int]] = {}
@@ -277,8 +289,12 @@ def observe(transcripts: list[Path], bundle: Path | None,
         usable = [f for f in members if f["terminal"] is not None
                   and not f["terminal_excluded"] and not f["cut_before_terminal"]]
         set_aside = [f for f in members if f["terminal_excluded"] or (f["terminal"] is not None and f not in usable)]
+        # Then the richer compatible evidence — the larger snapshots and
+        # the more content blocks — before the name (#1965).
         chosen = max(usable, key=lambda f: (len(f["usage"]), int(f["terminal"].get("output_tokens", 0) or 0),
-                                            str(f["path"]))) if usable else None
+                                            sum(int(u.get("output_tokens", 0) or 0) for u in f["usage"].values()),
+                                            sum(len(b) for b in f["blocks"].values()),
+                                            str(f["path"]), -f["index"])) if usable else None
         # The covered messages are taken as the chosen file recorded them
         # (#1964): its terminal result finalizes that file's own view, and
         # another file's larger snapshot of the same message is evidence of
@@ -294,9 +310,10 @@ def observe(transcripts: list[Path], bundle: Path | None,
             m[k] = m.get(k, 0) + v
         if chosen is not None:
             from_terminal += 1
-        if set_aside and (chosen is None or any(k not in covered for k in usage_by_msg)):
+        if set_aside and usage_by_msg and (chosen is None or any(k not in covered for k in usage_by_msg)):
             # A result the cut set aside still qualifies the messages no
-            # usable result covers (#1961).
+            # usable result covers (#1961); a session with no retained
+            # message qualifies nothing (#1968).
             excluded += 1
         out["total_tokens"] += total
         for k, v in m.items():
@@ -341,11 +358,11 @@ def _spans(files: list[dict]) -> list:
         ids = set(f["events"])
         if not ids:
             continue
-        # A file that ends in its own terminal result is a completed
-        # invocation whatever another file replays of it (#1960); only a
-        # file without one, whose events another file all carries, is a
-        # copy cut short.
-        complete = f["terminal"] is not None or f["terminal_excluded"]
+        # A file carrying a usable terminal result of its own is a completed
+        # invocation whatever another file replays of it (#1960); a file
+        # without one, whose events another file all carries, is a copy cut
+        # short — an excluded result does not make it an invocation (#1966).
+        complete = f["complete"]
         if not complete and any(g is not f and (ids < set(g["events"])
                                                 or (ids == set(g["events"]) and str(g["path"]) < str(f["path"])))
                                 for g in files if g["events"]):
@@ -379,9 +396,10 @@ def _active_ms(spans: list) -> int:
 
 
 def _sessions(files: list[dict]) -> list[list[dict]]:
-    """Group transcripts that share a message id into one session (#1944);
-    a transcript sharing none is a session of its own, so a killed-and-
-    resumed run whose second file starts afresh stays two invocations."""
+    """Group transcript segments that share a message id into one session
+    (#1944); a segment sharing none is a session of its own, so a killed-
+    and-resumed run whose second file starts afresh stays two invocations,
+    and so does a continuation appended after a result (#1967)."""
     parent = list(range(len(files)))
     def find(i):
         while parent[i] != i:
