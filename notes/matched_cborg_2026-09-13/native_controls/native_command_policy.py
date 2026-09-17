@@ -15,9 +15,10 @@ import textwrap
 from data_sheets_schema.agentic_runtime import playbook_text, validate_toolchain
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 from native_readonly import PROGRAMS, lookup_policy, lookup_guidance
+from native_control import CONTRACT
 
 
-POLICY_VERSION = 2
+POLICY_VERSION = 3
 
 
 def program_key(program):
@@ -96,7 +97,7 @@ def permission_arguments(policy):
     Inline JSON settings retain each complete rule as one array element and
     avoid a mutable settings file in the child workspace.
     """
-    return ['--settings', json.dumps({'permissions': {'allow': policy['allowed_tools']}},
+    return ['--input-format', 'stream-json', '--settings', json.dumps({'permissions': {'allow': policy['allowed_tools']}},
                                     separators=(',', ':'))]
 
 
@@ -139,8 +140,9 @@ def build_command_policy(job, python, repository):
     cli = [python, '-m', 'data_sheets_schema.cli']
     rules = ['Read', 'Write']
     # Built-in read-only admission varies with the pattern (#2052). These
-    # grants provide the named capabilities; command_history checks operands
-    # and syntax. Like Read/Write, they are not a filesystem sandbox.
+    # grants provide the named capabilities. The parent PreToolUse callback
+    # checks the same grammar before execution; command_history checks again.
+    # Helper arguments and Read/Write still need independent review.
     for program in PROGRAMS:
         rules.append(_literal_rule('sed -n' if program == 'sed' else program, arguments=True))
     for command in PLAYBOOK_COMMANDS:
@@ -151,7 +153,8 @@ def build_command_policy(job, python, repository):
         rules.append(_literal_rule(shlex.join([python, '-m', f'data_sheets_schema.{module}']), arguments=True))
     for program, arguments in sorted(programs.items()):
         rules.append(_literal_rule(shlex.join([python, '-c', program]), arguments=arguments))
-    return {'version': POLICY_VERSION, 'python': python, 'manifest_paths': sorted(manifests),
+    return {'version': POLICY_VERSION, 'pretool_control': dict(CONTRACT),
+            'python': python, 'manifest_paths': sorted(manifests),
             'programs': [{'code': code, 'arguments': arguments} for code, arguments in sorted(programs.items())],
             'command_examples': sorted(examples), 'allowed_tools': rules,
             'readonly_lookups': lookup_policy(job, repository)}

@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 import traceback
+from contextlib import ExitStack
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -22,6 +23,7 @@ from run_api_canary import verify, verify_history, sha, check_canary_receipts
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 from native_command_policy import command_guidance, permission_arguments, program_key, validated_command_policy
 from native_readonly import lookup_command, registered_input_paths
+from native_control import NativeControl, check_control_history, digest as control_digest
 
 
 def now():
@@ -571,20 +573,37 @@ def record_then_close(proxy, record_stop, reason):
         proxy.close_admission()
 
 
-def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None):
+def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
+                  command_policy=None):
     process = None
+    control = None
     deadline = time.monotonic() + deadline_seconds
     try:
-        with Path(instruction).open('r') as incoming, (attempt/'transcript.jsonl').open('x') as out, (attempt/'stderr.txt').open('x') as err:
+        with ExitStack() as stack:
+            incoming = stack.enter_context(Path(instruction).open('r'))
+            out = stack.enter_context((attempt/'transcript.jsonl').open('xb'))
+            err = stack.enter_context((attempt/'stderr.txt').open('xb'))
+            if command_policy is not None:
+                if '--input-format' not in argv or argv[argv.index('--input-format') + 1] != 'stream-json':
+                    raise BudgetStop('native control requires registered stream-json input')
+                control = NativeControl(command_policy, _classify_command)
+                evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
             verify_launch()  # Bind the executable immediately before Popen.
-            process = subprocess.Popen(argv, stdin=incoming, text=True, cwd=cwd,
-                env=env, stdout=out, stderr=err, start_new_session=True)
-            while process.poll() is None:
+            process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
+                env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)
+            if control:
+                control.start(process, out, evidence, incoming.read())
+            while process.poll() is None or (control and not control.stdout_closed):
                 if proxy.failed.is_set():
                     raise BudgetStop(proxy.failure)
                 if time.monotonic() >= deadline:
                     raise BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
-                time.sleep(0.05)
+                if control:
+                    control.service()
+                else:
+                    time.sleep(0.05)
+            if control:
+                control.finish()
         if proxy.failed.is_set():
             raise BudgetStop(proxy.failure)
         return process.returncode
@@ -602,6 +621,11 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
         # This runs INSIDE proxy.running(), before server/pool cleanup.
         proxy.close_admission()
         terminate_group(process)
+        if control:
+            try:
+                control.retain_pipe_tail(attempt/'transcript.jsonl')
+            finally:
+                control.close()
 
 
 def main():
@@ -677,6 +701,7 @@ def main():
              'launch_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
              'provider':base['provider_base_url'],'model':base['model']['model'],
              'instruction_sha256':sha(job['instruction']),'native_system_sha256':sha(overlay['system_prompt']),
+             'native_control_policy_sha256':control_digest(command_policy),
              'native_effective_system_sha256':hashlib.sha256(system_prompt.encode('utf-8')).hexdigest()}
     write_new(attempt/'started.json',receipt)
     def classify(denials):
@@ -688,6 +713,7 @@ def main():
             env['ANTHROPIC_BASE_URL']=url
             receipt['exit_code']=execute_child(argv,proxy=proxy,instruction=job['instruction'],attempt=attempt,
                 cwd=base['repository'],env=env,deadline_seconds=base['generation']['agentic_attempt_deadline_seconds'],
+                command_policy=command_policy,
                 verify_launch=lambda: verified_executable(overlay),
                 record_stop=lambda reason: receipt.update(
                     pre_close_ledger_stop=record_controller_stop(ledger, billing_attempt, {'reason': reason})))
@@ -709,6 +735,7 @@ def main():
         # after every other check has run (#2026).
         receipt['permission_denials']=classify(terminal.get('permission_denials'))
         receipt['command_history']=command_history(events, command_policy, receipt['permission_denials'])
+        receipt['pretool_control']=check_control_history(events,attempt/'control.jsonl',command_policy,_classify_command)
         if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
             raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
@@ -745,7 +772,7 @@ def main():
                 problems = list(problems) + [evidence_problem]
         observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
         problems=(list(problems)+observation_problems(observed)+denial_problems(receipt['permission_denials'])
-                  +receipt['command_history']['problems'])
+                  +receipt['command_history']['problems']+receipt['pretool_control']['problems'])
         receipt.update(validation_problems=problems,pair_consistency=pair,
                        native_observed=observed,
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),

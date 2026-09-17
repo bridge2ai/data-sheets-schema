@@ -1,0 +1,685 @@
+{
+  "date": "2026-09-17",
+  "issues": [
+    2055,
+    2056
+  ],
+  "runtime_version": "2.1.272",
+  "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+  "real_provider_requests": 0,
+  "probes": [
+    {
+      "passed": true,
+      "exit_code": 0,
+      "unfinished_handlers": 0,
+      "scripted_requests": 27,
+      "real_provider_requests": 0,
+      "policy_sha256": "1b4828c2de719d6d64e0e22b3d25ba98547b6136f0e479b4dff13c3f85ee35ce",
+      "transcript_sha256": "370dbaa3ad6fb73b102668f32112b74c552d321890b1aff67ffd26e640def027",
+      "project_settings_contamination_probe": true,
+      "id": "d4d-pretool-integrated-broad-2055-r1",
+      "case_count": 26,
+      "cases": [
+        {
+          "id": "program_0",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_1",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_2",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_3",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_4",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_5",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "manifest_0",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "manifest_1",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "roster_without_manifest",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "module",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "builtin_readonly_pipeline",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "builtin_readonly_count",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_quoted_manifest",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_sed_window",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_head_tail",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_cat",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_regex",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_no_match",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "outside_roster",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "other_manifest",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "arbitrary_python",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "modified_program",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "other_record",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "multiple_print_ranges",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "compound_lookups",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "unregistered_readonly_path",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        }
+      ],
+      "control_history": {
+        "checked": true,
+        "bash_calls": 26,
+        "decisions": 26,
+        "problems": []
+      },
+      "result_sha256": "9aab457728f93310145d538b89c8cebc813ea9c9142afbce215564ae8eb7b276"
+    },
+    {
+      "passed": true,
+      "exit_code": 0,
+      "unfinished_handlers": 0,
+      "scripted_requests": 28,
+      "real_provider_requests": 0,
+      "policy_sha256": "8e525423a62e5ec5b815176703800c5707f4b6d81363d892e9d585ad49ef78ed",
+      "transcript_sha256": "1eb1017965e5608468d60b468d6d182d76673d65455a4fe514de6efcf211aaa0",
+      "project_settings_contamination_probe": false,
+      "id": "d4d-pretool-integrated-absent-2055-r2",
+      "case_count": 27,
+      "cases": [
+        {
+          "id": "program_0",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_1",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_2",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_3",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_4",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_5",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "manifest_0",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "manifest_1",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "roster_without_manifest",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "module",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "blank_command",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "builtin_readonly_pipeline",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "builtin_readonly_count",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_quoted_manifest",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_sed_window",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_head_tail",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_cat",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_regex",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_no_match",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "outside_roster",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "other_manifest",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "arbitrary_python",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "modified_program",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "other_record",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "multiple_print_ranges",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "compound_lookups",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "unregistered_readonly_path",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        }
+      ],
+      "control_history": {
+        "checked": true,
+        "bash_calls": 27,
+        "decisions": 27,
+        "problems": []
+      },
+      "result_sha256": "cda32e318cabc88780496d3e81af6f86fcace2fcb7c2ed985f289356dbc58f85"
+    },
+    {
+      "passed": true,
+      "exit_code": 0,
+      "unfinished_handlers": 0,
+      "scripted_requests": 28,
+      "real_provider_requests": 0,
+      "policy_sha256": "2c31006a9cbd287878f3d876699716e892e6debfc52747f2de3f3555d78b8872",
+      "transcript_sha256": "ffbb8ce0c451d00777af2b309094806fbf325b73bd642b7da0ff5ee5dcf3b3f2",
+      "observation_problems": [],
+      "project_settings_contamination_probe": true,
+      "id": "d4d-pretool-integrated-broad-2055-r3",
+      "case_count": 27,
+      "cases": [
+        {
+          "id": "program_0",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_1",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_2",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_3",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_4",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "program_5",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "manifest_0",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "manifest_1",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "roster_without_manifest",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "module",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "blank_command",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "builtin_readonly_pipeline",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "builtin_readonly_count",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_quoted_manifest",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_sed_window",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_head_tail",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_cat",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_regex",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "readonly_no_match",
+          "allow": true,
+          "denied": false,
+          "tool_result_error": false,
+          "passed": true
+        },
+        {
+          "id": "outside_roster",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "other_manifest",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "arbitrary_python",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "modified_program",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "other_record",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "multiple_print_ranges",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "compound_lookups",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        },
+        {
+          "id": "unregistered_readonly_path",
+          "allow": false,
+          "denied": true,
+          "tool_result_error": true,
+          "passed": true
+        }
+      ],
+      "control_history": {
+        "checked": true,
+        "bash_calls": 27,
+        "decisions": 27,
+        "problems": []
+      },
+      "result_sha256": "648b112c8db5304d03eb2db1374209d94b3858dd5a2c87c4bec5c6b31490b143"
+    },
+    {
+      "passed": true,
+      "control_failure": "timeout",
+      "stop_reason": "native command classification timed out before execution",
+      "callback_requests": 1,
+      "tool_results": 0,
+      "snapshot_files_created": 0,
+      "unfinished_handlers": 0,
+      "scripted_requests": 1,
+      "real_provider_requests": 0,
+      "policy_sha256": "75ac123de23c8190ab5a6623b6a2fbb0588e76a32c695a0c720d1120ac41e7a7",
+      "transcript_sha256": "13ea7638747da5fc5748c3228857537c3ef3cd17f1eca817856ce7980101acbd",
+      "id": "d4d-pretool-timeout-2055-r3",
+      "result_sha256": "09321a7f9f565e36d046401c7c47768f32d7ea5b07e42b01a9cc710b9dd36b83"
+    },
+    {
+      "passed": true,
+      "control_failure": "exception",
+      "stop_reason": "native command classification failed before execution",
+      "callback_requests": 1,
+      "tool_results": 0,
+      "snapshot_files_created": 0,
+      "unfinished_handlers": 0,
+      "scripted_requests": 1,
+      "real_provider_requests": 0,
+      "policy_sha256": "7af95cc4e6cb3bef4c2491248005c88a89d2087861bcd68d7de148c6a3b88875",
+      "transcript_sha256": "55d370707db62609d0919e1dfff68751debdfed1bd4a4dd610a254b84d32540a",
+      "id": "d4d-pretool-exception-2055-r3",
+      "result_sha256": "8e8adc23b69b94c79f8957cbd298d56314a2b53152e02a04680d7c7d6d8356de"
+    },
+    {
+      "passed": true,
+      "control_failure": "malformed",
+      "stop_reason": "native command classification returned a malformed decision",
+      "callback_requests": 1,
+      "tool_results": 0,
+      "snapshot_files_created": 0,
+      "unfinished_handlers": 0,
+      "scripted_requests": 1,
+      "real_provider_requests": 0,
+      "policy_sha256": "73d4f82e3624ee68af91224d6654f11807f2b3bf8586674a7f3a1104cfa0e2f7",
+      "transcript_sha256": "650b080392d07eea6da7a7e16c740d34687989dce352553975a22c66e8b28a7c",
+      "id": "d4d-pretool-malformed-2055-r3",
+      "result_sha256": "c574b12fcbc07d8ee3dc4750ad8985db7e2adb809f3e23d67ba42b9a8588240e"
+    }
+  ],
+  "focused_tests": {
+    "passed": 215,
+    "duration_seconds": 32.15
+  }
+}
