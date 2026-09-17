@@ -42,6 +42,7 @@ def fixture_record(tmp_path, case):
               'notes':'A separate public document describes the research team.'}
     run.full_path.write_text(yaml.safe_dump(record))
     run.core_path.write_text(yaml.safe_dump(record))
+    run.report_path.write_text('Synthetic offline reconciliation report.\n')
     run.provenance_path.write_text(yaml.safe_dump({
         'run': {'project':run.project, 'label':run.label, 'method':run.method, 'condition':run.condition},
         'inputs': {'bundle_path':str(bundle), 'bundle_md5':manifest['bundle_md5'],
@@ -149,7 +150,7 @@ def test_provenance_cannot_change_registered_receipt_inputs(tmp_path, controller
 
 NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed_denial', 'late_stop_denial',
                'init_mismatch_denial', 'evidence_unreadable', 'manifest_read_denial', 'interrupted',
-               'unicode_jsonl')
+               'unicode_jsonl', 'playbook_term_denial', 'playbook_grounding_denial', 'playbook_report_denial')
 
 
 @pytest.mark.parametrize('arm', ['api','agentic'])
@@ -158,7 +159,9 @@ NATIVE_ONLY = ('usage_missing', 'deadline_stop', 'forbidden_denial', 'prescribed
                                        ('deadline_stop',False), ('forbidden_denial',True), ('prescribed_denial',False),
                                        ('late_stop_denial',False), ('init_mismatch_denial',False),
                                        ('evidence_unreadable',False), ('manifest_read_denial',False),
-                                       ('interrupted',False), ('unicode_jsonl',True)])
+                                       ('interrupted',False), ('unicode_jsonl',True),
+                                       ('playbook_term_denial',False), ('playbook_grounding_denial',False),
+                                       ('playbook_report_denial',False)])
 def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeypatch, controllers, arm, case, passed):
     api, native = controllers
     runner = api if arm == 'api' else native
@@ -172,15 +175,22 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     registered_inputs = run.input_identity()
     pinned = {p:p.read_bytes() for p in (run.bundle,run.chunk_manifest)}
     lookups = redirect_to_historical_bytes(run, monkeypatch) if case == 'redirected_provenance' else []
-    monkeypatch.setattr(run, 'render_spec', lambda: {})
+    rendered = {}
+    if arm == 'agentic':
+        from data_sheets_schema.agentic_runtime import toolchain
+        rendered = {'agentic_toolchain': toolchain(), 'agentic_artifact_paths': {
+            'full': str(run.full_path), 'core': str(run.core_path), 'report': str(run.report_path)}}
+    monkeypatch.setattr(run, 'render_spec', lambda: rendered)
     monkeypatch.setattr(run, 'input_identity', lambda: registered_inputs)
     instruction = tmp_path/'instruction.md'; instruction.write_text('Synthetic offline fixture.')
     initial = tmp_path/'initial.json'; initial.write_text('{}')
-    job = {'id':'example_'+arm, 'canary':True, 'execution_arm':arm, 'render_spec':{},
-           'input_identity':registered_inputs, 'output_directories':[], 'outputs':{},
+    job = {'id':'example_'+arm, 'canary':True, 'execution_arm':arm, 'render_spec':rendered,
+           'input_identity':registered_inputs, 'output_directories':[],
+           'outputs': rendered.get('agentic_artifact_paths', {}),
            'instruction':str(instruction), 'initial_request':str(initial), 'bundle':str(run.bundle)}
-    if case == 'manifest_read_denial':
+    if arm == 'agentic':
         job['manifest'] = str(tmp_path/'source_manifest.yaml')
+        job['outputs'] = {**job['outputs'], 'provenance': str(run.provenance_path)}
     base = {'repository':str(tmp_path), 'claude_version':'offline', 'python':sys.executable,
             'provider_base_url':'https://api.cborg.lbl.gov', 'model':{'model':'offline-model'},
             'budget':{'additional_usd':200, 'per_attempt_usd':5,
@@ -210,11 +220,13 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         argv=['run_api_canary','--registration',str(registration),'--review',str(review),'--job',job['id']]
     else:
         from data_sheets_schema import agentic_observed
+        from native_command_policy import build_command_policy
+        policy = build_command_policy(job, sys.executable, tmp_path)
         overlay = tmp_path/'overlay.json'
         overlay.write_text(json.dumps({'registration':str(registration), 'registration_sha256':api.sha(registration),
             'allowed_jobs':[job['id']], 'pinned_files':{}, 'environment':{},
             'per_job_environment':{job['id']:{'D4D_LAUNCH_INSTRUCTION':str(instruction)}},
-            'cli_flags':[], 'allowed_tools':['Read','Write','Bash'], 'system_prompt':str(instruction),
+            'cli_flags':[], 'per_job_command_policy':{job['id']:policy}, 'system_prompt':str(instruction),
             'native_limits_observed_offline':{'context_window':1000,'max_output_tokens':100}}))
         verdict['overlay_sha256']=api.sha(overlay)
         monkeypatch.setattr(runner, 'verified_executable', lambda *args: sys.executable)
@@ -227,6 +239,11 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             def running(self): yield 'http://127.0.0.1:1'
         monkeypatch.setattr(runner, 'NativeProxy', OfflineProxy)
         def child(*args, **kwargs):
+            # The controller must deliver the complete policy through structured
+            # settings; the native CLI list parser loses complex Python rules.
+            argv = args[0]
+            assert '--allowedTools' not in argv
+            assert json.loads(argv[argv.index('--settings') + 1]) == {'permissions': {'allow': policy['allowed_tools']}}
             terminal={'type':'result','terminal_reason':'completed','stop_reason':'end_turn',
                       'modelUsage':{'offline-model':{'contextWindow':1000,'maxOutputTokens':100}}}
             if case != 'usage_missing':
@@ -238,6 +255,13 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             if case in ('prescribed_denial', 'late_stop_denial'):
                 terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d2',
                     'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli receipts check --label L'}}]
+            if case.startswith('playbook_'):
+                name = {'playbook_term_denial': 'linkml_term_validator',
+                        'playbook_grounding_denial': 'check_run',
+                        'playbook_report_denial': 'check_report'}[case]
+                command = next(command for command in policy['command_examples'] if name in command)
+                terminal['permission_denials'] = [{'tool_name':'Bash','tool_use_id':'delegated',
+                    'tool_input':{'command':command}}]
             if case == 'late_stop_denial':
                 terminal['is_error'] = True     # stops after the classification (#2037)
             if case == 'init_mismatch_denial':
@@ -341,7 +365,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
         return
     assert result['status'] == ('completed_pending_independent_review' if passed else 'validation_failed')
     check=result['checks']['receipt_acceptance'] if arm=='api' else result['receipt_acceptance']
-    if case in ('forbidden_denial', 'prescribed_denial'):
+    if case in ('forbidden_denial', 'prescribed_denial') or case.startswith('playbook_'):
         # Every denial is listed and classified; only the prescribed one disqualifies (#2026).
         (denial,) = result['permission_denials']
         assert denial['classification'] == ('not_prescribed' if case == 'forbidden_denial' else 'prescribed')

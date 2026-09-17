@@ -57,6 +57,18 @@ not receive that classification.
 This was a Codex review and local runtime verification. No completed Opus
 review or independent scientific acceptance is claimed.
 
+The first required CI run (`35258906431`, head `b0f5d7d5f`) found 14 failures
+in the receipt-controller integration fixture, which still supplied an empty
+toolchain and global permission rules. Filed #2047. The fixture now constructs
+an actual job policy and complete synthetic artifacts, retaining the
+production admission guard. Three additional full-controller cases prove
+that denied delegated term, grounding and report programs disqualify an
+otherwise passing result; the child checks its actual JSON settings argument.
+The updated integration suite passes **39 tests, with 13 native-only cases
+skipped for the API arm**. The separate CI scheduling suite passes **23 tests**.
+All other shards in the first CI run passed. The fixes to this fixture do not
+change the controller or policies exercised by the 15-case runtime probe.
+
 ## Limits and preservation
 
 The policy fixes the root `--manifest` escape to arbitrary subcommands and
