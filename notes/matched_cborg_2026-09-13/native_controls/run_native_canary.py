@@ -434,7 +434,7 @@ def record_then_close(proxy, record_stop, reason):
 
 
 def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
-                  command_policy=None, phase_spec=None):
+                  command_policy=None, phase_spec=None, command_classifier=None):
     process = None
     control = None
     deadline = time.monotonic() + deadline_seconds
@@ -453,7 +453,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                     problems = phase_review.report(complete=False)['problems']
                     if problems:
                         raise BudgetStop('native phase history: ' + '; '.join(problems))
-                control = NativeControl(command_policy, _classify_command, env.get('CLAUDE_CONFIG_DIR'),
+                control = NativeControl(command_policy, command_classifier or _classify_command, env.get('CLAUDE_CONFIG_DIR'),
                                         event_observer=review_event if phase_review is not None else None)
                 evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
             verify_launch()  # Bind the executable immediately before Popen.
