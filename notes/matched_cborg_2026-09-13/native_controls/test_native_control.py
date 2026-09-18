@@ -287,3 +287,41 @@ def test_file_path_matching_cannot_block_the_parent_deadline(run_case,monkeypatc
         run({'tool':'Write','input':{'file_path':str(target),'content':'must not execute'}})
     assert time.monotonic()-started < .5
     assert closed and stops and not target.exists()
+
+
+@pytest.mark.parametrize('change,reason', [
+    ('size', 'native persisted tool output has invalid provenance'),
+    ('hard_link', 'native persisted output is not a single-link regular file'),
+])
+def test_terminal_audit_preserves_local_file_policy_reason(run_case, change, reason):
+    """A valid persisted result becomes invalid, and the audit names why."""
+    import hashlib
+    import re
+
+    run, path, source, policy, closed, stops = run_case
+    _, events, checked = run()
+    assert checked['checked'] and not checked['problems']
+    session = '12345678-1234-1234-1234-123456789abc'
+    config = path / 'config'
+    persisted = config / 'projects' / re.sub(r'[^a-zA-Z0-9]', '-', str(path)) / session / 'tool-results/result.txt'
+    persisted.parent.mkdir(parents=True)
+    persisted.write_text('persisted helper output')
+    events.insert(0, {'type': 'system', 'subtype': 'init', 'cwd': str(path), 'session_id': session})
+    result = next(e for e in events if e.get('type') == 'user')
+    result['session_id'] = session
+    result['tool_use_result'] = {'persistedOutputPath': str(persisted), 'persistedOutputSize': persisted.stat().st_size}
+    result['message']['content'][0]['content'] = f'<persisted-output>\nFull output saved to: {persisted}\n'
+    evidence = {'kind': 'persisted_output', 'tool_use_id': 'synthetic_tool', 'path': str(persisted),
+                'file': {'bytes': persisted.stat().st_size, 'sha256': hashlib.sha256(persisted.read_bytes()).hexdigest()}}
+    with (path / 'control.jsonl').open('a') as stream:
+        stream.write(json.dumps(evidence) + '\n')
+    before = control.check_control_history(events, path / 'control.jsonl', policy, runner._classify_command, config)
+    assert before['checked'] and not before['problems']
+    if change == 'size':
+        persisted.write_text('different output with a different size')
+    else:
+        persisted.unlink()
+        os.link(source, persisted)
+    after = control.check_control_history(events, path / 'control.jsonl', policy, runner._classify_command, config)
+    assert not after['checked']
+    assert any(reason in problem for problem in after['problems'])
