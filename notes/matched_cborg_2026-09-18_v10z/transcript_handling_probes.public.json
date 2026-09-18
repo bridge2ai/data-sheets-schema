@@ -1,0 +1,301 @@
+{
+  "checked_at": "2026-09-18T07:26:43.432256+00:00",
+  "kind": "local_synthetic_transcript_ingestion_and_archive_probes",
+  "passed": true,
+  "cases": [
+    {
+      "case": "valid",
+      "scripts_passed": 4,
+      "physical_lines": 4,
+      "receipt_result_physical_line": 4,
+      "history_checkable": true,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "null",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "list",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "string",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "malformed_middle",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "invalid_utf8",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "blank_middle",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonmapping_message",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonmapping_tool_input",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonmapping_content",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonstring_block_type",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonstring_tool_name",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "trailing_partial",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 4,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    }
+  ],
+  "scripts_executed_per_case": 4,
+  "code_sha256": {
+    "transcript_review.py": "e1ab358e7712a6841694af049b2e225daf25da9d877fa702b67101c83a2107de",
+    "d4d-v10z-monitor.py": "991238d0868392aadfb9e5013c36155c7f0c62189947844c1d0751453da28e5c",
+    "d4d-v10z-live-review.py": "b3005dcab21f299a190360a3d323e4f2a95ee295e75def6d3268c83401601580",
+    "d4d-v10z-observe.py": "d17287f93e5e060b6072892b6bbc8209a65c393dbcba95a4ad943204463ca7e1",
+    "freeze_outcome.py": "63ec4ad5a91e88b147d82a37e777467febfc63e814d188aec557a2ccc328b86f",
+    "probe_transcript_handling.py": "2d0d5f52cc2fd1ed1d5a90e0449592e12f682edba07766f0735693f37a7ae8b6"
+  },
+  "old_live_review_failed_on_null": true,
+  "native_write_envelope_cases_passed": 10,
+  "historical_native_receipt_replay": {
+    "condition": "v10w",
+    "transcript_sha256": "03c89c5937bd31c098c3f1171460eb8ba6d75a1e7e1e949429e239e80a665eaf",
+    "physical_lines": 464,
+    "successful_writes": 9,
+    "receipt_result_lines": [
+      454,
+      462
+    ],
+    "selected_write_result_lines": [
+      198,
+      459
+    ],
+    "read_only": true
+  },
+  "phase_history_sha256": "c587c1047b1068834fe599292930c65ed4786eb229aa194b01c35495c6de3150",
+  "native_input_rejection_probes": {
+    "cases": [
+      {
+        "case": "valid_offset",
+        "verified_input_rejection": true,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "valid_limit",
+        "verified_input_rejection": true,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "missing_record",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "tampered_record",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "numeric_original",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "wrong_typed_field",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "extra_result_output",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "successful_result",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "missing_session_init",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 2
+      },
+      {
+        "case": "late_session_init",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 2
+      },
+      {
+        "case": "duplicate_tool_id",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "late_callback",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "malformed_control_frame",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "pending_later_call",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 3
+      },
+      {
+        "case": "blank_before_call",
+        "verified_input_rejection": false,
+        "no_decision_fabricated": true,
+        "source_transcript_unchanged": true,
+        "provisional": true,
+        "call_physical_line": 4
+      }
+    ],
+    "actual_production_code_sha256": {
+      "native_control.py": "f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e",
+      "native_file_policy.py": "1b51849742f857e5e6c1f6e88c287af6754efb5de7c346c2438347ca92f48280",
+      "budgeted_cborg.py": "97a2da43ce7bbc6389609d00ddb80150a42a33d930f532b6e5be05248b86012b"
+    },
+    "scope": "Live observer delegates rejection verification to production check_control_history; fixture metadata and command classifier isolate ingestion, with no provider or runner execution."
+  },
+  "network_requests": 0,
+  "provider_requests": 0,
+  "model_launches": 0,
+  "real_registration_executed": false,
+  "real_attempts_modified": false,
+  "limitations": "Fixture command policy and run metadata isolate transcript inspection; this does not validate provider transport or scientific phase acceptance.",
+  "issue": 2075
+}

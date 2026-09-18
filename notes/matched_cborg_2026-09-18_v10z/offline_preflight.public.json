@@ -1,0 +1,87 @@
+{
+  "checked_at": "2026-09-18T07:33:02.118406+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "d4810ca2d8784382ae397527ca2344637a39a807888a53252e2ca34b5eb8553f",
+  "native_overlay_sha256": "b05dcf111e74d47be7da7253f514eda7832e3ed5c247792824cf63fd711b440e",
+  "registered_pins_verified": 495,
+  "native_pins_verified": 14,
+  "historical_files_verified": 3241,
+  "prior_attempt_files_verified": 3830,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [],
+  "new_pinned_implementation_files": [],
+  "evaluation_instrument_changes_from_v10y": false,
+  "native_job_policies_rebuilt": {
+    "CHORUS_agentic_rep1": {
+      "programs": 5,
+      "command_examples": 6,
+      "allowed_rules": 71,
+      "effective_system_sha256": "b90929e7192376a1834c5e103dc865368e1cc072159f6147cf012e78f4715ad8",
+      "effective_system_bytes": 9180,
+      "policy_sha256": "f99c738c2f6ec6e95689e75c88b00b144bac4e48b4205fe93ebfe41a326fa002"
+    },
+    "KIDS_FIRST_agentic_rep1": {
+      "programs": 5,
+      "command_examples": 6,
+      "allowed_rules": 71,
+      "effective_system_sha256": "6e1482ebc03dc6fe77221e16d88e8985f84c62ad9ac5d73a445297e008f29a88",
+      "effective_system_bytes": 10328,
+      "policy_sha256": "da4b73b58f179188e79c07d301cf200e0e6c86656afff8ed2064cdf6ea0f83b9"
+    }
+  },
+  "native_controls_changed": [
+    2084,
+    2086
+  ],
+  "generation_instruction_issues": [],
+  "scientific_instruction_change": "none; inherited renderer14 with freshly rendered paths and identities",
+  "native_phase_history_sha256": "c587c1047b1068834fe599292930c65ed4786eb229aa194b01c35495c6de3150",
+  "phase_history_offline_probe_sha256": "e2fa384111dbce2459c4831f981d2fdbf1b8eae8c283784fceff568e1c3c1bda",
+  "audit_record_contract_offline_probe_sha256": "287835c3f40320fb0c59cfa8dd302e7468ebab6f8044b7fdf61481b5371f7748",
+  "input_rejection_offline_probe_sha256": "243aeaa3cb69b1732bcb190ff6e64ac49165b1eeeec9b3a450495f849f22f904",
+  "open_scientific_followups": [
+    1782,
+    1815,
+    1801,
+    1816,
+    2079
+  ],
+  "agentic_attempt_deadline_seconds": 10800,
+  "native_denial_policy": "denied prescribed command disqualifies a run, while denials of forbidden commands are listed and do not disqualify it on their own.",
+  "agentic_attempt_limit": "additional allocation (no per-attempt cap, user direction 2026-09-16)",
+  "schema_release": "3.0.0, unchanged from v10y; both merged schema hashes, profile digests and fitness specifications preserved",
+  "canary_order": [
+    "CHORUS_agentic_rep1",
+    "KIDS_FIRST_agentic_rep1",
+    "CHORUS_api_rep1",
+    "KIDS_FIRST_api_rep1"
+  ],
+  "generation_renderers": {
+    "api": 14,
+    "agentic": 14
+  },
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "effort_policy_unchanged": true,
+  "api_output_allowance_unchanged": {
+    "audit": 96000,
+    "report": 96000
+  },
+  "native_runtime_output_limit": 64000,
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "budget_extension_approval": "explicit_user_approval_2026-09-18_preserving_prior_requests",
+  "budget_extension_offline_proof_sha256": "f7820ba202bbcafad6f3bb80ed24d4727944a95f9304fcd0e14161218bc6872c",
+  "budget_extension_offline_cases": 13,
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "5d6995442dbac52ec272c60ee49972d72dd5139ffbf2487afba9e3fff587b29b",
+    "CHORUS_source_review_plan.json": "cc1114c94ee7614808a36a2d11b13383f21cd17213dc7dbfd4314b21487520a6"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks do not establish source quality or independent verification of unpublished originals/accounting. Completion cost and repeatability remain unmeasured; v10y produced a full draft and receipt but stopped before receipt-check execution, with no core, audit, accepted pair, final report or live provenance. v10z has not launched. The standing authorization covers CHORUS canaries until acceptance and then all registered CHORUS evaluations; this condition binds only the first CHORUS native retry after exact-commit CI, registration review and fresh checks. #2079 remains open for explicit independent acceptance review; further CHORUS retries require fresh reviewed conditions; registered CHORUS evaluations follow acceptance, and other-dataset expansion is outside this authorization. The ledger sequence cap bounds agentic spend.",
+  "accounting_resolved": true,
+  "proposed_caps_checked_locally": true,
+  "private_accounting_independently_reviewed": false
+}
