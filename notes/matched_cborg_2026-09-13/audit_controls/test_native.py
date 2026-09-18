@@ -47,7 +47,8 @@ def request():
     req=urllib.request.Request(os.environ['ANTHROPIC_BASE_URL']+'/v1/messages',data=json.dumps(body).encode(),
         headers={'x-api-key':os.environ['ANTHROPIC_API_KEY'],'Content-Type':'application/json'})
     try:
-        with urllib.request.urlopen(req,timeout=5) as response:return response.status, response.read().decode()
+        timeout=float(os.environ.get('API_TIMEOUT_MS',case.get('default_timeout_ms',5000)))/1000
+        with urllib.request.urlopen(req,timeout=timeout) as response:return response.status, response.read().decode()
     except urllib.error.HTTPError as error:return error.code,error.read().decode()
 request()
 denials=[]
@@ -359,6 +360,45 @@ def test_execute_job_connects_controls_context_and_terminal_recheck(native_case,
     assert result['validation']['passed'] and result['runtime']['unfinished_handlers']==0
     assert result['evidence']['initial_context']['complete_inline_context_observed']
     assert result['audit_path']==Path(c.job['audit_path'])
+
+
+@pytest.mark.parametrize('registered', [False, True])
+def test_delayed_headers_use_only_registered_native_client_timeout(native_case, monkeypatch, registered):
+    """Scaled child default versus a longer registered timeout, using real loopback HTTP."""
+    import time
+    c = native_case
+    c.case.update(default_timeout_ms=250, final_request=False)
+    context, sdk = configure_execution(c, monkeypatch)
+    # A long ambient value must not rescue the unregistered child. A short
+    # ambient value must not replace the explicit timeout of the registered one.
+    monkeypatch.setenv('API_TIMEOUT_MS', '1' if registered else '5000')
+    if registered:
+        c.manifest['native_runtime']['api_timeout_ms'] = 5000
+    calls = []
+    def respond(request):
+        calls.append(request)
+        time.sleep(0.6)
+        return httpx.Response(200, content=response_events(), headers={'content-type':'text/event-stream'})
+    upstream = httpx.Client(transport=httpx.MockTransport(respond))
+    if registered:
+        result = native.execute_job(context, client=sdk, upstream=upstream)
+        assert result['validation']['passed']
+    else:
+        with pytest.raises(BudgetStop):
+            native.execute_job(context, client=sdk, upstream=upstream)
+        assert 'TimeoutError' in (c.attempt / 'stderr.txt').read_text()
+        assert not (c.attempt / 'validation.json').exists()
+    rows = json.loads(c.ledger.path.read_text())['requests']
+    assert len(calls) == len(rows) == 1
+    folder = c.attempt / 'requests' / rows[0]['id']
+    if registered:
+        assert rows[0]['status'] == 'settled'
+    # A disconnected child can still leave a complete upstream response during
+    # bounded shutdown. Account it if captured; otherwise retain the reservation.
+    # Neither outcome makes the timed-out child a completed audit.
+    assert rows[0]['status'] == ('settled' if (folder / 'response.json').exists() else 'pending')
+    assert calls[0].content == (folder / 'native_request.json').read_bytes()
+    assert 'API_TIMEOUT_MS' not in calls[0].headers
 
 
 @pytest.mark.parametrize('change', ['missing_metadata','missing_error_flag','missing_result'])

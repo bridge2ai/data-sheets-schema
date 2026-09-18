@@ -26,7 +26,7 @@ from native_control import CONTRACT, check_control_history, load_native_events
 from native_file_policy import FileAccess
 from native_proxy import NativeProxy
 from run_native_canary import execute_child
-from .registration import sha, strict_json
+from .registration import native_api_timeout, sha, strict_json
 from .transport import provider_clients
 
 CLI_FLAGS = ['--print', '--safe-mode', '--restricted', '--strict-mcp-config',
@@ -325,6 +325,7 @@ def verify_initial_context(context, rows):
 
 
 def verify_runtime(manifest):
+    native_api_timeout(manifest)
     runtime = manifest['native_runtime']
     executable = Path(runtime['executable'])
     if manifest['pinned_files'].get(str(executable)) != sha(executable):
@@ -440,6 +441,9 @@ def _execute_job(context, state, *, client=None, upstream=None):
     state['proxy'] = proxy
     environment = {k: v for k, v in os.environ.items() if k in {'PATH', 'HOME', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM'}}
     environment.update(ENVIRONMENT)
+    timeout = native_api_timeout(manifest)
+    if timeout is not None:
+        environment['API_TIMEOUT_MS'] = str(timeout)
     environment.update(CLAUDE_CONFIG_DIR=str(config), ANTHROPIC_API_KEY=proxy.token,
         PYTHONPATH=os.pathsep.join([str(Path(manifest['repository'])/'src'), str(BASE), str(BASE/'native_controls')]),
         VIRTUAL_ENV=str(Path(manifest['python']).parent.parent))
