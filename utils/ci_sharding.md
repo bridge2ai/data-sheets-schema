@@ -1,10 +1,12 @@
 # CI test partitioning
 
 Every pull request runs the complete collected suite, including corpus tests,
-on six Python 3.12 shards. Main and manual runs retain four shards per version
-in the wider interpreter matrix and separate schema/example builds. This keeps
-the compatibility matrix from consuming the entire runner pool. The aggregate `test` check still
-requires every applicable job to succeed.
+on six Python 3.12 shards. Main and manual runs use four Python 3.12 shards
+and one separate schema/example build. All Python workflows use 3.12, reducing
+main/manual Python jobs from fifteen to five while retaining every test and
+build check. The aggregate `test` check still requires every applicable job
+to succeed. Package metadata still permits Python 3.9 and newer; this CI
+configuration does not independently check compatibility on other interpreters.
 
 Each shard uses `-n logical --maxprocesses=4 --dist load --maxschedchunk=1`: up to four
 workers on the standard public Linux runner, rather than the two physical
