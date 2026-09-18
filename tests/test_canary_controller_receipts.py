@@ -284,6 +284,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 # strings. They are data, not JSONL record separators.
                 terminal['result'] = 'source text\u0085next\u2028line\u2029paragraph'
             events=[{'type':'system','subtype':'init','model':'offline-model','apiKeySource':'ANTHROPIC_API_KEY',
+                     'cwd':str(tmp_path),'session_id':'12345678-1234-1234-1234-123456789abc',
                      'claude_code_version':'offline','tools':['Read','Write','Bash']}, terminal]
             if case in ('allowed_lookup', 'lookup_denial', 'unregistered_execution', 'unregistered_error',
                         'control_tampered'):
@@ -303,9 +304,9 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             observed_ids = {block['id'] for event in events for block in event.get('message', {}).get('content', [])
                             if block.get('type') == 'tool_use'}
             for denial in terminal.get('permission_denials', []):
-                if denial['tool_name'] == 'Bash' and denial['tool_use_id'] not in observed_ids:
+                if denial['tool_name'] in ('Bash', 'Read', 'Write') and denial['tool_use_id'] not in observed_ids:
                     events[-1:-1] = [
-                        {'type':'assistant','message':{'content':[{'type':'tool_use','name':'Bash',
+                        {'type':'assistant','message':{'content':[{'type':'tool_use','name':denial['tool_name'],
                             'id':denial['tool_use_id'],'input':denial['tool_input']}]}},
                         {'type':'user','message':{'content':[{'type':'tool_result',
                             'tool_use_id':denial['tool_use_id'],'is_error':True,'content':'offline denial'}]}}]
@@ -316,14 +317,18 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
             for event in events:
                 native_events.append(event)
                 for block in event.get('message', {}).get('content', []):
-                    if block.get('type') != 'tool_use' or block.get('name') != 'Bash':
+                    if block.get('type') != 'tool_use' or block.get('name') not in ('Bash','Read','Write'):
                         continue
                     request_id = 'callback_' + block['id']
                     callback = {'type':'control_request','request_id':request_id,'request':{
                         'subtype':'hook_callback','callback_id':policy['pretool_control']['callback_id'],
-                        'input':{'hook_event_name':'PreToolUse','tool_name':'Bash','tool_use_id':block['id'],
+                        'input':{'hook_event_name':'PreToolUse','tool_name':block['name'],'tool_use_id':block['id'],
                                  'cwd':str(tmp_path),'tool_input':block['input']}}}
-                    classification, basis = runner._classify_command(block['input']['command'],sys.executable,set(),policy)
+                    if block['name'] == 'Bash':
+                        classification, basis = runner._classify_command(block['input']['command'],sys.executable,set(),policy)
+                    else:
+                        from native_file_policy import FileAccess
+                        classification, basis = FileAccess(policy).classify(block['name'],block['input'])
                     response = {'type':'control_response','response':{'subtype':'success','request_id':request_id,
                                 'response':hook_output(classification,basis)}}
                     controls.append({'kind':'decision','request':callback,'response':response,

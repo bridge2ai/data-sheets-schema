@@ -18,6 +18,9 @@ scripts or heredocs, chain programs outside the registered lookup forms, or
 write anywhere outside this task's output directories. Write the
 artifacts you author yourself — the coverage receipt, the records, the
 report — with the file-writing tool, never a shell redirect. The parent
-checks every Bash command before execution. Every denial is recorded. A
+checks every Bash command and every Read/Write target before execution. The
+provenance inventory does not authorize reading every inventoried definition.
+Persisted tool outputs are readable only when the parent verifies their origin
+in this session and their unchanged bytes. Every denial is recorded. A
 denied prescribed command disqualifies the attempt; denial of a command
 outside the registered policy does not by itself disqualify it.

@@ -1,0 +1,52 @@
+{
+  "recorded_at": "2026-09-17T23:55:31.774468+00:00",
+  "kind": "offline_native_file_control_verification",
+  "real_provider_requests": 0,
+  "probes": [
+    {
+      "passed": true,
+      "real_provider_requests": 0,
+      "unfinished_handlers": 0,
+      "name": "d4d-file-policy-probe-r3",
+      "transcript_sha256": "24901755031a629abbfb08ecf8c8de1166212fad8ab2af9fc243929bbaba9a6b",
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "cases": 39,
+      "bash_calls": 28,
+      "file_calls": 11,
+      "decisions": 39,
+      "persisted_results": 1,
+      "control_problems": [],
+      "file_boundaries_verified": true,
+      "broad_project_settings": false
+    },
+    {
+      "passed": true,
+      "real_provider_requests": 0,
+      "unfinished_handlers": 0,
+      "name": "d4d-file-policy-probe-release",
+      "transcript_sha256": "45072682f55a5fc00b04d8397a2025487ed9e90d509f34647fd41ae5fdead702",
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "cases": 41,
+      "bash_calls": 29,
+      "file_calls": 12,
+      "decisions": 41,
+      "persisted_results": 1,
+      "control_problems": [],
+      "file_boundaries_verified": true,
+      "broad_project_settings": true
+    },
+    {
+      "passed": true,
+      "real_provider_requests": 0,
+      "unfinished_handlers": 0,
+      "name": "d4d-file-policy-path-timeout",
+      "transcript_sha256": "cc434a84a1a2ec0b11adccb6dd6980bb93832901e2576045d99fcdf4c878443b",
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "control_failure": "path-timeout",
+      "stop_reason": "native command classification timed out before execution",
+      "tool_results": 0,
+      "callback_requests": 1
+    }
+  ],
+  "regression_proof": "Five file-boundary behavioral tests fail when file admission is disabled; the path-timeout test fails before the timed-worker correction and passes afterward."
+}
