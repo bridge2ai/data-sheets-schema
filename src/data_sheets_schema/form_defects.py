@@ -298,13 +298,20 @@ def recorded_model(cache_path: Path) -> str:
 
 
 class FormSubtypeClassifier:
-    """Which form failure is this? Cached, model-scoped, offline-capable."""
+    """Which form failure is this? Cached, model-scoped, offline-capable.
+
+    New labels use the same class, schema path and profile as the fitness
+    judgement. Frozen cache replay retains its recorded instrument.
+    """
 
     def __init__(self, client=None, model: str | None = None,
                  max_tokens: int = 8000, cache_path: Path | None = None,
                  offline: bool = False, schema: str | None = None,
-                 specification: str | None = None, profile=None):
+                 specification: str | None = None, profile=None,
+                 class_name: str = "Dataset", schema_path: Path | None = None):
         self._client, self._model = client, model
+        self.class_name = class_name
+        self.schema_path = schema_path
         # The instrument of the records being classified (#1496); None is
         # the ambient profile, right only for a fresh run in the study.
         self.profile = profile
@@ -382,7 +389,8 @@ class FormSubtypeClassifier:
 
     def _live_snapshot(self) -> tuple:
         from data_sheets_schema.evidence_score import slot_specification_snapshot
-        return slot_specification_snapshot(profile=self.profile)      # the classifier's instrument (#1513)
+        return slot_specification_snapshot(self.class_name, self.schema_path,
+                                           profile=self.profile)
 
     @property
     def specification(self) -> str:
@@ -438,7 +446,8 @@ class FormSubtypeClassifier:
         """
         from data_sheets_schema import schema_digest
         def live_schema():
-            return schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=self.profile))
+            return schema_digest.fingerprint(schema_digest.digest_text(
+                self.class_name, self.schema_path, profile=self.profile))
         if not (self.cache_path and Path(self.cache_path).exists()):
             return live_schema()
         try:
