@@ -61,6 +61,7 @@ records identities and verification scope.
 The registration review caught #2074: its command-line parser did not yet accept
 renderer 13. The parser now accepts it while retaining default 9. An independent
 four-test run verifies the selected version reaches the generated instruction.
+The native CI lane includes both new phase-history and live-control test files.
 
 ## Launch boundary
 

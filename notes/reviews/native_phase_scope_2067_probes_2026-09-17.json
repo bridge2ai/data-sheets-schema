@@ -62,7 +62,8 @@
     "notes/matched_cborg_2026-09-13/native_controls/test_native_phase_history.py": "32539892239d43d542a7aa6a2a43a0df5a8e6fe5494dc63436c3a0ec918d6f79",
     "notes/matched_cborg_2026-09-13/native_controls/test_native_phase_control.py": "e13cac5c4f257938451f60d551d46b45d2d30ceac171f557ac26060f0114efcf",
     "tests/test_native_phase_scope_rendering.py": "785bb8e7a8c756e54299af57f105f52af09f029bc4b0ad24062ed347dccff387",
-    "notes/matched_cborg_2026-09-13/prepare_registration.py": "dcf4c0eb6163654a9fe5c4b752c4e8dbe89dddd4d65edfd41566846d7b434356"
+    "notes/matched_cborg_2026-09-13/prepare_registration.py": "dcf4c0eb6163654a9fe5c4b752c4e8dbe89dddd4d65edfd41566846d7b434356",
+    ".github/workflows/main.yaml": "4668971c3348cac7f3123c7849042057cc803cdaba0d31c27be7c569cd65e4f7"
   },
   "limits": [
     "Local child-process control probes and preserved native transcript replay; no new Claude model execution.",
