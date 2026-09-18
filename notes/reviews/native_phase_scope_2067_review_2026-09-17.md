@@ -29,7 +29,7 @@ and their denials do not themselves become terminal phase failures.
 
 ## Adversarial review
 
-Four review rounds identified and resolved four findings:
+Four controller review rounds and a final registration review resolved five findings:
 
 | Issue | Trigger | Resolution |
 | --- | --- | --- |
@@ -40,8 +40,8 @@ Four review rounds identified and resolved four findings:
 
 The fourth independent review found no remaining concrete blocker and independently
 ran 36 phase-history/local-child tests successfully. The broader focused suite
-passed 459 tests with 19 skips. The skips belong to existing corpus-dependent
-tests in the isolated checkout. The three renderer tests bind the changed
+passed 460 tests with 19 skips. The skips belong to existing corpus-dependent
+tests in the isolated checkout. The four renderer/registration tests bind the changed
 instruction to renderer 13 and exercise replay and assembly identity.
 
 Two execution-blocking regressions fail when the live phase observer is removed
@@ -57,6 +57,10 @@ check at event 454 and successful correction check at 462, with no terminal
 phase failure and no completed Phase 2. This is a check of the reviewer, not
 retroactive acceptance of v10w. The [probe summary](native_phase_scope_2067_probes_2026-09-17.json)
 records identities and verification scope.
+
+The registration review caught #2074: its command-line parser did not yet accept
+renderer 13. The parser now accepts it while retaining default 9. An independent
+four-test run verifies the selected version reaches the generated instruction.
 
 ## Launch boundary
 

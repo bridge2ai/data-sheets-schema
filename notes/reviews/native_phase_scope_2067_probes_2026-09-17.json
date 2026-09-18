@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "instrument": "native_phase_scope_review v1",
-  "prepared_at": "2026-09-18T01:31:20.135682+00:00",
+  "prepared_at": "2026-09-18T01:36:11.917070+00:00",
   "passed": true,
   "real_provider_requests": 0,
   "scientific_generation_requests": 0,
@@ -10,16 +10,17 @@
     2069,
     2070,
     2071,
-    2072
+    2072,
+    2074
   ],
   "focused_suite": {
-    "passed": 459,
+    "passed": 460,
     "skipped": 19,
-    "log_sha256": "1b6d3d94c6510230ae97795cd4613949fc6528a5f5b856c948f211b5979d1d77"
+    "log_sha256": "7591725e26ecf1f46b8708ec2dc9b192737f5137730a96e3363b0b8d2ad38f65"
   },
   "phase_history_cases": 28,
   "synthetic_child_control_cases": 8,
-  "renderer_identity_cases": 3,
+  "renderer_identity_cases": 4,
   "independent_phase_and_child_tests_passed": 36,
   "mutation": {
     "live_phase_observer_removed": true,
@@ -60,10 +61,12 @@
     "notes/matched_cborg_2026-09-13/native_controls/system.md": "e0eca41af69821df85fc560fbaa4a58225a0542b09324de7199bcf7a833690c0",
     "notes/matched_cborg_2026-09-13/native_controls/test_native_phase_history.py": "32539892239d43d542a7aa6a2a43a0df5a8e6fe5494dc63436c3a0ec918d6f79",
     "notes/matched_cborg_2026-09-13/native_controls/test_native_phase_control.py": "e13cac5c4f257938451f60d551d46b45d2d30ceac171f557ac26060f0114efcf",
-    "tests/test_native_phase_scope_rendering.py": "113c784bfc0ff237a5f984bc4b15efbf24b15009bff108bcb094437915c9c6d3"
+    "tests/test_native_phase_scope_rendering.py": "785bb8e7a8c756e54299af57f105f52af09f029bc4b0ad24062ed347dccff387",
+    "notes/matched_cborg_2026-09-13/prepare_registration.py": "dcf4c0eb6163654a9fe5c4b752c4e8dbe89dddd4d65edfd41566846d7b434356"
   },
   "limits": [
     "Local child-process control probes and preserved native transcript replay; no new Claude model execution.",
     "Ordered initial source reads/receipt writes, original hashes, schema/terms, full phase artifacts and scientific support remain separate acceptance checks."
-  ]
+  ],
+  "independent_registration_renderer_tests_passed": 4
 }
