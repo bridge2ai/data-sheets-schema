@@ -22,8 +22,11 @@ from prepare_registration import spec_for
 from run_api_canary import verify, verify_history, sha, check_canary_receipts
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 from native_command_policy import command_guidance, permission_arguments, program_key, validated_command_policy
+from native_command_policy import (classify_program_command, _shell_tokens, _simple_command,
+                                   _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL)
 from native_readonly import lookup_command, registered_input_paths
 from native_control import NativeControl, check_control_history, digest as control_digest
+from native_phase_history import PhaseHistory, phase_history
 
 
 def now():
@@ -37,111 +40,6 @@ def verified_executable(overlay):
     if overlay['pinned_files'].get(str(path)) != sha(path):
         raise BudgetStop('native executable bytes differ from the launch pin')
     return str(path)
-
-
-#: Characters bash reads as control or redirection operators when they are
-#: unquoted, alone or merged (`>|`, `&>>`, `<>`, `)|`). The system prompt
-#: forbids chaining unlisted programs, heredocs and writes outside the output
-#: directories, and no command the instruction prescribes uses any of them.
-OPERATOR_CHARS = frozenset(';&|<>()')
-
-
-def _shell_tokens(command, bash_words=False):
-    """shlex words. With bash_words, for text `_simple_command` has already
-    scanned: no comment character, and only a space or tab separates words
-    (bash keeps a carriage return inside the word)."""
-    try:
-        lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
-        lexer.whitespace_split = True
-        if bash_words:
-            lexer.commenters = ''
-            lexer.whitespace = ' \t'
-        return list(lexer)
-    except ValueError:
-        return None
-
-
-FORBIDDEN_SHELL = 'shell operators, redirection or substitution the system prompt forbids'
-
-
-def _simple_command(command):
-    """The command's words when bash would read one simple command, else
-    (None, reason).
-
-    shlex alone does not see how bash splits a command line (#2031): with
-    whitespace_split a newline is whitespace, a run of operator characters is
-    one token, and a `#` inside a word hides the rest of the line. So the
-    text is scanned first with bash's quoting. A backslash-newline joins two
-    lines. A `#` starts a comment only at the start of a word. A newline
-    ends the command, so any word after it, outside a comment, is a second
-    command. An unquoted operator character, a backtick or `$(` (also inside
-    double quotes) means the text is not one simple command."""
-    out = []
-    quote = None
-    word_start = True
-    ended = False
-    i, n = 0, len(command)
-    while i < n:
-        ch = command[i]
-        if quote == "'":
-            out.append(ch)
-            quote = None if ch == "'" else quote
-            i += 1
-            continue
-        if ch == '\\' and command[i + 1:i + 2] == '\n':
-            i += 2
-            continue
-        if quote is None:
-            if ch in ' \t':
-                out.append(ch)
-                word_start = True
-                i += 1
-                continue
-            if ch == '\n':
-                ended = ended or bool(''.join(out).strip())
-                out.append(' ')
-                word_start = True
-                i += 1
-                continue
-            if ch == '#' and word_start:
-                end = command.find('\n', i)
-                i = n if end < 0 else end
-                continue
-            if ended:
-                return None, FORBIDDEN_SHELL
-        if ch == '`' or command.startswith('$(', i):
-            return None, FORBIDDEN_SHELL
-        if ch == '\\':
-            out.append(command[i:i + 2])
-            word_start = False
-            i += 2
-            continue
-        if quote == '"':
-            out.append(ch)
-            quote = None if ch == '"' else quote
-            i += 1
-            continue
-        if ch in OPERATOR_CHARS:
-            return None, FORBIDDEN_SHELL
-        if ch in '\'"':
-            quote = ch
-        out.append(ch)
-        word_start = False
-        i += 1
-    tokens = None if quote else _shell_tokens(''.join(out), bash_words=True)
-    if not tokens:
-        return None, 'shell text that does not parse'
-    return tokens, None
-
-
-def _roster_command(args):
-    """The roster command `args` begins with, matched word by word (a roster
-    command may have three words: `api prompts check`)."""
-    for command in sorted(PLAYBOOK_COMMANDS, key=lambda c: -len(c.split())):
-        words = command.split()
-        if args[:len(words)] == words:
-            return command
-    return None
 
 
 def prescribed_programs(instruction_text, python):
@@ -170,45 +68,7 @@ def prescribed_programs(instruction_text, python):
 def _classify_command(command, python, programs, command_policy=None):
     if lookup_command(command, (command_policy or {}).get('readonly_lookups'), _simple_command):
         return 'prescribed', 'a registered read-only lookup of this job\'s inputs or outputs'
-    tokens, reason = _simple_command(command)
-    if tokens is None:
-        return 'not_prescribed', reason
-    if tokens[0] != python or len(tokens) < 3:
-        return 'not_prescribed', 'a program the instruction does not prescribe'
-    rest = tokens[3:] if tokens[1] == '-c' else tokens[1:]
-    if any(t in ('--help', '-h') for t in rest):
-        return 'not_prescribed', '--help exploration the system prompt forbids'
-    if tokens[1] == '-c':
-        if command_policy is not None:
-            try:
-                key = program_key(tokens[2])
-            except (SyntaxError, ValueError, TypeError):
-                return 'not_prescribed', 'an invalid inline Python program'
-            for program in command_policy['programs']:
-                if key == program_key(program['code']):
-                    if tokens[3:] and not program['arguments']:
-                        return 'not_prescribed', 'extra arguments to a fixed registered program'
-                    return 'prescribed', 'a Python program from the registered instruction or selected playbook'
-            return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
-        if tokens[2].strip() in programs:
-            return 'prescribed', 'a -c program the instruction prescribes verbatim'
-        return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
-    if tokens[1] != '-m':
-        return 'not_prescribed', 'an interpreter form the instruction does not prescribe'
-    module = tokens[2]
-    if module == 'data_sheets_schema.cli':
-        args = tokens[3:]
-        if args[:1] == ['--manifest']:
-            if command_policy is not None and (len(args) < 2 or args[1] not in command_policy['manifest_paths']):
-                return 'not_prescribed', 'a manifest outside the registered job'
-            args = args[2:]
-        roster = _roster_command(args)
-        if roster:
-            return 'prescribed', f"the roster command '{roster}'"
-        return 'not_prescribed', 'a CLI command outside the prescribed roster'
-    if module.startswith('data_sheets_schema.') and module.split('.', 1)[1] in MODULE_ENTRY_POINTS:
-        return 'prescribed', f"the registered module entry point '{module}'"
-    return 'not_prescribed', 'a module the instruction does not prescribe'
+    return classify_program_command(command, python, programs, command_policy)
 
 
 def _classify_path(tool, path, repository, output_directories, readable_inputs):
@@ -574,7 +434,7 @@ def record_then_close(proxy, record_stop, reason):
 
 
 def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
-                  command_policy=None):
+                  command_policy=None, phase_spec=None):
     process = None
     control = None
     deadline = time.monotonic() + deadline_seconds
@@ -586,7 +446,15 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             if command_policy is not None:
                 if '--input-format' not in argv or argv[argv.index('--input-format') + 1] != 'stream-json':
                     raise BudgetStop('native control requires registered stream-json input')
-                control = NativeControl(command_policy, _classify_command, env.get('CLAUDE_CONFIG_DIR'))
+                phase_review = (PhaseHistory(phase_spec, repository=cwd, command_policy=command_policy)
+                                if phase_spec is not None and phase_spec.render_version >= 13 else None)
+                def review_event(event):
+                    phase_review.observe(event)
+                    problems = phase_review.report(complete=False)['problems']
+                    if problems:
+                        raise BudgetStop('native phase history: ' + '; '.join(problems))
+                control = NativeControl(command_policy, _classify_command, env.get('CLAUDE_CONFIG_DIR'),
+                                        event_observer=review_event if phase_review is not None else None)
                 evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
             verify_launch()  # Bind the executable immediately before Popen.
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
@@ -714,7 +582,7 @@ def main():
             env['ANTHROPIC_BASE_URL']=url
             receipt['exit_code']=execute_child(argv,proxy=proxy,instruction=job['instruction'],attempt=attempt,
                 cwd=base['repository'],env=env,deadline_seconds=base['generation']['agentic_attempt_deadline_seconds'],
-                command_policy=command_policy,
+                command_policy=command_policy, phase_spec=spec,
                 verify_launch=lambda: verified_executable(overlay),
                 record_stop=lambda reason: receipt.update(
                     pre_close_ledger_stop=record_controller_stop(ledger, billing_attempt, {'reason': reason})))
@@ -738,6 +606,9 @@ def main():
         runtime_reads[:] = receipt['pretool_control'].get('persisted_output_paths', [])
         receipt['permission_denials']=classify(terminal.get('permission_denials'))
         receipt['command_history']=command_history(events, command_policy, receipt['permission_denials'])
+        if spec.render_version >= 13:
+            receipt['phase_history'] = phase_history(events, spec, complete=True, repository=base['repository'],
+                                                     command_policy=command_policy)
         if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
             raise BudgetStop('native attempt failed or stopped before completion')
         if set(terminal.get('modelUsage',{}))!={base['model']['model']}:
@@ -774,7 +645,8 @@ def main():
                 problems = list(problems) + [evidence_problem]
         observed=agentic_observed.observe([attempt/'transcript.jsonl'],Path(job['bundle']))
         problems=(list(problems)+observation_problems(observed)+denial_problems(receipt['permission_denials'])
-                  +receipt['command_history']['problems']+receipt['pretool_control']['problems'])
+                  +receipt['command_history']['problems']+receipt['pretool_control']['problems']
+                  +receipt.get('phase_history', {}).get('problems', []))
         receipt.update(validation_problems=problems,pair_consistency=pair,
                        native_observed=observed,
                        cli_reported_cost_usd=terminal.get('total_cost_usd'),cli_model_usage=terminal.get('modelUsage'),
@@ -795,6 +667,14 @@ def main():
                 runtime_reads[:] = receipt['pretool_control'].get('persisted_output_paths', [])
             except (OSError, ValueError, TypeError):
                 receipt['pretool_control'] = {'checked': False, 'problems': ['stopped native transcript is unreadable']}
+        if spec.render_version >= 13 and 'phase_history' not in receipt:
+            try:
+                with (attempt/'transcript.jsonl').open(encoding='utf-8') as stream:
+                    phase_events = [json.loads(line) for line in stream if line.strip()]
+                receipt['phase_history'] = phase_history(phase_events, spec, complete=False,
+                                                         repository=base['repository'], command_policy=command_policy)
+            except (OSError, ValueError, TypeError):
+                receipt['phase_history'] = {'checked': False, 'problems': ['stopped native phase history is unreadable']}
         if 'permission_denials' in receipt:
             # Classified before the stop: name what would disqualify (#2037).
             receipt['disqualifying_denials'] = denial_problems(receipt['permission_denials'])

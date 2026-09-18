@@ -30,7 +30,7 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
               help="write the `receipts` block into the provenance record and the "
                    "claim-receipt sidecar beside it")
 @click.option("--strict", is_flag=True,
-              help="exit 1 on any unreviewed chunk, unverified snippet or finding")
+              help="exit 1 when a registered receipt floor fails; reported diagnostics are not all gated")
 @click.option("--bundle", "bundle_opt", default=None, type=click.Path(exists=True, dir_okay=False),
               help="the bundle the run read; needed only before the provenance record "
                    "exists and the full record's header does not name it")

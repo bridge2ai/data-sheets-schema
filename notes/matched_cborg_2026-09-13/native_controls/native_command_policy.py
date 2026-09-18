@@ -194,3 +194,151 @@ def validated_command_policy(overlay, base, job):
     if recorded != expected or 'allowed_tools' in overlay:
         raise ValueError('native command policy differs from the registered job or retains global rules')
     return expected
+
+
+#: Characters bash reads as control or redirection operators when they are
+#: unquoted, alone or merged (`>|`, `&>>`, `<>`, `)|`). The system prompt
+#: forbids chaining unlisted programs, heredocs and writes outside the output
+#: directories, and no command the instruction prescribes uses any of them.
+OPERATOR_CHARS = frozenset(';&|<>()')
+
+
+def _shell_tokens(command, bash_words=False):
+    """shlex words. With bash_words, for text `_simple_command` has already
+    scanned: no comment character, and only a space or tab separates words
+    (bash keeps a carriage return inside the word)."""
+    try:
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
+        lexer.whitespace_split = True
+        if bash_words:
+            lexer.commenters = ''
+            lexer.whitespace = ' \t'
+        return list(lexer)
+    except ValueError:
+        return None
+
+
+FORBIDDEN_SHELL = 'shell operators, redirection or substitution the system prompt forbids'
+
+
+def _simple_command(command):
+    """The command's words when bash would read one simple command, else
+    (None, reason).
+
+    shlex alone does not see how bash splits a command line (#2031): with
+    whitespace_split a newline is whitespace, a run of operator characters is
+    one token, and a `#` inside a word hides the rest of the line. So the
+    text is scanned first with bash's quoting. A backslash-newline joins two
+    lines. A `#` starts a comment only at the start of a word. A newline
+    ends the command, so any word after it, outside a comment, is a second
+    command. An unquoted operator character, a backtick or `$(` (also inside
+    double quotes) means the text is not one simple command."""
+    out = []
+    quote = None
+    word_start = True
+    ended = False
+    i, n = 0, len(command)
+    while i < n:
+        ch = command[i]
+        if quote == "'":
+            out.append(ch)
+            quote = None if ch == "'" else quote
+            i += 1
+            continue
+        if ch == '\\' and command[i + 1:i + 2] == '\n':
+            i += 2
+            continue
+        if quote is None:
+            if ch in ' \t':
+                out.append(ch)
+                word_start = True
+                i += 1
+                continue
+            if ch == '\n':
+                ended = ended or bool(''.join(out).strip())
+                out.append(' ')
+                word_start = True
+                i += 1
+                continue
+            if ch == '#' and word_start:
+                end = command.find('\n', i)
+                i = n if end < 0 else end
+                continue
+            if ended:
+                return None, FORBIDDEN_SHELL
+        if ch == '`' or command.startswith('$(', i):
+            return None, FORBIDDEN_SHELL
+        if ch == '\\':
+            out.append(command[i:i + 2])
+            word_start = False
+            i += 2
+            continue
+        if quote == '"':
+            out.append(ch)
+            quote = None if ch == '"' else quote
+            i += 1
+            continue
+        if ch in OPERATOR_CHARS:
+            return None, FORBIDDEN_SHELL
+        if ch in '\'"':
+            quote = ch
+        out.append(ch)
+        word_start = False
+        i += 1
+    tokens = None if quote else _shell_tokens(''.join(out), bash_words=True)
+    if not tokens:
+        return None, 'shell text that does not parse'
+    return tokens, None
+
+
+def _roster_command(args):
+    """The roster command `args` begins with, matched word by word (a roster
+    command may have three words: `api prompts check`)."""
+    for command in sorted(PLAYBOOK_COMMANDS, key=lambda c: -len(c.split())):
+        words = command.split()
+        if args[:len(words)] == words:
+            return command
+    return None
+
+
+# This classifier is pure: path-based lookups stay in the timed controller worker.
+def classify_program_command(command, python, programs, command_policy=None):
+    tokens, reason = _simple_command(command)
+    if tokens is None:
+        return 'not_prescribed', reason
+    if tokens[0] != python or len(tokens) < 3:
+        return 'not_prescribed', 'a program the instruction does not prescribe'
+    rest = tokens[3:] if tokens[1] == '-c' else tokens[1:]
+    if any(t in ('--help', '-h') for t in rest):
+        return 'not_prescribed', '--help exploration the system prompt forbids'
+    if tokens[1] == '-c':
+        if command_policy is not None:
+            try:
+                key = program_key(tokens[2])
+            except (SyntaxError, ValueError, TypeError):
+                return 'not_prescribed', 'an invalid inline Python program'
+            for program in command_policy['programs']:
+                if key == program_key(program['code']):
+                    if tokens[3:] and not program['arguments']:
+                        return 'not_prescribed', 'extra arguments to a fixed registered program'
+                    return 'prescribed', 'a Python program from the registered instruction or selected playbook'
+            return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
+        if tokens[2].strip() in programs:
+            return 'prescribed', 'a -c program the instruction prescribes verbatim'
+        return 'not_prescribed', 'an ad-hoc -c script the system prompt forbids'
+    if tokens[1] != '-m':
+        return 'not_prescribed', 'an interpreter form the instruction does not prescribe'
+    module = tokens[2]
+    if module == 'data_sheets_schema.cli':
+        args = tokens[3:]
+        if args[:1] == ['--manifest']:
+            if command_policy is not None and (len(args) < 2 or args[1] not in command_policy['manifest_paths']):
+                return 'not_prescribed', 'a manifest outside the registered job'
+            args = args[2:]
+        roster = _roster_command(args)
+        if roster:
+            return 'prescribed', f"the roster command '{roster}'"
+        return 'not_prescribed', 'a CLI command outside the prescribed roster'
+    if module.startswith('data_sheets_schema.') and module.split('.', 1)[1] in MODULE_ENTRY_POINTS:
+        return 'prescribed', f"the registered module entry point '{module}'"
+    return 'not_prescribed', 'a module the instruction does not prescribe'

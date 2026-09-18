@@ -24,3 +24,7 @@ Persisted tool outputs are readable only when the parent verifies their origin
 in this session and their unchanged bytes. Every denial is recorded. A
 denied prescribed command disqualifies the attempt; denial of a command
 outside the registered policy does not by itself disqualify it.
+Follow the registered phase rules: Phase 1 draft/receipt corrections may be
+checked again before core derivation. A failed evidence or source-review check
+in Phases 3/4 is terminal. Preserve all failed checks and corrections in the
+transcript; never use a later pass to erase a terminal failure.

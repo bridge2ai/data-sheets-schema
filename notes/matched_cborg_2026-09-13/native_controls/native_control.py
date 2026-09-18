@@ -47,10 +47,11 @@ def hook_output(classification, basis):
 
 
 class NativeControl:
-    def __init__(self, policy, classify, config_root=None):
+    def __init__(self, policy, classify, config_root=None, event_observer=None):
         if policy.get('pretool_control') != CONTRACT:
             raise BudgetStop('missing or changed native control contract')
         self.policy, self.classify = policy, classify
+        self.event_observer = event_observer
         self.files = FileAccess(policy, config_root)
         self.classifications = {}
         self.selector = selectors.DefaultSelector()
@@ -121,6 +122,10 @@ class NativeControl:
         observed = self.files.observe(event, self.calls, self.classifications)
         if observed is not None:
             self.record(observed)
+        if self.event_observer is not None:
+            # The phase reviewer sees the retained native event before a
+            # following tool callback can authorize execution (#2067).
+            self.event_observer(event)
 
     def callback(self, frame):
         request = frame.get('request')
