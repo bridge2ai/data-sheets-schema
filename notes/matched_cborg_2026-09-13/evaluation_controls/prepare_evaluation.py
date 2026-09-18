@@ -16,7 +16,7 @@ import subprocess
 import sys
 
 from registration import (BudgetStop, NATIVE_STYLES, canonical_path, group,
-    read_json, required_paths, sha, verify_manifest)
+    read_json, required_paths, sha, source_artifacts, verify_implementation, verify_manifest)
 from budgeted_cborg import write_new
 from audit_controls.transport import transport_paths, verified_context
 from api import render_request, slot_instrument, value_digest
@@ -89,7 +89,7 @@ def slot_inventory(path, class_name, schema_path):
 
 
 def _job(manifest, destination, variant, style, identity, *, rating=1, canary=True, rubric=None):
-    source = manifest['source_generation']['artifacts'][variant]
+    source = source_artifacts(manifest)[variant]
     kind = 'Dataset' if variant == 'full' else 'CoreDataset'
     row = {'id': identity, 'style': style, 'variant': variant, 'class_name': kind,
         'input': source['path'], 'input_sha256': source['sha256'], 'context_path': manifest['context_path'],
@@ -205,6 +205,10 @@ def build_registration(destination, *, generation_registration, generation_accep
     _pin(manifest, generation_path, acceptance_path, context_path, bundle, *artifacts.values())
     if profile_object.pin_path is not None:
         _pin(manifest, profile_object.pin_path)
+    return _materialize(manifest, destination, bundle, native_runtime, spent, billing_checkpoint=billing_checkpoint)
+
+
+def _materialize(manifest, destination, bundle, native_runtime, spent, *, billing_checkpoint=None, prepared_directory=False):
     jobs = manifest['evaluation_jobs']
     for variant in ('full', 'core'):
         for style in ('semantic_agent', 'field_agent', 'direct_api_quality'):
@@ -235,11 +239,15 @@ def build_registration(destination, *, generation_registration, generation_accep
     jobs.sort(key=lambda job: (not job['canary'], job['rating'] > 1, style_order[job['style']],
                                job['variant'] != 'full', job['id']))
     manifest['planned_execution_order'] = [job['id'] for job in jobs]
-    destination.mkdir(parents=True, exist_ok=False)
-    checkpoint_copy = destination / 'generation_billing_checkpoint.json'
-    with checkpoint_copy.open('xb') as stream:
-        stream.write(billing_checkpoint.read_bytes())
-    _pin(manifest, checkpoint_copy)
+    if manifest.get('schema_version') == 2:
+        manifest['canary_acceptances'] = {job['canary_group']:str(destination/'acceptances'/(job['canary_group'].replace(':','_')+'.json')) for job in jobs if job['canary']}
+    if not prepared_directory:
+        destination.mkdir(parents=True, exist_ok=False)
+    if billing_checkpoint is not None:
+        checkpoint_copy = destination / 'generation_billing_checkpoint.json'
+        with checkpoint_copy.open('xb') as stream:
+            stream.write(billing_checkpoint.read_bytes())
+        _pin(manifest, checkpoint_copy)
     request_sizes = []
     for job in jobs:
         if job['style'] in NATIVE_STYLES:
@@ -249,6 +257,9 @@ def build_registration(destination, *, generation_registration, generation_accep
                 rubric_file=str(ROOT / f'data/rubric/rubric{number}.txt'),
                 instruction=str(destination / 'instructions' / (job['id'] + '.txt')),
                 native_runtime=deepcopy(native_runtime))
+            if manifest.get('schema_version') == 2:
+                job['native_runtime']['api_timeout_ms'] = min(native_runtime['api_timeout_ms'], job['deadline_seconds'] * 1000)
+                job['native_runtime']['api_force_idle_timeout'] = False
             job['validator_argv'] = validator_argv(manifest, job)
             job['native_runtime']['additional_directories'] = additional_directories(manifest, job)
             _pin(manifest, job['agent_definition'], job['rubric_file'], job['native_runtime']['executable'])
@@ -310,21 +321,106 @@ def build_registration(destination, *, generation_registration, generation_accep
     return {'registration': manifest_path, 'report': report}
 
 
+def build_composite_registration(destination, *, finalization_registration, finalization_acceptance,
+                                 context_path, native_executable=None):
+    """Prepare the accepted composite pair without claiming accounting ownership."""
+    from source_pair import inspect_finalization
+    import continuation_sequence
+    destination = canonical_path(str(destination))
+    if destination.exists():
+        raise BudgetStop('evaluation preparation directory already exists; never overwrite it')
+    source, inherited_pins, phase = inspect_finalization(finalization_registration, finalization_acceptance)
+    context_path = canonical_path(str(context_path), exists=True)
+    from data_sheets_schema.evaluation_context import load_context
+    from data_sheets_schema.profiles import profile_named
+    load_context(context_path)
+    profile_object = profile_named(source['profile'])
+    native_runtime = runtime_snapshot(native_executable or phase['native_runtime']['executable'])
+    for key in ('executable','version','context_window','max_output_tokens','effort'):
+        if native_runtime[key] != phase['native_runtime'][key]:
+            raise BudgetStop('composite evaluator changes the accepted native runtime '+key)
+    from audit_controls.registration import native_api_timeout, native_api_force_idle_timeout
+    timeout = native_api_timeout(phase)
+    if timeout is None or native_api_force_idle_timeout(phase) is not False:
+        raise BudgetStop('composite native evaluation requires reviewed bounded API and explicit idle-timeout controls')
+    native_runtime.update(api_timeout_ms=timeout, api_force_idle_timeout=False)
+    ledger_path = Path(source['finalization']['ledger']['path'])
+    ledger = read_json(ledger_path)
+    if str(ledger['additional_cap_usd']) != '400' or str(ledger['attempt_cap_usd']) != '5':
+        raise BudgetStop('composite predecessor changes the approved allocation/default cap')
+    spent = sum((Decimal(str(row['cost_usd'])) for row in ledger['requests']), Decimal(0))
+    if spent > Decimal(400):
+        raise BudgetStop('composite predecessor exceeds the approved allocation')
+    block = deepcopy(phase['budget_sequence'])
+    snapshot = destination/'predecessor_state.json'
+    state = canonical_path(block['state_path'], exists=True)
+    expected_state = continuation_sequence._activation_state(phase,
+        Path(source['finalization']['registration']['path']), source['finalization']['registration']['sha256'])
+    if continuation_sequence.canonical(read_json(state)) != continuation_sequence.canonical(expected_state):
+        raise BudgetStop('accepted finalization is not the exact current sequence owner')
+    predecessor = {'stage':'reconciliation', **{key:deepcopy(source['finalization'][key])
+        for key in ('registration','result','acceptance','ledger')}, 'state':{'path':str(snapshot),'sha256':sha(state)}}
+    block.update(stage='evaluation',predecessor=predecessor)
+    manifest = {'kind':'d4d_evaluation_registration','schema_version':2,
+        'registered_at':datetime.now(timezone.utc).isoformat(), 'repository':str(ROOT),
+        'repository_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        'python':sys.executable,'python_identity':{'resolved_path':str(Path(sys.executable).resolve()),
+            'sha256':sha(sys.executable),'prefix':str(Path(sys.prefix).resolve())},
+        **{key:deepcopy(phase[key]) for key in ('provider_base_url','provider_context_policy','model','profile')},
+        'project':source['project'],'method':source['method'],'context_path':str(context_path),
+        'rubric_dir':str(ROOT/'data/rubric'),'prompts_dir':str(ROOT/'src/download/prompts'),
+        'attempts_dir':str(destination/'attempts'),'evaluation_jobs':[],'pinned_files':inherited_pins,
+        'source_pair':source,'budget_sequence':block,
+        'budget':{'additional_usd':'400','per_attempt_usd':'5','ledger_path':str(destination/'billing.json'),
+            'prices_per_token':deepcopy(phase['budget']['prices_per_token']),
+            'continuation':{'checkpoint':str(ledger_path),'sha256':sha(ledger_path),'cost_usd':str(spent)}},
+        'conditional_subtype':{'selection':'all_form_failures','status':'deferred_until_all_fitness_results',
+            'requires':'exact aggregate evaluation closure and independent acceptance; bounded shared subtype successor'},
+        'offline_checks':['schema','pair','duplicate_keys','provenance','receipts','report_grounding',
+            'literal_grounding','field_presence_rubric10','field_presence_rubric20'],
+        'slot_selection':'every populated schema-known top-level slot of each explicit dataset unit; no propagation'}
+    if 'provider_transport' in phase:
+        manifest['provider_transport'] = deepcopy(phase['provider_transport'])
+    verify_implementation(manifest)
+    _pin(manifest, context_path, *transport_paths(manifest))
+    verified_context(manifest)
+    if profile_object.pin_path is not None:
+        _pin(manifest, profile_object.pin_path)
+    destination.mkdir(parents=True,exist_ok=False)
+    with snapshot.open('xb') as stream:
+        stream.write(state.read_bytes())
+    _pin(manifest,snapshot)
+    return _materialize(manifest,destination,Path(source['bundle']['path']),native_runtime,spent,
+                        prepared_directory=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--destination', type=Path, required=True)
-    parser.add_argument('--generation-registration', type=Path, required=True)
-    parser.add_argument('--generation-acceptance', type=Path, required=True)
-    parser.add_argument('--generation-job-id', required=True)
+    parser.add_argument('--generation-registration', type=Path)
+    parser.add_argument('--generation-acceptance', type=Path)
+    parser.add_argument('--generation-job-id')
     parser.add_argument('--context-path', type=Path, required=True)
-    parser.add_argument('--billing-checkpoint', type=Path, required=True)
+    parser.add_argument('--billing-checkpoint', type=Path)
+    parser.add_argument('--finalization-registration', type=Path)
+    parser.add_argument('--finalization-acceptance', type=Path)
     parser.add_argument('--native-executable', type=Path)
     parser.add_argument('--provider-base-url', choices=('https://api.cborg.lbl.gov', 'https://api-local.cborg.lbl.gov'))
     parser.add_argument('--provider-ca-bundle', type=Path,
         help='Explicit pinned CA bundle; required for the direct CBORG endpoint')
     parser.add_argument('--project'); parser.add_argument('--method'); parser.add_argument('--profile')
     args = vars(parser.parse_args())
-    result = build_registration(**args)
+    if args['finalization_registration'] is not None:
+        allowed = {'destination','finalization_registration','finalization_acceptance','context_path','native_executable'}
+        if args['finalization_acceptance'] is None or any(v is not None for k,v in args.items() if k not in allowed):
+            parser.error('composite preparation requires finalization acceptance and excludes legacy source/provider overrides')
+        result = build_composite_registration(**{k:v for k,v in args.items() if k in allowed})
+    else:
+        if args['finalization_acceptance'] is not None or any(args[k] is None for k in
+                ('generation_registration','generation_acceptance','generation_job_id','billing_checkpoint')):
+            parser.error('legacy preparation requires generation registration, acceptance, job and checkpoint')
+        args.pop('finalization_registration'); args.pop('finalization_acceptance')
+        result = build_registration(**args)
     print(json.dumps({'registration': str(result['registration']), **result['report']}, indent=2))
     return 0
 

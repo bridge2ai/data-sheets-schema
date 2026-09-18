@@ -74,6 +74,26 @@ def pinned(manifest, value, expected=None):
     return path
 
 
+def source_artifacts(manifest):
+    return (manifest['source_pair'] if manifest.get('schema_version') == 2 else manifest['source_generation'])['artifacts']
+
+
+def verify_implementation(manifest):
+    """Composite paid admission attests committed code, not merely arbitrary pins."""
+    repository = Path(manifest['repository'])
+    from data_sheets_schema import api_runner
+    if Path(api_runner.__file__).resolve() != repository/'src/data_sheets_schema/api_runner.py':
+        raise BudgetStop('evaluation imported scientific code from another checkout')
+    code = set((repository/'src/data_sheets_schema').rglob('*.py')) | set(HERE.glob('*.py')) | set(CONTROLS.glob('*.py'))
+    code.update((HERE.parent/'audit_controls').glob('*.py'))
+    code.update((HERE.parent/'finalization_controls').glob('*.py'))
+    code.update(HERE.parent/name for name in ('continuation_sequence.py','budgeted_cborg.py','prepare_registration.py','run_api_canary.py'))
+    relative = [str(path.relative_to(repository)) for path in sorted(code)]
+    for argv in (['git','ls-files','--error-unmatch','--',*relative], ['git','diff','--quiet','HEAD','--',*relative]):
+        if subprocess.run(argv,cwd=repository,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
+            raise BudgetStop('evaluation implementation differs from registered committed code')
+
+
 def required_paths(manifest):
     """Executable source closure plus every explicitly referenced instrument.
 
@@ -97,6 +117,21 @@ only the outer launcher. Registration builders may pin additional resources.
     paths.update(HERE.parent / 'audit_controls' / name
                  for name in ('__init__.py', 'transport.py', 'registration.py'))
     paths.update(transport_paths(manifest))
+    if manifest.get('schema_version') == 2:
+        paths.add(HERE.parent/'continuation_sequence.py')
+        paths.update((HERE.parent/'audit_controls').glob('*.py'))
+        paths.update((HERE.parent/'finalization_controls').glob('*.py'))
+        # Composite and later subtype closures retain every explicit reference.
+        pending = [manifest['source_pair'], manifest['budget_sequence']]
+        while pending:
+            value = pending.pop()
+            if isinstance(value, dict):
+                if set(value) == {'path', 'sha256'}:
+                    paths.add(canonical_path(value['path'], exists=True))
+                else:
+                    pending.extend(value.values())
+            elif isinstance(value, list):
+                pending.extend(value)
     # run_native_canary's imports remain part of the reused controller identity.
     for name in ('prepare_registration.py', 'run_api_canary.py'):
         paths.add(HERE.parent / name)
@@ -136,8 +171,11 @@ def _budget(manifest):
         any(not value.is_finite() or value < 0 for value in costs) or
         sum(costs, Decimal(0)) != Decimal(str(continuation['cost_usd']))):
         raise BudgetStop('generation accounting identities or settled total differ')
-    origin = manifest.get('prior_evaluation', manifest['source_generation'])
-    if state.get('manifest_sha256') != origin['registration_sha256']:
+    if manifest.get('schema_version') == 2:
+        identity = manifest['budget_sequence']['predecessor']['registration']['sha256']
+    else:
+        identity = manifest.get('prior_evaluation', manifest['source_generation'])['registration_sha256']
+    if state.get('manifest_sha256') != identity:
         raise BudgetStop('billing checkpoint does not identify its registered predecessor')
 
 
@@ -146,8 +184,18 @@ def _prior(manifest):
     if not prior:
         return None
     previous = read_json(pinned(manifest, prior['registration'], prior['registration_sha256']))
+    if manifest.get('schema_version') == 2:
+        block = manifest['budget_sequence']
+        predecessor = block['predecessor']
+        if (block['stage'] != 'evaluation_subtype' or predecessor['stage'] != 'evaluation' or
+                predecessor['registration'] != {'path':prior['registration'],'sha256':prior['registration_sha256']} or
+                predecessor['ledger']['path'] != prior['billing_ledger'] or
+                any(prior.get(key) != predecessor[key] for key in ('result','acceptance'))):
+            raise BudgetStop('subtype evaluation predecessor differs from its exact shared closure')
+    source_key = 'source_pair' if manifest.get('schema_version') == 2 else 'source_generation'
     if (previous.get('kind') != 'd4d_evaluation_registration' or
-        previous.get('source_generation') != manifest['source_generation']):
+        previous.get('schema_version') != manifest.get('schema_version') or
+        canonical_digest(previous.get(source_key)) != canonical_digest(manifest[source_key])):
         raise BudgetStop('prior evaluation does not share the accepted generation ancestry')
     if previous['budget']['ledger_path'] != prior['billing_ledger']:
         raise BudgetStop('prior evaluation billing path differs from its registration')
@@ -160,6 +208,9 @@ def _prior(manifest):
 
 
 def _generation(manifest):
+    if manifest.get('schema_version') == 2:
+        from source_pair import validate
+        return validate(manifest)
     source = manifest['source_generation']
     generation = read_json(pinned(manifest, source['registration'], source['registration_sha256']))
     acceptance = read_json(pinned(manifest, source['acceptance'], source['acceptance_sha256']))
@@ -187,6 +238,8 @@ def _generation(manifest):
 
 def sequence_path(manifest):
     """One acceptance-bound controller file, outside frozen/attempt evidence."""
+    if manifest.get('schema_version') == 2:
+        return canonical_path(manifest['budget_sequence']['state_path'])
     source = manifest['source_generation']
     path = canonical_path(source['evaluation_sequence_state'])
     forbidden = [Path(source['registration']).parent, Path(source['billing_ledger']).parent,
@@ -259,7 +312,7 @@ def group(job):
 def verify_manifest(manifest, path, digest):
     if sha(path) != digest:
         raise BudgetStop('evaluation registration changed')
-    if manifest.get('kind') != 'd4d_evaluation_registration' or manifest.get('schema_version') != 1:
+    if manifest.get('kind') != 'd4d_evaluation_registration' or type(manifest.get('schema_version')) is not int or manifest['schema_version'] not in (1, 2):
         raise BudgetStop('unsupported evaluation registration')
     repository = canonical_path(manifest['repository'], exists=True)
     if repository != HERE.parents[2]:
@@ -283,6 +336,10 @@ def verify_manifest(manifest, path, digest):
         pinned(manifest, filename, expected)
     for filename in required_paths(manifest):
         pinned(manifest, str(filename))
+    if manifest['schema_version'] == 2:
+        verify_implementation(manifest)
+        import continuation_sequence
+        continuation_sequence._validate(manifest, path, digest)
     _generation(manifest)
     previous = _prior(manifest)
     _budget(manifest)
@@ -303,7 +360,7 @@ def verify_manifest(manifest, path, digest):
             raise BudgetStop('invalid evaluation rating or canary identity')
         if job['canary_group'] != group(job):
             raise BudgetStop('evaluation canary group differs from style/variant/rubric')
-        source = manifest['source_generation']['artifacts'][job['variant']]
+        source = source_artifacts(manifest)[job['variant']]
         if job['input'] != source['path'] or job['input_sha256'] != source['sha256']:
             raise BudgetStop('evaluation input is outside the independently accepted pair')
         expected_class = 'Dataset' if job['variant'] == 'full' else 'CoreDataset'
@@ -327,6 +384,11 @@ def verify_manifest(manifest, path, digest):
             raise BudgetStop('noncanary evaluation lacks independent canary acceptance path')
     if any(job['canary_group'] not in cells for job in jobs):
         raise BudgetStop('evaluation group lacks its registered canary')
+    if manifest['schema_version'] == 2:
+        expected_acceptances = {cell:str(Path(path).parent/'acceptances'/(cell.replace(':','_')+'.json')) for cell in cells}
+        if manifest.get('canary_acceptances') != expected_acceptances or any(
+                not job['canary'] and job['canary_acceptance'] != expected_acceptances[job['canary_group']] for job in jobs):
+            raise BudgetStop('composite evaluation lacks exact acceptance paths for every primary group')
     if any(job['style'] == 'subtype' for job in jobs):
         if previous is None or manifest.get('subtype_selection') != 'all_form_failures':
             raise BudgetStop('subtype requests require a reviewed prior-evaluation all-form-failures selection')
@@ -339,7 +401,10 @@ def verify_manifest(manifest, path, digest):
             value = read_json(pinned(manifest, parent['output'], receipt['output_sha256']))
             if value.get('judgement', {}).get('failure') == 'form':
                 selected.add(parent['id'])
-        if selected != {job.get('fitness_job_id') for job in jobs if job['style'] == 'subtype'}:
+        parents = [job.get('fitness_job_id') for job in jobs if job['style'] == 'subtype']
+        if len(parents) != len(set(parents)):
+            raise BudgetStop('subtype roster must contain exactly one job per fitness form failure')
+        if selected != set(parents):
             raise BudgetStop('subtype roster does not cover exactly all prior fitness form failures')
     return {job['id']: job for job in jobs}
 
