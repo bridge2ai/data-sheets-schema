@@ -22,6 +22,7 @@ for directory in (HERE.parent, CONTROLS):
         sys.path.insert(0, str(directory))
 
 from budgeted_cborg import BudgetStop, Ledger
+from audit_controls.transport import transport_paths, verified_context
 
 STYLES = frozenset({'semantic_agent', 'field_agent', 'direct_api_quality',
                     'grounding', 'fitness', 'subtype'})
@@ -91,6 +92,11 @@ only the outer launcher. Registration builders may pin additional resources.
     paths.update(HERE.glob('*.py'))
     paths.update(CONTROLS.glob('*.py'))
     paths.add(HERE.parent / 'budgeted_cborg.py')
+    # The shared TLS factory imports only these audit-controller modules;
+    # their path/hash identities are part of the evaluation implementation.
+    paths.update(HERE.parent / 'audit_controls' / name
+                 for name in ('__init__.py', 'transport.py', 'registration.py'))
+    paths.update(transport_paths(manifest))
     # run_native_canary's imports remain part of the reused controller identity.
     for name in ('prepare_registration.py', 'run_api_canary.py'):
         paths.add(HERE.parent / name)
@@ -261,8 +267,10 @@ def verify_manifest(manifest, path, digest):
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repository, text=True).strip()
     if head != manifest['repository_commit']:
         raise BudgetStop('evaluation code commit differs from registration')
-    if manifest.get('provider_base_url') != 'https://api.cborg.lbl.gov' or manifest['model']['model'] != 'claude-opus-5':
+    if manifest['model']['model'] != 'claude-opus-5':
         raise BudgetStop('evaluation provider/model differs from the approved CBORG instrument')
+    # Validate the exact endpoint, CA pin and PEM before any client/count call.
+    verified_context(manifest)
     python = Path(manifest['python'])
     identity = manifest['python_identity']
     if (not python.is_absolute() or str(python.resolve(strict=True)) != identity['resolved_path'] or

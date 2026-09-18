@@ -18,6 +18,7 @@ import sys
 from registration import (BudgetStop, NATIVE_STYLES, canonical_path, group,
     read_json, required_paths, sha, verify_manifest)
 from budgeted_cborg import write_new
+from audit_controls.transport import transport_paths, verified_context
 from api import render_request, slot_instrument, value_digest
 from native import CLI_FLAGS, ENVIRONMENT, additional_directories
 from instructions import render_instruction
@@ -112,7 +113,8 @@ def _job(manifest, destination, variant, style, identity, *, rating=1, canary=Tr
 
 def build_registration(destination, *, generation_registration, generation_acceptance,
                        generation_job_id, context_path, billing_checkpoint,
-                       native_executable=None, project=None, method=None, profile=None):
+                       native_executable=None, project=None, method=None, profile=None,
+                       provider_base_url=None, provider_ca_bundle=None):
     """Build an exclusive offline condition; caller must supply actual acceptance.
 
     The source generation ledger must already be settled and match the
@@ -175,7 +177,7 @@ def build_registration(destination, *, generation_registration, generation_accep
         'repository_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'python': sys.executable, 'python_identity': {'resolved_path': str(Path(sys.executable).resolve()),
             'sha256': sha(sys.executable), 'prefix': str(Path(sys.prefix).resolve())},
-        'provider_base_url': generation['provider_base_url'],
+        'provider_base_url': provider_base_url if provider_base_url is not None else generation['provider_base_url'],
         'provider_context_policy': generation['provider_context_policy'], 'model': deepcopy(generation['model']),
         'project': project or source_job['project'], 'method': method or source_job['method'],
         'profile': selected_profile, 'context_path': str(context_path),
@@ -195,6 +197,11 @@ def build_registration(destination, *, generation_registration, generation_accep
         'offline_checks': ['schema', 'pair', 'duplicate_keys', 'provenance', 'receipts', 'report_grounding',
                            'literal_grounding', 'field_presence_rubric10', 'field_presence_rubric20'],
         'slot_selection': 'every populated schema-known top-level slot of each explicit dataset unit; no propagation'}
+    if provider_ca_bundle is not None:
+        manifest['provider_transport'] = {'kind': 'pinned_ca_v1',
+            'ca_bundle': str(canonical_path(str(provider_ca_bundle), exists=True))}
+    _pin(manifest, *transport_paths(manifest))
+    verified_context(manifest)
     _pin(manifest, generation_path, acceptance_path, context_path, bundle, *artifacts.values())
     if profile_object.pin_path is not None:
         _pin(manifest, profile_object.pin_path)
@@ -312,6 +319,9 @@ def main():
     parser.add_argument('--context-path', type=Path, required=True)
     parser.add_argument('--billing-checkpoint', type=Path, required=True)
     parser.add_argument('--native-executable', type=Path)
+    parser.add_argument('--provider-base-url', choices=('https://api.cborg.lbl.gov', 'https://api-local.cborg.lbl.gov'))
+    parser.add_argument('--provider-ca-bundle', type=Path,
+        help='Explicit pinned CA bundle; required for the direct CBORG endpoint')
     parser.add_argument('--project'); parser.add_argument('--method'); parser.add_argument('--profile')
     args = vars(parser.parse_args())
     result = build_registration(**args)

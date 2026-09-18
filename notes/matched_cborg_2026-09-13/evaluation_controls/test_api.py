@@ -247,7 +247,7 @@ def test_production_client_cleanup_cannot_undo_wall_clock_bound(tmp_path, monkey
     original_close = sdk.close
     sdk.close = lambda: close_release.wait(5)
     monkeypatch.setenv("CBORG_API_KEY", "offline")
-    monkeypatch.setattr(api, "cborg_client", lambda *args, **kwargs: sdk)
+    monkeypatch.setattr(api, "provider_clients", lambda *args, **kwargs: (sdk, None))
     started = time.monotonic()
     try:
         with pytest.raises(Exception, match="wall clock"):
