@@ -52,13 +52,15 @@ def test_incomplete_or_ambiguous_streams_never_complete(values):
         observer.feed(wire(values));observer.final()
 
 
-def fixture_proxy(tmp_path, *, values=None, cap=5):
+def fixture_proxy(tmp_path, *, values=None, cap=5, response_factory=None):
     calls=[]
     def respond(request):
         calls.append(request)
         assert str(request.url)=="https://api.cborg.lbl.gov/v1/messages?beta=true"
         assert request.headers["x-api-key"]=="offline-provider-key"
         assert json.loads(request.content)==REQUEST
+        if response_factory is not None:
+            return response_factory()
         return httpx.Response(200,content=wire(events() if values is None else values),headers={"content-type":"text/event-stream"})
     sdk=SimpleNamespace(messages=SimpleNamespace(count_tokens=lambda **kw:SimpleNamespace(input_tokens=100)))
     ledger=Ledger(tmp_path/'ledger.json',manifest_sha256='offline',attempt_cap=cap)
@@ -79,6 +81,109 @@ def test_native_request_unchanged_and_accounted_before_terminal_event(tmp_path):
     assert len(list((tmp_path/'requests').rglob('native_request.json')))==1
     assert len(list((tmp_path/'requests').rglob('response.sse')))==1
     assert 'offline-provider-key' not in ''.join(p.read_text() for p in (tmp_path/'requests').rglob('*') if p.is_file())
+
+
+@pytest.mark.parametrize('outcome', ['complete', 'http524', 'cut_before_body', 'cut_after_start'])
+def test_response_diagnostics_precede_body_and_never_settle_incomplete_charge(tmp_path, outcome):
+    observations = []
+    reported = '9.87654321' if outcome == 'complete' else '0'
+    correlation = {'request-id': 'offline-request', 'x-request-id': 'offline-upstream',
+                   'x-litellm-call-id': 'offline-litellm', 'cf-ray': 'offline-ray-SJC'}
+    class Body(httpx.SyncByteStream):
+        def __iter__(self):
+            # This executes only when the parent starts reading the upstream
+            # body, after headers. Inspect real evidence/ledger at that boundary.
+            evidence = json.loads(next((tmp_path/'requests').rglob('http_status.json')).read_bytes())
+            row = json.loads((tmp_path/'ledger.json').read_bytes())['requests'][0]
+            observations.append((evidence, row['status']))
+            if outcome == 'http524':
+                yield b'<html>Synthetic timeout</html>'
+            elif outcome == 'complete':
+                yield wire(events())
+            else:
+                if outcome == 'cut_after_start':
+                    yield wire(events()[:1])
+                raise httpx.RemoteProtocolError('synthetic interrupted body')
+    proxy, ledger, calls = fixture_proxy(tmp_path, response_factory=lambda: httpx.Response(
+        524 if outcome == 'http524' else 200, stream=Body(), headers={
+            'content-type': 'text/html; charset=UTF-8' if outcome == 'http524' else 'text/event-stream',
+            **correlation, 'x-litellm-response-cost': reported,
+            'authorization': 'sensitive-response-auth', 'set-cookie': 'sensitive-response-cookie',
+            'x-api-key': 'sensitive-response-key', 'x-source-text': 'sensitive-response-source'}))
+    with proxy.running() as url:
+        response = httpx.post(url+'/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token})
+        if outcome != 'complete':
+            again = httpx.post(url+'/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token})
+            assert again.status_code == 402
+    assert len(calls) == 1 and len(observations) == 1
+    metadata, status_at_body = observations[0]
+    assert status_at_body == 'pending'
+    assert metadata['status'] == (524 if outcome == 'http524' else 200)
+    assert metadata['correlation_headers'] == correlation
+    assert metadata['reported_cost'] == {'header': 'x-litellm-response-cost', 'value': reported,
+                                         'diagnostic_only': True}
+    assert all(name not in response.headers for name in (*correlation, 'x-litellm-response-cost',
+                                                         'authorization', 'set-cookie', 'x-api-key', 'x-source-text'))
+    assert all(value not in response.text for value in correlation.values())
+    evidence_text = ''.join(path.read_text() for path in (tmp_path/'requests').rglob('*') if path.is_file())
+    assert 'sensitive-response-' not in evidence_text
+    row = json.loads(ledger.path.read_bytes())['requests'][0]
+    if outcome == 'complete':
+        assert response.content == wire(events()) and not proxy.failed.is_set()
+        assert row['status'] == 'settled' and Decimal(row['cost_usd']) == Decimal('0.0008')
+    else:
+        assert proxy.failed.is_set() and row['status'] == 'pending' and 'cost_usd' not in row
+        assert Decimal(row['reserved_usd']) > 0
+        with pytest.raises(BudgetStop, match='pending or unknown'):
+            ledger.reserve('another-attempt', Decimal('0.01'), 'next')
+        if outcome == 'http524':
+            assert response.status_code == 402
+            assert next((tmp_path/'requests').rglob('upstream_error.body')).read_bytes() == b'<html>Synthetic timeout</html>'
+
+
+@pytest.mark.parametrize('cost', ['', '-0', '-1', '+1', '.25', '1.', '01', ' 0.2', '0.2 ',
+                                 'NaN', 'Infinity', '1,2', '1\n2', '9'*65, '1e'+'9'*61])
+def test_invalid_reported_cost_is_omitted_without_changing_completed_accounting(tmp_path, cost):
+    proxy, ledger, calls = fixture_proxy(tmp_path, response_factory=lambda: httpx.Response(
+        200, content=wire(events()), headers={'content-type': 'text/event-stream',
+            'x-litellm-response-cost': cost, 'request-id': 'safe-request'}))
+    with proxy.running() as url:
+        response = httpx.post(url+'/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token})
+    assert response.status_code == 200 and not proxy.failed.is_set() and len(calls) == 1
+    metadata = json.loads(next((tmp_path/'requests').rglob('http_status.json')).read_bytes())
+    assert 'reported_cost' not in metadata and metadata['correlation_headers'] == {'request-id': 'safe-request'}
+    row = json.loads(ledger.path.read_bytes())['requests'][0]
+    assert row['status'] == 'settled' and Decimal(row['cost_usd']) == Decimal('0.0008')
+
+
+@pytest.mark.parametrize('cost', ['0', '1e-9', '0.01234567890123456789'])
+def test_finite_reported_cost_retains_exact_decimal_text_only(tmp_path, cost):
+    proxy, ledger, calls = fixture_proxy(tmp_path, response_factory=lambda: httpx.Response(
+        200, content=wire(events()), headers={'content-type': 'text/event-stream', 'x-litellm-response-cost': cost}))
+    with proxy.running() as url:
+        response = httpx.post(url+'/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token})
+    assert response.status_code == 200 and not proxy.failed.is_set()
+    metadata = json.loads(next((tmp_path/'requests').rglob('http_status.json')).read_bytes())
+    assert metadata['reported_cost']['value'] == cost and metadata['reported_cost']['diagnostic_only'] is True
+    assert Decimal(json.loads(ledger.path.read_bytes())['requests'][0]['cost_usd']) == Decimal('0.0008')
+
+
+def test_response_headers_refuse_sensitive_invalid_unbounded_and_duplicate_values(tmp_path):
+    headers = [('content-type', 'text/event-stream'), ('request-id', 'x'*161),
+               ('x-request-id', 'invalid\nvalue'), ('x-litellm-call-id', 'untrusted source text'),
+               ('cf-ray', 'safe-ray-1'), ('x-litellm-response-cost', '0.1'),
+               ('x-litellm-response-cost', '0.2'), ('authorization', 'never-record-auth'),
+               ('set-cookie', 'never-record-cookie'), ('x-unregistered-id', 'never-record-extra')]
+    proxy, ledger, calls = fixture_proxy(tmp_path, response_factory=lambda: httpx.Response(
+        200, content=wire(events()), headers=headers))
+    with proxy.running() as url:
+        response = httpx.post(url+'/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token})
+    assert response.status_code == 200 and not proxy.failed.is_set()
+    metadata = json.loads(next((tmp_path/'requests').rglob('http_status.json')).read_bytes())
+    assert metadata == {'status': 200, 'content_type': 'text/event-stream',
+                        'correlation_headers': {'cf-ray': 'safe-ray-1'}}
+    archived = ''.join(path.read_text() for path in (tmp_path/'requests').rglob('*') if path.is_file())
+    assert 'never-record-' not in archived and 'untrusted source text' not in archived
 
 
 @pytest.mark.parametrize('bypass', [False, True])
