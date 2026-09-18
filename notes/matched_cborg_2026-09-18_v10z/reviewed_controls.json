@@ -1,0 +1,139 @@
+{
+  "source_base": "e764f864b432690509d9061517707c2e630678e7",
+  "registration_base_main": "e764f864b432690509d9061517707c2e630678e7",
+  "renderer": 14,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "The native controls now recognize a narrowly verified Read numeric-string input rejection before a callback and preserve physical transcript positions without accepting blank or incomplete history (#2084/#2086). The rejected call must belong to a previously initialized native session and have a unique ordered error-only result, with no callback or conflicting execution evidence; no permission decision is fabricated. Renderer 14, its inherited shared audit record/artifact contract (#2078), renderer-13 Phase 1 correction and terminal-failure guidance, native phase-history checking (#2067), policy v4 and control contract v2 remain unchanged. All generation instruction identities are rebuilt only for the fresh paths and labels; sources, schemas, profiles and evaluation instruments remain fixed. Both arms receive a fresh condition and unused output paths. v10y remains incomplete after correctly stopping on omitted explicit receipt-command selectors before that checker executed; its full draft and receipt do not constitute an accepted final pair. This control fix addresses a separate defect and does not reinterpret the actual stop.",
+  "merged_controls": [
+    {
+      "pr": 2017,
+      "merge": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "scope": "v10s native controller, receipt and stop behavior"
+    },
+    {
+      "pr": 2046,
+      "merge": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+      "reviewed_head": "22741810b284613701a111f1d1db444c68cbe2c7",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35260365143",
+      "scope": "job-bound helper policy and denial classification; exact JSON delivery"
+    },
+    {
+      "pr": 2050,
+      "merge": "df78bb6b8fef18ad072fb21cad93e658c0381757",
+      "scope": "vendor-documented built-in lookup behavior and synthetic probes"
+    },
+    {
+      "pr": 2053,
+      "merge": "7f394cc002c0002707006e2c5577ea0a0a7cd833",
+      "reviewed_head": "43ce73e7c2d57499807cae5be88f161a684c187a",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35266480855",
+      "scope": "registered lookup grammar and executed-command review"
+    },
+    {
+      "pr": 2057,
+      "merge": "c800d69f95faf4de1f976058efcda8f1a55546fc",
+      "scope": "parent command-policy callback and decision reconciliation"
+    },
+    {
+      "pr": 2063,
+      "merge": "722bf8260ab41406e6fc02f6aa7ac25485f601d1",
+      "scope": "file path admission, persisted-result provenance, and timed matching"
+    },
+    {
+      "pr": 2066,
+      "merge": "b7047ac848ee007842b17e6317b860f1864a2e52",
+      "scope": "safe local file-policy reasons in terminal diagnostics"
+    },
+    {
+      "pr": 2073,
+      "merge": "6bed5c36a3bcac0e3639b8673b15f672cf6d7b8d",
+      "scope": "inherited renderer13 phase-scoped stop guidance and native checker-history review"
+    },
+    {
+      "pr": 2081,
+      "merge": "92c9b2df21c3199c3e5b5b0669c74322793d060c",
+      "reviewed_head": "0ef9061f6b3e9e1608119a8d3955ac735b0c53f1",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35313133591",
+      "scope": "inherited renderer14 shared audit finding-record and evidence-artifact contract"
+    },
+    {
+      "pr": 2087,
+      "merge": "e764f864b432690509d9061517707c2e630678e7",
+      "reviewed_head": "b988c804fbc77d92a476b85a20d70e0527fc550f",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35318584540",
+      "scope": "native input-rejection evidence, prior session binding and physical transcript identity (#2084/#2086)"
+    }
+  ],
+  "file_policy_sha256": "1b51849742f857e5e6c1f6e88c287af6754efb5de7c346c2438347ca92f48280",
+  "native_controller_sha256": "e69f0c2e39b8928223e69a39a974e56e64c614de652bf57884cc7ea5a192195c",
+  "command_policy_sha256": "9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640",
+  "pretool_control_sha256": "f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e",
+  "lookup_contract_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+  "phase_history_sha256": "c587c1047b1068834fe599292930c65ed4786eb229aa194b01c35495c6de3150",
+  "phase_history_offline_probe_sha256": "e2fa384111dbce2459c4831f981d2fdbf1b8eae8c283784fceff568e1c3c1bda",
+  "issue_2067_controls_pr": 2073,
+  "issue_2078_controls_pr": 2081,
+  "issue_2084_controls_pr": 2087,
+  "issue_2086_controls_pr": 2087,
+  "input_rejection_offline_probe_sha256": "243aeaa3cb69b1732bcb190ff6e64ac49165b1eeeec9b3a450495f849f22f904",
+  "input_rejection_validation": {
+    "focused_tests": 101,
+    "native_control_tests": 318,
+    "detected_mutations": 5,
+    "local_python": "3.13.12",
+    "ci_python": "3.12",
+    "provider_transports": "mocked",
+    "paid_model_calls": 0
+  },
+  "audit_record_contract_offline_probe_sha256": "287835c3f40320fb0c59cfa8dd302e7468ebab6f8044b7fdf61481b5371f7748",
+  "operator_transcript_review": {
+    "issue": 2075,
+    "proof_sha256": "2c501ab609bac876a7a6fab71c2780d39100ceca977a070caef13c569793700d",
+    "script_sha256": {
+      "transcript_review.py": "e1ab358e7712a6841694af049b2e225daf25da9d877fa702b67101c83a2107de",
+      "d4d-v10z-monitor.py": "991238d0868392aadfb9e5013c36155c7f0c62189947844c1d0751453da28e5c",
+      "d4d-v10z-live-review.py": "b3005dcab21f299a190360a3d323e4f2a95ee295e75def6d3268c83401601580",
+      "d4d-v10z-observe.py": "d17287f93e5e060b6072892b6bbc8209a65c393dbcba95a4ad943204463ca7e1",
+      "freeze_outcome.py": "63ec4ad5a91e88b147d82a37e777467febfc63e814d188aec557a2ccc328b86f",
+      "probe_transcript_handling.py": "2d0d5f52cc2fd1ed1d5a90e0449592e12f682edba07766f0735693f37a7ae8b6"
+    }
+  },
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "5d6995442dbac52ec272c60ee49972d72dd5139ffbf2487afba9e3fff587b29b",
+    "CHORUS_source_review_plan.json": "cc1114c94ee7614808a36a2d11b13383f21cd17213dc7dbfd4314b21487520a6"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816,
+    2079
+  ],
+  "prior_artifact_preservation": {
+    "verified_artifacts": 3830,
+    "verified_archived_relocations": 85,
+    "relocation_audit_sha256": "81910b0156c9e75fcef1c66e979f15cec44b5800d20fde35be9459154558ca17",
+    "basis": "Original temporary locations for 85 prior files were unavailable. Exact SHA256 archived copies are verified and their original-to-archived mapping is separately pinned. No artifact was regenerated; not all original temporary paths still exist."
+  },
+  "open_transcript_followups": [
+    2077
+  ],
+  "transcript_review_limitations": "Duplicate tool identities make history uncheckable (#2077 remains open). Optional reconstructed receipts retain the first payload for an identity and are not acceptance evidence. Distinct-ID execution is not blocked by this limitation.",
+  "canary_order_confirmation": {
+    "kind": "user_canary_order_confirmation",
+    "recorded_at": "2026-09-17T18:38:46.571596+00:00",
+    "source": "User message in the active Codex conversation on 2026-09-17",
+    "question": "For the new condition, should I retain the later approved v10s native-first order, or return to the active goal\u2019s API-first order? The API transport issue remains unresolved.",
+    "user_response": "Retain native first (recommended)",
+    "canary_order": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1",
+      "CHORUS_api_rep1",
+      "KIDS_FIRST_api_rep1"
+    ],
+    "scope": "Order confirmation. Each later canary requires independent acceptance of every prior one. This is not a launch receipt."
+  },
+  "launch_authorization": "No launch receipt issued by this script. The prior v10y attempt binding was consumed. The standing instruction authorizes fresh reviewed CHORUS native canaries until independent acceptance, then all applicable registered evaluations of accepted CHORUS D4Ds, within the amended approved allocation and without another user approval. Each attempt requires a fresh condition, review, merge, exact-head CI, current checks and a one-job launch binding; v10z binds only CHORUS_agentic_rep1. Consumed conditions cannot resume or be blindly replayed. Evaluations require accepted hashes, pinned instruments, applicability, workload, costs and exclusive paths. Other generation jobs and datasets retain their own launch decisions. #2079 remains open for independent acceptance checks outside generator instructions. Renderer14 guidance is unchanged except for fresh paths and labels. The user-approved sequence-budget increase is recorded separately with the original ledger preserved; per-attempt API caps remain unchanged.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Software checks do not establish independent scientific acceptance. Actual helper arguments, file-tool paths, source support and step ordering still require review."
+}
