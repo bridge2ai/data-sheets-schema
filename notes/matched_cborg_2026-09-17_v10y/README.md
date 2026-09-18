@@ -1,5 +1,7 @@
 # v10y matched canaries, 2026-09-17
 
+Execution update: the authorized CHORUS native attempt [stopped before its first receipt check executed](../native_canary_v10y_outcome_2026-09-17.md). The full draft and receipt are preserved; no final pair is accepted and this condition cannot be resumed. The registration below records the plan as prepared.
+
 v10x remains stopped and incomplete. Phase 1 receipt correction passed before core derivation, but its Phase 3 audit used `original_full` in `findings[].record`, where the validator requires `full`, `core` or `both`. The controller correctly stopped on that terminal failure. The [outcome](../native_canary_v10x_outcome_2026-09-17.md) preserves the full draft, derived core and failed audit; no final pair, report or provenance was accepted. This fresh condition follows the reviewed [#2078 contract fix](https://github.com/bridge2ai/data-sheets-schema/pull/2081).
 
 The user's latest exact instruction **“do the canary”** authorizes one fresh CHORUS native attempt after review, merge, successful CI and fresh checks. It overrides the previous #2079 prelaunch hold; #2079 remains open for independent acceptance review. Record the actual instruction-recording and launch-binding times separately. The prior v10x launch authorization was consumed by that attempt.
