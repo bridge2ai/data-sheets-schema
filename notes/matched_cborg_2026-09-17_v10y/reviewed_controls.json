@@ -1,0 +1,114 @@
+{
+  "source_base": "92c9b2df21c3199c3e5b5b0669c74322793d060c",
+  "registration_base_main": "92c9b2df21c3199c3e5b5b0669c74322793d060c",
+  "renderer": 14,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Renderer 14 clarifies audit finding-record versus evidence-artifact namespaces for both arms (#2078), with a synthetic validator fixture rather than dataset facts. The inherited renderer-13 Phase 1 correction and terminal-failure guidance and native phase-history checking (#2067) are unchanged, alongside policy v4 / control contract v2 Bash/Read/Write controls and the merged #2065 diagnostic improvement. All generation instructions and input identities are rebuilt; sources, schemas, profiles and evaluation instruments remain fixed. Both arms receive a fresh condition and unused output paths. v10x remains incomplete after its correct terminal Phase 3 stop for an invalid audit record enum; its full draft and derived core do not constitute an accepted final pair.",
+  "merged_controls": [
+    {
+      "pr": 2017,
+      "merge": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "scope": "v10s native controller, receipt and stop behavior"
+    },
+    {
+      "pr": 2046,
+      "merge": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+      "reviewed_head": "22741810b284613701a111f1d1db444c68cbe2c7",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35260365143",
+      "scope": "job-bound helper policy and denial classification; exact JSON delivery"
+    },
+    {
+      "pr": 2050,
+      "merge": "df78bb6b8fef18ad072fb21cad93e658c0381757",
+      "scope": "vendor-documented built-in lookup behavior and synthetic probes"
+    },
+    {
+      "pr": 2053,
+      "merge": "7f394cc002c0002707006e2c5577ea0a0a7cd833",
+      "reviewed_head": "43ce73e7c2d57499807cae5be88f161a684c187a",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35266480855",
+      "scope": "registered lookup grammar and executed-command review"
+    },
+    {
+      "pr": 2057,
+      "merge": "c800d69f95faf4de1f976058efcda8f1a55546fc",
+      "scope": "parent command-policy callback and decision reconciliation"
+    },
+    {
+      "pr": 2063,
+      "merge": "722bf8260ab41406e6fc02f6aa7ac25485f601d1",
+      "scope": "file path admission, persisted-result provenance, and timed matching"
+    },
+    {
+      "pr": 2066,
+      "merge": "b7047ac848ee007842b17e6317b860f1864a2e52",
+      "scope": "safe local file-policy reasons in terminal diagnostics"
+    },
+    {
+      "pr": 2073,
+      "merge": "6bed5c36a3bcac0e3639b8673b15f672cf6d7b8d",
+      "scope": "inherited renderer13 phase-scoped stop guidance and native checker-history review"
+    },
+    {
+      "pr": 2081,
+      "merge": "92c9b2df21c3199c3e5b5b0669c74322793d060c",
+      "reviewed_head": "0ef9061f6b3e9e1608119a8d3955ac735b0c53f1",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35313133591",
+      "scope": "renderer14 shared audit finding-record and evidence-artifact contract"
+    }
+  ],
+  "file_policy_sha256": "1b51849742f857e5e6c1f6e88c287af6754efb5de7c346c2438347ca92f48280",
+  "native_controller_sha256": "c1e5bd70ab5ac941475b818494a113b106cafd35c4891efef7a6ba83dbb1549d",
+  "command_policy_sha256": "9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640",
+  "pretool_control_sha256": "70027c73b74b3cb966ae3f024774429bf2b8e6e479b29b86659b225f0578bc8d",
+  "lookup_contract_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+  "phase_history_sha256": "c587c1047b1068834fe599292930c65ed4786eb229aa194b01c35495c6de3150",
+  "phase_history_offline_probe_sha256": "e2fa384111dbce2459c4831f981d2fdbf1b8eae8c283784fceff568e1c3c1bda",
+  "issue_2067_controls_pr": 2073,
+  "issue_2078_controls_pr": 2081,
+  "audit_record_contract_offline_probe_sha256": "287835c3f40320fb0c59cfa8dd302e7468ebab6f8044b7fdf61481b5371f7748",
+  "operator_transcript_review": {
+    "issue": 2075,
+    "proof_sha256": "20aa5a3a5d79ce68142010ca07995440981a564900fbb45977b820a415f0fd95",
+    "script_sha256": {
+      "transcript_review.py": "e1ab358e7712a6841694af049b2e225daf25da9d877fa702b67101c83a2107de",
+      "d4d-v10y-monitor.py": "39fee69e78356e850a8e1382a2b872693925ad1b05a53fdf2d4d6e68716fdf06",
+      "d4d-v10y-live-review.py": "af89f7c78d2081340aab9af30cea80805a0de0be142842051f38e8224a7f7fc0",
+      "d4d-v10y-observe.py": "44f36cee0ef4027f9726269c5a48fac03fd44d72d6a138098ba20642abbf2d7a",
+      "freeze_outcome.py": "6e5bbf3644c8a653e4161c6e7bdb377291deb01c28df67b89d5a5e68dd491e7d",
+      "probe_transcript_handling.py": "fabd061c3b6af7f32483865e8c8e141657075440678aacd7b1df394671043528"
+    }
+  },
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "466d2f344576221f669684c64c71aa253636137d2f3a1d4126e71bb6ce2616b9",
+    "CHORUS_source_review_plan.json": "e1d898337e82d6fe7cb1b8e5444de6b10cfc60626e70ce666b7d349da1d66a6f"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816,
+    2079
+  ],
+  "open_transcript_followups": [
+    2077
+  ],
+  "transcript_review_limitations": "Duplicate tool identities make history uncheckable (#2077 remains open). Optional reconstructed receipts retain the first payload for an identity and are not acceptance evidence. Distinct-ID execution is not blocked by this limitation.",
+  "canary_order_confirmation": {
+    "kind": "user_canary_order_confirmation",
+    "recorded_at": "2026-09-17T18:38:46.571596+00:00",
+    "source": "User message in the active Codex conversation on 2026-09-17",
+    "question": "For the new condition, should I retain the later approved v10s native-first order, or return to the active goal\u2019s API-first order? The API transport issue remains unresolved.",
+    "user_response": "Retain native first (recommended)",
+    "canary_order": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1",
+      "CHORUS_api_rep1",
+      "KIDS_FIRST_api_rep1"
+    ],
+    "scope": "Order confirmation. Each later canary requires independent acceptance of every prior one. This is not a launch receipt."
+  },
+  "launch_authorization": "No launch receipt issued. The prior v10x launch instruction was consumed. The latest exact instruction do the canary authorizes one fresh CHORUS native attempt after registration review and merge, exact merged-head CI and fresh checks. It will be bound to the final hashes after readiness; no new message is required. It overrides the prior #2079 prelaunch hold; #2079 remains open for independent acceptance checks, not generator hints. Existing funding and native-first order persist; no new allocation is requested. Only CHORUS_agentic_rep1 is authorized.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Software checks do not establish independent scientific acceptance. Actual helper arguments, file-tool paths, source support and step ordering still require review."
+}
