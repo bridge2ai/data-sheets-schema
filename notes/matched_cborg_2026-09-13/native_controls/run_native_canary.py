@@ -25,7 +25,7 @@ from native_command_policy import command_guidance, permission_arguments, progra
 from native_command_policy import (classify_program_command, _shell_tokens, _simple_command,
                                    _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL)
 from native_readonly import lookup_command, registered_input_paths
-from native_control import NativeControl, check_control_history, digest as control_digest
+from native_control import NativeControl, check_control_history, load_native_events, digest as control_digest
 from native_phase_history import PhaseHistory, phase_history
 
 
@@ -588,10 +588,7 @@ def main():
                     pre_close_ledger_stop=record_controller_stop(ledger, billing_attempt, {'reason': reason})))
         if proxy.failed.is_set() or proxy.unfinished_handlers:
             raise BudgetStop(proxy.failure or 'native handlers did not finish before evidence freeze')
-        # JSONL separates records with physical newlines (#2043). Unicode NEL/line/
-        # paragraph separators can appear literally inside valid JSON strings.
-        with (attempt/'transcript.jsonl').open(encoding='utf-8') as transcript:
-            events=[json.loads(line) for line in transcript if line.strip()]
+        events=load_native_events(attempt/'transcript.jsonl')
         initializers=[e for e in events if e.get('type')=='system' and e.get('subtype')=='init']
         finals=[e for e in events if e.get('type')=='result']
         if len(initializers)!=1 or len(finals)!=1:
@@ -660,8 +657,7 @@ def main():
         receipt.update(transcript_terminal_state(attempt/'transcript.jsonl'))
         if 'pretool_control' not in receipt:
             try:
-                with (attempt/'transcript.jsonl').open(encoding='utf-8') as stream:
-                    stopped_events = [json.loads(line) for line in stream if line.strip()]
+                stopped_events = load_native_events(attempt/'transcript.jsonl')
                 receipt['pretool_control'] = check_control_history(
                     stopped_events, attempt/'control.jsonl', command_policy, _classify_command, config)
                 runtime_reads[:] = receipt['pretool_control'].get('persisted_output_paths', [])
@@ -669,8 +665,7 @@ def main():
                 receipt['pretool_control'] = {'checked': False, 'problems': ['stopped native transcript is unreadable']}
         if spec.render_version >= 13 and 'phase_history' not in receipt:
             try:
-                with (attempt/'transcript.jsonl').open(encoding='utf-8') as stream:
-                    phase_events = [json.loads(line) for line in stream if line.strip()]
+                phase_events = load_native_events(attempt/'transcript.jsonl')
                 receipt['phase_history'] = phase_history(phase_events, spec, complete=False,
                                                          repository=base['repository'], command_policy=command_policy)
             except (OSError, ValueError, TypeError):

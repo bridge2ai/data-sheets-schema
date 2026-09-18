@@ -84,7 +84,7 @@ classifier stops after two seconds, before the runtime's three-second callback
 timeout. The hook contract and policy identity are pinned in the overlay;
 the started receipt records the policy hash. The parent preserves its control
 exchange separately and retains the original native transcript, including
-unconsumed pipe bytes at shutdown. Completion requires matching decisions,
+unconsumed pipe bytes at shutdown. Executed calls require matching decisions,
 calls and results. The [vendor documentation](https://code.claude.com/docs/en/hooks#timeouts)
 distinguishes blocking SDK callback timeouts from non-blocking ordinary hook
 timeouts; the pinned-runtime probes verify the actual selected mechanism.
@@ -93,13 +93,26 @@ The terminal audit still checks every observed Bash execution. A nonzero exit
 does not prove that nothing executed, so those calls are included. Every denial
 is listed; a denied prescribed command disqualifies, while denial of an
 unprescribed or blank command does not do so on its own. Missing or ambiguous
-execution evidence prevents acceptance. File calls also require matching
+execution evidence prevents acceptance. Executed file calls also require matching
 callbacks, decisions and results. Stopped receipts preserve their available
 control audit. Helper arguments still require review: this is not a filesystem
 sandbox. Actual manifests and
 artifact targets, file-tool paths, phase ordering and source entailment still
 require independent review. Historical registrations retain their original
 policies and verdicts; these controls require a new condition.
+
+A narrow exception records native input rejection before a callback (#2084).
+For a `Read` with one string-valued `offset` or `limit`, the exact typed
+validation error and error-only result must agree with the original argument,
+unique call/result identity, prior session initialization and event order.
+This records `input_rejected_before_callback`, without granting access or
+inventing a permission decision. Any callback or conflicting execution evidence
+prevents that exemption. Other missing callbacks remain unexplained. Live
+completion and retrospective review verify the same rejection evidence.
+Transcript loading preserves physical line numbers; blank frames make history
+uncheckable, and malformed or incomplete frames are rejected. The
+[review](../../reviews/native_input_rejection_2084_review_2026-09-18.md) records
+the offline checks. This change does not reinterpret or resume v10y.
 
 The probe includes file reads/writes, symlink escapes and persisted-output
 provenance alongside read-only shell, helper and denied Python/manifest cases.

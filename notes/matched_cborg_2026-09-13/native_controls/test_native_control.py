@@ -29,6 +29,8 @@ if case.get('early_result'):
 send({'type':'control_response','response':{'subtype':'success','request_id':init['request_id'],'response':{}}})
 prompt=json.loads(sys.stdin.readline())
 assert prompt['message']['content']=='synthetic input'
+if case.get('blank_line'):print('',flush=True)
+for frame in case.get('precallback_events',[]):send(frame)
 command=case['command'];identity='synthetic_tool'
 tool=case.get('tool','Bash');payload=case.get('input',{'command':command})
 send({'type':'assistant','message':{'content':[{'type':'tool_use','id':identity,'name':tool,'input':payload}]}})
@@ -54,7 +56,9 @@ if not denied:
     if tool=='Bash':
         result=subprocess.run(command,shell=True,capture_output=True,text=True)
         error=result.returncode!=0;content=result.stdout+result.stderr
-    elif tool=='Read':error=False;content=Path(payload['file_path']).read_text()
+    elif tool=='Read':
+        error=False;content=Path(payload['file_path']).read_text()
+        if case.get('read_log'):Path(case['read_log']).write_text(identity)
     else:
         Path(payload['file_path']).write_text(payload['content'])
         error=False;content='written'
@@ -83,7 +87,7 @@ def run_case(tmp_path):
             proxy=proxy,instruction=instruction,attempt=tmp_path,cwd=tmp_path,env={},
             deadline_seconds=timeout,verify_launch=lambda:None,command_policy=policy,
             record_stop=stops.append)
-        events=[json.loads(line) for line in (tmp_path/'transcript.jsonl').read_text().splitlines()]
+        events=runner.load_native_events(tmp_path/'transcript.jsonl')
         return result,events,control.check_control_history(events,tmp_path/'control.jsonl',policy,runner._classify_command)
     return run,tmp_path,source,policy,closed,stops
 
@@ -92,7 +96,8 @@ def test_prescribed_read_executes_and_has_complete_parent_evidence(run_case):
     run,path,source,policy,closed,stops=run_case
     code,events,checked=run()
     assert code==0 and closed and not stops
-    assert checked=={'checked':True,'bash_calls':1,'file_calls':0,'decisions':1,'persisted_output_paths':[],'problems':[]}
+    assert checked=={'checked':True,'bash_calls':1,'file_calls':0,'decisions':1,'input_rejections':[],
+                    'persisted_output_paths':[],'problems':[]}
     assert 'REGISTERED_MARKER' in (path/'transcript.jsonl').read_text()
     assert not runner.command_history(events,policy,[])['problems']
 
@@ -325,3 +330,237 @@ def test_terminal_audit_preserves_local_file_policy_reason(run_case, change, rea
     after = control.check_control_history(events, path / 'control.jsonl', policy, runner._classify_command, config)
     assert not after['checked']
     assert any(reason in problem for problem in after['problems'])
+
+
+def _rejected_read(source, field='offset'):
+    """The retained native 2.1.272 rejection shape (#2084), with fixture IDs.
+
+    Read.offset was a string, with no PreToolUse callback and no file output.
+    The advertised native Read schema gives limit the same numeric type.
+    Dataset contents, private paths and model calls are not used by this trace.
+    """
+    session = '12345678-1234-1234-1234-123456789abc'
+    payload = {'file_path': str(source), 'offset': 11736, 'limit': 60}
+    payload[field] = str(payload[field]) + ','
+    call = {'type': 'assistant', 'session_id': session, 'parent_tool_use_id': None,
+            'message': {'role': 'assistant', 'content': [
+                {'type': 'tool_use', 'id': 'rejected_read', 'name': 'Read', 'input': payload}]}}
+    errors = [{'expected': 'number', 'code': 'invalid_type', 'path': [field], 'message': 'Invalid input'}]
+    wrapper = ('<tool_use_error>InputValidationError: Read failed due to the following issue:\n'
+               f'The parameter `{field}` type is expected as `number` but provided as '
+               '`unknown`</tool_use_error>')
+    result = {'type': 'user', 'session_id': session, 'parent_tool_use_id': None,
+              'message': {'role': 'user', 'content': [
+                  {'type': 'tool_result', 'tool_use_id': 'rejected_read', 'is_error': True,
+                   'content': wrapper}]},
+              'tool_use_result': 'InputValidationError: ' + json.dumps(errors, indent=2)}
+    return [{'type': 'system', 'subtype': 'init', 'cwd': str(source.parent), 'session_id': session},
+            call, result]
+
+
+def _run_corrected_read(run_case, frames, **options):
+    run, path, source, *_ = run_case
+    return run({'precallback_events': frames, 'tool': 'Read',
+                'input': {'file_path': str(source), 'offset': 11736, 'limit': 60},
+                'read_log': str(path/'executed_read'), **options})
+
+
+@pytest.mark.parametrize('field', ['offset', 'limit'])
+def test_native_input_rejection_then_corrected_read_has_distinct_complete_evidence(run_case, field):
+    run, path, source, policy, closed, stops = run_case
+    code, events, checked = _run_corrected_read(run_case, _rejected_read(source, field))
+    assert code == 0 and not stops and checked['checked'] and checked['problems'] == []
+    assert checked['file_calls'] == 2 and checked['decisions'] == 1
+    assert checked['persisted_output_paths'] == []
+    # Only the corrected call executed a read; the malformed call has neither
+    # a callback nor a synthetic permission decision.
+    assert (path/'executed_read').read_text() == 'synthetic_tool'
+    callbacks = [e['request']['input']['tool_use_id'] for e in events if e.get('type') == 'control_request']
+    assert callbacks == ['synthetic_tool']
+    assert next(e for e in events if e.get('type') == 'result')['permission_denials'] == []
+    rejection, = checked['input_rejections']
+    assert (rejection['tool_use_id'], rejection['field'], rejection['input_type']) == ('rejected_read', field, 'string')
+    raw_lines = (path/'transcript.jsonl').read_text().splitlines()
+    for name in ('call', 'result'):
+        original = json.loads(raw_lines[rejection[name+'_line']-1])
+        assert control.digest(original) == rejection[name+'_sha256']
+    rows = [json.loads(line) for line in (path/'control.jsonl').read_text().splitlines()]
+    recorded, = [{k: v for k, v in row.items() if k != 'at'} for row in rows
+                 if row['kind'] == 'input_rejected_before_callback']
+    assert recorded == rejection
+
+
+@pytest.mark.parametrize('change', [
+    'text_only', 'ordinary_error', 'missing_metadata', 'malformed_json', 'empty_errors',
+    'extra_error', 'extra_validation_field', 'duplicate_json_key', 'wrong_code', 'wrong_expected',
+    'wrong_path', 'nested_path', 'absent_offset', 'valid_offset', 'float_offset', 'bool_offset',
+    'null_offset', 'list_offset', 'dict_offset', 'other_invalid_argument', 'unknown_argument',
+    'wrong_tool', 'wrong_wrapper_field', 'extra_content', 'false_error', 'integer_error',
+    'missing_error', 'extra_result_block', 'file_result', 'persisted_result', 'wrong_session',
+    'both_wrong_sessions', 'wrong_role', 'assistant_result', 'wrong_result_id', 'duplicate_call',
+    'duplicate_result', 'success_then_rejection', 'rejection_then_success', 'result_before_call',
+    'terminal_before_rejection', 'missing_session_init', 'session_init_between_call_and_result',
+    'session_init_after_result',
+])
+def test_unproved_callbackless_rejections_cannot_complete_or_pass_history(run_case, change):
+    _, path, source, policy, closed, stops = run_case
+    frames = _rejected_read(source)
+    call, result = frames[1:]
+    block = result['message']['content'][0]
+    payload = call['message']['content'][0]['input']
+    errors = json.loads(result['tool_use_result'].split(': ', 1)[1])
+    if change == 'text_only':result['tool_use_result'] = block['content']
+    elif change == 'ordinary_error':block['content'] = 'File not found'
+    elif change == 'missing_metadata':result.pop('tool_use_result')
+    elif change == 'malformed_json':result['tool_use_result'] = 'InputValidationError: not JSON'
+    elif change == 'empty_errors':errors.clear()
+    elif change == 'extra_error':errors.append(deepcopy(errors[0]))
+    elif change == 'extra_validation_field':errors[0]['unverified'] = True
+    elif change == 'duplicate_json_key':
+        result['tool_use_result'] = result['tool_use_result'].replace('"expected": "number"', '"expected": "string", "expected": "number"')
+    elif change == 'wrong_code':errors[0]['code'] = 'too_small'
+    elif change == 'wrong_expected':errors[0]['expected'] = 'string'
+    elif change == 'wrong_path':errors[0]['path'] = ['limit']
+    elif change == 'nested_path':errors[0]['path'] = ['input', 'offset']
+    elif change == 'absent_offset':payload.pop('offset')
+    elif change == 'valid_offset':payload['offset'] = 11736
+    elif change == 'float_offset':payload['offset'] = 11736.0
+    elif change == 'bool_offset':payload['offset'] = True
+    elif change == 'null_offset':payload['offset'] = None
+    elif change == 'list_offset':payload['offset'] = ['11736,']
+    elif change == 'dict_offset':payload['offset'] = {'offset': '11736,'}
+    elif change == 'other_invalid_argument':payload['limit'] = 0
+    elif change == 'unknown_argument':payload['command'] = 'cat secret'
+    elif change == 'wrong_tool':call['message']['content'][0]['name'] = 'Write'
+    elif change == 'wrong_wrapper_field':block['content'] = block['content'].replace('`offset`', '`limit`')
+    elif change == 'extra_content':block['content'] += '\nACTUAL_FILE_CONTENT'
+    elif change == 'false_error':block['is_error'] = False
+    elif change == 'integer_error':block['is_error'] = 1
+    elif change == 'missing_error':block.pop('is_error')
+    elif change == 'extra_result_block':result['message']['content'].append({'type': 'text', 'text': 'file content'})
+    elif change == 'file_result':result['tool_use_result'] = {'type': 'text', 'file': {'content': block['content']}}
+    elif change == 'persisted_result':result['tool_use_result'] = {'persistedOutputPath': str(source), 'persistedOutputSize': source.stat().st_size}
+    elif change == 'wrong_session':result['session_id'] = 'another-session'
+    elif change == 'both_wrong_sessions':call['session_id'] = result['session_id'] = 'another-session'
+    elif change == 'wrong_role':result['message']['role'] = 'assistant'
+    elif change == 'assistant_result':result['type'] = 'assistant'
+    elif change == 'wrong_result_id':block['tool_use_id'] = 'unknown'
+    elif change == 'duplicate_call':frames.insert(2, deepcopy(call))
+    elif change == 'duplicate_result':frames.append(deepcopy(result))
+    elif change in ('success_then_rejection', 'rejection_then_success'):
+        success = deepcopy(result);success['message']['content'][0].update(is_error=False, content='FILE_CONTENT')
+        frames.insert(2 if change == 'success_then_rejection' else 3, success)
+    elif change == 'result_before_call':frames[1], frames[2] = result, call
+    elif change == 'terminal_before_rejection':frames.insert(2, {'type': 'result'})
+    elif change == 'missing_session_init':frames.pop(0)
+    elif change == 'session_init_between_call_and_result':frames.insert(1, frames.pop(0))
+    elif change == 'session_init_after_result':frames.append(frames.pop(0))
+    else:raise AssertionError(change)
+    if change in ('empty_errors', 'extra_error', 'extra_validation_field', 'wrong_code',
+                  'wrong_expected', 'wrong_path', 'nested_path'):
+        result['tool_use_result'] = 'InputValidationError: ' + json.dumps(errors)
+    with pytest.raises(BudgetStop):
+        _run_corrected_read(run_case, frames)
+    assert closed and stops
+    events = [json.loads(line) for line in (path/'transcript.jsonl').read_text().splitlines()]
+    checked = control.check_control_history(events, path/'control.jsonl', policy, runner._classify_command)
+    assert checked['problems']
+
+
+@pytest.mark.parametrize('change', ['missing', 'duplicate', 'field', 'call_hash', 'result_hash', 'line'])
+def test_retrospective_rejection_requires_its_original_explicit_record(run_case, change):
+    _, path, source, policy, *_ = run_case
+    _, events, checked = _run_corrected_read(run_case, _rejected_read(source))
+    assert not checked['problems']
+    evidence = path/'control.jsonl'
+    rows = [json.loads(line) for line in evidence.read_text().splitlines()]
+    rejection = next(row for row in rows if row['kind'] == 'input_rejected_before_callback')
+    if change == 'missing':rows.remove(rejection)
+    elif change == 'duplicate':rows.append(deepcopy(rejection))
+    elif change == 'field':rejection['field'] = 'limit'
+    elif change == 'call_hash':rejection['call_sha256'] = '0'*64
+    elif change == 'result_hash':rejection['result_sha256'] = '0'*64
+    else:rejection['result_line'] += 1
+    evidence.write_text(''.join(json.dumps(row)+'\n' for row in rows))
+    after = control.check_control_history(events, evidence, policy, runner._classify_command)
+    assert after['problems']
+
+
+def test_callback_after_runtime_rejection_cannot_authorize_execution(run_case):
+    _, path, source, policy, closed, stops = run_case
+    frames = _rejected_read(source)
+    payload = frames[1]['message']['content'][0]['input']
+    frames.append({'type': 'control_request', 'request_id': 'too_late', 'request': {
+        'subtype': 'hook_callback', 'callback_id': control.CONTRACT['callback_id'], 'input': {
+            'hook_event_name': 'PreToolUse', 'tool_name': 'Read', 'tool_use_id': 'rejected_read',
+            'cwd': str(path), 'tool_input': payload}}})
+    with pytest.raises(BudgetStop, match='callback arrived after'):
+        _run_corrected_read(run_case, frames)
+    assert closed and stops and not (path/'executed_read').exists()
+    rows = [json.loads(line) for line in (path/'control.jsonl').read_text().splitlines()]
+    assert not any(row['kind'] == 'decision' for row in rows)
+
+
+def test_live_finish_reverifies_the_recorded_input_rejection(run_case, monkeypatch):
+    _, path, source, *_ = run_case
+    original = control.input_validation_rejection
+    calls = []
+    def reject_second_check(*args, **kwargs):
+        calls.append(True)
+        return original(*args, **kwargs) if len(calls) == 1 else None
+    monkeypatch.setattr(control, 'input_validation_rejection', reject_second_check)
+    with pytest.raises(BudgetStop, match='contradictory execution evidence'):
+        _run_corrected_read(run_case, _rejected_read(source))
+    assert len(calls) == 2
+
+
+def test_blank_frame_preserves_rejection_identity_but_does_not_make_history_checkable(run_case):
+    _, path, source, policy, closed, stops = run_case
+    code, events, checked = _run_corrected_read(run_case, _rejected_read(source), blank_line=True)
+    assert code == 0 and not stops and closed
+    assert events[1] == {'type': control.BLANK_FRAME_TYPE, 'physical_line': 2}
+    assert checked['checked'] is False
+    assert checked['problems'] == ['native transcript has blank physical frames; history is uncheckable']
+    rejection, = checked['input_rejections']
+    rows = [json.loads(line) for line in (path/'control.jsonl').read_text().splitlines()]
+    record, = [{k: v for k, v in row.items() if k != 'at'} for row in rows
+               if row['kind'] == 'input_rejected_before_callback']
+    assert record == rejection
+    # The blank remains physical line 2; source event hashes still refer to
+    # the actual call/result on lines 4/5, not a densely renumbered transcript.
+    lines = (path/'transcript.jsonl').read_bytes().split(b'\n')
+    assert lines[1] == b''
+    assert (record['call_line'], record['result_line']) == (4, 5)
+    for key in ('call', 'result'):
+        assert control.digest(json.loads(lines[record[key+'_line']-1])) == record[key+'_sha256']
+    # The phase review can retain these positions; the separate control/parser
+    # diagnostic still prevents overall acceptance of blank/incomplete history.
+    from native_phase_history import phase_history
+    from tests.test_evidence_generation_gate import specification
+    phase = phase_history(events, specification(path), complete=False,
+                          repository=path, command_policy=policy)
+    assert not phase['problems']
+
+
+@pytest.mark.parametrize('raw', [
+    b'null\n', b'[]\n', b'"informational text"\n', b'{broken}\n', b'\xff\n',
+    b'{"type":"result"}', b'{"type":"result"}\r{"type":"result"}\n',
+])
+def test_physical_line_loader_rejects_malformed_or_incomplete_frames(tmp_path, raw):
+    path = tmp_path/'transcript.jsonl';path.write_bytes(b'{}\n'+raw)
+    with pytest.raises(ValueError):
+        runner.load_native_events(path)
+
+
+def test_physical_line_loader_does_not_split_unicode_inside_a_json_string(tmp_path):
+    event = {'type': 'assistant', 'message': {'content': 'alpha\u0085\u2028\u2029omega'}}
+    path = tmp_path/'transcript.jsonl'
+    path.write_text(json.dumps(event, ensure_ascii=False)+'\n')
+    assert runner.load_native_events(path) == [event]
+
+
+def test_physical_line_loader_retains_the_live_frame_size_limit(tmp_path, monkeypatch):
+    path = tmp_path/'transcript.jsonl';path.write_text('{"type":"result"}\n')
+    monkeypatch.setattr(control, 'MAX_FRAME_BYTES', 8)
+    with pytest.raises(ValueError, match='size limit'):
+        runner.load_native_events(path)
