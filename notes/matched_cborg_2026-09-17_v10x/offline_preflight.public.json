@@ -1,0 +1,82 @@
+{
+  "checked_at": "2026-09-18T01:46:23.705740+00:00",
+  "kind": "operator_offline_preflight_not_launch_approval",
+  "registration_sha256": "ebdffc083d12b9f8cd0ab0fe4ccea0945d49a7154c9e24d0dd3fe63883a7ad0b",
+  "native_overlay_sha256": "dbe7fe9a6ab44b2d1e798081f2f68fb18fdf405de63f5b14f5f289c51fa5b258",
+  "registered_pins_verified": 486,
+  "native_pins_verified": 14,
+  "historical_files_verified": 3241,
+  "prior_attempt_files_verified": 2432,
+  "jobs_with_unchanged_sources_manifests_chunks_and_profiles": 32,
+  "changed_common_pinned_files": [
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/cli/receipts.py",
+    ".claude/commands/d4d-full-core.md",
+    "notes/matched_cborg_2026-09-13/prepare_registration.py"
+  ],
+  "new_pinned_implementation_files": [
+    "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py"
+  ],
+  "evaluation_instrument_changes_from_v10w": false,
+  "native_job_policies_rebuilt": {
+    "CHORUS_agentic_rep1": {
+      "programs": 5,
+      "command_examples": 6,
+      "allowed_rules": 71,
+      "effective_system_sha256": "a447e257504e27212ce3e28a81c97ccdc3e7ff656415bec8c8b115450afdaebe",
+      "effective_system_bytes": 9180,
+      "policy_sha256": "5f2223a5190621d916bce73c07d0ce88a915aca9bf01ca7a682f61f30a3f24a3"
+    },
+    "KIDS_FIRST_agentic_rep1": {
+      "programs": 5,
+      "command_examples": 6,
+      "allowed_rules": 71,
+      "effective_system_sha256": "2411d08049f34872457e8e97ea8e78f24f98041e2cf4067c30f8375413ee2e42",
+      "effective_system_bytes": 10328,
+      "policy_sha256": "b0647a01ebc4b0d947a49e2ca296b58bdf96af22fe386c9d929bc1f6048f13f2"
+    }
+  },
+  "native_controls_changed": [
+    2065,
+    2067
+  ],
+  "scientific_instruction_change": "renderer13 phase-scoped native correction and stop guidance; freshly rendered identities",
+  "native_phase_history_sha256": "c587c1047b1068834fe599292930c65ed4786eb229aa194b01c35495c6de3150",
+  "phase_history_offline_probe_sha256": "e2fa384111dbce2459c4831f981d2fdbf1b8eae8c283784fceff568e1c3c1bda",
+  "agentic_attempt_deadline_seconds": 10800,
+  "native_denial_policy": "denied prescribed command disqualifies a run, while denials of forbidden commands are listed and do not disqualify it on their own.",
+  "agentic_attempt_limit": "additional allocation (no per-attempt cap, user direction 2026-09-16)",
+  "schema_release": "3.0.0, unchanged from v10w; both merged schema hashes, profile digests and fitness specifications preserved",
+  "canary_order": [
+    "CHORUS_agentic_rep1",
+    "KIDS_FIRST_agentic_rep1",
+    "CHORUS_api_rep1",
+    "KIDS_FIRST_api_rep1"
+  ],
+  "generation_renderers": {
+    "api": 13,
+    "agentic": 13
+  },
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "effort_policy_unchanged": true,
+  "api_output_allowance_unchanged": {
+    "audit": 96000,
+    "report": 96000
+  },
+  "native_runtime_output_limit": 64000,
+  "generation_instructions_rebuilt_exactly": 32,
+  "initial_requests_rebuilt_exactly": 16,
+  "distinct_unused_output_directories": 64,
+  "budget_extension_approval": "not_applicable_agentic_attempts_uncapped_by_user_direction_2026-09-16",
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "dbbb4b4d7dbe18f9eae1f8a3fc1da8d05f4acc40f8306391693c5e331caa1f17",
+    "CHORUS_source_review_plan.json": "ab07bcb47efa2850e0c1535334d8fada76b1add7294b52a210ee7c620d1a86e6"
+  },
+  "launch_receipts_issued": 0,
+  "scientific_requests_from_preparation": 0,
+  "limitations": "Operator checks do not establish source quality or independent verification of unpublished originals/accounting. Source review, native tool turns, compaction and repeatability remain unmeasured; v10w was operator-stopped after a full draft and pre-Phase-2 receipt correction, without a complete pair or scientific acceptance; v10x has not launched. The existing issue-resolution-and-canary instruction authorizes only the first CHORUS native retry after exact-commit CI, registration review and fresh checks; the sequence cap of the ledger, not any amendment, bounds agentic spend.",
+  "accounting_resolved": true,
+  "proposed_caps_checked_locally": true,
+  "private_accounting_independently_reviewed": false
+}

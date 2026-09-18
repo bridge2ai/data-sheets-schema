@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "issue": 2075,
+  "kind": "offline_observer_archive_transcript_proof",
+  "checked_at": "2026-09-18T01:43:58.540362+00:00",
+  "passed": true,
+  "fixture_cases": 13,
+  "script_checks": 52,
+  "cases": [
+    {
+      "case": "valid",
+      "scripts_passed": 4,
+      "physical_lines": 4,
+      "receipt_result_physical_line": 4,
+      "history_checkable": true,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "null",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "list",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "string",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "malformed_middle",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "invalid_utf8",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "blank_middle",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonmapping_message",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonmapping_tool_input",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonmapping_content",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonstring_block_type",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "nonstring_tool_name",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 5,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    },
+    {
+      "case": "trailing_partial",
+      "scripts_passed": 4,
+      "physical_lines": 5,
+      "receipt_result_physical_line": 4,
+      "history_checkable": false,
+      "archive_source_and_copy_match": true,
+      "hidden_evidence_archived": true,
+      "exclusive_archive_completed": true
+    }
+  ],
+  "code_sha256": {
+    "transcript_review.py": "e1ab358e7712a6841694af049b2e225daf25da9d877fa702b67101c83a2107de",
+    "d4d-v10x-monitor.py": "6107700c977d6adf68992e413ac803823965379c10c909202957f0434c1c7d41",
+    "d4d-v10x-live-review.py": "18439ae8ab91c873a69a8b4b429b25214d909a7ce2816bb8b03b0b98cb83f3c6",
+    "d4d-v10x-observe.py": "bb5636c5df808490e9466a3fe9b960d3f8d719dda0e4f38b23aa6cf58619a09e",
+    "freeze_outcome.py": "6f718c61f2e5575198ac9f1222dc98fd06c77d4a7c659f6d5b71559642590007",
+    "probe_transcript_handling.py": "768e505b75636e181eee6c3fccce1c08b858652d1a16365f34acdf44b56f90c1"
+  },
+  "old_live_review_failed_on_null": true,
+  "native_write_envelope_cases_passed": 10,
+  "historical_native_receipt_replay": {
+    "transcript_sha256": "03c89c5937bd31c098c3f1171460eb8ba6d75a1e7e1e949429e239e80a665eaf",
+    "physical_lines": 464,
+    "successful_writes": 9,
+    "receipt_result_lines": [
+      454,
+      462
+    ],
+    "selected_write_result_lines": [
+      198,
+      459
+    ],
+    "read_only": true
+  },
+  "phase_history_sha256": "c587c1047b1068834fe599292930c65ed4786eb229aa194b01c35495c6de3150",
+  "network_requests": 0,
+  "provider_requests": 0,
+  "model_launches": 0,
+  "real_registration_executed": false,
+  "real_attempts_modified": false,
+  "limits": "Fixture command policy and run metadata isolate transcript inspection; this does not validate provider transport or scientific phase acceptance.",
+  "private_report_sha256": "4dd41bb5d10e3c987b1ae166d2d8552a2a5fd59dcc2df0a7b6be589df2b3c3ea"
+}
