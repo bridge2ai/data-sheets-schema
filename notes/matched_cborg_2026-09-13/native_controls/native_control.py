@@ -347,5 +347,8 @@ def check_control_history(events, path, policy, classify, config_root=None):
                 'file_calls': sum(call['name'] in ('Read', 'Write') for _, call in calls.values()),
                 'decisions': sum(map(len, decisions.values())),
                 'persisted_output_paths': list(files.persisted), 'problems': problems}
-    except (OSError, ValueError, TypeError, KeyError, AttributeError, IndexError, BudgetStop) as error:
+    except BudgetStop as error:
+        # These messages originate in the local file policy, not provider errors.
+        return {'checked': False, 'problems': [f'native control evidence failed file policy: {error}']}
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, IndexError) as error:
         return {'checked': False, 'problems': [f'native control evidence is missing or malformed ({type(error).__name__})']}
