@@ -1,0 +1,102 @@
+{
+  "source_base": "6bed5c36a3bcac0e3639b8673b15f672cf6d7b8d",
+  "registration_base_main": "6bed5c36a3bcac0e3639b8673b15f672cf6d7b8d",
+  "renderer": 13,
+  "evidence_protocol": 3,
+  "source_review_instrument": 1,
+  "implementation_delta": "Renderer 13 explicitly scopes Phase 1 full/receipt corrections and terminal evidence/source-review failures (#2067). Native phase-history checking is pinned, alongside the existing policy v4 / control contract v2 Bash/Read/Write controls and the merged #2065 diagnostic improvement. All generation instructions and input identities are rebuilt; sources, schemas, profiles and evaluation instruments remain fixed. Both arms receive a fresh condition and unused output paths. v10w remains operator-stopped and incomplete under its original instructions and preserves the later stop correction.",
+  "merged_controls": [
+    {
+      "pr": 2017,
+      "merge": "0a2d350a3d7063e14271499300740ca80a09d0ec",
+      "scope": "v10s native controller, receipt and stop behavior"
+    },
+    {
+      "pr": 2046,
+      "merge": "40783c7f854139c5dfd8141b4e8aa902d15698bf",
+      "reviewed_head": "22741810b284613701a111f1d1db444c68cbe2c7",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35260365143",
+      "scope": "job-bound helper policy and denial classification; exact JSON delivery"
+    },
+    {
+      "pr": 2050,
+      "merge": "df78bb6b8fef18ad072fb21cad93e658c0381757",
+      "scope": "vendor-documented built-in lookup behavior and synthetic probes"
+    },
+    {
+      "pr": 2053,
+      "merge": "7f394cc002c0002707006e2c5577ea0a0a7cd833",
+      "reviewed_head": "43ce73e7c2d57499807cae5be88f161a684c187a",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35266480855",
+      "scope": "registered lookup grammar and executed-command review"
+    },
+    {
+      "pr": 2057,
+      "merge": "c800d69f95faf4de1f976058efcda8f1a55546fc",
+      "scope": "parent command-policy callback and decision reconciliation"
+    },
+    {
+      "pr": 2063,
+      "merge": "722bf8260ab41406e6fc02f6aa7ac25485f601d1",
+      "scope": "file path admission, persisted-result provenance, and timed matching"
+    },
+    {
+      "pr": 2066,
+      "merge": "b7047ac848ee007842b17e6317b860f1864a2e52",
+      "scope": "safe local file-policy reasons in terminal diagnostics"
+    },
+    {
+      "pr": 2073,
+      "merge": "6bed5c36a3bcac0e3639b8673b15f672cf6d7b8d",
+      "reviewed_head": "1773b2bb4d46ce1affba83c5caa1a4d0a8082beb",
+      "ci": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/35296029143",
+      "scope": "renderer13 phase-scoped stop guidance and native checker-history review"
+    }
+  ],
+  "file_policy_sha256": "1b51849742f857e5e6c1f6e88c287af6754efb5de7c346c2438347ca92f48280",
+  "native_controller_sha256": "c1e5bd70ab5ac941475b818494a113b106cafd35c4891efef7a6ba83dbb1549d",
+  "command_policy_sha256": "9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640",
+  "pretool_control_sha256": "70027c73b74b3cb966ae3f024774429bf2b8e6e479b29b86659b225f0578bc8d",
+  "lookup_contract_sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+  "phase_history_sha256": "c587c1047b1068834fe599292930c65ed4786eb229aa194b01c35495c6de3150",
+  "phase_history_offline_probe_sha256": "e2fa384111dbce2459c4831f981d2fdbf1b8eae8c283784fceff568e1c3c1bda",
+  "issue_2067_controls_pr": 2073,
+  "operator_transcript_review": {
+    "issue": 2075,
+    "proof_sha256": "9da53a28f3e40623714dad9d5a053ded1584302168e59858997227edcdeb525e",
+    "script_sha256": {
+      "transcript_review.py": "e1ab358e7712a6841694af049b2e225daf25da9d877fa702b67101c83a2107de",
+      "d4d-v10x-monitor.py": "6107700c977d6adf68992e413ac803823965379c10c909202957f0434c1c7d41",
+      "d4d-v10x-live-review.py": "18439ae8ab91c873a69a8b4b429b25214d909a7ce2816bb8b03b0b98cb83f3c6",
+      "d4d-v10x-observe.py": "bb5636c5df808490e9466a3fe9b960d3f8d719dda0e4f38b23aa6cf58619a09e",
+      "freeze_outcome.py": "6f718c61f2e5575198ac9f1222dc98fd06c77d4a7c659f6d5b71559642590007",
+      "probe_transcript_handling.py": "768e505b75636e181eee6c3fccce1c08b858652d1a16365f34acdf44b56f90c1"
+    }
+  },
+  "source_review_plan_hashes": {
+    "KIDS_FIRST_source_review_plan.json": "dbbb4b4d7dbe18f9eae1f8a3fc1da8d05f4acc40f8306391693c5e331caa1f17",
+    "CHORUS_source_review_plan.json": "ab07bcb47efa2850e0c1535334d8fada76b1add7294b52a210ee7c620d1a86e6"
+  },
+  "scientific_issues_stay_open": [
+    1815,
+    1782,
+    1801,
+    1816
+  ],
+  "canary_order_confirmation": {
+    "kind": "user_canary_order_confirmation",
+    "recorded_at": "2026-09-17T18:38:46.571596+00:00",
+    "source": "User message in the active Codex conversation on 2026-09-17",
+    "question": "For the new condition, should I retain the later approved v10s native-first order, or return to the active goal\u2019s API-first order? The API transport issue remains unresolved.",
+    "user_response": "Retain native first (recommended)",
+    "canary_order": [
+      "CHORUS_agentic_rep1",
+      "KIDS_FIRST_agentic_rep1",
+      "CHORUS_api_rep1",
+      "KIDS_FIRST_api_rep1"
+    ],
+    "scope": "Order confirmation. Each later canary requires independent acceptance of every prior one. This is not a launch receipt."
+  },
+  "launch_authorization": "No launch receipt issued. The prior v10w launch instruction was consumed. The current issue-resolution-and-canary instruction authorizes one fresh CHORUS native attempt after registration review and merge, exact merged-head CI and fresh checks. It will be bound to the final hashes after readiness; no new message is required. Existing funding and native-first order persist; no new allocation is requested. CHORUS native is first.",
+  "limits": "Public review can inspect registered identities and controls, not private originals or detailed accounting. Software checks do not establish independent scientific acceptance. Actual helper arguments, file-tool paths, source support and step ordering still require review."
+}
