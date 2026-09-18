@@ -64,6 +64,20 @@ actual final generation ledger. The source bundle must still match its original
 generation identity; re-pinning altered source bytes is refused. The evaluation
 code, schemas, profiles, definitions and prompts have their own explicit pins.
 
+The endpoint defaults to the generation registration's exact CBORG URL. To use
+the documented direct route on LBL-Net/VPN, add
+`--provider-base-url https://api-local.cborg.lbl.gov --provider-ca-bundle /absolute/verified-ca.pem`.
+The direct route requires an explicit, canonical CA file; it cannot inherit
+ambient trust or an unpinned generation transport setting. The new registration
+pins the CA and the shared audit transport implementation. Both native and API
+evaluations use the same verified client for token counting and generation,
+with hostname/chain verification, redirects disabled and no environment proxy
+or CA overrides. Its upstream timeout is 1,800 seconds, with a 20-second connect
+timeout and no SDK retries. These transport settings do not change model,
+effort, instruments or scoring. A public endpoint registration without a CA
+retains its existing client defaults. Preparation only validates local trust
+material; it makes no connectivity, token-count or model request.
+
 It registers 20 rubric ratings: 12 semantic (three ratings for each rubric/class
 cell), four field-agent primaries and four direct-API primaries. Grounding and
 fitness cover every populated schema-known top-level slot in each selected

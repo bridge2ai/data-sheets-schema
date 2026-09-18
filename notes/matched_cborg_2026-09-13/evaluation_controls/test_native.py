@@ -256,7 +256,7 @@ def test_native_launch_rechecks_full_rendering_before_version_or_provider(native
         calls.append(argv)
         raise BeforeProvider('valid rendering reached runtime version check')
     monkeypatch.setattr(native.subprocess, 'check_output', version)
-    monkeypatch.setattr(native, 'cborg_client', lambda *a, **kw: pytest.fail('provider was constructed'))
+    monkeypatch.setattr(native, 'provider_clients', lambda *a, **kw: pytest.fail('provider was constructed'))
     # challenge() consults git through subprocess.check_output too; use the
     # already rendered, real challenge while isolating this launch boundary.
     import data_sheets_schema.agent_pin as agent_pin

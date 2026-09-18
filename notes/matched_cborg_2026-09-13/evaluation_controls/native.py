@@ -13,7 +13,8 @@ import sys
 
 from registration import BudgetStop, canonical_path, pinned, sha, strict_json
 from validation import validate_native, validator_argv
-from budgeted_cborg import attempt_identity, cborg_client, provider_context_headers
+from budgeted_cborg import attempt_identity, provider_context_headers
+from audit_controls.transport import provider_clients
 from native_command_policy import _simple_command, _literal_rule, permission_arguments
 from native_control import CONTRACT, check_control_history, load_native_events
 from native_file_policy import FileAccess
@@ -213,11 +214,28 @@ def execute_job(context, *, client=None):
     config = attempt / 'cli_config'
     config.mkdir(mode=0o700)
     billing_attempt = attempt_identity(context.manifest_sha256, job['id'])
-    proxy = NativeProxy(sdk=client or cborg_client(manifest, key, max_retries=0),
-        ledger=context.ledger, attempt=billing_attempt, evidence=attempt / 'requests',
-        model=manifest['model']['model'], prices=manifest['budget']['prices_per_token'],
-        verify=context.verify, provider_key=key or 'offline-test-key', base_url=manifest['provider_base_url'],
-        request_headers=provider_context_headers(manifest))
+    owned_client = client is None
+    upstream = None
+    if owned_client:
+        client, upstream = provider_clients(manifest, key)
+    try:
+        proxy = NativeProxy(sdk=client,
+            ledger=context.ledger, attempt=billing_attempt, evidence=attempt / 'requests',
+            model=manifest['model']['model'], prices=manifest['budget']['prices_per_token'],
+            verify=context.verify, provider_key=key or 'offline-test-key', base_url=manifest['provider_base_url'],
+            request_headers=provider_context_headers(manifest), upstream=upstream)
+    except BaseException:
+        # running() owns both clients after construction; before that boundary,
+        # close only clients created here, preserving the original setup error.
+        if owned_client:
+            for resource in (client, upstream):
+                close = getattr(resource, 'close', None)
+                if close is not None:
+                    try:
+                        close()
+                    except BaseException:
+                        pass
+        raise
     environment = {key: value for key, value in os.environ.items()
                    if key in {'PATH', 'HOME', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM'}}
     environment.update(ENVIRONMENT)

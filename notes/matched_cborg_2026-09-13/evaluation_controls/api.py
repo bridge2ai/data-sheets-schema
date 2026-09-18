@@ -16,8 +16,9 @@ import threading
 from types import SimpleNamespace
 
 from budgeted_cborg import (
-    BudgetStop, CappedClient, attempt_identity, cborg_client, write_new,
+    BudgetStop, CappedClient, attempt_identity, write_new,
 )
+from audit_controls.transport import provider_clients
 
 
 STYLES = {"direct_api_quality", "grounding", "fitness", "subtype"}
@@ -386,20 +387,21 @@ def execute_job(context, *, client=None):
         key = os.environ.get("CBORG_API_KEY")
         if not key:
             raise ValueError("CBORG_API_KEY is required")
-        sdk = cborg_client(manifest, key, max_retries=0)
-    journal = SimpleNamespace(messages=_JournalMessages(sdk.messages, attempt / "response_events.jsonl", lifetime))
-    capped = CappedClient(
-        journal, ledger=context.ledger,
-        attempt=attempt_identity(context.manifest_sha256, job["id"]),
-        evidence=attempt / "requests", model=manifest["model"]["model"],
-        prices=manifest["budget"]["prices_per_token"], verify=context.verify,
-        initial_request=expected, mutation_guard=lifetime.guard)
-    complete = _CompleteMessages(capped.messages, job["style"])
+        # Both token counting and evaluation streaming use this same client.
+        sdk, _ = provider_clients(manifest, key)
     old_attempts = api_runner.MAX_ATTEMPTS
     old_deadline = api_runner.PHASE_WALL_CLOCK_SECONDS
-    api_runner.MAX_ATTEMPTS = 1
-    api_runner.PHASE_WALL_CLOCK_SECONDS = job["deadline_seconds"]
     try:
+        journal = SimpleNamespace(messages=_JournalMessages(sdk.messages, attempt / "response_events.jsonl", lifetime))
+        capped = CappedClient(
+            journal, ledger=context.ledger,
+            attempt=attempt_identity(context.manifest_sha256, job["id"]),
+            evidence=attempt / "requests", model=manifest["model"]["model"],
+            prices=manifest["budget"]["prices_per_token"], verify=context.verify,
+            initial_request=expected, mutation_guard=lifetime.guard)
+        complete = _CompleteMessages(capped.messages, job["style"])
+        api_runner.MAX_ATTEMPTS = 1
+        api_runner.PHASE_WALL_CLOCK_SECONDS = job["deadline_seconds"]
         messages = _QualityMessages(complete) if job["style"] == "direct_api_quality" else complete
         result, instrument = _invoke(
             manifest, job, SimpleNamespace(messages=messages), attempt)
