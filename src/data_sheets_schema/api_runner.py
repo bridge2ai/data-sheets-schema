@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -918,7 +918,12 @@ def assembly_digest(render_version: int = 8) -> dict[str, Any]:
     if render_version >= 12:
         from data_sheets_schema.source_review import INVENTORY_HEADER
         layout += "; hash-bound source-review inventory before audit/report instruction: " + INVENTORY_HEADER
-    basis = json.dumps([layout, instructions, REGATE_HEADERS], sort_keys=True)
+    parts = [layout, instructions, REGATE_HEADERS]
+    if render_version >= 13:
+        parts.append({"native_phase1_receipts": NATIVE_PHASE1_RECEIPTS,
+                      "native_source_stop": NATIVE_SOURCE_STOP,
+                      "native_evidence_stop": NATIVE_EVIDENCE_STOP})
+    basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
 
@@ -1126,8 +1131,19 @@ def resolve_prompt(spec: RunSpec) -> str:
         from data_sheets_schema.resources import resource_path
         from data_sheets_schema.evidence_assertions import protocol_for_renderer
         protocol = protocol_for_renderer(spec.render_version)
-        body += "\n\n" + resource_path(
+        evidence_text = resource_path(
             Path(f"src/download/prompts/evidence_protocol_v{protocol}.md")).read_text(encoding="utf-8")
+        if spec.is_agentic and spec.render_version >= 13:
+            # Keep the published protocol and renderer <=12 byte-replayable.
+            # v13 narrows the native stop instruction to the checks it governs.
+            historical = ("results and confirm the agent stopped on any failed check, as well as verifying\n"
+                          "the original-freeze hashes and final artifacts. Current-file validation alone\n"
+                          "cannot establish that tool-history requirement.")
+            if evidence_text.count(historical) != 1:
+                raise ValueError("native source-review stop instruction cannot be resolved")
+            evidence_text = evidence_text.replace(historical, NATIVE_SOURCE_STOP)
+            body += "\n\n" + NATIVE_PHASE1_RECEIPTS
+        body += "\n\n" + evidence_text
         if spec.is_agentic:
             body += native_evidence_instructions(spec)
             # Add this after portable command/path adaptation: the serialized
@@ -1149,6 +1165,52 @@ def resolve_prompt(spec: RunSpec) -> str:
         body += "\n\n".join(evidence_phase_contract(phase, spec.render_version)
                               for phase in EVIDENCE_PHASE_CONTRACTS)
     return body
+
+
+NATIVE_PHASE1_RECEIPTS = """## Native Phase 1 corrections and the Phase 2 gate (renderer v13)
+
+Before core derivation, the generator may correct this attempt's draft full
+record and coverage receipt: YAML syntax, slot paths, chunk dispositions and
+source quotations, including adding or removing extracted assertions. Every
+correction must use the registered sources already read and preserve the
+registered bundle/chunk identity. Keep one review entry per manifest chunk.
+Do not invent an earlier read or receipt write, reconstruct missing initial
+entries at the end, or change historical artifacts. The transcript preserves
+each original write, failed check and correction for independent review.
+
+A failed Phase 1 schema, term or receipt check is a correction opportunity,
+not a terminal evidence/source-review failure. After changing the full record,
+repeat schema and term validation. After changing either the full record or
+receipt, rerun the exact selected strict receipt check. Core derivation must
+wait for its successful result on the current files; a pending check or a pass
+from before a subsequent write is insufficient. Do not resume an attempt the
+controller or ledger has already stopped.
+
+Use the strict command's exit status and registered receipt floors. Incomplete
+slot coverage, short unattesting snippets, value-token overlap and attribution
+diagnostics are reported separately; they are not all strict failures. Do not
+pad or weaken receipts to improve counts. Exit zero does not prove entailment:
+independent review still checks every claim's source, subject and scope.
+
+These permissions cover the generator's Phase 1 work only. The operator must
+preserve the measured writes and results rather than repair them after the run.
+Failed Phase 3/4 evidence or source-review checks remain terminal under the
+rules below; a later passing check cannot erase a terminal failure.
+"""
+
+NATIVE_SOURCE_STOP = """results and confirm the agent stopped on a failed Phase 3/4 evidence-assertion
+check or an uncheckable source-review inventory, as well as verifying the
+original-freeze hashes and final artifacts. Phase 1 receipt corrections are
+governed by the pre-derivation gate, not this terminal-stop rule. Current-file
+validation alone cannot establish either tool-history requirement."""
+
+NATIVE_EVIDENCE_STOP = (
+    "Preserve the originals and audit unchanged. A failed evidence_assertions check "
+    "above, or an uncheckable source_review inventory, is terminal: stop this attempt "
+    "without rewriting the rejected evidence or sending another paid request. "
+    "This rule does not make a Phase 1 receipt correction terminal. "
+    "The orchestrator must rerun the final check on the same files before acceptance.\n"
+)
 
 
 def native_evidence_instructions(spec: RunSpec) -> str:
@@ -1199,8 +1261,9 @@ def native_evidence_instructions(spec: RunSpec) -> str:
         "declared relationship removals with:\n\n"
         + shlex.join(args + ["--final-full", paths["full"], "--final-core", paths["core"],
                              "--report", paths["report"]]) + "\n\n"
-        "Preserve the originals and audit unchanged. Stop on any failed check. "
-        "The orchestrator must rerun the final check on the same files before acceptance.\n"
+        + (NATIVE_EVIDENCE_STOP if spec.render_version >= 13 else
+           "Preserve the originals and audit unchanged. Stop on any failed check. "
+           "The orchestrator must rerun the final check on the same files before acceptance.\n")
     )
 
 

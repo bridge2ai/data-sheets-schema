@@ -340,7 +340,7 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
      `funders[0]` when one passage attests a whole entry) and a **verbatim**
      snippet from *this* chunk of at least 8 characters after normalization
      per `...`-separated part (a grant number or an identifier qualifies; a
-     short common word does not, and fails the check);
+     short common word does not attest a value and is reported separately);
    - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
      already receipted from those chunks;
    - `nothing_relevant` with a `reason`;
@@ -369,13 +369,32 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    command then reads the bundle named in the full record's `# Source
    bundle:` header as it is on disk (pass `--bundle` if the header is not
    written yet). It is re-run with `--write` after the record step, which
-   is what puts the block in the record. It must report `chunks N/N reviewed`, every
-   snippet verified and no findings. `slots without a receipt` is reported,
-   not gated: a populated slot whose receipt you cannot name is one to
-   re-examine, not one to pad. The validator cannot tell that a
+   is what puts the block in the record. It must exit successfully under the
+   registered receipt floors. These gate unreviewed chunks, mismatched or
+   unchecked snippets, addressing slips above the registered tolerance,
+   vacuous receipts and other gated findings. Short unattesting snippets,
+   incomplete slot coverage, value-token overlap and attribution diagnostics
+   are reported separately; not every diagnostic is a strict failure. A
+   populated slot whose receipt you cannot name is one to re-examine, not one
+   to pad. The validator cannot tell that a
    `nothing_relevant` chunk truly had nothing, or that a real snippet
    supports the value it sits under — those stay review work, made specific
    by chunk id and slot path.
+
+   A failed Phase 1 receipt check may be corrected before Phase 2. Correct
+   this run's receipt syntax, addresses, dispositions or source quotations
+   using the registered chunks already read, retaining an entry for every
+   chunk. Corrections do not repair missing initial read/write order or
+   authorize a different bundle. Preserve the original writes, failures and
+   corrections in the transcript. Re-run the same strict receipt check after
+   any full-record or receipt change; a previous pass is then stale. Re-run
+   schema and term validation when the full record changed. Do not derive the
+   core while the receipt check is pending or failing. Operators must not
+   rewrite measured artifacts after the attempt to make them pass.
+
+   This Phase 1 correction loop does not authorize continuation after a
+   terminal Phase 3/4 evidence or source-review failure, or after a controller
+   or ledger stop. Preserve the rejected audit and originals unchanged.
 
 The launcher still records what you actually opened (`bundle_lines_read`)
 and, with the receipt, which reviewed chunks the transcript never opened
@@ -888,8 +907,8 @@ reconciliation report rather than pinning the edit to make the check pass.
   distinct from this project.
 - The core header contains `Phase 4 reconciliation: completed`.
 - The Phase 3/4 reconciliation report is present.
-- The coverage receipt is present and `d4d receipts check --strict` passes:
-  every manifest chunk reviewed, every snippet verified, no findings. The
+- The coverage receipt is present and `d4d receipts check --strict` passes
+  the registered receipt floors, with reported diagnostics reviewed separately. The
   provenance record carries `inputs.receipt_expected: true` (the
   `--receipt-expected` flag) so the canary gate holds the run to it.
 - The live provenance record is present and its `record_mode` is `live`, and it

@@ -33,7 +33,7 @@ assert subprocess.check_output([str(cli),'--version'],text=True).strip()==r['cla
 py=r['python']
 jobs=[j for j in r['generation']['jobs'] if j['canary'] and j['execution_arm']=='agentic']
 policies={j['id']:build_command_policy(j,py,r['repository']) for j in jobs}
-files=[HERE/name for name in ('native_proxy.py','run_native_canary.py','prepare_overlay.py','prepare_overlay_roster.py','native_command_policy.py','native_readonly.py','native_control.py','native_file_policy.py','system.md')]
+files=[HERE/name for name in ('native_proxy.py','run_native_canary.py','prepare_overlay.py','prepare_overlay_roster.py','native_command_policy.py','native_readonly.py','native_control.py','native_file_policy.py','native_phase_history.py','system.md')]
 files.extend(BASE/name for name in ('budgeted_cborg.py','run_api_canary.py','prepare_registration.py'))
 files.append(cli.resolve())
 value={'registered_at':datetime.now(timezone.utc).isoformat(),'status':'draft_awaiting_independent_review_and_prior_canary_acceptance',

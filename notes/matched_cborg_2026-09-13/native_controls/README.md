@@ -110,6 +110,33 @@ output directory for each run. Scientific acceptance still inspects actual
 successful calls, read targets and denied calls; a permission grant alone
 does not establish instruction adherence (#2049).
 
+## Phase checks for renderer 13, 2026-09-17
+
+Renderer 13 separates Phase 1 corrections from terminal Phase 3/4 failures
+(#2067). The generator may correct its draft record and coverage receipt using
+the registered sources, retaining every write and checker result. After a
+full-record or receipt write, the first core derivation needs a fresh successful
+strict receipt check, with no pending receipt check or write. The registered
+receipt floors govern success; coverage and token-overlap diagnostics do not
+all constitute failures. Operators preserve the measured artifacts instead of
+repairing them after execution.
+
+The parent observes the actual native calls and results. It stops a premature
+core derivation before its execution callback, and stops when a selected
+evidence check or source-review inventory fails. Ordinary Phase 1 receipt
+failures remain correctable. The same reviewer is run on the final or stopped
+transcript, so a later success cannot erase a terminal failure. Unprescribed
+helpers remain subject to the existing denial classification; a denied help
+request or compound command does not become a phase failure. The phase reviewer
+uses the shared pure shell/program classifier; filesystem lookups remain in
+the timed callback worker.
+
+This check does not prove initial source-read/receipt order, schema/term
+validation, original-freeze hashes, complete Phase 3/4 artifacts or scientific
+support. Those retain their independent acceptance checks. Renderer 12 and its
+stopped attempts remain unchanged. See the [review](../../reviews/native_phase_scope_2067_review_2026-09-17.md)
+and [offline evidence](../../reviews/native_phase_scope_2067_probes_2026-09-17.json).
+
 ## Initial observations, 2026-09-13
 
 These files are preparation for the agentic canaries. They are not part of the
