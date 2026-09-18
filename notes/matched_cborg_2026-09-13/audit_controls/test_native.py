@@ -34,6 +34,9 @@ CHILD = r'''
 import json, os, shlex, subprocess, sys, threading, time, urllib.request, urllib.error
 from pathlib import Path
 case=json.loads(Path(sys.argv[1]).read_text())
+if case.get('capture_environment'):
+    Path(case['capture_environment']).write_text(json.dumps({
+        key:os.environ.get(key) for key in ('API_TIMEOUT_MS','API_FORCE_IDLE_TIMEOUT')}))
 def send(value):print(json.dumps(value),flush=True)
 init=json.loads(sys.stdin.readline())
 send({'type':'control_response','response':{'subtype':'success','request_id':init['request_id'],'response':{}}})
@@ -364,7 +367,7 @@ def test_execute_job_connects_controls_context_and_terminal_recheck(native_case,
 
 @pytest.mark.parametrize('registered', [False, True])
 def test_delayed_headers_use_only_registered_native_client_timeout(native_case, monkeypatch, registered):
-    """Scaled child default versus a longer registered timeout, using real loopback HTTP."""
+    """Environment plumbing with a Python child; not a test of native/Bun idle timers."""
     import time
     c = native_case
     c.case.update(default_timeout_ms=250, final_request=False)
@@ -399,6 +402,38 @@ def test_delayed_headers_use_only_registered_native_client_timeout(native_case, 
     assert rows[0]['status'] == ('settled' if (folder / 'response.json').exists() else 'pending')
     assert calls[0].content == (folder / 'native_request.json').read_bytes()
     assert 'API_TIMEOUT_MS' not in calls[0].headers
+
+
+@pytest.mark.parametrize('registered', [None, False])
+def test_native_fetch_idle_policy_comes_only_from_registration(native_case, monkeypatch, registered):
+    """Execute a real child process to verify settings; native timing is a separate probe."""
+    c = native_case
+    captured = c.attempt / 'child_environment.json'
+    c.case['capture_environment'] = str(captured)
+    context, sdk = configure_execution(c, monkeypatch)
+    monkeypatch.setenv('API_FORCE_IDLE_TIMEOUT', 'false' if registered is not False else 'true')
+    if registered is not None:
+        c.manifest['native_runtime']['api_force_idle_timeout'] = registered
+        c.manifest['native_runtime']['api_timeout_ms'] = 5000
+    calls = []
+    def respond(request):
+        calls.append(request)
+        return httpx.Response(200, content=response_events(), headers={'content-type': 'text/event-stream'})
+    result = native.execute_job(context, client=sdk,
+        upstream=httpx.Client(transport=httpx.MockTransport(respond)))
+    assert result['validation']['passed']
+    expected = None if registered is None else 'false'
+    assert json.loads(captured.read_text())['API_FORCE_IDLE_TIMEOUT'] == expected
+    assert calls and all('API_FORCE_IDLE_TIMEOUT' not in call.headers for call in calls)
+
+
+def test_invalid_native_idle_setting_stops_before_provider_admission(native_case, monkeypatch):
+    c = native_case
+    context, sdk = configure_execution(c, monkeypatch)
+    c.manifest['native_runtime']['api_force_idle_timeout'] = 'false'
+    with pytest.raises(BudgetStop, match='explicit false'):
+        native.execute_job(context, client=sdk)
+    assert not c.ledger.path.exists()
 
 
 @pytest.mark.parametrize('change', ['missing_metadata','missing_error_flag','missing_result'])

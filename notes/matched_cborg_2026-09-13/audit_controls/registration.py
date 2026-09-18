@@ -339,6 +339,7 @@ def validate_registration(path):
     if type(job['deadline_seconds']) is not int or job['deadline_seconds'] <= 0:
         raise BudgetStop('audit deadline must be positive whole seconds')
     native_api_timeout(manifest)
+    native_api_force_idle_timeout(manifest)
     budget = manifest['budget']
     previous = read_json(budget['continuation']['checkpoint'])
     costs = [Decimal(str(row.get('cost_usd', 'NaN'))) for row in previous['requests']]
@@ -382,6 +383,19 @@ def native_api_timeout(manifest):
     if (type(value) is not int or value <= 0 or
             type(deadline) is not int or deadline <= 0 or value > deadline * 1000):
         raise BudgetStop('native API timeout must be positive whole milliseconds within the audit deadline')
+    return value
+
+
+def native_api_force_idle_timeout(manifest):
+    """Optional native fetch idle policy, independent of the SDK request deadline."""
+    runtime = manifest['native_runtime']
+    if 'api_force_idle_timeout' not in runtime:
+        return None
+    value = runtime['api_force_idle_timeout']
+    if value is not False:
+        raise BudgetStop('native API force-idle-timeout override must be explicit false')
+    if native_api_timeout(manifest) is None:
+        raise BudgetStop('disabling native fetch idle timeout requires a registered bounded native API timeout')
     return value
 
 
