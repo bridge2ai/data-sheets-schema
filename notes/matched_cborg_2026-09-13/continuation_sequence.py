@@ -22,6 +22,8 @@ from budgeted_cborg import BudgetStop, Ledger
 PROTOCOL = 'shared_sequence_v2'
 KIND = 'd4d_shared_budget_sequence'
 SEAL_KIND = 'd4d_audit_budget_handoff_seal'
+PREDECESSORS = {'reconciliation': 'audit', 'evaluation': 'reconciliation',
+                'evaluation_subtype': 'evaluation'}
 
 
 def _require(condition, reason):
@@ -147,7 +149,7 @@ def seal_document(manifest):
 
 
 def _closure(manifest, predecessor, lineage):
-    _require(predecessor['stage'] in {'audit', 'reconciliation'}, 'unsupported predecessor closure stage')
+    _require(predecessor['stage'] in {'audit', 'reconciliation', 'evaluation'}, 'unsupported predecessor closure stage')
     refs = {key: _ref(manifest, predecessor[key]) for key in
             ('registration', 'ledger', 'state', 'result', 'acceptance')}
     registration, ledger, result, acceptance = (read(refs[key]) for key in
@@ -156,7 +158,18 @@ def _closure(manifest, predecessor, lineage):
     _require(path(registration['budget']['ledger_path']) == refs['ledger']
              and ledger.get('manifest_sha256') == identity,
              'predecessor ledger does not belong to its registration')
-    if predecessor['stage'] == 'audit':
+    if predecessor['stage'] == 'evaluation':
+        _require(registration.get('schema_version') == 2
+                 and registration.get('budget_sequence', {}).get('stage') == 'evaluation'
+                 and digest(registration['budget_sequence']['origin']) == lineage,
+                 'evaluation predecessor changes sequence ancestry')
+        from evaluation_controls.closure import validate_aggregate
+        _require(manifest['pinned_files'].get(str(Path(__file__).parent / 'evaluation_controls/closure.py'))
+                 == sha(Path(__file__).parent / 'evaluation_controls/closure.py'),
+                 'aggregate closure implementation is unpinned or changed')
+        validate_aggregate(registration, refs['registration'], result, ledger)
+        artifacts = result['artifacts']
+    elif predecessor['stage'] == 'audit':
         _require(registration.get('kind') == 'd4d_native_audit_continuation'
                  and sha(registration['parent']['registration']) == manifest['budget_sequence']['origin']['registration']['sha256'],
                  'audit predecessor differs from original generation')
@@ -176,13 +189,13 @@ def _closure(manifest, predecessor, lineage):
         expected_scope = 'phase4_reconciliation'
         artifacts = result.get('artifacts')
     runtime = result.get('runtime', {})
-    _require(result.get('status') == 'completed_pending_independent_review'
+    _require(predecessor['stage'] == 'evaluation' or (result.get('status') == 'completed_pending_independent_review'
              and result.get('scope') == expected_scope and result.get('registration_sha256') == identity
              and result.get('job_id') == registration['job']['id']
              and result.get('unresolved_requests') == []
              and result.get('validation', {}).get('passed') is True
              and runtime.get('proxy_shutdown_complete') is True
-             and type(runtime.get('unfinished_handlers')) is int and runtime['unfinished_handlers'] == 0,
+             and type(runtime.get('unfinished_handlers')) is int and runtime['unfinished_handlers'] == 0),
              'predecessor lacks successful complete controller closure')
     _require(isinstance(artifacts, dict) and bool(artifacts), 'predecessor lacks closed artifacts')
     for name, value in artifacts.items():
@@ -213,13 +226,12 @@ def _tip(manifest, registration_path, registration_sha):
 def _activation_state(manifest, registration_path, registration_sha):
     """Reconstruct every transfer from pinned predecessor evidence, not live state.
 
-    The bounded stage order has at most two activations. Historical predecessor
+    The bounded stage order has at most three activations. Historical predecessor
     registrations supply their own immutable references; their code is not run.
     """
     block = manifest['budget_sequence']
     stage, predecessor = block['stage'], block['predecessor']
-    _require(stage in {'reconciliation', 'evaluation'} and predecessor['stage'] ==
-             ('audit' if stage == 'reconciliation' else 'reconciliation'), 'unsupported activation ancestry')
+    _require(stage in PREDECESSORS and predecessor['stage'] == PREDECESSORS[stage], 'unsupported activation ancestry')
     _, _, _, lineage = _origin(manifest)
     _require(canonical(read(_ref(manifest, block['seal']))) == canonical(seal_document(manifest)),
              'activation seal differs from pinned origin')
@@ -257,7 +269,7 @@ def _validate(manifest, registration_path, registration_sha):
     for name, value in manifest['pinned_files'].items():
         _require(sha(path(name)) == value, 'registered immutable evidence changed')
     block, budget = manifest['budget_sequence'], manifest['budget']
-    _require(block['protocol'] == PROTOCOL and block['stage'] in {'reconciliation', 'evaluation'},
+    _require(block['protocol'] == PROTOCOL and block['stage'] in PREDECESSORS,
              'unsupported shared accounting protocol or stage')
     origin, generation, state_path, lineage = _origin(manifest)
     _check_mutable_paths(manifest, registration_path, state_path)
@@ -265,7 +277,7 @@ def _validate(manifest, registration_path, registration_sha):
     _require(canonical(seal) == canonical(seal_document(manifest)), 'legacy audit seal differs from exact origin')
     _closure(manifest, block['audit_origin'], lineage)
     previous, cost, snapshot = _closure(manifest, block['predecessor'], lineage)
-    expected_predecessor = 'audit' if block['stage'] == 'reconciliation' else 'reconciliation'
+    expected_predecessor = PREDECESSORS[block['stage']]
     _require(block['predecessor']['stage'] == expected_predecessor, 'successor stage skips its required predecessor')
     _require(block['predecessor']['stage'] != 'audit'
              or canonical(block['predecessor']) == canonical(block['audit_origin']), 'first transfer changes audit origin')
@@ -280,7 +292,7 @@ def _validate(manifest, registration_path, registration_sha):
     target = path(budget['ledger_path'])
     _require(target == registration_path.parent / 'billing.json' and str(target) not in manifest['pinned_files']
              and target != path(block['predecessor']['ledger']['path']), 'successor ledger must be an isolated new destination')
-    rows = manifest.get('evaluation_jobs') if block['stage'] == 'evaluation' else [manifest['job']]
+    rows = manifest.get('evaluation_jobs') if block['stage'] in {'evaluation', 'evaluation_subtype'} else [manifest['job']]
     _require(isinstance(rows, list) and bool(rows), 'successor lacks a job roster')
     jobs = [row['id'] for row in rows]
     _require(all(isinstance(job, str) and bool(job) and ':' not in job for job in jobs)

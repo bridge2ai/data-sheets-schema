@@ -13,7 +13,7 @@ import sys
 
 from registration import BudgetStop, canonical_path, pinned, sha, strict_json
 from validation import validate_native, validator_argv
-from budgeted_cborg import attempt_identity, provider_context_headers
+from budgeted_cborg import attempt_identity, provider_context_headers, write_new
 from audit_controls.transport import provider_clients
 from native_command_policy import _simple_command, _literal_rule, permission_arguments
 from native_control import CONTRACT, check_control_history, load_native_events
@@ -189,11 +189,39 @@ def inspect_transcript(events, policy, job, manifest, control_path, config_root)
 
 
 def execute_job(context, *, client=None):
+    state, result, failure = {}, None, None
+    try:
+        result = _execute_job(context, state, client=client)
+        return result
+    except BaseException as error:
+        failure = error
+        raise
+    finally:
+        proxy = state.get('proxy')
+        frozen = proxy is not None and getattr(proxy, 'frozen', False) is True
+        closure = {'adapter': 'native', 'proxy_initialized': proxy is not None,
+            'proxy_shutdown_complete': frozen,
+            'unfinished_handlers': proxy.unfinished_handlers if frozen else None,
+            'exit_code': state.get('exit_code')}
+        write_new(context.attempt / 'adapter_closure.json', closure)
+        if result is not None:
+            result['runtime'].update(closure)
+        if failure is not None:
+            failure.evaluation_runtime = closure
+
+
+def _execute_job(context, state, *, client=None):
     manifest, job, attempt = context.manifest, context.job, context.attempt
     policy = build_policy(manifest, job)
     from instructions import verify_instruction
     verify_instruction(manifest, job)
     runtime = job['native_runtime']
+    from audit_controls.registration import native_api_timeout, native_api_force_idle_timeout
+    timeout_manifest = {'native_runtime': runtime, 'job': job}
+    timeout = native_api_timeout(timeout_manifest)
+    idle_timeout = native_api_force_idle_timeout(timeout_manifest)
+    if manifest.get('schema_version') == 2 and (timeout is None or idle_timeout is not False):
+        raise BudgetStop('composite native evaluation requires explicit bounded SDK and idle settings')
     if runtime.get('effort', 'native_default') != 'native_default':
         raise BudgetStop('native evaluation uses the native default effort; no effort override is registered')
     if runtime.get('cli_flags') != CLI_FLAGS or runtime.get('environment') != ENVIRONMENT:
@@ -224,6 +252,7 @@ def execute_job(context, *, client=None):
             model=manifest['model']['model'], prices=manifest['budget']['prices_per_token'],
             verify=context.verify, provider_key=key or 'offline-test-key', base_url=manifest['provider_base_url'],
             request_headers=provider_context_headers(manifest), upstream=upstream)
+        state['proxy'] = proxy
     except BaseException:
         # running() owns both clients after construction; before that boundary,
         # close only clients created here, preserving the original setup error.
@@ -239,6 +268,10 @@ def execute_job(context, *, client=None):
     environment = {key: value for key, value in os.environ.items()
                    if key in {'PATH', 'HOME', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM'}}
     environment.update(ENVIRONMENT)
+    if timeout is not None:
+        environment['API_TIMEOUT_MS'] = str(timeout)
+    if idle_timeout is not None:
+        environment['API_FORCE_IDLE_TIMEOUT'] = 'false'
     environment.update(CLAUDE_CONFIG_DIR=str(config), ANTHROPIC_API_KEY=proxy.token,
         PYTHONPATH=str(Path(manifest['repository']) / 'src'), VIRTUAL_ENV=str(Path(manifest['python']).parent.parent))
     directory_flags = [part for directory in runtime['additional_directories'] for part in ('--add-dir', directory)]
@@ -251,6 +284,7 @@ def execute_job(context, *, client=None):
             cwd=manifest['repository'], env=environment, deadline_seconds=job['deadline_seconds'],
             verify_launch=context.verify, command_policy=policy, command_classifier=classify_command,
             record_stop=lambda reason: context.ledger.stop_attempt(billing_attempt, reason))
+        state['exit_code'] = exit_code
     if proxy.failed.is_set() or proxy.unfinished_handlers or exit_code:
         raise BudgetStop('native evaluator stopped or has unfinished request handlers')
     events = load_native_events(attempt / 'transcript.jsonl')

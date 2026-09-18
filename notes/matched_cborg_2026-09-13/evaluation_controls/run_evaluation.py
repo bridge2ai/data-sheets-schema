@@ -3,6 +3,7 @@
 No batch expansion, retries, or independent acceptance is performed here.
 """
 import argparse
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
@@ -14,6 +15,40 @@ from registration import (BudgetStop, EvaluationContext, NATIVE_STYLES, canonica
     canonical_path, claim_sequence, read_json, sequence_path, sha, verify_dependencies,
     verify_manifest, verify_sequence)
 from budgeted_cborg import attempt_identity, open_ledger, write_new
+
+
+class OwnedLedger:
+    """Keep shared admission checks at reservation and settlement boundaries."""
+    def __init__(self, owner):
+        self.owner = owner
+
+    def __getattr__(self, name):
+        return getattr(self.owner.ledger, name)
+
+    def reserve(self, *args, **kwargs):
+        return self.owner.reserve(*args, **kwargs)
+
+    def settle(self, *args, **kwargs):
+        with self.owner._guard:
+            self.owner.verify_admission()
+            return self.owner.ledger.settle(*args, **kwargs)
+
+
+@contextmanager
+def accounting_owner(manifest, registration_path, manifest_sha256):
+    if manifest.get('schema_version') == 2:
+        from continuation_sequence import PROTOCOL, owned_sequence
+        if manifest.get('budget_sequence', {}).get('protocol') != PROTOCOL:
+            raise BudgetStop('composite evaluation requires canonical shared accounting')
+        with owned_sequence(manifest, registration_path, manifest_sha256) as owner:
+            yield OwnedLedger(owner), owner.state_path, owner.state_sha, owner.verify_admission
+    else:
+        sequence = sequence_path(manifest)
+        sequence.parent.mkdir(parents=True, exist_ok=True)
+        with FileLock(str(sequence) + '.lock', timeout=0):
+            sequence_sha256 = claim_sequence(manifest, manifest_sha256)
+            yield (open_ledger(manifest, manifest_sha256), sequence, sequence_sha256,
+                   lambda: verify_sequence(manifest, manifest_sha256, sequence_sha256))
 
 
 def now():
@@ -46,18 +81,16 @@ def run_job(registration_path, review_path, job_id, *, adapter=None):
     attempt = canonical_path(manifest['attempts_dir']) / job_id
     # A lock spanning validation, provider shutdown and publication keeps a
     # second process from opening a parallel paid job on this sequence.
-    sequence = sequence_path(manifest)
-    sequence.parent.mkdir(parents=True, exist_ok=True)
-    with FileLock(str(sequence) + '.lock', timeout=0):
+    if attempt.exists() or output.exists():
+        raise BudgetStop('evaluation attempt or output already exists; never resume or overwrite')
+    with accounting_owner(manifest, registration_path, manifest_sha256) as (ledger, sequence, sequence_sha256, verify_owner):
         if attempt.exists() or output.exists():
             raise BudgetStop('evaluation attempt or output already exists; never resume or overwrite')
-        sequence_sha256 = claim_sequence(manifest, manifest_sha256)
-        ledger = open_ledger(manifest, manifest_sha256)
         billing_attempt = attempt_identity(manifest_sha256, job_id)
         ledger.require_resolved(billing_attempt)
 
         def verify_all():
-            verify_sequence(manifest, manifest_sha256, sequence_sha256)
+            verify_owner()
             verify_manifest(manifest, registration_path, manifest_sha256)
             verify_review(review_path, review_sha256, manifest, manifest_sha256, job_id)
             current_bound, current_dependencies = verify_dependencies(manifest, manifest_sha256, registered_job)
@@ -83,7 +116,7 @@ def run_job(registration_path, review_path, job_id, *, adapter=None):
             else:
                 from api import execute_job
             adapter = execute_job
-        error = None
+        error, result = None, None
         try:
             result = adapter(context)
             verify_all()
@@ -94,6 +127,9 @@ def run_job(registration_path, review_path, job_id, *, adapter=None):
                 raise BudgetStop('evaluation has no fully settled model request accounting')
             if result.get('validation', {}).get('passed') is not True:
                 raise BudgetStop('evaluation adapter did not validate its candidate')
+            if manifest.get('schema_version') == 2:
+                from adapter_closure import require_closed
+                require_closed(result.get('runtime'), bound_job['style'])
             candidate = canonical_path(str(result['candidate_path']), exists=True)
             if (str(candidate) != bound_job['candidate'] or not candidate.is_file() or candidate.is_symlink() or
                 candidate.stat().st_nlink != 1):
@@ -106,6 +142,7 @@ def run_job(registration_path, review_path, job_id, *, adapter=None):
                 stream.write(candidate.read_bytes())
             if sha(output) != candidate_sha256:
                 raise BudgetStop('published evaluation differs from the validated candidate')
+            verify_all()
             receipt.update(status='completed_pending_independent_review', candidate=str(candidate),
                 candidate_sha256=candidate_sha256, output=str(output), output_sha256=candidate_sha256,
                 validation=result['validation'], runtime=result.get('runtime'), evidence=result.get('evidence'),
@@ -116,6 +153,11 @@ def run_job(registration_path, review_path, job_id, *, adapter=None):
             # text can carry request headers and is never copied to receipts.
             reason = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
             receipt.update(status='stopped', error_type=type(exc).__name__, reason=reason)
+            runtime = getattr(exc, 'evaluation_runtime', None)
+            if runtime is None and isinstance(result, dict):
+                runtime = result.get('runtime')
+            if runtime is not None:
+                receipt['runtime'] = runtime
             ledger.stop_attempt(billing_attempt, reason)
         finally:
             state = read_json(ledger.path)

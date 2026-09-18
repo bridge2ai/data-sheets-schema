@@ -372,6 +372,35 @@ def close_client_bounded(client):
 
 
 def execute_job(context, *, client=None):
+    state, outcome, failure = {}, None, None
+    try:
+        outcome = _execute_job(context, state, client=client)
+        return outcome
+    except BaseException as error:
+        failure = error
+        raise
+    finally:
+        lifetime = state.get('lifetime')
+        if lifetime is not None:
+            lifetime.freeze()
+        sdk = state.get('sdk')
+        cleanup = {'owned': client is None, 'completed': None}
+        if client is None and sdk is not None and hasattr(sdk, 'close'):
+            cleanup.update(close_client_bounded(sdk))
+            write_new(context.attempt / 'client_cleanup.json', {key: value for key, value in cleanup.items() if key != 'owned'})
+        complete = state.get('complete')
+        closure = {'adapter': 'api', 'request_lifetime_frozen': bool(lifetime and lifetime.closed),
+            'complete_response': complete is not None and complete.response is not None,
+            'independent_requests': complete.started if complete is not None else 0,
+            'client_cleanup': cleanup}
+        write_new(context.attempt / 'adapter_closure.json', closure)
+        if outcome is not None:
+            outcome['runtime'].update(closure)
+        if failure is not None:
+            failure.evaluation_runtime = closure
+
+
+def _execute_job(context, state, *, client=None):
     """Called only after common registration, gate and ledger checks."""
     from data_sheets_schema import api_runner
     manifest, job, attempt = context.manifest, context.job, context.attempt
@@ -382,6 +411,7 @@ def execute_job(context, *, client=None):
     if expected.get("model") != manifest["model"]["model"] or expected.get("max_tokens") != job["max_tokens"]:
         raise ValueError("request model or output ceiling differs")
     lifetime = _Lifetime()
+    state['lifetime'] = lifetime
     sdk = client
     if sdk is None:
         key = os.environ.get("CBORG_API_KEY")
@@ -389,6 +419,7 @@ def execute_job(context, *, client=None):
             raise ValueError("CBORG_API_KEY is required")
         # Both token counting and evaluation streaming use this same client.
         sdk, _ = provider_clients(manifest, key)
+    state['sdk'] = sdk
     old_attempts = api_runner.MAX_ATTEMPTS
     old_deadline = api_runner.PHASE_WALL_CLOCK_SECONDS
     try:
@@ -400,6 +431,7 @@ def execute_job(context, *, client=None):
             prices=manifest["budget"]["prices_per_token"], verify=context.verify,
             initial_request=expected, mutation_guard=lifetime.guard)
         complete = _CompleteMessages(capped.messages, job["style"])
+        state['complete'] = complete
         api_runner.MAX_ATTEMPTS = 1
         api_runner.PHASE_WALL_CLOCK_SECONDS = job["deadline_seconds"]
         messages = _QualityMessages(complete) if job["style"] == "direct_api_quality" else complete
@@ -432,5 +464,3 @@ def execute_job(context, *, client=None):
         lifetime.freeze()
         api_runner.MAX_ATTEMPTS = old_attempts
         api_runner.PHASE_WALL_CLOCK_SECONDS = old_deadline
-        if client is None and hasattr(sdk, "close"):
-            write_new(attempt / "client_cleanup.json", close_client_bounded(sdk))

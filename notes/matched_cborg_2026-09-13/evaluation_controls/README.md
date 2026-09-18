@@ -1,7 +1,7 @@
 # Registered evaluation controls
 
 These controls run one reviewed evaluation job against an independently
-accepted full/core generation pair. They reuse the existing CBORG budget ledger,
+accepted full/core pair from generation or a later finalization. They reuse the existing CBORG budget ledger,
 stream transport and native controller. They do not accept a generation, choose
 a scientific verdict, retry a failed rating, or expand a canary into a cohort.
 
@@ -17,6 +17,9 @@ request or run the offline tests.
    procedural/scientific evidence. Bind both artifact hashes, the generation
    registration hash, and one canonical `evaluation_sequence_state` path in the
    acceptance. This controller path lives outside frozen artifacts and attempts.
+   For a composite pair, use the accepted Phase 4 result and its existing shared
+   accounting sequence instead; the original generation remains in its actual
+   terminal state. The composite procedure is below.
 2. Register the exact current code commit and immutable file closure, Python
    binary **and environment**, provider/model/prices, source generation evidence,
    fully settled billing checkpoint, applicability context, instrument, output
@@ -96,6 +99,80 @@ heuristic; native cost estimates use the entire attempt cap. Sum-of-caps exposur
 is distinct from expected spend. Recheck provider prices and use actual canary
 costs before expansion; request admission always uses the shared live ledger.
 Preparation does not contact a model or token-count endpoint.
+
+## Accepted finalization outputs
+
+An independently accepted Phase 4 continuation uses schema version 2. Prepare
+it from the clean, committed evaluation checkout:
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13 python \
+  notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py \
+  --destination /absolute/new-composite-evaluation \
+  --finalization-registration /absolute/finalization/registration.json \
+  --finalization-acceptance /absolute/finalization-acceptance.json \
+  --context-path /absolute/caller-applicability.json
+```
+
+This source contract binds the original generation, accepted audit, finalization
+result, lineage, full/core/report hashes, and settled ledger. It inherits the
+frozen source bundle, profile, model, provider route, verified trust and prices.
+It refuses substitutions of the original pair for the accepted final pair.
+Each job uses the registered applicability context and its complete class schema.
+Native jobs explicitly retain the reviewed idle-timeout setting and a finite SDK
+timeout bounded by their own deadline. The scoring definitions and request
+renderers are the same as for a directly accepted generation pair.
+
+The canonical shared sequence has three bounded transfers: audit to finalization,
+finalization to initial evaluation, and initial evaluation to conditional subtype
+evaluation. Preparation makes no transfer. A paid job holds ownership through
+counting, reservation, adapter shutdown, publication and receipt. The $400
+allocation carries every previous charge once; finalization's $20 exception
+does not increase the $5 evaluation limit. Historical controllers and sibling
+registrations cannot spend after the successor takes ownership.
+
+Run the separate provider-free checks against the registered final pair:
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13 python \
+  notes/matched_cborg_2026-09-13/evaluation_controls/offline.py \
+  --registration /absolute/new-composite-evaluation/registration.json \
+  --destination /absolute/new-offline-results
+```
+
+The result contains both presence rubrics for both files, explicit source-bundle
+grounding, and replayed finalization checks for schemas, pair derivation,
+provenance, receipts and reports. It preserves the accepted artifacts and neither
+opens a ledger nor calls a provider. These are mechanical results, not scientific
+acceptance. Paid jobs still use the reviewed single-job launch command above.
+
+After every initial job and primary-canary review is complete, build the aggregate:
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13 python \
+  notes/matched_cborg_2026-09-13/evaluation_controls/closure.py \
+  --registration /absolute/new-composite-evaluation/registration.json \
+  --output /absolute/evaluation-closure.json
+```
+
+It rechecks all registered outputs, candidates, receipts, canary acceptances,
+adapter shutdown evidence and settled accounting. Independently review that
+closure before preparing the subtype successor:
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13 python \
+  notes/matched_cborg_2026-09-13/evaluation_controls/prepare_subtype.py \
+  --destination /absolute/new-subtype-condition \
+  --prior-registration /absolute/new-composite-evaluation/registration.json \
+  --aggregate-result /absolute/evaluation-closure.json \
+  --aggregate-acceptance /absolute/evaluation-closure-acceptance.json
+```
+
+Every actual fitness form failure appears exactly once. The successor preserves
+the same pair and comparison identities. A zero-failure set produces an explicit
+offline `not_applicable` selection receipt, with no paid roster or budget
+transfer. A nonempty successor needs its own exact registration review and
+class-group canary acceptance before dependent jobs.
 
 ## Instruments and evidence
 
