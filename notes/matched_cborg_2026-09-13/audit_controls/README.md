@@ -41,6 +41,16 @@ neither provider keepalive settings nor model requests, and does not make an
 interrupted charge complete. Preserve stopped conditions and register retries
 separately.
 
+The native client's fetch layer has a separate idle timer. A new condition can
+select `--native-api-force-idle-timeout false` to disable that timer while waiting
+for local-proxy response headers. This requires an explicit bounded
+`--native-api-timeout-ms`; no other override value is accepted. The registration
+pins `native_runtime.api_force_idle_timeout: false`, and only that field can set
+the child's `API_FORCE_IDLE_TIMEOUT=false`. Ambient values are ignored. Omission
+preserves the previous behavior. The SDK timeout, native event-stream watchdog,
+upstream read timeout and whole-job deadline still apply. This local setting does
+not change CBORG keepalive policy or authorize an automatic retry.
+
 `python -m audit_controls.native --registration REGISTRATION --review REVIEW`
 requires a review binding that registration to its exact code commit, successful CI
 and sole allowed job. It uses the same CBORG transport and shared budget ledger as

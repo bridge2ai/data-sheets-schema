@@ -31,6 +31,48 @@ def test_native_timeout_preserves_omission_and_accepts_a_bounded_integer():
     assert r.native_api_timeout(manifest) == 3600000
 
 
+@pytest.mark.parametrize('value', [None, True, 0, 1, 'false', 'true', [], {}, 1.0])
+def test_native_fetch_idle_policy_rejects_coerced_values(value):
+    with pytest.raises(r.BudgetStop, match='explicit false'):
+        r.native_api_force_idle_timeout({'native_runtime': {'api_force_idle_timeout': value}})
+
+
+def test_native_fetch_idle_policy_preserves_omission_and_explicit_boolean_identity():
+    assert r.native_api_force_idle_timeout({'native_runtime': {}}) is None
+    assert r.native_api_force_idle_timeout({'native_runtime': {'api_force_idle_timeout': False,
+        'api_timeout_ms': 3600000}, 'job': {'deadline_seconds': 10800}}) is False
+
+
+@pytest.mark.parametrize('timeout', [None, True, 0, '3600000', 10800001])
+def test_disabling_idle_timeout_requires_explicit_bounded_sdk_deadline(timeout):
+    runtime = {'api_force_idle_timeout': False}
+    if timeout is not None:
+        runtime['api_timeout_ms'] = timeout
+    with pytest.raises(r.BudgetStop, match='native API timeout'):
+        r.native_api_force_idle_timeout({'native_runtime': runtime, 'job': {'deadline_seconds': 10800}})
+
+
+@pytest.mark.parametrize('value', ['false', 0, 1])
+def test_prepare_rejects_invalid_idle_policy_before_creating_condition(tmp_path, value):
+    from audit_controls.prepare import prepare
+    destination = tmp_path / 'new-condition'
+    with pytest.raises(r.BudgetStop, match='explicit false'):
+        prepare(parent_registration=None, parent_overlay=None, parent_job_id=None,
+            reconciliation_receipt=None, reconciled_checkpoint=None, destination=destination,
+            job_id='one', repository=tmp_path, native_api_force_idle_timeout=value)
+    assert not destination.exists()
+
+
+def test_prepare_idle_override_without_sdk_bound_leaves_no_condition(tmp_path):
+    from audit_controls.prepare import prepare
+    destination = tmp_path / 'new-condition'
+    with pytest.raises(r.BudgetStop, match='registered bounded native API timeout'):
+        prepare(parent_registration=None, parent_overlay=None, parent_job_id=None,
+            reconciliation_receipt=None, reconciled_checkpoint=None, destination=destination,
+            job_id='one', repository=tmp_path, native_api_force_idle_timeout=False)
+    assert not destination.exists()
+
+
 @pytest.fixture
 def accounting(tmp_path):
     root = tmp_path.resolve()
