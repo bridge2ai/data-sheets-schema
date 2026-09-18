@@ -1,5 +1,7 @@
 # v10w matched canaries, 2026-09-17
 
+**Outcome:** the authorized CHORUS native retry ran and was operator-stopped during Phase 1 receipt correction. No pair is accepted. The [outcome review](../native_canary_v10w_outcome_2026-09-17.md) corrects the overly broad stop decision, preserves the evidence and names the next gate, #2067. The registration below describes the frozen plan.
+
 v10v stopped after an unregistered agent-definition Read. Its evidence and verdict remain unchanged. This fresh condition uses the file-access controls in [PR #2063](https://github.com/bridge2ai/data-sheets-schema/pull/2063). The user instructed **“resolve and retry”**: one fresh CHORUS native attempt is authorized after review, merge, successful CI and fresh checks. The original instruction predates registration; its binding records that timing accurately.
 
 The [registration](registration.public.json), [native overlay](native_overlay.public.json), [preflight](offline_preflight.public.json), [review](review_2026-09-17.md) and [implementation identities](reviewed_controls.json) bind this condition. Public views replace machine paths and omit detailed accounting; their hashes identify the local executable originals. They cannot launch a job or independently verify unpublished evidence.
