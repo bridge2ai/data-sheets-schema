@@ -256,8 +256,9 @@ class AuditProxy(NativeProxy):
                 self.audit_history.verify_admission()
             yield
 
-def inspect_transcript(events, policy, manifest, registration_sha256, control_path, config_root):
-    check = check_control_history(events, control_path, policy, classify_command, config_root)
+def inspect_transcript(events, policy, manifest, registration_sha256, control_path, config_root,
+                       *, history_factory=AuditHistory, command_classifier=classify_command, phase_key="phase3"):
+    check = check_control_history(events, control_path, policy, command_classifier, config_root)
     if not check.get('checked') or check.get('problems'):
         raise BudgetStop('native audit control history is incomplete or invalid')
     inits = [e for e in events if e.get('type') == 'system' and e.get('subtype') == 'init']
@@ -286,7 +287,7 @@ def inspect_transcript(events, policy, manifest, registration_sha256, control_pa
             raise BudgetStop('native audit permission denial is malformed')
         tool, payload = denial.get('tool_name'), denial['tool_input']
         if tool == 'Bash':
-            classification, basis = classify_command(payload.get('command'), policy['python'], [], policy)
+            classification, basis = command_classifier(payload.get('command'), policy['python'], [], policy)
         elif tool in ('Read', 'Write'):
             classification, basis = file_policy.classify(tool, payload)
         else:
@@ -294,10 +295,10 @@ def inspect_transcript(events, policy, manifest, registration_sha256, control_pa
         classified.append({**denial, 'classification': classification, 'basis': basis})
     if any(d['classification'] != 'not_prescribed' for d in classified):
         raise BudgetStop('a prescribed or unclassifiable audit operation was denied')
-    history = AuditHistory(manifest, registration_sha256, policy)
+    history = history_factory(manifest, registration_sha256, policy)
     for event in events:
         history.observe(event)
-    return {'control': check, 'denials': classified, 'phase3': history.finish(), 'terminal': terminal,
+    return {'control': check, 'denials': classified, phase_key: history.finish(), 'terminal': terminal,
             'phase1_phase2_performed_here': False}
 
 
@@ -379,10 +380,10 @@ def controller_primary(state, error):
     return BudgetStop(reason)
 
 
-def execute_job(context, *, client=None, upstream=None):
+def execute_job(context, *, client=None, upstream=None, protocol=None):
     state = {'stop_source': 'native_preflight', 'proxy': None}
     try:
-        return _execute_job(context, state, client=client, upstream=upstream)
+        return _execute_job(context, state, client=client, upstream=upstream, protocol=protocol)
     except BaseException as error:
         proxy = state['proxy']
         source = state['stop_source']
@@ -402,9 +403,10 @@ def execute_job(context, *, client=None, upstream=None):
         raise primary.with_traceback(state.get('primary_traceback')) from None
 
 
-def _execute_job(context, state, *, client=None, upstream=None):
+def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     manifest, job, attempt = context.manifest, context.job, context.attempt
-    policy = build_policy(manifest, context.registration_path)
+    selected = protocol or sys.modules[__name__]
+    policy = selected.build_policy(manifest, context.registration_path)
     executable = verify_runtime(manifest)
     key = os.environ.get('CBORG_API_KEY')
     if not key and client is None:
@@ -413,7 +415,7 @@ def _execute_job(context, state, *, client=None, upstream=None):
     state['stop_source'] = 'native_setup'
     config = attempt / 'cli_config'; config.mkdir(mode=0o700)
     billing_attempt = attempt_identity(context.manifest_sha256, job['id'])
-    history = AuditHistory(manifest, context.manifest_sha256, policy)
+    history = selected.AuditHistory(manifest, context.manifest_sha256, policy)
     def admission():
         context.verify()
         history.verify_admission()
@@ -467,7 +469,7 @@ def _execute_job(context, state, *, client=None, upstream=None):
         try:
             exit_code = execute_child(argv, proxy=proxy, instruction=Path(job['instruction']), attempt=attempt,
                 cwd=manifest['repository'], env=environment, deadline_seconds=job['deadline_seconds'],
-                verify_launch=admission, command_policy=policy, command_classifier=classify_command,
+                verify_launch=admission, command_policy=policy, command_classifier=selected.classify_command,
                 event_observer=history.observe,
                 record_stop=controller_stop)
         except BaseException as error:
@@ -495,9 +497,13 @@ def _execute_job(context, state, *, client=None, upstream=None):
     rows = [r for r in ledger_state['requests'] if r['attempt'] == billing_attempt]
     if not rows or any(r['status'] != 'settled' for r in rows):
         raise BudgetStop('native audit lacks fully settled model requests')
-    evidence = inspect_transcript(load_native_events(attempt/'transcript.jsonl'), policy, manifest,
+    evidence = selected.inspect_transcript(load_native_events(attempt/'transcript.jsonl'), policy, manifest,
         context.manifest_sha256, attempt/'control.jsonl', config)
     evidence['initial_context'] = verify_initial_context(context, rows)
+    if protocol is not None:
+        return protocol.complete(context, evidence, {
+            'exit_code': exit_code, 'native_version': manifest['native_runtime']['version'],
+            'model': manifest['model']['model'], 'effort': 'native_default', **shutdown_evidence(proxy)})
     from .contract import validate_audit
     validation = validate_audit(manifest)
     if validation.get('passed') is not True or validation.get('audit_sha256') != sha(job['audit_path']):

@@ -93,6 +93,7 @@ jobs:
           PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
         run: >-
           poetry run python -m pytest notes/matched_cborg_2026-09-13/audit_controls
+          notes/matched_cborg_2026-09-13/finalization_controls
           -q -p no:cacheprovider --junitxml=test-results/audit-controls.xml
 
       - name: Preserve test results and per-test timings
