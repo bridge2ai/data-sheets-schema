@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 from data_sheets_schema import source_review
-from .registration import (BudgetStop, canonical_path, inspect_parent, parent_path,
+from .registration import (BudgetStop, canonical_path, inspect_parent, native_api_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .contract import render_instruction
 
@@ -31,7 +31,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             reconciled_checkpoint, destination, job_id, repository, attempt_cap=20,
             deadline_seconds=10800, continuation_checkpoint=None,
             continuation_source_registration=None, continuation_reconciliation_receipt=None,
-            provider_base_url=None, provider_ca_bundle=None):
+            provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None):
+    if native_api_timeout_ms is not None:
+        native_api_timeout({'native_runtime': {'api_timeout_ms': native_api_timeout_ms},
+                            'job': {'deadline_seconds': deadline_seconds}})
     if bool(continuation_source_registration) != bool(continuation_reconciliation_receipt):
         raise BudgetStop('an audit reconciliation requires both source registration and receipt')
     if continuation_source_registration and not continuation_checkpoint:
@@ -100,6 +103,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
                 'cost_usd': str(sum((Decimal(row['cost_usd']) for row in prior['requests']), Decimal(0)))}},
         'sequence_state': str(parent_path(parent, generation['budget']['ledger_path']).with_name('audit_sequence.json')),
         'pinned_files': {}}
+    if native_api_timeout_ms is not None:
+        manifest['native_runtime']['api_timeout_ms'] = native_api_timeout_ms
     if provider_base_url is not None:
         manifest['provider_base_url'] = provider_base_url
     if provider_ca_bundle is not None:
@@ -129,6 +134,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'attempt_cap_usd': str(attempt_cap), 'shared_cap_usd': str(manifest['budget']['additional_usd']),
         'prior_spend_usd': manifest['budget']['continuation']['cost_usd'],
         'native_output_ceiling': manifest['native_runtime']['max_output_tokens'],
+        'native_api_timeout_ms': manifest['native_runtime'].get('api_timeout_ms', 'native_default'),
         'provider_base_url': manifest['provider_base_url'],
         'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
         'provider_calls': 0, 'scientific_acceptance': False})
@@ -143,6 +149,8 @@ def main():
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)
+    parser.add_argument('--native-api-timeout-ms', type=int,
+        help='local native SDK response timeout, positive milliseconds within the whole-job deadline')
     parser.add_argument('--continuation-checkpoint')
     parser.add_argument('--continuation-source-registration')
     parser.add_argument('--continuation-reconciliation-receipt')

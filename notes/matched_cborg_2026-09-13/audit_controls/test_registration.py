@@ -17,6 +17,20 @@ def save(path, value):
     Path(path).write_text(json.dumps(value))
 
 
+@pytest.mark.parametrize('value', [None, True, False, 0, -1, 1.5, '3600000', float('inf'), 10800001])
+def test_native_timeout_rejects_invalid_or_unbounded_values(value):
+    manifest = {'native_runtime': {'api_timeout_ms': value}, 'job': {'deadline_seconds': 10800}}
+    with pytest.raises(r.BudgetStop, match='native API timeout'):
+        r.native_api_timeout(manifest)
+
+
+def test_native_timeout_preserves_omission_and_accepts_a_bounded_integer():
+    manifest = {'native_runtime': {}, 'job': {'deadline_seconds': 10800}}
+    assert r.native_api_timeout(manifest) is None
+    manifest['native_runtime']['api_timeout_ms'] = 3600000
+    assert r.native_api_timeout(manifest) == 3600000
+
+
 @pytest.fixture
 def accounting(tmp_path):
     root = tmp_path.resolve()

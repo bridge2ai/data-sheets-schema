@@ -338,6 +338,7 @@ def validate_registration(path):
         raise BudgetStop('audit readable input roster differs')
     if type(job['deadline_seconds']) is not int or job['deadline_seconds'] <= 0:
         raise BudgetStop('audit deadline must be positive whole seconds')
+    native_api_timeout(manifest)
     budget = manifest['budget']
     previous = read_json(budget['continuation']['checkpoint'])
     costs = [Decimal(str(row.get('cost_usd', 'NaN'))) for row in previous['requests']]
@@ -369,6 +370,19 @@ def validate_registration(path):
     if Path(job['instruction']).read_text(encoding='utf-8') != render_instruction(manifest):
         raise BudgetStop('audit instruction does not match its deterministic registered rendering')
     return manifest
+
+
+def native_api_timeout(manifest):
+    """Optional local native SDK timeout; omission preserves its historical default."""
+    runtime = manifest['native_runtime']
+    if 'api_timeout_ms' not in runtime:
+        return None
+    value = runtime['api_timeout_ms']
+    deadline = manifest['job']['deadline_seconds']
+    if (type(value) is not int or value <= 0 or
+            type(deadline) is not int or deadline <= 0 or value > deadline * 1000):
+        raise BudgetStop('native API timeout must be positive whole milliseconds within the audit deadline')
+    return value
 
 
 @contextmanager

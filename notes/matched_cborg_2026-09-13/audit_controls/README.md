@@ -31,6 +31,16 @@ bundle alongside its trusted root; the server leaf must not become a trust ancho
 Historical public-route conditions retain their original configuration. Successful
 TLS and catalogue checks alone do not establish streaming or canary success.
 
+For a new condition that needs more time for response headers, preparation accepts
+`--native-api-timeout-ms 3600000`. This pins a one-hour local native SDK timeout in
+`native_runtime.api_timeout_ms`; it must be a positive integer within the registered
+whole-job deadline. The controller sets `API_TIMEOUT_MS` only from this field and
+ignores an ambient value. Omission preserves the native client's historical
+default. The upstream read timeout and whole-job deadline still apply. This changes
+neither provider keepalive settings nor model requests, and does not make an
+interrupted charge complete. Preserve stopped conditions and register retries
+separately.
+
 `python -m audit_controls.native --registration REGISTRATION --review REVIEW`
 requires a review binding that registration to its exact code commit, successful CI
 and sole allowed job. It uses the same CBORG transport and shared budget ledger as
