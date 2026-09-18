@@ -5,9 +5,11 @@ JSON and server-sent-event bodies are retained. Every paid request uses the
 same sequence ledger as the direct API arm and is admitted before forwarding.
 """
 from contextlib import contextmanager
+from decimal import Decimal, InvalidOperation
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import re
 import secrets
 import threading
 from types import SimpleNamespace
@@ -16,6 +18,38 @@ from urllib.parse import urlsplit
 import httpx
 
 from budgeted_cborg import BudgetStop, CappedMessages, digest, write_new
+from data_sheets_schema.stream_evidence import CORRELATION_HEADERS, _identifier
+
+
+def response_metadata(response):
+    """Bounded provider diagnostics; never a source of completed usage/cost.
+
+    Capture before reading any body, including error bodies. Values are kept
+    only under these named headers and are never forwarded to the child.
+    """
+    headers = response.headers
+    content_type = headers.get("content-type")
+    if (not isinstance(content_type, str) or len(content_type) > 160 or
+            not re.fullmatch(r"[A-Za-z0-9!#$%&'*+.^_`|~-]+/[A-Za-z0-9!#$%&'*+.^_`|~-]+"
+                             r"(?:; ?charset=[A-Za-z0-9._-]+)?", content_type)):
+        content_type = None
+    result = {"status": response.status_code, "content_type": content_type,
+              "correlation_headers": {name: value for name in CORRELATION_HEADERS
+                  if (value := _identifier(headers.get(name))) is not None}}
+    cost = headers.get("x-litellm-response-cost")
+    # Preserve exact decimal text, avoiding float rounding/overflow. Refuse
+    # signs, whitespace, NaN/Infinity, joined duplicate headers and huge input.
+    if (isinstance(cost, str) and len(cost) <= 64 and
+            re.fullmatch(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?", cost)):
+        try:
+            number = Decimal(cost)
+        except InvalidOperation:
+            pass
+        else:
+            if number.is_finite() and number >= 0:
+                result["reported_cost"] = {"header": "x-litellm-response-cost", "value": cost,
+                                           "diagnostic_only": True}
+    return result
 
 
 class Completion:
@@ -226,7 +260,7 @@ class NativeProxy:
                     with owner.state:
                         owner.require_open()
                     with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers) as response:
-                        owner.capture_json(folder / "http_status.json", {"status":response.status_code, "content_type":response.headers.get("content-type")})
+                        owner.capture_json(folder / "http_status.json", response_metadata(response))
                         if response.status_code != 200:
                             owner.capture(folder / "upstream_error.body", b"")
                             for chunk in response.iter_bytes():
