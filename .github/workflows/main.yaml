@@ -86,6 +86,14 @@ jobs:
           poetry run python -m pytest notes/matched_cborg_2026-09-13/evaluation_controls
           -q -p no:cacheprovider --junitxml=test-results/evaluation-controls.xml
 
+      - name: Exercise native audit continuation controls offline
+        if: matrix.python-version == '3.12' && matrix.shard == 2
+        env:
+          PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
+        run: >-
+          poetry run python -m pytest notes/matched_cborg_2026-09-13/audit_controls
+          -q -p no:cacheprovider --junitxml=test-results/audit-controls.xml
+
       - name: Preserve test results and per-test timings
         if: always()
         uses: actions/upload-artifact@v4
