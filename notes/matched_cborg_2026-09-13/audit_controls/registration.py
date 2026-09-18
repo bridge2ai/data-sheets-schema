@@ -236,7 +236,9 @@ def implementation_paths(manifest):
 
 
 def required_paths(manifest):
+    from .transport import transport_paths
     paths = implementation_paths(manifest)
+    paths.update(transport_paths(manifest))
     paths.add(canonical_path(manifest['python_identity']['resolved_path'], exists=True))
     config = Path(manifest['python']).parent.parent / 'pyvenv.cfg'
     if config.exists():
@@ -251,6 +253,11 @@ def required_paths(manifest):
     for record in (read_json(parent['registration']), read_json(parent['overlay'])):
         paths.update(canonical_path(str(parent_path(parent, name).resolve()), exists=True) for name in record['pinned_files'])
     paths.add(canonical_path(manifest['budget']['continuation']['checkpoint'], exists=True))
+    bridge = manifest['budget']['continuation'].get('reconciliation')
+    if bridge is not None:
+        if not isinstance(bridge, dict) or set(bridge) != {'source_registration', 'source_ledger', 'receipt', 'result'}:
+            raise BudgetStop('invalid audit reconciliation identity fields')
+        paths.update(canonical_path(value, exists=True) for value in bridge.values())
     return paths
 
 
@@ -288,8 +295,8 @@ def validate_registration(path):
     if (manifest.get('kind') != 'd4d_native_audit_continuation' or type(manifest.get('schema_version')) is not int or manifest.get('schema_version') != 1 or
             manifest.get('protocol_version') != 3 or manifest.get('render_version') != 14):
         raise BudgetStop('unsupported native audit-continuation contract')
-    if manifest.get('provider_base_url') != 'https://api.cborg.lbl.gov':
-        raise BudgetStop('audit requires the registered CBORG endpoint')
+    from .transport import verified_context
+    verified_context(manifest)
     verify(manifest, path, sha(path))
     missing = {str(value) for value in required_paths(manifest)} - set(manifest['pinned_files'])
     if missing:
@@ -351,6 +358,7 @@ def validate_registration(path):
             canonical_path(budget['ledger_path']) != path.parent / 'billing.json'):
         raise BudgetStop('audit budget cap, pricing or ledger location differs')
     pinned(manifest, budget['continuation']['checkpoint'], budget['continuation']['sha256'])
+    validate_audit_reconciliation(manifest)
     checkpoint = validate_reconciliation(manifest)
     if canonical_json(previous['requests'][:len(checkpoint['requests'])]) != canonical_json(checkpoint['requests']):
         raise BudgetStop('audit predecessor does not preserve reconciled source charges')
@@ -381,10 +389,18 @@ def sequence_guard(manifest, registration_sha):
         elif previous['registration_sha256'] == registration_sha:
             raise BudgetStop('audit continuation identity is already consumed')
         else:
-            if (checkpoint['checkpoint'] != previous['ledger_path'] or
-                    sha(previous['ledger_path']) != checkpoint['sha256']):
-                raise BudgetStop('audit billing fork: predecessor is not the current sequence tip')
-            state = read_json(previous['ledger_path'])
+            reconciled = validate_audit_reconciliation(manifest)
+            if reconciled is None:
+                if (checkpoint['checkpoint'] != previous['ledger_path'] or
+                        sha(previous['ledger_path']) != checkpoint['sha256']):
+                    raise BudgetStop('audit billing fork: predecessor is not the current sequence tip')
+                state = read_json(previous['ledger_path'])
+            else:
+                bridge = checkpoint['reconciliation']
+                if (bridge['source_ledger'] != previous['ledger_path'] or
+                        sha(bridge['source_registration']) != previous['registration_sha256']):
+                    raise BudgetStop('audit reconciliation does not belong to the current sequence tip')
+                state = reconciled
             if (state.get('manifest_sha256') != previous['registration_sha256'] or
                     previous.get('source_registration_sha256') != sha(manifest['parent']['registration'])):
                 raise BudgetStop('audit predecessor identity differs from sequence tip')
@@ -457,3 +473,67 @@ def open_audit_ledger(manifest, registration_path, manifest_sha256):
         attempt_caps_usd={attempt_identity(manifest_sha256, job['id']): budget['per_job_attempt_usd'][job['id']]})
     ledger.continue_from(prior['checkpoint'], expected_sha256=prior['sha256'], expected_cost_usd=prior['cost_usd'])
     return ledger
+
+
+def validate_audit_reconciliation(manifest):
+    """A confirmed copy can succeed an audit ledger without rewriting it (#2110)."""
+    continuation = manifest['budget']['continuation']
+    bridge = continuation.get('reconciliation')
+    if bridge is None:
+        return None
+    keys = {'source_registration', 'source_ledger', 'receipt', 'result'}
+    if not isinstance(bridge, dict) or set(bridge) != keys:
+        raise BudgetStop('invalid audit reconciliation identity fields')
+    paths = {key: pinned(manifest, bridge[key]) for key in keys}
+    checkpoint_path = pinned(manifest, continuation['checkpoint'], continuation['sha256'])
+    source_reg = read_json(paths['source_registration'])
+    if source_reg.get('kind') != 'd4d_native_audit_continuation':
+        raise BudgetStop('reconciled audit predecessor must be a native audit registration')
+    source_sha = sha(paths['source_registration'])
+    job = source_reg['job']
+    if (paths['source_ledger'] != paths['source_registration'].parent / 'billing.json' or
+            paths['source_ledger'] != canonical_path(source_reg['budget']['ledger_path']) or
+            checkpoint_path == paths['source_ledger'] or
+            Path(job['attempt_dir']) != paths['source_registration'].parent / 'attempts' / job['id'] or
+            paths['result'] != Path(job['attempt_dir']) / 'result.json' or
+            sha(source_reg['parent']['registration']) != sha(manifest['parent']['registration'])):
+        raise BudgetStop('reconciled audit predecessor paths or generation lineage differ')
+    source = read_json(paths['source_ledger'])
+    result, receipt = read_json(paths['result']), read_json(paths['receipt'])
+    if (source.get('manifest_sha256') != source_sha or
+            result.get('registration_sha256') != source_sha or result.get('job_id') != job['id'] or
+            result.get('scope') != 'phase3_audit_only' or result.get('status') != 'stopped' or
+            receipt.get('kind') != 'user_confirmed_provider_charge_reconciliation' or
+            receipt.get('source_attempt_kind') != 'phase3_audit_only' or
+            receipt.get('source_registration_sha256') != source_sha or
+            receipt.get('source_ledger_sha256') != sha(paths['source_ledger']) or
+            receipt.get('stopped_result_sha256') != sha(paths['result'])):
+        raise BudgetStop('reconciliation does not bind the stopped audit accounting')
+    confirmation = receipt.get('user_confirmation', {})
+    if any(not isinstance(confirmation.get(key), str) or not confirmation[key].strip()
+           for key in ('exact_response', 'quoted_request')):
+        raise BudgetStop('audit reconciliation lacks explicit confirmation evidence')
+    expected = strict_json(canonical_json(source))
+    pending = [row for row in expected['requests'] if row.get('status') != 'settled']
+    if len(pending) != 1 or pending[0].get('status') != 'pending':
+        raise BudgetStop('audit reconciliation must resolve exactly one pending source request')
+    row = pending[0]
+    cost = Decimal(str(receipt['confirmed_complete_charge_usd']))
+    if (row['id'] != receipt['request_id'] or row['attempt'] != receipt['attempt'] or
+            row['attempt'] != attempt_identity(source_sha, job['id']) or
+            row['reserved_usd'] != receipt['previous_reservation_usd'] or
+            result.get('unresolved_requests') != [row['id']] or
+            not cost.is_finite() or not Decimal(0) <= cost <= Decimal(row['reserved_usd'])):
+        raise BudgetStop('audit confirmation differs from the source request or reservation')
+    row.update(status='settled', cost_usd=str(cost), settled_at=receipt['recorded_at'],
+        settlement_basis='user_confirmed_provider_accounting',
+        reconciliation_receipt_sha256=sha(paths['receipt']),
+        provider_observation_sha256=receipt['provider_observation_sha256'], provider_usage_is_final=False,
+        source_attempt_kind='phase3_audit_only', source_attempt_outcome='stopped')
+    expected['reconciled_from'] = {'checkpoint_sha256': sha(paths['source_ledger']),
+        'receipt_sha256': sha(paths['receipt']), 'request_id': receipt['request_id'],
+        'previous_status': 'pending', 'confirmed_charge_usd': str(cost), 'source_attempt_completed': False}
+    checkpoint = read_json(checkpoint_path)
+    if canonical_json(checkpoint) != canonical_json(expected):
+        raise BudgetStop('reconciled audit checkpoint changes unconfirmed history')
+    return checkpoint

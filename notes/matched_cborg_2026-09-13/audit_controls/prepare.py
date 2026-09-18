@@ -29,7 +29,13 @@ def save(path, value):
 
 def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliation_receipt,
             reconciled_checkpoint, destination, job_id, repository, attempt_cap=20,
-            deadline_seconds=10800, continuation_checkpoint=None):
+            deadline_seconds=10800, continuation_checkpoint=None,
+            continuation_source_registration=None, continuation_reconciliation_receipt=None,
+            provider_base_url=None, provider_ca_bundle=None):
+    if bool(continuation_source_registration) != bool(continuation_reconciliation_receipt):
+        raise BudgetStop('an audit reconciliation requires both source registration and receipt')
+    if continuation_source_registration and not continuation_checkpoint:
+        raise BudgetStop('an audit reconciliation requires its separate continuation checkpoint')
     repository = canonical_path(str(Path(repository).resolve()), exists=True)
     if repository != Path.cwd():
         raise BudgetStop('prepare from the execution repository root')
@@ -94,6 +100,18 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
                 'cost_usd': str(sum((Decimal(row['cost_usd']) for row in prior['requests']), Decimal(0)))}},
         'sequence_state': str(parent_path(parent, generation['budget']['ledger_path']).with_name('audit_sequence.json')),
         'pinned_files': {}}
+    if provider_base_url is not None:
+        manifest['provider_base_url'] = provider_base_url
+    if provider_ca_bundle is not None:
+        manifest['provider_transport'] = {'kind': 'pinned_ca_v1',
+            'ca_bundle': str(Path(provider_ca_bundle).resolve())}
+    if continuation_source_registration:
+        source_path = str(Path(continuation_source_registration).resolve())
+        source = read_json(source_path)
+        manifest['budget']['continuation']['reconciliation'] = {
+            'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
+            'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
+            'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
     save(parent['phase2_proof'], inspect_parent(manifest))
     Path(job['system_prompt']).write_text(SYSTEM)
     instruction = render_instruction(manifest)
@@ -111,6 +129,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'attempt_cap_usd': str(attempt_cap), 'shared_cap_usd': str(manifest['budget']['additional_usd']),
         'prior_spend_usd': manifest['budget']['continuation']['cost_usd'],
         'native_output_ceiling': manifest['native_runtime']['max_output_tokens'],
+        'provider_base_url': manifest['provider_base_url'],
+        'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
         'provider_calls': 0, 'scientific_acceptance': False})
     return path
 
@@ -124,6 +144,10 @@ def main():
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)
     parser.add_argument('--continuation-checkpoint')
+    parser.add_argument('--continuation-source-registration')
+    parser.add_argument('--continuation-reconciliation-receipt')
+    parser.add_argument('--provider-base-url')
+    parser.add_argument('--provider-ca-bundle')
     args = vars(parser.parse_args())
     args['attempt_cap'] = str(args['attempt_cap'])
     path = prepare(**args)

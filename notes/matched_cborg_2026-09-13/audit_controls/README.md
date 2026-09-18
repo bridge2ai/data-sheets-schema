@@ -20,6 +20,17 @@ execution checkout with `src`, this directory's parent, and `native_controls` on
 `PYTHONPATH`. Preparation creates an exclusive new directory and makes no provider
 calls. Review the registration and cost plan before execution.
 
+On the LBL network or VPN, a new condition can select CBORG's documented direct
+route with `--provider-base-url https://api-local.cborg.lbl.gov` and
+`--provider-ca-bundle PATH`. Obtain the CA chain from an independently verified
+trust source and review it before registration. The bundle is pinned with the
+other inputs. Both token counting and native streaming use the same client with
+certificate-chain and hostname verification, redirects disabled and no environment
+proxy or trust overrides. An omitted server intermediate may be supplied in this
+bundle alongside its trusted root; the server leaf must not become a trust anchor.
+Historical public-route conditions retain their original configuration. Successful
+TLS and catalogue checks alone do not establish streaming or canary success.
+
 `python -m audit_controls.native --registration REGISTRATION --review REVIEW`
 requires a review binding that registration to its exact code commit, successful CI
 and sole allowed job. It uses the same CBORG transport and shared budget ledger as
@@ -37,6 +48,20 @@ charge retains its reservation and stops the attempt.
 The sequence lock is derived from the immutable parent ledger location. Copying a
 registration or a reconciliation receipt cannot create a second budget lineage.
 Each successor must carry the settled current tip. The shared budget is not reset.
+
+If the current audit stopped with an unresolved charge, preserve its ledger and
+stopped result. After the request match and complete charge are confirmed, create a
+separate reconciled checkpoint. Supply it with `--continuation-checkpoint`, plus
+`--continuation-source-registration` and `--continuation-reconciliation-receipt`.
+The new registration pins the predecessor registration, original ledger, stopped
+result and confirmation receipt. Admission verifies that the checkpoint changes
+only that confirmed pending request and belongs to the current sequence tip. It
+does not erase the stopped attempt, invent final usage or accept its audit.
+
+Stopped execution results include `stop_source` and `runtime` evidence. Runtime
+evidence records whether the proxy was initialized and its bounded shutdown
+completed. `unfinished_handlers` is a count only after that shutdown; otherwise it
+is `null`. A late handler failure does not replace an earlier controller stop.
 
 A successful result is `completed_pending_independent_review`. Scientific review
 must assess grounding and audit completeness separately. Reconciliation, report

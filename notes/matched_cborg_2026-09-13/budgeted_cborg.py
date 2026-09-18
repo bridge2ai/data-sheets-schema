@@ -16,6 +16,8 @@ import uuid
 
 from filelock import FileLock
 
+CBORG_ENDPOINTS = frozenset({'https://api.cborg.lbl.gov', 'https://api-local.cborg.lbl.gov'})
+
 
 class BudgetStop(RuntimeError):
     pass

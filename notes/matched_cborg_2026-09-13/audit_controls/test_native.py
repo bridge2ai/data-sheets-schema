@@ -4,6 +4,7 @@ These synthetic one-field records test control behavior, not scientific
 acceptance, schema completeness, or provider/native-model performance.
 """
 import copy
+from contextlib import contextmanager, nullcontext
 from decimal import Decimal
 import hashlib
 import json
@@ -11,6 +12,7 @@ import os
 from pathlib import Path
 import shlex
 import sys
+import threading
 from types import SimpleNamespace
 
 import httpx
@@ -327,8 +329,7 @@ def test_added_event_observer_composes_with_existing_generation_observer(native_
     assert c.history.validator and c.history.validation
 
 
-def test_execute_job_connects_controls_context_and_terminal_recheck(native_case,monkeypatch):
-    c=native_case
+def configure_execution(c, monkeypatch):
     case_path=Path(c.manifest['repository'])/'orchestration_case.json'
     case_path.write_text(json.dumps(c.case))
     executable=Path(c.manifest['repository'])/'offline-native'
@@ -347,6 +348,12 @@ def test_execute_job_connects_controls_context_and_terminal_recheck(native_case,
     context=SimpleNamespace(manifest=c.manifest,job=c.job,attempt=c.attempt,registration_path=c.registration,
         manifest_sha256='synthetic-registration',ledger=c.ledger,verify=lambda:None)
     sdk=SimpleNamespace(messages=SimpleNamespace(count_tokens=lambda **kw:SimpleNamespace(input_tokens=100)))
+    return context, sdk
+
+
+def test_execute_job_connects_controls_context_and_terminal_recheck(native_case,monkeypatch):
+    c=native_case
+    context, sdk=configure_execution(c,monkeypatch)
     result=native.execute_job(context,client=sdk,upstream=httpx.Client(transport=httpx.MockTransport(
         lambda req:httpx.Response(200,content=response_events(),headers={'content-type':'text/event-stream'}))))
     assert result['validation']['passed'] and result['runtime']['unfinished_handlers']==0
@@ -370,3 +377,259 @@ def test_genuine_stdout_http_race_waits_for_successful_result_then_admits(native
     evidence=c.run()
     assert evidence['phase3']['validation']['passed'] and len(c.calls)==2
     assert all(r['status']=='settled' for r in json.loads(c.ledger.path.read_text())['requests'])
+
+
+
+def configure_receipt_runner(c, monkeypatch):
+    """Isolate runtime receipt behavior from separately tested lineage gates."""
+    from audit_controls import registration
+    context,sdk=configure_execution(c,monkeypatch)
+    c.manifest['repository_commit']='synthetic-offline'
+    review=c.registration.parent/'synthetic-review.json'
+    review.write_text(json.dumps({'verdict':'approve','ci_conclusion':'success',
+        'registration_sha256':native.sha(c.registration),'repository_commit':'synthetic-offline','allowed_jobs':[c.job['id']]}))
+    monkeypatch.setattr(registration,'validate_registration',lambda _:c.manifest)
+    monkeypatch.setattr(registration,'verify',lambda *_:None)
+    monkeypatch.setattr(registration,'sequence_guard',lambda *_:nullcontext())
+    monkeypatch.setattr(registration,'open_audit_ledger',lambda *_:c.ledger)
+    # Only remove this fixture's empty directories; run_job must create them.
+    Path(c.job['output_dir']).rmdir();c.attempt.rmdir()
+    return context,sdk,review
+
+
+def test_stopped_proxy_receipt_records_actual_drained_handlers(native_case,monkeypatch):
+    c=native_case;_,sdk,review=configure_receipt_runner(c,monkeypatch)
+    upstream=httpx.Client(transport=httpx.MockTransport(lambda _:httpx.Response(524,content=b'offline timeout')))
+    def adapter(context):return native.execute_job(context,client=sdk,upstream=upstream)
+    with pytest.raises(BudgetStop) as error:native.run_job(c.registration,review,adapter=adapter)
+    receipt=json.loads((c.attempt/'result.json').read_text())
+    assert receipt['status']=='stopped' and receipt['stop_source']=='native_proxy'
+    assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':0}
+    assert receipt['runtime']==error.value.native_stop['runtime']
+    assert len(receipt['unresolved_requests'])==1
+    rows=json.loads(c.ledger.path.read_text())['requests']
+    assert len(rows)==1 and rows[0]['status']=='pending'
+
+
+def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_source(native_case,monkeypatch):
+    c=native_case;_,sdk,review=configure_receipt_runner(c,monkeypatch)
+    c.job['deadline_seconds']=0.6
+    entered,released,done=threading.Event(),threading.Event(),threading.Event()
+    observed=[]
+    original=native.AuditProxy
+    class ObservedProxy(original):
+        def __init__(self,**kwargs):super().__init__(**kwargs);observed.append(self)
+    monkeypatch.setattr(native,'AuditProxy',ObservedProxy)
+    def wait_for_release(_):
+        entered.set()
+        assert released.wait(10)
+        done.set()
+        return httpx.Response(200,content=response_events(),headers={'content-type':'text/event-stream'})
+    upstream=httpx.Client(transport=httpx.MockTransport(wait_for_release))
+    def adapter(context):return native.execute_job(context,client=sdk,upstream=upstream)
+    try:
+        with pytest.raises(BudgetStop,match='deadline'):native.run_job(c.registration,review,adapter=adapter)
+        assert entered.is_set()
+        receipt=json.loads((c.attempt/'result.json').read_text())
+        assert receipt['stop_source']=='native_controller' and receipt['status']=='stopped'
+        assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':1}
+        assert receipt['runtime']['unfinished_handlers']==observed[0].unfinished_handlers
+        assert len(receipt['unresolved_requests'])==1
+        before=c.ledger.path.read_bytes()
+        released.set();assert done.wait(2)
+        with observed[0].state:assert observed[0].state.wait_for(lambda:observed[0].active_handlers==0,timeout=2)
+        assert c.ledger.path.read_bytes()==before
+        assert json.loads(before)['requests'][0]['status']=='pending'
+    finally:
+        released.set()
+
+
+def test_preproxy_failure_records_unknown_count_instead_of_a_zero(native_case,monkeypatch):
+    c=native_case;_,sdk,review=configure_receipt_runner(c,monkeypatch)
+    def adapter(context):
+        context.verify=lambda:(_ for _ in ()).throw(BudgetStop('synthetic prelaunch pin refusal'))
+        return native.execute_job(context,client=sdk)
+    with pytest.raises(BudgetStop,match='prelaunch pin'):native.run_job(c.registration,review,adapter=adapter)
+    receipt=json.loads((c.attempt/'result.json').read_text())
+    assert receipt['stop_source']=='native_preflight'
+    assert receipt['runtime']=={'proxy_initialized':False,'proxy_shutdown_complete':False,'unfinished_handlers':None}
+    assert receipt['requests_admitted']==0 and not (c.attempt/'requests').exists()
+
+
+def test_incomplete_proxy_setup_does_not_claim_its_initial_zero_as_final(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    @contextmanager
+    def did_not_start(self,**kwargs):
+        raise BudgetStop('synthetic proxy setup failure')
+        yield
+    monkeypatch.setattr(native.AuditProxy,'running',did_not_start)
+    with pytest.raises(BudgetStop) as error:native.execute_job(context,client=sdk)
+    assert error.value.native_stop=={'stop_source':'native_setup','runtime':
+        {'proxy_initialized':True,'proxy_shutdown_complete':False,'unfinished_handlers':None}}
+
+
+def test_postcheck_failure_reports_the_completed_shutdown(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    monkeypatch.setattr(native,'inspect_transcript',lambda *_:(_ for _ in ()).throw(BudgetStop('synthetic transcript recheck failure')))
+    upstream=httpx.Client(transport=httpx.MockTransport(lambda _:httpx.Response(200,content=response_events(),headers={'content-type':'text/event-stream'})))
+    with pytest.raises(BudgetStop) as error:native.execute_job(context,client=sdk,upstream=upstream)
+    assert error.value.native_stop=={'stop_source':'native_postcheck','runtime':
+        {'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':0}}
+
+
+
+def test_shutdown_failure_is_named_and_does_not_invent_a_final_handler_count(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    @contextmanager
+    def interrupted_shutdown(self,**kwargs):
+        yield 'http://127.0.0.1:1'
+        raise BudgetStop('synthetic shutdown failure')
+    monkeypatch.setattr(native.AuditProxy,'running',interrupted_shutdown)
+    monkeypatch.setattr(native,'execute_child',lambda *a,**kw:0)
+    with pytest.raises(BudgetStop) as error:native.execute_job(context,client=sdk)
+    assert error.value.native_stop=={'stop_source':'native_shutdown','runtime':
+        {'proxy_initialized':True,'proxy_shutdown_complete':False,'unfinished_handlers':None}}
+
+
+
+def test_original_controller_stop_survives_later_proxy_failure(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    original=native.execute_child
+    def controller_then_late_proxy(*args,**kwargs):
+        # The real child/controller fails before validation; its callback must
+        # identify that cause even if proxy shutdown then produces an error.
+        try:return original(*args,**kwargs)
+        except BudgetStop:
+            kwargs['proxy'].fail(BudgetStop('synthetic later transport close failure'))
+            raise
+    c.case['calls'].pop()
+    (c.registration.parent/'orchestration_case.json').write_text(json.dumps(c.case))
+    monkeypatch.setattr(native,'execute_child',controller_then_late_proxy)
+    upstream=httpx.Client(transport=httpx.MockTransport(lambda _:httpx.Response(200,content=response_events(),headers={'content-type':'text/event-stream'})))
+    with pytest.raises(BudgetStop,match='completion lacks') as error:native.execute_job(context,client=sdk,upstream=upstream)
+    assert error.value.native_stop['stop_source']=='native_controller'
+    assert error.value.native_stop['runtime']['unfinished_handlers']==0
+
+
+@pytest.mark.parametrize('secondary', [BudgetStop('synthetic shutdown failure'),
+                                      RuntimeError('sensitive upstream details')])
+def test_controller_exception_survives_raising_proxy_cleanup(native_case,monkeypatch,secondary):
+    c=native_case;_,sdk,review=configure_receipt_runner(c,monkeypatch)
+    primary=BudgetStop('synthetic original controller deadline')
+    def child(*args,**kwargs):
+        kwargs['record_stop'](str(primary))
+        raise primary
+    @contextmanager
+    def interrupted_shutdown(self,**kwargs):
+        try:yield 'http://127.0.0.1:1'
+        finally:raise secondary
+    monkeypatch.setattr(native,'execute_child',child)
+    monkeypatch.setattr(native.AuditProxy,'running',interrupted_shutdown)
+    def adapter(context):return native.execute_job(context,client=sdk)
+    with pytest.raises(BudgetStop) as error:native.run_job(c.registration,review,adapter=adapter)
+    assert error.value is primary
+    receipt=json.loads((c.attempt/'result.json').read_text())
+    assert receipt['reason']==str(primary) and receipt['stop_source']=='native_controller'
+    assert receipt['cleanup_errors']==[{'source':'native_proxy_shutdown','error_type':type(secondary).__name__,
+        'reason':str(secondary) if isinstance(secondary,BudgetStop) else type(secondary).__name__}]
+    assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':False,'unfinished_handlers':None}
+    assert 'sensitive' not in json.dumps(receipt)
+    stops=json.loads(c.ledger.path.read_text())['stopped_attempts']
+    assert stops[receipt['billing_attempt']]['reason']==receipt['reason']
+
+
+def test_child_cleanup_keeps_original_controller_exception(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    primary=BudgetStop('synthetic original controller failure')
+    def child(*args,**kwargs):
+        try:
+            kwargs['record_stop'](str(primary))
+            raise primary
+        finally:raise RuntimeError('sensitive child cleanup details')
+    @contextmanager
+    def no_server(self,**kwargs):yield 'http://127.0.0.1:1'
+    monkeypatch.setattr(native,'execute_child',child)
+    monkeypatch.setattr(native.AuditProxy,'running',no_server)
+    with pytest.raises(BudgetStop) as error:native.execute_job(context,client=sdk)
+    assert error.value is primary
+    assert error.value.native_stop['cleanup_errors']==[{'source':'native_controller_cleanup',
+        'error_type':'RuntimeError','reason':'RuntimeError'}]
+
+
+def test_recorded_controller_reason_survives_when_child_hides_original_exception(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    def child(*args,**kwargs):
+        kwargs['record_stop']('synthetic first controller failure')
+        kwargs['record_stop']('synthetic later symptom')
+        raise RuntimeError('sensitive replaced exception')
+    @contextmanager
+    def no_server(self,**kwargs):yield 'http://127.0.0.1:1'
+    monkeypatch.setattr(native,'execute_child',child)
+    monkeypatch.setattr(native.AuditProxy,'running',no_server)
+    with pytest.raises(BudgetStop,match='synthetic first controller failure') as error:
+        native.execute_job(context,client=sdk)
+    assert error.value.native_stop['primary_error_recovered_from_stop_record'] is True
+    assert error.value.native_stop['cleanup_errors']==[{'source':'native_controller_cleanup',
+        'error_type':'RuntimeError','reason':'RuntimeError'}]
+
+
+def test_real_child_controller_cleanup_cannot_replace_recorded_failure(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    import run_native_canary
+    terminate=run_native_canary.terminate_group
+    def failing_cleanup(process):
+        terminate(process)
+        raise RuntimeError('sensitive termination cleanup details')
+    c.case['calls'].pop()
+    (c.registration.parent/'orchestration_case.json').write_text(json.dumps(c.case))
+    monkeypatch.setattr(run_native_canary,'terminate_group',failing_cleanup)
+    upstream=httpx.Client(transport=httpx.MockTransport(lambda _:httpx.Response(200,content=response_events(),headers={'content-type':'text/event-stream'})))
+    with pytest.raises(BudgetStop,match='completion lacks') as error:
+        native.execute_job(context,client=sdk,upstream=upstream)
+    assert error.value.native_stop['stop_source']=='native_controller'
+    assert error.value.native_stop['cleanup_errors']==[{'source':'native_controller_cleanup',
+        'error_type':'RuntimeError','reason':'RuntimeError'}]
+    assert error.value.native_stop['runtime']['unfinished_handlers']==0
+
+
+def test_execute_job_uses_registered_factory_for_counting_and_raw_stream(native_case,monkeypatch):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    counted=[];sent=[];factory_calls=[]
+    sdk.messages.count_tokens=lambda **kwargs:(counted.append(kwargs) or SimpleNamespace(input_tokens=100))
+    upstream=httpx.Client(transport=httpx.MockTransport(lambda request:(sent.append(request) or
+        httpx.Response(200,content=response_events(),headers={'content-type':'text/event-stream'}))))
+    def factory(manifest,key):
+        factory_calls.append(manifest)
+        assert key=='synthetic-offline-key'
+        return sdk,upstream
+    monkeypatch.setenv('CBORG_API_KEY','synthetic-offline-key')
+    monkeypatch.setattr(native,'provider_clients',factory)
+    result=native.execute_job(context)
+    assert factory_calls==[c.manifest] and counted and len(counted)==len(sent)
+    assert result['validation']['passed'] and upstream.is_closed
+    assert result['runtime']['unfinished_handlers']==0
+
+
+@pytest.mark.parametrize('closing_fails',[False,True])
+def test_created_transport_closes_if_proxy_construction_fails(native_case,monkeypatch,closing_fails):
+    c=native_case;context,sdk=configure_execution(c,monkeypatch)
+    upstream=httpx.Client(transport=httpx.MockTransport(lambda _:pytest.fail('no model request expected')))
+    closed=[]
+    def close_sdk():
+        closed.append(True)
+        if closing_fails:raise RuntimeError('sensitive cleanup details')
+    sdk.close=close_sdk
+    monkeypatch.setenv('CBORG_API_KEY','synthetic-offline-key')
+    monkeypatch.setattr(native,'provider_clients',lambda *_:(sdk,upstream))
+    primary=BudgetStop('synthetic constructor failure')
+    def fail(**kwargs):
+        assert kwargs['sdk'] is sdk and kwargs['upstream'] is upstream
+        raise primary
+    monkeypatch.setattr(native,'AuditProxy',fail)
+    with pytest.raises(BudgetStop) as error:native.execute_job(context)
+    assert error.value is primary and closed==[True] and upstream.is_closed
+    assert error.value.native_stop['stop_source']=='native_setup'
+    assert error.value.native_stop['runtime']['unfinished_handlers'] is None
+    if closing_fails:
+        assert error.value.native_stop['cleanup_errors']==[{'source':'native_setup_cleanup',
+            'error_type':'RuntimeError','reason':'RuntimeError'}]

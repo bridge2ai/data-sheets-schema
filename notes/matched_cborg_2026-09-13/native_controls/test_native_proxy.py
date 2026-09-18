@@ -52,11 +52,11 @@ def test_incomplete_or_ambiguous_streams_never_complete(values):
         observer.feed(wire(values));observer.final()
 
 
-def fixture_proxy(tmp_path, *, values=None, cap=5, response_factory=None):
+def fixture_proxy(tmp_path, *, values=None, cap=5, response_factory=None, base_url='https://api.cborg.lbl.gov'):
     calls=[]
     def respond(request):
         calls.append(request)
-        assert str(request.url)=="https://api.cborg.lbl.gov/v1/messages?beta=true"
+        assert str(request.url)==base_url+"/v1/messages?beta=true"
         assert request.headers["x-api-key"]=="offline-provider-key"
         assert json.loads(request.content)==REQUEST
         if response_factory is not None:
@@ -66,12 +66,13 @@ def fixture_proxy(tmp_path, *, values=None, cap=5, response_factory=None):
     ledger=Ledger(tmp_path/'ledger.json',manifest_sha256='offline',attempt_cap=cap)
     proxy=NativeProxy(sdk=sdk,ledger=ledger,attempt='native-offline',evidence=tmp_path/'requests',
           model=REQUEST['model'],prices=PRICES,verify=lambda:None,provider_key='offline-provider-key',
-          base_url='https://api.cborg.lbl.gov',upstream=httpx.Client(transport=httpx.MockTransport(respond)))
+          base_url=base_url,upstream=httpx.Client(transport=httpx.MockTransport(respond)))
     return proxy, ledger, calls
 
 
-def test_native_request_unchanged_and_accounted_before_terminal_event(tmp_path):
-    proxy,ledger,calls=fixture_proxy(tmp_path)
+@pytest.mark.parametrize('endpoint',['https://api.cborg.lbl.gov','https://api-local.cborg.lbl.gov'])
+def test_native_request_unchanged_and_accounted_before_terminal_event(tmp_path,endpoint):
+    proxy,ledger,calls=fixture_proxy(tmp_path,base_url=endpoint)
     with proxy.running() as url:
         response=httpx.post(url+'/v1/messages?beta=true',json=REQUEST,headers={'x-api-key':proxy.token})
     assert response.status_code==200 and response.content==wire(events())
