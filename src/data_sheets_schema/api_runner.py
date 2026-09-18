@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -1703,6 +1703,84 @@ EVIDENCE_PHASE_CONTRACTS = {
 }
 
 
+AUDIT_RECORD_CONTRACT_V14 = """### Audit record and artifact names (renderer v14)
+
+Every findings[].record must be exactly one of "full", "core", or "both".
+This field names the record(s) affected by the finding, not an evidence state.
+Use "full" for a full-record finding. Use "core" or "both" only when the
+affected core is actually supplied to this phase and its defect is established;
+do not infer unavailable core content from the full. The API audit receives
+only the original full record, so its findings use "full".
+
+Evidence assertions use a different field and namespace: artifact names the
+exact state containing a quotation, such as "original_full" or "original_core"
+during the audit. The report can also cite "final_full" and "final_core" when
+those files are supplied. The audit's source_review.artifact must be
+"original_full"; the final report's source_review.artifact must be "final_full".
+Never put these artifact names in findings[].record, or full/core/both in an
+artifact field. These rules also complete shortened finding examples in the
+playbook. Preserve the frozen originals and failed evidence; an invalid audit
+still stops the attempt rather than being renamed or repaired after rejection.
+
+### Synthetic audit namespace example
+
+This is a minimal evidence-contract fixture, not a schema-valid D4D or evidence
+for this run. Do not copy its facts, paths, source names, chunk IDs or digest.
+Use the actual inventory hash, all populated values and applicable sources.
+For this fixture only, original_full consists of the following UTF-8 bytes,
+including the single newline after the YAML line:
+
+```yaml
+description: The service is deployed.
+```
+
+The fixture's protocol.txt chunk c001 contains the exact source sentence
+"The service is planned." A plan does not establish deployment or its absence.
+The complete audit below flags the unsupported completion claim for revision;
+it does not claim the service was never deployed. The finding concerns the
+full record, while its evidence and source review refer to original_full:
+
+```json
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "description",
+      "issue": "The description asserts deployment, but the source establishes only a plan. Preserve the prospective scope.",
+      "review_paths": ["/description"],
+      "evidence": [
+        {"artifact": "original_full", "path": "/description", "op": "contains", "quote": "The service is deployed."},
+        {"source": "protocol.txt", "chunk": "c001", "quote": "The service is planned."}
+      ]
+    }
+  ],
+  "summary": "1 finding: 0 high, 1 medium, 0 low.",
+  "source_review": {
+    "artifact": "original_full",
+    "sha256": "ad1fad38d9cb4f243ffb1c64d011fee0965a9e561dd87128b96b351f5be95860",
+    "values": [
+      {
+        "path": "/description",
+        "claims": [
+          {
+            "text": "The service is deployed.",
+            "verdict": "revise",
+            "attributed_to": [],
+            "claim_status": "applied",
+            "source_status": "planned",
+            "evidence": [{"source": "protocol.txt", "chunk": "c001", "quote": "The service is planned."}],
+            "reason": "The source establishes a plan, not completed deployment."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+"""
+
+
 def evidence_phase_contract(phase: str, render_version: int) -> str:
     contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
     if render_version >= 12:
@@ -1712,6 +1790,8 @@ def evidence_phase_contract(phase: str, render_version: int) -> str:
             contract += (" Include source_review bound to the original_full inventory, covering every "
                          "populated value with source claims. Link every revise judgment to a finding "
                          "using review_paths (JSON Pointers). Do not audit only claims you already suspect.")
+            if render_version >= 14:
+                contract += "\n\n" + AUDIT_RECORD_CONTRACT_V14
         elif phase == "reconcile_full":
             contract += (" Resolve each source_review revise judgment throughout the record. "
                          "Preserve each clause's document attribution and operational scope; an "
