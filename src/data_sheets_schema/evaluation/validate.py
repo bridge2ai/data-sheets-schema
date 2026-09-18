@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate D4D evaluation JSON files against their schemas.
+Validate D4D evaluation JSON files against their instrument contracts.
 
 This ensures evaluations conform to the standardized schema, which in turn
 ensures HTML renderers can reliably parse the output.
@@ -82,8 +82,9 @@ def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]
 
 def validate_outputs(paths: List[Path], rubric: str | None = None,
                      schema_dir: Path | None = None, input_path: Path | None = None,
-                     definition_path: Path | None = None, context_path: Path | None = None) -> int:
-    """Require each explicitly named new output to pass its semantic schema.
+                     definition_path: Path | None = None, context_path: Path | None = None,
+                     project: str | None = None, method: str | None = None) -> int:
+    """Require each named new output to pass its own agent contract.
 
     Directory names and superseded shapes do not exempt a new output. This
     path reads only the files named by the caller, so an evaluator can check
@@ -92,6 +93,7 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
     schema_dir = schema_dir or resource_path("src/download/prompts")
     names = {"rubric10-semantic": "rubric10_semantic_schema.json",
              "rubric20-semantic": "rubric20_semantic_schema.json"}
+    from data_sheets_schema.field_agent_contract import RUBRICS, validate_output
     failed = not paths
     for path in paths:
         try:
@@ -99,13 +101,21 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
             if not isinstance(doc, dict):
                 raise ValueError("evaluation must be a JSON object")
             declared = doc.get("rubric")
-            if not isinstance(declared, str) or declared not in names:
-                raise ValueError(f"no semantic evaluation schema for rubric {declared!r}")
+            if not isinstance(declared, str) or declared not in names.keys() | RUBRICS:
+                raise ValueError(f"no evaluation contract for rubric {declared!r}")
             if rubric is not None and declared != rubric:
                 raise ValueError(f"expected {rubric}, found {declared}")
             if doc.get("version") != "2.0":
                 raise ValueError("new-output acceptance requires instrument version 2.0; "
                                  "use historical classification for earlier instruments")
+            if declared in RUBRICS:
+                validate_output(path, rubric=declared, project=project, method=method,
+                                input_path=input_path, definition_path=definition_path,
+                                context_path=context_path)
+                print(f"VALID {path}: {declared}")
+                continue
+            if project is not None or method is not None:
+                raise ValueError("--project and --method are field-agent validation options")
             valid, errors = validate_evaluation(doc, load_schema(schema_dir / names[declared]))
             if not valid:
                 raise ValueError("\n".join(errors))
@@ -200,9 +210,10 @@ def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
 
         rubric = eval_data.get("rubric", "unknown")
         if rubric not in schemas:
-            # Named and counted, not skipped in silence: the presence-style
-            # rubric10/rubric20 outputs have no schema in this repository, and
-            # a reader of the summary should see that they were not judged.
+            # Named and counted, not skipped in silence: historical plain
+            # rubric10/rubric20 outputs have no historical schema.
+            # New field-agent outputs instead use the explicit --file contract;
+            # corpus classification must not retrofit that contract to old scores.
             no_schema[str(rubric)] = no_schema.get(str(rubric), 0) + 1
             continue
 
@@ -243,11 +254,13 @@ def cli(argv: List[str] | None = None, *, eval_base: Path | None = None,
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--file", type=Path, action="append", dest="files",
                         help="validate this exact new output strictly; repeat for multiple files")
-    parser.add_argument("--rubric", choices=("rubric10-semantic", "rubric20-semantic"),
+    parser.add_argument("--rubric", choices=("rubric10-semantic", "rubric20-semantic", "rubric10", "rubric20"),
                         help="require the named outputs to use this rubric")
     parser.add_argument("--input", type=Path, help="original D4D input for version-2 resource coverage and byte identity")
     parser.add_argument("--agent-definition", type=Path, help="exact agent definition used for this version-2 assessment")
     parser.add_argument("--context", type=Path, help="trusted caller YAML/JSON applicability declarations; omitted predicates remain unknown")
+    parser.add_argument("--project", help="trusted project identity; required for field-agent output acceptance")
+    parser.add_argument("--method", help="trusted method identity; required for field-agent output acceptance")
     args = parser.parse_args(argv)
     if args.rubric and not args.files:
         parser.error("--rubric requires --file")
@@ -257,9 +270,12 @@ def cli(argv: List[str] | None = None, *, eval_base: Path | None = None,
         parser.error("--agent-definition requires --file")
     if args.context and not args.files:
         parser.error("--context requires --file")
+    if (args.project or args.method) and not args.files:
+        parser.error("--project and --method require --file")
     return validate_outputs(args.files, args.rubric, input_path=args.input,
                             definition_path=args.agent_definition, context_path=args.context,
-                            schema_dir=schema_dir) if args.files else main(eval_base=eval_base, schema_dir=schema_dir)
+                            schema_dir=schema_dir, project=args.project,
+                            method=args.method) if args.files else main(eval_base=eval_base, schema_dir=schema_dir)
 
 
 if __name__ == "__main__":
