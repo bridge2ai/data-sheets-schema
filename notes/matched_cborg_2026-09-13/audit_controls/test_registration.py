@@ -183,3 +183,147 @@ def test_copied_confirmation_cannot_fork_sequence(accounting, tmp_path):
 def test_json_overflow_and_invalid_unicode_refused():
     with pytest.raises(ValueError): r.strict_json('{"cost":1e999}')
     with pytest.raises(UnicodeError): r.strict_json('"\\ud800"')
+
+
+@pytest.fixture
+def stopped_audit(accounting):
+    """A generation checkpoint followed by one stopped, separately billed audit."""
+    m, _, _, baseline, reg = accounting
+    first = copy.deepcopy(m)
+    first.update(kind='d4d_native_audit_continuation')
+    first['job']['attempt_dir'] = str(reg.parent / 'attempts' / first['job']['id'])
+    save(reg, first)
+    source_sha = r.sha(reg)
+    with r.sequence_guard(first, source_sha):
+        ledger = r.open_audit_ledger(first, reg, source_sha)
+        request_id = ledger.reserve(r.attempt_identity(source_sha, first['job']['id']), Decimal('2.7'), 'audit')
+        ledger.stop_attempt(r.attempt_identity(source_sha, first['job']['id']), 'synthetic interrupted audit')
+    source = Path(first['budget']['ledger_path'])
+    old = r.read_json(source)
+    row = old['requests'][-1]
+    assert row['id'] == request_id
+    result = Path(first['job']['attempt_dir']) / 'result.json'
+    result.parent.mkdir(parents=True)
+    save(result, {'registration_sha256': source_sha, 'job_id': first['job']['id'],
+        'scope': 'phase3_audit_only', 'status': 'stopped', 'unresolved_requests': [row['id']]})
+    receipt = reg.parent / 'confirmed.json'
+    confirmation = {'kind': 'user_confirmed_provider_charge_reconciliation',
+        'source_attempt_kind': 'phase3_audit_only', 'source_registration_sha256': source_sha,
+        'source_ledger_sha256': r.sha(source), 'stopped_result_sha256': r.sha(result),
+        'user_confirmation': {'exact_response': 'approved', 'quoted_request': 'Confirm match and complete charge'},
+        'request_id': row['id'], 'attempt': row['attempt'], 'previous_reservation_usd': row['reserved_usd'],
+        'confirmed_complete_charge_usd': '0.08', 'recorded_at': '2026-09-18T01:00:00Z',
+        'provider_observation_sha256': 'observation'}
+    save(receipt, confirmation)
+    reconciled = copy.deepcopy(old)
+    reconciled['requests'][-1].update(status='settled', cost_usd='0.08',
+        settled_at=confirmation['recorded_at'], settlement_basis='user_confirmed_provider_accounting',
+        reconciliation_receipt_sha256=r.sha(receipt), provider_observation_sha256='observation',
+        provider_usage_is_final=False, source_attempt_kind='phase3_audit_only', source_attempt_outcome='stopped')
+    reconciled['reconciled_from'] = {'checkpoint_sha256': r.sha(source), 'receipt_sha256': r.sha(receipt),
+        'request_id': row['id'], 'previous_status': 'pending', 'confirmed_charge_usd': '0.08',
+        'source_attempt_completed': False}
+    checkpoint = reg.parent / 'reconciled.json'
+    save(checkpoint, reconciled)
+    next_m = copy.deepcopy(m)
+    next_dir = reg.parent / 'next'; next_dir.mkdir()
+    next_m['budget']['ledger_path'] = str(next_dir / 'billing.json')
+    next_m['budget']['continuation'] = {'checkpoint': str(checkpoint), 'sha256': r.sha(checkpoint),
+        'cost_usd': '2.26768875', 'reconciliation': {'source_registration': str(reg),
+        'source_ledger': str(source), 'receipt': str(receipt), 'result': str(result)}}
+    for path in (reg, source, receipt, result, checkpoint):
+        next_m['pinned_files'][str(path)] = r.sha(path)
+    return next_m, source, receipt, checkpoint, next_dir / 'registration.json'
+
+
+def repin(m, path):
+    m['pinned_files'][str(path)] = r.sha(path)
+    if str(path) == m['budget']['continuation']['checkpoint']:
+        m['budget']['continuation']['sha256'] = r.sha(path)
+
+
+def test_confirmed_audit_copy_advances_once_without_rewriting_history(stopped_audit):
+    m, source, receipt, checkpoint, reg = stopped_audit
+    preserved = {p: p.read_bytes() for p in (source, receipt, checkpoint)}
+    original_rows = r.read_json(source)['requests'][:-1]
+    assert r.validate_audit_reconciliation(m) == r.read_json(checkpoint)
+    with r.sequence_guard(m, 'second'):
+        ledger = r.open_audit_ledger(m, reg, 'second')
+    state = r.read_json(ledger.path)
+    assert state['requests'][:-1] == original_rows
+    assert all(row['status'] == 'settled' for row in state['requests'])
+    assert sum(Decimal(row['cost_usd']) for row in state['requests']) == Decimal('2.26768875')
+    assert r.read_json(source)['requests'][-1]['status'] == 'pending'
+    assert all(p.read_bytes() == value for p, value in preserved.items())
+    with pytest.raises(r.BudgetStop, match='already consumed'):
+        with r.sequence_guard(m, 'second'): pass
+    with pytest.raises(r.BudgetStop, match='current sequence tip'):
+        with r.sequence_guard(m, 'third'): pass
+
+
+@pytest.mark.parametrize('change', ['earlier_cost', 'removed_row', 'new_row', 'boolean_usage',
+    'confirmed_cost', 'fabricated_usage', 'completed_attempt', 'changed_budget', 'cleared_stops', 'relabelled_lineage'])
+def test_audit_reconciliation_checks_content_after_repin(stopped_audit, change):
+    m, _, _, checkpoint, _ = stopped_audit
+    value = r.read_json(checkpoint)
+    if change == 'earlier_cost': value['requests'][0]['cost_usd'] = '0'
+    elif change == 'removed_row': value['requests'].pop(0)
+    elif change == 'new_row': value['requests'].append(copy.deepcopy(value['requests'][0]))
+    elif change == 'boolean_usage': value['requests'][0]['usage']['output_tokens'] = True
+    elif change == 'confirmed_cost': value['requests'][-1]['cost_usd'] = '0'
+    elif change == 'fabricated_usage': value['requests'][-1]['provider_usage_is_final'] = True
+    elif change == 'completed_attempt': value['requests'][-1]['source_attempt_outcome'] = 'completed'
+    elif change == 'changed_budget': value['additional_cap_usd'] = '800'
+    elif change == 'cleared_stops': value['stopped_attempts'] = []
+    elif change == 'relabelled_lineage': value['reconciled_from']['source_attempt_completed'] = True
+    save(checkpoint, value); repin(m, checkpoint)
+    before = Path(m['sequence_state']).read_bytes()
+    with pytest.raises(r.BudgetStop, match='unconfirmed history'):
+        with r.sequence_guard(m, 'second'): pass
+    assert Path(m['sequence_state']).read_bytes() == before
+
+
+@pytest.mark.parametrize('field,value', [('request_id','unrelated'), ('attempt','unrelated'),
+    ('confirmed_complete_charge_usd','NaN'), ('confirmed_complete_charge_usd','-1'),
+    ('confirmed_complete_charge_usd','4'), ('source_registration_sha256','wrong'),
+    ('stopped_result_sha256','wrong'), ('source_attempt_kind','generation'),
+    ('previous_reservation_usd','4'), ('user_confirmation', {'exact_response': True, 'quoted_request': 'x'})])
+def test_audit_receipt_binds_exact_pending_request(stopped_audit, field, value):
+    m, _, receipt, _, _ = stopped_audit
+    record = r.read_json(receipt); record[field] = value
+    save(receipt, record); repin(m, receipt)
+    with pytest.raises(r.BudgetStop): r.validate_audit_reconciliation(m)
+
+
+@pytest.mark.parametrize('mutation', ['registration', 'ledger', 'result', 'foreign_source', 'missing_pin', 'extra_bridge_field'])
+def test_audit_bridge_rejects_stale_or_unbound_identity(stopped_audit, mutation):
+    m, _, _, _, _ = stopped_audit
+    bridge = m['budget']['continuation']['reconciliation']
+    state_path = Path(m['sequence_state'])
+    state = r.read_json(state_path)
+    if mutation == 'registration': state['registration_sha256'] = 'unrelated'; save(state_path, state)
+    elif mutation == 'ledger': state['ledger_path'] = str(state_path.parent / 'unrelated.json'); save(state_path, state)
+    elif mutation == 'foreign_source': state['source_registration_sha256'] = 'foreign'; save(state_path, state)
+    elif mutation == 'result':
+        path = Path(bridge['result']); record = r.read_json(path); record['status'] = 'completed'
+        save(path, record); repin(m, path)
+    elif mutation == 'missing_pin': del m['pinned_files'][bridge['source_ledger']]
+    elif mutation == 'extra_bridge_field': bridge['other'] = bridge['source_ledger']
+    before = state_path.read_bytes()
+    with pytest.raises(r.BudgetStop):
+        with r.sequence_guard(m, 'second'): pass
+    assert state_path.read_bytes() == before
+
+
+@pytest.mark.parametrize('kwargs', [
+    {'continuation_source_registration': '/source'},
+    {'continuation_reconciliation_receipt': '/receipt'},
+    {'continuation_source_registration': '/source', 'continuation_reconciliation_receipt': '/receipt'}])
+def test_prepare_requires_complete_reconciliation_before_creating_condition(tmp_path, kwargs):
+    from audit_controls.prepare import prepare
+    destination = tmp_path / 'uncreated'
+    with pytest.raises(r.BudgetStop, match='reconciliation requires'):
+        prepare(parent_registration='/unused', parent_overlay='/unused', parent_job_id='unused',
+            reconciliation_receipt='/unused', reconciled_checkpoint='/unused', destination=destination,
+            job_id='new', repository=str(tmp_path), **kwargs)
+    assert not destination.exists()

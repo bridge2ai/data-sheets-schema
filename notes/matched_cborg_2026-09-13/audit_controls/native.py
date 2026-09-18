@@ -19,7 +19,7 @@ from types import SimpleNamespace
 
 BASE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE / 'native_controls'))
-from budgeted_cborg import (BudgetStop, attempt_identity, cborg_client, now,
+from budgeted_cborg import (BudgetStop, attempt_identity, now,
     provider_context_headers, write_new)
 from native_command_policy import _simple_command, _literal_rule, permission_arguments
 from native_control import CONTRACT, check_control_history, load_native_events
@@ -27,6 +27,7 @@ from native_file_policy import FileAccess
 from native_proxy import NativeProxy
 from run_native_canary import execute_child
 from .registration import sha, strict_json
+from .transport import provider_clients
 
 CLI_FLAGS = ['--print', '--safe-mode', '--restricted', '--strict-mcp-config',
     '--disable-slash-commands', '--no-session-persistence', '--prompt-suggestions', 'false',
@@ -337,7 +338,69 @@ def verify_runtime(manifest):
     return executable
 
 
+def shutdown_evidence(proxy):
+    """Snapshot only the completed bounded shutdown, never an initial zero.
+
+    A finalized proxy may still retain live handlers. Their count is frozen at
+    that boundary; those handlers cannot later mutate evidence or accounting.
+    Before that boundary the retained count is unknown, including prelaunch.
+    """
+    finalized = proxy is not None and proxy.frozen is True
+    count = proxy.unfinished_handlers if finalized else None
+    if type(count) is not int or count < 0:
+        count = None
+    return {'proxy_initialized': proxy is not None,
+            'proxy_shutdown_complete': finalized, 'unfinished_handlers': count}
+
+
+def cleanup_error(source, error):
+    # Arbitrary transport/OS exception text may contain sensitive details.
+    return {'source': source, 'error_type': type(error).__name__,
+            'reason': str(error) if isinstance(error, BudgetStop) else type(error).__name__}
+
+
+def controller_primary(state, error):
+    """Recover the callback-recorded failure if execute_child cleanup hid it."""
+    reason = state.get('first_stop_reason')
+    if reason is None:
+        return error
+    current, seen = error, set()
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        recorded = str(current) if isinstance(current, BudgetStop) else f'unexpected {type(current).__name__}'
+        if recorded == reason:
+            return current
+        current = current.__context__
+    # A cleanup implementation can discard the original exception object. The
+    # callback still proves the first reason; do not invent its exception type.
+    state['primary_error_recovered_from_stop_record'] = True
+    return BudgetStop(reason)
+
+
 def execute_job(context, *, client=None, upstream=None):
+    state = {'stop_source': 'native_preflight', 'proxy': None}
+    try:
+        return _execute_job(context, state, client=client, upstream=upstream)
+    except BaseException as error:
+        proxy = state['proxy']
+        source = state['stop_source']
+        primary = state.get('primary_error', error)
+        if 'escaped_child_error' in state and error is not state['escaped_child_error']:
+            state.setdefault('cleanup_errors', []).append(cleanup_error('native_proxy_shutdown', error))
+        # Snapshot only after proxy cleanup. A raising cleanup must neither
+        # replace the first failure nor turn an unfinished shutdown into zero.
+        primary.native_stop = {'stop_source': source, 'runtime': shutdown_evidence(proxy)}
+        for key in ('cleanup_errors', 'primary_error_recovered_from_stop_record'):
+            if key in state:
+                primary.native_stop[key] = state[key]
+        if 'first_stop_reason' in state:
+            primary.native_stop_reason = state['first_stop_reason']
+        if primary is error:
+            raise
+        raise primary.with_traceback(state.get('primary_traceback')) from None
+
+
+def _execute_job(context, state, *, client=None, upstream=None):
     manifest, job, attempt = context.manifest, context.job, context.attempt
     policy = build_policy(manifest, context.registration_path)
     executable = verify_runtime(manifest)
@@ -345,16 +408,36 @@ def execute_job(context, *, client=None, upstream=None):
     if not key and client is None:
         raise BudgetStop('CBORG_API_KEY is required')
     context.verify()
+    state['stop_source'] = 'native_setup'
     config = attempt / 'cli_config'; config.mkdir(mode=0o700)
     billing_attempt = attempt_identity(context.manifest_sha256, job['id'])
     history = AuditHistory(manifest, context.manifest_sha256, policy)
     def admission():
         context.verify()
         history.verify_admission()
-    proxy = AuditProxy(audit_history=history, sdk=client or cborg_client(manifest, key, max_retries=0), ledger=context.ledger,
-        attempt=billing_attempt, evidence=attempt / 'requests', model=manifest['model']['model'],
-        prices=manifest['budget']['prices_per_token'], verify=admission, provider_key=key or 'offline-test-key',
-        base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest), upstream=upstream)
+    owned_client = client is None
+    registered_upstream = None
+    if owned_client:
+        client, registered_upstream = provider_clients(manifest, key)
+        if upstream is None:
+            upstream = registered_upstream
+    try:
+        proxy = AuditProxy(audit_history=history, sdk=client, ledger=context.ledger,
+            attempt=billing_attempt, evidence=attempt / 'requests', model=manifest['model']['model'],
+            prices=manifest['budget']['prices_per_token'], verify=admission, provider_key=key or 'offline-test-key',
+            base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest), upstream=upstream)
+    except BaseException:
+        # Before running() owns cleanup, close only resources created here.
+        if owned_client:
+            for resource in (client, registered_upstream):
+                close = getattr(resource, 'close', None)
+                if close is not None:
+                    try:
+                        close()
+                    except BaseException as cleanup:
+                        state.setdefault('cleanup_errors', []).append(cleanup_error('native_setup_cleanup', cleanup))
+        raise
+    state['proxy'] = proxy
     environment = {k: v for k, v in os.environ.items() if k in {'PATH', 'HOME', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM'}}
     environment.update(ENVIRONMENT)
     environment.update(CLAUDE_CONFIG_DIR=str(config), ANTHROPIC_API_KEY=proxy.token,
@@ -364,19 +447,44 @@ def execute_job(context, *, client=None, upstream=None):
     argv = [str(executable), *CLI_FLAGS, *directory_flags, '--model', manifest['model']['model'], '--name', job['id'],
         '--max-budget-usd', str(context.ledger.limit_for_attempt(billing_attempt)), *permission_arguments(policy),
         '--system-prompt', Path(job['system_prompt']).read_text()]
+    def controller_stop(reason):
+        # execute_child records controller failures before its own cleanup.
+        state.setdefault('first_stop_source', 'native_controller')
+        state.setdefault('first_stop_reason', reason)
+        context.ledger.stop_attempt(billing_attempt, reason)
     with proxy.running() as url:
+        state['stop_source'] = 'native_controller'
         environment['ANTHROPIC_BASE_URL'] = url
-        exit_code = execute_child(argv, proxy=proxy, instruction=Path(job['instruction']), attempt=attempt,
-            cwd=manifest['repository'], env=environment, deadline_seconds=job['deadline_seconds'],
-            verify_launch=admission, command_policy=policy, command_classifier=classify_command,
-            event_observer=history.observe,
-            record_stop=lambda reason: context.ledger.stop_attempt(billing_attempt, reason))
+        child_failed = False
+        try:
+            exit_code = execute_child(argv, proxy=proxy, instruction=Path(job['instruction']), attempt=attempt,
+                cwd=manifest['repository'], env=environment, deadline_seconds=job['deadline_seconds'],
+                verify_launch=admission, command_policy=policy, command_classifier=classify_command,
+                event_observer=history.observe,
+                record_stop=controller_stop)
+        except BaseException as error:
+            child_failed = True
+            # Capture the first observed cause before shutdown can make an
+            # in-flight handler fail merely because admission was closed.
+            state['stop_source'] = state.get('first_stop_source') or ('native_proxy' if proxy.failed.is_set() else 'native_controller')
+            primary = controller_primary(state, error)
+            state.update(primary_error=primary, primary_traceback=primary.__traceback__, escaped_child_error=error)
+            if primary is not error:
+                state.setdefault('cleanup_errors', []).append(cleanup_error('native_controller_cleanup', error))
+            raise
+        finally:
+            if not child_failed:
+                state['stop_source'] = 'native_shutdown'
+    state['stop_source'] = 'native_exit'
     if proxy.failed.is_set() or proxy.unfinished_handlers or exit_code:
+        if proxy.failed.is_set():
+            state['stop_source'] = 'native_proxy'
         raise BudgetStop('native audit stopped or has unfinished request handlers')
+    state['stop_source'] = 'native_postcheck'
     context.verify()
     context.ledger.require_resolved(billing_attempt)
-    state = strict_json(context.ledger.path.read_text())
-    rows = [r for r in state['requests'] if r['attempt'] == billing_attempt]
+    ledger_state = strict_json(context.ledger.path.read_text())
+    rows = [r for r in ledger_state['requests'] if r['attempt'] == billing_attempt]
     if not rows or any(r['status'] != 'settled' for r in rows):
         raise BudgetStop('native audit lacks fully settled model requests')
     evidence = inspect_transcript(load_native_events(attempt/'transcript.jsonl'), policy, manifest,
@@ -388,7 +496,7 @@ def execute_job(context, *, client=None, upstream=None):
         raise BudgetStop('native audit failed terminal independent mechanical recheck')
     return {'audit_path': Path(job['audit_path']), 'validation': validation, 'evidence': evidence,
         'runtime': {'exit_code': exit_code, 'native_version': manifest['native_runtime']['version'],
-                    'model': manifest['model']['model'], 'effort': 'native_default', 'unfinished_handlers': 0}}
+                    'model': manifest['model']['model'], 'effort': 'native_default', **shutdown_evidence(proxy)}}
 
 
 def run_job(registration_path, review_path, *, adapter=None):
@@ -422,7 +530,7 @@ def run_job(registration_path, review_path, *, adapter=None):
         write_new(attempt/'started.json', receipt)
         context = SimpleNamespace(manifest=manifest, job=job, attempt=attempt, manifest_sha256=manifest_sha256,
             registration_path=registration_path, ledger=ledger, verify=verify_all)
-        error = None
+        error, result = None, None
         try:
             result = (adapter or execute_job)(context)
             verify_all(); ledger.require_resolved(billing_attempt)
@@ -432,8 +540,12 @@ def run_job(registration_path, review_path, *, adapter=None):
                 audit_sha256=sha(job['audit_path']), validation=result['validation'], runtime=result['runtime'], evidence=result['evidence'])
         except BaseException as exc:
             error = exc
-            reason = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
-            receipt.update(status='stopped', error_type=type(exc).__name__, reason=reason)
+            reason = getattr(exc, 'native_stop_reason', str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__)
+            observation = getattr(exc, 'native_stop', None)
+            if observation is None:
+                observation = {'stop_source': 'audit_orchestrator',
+                    'runtime': result.get('runtime', shutdown_evidence(None)) if isinstance(result, dict) else shutdown_evidence(None)}
+            receipt.update(status='stopped', error_type=type(exc).__name__, reason=reason, **observation)
             ledger.stop_attempt(billing_attempt, reason)
         finally:
             state = strict_json(ledger.path.read_text())

@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from budgeted_cborg import BudgetStop, CappedMessages, digest, write_new
+from budgeted_cborg import BudgetStop, CBORG_ENDPOINTS, CappedMessages, digest, write_new
 from data_sheets_schema.stream_evidence import CORRELATION_HEADERS, _identifier
 
 
@@ -113,7 +113,7 @@ class Completion:
 class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
                  provider_key, base_url, upstream=None, request_headers=None):
-        if base_url != "https://api.cborg.lbl.gov":
+        if base_url not in CBORG_ENDPOINTS:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
         if request_headers is not None and not isinstance(request_headers, dict):
             raise BudgetStop("native provider headers must be a mapping")
