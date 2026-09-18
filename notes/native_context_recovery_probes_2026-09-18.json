@@ -1,0 +1,74 @@
+{
+  "kind": "bounded_native_context_actual_runtime_probe",
+  "recorded_at": "2026-09-18T23:27:11.900371+00:00",
+  "scope": "Actual pinned native binary, genuine pre-tool callbacks and synthetic loopback responses; simulated compacted user input, not an observed compaction or scientific acceptance.",
+  "binary_version": "2.1.272",
+  "binary_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+  "exit_code": 0,
+  "provider_calls": 0,
+  "scientific_acceptance": false,
+  "home_unchanged": true,
+  "isolated_config": true,
+  "empty_mcp": true,
+  "initial_user_has_no_instruction_or_locator": true,
+  "original_instruction_bytes": 87053,
+  "original_max_physical_line_bytes": 87000,
+  "frame_max_physical_line_bytes": 1000,
+  "frame_lines": 102,
+  "reads": [
+    {
+      "role": "index",
+      "sha256": "2c377423381c6f783bd76635d73bde3e553cd793b1f4778882a63a3d63c0335c",
+      "offset": 1,
+      "limit": 2,
+      "line_count": 2
+    },
+    {
+      "role": "instruction",
+      "sha256": "fdd216a4a5a5caecbd6dfbee1a018e8c1944de14e8ca47dba177ffc8ca050152",
+      "offset": 1,
+      "limit": 12,
+      "line_count": 102
+    },
+    {
+      "role": "instruction",
+      "sha256": "fdd216a4a5a5caecbd6dfbee1a018e8c1944de14e8ca47dba177ffc8ca050152",
+      "offset": 49,
+      "limit": 12,
+      "line_count": 102
+    },
+    {
+      "role": "instruction",
+      "sha256": "fdd216a4a5a5caecbd6dfbee1a018e8c1944de14e8ca47dba177ffc8ca050152",
+      "offset": 97,
+      "limit": 6,
+      "line_count": 102
+    }
+  ],
+  "unbounded_read_denied": true,
+  "control_history": {
+    "checked": true,
+    "bash_calls": 0,
+    "file_calls": 5,
+    "decisions": 5,
+    "input_rejections": [],
+    "persisted_output_paths": [],
+    "problems": []
+  },
+  "main_requests": 6,
+  "main_requests_with_registered_system": 6,
+  "runtime_auxiliary_requests_without_registered_system": 1,
+  "auxiliary_requests_are_not_rejected_by_new_system_policy": true,
+  "all_checks_pass": true,
+  "code_sha256": {
+    "native_context.py": "b482baa74152684260087e0b5b37e1efdaabc778600c9a5986495830ea68411f",
+    "native_context_control.py": "342e5d4f2029a05bb74c08722b56cd03e71a3bdfafca2872d8e86b005bce3fee",
+    "native_controls/native_file_policy.py": "778fe38e382fa74e61707e23307046d260632fec1a589a83f33b6dc574243843"
+  },
+  "limits": [
+    "No actual compaction was induced in this probe.",
+    "Only four selected frame ranges were exercised with the actual native binary; separate pure tests cover complete round-trip framing.",
+    "A persistent locator and completed historical Read do not prove current-epoch context coverage.",
+    "No paid provider or scientific acceptance was exercised."
+  ]
+}

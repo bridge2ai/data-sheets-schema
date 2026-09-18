@@ -63,12 +63,16 @@ def build_policy(manifest, registration_path):
     output = Path(job['output_dir'])
     if Path(job['audit_path']).parent != output or output.parent != Path(job['attempt_dir']):
         raise BudgetStop('audit output must be isolated below its attempt')
+    recovery = {}
+    if 'context_recovery' in manifest:
+        from native_context_control import paths as recovery_paths
+        recovery = {'bounded_reads': recovery_paths(manifest)}
     return {'version': 1, 'pretool_control': CONTRACT, 'python': manifest['python'],
         'programs': [], 'manifest_paths': [], 'validator_argv': expected,
         'allowed_tools': ['Read', 'Write', _literal_rule(shlex.join(expected))],
         'readonly_lookups': {'repository': manifest['repository'],
             'inputs': sorted(set([*reads, job['instruction'], job['system_prompt']])),
-            'output_directories': [str(output)]}}
+            'output_directories': [str(output)], **recovery}}
 
 
 def additional_directories(manifest):
@@ -112,6 +116,7 @@ class AuditHistory:
         self.calls, self.results, self.pending = {}, set(), set()
         self.last_write, self.validator, self.validation = None, None, None
         self.line = 0
+        self.recovery_reads = []
 
     def _marker(self):
         if self.failure.exists():
@@ -206,6 +211,11 @@ class AuditHistory:
                     self.results.add(identity)
                     self.pending.discard(identity)
                     start, call = self.calls[identity]
+                    if 'context_recovery' in self.manifest:
+                        from native_context_control import read_result
+                        observed = read_result(self.manifest, self.files, call, event, block)
+                        if observed is not None:
+                            self.recovery_reads.append({'call_line': start, 'result_line': self.line, **observed})
                     if call['name'] == 'Write':
                         if not _write_success(call, block, event, self.audit):
                             raise BudgetStop('audit Write lacks its exact successful typed result')
@@ -235,7 +245,8 @@ class AuditHistory:
             raise BudgetStop('audit completion lacks a final Write and single successful terminal validator')
         if self.validation != self._marker():
             raise BudgetStop('audit validation changed after its result')
-        return {'audit_write': self.last_write, 'validator': self.validator, 'validation': self.validation}
+        return {'audit_write': self.last_write, 'validator': self.validator, 'validation': self.validation,
+            **({'context_recovery_reads': self.recovery_reads} if 'context_recovery' in self.manifest else {})}
 
 
 

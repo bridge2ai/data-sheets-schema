@@ -232,12 +232,17 @@ def implementation_paths(manifest):
     paths.update(CONTROLS.glob('*.py'))
     paths.update(BASE / name for name in ('budgeted_cborg.py', 'run_api_canary.py', 'prepare_registration.py'))
     paths.update(repository / name for name in ('pyproject.toml', 'poetry.lock'))
+    if 'context_recovery' in manifest:
+        paths.update(BASE / name for name in ('native_context.py', 'native_context_control.py'))
     return paths
 
 
 def required_paths(manifest):
     from .transport import transport_paths
     paths = implementation_paths(manifest)
+    if 'context_recovery' in manifest:
+        from native_context_control import paths as recovery_paths
+        paths.update(Path(name) for name in recovery_paths(manifest))
     paths.update(transport_paths(manifest))
     paths.add(canonical_path(manifest['python_identity']['resolved_path'], exists=True))
     config = Path(manifest['python']).parent.parent / 'pyvenv.cfg'
@@ -334,7 +339,12 @@ def validate_registration(path):
     expected_argv = [manifest['python'], '-m', 'audit_controls.contract', '--registration', str(path)]
     if job['validator_argv'] != expected_argv:
         raise BudgetStop('audit validator arguments differ from registration')
-    if set(job['readable_inputs']) != set(manifest['inputs'].values()) | {job['instruction'], job['system_prompt']}:
+    readable = set(manifest['inputs'].values()) | {job['instruction'], job['system_prompt']}
+    if 'context_recovery' in manifest:
+        from native_context_control import paths as recovery_paths, validate as validate_recovery
+        validate_recovery(manifest, path)
+        readable.update(recovery_paths(manifest))
+    if set(job['readable_inputs']) != readable:
         raise BudgetStop('audit readable input roster differs')
     if type(job['deadline_seconds']) is not int or job['deadline_seconds'] <= 0:
         raise BudgetStop('audit deadline must be positive whole seconds')
@@ -365,8 +375,8 @@ def validate_registration(path):
     if canonical_json(previous['requests'][:len(checkpoint['requests'])]) != canonical_json(checkpoint['requests']):
         raise BudgetStop('audit predecessor does not preserve reconciled source charges')
     from .contract import render_instruction
-    from .prepare import SYSTEM
-    if Path(job['system_prompt']).read_text(encoding='utf-8') != SYSTEM:
+    from .prepare import render_system
+    if Path(job['system_prompt']).read_text(encoding='utf-8') != render_system(manifest):
         raise BudgetStop('audit system prompt differs from its registered contract')
     if Path(job['instruction']).read_text(encoding='utf-8') != render_instruction(manifest):
         raise BudgetStop('audit instruction does not match its deterministic registered rendering')

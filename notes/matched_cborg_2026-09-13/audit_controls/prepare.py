@@ -22,6 +22,13 @@ ends the attempt; do not repair or retry. Success is pending independent review.
 """
 
 
+def render_system(manifest):
+    if "context_recovery" not in manifest:
+        return SYSTEM
+    from native_context_control import render_system as recovery_system
+    return recovery_system(manifest, SYSTEM)
+
+
 def save(path, value):
     with Path(path).open('x', encoding='utf-8') as handle:
         json.dump(value, handle, indent=2, allow_nan=False)
@@ -33,7 +40,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             deadline_seconds=10800, continuation_checkpoint=None,
             continuation_source_registration=None, continuation_reconciliation_receipt=None,
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
-            native_api_force_idle_timeout=None):
+            native_api_force_idle_timeout=None, context_recovery=False):
+    if type(context_recovery) is not bool:
+        raise BudgetStop("context recovery requires an explicit boolean")
     if native_api_force_idle_timeout is not None:
         validate_native_idle_timeout({'native_runtime': {
             'api_force_idle_timeout': native_api_force_idle_timeout,
@@ -127,9 +136,12 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
             'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
     save(parent['phase2_proof'], inspect_parent(manifest))
-    Path(job['system_prompt']).write_text(SYSTEM)
     instruction = render_instruction(manifest)
     Path(job['instruction']).write_text(instruction)
+    if context_recovery:
+        from native_context_control import prepare as prepare_recovery
+        prepare_recovery(manifest, destination, context_recovery)
+    Path(job['system_prompt']).write_text(render_system(manifest))
     manifest['pinned_files'] = {str(p): sha(p) for p in sorted(required_paths(manifest))}
     save(path, manifest)
     validate_registration(path)
@@ -156,6 +168,8 @@ def main():
     for name in ('parent-registration', 'parent-overlay', 'parent-job-id', 'reconciliation-receipt',
                  'reconciled-checkpoint', 'destination', 'job-id'):
         parser.add_argument('--' + name, required=True)
+    parser.add_argument('--context-recovery', action='store_true',
+        help='pin bounded instruction/input recovery and persistent stage locators for this new condition')
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)

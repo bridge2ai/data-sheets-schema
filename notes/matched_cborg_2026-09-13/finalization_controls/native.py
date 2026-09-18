@@ -38,11 +38,15 @@ def build_policy(manifest, registration_path):
     reads=sorted(set([*job['readable_inputs'],job['instruction'],job['system_prompt']]))
     if any(manifest['pinned_files'].get(name)!=sha(name) for name in reads):
         raise BudgetStop('finalization native read is unpinned or changed')
+    recovery={}
+    if 'context_recovery' in manifest:
+        from native_context_control import paths as recovery_paths
+        recovery={'bounded_reads':recovery_paths(manifest)}
     return {'version':1,'pretool_control':CONTRACT,'python':manifest['python'],'programs':[],
         'manifest_paths':[],'helper_argv':helpers,
         'allowed_tools':['Read','Write',*[_literal_rule(shlex.join(argv)) for argv in helpers]],
         'readonly_lookups':{'repository':manifest['repository'],'inputs':reads,
-            'output_directories':[job['output_dir']]}}
+            'output_directories':[job['output_dir']],**recovery}}
 
 
 class FinalizationHistory:
@@ -60,6 +64,7 @@ class FinalizationHistory:
         self.derivation,self.current_check=None,None
         self.helper=None;self.problem=None;self.line=0
         self.context=None;self.context_reads=set();self.read_calls={}
+        self.recovery_reads=[]
 
     def _artifacts(self,report,*,complete=False,force_current=False):
         roles=('full','core','report') if complete else ('full','core')
@@ -240,6 +245,11 @@ class FinalizationHistory:
                 if identity not in self.calls or identity in self.results:raise BudgetStop('finalization result lacks a unique call')
                 self.results.add(identity);self.pending.discard(identity)
                 start,call=self.calls[identity]
+                if 'context_recovery' in self.manifest:
+                    from native_context_control import read_result
+                    observed=read_result(self.manifest,self.files,call,event,block)
+                    if observed is not None:
+                        self.recovery_reads.append({'call_line':start,'result_line':self.line,**observed})
                 if call['name']=='Write':
                     target=self.files.target(call['input'].get('file_path'))
                     if not runtime._write_success(call,block,event,target):raise BudgetStop('finalization Write lacks exact typed success')
@@ -273,6 +283,7 @@ class FinalizationHistory:
         self._current_derivation();self._artifacts(self.current_check,complete=True,force_current=True)
         return {'writes':self.writes,'derivations':self.derivations,'checks':self.checks,
                 'closing_repairs':max(0,len(self.checks)-1),
+                **({'context_recovery_reads':self.recovery_reads} if 'context_recovery' in self.manifest else {}),
                 'report_context_reads':[{'tool_use_id':key,'path':value[0]['path'],'sha256':value[0]['sha256'],
                     'offset':value[1][0],'limit':value[1][1]} for key,value in self.read_calls.items()]}
 

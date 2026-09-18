@@ -127,3 +127,21 @@ mocked HTTP responses. Some focused cases replace only expensive subprocess
 validators or full registration ancestry; those boundaries are stated in the
 tests. They do not claim performance or successful completion by the real model.
 No existing pinned worktree, real budget ledger or source artifact is changed.
+
+A fresh Phase 4 registration can independently select `--context-recovery`. It
+frames the unchanged current instruction, frozen inputs and accepted audit into
+pinned JSONL references. Its persistent system prompt retains the current artifact
+paths, exact helper commands and recovery index location. The index distinguishes
+`instruction` (current task) from `parent_instruction` (historical reference).
+This option does not inherit an earlier condition's recovery paths or modify its
+sources. Defaults and the scientific renderer remain unchanged.
+
+The recovery index and documents use at most 1,000 UTF-8 bytes per physical line
+and exact native Read ranges of at most 12 lines. Typed file metadata and complete
+raw/numbered content must match each prescribed delivery. Arbitrary whole-frame
+Reads are denied without disqualifying a run; incomplete prescribed delivery stops
+it. These optional recovery reads do not replace the mandatory current derivation's
+report-context reads described above and do not assert complete current-context
+coverage. Native compaction, runtime limits and all scientific acceptance checks
+remain in force. The runtime's auxiliary requests can have their own system prompts;
+there is no new blanket provider-request system-prompt gate.

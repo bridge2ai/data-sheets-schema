@@ -1,0 +1,15 @@
+# Native context recovery review — 2026-09-18
+
+Issue #2131 addresses loss of task and input locations after native automatic compaction. New audit and Phase 4 preparations can explicitly select `--context-recovery`. Their persistent system prompt names the current task, artifacts and permitted helper commands and points to an immutable recovery index. The index identifies the current instruction separately from historical parent instructions. Both the index and documents use lossless JSONL frames bounded to 1,000 UTF-8 bytes per line. Native Read calls must select one exact range of at most 12 lines.
+
+Registration regenerates and pins every frame and source identity. Both controllers verify the actual typed file metadata and complete raw and numbered text for each prescribed recovery Read. Whole-frame or otherwise out-of-range requests are denied without independently disqualifying the run. Missing or truncated prescribed delivery stops the attempt. Sources, original instructions and historical conditions remain unchanged.
+
+Default preparation preserves the historical system and scientific instruction bytes. The optional feature preserves the registered 200,000-token native context and automatic compaction. It does not demand full-context reacquisition or treat historical Read receipts as proof of current-context coverage. Phase 4 retains its separate mandatory current report-context delivery and one-repair boundary.
+
+The actual pinned native binary passed an offline localhost probe using a simulated compacted user message with no original instruction or locator. An 87,000-byte synthetic instruction line became frames no larger than 1,000 bytes. It completed four exact bounded Reads through genuine pre-tool callbacks and a fifth unbounded Read was denied. All call/decision/result identities reconciled. Six main requests retained the persistent system; one runtime auxiliary request used its own system. No blanket provider-request system check was added. The probe did not induce actual compaction and made no provider calls.
+
+Independent review additionally exercised coherent document omission/substitution, changed frame/index content, stripped system locators and attempts to read unregistered controller files. Scientific acceptance, provider streaming success and complete current-context coverage remain outside this mechanical proof.
+
+Validation: 1,057 offline controls regressions passed. After the final Phase 4 check-order wording clarification, all 86 focused framing, preparation and delivery tests passed and the actual-native probe passed again on the final helper bytes. Independent review additionally passed ten coherent registration probes. Local tests used Python 3.13 with CBORG_API_KEY unset; CI is restricted to Python 3.12. Tests and the native probe made no real provider calls.
+
+The compact [native-runtime evidence](native_context_recovery_probes_2026-09-18.json) includes the pinned executable and helper hashes, observed ranges, callback reconciliation and explicit proof limits. All new tests are discovered by the existing audit-controls CI lane; no workflow or job was added.

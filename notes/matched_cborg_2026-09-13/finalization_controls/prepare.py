@@ -21,8 +21,17 @@ review; do not perform generation, source audit or evaluation in this session.
 '''
 
 
+def render_system(manifest):
+    if "context_recovery" not in manifest:
+        return SYSTEM
+    from native_context_control import render_system as recovery_system
+    return recovery_system(manifest, SYSTEM)
+
+
 def prepare(*,accepted_audit_registration,acceptance,destination,job_id,repository,
-            attempt_cap='20',deadline_seconds=10800):
+            attempt_cap='20',deadline_seconds=10800,context_recovery=False):
+    if type(context_recovery) is not bool:
+        raise BudgetStop('context recovery requires an explicit boolean')
     repository=canonical_path(str(Path(repository).resolve()),exists=True)
     if Path.cwd()!=repository:raise BudgetStop('prepare from the selected finalization repository')
     old_path=canonical_path(str(Path(accepted_audit_registration).resolve()),exists=True)
@@ -82,8 +91,11 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
     seal=destination/'audit_closed.json';save(seal,seal_document(manifest));manifest['budget_sequence']['seal']=ref(seal)
     manifest['pinned_files'][str(seal)]=sha(seal)
     job['readable_inputs']=sorted(set(manifest['inputs'].values())|{job['instruction'],job['system_prompt']})
-    with Path(job['system_prompt']).open('x') as handle:handle.write(SYSTEM)
     with Path(job['instruction']).open('x') as handle:handle.write(render_instruction(manifest))
+    if context_recovery:
+        from native_context_control import prepare as prepare_recovery
+        prepare_recovery(manifest,destination,context_recovery)
+    with Path(job['system_prompt']).open('x') as handle:handle.write(render_system(manifest))
     manifest['pinned_files'].update({str(p.resolve()):sha(p) for p in required_paths(manifest)})
     save(registration,manifest)
     validate_registration(registration)
@@ -99,6 +111,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ('accepted-audit-registration','acceptance','destination','job-id'):
         parser.add_argument('--'+name,required=True)
+    parser.add_argument('--context-recovery',action='store_true',
+        help='pin bounded instruction/input recovery and persistent stage locators for this new condition')
     parser.add_argument('--repository',default=str(Path.cwd()))
     parser.add_argument('--attempt-cap',default='20');parser.add_argument('--deadline-seconds',type=int,default=10800)
     print(prepare(**vars(parser.parse_args())))
