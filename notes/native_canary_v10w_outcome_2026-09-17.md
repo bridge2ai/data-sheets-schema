@@ -26,6 +26,8 @@ The full D4D passed schema validation (transcript line 437) and term validation 
 
 The model then rewrote the receipt (lines 457/459) and reran the same check. The result at line 462 exited successfully, reporting eight of eight chunks, 78 of 80 snippets verified, two unattesting entries below the floors, one with no value-token overlap, and 58 of 73 slots with receipts, with six exempt. A successful exit does not establish that each snippet supports its assigned claim.
 
+The rewrite changed quotations as well as slot paths: nine snippet occurrences were removed and eleven added. It was not only a path remap. The two unattesting additions were short labels; none of these receipt-content changes has been accepted as semantically supporting its assigned value.
+
 Core derivation had not started. No frozen original pair, Phase 3 audit, reconciliation report or live provenance record was produced. Physical traversal of both output directories, including hidden and ignored files, found only the full record and coverage receipt.
 
 ## Correction to the operator stop
