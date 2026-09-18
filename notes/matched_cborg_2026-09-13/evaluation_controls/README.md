@@ -45,6 +45,44 @@ Once ownership advances to a successor registration, siblings and predecessors
 cannot spend the old checkpoint. A successor must explicitly identify the last
 evaluation registration and its current, fully settled ledger.
 
+## Offline preparation
+
+After independent generation acceptance, prepare the complete initial roster:
+
+```bash
+PYTHONPATH=src python notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py \
+  --destination /absolute/new-evaluation-condition \
+  --generation-registration /absolute/generation/registration.json \
+  --generation-acceptance /absolute/independent-acceptance.json \
+  --generation-job-id REGISTERED_GENERATION_JOB \
+  --context-path /absolute/caller-applicability.json \
+  --billing-checkpoint /absolute/fully-settled-generation-billing.json
+```
+
+The preparer requires existing acceptance of both unchanged artifacts and the
+actual final generation ledger. The source bundle must still match its original
+generation identity; re-pinning altered source bytes is refused. The evaluation
+code, schemas, profiles, definitions and prompts have their own explicit pins.
+
+It registers 20 rubric ratings: 12 semantic (three ratings for each rubric/class
+cell), four field-agent primaries and four direct-API primaries. Grounding and
+fitness cover every populated schema-known top-level slot in each selected
+dataset. Excluded empty or non-schema fields are listed in the slot inventory.
+An undeclared resource container is refused as ambiguous scope; an explicit
+Dataset or CoreDataset retains its component resources within that dataset.
+
+Primary canaries precede dependent repeats and slot sweeps. Each group's first
+eligible slot is chosen lexicographically, before observing judgments. Subtypes
+remain deferred until the complete fitness results exist. The preparer creates
+no billing ledger, allocation claim, attempt, acceptance or launch approval.
+
+The preparation report includes exact request sizes, the complete roster and a
+clearly labeled local cost estimate. Bytes divided by four is only a token-size
+heuristic; native cost estimates use the entire attempt cap. Sum-of-caps exposure
+is distinct from expected spend. Recheck provider prices and use actual canary
+costs before expansion; request admission always uses the shared live ledger.
+Preparation does not contact a model or token-count endpoint.
+
 ## Instruments and evidence
 
 | Style | Execution and acceptance contract |

@@ -61,3 +61,26 @@ fully settled checkpoint, applicability evidence and complete roster before any
 scores are observed. It must preserve every prior condition, failed attempt and
 historical evaluation. Conditional subtype work follows completed fitness and
 retains its full parent evidence; no future judgment is invented for registration.
+
+## Offline registration preparer follow-up
+
+The separate preparer materializes 20 rubric ratings (12 semantic, four field,
+four direct API) and grounding/fitness for each eligible populated slot. It
+requires actual independent generation acceptance and settled accounting, and
+creates no ledger, acceptance, allocation claim or paid attempt. Every primary
+style/rubric/class canary precedes dependent slot sweeps and the eight semantic
+repeats. Its local byte-based planning estimate is distinct from counted tokens,
+sum-of-caps exposure and actual admission under the shared ledger.
+
+Review #2099 reproduced a source-bundle substitution: the original implementation
+would pin replacement bundle bytes even though the accepted generation named
+different bytes. Preparation now verifies both the generation's bundle identity
+and its original file pin before creating the destination. Independent replay
+rejects the original failure and three additional wrong-path/missing/conflicting
+pin cases. No real evaluation registration or provider call used the flawed draft.
+
+The combined runner/preparer suite passed 97 tests before the final canary-order
+adjustment. The focused preparer suite exercises actual native/API rendering,
+explicit dataset scope, complete roster/order, source identity, stale or pending
+accounting and exclusive output paths. Independent review also verifies that
+offline check names in the manifest are a planned checklist, not claimed results.
