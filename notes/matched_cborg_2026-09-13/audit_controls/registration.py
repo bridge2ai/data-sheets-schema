@@ -1,6 +1,6 @@
 """Identity, ancestry and accounting for a separately registered native audit."""
 from contextlib import contextmanager
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 import math
@@ -513,8 +513,41 @@ def open_audit_ledger(manifest, registration_path, manifest_sha256):
     return ledger
 
 
+def _full_reservation_debit(receipt, row, result):
+    """An explicit budget debit does not establish a provider charge or usage."""
+    contradictory = {'confirmed_complete_charge_usd', 'confirmed_charge_usd',
+                     'user_confirmation', 'provider_observation_sha256'}
+    runtime = result.get('runtime')
+    if (contradictory.intersection(receipt) or
+            receipt.get('provider_charge_confirmed') is not False or
+            receipt.get('provider_charge_usd', 'missing') is not None or
+            receipt.get('provider_usage_is_final') is not False or
+            any(receipt[key] is not False for key in ('source_attempt_completed', 'scientific_acceptance') if key in receipt) or
+            not isinstance(runtime, dict) or runtime.get('proxy_shutdown_complete') is not True or
+            ('proxy_initialized' in runtime and runtime['proxy_initialized'] is not True) or
+            type(runtime.get('unfinished_handlers')) is not int or runtime['unfinished_handlers'] != 0):
+        raise BudgetStop('full reservation debit needs closed runtime and explicitly unknown provider charge')
+    for key in ('request_sha256', 'accounting_observation_sha256'):
+        if not isinstance(receipt.get(key), str) or not re.fullmatch(r'[0-9a-f]{64}', receipt[key]):
+            raise BudgetStop('full reservation debit lacks exact request and accounting evidence hashes')
+    if receipt['request_sha256'] != row.get('request_sha256'):
+        raise BudgetStop('full reservation debit names another request payload')
+    if not isinstance(receipt.get('recorded_at'), str) or not receipt['recorded_at'].strip():
+        raise BudgetStop('full reservation debit lacks its recorded authorization time')
+    try:
+        cost = Decimal(str(receipt['budget_debit_usd']))
+        reservation = Decimal(str(row['reserved_usd']))
+        released = Decimal(str(receipt['released_excess_reservation_usd']))
+    except (InvalidOperation, ValueError, TypeError, KeyError) as error:
+        raise BudgetStop('full reservation debit has invalid amounts') from error
+    if (not cost.is_finite() or not reservation.is_finite() or not released.is_finite() or
+            cost <= 0 or cost != reservation or released != 0):
+        raise BudgetStop('budget exception must debit the full reservation without releasing any excess')
+    return cost
+
+
 def validate_audit_reconciliation(manifest):
-    """A confirmed copy can succeed an audit ledger without rewriting it (#2110)."""
+    """A separately authorized copy can succeed stopped accounting without rewriting it."""
     continuation = manifest['budget']['continuation']
     bridge = continuation.get('reconciliation')
     if bridge is None:
@@ -538,17 +571,18 @@ def validate_audit_reconciliation(manifest):
         raise BudgetStop('reconciled audit predecessor paths or generation lineage differ')
     source = read_json(paths['source_ledger'])
     result, receipt = read_json(paths['result']), read_json(paths['receipt'])
+    exception = receipt.get('kind') == 'user_authorized_full_reservation_debit'
     if (source.get('manifest_sha256') != source_sha or
             result.get('registration_sha256') != source_sha or result.get('job_id') != job['id'] or
             result.get('scope') != 'phase3_audit_only' or result.get('status') != 'stopped' or
-            receipt.get('kind') != 'user_confirmed_provider_charge_reconciliation' or
+            receipt.get('kind') not in ('user_confirmed_provider_charge_reconciliation', 'user_authorized_full_reservation_debit') or
             receipt.get('source_attempt_kind') != 'phase3_audit_only' or
             receipt.get('source_registration_sha256') != source_sha or
             receipt.get('source_ledger_sha256') != sha(paths['source_ledger']) or
             receipt.get('stopped_result_sha256') != sha(paths['result'])):
         raise BudgetStop('reconciliation does not bind the stopped audit accounting')
-    confirmation = receipt.get('user_confirmation', {})
-    if any(not isinstance(confirmation.get(key), str) or not confirmation[key].strip()
+    confirmation = receipt.get('user_authorization' if exception else 'user_confirmation', {})
+    if not isinstance(confirmation, dict) or any(not isinstance(confirmation.get(key), str) or not confirmation[key].strip()
            for key in ('exact_response', 'quoted_request')):
         raise BudgetStop('audit reconciliation lacks explicit confirmation evidence')
     expected = strict_json(canonical_json(source))
@@ -556,21 +590,36 @@ def validate_audit_reconciliation(manifest):
     if len(pending) != 1 or pending[0].get('status') != 'pending':
         raise BudgetStop('audit reconciliation must resolve exactly one pending source request')
     row = pending[0]
-    cost = Decimal(str(receipt['confirmed_complete_charge_usd']))
+    cost = (_full_reservation_debit(receipt, row, result) if exception
+            else Decimal(str(receipt['confirmed_complete_charge_usd'])))
     if (row['id'] != receipt['request_id'] or row['attempt'] != receipt['attempt'] or
             row['attempt'] != attempt_identity(source_sha, job['id']) or
             row['reserved_usd'] != receipt['previous_reservation_usd'] or
             result.get('unresolved_requests') != [row['id']] or
             not cost.is_finite() or not Decimal(0) <= cost <= Decimal(row['reserved_usd'])):
         raise BudgetStop('audit confirmation differs from the source request or reservation')
-    row.update(status='settled', cost_usd=str(cost), settled_at=receipt['recorded_at'],
-        settlement_basis='user_confirmed_provider_accounting',
-        reconciliation_receipt_sha256=sha(paths['receipt']),
-        provider_observation_sha256=receipt['provider_observation_sha256'], provider_usage_is_final=False,
-        source_attempt_kind='phase3_audit_only', source_attempt_outcome='stopped')
-    expected['reconciled_from'] = {'checkpoint_sha256': sha(paths['source_ledger']),
-        'receipt_sha256': sha(paths['receipt']), 'request_id': receipt['request_id'],
-        'previous_status': 'pending', 'confirmed_charge_usd': str(cost), 'source_attempt_completed': False}
+    if exception:
+        row.update(status='settled', cost_usd=str(cost), settled_at=receipt['recorded_at'],
+            settlement_basis='user_authorized_full_reservation_debit',
+            reconciliation_receipt_sha256=sha(paths['receipt']),
+            accounting_observation_sha256=receipt['accounting_observation_sha256'],
+            provider_charge_confirmed=False, provider_charge_usd=None, provider_usage_is_final=False,
+            released_excess_reservation_usd='0',
+            source_attempt_kind='phase3_audit_only', source_attempt_outcome='stopped')
+        expected['reconciled_from'] = {'checkpoint_sha256': sha(paths['source_ledger']),
+            'receipt_sha256': sha(paths['receipt']), 'request_id': receipt['request_id'],
+            'previous_status': 'pending', 'budget_debit_usd': str(cost),
+            'settlement_basis': 'user_authorized_full_reservation_debit',
+            'provider_charge_confirmed': False, 'source_attempt_completed': False}
+    else:
+        row.update(status='settled', cost_usd=str(cost), settled_at=receipt['recorded_at'],
+            settlement_basis='user_confirmed_provider_accounting',
+            reconciliation_receipt_sha256=sha(paths['receipt']),
+            provider_observation_sha256=receipt['provider_observation_sha256'], provider_usage_is_final=False,
+            source_attempt_kind='phase3_audit_only', source_attempt_outcome='stopped')
+        expected['reconciled_from'] = {'checkpoint_sha256': sha(paths['source_ledger']),
+            'receipt_sha256': sha(paths['receipt']), 'request_id': receipt['request_id'],
+            'previous_status': 'pending', 'confirmed_charge_usd': str(cost), 'source_attempt_completed': False}
     checkpoint = read_json(checkpoint_path)
     if canonical_json(checkpoint) != canonical_json(expected):
         raise BudgetStop('reconciled audit checkpoint changes unconfirmed history')

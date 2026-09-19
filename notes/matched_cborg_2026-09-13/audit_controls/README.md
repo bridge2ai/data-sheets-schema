@@ -78,6 +78,25 @@ result and confirmation receipt. Admission verifies that the checkpoint changes
 only that confirmed pending request and belongs to the current sequence tip. It
 does not erase the stopped attempt, invent final usage or accept its audit.
 
+If a user explicitly authorizes counting the entire unresolved reservation against
+the budget, a separate `user_authorized_full_reservation_debit` receipt can support
+the same continuation bridge. This is a conservative budget debit, **not** a
+confirmed provider fee. It binds one exact stopped audit request, its payload hash,
+the unchanged source ledger/result, the user's exact authorization and quoted
+request, and an accounting-observation hash. `budget_debit_usd` must equal the full
+positive reservation; `released_excess_reservation_usd` must be zero. The runtime
+must have completed shutdown with zero unfinished handlers.
+
+The receipt and derived row retain `provider_charge_confirmed: false`,
+`provider_charge_usd: null` and `provider_usage_is_final: false`. Confirmed-charge
+fields are forbidden in this exception receipt. The derived checkpoint books that
+amount in `cost_usd` with `settlement_basis: user_authorized_full_reservation_debit`;
+its provenance uses `budget_debit_usd`, never `confirmed_charge_usd`. All prior rows,
+partial observations, caps and stopped-attempt metadata remain unchanged. Preserve
+the original pending ledger and stopped result. Counting this debit neither clears
+the transport failure nor accepts an audit, and never authorizes a budget reset or
+an additional attempt beyond the existing approval.
+
 Stopped execution results include `stop_source` and `runtime` evidence. Runtime
 evidence records whether the proxy was initialized and its bounded shutdown
 completed. `unfinished_handlers` is a count only after that shutdown; otherwise it
