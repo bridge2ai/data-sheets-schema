@@ -173,6 +173,10 @@ def _closure(manifest, predecessor, lineage):
         _require(registration.get('kind') == 'd4d_native_audit_continuation'
                  and sha(registration['parent']['registration']) == manifest['budget_sequence']['origin']['registration']['sha256'],
                  'audit predecessor differs from original generation')
+        runtime = result.get('runtime')
+        _require(isinstance(runtime, dict) and type(runtime.get('exit_code')) is int
+                 and runtime['exit_code'] == 0,
+                 'audit predecessor lacks successful native integer-zero exit')
         expected_scope = 'phase3_audit_only'
         artifacts = {result.get('audit_path'): result.get('audit_sha256')}
         validation = result.get('validation', {})

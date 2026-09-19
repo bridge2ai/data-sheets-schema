@@ -87,3 +87,25 @@ A successful result is `completed_pending_independent_review`. Scientific review
 must assess grounding and audit completeness separately. Reconciliation, report
 production, final pair acceptance and evaluations require subsequent registered
 stages. Preserve the stopped source run, rejected audits and all billing evidence.
+
+For a new condition, `--context-recovery` preserves exact instruction and input
+bytes as registered JSONL files under `recovery/`. The persistent system prompt
+identifies the current stage, output and exact validator, and gives the recovery
+index path and bounded Read recipe. In that index, `instruction` is the current
+authoritative task; `parent_instruction` is historical reference. The index itself
+uses bounded frames, so long original lines cannot make its bootstrap Read too large.
+Each physical frame is at most 1,000 UTF-8 bytes, and each prescribed Read covers one
+exact range of at most 12 lines. The original scientific instruction and input bytes
+remain unchanged. Omission preserves the previous preparation and system prompt.
+
+Recovery reads are optional. A completed prescribed recovery Read must have exact
+typed file metadata and complete raw and numbered content; a truncated or
+persisted-only result stops the attempt. Requests outside the registered frame
+ranges are denied and listed as unprescribed explorations. Successful ranges are
+recorded without asserting that the whole instruction was recovered or remains in
+the current context after compaction. The native 200,000-token context limit and
+automatic compaction remain unchanged. No full-context reacquisition gate is added.
+The pinned native runtime also makes auxiliary requests with its own system prompt;
+this feature does not reject those requests or claim every request carries the
+registered system. Actual scientific-session delivery and final scientific quality
+still require independent review.

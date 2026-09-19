@@ -59,7 +59,7 @@ def fixture(tmp_path, cost='2.1'):
         'status':'completed_pending_independent_review','unresolved_requests':[],
         'validation':{'schema_version':1,'passed':True,'checked':True,'job_id':'audit',
                       'audit_sha256':artifact['sha256'],'findings':[],'errors':[]},
-        'runtime':{'proxy_shutdown_complete':True,'unfinished_handlers':0},
+        'runtime':{'exit_code':0,'proxy_shutdown_complete':True,'unfinished_handlers':0},
         'audit_path':artifact['path'], 'audit_sha256':artifact['sha256']}
     result_ref = save(root/'audit/result.json', result)
     ledger_ref = {'path':str(audit_ledger),'sha256':sequence.sha(audit_ledger)}
@@ -390,6 +390,23 @@ def test_audit_validator_closure_must_be_checked_clean_and_exact(tmp_path,change
     with pytest.raises(BudgetStop):
         with enter(m,r):pytest.fail('contradictory validator receipt admitted')
     assert state.read_bytes()==before and not Path(m['budget']['ledger_path']).exists()
+
+
+@pytest.mark.parametrize('exit_code',[None,False,True,1,-1,'0',0.0,'missing'])
+def test_audit_exit_must_be_typed_integer_zero_before_handoff(tmp_path,exit_code):
+    m,r,state=fixture(tmp_path);p=m['budget_sequence']['predecessor']
+    result=sequence.read(p['result']['path'])
+    if exit_code=='missing':result['runtime'].pop('exit_code')
+    else:result['runtime']['exit_code']=exit_code
+    # The accepted bytes and every downstream reference are coherently repinned;
+    # rejection must concern the contradiction, not an outdated hash.
+    repin(m,p['result'],result);refresh_audit_origin(m);finish_registration(m,r)
+    original={name:Path(name).read_bytes() for name in m['pinned_files']}
+    state_before=state.read_bytes()
+    with pytest.raises(BudgetStop,match='audit predecessor lacks successful native integer-zero exit'):
+        with enter(m,r):pytest.fail('contradictory native completion admitted')
+    assert state.read_bytes()==state_before and not Path(m['budget']['ledger_path']).exists()
+    assert original=={name:Path(name).read_bytes() for name in original}
 
 
 def test_valid_pure_audit_report_needs_no_nested_registration_hash(tmp_path):

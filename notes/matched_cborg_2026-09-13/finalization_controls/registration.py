@@ -25,6 +25,9 @@ def required_paths(manifest):
     from audit_controls.transport import transport_paths
     accepted = read_json(manifest['accepted_audit']['registration']['path'])
     paths = implementation_paths(manifest) | set(transport_paths(manifest))
+    if 'context_recovery' in manifest:
+        from native_context_control import paths as recovery_paths
+        paths.update(Path(name) for name in recovery_paths(manifest))
     paths.update(Path(name) for name in accepted['pinned_files'])
     paths.update(Path(name) for name in manifest['inputs'].values())
     paths.update(Path(manifest['job'][name]) for name in ('instruction', 'system_prompt'))
@@ -140,6 +143,13 @@ def validate_registration(path):
             job['check_argv'] != [[*prefix,'--operation','check','--round',str(i)] for i in range(2)]):
         raise BudgetStop('finalization helper commands differ from the selected registration')
     readable=set(manifest['inputs'].values())|{job['instruction'],job['system_prompt']}
+    if 'context_recovery' in manifest:
+        from native_context_control import paths as recovery_paths, validate as validate_recovery
+        from .prepare import render_system
+        validate_recovery(manifest,path)
+        readable.update(recovery_paths(manifest))
+        if Path(job['system_prompt']).read_text(encoding='utf-8')!=render_system(manifest):
+            raise BudgetStop('finalization system prompt differs from its registered recovery contract')
     if set(job['readable_inputs'])!=readable:
         raise BudgetStop('finalization read scope differs from its exact input roster')
     if type(job['deadline_seconds']) is not int or job['deadline_seconds']<=0:

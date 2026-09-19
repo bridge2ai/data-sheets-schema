@@ -18,6 +18,9 @@ class FileAccess:
         # or output root which could now be a link to somewhere else.
         self.inputs = {Path(p) for p in paths.get('inputs', [])}
         self.outputs = [Path(p) for p in paths.get('output_directories', [])]
+        self.bounded_reads = {Path(p): n for p, n in paths.get('bounded_reads', {}).items()}
+        if any(p not in self.inputs or type(n) is not int or n < 1 for p, n in self.bounded_reads.items()):
+            raise BudgetStop('bounded native reads require registered inputs and positive line counts')
         self.config = Path(config_root).resolve() if config_root else None
         self.session = None
         self.persisted = {}
@@ -46,6 +49,14 @@ class FileAccess:
     def classify(self, tool, payload):
         try:
             target = self.target(payload.get('file_path'))
+            if tool == 'Read' and target in self.bounded_reads:
+                offset, limit = payload.get('offset'), payload.get('limit')
+                count = self.bounded_reads[target]
+                if (set(payload) != {'file_path', 'offset', 'limit'} or
+                        type(offset) is not int or type(limit) is not int or
+                        offset < 1 or offset > count or (offset - 1) % 12 or
+                        limit != min(12, count - offset + 1)):
+                    return 'not_prescribed', 'bounded context Read requires one exact registered range'
             if tool == 'Read' and target in self.inputs:
                 return 'prescribed', 'a registered input the instruction reads'
             if any(folder in target.parents for folder in self.outputs):

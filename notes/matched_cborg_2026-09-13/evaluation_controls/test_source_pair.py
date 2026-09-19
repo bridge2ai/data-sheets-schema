@@ -49,7 +49,7 @@ def composite(tmp_path,monkeypatch):
     auditresult=save(root/'audit/result.json',{'scope':'phase3_audit_only','job_id':'audit','registration_sha256':auditref['sha256'],
         'status':'completed_pending_independent_review','unresolved_requests':[],
         'validation':{'passed':True,'checked':True,'job_id':'audit','audit_sha256':reg.sha(auditpath),'findings':[],'errors':[]},
-        'runtime':{'proxy_shutdown_complete':True,'unfinished_handlers':0},'audit_path':str(auditpath),'audit_sha256':reg.sha(auditpath)})
+        'runtime':{'exit_code':0,'proxy_shutdown_complete':True,'unfinished_handlers':0},'audit_path':str(auditpath),'audit_sha256':reg.sha(auditpath)})
     auditaccept=save(root/'audit/acceptance.json',{'verdict':'accept','registration_sha256':auditref['sha256'],
         'result_sha256':auditresult['sha256'],'ledger_sha256':reg.sha(audit_ledger),'artifacts':{str(auditpath):reg.sha(auditpath)}})
     state=original_ledger.with_name('audit_sequence.json');legacy={'schema_version':1,'registration_sha256':auditref['sha256'],
