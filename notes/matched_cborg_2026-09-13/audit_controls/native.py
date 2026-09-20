@@ -47,6 +47,9 @@ def classify_command(command, python, programs, command_policy=None):
     expected = (command_policy or {}).get('validator_argv')
     if expected and tokens == expected and tokens[0] == python:
         return 'prescribed', 'the exact registered audit validator and arguments'
+    assembly = (command_policy or {}).get('assemble_argv')
+    if assembly and tokens == assembly and tokens[0] == python:
+        return 'prescribed', 'the exact registered audit part assembly and arguments'
     return 'not_prescribed', 'outside the exact registered audit validator'
 
 
@@ -67,9 +70,17 @@ def build_policy(manifest, registration_path):
     if 'context_recovery' in manifest:
         from native_context_control import paths as recovery_paths
         recovery = {'bounded_reads': recovery_paths(manifest)}
+    staged = {}
+    helpers = [_literal_rule(shlex.join(expected))]
+    if 'audit_output' in manifest:
+        from .output_parts import configuration
+        block = configuration(manifest, registration_path)
+        staged = {'assemble_argv': block['assemble_argv']}
+        recovery['write_paths'] = {path: block['max_part_bytes'] for path in block['parts']}
+        helpers.append(_literal_rule(shlex.join(block['assemble_argv'])))
     return {'version': 1, 'pretool_control': CONTRACT, 'python': manifest['python'],
-        'programs': [], 'manifest_paths': [], 'validator_argv': expected,
-        'allowed_tools': ['Read', 'Write', _literal_rule(shlex.join(expected))],
+        'programs': [], 'manifest_paths': [], 'validator_argv': expected, **staged,
+        'allowed_tools': ['Read', 'Write', *helpers],
         'readonly_lookups': {'repository': manifest['repository'],
             'inputs': sorted(set([*reads, job['instruction'], job['system_prompt']])),
             'output_directories': [str(output)], **recovery}}
@@ -118,6 +129,9 @@ class AuditHistory:
         self.line = 0
         self.recovery_reads = []
 
+    def _artifact_hash(self):
+        return self.last_write and self.last_write['sha256']
+
     def _marker(self):
         if self.failure.exists():
             raise BudgetStop('audit validator recorded a terminal failure')
@@ -131,7 +145,7 @@ class AuditHistory:
             report.get('findings') != [] or report.get('errors') != [] or
             report.get('job_id') != self.job['id'] or
             report.get('registration_sha256') != self.registration_sha256 or
-            not self.last_write or report.get('audit_sha256') != self.last_write['sha256'] or
+            not self._artifact_hash() or report.get('audit_sha256') != self._artifact_hash() or
             report.get('audit_sha256') != sha(self.audit)):
             raise BudgetStop('audit validation receipt failed or its identity changed')
         return report
@@ -249,6 +263,179 @@ class AuditHistory:
             **({'context_recovery_reads': self.recovery_reads} if 'context_recovery' in self.manifest else {})}
 
 
+class StagedAuditHistory(AuditHistory):
+    """Opt-in exact part Writes → typed assembly → existing once-only validator."""
+    def __init__(self, manifest, registration_sha256, policy, *, replay=False):
+        super().__init__(manifest, registration_sha256, policy)
+        from . import output_parts
+        self.parts_module = output_parts
+        self.output = output_parts.configuration(manifest)
+        self.part_writes = []
+        self.assembler = self.assembly = None
+        self.assembly_summary = None
+        self.replay = replay
+
+    def _artifact_hash(self):
+        return self.assembly and self.assembly['audit']['sha256']
+
+    def _part_descriptions(self):
+        return [entry['part'] for entry in self.part_writes]
+
+    def _current_parts(self, *, allow_empty=False):
+        # Admission also verifies the initial empty roster. Assembly retains
+        # read_parts' nonempty requirement, including during transcript replay.
+        if allow_empty and not self.part_writes:
+            block = self.parts_module.configuration(self.manifest)
+            directory = self.parts_module.canonical(Path(block['parts'][0]).parent)
+            if any(directory.iterdir()):  # Includes hidden/ignored entries.
+                raise BudgetStop('audit parts differ from completed native Writes')
+            return b'', []
+        raw, parts = self.parts_module.read_parts(self.manifest)
+        if parts != self._part_descriptions():
+            raise BudgetStop('audit parts differ from completed native Writes')
+        return raw, parts
+
+    def _assembled(self):
+        report = self.parts_module.verify_assembly(self.manifest, self.registration_sha256, self._part_descriptions())
+        if self.assembly is not None and not self.parts_module.same_json(report, self.assembly):
+            raise BudgetStop('audit assembly changed after its typed result')
+        if (self.assembly_summary is not None and
+                not self.parts_module.same_json(self.parts_module.summary(self.manifest, report), self.assembly_summary)):
+            raise BudgetStop('audit assembly receipt bytes changed after its typed result')
+        return report
+
+    def verify_admission(self):
+        with self.lock:
+            deadline = time.monotonic() + VALIDATOR_RESULT_WAIT_SECONDS
+            while not self.problem and ((self.assembler is not None and self.assembly is None) or
+                    any(self.calls[key][1]['name'] == 'Write' for key in self.pending)):
+                if time.monotonic() >= deadline:
+                    raise BudgetStop('audit part or assembly has no observed successful typed result; no further request admitted')
+                self.lock.wait(min(.05, max(0, deadline - time.monotonic())))
+            if self.problem:
+                raise BudgetStop(self.problem)
+            receipt, failure = self.parts_module.receipt_paths(self.manifest)
+            if os.path.lexists(failure) or (self.assembler is None and
+                    any(os.path.lexists(p) for p in (self.audit, receipt, self.parts_module.ready_path(self.manifest)))):
+                raise BudgetStop('audit output or assembly receipt has no successful observed assembly')
+            if self.assembly is not None:
+                self._assembled()
+            else:
+                self._current_parts(allow_empty=True)
+            super().verify_admission()
+
+    def _observe(self, event):
+        self.line += 1
+        if not isinstance(event, dict):
+            raise BudgetStop('audit transcript contains a non-object event')
+        for block in _blocks(event):
+            if not isinstance(block, dict):
+                continue
+            if block.get('type') == 'tool_use':
+                identity, tool, payload = block.get('id'), block.get('name'), block.get('input')
+                if not isinstance(identity, str) or not identity or identity in self.calls or not isinstance(payload, dict):
+                    raise BudgetStop('audit tool identity or input is malformed')
+                if self.validator is not None:
+                    raise BudgetStop('audit tools cannot continue after the single terminal validator')
+                pending_write = any(self.calls[key][1]['name'] == 'Write' for key in self.pending)
+                if pending_write or (self.assembler is not None and self.assembly is None):
+                    raise BudgetStop('audit part or assembly tool result is still pending')
+                tokens, _ = _simple_command(payload.get('command')) if tool == 'Bash' and isinstance(payload.get('command'), str) else (None, None)
+                assembly = tool == 'Bash' and tokens == self.policy['assemble_argv']
+                validator = tool == 'Bash' and tokens == self.policy['validator_argv']
+                if self.assembler is not None and not validator:
+                    raise BudgetStop('only the terminal validator may follow audit assembly')
+                if assembly or validator:
+                    if (set(payload) - {'command', 'description', 'timeout'} or
+                        ('description' in payload and not isinstance(payload['description'], str)) or
+                        ('timeout' in payload and (type(payload['timeout']) is not int or payload['timeout'] <= 0)) or self.pending):
+                        raise BudgetStop('audit helper requires foreground invocation and no pending tools')
+                if tool == 'Write':
+                    if self.pending or len(self.part_writes) >= len(self.output['parts']):
+                        raise BudgetStop('audit part Write requires no pending tools and an unused registered slot')
+                    target = self.files.target(payload.get('file_path'))
+                    if (str(target) != self.output['parts'][len(self.part_writes)] or
+                            self.files.classify(tool, payload)[0] != 'prescribed'):
+                        raise BudgetStop('audit Write must use the next bounded registered part')
+                    if not self.replay and os.path.lexists(target):
+                        raise BudgetStop('audit part already exists before its native Write')
+                    if self.part_writes and not self.replay:
+                        self._current_parts()
+                if assembly:
+                    self._current_parts()
+                    if self.assembler is not None:
+                        raise BudgetStop('audit assembly is once-only')
+                    if not self.replay and any(os.path.lexists(p) for p in (*self.parts_module.receipt_paths(self.manifest),
+                            self.parts_module.ready_path(self.manifest), self.audit)):
+                        raise BudgetStop('audit assembly has stale output or receipts')
+                    self.assembler = {'id': identity, 'call_line': self.line}
+                if validator:
+                    if self.assembly is None:
+                        raise BudgetStop('audit validator requires a completed typed assembly')
+                    self._assembled()
+                    self.validator = {'id': identity, 'line': self.line, 'audit_sha256': self._artifact_hash()}
+                self.calls[identity] = (self.line, block)
+                self.pending.add(identity)
+            elif block.get('type') == 'tool_result':
+                identity = block.get('tool_use_id')
+                if identity not in self.calls or identity in self.results:
+                    raise BudgetStop('audit result lacks a unique preceding call')
+                self.results.add(identity); self.pending.discard(identity)
+                start, call = self.calls[identity]
+                if 'context_recovery' in self.manifest:
+                    from native_context_control import read_result
+                    recovered = read_result(self.manifest, self.files, call, event, block)
+                    if recovered is not None:
+                        self.recovery_reads.append({'call_line': start, 'result_line': self.line, **recovered})
+                if call['name'] == 'Write':
+                    target = Path(self.output['parts'][len(self.part_writes)])
+                    if not _write_success(call, block, event, target):
+                        raise BudgetStop('audit part Write lacks its exact successful typed result')
+                    raw = call['input']['content'].encode('utf-8')
+                    if self.parts_module.read_regular(target, self.output['max_part_bytes']) != raw:
+                        raise BudgetStop('audit part differs from its native Write result')
+                    self.part_writes.append({'call_line': start, 'result_line': self.line,
+                                            'part': self.parts_module.describe(target, raw)})
+                if ((self.assembler and identity == self.assembler['id']) or
+                        (self.validator and identity == self.validator['id'])):
+                    metadata = event.get('tool_use_result')
+                    if (block.get('is_error') is not False or not isinstance(metadata, dict) or
+                        metadata.get('interrupted') is not False or not isinstance(metadata.get('stdout'), str) or
+                        not isinstance(metadata.get('stderr'), str) or
+                        any(k in metadata and (type(metadata[k]) is not int or metadata[k] != 0) for k in ('exitCode', 'exit_code'))):
+                        raise BudgetStop('audit helper lacks an exact successful typed result')
+                    report = strict_json(metadata['stdout'])
+                    if self.assembler and identity == self.assembler['id']:
+                        expected = self._assembled()
+                        if not self.parts_module.same_json(report, self.parts_module.summary(self.manifest, expected)):
+                            raise BudgetStop('audit assembly stdout differs from its receipt')
+                        self.assembly = expected
+                        self.assembly_summary = report
+                        self.assembler['result_line'] = self.line
+                    else:
+                        if not self.parts_module.same_json(report, self._marker()):
+                            raise BudgetStop('audit validator result differs from its current receipt')
+                        self.validation = report
+        if event.get('type') == 'result':
+            self.finish()
+
+    def finish(self):
+        if self.pending or not self.assembly or not self.validator or not self.validation:
+            raise BudgetStop('audit completion lacks typed part assembly and a single successful terminal validator')
+        self._assembled()
+        if self.validation != self._marker():
+            raise BudgetStop('audit validation changed after its result')
+        return {'audit_parts': self.part_writes, 'audit_assembly': {**self.assembler, 'receipt': self.assembly,
+                    'receipt_sha256': self.assembly_summary['receipt_sha256']},
+                'validator': self.validator, 'validation': self.validation,
+                **({'context_recovery_reads': self.recovery_reads} if 'context_recovery' in self.manifest else {})}
+
+
+def make_history(manifest, registration_sha256, policy, *, replay=False):
+    if 'audit_output' in manifest:
+        return StagedAuditHistory(manifest, registration_sha256, policy, replay=replay)
+    return AuditHistory(manifest, registration_sha256, policy)
+
 
 class AuditProxy(NativeProxy):
     """Recheck terminal markers after token counting, before reservation/send."""
@@ -268,7 +455,7 @@ class AuditProxy(NativeProxy):
             yield
 
 def inspect_transcript(events, policy, manifest, registration_sha256, control_path, config_root,
-                       *, history_factory=AuditHistory, command_classifier=classify_command, phase_key="phase3"):
+                       *, history_factory=None, command_classifier=classify_command, phase_key="phase3"):
     check = check_control_history(events, control_path, policy, command_classifier, config_root)
     if not check.get('checked') or check.get('problems'):
         raise BudgetStop('native audit control history is incomplete or invalid')
@@ -306,7 +493,8 @@ def inspect_transcript(events, policy, manifest, registration_sha256, control_pa
         classified.append({**denial, 'classification': classification, 'basis': basis})
     if any(d['classification'] != 'not_prescribed' for d in classified):
         raise BudgetStop('a prescribed or unclassifiable audit operation was denied')
-    history = history_factory(manifest, registration_sha256, policy)
+    history = (history_factory(manifest, registration_sha256, policy) if history_factory else
+               make_history(manifest, registration_sha256, policy, replay=True))
     for event in events:
         history.observe(event)
     return {'control': check, 'denials': classified, phase_key: history.finish(), 'terminal': terminal,
@@ -426,7 +614,10 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     state['stop_source'] = 'native_setup'
     config = attempt / 'cli_config'; config.mkdir(mode=0o700)
     billing_attempt = attempt_identity(context.manifest_sha256, job['id'])
-    history = selected.AuditHistory(manifest, context.manifest_sha256, policy)
+    history = getattr(selected, 'make_history', selected.AuditHistory)(manifest, context.manifest_sha256, policy)
+    if selected is sys.modules[__name__] and 'audit_output' in manifest:
+        from .output_parts import configuration
+        Path(configuration(manifest)['parts'][0]).parent.mkdir()
     def admission():
         context.verify()
         history.verify_admission()

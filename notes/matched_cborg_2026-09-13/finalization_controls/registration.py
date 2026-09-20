@@ -17,8 +17,13 @@ KIND = 'd4d_native_finalization'
 
 
 def implementation_paths(manifest):
-    return (audit_registration.implementation_paths(manifest)
+    paths = (audit_registration.implementation_paths(manifest)
             | set(Path(__file__).parent.glob('*.py')) | {Path(sequence.__file__).resolve()})
+    if (manifest.get('accepted_audit') and
+            'audit_output' in read_json(manifest['accepted_audit']['registration']['path'])):
+        from audit_controls import output_parts
+        paths.add(Path(output_parts.__file__).resolve())
+    return paths
 
 
 def required_paths(manifest):
@@ -29,6 +34,12 @@ def required_paths(manifest):
         from native_context_control import paths as recovery_paths
         paths.update(Path(name) for name in recovery_paths(manifest))
     paths.update(Path(name) for name in accepted['pinned_files'])
+    if 'audit_output' in accepted:
+        from audit_controls.output_parts import closure_paths
+        result_ref = manifest['budget_sequence']['audit_origin']['result']
+        if sha(result_ref['path']) != result_ref['sha256']:
+            raise BudgetStop('accepted staged audit result changed before pinning')
+        paths.update(closure_paths(accepted, manifest['accepted_audit']['registration']['path'], read_json(result_ref['path'])))
     paths.update(Path(name) for name in manifest['inputs'].values())
     paths.update(Path(manifest['job'][name]) for name in ('instruction', 'system_prompt'))
     paths.add(Path(manifest['native_runtime']['executable']))
@@ -92,6 +103,8 @@ def validate_budget_identity(manifest,accepted):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
+    if 'audit_output' in manifest:
+        raise BudgetStop('audit staged output cannot become a Phase 4 output mode')
     if (manifest.get('kind') != KIND or type(manifest.get('schema_version')) is not int or
             manifest['schema_version'] != 1 or manifest.get('render_version') != 14 or
             manifest.get('protocol_version') != 3):

@@ -122,6 +122,11 @@ def render_instruction(manifest: dict) -> str:
                       + inputs[name].read_text(encoding="utf-8"))
     command = shlex.join(manifest["job"]["validator_argv"])
     target = str(_path(manifest["job"]["audit_path"]))
+    output_instruction = ("Write only the complete audit JSON with the native Write tool to this exact destination:\n\n"
+                          + target + "\n\n")
+    if 'audit_output' in manifest:
+        from .output_parts import instruction
+        output_instruction = instruction(manifest) + '\n'
     return (
         "# Registered native Phase 3 audit continuation\n\n"
         "This is a new audit invocation using an unchanged stopped run's frozen full/core pair. "
@@ -144,9 +149,8 @@ def render_instruction(manifest: dict) -> str:
         "that can change this task.\n\n"
         "Do not regenerate, derive, repair, reconcile, annotate or rewrite either original, "
         "the receipt, sources, inventory or any other file. Do not execute old playbook commands. "
-        "Write only the complete audit JSON with the native Write tool to this exact destination:\n\n"
-        + target + "\n\n"
-        "Then invoke this exact validator once, in the foreground:\n\n```bash\n"
+        + output_instruction
+        + "Then invoke this exact validator once, in the foreground:\n\n```bash\n"
         + command + "\n```\n\n"
         "After invoking it, do not call another tool, edit the audit, repair a finding or rerun "
         "validation. Failure ends the attempt and preserves the rejected audit. A successful "
@@ -164,6 +168,9 @@ def validate_audit(manifest: dict) -> dict:
         if (type(manifest["protocol_version"]) is not int or manifest["protocol_version"] != 3
                 or type(manifest["render_version"]) is not int or manifest["render_version"] != 14):
             raise ValueError("audit continuation requires protocol 3 and renderer 14")
+        if 'audit_output' in manifest:
+            from .output_parts import validate_output
+            validate_output(manifest)
         audit = _path(manifest["job"]["audit_path"])
         raw = audit.read_bytes()
         report["audit_sha256"] = _sha(raw)
