@@ -193,3 +193,60 @@ The pinned native runtime also makes auxiliary requests with its own system prom
 this feature does not reject those requests or claim every request carries the
 registered system. Actual scientific-session delivery and final scientific quality
 still require independent review.
+
+### Bounded native audit output
+
+For a fresh condition, `--staged-audit-output` selects the registered
+`audit_output.protocol: raw_utf8_parts_v1` mode
+([#2144](https://github.com/bridge2ai/data-sheets-schema/issues/2144)). This addresses
+a single large native Write exceeding a response's output limit. It does not
+change the source bundle, scientific/evidence instrument, model limits, budget,
+or independent acceptance requirements. Historical registrations omit the field
+and retain the original whole-audit Write and replay behavior.
+
+The model writes a nonempty contiguous prefix of 64 registered paths,
+`output/audit-parts/000001.txt` through `000064.txt`, in that order. Each part is
+nonempty raw UTF-8, at most 32,768 bytes. Every Write must complete with its exact
+typed result before another tool. Registered Reads, including optional recovery
+reads and completed output parts, remain available between completed Writes.
+Completed parts cannot be rewritten. The native pretool policy grants only these
+exact Write destinations and byte limits; the final `output/audit.json` is written
+by the trusted assembler.
+
+After the last part, the sole registered assembly command is:
+
+```text
+REGISTERED_PYTHON -m audit_controls.output_parts --registration REGISTRATION
+```
+
+The assembler concatenates the exact part bytes without separators, JSON parsing,
+normalization, inference or repair. Individual parts need not be complete JSON.
+Gaps, extra/hidden files, invalid UTF-8, aliases, oversized parts, stale receipts,
+changed parts and existing final output fail closed. A failed assembly cannot be
+retried or repaired in that attempt. The complete roster and hashes remain in the
+exclusive `assembly.json` receipt outside native-writable output. A final hardlink
+at `assembly_ready.json` witnesses completed output/receipt writes, closes and
+fsyncs; no fallible persistence step follows publication. If that witness is lost
+on reboot, review is required: reentry does not recreate it. Failure receipts are
+best effort; missing readiness and missing typed success remain blockers even if
+a failure receipt could not be saved.
+
+Bash stdout contains only a compact receipt digest, part count, final audit
+digest/byte count and registration/job identity. Native history binds the entire
+part roster to real successful Write results, then binds that compact typed
+assembly result to the retained receipt and exact final bytes. Paid admission
+waits for observed part/assembly results during the existing bounded stdout-flush
+race; a file or receipt alone cannot release it. After assembly starts, only the
+existing single terminal validator may run, after successful typed assembly.
+Before assembly, every admission checks the exact completed-part roster,
+including its initially empty state and while a registered Read is pending;
+premature final output or assembly receipts also block admission
+([#2145](https://github.com/bridge2ai/data-sheets-schema/issues/2145)).
+That validator retains its original scientific semantics and also checks staged
+assembly provenance. No whole-file native Write is required in this mode.
+
+Phase 4 consumes the same accepted final audit. Preparation verifies and pins
+the accepted result's part/assembly evidence before carrying it forward; later
+admission rechecks it. These administrative part/receipt paths are not added to
+model-readable inputs, and Phase 4 does not inherit the audit-only output mode.
+Neither successful concatenation nor validation supplies scientific acceptance.

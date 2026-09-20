@@ -19,6 +19,13 @@ class FileAccess:
         self.inputs = {Path(p) for p in paths.get('inputs', [])}
         self.outputs = [Path(p) for p in paths.get('output_directories', [])]
         self.bounded_reads = {Path(p): n for p, n in paths.get('bounded_reads', {}).items()}
+        self.write_paths = paths.get('write_paths')
+        if self.write_paths is not None:
+            if (not isinstance(self.write_paths, dict) or not self.write_paths or
+                    any(not Path(p).is_absolute() or Path(p).resolve() != Path(p) or
+                        not any(folder in Path(p).parents for folder in self.outputs) or
+                        type(n) is not int or n < 1 for p, n in self.write_paths.items())):
+                raise BudgetStop('bounded native writes require exact output paths and positive byte limits')
         if any(p not in self.inputs or type(n) is not int or n < 1 for p, n in self.bounded_reads.items()):
             raise BudgetStop('bounded native reads require registered inputs and positive line counts')
         self.config = Path(config_root).resolve() if config_root else None
@@ -49,6 +56,19 @@ class FileAccess:
     def classify(self, tool, payload):
         try:
             target = self.target(payload.get('file_path'))
+            if tool == 'Write' and self.write_paths is not None:
+                original = Path(payload['file_path'])
+                original = original if original.is_absolute() else self.root / original
+                content = payload.get('content')
+                if (str(target) not in self.write_paths or original != target or
+                        set(payload) != {'file_path', 'content'} or not isinstance(content, str)):
+                    return 'not_prescribed', 'outside exact registered native part Writes'
+                try:
+                    size = len(content.encode('utf-8'))
+                except UnicodeError:
+                    return 'not_prescribed', 'native part Write must contain valid UTF-8'
+                if not 0 < size <= self.write_paths[str(target)]:
+                    return 'not_prescribed', 'native part Write exceeds its registered byte bounds'
             if tool == 'Read' and target in self.bounded_reads:
                 offset, limit = payload.get('offset'), payload.get('limit')
                 count = self.bounded_reads[target]

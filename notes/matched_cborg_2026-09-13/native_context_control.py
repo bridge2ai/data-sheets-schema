@@ -44,6 +44,10 @@ def render_system(manifest, original):
         current = ("Current stage: Phase 3 audit only. Write only the new audit at "
                    + job["audit_path"] + ".\nThe single terminal validator is: "
                    + shlex.join(job["validator_argv"]) + "\n")
+        if 'audit_output' in manifest:
+            from audit_controls.output_parts import instruction
+            current = ('Current stage: Phase 3 audit only.\n' + instruction(manifest)
+                       + 'The single terminal validator is: ' + shlex.join(job['validator_argv']) + '\n')
     elif manifest["kind"] == "d4d_native_finalization":
         current = ("Current stage: Phase 4 finalization only. Native writable artifacts: "
                    + job["full_path"] + " and " + job["report_path"]

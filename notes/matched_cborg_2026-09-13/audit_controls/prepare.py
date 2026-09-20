@@ -23,10 +23,17 @@ ends the attempt; do not repair or retry. Success is pending independent review.
 
 
 def render_system(manifest):
+    system = SYSTEM
+    if 'audit_output' in manifest:
+        from .output_parts import instruction
+        system = SYSTEM.replace('write the one registered audit JSON, and invoke\nits exact validator once.',
+            'write bounded registered audit parts, assemble them once, and invoke\nits exact validator once.')
+        if 'context_recovery' not in manifest:
+            system += '\n' + instruction(manifest)
     if "context_recovery" not in manifest:
-        return SYSTEM
+        return system
     from native_context_control import render_system as recovery_system
-    return recovery_system(manifest, SYSTEM)
+    return recovery_system(manifest, system)
 
 
 def save(path, value):
@@ -40,11 +47,14 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             deadline_seconds=10800, continuation_checkpoint=None,
             continuation_source_registration=None, continuation_reconciliation_receipt=None,
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
-            native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False):
+            native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
+            staged_audit_output=False):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
         raise BudgetStop("context recovery requires an explicit boolean")
+    if type(staged_audit_output) is not bool:
+        raise BudgetStop('staged audit output requires an explicit boolean')
     if native_api_force_idle_timeout is not None:
         validate_native_idle_timeout({'native_runtime': {
             'api_force_idle_timeout': native_api_force_idle_timeout,
@@ -122,6 +132,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'sequence_state': str(parent_path(parent, generation['budget']['ledger_path']).with_name('audit_sequence.json')),
         'pinned_files': {}}
     manifest.update(claim_selection)
+    if staged_audit_output:
+        from .output_parts import select
+        select(manifest, path, staged_audit_output)
     if native_api_timeout_ms is not None:
         manifest['native_runtime']['api_timeout_ms'] = native_api_timeout_ms
     if native_api_force_idle_timeout is not None:
@@ -175,6 +188,8 @@ def main():
         help='pin bounded instruction/input recovery and persistent stage locators for this new condition')
     parser.add_argument('--durable-sequence-claim', action='store_true',
         help='require exact-byte durable ownership evidence before this new condition admits spending')
+    parser.add_argument('--staged-audit-output', action='store_true',
+        help='write bounded raw UTF-8 audit parts and assemble their exact bytes before the terminal validator')
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)

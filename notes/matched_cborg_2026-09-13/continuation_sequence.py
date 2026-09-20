@@ -179,6 +179,14 @@ def _closure(manifest, predecessor, lineage):
                  'audit predecessor lacks successful native integer-zero exit')
         expected_scope = 'phase3_audit_only'
         artifacts = {result.get('audit_path'): result.get('audit_sha256')}
+        if 'audit_output' in registration:
+            from audit_controls import output_parts
+            implementation = Path(output_parts.__file__).resolve()
+            _require(manifest['pinned_files'].get(str(implementation)) == sha(implementation),
+                     'staged audit closure implementation is unpinned or changed')
+            for evidence_path in output_parts.closure_paths(registration, refs['registration'], result):
+                _require(manifest['pinned_files'].get(str(evidence_path)) == sha(evidence_path),
+                         'staged audit closure evidence is unpinned or changed')
         validation = result.get('validation', {})
         _require(isinstance(validation, dict) and validation.get('checked') is True
                  and validation.get('findings') == [] and validation.get('errors') == []

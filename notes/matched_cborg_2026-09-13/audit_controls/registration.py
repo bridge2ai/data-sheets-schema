@@ -231,6 +231,8 @@ def implementation_paths(manifest):
     paths.update((repository / 'src/data_sheets_schema').rglob('*.json'))
     paths.update(path for path in (repository / 'src/download/prompts').rglob('*') if path.is_file())
     paths.update(HERE.glob('*.py'))
+    if 'audit_output' not in manifest:
+        paths.discard(HERE / 'output_parts.py')
     paths.update(CONTROLS.glob('*.py'))
     paths.update(BASE / name for name in ('budgeted_cborg.py', 'run_api_canary.py', 'prepare_registration.py'))
     paths.update(repository / name for name in ('pyproject.toml', 'poetry.lock'))
@@ -300,6 +302,11 @@ def verify(manifest, path, expected_sha):
     failure = Path(manifest['job']['attempt_dir']) / 'validation_failure.json'
     if failure.exists():
         raise BudgetStop('audit validation failed; no further paid request is permitted')
+    if 'audit_output' in manifest:
+        from .output_parts import configuration, receipt_paths
+        configuration(manifest, path)
+        if os.path.lexists(receipt_paths(manifest)[1]):
+            raise BudgetStop('audit assembly failed; no further paid request is permitted')
 
 
 def validate_registration(path):
@@ -347,6 +354,9 @@ def validate_registration(path):
     expected_argv = [manifest['python'], '-m', 'audit_controls.contract', '--registration', str(path)]
     if job['validator_argv'] != expected_argv:
         raise BudgetStop('audit validator arguments differ from registration')
+    if 'audit_output' in manifest:
+        from .output_parts import configuration
+        configuration(manifest, path)
     readable = set(manifest['inputs'].values()) | {job['instruction'], job['system_prompt']}
     if 'context_recovery' in manifest:
         from native_context_control import paths as recovery_paths, validate as validate_recovery
