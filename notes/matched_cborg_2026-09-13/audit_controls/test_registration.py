@@ -246,7 +246,7 @@ def stopped_audit(accounting):
     """A generation checkpoint followed by one stopped, separately billed audit."""
     m, _, _, baseline, reg = accounting
     first = copy.deepcopy(m)
-    first.update(kind='d4d_native_audit_continuation')
+    first.update(kind='d4d_native_audit_continuation', repository=str(reg.parent), repository_commit='a' * 40)
     first['job']['attempt_dir'] = str(reg.parent / 'attempts' / first['job']['id'])
     save(reg, first)
     source_sha = r.sha(reg)
@@ -261,7 +261,9 @@ def stopped_audit(accounting):
     result = Path(first['job']['attempt_dir']) / 'result.json'
     result.parent.mkdir(parents=True)
     save(result, {'registration_sha256': source_sha, 'job_id': first['job']['id'],
-        'scope': 'phase3_audit_only', 'status': 'stopped', 'unresolved_requests': [row['id']]})
+        'scope': 'phase3_audit_only', 'status': 'stopped', 'unresolved_requests': [row['id']],
+        'started_at': '2026-09-18T00:00:00Z', 'finished_at': '2026-09-18T00:10:00Z',
+        'runtime': {'proxy_initialized': True, 'proxy_shutdown_complete': True, 'unfinished_handlers': 0}})
     receipt = reg.parent / 'confirmed.json'
     confirmation = {'kind': 'user_confirmed_provider_charge_reconciliation',
         'source_attempt_kind': 'phase3_audit_only', 'source_registration_sha256': source_sha,
