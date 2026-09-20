@@ -84,8 +84,9 @@ the same continuation bridge. This is a conservative budget debit, **not** a
 confirmed provider fee. It binds one exact stopped audit request, its payload hash,
 the unchanged source ledger/result, the user's exact authorization and quoted
 request, and an accounting-observation hash. `budget_debit_usd` must equal the full
-positive reservation; `released_excess_reservation_usd` must be zero. The runtime
-must have completed shutdown with zero unfinished handlers.
+positive reservation; `released_excess_reservation_usd` must be zero. Both this
+variant and confirmed-provider accounting require the common runtime closure
+check described below.
 
 The receipt and derived row retain `provider_charge_confirmed: false`,
 `provider_charge_usd: null` and `provider_usage_is_final: false`. Confirmed-charge
@@ -101,6 +102,70 @@ Stopped execution results include `stop_source` and `runtime` evidence. Runtime
 evidence records whether the proxy was initialized and its bounded shutdown
 completed. `unfinished_handlers` is a count only after that shutdown; otherwise it
 is `null`. A late handler failure does not replace an earlier controller stop.
+
+### Later runtime closure
+
+Both accounting variants accept a completed shutdown with an integer zero count.
+A nonzero count after completed bounded shutdown is historical evidence: preserve
+it even after its processes end. A later host reboot can establish local process
+closure through a separately reviewed supplement ([#2136](https://github.com/bridge2ai/data-sheets-schema/issues/2136)).
+It cannot establish provider-side completion, a final charge, audit completion, or
+new spending authorization.
+
+The existing accounting receipt may include `runtime_closure: {path, sha256}`.
+Its canonical absolute path names a separate JSON proof with exactly these fields:
+
+```text
+schema_version: 1
+kind: independently_reviewed_host_reboot_closure
+source_registration_sha256: SHA256 of the original source registration
+source_ledger_sha256: SHA256 of the unchanged pending ledger
+stopped_result_sha256: SHA256 of the unchanged stopped result
+job_id: original job ID
+billing_attempt: original registration SHA256 + ':' + job ID
+execution_repository: original registered execution checkout
+execution_commit: original registered Git commit
+observation: {path, sha256}
+launch_observation: {path, sha256}
+review:
+  verdict: accept
+  reviewer: independent reviewer's identity
+  observer: OS evidence collector's distinct identity
+  reviewed_at: timezone-aware ISO timestamp
+  same_execution_host: true
+  host_identity_basis: independently_reviewed_local_provenance
+  historical_host_identity: not_recorded
+  basis: concrete provenance connecting this launch and OS observation
+```
+
+This initial contract supports legacy launches without a recorded host identifier.
+The reviewer must inspect the collector's provenance and explicitly attest that
+the OS observation comes from the execution host. Software checks identities,
+hashes and chronology; it cannot authenticate the people named in this local
+review or independently prove physical host identity. A matching pathname or PID
+does not supply that missing fact. Do not invent a historical host identifier or
+approve the supplement when same-host provenance cannot be established.
+
+The launch observation must contain matching `registration_sha256`, `job_id`,
+`execution_repository`, `repository_commit`, `launch_observed: true`, and a
+`recorded_at` timestamp between the source result's `started_at` and `finished_at`.
+The OS observation must retain macOS `kern.boottime` output in `sysctl_boottime`,
+its normalized `boot_at`, `boot_session_uuid`, and `observed_at`. The raw boot time
+must be strictly after the original stopped result, followed by observation and
+independent review in that order, all at or before admission time. Observer and
+reviewer names must be whitespace-trimmed and differ after case normalization.
+Microseconds are used from the raw output; the
+normalized timestamp may preserve those microseconds or truncate to whole seconds.
+A missing process, vanished checkout, or unknown tool handle alone is insufficient.
+Other OS proof formats are not silently inferred.
+
+Preparation discovers these references through the existing continuation receipt
+and pins the proof, launch observation and OS observation. No extra CLI override
+is needed, and these administrative documents are not delivered to the model.
+Admission rechecks every pin and semantic binding for both financial variants.
+The copied accounting row and `reconciled_from` retain `runtime_closure_sha256`;
+all original accounting and runtime evidence remain unchanged. A closure proof
+cannot replace the exact request's financial authorization or confirmation.
 
 A successful result is `completed_pending_independent_review`. Scientific review
 must assess grounding and audit completeness separately. Reconciliation, report

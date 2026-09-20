@@ -119,6 +119,38 @@ def decoded(path):
     return ''.join(json.loads(line)['text'] for line in Path(path).read_text().splitlines())
 
 
+def test_actual_preparer_pins_transitive_runtime_closure_without_model_delivery(ancestry, tmp_path):
+    # This fixture stubs historical acceptance, as documented above. Exercise
+    # the real preparer and transitive pins; semantic admission is tested in
+    # test_runtime_closure using real sequence/accounting validators.
+    args, _, _, state = ancestry
+    source = tmp_path / 'stopped-audit'
+    source_reg = save(source / 'registration.json', {
+        'budget': {'ledger_path': str(source / 'billing.json')},
+        'job': {'id': 'stopped', 'attempt_dir': str(source / 'attempts/stopped')}})
+    save(source / 'billing.json', {'synthetic': 'unchanged pending ledger'})
+    save(source / 'attempts/stopped/result.json', {'synthetic': 'historical count-one result'})
+    observation = save(tmp_path / 'boot.json', {'synthetic': 'raw OS observation'})
+    launch = save(tmp_path / 'launch.json', {'synthetic': 'exact launch observation'})
+    ref = lambda p: {'path': str(p), 'sha256': audit_registration.sha(p)}
+    proof = save(tmp_path / 'closure.json', {'observation': ref(observation), 'launch_observation': ref(launch)})
+    receipt = save(tmp_path / 'audit-accounting.json', {'runtime_closure': ref(proof)})
+    before = {p: p.read_bytes() for p in (source_reg, observation, launch, proof, receipt, state)}
+    path = audit_prepare.prepare(**args, destination=tmp_path / 'successor',
+        continuation_checkpoint=args['reconciled_checkpoint'],
+        continuation_source_registration=source_reg, continuation_reconciliation_receipt=receipt)
+    manifest = audit_registration.read_json(path)
+    for p in (proof, observation, launch):
+        assert manifest['pinned_files'][str(p)] == audit_registration.sha(p)
+        assert str(p) not in manifest['job']['readable_inputs']
+        assert str(p) not in Path(manifest['job']['instruction']).read_text()
+    assert all(p.read_bytes() == raw for p, raw in before.items())
+    assert not Path(manifest['budget']['ledger_path']).exists()
+    observation.write_text('{"synthetic": "changed after preparation"}')
+    with pytest.raises(audit_registration.BudgetStop, match='runtime closure evidence changed'):
+        audit_registration.required_paths(manifest)
+
+
 @pytest.mark.parametrize('stage', ['audit', 'finalization'])
 def test_actual_preparer_recovery_preserves_complete_instruction_and_input_roles(ancestry, tmp_path, stage):
     path, prepare, registration = stage_prepare(stage, ancestry, tmp_path / 'new_condition', True)

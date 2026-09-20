@@ -263,6 +263,8 @@ def required_paths(manifest):
         if not isinstance(bridge, dict) or set(bridge) != {'source_registration', 'source_ledger', 'receipt', 'result'}:
             raise BudgetStop('invalid audit reconciliation identity fields')
         paths.update(canonical_path(value, exists=True) for value in bridge.values())
+        from .runtime_closure import closure_paths
+        paths.update(closure_paths(read_json(bridge['receipt'])))
     return paths
 
 
@@ -513,20 +515,16 @@ def open_audit_ledger(manifest, registration_path, manifest_sha256):
     return ledger
 
 
-def _full_reservation_debit(receipt, row, result):
+def _full_reservation_debit(receipt, row):
     """An explicit budget debit does not establish a provider charge or usage."""
     contradictory = {'confirmed_complete_charge_usd', 'confirmed_charge_usd',
                      'user_confirmation', 'provider_observation_sha256'}
-    runtime = result.get('runtime')
     if (contradictory.intersection(receipt) or
             receipt.get('provider_charge_confirmed') is not False or
             receipt.get('provider_charge_usd', 'missing') is not None or
             receipt.get('provider_usage_is_final') is not False or
-            any(receipt[key] is not False for key in ('source_attempt_completed', 'scientific_acceptance') if key in receipt) or
-            not isinstance(runtime, dict) or runtime.get('proxy_shutdown_complete') is not True or
-            ('proxy_initialized' in runtime and runtime['proxy_initialized'] is not True) or
-            type(runtime.get('unfinished_handlers')) is not int or runtime['unfinished_handlers'] != 0):
-        raise BudgetStop('full reservation debit needs closed runtime and explicitly unknown provider charge')
+            any(receipt[key] is not False for key in ('source_attempt_completed', 'scientific_acceptance') if key in receipt)):
+        raise BudgetStop('full reservation debit needs an explicitly unknown provider charge')
     for key in ('request_sha256', 'accounting_observation_sha256'):
         if not isinstance(receipt.get(key), str) or not re.fullmatch(r'[0-9a-f]{64}', receipt[key]):
             raise BudgetStop('full reservation debit lacks exact request and accounting evidence hashes')
@@ -590,7 +588,9 @@ def validate_audit_reconciliation(manifest):
     if len(pending) != 1 or pending[0].get('status') != 'pending':
         raise BudgetStop('audit reconciliation must resolve exactly one pending source request')
     row = pending[0]
-    cost = (_full_reservation_debit(receipt, row, result) if exception
+    from .runtime_closure import require_closed_runtime
+    closure_sha = require_closed_runtime(manifest, paths, source_reg, result, receipt)
+    cost = (_full_reservation_debit(receipt, row) if exception
             else Decimal(str(receipt['confirmed_complete_charge_usd'])))
     if (row['id'] != receipt['request_id'] or row['attempt'] != receipt['attempt'] or
             row['attempt'] != attempt_identity(source_sha, job['id']) or
@@ -620,6 +620,9 @@ def validate_audit_reconciliation(manifest):
         expected['reconciled_from'] = {'checkpoint_sha256': sha(paths['source_ledger']),
             'receipt_sha256': sha(paths['receipt']), 'request_id': receipt['request_id'],
             'previous_status': 'pending', 'confirmed_charge_usd': str(cost), 'source_attempt_completed': False}
+    if closure_sha is not None:
+        row['runtime_closure_sha256'] = closure_sha
+        expected['reconciled_from']['runtime_closure_sha256'] = closure_sha
     checkpoint = read_json(checkpoint_path)
     if canonical_json(checkpoint) != canonical_json(expected):
         raise BudgetStop('reconciled audit checkpoint changes unconfirmed history')
