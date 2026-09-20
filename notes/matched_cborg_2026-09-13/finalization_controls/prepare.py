@@ -29,7 +29,9 @@ def render_system(manifest):
 
 
 def prepare(*,accepted_audit_registration,acceptance,destination,job_id,repository,
-            attempt_cap='20',deadline_seconds=10800,context_recovery=False):
+            attempt_cap='20',deadline_seconds=10800,context_recovery=False,durable_sequence_claim=False):
+    from sequence_claim import select
+    claim_selection={};select(claim_selection,durable_sequence_claim)
     if type(context_recovery) is not bool:
         raise BudgetStop('context recovery requires an explicit boolean')
     repository=canonical_path(str(Path(repository).resolve()),exists=True)
@@ -86,6 +88,7 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
             'origin':{'registration':ref(generation_path),'ledger_path':str(original_ledger)},
             'audit_origin':deepcopy(predecessor),'predecessor':predecessor},
         pinned_files=dict(accepted['pinned_files']))
+    manifest.update(claim_selection)
     for p in [old_path,old_result,old_ledger,acceptance,snapshot,generation_path,*map(Path,manifest['inputs'].values())]:
         manifest['pinned_files'][str(p)]=sha(p)
     seal=destination/'audit_closed.json';save(seal,seal_document(manifest));manifest['budget_sequence']['seal']=ref(seal)
@@ -113,6 +116,8 @@ def main():
         parser.add_argument('--'+name,required=True)
     parser.add_argument('--context-recovery',action='store_true',
         help='pin bounded instruction/input recovery and persistent stage locators for this new condition')
+    parser.add_argument('--durable-sequence-claim',action='store_true',
+        help='require durable exact-byte ownership evidence before spending')
     parser.add_argument('--repository',default=str(Path.cwd()))
     parser.add_argument('--attempt-cap',default='20');parser.add_argument('--deadline-seconds',type=int,default=10800)
     print(prepare(**vars(parser.parse_args())))

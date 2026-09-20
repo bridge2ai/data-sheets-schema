@@ -40,7 +40,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             deadline_seconds=10800, continuation_checkpoint=None,
             continuation_source_registration=None, continuation_reconciliation_receipt=None,
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
-            native_api_force_idle_timeout=None, context_recovery=False):
+            native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False):
+    from sequence_claim import select
+    claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
         raise BudgetStop("context recovery requires an explicit boolean")
     if native_api_force_idle_timeout is not None:
@@ -119,6 +121,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
                 'cost_usd': str(sum((Decimal(row['cost_usd']) for row in prior['requests']), Decimal(0)))}},
         'sequence_state': str(parent_path(parent, generation['budget']['ledger_path']).with_name('audit_sequence.json')),
         'pinned_files': {}}
+    manifest.update(claim_selection)
     if native_api_timeout_ms is not None:
         manifest['native_runtime']['api_timeout_ms'] = native_api_timeout_ms
     if native_api_force_idle_timeout is not None:
@@ -170,6 +173,8 @@ def main():
         parser.add_argument('--' + name, required=True)
     parser.add_argument('--context-recovery', action='store_true',
         help='pin bounded instruction/input recovery and persistent stage locators for this new condition')
+    parser.add_argument('--durable-sequence-claim', action='store_true',
+        help='require exact-byte durable ownership evidence before this new condition admits spending')
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)

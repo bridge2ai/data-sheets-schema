@@ -22,7 +22,9 @@ from evaluation_controls.registration import (canonical_path, canonical_digest, 
 from evaluation_controls.api import render_request, slot_instrument
 
 
-def prepare(*, destination, prior_registration, aggregate_result, aggregate_acceptance):
+def prepare(*, destination, prior_registration, aggregate_result, aggregate_acceptance, durable_sequence_claim=False):
+    from sequence_claim import select
+    claim_selection = {}; select(claim_selection, durable_sequence_claim)
     destination = canonical_path(str(destination))
     require(not destination.exists(), 'subtype preparation directory already exists')
     prior_path = canonical_path(str(prior_registration), exists=True)
@@ -57,6 +59,8 @@ def prepare(*, destination, prior_registration, aggregate_result, aggregate_acce
         write_new(destination / 'selection.json', selection)
         return {'registration': None, 'selection': str(destination / 'selection.json'), 'jobs': 0}
     manifest = deepcopy(previous)
+    manifest.pop('sequence_claim', None)
+    manifest.update(claim_selection)
     manifest.update(registered_at=datetime.now(timezone.utc).isoformat(), evaluation_jobs=[],
         attempts_dir=str(destination / 'attempts'), subtype_selection='all_form_failures',
         prior_evaluation={'registration': str(prior_path), 'registration_sha256': prior_sha,
@@ -136,6 +140,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('destination', 'prior-registration', 'aggregate-result', 'aggregate-acceptance'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--durable-sequence-claim', action='store_true',
+        help='require durable ownership evidence for this new shared subtype condition')
     prepare(**vars(parser.parse_args()))
     return 0
 

@@ -1,6 +1,7 @@
 """Identity, ancestry and accounting for a separately registered native audit."""
 from contextlib import contextmanager
 from decimal import Decimal, InvalidOperation
+import fcntl
 import hashlib
 import json
 import math
@@ -8,10 +9,11 @@ import os
 from pathlib import Path
 import re
 import shlex
+import stat
 import subprocess
 import sys
 
-from filelock import FileLock
+from filelock import Timeout
 
 HERE = Path(__file__).resolve().parent
 BASE = HERE.parent
@@ -234,6 +236,10 @@ def implementation_paths(manifest):
     paths.update(repository / name for name in ('pyproject.toml', 'poetry.lock'))
     if 'context_recovery' in manifest:
         paths.update(BASE / name for name in ('native_context.py', 'native_context_control.py'))
+    if 'sequence_claim' in manifest:
+        from sequence_claim import enabled, IMPLEMENTATIONS
+        enabled(manifest)
+        paths.update(IMPLEMENTATIONS)
     return paths
 
 
@@ -411,6 +417,57 @@ def native_api_force_idle_timeout(manifest):
     return value
 
 
+class SequenceLock:
+    """Same flock namespace as FileLock, without its pre-flock truncation."""
+    def __init__(self, path):
+        self.path = canonical_path(str(path))
+        if self.path.is_symlink():
+            raise BudgetStop('sequence lock path is symlinked')
+        self.descriptor = None
+
+    def _check(self, descriptor):
+        info = os.fstat(descriptor)
+        current = os.stat(self.path, follow_symlinks=False)
+        if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_uid != os.getuid() or
+                (current.st_dev, current.st_ino) != (info.st_dev, info.st_ino)):
+            raise BudgetStop('sequence lock is aliased, foreign or replaced')
+
+    @property
+    def is_locked(self):
+        if self.descriptor is None:
+            return False
+        self._check(self.descriptor)
+        return True
+
+    def acquire(self, timeout=0):
+        if timeout != 0 or self.descriptor is not None:
+            raise BudgetStop('sequence lock requires one nonblocking acquisition')
+        descriptor = os.open(self.path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        try:
+            self._check(descriptor)
+            try:
+                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as error:
+                raise Timeout(str(self.path)) from error
+            self._check(descriptor)
+        except BaseException:
+            os.close(descriptor)
+            raise
+        self.descriptor = descriptor
+        return self
+
+    def __enter__(self):
+        return self if self.descriptor is not None else self.acquire()
+
+    def __exit__(self, *args):
+        descriptor, self.descriptor = self.descriptor, None
+        if descriptor is not None:
+            try:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
+            finally:
+                os.close(descriptor)
+
+
 @contextmanager
 def sequence_guard(manifest, registration_sha):
     """Serialize descendants of the same confirmed source charge checkpoint."""
@@ -419,9 +476,16 @@ def sequence_guard(manifest, registration_sha):
     expected = canonical_path(manifest['sequence_state'])
     if expected != path:
         raise BudgetStop('audit sequence state is not derived from its immutable source ledger')
-    lock = FileLock(str(path) + '.lock')
+    claim = None
+    if 'sequence_claim' in manifest:
+        import sequence_claim
+        claim = sequence_claim.context(manifest, Path(manifest['budget']['ledger_path']).parent / 'registration.json',
+            registration_sha, path, {'registration_sha256': sha(manifest['parent']['registration']),
+                'ledger_path': str(parent_path(manifest['parent'], generation['budget']['ledger_path']))}, 'audit')
+    lock = SequenceLock(str(path) + '.lock')
     with lock.acquire(timeout=0):
-        previous = read_json(path) if path.exists() else None
+        previous_raw = path.read_bytes() if path.exists() else None
+        previous = strict_json(previous_raw) if previous_raw is not None else None
         checkpoint = manifest['budget']['continuation']
         if previous is None:
             if checkpoint['checkpoint'] != manifest['parent']['reconciled_checkpoint']:
@@ -455,6 +519,8 @@ def sequence_guard(manifest, registration_sha):
             json.dump(value, handle, indent=2)
             handle.write('\n')
         temporary.replace(path)
+        if claim is not None:
+            sequence_claim.record(claim, value, previous_raw)
         yield
 
 

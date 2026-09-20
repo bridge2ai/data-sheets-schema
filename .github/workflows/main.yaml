@@ -61,6 +61,7 @@ jobs:
         run: >-
           poetry run python -m pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py
           notes/matched_cborg_2026-09-13/test_continuation_sequence.py
+          notes/matched_cborg_2026-09-13/test_sequence_claim.py
           -q -p no:cacheprovider --junitxml=test-results/budget.xml
 
       - name: Exercise native canary transport and shutdown offline

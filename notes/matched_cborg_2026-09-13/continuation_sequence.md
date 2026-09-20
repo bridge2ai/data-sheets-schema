@@ -135,11 +135,83 @@ The handoff fsyncs its own new durable boundary. Existing later
 `Ledger.transaction` writes retain their current atomic-replace behavior; this
 change does not claim a new power-loss guarantee for every transport write.
 
+## Durable ownership evidence for new registrations
+
+The optional `--durable-sequence-claim` flag is available to the audit,
+finalization, composite evaluation and subtype preparers
+([#2137](https://github.com/bridge2ai/data-sheets-schema/issues/2137)). It selects
+`sequence_claim: {protocol: durable_sequence_claim_v1}` and pins the shared
+`sequence_claim.py` helper and its audit lock implementation. Select it explicitly
+for each new condition. Omission leaves claim preservation disabled; no old
+registration or stopped evidence changes.
+Legacy evaluation accounting outside `shared_sequence_v2` does not claim this
+guarantee. The optional claim protocol does not change financial authorization.
+
+All audit guards in this updated implementation acquire their existing lock with
+nontruncating `open` and `flock`, even without claim opt-in
+([#2141](https://github.com/bridge2ai/data-sheets-schema/issues/2141)). The lock must
+be a regular file owned by the current user, with exactly one link, and still name
+the opened inode before and after acquisition. The implementation lives in the
+already pinned audit module; frozen historical checkouts remain unchanged. The
+claim helper uses this same lock for shared ownership and pins its source too.
+
+After the existing origin lock and ordinary ownership checks, the canonical owner
+advances normally. Before the guard yields, the helper creates `sequence_claim/`
+beside the validated condition's `registration.json` and `billing.json`. This
+destination is derived, never supplied as an unbound caller pathname. It contains:
+
+- `owner.json`: the exact bytes read from the canonical owner, not a reserialized
+  dictionary.
+- `predecessor.json`: the exact preceding owner bytes, unless this was the first
+  audit claim and no owner existed.
+- `manifest.json`: canonical owner path, claiming registration path/hash,
+  original generation registration/ledger identity, stage, helper hash, owner and
+  predecessor byte hashes, and explicit first-claim absence where applicable.
+- `ready.json`: an exact hard link to the manifest inode, published only after
+  every required persistence operation and byte comparison succeeds.
+
+The canonical owner and directories are synced. Each snapshot file is written to
+an exclusive temporary inode, flushed and fsynced, then published atomically with
+a no-replace hard link. The claim and containing directories are fsynced and the
+canonical/retained bytes are rechecked before admission. Existing foreign files,
+symlinks and hard-link aliases are refused, except for the exact two-link
+manifest/witness pair. Partial temporary files remain for review after failure;
+they never count as a complete claim.
+
+The no-replace `ready.json` link is the publisher's last fallible operation
+([#2142](https://github.com/bridge2ai/data-sheets-schema/issues/2142)). No fsync or
+verification follows that publication inside preservation. All snapshot bytes
+and directory entries have already been synced. The additional witness entry
+itself may disappear on a crash; absence blocks reentry and cannot be repaired
+automatically. This trades recovery availability for fail-closed admission. It
+avoids allowing a later attempt after a reported fsync failure merely because
+all ordinary claim files were already visible. This assumes local filesystem
+atomic link/fsync behavior; it is not a guarantee against dishonest storage or
+arbitrary privileged replacement of evidence.
+
+If preservation fails after advancement, the new owner stays consumed and the
+guard does not yield. A best-effort `sequence_claim_failed.json` records that
+no-admission failure; a failing filesystem cannot guarantee that even this marker
+persists. An existing failure marker or its unfinished temporary file blocks
+reentry, but correctness does not depend on that marker: every failed persistence
+boundary leaves the required success witness unpublished. Missing or incomplete
+claims are never repaired during reentry. The
+shared owner verifies its existing claim read-only on each reentry/admission;
+audit identity reuse remains forbidden regardless of snapshot existence.
+
+Claims are administrative records and are not model inputs. They are evidence of
+an observed transition, not proof that this owner is still the sequence tip, not
+permission to resume an attempt, and not instructions to reconstruct a lost
+canonical state. Recovery still requires the complete claimant chain and separate
+review. These snapshots do not settle provider charges or accept scientific work,
+and do not add power-loss guarantees to later transport/ledger writes.
+
 ## Offline verification
 
 ```bash
 PYTHONPATH=src python -m pytest -q \
-  notes/matched_cborg_2026-09-13/test_continuation_sequence.py
+  notes/matched_cborg_2026-09-13/test_continuation_sequence.py \
+  notes/matched_cborg_2026-09-13/test_sequence_claim.py
 ```
 
 Tests use real `Ledger`, real filesystem locks, worker-thread admission and
