@@ -270,6 +270,11 @@ def _validate(manifest, registration_path, registration_sha):
              'successor registration changed')
     _require(manifest['pinned_files'].get(str(Path(__file__).resolve())) == sha(__file__),
              'shared accounting implementation is unpinned or changed')
+    if 'sequence_claim' in manifest:
+        import sequence_claim
+        sequence_claim.enabled(manifest)
+        _require(all(manifest['pinned_files'].get(str(p)) == sha(p) for p in sequence_claim.IMPLEMENTATIONS),
+                 'durable sequence claim implementation is unpinned or changed')
     for name, value in manifest['pinned_files'].items():
         _require(sha(path(name)) == value, 'registered immutable evidence changed')
     block, budget = manifest['budget_sequence'], manifest['budget']
@@ -344,6 +349,11 @@ class SequenceOwner:
         expected = _validate(self.manifest, self.registration_path, self.registration_sha)[-1]
         _require(sha(self.state_path) == self.state_sha and canonical(read(self.state_path)) == canonical(expected),
                  'shared accounting owner changed')
+        if 'sequence_claim' in self.manifest:
+            import sequence_claim
+            claim = _claim_context(self.manifest, self.registration_path, self.registration_sha, self.state_path)
+            predecessor = Path(self.manifest['budget_sequence']['predecessor']['state']['path']).read_bytes()
+            sequence_claim.verify(claim, expected, predecessor)
         state = read(self.ledger.path)
         _require(all(state.get(key) == value for key, value in self.ledger.identity.items())
                  and state.get('attempt_caps_usd', {}) == self.ledger.identity.get('attempt_caps_usd', {}),
@@ -377,6 +387,16 @@ class SequenceOwner:
             return self.ledger.reserve(attempt, estimate, request_sha256)
 
 
+def _claim_context(manifest, registration_path, registration_sha, state_path):
+    if 'sequence_claim' not in manifest:
+        return None
+    import sequence_claim
+    origin = manifest['budget_sequence']['origin']
+    return sequence_claim.context(manifest, registration_path, registration_sha, state_path,
+        {'registration_sha256': origin['registration']['sha256'], 'ledger_path': origin['ledger_path']},
+        manifest['budget_sequence']['stage'])
+
+
 @contextmanager
 def owned_sequence(manifest, registration_path, registration_sha):
     """Hold legacy lock through handoff, caller admission and bounded shutdown.
@@ -389,9 +409,15 @@ def owned_sequence(manifest, registration_path, registration_sha):
     try:
         state_path = _origin(manifest)[2]
         _check_mutable_paths(manifest, registration_path, state_path)
-        lock = FileLock(str(state_path) + '.lock', timeout=0, thread_local=False)
+        claim = _claim_context(manifest, registration_path, registration_sha, state_path)
+        if claim is not None:
+            import sequence_claim
+            lock = sequence_claim.ClaimLock(str(state_path) + '.lock')
+        else:
+            lock = FileLock(str(state_path) + '.lock', timeout=0, thread_local=False)
         with lock:
             state_path, lineage, previous, snapshot, jobs, activated = _validate(manifest, registration_path, registration_sha)
+            current_raw = state_path.read_bytes()
             current = read(state_path)  # Missing state is never a fresh allocation.
             expected_tip = _tip(manifest, registration_path, registration_sha)
             legacy = _legacy_fields(manifest, lineage)
@@ -427,6 +453,9 @@ def owned_sequence(manifest, registration_path, registration_sha):
                 ledger.continue_from(checkpoint['checkpoint'], expected_sha256=checkpoint['sha256'], expected_cost_usd=checkpoint['cost_usd'])
                 _sync(ledger.path); _sync(ledger.path.parent)
                 _replace_state(state_path, activated)
+                if claim is not None:
+                    import sequence_claim
+                    sequence_claim.record(claim, activated, current_raw)
             owner = SequenceOwner(manifest, registration_path, registration_sha, lock, state_path,
                                   sha(state_path), ledger, previous, jobs)
             try:

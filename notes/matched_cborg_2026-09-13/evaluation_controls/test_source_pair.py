@@ -107,6 +107,28 @@ def composite(tmp_path,monkeypatch):
 def build(case):return prepare.build_composite_registration(**{k:v for k,v in case.items() if k not in ('state','phase')})
 
 
+@pytest.mark.parametrize('durable', [False, True])
+def test_composite_preparer_pins_claim_for_both_native_and_api_ownership(composite, durable):
+    import sequence_claim
+    from run_evaluation import accounting_owner
+    composite['durable_sequence_claim'] = durable
+    result = build(composite);path = result['registration'];m = reg.read_json(path)
+    assert sequence_claim.enabled(m) is durable
+    if durable:
+        assert m['pinned_files'][str(sequence_claim.IMPLEMENTATION)] == reg.sha(sequence_claim.IMPLEMENTATION)
+    assert not (path.parent/'sequence_claim').exists()
+    assert {'semantic_agent', 'direct_api_quality'} <= {job['style'] for job in m['evaluation_jobs']}
+    for style in ('semantic_agent', 'direct_api_quality'):
+        job = next(job for job in m['evaluation_jobs'] if job['style'] == style)
+        prompt = Path(job.get('instruction') or job['expected_request']).read_text()
+        assert str(path.parent/'sequence_claim') not in prompt
+        # Both adapter arms use this real shared owner; no adapter/provider runs.
+        with accounting_owner(m, path, reg.sha(path)) as (_, state, _, verify):
+            verify()
+            if durable:
+                assert (path.parent/'sequence_claim/owner.json').read_bytes() == state.read_bytes()
+
+
 def test_composite_preparation_preserves_ancestry_roster_and_real_budget(composite):
     before=composite['state'].read_bytes();phase=composite['phase']
     ledger=Path(phase['budget']['ledger_path']);billing=ledger.read_bytes()

@@ -322,10 +322,12 @@ def _materialize(manifest, destination, bundle, native_runtime, spent, *, billin
 
 
 def build_composite_registration(destination, *, finalization_registration, finalization_acceptance,
-                                 context_path, native_executable=None):
+                                 context_path, native_executable=None, durable_sequence_claim=False):
     """Prepare the accepted composite pair without claiming accounting ownership."""
     from source_pair import inspect_finalization
     import continuation_sequence
+    from sequence_claim import select
+    claim_selection = {}; select(claim_selection, durable_sequence_claim)
     destination = canonical_path(str(destination))
     if destination.exists():
         raise BudgetStop('evaluation preparation directory already exists; never overwrite it')
@@ -379,6 +381,7 @@ def build_composite_registration(destination, *, finalization_registration, fina
         'offline_checks':['schema','pair','duplicate_keys','provenance','receipts','report_grounding',
             'literal_grounding','field_presence_rubric10','field_presence_rubric20'],
         'slot_selection':'every populated schema-known top-level slot of each explicit dataset unit; no propagation'}
+    manifest.update(claim_selection)
     if 'provider_transport' in phase:
         manifest['provider_transport'] = deepcopy(phase['provider_transport'])
     verify_implementation(manifest)
@@ -405,17 +408,22 @@ def main():
     parser.add_argument('--finalization-registration', type=Path)
     parser.add_argument('--finalization-acceptance', type=Path)
     parser.add_argument('--native-executable', type=Path)
+    parser.add_argument('--durable-sequence-claim', action='store_true',
+        help='require durable ownership evidence for new shared composite evaluations')
     parser.add_argument('--provider-base-url', choices=('https://api.cborg.lbl.gov', 'https://api-local.cborg.lbl.gov'))
     parser.add_argument('--provider-ca-bundle', type=Path,
         help='Explicit pinned CA bundle; required for the direct CBORG endpoint')
     parser.add_argument('--project'); parser.add_argument('--method'); parser.add_argument('--profile')
     args = vars(parser.parse_args())
     if args['finalization_registration'] is not None:
-        allowed = {'destination','finalization_registration','finalization_acceptance','context_path','native_executable'}
+        allowed = {'destination','finalization_registration','finalization_acceptance','context_path','native_executable',
+                   'durable_sequence_claim'}
         if args['finalization_acceptance'] is None or any(v is not None for k,v in args.items() if k not in allowed):
             parser.error('composite preparation requires finalization acceptance and excludes legacy source/provider overrides')
         result = build_composite_registration(**{k:v for k,v in args.items() if k in allowed})
     else:
+        if args.pop('durable_sequence_claim'):
+            parser.error('durable sequence claims require composite finalization ancestry')
         if args['finalization_acceptance'] is not None or any(args[k] is None for k in
                 ('generation_registration','generation_acceptance','generation_job_id','billing_checkpoint')):
             parser.error('legacy preparation requires generation registration, acceptance, job and checkpoint')

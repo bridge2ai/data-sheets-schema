@@ -88,6 +88,10 @@ def verify_implementation(manifest):
     code.update((HERE.parent/'audit_controls').glob('*.py'))
     code.update((HERE.parent/'finalization_controls').glob('*.py'))
     code.update(HERE.parent/name for name in ('continuation_sequence.py','budgeted_cborg.py','prepare_registration.py','run_api_canary.py'))
+    if 'sequence_claim' in manifest:
+        from sequence_claim import enabled, IMPLEMENTATIONS
+        enabled(manifest)
+        code.update(IMPLEMENTATIONS)
     relative = [str(path.relative_to(repository)) for path in sorted(code)]
     for argv in (['git','ls-files','--error-unmatch','--',*relative], ['git','diff','--quiet','HEAD','--',*relative]):
         if subprocess.run(argv,cwd=repository,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
@@ -112,6 +116,12 @@ only the outer launcher. Registration builders may pin additional resources.
     paths.update(HERE.glob('*.py'))
     paths.update(CONTROLS.glob('*.py'))
     paths.add(HERE.parent / 'budgeted_cborg.py')
+    if 'sequence_claim' in manifest:
+        from sequence_claim import enabled, IMPLEMENTATIONS
+        enabled(manifest)
+        if manifest.get('schema_version') != 2:
+            raise BudgetStop('durable sequence claims require shared composite evaluation accounting')
+        paths.update(IMPLEMENTATIONS)
     # The shared TLS factory imports only these audit-controller modules;
     # their path/hash identities are part of the evaluation implementation.
     paths.update(HERE.parent / 'audit_controls' / name

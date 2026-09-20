@@ -210,12 +210,19 @@ def prepare_from_fixture(e, er, state, root, monkeypatch):
             'aggregate_result':Path(result['path']),'aggregate_acceptance':Path(accepted['path'])}
 
 
-def test_subtype_preparation_preserves_all_fitness_reasons_without_spending(tmp_path, monkeypatch):
+@pytest.mark.parametrize('durable', [False, True])
+def test_subtype_preparation_preserves_all_fitness_reasons_without_spending(tmp_path, monkeypatch, durable):
+    import sequence_claim
     e, er, state = completed_evaluation(tmp_path, monkeypatch)
     args = prepare_from_fixture(e, er, state, tmp_path, monkeypatch)
     before = state.read_bytes(), Path(e['budget']['ledger_path']).read_bytes()
-    result = prepare_subtype.prepare(**args)
+    if durable:
+        # Keep this fixture's narrowed implementation closure, including the
+        # selected helper; full closure pinning is covered by composite prep.
+        monkeypatch.setattr(prepare_subtype, 'required_paths', lambda m: sequence_claim.IMPLEMENTATIONS)
+    result = prepare_subtype.prepare(**args, durable_sequence_claim=durable)
     m = read_json(result['registration'])
+    assert sequence_claim.enabled(m) is durable
     assert result['jobs'] == 2 and result['provider_calls'] == result['token_count_calls'] == 0
     assert m['source_pair'] == e['source_pair']
     assert m['budget_sequence']['stage'] == 'evaluation_subtype'
@@ -230,6 +237,8 @@ def test_subtype_preparation_preserves_all_fitness_reasons_without_spending(tmp_
     assert not Path(m['budget']['ledger_path']).exists()
     with foundation.enter(m, Path(result['registration'])) as owner:
         assert len(read_json(owner.ledger.path)['requests']) == 3
+        if durable:
+            assert (Path(result['registration']).parent/'sequence_claim/owner.json').read_bytes() == state.read_bytes()
     with pytest.raises(BudgetStop):
         with foundation.enter(e, er): pass
 

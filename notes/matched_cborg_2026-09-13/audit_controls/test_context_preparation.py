@@ -152,6 +152,27 @@ def test_actual_preparer_pins_transitive_runtime_closure_without_model_delivery(
 
 
 @pytest.mark.parametrize('stage', ['audit', 'finalization'])
+@pytest.mark.parametrize('durable', [False, True])
+def test_real_preparers_explicitly_pin_durable_claim_without_creating_admin_state(ancestry, tmp_path, stage, durable):
+    import sequence_claim
+    if stage == 'audit':
+        path = audit_prepare.prepare(**ancestry[0], destination=tmp_path/'durable', durable_sequence_claim=durable)
+    else:
+        accepted, acceptance = accepted_audit(ancestry, tmp_path/'accepted')
+        path = final_prepare.prepare(accepted_audit_registration=accepted, acceptance=acceptance,
+            destination=tmp_path/'durable', job_id='synthetic_final', repository=ancestry[0]['repository'],
+            durable_sequence_claim=durable)
+    manifest = audit_registration.read_json(path)
+    assert sequence_claim.enabled(manifest) is durable
+    if durable:
+        assert manifest['pinned_files'][str(sequence_claim.IMPLEMENTATION)] == audit_registration.sha(sequence_claim.IMPLEMENTATION)
+    assert not (path.parent/'sequence_claim').exists()
+    assert not (path.parent/'sequence_claim_failed.json').exists()
+    assert str(path.parent/'sequence_claim') not in Path(manifest['job']['instruction']).read_text()
+    assert str(sequence_claim.IMPLEMENTATION) not in manifest['job']['readable_inputs']
+
+
+@pytest.mark.parametrize('stage', ['audit', 'finalization'])
 def test_actual_preparer_recovery_preserves_complete_instruction_and_input_roles(ancestry, tmp_path, stage):
     path, prepare, registration = stage_prepare(stage, ancestry, tmp_path / 'new_condition', True)
     manifest = registration.validate_registration(path)
