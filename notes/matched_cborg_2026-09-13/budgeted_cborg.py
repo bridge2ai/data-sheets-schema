@@ -29,6 +29,15 @@ class BudgetStop(RuntimeError):
 #: offline user-authorized debit: the provider fee stays unknown.
 STALL_DEBIT_BASIS = "registered_stall_policy_full_reservation_debit"
 
+#: Transport bounds shared by the proxy and the registration validator, so the
+#: validator reasons about the numbers the proxy really uses (#2152, #2155).
+LEGACY_UPSTREAM_READ_SECONDS = 1800
+UPSTREAM_CONNECT_SECONDS = 20
+#: Under a stall policy one token-count try is bounded, and the pause between
+#: tries is short and ends at once when admission closes (#2152, #2157).
+POLICY_COUNT_TRY_SECONDS = 120
+POLICY_COUNT_PAUSE_SECONDS = 5
+
 
 def retryable_count_error(exc):
     """A token-count failure that is safe to repeat: counting is free and
@@ -248,6 +257,7 @@ class Ledger:
             row = next(row for row in state["requests"] if row["id"] == ticket)
             if row["status"] != "pending":
                 raise BudgetStop("charge already settled")
+            self._check_stopped(state, row["attempt"])
             prior = sum(1 for other in state["requests"] if other["attempt"] == row["attempt"]
                         and other.get("settlement_basis") == STALL_DEBIT_BASIS)
             allowed = prior < maximum
@@ -264,11 +274,13 @@ class Ledger:
 
 class CappedMessages:
     def __init__(self, client, *, ledger, attempt, evidence, model, prices, verify, initial_request=None,
-                 mutation_guard=None, count_attempts=1, count_pause=None):
+                 mutation_guard=None, count_attempts=1, count_pause=None, count_timeout=None):
         if type(count_attempts) is not int or not 1 <= count_attempts <= 5:
             raise BudgetStop("token-count attempts must be a whole number from 1 to 5")
         self.count_attempts = count_attempts
         self.count_pause = count_pause or time.sleep
+        # None is never forwarded, so a legacy count keeps its client's timeout.
+        self.count_timeout = count_timeout
         self.count_retries = 0
         self.client, self.ledger, self.attempt = client, ledger, attempt
         self.evidence, self.model, self.prices = Path(evidence), model, prices
@@ -361,18 +373,24 @@ class CappedMessages:
     def count_tokens(self, fields):
         """The provider's input count, repeated only under a registered
         allowance and only for failures that cannot have cost anything."""
+        options = {"timeout": self.count_timeout} if self.count_timeout is not None else {}
         for attempt in range(1, self.count_attempts + 1):
             try:
-                return self.client.messages.count_tokens(**fields).input_tokens
+                return self.client.messages.count_tokens(**fields, **options).input_tokens
             except Exception as exc:
                 if attempt == self.count_attempts or not retryable_count_error(exc):
                     raise
-                self.count_retries += 1
-                self.evidence.mkdir(parents=True, exist_ok=True)
-                with (self.evidence / "count_retries.jsonl").open("a", encoding="utf-8") as out:
-                    out.write(json.dumps({"at": now(), "failed_try": attempt,
-                                          "error_type": type(exc).__name__}) + "\n")
-                self.count_pause(min(2 ** attempt, 10))
+                # A retry is new work and new evidence: never after admission
+                # closed or evidence froze (#2157). The guard raises then.
+                with self.mutation_guard("admit"):
+                    self.count_retries += 1
+                    self.evidence.mkdir(parents=True, exist_ok=True)
+                    with (self.evidence / "count_retries.jsonl").open("a", encoding="utf-8") as out:
+                        out.write(json.dumps({"at": now(), "failed_try": attempt,
+                                              "error_type": type(exc).__name__}) + "\n")
+                self.count_pause(min(attempt, POLICY_COUNT_PAUSE_SECONDS))
+                with self.mutation_guard("admit"):
+                    pass
 
     def debit_stall(self, ticket, *, maximum, evidence):
         with self.mutation_guard("settle"):

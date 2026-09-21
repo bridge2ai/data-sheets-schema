@@ -11,7 +11,12 @@ import pytest
 
 BASE = Path(__file__).resolve().parent.parent
 sys.path[:0] = [str(BASE), str(BASE / 'native_controls')]
-from budgeted_cborg import BudgetStop, CappedMessages, Ledger, STALL_DEBIT_BASIS, retryable_count_error
+import threading
+import time
+
+import native_proxy
+from budgeted_cborg import (BudgetStop, CappedMessages, Ledger, POLICY_COUNT_TRY_SECONDS, STALL_DEBIT_BASIS,
+                            retryable_count_error)
 from native_proxy import NativeProxy, UNCONFIRMED_CHARGE, stall_evidence, validated_stall_policy
 from native_controls.test_native_proxy import REQUEST, PRICES, events, wire
 
@@ -23,7 +28,7 @@ def good():
     return httpx.Response(200, content=wire(events()), headers={'content-type': 'text/event-stream'})
 
 
-def proxy_with(tmp_path, script, *, policy=POLICY, count=None, cap=5):
+def proxy_with(tmp_path, script, *, policy=POLICY, count=None, cap=5, pause='instant'):
     """`script` yields one upstream outcome per paid request: a Response, or an exception to raise."""
     calls, outcomes = [], iter(script)
     def respond(request):
@@ -38,8 +43,16 @@ def proxy_with(tmp_path, script, *, policy=POLICY, count=None, cap=5):
     proxy = NativeProxy(sdk=sdk, ledger=ledger, attempt='native-offline', evidence=tmp_path / 'requests',
         model=REQUEST['model'], prices=PRICES, verify=lambda: None, provider_key='offline-provider-key',
         base_url='https://api.cborg.lbl.gov', upstream=httpx.Client(transport=httpx.MockTransport(respond)),
-        **({'stall_policy': policy, 'count_pause': lambda seconds: None} if policy is not None else {}))
+        **({'stall_policy': policy, **({'count_pause': lambda seconds: None} if pause == 'instant' else {})}
+           if policy is not None else {}))
     return proxy, ledger, calls
+
+
+class Unreadable(httpx.SyncByteStream):
+    """An error body that fails while it is drained."""
+    def __iter__(self):
+        yield b'partial'
+        raise httpx.ReadError('body cut', request=OFFLINE)
 
 
 def post(url, proxy):
@@ -50,10 +63,13 @@ def rows(ledger):
     return json.loads(ledger.path.read_bytes())['requests']
 
 
-@pytest.mark.parametrize('stall', [httpx.Response(524, content=b'origin timeout'), httpx.Response(502), httpx.Response(503),
-                                   httpx.ReadTimeout('no headers', request=OFFLINE), httpx.ConnectTimeout('x', request=OFFLINE),
-                                   httpx.ReadError('reset', request=OFFLINE), httpx.RemoteProtocolError('cut', request=OFFLINE)],
-                         ids=['http524', 'http502', 'http503', 'read_timeout', 'connect_timeout', 'read_error', 'protocol'])
+@pytest.mark.parametrize('stall', [httpx.Response(524, content=b'origin timeout'), httpx.Response(500), httpx.Response(502),
+                                   httpx.Response(503), httpx.Response(529), httpx.Response(502, stream=Unreadable()),
+                                   httpx.ReadTimeout('no headers', request=OFFLINE), httpx.WriteTimeout('x', request=OFFLINE),
+                                   httpx.ReadError('reset', request=OFFLINE), httpx.WriteError('reset', request=OFFLINE),
+                                   httpx.RemoteProtocolError('cut', request=OFFLINE)],
+                         ids=['http524', 'http500', 'http502', 'http503', 'http529', 'http502_unreadable_body',
+                              'read_timeout', 'write_timeout', 'read_error', 'write_error', 'protocol'])
 def test_a_stall_before_any_relayed_byte_is_debited_and_the_attempt_continues(tmp_path, stall):
     proxy, ledger, calls = proxy_with(tmp_path, [stall, good()])
     with proxy.running() as url:
@@ -74,7 +90,8 @@ def test_a_stall_before_any_relayed_byte_is_debited_and_the_attempt_continues(tm
     assert Decimal(settled['cost_usd']) < Decimal(settled['reserved_usd'])
     (evidence,) = (tmp_path / 'requests').rglob('stall.json')
     recorded = json.loads(evidence.read_text())
-    assert recorded['stall_index'] == 1 and recorded['child_reply_status'] == 503
+    assert recorded['stall_index'] == 1 and recorded['child_reply_attempted'] == 503
+    assert 'child_reply_status' not in recorded      # a reply is attempted, never known delivered (#2152)
     assert recorded == {**recorded, **stalled['stall_evidence']}
     assert len(calls) == 2 and 'offline-provider-key' not in evidence.read_text()
 
@@ -111,6 +128,69 @@ def test_a_provider_client_error_is_never_a_stall(tmp_path, status):
         reply = post(url, proxy)
     assert reply.status_code == 402 and proxy.failure == UNCONFIRMED_CHARGE
     assert rows(ledger)[0]['status'] == 'pending' and proxy.stalls_survived == 0
+
+
+@pytest.mark.parametrize('status', [400, 429])
+def test_a_client_error_whose_body_cannot_be_read_is_still_not_a_stall(tmp_path, status):
+    """#2156: the status arrived, so the failure that followed cannot make it a stall."""
+    proxy, ledger, calls = proxy_with(tmp_path, [httpx.Response(status, stream=Unreadable()), good()])
+    with proxy.running() as url:
+        reply = post(url, proxy)
+        refused = post(url, proxy)
+    assert reply.status_code == 402 and refused.status_code == 402 and len(calls) == 1
+    assert proxy.failure == 'ReadError' and proxy.stalls_survived == 0       # the historical reason, unchanged
+    assert rows(ledger)[0]['status'] == 'pending' and not list((tmp_path / 'requests').rglob('stall.json'))
+    assert stall_evidence(httpx.ReadError('x', request=OFFLINE), status) is None
+    assert stall_evidence(httpx.ReadError('x', request=OFFLINE), 502)['http_status'] == 502
+
+
+@pytest.mark.parametrize('failure', [httpx.ConnectError('refused', request=OFFLINE), httpx.ConnectTimeout('x', request=OFFLINE),
+                                     httpx.PoolTimeout('x', request=OFFLINE), httpx.UnsupportedProtocol('x', request=OFFLINE),
+                                     httpx.ProxyError('x', request=OFFLINE)],
+                         ids=['connect_error', 'connect_timeout', 'pool_timeout', 'unsupported_protocol', 'proxy_error'])
+def test_a_connection_that_was_never_made_is_not_a_stall(tmp_path, failure):
+    """#2156: nothing was sent, and an outage must not burn the allowance."""
+    proxy, ledger, calls = proxy_with(tmp_path, [failure, good()])
+    with proxy.running() as url:
+        assert post(url, proxy).status_code == 402
+    assert proxy.failure == type(failure).__name__ and proxy.stalls_survived == 0 and len(calls) == 1
+    assert rows(ledger)[0]['status'] == 'pending'
+
+
+def test_a_failed_evidence_copy_does_not_undo_a_survived_stall(tmp_path, monkeypatch):
+    """#2158: the ledger row already carries the evidence."""
+    proxy, ledger, _ = proxy_with(tmp_path, [httpx.Response(524), good()])
+    real = native_proxy.write_new
+    monkeypatch.setattr(native_proxy, 'write_new',
+        lambda path, value: (_ for _ in ()).throw(OSError('disk')) if path.name == 'stall.json' else real(path, value))
+    with proxy.running() as url:
+        assert [post(url, proxy).status_code, post(url, proxy).status_code] == [503, 200]
+    assert proxy.stalls_survived == 1 and not proxy.failed.is_set()
+    assert rows(ledger)[0]['stall_evidence'] == {'kind': 'upstream_http_status', 'http_status': 524}
+    assert not list((tmp_path / 'requests').rglob('stall.json'))
+
+
+def test_a_stall_reply_the_child_cannot_receive_stops_the_attempt(tmp_path, monkeypatch):
+    proxy, ledger, _ = proxy_with(tmp_path, [httpx.Response(524), good()])
+    def gone(handler):
+        raise BrokenPipeError()
+    monkeypatch.setattr(proxy, 'stall_reply', gone)
+    with proxy.running() as url:
+        with pytest.raises(httpx.HTTPError):
+            post(url, proxy)
+        assert post(url, proxy).status_code == 402
+    assert proxy.failure == 'native client closed before the registered stall reply'
+    assert rows(ledger)[0]['settlement_basis'] == STALL_DEBIT_BASIS      # counted, never left unknown
+
+
+def test_nothing_is_debited_after_the_evidence_freeze(tmp_path):
+    proxy, ledger, _ = proxy_with(tmp_path, [])
+    ticket = ledger.reserve('native-offline', '0.5', 'sha')
+    folder = tmp_path / 'requests' / ticket; folder.mkdir(parents=True)
+    proxy.frozen = True
+    with pytest.raises(BudgetStop, match='frozen'):
+        proxy.survive_stall(ticket, folder, {'kind': 'upstream_http_status', 'http_status': 524})
+    assert rows(ledger)[0]['status'] == 'pending' and proxy.stalls_survived == 0 and not list(folder.iterdir())
 
 
 def test_a_failure_after_bytes_were_relayed_stays_terminal(tmp_path):
@@ -188,6 +268,60 @@ def test_token_counting_is_repeated_only_within_the_registered_tries(tmp_path, f
     assert all(set(r) == {'at', 'failed_try', 'error_type'} for r in recorded)
 
 
+def test_each_policy_count_try_is_bounded_and_pauses_are_short(tmp_path):
+    """#2152: the child's timer also covers the proxy's counting, so a try cannot take the client's 1800 s."""
+    seen, pauses = [], []
+    def count(**kw):
+        seen.append(kw.get('timeout'))
+        if len(seen) < 3:
+            raise timeout_error()
+        return SimpleNamespace(input_tokens=100)
+    proxy, _, _ = proxy_with(tmp_path, [good()], count=count)
+    proxy.messages.count_pause = pauses.append
+    with proxy.running() as url:
+        assert post(url, proxy).status_code == 200
+    assert seen == [POLICY_COUNT_TRY_SECONDS] * 3 and pauses == [1, 2]
+
+
+def test_a_proxy_without_a_policy_counts_once_with_its_client_s_own_timeout(tmp_path):
+    seen = []
+    def count(**kw):
+        seen.append(kw); raise timeout_error()
+    proxy, ledger, calls = proxy_with(tmp_path, [good()], count=count, policy=None)
+    with proxy.running() as url:
+        assert post(url, proxy).status_code == 402
+    assert len(seen) == 1 and 'timeout' not in seen[0] and proxy.failure == 'APITimeoutError'
+    assert rows(ledger) == [] and calls == [] and not (tmp_path / 'requests' / 'count_retries.jsonl').exists()
+
+
+def test_no_count_retry_or_retry_evidence_after_admission_closed(tmp_path):
+    """#2157: a retry is new work and new evidence."""
+    tries = []
+    proxy, ledger, calls = proxy_with(tmp_path, [good()])
+    def count(**kw):
+        tries.append(kw)
+        proxy.close_admission()                 # the controller's deadline fires during the count
+        raise timeout_error()
+    proxy.messages.client.messages.count_tokens = count
+    with proxy.running() as url:
+        assert post(url, proxy).status_code == 402
+    assert len(tries) == 1 and proxy.messages.count_retries == 0 and proxy.failure == 'native admission is closed'
+    assert not (tmp_path / 'requests' / 'count_retries.jsonl').exists() and rows(ledger) == [] and calls == []
+
+
+def test_the_pause_between_count_tries_ends_when_admission_closes(tmp_path):
+    tries = []
+    def count(**kw):
+        tries.append(time.monotonic()); raise timeout_error()
+    proxy, _, _ = proxy_with(tmp_path, [good()], count=count, pause='real')
+    started = time.monotonic()
+    with proxy.running() as url:
+        threading.Timer(0.15, proxy.close_admission).start()
+        assert post(url, proxy).status_code == 402
+    assert len(tries) == 1 and time.monotonic() - started < 0.9       # not the whole one-second pause
+    assert proxy.unfinished_handlers == 0
+
+
 def test_the_child_s_own_count_requests_share_the_same_retry(tmp_path):
     tries = []
     def count(**kw):
@@ -234,7 +368,9 @@ def test_retryable_count_errors_are_transport_only():
 
 def test_only_upstream_failures_are_stall_evidence():
     assert stall_evidence(httpx.ReadTimeout('x', request=OFFLINE)) == {'kind': 'upstream_transport', 'error_type': 'ReadTimeout'}
-    for other in (BrokenPipeError(), OSError(), BudgetStop(UNCONFIRMED_CHARGE), ValueError(), KeyError()):
+    for other in (BrokenPipeError(), OSError(), BudgetStop(UNCONFIRMED_CHARGE), ValueError(), KeyError(),
+                  httpx.ConnectError('x', request=OFFLINE), httpx.PoolTimeout('x', request=OFFLINE),
+                  httpx.LocalProtocolError('x', request=OFFLINE), httpx.DecodingError('x', request=OFFLINE)):
         assert stall_evidence(other) is None
 
 
@@ -271,3 +407,12 @@ def test_the_ledger_counts_debits_per_attempt_and_never_debits_twice(tmp_path):
     with pytest.raises(BudgetStop, match='exhausted'):
         ledger.debit_unconfirmed(two, maximum=1, evidence={})
     assert [r['status'] for r in rows(ledger)] == ['settled', 'settled', 'pending']
+
+
+def test_the_ledger_never_debits_a_stopped_attempt(tmp_path):
+    ledger = Ledger(tmp_path / 'l.json', manifest_sha256='x', attempt_cap=5)
+    ticket = ledger.reserve('a', '0.5', 'sha')
+    ledger.stop_attempt('a', 'controller: native attempt deadline elapsed')
+    with pytest.raises(BudgetStop, match='previously stopped'):
+        ledger.debit_unconfirmed(ticket, maximum=5, evidence={})
+    assert rows(ledger)[0]['status'] == 'pending'

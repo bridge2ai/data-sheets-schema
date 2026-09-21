@@ -3,7 +3,8 @@ import ssl
 
 from httpx import Client, Timeout
 
-from budgeted_cborg import BudgetStop, CBORG_ENDPOINTS, cborg_client
+from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, LEGACY_UPSTREAM_READ_SECONDS, UPSTREAM_CONNECT_SECONDS,
+                            cborg_client)
 from .registration import canonical_path, pinned, native_stall_policy, native_upstream_read_timeout
 
 
@@ -43,7 +44,7 @@ def provider_clients(manifest, api_key):
     if context is None:
         return cborg_client(manifest, api_key, max_retries=0), None
     upstream = Client(verify=context, trust_env=False,
-        timeout=Timeout(1800, connect=20), follow_redirects=False)
+        timeout=Timeout(LEGACY_UPSTREAM_READ_SECONDS, connect=UPSTREAM_CONNECT_SECONDS), follow_redirects=False)
     try:
         sdk = cborg_client(manifest, api_key, max_retries=0, http_client=upstream)
     except BaseException:

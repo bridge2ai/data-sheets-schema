@@ -45,28 +45,44 @@ A new condition can register a bounded in-attempt stall policy with
 `--native-stall-policy PATH` (#2150). Without it, the first provider stall ends the
 whole attempt, as it always has. The JSON file names the policy kind
 `bounded_in_attempt_v1`, `count_attempts` from 1 to 5, `max_stall_debits` from 0 to
-10, and an `authorization` that quotes the maintainer's standing approval: the exact
-response, the request it answered and when it was recorded. The authorization is
-required whenever any debit is allowed, and must be `null` when none is.
+10, and an `authorization`. The authorization quotes the maintainer's standing
+approval: the exact response, the request it answered, when it was recorded, and
+`authorized_max_stall_debits`, which must equal `max_stall_debits`. It is required
+whenever any debit is allowed and must be `null` when none is. The file is read
+strictly: duplicate keys, a JSON `null` and an unreadable file are refused before the
+destination exists. Its content is copied into the manifest, which the registration
+hash binds; the file itself is not pinned.
 
 The policy does two things. Token counting is repeated up to `count_attempts` tries,
 only after a timeout, a dropped connection or a provider 5xx. A count costs nothing,
-so repeating one carries no charge ambiguity. A paid request that stalls before any
-response byte reaches the native client is counted at its whole reservation, and the
-ledger row says so: `settlement_basis` is `registered_stall_policy_full_reservation_debit`,
-the provider charge is unconfirmed and unknown, and nothing is released. The reservation
-is an upper bound on the fee, so the budget can only be over-counted. The proxy then
-answers the client with a retryable status, and the client's own retry continues the
-same session. `stall.json` beside the request keeps the evidence, and the terminal
-result lists the debited requests under `stall_debited_requests`.
+so repeating one carries no charge ambiguity. Each try is bounded to two minutes, the
+pause between tries is a few seconds and ends at once when admission closes, and no
+retry starts or writes evidence after that. A paid request that stalls after it was
+sent, and before any response byte reaches the native client, is counted at its whole
+reservation, and the ledger row says so: `settlement_basis` is
+`registered_stall_policy_full_reservation_debit`, the provider charge is unconfirmed
+and unknown, and nothing is released. The reservation is computed from the counted
+input at the higher price plus the whole output ceiling, so it bounds the fee by
+construction; a debited row cannot be checked against actual usage, because none
+arrives. The proxy then answers the client with a retryable status, and the client's
+own retry continues the same session. The ledger row carries the stall evidence,
+`stall.json` beside the request repeats it and records that a reply was attempted,
+and the terminal result lists the debited requests under `stall_debited_requests`.
 
-A stall counts only when the upstream exchange itself failed: a provider 5xx, a
-timeout, or a dropped or malformed connection. A provider 4xx, a failure after
-response bytes were relayed, a closed admission and every budget refusal stop the
-attempt as before. So does the stall after the registered maximum, which leaves its
-reservation pending for the maintainer's request-specific decision. Debits require a
-native SDK timeout longer than the upstream read bound in force, so the proxy sees
-the stall before the client gives up. The policy is audit-only: generation, Phase 4
+A stall counts only when the exchange failed after the request was sent: a provider
+5xx, a read or write timeout or error, or a malformed or dropped response. A provider
+status below 500 is never a stall, whatever fails afterwards. A connection that was
+never made sent nothing, so it stops the attempt as before instead of spending the
+allowance during an outage. A failure after response bytes were relayed, a closed
+admission and every budget refusal also stop the attempt as before. So does the stall
+after the registered maximum, which leaves its reservation pending for the
+maintainer's request-specific decision.
+
+Debits need the proxy to see a stall before the client gives up. The native SDK
+timeout must therefore cover the upstream read bound in force, the bounded
+token-count tries with their pauses, the connect allowance and a minute of margin,
+and the native fetch idle timer must be registered off. With three count tries that
+is 455 seconds above the read bound. The policy is audit-only: generation, Phase 4
 and the evaluations refuse it. `native_controls/probe_native_stall.py` drives the
 real pinned executable against a scripted upstream that stalls, with no provider
 contact, and shows the client retrying to completion.

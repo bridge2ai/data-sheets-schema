@@ -17,7 +17,8 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from budgeted_cborg import BudgetStop, CBORG_ENDPOINTS, CappedMessages, digest, now, write_new
+from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, CappedMessages, LEGACY_UPSTREAM_READ_SECONDS,
+                            POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS, digest, now, write_new)
 from data_sheets_schema.stream_evidence import CORRELATION_HEADERS, _identifier
 
 
@@ -121,14 +122,26 @@ class UpstreamStall(BudgetStop):
         self.status = status
 
 
-def stall_evidence(exc):
-    """What made a paid request a stall, or None. Only failures of the
-    upstream exchange qualify: a provider 5xx, a timeout, or a dropped or
-    malformed connection. Provider exception text is never kept."""
+#: Failures after the request left: the provider may have begun work. A
+#: connection that was never made (connect or pool errors) sent nothing, so it
+#: is not a stall; it stops the attempt as before instead of burning the
+#: allowance during an outage (#2156).
+POST_SEND_FAILURES = (httpx.ReadTimeout, httpx.WriteTimeout, httpx.ReadError, httpx.WriteError,
+                      httpx.RemoteProtocolError)
+
+
+def stall_evidence(exc, upstream_status=None):
+    """What made a paid request a stall, or None. A provider status below 500
+    is never a stall, whatever failed after it arrived (#2156). Otherwise a
+    provider 5xx, or a failure of the exchange after the request was sent,
+    qualifies. Provider exception text is never kept."""
+    if upstream_status is not None and upstream_status < 500:
+        return None
     if isinstance(exc, UpstreamStall):
         return {"kind": "upstream_http_status", "http_status": exc.status}
-    if isinstance(exc, (httpx.TimeoutException, httpx.NetworkError, httpx.RemoteProtocolError)):
-        return {"kind": "upstream_transport", "error_type": type(exc).__name__}
+    if isinstance(exc, POST_SEND_FAILURES):
+        return {"kind": "upstream_transport", "error_type": type(exc).__name__,
+                **({"http_status": upstream_status} if upstream_status is not None else {})}
     return None
 
 
@@ -158,7 +171,8 @@ class NativeProxy:
         # Per-request override only: the shared SDK counting client and all
         # legacy callers keep their original timeout. None is never forwarded
         # as a timeout keyword, since HTTPX interprets that as unbounded.
-        self.stream_options = ({'timeout': httpx.Timeout(1800, connect=20, read=upstream_read_timeout_seconds)}
+        self.stream_options = ({'timeout': httpx.Timeout(LEGACY_UPSTREAM_READ_SECONDS, connect=UPSTREAM_CONNECT_SECONDS,
+                                                         read=upstream_read_timeout_seconds)}
                                if upstream_read_timeout_seconds is not None else {})
         if request_headers is not None and not isinstance(request_headers, dict):
             raise BudgetStop("native provider headers must be a mapping")
@@ -171,6 +185,7 @@ class NativeProxy:
         self.token = secrets.token_urlsafe(32)
         self.key, self.base_url = provider_key, base_url
         self.state = threading.Condition(threading.RLock())
+        self.admission_closed = threading.Event()
         self.closed = False
         self.frozen = False
         self.active_handlers = 0
@@ -178,9 +193,13 @@ class NativeProxy:
         self.messages = CappedMessages(sdk, ledger=ledger, attempt=attempt,
             evidence=Path(evidence), model=model, prices=prices, verify=verify,
             mutation_guard=self.mutation_guard,
-            **({"count_attempts": self.stall_policy["count_attempts"], "count_pause": count_pause}
+            **({"count_attempts": self.stall_policy["count_attempts"],
+                "count_timeout": POLICY_COUNT_TRY_SECONDS,
+                # The pause ends at once when admission closes (#2157).
+                "count_pause": count_pause or (lambda seconds: self.admission_closed.wait(seconds))}
                if self.stall_policy is not None else {}))
-        self.upstream = upstream or httpx.Client(timeout=httpx.Timeout(1800, connect=20), follow_redirects=False)
+        self.upstream = upstream or httpx.Client(
+            timeout=httpx.Timeout(LEGACY_UPSTREAM_READ_SECONDS, connect=UPSTREAM_CONNECT_SECONDS), follow_redirects=False)
         self.failure = None
         self.failed = threading.Event()
         self.serial = threading.Lock()
@@ -197,6 +216,7 @@ class NativeProxy:
                 self.failure = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
             self.closed = True
             self.failed.set()
+            self.admission_closed.set()
 
     def survive_stall(self, ticket, folder, evidence):
         """Count a stalled request at its whole reservation and leave the
@@ -209,14 +229,27 @@ class NativeProxy:
             self.require_open()
             index = self.messages.debit_stall(ticket, maximum=self.stall_policy["max_stall_debits"],
                                               evidence=evidence)
-            write_new(folder / "stall.json", {"at": now(), "stall_index": index, **evidence,
-                "settlement": "whole reservation counted; provider charge unconfirmed",
-                "child_reply_status": 503})
             self.stalls_survived = index
+            try:
+                # The ledger row already carries this evidence, so a failed
+                # copy beside the request must not undo the survival (#2158).
+                write_new(folder / "stall.json", {"at": now(), "stall_index": index, **evidence,
+                    "settlement": "whole reservation counted; provider charge unconfirmed",
+                    "child_reply_attempted": 503})
+            except Exception:
+                pass
+
+    def stall_reply(self, handler):
+        """Tell the child its request may be repeated. Nothing of the
+        provider's reply is forwarded."""
+        handler.reply(503, {"type":"error", "error":{"type":"api_error",
+            "message":"registered transport stall; the request may be retried"}},
+            headers={"retry-after": "1", "x-should-retry": "true"})
 
     def close_admission(self):
         with self.state:
             self.closed = True
+            self.admission_closed.set()
 
     def require_open(self):
         if self.closed:
@@ -277,7 +310,7 @@ class NativeProxy:
             def _post_serially(self):
                 self.connection.settimeout(20)
                 sent = False
-                ticket = folder = None
+                ticket = folder = upstream_status = None
                 try:
                     supplied = self.headers.get("x-api-key", "")
                     if not supplied:
@@ -328,6 +361,7 @@ class NativeProxy:
                     with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers,
                                                **owner.stream_options) as response:
                         owner.capture_json(folder / "http_status.json", response_metadata(response))
+                        upstream_status = response.status_code
                         if response.status_code != 200:
                             owner.capture(folder / "upstream_error.body", b"")
                             for chunk in response.iter_bytes():
@@ -363,14 +397,12 @@ class NativeProxy:
                         # Nothing reached the child, so its own retry can
                         # continue the session once the charge is counted.
                         try:
-                            owner.survive_stall(ticket, folder, stall_evidence(exc))
+                            owner.survive_stall(ticket, folder, stall_evidence(exc, upstream_status))
                         except Exception:
                             pass
                         else:
                             try:
-                                self.reply(503, {"type":"error", "error":{"type":"api_error",
-                                    "message":"registered transport stall; the request may be retried"}},
-                                    headers={"retry-after": "1", "x-should-retry": "true"})
+                                owner.stall_reply(self)
                             except (OSError, BrokenPipeError):
                                 owner.fail(BudgetStop("native client closed before the registered stall reply"))
                             return

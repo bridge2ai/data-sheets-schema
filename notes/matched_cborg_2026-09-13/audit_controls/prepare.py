@@ -74,7 +74,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if native_stall_policy is not None:
         upstream_selection['native_stall_policy'] = native_stall_policy
         validate_stall_policy({'kind': 'd4d_native_audit_continuation', **upstream_selection,
-            'native_runtime': ({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
+            'native_runtime': {
+                **({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
+                **({'api_force_idle_timeout': native_api_force_idle_timeout}
+                   if native_api_force_idle_timeout is not None else {})},
             'job': {'deadline_seconds': deadline_seconds}})
     if bool(continuation_source_registration) != bool(continuation_reconciliation_receipt):
         raise BudgetStop('an audit reconciliation requires both source registration and receipt')
@@ -187,12 +190,29 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'native_output_ceiling': manifest['native_runtime']['max_output_tokens'],
         'native_api_timeout_ms': manifest['native_runtime'].get('api_timeout_ms', 'native_default'),
         'native_api_force_idle_timeout': manifest['native_runtime'].get('api_force_idle_timeout', 'native_default'),
-        'native_stall_policy': ({k: v for k, v in manifest['native_stall_policy'].items() if k != 'authorization'}
-                                if 'native_stall_policy' in manifest else 'stop_on_first_stall'),
+        # Only a selecting condition gains this key; a legacy plan is unchanged (#2158).
+        **({'native_stall_policy': {k: v for k, v in manifest['native_stall_policy'].items() if k != 'authorization'}}
+           if 'native_stall_policy' in manifest else {}),
         'provider_base_url': manifest['provider_base_url'],
         'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
         'provider_calls': 0, 'scientific_acceptance': False})
     return path
+
+
+def read_stall_policy(path):
+    """The policy file, strictly: duplicate keys, a JSON null and an unreadable
+    file are refused, so a named file can never register the legacy condition
+    or a value the maintainer did not write (#2153)."""
+    from .registration import strict_json
+    try:
+        value = strict_json(Path(path).read_text(encoding='utf-8'))
+    except BudgetStop:
+        raise
+    except (OSError, ValueError) as exc:
+        raise BudgetStop(f'native stall policy file is unreadable: {type(exc).__name__}') from None
+    if not isinstance(value, dict):
+        raise BudgetStop('native stall policy file must hold one JSON object')
+    return value
 
 
 def main():
@@ -227,7 +247,7 @@ def main():
     if args['native_api_force_idle_timeout'] is not None:
         args['native_api_force_idle_timeout'] = False
     if args['native_stall_policy'] is not None:
-        args['native_stall_policy'] = json.loads(Path(args['native_stall_policy']).read_text(encoding='utf-8'))
+        args['native_stall_policy'] = read_stall_policy(args['native_stall_policy'])
     args['attempt_cap'] = str(args['attempt_cap'])
     path = prepare(**args)
     print(json.dumps({'registration': str(path), 'sha256': sha(path)}))
