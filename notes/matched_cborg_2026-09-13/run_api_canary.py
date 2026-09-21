@@ -30,6 +30,13 @@ def verify(manifest, path, expected_sha):
         raise BudgetStop("native_upstream_read_timeout_seconds is audit-only; generation cannot select it")
     if "native_stall_policy" in manifest:
         raise BudgetStop("native_stall_policy is audit-only; generation cannot select it")
+    generation = manifest.get("generation")
+    jobs = generation.get("jobs") if isinstance(generation, dict) else None
+    if isinstance(jobs, list):
+        for job in jobs:
+            spec = job.get("render_spec") if isinstance(job, dict) else None
+            if isinstance(spec, dict) and spec.get("render_version") in (19, "19"):
+                raise BudgetStop("renderer 19 is audit-continuation-only; generation cannot select it")
     if Path.cwd().resolve() != Path(manifest["repository"]).resolve():
         raise BudgetStop("working directory differs from the registered repository")
     if sha(path) != expected_sha:

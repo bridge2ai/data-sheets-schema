@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -925,6 +925,8 @@ def assembly_digest(render_version: int = 8) -> dict[str, Any]:
                       "native_evidence_stop": NATIVE_EVIDENCE_STOP})
     if render_version >= 16:
         parts.append({"source_metadata_header": SOURCE_METADATA_HEADER_V16})
+    if render_version >= 19:
+        parts.append({"audit_schema_semantics_header": SCHEMA_SEMANTICS_HEADER_V19})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -1910,6 +1912,31 @@ under an earlier attempt.
 """
 
 
+SCHEMA_SEMANTICS_HEADER_V19 = """# Populated-record schema semantics (renderer v19)
+
+The following structural guidance is derived from the exact schemas and the
+original records' shape. It supplies class and field meanings, not evidence
+about a dataset. Assess a value's relationship and scope as well as whether
+its words appear in a source. A true fact can belong in a different field.
+The full registered schemas remain authoritative. This supplement does not
+establish source support, complete the audit, or replace independent review.
+"""
+
+SCHEMA_SEMANTICS_CONTRACT_V19 = """### Registered audit schema guidance (renderer v19)
+
+Use the populated-record schema-semantics supplement when assessing each
+original field and its containing relationships. Its class and induced-slot
+definitions describe the expected meaning of structured values. They are not
+dataset facts and cannot establish that an event or relationship occurred.
+Keep the full source-review coverage, original evidence and terminal checks.
+
+This renderer is selected by a separate audit-continuation registration. It
+does not authorize a generation launch or change any evaluation instrument.
+The supplement describes the original pair in Phase 3 only; it does not claim
+to describe new fields subsequently introduced during reconciliation.
+"""
+
+
 def evidence_phase_contract(phase: str, render_version: int) -> str:
     contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
     if render_version >= 12:
@@ -1941,6 +1968,8 @@ def evidence_phase_contract(phase: str, render_version: int) -> str:
             contract += "\n\n" + CLAIM_CLARIFICATION_CONTRACT_V17
         if render_version >= 18 and phase == "audit":
             contract += "\n\n" + DRAFT_GRAMMAR_CONTRACT_V18
+        if render_version >= 19 and phase == "audit":
+            contract += "\n\n" + SCHEMA_SEMANTICS_CONTRACT_V19
         return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 
@@ -2328,7 +2357,8 @@ def audit_counts(audit: str | None) -> dict[str, Any] | None:
 
 
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
-                _source_review_estimate: bool = False) -> PhaseRequest:
+                _source_review_estimate: bool = False,
+                _audit_schema_paths: tuple[Path, Path] | None = None) -> PhaseRequest:
     """Assemble one phase's request.
 
     The bundle and schema digest are the cached prefix: identical across all
@@ -2336,6 +2366,8 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
     """
     if phase not in PHASES:
         raise ValueError(f"unknown phase {phase!r}")
+    if _audit_schema_paths is not None and (phase != "audit" or spec.render_version != 19):
+        raise ValueError("explicit audit schema paths require renderer 19 audit")
     # Keyed off which artifact the phase writes, not off the phase name.
     # `reconcile_core` rewrites the CORE record but was being shown the Dataset
     # digest, so it reintroduced full-schema slots (`splits`, `subsets`,
@@ -2407,6 +2439,24 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": CARRY_LABEL.format(name=name) + text})
+    if spec.render_version >= 19 and phase == "audit":
+        from data_sheets_schema import schema_semantics
+        schema_paths = (_audit_schema_paths if _audit_schema_paths is not None else (
+            schema_digest.resolve_schema(schema_digest.FULL_SCHEMA),
+            schema_digest.resolve_schema(schema_digest.CORE_SCHEMA)))
+        if not isinstance(schema_paths, tuple) or len(schema_paths) != 2:
+            raise ValueError("audit schema paths must be an exact full/core pair")
+        if _source_review_estimate:
+            # plan() carries byte-size placeholders, never real records.
+            # Bound this component by the helper's enforced output-byte
+            # ceiling. Token counts remain approximate; actual admission
+            # counts the real registered request, including its guidance.
+            guidance = "ESTIMATE ONLY: " + "x" * schema_semantics.MAX_PAIR_RENDER_BYTES
+        else:
+            guidance = schema_semantics.render_pair(
+                carry["Completed full record"], carry["Completed core record"],
+                schema_paths=tuple(Path(p) for p in schema_paths), profile=spec.profile_obj)
+        parts.append({"type": "text", "text": SCHEMA_SEMANTICS_HEADER_V19 + "\n" + guidance})
     if phase == "report":
         counts = audit_counts(carry.get("Audit findings"))
         if counts is not None:
@@ -2522,7 +2572,11 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "approx_total_input_tokens": sum(p["approx_input_tokens"] for p in phases),
         "estimate_basis": basis + ("; source-review inventory estimated at twice full-record bytes plus 1024; "
                                     "not a bound or measured token count; actual admission must count the live payload"
-                                    if spec.render_version >= 12 else ""),
+                                    if spec.render_version >= 12 else "")
+                                + ("; audit schema guidance uses the maximum permitted rendered byte size "
+                                   "for the original pair, not observed guidance or measured tokens; "
+                                   "renderer 19 is for separately registered audit continuation, "
+                                   "not generation execution" if spec.render_version >= 19 else ""),
         "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                     "report": str(spec.report_path)},
         # Not costed above: made only when a receipt entry names a slot the
@@ -4088,6 +4142,8 @@ def sent_text_surfaces() -> dict[str, str]:
     out["source_metadata_header_v16"] = SOURCE_METADATA_HEADER_V16
     out["claim_clarification_contract_v17"] = CLAIM_CLARIFICATION_CONTRACT_V17
     out["draft_grammar_contract_v18"] = DRAFT_GRAMMAR_CONTRACT_V18
+    out["schema_semantics_header_v19"] = SCHEMA_SEMANTICS_HEADER_V19
+    out["schema_semantics_contract_v19"] = SCHEMA_SEMANTICS_CONTRACT_V19
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),
@@ -5945,6 +6001,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:
         return plan(spec)
+    if spec.render_version == 19:
+        raise ValueError("renderer 19 requires a separately registered audit continuation; "
+                         "generation execution is not supported")
 
     with _exclusive_run(spec):
         if resume:
@@ -6046,6 +6105,9 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
 
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
+    if spec.render_version == 19:
+        raise ValueError("renderer 19 requires a separately registered audit continuation; "
+                         "generation execution is not supported")
 
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come

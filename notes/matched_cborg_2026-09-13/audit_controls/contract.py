@@ -164,7 +164,21 @@ def render_instruction(manifest: dict) -> str:
         if upgraded:
             os.chdir(_path(manifest['repository']))
             spec = selected_spec(manifest, job, spec)
-        request = api_runner.build_phase(spec, "audit", carry=carry)
+        schema_arguments = {}
+        from .registration import schema_semantic_context
+        if schema_semantic_context(manifest):
+            # The inherited resource identity is the authority, not ambient
+            # resource resolution in the new execution checkout.
+            resources = job['render_spec']['agentic_toolchain']['resources']
+            for role, filename in (('full_schema', 'data_sheets_schema_all.yaml'),
+                                   ('core_schema', 'data_sheets_schema_core_all.yaml')):
+                relative = 'src/data_sheets_schema/schema/' + filename
+                if (inputs[role] != _path(resources[relative]) or
+                        inputs[role].read_bytes() !=
+                        (_path(manifest['repository']) / relative).read_bytes()):
+                    raise ValueError('schema semantics changes the registered ' + role + ' authority')
+            schema_arguments['_audit_schema_paths'] = (inputs['full_schema'], inputs['core_schema'])
+        request = api_runner.build_phase(spec, "audit", carry=carry, **schema_arguments)
     finally:
         os.chdir(previous)
     texts = [request.system]
@@ -176,7 +190,15 @@ def render_instruction(manifest: dict) -> str:
                 raise ValueError("audit continuation supports text request blocks only")
             texts.append(block["text"])
     reference = "\n\n".join(texts)
+    # Only the new renderer may omit this duplicate, and only when the exact
+    # registered protocol is retained by the checked persistent system renderer.
+    persistent_protocol = False
+    if schema_semantic_context(manifest) and 'audit_contract_context' in manifest:
+        from . import contract_context
+        persistent_protocol = contract_context.enabled(manifest)
     for name in ("source_manifest", "chunk_manifest", "receipt", "protocol"):
+        if name == 'protocol' and persistent_protocol:
+            continue
         reference += (f"\n\n## Exact registered {name} (reference data)\n\n"
                       + inputs[name].read_text(encoding="utf-8"))
     command = shlex.join(manifest["job"]["validator_argv"])

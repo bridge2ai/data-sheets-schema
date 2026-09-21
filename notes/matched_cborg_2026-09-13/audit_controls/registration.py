@@ -30,6 +30,7 @@ TRANSITION_KIND = 'frozen_pair_protocol_v4'
 SOURCE_METADATA_TRANSITION_KIND = 'frozen_pair_protocol_v5'
 CLAIM_CLARIFICATION_TRANSITION_KIND = 'frozen_pair_claim_clarification_v1'
 DRAFT_GRAMMAR_TRANSITION_KIND = 'frozen_pair_draft_grammar_v1'
+SCHEMA_SEMANTICS_TRANSITION_KIND = 'frozen_pair_schema_semantics_v1'
 VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
 
 
@@ -40,7 +41,8 @@ def scientific_contract(manifest):
     transitions = {(4, 15): {'kind': TRANSITION_KIND},
                    (5, 16): {'kind': SOURCE_METADATA_TRANSITION_KIND},
                    (5, 17): {'kind': CLAIM_CLARIFICATION_TRANSITION_KIND},
-                   (6, 18): {'kind': DRAFT_GRAMMAR_TRANSITION_KIND}}
+                   (6, 18): {'kind': DRAFT_GRAMMAR_TRANSITION_KIND},
+                   (6, 19): {'kind': SCHEMA_SEMANTICS_TRANSITION_KIND}}
     if (any(type(value) is not int for value in pair) or
             (pair not in transitions if upgraded else pair != (3, 14)) or
             (upgraded and (type(manifest[TRANSITION]) is not dict or
@@ -49,8 +51,15 @@ def scientific_contract(manifest):
                          'or explicit frozen_pair_protocol_v4 with 4/15 or '
                          'frozen_pair_protocol_v5 with 5/16 or '
                          'frozen_pair_claim_clarification_v1 with 5/17 or '
-                         'frozen_pair_draft_grammar_v1 with 6/18')
+                         'frozen_pair_draft_grammar_v1 with 6/18 or '
+                         'frozen_pair_schema_semantics_v1 with 6/19')
     return upgraded
+
+
+def schema_semantic_context(manifest):
+    """Only the exact selected scientific transition executes the new helper."""
+    scientific_contract(manifest)
+    return manifest['render_version'] == 19
 
 
 def versioned_scientific_files(manifest):
@@ -264,6 +273,10 @@ def inspect_parent(manifest):
 def implementation_paths(manifest):
     repository = canonical_path(manifest['repository'], exists=True)
     paths = set((repository / 'src/data_sheets_schema').rglob('*.py'))
+    if schema_semantic_context(manifest):
+        paths.add(repository / 'src/data_sheets_schema/schema_semantics.py')
+    else:
+        paths.discard(repository / 'src/data_sheets_schema/schema_semantics.py')
     paths.update((repository / 'src/data_sheets_schema').rglob('*.yaml'))
     paths.update((repository / 'src/data_sheets_schema').rglob('*.json'))
     paths.update(path for path in (repository / 'src/download/prompts').rglob('*') if path.is_file())
@@ -300,6 +313,8 @@ def required_paths(manifest):
         paths.add(config.resolve())
     paths.add(canonical_path(manifest['native_runtime']['executable'], exists=True))
     paths.update(canonical_path(value, exists=True) for value in manifest['inputs'].values())
+    if schema_semantic_context(manifest):
+        paths.update(schema_semantic_paths(manifest))
     paths.update(canonical_path(manifest['job'][key], exists=True) for key in ('instruction', 'system_prompt'))
     parent = manifest['parent']
     if TRANSITION in manifest:
@@ -322,6 +337,21 @@ def required_paths(manifest):
         paths.update(canonical_path(value, exists=True) for value in bridge.values())
         from .runtime_closure import closure_paths
         paths.update(closure_paths(read_json(bridge['receipt'])))
+    return paths
+
+
+def schema_semantic_paths(manifest):
+    """Pin the exact schema closure consumed by the selected pure renderer."""
+    if not schema_semantic_context(manifest):
+        return set()
+    from data_sheets_schema.schema_snapshot import capture_schema
+    paths = set()
+    for role in ('full_schema', 'core_schema'):
+        snapshot = capture_schema(canonical_path(manifest['inputs'][role], exists=True), strict=True)
+        for _, path, raw in snapshot.sources:
+            if not isinstance(raw, bytes):
+                raise BudgetStop('schema semantics has an unavailable schema dependency')
+            paths.add(canonical_path(str(path), exists=True))
     return paths
 
 

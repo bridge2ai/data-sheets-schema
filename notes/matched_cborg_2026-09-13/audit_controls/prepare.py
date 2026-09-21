@@ -12,7 +12,8 @@ from .registration import (BudgetStop, canonical_path, inspect_parent,
     native_stall_policy as validate_stall_policy, native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .registration import (TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND,
-                           CLAIM_CLARIFICATION_TRANSITION_KIND, DRAFT_GRAMMAR_TRANSITION_KIND)
+                           CLAIM_CLARIFICATION_TRANSITION_KIND, DRAFT_GRAMMAR_TRANSITION_KIND,
+                           SCHEMA_SEMANTICS_TRANSITION_KIND)
 from .contract import render_instruction
 
 SYSTEM = """You are the native auditor for a registered D4D Phase 3 continuation.
@@ -71,7 +72,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
             staged_audit_output=False, native_upstream_read_timeout_seconds=None,
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
-            source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False):
+            source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
+            schema_semantic_context=False):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -88,6 +90,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         raise BudgetStop('source claim clarification requires an explicit boolean')
     if type(draft_audit_grammar) is not bool:
         raise BudgetStop('draft audit grammar requires an explicit boolean')
+    if type(schema_semantic_context) is not bool:
+        raise BudgetStop('schema semantic context requires an explicit boolean')
+    if schema_semantic_context and not draft_audit_grammar:
+        raise BudgetStop('schema semantic context requires explicit draft audit grammar')
     if draft_audit_grammar and (staged_audit_output or upgrade_evidence_protocol or
                                source_metadata_evidence or clarify_source_claims):
         raise BudgetStop('draft audit grammar selects its own protocol and output mode exclusively')
@@ -205,6 +211,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if draft_audit_grammar:
         manifest.update(protocol_version=6, render_version=18)
         manifest[TRANSITION] = {'kind': DRAFT_GRAMMAR_TRANSITION_KIND}
+        if schema_semantic_context:
+            manifest.update(render_version=19)
+            manifest[TRANSITION] = {'kind': SCHEMA_SEMANTICS_TRANSITION_KIND}
         from .draft_output import specification
         manifest['audit_drafting'] = specification(manifest, path)
     if persistent_audit_contract:
@@ -305,6 +314,8 @@ def main():
         help='explicitly select protocol 5/renderer 17 with clarified source-claim review instructions')
     scientific.add_argument('--draft-audit-grammar', action='store_true',
         help='select protocol 6/renderer 18 and at most two immutable grammar drafts before terminal validation')
+    parser.add_argument('--schema-semantic-context', action='store_true',
+        help='with --draft-audit-grammar, select renderer 19 and exact nested schema semantics for the frozen pair')
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)

@@ -84,6 +84,16 @@ legacy history remain immutable historical provenance. Protocol-3 audits retain
 their existing Phase 4 behavior. Audit-only persistent-delivery and staged-output
 selectors are not inherited as active Phase 4 settings.
 
+An accepted audit explicitly selected with `--schema-semantic-context` and
+`--draft-audit-grammar` uses protocol 6 / renderer 19. Phase 4 inherits that
+exact transition, including byte identity of `schema_semantics.py`, the original
+schema/import pins and every accepted draft/check/seal artifact. Its renderer
+uses the ordinary schema presentation; the audit-only semantics supplement
+describes the original pair, not new fields introduced by reconciliation.
+No active audit drafting, persistent-contract or schema-context selector is
+copied into Phase 4 or evaluation. The terminal source checks and independent
+acceptance requirements are unchanged (#2182).
+
 The v4 anonymous whole-member action binds the exact original-full bytes and
 requires every unselected member of the affected list to survive exactly once,
 with unique typed structure. Reordering members and permitted narrative changes
