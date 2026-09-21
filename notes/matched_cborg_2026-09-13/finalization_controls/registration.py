@@ -109,7 +109,11 @@ def validate_scientific_identity(manifest, accepted):
         relative=Path('src/data_sheets_schema/anonymous_removals.py')
         if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
             raise BudgetStop('finalization changes the accepted anonymous-removal implementation')
-        protocol=Path(manifest['repository'])/'src/download/prompts/evidence_protocol_v4.md'
+        if manifest['protocol_version'] == 5:
+            relative=Path('src/data_sheets_schema/source_metadata.py')
+            if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
+                raise BudgetStop('finalization changes the accepted source-metadata implementation')
+        protocol=Path(manifest['repository'])/f"src/download/prompts/evidence_protocol_v{manifest['protocol_version']}.md"
         if sha(protocol)!=sha(accepted['inputs']['protocol']):
             raise BudgetStop('finalization changes the accepted evidence protocol')
 

@@ -383,12 +383,14 @@ def native_evidence_check(spec):
     """Recheck the exact originals using the generation's selected protocol."""
     from data_sheets_schema.evidence_assertions import check_files, protocol_for_renderer
     evidence_dir = spec.metadata_dir / 'evidence'
+    authority = ({'source_manifest': spec.manifest, 'project': spec.project}
+                 if spec.render_version >= 16 and spec.manifest_used else {})
     return check_files(audit=evidence_dir/'audit.json', bundle=spec.bundle,
         manifest=spec.chunk_manifest, report=spec.report_path,
         artifacts={'original_full':evidence_dir/'original_full.yaml',
                    'original_core':evidence_dir/'original_core.yaml',
                    'final_full':spec.full_path,'final_core':spec.core_path},
-        protocol_version=protocol_for_renderer(spec.render_version))
+        protocol_version=protocol_for_renderer(spec.render_version), **authority)
 
 
 def terminate_group(process):

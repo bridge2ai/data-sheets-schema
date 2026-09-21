@@ -400,3 +400,46 @@ the accepted result's part/assembly evidence before carrying it forward; later
 admission rechecks it. These administrative part/receipt paths are not added to
 model-readable inputs, and Phase 4 does not inherit the audit-only output mode.
 Neither successful concatenation nor validation supplies scientific acceptance.
+
+## Source-manifest metadata evidence (protocol 5 / renderer 16)
+
+A fresh condition can select `--source-metadata-evidence` to register
+`scientific_contract_transition: {"kind": "frozen_pair_protocol_v5"}`.
+It is mutually exclusive with `--upgrade-evidence-protocol`, whose existing
+meaning remains protocol 4 / renderer 15. With neither option, historical
+protocol 3 / renderer 14 behavior remains unchanged. New general API and
+native generation can explicitly select renderer 16 separately; the
+continuation selector remains audit/accepted-finalization specific.
+
+The new instrument retains the relationship proofs and once-only terminal
+check. It adds `source_review v2` support for a finite projection of the exact
+registered source manifest: source identity and processed filename, source
+type, effective priority, and supported capture/supersession metadata. The
+projection is bound to the manifest's raw-file SHA256 and selected project.
+It exposes no arbitrary manifest pointer, curator note, curation history or
+dataset description. Provenance assertions have a separate discriminator and
+cannot be mixed with document quotations in one atomic claim. Their authority
+is the source declaration, not the truth of dataset facts. No whole-field
+metadata exemption is added.
+
+Both arms receive the same protocol and projection. Native audit checking
+derives the project from the pinned parent job and the manifest from its
+exact input identity. API audit admission, reconciliation and report checks
+pass the same authority. An explicit absence of a source manifest still
+permits document-only review, but no source-manifest assertion. Changed or
+missing supplied bytes, unknown sources, invalid types and unsupported fields
+cannot establish metadata evidence. Independent review still establishes
+entailment and rejects metadata used as a substitute for dataset evidence.
+
+The protocol also spells out the existing output grammar: a finding has one
+removal object, not an array; its `review_paths` contains only values with a
+revision judgment. Supporting context belongs in evidence assertions. These
+clarifications do not relax the checker or authorize repair after validation.
+
+The original generation remains at its recorded protocol/render version.
+Accepted protocol-5 audits pass the matching scientific contract and helper
+bytes to Phase 4, which preserves the original generation lineage. Generation
+and evaluation refuse an active continuation selector. Audit operational
+options are not inherited. Old registrations, prompts, stopped outputs and
+scores remain unchanged; a fresh registration and independent review precede
+each launch with the new instrument.

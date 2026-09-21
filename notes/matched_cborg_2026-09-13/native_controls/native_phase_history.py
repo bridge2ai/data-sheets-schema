@@ -107,7 +107,12 @@ def _classify(command, spec, repository, command_policy):
             final = {'--final-full': paths['full'], '--final-core': paths['core'], '--report': paths['report']}
             if any(key in options for key in final):
                 required.update(final)
+            if spec.render_version >= 16 and spec.manifest_used:
+                required['--source-manifest'] = spec.manifest
             _require(all(path(options[key]) == path(value) for key, value in required.items()))
+            if spec.render_version >= 16 and spec.manifest_used:
+                required['--project'] = spec.project
+                _require(options.get('--project') == spec.project)
             if spec.render_version >= 11:
                 required['--protocol-version'] = str(protocol_for_renderer(spec.render_version))
                 _require(options.get('--protocol-version') == required['--protocol-version'])

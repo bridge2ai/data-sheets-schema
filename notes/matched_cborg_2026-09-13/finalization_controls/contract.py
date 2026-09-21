@@ -15,7 +15,7 @@ import yaml
 
 from filelock import FileLock
 from data_sheets_schema import api_runner, evidence_assertions, source_review
-from audit_controls.contract import INPUTS as AUDIT_INPUTS, strict_json, selected_spec
+from audit_controls.contract import INPUTS as AUDIT_INPUTS, strict_json, selected_spec, source_metadata_arguments
 
 INPUTS = AUDIT_INPUTS | {"audit"}
 
@@ -275,12 +275,13 @@ def render_instruction(manifest):
         "source reads, original freezing or the inherited audit.\n")
     from audit_controls.registration import scientific_contract
     if scientific_contract(manifest):
+        protocol, renderer = manifest['protocol_version'], manifest['render_version']
         text = text.replace('# Registered native Phase 4 continuation\n\n',
             '# Registered native Phase 4 continuation\n\n'
-            'This invocation retains the independently accepted audit\'s protocol 4 / renderer 15 '
+            f'This invocation retains the independently accepted audit\'s protocol {protocol} / renderer {renderer} '
             'scientific contract. The original generation and parent_instruction remain renderer-14 '
-            'historical provenance, not current protocol instructions. The registered protocol-v4 '
-            'input and selected renderer-15 context below govern current scientific actions.\n\n', 1)
+            f'historical provenance, not current protocol instructions. The registered protocol-v{protocol} '
+            f'input and selected renderer-{renderer} context below govern current scientific actions.\n\n', 1)
     return text
 
 
@@ -371,7 +372,8 @@ def validate_final(manifest):
         evidence = evidence_assertions.check_files(audit=inputs["audit"], bundle=inputs["bundle"],
             manifest=inputs["chunk_manifest"], report=paths["report"], protocol_version=manifest['protocol_version'],
             artifacts={"original_full": inputs["original_full"], "original_core": inputs["original_core"],
-                       "final_full": paths["full"], "final_core": paths["core"]})
+                       "final_full": paths["full"], "final_core": paths["core"]},
+            **source_metadata_arguments(manifest, inputs))
         result["evidence"] = evidence
         result["source_reviews"] = _source_checks(evidence, {**original, "final_full": raw["full"]})
         result["findings"].extend(evidence.get("findings", []))

@@ -79,7 +79,7 @@ def selected_spec(manifest, job, original):
     if not scientific_contract(manifest):
         return original
     repository = _path(manifest['repository'])
-    if ((repository / 'src/download/prompts/evidence_protocol_v4.md').read_bytes()
+    if ((repository / f"src/download/prompts/evidence_protocol_v{manifest['protocol_version']}.md").read_bytes()
             != _path(manifest['inputs']['protocol']).read_bytes()):
         raise ValueError('selected protocol bytes differ from the registered input')
     # The transition changes the action protocol, not generation resources.
@@ -90,7 +90,7 @@ def selected_spec(manifest, job, original):
         if (repository / relative).read_bytes() != _path(old_path).read_bytes():
             raise ValueError('protocol transition changes an inherited resource: ' + name)
     recorded = deepcopy(job['render_spec'])
-    recorded.update(render_version=15, bundle=manifest['inputs']['bundle'],
+    recorded.update(render_version=manifest['render_version'], bundle=manifest['inputs']['bundle'],
                     chunk_manifest=manifest['inputs']['chunk_manifest'],
                     manifest=manifest['inputs']['source_manifest'])
     selected = api_runner.RunSpec.from_render_spec(recorded, project=job['project'],
@@ -98,6 +98,34 @@ def selected_spec(manifest, job, original):
     if selected.render_spec() != recorded or original.render_spec() != job['render_spec']:
         raise ValueError('scientific transition changed the original or selected phase identity')
     return selected
+
+
+def source_metadata_arguments(manifest, inputs):
+    """Select provenance authority only from the pinned original generation job.
+
+    Historical calls retain their original keyword arguments and do not import
+    the new helper. Model evidence cannot choose a manifest file or project.
+    """
+    from .registration import scientific_contract
+    scientific_contract(manifest)
+    if manifest['protocol_version'] != 5:
+        return {}
+    parent_path = _path(manifest['parent']['registration'])
+    raw = parent_path.read_bytes()
+    if manifest['pinned_files'].get(str(parent_path)) != _sha(raw):
+        raise ValueError('source metadata parent registration changed or is not pinned')
+    generation = strict_json(raw)
+    jobs = [job for job in generation['generation']['jobs']
+            if job['id'] == manifest['parent']['job_id']]
+    if len(jobs) != 1:
+        raise ValueError('source metadata parent project is missing or ambiguous')
+    job = jobs[0]
+    source = inputs['source_manifest']
+    identity = job['input_identity']['source_manifest']
+    if (not isinstance(job.get('project'), str) or not job['project'].strip() or
+            identity != {'path': str(source), 'sha256': _sha(source.read_bytes())}):
+        raise ValueError('source metadata authority differs from the registered parent project/input')
+    return {'source_manifest': source, 'project': job['project']}
 
 
 def render_instruction(manifest: dict) -> str:
@@ -189,17 +217,18 @@ def render_instruction(manifest: dict) -> str:
         "validation, not scientific acceptance. Do not begin Phase 4 or any evaluation.\n"
     )
     if upgraded:
-        instruction = instruction.replace('unchanged shared audit context', 'selected protocol-4 audit context')
+        protocol, renderer = manifest['protocol_version'], manifest['render_version']
+        instruction = instruction.replace('unchanged shared audit context', f'selected protocol-{protocol} audit context')
         instruction = instruction.replace('shared renderer-14 scientific/evidence contracts above',
-                                          'selected renderer-15 scientific/evidence contracts above')
+                                          f'selected renderer-{renderer} scientific/evidence contracts above')
         instruction = instruction.replace('# Registered native Phase 3 audit continuation\n\n',
             '# Registered native Phase 3 audit continuation\n\n'
             'This new condition explicitly upgrades the audit action instrument from protocol 3 / '
-            'renderer 14 to protocol 4 / renderer 15. The original generation remains renderer 14; '
+            f'renderer 14 to protocol {protocol} / renderer {renderer}. The original generation remains renderer 14; '
             'its frozen records and exact replay are preserved. This is not unchanged-instrument '
             'generation or a repair of an earlier audit. The parent_instruction input and pinned '
             'protocol-v3 text are historical Phase 1/2 provenance, not current instructions. '
-            'The registered protocol-v4 input and selected renderer-15 contract below are the '
+            f'The registered protocol-v{protocol} input and selected renderer-{renderer} contract below are the '
             'current scientific action rules.\n\n', 1)
     return instruction
 
@@ -238,7 +267,8 @@ def validate_audit(manifest: dict) -> dict:
         checked = evidence_assertions.check_files(
             audit=audit, bundle=inputs["bundle"], manifest=inputs["chunk_manifest"],
             artifacts={name: inputs[name] for name in ("original_full", "original_core")},
-            protocol_version=manifest['protocol_version'])
+            protocol_version=manifest['protocol_version'],
+            **source_metadata_arguments(manifest, inputs))
         if audit.read_bytes() != raw or checked.get("artifact_sha256", {}).get("audit") != _sha(raw):
             raise ValueError("audit changed during validation")
         if any(path.read_bytes() != original[name] for name, path in inputs.items()):

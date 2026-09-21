@@ -27,6 +27,7 @@ from budgeted_cborg import (BudgetStop, LEGACY_UPSTREAM_READ_SECONDS, Ledger, PO
 
 TRANSITION = 'scientific_contract_transition'
 TRANSITION_KIND = 'frozen_pair_protocol_v4'
+SOURCE_METADATA_TRANSITION_KIND = 'frozen_pair_protocol_v5'
 VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
 
 
@@ -34,13 +35,23 @@ def scientific_contract(manifest):
     """An explicit new audit instrument, never a relabelled parent generation."""
     upgraded = TRANSITION in manifest
     pair = (manifest.get('protocol_version'), manifest.get('render_version'))
+    transitions = {(4, 15): {'kind': TRANSITION_KIND},
+                   (5, 16): {'kind': SOURCE_METADATA_TRANSITION_KIND}}
     if (any(type(value) is not int for value in pair) or
-            pair != ((4, 15) if upgraded else (3, 14)) or
+            (pair not in transitions if upgraded else pair != (3, 14)) or
             (upgraded and (type(manifest[TRANSITION]) is not dict or
-                          manifest[TRANSITION] != {'kind': TRANSITION_KIND}))):
+                          manifest[TRANSITION] != transitions[pair]))):
         raise BudgetStop('unsupported scientific contract transition: require unchanged 3/14 '
-                         'or explicit frozen_pair_protocol_v4 with 4/15')
+                         'or explicit frozen_pair_protocol_v4 with 4/15 or '
+                         'frozen_pair_protocol_v5 with 5/16')
     return upgraded
+
+
+def versioned_scientific_files(manifest):
+    """Only an explicit protocol-5 transition changes source-review semantics."""
+    scientific_contract(manifest)
+    return (VERSIONED_SCIENTIFIC_FILES | {'source_review.py'}
+            if manifest['protocol_version'] == 5 else VERSIONED_SCIENTIFIC_FILES)
 
 
 def sha(path):
@@ -164,7 +175,7 @@ def inspect_parent(manifest):
         'chunk_manifest': Path(job['input_identity']['chunks']['path']),
         'source_manifest': Path(job['input_identity']['source_manifest']['path']),
         'parent_instruction': Path(job['instruction']),
-        'protocol': ((Path(manifest['repository']) / 'src/download/prompts/evidence_protocol_v4.md')
+        'protocol': ((Path(manifest['repository']) / f"src/download/prompts/evidence_protocol_v{manifest['protocol_version']}.md")
                      if upgraded else Path(parent['repository']) / 'src/download/prompts/evidence_protocol_v3.md'),
     }
     resources = job['render_spec']['agentic_toolchain']['resources']
@@ -286,7 +297,7 @@ def required_paths(manifest):
         scientific_contract(manifest)
         paths.add(canonical_path(str(Path(parent['repository']) /
                       'src/download/prompts/evidence_protocol_v3.md'), exists=True))
-        for filename in VERSIONED_SCIENTIFIC_FILES:
+        for filename in versioned_scientific_files(manifest):
             paths.add(canonical_path(str(Path(parent['repository']) /
                           'src/data_sheets_schema' / filename), exists=True))
     paths.update(canonical_path(parent[key], exists=True) for key in
@@ -310,7 +321,7 @@ def validate_scientific_identity(manifest):
     parent = manifest['parent']
     for filename in ('api_runner.py', 'evidence_assertions.py', 'source_review.py', 'profiles.py', 'schema_digest.py'):
         relative = Path('src/data_sheets_schema') / filename
-        if upgraded and filename in VERSIONED_SCIENTIFIC_FILES:
+        if upgraded and filename in versioned_scientific_files(manifest):
             # The selected transition records both exact implementations;
             # unrelated scientific components retain their equality gate.
             pinned(manifest, str(Path(parent['repository']) / relative))

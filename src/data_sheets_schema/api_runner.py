@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -923,6 +923,8 @@ def assembly_digest(render_version: int = 8) -> dict[str, Any]:
         parts.append({"native_phase1_receipts": NATIVE_PHASE1_RECEIPTS,
                       "native_source_stop": NATIVE_SOURCE_STOP,
                       "native_evidence_stop": NATIVE_EVIDENCE_STOP})
+    if render_version >= 16:
+        parts.append({"source_metadata_header": SOURCE_METADATA_HEADER_V16})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -1144,6 +1146,8 @@ def resolve_prompt(spec: RunSpec) -> str:
             evidence_text = evidence_text.replace(historical, NATIVE_SOURCE_STOP)
             body += "\n\n" + NATIVE_PHASE1_RECEIPTS
         body += "\n\n" + evidence_text
+        if spec.render_version >= 16:
+            body += "\n\n" + source_metadata_block(spec)
         if spec.is_agentic:
             body += native_evidence_instructions(spec)
             # Add this after portable command/path adaptation: the serialized
@@ -1228,6 +1232,8 @@ def native_evidence_instructions(spec: RunSpec) -> str:
     if spec.render_version >= 11:
         from data_sheets_schema.evidence_assertions import protocol_for_renderer
         args += ["--protocol-version", str(protocol_for_renderer(spec.render_version))]
+    if spec.render_version >= 16 and spec.manifest_used:
+        args += ["--source-manifest", str(spec.manifest), "--project", spec.project]
     freeze = (
         "from pathlib import Path\nimport hashlib, json\n"
         f"pairs = {[(paths['full'], str(original_full)), (paths['core'], str(original_core))]!r}\n"
@@ -1794,10 +1800,45 @@ This operation does not establish that a proposed removal is scientifically corr
 """
 
 
+SOURCE_METADATA_HEADER_V16 = (
+    "# Registered source metadata for evidence protocol v5\n\n"
+    "This projection describes the selected source declarations only. It does not "
+    "establish dataset facts or permit citations to omitted manifest fields. "
+    "A null projection means no source-manifest evidence is available.\n\n")
+
+
+SOURCE_METADATA_CONTRACT_V16 = """### Audit evidence and output shape (renderer v16)
+
+The supplied source-manifest projection is authority only for its explicitly
+listed source metadata. It is not a source of dataset facts. For an atomic
+claim about that metadata, use the exact protocol-v5 provenance assertion and
+the supplied manifest digest; ordinary factual claims still need document
+passages. Never cite arbitrary manifest notes or the original record as an
+independent source. A metadata equality check does not prove entailment.
+
+Each finding's remove_relationship, when present, is one JSON object, never
+an array. Put separate rejected relationships in separate findings. The
+review_paths array contains only original inventory paths with at least one
+revise judgment. Supporting or contextual values belong in evidence assertions,
+not in review_paths. Do not include all descendants merely because their
+containing object is proposed for removal. Every revised value must have a
+valid finding link, including repeated claims in notes or caveats.
+
+Use the supplied schema's meaning and requirements when evaluating placement.
+Do not invent a narrower class definition, make an optional field required,
+or reject an allowed enumeration solely because it is a general category.
+Read the complete original value and its governing qualifiers before alleging
+a loss of scope. A finding about one defect does not establish its other
+allegations. Source quotes must occur in their named document and chunk;
+use separate assertions for text that crosses a chunk boundary.
+"""
+
+
 def evidence_phase_contract(phase: str, render_version: int) -> str:
     contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
     if render_version >= 12:
-        contract = contract.replace("protocol v1", "protocol v4" if render_version >= 15 else "protocol v3")
+        contract = contract.replace("protocol v1", "protocol v5" if render_version >= 16 else
+                                    "protocol v4" if render_version >= 15 else "protocol v3")
         if phase == "audit":
             contract = contract.replace("with findings and summary", "with findings, summary and source_review")
             contract += (" Include source_review bound to the original_full inventory, covering every "
@@ -1817,6 +1858,8 @@ def evidence_phase_contract(phase: str, render_version: int) -> str:
                          "Never relabel a contradiction as supported to pass a check.")
         if render_version >= 15 and phase in {"audit", "reconcile_full", "report", "report_regate"}:
             contract += "\n\n" + ANONYMOUS_REMOVAL_CONTRACT_V15
+        if render_version >= 16 and phase in {"audit", "reconcile_full", "report", "report_regate"}:
+            contract += "\n\n" + SOURCE_METADATA_CONTRACT_V16
         return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 
@@ -3699,13 +3742,33 @@ def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[st
     return out
 
 
+def source_metadata_authority(spec: RunSpec) -> dict[str, Any]:
+    """Only the selected v5 instrument receives actual manifest-byte authority."""
+    if spec.render_version < 16:
+        return {}
+    return {"source_manifest_raw": spec.manifest.read_bytes() if spec.manifest_used else None,
+            "project": spec.project if spec.manifest_used else None}
+
+
+def source_metadata_block(spec: RunSpec) -> str:
+    """Expose a bounded metadata projection, never arbitrary manifest content."""
+    from data_sheets_schema.source_metadata import projection
+    authority = source_metadata_authority(spec)
+    raw = authority.get("source_manifest_raw")
+    projected = projection(raw, authority["project"]) if raw is not None else None
+    return SOURCE_METADATA_HEADER_V16 + json.dumps(projected, ensure_ascii=False, sort_keys=True)
+
+
 def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool = False,
                           reconciled: bool = False) -> dict[str, Any]:
     """Check the explicit v9 protocol against this invocation's own carry."""
     from data_sheets_schema import evidence_assertions as evidence
     protocol = evidence.protocol_for_renderer(spec.render_version)
     try:
+        metadata_authority = source_metadata_authority(spec)
         chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
+        if metadata_authority.get("source_manifest_raw") is not None:
+            pins["source_manifest"] = hashlib.sha256(metadata_authority["source_manifest_raw"]).hexdigest()
         audit = evidence.load_json(carry["Audit findings"])
         originals = {"original_full": carry["Original full record"]}
         if "Original core record" in carry:
@@ -3717,7 +3780,8 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
             artifacts["final_core"] = spec.core_path.read_bytes().decode("utf-8")
         # An audit must refer only to its original inputs, never to a later
         # repair that happens to make an earlier allegation true.
-        out = evidence.check_audit(audit, artifacts=originals, chunks=chunks, protocol_version=protocol)
+        out = evidence.check_audit(audit, artifacts=originals, chunks=chunks,
+                                   protocol_version=protocol, **metadata_authority)
         if reconciled or report:
             out["findings"] += evidence.check_relationship_removals(
                 audit, evidence.load_record(originals["original_full"]), evidence.load_record(artifacts["final_full"]),
@@ -3725,7 +3789,7 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
         if report:
             text = spec.report_path.read_bytes().decode("utf-8")
             report_check = evidence.check_report(text, artifacts=artifacts, chunks=chunks,
-                                                protocol_version=protocol)
+                                                protocol_version=protocol, **metadata_authority)
             out["assertions_checked"] += report_check["assertions_checked"]
             out["findings"] += report_check["findings"]
             if "source_review_final" in report_check:
@@ -3810,21 +3874,24 @@ def _admit_source_response(spec: RunSpec, phase: str, text: str, stop_reason,
     from data_sheets_schema import evidence_assertions as evidence
     protocol = evidence.protocol_for_renderer(spec.render_version)
     try:
+        metadata_authority = source_metadata_authority(spec)
         if stop_reason == "max_tokens":
             raise ValueError("source-review output truncated at max_tokens")
         body = _extract(text, "json" if phase == "audit" else "md")
         chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
+        if metadata_authority.get("source_manifest_raw") is not None:
+            pins["source_manifest"] = hashlib.sha256(metadata_authority["source_manifest_raw"]).hexdigest()
         if phase == "audit":
             out = evidence.check_audit(evidence.load_json(body),
                 artifacts={"original_full": needed["Completed full record"]},
-                chunks=chunks, protocol_version=protocol)
+                chunks=chunks, protocol_version=protocol, **metadata_authority)
         else:
             artifacts = {"original_full": needed["Original full record"],
                          "original_core": needed["Original core record"],
                          "final_full": needed["Reconciled full record"],
                          "final_core": needed["Completed core record"]}
             review = evidence.check_report(body, artifacts=artifacts, chunks=chunks,
-                                            protocol_version=protocol)["source_review_final"]
+                                            protocol_version=protocol, **metadata_authority)["source_review_final"]
             # Ordinary report assertions can still use the single re-check;
             # the source judgment must already pass before any local writes.
             out = {"instrument": evidence.instrument(protocol), "checked": True,
@@ -3936,6 +4003,8 @@ def sent_text_surfaces() -> dict[str, str]:
     from data_sheets_schema.source_review import INVENTORY_HEADER
     out["source_review_inventory_header"] = INVENTORY_HEADER
     out["anonymous_removal_contract_v15"] = ANONYMOUS_REMOVAL_CONTRACT_V15
+    out["source_metadata_contract_v16"] = SOURCE_METADATA_CONTRACT_V16
+    out["source_metadata_header_v16"] = SOURCE_METADATA_HEADER_V16
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),

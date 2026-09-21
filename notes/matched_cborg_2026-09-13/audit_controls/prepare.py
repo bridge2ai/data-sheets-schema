@@ -11,7 +11,7 @@ from .registration import (BudgetStop, canonical_path, inspect_parent,
     native_api_force_idle_timeout as validate_native_idle_timeout, native_api_timeout,
     native_stall_policy as validate_stall_policy, native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
-from .registration import TRANSITION, TRANSITION_KIND
+from .registration import TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND
 from .contract import render_instruction
 
 SYSTEM = """You are the native auditor for a registered D4D Phase 3 continuation.
@@ -59,7 +59,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
             native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
             staged_audit_output=False, native_upstream_read_timeout_seconds=None,
-            native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False):
+            native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
+            source_metadata_evidence=False):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -70,6 +71,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         raise BudgetStop('persistent audit contract requires an explicit boolean')
     if type(upgrade_evidence_protocol) is not bool:
         raise BudgetStop('evidence protocol upgrade requires an explicit boolean')
+    if type(source_metadata_evidence) is not bool:
+        raise BudgetStop('source metadata evidence requires an explicit boolean')
+    if source_metadata_evidence and upgrade_evidence_protocol:
+        raise BudgetStop('source metadata evidence and the protocol-4 upgrade are mutually exclusive')
     if native_api_force_idle_timeout is not None:
         validate_native_idle_timeout({'native_runtime': {
             'api_force_idle_timeout': native_api_force_idle_timeout,
@@ -134,6 +139,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'source_inventory': str(destination / 'source_inventory.json')}
     if upgrade_evidence_protocol:
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v4.md')
+    if source_metadata_evidence:
+        inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v5.md')
     save(inputs['source_inventory'], source_review.inventory(Path(inputs['original_full']).read_text(), 'original_full'))
     attempt = destination / 'attempts' / job_id
     job = {'id': job_id, 'attempt_dir': str(attempt), 'output_dir': str(attempt / 'output'),
@@ -167,6 +174,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if upgrade_evidence_protocol:
         manifest.update(protocol_version=4, render_version=15)
         manifest[TRANSITION] = {'kind': TRANSITION_KIND}
+    if source_metadata_evidence:
+        manifest.update(protocol_version=5, render_version=16)
+        manifest[TRANSITION] = {'kind': SOURCE_METADATA_TRANSITION_KIND}
     if persistent_audit_contract:
         from .contract_context import select
         select(manifest, persistent_audit_contract)
@@ -217,7 +227,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'provider_base_url': manifest['provider_base_url'],
         **({'audit_contract_context': manifest['audit_contract_context']}
            if 'audit_contract_context' in manifest else {}),
-        **({TRANSITION: manifest[TRANSITION], 'protocol_version': 4, 'render_version': 15,
+        **({TRANSITION: manifest[TRANSITION], 'protocol_version': manifest['protocol_version'],
+            'render_version': manifest['render_version'],
             'parent_render_version': 14, 'scientific_instrument_unchanged': False}
            if TRANSITION in manifest else {}),
         'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
@@ -254,8 +265,11 @@ def main():
         help='write bounded raw UTF-8 audit parts and assemble their exact bytes before the terminal validator')
     parser.add_argument('--persistent-audit-contract', action='store_true',
         help='retain exact registered protocol and shared Phase 3 contract text in the audit system prompt')
-    parser.add_argument('--upgrade-evidence-protocol', action='store_true',
+    scientific = parser.add_mutually_exclusive_group()
+    scientific.add_argument('--upgrade-evidence-protocol', action='store_true',
         help='explicitly select protocol 4/renderer 15 for a new audit on the frozen renderer-14 pair')
+    scientific.add_argument('--source-metadata-evidence', action='store_true',
+        help='explicitly select protocol 5/renderer 16 with bounded source-manifest provenance evidence')
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)

@@ -1,6 +1,8 @@
 """Check complete value coverage and declared source scope, not semantic entailment.
 
 Opt-in evidence protocol v3 uses this alongside its existing quotation checks.
+Protocol v5 enables v2's exact registered metadata declarations separately from
+bundle evidence, without expanding the record-metadata coverage exemptions.
 The source/status classifications remain judgments for independent review.
 """
 from __future__ import annotations
@@ -12,6 +14,7 @@ import json
 from pathlib import Path
 
 INSTRUMENT = "source_review v1 (#1815, #1782)"
+PROVENANCE_INSTRUMENT = "source_review v2 (#2169)"
 STATUSES = {"fact", "planned", "in_progress", "applied", "instruction", "capability"}
 CLAIM_KEYS = {"text", "verdict", "attributed_to", "claim_status", "source_status", "evidence", "reason"}
 INVENTORY_HEADER = "# Required source-review inventory\n\n"
@@ -58,9 +61,19 @@ def inventory(raw: str, artifact: str) -> dict:
             "values": values}
 
 
-def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None) -> dict:
+def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None,
+          protocol_version: int = 3, source_manifest_raw: bytes | str | None = None,
+          project: str | None = None) -> dict:
     """Require coverage and reject declared attribution/status contradictions."""
     from data_sheets_schema.evidence_assertions import check_assertions, _fold
+    if type(protocol_version) is not int or protocol_version not in (3, 4, 5):
+        raise ValueError("unsupported source-review protocol version")
+    if protocol_version != 5 and (source_manifest_raw is not None or project is not None):
+        raise ValueError("registered provenance authority requires evidence protocol 5")
+    authority = None
+    if protocol_version == 5 and source_manifest_raw is not None:
+        from data_sheets_schema.source_metadata import projection
+        authority = projection(source_manifest_raw, project)
     required = inventory(raw, artifact)
     expected = {row["path"]: row for row in required["values"]}
     findings, seen, revisions = [], set(), set()
@@ -117,10 +130,24 @@ def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None)
                             or any(s == "<preamble>" or s not in {c["source"] for c in chunks.values()} for s in attributed)):
                         raise ValueError("attributed_to must list distinct named source documents, or be empty")
                     evidence = claim["evidence"]
-                    if (not isinstance(evidence, list)
-                            or any(not isinstance(e, dict) or set(e) != {"source", "chunk", "quote"} for e in evidence)):
-                        raise ValueError("claim evidence must contain only source/chunk/quote assertions")
-                    errors = check_assertions(evidence, artifacts={}, chunks=chunks)
+                    provenance = (protocol_version == 5 and isinstance(evidence, list)
+                                  and any(isinstance(e, dict) and "provenance" in e for e in evidence))
+                    if provenance:
+                        from data_sheets_schema.source_metadata import check_assertion
+                        if attributed:
+                            raise ValueError("a provenance-only clause cannot attribute its facts to bundle documents")
+                        if claim["claim_status"] != "fact" or claim["source_status"] != "fact":
+                            raise ValueError("registered provenance establishes only declared metadata facts")
+                        # Each entry must be the exact provenance form; mixed
+                        # bundle evidence cannot turn metadata into dataset facts.
+                        for entry in evidence:
+                            check_assertion(entry, authority=authority)
+                        errors = []
+                    else:
+                        if (not isinstance(evidence, list)
+                                or any(not isinstance(e, dict) or set(e) != {"source", "chunk", "quote"} for e in evidence)):
+                            raise ValueError("claim evidence must contain only source/chunk/quote assertions")
+                        errors = check_assertions(evidence, artifacts={}, chunks=chunks)
                     findings.extend({**error, "source_review_path": path, "claim": index} for error in errors)
                     claims_checked += 1
                     if claim["verdict"] == "revise":
@@ -132,7 +159,7 @@ def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None)
                             raise ValueError("a supported claim needs source evidence")
                         if claim["claim_status"] != claim["source_status"]:
                             problem("declared source status does not support the claim's status", path=path, claim=index)
-                        if set(attributed) - {e["source"] for e in evidence}:
+                        if not provenance and set(attributed) - {e["source"] for e in evidence}:
                             problem("a claimed document attribution lacks evidence from that document", path=path, claim=index)
                 if any(not char.isspace() and i not in covered for i, char in enumerate(text)):
                     problem("source review omits part of the value's text", path=path)
@@ -153,7 +180,8 @@ def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None)
                 linked.update(paths)
         for path in sorted(revisions - linked):
             problem("a revise judgment lacks a linked audit finding", path=path)
-    return {"instrument": INSTRUMENT, "artifact": artifact, "sha256": required["sha256"],
+    return {"instrument": PROVENANCE_INSTRUMENT if protocol_version == 5 else INSTRUMENT,
+            "artifact": artifact, "sha256": required["sha256"],
             "values_required": len(expected), "values_reviewed": len(seen),
             "claims_checked": claims_checked, "findings": findings,
             "scope": "Coverage and declared evidence/scope consistency only; semantic classifications and entailment require independent review."}
