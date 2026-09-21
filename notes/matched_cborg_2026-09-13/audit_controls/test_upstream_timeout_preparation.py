@@ -38,16 +38,35 @@ def test_fresh_selector_is_registered_pinned_and_scientifically_inert(ancestry, 
     assert ancestry[2] == {name: Path(name).read_bytes() for name in ancestry[2]}
 
 
-@pytest.mark.parametrize('value,sdk', [(True,3600000), (0,3600000), (-1,3600000), (1.5,3600000),
-    ('2700',3600000), (2700,None), (3600,3600000), (1,10800001)])
-def test_invalid_selector_refused_before_destination_creation(tmp_path, value, sdk):
+@pytest.mark.parametrize('value,sdk,reason', [
+    (True,3600000,'positive whole-second'), (0,3600000,'positive whole-second'),
+    (-1,3600000,'positive whole-second'), (1.5,3600000,'positive whole-second'),
+    ('2700',3600000,'positive whole-second'), (2700,None,'larger explicit native SDK timeout'),
+    (3600,3600000,'larger explicit native SDK timeout'), (1,10800001,'within the audit deadline')])
+def test_invalid_selector_refused_before_destination_creation(tmp_path, monkeypatch, value, sdk, reason):
+    # Exercise the selected repository: its unrelated cwd guard must not make
+    # an omitted selector check look like successful early refusal (#2155).
+    monkeypatch.chdir(tmp_path)
     destination = tmp_path / 'uncreated'
-    with pytest.raises(registration.BudgetStop):
-        prepare.prepare(parent_registration=None, parent_overlay=None, parent_job_id=None,
+    with pytest.raises(registration.BudgetStop, match=reason):
+        prepare.prepare(parent_registration=tmp_path / 'missing-parent.json', parent_overlay=None, parent_job_id=None,
             reconciliation_receipt=None, reconciled_checkpoint=None, destination=destination,
             job_id='unused', repository=tmp_path, native_api_timeout_ms=sdk,
             native_upstream_read_timeout_seconds=value)
     assert not destination.exists()
+
+
+def test_valid_selector_passes_the_same_setup_and_reaches_parent_loading(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    destination = tmp_path / 'created'
+    parent = tmp_path / 'missing-parent.json'
+    with pytest.raises(FileNotFoundError) as error:
+        prepare.prepare(parent_registration=parent, parent_overlay=None, parent_job_id=None,
+            reconciliation_receipt=None, reconciled_checkpoint=None, destination=destination,
+            job_id='unused', repository=tmp_path, native_api_timeout_ms=3600000,
+            native_upstream_read_timeout_seconds=2700)
+    assert Path(error.value.filename) == parent
+    assert destination.is_dir()
 
 
 def test_real_phase4_preparation_keeps_accepted_selector_as_evidence_only(ancestry, tmp_path):
