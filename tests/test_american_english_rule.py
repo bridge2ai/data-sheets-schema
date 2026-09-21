@@ -70,8 +70,8 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         # Exact, not a floor (#1151 round 2, S1): deleting a surface from the
         # map is the regression this guard exists to catch. Nine phase
         # instructions, four versioned phase contracts, the layout, and
-        # eleven authored surfaces.
-        self.assertEqual(len(surfaces), 30, sorted(surfaces))
+        # eleven authored surfaces, plus the renderer-15 anonymous-removal contract.
+        self.assertEqual(len(surfaces), 31, sorted(surfaces))
         for name, text in surfaces.items():
             with self.subTest(surface=name):
                 found = british_forms(text, exempt_quotes=False)

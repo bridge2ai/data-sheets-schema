@@ -15,7 +15,7 @@ import yaml
 
 from filelock import FileLock
 from data_sheets_schema import api_runner, evidence_assertions, source_review
-from audit_controls.contract import INPUTS as AUDIT_INPUTS, strict_json
+from audit_controls.contract import INPUTS as AUDIT_INPUTS, strict_json, selected_spec
 
 INPUTS = AUDIT_INPUTS | {"audit"}
 
@@ -44,9 +44,8 @@ def _regular(path):
 
 
 def _paths(manifest):
-    if (type(manifest.get("protocol_version")) is not int or manifest["protocol_version"] != 3
-            or type(manifest.get("render_version")) is not int or manifest["render_version"] != 14):
-        raise ValueError("Phase 4 requires protocol 3 and renderer 14")
+    from audit_controls.registration import scientific_contract
+    scientific_contract(manifest)
     if set(manifest["inputs"]) != INPUTS:
         raise ValueError("Phase 4 requires the exact inherited input roles and accepted audit")
     inputs = {k: _path(v) for k, v in manifest["inputs"].items()}
@@ -87,11 +86,17 @@ def _input_bytes(manifest, inputs):
 
 @contextmanager
 def _parent_spec(manifest):
+    from audit_controls.registration import scientific_contract, TRANSITION
+    upgraded = scientific_contract(manifest)
     ref = manifest["accepted_audit"]["registration"]
     raw = _path(ref["path"]).read_bytes()
     if _sha(raw) != ref["sha256"]:
         raise ValueError("accepted audit registration changed")
     accepted = strict_json(raw)
+    if (scientific_contract(accepted) != upgraded or
+            any(manifest.get(key) != accepted.get(key) for key in
+                ('protocol_version', 'render_version', TRANSITION))):
+        raise ValueError('accepted audit scientific version differs')
     parent = accepted["parent"]
     generation = strict_json(_path(parent["registration"]).read_bytes())
     jobs = [j for j in generation["generation"]["jobs"] if j["id"] == parent["job_id"]]
@@ -112,6 +117,9 @@ def _parent_spec(manifest):
                                ("source_manifest", spec.manifest)):
             if original is not None and Path(original).read_bytes() != _path(manifest["inputs"][name]).read_bytes():
                 raise ValueError("shared source bytes differ: " + name)
+        if upgraded:
+            os.chdir(_path(manifest['repository']))
+            spec = selected_spec(manifest, job, spec)
         yield spec
     finally:
         os.chdir(previous)
@@ -229,7 +237,7 @@ def render_instruction(manifest):
     with _parent_spec(manifest) as spec:
         context = _request_text(api_runner.build_phase(spec, "reconcile_full", carry=carry))
     job = manifest["job"]
-    return ("# Registered native Phase 4 continuation\n\n"
+    text = ("# Registered native Phase 4 continuation\n\n"
         "The accepted audit and unchanged frozen original pair are inputs to this new Phase 4 invocation. "
         "They are not independent dataset sources. The shared instrument below is reference context; "
         "its historical destinations and shell commands are not current execution commands. "
@@ -265,6 +273,15 @@ def render_instruction(manifest):
         "tools and change no file. A pass permits only a final response and remains subject to independent "
         "scientific acceptance. Do not begin evaluations or claim this invocation performed generation, "
         "source reads, original freezing or the inherited audit.\n")
+    from audit_controls.registration import scientific_contract
+    if scientific_contract(manifest):
+        text = text.replace('# Registered native Phase 4 continuation\n\n',
+            '# Registered native Phase 4 continuation\n\n'
+            'This invocation retains the independently accepted audit\'s protocol 4 / renderer 15 '
+            'scientific contract. The original generation and parent_instruction remain renderer-14 '
+            'historical provenance, not current protocol instructions. The registered protocol-v4 '
+            'input and selected renderer-15 context below govern current scientific actions.\n\n', 1)
+    return text
 
 
 def _schema_maps(pair):
@@ -352,7 +369,7 @@ def validate_final(manifest):
             evidence_assertions.load_record(raw[name].decode())
         # Evidence comes first: rejected classifications must never become repair input.
         evidence = evidence_assertions.check_files(audit=inputs["audit"], bundle=inputs["bundle"],
-            manifest=inputs["chunk_manifest"], report=paths["report"], protocol_version=3,
+            manifest=inputs["chunk_manifest"], report=paths["report"], protocol_version=manifest['protocol_version'],
             artifacts={"original_full": inputs["original_full"], "original_core": inputs["original_core"],
                        "final_full": paths["full"], "final_core": paths["core"]})
         result["evidence"] = evidence

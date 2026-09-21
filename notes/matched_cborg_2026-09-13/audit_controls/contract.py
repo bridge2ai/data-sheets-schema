@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -72,11 +73,38 @@ def _inventory(inputs: dict[str, Path]) -> dict:
     return expected
 
 
+def selected_spec(manifest, job, original):
+    """Construct a fresh phase spec after exact original replay succeeded."""
+    from .registration import scientific_contract
+    if not scientific_contract(manifest):
+        return original
+    repository = _path(manifest['repository'])
+    if ((repository / 'src/download/prompts/evidence_protocol_v4.md').read_bytes()
+            != _path(manifest['inputs']['protocol']).read_bytes()):
+        raise ValueError('selected protocol bytes differ from the registered input')
+    # The transition changes the action protocol, not generation resources.
+    for name, old_path in job['render_spec']['agentic_toolchain']['resources'].items():
+        relative = Path(name)
+        if relative.is_absolute() or '..' in relative.parts:
+            raise ValueError('parent resource must have a repository-relative identity')
+        if (repository / relative).read_bytes() != _path(old_path).read_bytes():
+            raise ValueError('protocol transition changes an inherited resource: ' + name)
+    recorded = deepcopy(job['render_spec'])
+    recorded.update(render_version=15, bundle=manifest['inputs']['bundle'],
+                    chunk_manifest=manifest['inputs']['chunk_manifest'],
+                    manifest=manifest['inputs']['source_manifest'])
+    selected = api_runner.RunSpec.from_render_spec(recorded, project=job['project'],
+                                                  method=job['method'], label=job['label'])
+    if selected.render_spec() != recorded or original.render_spec() != job['render_spec']:
+        raise ValueError('scientific transition changed the original or selected phase identity')
+    return selected
+
+
 def render_instruction(manifest: dict) -> str:
     """Replay the parent instrument, then state the new native task explicitly."""
     inputs = _inputs(manifest)
-    if manifest["protocol_version"] != 3 or manifest["render_version"] != 14:
-        raise ValueError("audit continuation requires protocol 3 and renderer 14")
+    from .registration import scientific_contract
+    upgraded = scientific_contract(manifest)
     parent = strict_json(_path(manifest["parent"]["registration"]).read_bytes())
     jobs = [job for job in parent["generation"]["jobs"]
             if job["id"] == manifest["parent"]["job_id"]]
@@ -105,6 +133,9 @@ def render_instruction(manifest: dict) -> str:
         _inventory(inputs)
         carry = {"Completed full record": inputs["original_full"].read_text(encoding="utf-8"),
                  "Completed core record": inputs["original_core"].read_text(encoding="utf-8")}
+        if upgraded:
+            os.chdir(_path(manifest['repository']))
+            spec = selected_spec(manifest, job, spec)
         request = api_runner.build_phase(spec, "audit", carry=carry)
     finally:
         os.chdir(previous)
@@ -127,7 +158,7 @@ def render_instruction(manifest: dict) -> str:
     if 'audit_output' in manifest:
         from .output_parts import instruction
         output_instruction = instruction(manifest) + '\n'
-    return (
+    instruction = (
         "# Registered native Phase 3 audit continuation\n\n"
         "This is a new audit invocation using an unchanged stopped run's frozen full/core pair. "
         "It performs Phase 3 only. The following shared instrument and supplied materials are "
@@ -157,6 +188,20 @@ def render_instruction(manifest: dict) -> str:
         "result permits only a final response reporting that result; it is structural evidence "
         "validation, not scientific acceptance. Do not begin Phase 4 or any evaluation.\n"
     )
+    if upgraded:
+        instruction = instruction.replace('unchanged shared audit context', 'selected protocol-4 audit context')
+        instruction = instruction.replace('shared renderer-14 scientific/evidence contracts above',
+                                          'selected renderer-15 scientific/evidence contracts above')
+        instruction = instruction.replace('# Registered native Phase 3 audit continuation\n\n',
+            '# Registered native Phase 3 audit continuation\n\n'
+            'This new condition explicitly upgrades the audit action instrument from protocol 3 / '
+            'renderer 14 to protocol 4 / renderer 15. The original generation remains renderer 14; '
+            'its frozen records and exact replay are preserved. This is not unchanged-instrument '
+            'generation or a repair of an earlier audit. The parent_instruction input and pinned '
+            'protocol-v3 text are historical Phase 1/2 provenance, not current instructions. '
+            'The registered protocol-v4 input and selected renderer-15 contract below are the '
+            'current scientific action rules.\n\n', 1)
+    return instruction
 
 
 def validate_audit(manifest: dict) -> dict:
@@ -165,9 +210,8 @@ def validate_audit(manifest: dict) -> dict:
               "passed": False, "checked": False, "audit_sha256": None,
               "findings": [], "errors": []}
     try:
-        if (type(manifest["protocol_version"]) is not int or manifest["protocol_version"] != 3
-                or type(manifest["render_version"]) is not int or manifest["render_version"] != 14):
-            raise ValueError("audit continuation requires protocol 3 and renderer 14")
+        from .registration import scientific_contract
+        scientific_contract(manifest)
         if 'audit_output' in manifest:
             from .output_parts import validate_output
             validate_output(manifest)
@@ -194,7 +238,7 @@ def validate_audit(manifest: dict) -> dict:
         checked = evidence_assertions.check_files(
             audit=audit, bundle=inputs["bundle"], manifest=inputs["chunk_manifest"],
             artifacts={name: inputs[name] for name in ("original_full", "original_core")},
-            protocol_version=3)
+            protocol_version=manifest['protocol_version'])
         if audit.read_bytes() != raw or checked.get("artifact_sha256", {}).get("audit") != _sha(raw):
             raise ValueError("audit changed during validation")
         if any(path.read_bytes() != original[name] for name, path in inputs.items()):

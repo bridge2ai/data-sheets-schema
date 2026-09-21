@@ -20,6 +20,8 @@ def sha(path):
 
 
 def verify(manifest, path, expected_sha):
+    if "scientific_contract_transition" in manifest:
+        raise BudgetStop("scientific_contract_transition is continuation-only; generation cannot select it")
     if "audit_contract_context" in manifest:
         raise BudgetStop("audit_contract_context is audit-only; generation cannot select it")
     if "native_upstream_read_timeout_seconds" in manifest:

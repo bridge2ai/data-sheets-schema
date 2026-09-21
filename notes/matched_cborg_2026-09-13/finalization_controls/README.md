@@ -48,9 +48,10 @@ charges, unknown shutdown state and stale predecessor evidence prevent transfer.
 
 ## Scientific and procedural boundaries
 
-The registered native instruction replays the parent's renderer-14 scientific
-instrument. It supplies the source bundle, schemas, original records and accepted
-audit inline. The model writes only the new full record and report. Trusted exact
+The registered native instruction replays the parent's renderer-14 instruction
+exactly and uses the independently accepted audit's scientific contract. It
+supplies the source bundle, schemas, original records and accepted audit inline.
+The model writes only the new full record and report. Trusted exact
 helpers derive the core, check both schemas and terms, check the pair and
 identifiers, and construct the final source inventory and report context.
 Duplicate keys and projection identity are checked. Helper outputs and original
@@ -72,6 +73,24 @@ rewritten or presented as a new source-reading receipt. Per-value final source
 review supplies the explicit evidence for retained and corrected values.
 Mechanical evidence checks do not prove entailment, correct status classification
 or complete identification of unsupported claims; those need independent review.
+
+An audit prepared with `--upgrade-evidence-protocol` explicitly selects protocol 4
+/ renderer 15 on the frozen original pair (#2165). Phase 4 inherits that accepted
+version and `scientific_contract_transition` without a second upgrade flag; it
+refuses a silent downgrade or a different instrument. Its scientific code,
+`anonymous_removals.py` and active v4 protocol must byte-match the accepted audit,
+even if changed files have new local pins. The renderer-14 parent instruction and
+legacy history remain immutable historical provenance. Protocol-3 audits retain
+their existing Phase 4 behavior. Audit-only persistent-delivery and staged-output
+selectors are not inherited as active Phase 4 settings.
+
+The v4 anonymous whole-member action binds the exact original-full bytes and
+requires every unselected member of the affected list to survive exactly once,
+with unique typed structure. Reordering members and permitted narrative changes
+cannot excuse new members, lost peers or retained targets. Unsupported or
+ambiguous actions stop at the evidence gate before ordinary record repair. The
+full constraints are in the [audit controller documentation](../audit_controls/README.md#explicit-scientific-protocol-upgrade)
+and [protocol v4](../../../src/download/prompts/evidence_protocol_v4.md).
 
 ## Bounded report-context delivery
 

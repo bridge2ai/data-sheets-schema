@@ -4,7 +4,8 @@ Version 1 binds quotations to an artifact/path or document/chunk and checks
 removal of relationships an audit explicitly rejected. Opt-in version 2 also
 proves child removals in uniquely matched anonymous objects and validates
 actions at audit admission. Opt-in version 3 requires complete scalar-value
-source reviews and checks declared attribution/status consistency. No version
+source reviews and checks declared attribution/status consistency. Opt-in
+version 4 adds exact-original-bound anonymous whole-member removals. No version
 independently classifies prose or certifies semantic conclusions. All inputs
 are read only.
 """
@@ -31,14 +32,15 @@ NARRATIVE_FIELDS = frozenset({"description", "notes", "source_caveats"})
 
 
 def instrument(protocol_version: int = 1) -> str:
-    if type(protocol_version) is not int or protocol_version not in (1, 2, 3):
+    if type(protocol_version) is not int or protocol_version not in (1, 2, 3, 4):
         raise ValueError("unsupported evidence protocol version")
     return {1: INSTRUMENT, 2: "evidence_assertions v2 (#1839)",
-            3: "evidence_assertions v3 / source_review v1 (#1815, #1782)"}[protocol_version]
+            3: "evidence_assertions v3 / source_review v1 (#1815, #1782)",
+            4: "evidence_assertions v4 / source_review v1 (#2165)"}[protocol_version]
 
 
 def protocol_for_renderer(render_version: int) -> int:
-    return 3 if render_version >= 12 else 2 if render_version >= 11 else 1
+    return 4 if render_version >= 15 else 3 if render_version >= 12 else 2 if render_version >= 11 else 1
 
 
 def load_json(raw: str | bytes):
@@ -193,14 +195,16 @@ def check_audit(audit, *, artifacts: dict[str, str], chunks: dict,
         try:
             original = load_record(artifacts["original_full"])
             preconditions = [f for f in check_relationship_removals(
-                audit, original, original, protocol_version=2)
+                audit, original, original, protocol_version=protocol_version,
+                original_raw=artifacts["original_full"])
                 if f["kind"] != "unsupported_relationship_retained"]
             problems += preconditions
             if not preconditions:
                 paths = [_tokens(f["remove_relationship"]["path"]) for f in audit["findings"]
                          if isinstance(f, dict) and "remove_relationship" in f]
                 projected = _project_removals(original, paths)
-                problems += check_relationship_removals(audit, original, projected, protocol_version=2)
+                problems += check_relationship_removals(audit, original, projected,
+                    protocol_version=protocol_version, original_raw=artifacts["original_full"])
         except (ValueError, KeyError, yaml.YAMLError) as exc:
             problems.append(_problem("evidence_contract", str(exc)))
     out = {"instrument": instrument(protocol_version), "checked": True,
@@ -449,16 +453,23 @@ def _relationship_after(original, final, tokens, declared, *, protocol_version=1
 
 
 def check_relationship_removals(audit, original: dict, final: dict, *,
-                                protocol_version: int = 1) -> list[dict]:
+                                protocol_version: int = 1,
+                                original_raw: str | bytes | None = None) -> list[dict]:
     """Check declared removal without treating list positions as identity.
 
     For a list member, identity is a pointer relative to that member, ending
     in a schema identifier field or name. All identifiers and indexed ancestors must retain
     stable identities. A non-list relationship must be absent altogether.
+    Protocol 4's explicit anonymous whole-member form requires original_raw;
+    dictionaries alone cannot establish its exact-artifact binding. Legacy
+    forms and protocol versions do not use this additional argument.
     This checks the declared action, not the audit's semantic judgment.
     """
     instrument(protocol_version)
-    findings, removal_paths = [], []
+    findings, removal_paths, handled = [], [], set()
+    if protocol_version >= 4:
+        from data_sheets_schema.anonymous_removals import check
+        handled, findings = check(audit, original, final, original_raw=original_raw)
     if protocol_version >= 2:
         for finding in audit.get("findings", []):
             try:
@@ -466,6 +477,8 @@ def check_relationship_removals(audit, original: dict, final: dict, *,
             except (ValueError, TypeError, KeyError):
                 pass  # The per-finding validation below reports malformed declarations.
     for index, finding in enumerate(audit.get("findings", [])):
+        if index in handled:
+            continue
         if not isinstance(finding, dict) or "remove_relationship" not in finding:
             continue
         rule = finding["remove_relationship"]
@@ -568,7 +581,7 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
     if "original_full" in texts and "final_full" in texts and isinstance(parsed, dict):
         out["findings"] += check_relationship_removals(
             parsed, load_record(texts["original_full"]), load_record(texts["final_full"]),
-            protocol_version=protocol_version)
+            protocol_version=protocol_version, original_raw=raw_artifacts["original_full"])
     if report is not None:
         raw = report.read_bytes()
         pins["report"] = hashlib.sha256(raw).hexdigest()
@@ -588,7 +601,7 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--protocol-version", type=int, choices=(1, 2, 3), default=1)
+    parser.add_argument("--protocol-version", type=int, choices=(1, 2, 3, 4), default=1)
     for name in ("audit", "bundle", "manifest", "original-full"):
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("original-core", "final-full", "final-core", "report"):
