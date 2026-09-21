@@ -8,7 +8,8 @@ import sys
 
 from data_sheets_schema import source_review
 from .registration import (BudgetStop, canonical_path, inspect_parent,
-    native_api_force_idle_timeout as validate_native_idle_timeout, native_api_timeout, parent_path,
+    native_api_force_idle_timeout as validate_native_idle_timeout, native_api_timeout,
+    native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .contract import render_instruction
 
@@ -48,7 +49,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             continuation_source_registration=None, continuation_reconciliation_receipt=None,
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
             native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
-            staged_audit_output=False):
+            staged_audit_output=False, native_upstream_read_timeout_seconds=None):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -63,6 +64,12 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if native_api_timeout_ms is not None:
         native_api_timeout({'native_runtime': {'api_timeout_ms': native_api_timeout_ms},
                             'job': {'deadline_seconds': deadline_seconds}})
+    upstream_selection = {}
+    if native_upstream_read_timeout_seconds is not None:
+        upstream_selection['native_upstream_read_timeout_seconds'] = native_upstream_read_timeout_seconds
+        native_upstream_read_timeout({'kind': 'd4d_native_audit_continuation', **upstream_selection,
+            'native_runtime': ({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
+            'job': {'deadline_seconds': deadline_seconds}})
     if bool(continuation_source_registration) != bool(continuation_reconciliation_receipt):
         raise BudgetStop('an audit reconciliation requires both source registration and receipt')
     if continuation_source_registration and not continuation_checkpoint:
@@ -132,6 +139,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'sequence_state': str(parent_path(parent, generation['budget']['ledger_path']).with_name('audit_sequence.json')),
         'pinned_files': {}}
     manifest.update(claim_selection)
+    manifest.update(upstream_selection)
     if staged_audit_output:
         from .output_parts import select
         select(manifest, path, staged_audit_output)
@@ -195,6 +203,8 @@ def main():
     parser.add_argument('--deadline-seconds', type=int, default=10800)
     parser.add_argument('--native-api-timeout-ms', type=int,
         help='local native SDK response timeout, positive milliseconds within the whole-job deadline')
+    parser.add_argument('--native-upstream-read-timeout-seconds', type=int,
+        help='audit-only raw stream read timeout, positive seconds below an explicit native SDK timeout')
     parser.add_argument('--native-api-force-idle-timeout', choices=('false',),
         help='disable the independent native fetch idle timer; requires a bounded --native-api-timeout-ms')
     parser.add_argument('--continuation-checkpoint')

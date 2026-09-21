@@ -414,6 +414,21 @@ def native_api_timeout(manifest):
     return value
 
 
+def native_upstream_read_timeout(manifest):
+    """Audit-only raw-stream read limit; absence preserves legacy transport (#2147)."""
+    key = 'native_upstream_read_timeout_seconds'
+    if key not in manifest:
+        return None
+    value = manifest[key]
+    if (manifest.get('kind') != 'd4d_native_audit_continuation' or
+            type(value) is not int or value <= 0):
+        raise BudgetStop('upstream read timeout requires a positive whole-second audit-only setting')
+    outer = native_api_timeout(manifest)
+    if outer is None or value * 1000 >= outer:
+        raise BudgetStop('upstream read timeout requires a larger explicit native SDK timeout within the job deadline')
+    return value
+
+
 def native_api_force_idle_timeout(manifest):
     """Optional native fetch idle policy, independent of the SDK request deadline."""
     runtime = manifest['native_runtime']

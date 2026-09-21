@@ -51,6 +51,26 @@ preserves the previous behavior. The SDK timeout, native event-stream watchdog,
 upstream read timeout and whole-job deadline still apply. This local setting does
 not change CBORG keepalive policy or authorize an automatic retry.
 
+For a separately reviewed native audit, `--native-upstream-read-timeout-seconds`
+sets the optional top-level `native_upstream_read_timeout_seconds`
+([#2147](https://github.com/bridge2ai/data-sheets-schema/issues/2147)). It must be a
+positive integer strictly below an explicit `--native-api-timeout-ms`, which
+remains bounded by the whole-job deadline. There is no new default: omission
+preserves the original stream call and its 1,800-second upstream read timeout.
+The override changes only the raw generation request's read timeout, including
+both the wait for response headers and gaps between body reads. Token counting
+keeps its original timeout; connect remains 20 seconds, write/pool 1,800 seconds,
+and TLS verification, redirects, environment isolation and zero retries are unchanged.
+
+This field is audit-only and is not copied into Phase 4 or evaluation settings.
+Both generation arms reject its presence, including `null`, before mutable setup
+([#2148](https://github.com/bridge2ai/data-sheets-schema/issues/2148)). Non-audit
+transport policy remains unchanged. Leave deliberate slack below the SDK
+timeout: token counting/preparation also consume the outer request's time. A
+larger read limit does not guarantee a response, address streams kept alive by
+keepalives, or establish an interrupted request's charge. Retain the existing
+job/watchdog bounds, stopped evidence, accounting rules and independent review.
+
 `python -m audit_controls.native --registration REGISTRATION --review REVIEW`
 requires a review binding that registration to its exact code commit, successful CI
 and sole allowed job. It uses the same CBORG transport and shared budget ledger as
