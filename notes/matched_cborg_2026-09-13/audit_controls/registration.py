@@ -28,6 +28,7 @@ from budgeted_cborg import (BudgetStop, LEGACY_UPSTREAM_READ_SECONDS, Ledger, PO
 TRANSITION = 'scientific_contract_transition'
 TRANSITION_KIND = 'frozen_pair_protocol_v4'
 SOURCE_METADATA_TRANSITION_KIND = 'frozen_pair_protocol_v5'
+CLAIM_CLARIFICATION_TRANSITION_KIND = 'frozen_pair_claim_clarification_v1'
 VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
 
 
@@ -36,14 +37,16 @@ def scientific_contract(manifest):
     upgraded = TRANSITION in manifest
     pair = (manifest.get('protocol_version'), manifest.get('render_version'))
     transitions = {(4, 15): {'kind': TRANSITION_KIND},
-                   (5, 16): {'kind': SOURCE_METADATA_TRANSITION_KIND}}
+                   (5, 16): {'kind': SOURCE_METADATA_TRANSITION_KIND},
+                   (5, 17): {'kind': CLAIM_CLARIFICATION_TRANSITION_KIND}}
     if (any(type(value) is not int for value in pair) or
             (pair not in transitions if upgraded else pair != (3, 14)) or
             (upgraded and (type(manifest[TRANSITION]) is not dict or
                           manifest[TRANSITION] != transitions[pair]))):
         raise BudgetStop('unsupported scientific contract transition: require unchanged 3/14 '
                          'or explicit frozen_pair_protocol_v4 with 4/15 or '
-                         'frozen_pair_protocol_v5 with 5/16')
+                         'frozen_pair_protocol_v5 with 5/16 or '
+                         'frozen_pair_claim_clarification_v1 with 5/17')
     return upgraded
 
 

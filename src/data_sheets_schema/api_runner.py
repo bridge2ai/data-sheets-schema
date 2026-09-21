@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -1834,6 +1834,52 @@ use separate assertions for text that crosses a chunk boundary.
 """
 
 
+CLAIM_CLARIFICATION_CONTRACT_V17 = r"""### Literal claims, scope and placement (renderer v17)
+
+Apply this checklist to every retained or revised source-review claim. It
+clarifies evidence protocol v5; it does not add evidence or change its grammar.
+
+Copy claim text from the decoded value in the applicable source-review inventory:
+original_full for the audit, final_full for the report. JSON string delimiters
+are syntax, not extra quotation-mark characters. For the inventory value Alpha,
+{"text": "Alpha"} copies it, while {"text": "\"Alpha\""} adds
+characters and is wrong. Preserve quotation marks that really occur in the
+reviewed value, escaping them once for JSON; never strip them indiscriminately.
+Do not copy YAML delimiters or wrap a copied title or passage in extra quotes.
+Each claim must quote a contiguous literal clause, allowing whitespace folding
+but retaining case and punctuation. Together the clauses must cover the whole
+value, including punctuation.
+
+Match the subject, extent and time actually asserted. Evidence for one subset,
+modality, location or release does not by itself establish a dataset-wide claim.
+Preserve the supported extent and identify the unsupported extension; lack of
+evidence does not establish that an operation is impossible or never occurred.
+Source rank, compatible quantities and a "current" label do not establish an
+observation date or order. A capture date dates the capture, not necessarily
+the observation. For example, a dated lower bound and an undated release count
+can be compatible without establishing that one observation preceded the other.
+Do not invent a conflict or trend from those facts alone.
+
+Assess the supplied schema's actual slot and relationship as well as the truth
+of the words. General access instructions do not establish version support;
+project participation does not establish a specific creator, maintainer or
+reviewer role. Preserve supported facts without an unsupported placement.
+Read explicit format guidance, including a version or an unknown-version marker
+when the slot calls for one. Do not invent a missing version, reject a supported
+tool, narrow a class to its examples, or make an optional field required.
+
+Classify the activity described, even when the clause factually reports a source:
+"The source plans a migration" is planned, not fact or applied merely because
+the source made that statement. An ongoing operation remains in_progress and
+a request remains instruction. Separate literal clauses with different statuses
+or scopes and give each its own evidence; do not hide a current observation
+inside a planned claim, or an ongoing step inside an applied claim. Preserve
+the reviewed value's qualifiers and check every occurrence and allegation separately.
+Use the existing revise links and terminal-stop rules. Do not rewrite a failed
+review or its classifications to manufacture a passing check.
+"""
+
+
 def evidence_phase_contract(phase: str, render_version: int) -> str:
     contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
     if render_version >= 12:
@@ -1860,6 +1906,8 @@ def evidence_phase_contract(phase: str, render_version: int) -> str:
             contract += "\n\n" + ANONYMOUS_REMOVAL_CONTRACT_V15
         if render_version >= 16 and phase in {"audit", "reconcile_full", "report", "report_regate"}:
             contract += "\n\n" + SOURCE_METADATA_CONTRACT_V16
+        if render_version >= 17 and phase in {"audit", "reconcile_full", "report", "report_regate"}:
+            contract += "\n\n" + CLAIM_CLARIFICATION_CONTRACT_V17
         return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 
@@ -4005,6 +4053,7 @@ def sent_text_surfaces() -> dict[str, str]:
     out["anonymous_removal_contract_v15"] = ANONYMOUS_REMOVAL_CONTRACT_V15
     out["source_metadata_contract_v16"] = SOURCE_METADATA_CONTRACT_V16
     out["source_metadata_header_v16"] = SOURCE_METADATA_HEADER_V16
+    out["claim_clarification_contract_v17"] = CLAIM_CLARIFICATION_CONTRACT_V17
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),

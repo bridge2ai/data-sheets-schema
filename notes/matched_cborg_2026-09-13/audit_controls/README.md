@@ -443,3 +443,30 @@ and evaluation refuse an active continuation selector. Audit operational
 options are not inherited. Old registrations, prompts, stopped outputs and
 scores remain unchanged; a fresh registration and independent review precede
 each launch with the new instrument.
+
+## Explicit claim clarification (protocol 5 / renderer 17)
+
+For a fresh audit condition, `--clarify-source-claims` selects protocol 5 /
+renderer 17 and the distinct transition
+`scientific_contract_transition: {"kind": "frozen_pair_claim_clarification_v1"}`.
+This option is mutually exclusive with the two earlier upgrade options.
+`--source-metadata-evidence` continues to select 5/16,
+`--upgrade-evidence-protocol` continues to select 4/15, and omission still
+selects 3/14. An accepted audit carries its selected scientific contract into
+Phase 4; the frozen generation identity is preserved separately.
+
+Renderer 17 clarifies existing rules with generic examples: claim text copies
+the decoded scalar rather than its serialization delimiters; support must
+match the claim's subject, scope and status; an undated source does not
+establish chronology; and a supported fact must fit the actual schema field.
+Literal quotation marks that belong to a scalar remain significant. Distinct
+clauses and their statuses need separate judgments. Source priority supplies
+neither observation dates nor evidence for a dataset relationship.
+
+The same clarification accompanies audit, reconciliation and report phases in
+both arms, including the native persistent audit contract. It changes prompt
+identity, not protocol-5 grammar or validator semantics. Earlier rendered
+prompts and all protocol bytes remain unchanged. The clarification does not
+guarantee semantic correctness: independent scientific review is still
+required, and previously rejected outputs remain rejected. Select it only
+through a fresh registration with its code and rendered instructions pinned.
