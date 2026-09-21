@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from budgeted_cborg import BudgetStop, CBORG_ENDPOINTS, CappedMessages, digest, write_new
+from budgeted_cborg import BudgetStop, CBORG_ENDPOINTS, CappedMessages, digest, now, write_new
 from data_sheets_schema.stream_evidence import CORRELATION_HEADERS, _identifier
 
 
@@ -110,12 +110,48 @@ class Completion:
         return SimpleNamespace(model_dump=lambda **kw: self.message)
 
 
+UNCONFIRMED_CHARGE = "upstream HTTP response did not confirm a completed charge"
+
+
+class UpstreamStall(BudgetStop):
+    """A provider 5xx before any response byte reached the child. It reads as
+    the historical stop reason wherever no stall policy survives it."""
+    def __init__(self, status):
+        super().__init__(UNCONFIRMED_CHARGE)
+        self.status = status
+
+
+def stall_evidence(exc):
+    """What made a paid request a stall, or None. Only failures of the
+    upstream exchange qualify: a provider 5xx, a timeout, or a dropped or
+    malformed connection. Provider exception text is never kept."""
+    if isinstance(exc, UpstreamStall):
+        return {"kind": "upstream_http_status", "http_status": exc.status}
+    if isinstance(exc, (httpx.TimeoutException, httpx.NetworkError, httpx.RemoteProtocolError)):
+        return {"kind": "upstream_transport", "error_type": type(exc).__name__}
+    return None
+
+
+def validated_stall_policy(value):
+    """{count_attempts: 1..5, max_stall_debits: 0..10} or None (#2150)."""
+    if value is None:
+        return None
+    if (not isinstance(value, dict) or set(value) != {"count_attempts", "max_stall_debits"}
+            or type(value["count_attempts"]) is not int or not 1 <= value["count_attempts"] <= 5
+            or type(value["max_stall_debits"]) is not int or not 0 <= value["max_stall_debits"] <= 10):
+        raise BudgetStop("native stall policy needs count_attempts 1-5 and max_stall_debits 0-10")
+    return dict(value)
+
+
 class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
                  provider_key, base_url, upstream=None, request_headers=None,
-                 upstream_read_timeout_seconds=None):
+                 upstream_read_timeout_seconds=None, stall_policy=None, count_pause=None):
         if base_url not in CBORG_ENDPOINTS:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
+        # Opt-in only: None keeps every legacy path byte for byte (#2150).
+        self.stall_policy = validated_stall_policy(stall_policy)
+        self.stalls_survived = 0
         if upstream_read_timeout_seconds is not None and (
                 type(upstream_read_timeout_seconds) is not int or upstream_read_timeout_seconds <= 0):
             raise BudgetStop('native upstream read timeout must be positive whole seconds')
@@ -141,7 +177,9 @@ class NativeProxy:
         self.unfinished_handlers = 0
         self.messages = CappedMessages(sdk, ledger=ledger, attempt=attempt,
             evidence=Path(evidence), model=model, prices=prices, verify=verify,
-            mutation_guard=self.mutation_guard)
+            mutation_guard=self.mutation_guard,
+            **({"count_attempts": self.stall_policy["count_attempts"], "count_pause": count_pause}
+               if self.stall_policy is not None else {}))
         self.upstream = upstream or httpx.Client(timeout=httpx.Timeout(1800, connect=20), follow_redirects=False)
         self.failure = None
         self.failed = threading.Event()
@@ -159,6 +197,22 @@ class NativeProxy:
                 self.failure = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
             self.closed = True
             self.failed.set()
+
+    def survive_stall(self, ticket, folder, evidence):
+        """Count a stalled request at its whole reservation and leave the
+        attempt open, under the registered allowance. Raises when the policy
+        does not cover it; the caller then stops the attempt as before."""
+        if self.stall_policy is None or ticket is None or evidence is None:
+            raise BudgetStop("no registered stall policy covers this failure")
+        with self.state:
+            self.require_writable()
+            self.require_open()
+            index = self.messages.debit_stall(ticket, maximum=self.stall_policy["max_stall_debits"],
+                                              evidence=evidence)
+            write_new(folder / "stall.json", {"at": now(), "stall_index": index, **evidence,
+                "settlement": "whole reservation counted; provider charge unconfirmed",
+                "child_reply_status": 503})
+            self.stalls_survived = index
 
     def close_admission(self):
         with self.state:
@@ -198,11 +252,13 @@ class NativeProxy:
             protocol_version = "HTTP/1.0"
             def log_message(self, *args):
                 pass
-            def reply(self, code, value):
+            def reply(self, code, value, headers=None):
                 raw = json.dumps(value).encode()
                 self.send_response(code)
                 self.send_header("Content-Type", "application/json")
                 self.send_header("Content-Length", str(len(raw)))
+                for name, text in (headers or {}).items():
+                    self.send_header(name, text)
                 self.end_headers()
                 self.wfile.write(raw)
             def do_POST(self):
@@ -221,6 +277,7 @@ class NativeProxy:
             def _post_serially(self):
                 self.connection.settimeout(20)
                 sent = False
+                ticket = folder = None
                 try:
                     supplied = self.headers.get("x-api-key", "")
                     if not supplied:
@@ -247,7 +304,7 @@ class NativeProxy:
                     owner.messages.verify()
                     if path.endswith("/count_tokens"):
                         fields = {k:v for k,v in request.items() if k in {"model", "system", "messages", "tools", "tool_choice", "thinking"}}
-                        count = owner.messages.client.messages.count_tokens(**fields).input_tokens
+                        count = owner.messages.count_tokens(fields)
                         if type(count) is not int or count < 0:
                             raise BudgetStop("invalid native input count")
                         self.reply(200, {"input_tokens":count})
@@ -275,7 +332,9 @@ class NativeProxy:
                             owner.capture(folder / "upstream_error.body", b"")
                             for chunk in response.iter_bytes():
                                 owner.capture(folder / "upstream_error.body", chunk, append=True)
-                            raise BudgetStop("upstream HTTP response did not confirm a completed charge")
+                            if response.status_code >= 500:
+                                raise UpstreamStall(response.status_code)
+                            raise BudgetStop(UNCONFIRMED_CHARGE)
                         if "text/event-stream" not in response.headers.get("content-type", ""):
                             raise BudgetStop("unregistered upstream response format")
                         self.send_response(200)
@@ -300,6 +359,21 @@ class NativeProxy:
                             self.wfile.write(chunk)
                         self.wfile.flush()
                 except Exception as exc:
+                    if not sent and owner.stall_policy is not None:
+                        # Nothing reached the child, so its own retry can
+                        # continue the session once the charge is counted.
+                        try:
+                            owner.survive_stall(ticket, folder, stall_evidence(exc))
+                        except Exception:
+                            pass
+                        else:
+                            try:
+                                self.reply(503, {"type":"error", "error":{"type":"api_error",
+                                    "message":"registered transport stall; the request may be retried"}},
+                                    headers={"retry-after": "1", "x-should-retry": "true"})
+                            except (OSError, BrokenPipeError):
+                                owner.fail(BudgetStop("native client closed before the registered stall reply"))
+                            return
                     owner.fail(exc)
                     if not sent:
                         try:

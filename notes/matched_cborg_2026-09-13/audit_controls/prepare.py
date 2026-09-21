@@ -9,7 +9,7 @@ import sys
 from data_sheets_schema import source_review
 from .registration import (BudgetStop, canonical_path, inspect_parent,
     native_api_force_idle_timeout as validate_native_idle_timeout, native_api_timeout,
-    native_upstream_read_timeout, parent_path,
+    native_stall_policy as validate_stall_policy, native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .contract import render_instruction
 
@@ -49,7 +49,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             continuation_source_registration=None, continuation_reconciliation_receipt=None,
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
             native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
-            staged_audit_output=False, native_upstream_read_timeout_seconds=None):
+            staged_audit_output=False, native_upstream_read_timeout_seconds=None,
+            native_stall_policy=None):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -68,6 +69,11 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if native_upstream_read_timeout_seconds is not None:
         upstream_selection['native_upstream_read_timeout_seconds'] = native_upstream_read_timeout_seconds
         native_upstream_read_timeout({'kind': 'd4d_native_audit_continuation', **upstream_selection,
+            'native_runtime': ({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
+            'job': {'deadline_seconds': deadline_seconds}})
+    if native_stall_policy is not None:
+        upstream_selection['native_stall_policy'] = native_stall_policy
+        validate_stall_policy({'kind': 'd4d_native_audit_continuation', **upstream_selection,
             'native_runtime': ({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
             'job': {'deadline_seconds': deadline_seconds}})
     if bool(continuation_source_registration) != bool(continuation_reconciliation_receipt):
@@ -181,6 +187,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'native_output_ceiling': manifest['native_runtime']['max_output_tokens'],
         'native_api_timeout_ms': manifest['native_runtime'].get('api_timeout_ms', 'native_default'),
         'native_api_force_idle_timeout': manifest['native_runtime'].get('api_force_idle_timeout', 'native_default'),
+        'native_stall_policy': ({k: v for k, v in manifest['native_stall_policy'].items() if k != 'authorization'}
+                                if 'native_stall_policy' in manifest else 'stop_on_first_stall'),
         'provider_base_url': manifest['provider_base_url'],
         'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
         'provider_calls': 0, 'scientific_acceptance': False})
@@ -207,6 +215,9 @@ def main():
         help='audit-only raw stream read timeout, positive seconds below an explicit native SDK timeout')
     parser.add_argument('--native-api-force-idle-timeout', choices=('false',),
         help='disable the independent native fetch idle timer; requires a bounded --native-api-timeout-ms')
+    parser.add_argument('--native-stall-policy',
+        help='path to a JSON audit-only stall policy (bounded_in_attempt_v1): token-count tries, the maximum '
+             'number of stalled requests counted at their whole reservation, and the quoted maintainer authorization')
     parser.add_argument('--continuation-checkpoint')
     parser.add_argument('--continuation-source-registration')
     parser.add_argument('--continuation-reconciliation-receipt')
@@ -215,6 +226,8 @@ def main():
     args = vars(parser.parse_args())
     if args['native_api_force_idle_timeout'] is not None:
         args['native_api_force_idle_timeout'] = False
+    if args['native_stall_policy'] is not None:
+        args['native_stall_policy'] = json.loads(Path(args['native_stall_policy']).read_text(encoding='utf-8'))
     args['attempt_cap'] = str(args['attempt_cap'])
     path = prepare(**args)
     print(json.dumps({'registration': str(path), 'sha256': sha(path)}))

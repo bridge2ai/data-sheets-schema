@@ -1,0 +1,48 @@
+{
+  "issue": 2150,
+  "purpose": "The real pinned native executable, offline, against a scripted upstream that stalls twice and one token count that times out.",
+  "native_executable": {
+    "version": "2.1.272",
+    "sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75"
+  },
+  "code_sha256": {
+    "native_controls/probe_native_stall.py": "7afb6d3ebbd9fc05e1ead471049c6a84f6f78e23b22c22d8385070a719fa9fe2",
+    "native_controls/native_proxy.py": "2ed8f5218d1591e83a9cee8c44a74fdb84486511febf2205b6753bba42dd939b",
+    "budgeted_cborg.py": "11fa9d0dce35f925f845d74cb9e0b85ff94009865cd69130a75a29e32744ee62"
+  },
+  "stall_policy": {
+    "count_attempts": 3,
+    "max_stall_debits": 4
+  },
+  "observed": {
+    "exit_code": 0,
+    "proxy_failure": null,
+    "scripted_upstream_calls": 6,
+    "scripted_faults": [
+      "http524",
+      "timeout"
+    ],
+    "count_tries": 7,
+    "count_retries": 1,
+    "stalls_survived": 2,
+    "ledger_rows": 6,
+    "unsettled_rows": 0,
+    "stall_debit_rows": 2,
+    "output_created": true,
+    "terminal_result": {
+      "is_error": false,
+      "terminal_reason": "completed",
+      "stop_reason": "end_turn",
+      "num_turns": 4
+    },
+    "unfinished_handlers": 0,
+    "real_provider_requests": 0
+  },
+  "establishes": "After a provider 524 and after a pre-header read timeout, each answered with the proxy's retryable 503, this executable retried on its own and completed its session; both stalled requests were counted at their whole reservation and every ledger row settled.",
+  "does_not_establish": [
+    "behaviour against the real provider",
+    "a stall after response bytes were relayed (it stays terminal by design)",
+    "how many requests a complete audit needs",
+    "any scientific result; every price, count and prompt here is synthetic"
+  ]
+}

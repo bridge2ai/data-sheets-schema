@@ -41,6 +41,36 @@ neither provider keepalive settings nor model requests, and does not make an
 interrupted charge complete. Preserve stopped conditions and register retries
 separately.
 
+A new condition can register a bounded in-attempt stall policy with
+`--native-stall-policy PATH` (#2150). Without it, the first provider stall ends the
+whole attempt, as it always has. The JSON file names the policy kind
+`bounded_in_attempt_v1`, `count_attempts` from 1 to 5, `max_stall_debits` from 0 to
+10, and an `authorization` that quotes the maintainer's standing approval: the exact
+response, the request it answered and when it was recorded. The authorization is
+required whenever any debit is allowed, and must be `null` when none is.
+
+The policy does two things. Token counting is repeated up to `count_attempts` tries,
+only after a timeout, a dropped connection or a provider 5xx. A count costs nothing,
+so repeating one carries no charge ambiguity. A paid request that stalls before any
+response byte reaches the native client is counted at its whole reservation, and the
+ledger row says so: `settlement_basis` is `registered_stall_policy_full_reservation_debit`,
+the provider charge is unconfirmed and unknown, and nothing is released. The reservation
+is an upper bound on the fee, so the budget can only be over-counted. The proxy then
+answers the client with a retryable status, and the client's own retry continues the
+same session. `stall.json` beside the request keeps the evidence, and the terminal
+result lists the debited requests under `stall_debited_requests`.
+
+A stall counts only when the upstream exchange itself failed: a provider 5xx, a
+timeout, or a dropped or malformed connection. A provider 4xx, a failure after
+response bytes were relayed, a closed admission and every budget refusal stop the
+attempt as before. So does the stall after the registered maximum, which leaves its
+reservation pending for the maintainer's request-specific decision. Debits require a
+native SDK timeout longer than the upstream read bound in force, so the proxy sees
+the stall before the client gives up. The policy is audit-only: generation, Phase 4
+and the evaluations refuse it. `native_controls/probe_native_stall.py` drives the
+real pinned executable against a scripted upstream that stalls, with no provider
+contact, and shows the client retrying to completion.
+
 The native client's fetch layer has a separate idle timer. A new condition can
 select `--native-api-force-idle-timeout false` to disable that timer while waiting
 for local-proxy response headers. This requires an explicit bounded
