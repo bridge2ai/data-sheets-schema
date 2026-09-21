@@ -26,6 +26,32 @@ from validation import validator_argv
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+_UNSELECTED = object()
+
+
+def _fitness_selection(value):
+    from data_sheets_schema.fitness_schema import SELECTOR, validate_selection
+    selection = {} if value is _UNSELECTED else {SELECTOR:value}
+    validate_selection(selection)
+    return selection
+
+
+def _fitness_snapshots(manifest):
+    from data_sheets_schema.fitness_schema import validate_selection, capture
+    from data_sheets_schema.profiles import profile_named
+    if validate_selection(manifest) is None:
+        return {}
+    from source_pair import fitness_schema_authority, fitness_snapshot_paths
+    paths, _, _ = fitness_schema_authority(manifest)
+    snapshots = {}
+    for variant in ('full','core'):
+        kind = 'Dataset' if variant=='full' else 'CoreDataset'
+        snapshot = capture(kind, paths[variant], profile=profile_named(manifest['profile']))
+        job = {'variant':variant,'class_name':kind,'schema_path':str(paths[variant])}
+        for path, identity in fitness_snapshot_paths(manifest, job, snapshot, require_pins=False):
+            manifest['pinned_files'][str(path)] = identity
+        snapshots[variant] = snapshot
+    return snapshots
 
 
 def _source_path(repository, value):
@@ -105,6 +131,10 @@ def _job(manifest, destination, variant, style, identity, *, rating=1, canary=Tr
         'max_tokens': 64000 if style in NATIVE_STYLES else (32000 if style == 'direct_api_quality' else 8000)}
     if rubric:
         row['rubric'] = rubric
+    if style == 'fitness' and 'fitness_schema_guidance' in manifest:
+        from source_pair import fitness_schema_authority
+        row['fitness_schema_guidance'] = manifest['fitness_schema_guidance']
+        row['schema_path'] = str(fitness_schema_authority(manifest)[0][variant])
     row['canary_group'] = group(row)
     if not canary:
         row['canary_acceptance'] = str(destination / 'acceptances' / (row['canary_group'].replace(':', '_') + '.json'))
@@ -114,13 +144,15 @@ def _job(manifest, destination, variant, style, identity, *, rating=1, canary=Tr
 def build_registration(destination, *, generation_registration, generation_acceptance,
                        generation_job_id, context_path, billing_checkpoint,
                        native_executable=None, project=None, method=None, profile=None,
-                       provider_base_url=None, provider_ca_bundle=None):
+                       provider_base_url=None, provider_ca_bundle=None,
+                       fitness_schema_guidance=_UNSELECTED):
     """Build an exclusive offline condition; caller must supply actual acceptance.
 
     The source generation ledger must already be settled and match the
     checkpoint. This first evaluation registration cannot fork an existing
     evaluation chain; the execution controller enforces the handoff atomically.
     """
+    fitness_selection = _fitness_selection(fitness_schema_guidance)
     destination = canonical_path(str(destination))
     if destination.exists():
         raise BudgetStop('evaluation preparation directory already exists; never overwrite it')
@@ -197,6 +229,7 @@ def build_registration(destination, *, generation_registration, generation_accep
         'offline_checks': ['schema', 'pair', 'duplicate_keys', 'provenance', 'receipts', 'report_grounding',
                            'literal_grounding', 'field_presence_rubric10', 'field_presence_rubric20'],
         'slot_selection': 'every populated schema-known top-level slot of each explicit dataset unit; no propagation'}
+    manifest.update(fitness_selection)
     if provider_ca_bundle is not None:
         manifest['provider_transport'] = {'kind': 'pinned_ca_v1',
             'ca_bundle': str(canonical_path(str(provider_ca_bundle), exists=True))}
@@ -208,7 +241,9 @@ def build_registration(destination, *, generation_registration, generation_accep
     return _materialize(manifest, destination, bundle, native_runtime, spent, billing_checkpoint=billing_checkpoint)
 
 
-def _materialize(manifest, destination, bundle, native_runtime, spent, *, billing_checkpoint=None, prepared_directory=False):
+def _materialize(manifest, destination, bundle, native_runtime, spent, *, billing_checkpoint=None, prepared_directory=False,
+                 fitness_snapshots=None):
+    snapshots = _fitness_snapshots(manifest) if fitness_snapshots is None else fitness_snapshots
     jobs = manifest['evaluation_jobs']
     for variant in ('full', 'core'):
         for style in ('semantic_agent', 'field_agent', 'direct_api_quality'):
@@ -223,13 +258,18 @@ def _materialize(manifest, destination, bundle, native_runtime, spent, *, billin
         base = next(job for job in jobs if job['variant'] == variant)
         inventory[variant] = slot_inventory(base['input'], base['class_name'], base['schema_path'])
         for style in ('grounding', 'fitness'):
-            for index, selected in enumerate(inventory[variant]['included'], 1):
+            selected_inventory = inventory[variant]
+            if style=='fitness' and snapshots:
+                selected_inventory = slot_inventory(base['input'],base['class_name'],snapshots[variant].schema_path)
+                inventory[variant]['selected_fitness_inventory'] = selected_inventory
+            for index, selected in enumerate(selected_inventory['included'], 1):
                 identity = f'{variant}_{style}_slot{index:04d}'
                 row = _job(manifest, destination, variant, style, identity, canary=index == 1)
                 row.update(selected)
                 if style == 'grounding':
                     row['bundle'] = str(bundle)
-                row['instrument'] = slot_instrument(row)
+                row['instrument'] = (slot_instrument(row, schema_snapshot=snapshots[variant])
+                                     if style=='fitness' and snapshots else slot_instrument(row))
                 jobs.append(row)
     style_order = {name: index for index, name in enumerate(
         ('semantic_agent', 'field_agent', 'direct_api_quality', 'grounding', 'fitness'))}
@@ -271,7 +311,8 @@ def _materialize(manifest, destination, bundle, native_runtime, spent, *, billin
             request_sizes.append({'job_id': job['id'], 'instruction_utf8_bytes': len(text.encode()),
                                   'system_utf8_bytes': Path(job['agent_definition']).stat().st_size})
         else:
-            request = render_request(manifest, job)
+            request = (render_request(manifest, job, schema_snapshot=snapshots[job['variant']])
+                       if job['style']=='fitness' and snapshots else render_request(manifest, job))
             path = destination / 'requests' / (job['id'] + '.json')
             write_new(path, request)
             job['expected_request'] = str(path)
@@ -322,8 +363,10 @@ def _materialize(manifest, destination, bundle, native_runtime, spent, *, billin
 
 
 def build_composite_registration(destination, *, finalization_registration, finalization_acceptance,
-                                 context_path, native_executable=None, durable_sequence_claim=False):
+                                 context_path, native_executable=None, durable_sequence_claim=False,
+                                 fitness_schema_guidance=_UNSELECTED):
     """Prepare the accepted composite pair without claiming accounting ownership."""
+    fitness_selection = _fitness_selection(fitness_schema_guidance)
     from source_pair import inspect_finalization
     import continuation_sequence
     from sequence_claim import select
@@ -382,6 +425,7 @@ def build_composite_registration(destination, *, finalization_registration, fina
             'literal_grounding','field_presence_rubric10','field_presence_rubric20'],
         'slot_selection':'every populated schema-known top-level slot of each explicit dataset unit; no propagation'}
     manifest.update(claim_selection)
+    manifest.update(fitness_selection)
     if 'provider_transport' in phase:
         manifest['provider_transport'] = deepcopy(phase['provider_transport'])
     verify_implementation(manifest)
@@ -389,12 +433,13 @@ def build_composite_registration(destination, *, finalization_registration, fina
     verified_context(manifest)
     if profile_object.pin_path is not None:
         _pin(manifest, profile_object.pin_path)
+    snapshots = _fitness_snapshots(manifest)
     destination.mkdir(parents=True,exist_ok=False)
     with snapshot.open('xb') as stream:
         stream.write(state.read_bytes())
     _pin(manifest,snapshot)
     return _materialize(manifest,destination,Path(source['bundle']['path']),native_runtime,spent,
-                        prepared_directory=True)
+                        prepared_directory=True, fitness_snapshots=snapshots)
 
 
 def main():
@@ -414,10 +459,12 @@ def main():
     parser.add_argument('--provider-ca-bundle', type=Path,
         help='Explicit pinned CA bundle; required for the direct CBORG endpoint')
     parser.add_argument('--project'); parser.add_argument('--method'); parser.add_argument('--profile')
+    parser.add_argument('--fitness-schema-guidance', choices=('nested_semantics_v1',), default=argparse.SUPPRESS,
+        help='Explicit new fitness/subtype instrument; requires accepted schema/import authority')
     args = vars(parser.parse_args())
     if args['finalization_registration'] is not None:
         allowed = {'destination','finalization_registration','finalization_acceptance','context_path','native_executable',
-                   'durable_sequence_claim'}
+                   'durable_sequence_claim','fitness_schema_guidance'}
         if args['finalization_acceptance'] is None or any(v is not None for k,v in args.items() if k not in allowed):
             parser.error('composite preparation requires finalization acceptance and excludes legacy source/provider overrides')
         result = build_composite_registration(**{k:v for k,v in args.items() if k in allowed})

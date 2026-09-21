@@ -829,7 +829,15 @@ class LLMSlotFitnessScorer:
     def __init__(self, client=None, model: str | None = None,
                  class_name: str = "Dataset", max_tokens: int = 8000,
                  log_path: Path | None = None, cache_path: Path | None = None,
-                 schema_path: Path | None = None, profile=None):
+                 schema_path: Path | None = None, profile=None,
+                 schema_guidance: str | None = None, schema_snapshot=None):
+        self.schema_guidance = schema_guidance
+        self.schema_snapshot = schema_snapshot
+        from data_sheets_schema.fitness_schema import validate_selection
+        if schema_guidance is not None:
+            validate_selection({"fitness_schema_guidance": schema_guidance})
+        elif schema_snapshot is not None:
+            raise ValueError("fitness schema snapshot requires explicit guidance selection")
         self._client = client
         self._model = model
         self.class_name = class_name
@@ -863,6 +871,10 @@ class LLMSlotFitnessScorer:
         return self._client, self._model
 
     def _snapshot(self) -> tuple:
+        if self.schema_guidance is not None:
+            from data_sheets_schema.fitness_schema import selected_snapshot
+            return selected_snapshot(self.schema_guidance, self.schema_snapshot, self.class_name,
+                                     self.schema_path, self.profile).as_tuple()
         return slot_specification_snapshot(self.class_name, self.schema_path, profile=self.profile)
 
     def _context(self, model: str, *, schema: str | None = None,
@@ -895,6 +907,10 @@ class LLMSlotFitnessScorer:
                 continue
             e = json.loads(line)
             why = JudgementContext.mismatch(e, ctx)
+            if e.get("fitness_schema_guidance") != self.schema_guidance:
+                why = "fitness_schema_guidance"
+            if self.schema_guidance is not None and e.get("class_name") != self.class_name:
+                why = "class_name"
             if why is not None:
                 skipped[why] = skipped.get(why, 0) + 1
                 continue
@@ -928,7 +944,10 @@ class LLMSlotFitnessScorer:
             self._specs.clear()
             self._spec_schema = specification
         if slot not in self._specs:
-            self._specs[slot] = _render_slot_spec(slot, inventory, vocabulary)
+            if self.schema_guidance is not None:
+                self._specs[slot] = inventory.spec(slot)
+            else:
+                self._specs[slot] = _render_slot_spec(slot, inventory, vocabulary)
         return self._specs[slot]
 
     def __call__(self, *, project: str, slot: str, value: Any,
@@ -939,10 +958,14 @@ class LLMSlotFitnessScorer:
         collapses back into the grounding question this axis exists to separate
         from.
         """
+        # Selected schemas fail before provider resolution. Preserve the legacy
+        # ordering, and use this exact snapshot for both identity and prompt.
+        snapshot = self._snapshot() if self.schema_guidance is not None else None
+        if snapshot is not None:
+            snapshot[1].spec(slot)  # Unknown declared slots also fail before a client.
         client, model = self._resolve()
-        # Capture once: an edit between context creation and prompt rendering
-        # must not put a judgement under another instrument's key (#1259).
-        snapshot = self._snapshot()
+        if snapshot is None:
+            snapshot = self._snapshot()
         ctx = self._context(model, schema=snapshot[0], specification=snapshot[3])
         self._load_cache(ctx)
 
@@ -995,7 +1018,10 @@ class LLMSlotFitnessScorer:
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    **ctx.as_entry(), "slot": slot, "value": key[2],
+                    **ctx.as_entry(),
+                    **({"fitness_schema_guidance": self.schema_guidance, "class_name": self.class_name}
+                       if self.schema_guidance else {}),
+                    "slot": slot, "value": key[2],
                     "fitness": judgement.fitness, "failure": judgement.failure,
                     "reason": judgement.reason}, ensure_ascii=False) + "\n")
         return judgement

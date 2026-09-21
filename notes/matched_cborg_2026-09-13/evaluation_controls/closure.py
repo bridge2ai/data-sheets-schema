@@ -27,6 +27,7 @@ def require(value, reason):
 def validate_output(manifest, job, output):
     """Reuse each instrument's real exact-file/score contract without a provider."""
     from evaluation_controls import api
+    api._schema_selection(manifest, job)
     if job['style'] in {'semantic_agent', 'field_agent'}:
         from evaluation_controls.validation import validate_native
         return validate_native(output, job, manifest)
@@ -69,6 +70,8 @@ def validate_output(manifest, job, output):
 
 def build_aggregate(manifest, registration_path, ledger=None):
     """Reconstruct the complete closure from actual files; no acceptance implied."""
+    from data_sheets_schema.fitness_schema import validate_manifest_selection
+    validate_manifest_selection(manifest)
     registration_path = canonical_path(str(registration_path), exists=True)
     registration_sha = sha(registration_path)
     require(read_json(registration_path) == manifest, 'aggregate registration changed')
@@ -151,6 +154,8 @@ def build_aggregate(manifest, registration_path, ledger=None):
                     'fitness_receipt_sha256': sha(receipt_path),
                     **{key: job[key] for key in ('variant', 'class_name', 'input', 'input_sha256', 'unit_path',
                                                'slot', 'value_sha256', 'profile', 'schema_path')},
+                    **({'fitness_schema_guidance':job['fitness_schema_guidance']}
+                       if 'fitness_schema_guidance' in job else {}),
                     'instrument': value['instrument'], 'judgement': value['judgement']})
     return {'kind': 'd4d_evaluation_aggregate_closure', 'schema_version': 1,
         'scope': 'complete_initial_evaluation_roster', 'status': 'completed_pending_independent_review',

@@ -118,6 +118,8 @@ class FormFailure:
     # spanning two profiles is refused like one spanning two models.
     schema: str = ""
     specification: str = ""
+    schema_guidance: str | None = None
+    class_name: str = ""
 
     @property
     def key(self) -> str:
@@ -143,6 +145,7 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
     models: set[str] = set()
     schemas: set[str] = set()
     specifications: set[str] = set()
+    guidances: set[str | None] = set()
     for path in sorted(cache_dir.glob("*_fitness.jsonl")):
         project = path.name.replace("_fitness.jsonl", "")
         for line in path.read_text(encoding="utf-8").splitlines():
@@ -158,18 +161,22 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
             # judged before the complete specification was recorded is not
             # the same instrument as one judged under it (#1608).
             specifications.add(str(entry.get("specification") or ""))
+            from data_sheets_schema.fitness_schema import validate_selection
+            guidances.add(validate_selection(entry))
             out.append(FormFailure(
                 project=project, slot=entry["slot"], value=entry["value"],
                 reason=entry.get("reason", ""),
                 fitness=float(entry.get("fitness", 0.0)),
                 schema=str(entry.get("schema", "") or ""),
-                specification=str(entry.get("specification", "") or "")))
+                specification=str(entry.get("specification", "") or ""),
+                schema_guidance=validate_selection(entry),
+                class_name=str(entry.get("class_name", ""))))
     for name, seen in (("rubric", rubrics), ("model", models), ("schema", schemas),
-                       ("specification", specifications)):     # the digest omits distinctions the specification keeps (#1562)
+                       ("specification", specifications), ("schema guidance", guidances)):     # the digest omits distinctions the specification keeps (#1562)
         if len(seen) > 1:
             raise ValueError(
                 f"form failures span {len(seen)} fitness {name}s: "
-                f"{sorted(seen)}. These are different instruments and their "
+                f"{sorted(seen, key=str)}. These are different instruments and their "
                 "failures cannot be pooled into one sub-type table.")
     return out
 
@@ -308,7 +315,15 @@ class FormSubtypeClassifier:
                  max_tokens: int = 8000, cache_path: Path | None = None,
                  offline: bool = False, schema: str | None = None,
                  specification: str | None = None, profile=None,
-                 class_name: str = "Dataset", schema_path: Path | None = None):
+                 class_name: str = "Dataset", schema_path: Path | None = None,
+                 schema_guidance: str | None = None, schema_snapshot=None):
+        self.schema_guidance = schema_guidance
+        self.schema_snapshot = schema_snapshot
+        from data_sheets_schema.fitness_schema import validate_selection
+        if schema_guidance is not None:
+            validate_selection({"fitness_schema_guidance": schema_guidance})
+        elif schema_snapshot is not None:
+            raise ValueError("fitness schema snapshot requires explicit guidance selection")
         self._client, self._model = client, model
         self.class_name = class_name
         self.schema_path = schema_path
@@ -323,6 +338,13 @@ class FormSubtypeClassifier:
         self._memo: dict[str, tuple[str, str]] = {}
         self.calls = 0
         self.memo_hits = 0
+        if schema_guidance is not None and schema_snapshot is not None:
+            from data_sheets_schema.fitness_schema import selected_snapshot
+            bound = selected_snapshot(schema_guidance, schema_snapshot, class_name, schema_path, profile)
+            if ((schema is not None and schema != bound.schema)
+                    or (specification is not None and specification != bound.specification)):
+                raise ValueError("subtype explicit snapshot instrument mismatch")
+            self._schema, self._specification = bound.schema, bound.specification
         self._load()
 
     @property
@@ -368,6 +390,10 @@ class FormSubtypeClassifier:
             if (entry.get("rubric") != _digest(FORM_SUBTYPE_SYSTEM)
                     or entry.get("model") != self.model):
                 continue
+            if entry.get("fitness_schema_guidance") != self.schema_guidance:
+                continue
+            if self.schema_guidance is not None and entry.get("class_name") != self.class_name:
+                continue
             # Scoped on schema as well (#465). An entry written before this
             # field existed carries none; it is admitted only when the live
             # schema is the one it was demonstrably judged against, which
@@ -388,6 +414,10 @@ class FormSubtypeClassifier:
             self._memo[key] = (entry["subtype"], entry.get("reason", ""))
 
     def _live_snapshot(self) -> tuple:
+        if self.schema_guidance is not None:
+            from data_sheets_schema.fitness_schema import selected_snapshot
+            return selected_snapshot(self.schema_guidance, self.schema_snapshot, self.class_name,
+                                     self.schema_path, self.profile).as_tuple()
         from data_sheets_schema.evidence_score import slot_specification_snapshot
         return slot_specification_snapshot(self.class_name, self.schema_path,
                                            profile=self.profile)
@@ -408,6 +438,8 @@ class FormSubtypeClassifier:
                     entry = json.loads(line)
                     if (entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM)
                             and entry.get("model") == self.model
+                            and entry.get("fitness_schema_guidance") == self.schema_guidance
+                            and (self.schema_guidance is None or entry.get("class_name") == self.class_name)
                             and (entry.get("schema") or LEGACY_SCHEMA) == self.schema):
                         recorded.add(entry.get("specification", ""))
             if len(recorded) > 1:
@@ -446,12 +478,20 @@ class FormSubtypeClassifier:
         """
         from data_sheets_schema import schema_digest
         def live_schema():
+            if self.schema_guidance is not None:
+                return self._live_snapshot()[0]
             return schema_digest.fingerprint(schema_digest.digest_text(
                 self.class_name, self.schema_path, profile=self.profile))
         if not (self.cache_path and Path(self.cache_path).exists()):
             return live_schema()
         try:
-            recorded = recorded_schemas(self.cache_path)
+            if self.schema_guidance is None:
+                recorded = recorded_schemas(self.cache_path)
+            else:
+                recorded = {e["schema"] for line in self.cache_path.read_text().splitlines() if line.strip()
+                            if (e := json.loads(line)).get("fitness_schema_guidance") == self.schema_guidance
+                            and e.get("class_name") == self.class_name
+                            and e.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM) and e.get("model") == self.model}
         except OSError:
             return live_schema()
         if len(recorded) == 1:
@@ -485,6 +525,8 @@ class FormSubtypeClassifier:
             fh.write(json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM),
                                  "model": self.model, "chars": VALUE_CHARS,
                                  "schema": self.schema,
+                                 **({"fitness_schema_guidance": self.schema_guidance, "class_name": self.class_name}
+                                    if self.schema_guidance else {}),
                                  **attestation,
                                  "key": key, "slot": slot,
                                  "subtype": subtype, "reason": reason}) + "\n")
@@ -493,6 +535,19 @@ class FormSubtypeClassifier:
         # The instrument first, before any cache can answer for it (#1561):
         # a failure judged under another schema or complete specification
         # is not this classifier's to classify, cached or not (#1514, #1562).
+        if failure.schema_guidance != self.schema_guidance:
+            raise ValueError("parent fitness schema guidance mismatch")
+        if self.schema_guidance is not None:
+            if self.schema_snapshot is not None:
+                # Check the supplied captured context even on a memo hit. This
+                # verifies object identity without rereading live schema bytes.
+                self._live_snapshot()
+            if failure.class_name != self.class_name:
+                raise ValueError("parent fitness class mismatch")
+            if not failure.schema or not failure.specification:
+                raise ValueError("selected subtype requires parent fitness instrument")
+            if len(failure.value) > VALUE_CHARS:
+                raise ValueError("selected subtype value exceeds exact-value bound")
         if failure.schema and failure.schema != self.schema:
             raise ValueError(f"the failure was judged under schema {failure.schema[:12]}…, this classifier "
                              f"is keyed on {self.schema[:12]}…; they are different instruments (#1514)")
@@ -518,10 +573,11 @@ class FormSubtypeClassifier:
                              "replay it offline or start a fresh cache for new judgements")
         from data_sheets_schema.api_runner import _call_with_retry, _client
         from data_sheets_schema.evidence_score import _render_slot_spec
+        spec = (snapshot[1].spec(failure.slot) if self.schema_guidance is not None
+                else _render_slot_spec(failure.slot, snapshot[1], snapshot[2]))
         if self._client is None:
             self._client = _client()
-
-        prompt = (f"{_render_slot_spec(failure.slot, snapshot[1], snapshot[2])}\n\n"
+        prompt = (f"{spec}\n\n"
                   f"Value as written:\n{failure.value[:VALUE_CHARS]}\n\n"
                   f"The fitness judge said: {failure.reason}\n\n"
                   "Which form failure is this?")
@@ -635,6 +691,12 @@ def main(argv: list[str] | None = None) -> int:
                              "for a new cache (#465)")
     parser.add_argument("--specification", default=None,
                         help="complete specification SHA256 to select in a multi-instrument cache")
+    parser.add_argument("--fitness-schema-guidance", choices=["nested_semantics_v1"], default=None,
+                        help="explicit declared nested-schema instrument; never inferred from an old cache")
+    parser.add_argument("--class-name", default=None,
+                        help="root class for the explicitly selected schema-guidance instrument")
+    parser.add_argument("--schema-path", type=Path, default=None,
+                        help="exact schema root for the explicitly selected schema-guidance instrument")
     parser.add_argument("--config", action="append", metavar="TAG=LABEL",
                         help="arm to attribute against, repeatable; defaults to "
                              "the historical v1/v2 labels. Required for any "
@@ -642,6 +704,11 @@ def main(argv: list[str] | None = None) -> int:
                              "back against records, so an unlisted label's "
                              "failures all read as `unattributed` (#466)")
     args = parser.parse_args(argv)
+    if (args.class_name is not None or args.schema_path is not None) and args.fitness_schema_guidance is None:
+        parser.error("--class-name/--schema-path require --fitness-schema-guidance")
+    selected = ({"schema_guidance": args.fitness_schema_guidance,
+                 "class_name": args.class_name or "Dataset", "schema_path": args.schema_path}
+                if args.fitness_schema_guidance is not None else {})
 
     configs = None
     if args.config:
@@ -678,7 +745,8 @@ def main(argv: list[str] | None = None) -> int:
                                            schema=args.schema,
                                            specification=args.specification,
                                            offline=args.offline,
-                                           profile=profile_named(args.profile) if args.profile else None)
+                                           profile=profile_named(args.profile) if args.profile else None,
+                                           **selected)
         # The live instrument is materialised here: an unknown ambient
         # profile surfaces as a named error, not a traceback (#1679, #1703).
         print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",

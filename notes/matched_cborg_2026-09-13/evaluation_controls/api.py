@@ -82,18 +82,59 @@ def selected_value(job):
     return value
 
 
-def slot_instrument(job):
+def _schema_selection(manifest, job):
+    from data_sheets_schema.fitness_schema import validate_manifest_selection, validate_selection
+    selected = validate_manifest_selection(manifest)
+    actual = validate_selection(job, style=job.get('style', ''))
+    expected = selected if job.get('style') in {'fitness', 'subtype'} else None
+    if actual != expected:
+        raise ValueError('manifest/job fitness schema guidance mismatch')
+    if actual and validate_selection(job.get('instrument',{}), style=job.get('style','')) != actual:
+        raise ValueError('selected job lacks its selected fitness instrument')
+    return actual
+
+
+def fitness_snapshot(job):
+    from data_sheets_schema.fitness_schema import capture, validate_selection
+    from data_sheets_schema.profiles import profile_named
+    if validate_selection(job, style=job.get('style', '')) is None:
+        return None
+    return capture(job['class_name'], Path(job['schema_path']), profile=profile_named(job['profile']))
+
+
+def _selected_snapshot(manifest, job, snapshot=None):
+    if _schema_selection(manifest, job) is None:
+        if snapshot is not None:
+            raise ValueError('legacy evaluation cannot receive selected schema guidance')
+        return None
+    from source_pair import fitness_snapshot_paths
+    from data_sheets_schema.profiles import profile_named
+    snapshot = snapshot if snapshot is not None else fitness_snapshot(job)
+    snapshot.assert_context(job['class_name'], Path(job['schema_path']), profile_named(job['profile']))
+    fitness_snapshot_paths(manifest, job, snapshot)
+    return snapshot
+
+
+def slot_instrument(job, *, schema_snapshot=None):
     from data_sheets_schema.evidence_score import (
         FITNESS_SYSTEM, SCORER_SYSTEM, slot_specification_snapshot,
     )
     from data_sheets_schema.form_defects import FORM_SUBTYPE_SYSTEM
     from data_sheets_schema.profiles import profile_named
+    from data_sheets_schema.fitness_schema import validate_selection
+    selected = validate_selection(job, style=job.get('style', ''))
     system = {"grounding": SCORER_SYSTEM, "fitness": FITNESS_SYSTEM,
               "subtype": FORM_SUBTYPE_SYSTEM}[job["style"]]
     result = {"system_sha256": hashlib.sha256(system.encode()).hexdigest()}
     if job["style"] == "grounding":
         result["bundle_sha256"] = sha(job["bundle"])
+    elif selected:
+        snapshot = schema_snapshot if schema_snapshot is not None else fitness_snapshot(job)
+        snapshot.assert_context(job['class_name'], Path(job['schema_path']), profile_named(job['profile']))
+        result.update(snapshot.instrument())
     else:
+        if schema_snapshot is not None:
+            raise ValueError('legacy slot instrument cannot receive selected guidance')
         snapshot = slot_specification_snapshot(
             job["class_name"], Path(job["schema_path"]),
             profile=profile_named(job["profile"]))
@@ -103,19 +144,22 @@ def slot_instrument(job):
 
 def _fitness_failure(job, value, instrument):
     from data_sheets_schema.form_defects import FormFailure, VALUE_CHARS
+    from data_sheets_schema.fitness_schema import validate_selection
     path = Path(job["fitness_result"])
     if sha(path) != job["fitness_result_sha256"]:
         raise ValueError("conditional subtype parent changed")
     parent = strict_json(path.read_text())
     if parent.get("style") != "fitness":
         raise ValueError("subtype parent is not a fitness judgement")
+    if validate_selection(parent.get('instrument',{}),style='fitness') != validate_selection(job,style='subtype'):
+        raise ValueError('subtype parent guidance selector differs')
     for key in ("input_sha256", "unit_path", "slot", "value_sha256"):
         if parent.get(key) != job[key]:
             raise ValueError("subtype parent selects a different " + key)
     if parent.get("job_id") != job["fitness_job_id"]:
         raise ValueError("subtype parent job differs")
-    for key in ("schema", "specification"):
-        if parent.get("instrument", {}).get(key) != instrument[key]:
+    for key in ("schema", "specification", "fitness_schema_guidance"):
+        if parent.get("instrument", {}).get(key) != instrument.get(key):
             raise ValueError("subtype parent has a different " + key)
     judgement = parent["judgement"]
     validate_slot_json(judgement, "fitness")
@@ -124,14 +168,18 @@ def _fitness_failure(job, value, instrument):
     rendered = json.dumps(value, sort_keys=True, default=str)
     if len(rendered) > VALUE_CHARS:
         raise ValueError("subtype value would be truncated by the legacy classifier")
+    options = {}
+    if 'fitness_schema_guidance' in instrument:
+        options.update(schema_guidance=instrument['fitness_schema_guidance'], class_name=job['class_name'])
     return FormFailure(job["project"], job["slot"], rendered,
                        judgement["reason"], judgement["fitness"],
-                       schema=instrument["schema"], specification=instrument["specification"])
+                       schema=instrument["schema"], specification=instrument["specification"], **options)
 
 
-def _invoke(manifest, job, client, attempt=None):
+def _invoke(manifest, job, client, attempt=None, *, schema_snapshot=None):
     """Use the instrument implementation for both preparation and execution."""
     style = job["style"]
+    snapshot = _selected_snapshot(manifest, job, schema_snapshot)
     if style not in STYLES:
         raise ValueError("unknown API evaluation style")
     model = manifest["model"]["model"]
@@ -157,10 +205,12 @@ def _invoke(manifest, job, client, attempt=None):
     from data_sheets_schema.form_defects import FormSubtypeClassifier
     from data_sheets_schema.profiles import profile_named
     value = selected_value(job)
-    instrument = slot_instrument(job)
+    instrument = (slot_instrument(job, schema_snapshot=snapshot) if snapshot is not None else slot_instrument(job))
     if instrument != job["instrument"]:
         raise ValueError("slot instrument differs from registration")
     options = dict(client=client, model=model, max_tokens=job["max_tokens"])
+    if snapshot is not None:
+        options.update(schema_guidance=job['fitness_schema_guidance'], schema_snapshot=snapshot)
     # Fresh instances and caches make every repeat a new independent request.
     if attempt:
         options.update(cache_path=attempt / "slot_cache.jsonl")
@@ -200,11 +250,14 @@ class _CaptureMessages:
         yield  # pragma: no cover
 
 
-def render_request(manifest, job):
+def render_request(manifest, job, *, schema_snapshot=None):
     """Capture actual library rendering; never construct or contact a provider."""
     capture = _CaptureMessages()
     try:
-        _invoke(manifest, job, SimpleNamespace(messages=capture))
+        if schema_snapshot is None:
+            _invoke(manifest, job, SimpleNamespace(messages=capture))
+        else:
+            _invoke(manifest, job, SimpleNamespace(messages=capture), schema_snapshot=schema_snapshot)
     except Exception as exc:
         current = exc
         while current is not None and not isinstance(current, _CapturedRequest):
@@ -405,8 +458,11 @@ def _execute_job(context, state, *, client=None):
     from data_sheets_schema import api_runner
     manifest, job, attempt = context.manifest, context.job, context.attempt
     context.verify()
+    snapshot = _selected_snapshot(manifest, job)
     expected = strict_json(Path(job["expected_request"]).read_text())
-    if render_request(manifest, job) != expected:
+    request = (render_request(manifest, job, schema_snapshot=snapshot) if snapshot is not None
+               else render_request(manifest, job))
+    if request != expected:
         raise ValueError("actual evaluator request differs from registration")
     if expected.get("model") != manifest["model"]["model"] or expected.get("max_tokens") != job["max_tokens"]:
         raise ValueError("request model or output ceiling differs")
@@ -435,8 +491,9 @@ def _execute_job(context, state, *, client=None):
         api_runner.MAX_ATTEMPTS = 1
         api_runner.PHASE_WALL_CLOCK_SECONDS = job["deadline_seconds"]
         messages = _QualityMessages(complete) if job["style"] == "direct_api_quality" else complete
+        options = {'schema_snapshot':snapshot} if snapshot is not None else {}
         result, instrument = _invoke(
-            manifest, job, SimpleNamespace(messages=messages), attempt)
+            manifest, job, SimpleNamespace(messages=messages), attempt, **options)
         if complete.started != 1 or complete.response is None:
             raise ValueError("evaluation lacks a completed independent request")
         if instrument is not None:

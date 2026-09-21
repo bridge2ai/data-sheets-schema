@@ -157,6 +157,34 @@ only the outer launcher. Registration builders may pin additional resources.
             paths.add(canonical_path(job['bundle'], exists=True))
         if job['style'] in NATIVE_STYLES:
             paths.add(canonical_path(job['native_runtime']['executable'], exists=True))
+    paths.update(_fitness_resources(manifest))
+    return paths
+
+
+def _fitness_selection(manifest):
+    from data_sheets_schema.fitness_schema import validate_manifest_selection
+    try:
+        return validate_manifest_selection(manifest)
+    except ValueError as error:
+        raise BudgetStop(str(error)) from error
+
+
+def _fitness_resources(manifest):
+    if _fitness_selection(manifest) is None:
+        return set()
+    from api import fitness_snapshot, slot_instrument
+    from source_pair import fitness_snapshot_paths
+    snapshots, paths = {}, set()
+    for job in manifest['evaluation_jobs']:
+        if job['style'] not in {'fitness','subtype'}:
+            continue
+        key = job['class_name'], job['schema_path'], job['profile']
+        if key not in snapshots:
+            snapshots[key] = fitness_snapshot(job)
+        snapshot = snapshots[key]
+        paths.update(path for path, _ in fitness_snapshot_paths(manifest,job,snapshot))
+        if canonical_digest(job.get('instrument')) != canonical_digest(slot_instrument(job,schema_snapshot=snapshot)):
+            raise BudgetStop('selected fitness instrument differs from captured schema authority')
     return paths
 
 
@@ -320,6 +348,7 @@ def group(job):
 
 
 def verify_manifest(manifest, path, digest):
+    _fitness_selection(manifest)
     if 'audit_drafting' in manifest:
         raise BudgetStop('audit_drafting is audit-only; evaluation cannot select it')
     if 'scientific_contract_transition' in manifest:
@@ -438,6 +467,11 @@ def receipt_for(manifest, manifest_sha256, job):
 
 def verify_dependencies(manifest, manifest_sha256, job):
     """Bind runtime dependencies without changing the registered job payload."""
+    _fitness_selection(manifest)
+    from data_sheets_schema.fitness_schema import validate_selection
+    expected = validate_selection(manifest) if job.get('style') in {'fitness','subtype'} else None
+    if validate_selection(job,style=job.get('style','')) != expected:
+        raise BudgetStop('bound evaluation job changes fitness schema guidance')
     jobs = {row['id']: row for row in manifest['evaluation_jobs']}
     bound = dict(job)
     dependencies = {}
@@ -456,14 +490,21 @@ def verify_dependencies(manifest, manifest_sha256, job):
         previous = _prior(manifest)
         if previous is None:
             raise BudgetStop('subtype requires an explicitly registered prior evaluation')
+        if _fitness_selection(previous) != _fitness_selection(manifest):
+            raise BudgetStop('subtype changes its parent fitness schema guidance')
         prior_sha = manifest['prior_evaluation']['registration_sha256']
         parent = next((row for row in previous['evaluation_jobs'] if row['id'] == job.get('fitness_job_id')), None)
-        fields = ('input', 'input_sha256', 'class_name', 'unit_path', 'slot', 'value_sha256', 'profile', 'schema_path')
+        fields = ('input', 'input_sha256', 'class_name', 'unit_path', 'slot', 'value_sha256', 'profile', 'schema_path',
+                  'fitness_schema_guidance')
         if not parent or parent['style'] != 'fitness' or any(parent.get(k) != job.get(k) for k in fields):
             raise BudgetStop('subtype dependency differs from the registered fitness slot')
         receipt_path, receipt = receipt_for(previous, prior_sha, parent)
         pinned(manifest, str(receipt_path))
         value = read_json(pinned(manifest, parent['output'], receipt['output_sha256']))
+        if expected and any(value.get('instrument',{}).get(key) != job['instrument'].get(key)
+                            or parent['instrument'].get(key) != job['instrument'].get(key)
+                            for key in ('fitness_schema_guidance','schema','specification')):
+            raise BudgetStop('subtype changes the accepted parent fitness instrument')
         if value.get('judgement', {}).get('failure') != 'form':
             raise BudgetStop('subtype applies only to an accepted fitness form failure')
         if job['fitness_result'] != parent['output'] or (job.get('fitness_result_sha256') and

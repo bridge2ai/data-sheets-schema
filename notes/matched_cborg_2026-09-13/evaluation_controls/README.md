@@ -240,3 +240,48 @@ exact-file validation), #2093 (strict responses, bounded cleanup and conditional
 subtype registration), and #2095 (exclusive shared-budget handoff). Historical
 generation controls retain their original default command classifier; evaluation
 passes its own exact-command classifier explicitly.
+
+## Explicit nested schema guidance for fitness
+
+Fresh ordinary or composite registrations can select
+`--fitness-schema-guidance nested_semantics_v1`. The selector is recorded as
+`fitness_schema_guidance` at the manifest level and on fitness jobs only.
+Omission retains the historical fitness/subtype instrument; explicit null,
+unknown values, inconsistent job selectors, and selectors on other styles are
+rejected. Existing semantic, field, quality and grounding requests are unchanged.
+Rating repetitions and the existing top-level empty-value exclusions remain
+unchanged; the selected slot roster follows the accepted schema.
+
+The selected instrument captures complete declared nested slot/class meanings
+independently of the judged value. Invalid structures and empty nested children
+remain in the unchanged value payload for the judge. This differs from strict
+audit-record traversal. A single captured snapshot supplies the selected
+instrument hash and the actual prompt before provider resolution. Schema roots
+come from the accepted generation's pinned schemas, or the accepted Phase4
+`full_schema`/`core_schema` inputs for a composite source. Every captured import
+and profile vocabulary must match that accepted authority and be pinned in the
+new registration. Missing authority is refused before creating a condition.
+
+The selected `specification` is class/profile scoped and includes the complete
+versioned guidance. Its `schema` uses the explicit
+`legacy_shape_with_declared_schema_id_v1` display-role basis; it is not relabeled
+as the historical generation digest. Absolute resource paths remain authority
+bindings, while identical schema/import/profile content has portable selected
+instrument and prompt identities. Historical prompt, digest and cache behavior
+is unchanged when the selector is absent.
+Implementation identity remains bound separately by the registered Python and
+package source pins, including the new helper through the existing complete
+Python source closure. Local implementation paths do not enter the sent guide
+or the portable selected cache identity.
+
+The exact increased request bytes appear in the preparation report and its
+existing cost estimate. No extra paid judgment is added. The $5 evaluation
+attempt cap and shared $400 accounting still govern admission; an offline byte
+estimate does not guarantee context fit or available budget.
+
+Conditional subtype preparation inherits the exact parent selection and
+schema/specification, retaining the accepted fitness reason and value. A legacy
+or mismatched fitness result cannot populate the new subtype cache. Aggregate
+closure preserves the selected version on every form-failure row; it never
+reinterprets historical judgments. Activating this option still requires an
+actually accepted source pair and the normal independent canary reviews.

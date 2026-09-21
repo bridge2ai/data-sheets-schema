@@ -6,6 +6,73 @@ from pathlib import Path
 KIND = 'composite_finalization_v1'
 
 
+def fitness_schema_authority(manifest):
+    """Exact accepted schema roots; selected guidance never guesses new schemas."""
+    from data_sheets_schema.fitness_schema import validate_selection
+    if validate_selection(manifest) is None:
+        return None
+    Stop, _, canonical, read, sha = _tools()
+    if manifest.get('schema_version') == 2:
+        ref = manifest['source_pair']['finalization']['registration']
+        path = canonical(ref['path'], exists=True)
+        if sha(path) != ref['sha256']:
+            raise Stop('selected fitness finalization authority changed')
+        source = read(path)
+        if source.get('kind') != 'd4d_native_finalization':
+            raise Stop('selected fitness requires its accepted finalization schema')
+        paths = {variant: canonical(source['inputs'][variant+'_schema'], exists=True)
+                 for variant in ('full', 'core')}
+    else:
+        ref = manifest['source_generation']
+        path = canonical(ref['registration'], exists=True)
+        if sha(path) != ref['registration_sha256']:
+            raise Stop('selected fitness generation authority changed')
+        source = read(path)
+        paths = {variant: canonical(str(Path(source['repository'])/'src/data_sheets_schema/schema'/name), exists=True)
+                 for variant, name in (('full','data_sheets_schema_all.yaml'),
+                                       ('core','data_sheets_schema_core_all.yaml'))}
+    base = canonical(source['repository'], exists=True)
+    pins = {}
+    for name, identity in source['pinned_files'].items():
+        key = Path(name)
+        key = key if key.is_absolute() else base/key
+        key = str(key.resolve(strict=True))
+        if key in pins and pins[key] != identity:
+            raise Stop('ambiguous accepted fitness schema pin')
+        pins[key] = identity
+    if any(pins.get(str(path)) != sha(path) for path in paths.values()):
+        raise Stop('accepted fitness schema root lacks its exact original pin')
+    return paths, pins, base
+
+
+def fitness_snapshot_paths(manifest, job, snapshot, *, require_pins=True):
+    """Bind the actual captured imports and vocabulary to accepted authority."""
+    Stop, _, _, _, sha = _tools()
+    paths, source_pins, source_root = fitness_schema_authority(manifest)
+    expected = paths[job['variant']]
+    if (job['schema_path'] != str(expected) or snapshot.schema_path != str(expected)
+            or job['class_name'] != ('Dataset' if job['variant']=='full' else 'CoreDataset')):
+        raise Stop('selected fitness schema differs from the accepted full/core authority')
+    captured = []
+    for path, identity in snapshot.sources:
+        path = Path(path).resolve(strict=True)
+        if source_pins.get(str(path)) != identity or sha(path) != identity:
+            raise Stop('selected fitness import closure differs from accepted schema pins')
+        captured.append((path, identity))
+    for path, identity in snapshot.profile_sources:
+        path = Path(path).resolve(strict=True)
+        try:
+            ancestor = source_root/path.relative_to(Path(manifest['repository']))
+        except ValueError:
+            ancestor = path
+        if source_pins.get(str(ancestor.resolve(strict=True))) != identity or sha(path) != identity:
+            raise Stop('selected fitness vocabulary differs from accepted profile pins')
+        captured.append((path, identity))
+    if require_pins and any(manifest['pinned_files'].get(str(path)) != identity for path, identity in captured):
+        raise Stop('selected fitness captured schema/vocabulary closure is not pinned')
+    return captured
+
+
 def _tools():
     # Evaluation controls also support historical direct script entry points.
     from registration import BudgetStop, canonical_digest, canonical_path, read_json, sha
@@ -162,6 +229,8 @@ def validate_roster(manifest):
     Stop, digest, _, read, _ = _tools()
     from prepare_evaluation import slot_inventory
     from registration import group
+    from data_sheets_schema.fitness_schema import validate_manifest_selection
+    selected = validate_manifest_selection(manifest)
     source=manifest['source_pair'];root=Path(manifest['repository'])
     stage=manifest['budget_sequence']['stage'];jobs=manifest['evaluation_jobs']
     subtype=stage=='evaluation_subtype'
@@ -169,10 +238,13 @@ def validate_roster(manifest):
         raise Stop('composite evaluation stage differs from its initial or subtype roster')
     expected_schema={variant:str(root/'src/data_sheets_schema/schema'/name) for variant,name in (
         ('full','data_sheets_schema_all.yaml'),('core','data_sheets_schema_core_all.yaml'))}
+    selected_schema = fitness_schema_authority(manifest)[0] if selected else {}
     for job in jobs:
         if any(job.get(key)!=manifest[key] for key in ('context_path','project','method','profile')):
             raise Stop('evaluation job changes the registered context or dataset identity')
-        if job.get('schema_path') != expected_schema.get(job['variant']):
+        schema = (str(selected_schema[job['variant']]) if selected and job['style'] in {'fitness','subtype'}
+                  else expected_schema.get(job['variant']))
+        if job.get('schema_path') != schema:
             raise Stop('evaluation job changes its complete class schema')
         if job['style']=='grounding' and job.get('bundle')!=source['bundle']['path']:
             raise Stop('grounding job changes the frozen source bundle')
@@ -188,7 +260,7 @@ def validate_roster(manifest):
             raise Stop('subtype evaluation lacks an exact prior registration')
         previous=read(prior['registration'])
         for key in ('source_pair','context_path','project','method','profile','model','provider_base_url',
-                    'provider_context_policy','provider_transport','rubric_dir','prompts_dir'):
+                    'provider_context_policy','provider_transport','rubric_dir','prompts_dir','fitness_schema_guidance'):
             if digest(previous.get(key))!=digest(manifest.get(key)):
                 raise Stop('subtype successor changes comparison identity '+key)
         return
@@ -202,7 +274,10 @@ def validate_roster(manifest):
         inventory=slot_inventory(source['artifacts'][variant]['path'],
             'Dataset' if variant=='full' else 'CoreDataset',expected_schema[variant])
         for style in ('grounding','fitness'):
-            for index,row in enumerate(inventory['included']):
+            selected_inventory = (slot_inventory(source['artifacts'][variant]['path'],
+                'Dataset' if variant=='full' else 'CoreDataset',selected_schema[variant])
+                if selected and style=='fitness' else inventory)
+            for index,row in enumerate(selected_inventory['included']):
                 expected.append((variant,style,None,1,row['unit_path'],row['slot'],row['value_sha256'],index==0))
     actual=[(j['variant'],j['style'],j.get('rubric'),j['rating'],j.get('unit_path'),j.get('slot'),j.get('value_sha256'),j['canary']) for j in jobs]
     from collections import Counter
