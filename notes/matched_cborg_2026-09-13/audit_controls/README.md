@@ -287,8 +287,9 @@ types, verdict vocabulary and evidence rules in the persistent instruction
 alongside stage and recovery controls. It adds no dataset-specific guidance.
 
 The original instruction, source bytes, scientific instrument and terminal
-validator stay unchanged. Omission preserves historical rendering and pin
-closure. The selector is audit-only; generation, Phase 4 and evaluations reject
+validator stay unchanged. Omission preserves historical rendering and leaves the
+optional runtime helper outside the required pin closure. The selector is
+audit-only; generation, Phase 4 and evaluations reject
 its presence, including null, and successor preparation does not inherit it as
 an active setting. Prior registrations remain pinned as historical evidence.
 The option is compatible with bounded context recovery and staged audit output.
