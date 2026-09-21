@@ -11,6 +11,41 @@ from audit_controls.test_stall_policy import manifest
 from audit_controls.test_transport import certificates
 
 
+@pytest.mark.parametrize('bypass', [False, True])
+@pytest.mark.parametrize('mismatch', [False, True])
+def test_actual_bounded_clients_satisfy_proxy_context_policy(tmp_path, bypass, mismatch):
+    """Exercise the factory-to-proxy boundary that the selection mocks miss (#2162)."""
+    from budgeted_cborg import BudgetStop, Ledger, provider_context_headers
+    from native_controls.native_proxy import NativeProxy
+    from native_controls.test_native_proxy import PRICES
+
+    selected = manifest(provider_base_url='https://api.cborg.lbl.gov',
+        native_upstream_read_timeout_seconds=1200,
+        **({'provider_context_policy': 'headroom_bypass_v1'} if bypass else {}))
+    sdk, upstream = transport.provider_clients(selected, 'synthetic-key')
+    headers = provider_context_headers(selected)
+    if mismatch:
+        headers = {} if bypass else {'x-headroom-bypass': 'true'}
+    ledger = Ledger(tmp_path / 'ledger.json', manifest_sha256='offline', attempt_cap=40)
+    try:
+        def build():
+            return NativeProxy(sdk=sdk, upstream=upstream, ledger=ledger, attempt='offline',
+                evidence=tmp_path / 'requests', model='synthetic-model', prices=PRICES,
+                verify=lambda: None, provider_key='synthetic-key', base_url=selected['provider_base_url'],
+                request_headers=headers, upstream_read_timeout_seconds=1200,
+                stall_policy={'count_attempts': 3, 'max_stall_debits': 6})
+        if mismatch:
+            with pytest.raises(BudgetStop, match='context policies differ'):
+                build()
+        else:
+            proxy = build()
+            assert proxy.request_headers == sdk.default_headers == headers
+            assert proxy.server is None and proxy.thread is None
+    finally:
+        sdk.close()
+        upstream.close()
+
+
 def test_policy_selects_both_bounded_clients_with_verified_configuration(certificates, monkeypatch):
     from audit_controls import bounded_stream, bounded_transport
     tls, ca, _, _ = certificates

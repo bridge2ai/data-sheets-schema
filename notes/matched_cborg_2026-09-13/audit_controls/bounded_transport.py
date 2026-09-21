@@ -97,6 +97,11 @@ class BoundedCountClient:
         self._active = set()
         self._closed = False
 
+    @property
+    def default_headers(self):
+        """Expose the worker's context policy to the proxy's SDK check (#2162)."""
+        return dict(self._config['default_headers'])
+
     def count_tokens(self, *, timeout=None, **fields):
         bound = self.timeout_seconds if timeout is None else min(self.timeout_seconds, _positive_seconds(timeout))
         deadline = time.monotonic() + bound

@@ -75,6 +75,11 @@ def test_real_worker_returns_typed_count_and_registered_headers(children):
     with server() as (url, seen):
         client = bounded.BoundedCountClient(api_key='fake-key', base_url=url,
             default_headers={'x-headroom-bypass': 'true'}, timeout_seconds=5)
+        # SDK-facing inspection must describe the actual wire policy without
+        # allowing a caller to mutate the worker's registered configuration.
+        headers = client.default_headers
+        assert headers == {'x-headroom-bypass': 'true'}
+        headers.clear()
         try:
             assert client.messages.count_tokens(**FIELDS).input_tokens == 100
         finally:
