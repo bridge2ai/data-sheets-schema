@@ -320,6 +320,8 @@ def group(job):
 
 
 def verify_manifest(manifest, path, digest):
+    if 'audit_contract_context' in manifest:
+        raise BudgetStop('audit_contract_context is audit-only; evaluation cannot select it')
     if sha(path) != digest:
         raise BudgetStop('evaluation registration changed')
     if manifest.get('kind') != 'd4d_evaluation_registration' or type(manifest.get('schema_version')) is not int or manifest['schema_version'] not in (1, 2):

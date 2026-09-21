@@ -10,6 +10,9 @@ from .registration import canonical_path, pinned, native_stall_policy, native_up
 
 
 def transport_paths(manifest):
+    if 'audit_contract_context' in manifest:
+        from .contract_context import enabled
+        enabled(manifest)
     native_upstream_read_timeout(manifest)
     native_stall_policy(manifest)
     endpoint = manifest.get('provider_base_url')

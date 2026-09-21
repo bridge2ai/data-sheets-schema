@@ -25,3 +25,36 @@ The [retained offline probe](native_stall_policy_probe_2026-09-21.json) records 
 The previous audit10 registration remains unlaunched and frozen. The maintainer approved a new condition with three token-count tries, at most six authorized full-reservation stall debits, a $40 attempt cap, a 20-minute read limit, a one-hour native SDK timeout and a six-hour job deadline. The shared allocation remains $400. A fresh registration must bind the reviewed merged code and those limits before launch. Scientific acceptance is still pending, and Kids First remains waiting.
 
 The policy's [transport controls](matched_cborg_2026-09-13/audit_controls/README.md) use cancellable I/O workers to enforce a total deadline for each count and for receiving paid-response headers. The parent retains all accounting and evidence ownership. Local worker failures are terminal and cannot spend the provider-stall allowance. Slow-response, cleanup and error-classification tests run against synthetic local services. These checks establish the local controls; they do not establish real-provider reliability or accept a scientific result.
+
+## First registered execution with the retry policy
+
+The fresh audit10 retry condition stopped during setup before admitting a provider
+request. The bounded token-count client did not expose its configured headers to
+the native context-policy agreement check. [PR #2163](https://github.com/bridge2ai/data-sheets-schema/pull/2163)
+fixed that interface; the stopped audit10 condition remains consumed and preserved
+with zero additional cost. It is distinct from the older unlaunched audit10
+registration described above.
+
+Audit11 used the approved settings and merged code `310f2854f`. Its first paid
+request timed out and was counted at its full $2.54427500 reservation under the
+authorized policy. The same native session retried and continued. All 30 requests
+settled, and ten output parts assembled into a complete audit. The terminal
+validator then rejected the output contract: invalid verdict labels, string-valued
+document attributions, invalid removal identities and an assertion at an absent
+core path. The controller correctly stopped; assembly is not scientific acceptance.
+
+Audit11 accounted for $12.37687525: $9.83260025 in ordinary settlements and the
+$2.54427500 policy debit. The latter's actual provider fee remains unknown, with
+no reserve released. Shared accounting is now $170.61226875, leaving $229.38773125
+of the $400 allocation with no unresolved reservation. Independent terminal
+reviews confirmed clean shutdown, settled accounting and preserved ownership.
+
+[Issue #2164](https://github.com/bridge2ai/data-sheets-schema/issues/2164) adds an
+explicitly registered persistent copy of the existing audit contract. The correct
+protocol was already delivered initially and was recoverable; this improves its
+availability after compaction without claiming compaction caused every error.
+[Issue #2165](https://github.com/bridge2ai/data-sheets-schema/issues/2165) separately
+tracks the inability to selectively remove some anonymous structured relationships
+while preserving supported peers. No subsequent canary is launched until that
+limitation is resolved and the new condition is independently reviewed. The
+rejected audit, its validation and all historical results remain unchanged.

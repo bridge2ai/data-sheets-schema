@@ -31,10 +31,13 @@ def render_system(manifest):
             'write bounded registered audit parts, assemble them once, and invoke\nits exact validator once.')
         if 'context_recovery' not in manifest:
             system += '\n' + instruction(manifest)
-    if "context_recovery" not in manifest:
-        return system
-    from native_context_control import render_system as recovery_system
-    return recovery_system(manifest, system)
+    if "context_recovery" in manifest:
+        from native_context_control import render_system as recovery_system
+        system = recovery_system(manifest, system)
+    if 'audit_contract_context' in manifest:
+        from .contract_context import render_system as contract_system
+        system = contract_system(manifest, system)
+    return system
 
 
 def save(path, value):
@@ -50,13 +53,15 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
             native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
             staged_audit_output=False, native_upstream_read_timeout_seconds=None,
-            native_stall_policy=None):
+            native_stall_policy=None, persistent_audit_contract=False):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
         raise BudgetStop("context recovery requires an explicit boolean")
     if type(staged_audit_output) is not bool:
         raise BudgetStop('staged audit output requires an explicit boolean')
+    if type(persistent_audit_contract) is not bool:
+        raise BudgetStop('persistent audit contract requires an explicit boolean')
     if native_api_force_idle_timeout is not None:
         validate_native_idle_timeout({'native_runtime': {
             'api_force_idle_timeout': native_api_force_idle_timeout,
@@ -149,6 +154,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'pinned_files': {}}
     manifest.update(claim_selection)
     manifest.update(upstream_selection)
+    if persistent_audit_contract:
+        from .contract_context import select
+        select(manifest, persistent_audit_contract)
     if staged_audit_output:
         from .output_parts import select
         select(manifest, path, staged_audit_output)
@@ -194,6 +202,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         **({'native_stall_policy': {k: v for k, v in manifest['native_stall_policy'].items() if k != 'authorization'}}
            if 'native_stall_policy' in manifest else {}),
         'provider_base_url': manifest['provider_base_url'],
+        **({'audit_contract_context': manifest['audit_contract_context']}
+           if 'audit_contract_context' in manifest else {}),
         'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
         'provider_calls': 0, 'scientific_acceptance': False})
     return path
@@ -226,6 +236,8 @@ def main():
         help='require exact-byte durable ownership evidence before this new condition admits spending')
     parser.add_argument('--staged-audit-output', action='store_true',
         help='write bounded raw UTF-8 audit parts and assemble their exact bytes before the terminal validator')
+    parser.add_argument('--persistent-audit-contract', action='store_true',
+        help='retain exact registered protocol and shared Phase 3 contract text in the audit system prompt')
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)
