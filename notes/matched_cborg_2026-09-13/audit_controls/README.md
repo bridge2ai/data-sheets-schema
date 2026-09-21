@@ -276,6 +276,29 @@ this feature does not reject those requests or claim every request carries the
 registered system. Actual scientific-session delivery and final scientific quality
 still require independent review.
 
+### Persistent audit contract
+
+For a fresh audit condition, `--persistent-audit-contract` registers
+`audit_contract_context: {"kind": "persistent_protocol_v1"}`
+([#2164](https://github.com/bridge2ai/data-sheets-schema/issues/2164)). The native
+system message retains the exact registered evidence protocol and the unchanged
+renderer-14 audit contract, including its JSON example. This keeps their field
+types, verdict vocabulary and evidence rules in the persistent instruction
+alongside stage and recovery controls. It adds no dataset-specific guidance.
+
+The original instruction, source bytes, scientific instrument and terminal
+validator stay unchanged. Omission preserves historical rendering and pin
+closure. The selector is audit-only; generation, Phase 4 and evaluations reject
+its presence, including null, and successor preparation does not inherit it as
+an active setting. Prior registrations remain pinned as historical evidence.
+The option is compatible with bounded context recovery and staged audit output.
+
+This is a delivery change, not proof of successful model compliance after
+compaction. Audit11 assembled its output but failed the existing contract check;
+its output and validation are preserved. A new registration and independent
+review are required before another attempt. The option neither repairs rejected
+outputs nor changes how anonymous list removals are validated.
+
 ### Bounded native audit output
 
 For a fresh condition, `--staged-audit-output` selects the registered

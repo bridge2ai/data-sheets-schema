@@ -20,6 +20,8 @@ def sha(path):
 
 
 def verify(manifest, path, expected_sha):
+    if "audit_contract_context" in manifest:
+        raise BudgetStop("audit_contract_context is audit-only; generation cannot select it")
     if "native_upstream_read_timeout_seconds" in manifest:
         raise BudgetStop("native_upstream_read_timeout_seconds is audit-only; generation cannot select it")
     if "native_stall_policy" in manifest:

@@ -605,6 +605,11 @@ def execute_job(context, *, client=None, upstream=None, protocol=None):
 
 def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     manifest, job, attempt = context.manifest, context.job, context.attempt
+    if 'audit_contract_context' in manifest:
+        if protocol is not None:
+            raise BudgetStop('audit_contract_context is restricted to the native audit controller')
+        from .contract_context import enabled
+        enabled(manifest)
     upstream_timeout = native_upstream_read_timeout(manifest)
     if upstream_timeout is not None and protocol is not None:
         raise BudgetStop('upstream read timeout is restricted to the native audit controller')

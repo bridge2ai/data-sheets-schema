@@ -103,6 +103,8 @@ def validate_budget_identity(manifest,accepted):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
+    if 'audit_contract_context' in manifest:
+        raise BudgetStop('audit_contract_context is audit-only; Phase 4 cannot select it')
     if 'audit_output' in manifest:
         raise BudgetStop('audit staged output cannot become a Phase 4 output mode')
     if (manifest.get('kind') != KIND or type(manifest.get('schema_version')) is not int or

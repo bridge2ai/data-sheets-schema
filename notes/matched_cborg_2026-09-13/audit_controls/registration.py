@@ -234,6 +234,8 @@ def implementation_paths(manifest):
     paths.update(HERE.glob('*.py'))
     if 'audit_output' not in manifest:
         paths.discard(HERE / 'output_parts.py')
+    if 'audit_contract_context' not in manifest:
+        paths.discard(HERE / 'contract_context.py')
     paths.update(CONTROLS.glob('*.py'))
     paths.update(BASE / name for name in ('budgeted_cborg.py', 'run_api_canary.py', 'prepare_registration.py'))
     paths.update(repository / name for name in ('pyproject.toml', 'poetry.lock'))
@@ -316,6 +318,9 @@ def validate_registration(path):
     if (manifest.get('kind') != 'd4d_native_audit_continuation' or type(manifest.get('schema_version')) is not int or manifest.get('schema_version') != 1 or
             manifest.get('protocol_version') != 3 or manifest.get('render_version') != 14):
         raise BudgetStop('unsupported native audit-continuation contract')
+    if 'audit_contract_context' in manifest:
+        from .contract_context import enabled
+        enabled(manifest)
     from .transport import verified_context
     verified_context(manifest)
     verify(manifest, path, sha(path))
