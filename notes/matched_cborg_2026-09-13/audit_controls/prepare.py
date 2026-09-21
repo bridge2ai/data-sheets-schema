@@ -12,7 +12,7 @@ from .registration import (BudgetStop, canonical_path, inspect_parent,
     native_stall_policy as validate_stall_policy, native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .registration import (TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND,
-                           CLAIM_CLARIFICATION_TRANSITION_KIND)
+                           CLAIM_CLARIFICATION_TRANSITION_KIND, DRAFT_GRAMMAR_TRANSITION_KIND)
 from .contract import render_instruction
 
 SYSTEM = """You are the native auditor for a registered D4D Phase 3 continuation.
@@ -38,6 +38,16 @@ def render_system(manifest):
             'write bounded registered audit parts, assemble them once, and invoke\nits exact validator once.')
         if 'context_recovery' not in manifest:
             system += '\n' + instruction(manifest)
+    if 'audit_drafting' in manifest:
+        from .draft_output import instruction
+        system = system.replace('write the one registered audit JSON, and invoke\nits exact validator once.',
+            'write at most two immutable registered draft sets, check grammar, seal once,\n'
+            'and invoke the exact terminal source validator once.')
+        system = system.replace('A failed check\nends the attempt; do not repair or retry.',
+            'Only a failed first grammar check permits the second registered draft.\n'
+            'Any failed terminal source check ends the attempt; do not repair or retry.')
+        if 'context_recovery' not in manifest:
+            system += '\n' + instruction(manifest)
     if "context_recovery" in manifest:
         from native_context_control import render_system as recovery_system
         system = recovery_system(manifest, system)
@@ -61,7 +71,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
             staged_audit_output=False, native_upstream_read_timeout_seconds=None,
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
-            source_metadata_evidence=False, clarify_source_claims=False):
+            source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -76,6 +86,11 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         raise BudgetStop('source metadata evidence requires an explicit boolean')
     if type(clarify_source_claims) is not bool:
         raise BudgetStop('source claim clarification requires an explicit boolean')
+    if type(draft_audit_grammar) is not bool:
+        raise BudgetStop('draft audit grammar requires an explicit boolean')
+    if draft_audit_grammar and (staged_audit_output or upgrade_evidence_protocol or
+                               source_metadata_evidence or clarify_source_claims):
+        raise BudgetStop('draft audit grammar selects its own protocol and output mode exclusively')
     if source_metadata_evidence and upgrade_evidence_protocol:
         raise BudgetStop('source metadata evidence and the protocol-4 upgrade are mutually exclusive')
     if clarify_source_claims and (source_metadata_evidence or upgrade_evidence_protocol):
@@ -146,6 +161,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v4.md')
     if source_metadata_evidence or clarify_source_claims:
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v5.md')
+    if draft_audit_grammar:
+        inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v6.md')
     save(inputs['source_inventory'], source_review.inventory(Path(inputs['original_full']).read_text(), 'original_full'))
     attempt = destination / 'attempts' / job_id
     job = {'id': job_id, 'attempt_dir': str(attempt), 'output_dir': str(attempt / 'output'),
@@ -185,6 +202,11 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if clarify_source_claims:
         manifest.update(protocol_version=5, render_version=17)
         manifest[TRANSITION] = {'kind': CLAIM_CLARIFICATION_TRANSITION_KIND}
+    if draft_audit_grammar:
+        manifest.update(protocol_version=6, render_version=18)
+        manifest[TRANSITION] = {'kind': DRAFT_GRAMMAR_TRANSITION_KIND}
+        from .draft_output import specification
+        manifest['audit_drafting'] = specification(manifest, path)
     if persistent_audit_contract:
         from .contract_context import select
         select(manifest, persistent_audit_contract)
@@ -235,6 +257,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'provider_base_url': manifest['provider_base_url'],
         **({'audit_contract_context': manifest['audit_contract_context']}
            if 'audit_contract_context' in manifest else {}),
+        **({'audit_drafting': manifest['audit_drafting']} if 'audit_drafting' in manifest else {}),
         **({TRANSITION: manifest[TRANSITION], 'protocol_version': manifest['protocol_version'],
             'render_version': manifest['render_version'],
             'parent_render_version': 14, 'scientific_instrument_unchanged': False}
@@ -280,6 +303,8 @@ def main():
         help='explicitly select protocol 5/renderer 16 with bounded source-manifest provenance evidence')
     scientific.add_argument('--clarify-source-claims', action='store_true',
         help='explicitly select protocol 5/renderer 17 with clarified source-claim review instructions')
+    scientific.add_argument('--draft-audit-grammar', action='store_true',
+        help='select protocol 6/renderer 18 and at most two immutable grammar drafts before terminal validation')
     parser.add_argument('--repository', default=str(Path.cwd()))
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)

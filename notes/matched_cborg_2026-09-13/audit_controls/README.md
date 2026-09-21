@@ -147,6 +147,38 @@ a subsequent request: the controller must also observe the typed successful tool
 result. The audit cannot be repaired after validation starts. An unknown provider
 charge retains its reservation and stops the attempt.
 
+### Bounded grammar drafts (protocol 6 / renderer 18)
+
+For a new audit condition, `--draft-audit-grammar` explicitly selects protocol 6,
+renderer 18 and an `audit_drafting` block using `bounded_draft_grammar_v1` (#2178). It is mutually
+exclusive with the earlier scientific selectors and `--staged-audit-output`.
+Omission preserves their behavior and instructions. This option does not alter
+any rejected audit or make the original generation a renderer-18 run.
+
+The native agent writes a complete audit into a contiguous prefix of at most 64
+registered UTF-8 parts, each no larger than 32,768 bytes. Its exact grammar command
+preserves those bytes and checks the draft's JSON shapes, enums and internal
+declaration/link consistency. The pure parser receives only the draft bytes;
+ordinary registration and pin verification may read registered inputs. No source
+content, expected scientific judgments or independent review findings enter the
+grammar feedback. The report contains at most twenty fixed error codes and
+structural draft locations. A grammar pass proves neither coverage nor support.
+
+Only a completed first grammar check with a negative grammar verdict permits a
+second complete draft. Both drafts and every part remain immutable. A failed
+helper, missing typed result, incomplete preservation witness, changed evidence
+or second negative grammar verdict stops the attempt. The mode permits one
+format correction, never unlimited attempts or a budget reset.
+
+The first grammar-passing draft must be sealed next. Sealing copies its exact
+concatenated bytes once to `audit.json`; it does not normalize or repair content.
+The only following tool is the existing single terminal source/evidence validator.
+Every failed source check remains terminal, and independent scientific review
+remains mandatory even after both checks pass. Keep all draft/check/seal evidence
+in the accepted audit's closure before preparing Phase 4. Phase 4 inherits the
+accepted scientific instrument, but generation, Phase 4 and evaluations reject
+the audit-only drafting selector. Historical conditions remain unchanged.
+
 The sequence lock is derived from the immutable parent ledger location. Copying a
 registration or a reconciliation receipt cannot create a second budget lineage.
 Each successor must carry the settled current tip. The shared budget is not reset.

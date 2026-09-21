@@ -108,7 +108,7 @@ def source_metadata_arguments(manifest, inputs):
     """
     from .registration import scientific_contract
     scientific_contract(manifest)
-    if manifest['protocol_version'] != 5:
+    if manifest['protocol_version'] < 5:
         return {}
     parent_path = _path(manifest['parent']['registration'])
     raw = parent_path.read_bytes()
@@ -186,6 +186,9 @@ def render_instruction(manifest: dict) -> str:
     if 'audit_output' in manifest:
         from .output_parts import instruction
         output_instruction = instruction(manifest) + '\n'
+    if 'audit_drafting' in manifest:
+        from .draft_output import instruction
+        output_instruction = instruction(manifest) + '\n'
     instruction = (
         "# Registered native Phase 3 audit continuation\n\n"
         "This is a new audit invocation using an unchanged stopped run's frozen full/core pair. "
@@ -243,6 +246,9 @@ def validate_audit(manifest: dict) -> dict:
         scientific_contract(manifest)
         if 'audit_output' in manifest:
             from .output_parts import validate_output
+            validate_output(manifest)
+        if 'audit_drafting' in manifest:
+            from .draft_output import validate_output
             validate_output(manifest)
         audit = _path(manifest["job"]["audit_path"])
         raw = audit.read_bytes()

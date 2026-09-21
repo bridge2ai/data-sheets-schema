@@ -29,6 +29,7 @@ TRANSITION = 'scientific_contract_transition'
 TRANSITION_KIND = 'frozen_pair_protocol_v4'
 SOURCE_METADATA_TRANSITION_KIND = 'frozen_pair_protocol_v5'
 CLAIM_CLARIFICATION_TRANSITION_KIND = 'frozen_pair_claim_clarification_v1'
+DRAFT_GRAMMAR_TRANSITION_KIND = 'frozen_pair_draft_grammar_v1'
 VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
 
 
@@ -38,7 +39,8 @@ def scientific_contract(manifest):
     pair = (manifest.get('protocol_version'), manifest.get('render_version'))
     transitions = {(4, 15): {'kind': TRANSITION_KIND},
                    (5, 16): {'kind': SOURCE_METADATA_TRANSITION_KIND},
-                   (5, 17): {'kind': CLAIM_CLARIFICATION_TRANSITION_KIND}}
+                   (5, 17): {'kind': CLAIM_CLARIFICATION_TRANSITION_KIND},
+                   (6, 18): {'kind': DRAFT_GRAMMAR_TRANSITION_KIND}}
     if (any(type(value) is not int for value in pair) or
             (pair not in transitions if upgraded else pair != (3, 14)) or
             (upgraded and (type(manifest[TRANSITION]) is not dict or
@@ -46,7 +48,8 @@ def scientific_contract(manifest):
         raise BudgetStop('unsupported scientific contract transition: require unchanged 3/14 '
                          'or explicit frozen_pair_protocol_v4 with 4/15 or '
                          'frozen_pair_protocol_v5 with 5/16 or '
-                         'frozen_pair_claim_clarification_v1 with 5/17')
+                         'frozen_pair_claim_clarification_v1 with 5/17 or '
+                         'frozen_pair_draft_grammar_v1 with 6/18')
     return upgraded
 
 
@@ -54,7 +57,7 @@ def versioned_scientific_files(manifest):
     """Only an explicit protocol-5 transition changes source-review semantics."""
     scientific_contract(manifest)
     return (VERSIONED_SCIENTIFIC_FILES | {'source_review.py'}
-            if manifest['protocol_version'] == 5 else VERSIONED_SCIENTIFIC_FILES)
+            if manifest['protocol_version'] >= 5 else VERSIONED_SCIENTIFIC_FILES)
 
 
 def sha(path):
@@ -265,8 +268,11 @@ def implementation_paths(manifest):
     paths.update((repository / 'src/data_sheets_schema').rglob('*.json'))
     paths.update(path for path in (repository / 'src/download/prompts').rglob('*') if path.is_file())
     paths.update(HERE.glob('*.py'))
-    if 'audit_output' not in manifest:
+    if 'audit_output' not in manifest and 'audit_drafting' not in manifest:
         paths.discard(HERE / 'output_parts.py')
+    if 'audit_drafting' not in manifest:
+        paths.discard(HERE / 'draft_output.py')
+        paths.discard(HERE / 'draft_history.py')
     if 'audit_contract_context' not in manifest:
         paths.discard(HERE / 'contract_context.py')
     paths.update(CONTROLS.glob('*.py'))
@@ -365,6 +371,10 @@ def verify(manifest, path, expected_sha):
         configuration(manifest, path)
         if os.path.lexists(receipt_paths(manifest)[1]):
             raise BudgetStop('audit assembly failed; no further paid request is permitted')
+    if 'audit_drafting' in manifest:
+        from .draft_output import configuration, verify_open
+        configuration(manifest, path)
+        verify_open(manifest)
 
 
 def validate_registration(path):
@@ -373,6 +383,8 @@ def validate_registration(path):
     if (manifest.get('kind') != 'd4d_native_audit_continuation' or type(manifest.get('schema_version')) is not int or manifest.get('schema_version') != 1):
         raise BudgetStop('unsupported native audit-continuation contract')
     scientific_contract(manifest)
+    if manifest['protocol_version'] == 6 and 'audit_drafting' not in manifest:
+        raise BudgetStop('protocol-6 audit requires its explicit bounded drafting registration')
     if 'audit_contract_context' in manifest:
         from .contract_context import enabled
         enabled(manifest)
@@ -414,6 +426,9 @@ def validate_registration(path):
         raise BudgetStop('audit validator arguments differ from registration')
     if 'audit_output' in manifest:
         from .output_parts import configuration
+        configuration(manifest, path)
+    if 'audit_drafting' in manifest:
+        from .draft_output import configuration
         configuration(manifest, path)
     readable = set(manifest['inputs'].values()) | {job['instruction'], job['system_prompt']}
     if 'context_recovery' in manifest:

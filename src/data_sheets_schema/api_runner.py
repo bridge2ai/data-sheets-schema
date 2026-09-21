@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -1880,10 +1880,41 @@ review or its classifications to manufacture a passing check.
 """
 
 
+DRAFT_GRAMMAR_CONTRACT_V18 = """### Registered audit drafting (renderer v18)
+
+Evidence protocol v6 retains the protocol-v5 scientific checks. Renderer 18
+alone does not authorize drafting tools, another response or a correction.
+Only a native audit with separately registered audit_drafting may submit at
+most two immutable draft sets through its exact registered grammar command.
+The second set is allowed only after the first set's grammar check fails.
+Preserve both sets and all typed Write/check results. Do not overwrite a draft.
+
+The grammar parser checks only strict JSON shapes, declared enums and internal
+declaration/link consistency. It does not read scientific inputs, run the
+evidence/source checker, classify prose or select a correct status or repair.
+The command may run existing read-only registration/pin checks, but only draft
+bytes reach the grammar parser; registered inputs do not supply its feedback.
+A grammar result is not source validation or scientific acceptance. Do not
+change a scientific judgment merely to satisfy a declaration consistency rule.
+
+Seal the first grammar-passing draft as the exact final audit bytes, then run
+the existing single terminal source/evidence validator. A second grammar
+failure or an uncheckable draft stage stops the attempt. No corrections are
+allowed after sealing or after any source/evidence validation starts. The
+terminal-stop rules above still apply to every actual source-review failure;
+the separately registered pure grammar stage does not invoke that review.
+This drafting permission does not apply to API responses, generation, Phase 4
+or evaluation. Without the registered native drafting mode, keep the ordinary
+output and terminal-check workflow. Do not reuse or repair an audit rejected
+under an earlier attempt.
+"""
+
+
 def evidence_phase_contract(phase: str, render_version: int) -> str:
     contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
     if render_version >= 12:
-        contract = contract.replace("protocol v1", "protocol v5" if render_version >= 16 else
+        contract = contract.replace("protocol v1", "protocol v6" if render_version >= 18 else
+                                    "protocol v5" if render_version >= 16 else
                                     "protocol v4" if render_version >= 15 else "protocol v3")
         if phase == "audit":
             contract = contract.replace("with findings and summary", "with findings, summary and source_review")
@@ -1908,6 +1939,8 @@ def evidence_phase_contract(phase: str, render_version: int) -> str:
             contract += "\n\n" + SOURCE_METADATA_CONTRACT_V16
         if render_version >= 17 and phase in {"audit", "reconcile_full", "report", "report_regate"}:
             contract += "\n\n" + CLAIM_CLARIFICATION_CONTRACT_V17
+        if render_version >= 18 and phase == "audit":
+            contract += "\n\n" + DRAFT_GRAMMAR_CONTRACT_V18
         return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 
@@ -4054,6 +4087,7 @@ def sent_text_surfaces() -> dict[str, str]:
     out["source_metadata_contract_v16"] = SOURCE_METADATA_CONTRACT_V16
     out["source_metadata_header_v16"] = SOURCE_METADATA_HEADER_V16
     out["claim_clarification_contract_v17"] = CLAIM_CLARIFICATION_CONTRACT_V17
+    out["draft_grammar_contract_v18"] = DRAFT_GRAMMAR_CONTRACT_V18
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),

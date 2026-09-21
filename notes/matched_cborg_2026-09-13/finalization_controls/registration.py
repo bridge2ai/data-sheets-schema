@@ -23,6 +23,10 @@ def implementation_paths(manifest):
             'audit_output' in read_json(manifest['accepted_audit']['registration']['path'])):
         from audit_controls import output_parts
         paths.add(Path(output_parts.__file__).resolve())
+    if (manifest.get('accepted_audit') and
+            'audit_drafting' in read_json(manifest['accepted_audit']['registration']['path'])):
+        from audit_controls import draft_output, output_parts
+        paths.update({Path(draft_output.__file__).resolve(), Path(output_parts.__file__).resolve()})
     return paths
 
 
@@ -39,6 +43,12 @@ def required_paths(manifest):
         result_ref = manifest['budget_sequence']['audit_origin']['result']
         if sha(result_ref['path']) != result_ref['sha256']:
             raise BudgetStop('accepted staged audit result changed before pinning')
+        paths.update(closure_paths(accepted, manifest['accepted_audit']['registration']['path'], read_json(result_ref['path'])))
+    if 'audit_drafting' in accepted:
+        from audit_controls.draft_output import closure_paths
+        result_ref = manifest['budget_sequence']['audit_origin']['result']
+        if sha(result_ref['path']) != result_ref['sha256']:
+            raise BudgetStop('accepted drafted audit result changed before pinning')
         paths.update(closure_paths(accepted, manifest['accepted_audit']['registration']['path'], read_json(result_ref['path'])))
     paths.update(Path(name) for name in manifest['inputs'].values())
     paths.update(Path(manifest['job'][name]) for name in ('instruction', 'system_prompt'))
@@ -109,7 +119,7 @@ def validate_scientific_identity(manifest, accepted):
         relative=Path('src/data_sheets_schema/anonymous_removals.py')
         if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
             raise BudgetStop('finalization changes the accepted anonymous-removal implementation')
-        if manifest['protocol_version'] == 5:
+        if manifest['protocol_version'] >= 5:
             relative=Path('src/data_sheets_schema/source_metadata.py')
             if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
                 raise BudgetStop('finalization changes the accepted source-metadata implementation')
@@ -121,6 +131,8 @@ def validate_scientific_identity(manifest, accepted):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
+    if 'audit_drafting' in manifest:
+        raise BudgetStop('audit_drafting is audit-only; Phase 4 cannot select it')
     if 'audit_contract_context' in manifest:
         raise BudgetStop('audit_contract_context is audit-only; Phase 4 cannot select it')
     if 'audit_output' in manifest:
