@@ -41,6 +41,68 @@ neither provider keepalive settings nor model requests, and does not make an
 interrupted charge complete. Preserve stopped conditions and register retries
 separately.
 
+A new condition can register a bounded in-attempt stall policy with
+`--native-stall-policy PATH` (#2150). Without it, the first provider stall ends the
+whole attempt, as it always has. The JSON file names the policy kind
+`bounded_in_attempt_v1`, `count_attempts` from 1 to 5, `max_stall_debits` from 0 to
+10, and an `authorization`. The authorization quotes the maintainer's standing
+approval: the exact response, the request it answered, when it was recorded, and
+`authorized_max_stall_debits`, which must equal `max_stall_debits`. It is required
+whenever any debit is allowed and must be `null` when none is. The file is read
+strictly: duplicate keys, a JSON `null` and an unreadable file are refused before the
+destination exists. Its content is copied into the manifest, which the registration
+hash binds; the file itself is not pinned.
+
+The policy does two things. Token counting is repeated up to `count_attempts` tries,
+only after a timeout, a dropped connection or a provider 5xx. A count costs nothing,
+so repeating one carries no charge ambiguity. Each try has a two-minute total deadline, the
+pause between tries is a few seconds and ends at once when admission closes, and no
+retry starts or writes evidence after that. A paid request that stalls after it was
+sent, and before any response byte reaches the native client, is counted at its whole
+reservation, and the ledger row says so: `settlement_basis` is
+`registered_stall_policy_full_reservation_debit`, the provider charge is unconfirmed
+and unknown, and nothing is released. The reservation is computed from the counted
+input at the higher price plus the whole output ceiling, so it bounds the fee by
+construction; a debited row cannot be checked against actual usage, because none
+arrives. The proxy then answers the client with a retryable status, and the client's
+own retry continues the same session. The ledger row carries the stall evidence,
+`stall.json` beside the request repeats it and records that a reply was attempted,
+and the terminal result lists the debited requests under `stall_debited_requests`.
+
+A stall counts only when the exchange failed after the request was sent: a provider
+5xx, a read or write timeout or error, or a malformed or dropped response. A provider
+status below 500 is never a stall, whatever fails afterwards. A connection that was
+never made sent nothing, so it stops the attempt as before instead of spending the
+allowance during an outage. A failure after response bytes were relayed, a closed
+admission and every budget refusal also stop the attempt as before. So does the stall
+after the registered maximum, which leaves its reservation pending for the
+maintainer's request-specific decision.
+
+Debits need the proxy to see a stall before the client gives up. The native SDK
+timeout must therefore cover the pre-header deadline, the bounded
+token-count tries with their pauses and a minute of margin,
+and the native fetch idle timer must be registered off. With three count tries that
+is 455 seconds above the read bound. The policy is audit-only: generation, Phase 4
+and the evaluations refuse it. `native_controls/probe_native_stall.py` drives the
+real pinned executable against a scripted upstream that stalls, with no provider
+contact, and shows the client retrying to completion.
+
+Under this policy, counting and paid streaming use separate killable I/O workers
+(#2159). Counting has one total deadline, including process startup, DNS, TLS and
+the complete response. A paid request has one deadline until response headers,
+equal to the selected read limit plus the 20-second connect allowance. This also
+bounds pooling, writing and partial headers. The worker is killed and reaped before
+the parent retries or debits a timed-out request. Expiry before a send witness
+stops without a stall debit. After headers, the selected read-inactivity limit
+applies; a failure after relay remains terminal. A provider 5xx is classified from
+its status without waiting for an error body.
+
+Workers receive credentials, registered transport settings and exact request
+bytes through anonymous pipes, not command-line arguments, environment variables
+or files. They hold no ledger or evidence state. The parent retains admission,
+accounting and evidence ownership, and cancels the workers during shutdown. The
+existing clients and cleanup order remain unchanged when the policy is absent.
+
 The native client's fetch layer has a separate idle timer. A new condition can
 select `--native-api-force-idle-timeout false` to disable that timer while waiting
 for local-proxy response headers. This requires an explicit bounded

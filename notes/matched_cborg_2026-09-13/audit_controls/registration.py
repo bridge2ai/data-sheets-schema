@@ -22,7 +22,8 @@ for directory in (BASE, CONTROLS):
     if str(directory) not in sys.path:
         sys.path.insert(0, str(directory))
 
-from budgeted_cborg import BudgetStop, Ledger, attempt_identity
+from budgeted_cborg import (BudgetStop, LEGACY_UPSTREAM_READ_SECONDS, Ledger, POLICY_COUNT_PAUSE_SECONDS,
+                            POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS, attempt_identity)
 
 
 def sha(path):
@@ -368,6 +369,7 @@ def validate_registration(path):
         raise BudgetStop('audit deadline must be positive whole seconds')
     native_api_timeout(manifest)
     native_api_force_idle_timeout(manifest)
+    native_stall_policy(manifest)
     budget = manifest['budget']
     previous = read_json(budget['continuation']['checkpoint'])
     costs = [Decimal(str(row.get('cost_usd', 'NaN'))) for row in previous['requests']]
@@ -427,6 +429,62 @@ def native_upstream_read_timeout(manifest):
     if outer is None or value * 1000 >= outer:
         raise BudgetStop('upstream read timeout requires a larger explicit native SDK timeout within the job deadline')
     return value
+
+
+def stall_policy_minimum_api_timeout_ms(manifest, count_attempts):
+    """The least native SDK timeout under which the proxy, not the child,
+    sees a stall first (#2152). The child's timer also covers what the proxy
+    does before it sends: the bounded token-count tries with their pauses and
+    the connect allowance. One minute of margin covers the reply itself."""
+    bound = native_upstream_read_timeout(manifest) or LEGACY_UPSTREAM_READ_SECONDS
+    before_send = count_attempts * (POLICY_COUNT_TRY_SECONDS + POLICY_COUNT_PAUSE_SECONDS) + UPSTREAM_CONNECT_SECONDS
+    return (bound + before_send + 60) * 1000
+
+
+def native_stall_policy(manifest):
+    """Audit-only bounded in-attempt stall policy; absence preserves the
+    historical stop on the first stall (#2150).
+
+    A paid request that stalls after it was sent and before any byte reaches
+    the child is counted at its whole reservation, with the provider fee left
+    unknown, and the child's own retry continues the session. That debit is
+    the maintainer's to authorize, so a policy that allows any must quote the
+    authorization and the number of debits it covers. The proxy has to see
+    the stall before the child gives up, so the native SDK timeout must cover
+    the total pre-header bound in force plus the bounded token-count tries,
+    and the native fetch idle timer must be registered off. Under the policy,
+    killable I/O workers enforce these total bounds (#2159)."""
+    key = 'native_stall_policy'
+    if key not in manifest:
+        return None
+    value = manifest[key]
+    if (manifest.get('kind') != 'd4d_native_audit_continuation' or not isinstance(value, dict) or
+            set(value) != {'kind', 'count_attempts', 'max_stall_debits', 'authorization'} or
+            value['kind'] != 'bounded_in_attempt_v1' or
+            type(value['count_attempts']) is not int or not 1 <= value['count_attempts'] <= 5 or
+            type(value['max_stall_debits']) is not int or not 0 <= value['max_stall_debits'] <= 10):
+        raise BudgetStop('native stall policy is audit-only: bounded_in_attempt_v1, count_attempts 1-5, max_stall_debits 0-10')
+    if not isinstance(manifest.get('native_runtime'), dict) or not isinstance(manifest.get('job'), dict):
+        raise BudgetStop('native stall policy needs the registered native runtime and job')
+    authorization = value['authorization']
+    if value['max_stall_debits'] == 0:
+        if authorization is not None:
+            raise BudgetStop('a stall policy without debits carries no debit authorization')
+    else:
+        texts = ('exact_response', 'quoted_request', 'recorded_at')
+        if (not isinstance(authorization, dict) or
+                set(authorization) != {*texts, 'authorized_max_stall_debits'} or
+                any(not isinstance(authorization[name], str) or not authorization[name].strip() for name in texts) or
+                type(authorization['authorized_max_stall_debits']) is not int or
+                authorization['authorized_max_stall_debits'] != value['max_stall_debits']):
+            raise BudgetStop('stall debits need the maintainer\'s quoted standing authorization for exactly this many debits')
+        outer = native_api_timeout(manifest)
+        if outer is None or outer < stall_policy_minimum_api_timeout_ms(manifest, value['count_attempts']):
+            raise BudgetStop('stall debits need a native SDK timeout covering the upstream read bound, '
+                             'the token-count tries and the connect allowance')
+        if native_api_force_idle_timeout(manifest) is not False:
+            raise BudgetStop('stall debits need the native fetch idle timer registered off')
+    return {'count_attempts': value['count_attempts'], 'max_stall_debits': value['max_stall_debits']}
 
 
 def native_api_force_idle_timeout(manifest):

@@ -19,14 +19,15 @@ from types import SimpleNamespace
 
 BASE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE / 'native_controls'))
-from budgeted_cborg import (BudgetStop, attempt_identity, now,
+from budgeted_cborg import (BudgetStop, STALL_DEBIT_BASIS, attempt_identity, now,
     provider_context_headers, write_new)
 from native_command_policy import _simple_command, _literal_rule, permission_arguments
 from native_control import CONTRACT, check_control_history, load_native_events
 from native_file_policy import FileAccess
 from native_proxy import NativeProxy
 from run_native_canary import execute_child
-from .registration import native_api_force_idle_timeout, native_api_timeout, native_upstream_read_timeout, sha, strict_json
+from .registration import (native_api_force_idle_timeout, native_api_timeout, native_stall_policy,
+                           native_upstream_read_timeout, sha, strict_json)
 from .transport import provider_clients
 
 CLI_FLAGS = ['--print', '--safe-mode', '--restricted', '--strict-mcp-config',
@@ -607,6 +608,9 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     upstream_timeout = native_upstream_read_timeout(manifest)
     if upstream_timeout is not None and protocol is not None:
         raise BudgetStop('upstream read timeout is restricted to the native audit controller')
+    stall_policy = native_stall_policy(manifest)
+    if stall_policy is not None and protocol is not None:
+        raise BudgetStop('stall policy is restricted to the native audit controller')
     selected = protocol or sys.modules[__name__]
     policy = selected.build_policy(manifest, context.registration_path)
     executable = verify_runtime(manifest)
@@ -635,7 +639,8 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
             attempt=billing_attempt, evidence=attempt / 'requests', model=manifest['model']['model'],
             prices=manifest['budget']['prices_per_token'], verify=admission, provider_key=key or 'offline-test-key',
             base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest), upstream=upstream,
-            **({'upstream_read_timeout_seconds': upstream_timeout} if upstream_timeout is not None else {}))
+            **({'upstream_read_timeout_seconds': upstream_timeout} if upstream_timeout is not None else {}),
+            **({'stall_policy': stall_policy} if stall_policy is not None else {}))
     except BaseException:
         # Before running() owns cleanup, close only resources created here.
         if owned_client:
@@ -773,6 +778,11 @@ def run_job(registration_path, review_path, *, adapter=None):
             receipt.update(finished_at=now(), requests_admitted=len(rows),
                 settled_cost_usd=str(sum((Decimal(r['cost_usd']) for r in rows if r['status']=='settled'), Decimal(0))),
                 unresolved_requests=[r['id'] for r in rows if r['status']!='settled'])
+            if 'native_stall_policy' in manifest:
+                # Requests the registered policy counted at their whole
+                # reservation; their provider fee is unknown (#2150).
+                receipt['stall_debited_requests'] = [r['id'] for r in rows
+                                                     if r.get('settlement_basis') == STALL_DEBIT_BASIS]
             write_new(attempt/'result.json', receipt)
         if error is not None:
             raise error

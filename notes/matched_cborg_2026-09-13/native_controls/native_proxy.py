@@ -17,7 +17,8 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from budgeted_cborg import BudgetStop, CBORG_ENDPOINTS, CappedMessages, digest, write_new
+from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, CappedMessages, LEGACY_UPSTREAM_READ_SECONDS,
+                            POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS, digest, now, write_new)
 from data_sheets_schema.stream_evidence import CORRELATION_HEADERS, _identifier
 
 
@@ -110,19 +111,68 @@ class Completion:
         return SimpleNamespace(model_dump=lambda **kw: self.message)
 
 
+UNCONFIRMED_CHARGE = "upstream HTTP response did not confirm a completed charge"
+
+
+class UpstreamStall(BudgetStop):
+    """A provider 5xx before any response byte reached the child. It reads as
+    the historical stop reason wherever no stall policy survives it."""
+    def __init__(self, status):
+        super().__init__(UNCONFIRMED_CHARGE)
+        self.status = status
+
+
+#: Failures after the request left: the provider may have begun work. A
+#: connection that was never made (connect or pool errors) sent nothing, so it
+#: is not a stall; it stops the attempt as before instead of burning the
+#: allowance during an outage (#2156).
+POST_SEND_FAILURES = (httpx.ReadTimeout, httpx.WriteTimeout, httpx.ReadError, httpx.WriteError,
+                      httpx.RemoteProtocolError)
+
+
+def stall_evidence(exc, upstream_status=None):
+    """What made a paid request a stall, or None. A provider status below 500
+    is never a stall, whatever failed after it arrived (#2156). Otherwise a
+    provider 5xx, or a failure of the exchange after the request was sent,
+    qualifies. Provider exception text is never kept."""
+    if upstream_status is not None and upstream_status < 500:
+        return None
+    if isinstance(exc, UpstreamStall):
+        return {"kind": "upstream_http_status", "http_status": exc.status}
+    if isinstance(exc, POST_SEND_FAILURES):
+        return {"kind": "upstream_transport", "error_type": type(exc).__name__,
+                **({"http_status": upstream_status} if upstream_status is not None else {})}
+    return None
+
+
+def validated_stall_policy(value):
+    """{count_attempts: 1..5, max_stall_debits: 0..10} or None (#2150)."""
+    if value is None:
+        return None
+    if (not isinstance(value, dict) or set(value) != {"count_attempts", "max_stall_debits"}
+            or type(value["count_attempts"]) is not int or not 1 <= value["count_attempts"] <= 5
+            or type(value["max_stall_debits"]) is not int or not 0 <= value["max_stall_debits"] <= 10):
+        raise BudgetStop("native stall policy needs count_attempts 1-5 and max_stall_debits 0-10")
+    return dict(value)
+
+
 class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
                  provider_key, base_url, upstream=None, request_headers=None,
-                 upstream_read_timeout_seconds=None):
+                 upstream_read_timeout_seconds=None, stall_policy=None, count_pause=None):
         if base_url not in CBORG_ENDPOINTS:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
+        # Opt-in only: None keeps every legacy path byte for byte (#2150).
+        self.stall_policy = validated_stall_policy(stall_policy)
+        self.stalls_survived = 0
         if upstream_read_timeout_seconds is not None and (
                 type(upstream_read_timeout_seconds) is not int or upstream_read_timeout_seconds <= 0):
             raise BudgetStop('native upstream read timeout must be positive whole seconds')
         # Per-request override only: the shared SDK counting client and all
         # legacy callers keep their original timeout. None is never forwarded
         # as a timeout keyword, since HTTPX interprets that as unbounded.
-        self.stream_options = ({'timeout': httpx.Timeout(1800, connect=20, read=upstream_read_timeout_seconds)}
+        self.stream_options = ({'timeout': httpx.Timeout(LEGACY_UPSTREAM_READ_SECONDS, connect=UPSTREAM_CONNECT_SECONDS,
+                                                         read=upstream_read_timeout_seconds)}
                                if upstream_read_timeout_seconds is not None else {})
         if request_headers is not None and not isinstance(request_headers, dict):
             raise BudgetStop("native provider headers must be a mapping")
@@ -135,14 +185,21 @@ class NativeProxy:
         self.token = secrets.token_urlsafe(32)
         self.key, self.base_url = provider_key, base_url
         self.state = threading.Condition(threading.RLock())
+        self.admission_closed = threading.Event()
         self.closed = False
         self.frozen = False
         self.active_handlers = 0
         self.unfinished_handlers = 0
         self.messages = CappedMessages(sdk, ledger=ledger, attempt=attempt,
             evidence=Path(evidence), model=model, prices=prices, verify=verify,
-            mutation_guard=self.mutation_guard)
-        self.upstream = upstream or httpx.Client(timeout=httpx.Timeout(1800, connect=20), follow_redirects=False)
+            mutation_guard=self.mutation_guard,
+            **({"count_attempts": self.stall_policy["count_attempts"],
+                "count_timeout": POLICY_COUNT_TRY_SECONDS,
+                # The pause ends at once when admission closes (#2157).
+                "count_pause": count_pause or (lambda seconds: self.admission_closed.wait(seconds))}
+               if self.stall_policy is not None else {}))
+        self.upstream = upstream or httpx.Client(
+            timeout=httpx.Timeout(LEGACY_UPSTREAM_READ_SECONDS, connect=UPSTREAM_CONNECT_SECONDS), follow_redirects=False)
         self.failure = None
         self.failed = threading.Event()
         self.serial = threading.Lock()
@@ -159,10 +216,40 @@ class NativeProxy:
                 self.failure = str(exc) if isinstance(exc, BudgetStop) else type(exc).__name__
             self.closed = True
             self.failed.set()
+            self.admission_closed.set()
+
+    def survive_stall(self, ticket, folder, evidence):
+        """Count a stalled request at its whole reservation and leave the
+        attempt open, under the registered allowance. Raises when the policy
+        does not cover it; the caller then stops the attempt as before."""
+        if self.stall_policy is None or ticket is None or evidence is None:
+            raise BudgetStop("no registered stall policy covers this failure")
+        with self.state:
+            self.require_writable()
+            self.require_open()
+            index = self.messages.debit_stall(ticket, maximum=self.stall_policy["max_stall_debits"],
+                                              evidence=evidence)
+            self.stalls_survived = index
+            try:
+                # The ledger row already carries this evidence, so a failed
+                # copy beside the request must not undo the survival (#2158).
+                write_new(folder / "stall.json", {"at": now(), "stall_index": index, **evidence,
+                    "settlement": "whole reservation counted; provider charge unconfirmed",
+                    "child_reply_attempted": 503})
+            except Exception:
+                pass
+
+    def stall_reply(self, handler):
+        """Tell the child its request may be repeated. Nothing of the
+        provider's reply is forwarded."""
+        handler.reply(503, {"type":"error", "error":{"type":"api_error",
+            "message":"registered transport stall; the request may be retried"}},
+            headers={"retry-after": "1", "x-should-retry": "true"})
 
     def close_admission(self):
         with self.state:
             self.closed = True
+            self.admission_closed.set()
 
     def require_open(self):
         if self.closed:
@@ -198,11 +285,13 @@ class NativeProxy:
             protocol_version = "HTTP/1.0"
             def log_message(self, *args):
                 pass
-            def reply(self, code, value):
+            def reply(self, code, value, headers=None):
                 raw = json.dumps(value).encode()
                 self.send_response(code)
                 self.send_header("Content-Type", "application/json")
                 self.send_header("Content-Length", str(len(raw)))
+                for name, text in (headers or {}).items():
+                    self.send_header(name, text)
                 self.end_headers()
                 self.wfile.write(raw)
             def do_POST(self):
@@ -221,6 +310,7 @@ class NativeProxy:
             def _post_serially(self):
                 self.connection.settimeout(20)
                 sent = False
+                ticket = folder = upstream_status = None
                 try:
                     supplied = self.headers.get("x-api-key", "")
                     if not supplied:
@@ -247,7 +337,7 @@ class NativeProxy:
                     owner.messages.verify()
                     if path.endswith("/count_tokens"):
                         fields = {k:v for k,v in request.items() if k in {"model", "system", "messages", "tools", "tool_choice", "thinking"}}
-                        count = owner.messages.client.messages.count_tokens(**fields).input_tokens
+                        count = owner.messages.count_tokens(fields)
                         if type(count) is not int or count < 0:
                             raise BudgetStop("invalid native input count")
                         self.reply(200, {"input_tokens":count})
@@ -271,11 +361,19 @@ class NativeProxy:
                     with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers,
                                                **owner.stream_options) as response:
                         owner.capture_json(folder / "http_status.json", response_metadata(response))
+                        upstream_status = response.status_code
                         if response.status_code != 200:
                             owner.capture(folder / "upstream_error.body", b"")
+                            if owner.stall_policy is not None and response.status_code >= 500:
+                                # The status already establishes the policy's
+                                # stall. Draining an arbitrary error body could
+                                # outlive the client's retry window (#2159).
+                                raise UpstreamStall(response.status_code)
                             for chunk in response.iter_bytes():
                                 owner.capture(folder / "upstream_error.body", chunk, append=True)
-                            raise BudgetStop("upstream HTTP response did not confirm a completed charge")
+                            if response.status_code >= 500:
+                                raise UpstreamStall(response.status_code)
+                            raise BudgetStop(UNCONFIRMED_CHARGE)
                         if "text/event-stream" not in response.headers.get("content-type", ""):
                             raise BudgetStop("unregistered upstream response format")
                         self.send_response(200)
@@ -300,6 +398,19 @@ class NativeProxy:
                             self.wfile.write(chunk)
                         self.wfile.flush()
                 except Exception as exc:
+                    if not sent and owner.stall_policy is not None:
+                        # Nothing reached the child, so its own retry can
+                        # continue the session once the charge is counted.
+                        try:
+                            owner.survive_stall(ticket, folder, stall_evidence(exc, upstream_status))
+                        except Exception:
+                            pass
+                        else:
+                            try:
+                                owner.stall_reply(self)
+                            except (OSError, BrokenPipeError):
+                                owner.fail(BudgetStop("native client closed before the registered stall reply"))
+                            return
                     owner.fail(exc)
                     if not sent:
                         try:
@@ -318,6 +429,31 @@ class NativeProxy:
             yield f"http://127.0.0.1:{self.server.server_port}"
         finally:
             self.close_admission()
+            def close_clients():
+                if self.stall_policy is not None:
+                    # Policy clients own killable I/O workers. Cancel counting
+                    # first, independently of streaming cleanup, so shutdown
+                    # does not leave a count alive behind a socket close.
+                    for resource in (self.messages.client, self.upstream):
+                        try:
+                            close = getattr(resource, "close", None)
+                            if close:
+                                close()
+                        except Exception:
+                            pass
+                else:
+                    try:
+                        self.upstream.close()
+                        close = getattr(self.messages.client, "close", None)
+                        if close:
+                            close()
+                    except Exception:
+                        pass
+            closer = threading.Thread(target=close_clients, daemon=True)
+            if self.stall_policy is not None:
+                # Wake active policy handlers before measuring closure. They
+                # still face the closed-admission/evidence-freeze guards.
+                closer.start()
             self.server.shutdown()
             self.server.server_close()
             self.thread.join(timeout=2)
@@ -328,14 +464,6 @@ class NativeProxy:
             # HTTP pool closure can block on an in-flight socket. Receipt
             # finalization is bounded; frozen handlers cannot settle charges
             # or change evidence afterward. Unknown reservations stay pending.
-            def close_clients():
-                try:
-                    self.upstream.close()
-                    close = getattr(self.messages.client, "close", None)
-                    if close:
-                        close()
-                except Exception:
-                    pass
-            closer = threading.Thread(target=close_clients, daemon=True)
-            closer.start()
+            if self.stall_policy is None:
+                closer.start()
             closer.join(timeout=cleanup_timeout)

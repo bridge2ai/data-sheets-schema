@@ -11,6 +11,7 @@ from decimal import Decimal
 import hashlib
 import json
 import math
+import time
 from pathlib import Path
 import uuid
 
@@ -21,6 +22,29 @@ CBORG_ENDPOINTS = frozenset({'https://api.cborg.lbl.gov', 'https://api-local.cbo
 
 class BudgetStop(RuntimeError):
     pass
+
+
+#: Ledger basis for a stalled paid request that a registered stall policy
+#: counted at its whole reservation inside one attempt (#2150). It mirrors the
+#: offline user-authorized debit: the provider fee stays unknown.
+STALL_DEBIT_BASIS = "registered_stall_policy_full_reservation_debit"
+
+#: Transport bounds shared by the proxy and the registration validator, so the
+#: validator reasons about the numbers the proxy really uses (#2152, #2155).
+LEGACY_UPSTREAM_READ_SECONDS = 1800
+UPSTREAM_CONNECT_SECONDS = 20
+#: Under a stall policy one token-count try is bounded, and the pause between
+#: tries is short and ends at once when admission closes (#2152, #2157).
+POLICY_COUNT_TRY_SECONDS = 120
+POLICY_COUNT_PAUSE_SECONDS = 5
+
+
+def retryable_count_error(exc):
+    """A token-count failure that is safe to repeat: counting is free and
+    idempotent, so a timeout, a dropped connection or a provider 5xx carries
+    no charge ambiguity. Anything else (a 4xx, a bad count) is not retried."""
+    import anthropic
+    return isinstance(exc, (anthropic.APIConnectionError, anthropic.InternalServerError))
 
 
 def provider_context_headers(manifest):
@@ -219,10 +243,45 @@ class Ledger:
         if row["status"] != "settled":
             raise BudgetStop("observed charge exceeded its conservative reservation; stop and reconcile")
 
+    def debit_unconfirmed(self, ticket, *, maximum, evidence):
+        """Count a stalled request at its whole reservation and keep going (#2150).
+
+        The reservation is an upper bound on the provider fee, so the budget
+        can only be over-counted. Nothing is released and no provider charge
+        is asserted. At most `maximum` such debits are allowed per attempt;
+        beyond that the row stays pending and the attempt stops as before.
+        """
+        if type(maximum) is not int or maximum < 0:
+            raise BudgetStop("stall allowance must be a non-negative whole number")
+        with self.transaction() as state:
+            row = next(row for row in state["requests"] if row["id"] == ticket)
+            if row["status"] != "pending":
+                raise BudgetStop("charge already settled")
+            self._check_stopped(state, row["attempt"])
+            prior = sum(1 for other in state["requests"] if other["attempt"] == row["attempt"]
+                        and other.get("settlement_basis") == STALL_DEBIT_BASIS)
+            allowed = prior < maximum
+            if allowed:
+                row.update(status="settled", cost_usd=row["reserved_usd"], settled_at=now(),
+                           settlement_basis=STALL_DEBIT_BASIS, stall_index=prior + 1,
+                           stall_evidence=evidence, provider_charge_confirmed=False,
+                           provider_charge_usd=None, provider_usage_is_final=False,
+                           released_excess_reservation_usd="0")
+        if not allowed:
+            raise BudgetStop("registered stall allowance is exhausted; reservation retained")
+        return prior + 1
+
 
 class CappedMessages:
     def __init__(self, client, *, ledger, attempt, evidence, model, prices, verify, initial_request=None,
-                 mutation_guard=None):
+                 mutation_guard=None, count_attempts=1, count_pause=None, count_timeout=None):
+        if type(count_attempts) is not int or not 1 <= count_attempts <= 5:
+            raise BudgetStop("token-count attempts must be a whole number from 1 to 5")
+        self.count_attempts = count_attempts
+        self.count_pause = count_pause or time.sleep
+        # None is never forwarded, so a legacy count keeps its client's timeout.
+        self.count_timeout = count_timeout
+        self.count_retries = 0
         self.client, self.ledger, self.attempt = client, ledger, attempt
         self.evidence, self.model, self.prices = Path(evidence), model, prices
         self.verify = verify
@@ -276,7 +335,7 @@ class CappedMessages:
                     check(item)
         check(request)
         count_args = {k: v for k, v in request.items() if k in {"model", "system", "messages", "tools", "tool_choice", "thinking"}}
-        count = self.client.messages.count_tokens(**count_args).input_tokens
+        count = self.count_tokens(count_args)
         if type(count) is not int or count < 0:
             raise BudgetStop("provider returned no usable input count")
         ceiling = request.get("max_tokens")
@@ -310,6 +369,32 @@ class CappedMessages:
             write_new(folder / "admission.json", {"input_count": count, "input_bound": input_bound,
                       "output_ceiling": ceiling, "reserved_usd": str(estimate), "token_count_at": now()})
         return ticket, folder
+
+    def count_tokens(self, fields):
+        """The provider's input count, repeated only under a registered
+        allowance and only for failures that cannot have cost anything."""
+        options = {"timeout": self.count_timeout} if self.count_timeout is not None else {}
+        for attempt in range(1, self.count_attempts + 1):
+            try:
+                return self.client.messages.count_tokens(**fields, **options).input_tokens
+            except Exception as exc:
+                if attempt == self.count_attempts or not retryable_count_error(exc):
+                    raise
+                # A retry is new work and new evidence: never after admission
+                # closed or evidence froze (#2157). The guard raises then.
+                with self.mutation_guard("admit"):
+                    self.count_retries += 1
+                    self.evidence.mkdir(parents=True, exist_ok=True)
+                    with (self.evidence / "count_retries.jsonl").open("a", encoding="utf-8") as out:
+                        out.write(json.dumps({"at": now(), "failed_try": attempt,
+                                              "error_type": type(exc).__name__}) + "\n")
+                self.count_pause(min(attempt, POLICY_COUNT_PAUSE_SECONDS))
+                with self.mutation_guard("admit"):
+                    pass
+
+    def debit_stall(self, ticket, *, maximum, evidence):
+        with self.mutation_guard("settle"):
+            return self.ledger.debit_unconfirmed(ticket, maximum=maximum, evidence=evidence)
 
     def finish(self, ticket, folder, response, *, stream_complete=None):
         with self.stopping_on_error(), self.mutation_guard("settle"):
