@@ -4,10 +4,11 @@ import ssl
 from httpx import Client, Timeout
 
 from budgeted_cborg import BudgetStop, CBORG_ENDPOINTS, cborg_client
-from .registration import canonical_path, pinned
+from .registration import canonical_path, pinned, native_upstream_read_timeout
 
 
 def transport_paths(manifest):
+    native_upstream_read_timeout(manifest)
     endpoint = manifest.get('provider_base_url')
     if endpoint not in CBORG_ENDPOINTS:
         raise BudgetStop('audit requires a documented CBORG endpoint')

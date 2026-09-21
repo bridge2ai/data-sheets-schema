@@ -20,6 +20,8 @@ def sha(path):
 
 
 def verify(manifest, path, expected_sha):
+    if "native_upstream_read_timeout_seconds" in manifest:
+        raise BudgetStop("native_upstream_read_timeout_seconds is audit-only; generation cannot select it")
     if Path.cwd().resolve() != Path(manifest["repository"]).resolve():
         raise BudgetStop("working directory differs from the registered repository")
     if sha(path) != expected_sha:

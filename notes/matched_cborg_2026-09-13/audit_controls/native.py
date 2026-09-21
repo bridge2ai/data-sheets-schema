@@ -26,7 +26,7 @@ from native_control import CONTRACT, check_control_history, load_native_events
 from native_file_policy import FileAccess
 from native_proxy import NativeProxy
 from run_native_canary import execute_child
-from .registration import native_api_force_idle_timeout, native_api_timeout, sha, strict_json
+from .registration import native_api_force_idle_timeout, native_api_timeout, native_upstream_read_timeout, sha, strict_json
 from .transport import provider_clients
 
 CLI_FLAGS = ['--print', '--safe-mode', '--restricted', '--strict-mcp-config',
@@ -604,6 +604,9 @@ def execute_job(context, *, client=None, upstream=None, protocol=None):
 
 def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     manifest, job, attempt = context.manifest, context.job, context.attempt
+    upstream_timeout = native_upstream_read_timeout(manifest)
+    if upstream_timeout is not None and protocol is not None:
+        raise BudgetStop('upstream read timeout is restricted to the native audit controller')
     selected = protocol or sys.modules[__name__]
     policy = selected.build_policy(manifest, context.registration_path)
     executable = verify_runtime(manifest)
@@ -631,7 +634,8 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
         proxy = AuditProxy(audit_history=history, sdk=client, ledger=context.ledger,
             attempt=billing_attempt, evidence=attempt / 'requests', model=manifest['model']['model'],
             prices=manifest['budget']['prices_per_token'], verify=admission, provider_key=key or 'offline-test-key',
-            base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest), upstream=upstream)
+            base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest), upstream=upstream,
+            **({'upstream_read_timeout_seconds': upstream_timeout} if upstream_timeout is not None else {}))
     except BaseException:
         # Before running() owns cleanup, close only resources created here.
         if owned_client:

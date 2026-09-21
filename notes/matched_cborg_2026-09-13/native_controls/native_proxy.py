@@ -112,9 +112,18 @@ class Completion:
 
 class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
-                 provider_key, base_url, upstream=None, request_headers=None):
+                 provider_key, base_url, upstream=None, request_headers=None,
+                 upstream_read_timeout_seconds=None):
         if base_url not in CBORG_ENDPOINTS:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
+        if upstream_read_timeout_seconds is not None and (
+                type(upstream_read_timeout_seconds) is not int or upstream_read_timeout_seconds <= 0):
+            raise BudgetStop('native upstream read timeout must be positive whole seconds')
+        # Per-request override only: the shared SDK counting client and all
+        # legacy callers keep their original timeout. None is never forwarded
+        # as a timeout keyword, since HTTPX interprets that as unbounded.
+        self.stream_options = ({'timeout': httpx.Timeout(1800, connect=20, read=upstream_read_timeout_seconds)}
+                               if upstream_read_timeout_seconds is not None else {})
         if request_headers is not None and not isinstance(request_headers, dict):
             raise BudgetStop("native provider headers must be a mapping")
         self.request_headers = dict(request_headers) if request_headers is not None else {}
@@ -259,7 +268,8 @@ class NativeProxy:
                     completion = Completion()
                     with owner.state:
                         owner.require_open()
-                    with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers) as response:
+                    with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers,
+                                               **owner.stream_options) as response:
                         owner.capture_json(folder / "http_status.json", response_metadata(response))
                         if response.status_code != 200:
                             owner.capture(folder / "upstream_error.body", b"")
