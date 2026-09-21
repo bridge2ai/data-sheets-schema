@@ -51,6 +51,9 @@ def classify_command(command, python, programs, command_policy=None):
     assembly = (command_policy or {}).get('assemble_argv')
     if assembly and tokens == assembly and tokens[0] == python:
         return 'prescribed', 'the exact registered audit part assembly and arguments'
+    for expected_draft in (command_policy or {}).get('draft_argv', []):
+        if tokens == expected_draft and tokens[0] == python:
+            return 'prescribed', 'the exact registered draft grammar or seal command'
     return 'not_prescribed', 'outside the exact registered audit validator'
 
 
@@ -79,6 +82,14 @@ def build_policy(manifest, registration_path):
         staged = {'assemble_argv': block['assemble_argv']}
         recovery['write_paths'] = {path: block['max_part_bytes'] for path in block['parts']}
         helpers.append(_literal_rule(shlex.join(block['assemble_argv'])))
+    if 'audit_drafting' in manifest:
+        from .draft_output import configuration
+        block = configuration(manifest, registration_path)
+        commands = [row['check_argv'] for row in block['rounds']] + [block['seal_argv']]
+        staged = {'draft_argv': commands}
+        recovery['write_paths'] = {path: block['max_part_bytes']
+                                  for row in block['rounds'] for path in row['parts']}
+        helpers.extend(_literal_rule(shlex.join(argv)) for argv in commands)
     return {'version': 1, 'pretool_control': CONTRACT, 'python': manifest['python'],
         'programs': [], 'manifest_paths': [], 'validator_argv': expected, **staged,
         'allowed_tools': ['Read', 'Write', *helpers],
@@ -433,6 +444,9 @@ class StagedAuditHistory(AuditHistory):
 
 
 def make_history(manifest, registration_sha256, policy, *, replay=False):
+    if 'audit_drafting' in manifest:
+        from .draft_history import DraftAuditHistory
+        return DraftAuditHistory(manifest, registration_sha256, policy, replay=replay)
     if 'audit_output' in manifest:
         return StagedAuditHistory(manifest, registration_sha256, policy, replay=replay)
     return AuditHistory(manifest, registration_sha256, policy)
@@ -605,6 +619,11 @@ def execute_job(context, *, client=None, upstream=None, protocol=None):
 
 def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     manifest, job, attempt = context.manifest, context.job, context.attempt
+    if 'audit_drafting' in manifest:
+        if protocol is not None:
+            raise BudgetStop('audit drafting is restricted to the native audit controller')
+        from .draft_output import configuration
+        configuration(manifest, context.registration_path)
     if 'audit_contract_context' in manifest:
         if protocol is not None:
             raise BudgetStop('audit_contract_context is restricted to the native audit controller')
@@ -630,6 +649,13 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     if selected is sys.modules[__name__] and 'audit_output' in manifest:
         from .output_parts import configuration
         Path(configuration(manifest)['parts'][0]).parent.mkdir()
+    if selected is sys.modules[__name__] and 'audit_drafting' in manifest:
+        from .draft_output import configuration
+        block = configuration(manifest)
+        directory = Path(block['rounds'][0]['parts'][0]).parent.parent
+        directory.mkdir()
+        for row in block['rounds']:
+            Path(row['parts'][0]).parent.mkdir()
     def admission():
         context.verify()
         history.verify_admission()

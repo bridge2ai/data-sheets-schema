@@ -3,6 +3,7 @@
 Opt-in evidence protocol v3 uses this alongside its existing quotation checks.
 Protocol v5 enables v2's exact registered metadata declarations separately from
 bundle evidence, without expanding the record-metadata coverage exemptions.
+Protocol v6 retains those scientific checks without a draft-repair exception.
 The source/status classifications remain judgments for independent review.
 """
 from __future__ import annotations
@@ -66,12 +67,12 @@ def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None,
           project: str | None = None) -> dict:
     """Require coverage and reject declared attribution/status contradictions."""
     from data_sheets_schema.evidence_assertions import check_assertions, _fold
-    if type(protocol_version) is not int or protocol_version not in (3, 4, 5):
+    if type(protocol_version) is not int or protocol_version not in (3, 4, 5, 6):
         raise ValueError("unsupported source-review protocol version")
-    if protocol_version != 5 and (source_manifest_raw is not None or project is not None):
+    if protocol_version not in (5, 6) and (source_manifest_raw is not None or project is not None):
         raise ValueError("registered provenance authority requires evidence protocol 5")
     authority = None
-    if protocol_version == 5 and source_manifest_raw is not None:
+    if protocol_version in (5, 6) and source_manifest_raw is not None:
         from data_sheets_schema.source_metadata import projection
         authority = projection(source_manifest_raw, project)
     required = inventory(raw, artifact)
@@ -130,7 +131,7 @@ def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None,
                             or any(s == "<preamble>" or s not in {c["source"] for c in chunks.values()} for s in attributed)):
                         raise ValueError("attributed_to must list distinct named source documents, or be empty")
                     evidence = claim["evidence"]
-                    provenance = (protocol_version == 5 and isinstance(evidence, list)
+                    provenance = (protocol_version in (5, 6) and isinstance(evidence, list)
                                   and any(isinstance(e, dict) and "provenance" in e for e in evidence))
                     if provenance:
                         from data_sheets_schema.source_metadata import check_assertion
@@ -180,7 +181,7 @@ def check(review, *, raw: str, artifact: str, chunks: dict, audit_findings=None,
                 linked.update(paths)
         for path in sorted(revisions - linked):
             problem("a revise judgment lacks a linked audit finding", path=path)
-    return {"instrument": PROVENANCE_INSTRUMENT if protocol_version == 5 else INSTRUMENT,
+    return {"instrument": PROVENANCE_INSTRUMENT if protocol_version in (5, 6) else INSTRUMENT,
             "artifact": artifact, "sha256": required["sha256"],
             "values_required": len(expected), "values_reviewed": len(seen),
             "claims_checked": claims_checked, "findings": findings,

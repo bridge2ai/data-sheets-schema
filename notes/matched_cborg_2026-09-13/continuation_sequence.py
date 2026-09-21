@@ -187,6 +187,14 @@ def _closure(manifest, predecessor, lineage):
             for evidence_path in output_parts.closure_paths(registration, refs['registration'], result):
                 _require(manifest['pinned_files'].get(str(evidence_path)) == sha(evidence_path),
                          'staged audit closure evidence is unpinned or changed')
+        if 'audit_drafting' in registration:
+            from audit_controls import draft_output
+            implementation = Path(draft_output.__file__).resolve()
+            _require(manifest['pinned_files'].get(str(implementation)) == sha(implementation),
+                     'drafted audit closure implementation is unpinned or changed')
+            for evidence_path in draft_output.closure_paths(registration, refs['registration'], result):
+                _require(manifest['pinned_files'].get(str(evidence_path)) == sha(evidence_path),
+                         'drafted audit closure evidence is unpinned or changed')
         validation = result.get('validation', {})
         _require(isinstance(validation, dict) and validation.get('checked') is True
                  and validation.get('findings') == [] and validation.get('errors') == []

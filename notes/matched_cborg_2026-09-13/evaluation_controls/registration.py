@@ -320,6 +320,8 @@ def group(job):
 
 
 def verify_manifest(manifest, path, digest):
+    if 'audit_drafting' in manifest:
+        raise BudgetStop('audit_drafting is audit-only; evaluation cannot select it')
     if 'scientific_contract_transition' in manifest:
         raise BudgetStop('scientific_contract_transition is continuation-only; evaluation cannot select it')
     if 'audit_contract_context' in manifest:

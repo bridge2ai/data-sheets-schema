@@ -6,7 +6,9 @@ proves child removals in uniquely matched anonymous objects and validates
 actions at audit admission. Opt-in version 3 requires complete scalar-value
 source reviews and checks declared attribution/status consistency. Opt-in
 version 4 adds exact-original-bound anonymous whole-member removals. Opt-in
-version 5 permits narrowly projected registered provenance in source reviews. No version
+version 5 permits narrowly projected registered provenance in source reviews.
+Version 6 preserves those scientific checks; a separately registered native
+audit may use a bounded source-free draft grammar stage before the final check. No version
 independently classifies prose or certifies semantic conclusions. All inputs
 are read only.
 """
@@ -33,23 +35,24 @@ NARRATIVE_FIELDS = frozenset({"description", "notes", "source_caveats"})
 
 
 def instrument(protocol_version: int = 1) -> str:
-    if type(protocol_version) is not int or protocol_version not in (1, 2, 3, 4, 5):
+    if type(protocol_version) is not int or protocol_version not in (1, 2, 3, 4, 5, 6):
         raise ValueError("unsupported evidence protocol version")
     return {1: INSTRUMENT, 2: "evidence_assertions v2 (#1839)",
             3: "evidence_assertions v3 / source_review v1 (#1815, #1782)",
             4: "evidence_assertions v4 / source_review v1 (#2165)",
-            5: "evidence_assertions v5 / source_review v2 (#2169)"}[protocol_version]
+            5: "evidence_assertions v5 / source_review v2 (#2169)",
+            6: "evidence_assertions v6 / source_review v2 (#2178)"}[protocol_version]
 
 
 def protocol_for_renderer(render_version: int) -> int:
-    return 5 if render_version >= 16 else 4 if render_version >= 15 else 3 if render_version >= 12 else 2 if render_version >= 11 else 1
+    return 6 if render_version >= 18 else 5 if render_version >= 16 else 4 if render_version >= 15 else 3 if render_version >= 12 else 2 if render_version >= 11 else 1
 
 
 def _review_authority(protocol_version, source_manifest_raw, project):
     """Keep legacy calls/signatures at their call sites exactly as before."""
     instrument(protocol_version)
-    if protocol_version == 5:
-        return {"protocol_version": 5, "source_manifest_raw": source_manifest_raw, "project": project}
+    if protocol_version in (5, 6):
+        return {"protocol_version": protocol_version, "source_manifest_raw": source_manifest_raw, "project": project}
     if source_manifest_raw is not None or project is not None:
         raise ValueError("registered provenance authority requires evidence protocol 5")
     return {}
@@ -587,7 +590,7 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
     _review_authority(protocol_version, source_manifest, project)
     source_raw = source_manifest.read_bytes() if source_manifest is not None else None
     authority = ({"source_manifest_raw": source_raw, "project": project}
-                 if protocol_version == 5 else {})
+                 if protocol_version in (5, 6) else {})
     raw_artifacts = {k: p.read_bytes() for k, p in artifacts.items()}
     texts = {k: raw.decode("utf-8") for k, raw in raw_artifacts.items()}
     chunks, pins = source_chunks(bundle, manifest)
@@ -626,7 +629,7 @@ def check_files(*, audit: Path, bundle: Path, manifest: Path,
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--protocol-version", type=int, choices=(1, 2, 3, 4, 5), default=1)
+    parser.add_argument("--protocol-version", type=int, choices=(1, 2, 3, 4, 5, 6), default=1)
     parser.add_argument("--source-manifest", type=Path)
     parser.add_argument("--project")
     for name in ("audit", "bundle", "manifest", "original-full"):
