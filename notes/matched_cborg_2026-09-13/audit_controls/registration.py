@@ -451,8 +451,9 @@ def native_stall_policy(manifest):
     the maintainer's to authorize, so a policy that allows any must quote the
     authorization and the number of debits it covers. The proxy has to see
     the stall before the child gives up, so the native SDK timeout must cover
-    the upstream read bound in force plus everything the proxy does before it
-    sends, and the native fetch idle timer must be registered off."""
+    the total pre-header bound in force plus the bounded token-count tries,
+    and the native fetch idle timer must be registered off. Under the policy,
+    killable I/O workers enforce these total bounds (#2159)."""
     key = 'native_stall_policy'
     if key not in manifest:
         return None

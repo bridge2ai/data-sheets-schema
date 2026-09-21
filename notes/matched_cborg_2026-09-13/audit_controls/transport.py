@@ -3,8 +3,9 @@ import ssl
 
 from httpx import Client, Timeout
 
-from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, LEGACY_UPSTREAM_READ_SECONDS, UPSTREAM_CONNECT_SECONDS,
-                            cborg_client)
+from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, LEGACY_UPSTREAM_READ_SECONDS,
+                            POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS,
+                            cborg_client, provider_context_headers)
 from .registration import canonical_path, pinned, native_stall_policy, native_upstream_read_timeout
 
 
@@ -41,6 +42,30 @@ def verified_context(manifest):
 def provider_clients(manifest, api_key):
     """One verified connection policy for SDK counting and raw native streaming."""
     context = verified_context(manifest)
+    if native_stall_policy(manifest) is not None:
+        # Only the opt-in audit policy uses killable I/O workers. A per-read
+        # HTTPX timeout cannot bound counting or receipt of response headers
+        # when the provider continues sending partial data (#2159).
+        from .bounded_transport import BoundedCountClient
+        from .bounded_stream import BoundedStreamClient
+        ca = manifest.get('provider_transport', {}).get('ca_bundle')
+        metadata = Client(verify=context if context is not None else True, trust_env=False,
+            timeout=Timeout(LEGACY_UPSTREAM_READ_SECONDS, connect=UPSTREAM_CONNECT_SECONDS),
+            follow_redirects=False)
+        sdk = None
+        try:
+            sdk = BoundedCountClient(api_key=api_key, base_url=manifest['provider_base_url'],
+                ca_bundle=ca, default_headers=provider_context_headers(manifest),
+                timeout_seconds=POLICY_COUNT_TRY_SECONDS)
+            upstream = BoundedStreamClient(metadata, ca_bundle=ca,
+                read_timeout_seconds=native_upstream_read_timeout(manifest) or LEGACY_UPSTREAM_READ_SECONDS,
+                connect_timeout_seconds=UPSTREAM_CONNECT_SECONDS)
+        except BaseException:
+            if sdk is not None:
+                sdk.close()
+            metadata.close()
+            raise
+        return sdk, upstream
     if context is None:
         return cborg_client(manifest, api_key, max_retries=0), None
     upstream = Client(verify=context, trust_env=False,

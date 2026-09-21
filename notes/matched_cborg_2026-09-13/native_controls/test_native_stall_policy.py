@@ -96,6 +96,26 @@ def test_a_stall_before_any_relayed_byte_is_debited_and_the_attempt_continues(tm
     assert len(calls) == 2 and 'offline-provider-key' not in evidence.read_text()
 
 
+def test_a_retryable_status_does_not_wait_for_the_error_body(tmp_path):
+    """A 5xx header is sufficient; a trickling body must not consume the retry window (#2159)."""
+    drained = []
+
+    class NeverDrain(httpx.SyncByteStream):
+        def __iter__(self):
+            drained.append(True)
+            raise AssertionError('the policy must classify before draining')
+            yield b''
+
+    proxy, ledger, _ = proxy_with(tmp_path, [httpx.Response(524, stream=NeverDrain()), good()])
+    with proxy.running() as url:
+        assert post(url, proxy).status_code == 503
+        assert post(url, proxy).status_code == 200
+    assert drained == [] and proxy.stalls_survived == 1
+    assert rows(ledger)[0]['stall_evidence'] == {'kind': 'upstream_http_status', 'http_status': 524}
+    (body,) = (tmp_path / 'requests').rglob('upstream_error.body')
+    assert body.read_bytes() == b''
+
+
 def test_the_allowance_is_bounded_and_the_next_stall_stops_as_before(tmp_path):
     proxy, ledger, calls = proxy_with(tmp_path, [httpx.Response(524)] * 3)
     with proxy.running() as url:
@@ -191,6 +211,38 @@ def test_nothing_is_debited_after_the_evidence_freeze(tmp_path):
     with pytest.raises(BudgetStop, match='frozen'):
         proxy.survive_stall(ticket, folder, {'kind': 'upstream_http_status', 'http_status': 524})
     assert rows(ledger)[0]['status'] == 'pending' and proxy.stalls_survived == 0 and not list(folder.iterdir())
+
+
+def test_policy_shutdown_cancels_counting_before_measuring_handler_closure(tmp_path):
+    """Closing the upstream first must not strand an active count worker (#2159)."""
+    entered, released = threading.Event(), threading.Event()
+    closed, replies = [], []
+
+    def count(**kwargs):
+        entered.set()
+        assert released.wait(3), 'count was not cancelled'
+        raise RuntimeError('synthetic count client closed')
+
+    proxy, _, _ = proxy_with(tmp_path, [], count=count)
+    proxy.messages.client.close = lambda: (closed.append('count'), released.set())
+    original_close = proxy.upstream.close
+
+    def close_stream():
+        closed.append('stream')
+        original_close()
+
+    proxy.upstream.close = close_stream
+    with proxy.running(cleanup_timeout=0.3) as url:
+        def auxiliary_count():
+            replies.append(httpx.post(url + '/v1/messages/count_tokens', json=REQUEST,
+                headers={'x-api-key': proxy.token}, timeout=4).status_code)
+        worker = threading.Thread(target=auxiliary_count)
+        worker.start()
+        assert entered.wait(2)
+    worker.join(timeout=4)
+    assert not worker.is_alive() and replies == [402]
+    assert closed == ['count', 'stream'] and proxy.unfinished_handlers == 0
+    assert proxy.messages.count_retries == 0
 
 
 def test_a_failure_after_bytes_were_relayed_stays_terminal(tmp_path):

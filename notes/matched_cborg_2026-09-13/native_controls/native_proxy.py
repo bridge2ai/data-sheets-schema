@@ -364,6 +364,11 @@ class NativeProxy:
                         upstream_status = response.status_code
                         if response.status_code != 200:
                             owner.capture(folder / "upstream_error.body", b"")
+                            if owner.stall_policy is not None and response.status_code >= 500:
+                                # The status already establishes the policy's
+                                # stall. Draining an arbitrary error body could
+                                # outlive the client's retry window (#2159).
+                                raise UpstreamStall(response.status_code)
                             for chunk in response.iter_bytes():
                                 owner.capture(folder / "upstream_error.body", chunk, append=True)
                             if response.status_code >= 500:
@@ -424,6 +429,31 @@ class NativeProxy:
             yield f"http://127.0.0.1:{self.server.server_port}"
         finally:
             self.close_admission()
+            def close_clients():
+                if self.stall_policy is not None:
+                    # Policy clients own killable I/O workers. Cancel counting
+                    # first, independently of streaming cleanup, so shutdown
+                    # does not leave a count alive behind a socket close.
+                    for resource in (self.messages.client, self.upstream):
+                        try:
+                            close = getattr(resource, "close", None)
+                            if close:
+                                close()
+                        except Exception:
+                            pass
+                else:
+                    try:
+                        self.upstream.close()
+                        close = getattr(self.messages.client, "close", None)
+                        if close:
+                            close()
+                    except Exception:
+                        pass
+            closer = threading.Thread(target=close_clients, daemon=True)
+            if self.stall_policy is not None:
+                # Wake active policy handlers before measuring closure. They
+                # still face the closed-admission/evidence-freeze guards.
+                closer.start()
             self.server.shutdown()
             self.server.server_close()
             self.thread.join(timeout=2)
@@ -434,14 +464,6 @@ class NativeProxy:
             # HTTP pool closure can block on an in-flight socket. Receipt
             # finalization is bounded; frozen handlers cannot settle charges
             # or change evidence afterward. Unknown reservations stay pending.
-            def close_clients():
-                try:
-                    self.upstream.close()
-                    close = getattr(self.messages.client, "close", None)
-                    if close:
-                        close()
-                except Exception:
-                    pass
-            closer = threading.Thread(target=close_clients, daemon=True)
-            closer.start()
+            if self.stall_policy is None:
+                closer.start()
             closer.join(timeout=cleanup_timeout)

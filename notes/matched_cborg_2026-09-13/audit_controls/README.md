@@ -55,7 +55,7 @@ hash binds; the file itself is not pinned.
 
 The policy does two things. Token counting is repeated up to `count_attempts` tries,
 only after a timeout, a dropped connection or a provider 5xx. A count costs nothing,
-so repeating one carries no charge ambiguity. Each try is bounded to two minutes, the
+so repeating one carries no charge ambiguity. Each try has a two-minute total deadline, the
 pause between tries is a few seconds and ends at once when admission closes, and no
 retry starts or writes evidence after that. A paid request that stalls after it was
 sent, and before any response byte reaches the native client, is counted at its whole
@@ -79,13 +79,29 @@ after the registered maximum, which leaves its reservation pending for the
 maintainer's request-specific decision.
 
 Debits need the proxy to see a stall before the client gives up. The native SDK
-timeout must therefore cover the upstream read bound in force, the bounded
-token-count tries with their pauses, the connect allowance and a minute of margin,
+timeout must therefore cover the pre-header deadline, the bounded
+token-count tries with their pauses and a minute of margin,
 and the native fetch idle timer must be registered off. With three count tries that
 is 455 seconds above the read bound. The policy is audit-only: generation, Phase 4
 and the evaluations refuse it. `native_controls/probe_native_stall.py` drives the
 real pinned executable against a scripted upstream that stalls, with no provider
 contact, and shows the client retrying to completion.
+
+Under this policy, counting and paid streaming use separate killable I/O workers
+(#2159). Counting has one total deadline, including process startup, DNS, TLS and
+the complete response. A paid request has one deadline until response headers,
+equal to the selected read limit plus the 20-second connect allowance. This also
+bounds pooling, writing and partial headers. The worker is killed and reaped before
+the parent retries or debits a timed-out request. Expiry before a send witness
+stops without a stall debit. After headers, the selected read-inactivity limit
+applies; a failure after relay remains terminal. A provider 5xx is classified from
+its status without waiting for an error body.
+
+Workers receive credentials, registered transport settings and exact request
+bytes through anonymous pipes, not command-line arguments, environment variables
+or files. They hold no ledger or evidence state. The parent retains admission,
+accounting and evidence ownership, and cancels the workers during shutdown. The
+existing clients and cleanup order remain unchanged when the policy is absent.
 
 The native client's fetch layer has a separate idle timer. A new condition can
 select `--native-api-force-idle-timeout false` to disable that timer while waiting
