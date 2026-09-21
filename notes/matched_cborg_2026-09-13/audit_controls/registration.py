@@ -25,6 +25,23 @@ for directory in (BASE, CONTROLS):
 from budgeted_cborg import (BudgetStop, LEGACY_UPSTREAM_READ_SECONDS, Ledger, POLICY_COUNT_PAUSE_SECONDS,
                             POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS, attempt_identity)
 
+TRANSITION = 'scientific_contract_transition'
+TRANSITION_KIND = 'frozen_pair_protocol_v4'
+VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
+
+
+def scientific_contract(manifest):
+    """An explicit new audit instrument, never a relabelled parent generation."""
+    upgraded = TRANSITION in manifest
+    pair = (manifest.get('protocol_version'), manifest.get('render_version'))
+    if (any(type(value) is not int for value in pair) or
+            pair != ((4, 15) if upgraded else (3, 14)) or
+            (upgraded and (type(manifest[TRANSITION]) is not dict or
+                          manifest[TRANSITION] != {'kind': TRANSITION_KIND}))):
+        raise BudgetStop('unsupported scientific contract transition: require unchanged 3/14 '
+                         'or explicit frozen_pair_protocol_v4 with 4/15')
+    return upgraded
+
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -112,6 +129,7 @@ def inspect_parent(manifest):
     from native_phase_history import phase_history
     from run_native_canary import _classify_command, prescribed_programs
 
+    upgraded = scientific_contract(manifest)
     parent = manifest['parent']
     generation, job = parent_job(manifest)
     if generation['repository'] != parent['repository']:
@@ -146,7 +164,8 @@ def inspect_parent(manifest):
         'chunk_manifest': Path(job['input_identity']['chunks']['path']),
         'source_manifest': Path(job['input_identity']['source_manifest']['path']),
         'parent_instruction': Path(job['instruction']),
-        'protocol': Path(parent['repository']) / 'src/download/prompts/evidence_protocol_v3.md',
+        'protocol': ((Path(manifest['repository']) / 'src/download/prompts/evidence_protocol_v4.md')
+                     if upgraded else Path(parent['repository']) / 'src/download/prompts/evidence_protocol_v3.md'),
     }
     resources = job['render_spec']['agentic_toolchain']['resources']
     expected.update(full_schema=Path(resources['src/data_sheets_schema/schema/data_sheets_schema_all.yaml']),
@@ -263,6 +282,13 @@ def required_paths(manifest):
     paths.update(canonical_path(value, exists=True) for value in manifest['inputs'].values())
     paths.update(canonical_path(manifest['job'][key], exists=True) for key in ('instruction', 'system_prompt'))
     parent = manifest['parent']
+    if TRANSITION in manifest:
+        scientific_contract(manifest)
+        paths.add(canonical_path(str(Path(parent['repository']) /
+                      'src/download/prompts/evidence_protocol_v3.md'), exists=True))
+        for filename in VERSIONED_SCIENTIFIC_FILES:
+            paths.add(canonical_path(str(Path(parent['repository']) /
+                          'src/data_sheets_schema' / filename), exists=True))
     paths.update(canonical_path(parent[key], exists=True) for key in
                  ('registration', 'overlay', 'result', 'transcript', 'control', 'phase2_proof',
                   'reconciliation_receipt', 'reconciled_checkpoint'))
@@ -277,6 +303,21 @@ def required_paths(manifest):
         from .runtime_closure import closure_paths
         paths.update(closure_paths(read_json(bridge['receipt'])))
     return paths
+
+
+def validate_scientific_identity(manifest):
+    upgraded = scientific_contract(manifest)
+    parent = manifest['parent']
+    for filename in ('api_runner.py', 'evidence_assertions.py', 'source_review.py', 'profiles.py', 'schema_digest.py'):
+        relative = Path('src/data_sheets_schema') / filename
+        if upgraded and filename in VERSIONED_SCIENTIFIC_FILES:
+            # The selected transition records both exact implementations;
+            # unrelated scientific components retain their equality gate.
+            pinned(manifest, str(Path(parent['repository']) / relative))
+            pinned(manifest, str(Path(manifest['repository']) / relative))
+            continue
+        if sha(Path(manifest['repository']) / relative) != sha(Path(parent['repository']) / relative):
+            raise BudgetStop('shared scientific instrument changed: ' + filename)
 
 
 def verify(manifest, path, expected_sha):
@@ -315,9 +356,9 @@ def verify(manifest, path, expected_sha):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
-    if (manifest.get('kind') != 'd4d_native_audit_continuation' or type(manifest.get('schema_version')) is not int or manifest.get('schema_version') != 1 or
-            manifest.get('protocol_version') != 3 or manifest.get('render_version') != 14):
+    if (manifest.get('kind') != 'd4d_native_audit_continuation' or type(manifest.get('schema_version')) is not int or manifest.get('schema_version') != 1):
         raise BudgetStop('unsupported native audit-continuation contract')
+    scientific_contract(manifest)
     if 'audit_contract_context' in manifest:
         from .contract_context import enabled
         enabled(manifest)
@@ -340,10 +381,7 @@ def validate_registration(path):
             manifest['native_runtime']['version'] != generation['claude_version'] or
             manifest['native_runtime'].get('effort') != 'native_default'):
         raise BudgetStop('audit changes the inherited model, profile or native effort')
-    for filename in ('api_runner.py', 'evidence_assertions.py', 'source_review.py', 'profiles.py', 'schema_digest.py'):
-        relative = Path('src/data_sheets_schema') / filename
-        if sha(Path(manifest['repository']) / relative) != sha(Path(parent['repository']) / relative):
-            raise BudgetStop('shared scientific instrument changed: ' + filename)
+    validate_scientific_identity(manifest)
     proof = inspect_parent(manifest)
     if read_json(parent['phase2_proof']) != proof:
         raise BudgetStop('inherited phase proof differs from actual parent history')

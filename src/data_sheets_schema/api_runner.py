@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -1781,10 +1781,23 @@ full record, while its evidence and source review refer to original_full:
 """
 
 
+ANONYMOUS_REMOVAL_CONTRACT_V15 = """### Anonymous relationship removal (renderer v15)
+
+Evidence protocol v4 permits the explicit anonymous_structure_v1 removal mode.
+Copy original_full_sha256 from the required original_full source-review inventory;
+do not invent an identifier or compute a substitute digest. The original path
+locates the proposed removal but is not the member's identity after reconciliation.
+Follow the complete protocol's admissibility and preservation rules: the checker
+must establish which original member was removed and that every unselected member
+survives with its structured values unchanged. A disclaimer is not removal.
+This operation does not establish that a proposed removal is scientifically correct.
+"""
+
+
 def evidence_phase_contract(phase: str, render_version: int) -> str:
     contract = EVIDENCE_PHASE_CONTRACTS.get("report" if phase == "report_regate" else phase, "")
     if render_version >= 12:
-        contract = contract.replace("protocol v1", "protocol v3")
+        contract = contract.replace("protocol v1", "protocol v4" if render_version >= 15 else "protocol v3")
         if phase == "audit":
             contract = contract.replace("with findings and summary", "with findings, summary and source_review")
             contract += (" Include source_review bound to the original_full inventory, covering every "
@@ -1802,6 +1815,8 @@ def evidence_phase_contract(phase: str, render_version: int) -> str:
                          "value again, including unchanged values and each member of mixed-status prose. "
                          "A retained claim requiring revision must be marked revise; it stops completion. "
                          "Never relabel a contradiction as supported to pass a check.")
+        if render_version >= 15 and phase in {"audit", "reconcile_full", "report", "report_regate"}:
+            contract += "\n\n" + ANONYMOUS_REMOVAL_CONTRACT_V15
         return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 
@@ -3706,7 +3721,7 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
         if reconciled or report:
             out["findings"] += evidence.check_relationship_removals(
                 audit, evidence.load_record(originals["original_full"]), evidence.load_record(artifacts["final_full"]),
-                protocol_version=protocol)
+                protocol_version=protocol, original_raw=originals["original_full"])
         if report:
             text = spec.report_path.read_bytes().decode("utf-8")
             report_check = evidence.check_report(text, artifacts=artifacts, chunks=chunks,
@@ -3781,8 +3796,8 @@ def _refuse_unusable_source_review(spec: RunSpec, phase: str, problem: str,
     """A delivered but unusable v3 review is terminal, including on resume."""
     if spec.render_version < 12 or phase not in {"audit", "report", "report_regate", "report_after_repair"}:
         return
-    from data_sheets_schema.evidence_assertions import instrument
-    out = {"instrument": instrument(3), "checked": False, "assertions_checked": 0,
+    from data_sheets_schema.evidence_assertions import instrument, protocol_for_renderer
+    out = {"instrument": instrument(protocol_for_renderer(spec.render_version)), "checked": False, "assertions_checked": 0,
            "findings": [{"kind": "source_review_unusable", "detail": problem}]}
     _reject_source_response(spec, phase, text, usage, out)
 
@@ -3793,6 +3808,7 @@ def _admit_source_response(spec: RunSpec, phase: str, text: str, stop_reason,
     if spec.render_version < 12 or phase not in {"audit", "report", "report_regate", "report_after_repair"}:
         return
     from data_sheets_schema import evidence_assertions as evidence
+    protocol = evidence.protocol_for_renderer(spec.render_version)
     try:
         if stop_reason == "max_tokens":
             raise ValueError("source-review output truncated at max_tokens")
@@ -3801,17 +3817,17 @@ def _admit_source_response(spec: RunSpec, phase: str, text: str, stop_reason,
         if phase == "audit":
             out = evidence.check_audit(evidence.load_json(body),
                 artifacts={"original_full": needed["Completed full record"]},
-                chunks=chunks, protocol_version=3)
+                chunks=chunks, protocol_version=protocol)
         else:
             artifacts = {"original_full": needed["Original full record"],
                          "original_core": needed["Original core record"],
                          "final_full": needed["Reconciled full record"],
                          "final_core": needed["Completed core record"]}
             review = evidence.check_report(body, artifacts=artifacts, chunks=chunks,
-                                            protocol_version=3)["source_review_final"]
+                                            protocol_version=protocol)["source_review_final"]
             # Ordinary report assertions can still use the single re-check;
             # the source judgment must already pass before any local writes.
-            out = {"instrument": evidence.instrument(3), "checked": True,
+            out = {"instrument": evidence.instrument(protocol), "checked": True,
                    "source_review_final": review, "findings": review["findings"]}
         out["source_sha256"] = pins
     except (OSError, ValueError, KeyError, TypeError, RuntimeError, yaml.YAMLError) as exc:
@@ -3919,6 +3935,7 @@ def sent_text_surfaces() -> dict[str, str]:
                 for phase in (*EVIDENCE_PHASE_CONTRACTS, "report_regate")})
     from data_sheets_schema.source_review import INVENTORY_HEADER
     out["source_review_inventory_header"] = INVENTORY_HEADER
+    out["anonymous_removal_contract_v15"] = ANONYMOUS_REMOVAL_CONTRACT_V15
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),

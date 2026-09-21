@@ -12,12 +12,12 @@ def configuration(manifest):
     if KEY not in manifest:
         return None
     block = manifest[KEY]
+    from .registration import scientific_contract
+    scientific_contract(manifest)
     if (type(block) is not dict or block != {'kind': KIND} or
-            manifest.get('kind') != 'd4d_native_audit_continuation' or
-            type(manifest.get('protocol_version')) is not int or manifest['protocol_version'] != 3 or
-            type(manifest.get('render_version')) is not int or manifest['render_version'] != 14):
+            manifest.get('kind') != 'd4d_native_audit_continuation'):
         raise BudgetStop('persistent audit contract requires an audit-only persistent_protocol_v1 selector '
-                         'with protocol 3 and renderer 14')
+                         'with a registered scientific contract')
     return block
 
 
@@ -55,11 +55,12 @@ def render_system(manifest, original):
     except (KeyError, TypeError, ValueError, OSError) as error:
         raise BudgetStop('persistent audit contract requires the exact readable protocol file') from error
     from data_sheets_schema.api_runner import evidence_phase_contract
-    audit = evidence_phase_contract('audit', 14)
+    version = manifest['render_version']
+    audit = evidence_phase_contract('audit', version)
     return (original + '\nPersistent shared audit contract\n'
             'The following protocol and Phase 3 text reproduce the registered shared contract.\n'
             'The input/artifact names original_full and original_core identify frozen record states. '
             'They are distinct from findings[].record, whose values are full, core or both. '
             'source_review is bound to the original_full inventory as specified below.\n\n'
             'Registered evidence protocol (verbatim)\n' + protocol
-            + '\n\nShared Phase 3 audit contract (renderer 14, verbatim)\n' + audit + '\n')
+            + f'\n\nShared Phase 3 audit contract (renderer {version}, verbatim)\n' + audit + '\n')

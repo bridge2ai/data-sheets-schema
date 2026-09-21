@@ -49,12 +49,22 @@ no reserve released. Shared accounting is now $170.61226875, leaving $229.387731
 of the $400 allocation with no unresolved reservation. Independent terminal
 reviews confirmed clean shutdown, settled accounting and preserved ownership.
 
-[Issue #2164](https://github.com/bridge2ai/data-sheets-schema/issues/2164) adds an
+[PR #2166](https://github.com/bridge2ai/data-sheets-schema/pull/2166) adds an
 explicitly registered persistent copy of the existing audit contract. The correct
 protocol was already delivered initially and was recoverable; this improves its
 availability after compaction without claiming compaction caused every error.
-[Issue #2165](https://github.com/bridge2ai/data-sheets-schema/issues/2165) separately
-tracks the inability to selectively remove some anonymous structured relationships
-while preserving supported peers. No subsequent canary is launched until that
-limitation is resolved and the new condition is independently reviewed. The
-rejected audit, its validation and all historical results remain unchanged.
+[Issue #2165](https://github.com/bridge2ai/data-sheets-schema/issues/2165) addresses
+selective removal of anonymous structured relationships while preserving supported
+peers. Its explicit protocol 4 / renderer 15 transition retains the original
+generation pair and its protocol 3 history. The new rule binds a removal to the
+exact original bytes and requires unique structural matches for every surviving
+peer. It does not establish that a removal is scientifically justified; that
+judgment still requires independent review.
+
+A successor must register both the scientific protocol transition and persistent
+contract delivery on reviewed merged code. Phase 4 must use the accepted audit's
+protocol and helper bytes. The shared prompt renderer supports the same new
+contract in both arms; historical renderers retain their instruction bytes.
+No subsequent canary is launched until the new condition is independently
+reviewed. The rejected audit, its validation and all historical results remain
+unchanged.

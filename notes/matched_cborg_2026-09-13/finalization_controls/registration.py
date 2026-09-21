@@ -100,6 +100,20 @@ def validate_budget_identity(manifest,accepted):
         raise BudgetStop('finalization exceeds its inherited approved attempt cap')
 
 
+def validate_scientific_identity(manifest, accepted):
+    for name in ('api_runner.py','evidence_assertions.py','source_review.py','report_claims.py','derive_core.py','d4d_pair_consistency.py','profiles.py','schema_digest.py'):
+        relative=Path('src/data_sheets_schema')/name
+        if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
+            raise BudgetStop('finalization changes the inherited scientific instrument: '+name)
+    if audit_registration.scientific_contract(manifest):
+        relative=Path('src/data_sheets_schema/anonymous_removals.py')
+        if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
+            raise BudgetStop('finalization changes the accepted anonymous-removal implementation')
+        protocol=Path(manifest['repository'])/'src/download/prompts/evidence_protocol_v4.md'
+        if sha(protocol)!=sha(accepted['inputs']['protocol']):
+            raise BudgetStop('finalization changes the accepted evidence protocol')
+
+
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
@@ -108,9 +122,9 @@ def validate_registration(path):
     if 'audit_output' in manifest:
         raise BudgetStop('audit staged output cannot become a Phase 4 output mode')
     if (manifest.get('kind') != KIND or type(manifest.get('schema_version')) is not int or
-            manifest['schema_version'] != 1 or manifest.get('render_version') != 14 or
-            manifest.get('protocol_version') != 3):
+            manifest['schema_version'] != 1):
         raise BudgetStop('unsupported Phase 4 continuation registration')
+    upgraded = audit_registration.scientific_contract(manifest)
     verified_context(manifest)
     verify(manifest,path,sha(path))
     if required_paths(manifest)-{Path(name) for name in manifest['pinned_files']}:
@@ -125,6 +139,10 @@ def validate_registration(path):
     if ref != block['predecessor']['registration']:
         raise BudgetStop('scientific audit differs from the accepted budget predecessor')
     accepted = read_json(pinned(manifest,ref['path'],ref['sha256']))
+    if (audit_registration.scientific_contract(accepted) != upgraded or
+            any(manifest.get(key) != accepted.get(key) for key in
+                ('protocol_version', 'render_version', audit_registration.TRANSITION))):
+        raise BudgetStop('finalization changes the accepted scientific contract version')
     validate_budget_identity(manifest,accepted)
     expected_inputs = {**accepted['inputs'], 'audit':accepted['job']['audit_path']}
     if manifest['inputs'] != expected_inputs or manifest['parent'] != accepted['parent']:
@@ -136,10 +154,7 @@ def validate_registration(path):
             raise BudgetStop('finalization changes the accepted audit '+key)
     if manifest.get('provider_transport') != accepted.get('provider_transport'):
         raise BudgetStop('finalization changes the reviewed provider transport')
-    for name in ('api_runner.py','evidence_assertions.py','source_review.py','report_claims.py','derive_core.py','d4d_pair_consistency.py','profiles.py','schema_digest.py'):
-        relative=Path('src/data_sheets_schema')/name
-        if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
-            raise BudgetStop('finalization changes the inherited scientific instrument: '+name)
+    validate_scientific_identity(manifest, accepted)
     job=manifest['job']
     if not isinstance(job.get('id'),str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,150}',job['id']):
         raise BudgetStop('invalid finalization job identity')

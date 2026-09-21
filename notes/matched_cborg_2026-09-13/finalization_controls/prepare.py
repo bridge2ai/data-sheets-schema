@@ -39,6 +39,8 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
     old_path=canonical_path(str(Path(accepted_audit_registration).resolve()),exists=True)
     accepted=read_json(old_path)
     if accepted.get('kind')!='d4d_native_audit_continuation':raise BudgetStop('finalization requires a native audit predecessor')
+    from audit_controls.registration import scientific_contract, TRANSITION
+    upgraded=scientific_contract(accepted)
     acceptance=canonical_path(str(Path(acceptance).resolve()),exists=True)
     old_result=Path(accepted['job']['attempt_dir'])/'result.json'
     old_ledger=Path(accepted['budget']['ledger_path'])
@@ -75,7 +77,7 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
         check_argv=[[*prefix,'--operation','check','--round',str(i)] for i in range(2)])
     manifest={key:deepcopy(accepted[key]) for key in ('model','profile','provider_base_url','provider_context_policy','native_runtime')}
     if 'provider_transport' in accepted:manifest['provider_transport']=deepcopy(accepted['provider_transport'])
-    manifest.update(kind=KIND,schema_version=1,render_version=14,protocol_version=3,
+    manifest.update(kind=KIND,schema_version=1,render_version=accepted['render_version'],protocol_version=accepted['protocol_version'],
         repository=str(repository),repository_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         python=sys.executable,python_version=sys.version,
         python_identity={'resolved_path':str(Path(sys.executable).resolve()),'prefix':sys.prefix},
@@ -88,6 +90,7 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
             'origin':{'registration':ref(generation_path),'ledger_path':str(original_ledger)},
             'audit_origin':deepcopy(predecessor),'predecessor':predecessor},
         pinned_files=dict(accepted['pinned_files']))
+    if upgraded:manifest[TRANSITION]=deepcopy(accepted[TRANSITION])
     manifest.update(claim_selection)
     for p in [old_path,old_result,old_ledger,acceptance,snapshot,generation_path,*map(Path,manifest['inputs'].values())]:
         manifest['pinned_files'][str(p)]=sha(p)

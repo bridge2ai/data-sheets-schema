@@ -8,7 +8,7 @@ turn the stopped generation into a completed attempt.
 `prepare` works offline. It replays the actual parent instruction and tool history,
 checks source identities, successful receipt checking, core derivation and the
 original snapshot, and binds the confirmed accounting checkpoint. It renders the
-shared generic-v9/renderer-14 audit contract with the complete frozen source bundle,
+shared generic-v9/renderer-14 audit contract by default, with the complete frozen source bundle,
 full/core originals and source-review inventory. No operator review findings are
 supplied to the model. The new wrapper identifies the session as audit only and
 makes its output and exact validator command explicit.
@@ -141,7 +141,7 @@ can read the registered files, write its isolated audit output, and execute the
 exact validator. It cannot alter the original records or source evidence.
 
 The validator claims an exclusive receipt before checking the JSON. It checks
-protocol-3 evidence and all inventory values against the actual originals and source
+the selected evidence protocol and all inventory values against the actual originals and source
 bytes. Failure terminates further admission. A passing file alone does not permit
 a subsequent request: the controller must also observe the typed successful tool
 result. The audit cannot be repaired after validation starts. An unknown provider
@@ -281,13 +281,14 @@ still require independent review.
 For a fresh audit condition, `--persistent-audit-contract` registers
 `audit_contract_context: {"kind": "persistent_protocol_v1"}`
 ([#2164](https://github.com/bridge2ai/data-sheets-schema/issues/2164)). The native
-system message retains the exact registered evidence protocol and the unchanged
-renderer-14 audit contract, including its JSON example. This keeps their field
+system message retains the exact registered evidence protocol and selected
+audit contract, including its JSON example. Without a separate protocol upgrade,
+this remains the unchanged renderer-14 contract. This keeps their field
 types, verdict vocabulary and evidence rules in the persistent instruction
 alongside stage and recovery controls. It adds no dataset-specific guidance.
 
-The original instruction, source bytes, scientific instrument and terminal
-validator stay unchanged. Omission preserves historical rendering and leaves the
+By itself, this option leaves the original instruction, source bytes, scientific
+instrument and terminal validator unchanged. Omission preserves historical rendering and leaves the
 optional runtime helper outside the required pin closure. The selector is
 audit-only; generation, Phase 4 and evaluations reject
 its presence, including null, and successor preparation does not inherit it as
@@ -299,6 +300,49 @@ compaction. Audit11 assembled its output but failed the existing contract check;
 its output and validation are preserved. A new registration and independent
 review are required before another attempt. The option neither repairs rejected
 outputs nor changes how anonymous list removals are validated.
+
+### Explicit scientific protocol upgrade
+
+For a new audit on a frozen renderer-14 generation pair,
+`--upgrade-evidence-protocol` selects protocol 4 / renderer 15
+([#2165](https://github.com/bridge2ai/data-sheets-schema/issues/2165)). It records
+`scientific_contract_transition: {"kind": "frozen_pair_protocol_v4"}`. This changes
+the scientific action contract; it is separate from persistent delivery and can
+be combined with `--persistent-audit-contract`, recovery and staged output.
+Omission preserves protocol 3 / renderer 14. A new version without the explicit
+transition, or a malformed transition, is refused.
+
+Preparation first replays the original renderer-14 instruction and Phase 1/2
+history exactly. It then constructs a separate renderer-15 audit specification.
+Original full/core records, source inventory, bundle, schemas, receipts and parent
+instruction remain unchanged. The active protocol input becomes v4; both old and
+new protocol/code identities remain pinned. The parent instruction and v3 text
+are historical provenance, while the selected v4 contract governs current audit
+actions. This does not regenerate the pair, rewrite a failed audit, or claim the
+original generation used the new instrument. Unrelated scientific code retains
+its inherited equality checks.
+
+Protocol 4 adds `remove_relationship` with exactly `path`,
+`match: "anonymous_structure_v1"` and `original_full_sha256`. Copy the digest from
+the registered original-full inventory; the checker verifies the actual original
+bytes. The original index locates a member, never identifies its final position.
+The initial mode supports a list reached through dictionary keys and a target
+without own or nested stable-identity keys, including invalid or null ones.
+Every original member needs a nonempty, unique typed structural signature.
+Only the existing narrative-text fields are excluded; structured values and
+nested list order remain bound. Final survivors must match exactly, once each;
+undeclared deletions, additions, replacements and reintroduced targets fail.
+All-selected removal leaves `[]`, not a missing container. Duplicate signatures,
+indexed ancestors, overlapping or mixed actions in that container, unsupported
+scalar types and nonfinite numbers fail closed. See the exact
+[protocol](../../../src/download/prompts/evidence_protocol_v4.md) for the full rules.
+
+Admission tests the declared batch with an in-memory projection; Phase 4 rechecks
+actual final bytes under the accepted version. Neither test proves the scientific
+claim that a relationship is unsupported or absent elsewhere in the record.
+Complete source review and independent acceptance remain required. An accepted
+v4 audit passes its version and exact helper/protocol identity to Phase 4; fresh
+generation and evaluations reject this continuation-only selector.
 
 ### Bounded native audit output
 
