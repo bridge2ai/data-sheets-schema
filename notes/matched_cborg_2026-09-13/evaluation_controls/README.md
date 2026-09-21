@@ -249,8 +249,8 @@ Fresh ordinary or composite registrations can select
 Omission retains the historical fitness/subtype instrument; explicit null,
 unknown values, inconsistent job selectors, and selectors on other styles are
 rejected. Existing semantic, field, quality and grounding requests are unchanged.
-The number of ratings and the existing top-level empty-value exclusions remain
-unchanged; a selected fitness roster uses the accepted schema's declared slots.
+Rating repetitions and the existing top-level empty-value exclusions remain
+unchanged; the selected slot roster follows the accepted schema.
 
 The selected instrument captures complete declared nested slot/class meanings
 independently of the judged value. Invalid structures and empty nested children

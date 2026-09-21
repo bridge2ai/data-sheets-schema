@@ -26,7 +26,7 @@ GUIDANCE = "nested_semantics_v1"
 SELECTOR = "fitness_schema_guidance"
 MAX_SPEC_BYTES = 524_288
 MAX_SNAPSHOT_BYTES = 16_777_216
-SCOPE = 'Schema instructions for field fitness, not dataset facts or source evidence. All declared child fields are shown; optional fields need not be invented. Each inline_classes entry maps field names through slot_definition_refs to exact slot_definitions. Resolve these references to read the complete declarations. Reference ranges take references, not inline objects. Schema prose, notes and examples remain guidance only.'
+SCOPE = 'Schema instructions for field fitness, not dataset facts or source evidence. All declared child fields are shown; optional fields need not be invented. Each inline_classes entry maps field names through slot_definition_refs to exact slot_definitions. Resolve these references to read the complete declarations. Reference ranges take references, not inline objects. Their reference_identifier describes the identifier value, not an inline object or an identifier field to add. Schema prose, notes and examples remain guidance only.'
 
 
 def validate_selection(mapping, *, style=None):
@@ -245,7 +245,7 @@ def _declarations(sv, vocabulary, class_name):
                                   "unresolved_vocabularies": [n for n in names if n not in vocabulary]}
         return item
 
-    def guidance(s, owner):
+    def guidance(s, owner, *, identifier_value=False):
         _reject_expressions(s, _SLOT_EXPRESSIONS, "unsupported_schema_range_branch")
         raw = raw_slot(str(s.name), owner)
         if (s.is_a != raw.is_a or list(s.mixins) != list(raw.mixins)):
@@ -259,12 +259,22 @@ def _declarations(sv, vocabulary, class_name):
         typ = sv.get_type(rng) if rng else None
         if sum(x is not None for x in (cls, enum, typ)) != 1:
             raise SemanticGuidanceError("unknown_or_ambiguous_schema_range")
+        if identifier_value and (cls is not None or s.multivalued):
+            raise SemanticGuidanceError("unsupported_reference_identifier_range")
         item = {"name": str(s.name), "description": str(s.description) if s.description is not None else None,
                 "range": rng, "required": bool(s.required), "multivalued": bool(s.multivalued),
                 "representation": "inline_object" if cls and sv.is_inlined(s) else "reference" if cls else "scalar"}
         if cls:
             item["range_class"] = meaning(rng)
             item["inlined_as_list"] = bool(s.inlined_as_list)
+            if item["representation"] == "reference":
+                # A reference carries its effective identifier value, not the
+                # target object. Show only that declaration and its ancestry;
+                # unrelated child fields are not reference-value obligations.
+                identifiers = [value for value in slots(rng).values() if value.identifier]
+                if len(identifiers) != 1:
+                    raise SemanticGuidanceError("ambiguous_reference_identifier")
+                item["reference_identifier"] = guidance(identifiers[0], rng, identifier_value=True)
         if typ:
             item["range_type"] = type_meaning(rng)
         if enum:

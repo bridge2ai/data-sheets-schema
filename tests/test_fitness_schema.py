@@ -371,3 +371,73 @@ def test_relocated_schema_imports_and_profile_have_identical_selected_instrument
     changed = fs.capture('Record', other / path.name, profile=Profile('relocated', vocabulary_pin=other / pin.name))
     assert changed.specification != first.specification
     assert changed.spec('settings') != first.spec('settings')
+
+
+@pytest.mark.parametrize('identifier_kind', ['inherited_type', 'enum', 'slot_ancestry'])
+def test_reference_identifier_semantics_visible_in_actual_selected_prompt(schema, monkeypatch, identifier_kind):
+    # #2189: a reference's identifier constrains the scalar value without
+    # making the class's non-identifier child fields inline requirements.
+    data, _, save = schema
+    data['classes']['Record']['attributes']['contact'] = {'range': 'Contact'}
+    data['classes']['ContactBase'] = {'description': 'Contact role.', 'attributes': {
+        'id': {'identifier': True, 'description': 'Stable registry identifier.', 'pattern': '^REF-[0-9]+$'}}}
+    data['classes']['Contact'] = {'is_a': 'ContactBase', 'attributes': {
+        'private_note': {'description': 'UNRELATED_CHILD_MUST_STAY_ABSENT', 'required': True}}}
+    if identifier_kind == 'inherited_type':
+        data['types']['RegistryCode'] = {'typeof': 'string', 'description': 'Registry code, not a label.',
+                                         'pattern': '^REF-[0-9]+$'}
+        data['classes']['ContactBase']['attributes']['id']['range'] = 'RegistryCode'
+    elif identifier_kind == 'enum':
+        data['enums'] = {'Codes': {'description': 'Registered identifiers.', 'permissible_values': {
+            'REF-1': {'description': 'Primary registry entry.', 'meaning': 'ex:primary'}}}}
+        data['classes']['ContactBase']['attributes']['id']['range'] = 'Codes'
+    else:
+        data['slots'] = {'identity_rule': {'description': 'Identifier ancestor obligation.',
+                                         'pattern': '^REF-[0-9]+$'}}
+        data['classes']['ContactBase']['attributes']['id']['is_a'] = 'identity_rule'
+    save()
+    snap = captured(schema); guide = json.loads(snap.spec('contact'))
+    assert guide['slot']['representation'] == 'reference' and guide['inline_classes'] == {}
+    identifier = guide['slot']['reference_identifier']
+    assert identifier['description'] == 'Stable registry identifier.'
+    assert identifier['constraints']['pattern'] == '^REF-[0-9]+$'
+    assert identifier['constraints']['identifier'] is True
+    text = snap.spec('contact')
+    assert 'UNRELATED_CHILD_MUST_STAY_ABSENT' not in text
+    if identifier_kind == 'inherited_type':
+        assert identifier['range_type']['description'] == 'Registry code, not a label.'
+        assert identifier['range_type']['parent']['name'] == 'string'
+    elif identifier_kind == 'enum':
+        assert identifier['enum']['permissible_values']['REF-1']['description'] == 'Primary registry entry.'
+    else:
+        assert identifier['slot_ancestors'][0]['description'] == 'Identifier ancestor obligation.'
+    calls = fake_calls(monkeypatch)
+    LLMSlotFitnessScorer(client=object(), model='synthetic', class_name='Record', schema_path=schema[1],
+        profile=NEUTRAL, schema_guidance=fs.GUIDANCE, schema_snapshot=snap)(
+            project='synthetic', slot='contact', value='INVALID_RAW_REFERENCE')
+    assert '^REF-[0-9]+$' in calls[0]['messages'][0]['content']
+    assert 'INVALID_RAW_REFERENCE' not in text
+    data['classes']['ContactBase']['attributes']['id']['pattern'] = '^ORG-[A-Z]+$'
+    save(); changed = captured(schema)
+    assert changed.specification != snap.specification
+    assert json.loads(changed.spec('contact'))['slot']['reference_identifier']['constraints']['pattern'] == '^ORG-[A-Z]+$'
+    assert 'UNRELATED_CHILD_MUST_STAY_ABSENT' not in changed.spec('contact')
+
+
+@pytest.mark.parametrize('problem', ['multiple', 'multivalued', 'class_range'])
+def test_ambiguous_or_structured_reference_identifier_refuses_before_provider(schema, monkeypatch, problem):
+    data, _, save = schema
+    data['classes']['Record']['attributes']['contact'] = {'range': 'Contact'}
+    data['classes']['Contact'] = {'attributes': {'id': {'identifier': True}}}
+    if problem == 'multiple':
+        data['classes']['Contact']['attributes']['another'] = {'identifier': True}
+    elif problem == 'multivalued':
+        data['classes']['Contact']['attributes']['id']['multivalued'] = True
+    else:
+        data['classes']['Contact']['attributes']['id']['range'] = 'Settings'
+    save()
+    monkeypatch.setattr(api_runner, '_client', lambda: pytest.fail('provider resolved before schema refusal'))
+    scorer = LLMSlotFitnessScorer(model='synthetic', class_name='Record', schema_path=schema[1],
+                                 profile=NEUTRAL, schema_guidance=fs.GUIDANCE)
+    with pytest.raises(ValueError, match='reference_identifier'):
+        scorer(project='synthetic', slot='contact', value='wrong')
