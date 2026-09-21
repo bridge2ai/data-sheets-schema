@@ -51,6 +51,7 @@ def required_paths(manifest):
             raise BudgetStop('accepted drafted audit result changed before pinning')
         paths.update(closure_paths(accepted, manifest['accepted_audit']['registration']['path'], read_json(result_ref['path'])))
     paths.update(Path(name) for name in manifest['inputs'].values())
+    paths.update(audit_registration.schema_semantic_paths(manifest))
     paths.update(Path(manifest['job'][name]) for name in ('instruction', 'system_prompt'))
     paths.add(Path(manifest['native_runtime']['executable']))
     paths.add(Path(manifest['python_identity']['resolved_path']))
@@ -116,6 +117,10 @@ def validate_scientific_identity(manifest, accepted):
         if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
             raise BudgetStop('finalization changes the inherited scientific instrument: '+name)
     if audit_registration.scientific_contract(manifest):
+        if audit_registration.schema_semantic_context(manifest):
+            relative=Path('src/data_sheets_schema/schema_semantics.py')
+            if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
+                raise BudgetStop('finalization changes the accepted schema-semantics implementation')
         relative=Path('src/data_sheets_schema/anonymous_removals.py')
         if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
             raise BudgetStop('finalization changes the accepted anonymous-removal implementation')

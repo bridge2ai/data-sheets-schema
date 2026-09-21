@@ -222,10 +222,11 @@ class PreparedDraftSession(RegisteredSession, DraftSession):
     """Use real registered model/version metadata with the real draft lifecycle."""
 
 
-def accepted_drafted_audit(ancestry, destination, *, correction=False):
+def accepted_drafted_audit(ancestry, destination, *, correction=False, schema_semantic_context=False):
     from audit_controls import draft_output, native
     path = prepare.prepare(**ancestry[0], destination=destination, draft_audit_grammar=True,
-        persistent_audit_contract=True, context_recovery=True, durable_sequence_claim=True)
+        persistent_audit_contract=True, context_recovery=True, durable_sequence_claim=True,
+        schema_semantic_context=schema_semantic_context)
     m = registration.validate_registration(path)
     for row in m['audit_drafting']['rounds']:
         Path(row['parts'][0]).parent.mkdir(parents=True)

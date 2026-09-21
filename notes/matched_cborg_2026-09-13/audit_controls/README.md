@@ -179,6 +179,38 @@ in the accepted audit's closure before preparing Phase 4. Phase 4 inherits the
 accepted scientific instrument, but generation, Phase 4 and evaluations reject
 the audit-only drafting selector. Historical conditions remain unchanged.
 
+### Explicit schema semantics (protocol 6 / renderer 19)
+
+For a new audit condition, combine `--schema-semantic-context` with
+`--draft-audit-grammar` to select `frozen_pair_schema_semantics_v1` (#2182).
+The other scientific selectors and staged-output mode remain mutually exclusive.
+This is a new rendering instrument on the frozen original pair, not a claim
+that the original renderer-14 generation used the new guidance. Protocol 6,
+the terminal source checks and independent scientific acceptance are unchanged.
+
+The shared audit renderer adds deterministic, source-free schema definitions
+for the original full and core records' populated structure and required
+siblings. Complete class and induced-slot meanings, ranges, cardinality and
+vocabulary guidance come from the exact registered schemas and their imports.
+The existing schema digest stays byte-identical. All eleven input roles stay
+unchanged: the registered instruction captures the derived supplement, and
+the new helper plus actual schema-import closure are pinned only for the new
+transition. Guidance describes schema meaning; it cannot establish dataset facts.
+
+With `--persistent-audit-contract`, renderer 19 omits only the duplicate exact
+protocol appendix from the user instruction, retaining the exact protocol in
+the checked persistent system prompt and the existing shared instruction.
+Without persistent delivery that appendix remains. Earlier rendering versions
+keep their existing bytes. General generation launches cannot select renderer
+19; the new context is prepared for the audit continuation only.
+
+Phase 4 inherits protocol 6 / renderer 19 and must preserve the accepted helper
+identity and complete audit/draft pins. It does not inherit an active audit
+drafting or schema-context selector. Its ordinary schema presentation remains;
+the Phase 3 supplement describes the original pair and makes no claim to cover
+new fields introduced during reconciliation. Evaluation instruments remain
+unchanged. This supplement does not guarantee a complete or correct audit.
+
 The sequence lock is derived from the immutable parent ledger location. Copying a
 registration or a reconciliation receipt cannot create a second budget lineage.
 Each successor must carry the settled current tip. The shared budget is not reset.

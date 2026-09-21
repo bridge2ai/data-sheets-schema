@@ -36,12 +36,15 @@ def specification(manifest, registration_path):
 def configuration(manifest, registration_path=None):
     if 'audit_drafting' not in manifest:
         return None
+    if manifest.get('render_version') == 19:
+        from .registration import scientific_contract
+        scientific_contract(manifest)
     if (manifest.get('kind') != 'd4d_native_audit_continuation' or
             type(manifest.get('protocol_version')) is not int or
             type(manifest.get('render_version')) is not int or
-            (manifest['protocol_version'], manifest['render_version']) != (6, 18) or
+            (manifest['protocol_version'], manifest['render_version']) not in {(6, 18), (6, 19)} or
             'audit_output' in manifest):
-        raise BudgetStop('bounded audit drafting requires only the audit 6/18 protocol')
+        raise BudgetStop('bounded audit drafting requires the selected audit 6/18 or 6/19 protocol')
     job = manifest['job']
     path = canonical(registration_path or Path(job['attempt_dir']).parent.parent / 'registration.json')
     block = manifest['audit_drafting']
