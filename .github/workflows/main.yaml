@@ -81,28 +81,71 @@ jobs:
           notes/matched_cborg_2026-09-13/native_controls/test_native_stall_policy.py
           -q -p no:cacheprovider --junitxml=test-results/native.xml
 
-      - name: Exercise registered evaluation controls offline
-        if: matrix.python-version == '3.12' && matrix.shard == 3
-        env:
-          PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls:notes/matched_cborg_2026-09-13/evaluation_controls
-        run: >-
-          poetry run python -m pytest notes/matched_cborg_2026-09-13/evaluation_controls
-          -q -p no:cacheprovider --junitxml=test-results/evaluation-controls.xml
+      - name: Preserve test results and per-test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py${{ matrix.python-version }}-shard${{ matrix.shard }}
+          path: test-results/*.xml
+          retention-days: 14
 
+  # These complete offline suites run alongside core shards, once per run (#2237).
+  offline-audit:
+    name: Python 3.12 / offline audit and finalization
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
       - name: Exercise native audit continuation controls offline
-        if: matrix.python-version == '3.12' && matrix.shard == 2
         env:
           PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
         run: >-
           poetry run python -m pytest notes/matched_cborg_2026-09-13/audit_controls
           notes/matched_cborg_2026-09-13/finalization_controls
           -q -p no:cacheprovider --junitxml=test-results/audit-controls.xml
-
       - name: Preserve test results and per-test timings
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tests-py${{ matrix.python-version }}-shard${{ matrix.shard }}
+          name: tests-py3.12-offline-audit
+          path: test-results/*.xml
+          retention-days: 14
+
+  offline-evaluation:
+    name: Python 3.12 / offline evaluation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+      - name: Exercise registered evaluation controls offline
+        env:
+          PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls:notes/matched_cborg_2026-09-13/evaluation_controls
+        run: >-
+          poetry run python -m pytest notes/matched_cborg_2026-09-13/evaluation_controls
+          -q -p no:cacheprovider --junitxml=test-results/evaluation-controls.xml
+      - name: Preserve test results and per-test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py3.12-offline-evaluation
           path: test-results/*.xml
           retention-days: 14
 
@@ -137,20 +180,24 @@ jobs:
         run: time make test-examples
 
   # Preserve the stable merge check. Failure, cancellation or an unexpected
-  # skip in any shard must make this aggregate fail (#1812).
+  # skip in any required test lane must make this aggregate fail (#1812, #2237).
   test:
     if: always()
-    needs: [python-tests, schema-examples]
+    needs: [python-tests, offline-audit, offline-evaluation, schema-examples]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require every applicable job to pass
         env:
           PYTHON_RESULT: ${{ needs.python-tests.result }}
+          AUDIT_RESULT: ${{ needs.offline-audit.result }}
+          EVALUATION_RESULT: ${{ needs.offline-evaluation.result }}
           BUILD_RESULT: ${{ needs.schema-examples.result }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$PYTHON_RESULT" = success
+          test "$AUDIT_RESULT" = success
+          test "$EVALUATION_RESULT" = success
           if [ "$EVENT_NAME" = pull_request ]; then
             test "$BUILD_RESULT" = skipped
           else
