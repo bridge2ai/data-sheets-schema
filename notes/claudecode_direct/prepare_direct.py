@@ -141,7 +141,8 @@ def build(args):
     for path in [repository / "pyproject.toml", repository / "poetry.lock", CONTROLS / "prepare_registration.py",
                  CONTROLS / "run_api_canary.py", CONTROLS / "budgeted_cborg.py",
                  *sorted((CONTROLS / "native_controls").glob("*.py")), CONTROLS / "native_controls" / "system.md",
-                 HERE / "prepare_direct.py", HERE / "run_direct_canary.py", system_prompt, instruction,
+                 HERE / "prepare_direct.py", HERE / "run_direct_canary.py", HERE / "bind_direct_launch.py",
+                 system_prompt, instruction,
                  Path(case["manifest"]), Path(case["bundle"]), Path(case["chunks"]), executable]:
         pins[str(path)] = sha(path)
     probe_config = output / "auth_probe_config"

@@ -69,9 +69,22 @@ poetry run python notes/claudecode_direct/run_direct_canary.py \
 
 The launcher needs three files: the registration, a review binding its hash
 to an approving verdict and a successful CI run, and the maintainer's launch
-word quoting their exact instruction for that hash. The first paid call of
-this arm is the canary itself; there is no cheaper probe that exercises the
-login, the runtime and the provider together.
+word quoting their exact instruction for that hash. `bind_direct_launch.py`
+writes the last two and refuses a CI run that is not a completed success on
+the registered commit, an independent review that approves another hash, a
+blank response, or an existing file:
+
+```bash
+poetry run python notes/claudecode_direct/bind_direct_launch.py review \
+    --registration <dir>/registration.json --independent-review <report.json> \
+    --ci-run <run id> --out <dir>/review.json
+poetry run python notes/claudecode_direct/bind_direct_launch.py word \
+    --registration <dir>/registration.json --exact-response "<the maintainer's words>" \
+    --quoted-request "<the question they answered>" --out <dir>/word.json
+```
+
+The first paid call of this arm is the canary itself; there is no cheaper
+probe that exercises the login, the runtime and the provider together.
 
 ## Not established
 

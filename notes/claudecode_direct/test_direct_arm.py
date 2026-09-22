@@ -211,3 +211,41 @@ def test_a_run_that_ends_without_a_result_line_is_a_named_stop(offline_launch, m
     receipt = json.loads((path.parent / "attempts" / "CHORUS_direct_rep1" / "result.json").read_text())
     assert code == 1 and receipt["status"] == "stopped" and receipt["transcript_terminal_result"] == "absent"
     assert receipt["reason_source"] == "controller" and "permission_denials_note" in receipt
+
+
+def test_the_binding_helper_writes_records_only_for_this_exact_registration(prepared, tmp_path, monkeypatch):
+    import bind_direct_launch as binding
+    path, registration, _ = prepared
+    digest = binding.sha(path)
+    independent = tmp_path / "independent.json"
+    independent.write_text(json.dumps({"verdict": "approve", "registration_sha256": digest}))
+    runs = {"1": {"status": "completed", "conclusion": "success", "headSha": registration["code_commit"], "name": "Build and test data_sheets_schema"},
+            "2": {"status": "completed", "conclusion": "failure", "headSha": registration["code_commit"], "name": "Build and test data_sheets_schema"},
+            "3": {"status": "completed", "conclusion": "success", "headSha": "0" * 40, "name": "Build and test data_sheets_schema"}}
+    monkeypatch.setattr(binding, "ci_run", lambda run_id: runs[str(run_id)])
+    out = tmp_path / "review.json"
+    binding.main(["review", "--registration", str(path), "--independent-review", str(independent), "--ci-run", "1", "--out", str(out)])
+    record = json.loads(out.read_text())
+    assert record["registration_sha256"] == digest and record["allowed_jobs"] == ["CHORUS_direct_rep1"]
+    assert record["ci_run_id"] == 1 and record["ci_conclusion"] == "success"
+    for run_id, reason in (("2", "not a completed success"), ("3", "not on the registered code commit")):
+        with pytest.raises(SystemExit, match=reason):
+            binding.main(["review", "--registration", str(path), "--independent-review", str(independent),
+                          "--ci-run", run_id, "--out", str(tmp_path / f"r{run_id}.json")])
+        assert not (tmp_path / f"r{run_id}.json").exists()
+    stale = tmp_path / "stale.json"
+    stale.write_text(json.dumps({"verdict": "approve", "registration_sha256": "f" * 64}))
+    with pytest.raises(SystemExit, match="exact registration"):
+        binding.main(["review", "--registration", str(path), "--independent-review", str(stale), "--ci-run", "1", "--out", str(tmp_path / "r4.json")])
+    with pytest.raises(SystemExit, match="refusing to overwrite"):
+        binding.main(["review", "--registration", str(path), "--independent-review", str(independent), "--ci-run", "1", "--out", str(out)])
+    word = tmp_path / "word.json"
+    binding.main(["word", "--registration", str(path), "--exact-response", "launch the CHORUS direct canary",
+                  "--quoted-request", "May I launch registration abc?", "--out", str(word)])
+    assert json.loads(word.read_text())["registration_sha256"] == digest
+    with pytest.raises(SystemExit, match="exact response"):
+        binding.main(["word", "--registration", str(path), "--exact-response", "   ", "--quoted-request", "q", "--out", str(tmp_path / "w2.json")])
+    # The launcher accepts exactly these records.
+    review_ok = json.loads(out.read_text()); word_ok = json.loads(word.read_text())
+    assert review_ok["verdict"] == "approve" and review_ok["ci_conclusion"] == "success"
+    assert word_ok["exact_response"].strip() and word_ok["registration_sha256"] == digest
