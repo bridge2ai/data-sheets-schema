@@ -603,3 +603,154 @@ def test_relative_profile_pin_still_rejects_symlink_alias(staged, monkeypatch, a
     with pytest.raises(ValueError, match='input_requires_canonical_regular_file'):
         context.render_worker_context(inputs=staged['files'], profile=profile, project='example',
             plan=staged['plan'], worker_id=staged['plan']['workers'][0]['id'])
+
+
+def worker_arguments(s, worker=0):
+    return dict(inputs=s['files'], profile=NEUTRAL, project='example', plan=s['plan'],
+                worker_id=s['plan']['workers'][worker]['id'])
+
+
+def test_worker_default_bytes_remain_exact(staged):
+    text = context.render_worker_context(**worker_arguments(staged))
+    assert text == context.render_worker_context(**worker_arguments(staged), audit_batch_navigation=None)
+    # Baseline captured directly from the pre-selector module at ad2b892b.
+    raw = text.replace(str(staged['tmp']), '/SYNTHETIC_ROOT').encode()
+    assert len(raw) == 10195
+    assert hashlib.sha256(raw).hexdigest() == '96b392d5ed558ebd1d76b6b15e99a68d437a87e9cb5def435a6cd5700bbe0288'
+
+
+@pytest.mark.parametrize('selector', ['', False, True, 0, {}, [], 'explicit_row_reads_v1', 'explicit_child_reads_v2'])
+def test_worker_navigation_selector_refuses_before_scientific_reads(monkeypatch, selector):
+    def forbidden(**unused):pytest.fail('invalid selector reached scientific inputs')
+    monkeypatch.setattr(context, '_base', forbidden)
+    with pytest.raises(ValueError, match='unsupported_worker_navigation'):
+        context.render_worker_context(inputs={}, profile=NEUTRAL, project='example', plan={},
+            worker_id='worker_0001', audit_batch_navigation=selector)
+
+
+def test_worker_navigation_preserves_every_context_value_and_is_deterministic(staged):
+    args = worker_arguments(staged)
+    old = context.render_worker_context(**args)
+    text = context.render_worker_context(**args, audit_batch_navigation='explicit_child_reads_v1')
+    assert json.loads(text) == json.loads(old)
+    assert list(json.loads(text))[:4] == ['format', 'stage', 'plan_sha256', 'assignment']
+    assert text != old
+    assert text == context.render_worker_context(**args, audit_batch_navigation='explicit_child_reads_v1')
+    args['inputs'] = dict(reversed(list(args['inputs'].items())))
+    assert text == context.render_worker_context(**args, audit_batch_navigation='explicit_child_reads_v1')
+    assert len(text.encode()) - len(old.encode()) < 500
+
+
+@pytest.mark.parametrize('empty', [False, True])
+def test_worker_recovery_returns_exact_complete_assignment_before_scientific_tail(staged, empty):
+    record = {} if empty else {f'field_{i:03d}_~slash/quote"\nλ': f'Synthetic {i}.' for i in range(96)}
+    for role in ('original_full', 'original_core'):
+        staged['files'][role].write_text(yaml.safe_dump(record, sort_keys=False))
+    staged['plan'] = audit_batches.make_plan(staged['files']['original_full'].read_text())
+    huge_source = 'An arbitrarily long source line is preserved. ' * 3000
+    bundle = staged['files']['bundle'].read_text() + huge_source + '\n'
+    staged['files']['bundle'].write_text(bundle)
+    staged['files']['chunk_manifest'].write_text(yaml.safe_dump(
+        chunking.manifest_from_bytes(bundle.encode(), staged['files']['bundle'].name), sort_keys=False))
+    args = worker_arguments(staged)
+    legacy = context.render_worker_context(**args)
+    rendered = context.render_worker_context(**args, audit_batch_navigation='explicit_child_reads_v1')
+    value = json.loads(rendered)
+    assert value == json.loads(legacy)
+    assert value['complete_source_bundle'] == bundle
+    pages = context.worker_navigation_reads(rendered, staged['tmp']/'worker instruction.json')
+    assert len(pages) == (1 if empty else 2)
+    lines = rendered.split('\n')
+    recovered = []
+    end = 0
+    for page in pages:
+        args = page['input']
+        assert args['offset'] == end+1 and 1 <= args['limit'] <= 200
+        assert page['tool'] == 'Read'
+        start = args['offset']-1;end = start+args['limit']
+        part = lines[start:end]  # the actual advertised range, including its full final limit
+        recovered.extend(part)
+        numbered = '\n'.join(f'{i}\t{line}' for i, line in enumerate(part, start+1))
+        assert len(numbered.encode()) < 25000  # conservative envelope for this synthetic fixture
+    assert lines[end].startswith('  "assigned_inventory":')
+    assert pages[-1]['input']['limit'] < 200  # exact boundary, no arbitrary-string spill
+    prefix = '\n'.join(recovered).rstrip()
+    assert prefix.endswith(',')
+    prefix = json.loads(prefix[:-1]+'\n}')
+    assert prefix == {key: value[key] for key in ('format', 'stage', 'plan_sha256', 'assignment')}
+    assert prefix['assignment'] == staged['plan']['workers'][0]
+    assert huge_source not in '\n'.join(recovered)
+    assert len(rendered.encode()) - len(legacy.encode()) < 2500
+
+
+def test_worker_recovery_ranges_do_not_access_filesystem_and_keep_exact_locator(staged, monkeypatch):
+    rendered = context.render_worker_context(**worker_arguments(staged), audit_batch_navigation='explicit_child_reads_v1')
+    path = staged['tmp']/'.hidden'/'space "quote" $(literal); newline\n.json'
+    def forbidden(*args, **kwargs):pytest.fail('range helper accessed filesystem')
+    for name in ('open', 'stat', 'resolve', 'read_bytes', 'read_text'):
+        monkeypatch.setattr(Path, name, forbidden)
+    pages = context.worker_navigation_reads(rendered, path)
+    assert pages[0]['input']['file_path'] == str(path)
+
+
+@pytest.mark.parametrize('damage', ['legacy', 'whitespace', 'duplicate', 'wrong_stage', 'wrong_format',
+                                   'wrong_digest', 'missing_assignment', 'nan', 'nontext'])
+def test_worker_recovery_rejects_noncanonical_or_wrong_stage_context(staged, damage):
+    rendered = context.render_worker_context(**worker_arguments(staged), audit_batch_navigation='explicit_child_reads_v1')
+    value = json.loads(rendered)
+    if damage == 'legacy':rendered = render(staged)
+    elif damage == 'whitespace':rendered = rendered.replace('  "format":', '   "format":', 1)
+    elif damage == 'duplicate':rendered = rendered.replace('{\n', '{\n  "stage": "worker",\n', 1)
+    elif damage == 'wrong_stage':value['stage'] = 'integration'
+    elif damage == 'wrong_format':value['format'] = 'unknown'
+    elif damage == 'wrong_digest':value['plan_sha256'] = 'G'*64
+    elif damage == 'missing_assignment':value.pop('assignment');rendered = json.dumps(value)
+    elif damage == 'nan':rendered = rendered.replace('"worker"', 'NaN', 1)
+    else:rendered = b'not text'
+    if damage in {'wrong_stage', 'wrong_format', 'wrong_digest'}:
+        rendered = context._render_worker_navigation(value)
+    with pytest.raises(ValueError, match='invalid_worker_navigation_context'):
+        context.worker_navigation_reads(rendered, staged['tmp']/'instruction.json')
+
+
+@pytest.mark.parametrize('path', ['relative.json', '/absolute/../other.json', '/absolute/nul\0.json'])
+def test_worker_recovery_rejects_noncanonical_locator_spelling(staged, path):
+    rendered = context.render_worker_context(**worker_arguments(staged), audit_batch_navigation='explicit_child_reads_v1')
+    with pytest.raises(ValueError, match='invalid_worker_navigation_context'):
+        context.worker_navigation_reads(rendered, Path(path))
+
+
+def test_worker_navigation_retains_existing_whole_context_bound(staged, monkeypatch):
+    args = worker_arguments(staged)
+    rendered = context.render_worker_context(**args, audit_batch_navigation='explicit_child_reads_v1')
+    monkeypatch.setattr(context, 'MAX_CONTEXT_BYTES', len(rendered.encode())-1)
+    with pytest.raises(ValueError, match='scientific_context_byte_bound'):
+        context.render_worker_context(**args, audit_batch_navigation='explicit_child_reads_v1')
+    with pytest.raises(ValueError, match='invalid_worker_navigation_context'):
+        context.worker_navigation_reads(rendered, staged['tmp']/'instruction.json')
+
+
+def test_child_navigation_keeps_integration_renderer22_bytes_exact(staged):
+    args = integration_arguments(staged)
+    assert (context.render_integration_context(**args, audit_batch_navigation='explicit_child_reads_v1')
+            == context.render_integration_context(**args, audit_batch_navigation='explicit_row_reads_v1'))
+
+
+def test_worker_navigation_read_payloads_match_existing_policy_only(staged, monkeypatch):
+    import importlib.util
+    controls = Path(context.__file__).resolve().parents[2]/'notes/matched_cborg_2026-09-13'
+    monkeypatch.syspath_prepend(str(controls))
+    spec = importlib.util.spec_from_file_location('worker_navigation_file_policy', controls/'native_controls/native_file_policy.py')
+    module = importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    rendered = context.render_worker_context(**worker_arguments(staged), audit_batch_navigation='explicit_child_reads_v1')
+    external = staged['tmp']/'.hidden'/'external instructions';external.mkdir(parents=True)
+    path = external/'space "quote" $(literal); newline\n.json';path.write_text(rendered)
+    execution = staged['tmp']/'execution';execution.mkdir()
+    policy = {'readonly_lookups': {'repository': str(execution), 'inputs': [str(path)], 'output_directories': []}}
+    access = module.FileAccess(policy)
+    for page in context.worker_navigation_reads(rendered, path):
+        assert access.classify(page['tool'], page['input'])[0] == 'prescribed'
+        foreign = {**page['input'], 'file_path': str(execution/path.name)}
+        assert access.classify('Read', foreign)[0] == 'not_prescribed'
+        logical = {**page['input'], 'file_path': '/caption'}
+        assert access.classify('Read', logical)[0] == 'not_prescribed'

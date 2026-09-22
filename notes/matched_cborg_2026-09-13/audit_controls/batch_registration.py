@@ -93,10 +93,10 @@ def child_system(manifest, child_id):
             + '# Registered original/source locators\n\n'
             + json.dumps(locators, ensure_ascii=False, sort_keys=True, indent=2)
             + '\n\n# Exact permitted output operations\n\n' + instruction(manifest, child_id))
-    if manifest['render_version'] in (21, 22):
+    if manifest['render_version'] in (21, 22, 23):
         from data_sheets_schema.audit_batch_format import render
         text += '\n\n' + render(row['kind'])
-    if manifest['render_version'] == 22 and row['kind'] == 'integration':
+    if manifest['render_version'] in (22, 23) and row['kind'] == 'integration':
         text += ('\n\n# Registered integration row navigation\n\n'
             'The supplied integration instruction contains row_reads entries. Each entry gives '
             'the exact Read tool input for one canonical worker row. Use those input objects '
@@ -113,7 +113,34 @@ def child_system(manifest, child_id):
             + json.dumps({'integration_instruction': {'tool': 'Read', 'input': {'file_path': row['instruction'], 'offset': 4, 'limit': 200}},
                           'proposal_index': {'tool': 'Read', 'input': {'file_path': manifest['audit_batches']['integration_index']}}},
                          ensure_ascii=False, sort_keys=True, indent=2))
+    if manifest['render_version'] == 23 and row['kind'] == 'worker':
+        from data_sheets_schema.audit_batch_context import worker_navigation_reads
+        reads = worker_navigation_reads(Path(row['instruction']).read_text(encoding='utf-8'),
+                                        Path(row['instruction']))
+        text += ('\n\n# Registered worker assignment recovery\n\n'
+            'Your worker identity and exact assignment recovery Reads are below. '
+            'If the initial context is no longer available, use every supplied Read payload '
+            'in order to recover the complete assignment and its plan identity. The last '
+            'range ends before the scientific input fields. These are existing registered '
+            'inputs; no additional permissions are granted. JSON Pointers in the assignment '
+            'identify record values, never filesystem paths. Do not guess filenames or '
+            'replace these Reads with Bash commands. The complete originals, source bundle '
+            'and schema remain available at their registered locators above. Assignment '
+            'recovery does not replace scientific source assessment or the exact Write, '
+            'grammar-check and seal operations above. A final response is allowed only '
+            'after successful sealing.\n\n'
+            + json.dumps({'worker_id': row['id'], 'worker_instruction_reads': reads,
+                          'batch_plan': {'tool': 'Read', 'input': {
+                              'file_path': manifest['audit_batches']['plan_path'], 'offset': 1, 'limit': 200}}},
+                         ensure_ascii=False, sort_keys=True, indent=2))
     return text
+
+
+def _worker_navigation_options(manifest):
+    if manifest['render_version'] != 23:
+        return {}
+    from .registration import audit_batch_navigation
+    return {'audit_batch_navigation': audit_batch_navigation(manifest)}
 
 
 def render_parent_instruction(manifest):
@@ -163,7 +190,7 @@ def prepare_inputs(manifest, registration_path, config):
     for child in manifest['audit_batches']['children']:
         if child['kind'] == 'worker':
             _write(child['instruction'], audit_batch_context.render_worker_context(
-                **arguments, worker_id=child['id']))
+                **arguments, worker_id=child['id'], **_worker_navigation_options(manifest)))
         else:
             _write(manifest['audit_batches']['integration_base'],
                    audit_batch_context.render_integration_base_context(**arguments))
@@ -215,7 +242,8 @@ def verify_rendered_inputs(manifest, registration_path):
         if Path(child['system_prompt']).read_text(encoding='utf-8') != child_system(manifest, child['id']):
             raise BudgetStop('batch child system differs from its registered rendering')
         if child['kind'] == 'worker':
-            expected = audit_batch_context.render_worker_context(**arguments, worker_id=child['id'])
+            expected = audit_batch_context.render_worker_context(
+                **arguments, worker_id=child['id'], **_worker_navigation_options(manifest))
             if Path(child['instruction']).read_text(encoding='utf-8') != expected:
                 raise BudgetStop('batch worker instruction differs from its registered rendering')
         else:

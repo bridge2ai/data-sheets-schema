@@ -39,7 +39,7 @@ def verify(manifest, path, expected_sha):
     if isinstance(jobs, list):
         for job in jobs:
             spec = job.get("render_spec") if isinstance(job, dict) else None
-            if isinstance(spec, dict) and spec.get("render_version") in (19, "19", 20, "20", 21, "21", 22, "22"):
+            if isinstance(spec, dict) and spec.get("render_version") in (19, "19", 20, "20", 21, "21", 22, "22", 23, "23"):
                 raise BudgetStop(f"renderer {spec['render_version']} is audit-continuation-only; generation cannot select it")
     if Path.cwd().resolve() != Path(manifest["repository"]).resolve():
         raise BudgetStop("working directory differs from the registered repository")

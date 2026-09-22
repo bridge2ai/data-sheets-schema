@@ -125,7 +125,7 @@ def validate_scientific_identity(manifest, accepted):
     if audit_registration.scientific_contract(manifest):
         if manifest['protocol_version'] == 7:
             batch_files = ('audit_batches.py', 'audit_batch_context.py', 'audit_grammar.py')
-            if manifest['render_version'] in (21, 22):
+            if manifest['render_version'] in (21, 22, 23):
                 batch_files += ('audit_batch_format.py',)
             for name in batch_files:
                 relative = Path('src/data_sheets_schema') / name
