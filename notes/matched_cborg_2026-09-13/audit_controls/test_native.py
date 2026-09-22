@@ -53,6 +53,10 @@ def request():
         timeout=float(os.environ.get('API_TIMEOUT_MS',case.get('default_timeout_ms',5000)))/1000
         with urllib.request.urlopen(req,timeout=timeout) as response:return response.status, response.read().decode()
     except urllib.error.HTTPError as error:return error.code,error.read().decode()
+    except TimeoutError:
+        if case.get('timeout_witness'):
+            Path(case['timeout_witness']).write_text(json.dumps({'kind':'request_timeout','timeout_seconds':timeout}))
+        raise
 request()
 denials=[]
 for index, call in enumerate(case['calls']):
@@ -370,7 +374,8 @@ def test_delayed_headers_use_only_registered_native_client_timeout(native_case, 
     """Environment plumbing with a Python child; not a test of native/Bun idle timers."""
     import time
     c = native_case
-    c.case.update(default_timeout_ms=250, final_request=False)
+    timeout_witness = c.attempt / 'synthetic_client_timeout.json'
+    c.case.update(default_timeout_ms=250, final_request=False, timeout_witness=str(timeout_witness))
     context, sdk = configure_execution(c, monkeypatch)
     # A long ambient value must not rescue the unregistered child. A short
     # ambient value must not replace the explicit timeout of the registered one.
@@ -386,10 +391,13 @@ def test_delayed_headers_use_only_registered_native_client_timeout(native_case, 
     if registered:
         result = native.execute_job(context, client=sdk, upstream=upstream)
         assert result['validation']['passed']
+        assert not timeout_witness.exists()
     else:
         with pytest.raises(BudgetStop):
             native.execute_job(context, client=sdk, upstream=upstream)
-        assert 'TimeoutError' in (c.attempt / 'stderr.txt').read_text()
+        # The parent may terminate/drain the child while Python is printing its
+        # traceback. Capture the actual timeout before that shutdown race.
+        assert json.loads(timeout_witness.read_text()) == {'kind':'request_timeout','timeout_seconds':0.25}
         assert not (c.attempt / 'validation.json').exists()
     rows = json.loads(c.ledger.path.read_text())['requests']
     assert len(calls) == len(rows) == 1
