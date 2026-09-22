@@ -124,7 +124,10 @@ def validate_scientific_identity(manifest, accepted):
             raise BudgetStop('finalization changes the inherited scientific instrument: '+name)
     if audit_registration.scientific_contract(manifest):
         if manifest['protocol_version'] == 7:
-            for name in ('audit_batches.py', 'audit_batch_context.py', 'audit_grammar.py'):
+            batch_files = ('audit_batches.py', 'audit_batch_context.py', 'audit_grammar.py')
+            if manifest['render_version'] == 21:
+                batch_files += ('audit_batch_format.py',)
+            for name in batch_files:
                 relative = Path('src/data_sheets_schema') / name
                 if sha(Path(manifest['repository']) / relative) != sha(Path(accepted['repository']) / relative):
                     raise BudgetStop('finalization changes the accepted batch scientific implementation: ' + name)

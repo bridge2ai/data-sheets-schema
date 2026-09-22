@@ -13,7 +13,8 @@ from .registration import (BudgetStop, canonical_path, inspect_parent,
     read_json, required_paths, sha, validate_registration)
 from .registration import (TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND,
                            CLAIM_CLARIFICATION_TRANSITION_KIND, DRAFT_GRAMMAR_TRANSITION_KIND,
-                           SCHEMA_SEMANTICS_TRANSITION_KIND, BATCH_TRANSITION_KIND)
+                           SCHEMA_SEMANTICS_TRANSITION_KIND, BATCH_TRANSITION_KIND,
+                           BATCH_FORMAT_TRANSITION_KIND)
 from .contract import render_instruction
 
 SYSTEM = """You are the native auditor for a registered D4D Phase 3 continuation.
@@ -76,7 +77,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             staged_audit_output=False, native_upstream_read_timeout_seconds=None,
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
-            schema_semantic_context=False, audit_batches=None):
+            schema_semantic_context=False, audit_batches=None, audit_batch_format=False):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -95,6 +96,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         raise BudgetStop('draft audit grammar requires an explicit boolean')
     if type(schema_semantic_context) is not bool:
         raise BudgetStop('schema semantic context requires an explicit boolean')
+    if type(audit_batch_format) is not bool:
+        raise BudgetStop('audit batch format requires an explicit boolean')
+    if audit_batch_format and audit_batches is None:
+        raise BudgetStop('audit batch format requires explicit audit batches')
     if audit_batches is not None:
         from .batch_registration import selection
         audit_batches = selection(audit_batches)
@@ -217,8 +222,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     manifest.update(claim_selection)
     manifest.update(upstream_selection)
     if audit_batches is not None:
-        manifest.update(protocol_version=7, render_version=20)
-        manifest[TRANSITION] = {'kind': BATCH_TRANSITION_KIND}
+        manifest.update(protocol_version=7, render_version=21 if audit_batch_format else 20)
+        manifest[TRANSITION] = {'kind': BATCH_FORMAT_TRANSITION_KIND if audit_batch_format else BATCH_TRANSITION_KIND}
     if upgrade_evidence_protocol:
         manifest.update(protocol_version=4, render_version=15)
         manifest[TRANSITION] = {'kind': TRANSITION_KIND}
@@ -344,6 +349,8 @@ def main():
         help='select protocol 6/renderer 18 and at most two immutable grammar drafts before terminal validation')
     scientific.add_argument('--audit-batches', type=Path,
         help='JSON configuration selecting protocol 7/renderer 20 fresh workers and explicit final integration')
+    parser.add_argument('--audit-batch-format', action='store_true',
+        help='with --audit-batches, select renderer 21 and an exact source-blind JSON format contract')
     parser.add_argument('--schema-semantic-context', action='store_true',
         help='with --draft-audit-grammar, select renderer 19 and exact nested schema semantics for the frozen pair')
     parser.add_argument('--repository', default=str(Path.cwd()))

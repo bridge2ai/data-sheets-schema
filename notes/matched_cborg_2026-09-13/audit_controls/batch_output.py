@@ -80,9 +80,9 @@ def configuration(manifest, registration_path=None):
     scientific_contract(manifest)
     if (manifest.get('kind') != 'd4d_native_audit_continuation'
             or type(manifest.get('protocol_version')) is not int or manifest['protocol_version'] != 7
-            or type(manifest.get('render_version')) is not int or manifest['render_version'] != 20
+            or type(manifest.get('render_version')) is not int or manifest['render_version'] not in (20, 21)
             or any(k in manifest for k in ('audit_output', 'audit_drafting', 'context_recovery', 'audit_contract_context'))):
-        raise BudgetStop('fresh batch integration requires only the selected native audit 7/20 mode')
+        raise BudgetStop('fresh batch integration requires only a selected native audit 7/20 or 7/21 mode')
     block = manifest['audit_batches']
     if type(block) is not dict or type(block.get('worker_total_cap_usd')) is not str:
         raise BudgetStop('audit batch selector requires an explicit worker reservation ceiling')
