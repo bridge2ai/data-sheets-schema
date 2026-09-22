@@ -601,3 +601,26 @@ The existing grammar, two-draft limit, scientific duties, terminal source check,
 independent acceptance and spending controls remain in force. A failed attempt
 requires a fresh registration with every worker restarted from its registered
 inputs; it cannot be repaired or resumed.
+
+### Explicit row Read navigation (renderer 22)
+
+For a fresh batch registration, `--audit-batch-navigation` also requires
+`--audit-batch-format` and `--audit-batches`. It selects protocol 7 / renderer 22,
+the `frozen_pair_batch_navigation_v1` transition, and
+`audit_batch_navigation: {"kind": "explicit_row_reads_v1"}`. The dynamic integration
+context supplies exact `Read` input objects beside explicitly named logical
+pointers and expected row hashes. Row filenames, canonical bytes, permissions,
+complete successful row-read coverage, findings, scientific duties and the single
+terminal source check remain unchanged.
+The integration system prompt also retains exact instruction/index recovery
+locators that are already permitted inputs. Its instruction Read starts at the
+line-addressable navigation appendix and uses bounded ranges to recover the row
+locators. This recovery concerns navigation; complete sources and worker findings
+remain scientific inputs with their own registered locators. The index remains
+identity metadata; it cannot replace complete row Reads or scientific evidence.
+
+Omission preserves renderer 20/21 navigation; a predecessor never selects this
+option implicitly. The active selector is refused by generation, evaluation and
+Phase 4. Phase 4 inherits an accepted renderer-22 instrument and its pinned
+implementation without activating the audit navigation. This is a separately
+registered presentation change, not proof of the cause of any historical failure.

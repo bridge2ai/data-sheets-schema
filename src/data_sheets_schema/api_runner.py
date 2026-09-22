@@ -528,7 +528,7 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
@@ -6014,7 +6014,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:
         return plan(spec)
-    if spec.render_version in (19, 20, 21):
+    if spec.render_version in (19, 20, 21, 22):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")
 
@@ -6118,7 +6118,7 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
 
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
-    if spec.render_version in (19, 20, 21):
+    if spec.render_version in (19, 20, 21, 22):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")
 

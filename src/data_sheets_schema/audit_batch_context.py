@@ -275,6 +275,21 @@ def _render(value):
     return text
 
 
+def _render_row_navigation(appendix):
+    """Keep operational Reads before arbitrary scientific strings, on lines.
+
+    Only the outer order is special. Canonicalize every value recursively so
+    equivalent input dictionaries cannot change the rendered navigation.
+    """
+    order = ("path_navigation", "row_reads", "format", "index", "worker_artifacts",
+             "complete_worker_findings", "required_read_rule")
+    ordered = {key: json.loads(_json(appendix[key])) for key in order}
+    text = json.dumps(ordered, ensure_ascii=False, allow_nan=False, indent=2) + "\n"
+    if len(text.encode("utf-8")) > MAX_CONTEXT_BYTES:
+        raise BatchContextError("scientific_context_byte_bound")
+    return text
+
+
 def render_worker_context(*, inputs, profile, project, plan, worker_id):
     return _render(_base(inputs=inputs, profile=profile, project=project, plan=plan, worker_id=worker_id))
 
@@ -285,13 +300,22 @@ def render_integration_base_context(*, inputs, profile, project, plan):
 
 
 def render_integration_context(*, inputs, profile, project, plan, worker_index,
-                               worker_artifacts, row_artifacts=None):
+                               worker_artifacts, row_artifacts=None,
+                               audit_batch_navigation=None):
     """Exact base plus verified navigation and all complete worker findings.
 
     Canonical row views are required for every indexed row. Their exact bytes
     must equal canonical_bytes(row); a hash from an arbitrary file is not a
     scientific input permission. Nothing outside the named artifacts is read.
+
+    The explicit_row_reads_v1 selection supplies native Read payloads without
+    changing scientific duties or the canonical index. None preserves the
+    historical renderer-20/21 text exactly.
     """
+    if audit_batch_navigation is not None and (type(audit_batch_navigation) is not str
+            or audit_batch_navigation != "explicit_row_reads_v1"):
+        raise BatchContextError("unsupported_row_navigation")
+    explicit_reads = audit_batch_navigation is not None
     from data_sheets_schema import audit_batches
     from data_sheets_schema.evidence_assertions import load_json
     base = render_integration_base_context(inputs=inputs, profile=profile, project=project, plan=plan)
@@ -313,21 +337,40 @@ def render_integration_context(*, inputs, profile, project, plan, worker_index,
     if not isinstance(row_artifacts, Mapping) or set(row_artifacts) != {r["path"] for r in worker_index["rows"]}:
         raise BatchContextError("row_artifact_roster_mismatch")
     for entry in worker_index["rows"]:
-        item = dict(entry)
-        item["worker_artifact"] = str(locations[entry["worker_id"]])
         path = _path(row_artifacts[entry["path"]])
+        if explicit_reads and path in row_bytes:
+            raise BatchContextError("duplicate_row_read_locator")
         old = next(r for r in parsed[entry["worker_id"]]["source_review"]["values"] if r["path"] == entry["path"])
         canonical = audit_batches.canonical_bytes(old)
         if path.read_bytes() != canonical or _sha(canonical) != entry["sha256"]:
             raise BatchContextError("row_view_does_not_bind_worker_row")
         row_bytes[path] = canonical
-        item["row_artifact"] = {"path": str(path), "bytes": len(canonical), "sha256": entry["sha256"]}
+        if explicit_reads:
+            item = {"logical_pointer": entry["path"], "tool": "Read",
+                    "input": {"file_path": str(path)},
+                    "expected_bytes": len(canonical), "expected_sha256": entry["sha256"]}
+        else:
+            item = dict(entry)
+            item["worker_artifact"] = str(locations[entry["worker_id"]])
+            item["row_artifact"] = {"path": str(path), "bytes": len(canonical), "sha256": entry["sha256"]}
         rows.append(item)
     appendix = {"format": "audit_batch_integration_navigation_v1", "index": deepcopy(worker_index),
                 "worker_artifacts": {key: str(path) for key, path in sorted(locations.items())},
                 "rows": rows, "complete_worker_findings": findings,
                 "required_read_rule": "Before final integration decisions, successfully Read every canonical row view completely, including rows retained unchanged. Assess all rows against the originals and sources before binding the explicit retention decision to this index digest. Complete worker findings above must all receive explicit dispositions. This index and these proposals are not source evidence."}
-    text = base + "\n# Immutable worker proposals: navigation and complete findings\n" + _render(appendix)
+    if explicit_reads:
+        appendix["format"] = "audit_batch_integration_navigation_v2"
+        appendix["row_reads"] = appendix.pop("rows")
+        appendix["path_navigation"] = (
+            "For each row_reads entry, call its tool with the supplied input object exactly. "
+            "input.file_path is the absolute filesystem locator for that canonical row. "
+            "logical_pointer and index.rows[].path identify values inside the original record; "
+            "they are not filesystem paths. Do not derive filenames from pointers or hashes, "
+            "join them to a directory, or replace the supplied Read with a Bash command. "
+            "Paths for other source/schema inputs and worker artifacts are their registered "
+            "absolute locators. This navigation grants no additional tool or path permissions.")
+    rendered = _render_row_navigation(appendix) if explicit_reads else _render(appendix)
+    text = base + "\n# Immutable worker proposals: navigation and complete findings\n" + rendered
     if len(text.encode("utf-8")) > MAX_CONTEXT_BYTES:
         raise BatchContextError("scientific_context_byte_bound")
     if any(path.read_bytes() != data[key] for key, path in locations.items()) or any(path.read_bytes() != raw for path, raw in row_bytes.items()):

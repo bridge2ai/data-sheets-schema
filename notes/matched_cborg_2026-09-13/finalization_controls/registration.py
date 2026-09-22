@@ -125,7 +125,7 @@ def validate_scientific_identity(manifest, accepted):
     if audit_registration.scientific_contract(manifest):
         if manifest['protocol_version'] == 7:
             batch_files = ('audit_batches.py', 'audit_batch_context.py', 'audit_grammar.py')
-            if manifest['render_version'] == 21:
+            if manifest['render_version'] in (21, 22):
                 batch_files += ('audit_batch_format.py',)
             for name in batch_files:
                 relative = Path('src/data_sheets_schema') / name
@@ -150,6 +150,8 @@ def validate_scientific_identity(manifest, accepted):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
+    if 'audit_batch_navigation' in manifest:
+        raise BudgetStop('audit_batch_navigation is audit-only; Phase 4 cannot select it')
     if 'audit_batches' in manifest:
         raise BudgetStop('audit_batches is audit-only; Phase 4 cannot select it')
     if 'audit_drafting' in manifest:

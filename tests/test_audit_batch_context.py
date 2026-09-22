@@ -376,6 +376,186 @@ def test_empty_integration_still_requires_explicit_empty_row_view_roster(staged)
     assert context.render_integration_context(**args, row_artifacts={})
 
 
+def integration_arguments(s):
+    artifacts, index, rows = proposals(s)
+    return dict(inputs=s['files'], profile=NEUTRAL, project='example', plan=s['plan'],
+                worker_index=index, worker_artifacts=artifacts, row_artifacts=rows)
+
+
+def integration_appendix(s, **args):
+    base = context.render_integration_base_context(inputs=s['files'], profile=NEUTRAL,
+                                                   project='example', plan=s['plan'])
+    text = context.render_integration_context(**args)
+    assert text.startswith(base + '\n# Immutable worker proposals:')
+    return text, json.loads(text[len(base):].split('\n', 2)[2])
+
+
+def test_default_navigation_preserves_prechange_bytes(staged):
+    args = integration_arguments(staged)
+    text = context.render_integration_context(**args)
+    assert context.render_integration_context(**args, audit_batch_navigation=None) == text
+    # Captured from the unchanged renderer before adding the selector. Only
+    # the temporary fixture directory is normalized; all other bytes remain.
+    normalized = text.replace(str(staged['tmp']), '/SYNTHETIC_ROOT').encode()
+    assert len(normalized) == 14003
+    assert hashlib.sha256(normalized).hexdigest() == '3c746f265c3e183bb501658b184591eef25ba71628e27e7ffb4487bd3f34295d'
+
+
+@pytest.mark.parametrize('selector', ['', True, False, 0, {}, [], 'explicit_row_reads_v2'])
+def test_navigation_selector_is_strict_before_reading_inputs(monkeypatch, selector):
+    def forbidden(**unused):pytest.fail('invalid selector reached scientific inputs')
+    monkeypatch.setattr(context, 'render_integration_base_context', forbidden)
+    with pytest.raises(ValueError, match='unsupported_row_navigation'):
+        context.render_integration_context(inputs={}, profile=NEUTRAL, project='example',
+            plan={}, worker_index={}, worker_artifacts={}, audit_batch_navigation=selector)
+
+
+def test_explicit_reads_preserve_index_findings_and_scientific_prefix(staged):
+    args = integration_arguments(staged)
+    _, old = integration_appendix(staged, **args)
+    text, new = integration_appendix(staged, **args, audit_batch_navigation='explicit_row_reads_v1')
+    assert text == context.render_integration_context(**args, audit_batch_navigation='explicit_row_reads_v1')
+    assert new['format'] == 'audit_batch_integration_navigation_v2' and 'rows' not in new
+    for key in ('index', 'worker_artifacts', 'complete_worker_findings', 'required_read_rule'):
+        assert new[key] == old[key]
+    assert new['index']['sha256'] == args['worker_index']['sha256']
+    assert [entry['logical_pointer'] for entry in new['row_reads']] == [r['path'] for r in new['index']['rows']]
+    for entry in new['row_reads']:
+        path = args['row_artifacts'][entry['logical_pointer']]
+        raw = path.read_bytes()
+        assert entry == {'logical_pointer': entry['logical_pointer'], 'tool': 'Read',
+                         'input': {'file_path': str(path)}, 'expected_bytes': len(raw),
+                         'expected_sha256': hashlib.sha256(raw).hexdigest()}
+        assert text.count(str(path)) == 1  # one filesystem locator, no competing path table
+    assert 'not filesystem paths' in new['path_navigation']
+    assert 'Do not derive filenames' in new['path_navigation']
+    assert 'including rows retained unchanged' in new['required_read_rule']
+
+
+def test_explicit_read_payloads_are_exact_policy_inputs_even_with_hostile_spelling(staged, monkeypatch):
+    import importlib.util
+    root = Path(context.__file__).resolve().parents[2]
+    controls = root/'notes/matched_cborg_2026-09-13'
+    monkeypatch.syspath_prepend(str(controls))
+    spec = importlib.util.spec_from_file_location('navigation_file_policy', controls/'native_controls/native_file_policy.py')
+    module = importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    args = integration_arguments(staged)
+    external = staged['tmp']/'.local_drafts'/'space "quote" λ $(literal)'
+    external.mkdir(parents=True)
+    for ordinal, (logical, old) in enumerate(args['row_artifacts'].items()):
+        path = external/f'{ordinal} semicolon; newline\n.json'
+        path.write_bytes(old.read_bytes());args['row_artifacts'][logical] = path
+    execution = staged['tmp']/'execution';execution.mkdir()
+    _, appendix = integration_appendix(staged, **args, audit_batch_navigation='explicit_row_reads_v1')
+    policy = {'readonly_lookups': {'repository': str(execution),
+              'inputs': [str(p) for p in args['row_artifacts'].values()], 'output_directories': []}}
+    access = module.FileAccess(policy)
+    for entry in appendix['row_reads']:
+        assert access.classify(entry['tool'], entry['input'])[0] == 'prescribed'
+        assert not Path(entry['input']['file_path']).is_relative_to(execution)
+        assert access.classify('Read', {'file_path': entry['logical_pointer']})[0] == 'not_prescribed'
+        guessed = execution/Path(entry['input']['file_path']).name
+        assert access.classify('Read', {'file_path': str(guessed)})[0] == 'not_prescribed'
+
+
+@pytest.mark.parametrize('damage', ['missing', 'extra', 'duplicate', 'stale', 'symlink', 'relative', 'index'])
+def test_explicit_navigation_refuses_missing_stale_or_aliased_locators(staged, damage):
+    args = integration_arguments(staged)
+    rows = args['row_artifacts'];first, second = list(rows)[:2]
+    if damage == 'missing':rows.pop(first)
+    elif damage == 'extra':rows['/not-in-index'] = rows[first]
+    elif damage == 'duplicate':rows[second] = rows[first]
+    elif damage == 'stale':rows[first].write_bytes(b'{"different":"synthetic"}\n')
+    elif damage == 'symlink':
+        alias = staged['tmp']/'alias.json';alias.symlink_to(rows[first]);rows[first] = alias
+    elif damage == 'relative':rows[first] = Path(rows[first].name)
+    else:args['worker_index']['rows'][0]['sha256'] = '0'*64
+    with pytest.raises((ValueError, OSError)):
+        context.render_integration_context(**args, audit_batch_navigation='explicit_row_reads_v1')
+
+
+def test_explicit_navigation_catches_row_mutation_during_render(staged, monkeypatch):
+    args = integration_arguments(staged)
+    original = context._render_row_navigation
+    def changed(value):
+        result = original(value)
+        if value.get('format') == 'audit_batch_integration_navigation_v2':
+            next(iter(args['row_artifacts'].values())).write_bytes(b'changed after render\n')
+        return result
+    monkeypatch.setattr(context, '_render_row_navigation', changed)
+    with pytest.raises(ValueError, match='worker_changed_during_context_render'):
+        context.render_integration_context(**args, audit_batch_navigation='explicit_row_reads_v1')
+
+
+def test_explicit_navigation_has_no_per_row_path_duplication_and_stays_bounded(staged, monkeypatch):
+    record = {'caption': [f'Synthetic item {i}.' for i in range(24)]}
+    for role in ('original_full', 'original_core'):
+        staged['files'][role].write_text(yaml.safe_dump(record, sort_keys=False))
+    staged['plan'] = audit_batches.make_plan(staged['files']['original_full'].read_text())
+    args = integration_arguments(staged)
+    old, _ = integration_appendix(staged, **args)
+    new, appendix = integration_appendix(staged, **args, audit_batch_navigation='explicit_row_reads_v1')
+    assert len(appendix['row_reads']) == 24
+    assert len(new.encode()) < len(old.encode())  # guidance replaces duplicated row metadata
+    monkeypatch.setattr(context, 'MAX_CONTEXT_BYTES', len(new.encode())-1)
+    with pytest.raises(ValueError, match='scientific_context_byte_bound'):
+        context.render_integration_context(**args, audit_batch_navigation='explicit_row_reads_v1')
+
+
+def test_explicit_empty_navigation_requires_the_explicit_empty_roster(staged):
+    repin_record(staged, {})
+    args = integration_arguments(staged)
+    _, appendix = integration_appendix(staged, **args, audit_batch_navigation='explicit_row_reads_v1')
+    assert appendix['row_reads'] == [] and appendix['index']['rows'] == []
+    args['row_artifacts'] = None
+    with pytest.raises(ValueError, match='row_artifact_roster_mismatch'):
+        context.render_integration_context(**args, audit_batch_navigation='explicit_row_reads_v1')
+
+
+def test_navigation_recovery_ranges_precede_arbitrary_scientific_strings(staged):
+    record = {f'field_{i}': f'Synthetic value {i}.' for i in range(220)}
+    for role in ('original_full', 'original_core'):
+        staged['files'][role].write_text(yaml.safe_dump(record, sort_keys=False))
+    staged['plan'] = audit_batches.make_plan(staged['files']['original_full'].read_text())
+    args = integration_arguments(staged)
+    # This valid finding string is intentionally not line-recoverable. It must
+    # remain intact after operational navigation, without a new scientific cap.
+    huge_issue = 'Synthetic long scientific concern. ' * 1200
+    worker = next(iter(args['worker_artifacts']))
+    path = args['worker_artifacts'][worker]
+    value = json.loads(path.read_bytes());value['findings'][0]['issue'] = huge_issue
+    path.write_bytes(audit_batches.canonical_bytes(value))
+    args['worker_index'] = audit_batches.build_index(staged['plan'],
+        {key: path.read_bytes() for key, path in args['worker_artifacts'].items()})
+    text, appendix = integration_appendix(staged, **args, audit_batch_navigation='explicit_row_reads_v1')
+    lines = text.splitlines(keepends=True)
+    assert lines[1] == '\n' and lines[2].startswith('# Immutable worker proposals:')
+    assert lines[3] == '{\n'  # registered recovery offset=4 skips the compact base
+    assert list(appendix)[:2] == ['path_navigation', 'row_reads']
+    stop = next(i for i, line in enumerate(lines) if line.startswith('  "format":'))
+    recovered = ''.join(lines[3:stop]).rstrip()
+    assert recovered.endswith(',')
+    recovered = json.loads(recovered[:-1]+'\n}')
+    assert recovered['row_reads'] == appendix['row_reads'] and len(recovered['row_reads']) == 220
+    assert appendix['index'] == args['worker_index']
+    assert any(row['finding']['issue'] == huge_issue for row in appendix['complete_worker_findings'])
+    assert all(huge_issue not in line for line in lines[3:stop])
+    # Pinned CLI2.1.272 uses a 25,000-token default Read ceiling. Keeping these
+    # synthetic numbered slices below25,000 UTF-8 bytes is a conservative
+    # envelope, not a claim that arbitrary scientific strings fit that limit.
+    for start in range(3, stop, 200):
+        # Real Read(limit=200) can include following index lines in its last slice.
+        part = lines[start:start+200]
+        numbered = ''.join(f'{number}\t{line}' for number, line in enumerate(part, start+1))
+        assert len(numbered.encode()) < 25000
+    assert max(len(line.encode()) for line in lines[3:stop]) < 4096
+    assert len(text.encode()) < context.MAX_CONTEXT_BYTES
+    # Input map insertion order cannot alter pretty nested values or outer order.
+    args['worker_artifacts'] = dict(reversed(list(args['worker_artifacts'].items())))
+    args['row_artifacts'] = dict(reversed(list(args['row_artifacts'].items())))
+    assert context.render_integration_context(**args, audit_batch_navigation='explicit_row_reads_v1') == text
+
+
 @pytest.mark.parametrize('damage', ['duplicate', 'boolean_limit', 'wrong_bundle_name'])
 def test_manifest_declaration_ambiguity_is_rejected(staged, damage):
     path = staged['files']['chunk_manifest']
