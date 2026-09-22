@@ -1,6 +1,7 @@
 """A CI split must execute every test exactly once and retain failures."""
 
 from collections import Counter
+from itertools import product
 from pathlib import Path
 import os
 import json
@@ -150,16 +151,27 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
     workflow = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())
     gate = workflow["jobs"]["test"]
     assert gate["if"] == "always()"
-    assert set(gate["needs"]) == {"python-tests", "schema-examples"}
-    script = gate["steps"][0]["run"]
+    assert set(gate["needs"]) == {
+        "python-tests", "offline-audit", "offline-evaluation", "schema-examples"
+    }
+    step = gate["steps"][0]
+    statuses = ("success", "failure", "cancelled", "skipped")
     for event in ("pull_request", "push", "workflow_dispatch"):
-        for python_result in ("success", "failure", "cancelled", "skipped"):
-            for build_result in ("success", "failure", "cancelled", "skipped"):
-                env = {**os.environ, "EVENT_NAME": event,
-                       "PYTHON_RESULT": python_result, "BUILD_RESULT": build_result}
-                result = subprocess.run(["bash", "-e", "-c", script], cwd=tmp_path,
-                                        env=env, capture_output=True, timeout=10)
-                expected_build = "skipped" if event == "pull_request" else "success"
-                assert (result.returncode == 0) == (
-                    python_result == "success" and build_result == expected_build
-                ), (event, python_result, build_result)
+        for outcomes in product(statuses, repeat=len(gate["needs"])):
+            results = dict(zip(gate["needs"], outcomes))
+            expressions = {"${{ github.event_name }}": event}
+            expressions.update({f"${{{{ needs.{job}.result }}}}": result
+                                for job, result in results.items()})
+            # Exercise the actual workflow bindings; a duplicated needs source
+            # must fail even when the shell script itself is correct.
+            env = {key: value for key, value in os.environ.items()
+                   if not key.endswith("_RESULT") and key != "EVENT_NAME"}
+            env.update({name: expressions[value] for name, value in step["env"].items()})
+            result = subprocess.run(["bash", "-e", "-c", step["run"]], cwd=tmp_path,
+                                    env=env, capture_output=True, timeout=10)
+            expected_build = "skipped" if event == "pull_request" else "success"
+            assert (result.returncode == 0) == (
+                all(results[job] == "success" for job in
+                    ("python-tests", "offline-audit", "offline-evaluation"))
+                and results["schema-examples"] == expected_build
+            ), (event, results)
