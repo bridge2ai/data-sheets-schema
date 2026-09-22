@@ -50,6 +50,12 @@ def required_paths(manifest):
         if sha(result_ref['path']) != result_ref['sha256']:
             raise BudgetStop('accepted drafted audit result changed before pinning')
         paths.update(closure_paths(accepted, manifest['accepted_audit']['registration']['path'], read_json(result_ref['path'])))
+    if 'audit_batches' in accepted:
+        from audit_controls.batch_output import closure_paths
+        result_ref = manifest['budget_sequence']['audit_origin']['result']
+        if sha(result_ref['path']) != result_ref['sha256']:
+            raise BudgetStop('accepted batched audit result changed before pinning')
+        paths.update(closure_paths(accepted, manifest['accepted_audit']['registration']['path'], read_json(result_ref['path'])))
     paths.update(Path(name) for name in manifest['inputs'].values())
     paths.update(audit_registration.schema_semantic_paths(manifest))
     paths.update(Path(manifest['job'][name]) for name in ('instruction', 'system_prompt'))
@@ -117,6 +123,11 @@ def validate_scientific_identity(manifest, accepted):
         if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
             raise BudgetStop('finalization changes the inherited scientific instrument: '+name)
     if audit_registration.scientific_contract(manifest):
+        if manifest['protocol_version'] == 7:
+            for name in ('audit_batches.py', 'audit_batch_context.py', 'audit_grammar.py'):
+                relative = Path('src/data_sheets_schema') / name
+                if sha(Path(manifest['repository']) / relative) != sha(Path(accepted['repository']) / relative):
+                    raise BudgetStop('finalization changes the accepted batch scientific implementation: ' + name)
         if audit_registration.schema_semantic_context(manifest):
             relative=Path('src/data_sheets_schema/schema_semantics.py')
             if sha(Path(manifest['repository'])/relative)!=sha(Path(accepted['repository'])/relative):
@@ -136,6 +147,8 @@ def validate_scientific_identity(manifest, accepted):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
+    if 'audit_batches' in manifest:
+        raise BudgetStop('audit_batches is audit-only; Phase 4 cannot select it')
     if 'audit_drafting' in manifest:
         raise BudgetStop('audit_drafting is audit-only; Phase 4 cannot select it')
     if 'audit_contract_context' in manifest:

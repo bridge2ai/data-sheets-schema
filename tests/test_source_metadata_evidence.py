@@ -286,9 +286,10 @@ def test_legacy_file_check_rejects_new_authority_before_read(tmp_path):
 
 
 def test_version_dispatch_is_explicit():
-    assert [evidence.protocol_for_renderer(v) for v in (10, 11, 12, 14, 15, 16, 17, 18)] == [1, 2, 3, 3, 4, 5, 5, 6]
+    assert [evidence.protocol_for_renderer(v) for v in (10, 11, 12, 14, 15, 16, 17, 18, 19, 20)] == [1, 2, 3, 3, 4, 5, 5, 6, 6, 7]
     assert evidence.instrument(5) == "evidence_assertions v5 / source_review v2 (#2169)"
     assert evidence.instrument(6) == "evidence_assertions v6 / source_review v2 (#2178)"
-    for value in (True, 5.0, 6.0, None, 7):
+    assert evidence.instrument(7) == "evidence_assertions v7 / source_review v2 (#2192)"
+    for value in (True, 5.0, 6.0, 7.0, None, 8):
         with pytest.raises(ValueError):
             evidence.instrument(value)

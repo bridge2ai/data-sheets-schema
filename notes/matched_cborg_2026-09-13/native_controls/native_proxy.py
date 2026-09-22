@@ -159,7 +159,7 @@ def validated_stall_policy(value):
 class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
                  provider_key, base_url, upstream=None, request_headers=None,
-                 upstream_read_timeout_seconds=None, stall_policy=None, count_pause=None):
+                 upstream_read_timeout_seconds=None, stall_policy=None, count_pause=None, stage_cap=None):
         if base_url not in CBORG_ENDPOINTS:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
         # Opt-in only: None keeps every legacy path byte for byte (#2150).
@@ -193,6 +193,7 @@ class NativeProxy:
         self.messages = CappedMessages(sdk, ledger=ledger, attempt=attempt,
             evidence=Path(evidence), model=model, prices=prices, verify=verify,
             mutation_guard=self.mutation_guard,
+            **({'stage_cap': stage_cap} if stage_cap is not None else {}),
             **({"count_attempts": self.stall_policy["count_attempts"],
                 "count_timeout": POLICY_COUNT_TRY_SECONDS,
                 # The pause ends at once when admission closes (#2157).

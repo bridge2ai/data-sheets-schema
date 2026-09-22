@@ -136,7 +136,7 @@ class Ledger:
             temporary.write_text(json.dumps(state, indent=2) + "\n")
             temporary.replace(self.path)
 
-    def reserve(self, attempt, estimate, request_sha256):
+    def reserve(self, attempt, estimate, request_sha256, *, stage_cap=None):
         estimate = money(estimate)
         if not estimate.is_finite() or estimate <= 0:
             raise BudgetStop("request reservation must be finite and positive")
@@ -146,7 +146,16 @@ class Ledger:
                 raise BudgetStop("an earlier charge is pending or unknown; reconcile before continuing")
             total = sum((money(row["cost_usd"]) for row in state["requests"]), Decimal(0))
             used = sum((money(row["cost_usd"]) for row in state["requests"] if row["attempt"] == attempt), Decimal(0))
-            cap = self.limit_for_attempt(attempt)
+            canonical_cap = self.limit_for_attempt(attempt)
+            cap = canonical_cap
+            if stage_cap is not None:
+                try:
+                    selected_cap = money(stage_cap)
+                except (ValueError, TypeError, ArithmeticError) as error:
+                    raise BudgetStop("stage reservation ceiling must be finite and positive") from error
+                if not selected_cap.is_finite() or selected_cap <= 0 or selected_cap > cap:
+                    raise BudgetStop("stage reservation ceiling exceeds the registered attempt cap")
+                cap = selected_cap
             if estimate <= 0 or total + estimate > self.total_cap or used + estimate > cap:
                 reason = f"request reserve ${estimate} exceeds remaining budget: attempt ${cap-used}, sequence ${self.total_cap-total}"
                 state.setdefault("stopped_attempts", {})[attempt] = {
@@ -158,7 +167,8 @@ class Ledger:
                 ticket = uuid.uuid4().hex
                 state["requests"].append({"id": ticket, "attempt": attempt,
                     "request_sha256": request_sha256, "reserved_at": now(),
-                    "reserved_usd": str(estimate), "attempt_cap_usd": str(cap), "status": "pending"})
+                    "reserved_usd": str(estimate), "attempt_cap_usd": str(canonical_cap), "status": "pending",
+                    **({"stage_cap_usd": str(selected_cap)} if stage_cap is not None else {})})
         # Raise after the transaction commits, or the stop event is lost.
         if ticket is None:
             raise BudgetStop(reason)
@@ -274,7 +284,7 @@ class Ledger:
 
 class CappedMessages:
     def __init__(self, client, *, ledger, attempt, evidence, model, prices, verify, initial_request=None,
-                 mutation_guard=None, count_attempts=1, count_pause=None, count_timeout=None):
+                 mutation_guard=None, count_attempts=1, count_pause=None, count_timeout=None, stage_cap=None):
         if type(count_attempts) is not int or not 1 <= count_attempts <= 5:
             raise BudgetStop("token-count attempts must be a whole number from 1 to 5")
         self.count_attempts = count_attempts
@@ -282,6 +292,7 @@ class CappedMessages:
         # None is never forwarded, so a legacy count keeps its client's timeout.
         self.count_timeout = count_timeout
         self.count_retries = 0
+        self.stage_cap = stage_cap
         self.client, self.ledger, self.attempt = client, ledger, attempt
         self.evidence, self.model, self.prices = Path(evidence), model, prices
         self.verify = verify
@@ -352,7 +363,8 @@ class CappedMessages:
         # without blocking on a provider response (#1768).
         with self.mutation_guard("admit"):
             try:
-                ticket = self.ledger.reserve(self.attempt, estimate, digest(raw))
+                ticket = self.ledger.reserve(self.attempt, estimate, digest(raw),
+                    **({'stage_cap': self.stage_cap} if self.stage_cap is not None else {}))
             except BudgetStop as exc:
                 folder = self.evidence.parent / "denied_requests" / uuid.uuid4().hex
                 folder.mkdir(parents=True, exist_ok=False)

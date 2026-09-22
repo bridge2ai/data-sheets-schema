@@ -595,6 +595,11 @@ def controller_primary(state, error):
 
 
 def execute_job(context, *, client=None, upstream=None, protocol=None):
+    if 'audit_batches' in context.manifest:
+        if protocol is not None:
+            raise BudgetStop('audit batches are restricted to the native audit controller')
+        from .batch_native import execute_job as execute_batches
+        return execute_batches(context, client=client, upstream=upstream)
     state = {'stop_source': 'native_preflight', 'proxy': None}
     try:
         return _execute_job(context, state, client=client, upstream=upstream, protocol=protocol)
@@ -786,6 +791,9 @@ def run_job(registration_path, review_path, *, adapter=None):
         write_new(attempt/'started.json', receipt)
         context = SimpleNamespace(manifest=manifest, job=job, attempt=attempt, manifest_sha256=manifest_sha256,
             registration_path=registration_path, ledger=ledger, verify=verify_all)
+        if 'audit_batches' in manifest:
+            context._batch_clock = time.monotonic
+            context._batch_deadline = time.monotonic() + job['deadline_seconds']
         error, result = None, None
         try:
             result = (adapter or execute_job)(context)
@@ -814,6 +822,17 @@ def run_job(registration_path, review_path, *, adapter=None):
                 # reservation; their provider fee is unknown (#2150).
                 receipt['stall_debited_requests'] = [r['id'] for r in rows
                                                      if r.get('settlement_basis') == STALL_DEBIT_BASIS]
+            if 'audit_batches' in manifest and error is None:
+                from .batch_native import finish_deadline
+                try:
+                    finish_deadline(context, result)
+                except BaseException as late:
+                    error = late
+                    reason = str(late) if isinstance(late, BudgetStop) else type(late).__name__
+                    receipt.update(status='stopped', error_type=type(late).__name__, reason=reason,
+                        **getattr(late, 'native_stop', {'stop_source': 'batch_deadline',
+                            'runtime': shutdown_evidence(None)}))
+                    ledger.stop_attempt(billing_attempt, reason)
             write_new(attempt/'result.json', receipt)
         if error is not None:
             raise error
