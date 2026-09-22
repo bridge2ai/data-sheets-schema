@@ -225,7 +225,7 @@ def test_actual_api_response_still_stops_on_contract_errors(tmp_path, monkeypatc
     assert body == before and usage['source_review_admission']['state'] == 'pending'
 
 
-@pytest.mark.parametrize('value', [None, True, False, 6.0, '6', 7])
+@pytest.mark.parametrize('value', [None, True, False, 6.0, '6', 8])
 def test_bad_protocol_selectors_remain_rejected(value):
     with pytest.raises(ValueError, match='unsupported'):
         evidence.instrument(value)
