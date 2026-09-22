@@ -60,7 +60,7 @@ ARM_BY_METHOD = {
     "claudecode_api_core": "baseline",
     # The third runtime path (#2202): Claude Code on the maintainer's
     # subscription, direct to Anthropic. Same baseline inputs; the arm
-    # differs in provider, which `ARM_PROCEDURE_FIELDS` reports.
+    # differs in transport, which its distinct runtime string reports.
     "claudecode_direct": "baseline",
     "claudecode_direct_core": "baseline",
     "claudecode_agent_crate": "de_novo",
@@ -82,10 +82,26 @@ AGENT_FAMILY = ("claudecode_agent", "claudecode_api", "claudecode_direct")
 #: CBORG-proxied agentic canonicals and could supersede them.
 RUNTIME_KEYS = {"claude code": "agentic", "claude api (direct)": "api",
                 "claude code (direct)": "direct"}
+#: Every runtime key, in the order the reports list them: what `--runtime`
+#: admits and what `canonical_sets` enumerates (#2211, #2210).
+RUNTIME_CHOICES = ("api", "agentic", "direct")
+#: The keys whose executing program is the Claude Code binary, whatever
+#: transport reaches the model (#2202): the agentic arm through the local
+#: proxy to CBORG, the direct arm on the maintainer's subscription. Both read
+#: the playbooks, neither writes a reasoning log of its own, and a header
+#: temperature or effort on either is the generating agent's assertion.
+CLAUDE_CODE_KEYS = ("agentic", "direct")
+
+
+def is_claude_code_runtime(runtime: str | None) -> bool:
+    """Is this runtime string one of the Claude Code arms (#2212, #2213)?"""
+    if not isinstance(runtime, str):
+        return False
+    return RUNTIME_KEYS.get(runtime.strip().lower()) in CLAUDE_CODE_KEYS
 
 
 def runtime_of(record: dict) -> str | None:
-    """`api`, `agentic`, or None when the record does not say (#690)."""
+    """`api`, `agentic`, `direct`, or None when the record does not say (#690)."""
     model = record.get("model") if isinstance(record, dict) else None
     value = (model or {}).get("agent_runtime") if isinstance(model, dict) else None
     if not isinstance(value, str):
@@ -535,8 +551,9 @@ def canonical_runs(concat_dir: Path | None = None,
     if ambiguous:
         detail = "; ".join(f"{p}: {', '.join(sorted(labels))}"
                            for p, labels in sorted(ambiguous.items()))
-        hint = ("" if runtime else " or runtime= ('api' / 'agentic') where the marks "
-                "belong to different runtimes")
+        hint = ("" if runtime else " or runtime= ("
+                + " / ".join(repr(k) for k in RUNTIME_CHOICES)
+                + ") where the marks belong to different runtimes")
         raise AmbiguousCanonical(
             f"more than one canonical record per project ({detail}). "
             f"Pass config= to say which configuration you mean{hint}.")
@@ -547,10 +564,11 @@ def canonical_runs(concat_dir: Path | None = None,
 def canonical_sets(concat_dir: Path | None = None,
                    config: str | None = None) -> dict[str, dict[str, dict]]:
     """runtime -> project -> canonical run, for callers that want every arm's
-    canonical set rather than one answer per project (#690). Keys are `api`,
-    `agentic`, and `unknown` for marks whose record names no runtime."""
+    canonical set rather than one answer per project (#690). Keys are the
+    runtime keys in `RUNTIME_CHOICES` (#2210); a mark whose record names no
+    runtime is under none of them."""
     out: dict[str, dict[str, dict]] = {}
-    for rt in ("api", "agentic"):
+    for rt in RUNTIME_CHOICES:
         found = canonical_runs(concat_dir=concat_dir, config=config, runtime=rt)
         if found:
             out[rt] = found
@@ -1352,11 +1370,13 @@ ARM_PROCEDURE_FIELDS = (
     # condition difference.
     ("condition", ("run", "condition")),
     ("model", ("model", "model")),
+    # The transport is in the runtime string: the direct arm writes `Claude
+    # Code (direct)` (#2202). `model.provider` is not compared here (#2214):
+    # on the 2026-08 agentic records it is the literal `Anthropic` the old
+    # playbook line dictated, while the transport was CBORG through the
+    # proxy, so comparing it reported a transport confound between two arms
+    # that shared one. It stays a recorded fact; #2215 is its basis.
     ("runtime", ("model", "agent_runtime")),
-    # Two Claude Code arms now differ only in provider (#2202): the agentic
-    # arm reaches Anthropic through CBORG, the direct arm does not. A
-    # comparison that could not see that would report no difference.
-    ("provider", ("model", "provider")),
     # The judge is part of the procedure (#1097). v7 was reviewed by
     # `claude-fable-5` and v8 by `claude-fable-5-1`, and a reader running this
     # tool on exactly the comparison that difference affects got a report that

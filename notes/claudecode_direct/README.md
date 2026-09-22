@@ -36,25 +36,46 @@ controller's own stop state.
 - **Auth.** With an isolated `CLAUDE_CONFIG_DIR` the runtime looks for a
   keychain item suffixed by that directory and finds no login. The child gets
   `CLAUDE_SECURESTORAGE_CONFIG_DIR` set and empty, which makes it use the
-  maintainer's own login item. No token enters the environment, and the
-  launcher refuses to start if `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`,
-  `ANTHROPIC_BASE_URL`, `CBORG_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` is set.
-  `auth status --json` is captured before launch, in the child's exact
-  environment: method, provider and plan only. The init line must report
-  `apiKeySource: none`.
+  maintainer's own login item in the login keychain. That item is a shared
+  store: a token refresh during the run may rewrite it. The child's
+  environment is built from the preparer's constants, the job's variables
+  and the parent's pass-through names only, and it is refused wherever a
+  provider key, token, custom header, cloud-provider switch, proxy or base
+  URL appears, in the launcher's own environment or in the registration.
+  `auth status --json` is captured before launch in that exact environment:
+  method, provider and plan only. The init line must report `apiKeySource:
+  none`; that is a necessary condition, not proof of the login by itself,
+  since the runtime reports `none` for a bearer token or a cloud provider
+  too, which is why the environment is screened first.
 - **Cost.** Nothing meters the provider. The receipt carries the runtime's
-  terminal `usage`, `modelUsage`, `num_turns` and its own `total_cost_usd`,
-  which is the runtime's estimate. `--max-budget-usd` is passed as a runaway
-  guard on that estimate; it is not a cap against any allocation. The
-  observer measures the transcript as it does for every Claude Code run.
+  terminal `usage`, the registered model's `modelUsage`, `num_turns` and its
+  own `total_cost_usd`, which is the runtime's estimate. `--max-budget-usd`
+  is passed as a runaway guard on that estimate; the runtime honours it on a
+  login session, and it is not a cap against any allocation. The observer
+  measures the transcript as it does for every Claude Code run.
+- **Auxiliary model.** The runtime's own auxiliary calls, titles and
+  summaries, use a second model, `claude-haiku-4-5`, and they appear in the
+  terminal accounting; the proxied arm never saw them because its proxy
+  refused off-model requests. The registration names the auxiliary models it
+  permits, their usage is recorded under `auxiliary_model_usage`, and a model
+  outside that set stops the run. `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`
+  is set to reduce them; it does not remove them.
 - **Effort.** `--effort max` is passed to the runtime and `--reasoning-effort
   max` is rendered into the instruction's own recorder line, so the record
-  carries it as asserted by the launcher. The runtime does not report effort.
+  carries it as asserted by the launcher. The runtime does report the active
+  effort, after any silent downgrade, on every tool callback, and the control
+  log keeps it; after the run every reported level is compared with the
+  registered one, recorded under `effort_observed`, and a difference is a
+  validation problem.
 - **Isolation.** The registration names the checkout it was prepared in and
-  the launcher refuses any other. Writes go only under
-  `data/d4d_concatenated/claudecode_direct` and its core twin. Nothing under
-  `notes/matched_cborg_*` is read or written: no ledger, no sequence owner, no
-  registration, no attempt directory of the CBORG arms.
+  the launcher refuses any other. The job's method, runtime and every output
+  path must be the direct arm's, checked before any write. Writes go under
+  `data/d4d_concatenated/claudecode_direct`, its core twin, and the attempt
+  directory beside the registration. Nothing under `notes/matched_cborg_*` is
+  read or written: no ledger, no sequence owner, no registration, no attempt
+  directory of the CBORG arms. Every check, the login probe included, runs
+  before the attempt directory exists, so a refusal never consumes the job
+  identity.
 
 ## Running one canary
 
@@ -83,8 +104,10 @@ poetry run python notes/claudecode_direct/bind_direct_launch.py word \
     --quoted-request "<the question they answered>" --out <dir>/word.json
 ```
 
-The first paid call of this arm is the canary itself; there is no cheaper
-probe that exercises the login, the runtime and the provider together.
+On a subscription a one-token `--print` run under the same login, model and
+effort costs nothing marginal and would show the auxiliary model and the
+reported effort before a full canary. It is still a model call, and the
+maintainer's word gates it like the canary.
 
 ## Not established
 

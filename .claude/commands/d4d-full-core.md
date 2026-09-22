@@ -69,8 +69,8 @@ Header substitution fields used below:
 
 | Field | Meaning |
 |---|---|
-| `{RUNTIME}` | what is executing — `Claude Code`, `Claude API (direct)`, `Codex CLI` |
-| `{PROVIDER}` | `Anthropic`, `OpenAI`, or the proxy actually reached |
+| `{RUNTIME}` | what is executing, exactly as the launch instruction header states it — `Claude Code`, `Claude Code (direct)`, `Claude API (direct)`, `Codex CLI`; never shorten one to another |
+| `{PROVIDER}` | exactly as the launch instruction header states it — `Anthropic`, `Anthropic (Claude subscription, direct)`, `OpenAI`, or the proxy actually reached |
 | `{MODEL}` | the model identifier the request carries |
 | `{EFFORT}` | reasoning effort, where the runtime exposes one |
 | `{MODE}` | `four-phase project agent` or `independent` |

@@ -414,8 +414,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 raise ValueError("--render-spec-json requires a native renderer-9-or-newer specification")
             if registered.render_spec() != supplied or registered.instruction != supplied_text:
                 raise ValueError("registered rendering specification does not reproduce the supplied instruction")
+            # The registered specification is the launcher's assertion; a
+            # flag that disagrees with it, the effort included (#2216), is
+            # refused rather than recorded.
             for name, explicit in (("condition", condition), ("runtime", runtime),
-                                   ("provider", provider), ("profile", stated_profile)):
+                                   ("provider", provider), ("profile", stated_profile),
+                                   ("reasoning_effort", reasoning_effort)):
                 if explicit is not None and explicit != getattr(registered, name):
                     raise ValueError(f"--{name} conflicts with the registered specification")
             if (click.get_current_context().get_parameter_source("arm") == click.core.ParameterSource.COMMANDLINE
@@ -424,6 +428,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         except (ValueError, KeyError, TypeError) as exc:
             raise click.ClickException(str(exc)) from exc
         condition, stated_profile = registered.condition, registered.profile
+        # Taken from the specification like the fields above: the recorder
+        # line is copied by hand, and a dropped flag must not drop the
+        # effort the launcher asserted (#2216).
+        reasoning_effort = reasoning_effort or registered.reasoning_effort
         if manifest is None:
             manifest = str(registered.manifest) if registered.manifest is not None else "none"
         if chunk_manifest is None:

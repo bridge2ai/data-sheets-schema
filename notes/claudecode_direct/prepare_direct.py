@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -42,8 +43,10 @@ EXECUTION_ARM = "direct"
 CLI_FLAGS = ["--print", "--safe-mode", "--restricted", "--strict-mcp-config", "--disable-slash-commands",
              "--no-session-persistence", "--prompt-suggestions", "false", "--output-format", "stream-json",
              "--verbose", "--permission-mode", "dontAsk", "--tools", "Read,Write,Bash"]
-CHILD_ENVIRONMENT = {"DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1", "DISABLE_TELEMETRY": "1",
-                     "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1",
+#: `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` is the name the 2.1.272 binary
+#: reads (#2207); the older spelling is kept for the records that carry it.
+CHILD_ENVIRONMENT = {"DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1", "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+                     "DISABLE_TELEMETRY": "1", "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1",
                      # An isolated config directory would otherwise look for a
                      # keychain item suffixed by that directory and find no
                      # login. Set and empty, this makes the runtime use the
@@ -52,7 +55,14 @@ CHILD_ENVIRONMENT = {"DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1", "DISABLE_TELEMETR
 #: Never present in the child's environment: the run must authenticate by the
 #: maintainer's login, never by a key, and must never be redirected.
 FORBIDDEN_ENVIRONMENT = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "CBORG_API_KEY",
-                         "CLAUDE_CODE_OAUTH_TOKEN")
+                         "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_CUSTOM_HEADERS", "CLAUDE_CODE_USE_BEDROCK",
+                         "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY")
+#: What the launcher's own process may pass through to the child.
+PARENT_PASSTHROUGH = ("PATH", "HOME", "USER", "SHELL", "TMPDIR", "LANG", "LC_ALL", "TERM")
+#: The runtime's own auxiliary calls (titles, summaries) use a second model
+#: (#2207). They are not the datasheet's model; they are recorded, and any
+#: model outside this set fails the run.
+AUXILIARY_MODELS = ("claude-haiku-4-5", "claude-haiku-4-5-20251001")
 
 
 class DirectStop(RuntimeError):
@@ -70,11 +80,27 @@ def save(path, value):
         out.write("\n")
 
 
-def auth_evidence(executable, config_dir):
-    """What the runtime reports about the login it will use: method, plan and
-    provider only. No token, email or organisation is recorded."""
-    env = {k: v for k, v in os.environ.items() if k in {"PATH", "HOME", "USER", "TMPDIR"}}
-    env.update(CHILD_ENVIRONMENT, CLAUDE_CONFIG_DIR=str(config_dir))
+def child_environment(config_dir, registered=None, per_job=None):
+    """The child's exact environment: the parent's pass-through names, the
+    registered child environment, the job's variables and the isolated
+    config directory. Every forbidden name is refused wherever it comes from
+    (#2204), and a registered environment must equal the preparer's."""
+    if registered is not None and registered != CHILD_ENVIRONMENT:
+        raise DirectStop("the registered child environment differs from the preparer's")
+    env = {k: v for k, v in os.environ.items() if k in PARENT_PASSTHROUGH}
+    env.update(CHILD_ENVIRONMENT)
+    env.update(per_job or {})
+    env.update(CLAUDE_CONFIG_DIR=str(config_dir))
+    present = sorted(name for name in FORBIDDEN_ENVIRONMENT if name in env)
+    if present:
+        raise DirectStop("the child environment must not carry provider keys or redirection: " + ", ".join(present))
+    return env
+
+
+def auth_evidence(executable, env):
+    """What the runtime reports about the login it will use, in the child's
+    exact environment: method, plan and provider only. No token, email or
+    organisation is recorded."""
     raw = subprocess.check_output([executable, "auth", "status", "--json"], env=env, text=True, timeout=60)
     status = json.loads(raw)
     keep = {k: status.get(k) for k in ("loggedIn", "authMethod", "apiProvider", "subscriptionType")}
@@ -126,15 +152,16 @@ def build(args):
                         "provenance": str(spec.provenance_path), "report": str(spec.report_path)})
     if "--reasoning-effort " + EFFORT not in spec.instruction:
         raise DirectStop("the rendered recorder line does not assert the registered effort")
-    if f"# Provider: {PROVIDER}" not in spec.instruction or f"# Agent runtime: {RUNTIME}" not in spec.instruction:
-        raise DirectStop("the rendered header does not state the direct arm's runtime and provider")
+    if (f"# Provider: {PROVIDER}" not in spec.instruction or f"# Agent runtime: {RUNTIME}" not in spec.instruction
+            or f"# Model: {MODEL}" not in spec.instruction):
+        raise DirectStop("the rendered header does not state the direct arm's runtime, provider and model")
     python = sys.executable
     policy = build_command_policy(job, python, str(repository))
     system_prompt = HERE / "system.md"
     pins = {}
     for directory, suffixes in [(repository / "src/data_sheets_schema", {".py", ".yaml", ".json"}),
                                 (repository / ".claude/agents", {".md"}), (repository / ".claude/commands", {".md"}),
-                                (repository / "src/download/prompts", {".md", ".json"})]:
+                                (repository / "src/download/prompts", {".md", ".json", ".yaml"})]:
         for path in sorted(directory.rglob("*")):
             if path.is_file() and path.suffix in suffixes:
                 pins[str(path)] = sha(path)
@@ -145,9 +172,15 @@ def build(args):
                  system_prompt, instruction,
                  Path(case["manifest"]), Path(case["bundle"]), Path(case["chunks"]), executable]:
         pins[str(path)] = sha(path)
+    per_job = {"D4D_MANIFEST": case["manifest"], "D4D_PROFILE": case["profile"], "D4D_LAUNCH_INSTRUCTION": str(instruction)}
+    # The login is probed in the child's exact environment, in a throwaway
+    # configuration directory that leaves nothing behind.
     probe_config = output / "auth_probe_config"
     probe_config.mkdir(mode=0o700)
-    auth = auth_evidence(str(executable), probe_config)
+    try:
+        auth = auth_evidence(str(executable), child_environment(probe_config, CHILD_ENVIRONMENT, per_job))
+    finally:
+        shutil.rmtree(probe_config, ignore_errors=True)
     registration = {
         "kind": "d4d_direct_arm_registration", "schema_version": 1,
         "registered_at": datetime.now(timezone.utc).isoformat(), "status": "prepared_awaiting_review_ci_and_launch_word",
@@ -156,8 +189,9 @@ def build(args):
                 "cost_basis": "the runtime's terminal accounting (usage and its own cost estimate); not metered per request"},
         "repository": str(repository), "code_commit": git_head(repository),
         "python": python, "python_version": sys.version,
-        "model": {"model": MODEL, "effort": EFFORT,
-                  "effort_basis": "asserted by the launcher through --effort and recorded through --reasoning-effort; the runtime does not report it"},
+        "model": {"model": MODEL, "effort": EFFORT, "auxiliary_models_permitted": list(AUXILIARY_MODELS),
+                  "effort_basis": "asserted by the launcher through --effort and recorded through --reasoning-effort; "
+                                  "checked after the run against the effort the runtime reports on every tool callback"},
         "native_runtime": {"executable": str(executable), "version": version,
                            "cli_flags": CLI_FLAGS + ["--effort", EFFORT], "environment": CHILD_ENVIRONMENT,
                            "forbidden_environment": list(FORBIDDEN_ENVIRONMENT),
@@ -169,13 +203,14 @@ def build(args):
                        "runaway_guard_basis": "passed to --max-budget-usd so the runtime stops itself on its own estimate; "
                                               "not a metered cap and not a charge against any allocation",
                        "jobs": [job], "canary_order": [identifier]},
-        "isolation": {"writes_only_under": job["output_directories"],
+        "isolation": {"writes_only_under": job["output_directories"] + ["the attempt directory beside this registration"],
                       "never_touches": ["any CBORG ledger or sequence owner", "any matched_cborg registration or attempt directory",
                                         "claudecode_agent and claudecode_api records"],
-                      "config_dir": "a fresh directory per attempt under the attempt directory"},
+                      "config_dir": "a fresh directory per attempt under the attempt directory",
+                      "shared_credential_store": "the maintainer's claude.ai login item in the login keychain, which a "
+                                                 "token refresh during the run may rewrite (#2208)"},
         "per_job_command_policy": {identifier: policy},
-        "per_job_environment": {identifier: {"D4D_MANIFEST": case["manifest"], "D4D_PROFILE": case["profile"],
-                                             "D4D_LAUNCH_INSTRUCTION": str(instruction)}},
+        "per_job_environment": {identifier: per_job},
         "pinned_files": pins,
     }
     path = output / "registration.json"

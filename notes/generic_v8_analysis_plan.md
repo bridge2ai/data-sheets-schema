@@ -2755,17 +2755,32 @@ Anthropic (Claude subscription, direct)`; the runtime string is distinct on
 purpose, because canonical selection is scoped by runtime key and a
 subscription record reading plain `Claude Code` would be scoped with, and
 could supersede, the agentic canonicals. `runs.RUNTIME_KEYS` gains the key
-`direct`, `provider` joins `ARM_PROCEDURE_FIELDS`, so `compare-arms` and
-`arm_confounds` report the transport difference between the two Claude Code
-arms, and `check_replicate` already refuses to pool across providers. The arm
+`direct`, and `RUNTIME_CHOICES` lists all three where `--runtime` is offered
+and `canonical_sets` enumerates (#2210, #2211). The `runtime` row of
+`ARM_PROCEDURE_FIELDS` is what separates the two Claude Code arms in
+`compare-arms` and `arm_confounds`; `model.provider` is **not** compared
+(#2214): the first form of this change added it, and on the headline v6
+agentic against v7 API comparison that reported a transport confound between
+two arms that both ran through CBORG, because the 2026-08 agentic records
+carry the literal `Anthropic` the old playbook line dictated. The provider
+stays a recorded fact; its basis is #2215. `check_replicate` still refuses to
+pool across providers. The arm
 runs `claude-opus-5` at effort `max`, passed to the runtime as `--effort` and
 rendered into the instruction's own recorder line as `--reasoning-effort
-max`; the recorder admits `xhigh` and `max` and records the value as asserted
-by the launcher, since the runtime does not report it. The effort is a
+max`; the recorder admits `xhigh` and `max`, records the value as asserted
+by the launcher, and the render-spec gate refuses a flag that disagrees with
+the registered specification and takes the effort from it where the copied
+line dropped the flag (#2216). The runtime does report the active effort on
+every tool callback, which the control log keeps; the launcher compares every
+reported level with the registered one after the run and records it as
+`effort_observed` (#2208). The effort is a
 second, deliberate difference from the other arms, which run at the
 provider's or the runtime's default. Cost is the runtime's terminal
 accounting, an estimate, never a metered charge, and never a debit against
-the CBORG allocation.
+the CBORG allocation. A Claude Code runtime is recognised by its runtime key,
+not by the exact string (`runs.is_claude_code_runtime`), so the direct arm's
+reasoning-log status and its header effort and temperature bases read as the
+agentic arm's do (#2212, #2213).
 
 What the arm keeps: the same rendered instruction (renderer 17, condition
 `generic_v9`, profile `bridge2ai`), the same frozen sources and chunk
@@ -2775,21 +2790,36 @@ policies, the phase history, the denial classifier under the maintainer's
 denial ruling, the transcript observer and every record, receipt and
 evidence gate. The launcher imports those controls and edits none of them.
 
-Two playbook lines moved so that a run records the runtime and provider its
-own launch instruction states instead of a literal `Provider: Anthropic`:
-`.claude/commands/d4d-full-core.md` `a054b282…` → `7e09c5e1…` and `.claude/commands/d4d-agent.md`
-`27e8ea15…` → `1ce33770…`. The native instruction identity of
-any later agentic registration moves with them; no consumed condition,
-record or score is re-attested. No render spec of an existing record
-changes: the recorder-line effort is emitted only when a spec asserts one.
+The playbooks moved so that a run records the `Agent runtime`, `Provider`
+and `Model` lines its own launch instruction header states instead of a
+literal `Provider: Anthropic` and "the exact model" (the `Model` derivation
+is a procedure-field change for the existing agentic arm too, #2222), and
+the header substitution table names `Claude Code (direct)` and the
+subscription provider beside the existing values, so a model cannot
+normalise the direct runtime string to the listed `Claude Code` (#2220):
+`.claude/commands/d4d-full-core.md` `a054b282…` → `820f944e…` and
+`.claude/commands/d4d-agent.md` `27e8ea15…` → `bbe1a836…`. What moves
+with them is a record's `playbooks.files[].sha256` and a registration's
+`pinned_files`, not the rendered instruction: the agentic toolchain records
+playbook paths, and the same specification renders byte-identical
+instructions before and after (checked at renderers 9, 12 and 17 for the
+agentic and API specs). No consumed condition, record or score is
+re-attested, and no render spec of an existing record changes: the
+recorder-line effort is emitted only when a spec asserts one.
 
 Isolation, at the maintainer's direction: the arm runs from its own
 checkout, writes only under its two directories, and reads and writes
 nothing under `notes/matched_cborg_*`: no ledger, no sequence owner, no
-registration, no attempt directory of the CBORG arms. The child gets no
-`ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL`,
-`CBORG_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`, and the launcher refuses to
-start with any of them set. Its init line must report `apiKeySource: none`.
+registration, no attempt directory of the CBORG arms. The child's
+environment is built from the preparer's constants, the job's variables and
+a short pass-through list, and is refused wherever a provider key, token,
+custom header, cloud-provider switch, proxy or base URL appears, in the
+launcher's own environment or in the registration (#2204); the job's method,
+runtime and every output path must be the direct arm's (#2205); every check,
+the login probe included, runs before the attempt directory exists (#2206);
+the runtime's auxiliary model is registered and recorded rather than failing
+the run (#2207). Its init line must report `apiKeySource: none`, a necessary
+condition and not proof of the login by itself.
 Shared with the other arms: the machine, and the maintainer's subscription
 rate limit. An ignored-inclusive search on 2026-09-22 found no
 `claudecode_direct` run directory and no prior proposal for such an arm.

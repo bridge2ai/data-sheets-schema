@@ -300,9 +300,13 @@ def log_status(runtime: str | None, label: str, log_exists: bool,
     The distinction matters wherever arms are compared: a missing reasoning
     figure for the agentic arm must not be read as zero spend.
     """
+    from data_sheets_schema.runs import is_claude_code_runtime   # lazy: runs reads this module's records
     if log_exists:
         return HAS_LOG
-    if (runtime or "").strip().lower() == "claude code":
+    if is_claude_code_runtime(runtime):
+        # Either Claude Code arm (#2212): the proxied agentic arm and the
+        # direct arm alike carry no log of their own and may carry the
+        # transcript's measure.
         if isinstance(observed, dict) and (observed.get("malformed_message_events")
                                            or observed.get("overlapping_evidence")):
             return OBSERVATION_INVALID
