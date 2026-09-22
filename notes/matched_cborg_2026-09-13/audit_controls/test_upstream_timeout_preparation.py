@@ -15,7 +15,8 @@ KEY = 'native_upstream_read_timeout_seconds'
 def test_fresh_selector_is_registered_pinned_and_scientifically_inert(ancestry, tmp_path, staged):
     common = dict(ancestry[0], native_api_timeout_ms=3600000, staged_audit_output=staged,
                   context_recovery=True)
-    legacy = prepare.prepare(**common, destination=tmp_path / 'legacy')
+    # Equal-length destinations keep recovery frame boundaries comparable.
+    legacy = prepare.prepare(**common, destination=tmp_path / 'legacy__')
     selected = prepare.prepare(**common, destination=tmp_path / 'selected',
                                native_upstream_read_timeout_seconds=2700)
     before = registration.validate_registration(legacy)

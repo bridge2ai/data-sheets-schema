@@ -13,7 +13,7 @@ from .registration import (BudgetStop, canonical_path, inspect_parent,
     read_json, required_paths, sha, validate_registration)
 from .registration import (TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND,
                            CLAIM_CLARIFICATION_TRANSITION_KIND, DRAFT_GRAMMAR_TRANSITION_KIND,
-                           SCHEMA_SEMANTICS_TRANSITION_KIND)
+                           SCHEMA_SEMANTICS_TRANSITION_KIND, BATCH_TRANSITION_KIND)
 from .contract import render_instruction
 
 SYSTEM = """You are the native auditor for a registered D4D Phase 3 continuation.
@@ -27,6 +27,9 @@ ends the attempt; do not repair or retry. Success is pending independent review.
 
 
 def render_system(manifest):
+    if 'audit_batches' in manifest:
+        from .batch_registration import render_parent_system
+        return render_parent_system(manifest)
     system = SYSTEM
     if TRANSITION in manifest:
         from .registration import scientific_contract
@@ -73,7 +76,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             staged_audit_output=False, native_upstream_read_timeout_seconds=None,
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
-            schema_semantic_context=False):
+            schema_semantic_context=False, audit_batches=None):
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -92,6 +95,16 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         raise BudgetStop('draft audit grammar requires an explicit boolean')
     if type(schema_semantic_context) is not bool:
         raise BudgetStop('schema semantic context requires an explicit boolean')
+    if audit_batches is not None:
+        from .batch_registration import selection
+        audit_batches = selection(audit_batches)
+        if any((context_recovery, staged_audit_output, persistent_audit_contract,
+                upgrade_evidence_protocol, source_metadata_evidence,
+                clarify_source_claims, draft_audit_grammar, schema_semantic_context)):
+            raise BudgetStop('audit batches select their own protocol, context and output modes exclusively')
+        cap = Decimal(str(attempt_cap))
+        if not cap.is_finite() or not Decimal(audit_batches['worker_total_cap_usd']) < cap:
+            raise BudgetStop('batch workers must leave a positive integration allowance')
     if schema_semantic_context and not draft_audit_grammar:
         raise BudgetStop('schema semantic context requires explicit draft audit grammar')
     if draft_audit_grammar and (staged_audit_output or upgrade_evidence_protocol or
@@ -169,7 +182,11 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v5.md')
     if draft_audit_grammar:
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v6.md')
-    save(inputs['source_inventory'], source_review.inventory(Path(inputs['original_full']).read_text(), 'original_full'))
+    if audit_batches is not None:
+        inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v7.md')
+    inventory_text = (Path(inputs['original_full']).read_bytes().decode('utf-8')
+                      if audit_batches is not None else Path(inputs['original_full']).read_text())
+    save(inputs['source_inventory'], source_review.inventory(inventory_text, 'original_full'))
     attempt = destination / 'attempts' / job_id
     job = {'id': job_id, 'attempt_dir': str(attempt), 'output_dir': str(attempt / 'output'),
         'audit_path': str(attempt / 'output/audit.json'), 'instruction': str(destination / 'instruction.md'),
@@ -199,6 +216,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'pinned_files': {}}
     manifest.update(claim_selection)
     manifest.update(upstream_selection)
+    if audit_batches is not None:
+        manifest.update(protocol_version=7, render_version=20)
+        manifest[TRANSITION] = {'kind': BATCH_TRANSITION_KIND}
     if upgrade_evidence_protocol:
         manifest.update(protocol_version=4, render_version=15)
         manifest[TRANSITION] = {'kind': TRANSITION_KIND}
@@ -239,6 +259,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
             'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
     save(parent['phase2_proof'], inspect_parent(manifest))
+    if audit_batches is not None:
+        from .batch_registration import prepare_inputs
+        prepare_inputs(manifest, path, audit_batches)
     instruction = render_instruction(manifest)
     Path(job['instruction']).write_text(instruction)
     if context_recovery:
@@ -248,6 +271,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     manifest['pinned_files'] = {str(p): sha(p) for p in sorted(required_paths(manifest))}
     save(path, manifest)
     validate_registration(path)
+    batch_plan_fields = {}
+    if audit_batches is not None:
+        from .batch_registration import offline_plan_fields
+        batch_plan_fields = offline_plan_fields(manifest)
     save(destination / 'offline_plan.json', {'registration_sha256': sha(path),
         'repository_commit': manifest['repository_commit'], 'job': job_id,
         'scope': 'Phase 3 audit only; no regeneration, reconciliation or evaluation',
@@ -267,12 +294,13 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         **({'audit_contract_context': manifest['audit_contract_context']}
            if 'audit_contract_context' in manifest else {}),
         **({'audit_drafting': manifest['audit_drafting']} if 'audit_drafting' in manifest else {}),
+        **({'audit_batches': manifest['audit_batches']} if 'audit_batches' in manifest else {}),
         **({TRANSITION: manifest[TRANSITION], 'protocol_version': manifest['protocol_version'],
             'render_version': manifest['render_version'],
             'parent_render_version': 14, 'scientific_instrument_unchanged': False}
            if TRANSITION in manifest else {}),
         'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
-        'provider_calls': 0, 'scientific_acceptance': False})
+        'provider_calls': 0, 'scientific_acceptance': False, **batch_plan_fields})
     return path
 
 
@@ -314,6 +342,8 @@ def main():
         help='explicitly select protocol 5/renderer 17 with clarified source-claim review instructions')
     scientific.add_argument('--draft-audit-grammar', action='store_true',
         help='select protocol 6/renderer 18 and at most two immutable grammar drafts before terminal validation')
+    scientific.add_argument('--audit-batches', type=Path,
+        help='JSON configuration selecting protocol 7/renderer 20 fresh workers and explicit final integration')
     parser.add_argument('--schema-semantic-context', action='store_true',
         help='with --draft-audit-grammar, select renderer 19 and exact nested schema semantics for the frozen pair')
     parser.add_argument('--repository', default=str(Path.cwd()))
@@ -338,6 +368,9 @@ def main():
         args['native_api_force_idle_timeout'] = False
     if args['native_stall_policy'] is not None:
         args['native_stall_policy'] = read_stall_policy(args['native_stall_policy'])
+    if args['audit_batches'] is not None:
+        from .batch_registration import read_selection
+        args['audit_batches'] = read_selection(args['audit_batches'])
     args['attempt_cap'] = str(args['attempt_cap'])
     path = prepare(**args)
     print(json.dumps({'registration': str(path), 'sha256': sha(path)}))

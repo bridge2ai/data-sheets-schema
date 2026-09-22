@@ -31,6 +31,7 @@ SOURCE_METADATA_TRANSITION_KIND = 'frozen_pair_protocol_v5'
 CLAIM_CLARIFICATION_TRANSITION_KIND = 'frozen_pair_claim_clarification_v1'
 DRAFT_GRAMMAR_TRANSITION_KIND = 'frozen_pair_draft_grammar_v1'
 SCHEMA_SEMANTICS_TRANSITION_KIND = 'frozen_pair_schema_semantics_v1'
+BATCH_TRANSITION_KIND = 'frozen_pair_integrated_batches_v1'
 VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
 
 
@@ -42,7 +43,8 @@ def scientific_contract(manifest):
                    (5, 16): {'kind': SOURCE_METADATA_TRANSITION_KIND},
                    (5, 17): {'kind': CLAIM_CLARIFICATION_TRANSITION_KIND},
                    (6, 18): {'kind': DRAFT_GRAMMAR_TRANSITION_KIND},
-                   (6, 19): {'kind': SCHEMA_SEMANTICS_TRANSITION_KIND}}
+                   (6, 19): {'kind': SCHEMA_SEMANTICS_TRANSITION_KIND},
+                   (7, 20): {'kind': BATCH_TRANSITION_KIND}}
     if (any(type(value) is not int for value in pair) or
             (pair not in transitions if upgraded else pair != (3, 14)) or
             (upgraded and (type(manifest[TRANSITION]) is not dict or
@@ -52,14 +54,15 @@ def scientific_contract(manifest):
                          'frozen_pair_protocol_v5 with 5/16 or '
                          'frozen_pair_claim_clarification_v1 with 5/17 or '
                          'frozen_pair_draft_grammar_v1 with 6/18 or '
-                         'frozen_pair_schema_semantics_v1 with 6/19')
+                         'frozen_pair_schema_semantics_v1 with 6/19 or '
+                         'frozen_pair_integrated_batches_v1 with 7/20')
     return upgraded
 
 
 def schema_semantic_context(manifest):
     """Only the exact selected scientific transition executes the new helper."""
     scientific_contract(manifest)
-    return manifest['render_version'] == 19
+    return manifest['render_version'] in (19, 20)
 
 
 def versioned_scientific_files(manifest):
@@ -273,6 +276,9 @@ def inspect_parent(manifest):
 def implementation_paths(manifest):
     repository = canonical_path(manifest['repository'], exists=True)
     paths = set((repository / 'src/data_sheets_schema').rglob('*.py'))
+    if manifest.get('render_version') != 20:
+        paths.difference_update(repository / 'src/data_sheets_schema' / name
+                                for name in ('audit_batches.py', 'audit_batch_context.py'))
     if schema_semantic_context(manifest):
         paths.add(repository / 'src/data_sheets_schema/schema_semantics.py')
     else:
@@ -281,9 +287,12 @@ def implementation_paths(manifest):
     paths.update((repository / 'src/data_sheets_schema').rglob('*.json'))
     paths.update(path for path in (repository / 'src/download/prompts').rglob('*') if path.is_file())
     paths.update(HERE.glob('*.py'))
-    if 'audit_output' not in manifest and 'audit_drafting' not in manifest:
+    if manifest.get('render_version') != 20:
+        paths.difference_update(HERE / name for name in
+            ('batch_registration.py', 'batch_native.py', 'batch_history.py', 'batch_output.py'))
+    if 'audit_output' not in manifest and 'audit_drafting' not in manifest and manifest.get('render_version') != 20:
         paths.discard(HERE / 'output_parts.py')
-    if 'audit_drafting' not in manifest:
+    if 'audit_drafting' not in manifest and manifest.get('render_version') != 20:
         paths.discard(HERE / 'draft_output.py')
         paths.discard(HERE / 'draft_history.py')
     if 'audit_contract_context' not in manifest:
@@ -303,6 +312,10 @@ def implementation_paths(manifest):
 def required_paths(manifest):
     from .transport import transport_paths
     paths = implementation_paths(manifest)
+    if 'audit_batches' in manifest:
+        from .batch_output import required_paths as batch_paths
+        paths.update(batch_paths(manifest))
+        paths.update(batch_authority_paths(manifest))
     if 'context_recovery' in manifest:
         from native_context_control import paths as recovery_paths
         paths.update(Path(name) for name in recovery_paths(manifest))
@@ -337,6 +350,11 @@ def required_paths(manifest):
         paths.update(canonical_path(value, exists=True) for value in bridge.values())
         from .runtime_closure import closure_paths
         paths.update(closure_paths(read_json(bridge['receipt'])))
+        source = read_json(bridge['source_registration'])
+        if 'audit_batches' in source:
+            from .batch_native import require_closed_batch_runtime
+            paths.update(Path(name) for name in source['pinned_files'])
+            paths.update(require_closed_batch_runtime(source, read_json(bridge['result'])))
     return paths
 
 
@@ -352,6 +370,20 @@ def schema_semantic_paths(manifest):
             if not isinstance(raw, bytes):
                 raise BudgetStop('schema semantics has an unavailable schema dependency')
             paths.add(canonical_path(str(path), exists=True))
+    return paths
+
+
+def batch_authority_paths(manifest):
+    """Exact complete schema imports and the selected profile vocabulary only."""
+    scientific_contract(manifest)
+    if manifest['render_version'] != 20:
+        return set()
+    from data_sheets_schema.profiles import profile_named, vocabulary_bytes
+    profile = profile_named(manifest['profile'])
+    vocabulary_bytes(profile)  # Declared-but-missing vocabularies fail closed.
+    paths = schema_semantic_paths(manifest)
+    if profile.pin_path is not None:
+        paths.add(canonical_path(str(profile.pin_path.absolute()), exists=True))
     return paths
 
 
@@ -405,6 +437,10 @@ def verify(manifest, path, expected_sha):
         from .draft_output import configuration, verify_open
         configuration(manifest, path)
         verify_open(manifest)
+    if 'audit_batches' in manifest:
+        from .batch_output import configuration, verify_open
+        configuration(manifest, path)
+        verify_open(manifest)
 
 
 def validate_registration(path):
@@ -415,6 +451,11 @@ def validate_registration(path):
     scientific_contract(manifest)
     if manifest['protocol_version'] == 6 and 'audit_drafting' not in manifest:
         raise BudgetStop('protocol-6 audit requires its explicit bounded drafting registration')
+    if manifest['protocol_version'] == 7 and 'audit_batches' not in manifest:
+        raise BudgetStop('protocol-7 audit requires its explicit batch registration')
+    if 'audit_batches' in manifest:
+        from .batch_registration import validate_selection
+        validate_selection(manifest, path)
     if 'audit_contract_context' in manifest:
         from .contract_context import enabled
         enabled(manifest)
@@ -460,6 +501,9 @@ def validate_registration(path):
     if 'audit_drafting' in manifest:
         from .draft_output import configuration
         configuration(manifest, path)
+    if 'audit_batches' in manifest:
+        from .batch_output import configuration
+        configuration(manifest, path)
     readable = set(manifest['inputs'].values()) | {job['instruction'], job['system_prompt']}
     if 'context_recovery' in manifest:
         from native_context_control import paths as recovery_paths, validate as validate_recovery
@@ -502,6 +546,9 @@ def validate_registration(path):
         raise BudgetStop('audit system prompt differs from its registered contract')
     if Path(job['instruction']).read_text(encoding='utf-8') != render_instruction(manifest):
         raise BudgetStop('audit instruction does not match its deterministic registered rendering')
+    if 'audit_batches' in manifest:
+        from .batch_registration import verify_rendered_inputs
+        verify_rendered_inputs(manifest, path)
     return manifest
 
 

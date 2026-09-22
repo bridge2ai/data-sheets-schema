@@ -534,3 +534,52 @@ prompts and all protocol bytes remain unchanged. The clarification does not
 guarantee semantic correctness: independent scientific review is still
 required, and previously rejected outputs remain rejected. Select it only
 through a fresh registration with its code and rendered instructions pinned.
+
+## Fresh-context audit batches (protocol 7 / renderer 20)
+
+A new registration may select `--audit-batches PATH` (#2192). The JSON file must
+contain `kind: fresh_context_integrated_v1` and a positive
+`worker_total_cap_usd` strictly below the audit's attempt cap. Optional positive
+integer limits are `max_paths` (default 96), `max_inventory_bytes` (default 16384)
+and `max_workers` (default 16). Limits are deterministic packing constraints;
+an indivisible field that cannot fit is rejected before execution. This mode
+replaces the earlier audit drafting, staged output, persistent-contract and
+context-recovery selectors. It does not change their historical behavior.
+
+Preparation binds a complete path inventory to the exact original bytes and
+partitions whole top-level fields into workers. Every worker receives the same
+complete originals and source bundle, with scoped schema guidance and access to
+the complete registered schema/import/profile authority. Each child gets a fresh
+native context. Its exact protocol and permitted operations remain in its system
+prompt. Worker proposals are immutable scientific drafts, not accepted audits.
+
+One final model integration receives every worker finding and must successfully
+read every canonical worker row, including retained rows (#2194). It reviews
+omissions and interactions across fields and the full/core pair. It explicitly
+disposes of every finding and binds each replacement row to its predecessor
+hash. Unchanged rows require an explicit index-bound retention declaration.
+Assembly performs only these declared transformations and canonical serialization;
+it preserves proposals, decisions and lineage. Schema imports must retain one
+consistent snapshot across the full/core contexts (#2193).
+
+Each child may submit at most two immutable grammar drafts. Only a failed first
+grammar result authorizes the second. Grammar is source-blind: it cannot score
+support or repair evidence. After integration seals, the assembled complete audit
+gets one terminal evidence check, including all evidence used in integration
+decisions. Failure is terminal. A successful tool receipt is rebound by closure
+checks; the controller does not execute the scientific validator again.
+
+All children share one ledger attempt, one sequence claim, one absolute deadline
+and one stall-debit allowance. A fresh client/proxy per child does not reset these.
+Worker reservations atomically enforce the lower cumulative worker ceiling,
+leaving the registered remainder for integration. The ledger retains the actual
+canonical attempt cap and separately records the stage cap. No child is resumed
+or selectively retried after failure. Interrupted attempts require closure of
+every extant child; a last-child shutdown alone is insufficient.
+
+Acceptance binds every child, its exact initial request, typed tool history,
+proposal/drafts, request accounting, row views, integration index and final
+lineage. Independent scientific review must assess all discarded/replaced
+concerns as well as the final audit. Phase 4 inherits the accepted scientific
+instrument and transitive evidence, but no active batch tools. Generation and
+evaluation entry points reject the selector, even when its value is null.

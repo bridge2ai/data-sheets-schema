@@ -63,9 +63,10 @@ def _inputs(manifest: dict) -> dict[str, Path]:
     return {name: _path(value) for name, value in inputs.items()}
 
 
-def _inventory(inputs: dict[str, Path]) -> dict:
-    expected = source_review.inventory(inputs["original_full"].read_text(encoding="utf-8"),
-                                       "original_full")
+def _inventory(inputs: dict[str, Path], *, exact_bytes=False) -> dict:
+    raw = (inputs['original_full'].read_bytes().decode('utf-8') if exact_bytes
+           else inputs['original_full'].read_text(encoding='utf-8'))
+    expected = source_review.inventory(raw, "original_full")
     observed = strict_json(inputs["source_inventory"].read_bytes())
     # Canonical serialization retains type distinctions such as true versus 1.
     if _json(observed) != _json(expected):
@@ -158,7 +159,7 @@ def render_instruction(manifest: dict) -> str:
                            ("source_manifest", spec.manifest)):
             if path is not None and Path(path).read_bytes() != inputs[name].read_bytes():
                 raise ValueError(f"continuation {name} differs from the parent source bytes")
-        _inventory(inputs)
+        _inventory(inputs, exact_bytes='audit_batches' in manifest)
         carry = {"Completed full record": inputs["original_full"].read_text(encoding="utf-8"),
                  "Completed core record": inputs["original_core"].read_text(encoding="utf-8")}
         if upgraded:
@@ -178,6 +179,9 @@ def render_instruction(manifest: dict) -> str:
                         (_path(manifest['repository']) / relative).read_bytes()):
                     raise ValueError('schema semantics changes the registered ' + role + ' authority')
             schema_arguments['_audit_schema_paths'] = (inputs['full_schema'], inputs['core_schema'])
+        if 'audit_batches' in manifest:
+            from .batch_registration import render_parent_instruction
+            return render_parent_instruction(manifest)
         request = api_runner.build_phase(spec, "audit", carry=carry, **schema_arguments)
     finally:
         os.chdir(previous)
@@ -272,6 +276,15 @@ def validate_audit(manifest: dict) -> dict:
         if 'audit_drafting' in manifest:
             from .draft_output import validate_output
             validate_output(manifest)
+        integration_evidence = {}
+        if 'audit_batches' in manifest:
+            from .batch_output import validate_output
+            assembly = validate_output(manifest)
+            lineage_raw = _path(assembly['lineage']['path']).read_bytes()
+            if _sha(lineage_raw) != assembly['lineage']['sha256']:
+                raise ValueError('integration lineage changed before validation')
+            lineage = strict_json(lineage_raw)
+            integration_evidence = {'integration_assertions': lineage['decision_assertions']}
         audit = _path(manifest["job"]["audit_path"])
         raw = audit.read_bytes()
         report["audit_sha256"] = _sha(raw)
@@ -285,7 +298,7 @@ def validate_audit(manifest: dict) -> dict:
         for name, input_raw in original.items():
             if manifest["pinned_files"].get(str(inputs[name])) != _sha(input_raw):
                 raise ValueError(f"registered {name} bytes changed or are not pinned")
-        _inventory(inputs)
+        _inventory(inputs, exact_bytes='audit_batches' in manifest)
         evidence_assertions.load_record(original["original_full"].decode("utf-8"))
         evidence_assertions.load_record(original["original_core"].decode("utf-8"))
         value = strict_json(raw)
@@ -296,7 +309,10 @@ def validate_audit(manifest: dict) -> dict:
             audit=audit, bundle=inputs["bundle"], manifest=inputs["chunk_manifest"],
             artifacts={name: inputs[name] for name in ("original_full", "original_core")},
             protocol_version=manifest['protocol_version'],
+            **integration_evidence,
             **source_metadata_arguments(manifest, inputs))
+        if integration_evidence and _path(assembly['lineage']['path']).read_bytes() != lineage_raw:
+            raise ValueError('integration lineage changed during validation')
         if audit.read_bytes() != raw or checked.get("artifact_sha256", {}).get("audit") != _sha(raw):
             raise ValueError("audit changed during validation")
         if any(path.read_bytes() != original[name] for name, path in inputs.items()):

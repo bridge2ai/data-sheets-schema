@@ -50,6 +50,12 @@ def timestamp(value):
 
 def require_closed_runtime(manifest, source_paths, source_registration, result, receipt):
     """Gate both financial variants; return supplemental provenance hash or None."""
+    if 'audit_batches' in source_registration:
+        from .batch_native import require_closed_batch_runtime
+        for value in source_registration['pinned_files']:
+            pinned(manifest, value, source_registration['pinned_files'][value])
+        for path in require_closed_batch_runtime(source_registration, result):
+            pinned(manifest, str(path))
     runtime = result.get('runtime')
     if (not isinstance(runtime, dict) or runtime.get('proxy_shutdown_complete') is not True or
             ('proxy_initialized' in runtime and runtime['proxy_initialized'] is not True) or

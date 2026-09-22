@@ -351,6 +351,8 @@ def verify_manifest(manifest, path, digest):
     _fitness_selection(manifest)
     if 'audit_drafting' in manifest:
         raise BudgetStop('audit_drafting is audit-only; evaluation cannot select it')
+    if 'audit_batches' in manifest:
+        raise BudgetStop('audit_batches is audit-only; evaluation cannot select it')
     if 'scientific_contract_transition' in manifest:
         raise BudgetStop('scientific_contract_transition is continuation-only; evaluation cannot select it')
     if 'audit_contract_context' in manifest:

@@ -228,7 +228,8 @@ def test_real_audit_entry_without_the_policy_still_stops_on_the_first_stall(nati
 def test_fresh_policy_is_registered_pinned_and_scientifically_inert(ancestry, tmp_path):
     common = dict(ancestry[0], native_api_timeout_ms=3600000, native_api_force_idle_timeout=False,
                   staged_audit_output=True, context_recovery=True)
-    legacy = prepare.prepare(**common, destination=tmp_path / 'legacy')
+    # Equal-length destinations keep recovery frame boundaries comparable.
+    legacy = prepare.prepare(**common, destination=tmp_path / 'legacy__')
     selected = prepare.prepare(**common, destination=tmp_path / 'selected', native_stall_policy=policy())
     before = registration.validate_registration(legacy)
     after = registration.validate_registration(selected)
