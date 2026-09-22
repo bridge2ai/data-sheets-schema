@@ -18,7 +18,7 @@ from . import batch_output as output
 from . import native
 from .batch_history import BatchHistory
 from .registration import (strict_json, sha, native_api_timeout, native_api_force_idle_timeout,
-                           native_stall_policy, native_upstream_read_timeout)
+                           native_stall_policy, native_upstream_read_timeout, audit_batch_navigation)
 from .output_parts import canonical, describe, read_regular, same_json
 from .transport import provider_clients
 
@@ -127,7 +127,8 @@ def prepare_integration(manifest, identity):
     output._exclusive(block['integration_index'], audit_batches.canonical_bytes(index))
     instruction = audit_batch_context.render_integration_context(**args, worker_index=index,
         worker_artifacts={r['id']: Path(r['proposal_path']) for r in block['children'] if r['kind'] == 'worker'},
-        row_artifacts=artifacts)
+        row_artifacts=artifacts, **({'audit_batch_navigation': audit_batch_navigation(manifest)}
+                                  if 'audit_batch_navigation' in manifest else {}))
     output._exclusive(row['instruction'], instruction.encode('utf-8'))
     receipt = {'schema_version': 1, 'registration_sha256': identity, 'child_id': 'integration',
                'index': describe(block['integration_index'], audit_batches.canonical_bytes(index)),
@@ -142,7 +143,8 @@ def verify_integration(manifest, identity):
     index, artifacts, views, bindings, args = integration_material(manifest)
     instruction = audit_batch_context.render_integration_context(**args, worker_index=index,
         worker_artifacts={r['id']: Path(r['proposal_path']) for r in manifest['audit_batches']['children'] if r['kind'] == 'worker'},
-        row_artifacts=artifacts).encode('utf-8')
+        row_artifacts=artifacts, **({'audit_batch_navigation': audit_batch_navigation(manifest)}
+                                  if 'audit_batch_navigation' in manifest else {})).encode('utf-8')
     for path, raw in views.items():
         if read_regular(path, output.MAX_BYTES) != raw:
             raise BudgetStop('integration row view changed')

@@ -93,9 +93,26 @@ def child_system(manifest, child_id):
             + '# Registered original/source locators\n\n'
             + json.dumps(locators, ensure_ascii=False, sort_keys=True, indent=2)
             + '\n\n# Exact permitted output operations\n\n' + instruction(manifest, child_id))
-    if manifest['render_version'] == 21:
+    if manifest['render_version'] in (21, 22):
         from data_sheets_schema.audit_batch_format import render
         text += '\n\n' + render(row['kind'])
+    if manifest['render_version'] == 22 and row['kind'] == 'integration':
+        text += ('\n\n# Registered integration row navigation\n\n'
+            'The supplied integration instruction contains row_reads entries. Each entry gives '
+            'the exact Read tool input for one canonical worker row. Use those input objects '
+            'verbatim; do not search for files or derive filenames from hashes, logical pointers '
+            'or directory names. Successfully Read every complete row, including retained rows. '
+            'If the initial instruction is no longer available in context, recover it using the '
+            'integration_instruction Read below. It starts at the line-addressable navigation '
+            'appendix, after the compact scientific prefix. Continue in bounded line ranges '
+            'until all row_reads are recovered; reduce the range if a Read is truncated. '
+            'Recover source evidence from its registered source locators as needed. '
+            'The proposal_index is identity metadata, not a replacement for the instruction, '
+            'complete row Reads or scientific evidence. These locators grant no additional '
+            'permissions; use only registered operations.\n\n'
+            + json.dumps({'integration_instruction': {'tool': 'Read', 'input': {'file_path': row['instruction'], 'offset': 4, 'limit': 200}},
+                          'proposal_index': {'tool': 'Read', 'input': {'file_path': manifest['audit_batches']['integration_index']}}},
+                         ensure_ascii=False, sort_keys=True, indent=2))
     return text
 
 
