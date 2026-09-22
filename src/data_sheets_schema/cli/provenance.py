@@ -14,7 +14,7 @@ from pathlib import Path
 #: does not pull in `provenance` just to build a decorator. It is the same
 #: vocabulary `_effort_from_route` matches routes against, and
 #: `test_effort_ladder_matches_the_recorder` fails if the two drift apart.
-EFFORT_CHOICES = ("minimal", "low", "medium", "high")
+EFFORT_CHOICES = ("minimal", "low", "medium", "high", "xhigh", "max")
 
 
 @click.group()

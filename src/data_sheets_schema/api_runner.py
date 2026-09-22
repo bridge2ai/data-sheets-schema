@@ -510,6 +510,12 @@ class RunSpec:
     # another runtime will execute — it rendered "LBL CBORG (proxy to
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
+    # The effort the launcher asserts for a runtime that does not expose it
+    # in a route suffix (#2202). Rendered into the recorder line as
+    # `--reasoning-effort`, so the model never edits a prescribed command;
+    # the recorder still marks it asserted, not observed. None renders
+    # nothing, which keeps every existing render spec byte-identical.
+    reasoning_effort: str | None = None
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
@@ -601,7 +607,7 @@ class RunSpec:
     @property
     def is_agentic(self) -> bool:
         """Whether the runtime follows the shared agentic playbook."""
-        return self.runtime in {"Claude Code", "Codex CLI"}
+        return self.runtime in {"Claude Code", "Claude Code (direct)", "Codex CLI"}
 
     @classmethod
     def from_render_spec(cls, recorded: dict[str, Any], *, project: str,
@@ -622,7 +628,8 @@ class RunSpec:
                    manifest_line=recorded.get("manifest_line", ""),
                    manifest=None,
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
-                   provider=recorded.get("provider"), _replay_only=True)
+                   provider=recorded.get("provider"),
+                   reasoning_effort=recorded.get("reasoning_effort"), _replay_only=True)
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
@@ -739,6 +746,7 @@ class RunSpec:
                 "runtime": self.runtime,
                 "provider": self.provider or provider_identity()["provider"]
                 or PROVIDER,
+                **({"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}),
                 "bundle": str(self.bundle)}
 
     @cached_property
@@ -1055,6 +1063,8 @@ def resolve_prompt(spec: RunSpec) -> str:
                 command += " --profile " + shlex.quote(spec.profile)
             if spec.chunk_manifest is not None:
                 command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
+            if spec.reasoning_effort:
+                command += " --reasoning-effort " + shlex.quote(spec.reasoning_effort)
             return command
         body = re.sub(r"(?m)^([ \t]*(?:poetry run )?d4d provenance record[^\n]*)$",
                       recording_command, body)

@@ -17,6 +17,8 @@ METHODS = [
     "claudecode_agent_core",    # Claude Code agent — D4D Core schema (exchange layer)
     "claudecode_api",           # Claude API runtime, baseline arm, from generic_v8 on (#690, v8 plan D6)
     "claudecode_api_core",      # ... its D4D Core counterpart
+    "claudecode_direct",        # Claude Code on the maintainer's subscription, direct to Anthropic; no proxy, no ledger (#2202)
+    "claudecode_direct_core",   # ... its D4D Core counterpart
     "claudecode_assistant",     # Claude Code assistant (interactive)
     "rocrate_mapped",           # RO-Crate via UPSTREAM's ro-crate-linkml.yaml, no model
     "rocrate_static_map",       # RO-Crate via OUR mapping table, no model

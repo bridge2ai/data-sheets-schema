@@ -384,7 +384,9 @@ def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str 
     return out or None if ok else None
 
 
-_EFFORT_LADDER = ("minimal", "low", "medium", "high")
+#: `xhigh` and `max` are Claude Code session levels (#2202); no CBORG route
+#: names them, so they reach a record only as an asserted launcher value.
+_EFFORT_LADDER = ("minimal", "low", "medium", "high", "xhigh", "max")
 
 
 def _effort_from_route(model_name: str | None) -> tuple[str | None, str | None]:

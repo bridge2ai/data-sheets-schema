@@ -262,7 +262,9 @@ so in the provenance `notes` rather than picking a label.
   or launch fresh phase agents with exact-path handoff.
 - Explicitly tell each agent that prior D4D content from the parent conversation
   is forbidden evidence.
-- Record `Agent runtime: Claude Code`, `Provider: Anthropic`, and the exact model.
+- Record the `Agent runtime`, `Provider` and `Model` lines exactly as the launch
+  instruction header states them; the header is rendered for the runtime and
+  provider that actually run you, and two Claude Code arms differ only there.
 
 ### Codex / GPT
 

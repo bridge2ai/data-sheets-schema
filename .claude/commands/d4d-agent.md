@@ -213,8 +213,8 @@ When multiple sources describe the same dataset:
 ```yaml
 # D4D Datasheet for {PROJECT} Dataset
 # Generation Method: schema-grounded agentic, phase 1
-# Agent runtime: {Claude Code|Codex CLI}
-# Provider: {Anthropic|OpenAI}
+# Agent runtime: {as the launch instruction header states it}
+# Provider: {as the launch instruction header states it}
 # Model: {MODEL}
 # Reasoning effort: {EFFORT}
 # Mode: {MODE}

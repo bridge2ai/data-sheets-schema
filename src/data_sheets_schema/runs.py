@@ -58,6 +58,11 @@ ARM_BY_METHOD = {
     # and were told apart only by the label and `model.agent_runtime`.
     "claudecode_api": "baseline",
     "claudecode_api_core": "baseline",
+    # The third runtime path (#2202): Claude Code on the maintainer's
+    # subscription, direct to Anthropic. Same baseline inputs; the arm
+    # differs in provider, which `ARM_PROCEDURE_FIELDS` reports.
+    "claudecode_direct": "baseline",
+    "claudecode_direct_core": "baseline",
     "claudecode_agent_crate": "de_novo",
     "claudecode_agent_crate_core": "de_novo",
     "claudecode_agent_healthsheet": "healthsheet_only",
@@ -69,10 +74,14 @@ ARM_BY_METHOD = {
 }
 DETERMINISTIC = {"rocrate_mapped", "rocrate_static_map"}
 #: Method-directory prefixes that hold model-generated agent-family runs.
-AGENT_FAMILY = ("claudecode_agent", "claudecode_api")
+AGENT_FAMILY = ("claudecode_agent", "claudecode_api", "claudecode_direct")
 
 #: `model.agent_runtime` as the records write it, folded to a runtime key.
-RUNTIME_KEYS = {"claude code": "agentic", "claude api (direct)": "api"}
+#: The direct arm writes a distinct runtime string on purpose (#2202): a
+#: subscription record reading plain "Claude Code" would be scoped with the
+#: CBORG-proxied agentic canonicals and could supersede them.
+RUNTIME_KEYS = {"claude code": "agentic", "claude api (direct)": "api",
+                "claude code (direct)": "direct"}
 
 
 def runtime_of(record: dict) -> str | None:
@@ -1344,6 +1353,10 @@ ARM_PROCEDURE_FIELDS = (
     ("condition", ("run", "condition")),
     ("model", ("model", "model")),
     ("runtime", ("model", "agent_runtime")),
+    # Two Claude Code arms now differ only in provider (#2202): the agentic
+    # arm reaches Anthropic through CBORG, the direct arm does not. A
+    # comparison that could not see that would report no difference.
+    ("provider", ("model", "provider")),
     # The judge is part of the procedure (#1097). v7 was reviewed by
     # `claude-fable-5` and v8 by `claude-fable-5-1`, and a reader running this
     # tool on exactly the comparison that difference affects got a report that

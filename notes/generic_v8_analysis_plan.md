@@ -2740,3 +2740,62 @@ where the verdict reproduces and holds the rest for a per-label rerun
 `tests/test_schema_release_identity.py` and
 `tests/test_neutral_generation_schema.py`; the dated account is
 `notes/schema_release_3.0.0_2026-09-16.md`.
+
+### A third generation arm: Claude Code on the maintainer's subscription, direct to Anthropic (#2202; 2026-09-22)
+
+A runtime-and-transport boundary, registered before any spend on the arm.
+The maintainer decided on 2026-09-22 to add a third arm beside the API arm
+(the Messages SDK through CBORG, `claudecode_api`) and the agentic arm
+(Claude Code through the local proxy to CBORG, `claudecode_agent`): the
+Claude Code runtime authenticated by the maintainer's claude.ai login,
+talking to Anthropic directly, with no proxy, no CBORG endpoint and no
+ledger. It writes under **`claudecode_direct`** and `claudecode_direct_core`.
+Its records carry `Agent runtime: Claude Code (direct)` and `Provider:
+Anthropic (Claude subscription, direct)`; the runtime string is distinct on
+purpose, because canonical selection is scoped by runtime key and a
+subscription record reading plain `Claude Code` would be scoped with, and
+could supersede, the agentic canonicals. `runs.RUNTIME_KEYS` gains the key
+`direct`, `provider` joins `ARM_PROCEDURE_FIELDS`, so `compare-arms` and
+`arm_confounds` report the transport difference between the two Claude Code
+arms, and `check_replicate` already refuses to pool across providers. The arm
+runs `claude-opus-5` at effort `max`, passed to the runtime as `--effort` and
+rendered into the instruction's own recorder line as `--reasoning-effort
+max`; the recorder admits `xhigh` and `max` and records the value as asserted
+by the launcher, since the runtime does not report it. The effort is a
+second, deliberate difference from the other arms, which run at the
+provider's or the runtime's default. Cost is the runtime's terminal
+accounting, an estimate, never a metered charge, and never a debit against
+the CBORG allocation.
+
+What the arm keeps: the same rendered instruction (renderer 17, condition
+`generic_v9`, profile `bridge2ai`), the same frozen sources and chunk
+manifest, the same pinned runtime 2.1.272, and every control that hooks the
+runtime rather than the provider: the pre-execution command and file
+policies, the phase history, the denial classifier under the maintainer's
+denial ruling, the transcript observer and every record, receipt and
+evidence gate. The launcher imports those controls and edits none of them.
+
+Two playbook lines moved so that a run records the runtime and provider its
+own launch instruction states instead of a literal `Provider: Anthropic`:
+`.claude/commands/d4d-full-core.md` `a054b282…` → `7e09c5e1…` and `.claude/commands/d4d-agent.md`
+`27e8ea15…` → `1ce33770…`. The native instruction identity of
+any later agentic registration moves with them; no consumed condition,
+record or score is re-attested. No render spec of an existing record
+changes: the recorder-line effort is emitted only when a spec asserts one.
+
+Isolation, at the maintainer's direction: the arm runs from its own
+checkout, writes only under its two directories, and reads and writes
+nothing under `notes/matched_cborg_*`: no ledger, no sequence owner, no
+registration, no attempt directory of the CBORG arms. The child gets no
+`ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL`,
+`CBORG_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`, and the launcher refuses to
+start with any of them set. Its init line must report `apiKeySource: none`.
+Shared with the other arms: the machine, and the maintainer's subscription
+rate limit. An ignored-inclusive search on 2026-09-22 found no
+`claudecode_direct` run directory and no prior proposal for such an arm.
+
+The first run is one CHORUS canary through all four phases, after an
+independent review of the registration, CI on the exact commit and the
+maintainer's launch word for that registration's hash; Kids First follows
+only after an accepted CHORUS pair. An audit produced by this arm over the
+other arm's frozen draft would be a mixed condition and is not planned.
