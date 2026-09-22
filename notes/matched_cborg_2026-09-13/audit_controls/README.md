@@ -624,3 +624,28 @@ option implicitly. The active selector is refused by generation, evaluation and
 Phase 4. Phase 4 inherits an accepted renderer-22 instrument and its pinned
 implementation without activating the audit navigation. This is a separately
 registered presentation change, not proof of the cause of any historical failure.
+
+### Worker assignment recovery (renderer 23)
+
+For a fresh registration, add `--audit-worker-navigation` to the renderer-22
+options above. It selects protocol 7 / renderer 23, the
+`frozen_pair_child_navigation_v1` transition, and
+`audit_batch_navigation: {"kind": "explicit_child_reads_v1"}`. Each worker's
+instruction contains the same context values with assignment and identity fields
+first, in readable JSON lines. Its persistent system includes its worker ID,
+exact Read payloads covering the complete assignment prefix, and its existing
+plan locator. Each assignment Read covers at most 200 lines; the final page ends
+before the scientific input fields. The complete originals, sources and schema
+remain available through their existing registered locators.
+
+This recovery does not broaden file or command permissions, replace scientific
+source assessment, or accept an incomplete proposal. The typed Write, grammar
+check and seal remain mandatory; normal runtime completion alone is insufficient.
+Integration retains renderer 22's exact row-navigation presentation and duties.
+No source/scientific value is shortened or given a new length limit.
+
+The option must be selected again for each new condition. Omitting it preserves
+renderer 20/21/22 bytes. Generation and evaluation refuse renderer 23 and the
+active selector. Phase 4 binds an accepted renderer-23 instrument without
+activating navigation. Existing attempts and their evidence must remain intact;
+this change does not authorize resuming a stopped worker or reusing its proposal.

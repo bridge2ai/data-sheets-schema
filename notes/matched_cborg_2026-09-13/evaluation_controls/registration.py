@@ -351,8 +351,8 @@ def verify_manifest(manifest, path, digest):
     _fitness_selection(manifest)
     if 'audit_batch_navigation' in manifest:
         raise BudgetStop('audit_batch_navigation is audit-only; evaluation cannot select it')
-    if manifest.get('render_version') in (22, '22'):
-        raise BudgetStop('renderer 22 is audit-continuation-only; evaluation cannot select it')
+    if manifest.get('render_version') in (22, '22', 23, '23'):
+        raise BudgetStop('renderers 22 and 23 are audit-continuation-only; evaluation cannot select them')
     if 'audit_drafting' in manifest:
         raise BudgetStop('audit_drafting is audit-only; evaluation cannot select it')
     if 'audit_batches' in manifest:

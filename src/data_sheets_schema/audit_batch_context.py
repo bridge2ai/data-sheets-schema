@@ -290,8 +290,70 @@ def _render_row_navigation(appendix):
     return text
 
 
-def render_worker_context(*, inputs, profile, project, plan, worker_id):
-    return _render(_base(inputs=inputs, profile=profile, project=project, plan=plan, worker_id=worker_id))
+def _worker_navigation_parts(value):
+    """Separate the existing operational assignment from scientific values.
+
+    This changes serialization only. Every original context member occurs
+    once, and arbitrary scientific strings remain complete in the tail.
+    """
+    order = ("format", "stage", "plan_sha256", "assignment")
+    prefix = {key: json.loads(_json(value[key])) for key in order}
+    lines = json.dumps(prefix, ensure_ascii=False, allow_nan=False, indent=2).split("\n")
+    # Replace the temporary closing brace with the remaining context members.
+    head = "\n".join(lines[:-1]) + ",\n"
+    keys = sorted(set(value) - set(order))
+    tail = ",\n".join("  " + _json(key) + ": " + _json(value[key]) for key in keys)
+    return head, tail + "\n}\n"
+
+
+def _render_worker_navigation(value):
+    head, tail = _worker_navigation_parts(value)
+    text = head + tail
+    if len(text.encode("utf-8")) > MAX_CONTEXT_BYTES:
+        raise BatchContextError("scientific_context_byte_bound")
+    return text
+
+
+def worker_navigation_reads(rendered: str, file_path: Path):
+    """Return exact Read ranges covering a renderer-23 worker assignment.
+
+    No filesystem access occurs here. The caller must bind the instruction's
+    exact bytes and canonical regular-file locator in the registration. This
+    helper verifies the selected serialization and clips the final range at
+    its prefix boundary, before arbitrary scientific values. It promises no
+    fixed token ceiling for unusually long logical pointers.
+    """
+    try:
+        path = Path(file_path)
+        if not path.is_absolute() or ".." in path.parts or "\x00" in str(path):
+            raise ValueError("locator")
+        if type(rendered) is not str or len(rendered.encode("utf-8")) > MAX_CONTEXT_BYTES:
+            raise ValueError("text")
+        value = json.loads(rendered)
+        if (type(value) is not dict or value.get("format") != FORMAT
+                or value.get("stage") != "worker" or type(value.get("assignment")) is not dict
+                or type(value.get("plan_sha256")) is not str
+                or len(value["plan_sha256"]) != 64
+                or any(c not in "0123456789abcdef" for c in value["plan_sha256"])
+                or not set(value) - {"format", "stage", "plan_sha256", "assignment"}):
+            raise ValueError("shape")
+        head, tail = _worker_navigation_parts(value)
+        if head + tail != rendered:
+            raise ValueError("serialization")
+    except (TypeError, ValueError, KeyError, OverflowError, RecursionError) as exc:
+        raise BatchContextError("invalid_worker_navigation_context") from exc
+    count = head.count("\n")
+    return [{"tool": "Read", "input": {"file_path": str(path), "offset": start + 1,
+             "limit": min(200, count - start)}} for start in range(0, count, 200)]
+
+
+def render_worker_context(*, inputs, profile, project, plan, worker_id,
+                          audit_batch_navigation=None):
+    if audit_batch_navigation is not None and (type(audit_batch_navigation) is not str
+            or audit_batch_navigation != "explicit_child_reads_v1"):
+        raise BatchContextError("unsupported_worker_navigation")
+    value = _base(inputs=inputs, profile=profile, project=project, plan=plan, worker_id=worker_id)
+    return _render(value) if audit_batch_navigation is None else _render_worker_navigation(value)
 
 
 def render_integration_base_context(*, inputs, profile, project, plan):
@@ -308,12 +370,12 @@ def render_integration_context(*, inputs, profile, project, plan, worker_index,
     must equal canonical_bytes(row); a hash from an arbitrary file is not a
     scientific input permission. Nothing outside the named artifacts is read.
 
-    The explicit_row_reads_v1 selection supplies native Read payloads without
+    The explicit_row_reads_v1 and explicit_child_reads_v1 selections supply identical native Read payloads without
     changing scientific duties or the canonical index. None preserves the
     historical renderer-20/21 text exactly.
     """
     if audit_batch_navigation is not None and (type(audit_batch_navigation) is not str
-            or audit_batch_navigation != "explicit_row_reads_v1"):
+            or audit_batch_navigation not in {"explicit_row_reads_v1", "explicit_child_reads_v1"}):
         raise BatchContextError("unsupported_row_navigation")
     explicit_reads = audit_batch_navigation is not None
     from data_sheets_schema import audit_batches

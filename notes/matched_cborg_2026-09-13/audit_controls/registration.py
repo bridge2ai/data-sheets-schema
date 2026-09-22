@@ -35,6 +35,8 @@ BATCH_TRANSITION_KIND = 'frozen_pair_integrated_batches_v1'
 BATCH_FORMAT_TRANSITION_KIND = 'frozen_pair_batch_format_v1'
 BATCH_NAVIGATION_TRANSITION_KIND = 'frozen_pair_batch_navigation_v1'
 BATCH_NAVIGATION_KIND = 'explicit_row_reads_v1'
+BATCH_CHILD_NAVIGATION_TRANSITION_KIND = 'frozen_pair_child_navigation_v1'
+BATCH_CHILD_NAVIGATION_KIND = 'explicit_child_reads_v1'
 VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
 
 
@@ -49,7 +51,8 @@ def scientific_contract(manifest):
                    (6, 19): {'kind': SCHEMA_SEMANTICS_TRANSITION_KIND},
                    (7, 20): {'kind': BATCH_TRANSITION_KIND},
                    (7, 21): {'kind': BATCH_FORMAT_TRANSITION_KIND},
-                   (7, 22): {'kind': BATCH_NAVIGATION_TRANSITION_KIND}}
+                   (7, 22): {'kind': BATCH_NAVIGATION_TRANSITION_KIND},
+                   (7, 23): {'kind': BATCH_CHILD_NAVIGATION_TRANSITION_KIND}}
     if (any(type(value) is not int for value in pair) or
             (pair not in transitions if upgraded else pair != (3, 14)) or
             (upgraded and (type(manifest[TRANSITION]) is not dict or
@@ -62,31 +65,36 @@ def scientific_contract(manifest):
                          'frozen_pair_schema_semantics_v1 with 6/19 or '
                          'frozen_pair_integrated_batches_v1 with 7/20 or '
                          'frozen_pair_batch_format_v1 with 7/21 or '
-                         'frozen_pair_batch_navigation_v1 with 7/22')
+                         'frozen_pair_batch_navigation_v1 with 7/22 or '
+                         'frozen_pair_child_navigation_v1 with 7/23')
     return upgraded
 
 
 def audit_batch_navigation(manifest):
     """Audit-only opt-in; omission preserves every legacy navigation byte."""
     selected = 'audit_batch_navigation' in manifest
-    if manifest.get('render_version') == 22:
+    version = manifest.get('render_version')
+    if version in (22, 23):
+        kind, transition = ((BATCH_NAVIGATION_KIND, BATCH_NAVIGATION_TRANSITION_KIND)
+                            if version == 22 else
+                            (BATCH_CHILD_NAVIGATION_KIND, BATCH_CHILD_NAVIGATION_TRANSITION_KIND))
         if (manifest.get('kind') != 'd4d_native_audit_continuation'
                 or type(manifest.get('protocol_version')) is not int or manifest['protocol_version'] != 7
                 or type(manifest.get('render_version')) is not int
-                or manifest.get(TRANSITION) != {'kind': BATCH_NAVIGATION_TRANSITION_KIND}
+                or manifest.get(TRANSITION) != {'kind': transition}
                 or not selected or type(manifest['audit_batch_navigation']) is not dict
-                or manifest['audit_batch_navigation'] != {'kind': BATCH_NAVIGATION_KIND}):
-            raise BudgetStop('renderer 22 requires exact explicit audit batch navigation')
-        return BATCH_NAVIGATION_KIND
+                or manifest['audit_batch_navigation'] != {'kind': kind}):
+            raise BudgetStop(f'renderer {version} requires exact explicit audit batch navigation')
+        return kind
     if selected:
-        raise BudgetStop('audit_batch_navigation requires explicit audit renderer 22')
+        raise BudgetStop('audit_batch_navigation requires explicit audit renderer 22 or 23')
     return None
 
 
 def schema_semantic_context(manifest):
     """Only the exact selected scientific transition executes the new helper."""
     scientific_contract(manifest)
-    return manifest['render_version'] in (19, 20, 21, 22)
+    return manifest['render_version'] in (19, 20, 21, 22, 23)
 
 
 def versioned_scientific_files(manifest):
@@ -300,9 +308,9 @@ def inspect_parent(manifest):
 def implementation_paths(manifest):
     repository = canonical_path(manifest['repository'], exists=True)
     paths = set((repository / 'src/data_sheets_schema').rglob('*.py'))
-    if manifest.get('render_version') not in (21, 22):
+    if manifest.get('render_version') not in (21, 22, 23):
         paths.discard(repository / 'src/data_sheets_schema/audit_batch_format.py')
-    if manifest.get('render_version') not in (20, 21, 22):
+    if manifest.get('render_version') not in (20, 21, 22, 23):
         paths.difference_update(repository / 'src/data_sheets_schema' / name
                                 for name in ('audit_batches.py', 'audit_batch_context.py'))
     if schema_semantic_context(manifest):
@@ -313,12 +321,12 @@ def implementation_paths(manifest):
     paths.update((repository / 'src/data_sheets_schema').rglob('*.json'))
     paths.update(path for path in (repository / 'src/download/prompts').rglob('*') if path.is_file())
     paths.update(HERE.glob('*.py'))
-    if manifest.get('render_version') not in (20, 21, 22):
+    if manifest.get('render_version') not in (20, 21, 22, 23):
         paths.difference_update(HERE / name for name in
             ('batch_registration.py', 'batch_native.py', 'batch_history.py', 'batch_output.py'))
-    if 'audit_output' not in manifest and 'audit_drafting' not in manifest and manifest.get('render_version') not in (20, 21, 22):
+    if 'audit_output' not in manifest and 'audit_drafting' not in manifest and manifest.get('render_version') not in (20, 21, 22, 23):
         paths.discard(HERE / 'output_parts.py')
-    if 'audit_drafting' not in manifest and manifest.get('render_version') not in (20, 21, 22):
+    if 'audit_drafting' not in manifest and manifest.get('render_version') not in (20, 21, 22, 23):
         paths.discard(HERE / 'draft_output.py')
         paths.discard(HERE / 'draft_history.py')
     if 'audit_contract_context' not in manifest:
@@ -402,7 +410,7 @@ def schema_semantic_paths(manifest):
 def batch_authority_paths(manifest):
     """Exact complete schema imports and the selected profile vocabulary only."""
     scientific_contract(manifest)
-    if manifest['render_version'] not in (20, 21, 22):
+    if manifest['render_version'] not in (20, 21, 22, 23):
         return set()
     from data_sheets_schema.profiles import profile_named, vocabulary_bytes
     profile = profile_named(manifest['profile'])
