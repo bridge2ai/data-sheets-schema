@@ -1,4 +1,5 @@
 """Sequential fresh native sessions, one canonical audit owner and budget."""
+from copy import deepcopy
 from decimal import Decimal
 import hashlib
 import json
@@ -371,7 +372,8 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
         runtime = native.shutdown_evidence(proxy)
         primary.native_stop = {'stop_source': state.get('first_stop_source') or
             ('native_proxy' if proxy is not None and proxy.failed.is_set() else 'batch_controller'),
-            'runtime': runtime, 'batch_child': row['id']}
+            'runtime': runtime, 'batch_child': row['id'],
+            'native_terminal': deepcopy(history.native_terminal)}
         if 'first_stop_reason' in state:
             primary.native_stop_reason = state['first_stop_reason']
         try:

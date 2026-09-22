@@ -18,7 +18,7 @@ from data_sheets_schema import audit_batches
 from native_control import CONTRACT, INIT_ID, initialize_frame, digest
 from native_file_policy import FileAccess
 from . import batch_output as output, batch_native as runtime, native
-from .batch_history import BatchHistory
+from .batch_history import BatchHistory, _terminal_diagnostic
 from .test_staged_native import Session
 
 
@@ -159,6 +159,162 @@ def test_illegal_worker_operation_cannot_advance_history(batch,kind):
         if kind=='after_seal':s.seal()
         argv=s.row['rounds'][1]['check_argv']
     with pytest.raises(BudgetStop):s.call('Bash',{'command':shlex.join(argv)})
+
+
+def terminal_event(**changes):
+    return {'type':'result', 'subtype':'success', 'is_error':False,
+        'terminal_reason':'completed', 'stop_reason':'end_turn', 'num_turns':3,
+        'total_cost_usd':0.125, 'api_error_status':None, 'permission_denials':[], **changes}
+
+
+@pytest.mark.parametrize('subtype,reason,error', [
+    ('success','completed',False),
+    ('error_during_execution','api_error',True),
+    ('error_during_execution','prompt_too_long',True),
+    ('error_max_turns','max_turns',True),
+    ('error_max_budget_usd','budget_exhausted',True),
+    ('error_max_structured_output_retries','structured_output_retry_exhausted',True),
+])
+def test_terminal_category_survives_live_missing_seal_rejection(batch,subtype,reason,error):
+    session=BatchSession(batch,'worker_0001')
+    event=terminal_event(subtype=subtype,terminal_reason=reason,is_error=error)
+    with pytest.raises(BudgetStop,match='batch child lacks complete typed proposal sealing'):
+        session.emit(event)
+    observed=session.history.native_terminal
+    assert observed['state']=='observed' and observed['unavailable']=={}
+    assert observed['fields']['subtype']==subtype and observed['fields']['terminal_reason']==reason
+    assert observed['fields']['is_error'] is error and observed['fields']['num_turns']==3
+    assert observed['fields']['total_cost_usd']==0.125 and observed['fields']['permission_denial_count']==0
+    assert session.history.problem=='batch child lacks complete typed proposal sealing'
+    with pytest.raises(BudgetStop,match='batch child lacks complete typed proposal sealing'):
+        session.history.verify_admission()
+    assert session.history.seal is None and not Path(session.row['proposal_path']).exists()
+
+
+def test_native_terminal_diagnostic_is_absent_detached_and_cannot_be_replaced(batch):
+    session=BatchSession(batch,'worker_0001')
+    assert session.history.native_terminal=={'state':'absent'}
+    session.emit({'type':'system','subtype':'private-result-lookalike',
+        'result':terminal_event(is_error=True)})
+    assert session.history.native_terminal=={'state':'absent'}
+    event=terminal_event(permission_denials=[{'tool_name':'PRIVATE', 'tool_input':{'secret':'PRIVATE'}}])
+    with pytest.raises(BudgetStop,match='complete typed proposal sealing'):session.emit(event)
+    original=copy.deepcopy(session.history.native_terminal)
+    event['subtype']='PRIVATE';event['permission_denials'][0]['tool_input']['secret']='CHANGED'
+    assert session.history.native_terminal==original
+    with pytest.raises(BudgetStop,match='complete typed proposal sealing'):
+        session.emit(terminal_event(subtype='error_max_budget_usd',is_error=True,terminal_reason='budget_exhausted'))
+    assert session.history.native_terminal=={**original,'state':'ambiguous'}
+    assert 'PRIVATE' not in json.dumps(session.history.native_terminal)
+
+
+@pytest.mark.parametrize('key,value,state', [
+    ('is_error',0,'malformed'),('is_error',1,'malformed'),('is_error','false','malformed'),
+    ('is_error',None,'malformed'),('subtype',[],'malformed'),('subtype',{},'malformed'),
+    ('subtype','PRIVATE category','unrecognized'),('terminal_reason','PRIVATE reason','unrecognized'),
+    ('stop_reason','PRIVATE stop','unrecognized'),('terminal_reason',None,'malformed'),
+    ('num_turns',True,'malformed'),('num_turns',-1,'malformed'),('num_turns',1.5,'malformed'),
+    ('num_turns',1_000_001,'malformed'),('num_turns','3','malformed'),
+    ('total_cost_usd',True,'malformed'),('total_cost_usd',-0.1,'malformed'),
+    ('total_cost_usd',float('nan'),'malformed'),('total_cost_usd',float('inf'),'malformed'),
+    ('total_cost_usd',10**400,'malformed'),('total_cost_usd','PRIVATE amount','malformed'),
+    ('api_error_status',True,'malformed'),('api_error_status',99,'malformed'),
+    ('api_error_status',600,'malformed'),('api_error_status','PRIVATE HTTP error','malformed'),
+])
+def test_terminal_diagnostic_rejects_private_untyped_and_unbounded_scalars(key,value,state):
+    event=terminal_event(**{key:value},result='PRIVATE prose',errors=['PRIVATE error'],
+        modelUsage={'PRIVATE model':{'inputTokens':'PRIVATE'}},session_id='PRIVATE identity')
+    diagnostic=_terminal_diagnostic(event)
+    assert key not in diagnostic['fields'] and diagnostic['unavailable'][key]==state
+    serialized=json.dumps(diagnostic,allow_nan=False)
+    assert 'PRIVATE' not in serialized and 'modelUsage' not in serialized and 'session_id' not in serialized
+    assert set(diagnostic)=={'state','fields','unavailable'}
+
+
+def test_terminal_diagnostic_missing_fields_and_nullable_numeric_status_are_explicit():
+    diagnostic=_terminal_diagnostic({'type':'result'})
+    assert diagnostic['fields']=={}
+    assert diagnostic['unavailable']=={k:'absent' for k in ('subtype','terminal_reason','stop_reason',
+        'is_error','num_turns','total_cost_usd','api_error_status','permission_denial_count')}
+    valid=_terminal_diagnostic(terminal_event(stop_reason=None,num_turns=1_000_000,
+        total_cost_usd=1_000_000,api_error_status=503))
+    assert valid['unavailable']=={} and valid['fields']['stop_reason'] is None
+    assert valid['fields']['api_error_status']==503
+
+
+@pytest.mark.parametrize('denials',[None,{},'PRIVATE denial',[None],[{'tool_input':'PRIVATE'},'PRIVATE']])
+def test_terminal_denial_diagnostic_counts_only_typed_list_without_copying_contents(denials):
+    diagnostic=_terminal_diagnostic(terminal_event(permission_denials=denials))
+    assert diagnostic['unavailable']['permission_denial_count']=='malformed'
+    assert 'permission_denial_count' not in diagnostic['fields'] and 'PRIVATE' not in json.dumps(diagnostic)
+
+
+@pytest.mark.parametrize('failure',['early_result','missing_result','child_cleanup','proxy_cleanup','earlier_cause'])
+def test_stopped_child_keeps_terminal_diagnostic_and_original_failure(batch,monkeypatch,failure):
+    from . import registration
+    batch.m['budget']['prices_per_token']={'input':0.01,'output':0.01}
+    batch.m['provider_base_url']='https://synthetic.invalid'
+    class Proxy:
+        def __init__(self,**kwargs):
+            self.token='synthetic';self.failed=threading.Event();self.frozen=False;self.unfinished_handlers=None
+        @contextmanager
+        def running(self):
+            try:yield 'http://synthetic.invalid'
+            finally:
+                self.frozen=True;self.unfinished_handlers=0
+                if failure=='proxy_cleanup':raise RuntimeError('PRIVATE late proxy cleanup')
+    monkeypatch.setattr(runtime,'BatchProxy',Proxy)
+    monkeypatch.setenv('CBORG_API_KEY','synthetic')
+    monkeypatch.setattr(runtime,'provider_clients',lambda *args:(SimpleNamespace(),SimpleNamespace()))
+    monkeypatch.setattr(native,'verify_runtime',lambda m:Path('/synthetic/claude'))
+    def execute(argv,**kwargs):
+        kwargs['verify_launch']()
+        if failure=='missing_result':
+            kwargs['record_stop']('synthetic pre-result stop')
+            raise BudgetStop('synthetic pre-result stop')
+        if failure=='earlier_cause':kwargs['record_stop']('synthetic first cause')
+        try:
+            kwargs['event_observer'](terminal_event(result='PRIVATE final prose',errors=['PRIVATE'],
+                permission_denials=[{'tool_name':'PRIVATE', 'tool_input':{'private':'PRIVATE'}}]))
+        except BudgetStop as error:
+            kwargs['record_stop'](str(error))
+            if failure=='child_cleanup':raise RuntimeError('PRIVATE child cleanup') from error
+            raise
+        pytest.fail('an unsealed proposal must remain rejected')
+    monkeypatch.setattr(native,'execute_child',execute)
+    # Exercise outer result.json propagation as well as the child's stopped.json.
+    Path(batch.m['job']['output_dir']).rmdir();batch.attempt.rmdir()
+    batch.m['repository_commit']='synthetic'
+    batch.reg.write_text(json.dumps(batch.m));batch.identity=native.sha(batch.reg)
+    batch.owner=attempt_identity(batch.identity,batch.m['job']['id']);batch.ledger.path.unlink()
+    batch.ledger=Ledger(batch.m['budget']['ledger_path'],manifest_sha256=batch.identity,total_cap=400,
+        attempt_cap=40,attempt_caps_usd={batch.owner:40});batch.ledger.require_resolved(batch.owner)
+    review=batch.reg.parent/'launch-review.json';review.write_text(json.dumps({
+        'verdict':'approve','registration_sha256':batch.identity,'ci_conclusion':'success',
+        'repository_commit':'synthetic','allowed_jobs':[batch.m['job']['id']]}))
+    monkeypatch.setattr(registration,'validate_registration',lambda p:batch.m)
+    monkeypatch.setattr(registration,'verify',lambda *args:None)
+    monkeypatch.setattr(registration,'sequence_guard',lambda *args:nullcontext())
+    monkeypatch.setattr(registration,'open_audit_ledger',lambda *args:batch.ledger)
+    monkeypatch.setattr(native,'build_policy',lambda *args:{})
+    reason=('synthetic pre-result stop' if failure=='missing_result' else 'synthetic first cause'
+        if failure=='earlier_cause' else 'batch child lacks complete typed proposal sealing')
+    with pytest.raises(BudgetStop,match=reason):native.run_job(batch.reg,review)
+    child=Path(batch.m['audit_batches']['children'][0]['attempt_dir'])
+    stopped=json.loads((child/'stopped.json').read_text())
+    outer=json.loads((batch.attempt/'result.json').read_text())
+    diagnostic=stopped['native_terminal']
+    assert outer['native_terminal']==diagnostic
+    assert outer['reason']==reason and stopped['error_type']==outer['error_type']=='BudgetStop'
+    assert outer['stop_source']==stopped['stop_source']=='native_controller'
+    assert outer['runtime']['proxy_shutdown_complete'] is True and outer['runtime']['unfinished_handlers']==0
+    if failure=='missing_result':assert diagnostic=={'state':'absent'}
+    else:
+        assert diagnostic['fields']['subtype']=='success' and diagnostic['fields']['permission_denial_count']==1
+    assert 'PRIVATE' not in json.dumps(stopped) and 'PRIVATE' not in json.dumps(outer)
+    assert json.loads(batch.ledger.path.read_text())['requests']==[]
+    assert outer['requests_admitted']==0 and Decimal(outer['settled_cost_usd'])==0
+    assert not (batch.attempt/'validation.json').exists()
 
 
 @pytest.mark.parametrize('damage',['part','snapshot','receipt','witness','extra_hidden'])
