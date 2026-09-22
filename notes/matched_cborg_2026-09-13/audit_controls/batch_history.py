@@ -12,6 +12,62 @@ from .registration import strict_json
 from .output_parts import read_regular, describe, same_json
 
 
+# Fixed result enums from the pinned native 2.1.272 runtime (#2230). Unknown
+# values remain unavailable; never copy arbitrary error or model-authored text.
+_TERMINAL_ENUMS = {
+    'subtype': frozenset({'success', 'error_during_execution', 'error_max_turns',
+        'error_max_budget_usd', 'error_max_structured_output_retries'}),
+    'terminal_reason': frozenset({'blocking_limit', 'rapid_refill_breaker', 'prompt_too_long',
+        'image_error', 'model_error', 'api_error', 'malformed_tool_use_exhausted',
+        'aborted_streaming', 'aborted_tools', 'stop_hook_prevented', 'hook_stopped',
+        'tool_deferred', 'max_turns', 'background_requested', 'completed',
+        'budget_exhausted', 'structured_output_retry_exhausted',
+        'tool_deferred_unavailable', 'turn_setup_failed'}),
+    'stop_reason': frozenset({'end_turn', 'max_tokens', 'stop_sequence', 'tool_use',
+        'pause_turn', 'compaction', 'refusal', 'model_context_window_exceeded'}),
+}
+
+
+def _terminal_diagnostic(event):
+    """Detached, individually validated scalars; never completion or cause proof.
+
+    Missing, malformed and unknown fields are explicit. The limits below bound
+    diagnostic values only and cannot change request admission or accounting.
+    total_cost_usd is the CLI's estimate, not authoritative provider accounting.
+    """
+    fields, unavailable = {}, {}
+    for key in (*_TERMINAL_ENUMS, 'is_error', 'num_turns', 'total_cost_usd', 'api_error_status'):
+        if key not in event:
+            unavailable[key] = 'absent'
+            continue
+        value = event[key]
+        if key in _TERMINAL_ENUMS:
+            valid = type(value) is str or (key == 'stop_reason' and value is None)
+            if valid and value is not None and value not in _TERMINAL_ENUMS[key]:
+                unavailable[key] = 'unrecognized'
+                continue
+        elif key == 'is_error':
+            valid = type(value) is bool
+        elif key == 'num_turns':
+            valid = type(value) is int and 0 <= value <= 1_000_000
+        elif key == 'total_cost_usd':
+            valid = type(value) in (int, float) and 0 <= value <= 1_000_000
+        else:
+            valid = value is None or (type(value) is int and 100 <= value <= 599)
+        if valid:
+            fields[key] = value
+        else:
+            unavailable[key] = 'malformed'
+    denials = event.get('permission_denials')
+    if 'permission_denials' not in event:
+        unavailable['permission_denial_count'] = 'absent'
+    elif type(denials) is list and len(denials) <= 1_000_000 and all(type(d) is dict for d in denials):
+        fields['permission_denial_count'] = len(denials)
+    else:
+        unavailable['permission_denial_count'] = 'malformed'
+    return {'state': 'observed', 'fields': fields, 'unavailable': unavailable}
+
+
 class BatchHistory(AuditHistory):
     def __init__(self, manifest, identity, policy, child_id, *, replay=False):
         super().__init__(manifest, identity, policy)
@@ -23,6 +79,7 @@ class BatchHistory(AuditHistory):
         self.checker = self.sealer = self.seal = self.seal_stdout = None
         self.assembler = self.assembly = self.assembly_stdout = None
         self.replay = replay
+        self.native_terminal = {'state': 'absent'}
 
     def _parts(self):
         return [r['part'] for r in self.part_writes]
@@ -139,6 +196,13 @@ class BatchHistory(AuditHistory):
         self.line += 1
         if type(event) is not dict:
             raise BudgetStop('batch transcript contains a non-object event')
+        if event.get('type') == 'result':
+            # Save safe metadata before finish() can reject an unsealed proposal.
+            # A later result cannot replace the first observed diagnostic.
+            if self.native_terminal['state'] == 'absent':
+                self.native_terminal = _terminal_diagnostic(event)
+            else:
+                self.native_terminal = {**self.native_terminal, 'state': 'ambiguous'}
         for block in _blocks(event):
             if type(block) is not dict:
                 continue
