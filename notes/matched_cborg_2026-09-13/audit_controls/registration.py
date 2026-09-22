@@ -32,6 +32,7 @@ CLAIM_CLARIFICATION_TRANSITION_KIND = 'frozen_pair_claim_clarification_v1'
 DRAFT_GRAMMAR_TRANSITION_KIND = 'frozen_pair_draft_grammar_v1'
 SCHEMA_SEMANTICS_TRANSITION_KIND = 'frozen_pair_schema_semantics_v1'
 BATCH_TRANSITION_KIND = 'frozen_pair_integrated_batches_v1'
+BATCH_FORMAT_TRANSITION_KIND = 'frozen_pair_batch_format_v1'
 VERSIONED_SCIENTIFIC_FILES = frozenset({'api_runner.py', 'evidence_assertions.py'})
 
 
@@ -44,7 +45,8 @@ def scientific_contract(manifest):
                    (5, 17): {'kind': CLAIM_CLARIFICATION_TRANSITION_KIND},
                    (6, 18): {'kind': DRAFT_GRAMMAR_TRANSITION_KIND},
                    (6, 19): {'kind': SCHEMA_SEMANTICS_TRANSITION_KIND},
-                   (7, 20): {'kind': BATCH_TRANSITION_KIND}}
+                   (7, 20): {'kind': BATCH_TRANSITION_KIND},
+                   (7, 21): {'kind': BATCH_FORMAT_TRANSITION_KIND}}
     if (any(type(value) is not int for value in pair) or
             (pair not in transitions if upgraded else pair != (3, 14)) or
             (upgraded and (type(manifest[TRANSITION]) is not dict or
@@ -55,14 +57,15 @@ def scientific_contract(manifest):
                          'frozen_pair_claim_clarification_v1 with 5/17 or '
                          'frozen_pair_draft_grammar_v1 with 6/18 or '
                          'frozen_pair_schema_semantics_v1 with 6/19 or '
-                         'frozen_pair_integrated_batches_v1 with 7/20')
+                         'frozen_pair_integrated_batches_v1 with 7/20 or '
+                         'frozen_pair_batch_format_v1 with 7/21')
     return upgraded
 
 
 def schema_semantic_context(manifest):
     """Only the exact selected scientific transition executes the new helper."""
     scientific_contract(manifest)
-    return manifest['render_version'] in (19, 20)
+    return manifest['render_version'] in (19, 20, 21)
 
 
 def versioned_scientific_files(manifest):
@@ -276,7 +279,9 @@ def inspect_parent(manifest):
 def implementation_paths(manifest):
     repository = canonical_path(manifest['repository'], exists=True)
     paths = set((repository / 'src/data_sheets_schema').rglob('*.py'))
-    if manifest.get('render_version') != 20:
+    if manifest.get('render_version') != 21:
+        paths.discard(repository / 'src/data_sheets_schema/audit_batch_format.py')
+    if manifest.get('render_version') not in (20, 21):
         paths.difference_update(repository / 'src/data_sheets_schema' / name
                                 for name in ('audit_batches.py', 'audit_batch_context.py'))
     if schema_semantic_context(manifest):
@@ -287,12 +292,12 @@ def implementation_paths(manifest):
     paths.update((repository / 'src/data_sheets_schema').rglob('*.json'))
     paths.update(path for path in (repository / 'src/download/prompts').rglob('*') if path.is_file())
     paths.update(HERE.glob('*.py'))
-    if manifest.get('render_version') != 20:
+    if manifest.get('render_version') not in (20, 21):
         paths.difference_update(HERE / name for name in
             ('batch_registration.py', 'batch_native.py', 'batch_history.py', 'batch_output.py'))
-    if 'audit_output' not in manifest and 'audit_drafting' not in manifest and manifest.get('render_version') != 20:
+    if 'audit_output' not in manifest and 'audit_drafting' not in manifest and manifest.get('render_version') not in (20, 21):
         paths.discard(HERE / 'output_parts.py')
-    if 'audit_drafting' not in manifest and manifest.get('render_version') != 20:
+    if 'audit_drafting' not in manifest and manifest.get('render_version') not in (20, 21):
         paths.discard(HERE / 'draft_output.py')
         paths.discard(HERE / 'draft_history.py')
     if 'audit_contract_context' not in manifest:
@@ -376,7 +381,7 @@ def schema_semantic_paths(manifest):
 def batch_authority_paths(manifest):
     """Exact complete schema imports and the selected profile vocabulary only."""
     scientific_contract(manifest)
-    if manifest['render_version'] != 20:
+    if manifest['render_version'] not in (20, 21):
         return set()
     from data_sheets_schema.profiles import profile_named, vocabulary_bytes
     profile = profile_named(manifest['profile'])

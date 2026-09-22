@@ -583,3 +583,21 @@ lineage. Independent scientific review must assess all discarded/replaced
 concerns as well as the final audit. Phase 4 inherits the accepted scientific
 instrument and transitive evidence, but no active batch tools. Generation and
 evaluation entry points reject the selector, even when its value is null.
+
+### Explicit output format (renderer 21)
+
+Add `--audit-batch-format` when preparing a new `--audit-batches PATH`
+registration to select protocol 7 / renderer 21 (#2200). This records the
+`frozen_pair_batch_format_v1` transition and appends a source-blind format
+contract to each child's system instructions. The contract supplies the exact
+worker and integration JSON shapes, required and optional keys, allowed values,
+evidence variants, and digest and finding-link rules. Its synthetic examples
+illustrate syntax; their facts, paths, hashes and judgments are not run inputs.
+
+The option is never inferred from a predecessor. Omitting it preserves renderer
+20. The format module is pinned for renderer 21 and retained as part of the
+accepted instrument in Phase 4. Generation entry points refuse renderer 21.
+The existing grammar, two-draft limit, scientific duties, terminal source check,
+independent acceptance and spending controls remain in force. A failed attempt
+requires a fresh registration with every worker restarted from its registered
+inputs; it cannot be repaired or resumed.
