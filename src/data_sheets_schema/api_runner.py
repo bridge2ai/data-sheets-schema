@@ -557,6 +557,10 @@ class RunSpec:
             self.render_version = 7 if self.is_agentic else 8
         if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
+        if self.prompt_text_env and not (self.is_agentic and self.render_version >= 9):
+            # Only agentic renderers 9 and later carry the recorder line the
+            # key changes; elsewhere it would be recorded and do nothing (#2313).
+            raise ValueError("prompt_text_env applies only to agentic renderers 9 and later")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
@@ -651,9 +655,13 @@ class RunSpec:
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
                    provider=recorded.get("provider"),
                    reasoning_effort=recorded.get("reasoning_effort"),
-                   prompt_text_env=recorded.get("prompt_text_env", False), _replay_only=True)
-        if not isinstance(spec.prompt_text_env, bool):
-            raise ValueError(f"invalid recorded prompt_text_env: {spec.prompt_text_env!r}")
+                   prompt_text_env=recorded.get("prompt_text_env") is True, _replay_only=True)
+        if "prompt_text_env" in recorded and recorded["prompt_text_env"] is not True:
+            # `render_spec` emits the key only as true; any other spelling
+            # would not round-trip and would be refused later as a changed
+            # instruction, which names the wrong cause (#2315).
+            raise ValueError(f"invalid recorded prompt_text_env: {recorded['prompt_text_env']!r}; "
+                             "the key is recorded only as true")
         if spec.reasoning_effort is not None and spec.reasoning_effort not in provenance._EFFORT_LADDER:
             # The recorder's flag is a closed choice; the specification route
             # must not admit what the flag refuses (#2255).

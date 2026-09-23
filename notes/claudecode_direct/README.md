@@ -126,8 +126,12 @@ controller's own stop state.
   rather than a shell expansion, which the runtime refuses under dontAsk:
   the first canary was disqualified at that step (#2282). The preparer
   refuses a recorder line with an expansion or a specification with an
-  apostrophe, and the launcher refuses a job without the key.
-  `probe_recorder_permission.py` observes the runtime's decision offline.
+  apostrophe (conservatively: the apostrophe trigger is uncharacterised,
+  #2308), and the launcher refuses a job without the key.
+  `probe_recorder_permission.py` observes the runtime's decision offline and
+  shows whether the variable reaches the recorder; run it with
+  `--instruction <the registered instruction>` on each new registration
+  before its launch, with the interpreter the instruction names.
 
 ## Running one canary
 

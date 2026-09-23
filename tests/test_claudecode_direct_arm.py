@@ -469,10 +469,11 @@ def test_the_env_form_changes_only_the_recorder_line_and_its_note(native):  # no
     assert new_tokens[:at] == old_tokens[:at]
     assert json.loads(new_tokens[at + 1]) == {**json.loads(old_tokens[at + 1]), "prompt_text_env": True}
     assert new_tokens[at + 2:] == ["--prompt-text-env", "D4D_LAUNCH_INSTRUCTION"]
-    # Outside the recorder line, the only change is one appended sentence.
+    # Outside the recorder line, the only change is one appended sentence, present exactly once.
     old_rest = before.replace(old_line, "@@")
     new_rest = after.replace(new_line, "@@")
     added = "The provenance command reads that variable itself: run the line exactly as written, and do not expand or replace the variable in the shell.\n"
+    assert new_rest.count(added) == 1 and old_rest.count(added) == 0
     assert new_rest.replace(added, "", 1) == old_rest
 
 
@@ -483,9 +484,22 @@ def test_the_env_key_round_trips_and_a_non_boolean_is_refused(native):  # noqa: 
     kw = dict(project=spec.project, method=spec.method, label=spec.label)
     assert RunSpec.from_render_spec(recorded, **kw).prompt_text_env is True
     assert RunSpec.from_render_spec({k: v for k, v in recorded.items() if k != "prompt_text_env"}, **kw).prompt_text_env is False
-    for bad in ("yes", 1, None):
+    for bad in ("yes", 1, None, False, "true", []):          # recorded only as true (#2315)
         with pytest.raises(ValueError, match="invalid recorded prompt_text_env"):
             RunSpec.from_render_spec({**recorded, "prompt_text_env": bad}, **kw)
+
+
+def test_the_env_key_is_refused_where_it_renders_nothing(native):  # noqa: F811
+    """The key changes only the agentic recorder line of renderers 9 and later (#2313)."""
+    from data_sheets_schema.api_runner import RunSpec
+    spec, _, _ = native
+    for runtime, version in (("Claude API (direct)", 17), ("Claude Code", 8), (DIRECT, 3)):
+        with pytest.raises(ValueError, match="applies only to agentic renderers 9 and later"):
+            replace(spec, runtime=runtime, render_version=version, prompt_text_env=True)
+    recorded = replace(spec, prompt_text_env=True).render_spec()
+    with pytest.raises(ValueError, match="applies only to agentic renderers 9 and later"):
+        RunSpec.from_render_spec({**recorded, "runtime": "Claude API (direct)"}, project=spec.project,
+                                 method=spec.method, label=spec.label)
 
 
 @pytest.fixture
@@ -518,18 +532,23 @@ def test_the_recorder_reads_the_instruction_from_the_named_variable(env_native):
 def test_the_named_variable_must_be_set_to_an_existing_file(env_native, tmp_path):
     direct, sent, command, cli = env_native
     for env, message in (({"D4D_LAUNCH_INSTRUCTION": ""}, "is not set"),
-                         ({"D4D_LAUNCH_INSTRUCTION": str(tmp_path / "absent.md")}, "names no file")):
+                         ({"D4D_LAUNCH_INSTRUCTION": "   "}, "is not set"),
+                         ({"D4D_LAUNCH_INSTRUCTION": str(tmp_path / "absent.md")}, "does not name an existing file")):
         result = CliRunner().invoke(cli, command, env=env)
         assert result.exit_code != 0 and message in result.output, result.output
+        assert "absent.md" not in result.output                   # the value is never printed
         assert not direct.provenance_path.exists()
     unset = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": None})
     assert unset.exit_code != 0 and "is not set" in unset.output
     both = CliRunner().invoke(cli, command + ["--prompt-text", str(sent)], env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
     assert both.exit_code != 0 and "exclusive" in both.output
-    bad_name = [*command[:-1], "d4d-launch"]
-    named = CliRunner().invoke(cli, bad_name, env={"d4d-launch": str(sent)})
-    assert named.exit_code != 0 and "names no environment variable" in named.output
+    # Only the launch-instruction variable is read, and no value is echoed (#2312).
+    for other in ("d4d-launch", "FAKE_SECRET"):
+        named = CliRunner().invoke(cli, [*command[:-1], other], env={other: "sk-synthetic-not-a-real-key"})
+        assert named.exit_code != 0 and "accepts only D4D_LAUNCH_INSTRUCTION" in named.output
+        assert "sk-synthetic" not in named.output
     assert not direct.provenance_path.exists()
+
 
 
 def test_a_different_file_in_the_variable_is_refused_by_the_render_gate(env_native, tmp_path):

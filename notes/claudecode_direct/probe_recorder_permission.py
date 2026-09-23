@@ -17,12 +17,17 @@ specification, so a difference in decision is the ending's; the default run
 adds a bisection of the fixture's line.
 
 `--instruction PATH` takes the recorder line from a real rendered
-instruction instead and isolates single characters of its specification
-(`#`, parentheses, apostrophes). Observed on 2026-09-23
-(`recorder_permission_probe_2026-09-23.json`): on the first direct canary's
-registered line only the expansion is refused; the fixture's line, whose
-manifest path carries an apostrophe, is refused in every ending until the
-apostrophe is removed.
+instruction instead, in either ending, and isolates single characters of its
+specification (`#`, parentheses, apostrophes). The CLI stub reports whether
+`D4D_LAUNCH_INSTRUCTION` reached it; a refusal counts only when the runtime
+made it (reason `mode`), and a run passes only if some case was admitted.
+Observed on 2026-09-23 (`recorder_permission_probe_2026-09-23.json`): on the
+first direct canary's registered line only the expansion is refused; the
+same specification re-rendered with `prompt_text_env` is admitted as written
+and the child sees the variable; the fixture's line, whose manifest path
+appears twice in its specification, is refused in every ending until the
+specification's apostrophes are removed, while one apostrophe in a small
+specification is admitted.
 """
 import argparse
 import json
@@ -46,15 +51,25 @@ from native_command_policy import command_guidance, permission_arguments  # noqa
 import probe_native_permissions as native_probe                          # noqa: E402
 
 ENV_FLAG = "--prompt-text-env D4D_LAUNCH_INSTRUCTION"
+EXPANSION = ' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?Set D4D_LAUNCH_INSTRUCTION to the exact saved launch instruction}"'
+
+
+def split_ending(line):
+    """The line without its launch-instruction ending, in either rendered form (#2310)."""
+    if line.endswith(" " + ENV_FLAG):
+        return line[: -len(" " + ENV_FLAG)]
+    head, sep, _ = line.rpartition(' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?')
+    if not sep:
+        raise RuntimeError("the rendered recorder line ends in neither launch-instruction form")
+    return head
 
 
 def recorder_cases(instruction_text, instruction_path):
     """The rendered recorder line and its two variants."""
     line = next(l.strip() for l in instruction_text.splitlines()
                 if " -m data_sheets_schema.cli provenance record" in l and "--prompt-text" in l)
-    head, sep, _ = line.rpartition(' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?')
-    if not sep:
-        raise RuntimeError("the rendered recorder line does not end with the launch-instruction expansion")
+    head = split_ending(line)
+    line = head + EXPANSION
     stem, sep2, payload = head.rpartition(" --render-spec-json ")
     if not sep2:
         raise RuntimeError("the rendered recorder line carries no render specification")
@@ -75,9 +90,7 @@ def recorder_cases(instruction_text, instruction_path):
 
 def isolation_cases(line, instruction_path):
     """Cases on one real rendered recorder line that isolate single characters in its payload."""
-    head, sep, _ = line.rpartition(' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?')
-    if not sep:
-        raise RuntimeError("the rendered recorder line does not end with the launch-instruction expansion")
+    head = split_ending(line)
     stem, _, payload = head.rpartition(" --render-spec-json ")
     prefix = line.split(" provenance record", 1)[0] + " provenance record"
     spec = json.loads(shlex.split(payload)[0])
@@ -89,7 +102,8 @@ def isolation_cases(line, instruction_path):
     no_hash = {k: (v.replace("#", "") if isinstance(v, str) else v) for k, v in spec.items()}
     no_parens = {k: (v.replace("(", "").replace(")", "") if isinstance(v, str) else v) for k, v in spec.items()}
     neither = {k: (v.replace("#", "").replace("(", "").replace(")", "") if isinstance(v, str) else v) for k, v in spec.items()}
-    return [{"id": "real_expansion", "command": line},
+    return [{"id": "real_as_given", "command": line},
+            {"id": "real_expansion", "command": head + EXPANSION},
             {"id": "real_literal_path", "command": head + literal},
             {"id": "real_env_flag", "command": head + " " + ENV_FLAG},
             {"id": "real_env_flag_no_hash", "command": with_spec(no_hash)},
@@ -120,7 +134,16 @@ def main():
     if args.instruction is not None:
         real = next(l.strip() for l in args.instruction.read_text(encoding="utf-8").splitlines()
                     if " -m data_sheets_schema.cli provenance record" in l and "--prompt-text" in l)
+        if shlex.split(real)[0] != policy["python"]:
+            # The allow rules name this interpreter; a line naming another
+            # would be refused by the controller, never reaching the
+            # runtime's matcher, and would observe nothing (#2309).
+            raise SystemExit(f"the instruction's interpreter is not this probe's ({policy['python']}); "
+                             "run the probe with the interpreter the instruction names")
         cases = isolation_cases(real, instruction)
+    # The CLI stub reports whether the variable reached the child.
+    (work / "data_sheets_schema" / "cli.py").write_text(
+        'import os\nprint("CLI_STUB_OK", "LAUNCH_VARIABLE_SET" if os.environ.get("D4D_LAUNCH_INSTRUCTION") else "LAUNCH_VARIABLE_UNSET")\n')
     (root / "cases.json").write_text(json.dumps(cases, indent=2) + "\n")
     (root / "policy.json").write_text(json.dumps(policy, indent=2) + "\n")
     cli = str(args.claude_executable.resolve(strict=True))
@@ -193,9 +216,18 @@ def main():
 
     observed = [{"id": c["id"], "denied": c["id"] in denied, "denial_reason": reasons.get(c["id"]),
                  "ran_cli_stub": c["id"] in results and "CLI_STUB_OK" in text(results[c["id"]]),
+                 "child_saw_variable": c["id"] in results and "LAUNCH_VARIABLE_SET" in text(results[c["id"]]),
                  "result_head": (text(results[c["id"]])[:160] if c["id"] in results else None)} for c in cases]
+    # A refusal counts only when the runtime's own matcher made it (reason
+    # `mode`); an admitted case counts only when the child ran and saw the
+    # variable. Anything else observed nothing.
     summary = {"exit_code": code, "terminal_results": len(terminals), "cases": observed,
-               "passed": len(terminals) == 1 and all(o["denied"] != o["ran_cli_stub"] for o in observed),
+               # At least one case must be admitted, so a run that refused
+               # everything (another interpreter, a broken rule) observed nothing.
+               "passed": len(terminals) == 1 and any(not o["denied"] for o in observed) and all(
+                   (o["denied"] and o["denial_reason"] == "mode" and not o["ran_cli_stub"])
+                   or (not o["denied"] and o["ran_cli_stub"] and o["child_saw_variable"]) for o in observed),
+               "instruction_sha256": sha(args.instruction) if args.instruction is not None else None,
                "allow_rules": [r for r in policy.get("allowed_tools", []) if "provenance record" in r],
                "scripted_requests": len(calls), "real_provider_requests": 0, "runtime_sha256": sha(cli),
                "cases_sha256": sha(root / "cases.json"), "transcript_sha256": sha(root / "transcript.jsonl")}

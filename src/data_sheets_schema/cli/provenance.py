@@ -3,7 +3,6 @@
 import functools
 
 import os
-import re
 import click
 
 from data_sheets_schema.corpus import anchored as _corpus_path
@@ -320,10 +319,11 @@ def _parse_phases(specs) -> list[dict]:
                    '`d4d api render-prompt --out`. Hashed as prompts.request. '
                    'The file is what an instruction was built from; this is '
                    'what it became.')
-@click.option('--prompt-text-env', 'prompt_text_env', default=None, metavar='VARIABLE',
-              help='Read the --prompt-text path from this environment variable, so a '
-                   'prescribed command carries no shell expansion; Claude Code refuses '
-                   'one under dontAsk (#2282). Exclusive with --prompt-text.')
+@click.option('--prompt-text-env', 'prompt_text_env', default=None, metavar='D4D_LAUNCH_INSTRUCTION',
+              help='Read the --prompt-text path from the D4D_LAUNCH_INSTRUCTION environment '
+                   'variable, so a prescribed command carries no shell expansion; Claude Code '
+                   'refuses one under dontAsk (#2282). No other variable is read, and its value '
+                   'is never printed. Exclusive with --prompt-text.')
 @click.option('--condition', default=None, type=click.Choice(sorted(_CONDITIONS_FOR_RECORD())),
               help='Condition the instruction was rendered under. With --arm '
                    'and --runtime this reconstructs the render spec, so the '
@@ -410,14 +410,17 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         # The path comes from the named variable, not from the shell (#2282).
         if prompt_text is not None:
             raise click.ClickException("--prompt-text and --prompt-text-env are exclusive")
-        if not re.fullmatch(r"[A-Z_][A-Z0-9_]*", prompt_text_env):
-            raise click.ClickException(f"--prompt-text-env names no environment variable: {prompt_text_env!r}")
+        from data_sheets_schema.api_runner import LAUNCH_INSTRUCTION_VARIABLE
+        if prompt_text_env != LAUNCH_INSTRUCTION_VARIABLE:
+            # One variable only, so the recorder cannot be pointed at another
+            # (a key, a token) and made to read or print it (#2312).
+            raise click.ClickException(f"--prompt-text-env accepts only {LAUNCH_INSTRUCTION_VARIABLE}")
         value = os.environ.get(prompt_text_env, "")
         if not value.strip():
             raise click.ClickException(f"--prompt-text-env: {prompt_text_env} is not set; the launcher sets it "
                                        "to the exact saved launch instruction")
         if not Path(value).is_file():
-            raise click.ClickException(f"--prompt-text-env: {prompt_text_env} names no file: {value}")
+            raise click.ClickException(f"--prompt-text-env: {prompt_text_env} does not name an existing file")
         prompt_text = value
     supplied_text = ((Path(prompt_text).read_bytes().decode("utf-8") if render_spec_json is not None
                       else Path(prompt_text).read_text(encoding="utf-8")) if prompt_text else None)

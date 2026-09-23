@@ -212,13 +212,26 @@ def test_the_preparer_refuses_an_instruction_that_is_not_the_direct_arms(tmp_pat
         "--prompt-text-env D4D_LAUNCH_INSTRUCTION", '--prompt-text "${D4D_LAUNCH_INSTRUCTION:?x}"')))
     with pytest.raises(preparation.DirectStop, match="must read the launch instruction by --prompt-text-env"):
         preparation.build(arguments(tmp_path, fake, output=tmp_path / "r4"))
-    assert not (tmp_path / "r4" / "registration.json").exists()
+    assert not (tmp_path / "r4").exists()                     # refused before anything is written
+    # Both the flag and an expansion on one line: the expansion alone refuses it.
+    monkeypatch.setattr(RunSpec, "instruction", property(lambda self: expansion(self).replace(
+        "--prompt-text-env D4D_LAUNCH_INSTRUCTION", '--prompt-text-env D4D_LAUNCH_INSTRUCTION "${HOME}"')))
+    with pytest.raises(preparation.DirectStop, match="must read the launch instruction by --prompt-text-env"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r4b"))
+    assert not (tmp_path / "r4b").exists()
+    # No recorder line at all, with the effort still stated elsewhere.
+    monkeypatch.setattr(RunSpec, "instruction", property(lambda self: "\n".join(
+        "note: --reasoning-effort max" if " -m data_sheets_schema.cli provenance record" in line else line
+        for line in expansion(self).splitlines())))
+    with pytest.raises(preparation.DirectStop, match="must read the launch instruction by --prompt-text-env"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r4c"))
+    assert not (tmp_path / "r4c").exists()
     monkeypatch.setattr(RunSpec, "instruction", real)
     rendered = RunSpec.render_spec
     monkeypatch.setattr(RunSpec, "render_spec", lambda self: {**rendered(self), "manifest_line": "# child's manifest"})
     with pytest.raises(preparation.DirectStop, match="carries an apostrophe"):
         preparation.build(arguments(tmp_path, fake, output=tmp_path / "r5"))
-    assert not (tmp_path / "r5" / "registration.json").exists()
+    assert not (tmp_path / "r5").exists()
     monkeypatch.setattr(RunSpec, "render_spec", rendered)
     monkeypatch.setattr(RunSpec, "is_agentic", property(lambda self: False))
     with pytest.raises(preparation.DirectStop, match="must render the agentic instruction"):
@@ -1104,8 +1117,14 @@ def test_the_recorder_permission_probe_builds_its_cases_offline(tmp_path):
     line = ("/py -m data_sheets_schema.cli provenance record --project X --render-spec-json "
             + shlex.quote(json.dumps(spec)) + ' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?Set it}"')
     cases = {c["id"]: c["command"] for c in probe.isolation_cases(line, tmp_path / "i.md")}
-    assert cases["real_expansion"] == line
+    assert cases["real_as_given"] == line and cases["real_expansion"].endswith(probe.EXPANSION)
     assert cases["real_env_flag"].endswith(probe.ENV_FLAG) and "${" not in cases["real_env_flag"]
+    # The env-form line the fix renders is accepted as well (#2310): its "as given" case is itself.
+    env_line = line.rpartition(' --prompt-text "')[0] + " " + probe.ENV_FLAG
+    env_cases = {c["id"]: c["command"] for c in probe.isolation_cases(env_line, tmp_path / "i.md")}
+    assert env_cases["real_as_given"] == env_line and env_cases["real_expansion"] == cases["real_expansion"]
+    with pytest.raises(RuntimeError, match="neither launch-instruction form"):
+        probe.isolation_cases(line.rpartition(' --prompt-text "')[0], tmp_path / "i.md")
     assert all(c.startswith("/py -m data_sheets_schema.cli provenance record") for c in cases.values())
     assert "#" not in cases["real_env_flag_no_hash"] and "(" not in cases["real_env_flag_no_parens"]
     fixture = {c["id"] for c in probe.recorder_cases(line, tmp_path / "i.md")}

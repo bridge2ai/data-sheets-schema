@@ -3,42 +3,226 @@
   "date": "2026-09-23",
   "runtime": "Claude Code 2.1.272",
   "permission_mode": "dontAsk",
-  "provider": "scripted local provider; no key, no model call",
+  "provider": "scripted local provider; no provider key, no model call",
+  "reading": "A case is 'refused' only when the runtime's own matcher refused it (decision reason 'mode'); 'admitted' only when the child ran the stub CLI and the stub saw D4D_LAUNCH_INSTRUCTION. A run passes only if every case is one or the other and at least one case is admitted.",
   "runs": {
-    "real": {
-      "line": "the first direct-arm canary's registered recorder line",
-      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+    "fixture": {
+      "line": "default mode: the native permission probe's fixture line, whose manifest path carries an apostrophe (once in --manifest, twice in the render specification), and a bisection of it",
+      "instruction_sha256": null,
+      "passed": true,
+      "exit_code": 0,
+      "terminal_results": 1,
       "real_provider_requests": 0,
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "allow_rules": [
+        "Bash(<registered interpreter> -m data_sheets_schema.cli provenance record *)",
+        "Bash(<registered interpreter> -m data_sheets_schema.cli --manifest <probe fixture path> child'\"'\"'s manifest.yaml' provenance record *)",
+        "Bash(<registered interpreter> -m data_sheets_schema.cli --manifest 'source child'\"'\"'s manifest.yaml' provenance record *)"
+      ],
+      "cases_sha256": "108d23f84f83caad6d491cee82e26570d91749c039d5b9ad3e61e172b0e43cd3",
+      "transcript_sha256": "74559877f22f61b1ff91ee95313a6d81e8d1e71243d2ffbe87d5baca1391bbe4",
       "cases": {
-        "real_expansion": "refused",
-        "real_literal_path": "admitted",
-        "real_env_flag": "admitted",
-        "real_env_flag_no_hash": "admitted",
-        "real_env_flag_no_parens": "admitted",
-        "real_env_flag_neither": "admitted",
-        "tiny_hash_after_space": "admitted",
-        "tiny_hash_no_space": "admitted",
-        "tiny_parens": "admitted",
-        "tiny_apostrophe": "admitted",
-        "real_env_flag_no_apostrophe": "admitted"
+        "expansion": {
+          "decision": "refused",
+          "denial_reason": "mode",
+          "child_saw_variable": false
+        },
+        "literal_path": {
+          "decision": "refused",
+          "denial_reason": "mode",
+          "child_saw_variable": false
+        },
+        "env_flag": {
+          "decision": "refused",
+          "denial_reason": "mode",
+          "child_saw_variable": false
+        },
+        "bare": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "stem_only": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "stem_literal": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "stem_trivial_spec": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "stem_small_spec": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "stem_half_payload": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        }
       }
     },
-    "fixture": {
-      "line": "the native permission probe's fixture line (a manifest path with an apostrophe)",
-      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+    "canary": {
+      "line": "--instruction: the first direct-arm canary's registered instruction (the expansion form it was launched with)",
+      "instruction_sha256": "b528bff782fa0d44ec05621e6936140ec8043cd299f334f1b352acfe7df7ab92",
+      "passed": true,
+      "exit_code": 0,
+      "terminal_results": 1,
       "real_provider_requests": 0,
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "allow_rules": [
+        "Bash(<registered interpreter> -m data_sheets_schema.cli provenance record *)",
+        "Bash(<registered interpreter> -m data_sheets_schema.cli --manifest <probe fixture path> child'\"'\"'s manifest.yaml' provenance record *)",
+        "Bash(<registered interpreter> -m data_sheets_schema.cli --manifest 'source child'\"'\"'s manifest.yaml' provenance record *)"
+      ],
+      "cases_sha256": "657e11e233bdf8b5e9820b6951c1ecd532280b3aa13895841c1382d04c13419a",
+      "transcript_sha256": "88bee96d889973e862ca61b841f70a25d782f277cd762b102e747c636a06c69d",
       "cases": {
-        "real_expansion": "refused",
-        "real_literal_path": "refused",
-        "real_env_flag": "refused",
-        "real_env_flag_no_hash": "refused",
-        "real_env_flag_no_parens": "refused",
-        "real_env_flag_neither": "refused",
-        "tiny_hash_after_space": "admitted",
-        "tiny_hash_no_space": "admitted",
-        "tiny_parens": "admitted",
-        "tiny_apostrophe": "admitted",
-        "real_env_flag_no_apostrophe": "admitted"
+        "real_as_given": {
+          "decision": "refused",
+          "denial_reason": "mode",
+          "child_saw_variable": false
+        },
+        "real_expansion": {
+          "decision": "refused",
+          "denial_reason": "mode",
+          "child_saw_variable": false
+        },
+        "real_literal_path": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_no_hash": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_no_parens": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_neither": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_hash_after_space": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_hash_no_space": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_parens": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_apostrophe": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_no_apostrophe": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        }
+      }
+    },
+    "envform": {
+      "line": "--instruction: the same registered specification re-rendered with prompt_text_env, the line the next direct registration carries",
+      "instruction_sha256": "963ac922321d6c939dff8ef395dcb4f77cd710902960fa8404db21adb9ca8e12",
+      "passed": true,
+      "exit_code": 0,
+      "terminal_results": 1,
+      "real_provider_requests": 0,
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "allow_rules": [
+        "Bash(<registered interpreter> -m data_sheets_schema.cli provenance record *)",
+        "Bash(<registered interpreter> -m data_sheets_schema.cli --manifest <probe fixture path> child'\"'\"'s manifest.yaml' provenance record *)",
+        "Bash(<registered interpreter> -m data_sheets_schema.cli --manifest 'source child'\"'\"'s manifest.yaml' provenance record *)"
+      ],
+      "cases_sha256": "04fca176011c0b7e3240afd0c889a80b9f8698d1a91a719fb1e1bc82da07c12b",
+      "transcript_sha256": "2f6bde6aae36ce88f956c534c24e7bdd120c3bd2f1fbe939ee713721840ee44c",
+      "cases": {
+        "real_as_given": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_expansion": {
+          "decision": "refused",
+          "denial_reason": "mode",
+          "child_saw_variable": false
+        },
+        "real_literal_path": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_no_hash": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_no_parens": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_neither": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_hash_after_space": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_hash_no_space": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_parens": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "tiny_apostrophe": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        },
+        "real_env_flag_no_apostrophe": {
+          "decision": "admitted",
+          "denial_reason": null,
+          "child_saw_variable": true
+        }
       }
     }
   }
