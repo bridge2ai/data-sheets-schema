@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -51,26 +52,61 @@ CLI_FLAGS = ["--print", "--safe-mode", "--restricted", "--strict-mcp-config", "-
 #: reads (#2207); the older spelling is kept for the records that carry it.
 CHILD_ENVIRONMENT = {"DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1", "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
                      "DISABLE_TELEMETRY": "1", "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1",
+                     # The runtime is asked for the 200k build the native arm
+                     # observed, not the 1M one it reports as `claude-opus-5[1m]`
+                     # (#2266); whether it honours this on the subscription is
+                     # observed only by the first run.
+                     "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
                      # An isolated config directory would otherwise look for a
                      # keychain item suffixed by that directory and find no
                      # login. Set and empty, this makes the runtime use the
                      # maintainer's own login item. No token enters the env.
                      "CLAUDE_SECURESTORAGE_CONFIG_DIR": ""}
 #: Never present in the child's environment: the run must authenticate by the
-#: maintainer's login, never by a key, and must never be redirected. Every
-#: name here is one the pinned 2.1.272 binary reads (#2244): keys and tokens,
-#: base URLs and cloud-provider switches, proxies in both spellings, TLS
-#: overrides and model overrides. A second layer behind `PER_JOB_NAMES`.
+#: maintainer's login, never by a key, and must never be redirected. A second
+#: layer behind `PER_JOB_NAMES` (#2244), and what the launcher refuses in its
+#: own parent environment. Built from a string scan of the pinned 2.1.272
+#: binary (#2270): credentials and tokens, base URLs and cloud-provider
+#: switches, proxies in every spelling, TLS and certificate overrides,
+#: settings and config paths, model, effort and token overrides. Not claimed
+#: complete. `CBORG_API_KEY` is policy, not something the binary reads: the
+#: CBORG arms' key must never be near this arm. `CLAUDE_EFFORT` is deliberately
+#: absent: the recorder reads it to corroborate a header and a maintainer's
+#: shell may carry it; the child never receives it, since it is not a
+#: pass-through name.
 FORBIDDEN_ENVIRONMENT = (
-    "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN", "CBORG_API_KEY", "AWS_BEARER_TOKEN_BEDROCK",
-    "ANTHROPIC_BASE_URL", "ANTHROPIC_BEDROCK_BASE_URL", "ANTHROPIC_VERTEX_BASE_URL", "ANTHROPIC_FOUNDRY_BASE_URL",
-    "ANTHROPIC_CUSTOM_HEADERS", "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY",
+    # credentials and tokens
+    "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN",
+    "CLAUDE_CODE_OAUTH_REFRESH_TOKEN", "CLAUDE_CODE_SESSION_ACCESS_TOKEN", "CLAUDE_CODE_GATEWAY_TOKEN",
+    "CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR", "CLAUDE_CODE_API_KEY_FILE_DESCRIPTOR", "CBORG_API_KEY",
+    "AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_FOUNDRY_API_KEY", "ANTHROPIC_FOUNDRY_AUTH_TOKEN", "ANTHROPIC_AWS_API_KEY",
+    # base URLs, hosts and cloud-provider switches
+    "ANTHROPIC_BASE_URL", "ANTHROPIC_API_HOST", "CLAUDE_CODE_API_BASE_URL", "ANTHROPIC_BEDROCK_BASE_URL",
+    "ANTHROPIC_VERTEX_BASE_URL", "ANTHROPIC_FOUNDRY_BASE_URL", "ANTHROPIC_AWS_BASE_URL",
+    "ANTHROPIC_GOOGLE_CLOUD_BASE_URL", "ANTHROPIC_BEDROCK_MANTLE_BASE_URL", "ANTHROPIC_CUSTOM_HEADERS",
+    "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY",
     "CLAUDE_CODE_SKIP_BEDROCK_AUTH", "CLAUDE_CODE_SKIP_VERTEX_AUTH", "CLAUDE_CODE_SKIP_FOUNDRY_AUTH",
+    "CLAUDE_CODE_SKIP_ANTHROPIC_AWS_AUTH", "CLAUDE_CODE_SKIP_MANTLE_AUTH",
+    # proxies, in every spelling the binary reads
     "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy",
     "GLOBAL_AGENT_HTTP_PROXY", "GLOBAL_AGENT_HTTPS_PROXY", "GLOBAL_AGENT_NO_PROXY",
-    "NODE_EXTRA_CA_CERTS", "NODE_TLS_REJECT_UNAUTHORIZED", "CLAUDE_CODE_CLIENT_CERT", "CLAUDE_CODE_CLIENT_KEY",
-    "ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL",
-    "ANTHROPIC_SMALL_FAST_MODEL", "CLAUDE_CODE_SUBAGENT_MODEL")
+    "CLAUDE_CODE_PROXY_URL", "CLAUDE_CODE_HTTP_PROXY", "CLAUDE_CODE_HTTPS_PROXY",
+    # TLS and certificates
+    "NODE_EXTRA_CA_CERTS", "NODE_TLS_REJECT_UNAUTHORIZED", "NODE_USE_SYSTEM_CA", "SSL_CERT_FILE", "SSL_CERT_DIR",
+    "CLAUDE_CODE_CLIENT_CERT", "CLAUDE_CODE_CLIENT_KEY", "CLAUDE_CODE_CLIENT_KEY_PASSPHRASE", "CLAUDE_CODE_CERT_STORE",
+    # settings, config and process options
+    "CLAUDE_CODE_MANAGED_SETTINGS_PATH", "CLAUDE_CODE_REMOTE_SETTINGS_PATH", "ANTHROPIC_CONFIG_DIR", "ANTHROPIC_BETAS",
+    "NODE_OPTIONS",
+    # model, effort and token overrides
+    "ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL", "ANTHROPIC_DEFAULT_FABLE_MODEL", "ANTHROPIC_SMALL_FAST_MODEL",
+    "ANTHROPIC_CUSTOM_MODEL_OPTION", "CLAUDE_CODE_SUBAGENT_MODEL", "CLAUDE_CODE_SUBAGENT_MODEL_FORCE",
+    "CLAUDE_CODE_EFFORT_LEVEL", "CLAUDE_CODE_MAX_OUTPUT_TOKENS", "CLAUDE_CODE_MAX_CONTEXT_TOKENS",
+    "MAX_THINKING_TOKENS")
+#: A job id is one path component of this shape (#2252, #2276): it names the
+#: attempt directory and nothing else may. The preparer refuses to mint one
+#: that is not, so the launcher's refusal is never the first.
+JOB_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
 #: What the launcher's own process may pass through to the child.
 PARENT_PASSTHROUGH = ("PATH", "HOME", "USER", "SHELL", "TMPDIR", "LANG", "LC_ALL", "TERM")
 #: The only names a registration's job may add to the child's environment
@@ -155,8 +191,11 @@ def build(args):
         raise DirectStop("prepare from the checkout root that the registration will name")
     executable = Path(args.claude_executable).resolve(strict=True)
     version = subprocess.check_output([str(executable), "--version"], text=True).strip()
-    registry = generation.load_registry(repository / "data/preprocessed/source_manifest.yaml")
     project = args.project
+    identifier = f"{project}_{EXECUTION_ARM}_rep1"
+    if not JOB_ID.fullmatch(identifier):
+        raise DirectStop(f"the job id minted for project {project!r} is not a single path component")
+    registry = generation.load_registry(repository / "data/preprocessed/source_manifest.yaml")
     bundle = registry.bundle(project)
     case = {"project": project, "manifest": str(registry.path), "bundle": str(bundle),
             "chunks": str(generation.chunking.manifest_for(bundle, source_manifest=registry.path)),
@@ -164,7 +203,6 @@ def build(args):
             "shared_source_project": registry.shared_source_project(project)}
     mapping = generation.chunking.load_manifest(Path(case["chunks"]))
     generation.chunking.validate_manifest_mapping(mapping, Path(case["bundle"]).read_bytes(), mapping["bundle"])
-    identifier = f"{project}_{EXECUTION_ARM}_rep1"
     job = {**case, "id": identifier, "execution_arm": EXECUTION_ARM, "runtime": RUNTIME, "method": METHOD,
            "replicate": 1, "canary": True, "run_date": args.run_date, "render_version": args.render_version,
            "label": f"{args.label_date}_{MODEL}-{EXECUTION_ARM}-{args.cohort.replace('_', '-')}-{project.lower()}_rep1"}
@@ -182,6 +220,11 @@ def build(args):
     limits = {"contextWindow": int(args.context_window), "maxOutputTokens": int(args.max_output_tokens)}
     if any(value <= 0 for value in limits.values()):
         raise DirectStop("the expected runtime limits must be positive")
+    limits_basis = ("the preparer's defaults: the native registration's offline observation of the same model "
+                    "through CBORG; not observed on this transport until the first run (#2246)"
+                    if limits == EXPECTED_LIMITS else
+                    "given on the preparer's command line (--context-window / --max-output-tokens); not the native "
+                    "registration's observation and not observed on this transport until the first run (#2267)")
     job["output_directory"] = str(spec.metadata_dir)
     job["output_directories"] = sorted({str(spec.full_path.parent), str(spec.core_path.parent)})
     if any(Path(p).exists() for p in job["output_directories"]):
@@ -236,9 +279,7 @@ def build(args):
         "model": {"model": MODEL, "effort": EFFORT, "auxiliary_models_permitted": list(AUXILIARY_MODELS),
                   "effort_basis": "asserted by the launcher through --effort and recorded through --reasoning-effort; "
                                   "checked after the run against the effort the runtime reports on every tool callback",
-                  "limits_expected": limits,
-                  "limits_basis": "asserted from the native registration's offline observation of the same model "
-                                  "through CBORG; not observed on this transport until the first run (#2246)"},
+                  "limits_expected": limits, "limits_basis": limits_basis},
         "native_runtime": {"executable": str(executable), "version": version,
                            "cli_flags": CLI_FLAGS + ["--effort", EFFORT], "environment": CHILD_ENVIRONMENT,
                            "forbidden_environment": list(FORBIDDEN_ENVIRONMENT),

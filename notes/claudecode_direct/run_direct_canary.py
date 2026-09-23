@@ -45,8 +45,9 @@ import prepare_direct as preparation                                  # noqa: E4
 DIRECT_ROOTS = ("data/d4d_concatenated/claudecode_direct/", "data/d4d_concatenated/claudecode_direct_core/")
 #: A job id is one path component of the preparer's shape (#2252): it names
 #: the attempt directory and nothing else may.
-JOB_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
+JOB_ID = preparation.JOB_ID
 LIMIT_KEYS = ("contextWindow", "maxOutputTokens")
+DECIMAL = re.compile(r"[0-9]+(\.[0-9]+)?")
 
 
 def is_hex(text, length):
@@ -122,6 +123,17 @@ def verify_registration(registration, path):
         raise BudgetStop("the registered CLI flags differ from the preparer's")
     if runtime["expected_api_key_source"] != "none":
         raise BudgetStop("the direct arm expects a login, not a key")
+    if Path(str(runtime.get("system_prompt"))).resolve() != (HERE / "system.md").resolve():
+        raise BudgetStop("the registered system prompt is not the direct arm's system.md")   # #2264
+    if runtime.get("executable") not in registration["pinned_files"]:
+        raise BudgetStop("the registered executable is not pinned")                          # #2263
+    generation = registration["generation"]
+    deadline = generation.get("attempt_deadline_seconds")
+    if type(deadline) is not int or deadline <= 0:
+        raise BudgetStop("the registered attempt deadline is not a positive integer")        # #2273
+    guard = generation.get("runaway_budget_guard_usd")
+    if not isinstance(guard, str) or not DECIMAL.fullmatch(guard) or float(guard) <= 0:
+        raise BudgetStop("the registered runaway guard is not a positive decimal string")    # #2273
     for job in registration["generation"]["jobs"]:
         if not isinstance(job.get("id"), str) or not JOB_ID.fullmatch(job["id"]):
             raise BudgetStop("a registered job id is not a single path component")
@@ -209,6 +221,9 @@ def model_accounting(terminal, registration):
             raise BudgetStop(f"native terminal accounting for an auxiliary model is incomplete: {name}")
         if counted(entry, "outputTokens") >= generated:
             raise BudgetStop(f"an auxiliary model carried at least as much generation as the registered model: {name}")
+    if sum(counted(entry, "outputTokens") for entry in auxiliary.values()) >= generated:
+        # Together, not one at a time (#2271).
+        raise BudgetStop("the auxiliary models together carried at least as much generation as the registered model")
     return own, auxiliary
 
 
@@ -245,14 +260,23 @@ def main(argv=None):
         raise BudgetStop("this launcher only runs registered direct-arm canaries")
     if any(Path(p).exists() for p in job["output_directories"]):
         raise BudgetStop("direct canary output already exists; never overwrite or resume")
-    spec = spec_for(job)
-    if spec.render_spec() != job["render_spec"] or spec.input_identity() != job["input_identity"]:
+    try:
+        spec = spec_for(job)
+        rendering, identity = spec.render_spec(), spec.input_identity()
+    except (KeyError, ValueError, TypeError) as error:
+        raise BudgetStop(f"the registered specification cannot be built: {error}") from error   # #2272
+    if rendering != job["render_spec"] or identity != job["input_identity"]:
         raise BudgetStop("direct generation instruction or input identity changed")
     per_job = registration["per_job_environment"].get(job["id"])
     if not isinstance(per_job, dict):
         raise BudgetStop("the registered job environment is not a mapping")
     if per_job.get("D4D_LAUNCH_INSTRUCTION") != job["instruction"]:
         raise BudgetStop("provenance must read the exact registered launch instruction")
+    # All three names are bound to the job, not only the instruction (#2265):
+    # the profile and the manifest are what the recorder attests.
+    if per_job != {"D4D_MANIFEST": job["manifest"], "D4D_PROFILE": job["profile"],
+                   "D4D_LAUNCH_INSTRUCTION": job["instruction"]}:
+        raise BudgetStop("the registered job environment must bind exactly the job's manifest, profile and launch instruction")
     try:
         command_policy = build_command_policy(job, registration["python"], registration["repository"])
     except (KeyError, OSError, ValueError, TypeError, SyntaxError) as error:
@@ -292,6 +316,7 @@ def main(argv=None):
                "launch_commit": registration["code_commit"], "arm": registration["arm"],
                "model": registration["model"], "auth": auth,
                "instruction_sha256": sha(job["instruction"]), "system_sha256": sha(runtime["system_prompt"]),
+               "executable_sha256": registration["pinned_files"][runtime["executable"]],
                "control_policy_sha256": control_digest(command_policy),
                "effective_system_sha256": hashlib.sha256(system_prompt.encode("utf-8")).hexdigest(),
                "child_environment_names": sorted(env)}
@@ -322,7 +347,13 @@ def main(argv=None):
                 or init.get("apiKeySource") != runtime["expected_api_key_source"]
                 or init.get("claude_code_version") != runtime["version"].split()[0]
                 or set(init.get("tools", [])) != {"Read", "Write", "Bash"}):
-            raise BudgetStop("native runtime initialization differs from registration")
+            # Named, because a 1M-context build reports itself as another
+            # model (`claude-opus-5[1m]`, #2266) and the reader must see that.
+            raise BudgetStop("native runtime initialization differs from registration: "
+                             f"model {init.get('model')!r}, key source {init.get('apiKeySource')!r}, "
+                             f"version {init.get('claude_code_version')!r}, tools {sorted(init.get('tools', []))} "
+                             f"against {registration['model']['model']!r}, {runtime['expected_api_key_source']!r}, "
+                             f"{runtime['version'].split()[0]!r}, ['Bash', 'Read', 'Write']")
         receipt["pretool_control"] = check_control_history(events, attempt / "control.jsonl", command_policy,
                                                            native._classify_command, config)
         runtime_reads[:] = receipt["pretool_control"].get("persisted_output_paths", [])
@@ -344,6 +375,13 @@ def main(argv=None):
                 type(usage.get(k)) is int and usage[k] >= 0 for k in ("input_tokens", "output_tokens")):
             raise BudgetStop("native terminal usage is incomplete")
         receipt["runtime_limits_observed"] = {key: registered_usage.get(key) for key in LIMIT_KEYS}
+        # Whether the terminal's total and the per-model figures are meant to
+        # agree in the runtime's accounting is not established: recorded,
+        # not gated (#2271).
+        per_model = sum(counted(entry, "outputTokens") for entry in [registered_usage, *auxiliary_usage.values()])
+        receipt["accounting_reconciliation"] = {"terminal_output_tokens": usage["output_tokens"],
+                                                "model_usage_output_tokens": per_model,
+                                                "difference": usage["output_tokens"] - per_model}
         if not all(Path(p).is_file() for p in job["outputs"].values()):
             raise BudgetStop("native generation did not produce every registered artifact")
         from data_sheets_schema import api_runner, agentic_observed

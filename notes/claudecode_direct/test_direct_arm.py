@@ -1,9 +1,13 @@
 """The direct arm's preparer and launcher, offline (#2202). No model call, no login needed.
 
-One test per guard (#2209): a guard-removal mutant of every `if` in the
-launcher and the preparer (53 sites) is killed by this file, except the
-stop path's shortcut past `stopped_denials`, which classifies the same
-result line and is behaviourally equivalent for a one-result transcript.
+One test per guard (#2209, #2253, #2275): the third-round mutation pass over
+the launcher and the preparer (215 mutants: guard removal, `raise` to `pass`,
+boolean-operand neutralisation) left seven equivalent survivors and four
+gaps this file has since closed. The equivalents: the stop path's shortcut
+past `stopped_denials` (the same result line classified twice), the
+`__main__` line, the absolute-path operands the prefix test and
+`resolve(strict=True)` already imply, the `path.is_file()` operand of the pin
+walk, and the stop-path renderer bound every direct rendering satisfies.
 Every assertion on the child's environment is made on an input the guard
 has not already filtered.
 """
@@ -115,7 +119,10 @@ def test_the_registration_names_the_arm_and_asserts_its_effort_in_the_rendered_i
     assert re.fullmatch(r"2026-09-22_claude-opus-5-direct-test-fixture-[0-9a-f]{8}-chorus_rep1", job["label"])
     assert "# Model: claude-opus-5" in instruction
     assert registration["model"]["limits_expected"] == {"contextWindow": 200000, "maxOutputTokens": 64000}
-    assert registration["model"]["limits_basis"].startswith("asserted")
+    assert registration["model"]["limits_basis"].startswith("the preparer's defaults")
+    assert registration["native_runtime"]["executable"] in registration["pinned_files"]
+    assert Path(registration["native_runtime"]["system_prompt"]).resolve() == (HERE / "system.md").resolve()
+    assert registration["native_runtime"]["environment"]["CLAUDE_CODE_DISABLE_1M_CONTEXT"] == "1"
     assert registration["native_runtime"]["forbidden_environment"] == list(preparation.FORBIDDEN_ENVIRONMENT)
     assert set(registration["per_job_environment"][JOB]) == set(preparation.PER_JOB_NAMES)
     # Every pin reproduces; the playbooks, the schema sources, the prompts and
@@ -166,6 +173,14 @@ def test_the_preparer_refuses_the_wrong_directory_an_existing_registration_and_e
     with pytest.raises(preparation.DirectStop, match="limits must be positive"):
         preparation.build(arguments(tmp_path, fake, output=tmp_path / "r3", context_window=0))
     assert not (tmp_path / "r3").exists()
+    # A project whose minted job id is not a single path component is refused before the registry is read (#2276).
+    with pytest.raises(preparation.DirectStop, match="not a single path component"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r4", project="Kids.First"))
+    assert not (tmp_path / "r4").exists()
+    # The limits basis says where the values came from (#2267).
+    given = preparation.build(arguments(tmp_path, fake, output=tmp_path / "r5", context_window=1_000_000))
+    assert json.loads(given.read_text())["model"]["limits_basis"].startswith("given on the preparer's command line")
+    assert json.loads(given.read_text())["model"]["limits_expected"]["contextWindow"] == 1_000_000
 
 
 def test_the_preparer_refuses_an_instruction_that_is_not_the_direct_arms(tmp_path, monkeypatch):
@@ -250,6 +265,11 @@ def test_the_child_environment_is_screened_wherever_its_values_come_from(tmp_pat
     # The parent's own key never passes through: it is not a pass-through name.
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-parent")
     assert "ANTHROPIC_API_KEY" not in preparation.child_environment(tmp_path, None, per_job)
+    # Nor does the recorder's corroboration variable, which is deliberately not forbidden (#2270).
+    monkeypatch.setenv("CLAUDE_EFFORT", "low")
+    assert "CLAUDE_EFFORT" not in preparation.FORBIDDEN_ENVIRONMENT
+    assert "CLAUDE_EFFORT" not in preparation.child_environment(tmp_path, None, per_job)
+    assert preparation.child_environment(tmp_path, None, per_job)["CLAUDE_CODE_DISABLE_1M_CONTEXT"] == "1"
     # No job variables at all is a valid call.
     bare = preparation.child_environment(tmp_path, None, None)
     assert set(bare) <= set(preparation.PARENT_PASSTHROUGH) | set(preparation.CHILD_ENVIRONMENT) | {"CLAUDE_CONFIG_DIR"}
@@ -296,7 +316,13 @@ def test_the_denylist_and_the_allowlist_are_well_formed_and_disjoint():
     assert len(preparation.FORBIDDEN_ENVIRONMENT) == len(set(preparation.FORBIDDEN_ENVIRONMENT))
     assert {"https_proxy", "http_proxy", "all_proxy", "no_proxy", "GLOBAL_AGENT_HTTP_PROXY", "ANTHROPIC_BEDROCK_BASE_URL",
             "NODE_EXTRA_CA_CERTS", "NODE_TLS_REJECT_UNAUTHORIZED", "ANTHROPIC_DEFAULT_OPUS_MODEL",
-            "AWS_BEARER_TOKEN_BEDROCK", "CLAUDE_CODE_CLIENT_CERT"} <= set(preparation.FORBIDDEN_ENVIRONMENT)
+            "AWS_BEARER_TOKEN_BEDROCK", "CLAUDE_CODE_CLIENT_CERT",
+            # the second scan (#2270)
+            "CLAUDE_CODE_PROXY_URL", "CLAUDE_CODE_API_BASE_URL", "ANTHROPIC_API_HOST", "ANTHROPIC_DEFAULT_MODEL",
+            "CLAUDE_CODE_EFFORT_LEVEL", "CLAUDE_CODE_MAX_CONTEXT_TOKENS", "CLAUDE_CODE_SESSION_ACCESS_TOKEN",
+            "CLAUDE_API_KEY", "SSL_CERT_FILE", "CLAUDE_CODE_MANAGED_SETTINGS_PATH", "NODE_OPTIONS",
+            "ANTHROPIC_BETAS"} <= set(preparation.FORBIDDEN_ENVIRONMENT)
+    assert "CLAUDE_CODE_DISABLE_1M_CONTEXT" not in preparation.FORBIDDEN_ENVIRONMENT   # it is a registered constant
     assert not set(preparation.PER_JOB_NAMES) & set(preparation.FORBIDDEN_ENVIRONMENT)
     assert not set(preparation.PER_JOB_NAMES) & (set(preparation.CHILD_ENVIRONMENT) | set(preparation.PARENT_PASSTHROUGH))
     assert "CLAUDE_CONFIG_DIR" not in preparation.PER_JOB_NAMES
@@ -324,14 +350,14 @@ LIMITS = {"contextWindow": 200000, "maxOutputTokens": 64000}
 
 def fake_child(*, apikey="none", result=True, denials=(), write_outputs=None, tools=("Read", "Write", "Bash"),
                model_usage=None, efforts=("max",), seen=None, terminal=None, results=1, model="claude-opus-5",
-               version="2.1.272", inits=1, exit_code=0, control_lines=None):
+               version="2.1.272", inits=1, exit_code=0, control_lines=None, extra_events=()):
     def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
                       command_policy=None, phase_spec=None, command_classifier=None, event_observer=None):
         verify_launch()
         if seen is not None:
             seen.update(argv=list(argv), env=dict(env), attempt=attempt, cwd=cwd, deadline_seconds=deadline_seconds)
         events = [{"type": "system", "subtype": "init", "model": model, "apiKeySource": apikey,
-                   "claude_code_version": version, "tools": list(tools)}] * inits
+                   "claude_code_version": version, "tools": list(tools)}] * inits + list(extra_events)
         if result:
             final = {"type": "result", "terminal_reason": "completed", "stop_reason": "end_turn", "is_error": False,
                      "num_turns": 7, "total_cost_usd": 12.5,
@@ -384,10 +410,12 @@ def offline_launch(prepared, tmp_path, monkeypatch):
             Path(target).write_text("synthetic\n")
     launch = SimpleNamespace(path=path, registration=registration, review=review, word=word, write_outputs=write_outputs,
                              probes=probes, tmp_path=tmp_path)
+    # Resolved now: a test that fails while chdir'd elsewhere must still clean the checkout's tree (#2277).
+    absolute = [ROOT / d for d in job["output_directories"]]
     yield launch
-    for directory in job["output_directories"]:
+    for directory in absolute:
         shutil.rmtree(directory, ignore_errors=True)
-        remove_if_empty(Path(directory).parent)
+        remove_if_empty(directory.parent)
 
 
 def run(launch, review=None, word=None, job=JOB):
@@ -438,6 +466,8 @@ def test_a_completed_offline_launch_reports_runtime_accounting_and_touches_no_le
     assert receipt["runtime_reported_cost_usd"] == 12.5 and receipt["num_turns"] == 7
     assert receipt["runtime_usage"] == {"input_tokens": 1000, "output_tokens": 500}
     assert receipt["runtime_model_usage"] == OWN_USAGE and receipt["runtime_limits_observed"] == LIMITS
+    assert receipt["executable_sha256"] == launcher.sha(launch.registration["native_runtime"]["executable"])
+    assert receipt["accounting_reconciliation"] == {"terminal_output_tokens": 500, "model_usage_output_tokens": 500, "difference": 0}
     assert receipt["auxiliary_model_usage"] == {} and receipt["effort_observed"] == ["max"]
     assert receipt["phase_history"] == {"checked": True, "problems": []}
     assert receipt["pretool_control"] == {"checked": True, "problems": [], "persisted_output_paths": []}
@@ -484,7 +514,7 @@ def test_a_key_authenticated_runtime_is_refused_after_the_run(offline_launch, mo
     code = run(launch)
     receipt = receipt_of(launch)
     assert code == 1 and receipt["status"] == "stopped"
-    assert receipt["reason"] == "native runtime initialization differs from registration"
+    assert receipt["reason"].startswith("native runtime initialization differs from registration: model 'claude-opus-5', key source 'ANTHROPIC_API_KEY'")
     assert receipt["reason_source"] == "controller"
 
 
@@ -493,7 +523,7 @@ def test_an_initialization_with_other_tools_is_refused(offline_launch, monkeypat
     monkeypatch.setattr(launcher.native, "execute_child",
                         fake_child(tools=("Read", "Write", "Bash", "WebFetch"), write_outputs=launch.write_outputs))
     assert run(launch) == 1
-    assert receipt_of(launch)["reason"] == "native runtime initialization differs from registration"
+    assert "tools ['Bash', 'Read', 'WebFetch', 'Write'] against" in receipt_of(launch)["reason"]
 
 
 def test_the_auxiliary_model_is_recorded_and_a_foreign_model_stops_the_run(offline_launch, monkeypatch):
@@ -540,13 +570,41 @@ def test_the_model_gate_measures_the_work_not_only_the_names(offline_launch, mon
     reset(launch)
     stopped(launch, monkeypatch, fake_child(terminal={"modelUsage": None}, write_outputs=launch.write_outputs),
             "native terminal model accounting is missing")
-    # The init line is the only guard on the main-loop model before the accounting: a wrong model or version there stops.
+    # An absent cache count is incomplete, not a TypeError (#2275).
     reset(launch)
-    stopped(launch, monkeypatch, fake_child(model="claude-sonnet-5", write_outputs=launch.write_outputs),
-            "native runtime initialization differs from registration")
+    stopped(launch, monkeypatch, fake_child(model_usage={"claude-opus-5": {k: v for k, v in OWN_USAGE.items() if k != "cacheReadInputTokens"}},
+                                            write_outputs=launch.write_outputs),
+            "native terminal accounting for the registered model is incomplete")
+    # Two auxiliaries each below the registered model but together above it are a fallback (#2271).
+    reset(launch)
+    stopped(launch, monkeypatch, fake_child(model_usage={"claude-opus-5": dict(OWN_USAGE),
+                                                         "claude-haiku-4-5": {"inputTokens": 5, "outputTokens": 300},
+                                                         "claude-haiku-4-5-20251001": {"inputTokens": 5, "outputTokens": 300}},
+                                            write_outputs=launch.write_outputs),
+            "the auxiliary models together carried at least as much generation as the registered model")
+    # The reconciliation is recorded, not gated.
+    reset(launch)
+    monkeypatch.setattr(launcher.native, "execute_child",
+                        fake_child(model_usage={"claude-opus-5": {**OWN_USAGE, "outputTokens": 120}}, write_outputs=launch.write_outputs))
+    assert run(launch) == 0
+    assert receipt_of(launch)["accounting_reconciliation"] == {"terminal_output_tokens": 500, "model_usage_output_tokens": 120, "difference": 380}
+    # The init line is the only guard on the main-loop model before the accounting: a wrong model or version
+    # there stops, and the stop names what was observed (#2266: the 1M build reports itself as another model).
+    reset(launch)
+    receipt = stopped(launch, monkeypatch, fake_child(model="claude-opus-5[1m]", write_outputs=launch.write_outputs),
+                      "native runtime initialization differs from registration: model 'claude-opus-5[1m]', key source 'none', "
+                      "version '2.1.272', tools ['Bash', 'Read', 'Write'] against 'claude-opus-5', 'none', '2.1.272', ['Bash', 'Read', 'Write']")
     reset(launch)
     stopped(launch, monkeypatch, fake_child(version="2.1.271", write_outputs=launch.write_outputs),
-            "native runtime initialization differs from registration")
+            "native runtime initialization differs from registration: model 'claude-opus-5', key source 'none', "
+            "version '2.1.271', tools ['Bash', 'Read', 'Write'] against 'claude-opus-5', 'none', '2.1.272', ['Bash', 'Read', 'Write']")
+    # A real transcript carries other system events and other init-like events; only system/init counts (#2275).
+    reset(launch)
+    monkeypatch.setattr(launcher.native, "execute_child", fake_child(
+        extra_events=[{"type": "system", "subtype": "thinking_tokens", "count": 85}, {"type": "user", "subtype": "init"},
+                      {"type": "system", "subtype": "permission_denied"}, {"type": "assistant", "message": {}}],
+        write_outputs=launch.write_outputs))
+    assert run(launch) == 0
 
 
 def test_the_runtime_limits_are_recorded_and_a_difference_is_a_validation_problem(offline_launch, monkeypatch):
@@ -611,12 +669,15 @@ def test_a_provider_key_in_the_environment_refuses_before_anything_is_created(of
 
 def test_a_registration_carrying_a_key_or_a_redirection_is_refused(offline_launch, monkeypatch):
     launch = offline_launch
+    # A forbidden name in the registration's job variables is refused before anything is created: the exact
+    # binding (#2265) sees it first; `child_environment`'s own denylist is tested directly above.
     rewrite(launch, lambda r: r["per_job_environment"][JOB].update(ANTHROPIC_BASE_URL="http://proxy.invalid"), "perjob")
-    refused_before_anything_is_created(launch, monkeypatch, "must not carry.*ANTHROPIC_BASE_URL", error=preparation.DirectStop)
+    refused_before_anything_is_created(launch, monkeypatch, "bind exactly the job's manifest, profile and launch instruction")
     rewrite(launch, lambda r: r["per_job_environment"][JOB].pop("ANTHROPIC_BASE_URL"), "perjob-restored")
-    # A name the denylist does not know is refused by the allowlist (#2244), before anything is created.
+    # A name the denylist does not know is refused before anything is created: by the exact binding of the
+    # job's three variables (#2265), which runs before the allowlist (#2244) the preparer's probe applies.
     rewrite(launch, lambda r: r["per_job_environment"][JOB].update(SOME_FUTURE_VARIABLE="x"), "perjob-extra")
-    refused_before_anything_is_created(launch, monkeypatch, "may add only.*refused: SOME_FUTURE_VARIABLE", error=preparation.DirectStop)
+    refused_before_anything_is_created(launch, monkeypatch, "bind exactly the job's manifest, profile and launch instruction")
     rewrite(launch, lambda r: r["per_job_environment"][JOB].pop("SOME_FUTURE_VARIABLE"), "perjob-extra-restored")
     rewrite(launch, lambda r: r["native_runtime"]["environment"].update(ANTHROPIC_API_KEY="sk-registered"), "env")
     refused_before_anything_is_created(launch, monkeypatch, "child environment differs from the preparer's")
@@ -699,6 +760,21 @@ def test_the_review_binding_is_checked_in_every_respect(offline_launch, monkeypa
         report=r["generation"]["jobs"][0]["outputs"]["report"] + ".other"), "command policy cannot be built"),
     ("env-shape", lambda r: r["per_job_environment"].update({JOB: ["D4D_MANIFEST=x"]}), "job environment is not a mapping"),
     ("env-missing", lambda r: r["per_job_environment"].pop(JOB), "job environment is not a mapping"),
+    ("env-profile", lambda r: r["per_job_environment"][JOB].update(D4D_PROFILE="neutral"), "bind exactly the job's manifest, profile"),
+    ("env-manifest", lambda r: r["per_job_environment"][JOB].update(D4D_MANIFEST="/elsewhere/manifest.yaml"), "bind exactly the job's"),
+    ("env-short", lambda r: r["per_job_environment"][JOB].pop("D4D_PROFILE"), "bind exactly the job's"),
+    ("system-prompt", lambda r: r["native_runtime"].update(system_prompt=r["generation"]["jobs"][0]["instruction"]),
+     "system prompt is not the direct arm's system.md"),
+    ("system-prompt-none", lambda r: r["native_runtime"].pop("system_prompt"), "system prompt is not the direct arm's system.md"),
+    ("deadline", lambda r: r["generation"].update(attempt_deadline_seconds="soon"), "attempt deadline is not a positive integer"),
+    ("deadline-zero", lambda r: r["generation"].update(attempt_deadline_seconds=0), "attempt deadline is not a positive integer"),
+    ("guard-int", lambda r: r["generation"].update(runaway_budget_guard_usd=60), "runaway guard is not a positive decimal string"),
+    ("guard-zero", lambda r: r["generation"].update(runaway_budget_guard_usd="0"), "runaway guard is not a positive decimal string"),
+    ("guard-text", lambda r: r["generation"].update(runaway_budget_guard_usd="sixty"), "runaway guard is not a positive decimal string"),
+    ("condition", lambda r: r["generation"]["jobs"][0]["render_spec"].update(condition="generic_v99"), "specification cannot be built"),
+    ("render-version", lambda r: r["generation"]["jobs"][0].update(render_version="17"), "specification cannot be built"),
+    ("second-job-id", lambda r: r["generation"]["jobs"].append({**r["generation"]["jobs"][0], "id": 5}), "not a single path component"),
+    ("second-job-id-null", lambda r: r["generation"]["jobs"].append({**r["generation"]["jobs"][0], "id": None}), "not a single path component"),
 ])
 def test_every_registration_guard_refuses_before_anything_is_created(offline_launch, monkeypatch, name, mutate, match):
     launch = offline_launch
@@ -735,6 +811,23 @@ def test_a_job_id_is_one_path_component(offline_launch, monkeypatch):
             run(launch, job=bad)
         assert not (launch.path.parent / "attempts").exists()
         assert not (launch.path.parent.parent / "pwned_attempt").exists()
+
+
+def test_an_unpinned_executable_is_refused(offline_launch, monkeypatch, tmp_path):
+    """#2263: a substitute that prints the pinned version string launched."""
+    launch = offline_launch
+    (tmp_path / "elsewhere").mkdir()
+    substitute = fake_runtime(tmp_path / "elsewhere")
+    def swap(r):
+        r["native_runtime"]["executable"] = str(substitute)
+    rewrite(launch, swap, "unpinned-exe")
+    refused_before_anything_is_created(launch, monkeypatch, "registered executable is not pinned")
+    # Pinned with the wrong bytes: the pin loop refuses it.
+    def swap_pinned(r):
+        r["native_runtime"]["executable"] = str(substitute)
+        r["pinned_files"][str(substitute)] = "0" * 64
+    rewrite(launch, swap_pinned, "unpinned-exe-badhash")
+    refused_before_anything_is_created(launch, monkeypatch, "a registered pin changed")
 
 
 def test_a_deleted_pin_is_a_named_stop(offline_launch, monkeypatch, tmp_path):

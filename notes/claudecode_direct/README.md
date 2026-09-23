@@ -8,7 +8,7 @@ to Anthropic directly. No proxy, no CBORG endpoint, no ledger.
 
 | | API arm | Agentic arm | Direct arm |
 |---|---|---|---|
-| Runtime | Messages SDK, no tools | Claude Code 2.1.272 | Claude Code 2.1.272 |
+| Runtime | Messages SDK, no tools | Claude Code, the version its registration pins | Claude Code 2.1.272 |
 | Provider | CBORG | CBORG, through the proxy | Anthropic, claude.ai login |
 | Record runtime string | `Claude API (direct)` | `Claude Code` | `Claude Code (direct)` |
 | Method directory | `claudecode_api` | `claudecode_agent` | `claudecode_direct` |
@@ -49,8 +49,16 @@ controller's own stop state.
   `D4D_PROFILE`, `D4D_LAUNCH_INSTRUCTION`): any other name is refused
   whatever its value, so a registration cannot add a proxy, a base URL, a
   TLS override or a model override in either spelling, or shadow a
-  registered constant (#2244). The denylist behind it names every such
-  variable the pinned binary reads.
+  registered constant (#2244). The denylist behind it is a second layer,
+  and what the launcher refuses in its own parent environment: the
+  credential, redirection, proxy, TLS, settings and model-override
+  variables a string scan of the pinned binary found (#2270). It is not
+  claimed complete. The registered executable must be one of the
+  registration's pins, so its bytes are verified before launch and its
+  hash is on the receipt (#2263); the registered system prompt must be
+  this directory's `system.md` (#2264); and the job's three variables
+  must bind exactly the job's manifest, profile and launch instruction
+  (#2265).
   `auth status --json` is captured before launch in that exact environment:
   method, provider and plan only. The init line must report `apiKeySource:
   none`; that is a necessary condition, not proof of the login by itself,
@@ -62,26 +70,38 @@ controller's own stop state.
   is passed as a runaway guard on that estimate; the runtime honours it on a
   login session, and it is not a cap against any allocation. The observer
   measures the transcript as it does for every Claude Code run.
-- **Auxiliary model.** First-party Claude Code sessions report a second
-  model, `claude-haiku-4-5`, in their terminal accounting for the runtime's
-  own auxiliary calls. The proxied arm's proxy stops the run on a request for
+- **Auxiliary model.** The reference-rescore runs of Claude Code 2.1.269
+  through CBORG, requested as `claude-opus-5[1m]`, report a second model,
+  `claude-haiku-4-5`, in their terminal accounting for the runtime's own
+  auxiliary calls; a subscription session is expected to as well, which the
+  first run will show (#2268). The proxied arm's proxy stops the run on a request for
   any model but the registered one, so an auxiliary request there would have
   stopped a run rather than gone unrecorded; none is recorded. The
   registration names the auxiliary models it permits, their usage is recorded
   under `auxiliary_model_usage`, a model outside that set stops the run, the
-  registered model must carry positive input and output tokens, and no
-  auxiliary model may carry as much generation as the registered one, which
-  is what a main-loop fallback would look like (#2247).
+  registered model must carry positive input and output tokens, and the
+  auxiliary models, one at a time and together, may not carry as much
+  generation as the registered one, which is what a main-loop fallback
+  would look like (#2247, #2271). The difference between the terminal's
+  output total and the sum over the per-model figures is recorded under
+  `accounting_reconciliation` and not gated, since whether the runtime
+  means them to agree is not established.
   `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` is set; its effect on those
   calls is not established, since no recorded run has set it (#2248).
 - **Runtime limits.** The registration states the `contextWindow` and
   `maxOutputTokens` the runtime is expected to report for the registered
   model, taken from the native registration's offline observation of the
   same model through CBORG; they are asserted, not observed on this
-  transport, until the first run. The receipt records what the runtime
+  transport, until the first run; a value given on the preparer's command
+  line is recorded as that (#2267). The receipt records what the runtime
   reported under `runtime_limits_observed`, and a difference is a validation
   problem, since a different context window is a different instrument
-  (#2246).
+  (#2246). Every recorded 1M-context run of Claude Code names its model
+  `claude-opus-5[1m]` in the init line and the accounting, so the child is
+  given `CLAUDE_CODE_DISABLE_1M_CONTEXT=1` and asked for the 200k build the
+  native arm observed; whether it honours that on the subscription is
+  observed only by the first run, and a `[1m]` init line stops the run as a
+  different model, with the observed model named, after the spend (#2266).
 - **Effort.** `--effort max` is passed to the runtime and `--reasoning-effort
   max` is rendered into the instruction's own recorder line, so the record
   carries it as asserted by the launcher. The runtime does report the active
