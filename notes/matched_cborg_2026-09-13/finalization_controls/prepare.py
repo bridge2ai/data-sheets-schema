@@ -53,8 +53,13 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
     if any(r.get('status')!='settled' for r in billing['requests']):raise BudgetStop('accepted audit retains unsettled accounting')
     cost=sum((Decimal(r['cost_usd']) for r in billing['requests']),Decimal(0))
     if not cost.is_finite() or cost<0:raise BudgetStop('invalid predecessor cost')
-    validate_budget_identity({'job':{'id':job_id},'budget':{'prices_per_token':accepted['budget']['prices_per_token'],
-        'per_job_attempt_usd':{job_id:attempt_cap}}},accepted)
+    budget_candidate={'job':{'id':job_id},'budget':{'prices_per_token':accepted['budget']['prices_per_token'],
+        'per_job_attempt_usd':{job_id:attempt_cap}}}
+    if 'budget_amendment' in accepted:
+        import budget_amendment
+        budget_amendment.effective_total(accepted,read_json(accepted['parent']['registration']))
+        budget_amendment.inherit(accepted,budget_candidate)
+    validate_budget_identity(budget_candidate,accepted)
     destination=canonical_path(str(Path(destination).absolute()))
     destination.mkdir(parents=True,exist_ok=False)
     registration=destination/'registration.json'
@@ -91,6 +96,8 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
             'audit_origin':deepcopy(predecessor),'predecessor':predecessor},
         pinned_files=dict(accepted['pinned_files']))
     if upgraded:manifest[TRANSITION]=deepcopy(accepted[TRANSITION])
+    if 'budget_amendment' in accepted:
+        budget_amendment.inherit(accepted,manifest)
     manifest.update(claim_selection)
     for p in [old_path,old_result,old_ledger,acceptance,snapshot,generation_path,*map(Path,manifest['inputs'].values())]:
         manifest['pinned_files'][str(p)]=sha(p)

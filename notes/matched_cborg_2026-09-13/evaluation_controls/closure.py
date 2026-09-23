@@ -14,7 +14,7 @@ for directory in (HERE, HERE.parent):
     if str(directory) not in sys.path:
         sys.path.insert(0, str(directory))
 from budgeted_cborg import BudgetStop, attempt_identity, write_new
-from evaluation_controls.registration import (canonical_digest, canonical_path, read_json, sha,
+from evaluation_controls.registration import (allocation_total, canonical_digest, canonical_path, read_json, sha,
     receipt_for, verify_dependencies)
 from evaluation_controls.adapter_closure import require_closed
 
@@ -89,16 +89,20 @@ def build_aggregate(manifest, registration_path, ledger=None):
     rows = ledger.get('requests')
     require(ledger.get('manifest_sha256') == registration_sha and isinstance(rows, list) and
             all(row.get('status') == 'settled' for row in rows), 'aggregate has unresolved accounting')
-    require(ledger.get('additional_cap_usd') == '400' and ledger.get('attempt_cap_usd') == '5' and
+    total_cap = allocation_total(manifest)
+    require(ledger.get('additional_cap_usd') == str(total_cap) and ledger.get('attempt_cap_usd') == '5' and
             not ledger.get('attempt_caps_usd'), 'aggregate changed the evaluation allocation or attempt caps')
     identifiers = [row.get('id') for row in rows]
     require(all(isinstance(value, str) and value for value in identifiers) and
             len(identifiers) == len(set(identifiers)), 'aggregate request identities are invalid')
     costs = [Decimal(str(row.get('cost_usd'))) for row in rows]
-    require(all(value.is_finite() and value >= 0 for value in costs) and sum(costs) <= 400,
+    require(all(value.is_finite() and value >= 0 for value in costs) and sum(costs) <= total_cap,
             'aggregate settled accounting is invalid')
     prior = read_json(manifest['budget']['continuation']['checkpoint'])
-    require(rows[:len(prior['requests'])] == prior['requests'], 'aggregate lost carried charge history')
+    prefix = rows[:len(prior['requests'])]
+    same_history = (canonical_digest(prefix) == canonical_digest(prior['requests'])
+                    if 'budget_amendment' in manifest else prefix == prior['requests'])
+    require(same_history, 'aggregate lost carried charge history')
     jobs = manifest.get('evaluation_jobs')
     require(isinstance(jobs, list) and bool(jobs) and all(job['style'] != 'subtype' for job in jobs),
             'aggregate initial evaluation roster is empty or already contains subtypes')

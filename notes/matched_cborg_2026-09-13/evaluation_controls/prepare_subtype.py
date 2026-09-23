@@ -17,7 +17,7 @@ for directory in (HERE, HERE.parent):
 import continuation_sequence as sequence
 from budgeted_cborg import BudgetStop, write_new
 from evaluation_controls.closure import build_aggregate, require
-from evaluation_controls.registration import (canonical_path, canonical_digest, read_json, sha,
+from evaluation_controls.registration import (allocation_total, canonical_path, canonical_digest, read_json, sha,
     required_paths, verify_manifest)
 from evaluation_controls.api import render_request, slot_instrument
 
@@ -129,7 +129,7 @@ def prepare(*, destination, prior_registration, aggregate_result, aggregate_acce
             'subtype preparation raced with predecessor accounting')
     report = {'provider_calls': 0, 'token_count_calls': 0, 'budget_activated': False,
         'jobs': len(requests), 'sum_of_attempt_caps_usd': str(Decimal('5') * len(requests)),
-        'remaining_allocation_usd': str(Decimal('400') - Decimal(closure['settled_cost_usd'])),
+        'remaining_allocation_usd': str(allocation_total(manifest) - Decimal(closure['settled_cost_usd'])),
         'estimate_basis': 'Attempt-cap exposure, not predicted charge or an admission guarantee.',
         'request_json_bytes': {job['id']: Path(job['expected_request']).stat().st_size for job in manifest['evaluation_jobs']}}
     write_new(destination / 'preparation_report.json', report)

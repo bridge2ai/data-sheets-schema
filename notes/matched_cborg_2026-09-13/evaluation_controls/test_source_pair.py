@@ -27,7 +27,7 @@ def reference(path):return {'path':str(path),'sha256':reg.sha(path)}
 
 
 @pytest.fixture
-def composite(tmp_path,monkeypatch):
+def composite(tmp_path,monkeypatch,request):
     # Actual scientific fixture is preserved; no accepted real dataset is used.
     (tmp_path/'science').mkdir()
     science=final_fixture(tmp_path/'science')
@@ -39,12 +39,29 @@ def composite(tmp_path,monkeypatch):
         'generation':{'jobs':[{'id':'original','project':'Synthetic','method':'author_supplied','profile':'neutral',
             'bundle':inputs['bundle'],'input_identity':{'bundle':reference(inputs['bundle'])}}]}}
     origin=save(generation_path,generation);save(original_ledger,{'historical':'unchanged original ledger'})
+    amended = getattr(request, 'param', None) == 'amended'
+    proof = None
+    if amended:
+        from test_budget_amendment import make_fixture
+        proof, _, anchor, proof_manifest = make_fixture(root/'amendment', generation=generation,
+                                                       generation_path=generation_path)
     parent={'registration':str(generation_path),'job_id':'original'}
     audit_registration=root/'audit/registration.json';audit_ledger=audit_registration.parent/'billing.json'
     audit={'kind':'d4d_native_audit_continuation','parent':parent,'inputs':inputs,
         'job':{'id':'audit','audit_path':str(auditpath)},'budget':{'ledger_path':str(audit_ledger)}}
+    if amended:
+        audit['budget_amendment']=deepcopy(proof)
+        audit['pinned_files']=deepcopy(proof_manifest['pinned_files'])
+        audit['budget'].update(additional_usd='500',per_attempt_usd='5',
+            continuation={'checkpoint':proof['predecessor_ledger']['path'],
+                          'sha256':proof['predecessor_ledger']['sha256']})
     auditref=save(audit_registration,audit)
-    ledger=Ledger(audit_ledger,manifest_sha256=auditref['sha256'],total_cap='400',attempt_cap='5')
+    ledger=Ledger(audit_ledger,manifest_sha256=auditref['sha256'],total_cap='500' if amended else '400',attempt_cap='5')
+    if amended:
+        ledger.continue_from(proof['predecessor_ledger']['path'],
+            expected_sha256=proof['predecessor_ledger']['sha256'],
+            expected_cost_usd=str(sum(Decimal(r['cost_usd']) for r in anchor['requests'])),
+            budget_amendment=proof)
     ticket=ledger.reserve(auditref['sha256']+':audit','.02','offline');ledger.settle(ticket,'.01',response_sha256='offline',usage={})
     auditresult=save(root/'audit/result.json',{'scope':'phase3_audit_only','job_id':'audit','registration_sha256':auditref['sha256'],
         'status':'completed_pending_independent_review','unresolved_requests':[],
@@ -75,6 +92,11 @@ def composite(tmp_path,monkeypatch):
             'continuation':{'checkpoint':str(audit_ledger),'sha256':reg.sha(audit_ledger),'cost_usd':'.01'}},
         budget_sequence={'protocol':'shared_sequence_v2','stage':'reconciliation','state_path':str(state),
             'origin':{'registration':origin,'ledger_path':str(original_ledger)},'predecessor':predecessor,'audit_origin':deepcopy(predecessor)})
+    if amended:
+        phase['budget_amendment']=deepcopy(proof)
+        phase['budget']['additional_usd']='500'
+        phase['budget']['continuation']['cost_usd']=str(sum(Decimal(r['cost_usd']) for r in reg.read_json(audit_ledger)['requests']))
+        phase['pinned_files'].update(proof_manifest['pinned_files'])
     for ref in [origin,auditref,auditresult,auditaccept,snapshot,reference(audit_ledger),reference(auditpath),reference(sequence.__file__)]:
         phase['pinned_files'][ref['path']]=ref['sha256']
     seal=save(root/'seal.json',sequence.seal_document(phase));phase['budget_sequence']['seal']=seal;phase['pinned_files'][seal['path']]=seal['sha256']

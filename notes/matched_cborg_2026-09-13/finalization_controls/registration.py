@@ -34,6 +34,9 @@ def required_paths(manifest):
     from audit_controls.transport import transport_paths
     accepted = read_json(manifest['accepted_audit']['registration']['path'])
     paths = implementation_paths(manifest) | set(transport_paths(manifest))
+    if 'budget_amendment' in manifest:
+        import budget_amendment
+        paths.update(budget_amendment.paths(manifest))
     if 'context_recovery' in manifest:
         from native_context_control import paths as recovery_paths
         paths.update(Path(name) for name in recovery_paths(manifest))
@@ -102,6 +105,8 @@ def verify(manifest, path, expected_sha):
 
 
 def validate_budget_identity(manifest,accepted):
+    if ('budget_amendment' in manifest) != ('budget_amendment' in accepted) or manifest.get('budget_amendment') != accepted.get('budget_amendment'):
+        raise BudgetStop('finalization changes the accepted budget amendment')
     budget,prior=manifest['budget'],accepted['budget']
     if sequence.canonical(budget.get('prices_per_token'))!=sequence.canonical(prior.get('prices_per_token')):
         raise BudgetStop('finalization changes the accepted price table')

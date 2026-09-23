@@ -15,7 +15,7 @@ import shutil
 import subprocess
 import sys
 
-from registration import (BudgetStop, NATIVE_STYLES, canonical_path, group,
+from registration import (BudgetStop, NATIVE_STYLES, allocation_total, canonical_path, group,
     read_json, required_paths, sha, source_artifacts, verify_implementation, verify_manifest)
 from budgeted_cborg import write_new
 from audit_controls.transport import transport_paths, verified_context
@@ -345,10 +345,10 @@ def _materialize(manifest, destination, bundle, native_runtime, spent, *, billin
     report = {'registration_sha256': sha(manifest_path), 'provider_calls': 0, 'token_count_calls': 0,
         'registered_jobs': len(jobs), 'style_counts': counts, 'rubric_ratings': 20,
         'native_primary_canaries': 8, 'semantic_repeat_ratings': 8,
-        'remaining_allocation_usd': str(Decimal('400') - spent), 'per_attempt_limit_usd': '5',
+        'remaining_allocation_usd': str(allocation_total(manifest) - spent), 'per_attempt_limit_usd': '5',
         'sum_attempt_limits_usd': str(Decimal(5) * len(jobs)), 'request_sizes': request_sizes,
         'planning_cost_usd': str(estimate_total), 'planning_estimates': estimates,
-        'planning_estimate_exceeds_remaining': estimate_total > Decimal('400') - spent,
+        'planning_estimate_exceeds_remaining': estimate_total > allocation_total(manifest) - spent,
         'native_context_estimate_exceeds_observed_limit': [row['job_id'] for row in estimates
             if row.get('context_limit') and row['input_token_heuristic'] > row['context_limit']],
         'cost_estimate': 'Offline planning estimate only; bytes/4 is a heuristic, not a token count or admission guarantee. '
@@ -391,10 +391,15 @@ def build_composite_registration(destination, *, finalization_registration, fina
     native_runtime.update(api_timeout_ms=timeout, api_force_idle_timeout=False)
     ledger_path = Path(source['finalization']['ledger']['path'])
     ledger = read_json(ledger_path)
-    if str(ledger['additional_cap_usd']) != '400' or str(ledger['attempt_cap_usd']) != '5':
+    total_cap = Decimal('400')
+    if 'budget_amendment' in phase:
+        import budget_amendment
+        generation = read_json(source['original_generation']['registration']['path'])
+        total_cap = budget_amendment.effective_total(phase,generation)
+    if str(ledger['additional_cap_usd']) != str(total_cap) or str(ledger['attempt_cap_usd']) != '5':
         raise BudgetStop('composite predecessor changes the approved allocation/default cap')
     spent = sum((Decimal(str(row['cost_usd'])) for row in ledger['requests']), Decimal(0))
-    if spent > Decimal(400):
+    if spent > total_cap:
         raise BudgetStop('composite predecessor exceeds the approved allocation')
     block = deepcopy(phase['budget_sequence'])
     snapshot = destination/'predecessor_state.json'
@@ -416,7 +421,7 @@ def build_composite_registration(destination, *, finalization_registration, fina
         'rubric_dir':str(ROOT/'data/rubric'),'prompts_dir':str(ROOT/'src/download/prompts'),
         'attempts_dir':str(destination/'attempts'),'evaluation_jobs':[],'pinned_files':inherited_pins,
         'source_pair':source,'budget_sequence':block,
-        'budget':{'additional_usd':'400','per_attempt_usd':'5','ledger_path':str(destination/'billing.json'),
+        'budget':{'additional_usd':str(total_cap),'per_attempt_usd':'5','ledger_path':str(destination/'billing.json'),
             'prices_per_token':deepcopy(phase['budget']['prices_per_token']),
             'continuation':{'checkpoint':str(ledger_path),'sha256':sha(ledger_path),'cost_usd':str(spent)}},
         'conditional_subtype':{'selection':'all_form_failures','status':'deferred_until_all_fitness_results',
@@ -426,6 +431,8 @@ def build_composite_registration(destination, *, finalization_registration, fina
         'slot_selection':'every populated schema-known top-level slot of each explicit dataset unit; no propagation'}
     manifest.update(claim_selection)
     manifest.update(fitness_selection)
+    if 'budget_amendment' in phase:
+        budget_amendment.inherit(phase,manifest)
     if 'provider_transport' in phase:
         manifest['provider_transport'] = deepcopy(phase['provider_transport'])
     verify_implementation(manifest)
