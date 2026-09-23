@@ -229,6 +229,23 @@ def offline_plan_fields(manifest):
             'audit_batch_inputs': rows,
             'controller_instruction_bytes': len(Path(manifest['job']['instruction']).read_bytes()),
             'worker_total_cap_usd': block['worker_total_cap_usd'],
+            **({'budget_admission_plan': {
+                'worker_ceiling_usd': block['worker_total_cap_usd'],
+                'attempt_ceiling_usd': str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]),
+                'minimum_integration_allowance_usd': str(
+                    Decimal(str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]))
+                    - Decimal(block['worker_total_cap_usd'])),
+                'shared_allocation_usd': str(manifest['budget']['additional_usd']),
+                'remaining_shared_allocation_usd': str(Decimal(str(manifest['budget']['additional_usd']))
+                    - Decimal(str(manifest['budget']['continuation']['cost_usd']))),
+                'maximum_stall_debits': manifest.get('native_stall_policy', {}).get('max_stall_debits', 0),
+                'retry_allowance_guarantees_funded_retries': False,
+                'reservation_rule': 'Every retry reserves its full counted request estimate. Settled '
+                    'worker spend, including full-reservation stall debits, plus that estimate must '
+                    'fit the worker ceiling and remaining shared allocation. Integration uses the '
+                    'remaining attempt allowance; no stopped worker is reused.',
+                'workload_and_retry_costs_known': False}}
+               if 'budget_amendment' in manifest else {}),
             'complete_workload_cost_estimate_available': False}
 
 

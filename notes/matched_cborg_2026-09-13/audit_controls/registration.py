@@ -333,6 +333,8 @@ def implementation_paths(manifest):
         paths.discard(HERE / 'contract_context.py')
     paths.update(CONTROLS.glob('*.py'))
     paths.update(BASE / name for name in ('budgeted_cborg.py', 'run_api_canary.py', 'prepare_registration.py'))
+    if 'budget_amendment' in manifest:
+        paths.add(BASE / 'budget_amendment.py')
     paths.update(repository / name for name in ('pyproject.toml', 'poetry.lock'))
     if 'context_recovery' in manifest:
         paths.update(BASE / name for name in ('native_context.py', 'native_context_control.py'))
@@ -346,6 +348,10 @@ def implementation_paths(manifest):
 def required_paths(manifest):
     from .transport import transport_paths
     paths = implementation_paths(manifest)
+    if 'budget_amendment' in manifest:
+        from budget_amendment import paths as amendment_paths
+        paths.update(amendment_paths(manifest))
+        paths.add(budget_amendment_predecessor_path(manifest))
     if 'audit_batches' in manifest:
         from .batch_output import required_paths as batch_paths
         paths.update(batch_paths(manifest))
@@ -560,9 +566,15 @@ def validate_registration(path):
             any(not isinstance(value, str) or not value for value in ids) or
             sum(costs, Decimal(0)) != Decimal(str(budget['continuation']['cost_usd']))):
         raise BudgetStop('audit billing predecessor is unresolved or inconsistent')
-    for key, old_key in (('additional_usd', 'additional_cap_usd'), ('per_attempt_usd', 'attempt_cap_usd')):
-        if Decimal(str(budget[key])) != Decimal(str(previous[old_key])) or budget[key] != generation['budget'][key]:
-            raise BudgetStop('audit changes the approved allocation or default cap')
+    if 'budget_amendment' in manifest:
+        from budget_amendment import effective_total, validate_predecessor
+        effective_total(manifest, generation)
+        validate_predecessor(manifest, previous, checkpoint_sha256=budget['continuation']['sha256'])
+    else:
+        for key, old_key in (('additional_usd', 'additional_cap_usd'), ('per_attempt_usd', 'attempt_cap_usd')):
+            if Decimal(str(budget[key])) != Decimal(str(previous[old_key])) or budget[key] != generation['budget'][key]:
+                raise BudgetStop('audit changes the approved allocation or default cap')
+    validate_budget_amendment_predecessor(manifest, previous)
     cap = budget.get('per_job_attempt_usd', {}).get(job['id'])
     approved = generation['budget'].get('per_job_attempt_usd', {}).get(parent['job_id'], generation['budget']['per_attempt_usd'])
     if (set(budget.get('per_job_attempt_usd', {})) != {job['id']} or cap is None or
@@ -832,6 +844,60 @@ def validate_reconciliation(manifest):
     return checkpoint
 
 
+def budget_amendment_predecessor_path(manifest, *, exists=True):
+    """Locate the immediate audit, including an explicitly reconciled ledger."""
+    continuation = manifest['budget']['continuation']
+    checkpoint = canonical_path(continuation['checkpoint'], exists=True)
+    bridge = continuation.get('reconciliation')
+    if bridge is None:
+        target = checkpoint.with_name('registration.json')
+    else:
+        if type(bridge) is not dict or set(bridge) != {'source_registration', 'source_ledger', 'receipt', 'result'}:
+            raise BudgetStop('invalid audit reconciliation identity fields')
+        target = canonical_path(bridge['source_registration'], exists=exists)
+    return canonical_path(str(target), exists=exists)
+
+
+def validate_budget_amendment_predecessor(manifest, previous, *, require_pins=True):
+    """Bind the exact immediate predecessor's authority before new state writes.
+
+    Legacy checkpoints need no new sibling registration. An existing amended
+    audit predecessor cannot become an unamended successor by dropping proof.
+    """
+    selected = 'budget_amendment' in manifest
+    source_path = budget_amendment_predecessor_path(manifest, exists=selected)
+    if not selected:
+        if source_path.is_file() and 'budget_amendment' in read_json(source_path):
+            raise BudgetStop('audit successor drops its inherited budget amendment')
+        return None
+    from budget_amendment import selection
+    proof = selection(manifest['budget_amendment'])
+    continuation = manifest['budget']['continuation']
+    checkpoint = canonical_path(continuation['checkpoint'], exists=True)
+    bridge = continuation.get('reconciliation')
+    if require_pins:
+        pinned(manifest, str(source_path))
+        pinned(manifest, str(checkpoint), continuation['sha256'])
+    if sha(checkpoint) != continuation['sha256'] or canonical_json(read_json(checkpoint)) != canonical_json(previous):
+        raise BudgetStop('amended audit checkpoint differs from its exact registered predecessor')
+    source = read_json(source_path)
+    expected_ledger = checkpoint if bridge is None else canonical_path(bridge['source_ledger'], exists=True)
+    if (source.get('kind') != 'd4d_native_audit_continuation'
+            or sha(source_path) != previous.get('manifest_sha256')
+            or canonical_path(source['budget']['ledger_path']) != expected_ledger
+            or source.get('parent', {}).get('registration') != manifest['parent']['registration']
+            or Decimal(str(source['budget']['additional_usd'])) != Decimal(str(previous['additional_cap_usd']))):
+        raise BudgetStop('amended audit checkpoint names another immediate predecessor or origin')
+    if Decimal(str(previous['additional_cap_usd'])) == Decimal(proof['prior_total_usd']):
+        reference = proof['predecessor_registration']
+        if str(source_path) != reference['path'] or sha(source_path) != reference['sha256']:
+            raise BudgetStop('first amended audit differs from its authorized predecessor')
+    elif ('budget_amendment' not in source
+            or canonical_json(selection(source['budget_amendment'])) != canonical_json(proof)):
+        raise BudgetStop('audit successor changes its inherited budget amendment')
+    return source_path
+
+
 def open_audit_ledger(manifest, registration_path, manifest_sha256):
     budget, job = manifest['budget'], manifest['job']
     location = canonical_path(budget['ledger_path'])
@@ -841,10 +907,16 @@ def open_audit_ledger(manifest, registration_path, manifest_sha256):
         raise BudgetStop('audit cap does not bind its sole job')
     prior = budget['continuation']
     pinned(manifest, prior['checkpoint'], prior['sha256'])
+    previous = read_json(prior['checkpoint'])
+    validate_budget_amendment_predecessor(manifest, previous)
+    bridge = {}
+    if 'budget_amendment' in manifest:
+        from budget_amendment import ledger_bridge
+        bridge = ledger_bridge(manifest, previous, checkpoint_sha256=prior['sha256'])
     ledger = Ledger(location, manifest_sha256=manifest_sha256,
         total_cap=budget['additional_usd'], attempt_cap=budget['per_attempt_usd'],
         attempt_caps_usd={attempt_identity(manifest_sha256, job['id']): budget['per_job_attempt_usd'][job['id']]})
-    ledger.continue_from(prior['checkpoint'], expected_sha256=prior['sha256'], expected_cost_usd=prior['cost_usd'])
+    ledger.continue_from(prior['checkpoint'], expected_sha256=prior['sha256'], expected_cost_usd=prior['cost_usd'], **bridge)
     return ledger
 
 

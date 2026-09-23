@@ -195,8 +195,8 @@ class Ledger:
             state.setdefault("stopped_attempts", {}).setdefault(
                 attempt, {"stopped_at": now(), "reason": reason})
 
-    def continue_from(self, checkpoint, *, expected_sha256, expected_cost_usd):
-        """Carry charges exactly once without changing the allocation or default cap.
+    def continue_from(self, checkpoint, *, expected_sha256, expected_cost_usd, budget_amendment=None):
+        """Carry charges once; only explicit amendment proof may increase the cap.
 
         Any per-attempt exception belongs to the new registration's exact job
         identity; the prior checkpoint remains the evidence for its own caps.
@@ -205,7 +205,12 @@ class Ledger:
         if digest(raw) != expected_sha256:
             raise BudgetStop("prior billing checkpoint changed")
         previous = json.loads(raw)
-        if any(previous.get(k) != self.identity[k] for k in ("additional_cap_usd", "attempt_cap_usd")):
+        amendment_sha = None
+        if budget_amendment is not None:
+            from budget_amendment import validate_ledger_transition
+            amendment_sha = validate_ledger_transition(budget_amendment, previous,
+                checkpoint_sha256=expected_sha256, total_cap=self.total_cap, attempt_cap=self.attempt_cap)
+        elif any(previous.get(k) != self.identity[k] for k in ("additional_cap_usd", "attempt_cap_usd")):
             raise BudgetStop("prior billing checkpoint has different budget caps")
         if not isinstance(previous.get("manifest_sha256"), str) or not previous["manifest_sha256"]:
             raise BudgetStop("prior billing checkpoint lacks its registration identity")
@@ -225,9 +230,18 @@ class Ledger:
         identity = {"checkpoint_sha256": expected_sha256,
                     "manifest_sha256": previous["manifest_sha256"],
                     "cost_usd": str(total), "requests": len(rows)}
+        if amendment_sha is not None:
+            identity['budget_amendment_sha256'] = amendment_sha
         with self.transaction() as state:
             if "continued_from" in state:
-                if state["continued_from"] != identity or state["requests"][:len(rows)] != rows:
+                prefix = state["requests"][:len(rows)]
+                same_rows = (json.dumps(prefix, sort_keys=True, ensure_ascii=False, allow_nan=False)
+                             == json.dumps(rows, sort_keys=True, ensure_ascii=False, allow_nan=False)
+                             if budget_amendment is not None else prefix == rows)
+                same_identity = (json.dumps(state["continued_from"], sort_keys=True, ensure_ascii=False, allow_nan=False)
+                                 == json.dumps(identity, sort_keys=True, ensure_ascii=False, allow_nan=False)
+                                 if budget_amendment is not None else state["continued_from"] == identity)
+                if not same_identity or not same_rows:
                     raise BudgetStop("continued billing history changed")
             else:
                 if state["requests"]:

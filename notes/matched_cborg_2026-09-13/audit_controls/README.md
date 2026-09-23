@@ -535,6 +535,44 @@ guarantee semantic correctness: independent scientific review is still
 required, and previously rejected outputs remain rejected. Select it only
 through a fresh registration with its code and rendered instructions pinned.
 
+## Explicit additive budget authorization
+
+For a fresh audit, `--budget-amendment PATH` selects
+`additive_sequence_budget_v1` (#2278). It records one explicitly authorized
+increase to the original shared allocation. It does not edit the original
+registration, ledger, default per-attempt limit or ownership record. The next
+ledger imports every settled historical row unchanged, including debits whose
+actual provider fee remains unknown, and records the amendment digest at the
+first import with the higher ceiling.
+
+The selection names the prior allocation, increase, new absolute ceiling and
+unchanged default attempt cap as positive decimal strings. It pins five exact
+documents by canonical absolute path and SHA-256: the original generation
+registration, the closed audit registration, its ledger, its immutable consumed
+owner snapshot and the explicit authorization receipt. The live sequence owner
+cannot serve as the snapshot. The receipt must bind the approved increase to
+that predecessor and its complete settled accounting. Malformed, null,
+unapproved or mismatched evidence is refused before preparation creates its
+destination.
+
+The first import must use that exact closed checkpoint. Later audits, Phase 4
+and evaluations inherit the same proof and absolute ceiling; they cannot drop
+the proof, replace it or add the increase again. This version supports one
+increase from the original allocation. Another increase would require a
+separately reviewed protocol. Proof files are pinned controller evidence and
+are not added to scientific model inputs.
+
+For batch audits with an amendment, the offline plan also states the worker,
+attempt and shared ceilings, remaining shared allocation, minimum integration
+allowance and maximum stall-debit count. These are admission limits, not a
+complete cost estimate. Every retry must reserve its full counted request cost
+in addition to settled spend, including previous stall debits. For example,
+raising the shared allocation alone cannot fund a retry that exceeds the worker
+ceiling. Integration receives what remains of the attempt cap, and each fresh
+attempt restarts every worker. Token counts, later turns and integration inputs
+remain unknown until their actual payloads exist. The plan does not claim that
+the registered maximum number of retries is affordable.
+
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
 A new registration may select `--audit-batches PATH` (#2192). The JSON file must

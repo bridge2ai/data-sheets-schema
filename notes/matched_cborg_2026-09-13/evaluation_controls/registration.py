@@ -92,6 +92,9 @@ def verify_implementation(manifest):
         from sequence_claim import enabled, IMPLEMENTATIONS
         enabled(manifest)
         code.update(IMPLEMENTATIONS)
+    if 'budget_amendment' in manifest:
+        import budget_amendment
+        code.add(Path(budget_amendment.__file__).resolve())
     relative = [str(path.relative_to(repository)) for path in sorted(code)]
     for argv in (['git','ls-files','--error-unmatch','--',*relative], ['git','diff','--quiet','HEAD','--',*relative]):
         if subprocess.run(argv,cwd=repository,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
@@ -116,6 +119,11 @@ only the outer launcher. Registration builders may pin additional resources.
     paths.update(HERE.glob('*.py'))
     paths.update(CONTROLS.glob('*.py'))
     paths.add(HERE.parent / 'budgeted_cborg.py')
+    if 'budget_amendment' in manifest:
+        import budget_amendment
+        if manifest.get('schema_version') != 2:
+            raise BudgetStop('budget amendments require composite evaluation ancestry')
+        paths.update(budget_amendment.paths(manifest))
     if 'sequence_claim' in manifest:
         from sequence_claim import enabled, IMPLEMENTATIONS
         enabled(manifest)
@@ -188,17 +196,32 @@ def _fitness_resources(manifest):
     return paths
 
 
+def allocation_total(manifest):
+    """The legacy allocation, or the exact inherited composite authorization."""
+    if 'budget_amendment' not in manifest:
+        return Decimal('400')
+    if manifest.get('schema_version') != 2:
+        raise BudgetStop('budget amendments require composite evaluation ancestry')
+    import budget_amendment
+    origin = manifest['source_pair']['original_generation']['registration']
+    generation = read_json(pinned(manifest, origin['path'], origin['sha256']))
+    return budget_amendment.effective_total(manifest, generation)
+
+
 def _budget(manifest):
     budget = manifest['budget']
-    if (Decimal(str(budget['additional_usd'])) != Decimal('400') or
+    total_cap = allocation_total(manifest)
+    if (Decimal(str(budget['additional_usd'])) != total_cap or
         Decimal(str(budget['per_attempt_usd'])) != Decimal('5') or budget.get('per_job_attempt_usd')):
-        raise BudgetStop('evaluations require the shared 400 allocation and unchanged default 5 attempt cap')
+        raise BudgetStop('evaluations require their authorized shared allocation and unchanged default 5 attempt cap'
+                         if 'budget_amendment' in manifest else
+                         'evaluations require the shared 400 allocation and unchanged default 5 attempt cap')
     continuation = budget.get('continuation')
     if not isinstance(continuation, dict):
         raise BudgetStop('evaluations must continue the settled generation accounting')
     checkpoint = pinned(manifest, continuation['checkpoint'], continuation['sha256'])
     state = read_json(checkpoint)
-    if (Decimal(str(state.get('additional_cap_usd'))) != Decimal('400') or
+    if (Decimal(str(state.get('additional_cap_usd'))) != total_cap or
         Decimal(str(state.get('attempt_cap_usd'))) != Decimal('5') or
         not isinstance(state.get('requests'), list) or
         any(row.get('status') != 'settled' for row in state['requests'])):
