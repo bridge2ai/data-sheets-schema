@@ -22,6 +22,7 @@ from click.testing import CliRunner
 import pytest
 import yaml
 
+from tests.test_generation_manifest_identity import external, offline  # noqa: F401  the external cohort fixture
 from tests.test_native_registered_provenance import native  # noqa: F401  the registered native fixture
 from tests.test_provenance_reasoning_effort import header
 
@@ -189,10 +190,29 @@ class HeaderBasisForTheDirectRuntime(unittest.TestCase):
             path.write_text(header("claude-opus-5", DIRECT, "max") + body)
         (self.core_dir / "TESTPROJ_reconciliation.md").write_text("# r\n")
 
-    def _record(self):
+    def _record(self, **kw):
         from data_sheets_schema import provenance
         return provenance.build_record("TESTPROJ", self.method, self.label, mode="live", input_bundle=self.bundle,
-                                       input_verified=True, concat_dir=self.concat).data
+                                       input_verified=True, concat_dir=self.concat, **kw).data
+
+    def test_a_header_effort_that_disagrees_with_the_launcher_flag_is_noted_not_erased(self):
+        """#2221: the header route walked past the #2216 gate silently."""
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CLAUDE_EFFORT", None)
+            data = self._record(reasoning_effort="high")
+        self.assertEqual(data["model"]["reasoning_effort"], "max")            # the header stays recorded
+        notes = [n for n in (data.get("notes") or []) if "Reasoning effort mismatch" in n]
+        self.assertEqual(len(notes), 1)
+        self.assertIn("header says 'max'", notes[0]) and self.assertIn("launcher passed 'high'", notes[0])
+        gap = [u for u in data["unverified"] if u["field"] == "model.reasoning_effort"]
+        self.assertEqual(len(gap), 1)
+        self.assertIn("disagree", gap[0]["reason"])
+        # An agreeing flag adds nothing.
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CLAUDE_EFFORT", None)
+            agreeing = self._record(reasoning_effort="max")
+        self.assertEqual([n for n in (agreeing.get("notes") or []) if "effort mismatch" in n.lower()], [])
+        self.assertEqual([u for u in agreeing["unverified"] if u["field"] == "model.reasoning_effort"], [])
 
     def test_a_silent_environment_leaves_both_values_asserted_and_named_as_gaps(self):
         with mock.patch.dict(os.environ, {}, clear=False):
@@ -308,17 +328,50 @@ def test_the_gate_refuses_an_effort_that_disagrees_with_the_registered_specifica
     at = command.index("--reasoning-effort")
     result = CliRunner().invoke(cli, command[:at + 1] + ["high"] + command[at + 2:])
     assert result.exit_code != 0
-    assert "--reasoning_effort conflicts with the registered specification" in result.output
+    assert "--reasoning-effort conflicts with the registered specification" in result.output   # the flag's own spelling
     assert not direct.provenance_path.exists()
 
 
-def test_the_gate_refuses_an_effort_the_registered_specification_never_asserted(native):  # noqa: F811
+def test_a_specification_that_asserts_no_effort_binds_none(native):  # noqa: F811
+    """An existing registered launch may still state an effort, recorded as the launcher's own assertion, as before."""
     from data_sheets_schema.cli import cli
     spec, _, command = native
-    result = CliRunner().invoke(cli, command + ["--reasoning-effort", "max"])
-    assert result.exit_code != 0
-    assert "--reasoning_effort conflicts with the registered specification" in result.output
-    assert not spec.provenance_path.exists()
+    result = CliRunner().invoke(cli, command + ["--reasoning-effort", "high"])
+    assert result.exit_code == 0, (result.output, result.exception)
+    record = yaml.safe_load(spec.provenance_path.read_text())
+    assert record["model"]["reasoning_effort"] == "high"
+    assert record["model"]["reasoning_effort_basis"].startswith("asserted by the launcher")
+    assert "reasoning_effort" not in record["prompts"]["request"]["spec"]
+
+
+@pytest.mark.parametrize("version", [1, 2, 3])
+def test_backfill_spec_recovers_a_direct_runtime_record(external, monkeypatch, version):  # noqa: F811
+    """The candidate loop admits the direct runtime as an agentic one instead of raising (#2226)."""
+    import hashlib
+    from data_sheets_schema import api_runner as api, provenance as pv
+    from data_sheets_schema.cli import cli
+    from data_sheets_schema.runs import verify_request
+    spec = replace(external, runtime=DIRECT, provider=DIRECT_PROVIDER, render_version=version, chunk_manifest=None)
+    body = api.resolve_prompt(spec)
+    render = spec.render_spec()
+    if version == 1:
+        del render["render_version"]
+    data = {"run": {"project": spec.project, "method": spec.method, "label": spec.label},
+            "model": {"provider": render["provider"], "agent_runtime": DIRECT}, "record_generated_at": spec.run_date,
+            "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": str(spec.manifest)},
+                       "chunks": {"path": str(external.chunk_manifest)}},
+            "prompts": {"request": {"sha256": hashlib.sha256(body.encode()).hexdigest()}}}
+    monkeypatch.setattr(pv, "CONCAT_DIR", spec.out_dir)
+    path = pv.record_path_for(spec.project, spec.method, spec.label, spec.out_dir)
+    path.parent.mkdir(parents=True)
+    path.write_text(yaml.safe_dump(data))
+    result = CliRunner().invoke(cli, ["provenance", "backfill-spec", "--project", spec.project, "--method", spec.method,
+                                      "--label", spec.label, "--condition", spec.condition, "--runtime", DIRECT,
+                                      "--execute"])
+    assert result.exit_code == 0, (result.output, result.exception)
+    assert verify_request(spec.method, spec.label, spec.project, spec.out_dir)[0] == "match"
+    recovered = yaml.safe_load(path.read_text())["prompts"]["request"]["spec"]
+    assert recovered["render_version"] == version and recovered["runtime"] == DIRECT
 
 
 class PlaybookWording(unittest.TestCase):
@@ -337,6 +390,11 @@ class PlaybookWording(unittest.TestCase):
         # No `{...}` token outside the substitution vocabulary (#2220).
         self.assertIn("# Agent runtime: {RUNTIME}\n# Provider: {PROVIDER}\n", agent)
         self.assertNotIn("{as the launch", agent)
+        # The agent playbook defines the two tokens itself; it is a standalone method (#2227).
+        self.assertIn("`{RUNTIME}` and `{PROVIDER}` are the `Agent runtime` and `Provider` lines", agent)
+        self.assertIn("`Claude Code (direct)`", agent)
+        # The registered-specification rule for the effort is stated where the flag is explained (#2225).
+        self.assertIn("Under a registered specification that asserts an effort", core)
 
 
 if __name__ == "__main__":

@@ -38,6 +38,10 @@ PROVIDER = "Anthropic (Claude subscription, direct)"
 MODEL = "claude-opus-5"
 EFFORT = "max"
 EXECUTION_ARM = "direct"
+#: The cohort a production registration carries unless one is given; the
+#: fixture tests use another, so their label can never collide with a real
+#: record's (#2218, #2228).
+DEFAULT_COHORT = "generalized_direct_v1"
 #: The playbooks the instruction reaches; the transcript observer and the
 #: record gates need nothing else from the toolchain.
 CLI_FLAGS = ["--print", "--safe-mode", "--restricted", "--strict-mcp-config", "--disable-slash-commands",
@@ -227,7 +231,7 @@ def main():
     parser.add_argument("--claude-executable", default=str(Path.home() / ".local/share/claude/versions/2.1.272"))
     parser.add_argument("--condition", default="generic_v9")
     parser.add_argument("--render-version", type=int, default=17)
-    parser.add_argument("--cohort", default="generalized_direct_v1")
+    parser.add_argument("--cohort", default=DEFAULT_COHORT)
     parser.add_argument("--label-date", default=datetime.now(timezone.utc).date().isoformat())
     parser.add_argument("--run-date", default=datetime.now(timezone.utc).date().isoformat())
     parser.add_argument("--deadline-seconds", type=int, default=21600)

@@ -420,8 +420,14 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             for name, explicit in (("condition", condition), ("runtime", runtime),
                                    ("provider", provider), ("profile", stated_profile),
                                    ("reasoning_effort", reasoning_effort)):
+                if name == "reasoning_effort" and registered.reasoning_effort is None:
+                    # A specification that asserts no effort binds none: a
+                    # launcher may still state one, recorded as its own
+                    # assertion, as before this gate existed (#2225).
+                    continue
                 if explicit is not None and explicit != getattr(registered, name):
-                    raise ValueError(f"--{name} conflicts with the registered specification")
+                    # The flag's own spelling, not the parameter's (#2224).
+                    raise ValueError(f"--{name.replace('_', '-')} conflicts with the registered specification")
             if (click.get_current_context().get_parameter_source("arm") == click.core.ParameterSource.COMMANDLINE
                     and registered.arm not in {arm, _ARMS[arm][0]}):
                 raise ValueError("--arm conflicts with the registered specification")
@@ -758,7 +764,8 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             for name in PROFILES]
     backfill_basis = "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"
     current_toolchain = None
-    if runtime in {"Claude Code", "Codex CLI"}:
+    from data_sheets_schema.api_runner import AGENTIC_RUNTIMES   # the same set `is_agentic` reads (#2226)
+    if runtime in AGENTIC_RUNTIMES:
         from data_sheets_schema.agentic_runtime import toolchain
         from data_sheets_schema.resources import ResourceRootError
         try:
@@ -772,10 +779,10 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             destination_choices, (True, False)):
         if render_version == 1 and selected_profile and not schema_block.get("profile"):
             continue  # renderer 1 cannot prove a profile (#1678)
-        if scoped_chunks and (render_version < 5 or runtime not in {"Claude Code", "Codex CLI"}):
+        if scoped_chunks and (render_version < 5 or runtime not in AGENTIC_RUNTIMES):
             continue
         api_headers = {}
-        if render_version >= 8 and runtime not in {"Claude Code", "Codex CLI"}:
+        if render_version >= 8 and runtime not in AGENTIC_RUNTIMES:
             # Recover displayed values from the recorded execution, never
             # today's config. The final instruction hash must still agree.
             model = data.get("model") or {}
@@ -790,7 +797,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
         # unrecorded renderer6 toolchain only if the complete original hash
         # agrees. A different installation cannot silently reinterpret it.
         environment = {}
-        if render_version >= 6 and runtime in {"Claude Code", "Codex CLI"}:
+        if render_version >= 6 and runtime in AGENTIC_RUNTIMES:
             if current_toolchain is None:
                 continue
             environment["agentic_toolchain"] = current_toolchain
@@ -804,7 +811,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             **api_headers,
             **({"chunk_check_uses_manifest": True} if scoped_chunks else {}),
             **({"agentic_artifact_paths": destinations} if destinations is not None
-               and render_version >= 5 and runtime in {"Claude Code", "Codex CLI"} else {}),
+               and render_version >= 5 and runtime in AGENTIC_RUNTIMES else {}),
             "chunk_manifest": str(selected_chunks) if selected_chunks is not None else None,
             "run_date": (base + timedelta(days=delta)).isoformat(),
             **selected_profile,

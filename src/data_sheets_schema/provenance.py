@@ -1816,6 +1816,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # can be established the field stays absent and the gap is named in
     # `unverified`, because a run that did not choose an effort is a different
     # claim from a run whose effort is unknown.
+    header_effort_value = str(model.get("reasoning_effort") or "").strip().lower() or None
     if not model.get("reasoning_effort"):
         derived, basis = _effort_from_route(model.get("model"))
         if derived and reasoning_effort and derived != reasoning_effort:
@@ -1887,6 +1888,25 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         else:
             model.setdefault("reasoning_effort_basis",
                              "asserted by the generating agent, not observed")
+    if header_effort_value and reasoning_effort and header_effort_value != reasoning_effort.strip().lower():
+        # A header effort and a launcher flag that disagree (#2221): the
+        # header is what the record says and stays recorded, as the route
+        # does above, but the disagreement is not erased. Under a registered
+        # specification the flag is the specification's own assertion
+        # (#2216), so this is the one route by which a generated header can
+        # contradict the launcher unnoticed.
+        notes.append(
+            f"Reasoning effort mismatch: the record header says "
+            f"{header_effort_value!r} while the launcher passed "
+            f"{reasoning_effort!r}. The header is recorded; the launcher's "
+            "value is what the run was declared to run at.")
+        unverified.append({
+            "field": "model.reasoning_effort",
+            "value": model.get("reasoning_effort"),
+            "reason": (f"the header says {header_effort_value!r} while the "
+                       f"launcher passed {reasoning_effort!r}; the two "
+                       "disagree and neither observed the runtime"),
+        })
 
     cfg = load_generation_config()
     declared = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}

@@ -444,6 +444,11 @@ MAX_ATTEMPTS = 5
 BACKOFF_BASE_SECONDS = 2
 
 
+#: The runtime strings that follow the shared agentic playbook: the two
+#: Claude Code arms (#2202) and Codex. One set, read by `RunSpec.is_agentic`
+#: and by `backfill-spec`, so a runtime admitted here is admitted there (#2226).
+AGENTIC_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Codex CLI"})
+
 @dataclass
 class RunSpec:
     project: str
@@ -607,7 +612,7 @@ class RunSpec:
     @property
     def is_agentic(self) -> bool:
         """Whether the runtime follows the shared agentic playbook."""
-        return self.runtime in {"Claude Code", "Claude Code (direct)", "Codex CLI"}
+        return self.runtime in AGENTIC_RUNTIMES
 
     @classmethod
     def from_render_spec(cls, recorded: dict[str, Any], *, project: str,

@@ -856,6 +856,12 @@ suffix — it is read from there and marked observed. Where it does not, pass
 `--reasoning-effort` *only if you actually know what the run was launched at*;
 it is then recorded as asserted by the launcher. If you do not know, omit it:
 the recorder writes no value and names the gap, which is the honest outcome.
+Under a registered specification that asserts an effort, the rendered recorder
+line already carries it: the recorder takes that value where the copied line
+dropped the flag and refuses a different one (#2216). A header
+`# Reasoning effort:` line that disagrees with the flag is recorded with a
+mismatch note and named as unverified (#2221); do not write one you did not
+observe.
 **Never write "default", "n/a", "unspecified" or a guess** — a run that did not
 choose an effort is a different claim from a run whose effort is unknown, and
 neither is a run at high. Do not add a `# Reasoning effort:` line to the header

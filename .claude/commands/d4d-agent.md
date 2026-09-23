@@ -226,6 +226,13 @@ When multiple sources describe the same dataset:
 # Generated: {DATE}
 ```
 
+`{RUNTIME}` and `{PROVIDER}` are the `Agent runtime` and `Provider` lines
+exactly as the launch instruction header states them: `Claude Code`,
+`Claude Code (direct)`, `Claude API (direct)` or `Codex CLI`, and
+`Anthropic`, `Anthropic (Claude subscription, direct)`, `OpenAI` or the
+proxy actually reached. Never shorten one to another, and never carry a
+value over from a different runtime.
+
 ## Settings
 
 - Temperature is not observed by this workflow. Do not infer it from a prompt,

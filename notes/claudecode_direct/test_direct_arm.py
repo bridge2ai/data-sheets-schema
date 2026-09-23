@@ -46,7 +46,20 @@ def arguments(tmp_path, fake, **overrides):
                   render_version=17, cohort="test_fixture", label_date="2026-09-22", run_date="2026-09-22",
                   deadline_seconds=21600, runaway_guard_usd="60")
     values.update(overrides)
+    assert values["cohort"] != preparation.DEFAULT_COHORT, "the fixture cohort must not be the production default"
     return SimpleNamespace(**values)
+
+
+def test_the_fixture_cohort_is_one_production_does_not_produce_by_default(tmp_path):
+    """#2228: the #2218 fix was guarded by nothing."""
+    fixture = arguments(tmp_path, tmp_path / "claude")
+    assert fixture.cohort == "test_fixture" and preparation.DEFAULT_COHORT == "generalized_direct_v1"
+    assert "-test-fixture-" not in preparation.DEFAULT_COHORT.replace("_", "-")
+    # The preparer's own parser default is the production cohort, not the fixture's.
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cohort", default=preparation.DEFAULT_COHORT)
+    assert parser.parse_args([]).cohort != fixture.cohort
 
 
 def fake_runtime(tmp_path, version="2.1.272 (Claude Code)"):
@@ -152,6 +165,8 @@ def test_the_preparer_refuses_an_instruction_that_is_not_the_direct_arms(tmp_pat
                             ("# Agent runtime: Claude Code (direct)\n# Model: claude-opus-5\n"
                              " d4d provenance record --reasoning-effort max\n", "runtime, provider and model"),
                             ("# Agent runtime: Claude Code (direct)\n# Provider: Anthropic (Claude subscription, direct)\n"
+                             " d4d provenance record --reasoning-effort max\n", "runtime, provider and model"),
+                            ("# Provider: Anthropic (Claude subscription, direct)\n# Model: claude-opus-5\n"
                              " d4d provenance record --reasoning-effort max\n", "runtime, provider and model")):
         monkeypatch.setattr(RunSpec, "instruction", property(lambda self, text=rendered: text))
         with pytest.raises(preparation.DirectStop, match=match):
