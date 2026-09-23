@@ -1,0 +1,15 @@
+module,fit,unfit,supported,unsupported
+Base_import,264,18,31,3
+Composition,222,34,29,0
+Collection,145,19,20,0
+Core/other,126,6,13,1
+Uses,85,42,19,0
+Motivation,105,15,15,0
+Maintenance,104,11,15,0
+Preprocessing,81,27,15,0
+Human,76,3,6,0
+Ethics,53,21,7,0
+Distribution,47,21,9,0
+Data_Governance,62,1,9,0
+FileCollection,18,0,0,0
+Variables,11,0,0,0

@@ -1,0 +1,85 @@
+code,label,rubric,severity,count
+persistent_identifier,Missing or weak persistent identifier,rubric10-semantic,low,5
+persistent_identifier,Missing or weak persistent identifier,rubric10-semantic,medium,8
+persistent_identifier,Missing or weak persistent identifier,rubric10-semantic,high,3
+persistent_identifier,Missing or weak persistent identifier,rubric20-semantic,low,6
+persistent_identifier,Missing or weak persistent identifier,rubric20-semantic,medium,8
+persistent_identifier,Missing or weak persistent identifier,rubric20-semantic,high,3
+license_use_terms,License or use terms unstated or conflated,rubric10-semantic,low,18
+license_use_terms,License or use terms unstated or conflated,rubric10-semantic,medium,6
+license_use_terms,License or use terms unstated or conflated,rubric10-semantic,high,0
+license_use_terms,License or use terms unstated or conflated,rubric20-semantic,low,13
+license_use_terms,License or use terms unstated or conflated,rubric20-semantic,medium,11
+license_use_terms,License or use terms unstated or conflated,rubric20-semantic,high,1
+source_conflict,Unresolved source conflict or contradiction,rubric10-semantic,low,36
+source_conflict,Unresolved source conflict or contradiction,rubric10-semantic,medium,24
+source_conflict,Unresolved source conflict or contradiction,rubric10-semantic,high,3
+source_conflict,Unresolved source conflict or contradiction,rubric20-semantic,low,22
+source_conflict,Unresolved source conflict or contradiction,rubric20-semantic,medium,22
+source_conflict,Unresolved source conflict or contradiction,rubric20-semantic,high,0
+scope_drift,Scope drift (project or pipeline vs released data),rubric10-semantic,low,10
+scope_drift,Scope drift (project or pipeline vs released data),rubric10-semantic,medium,21
+scope_drift,Scope drift (project or pipeline vs released data),rubric10-semantic,high,8
+scope_drift,Scope drift (project or pipeline vs released data),rubric20-semantic,low,9
+scope_drift,Scope drift (project or pipeline vs released data),rubric20-semantic,medium,10
+scope_drift,Scope drift (project or pipeline vs released data),rubric20-semantic,high,2
+count_size,Count or size inconsistency,rubric10-semantic,low,8
+count_size,Count or size inconsistency,rubric10-semantic,medium,7
+count_size,Count or size inconsistency,rubric10-semantic,high,6
+count_size,Count or size inconsistency,rubric20-semantic,low,13
+count_size,Count or size inconsistency,rubric20-semantic,medium,10
+count_size,Count or size inconsistency,rubric20-semantic,high,4
+temporal_version,"Temporal, version or change-log inconsistency",rubric10-semantic,low,22
+temporal_version,"Temporal, version or change-log inconsistency",rubric10-semantic,medium,8
+temporal_version,"Temporal, version or change-log inconsistency",rubric10-semantic,high,2
+temporal_version,"Temporal, version or change-log inconsistency",rubric20-semantic,low,15
+temporal_version,"Temporal, version or change-log inconsistency",rubric20-semantic,medium,13
+temporal_version,"Temporal, version or change-log inconsistency",rubric20-semantic,high,1
+consent_ethics,"Human-subjects, consent or ethics gap",rubric10-semantic,low,11
+consent_ethics,"Human-subjects, consent or ethics gap",rubric10-semantic,medium,7
+consent_ethics,"Human-subjects, consent or ethics gap",rubric10-semantic,high,12
+consent_ethics,"Human-subjects, consent or ethics gap",rubric20-semantic,low,9
+consent_ethics,"Human-subjects, consent or ethics gap",rubric20-semantic,medium,8
+consent_ethics,"Human-subjects, consent or ethics gap",rubric20-semantic,high,11
+privacy_regulatory,"De-identification, privacy or regulatory gap",rubric10-semantic,low,13
+privacy_regulatory,"De-identification, privacy or regulatory gap",rubric10-semantic,medium,17
+privacy_regulatory,"De-identification, privacy or regulatory gap",rubric10-semantic,high,1
+privacy_regulatory,"De-identification, privacy or regulatory gap",rubric20-semantic,low,12
+privacy_regulatory,"De-identification, privacy or regulatory gap",rubric20-semantic,medium,22
+privacy_regulatory,"De-identification, privacy or regulatory gap",rubric20-semantic,high,2
+processing_provenance,Processing or software provenance gap,rubric10-semantic,low,6
+processing_provenance,Processing or software provenance gap,rubric10-semantic,medium,8
+processing_provenance,Processing or software provenance gap,rubric10-semantic,high,1
+processing_provenance,Processing or software provenance gap,rubric20-semantic,low,1
+processing_provenance,Processing or software provenance gap,rubric20-semantic,medium,2
+processing_provenance,Processing or software provenance gap,rubric20-semantic,high,0
+attribution,"Attribution, publisher or funding gap",rubric10-semantic,low,18
+attribution,"Attribution, publisher or funding gap",rubric10-semantic,medium,6
+attribution,"Attribution, publisher or funding gap",rubric10-semantic,high,0
+attribution,"Attribution, publisher or funding gap",rubric20-semantic,low,14
+attribution,"Attribution, publisher or funding gap",rubric20-semantic,medium,2
+attribution,"Attribution, publisher or funding gap",rubric20-semantic,high,0
+variables_metadata,Variable-level or descriptive metadata gap,rubric10-semantic,low,20
+variables_metadata,Variable-level or descriptive metadata gap,rubric10-semantic,medium,19
+variables_metadata,Variable-level or descriptive metadata gap,rubric10-semantic,high,4
+variables_metadata,Variable-level or descriptive metadata gap,rubric20-semantic,low,12
+variables_metadata,Variable-level or descriptive metadata gap,rubric20-semantic,medium,9
+variables_metadata,Variable-level or descriptive metadata gap,rubric20-semantic,high,0
+bias_quality,"Bias, limitation or data-quality documentation gap",rubric10-semantic,low,1
+bias_quality,"Bias, limitation or data-quality documentation gap",rubric10-semantic,medium,2
+bias_quality,"Bias, limitation or data-quality documentation gap",rubric10-semantic,high,1
+bias_quality,"Bias, limitation or data-quality documentation gap",rubric20-semantic,low,4
+bias_quality,"Bias, limitation or data-quality documentation gap",rubric20-semantic,medium,5
+bias_quality,"Bias, limitation or data-quality documentation gap",rubric20-semantic,high,0
+format_access,Format or access detail gap,rubric10-semantic,low,11
+format_access,Format or access detail gap,rubric10-semantic,medium,4
+format_access,Format or access detail gap,rubric10-semantic,high,1
+format_access,Format or access detail gap,rubric20-semantic,low,5
+format_access,Format or access detail gap,rubric20-semantic,medium,3
+format_access,Format or access detail gap,rubric20-semantic,high,0
+other,Other or uncategorized,rubric10-semantic,low,4
+other,Other or uncategorized,rubric10-semantic,medium,1
+other,Other or uncategorized,rubric10-semantic,high,0
+other,Other or uncategorized,rubric20-semantic,low,4
+other,Other or uncategorized,rubric20-semantic,medium,0
+other,Other or uncategorized,rubric20-semantic,high,0

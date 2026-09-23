@@ -1,0 +1,5 @@
+project,status,rows_applied,outcome_filled,outcome_empty,outcome_unresolvable,outcome_unplaceable,loss_none,loss_minimal,loss_moderate,loss_high,maptype_exactMatch,maptype_closeMatch,maptype_relatedMatch,maptype_narrowMatch,overlap_both_agree,overlap_both_differ,overlap_crate_only,overlap_generated_only,generated_record
+AI_READI,"crate package present, no mapper output",,,,,,,,,,,,,,,,,,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+CHORUS,mapped,137,32,47,4,54,22,6,3,1,22,6,3,1,0,18,14,34,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml
+CM4AI,mapped,137,42,37,4,54,31,7,3,1,31,7,3,1,2,28,12,29,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+VOICE,mapped,137,48,31,4,54,31,11,6,0,31,15,1,1,0,41,3,39,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml

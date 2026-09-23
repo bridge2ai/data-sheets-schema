@@ -1,0 +1,521 @@
+project,module,document_id,source_type,mean_fields_per_run,total_fields,n_runs
+AI_READI,Metadata (Information),ro_crate_metadata,RO-Crate,1.33,8,6
+AI_READI,Metadata (Information),fairhub_dataset_v3_api,structured metadata,8.17,49,6
+AI_READI,Metadata (Information),fairhub_dataset,data resource,0.0,0,6
+AI_READI,Metadata (Information),fairhub_dataset_v3,data resource,1.83,11,6
+AI_READI,Metadata (Information),dataset_documentation,documentation,0.0,0,6
+AI_READI,Metadata (Information),dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,Metadata (Information),dataset_license,license,0.33,2,6
+AI_READI,Metadata (Information),irb_protocol,IRB,0.0,0,6
+AI_READI,Metadata (Information),bmj_protocol_publication,publication,0.17,1,6
+AI_READI,Metadata (Information),nature_metabolism_publication,publication,0.83,5,6
+AI_READI,Metadata (Information),nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Metadata (Information),bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Motivation,ro_crate_metadata,RO-Crate,1.17,7,6
+AI_READI,Motivation,fairhub_dataset_v3_api,structured metadata,8.17,49,6
+AI_READI,Motivation,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Motivation,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,Motivation,dataset_documentation,documentation,0.0,0,6
+AI_READI,Motivation,dataset_documentation_v3,documentation,0.17,1,6
+AI_READI,Motivation,dataset_license,license,0.0,0,6
+AI_READI,Motivation,irb_protocol,IRB,0.0,0,6
+AI_READI,Motivation,bmj_protocol_publication,publication,2.67,16,6
+AI_READI,Motivation,nature_metabolism_publication,publication,3.67,22,6
+AI_READI,Motivation,nih_reporter_project,NIH project page,3.17,19,6
+AI_READI,Motivation,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Composition,ro_crate_metadata,RO-Crate,6.0,36,6
+AI_READI,Composition,fairhub_dataset_v3_api,structured metadata,25.33,152,6
+AI_READI,Composition,fairhub_dataset,data resource,0.83,5,6
+AI_READI,Composition,fairhub_dataset_v3,data resource,0.5,3,6
+AI_READI,Composition,dataset_documentation,documentation,0.17,1,6
+AI_READI,Composition,dataset_documentation_v3,documentation,2.17,13,6
+AI_READI,Composition,dataset_license,license,0.0,0,6
+AI_READI,Composition,irb_protocol,IRB,2.0,12,6
+AI_READI,Composition,bmj_protocol_publication,publication,4.5,27,6
+AI_READI,Composition,nature_metabolism_publication,publication,2.17,13,6
+AI_READI,Composition,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Composition,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Collection,ro_crate_metadata,RO-Crate,1.67,10,6
+AI_READI,Collection,fairhub_dataset_v3_api,structured metadata,16.5,99,6
+AI_READI,Collection,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Collection,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,Collection,dataset_documentation,documentation,0.0,0,6
+AI_READI,Collection,dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,Collection,dataset_license,license,0.0,0,6
+AI_READI,Collection,irb_protocol,IRB,3.83,23,6
+AI_READI,Collection,bmj_protocol_publication,publication,12.0,72,6
+AI_READI,Collection,nature_metabolism_publication,publication,1.0,6,6
+AI_READI,Collection,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Collection,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Preprocessing,ro_crate_metadata,RO-Crate,0.0,0,6
+AI_READI,Preprocessing,fairhub_dataset_v3_api,structured metadata,4.17,25,6
+AI_READI,Preprocessing,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Preprocessing,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,Preprocessing,dataset_documentation,documentation,0.0,0,6
+AI_READI,Preprocessing,dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,Preprocessing,dataset_license,license,0.0,0,6
+AI_READI,Preprocessing,irb_protocol,IRB,0.0,0,6
+AI_READI,Preprocessing,bmj_protocol_publication,publication,2.17,13,6
+AI_READI,Preprocessing,nature_metabolism_publication,publication,0.17,1,6
+AI_READI,Preprocessing,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Preprocessing,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Uses,ro_crate_metadata,RO-Crate,0.0,0,6
+AI_READI,Uses,fairhub_dataset_v3_api,structured metadata,1.17,7,6
+AI_READI,Uses,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Uses,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,Uses,dataset_documentation,documentation,0.0,0,6
+AI_READI,Uses,dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,Uses,dataset_license,license,5.83,35,6
+AI_READI,Uses,irb_protocol,IRB,0.33,2,6
+AI_READI,Uses,bmj_protocol_publication,publication,0.0,0,6
+AI_READI,Uses,nature_metabolism_publication,publication,0.67,4,6
+AI_READI,Uses,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Uses,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Distribution,ro_crate_metadata,RO-Crate,0.0,0,6
+AI_READI,Distribution,fairhub_dataset_v3_api,structured metadata,3.67,22,6
+AI_READI,Distribution,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Distribution,fairhub_dataset_v3,data resource,0.83,5,6
+AI_READI,Distribution,dataset_documentation,documentation,0.0,0,6
+AI_READI,Distribution,dataset_documentation_v3,documentation,0.17,1,6
+AI_READI,Distribution,dataset_license,license,0.17,1,6
+AI_READI,Distribution,irb_protocol,IRB,0.17,1,6
+AI_READI,Distribution,bmj_protocol_publication,publication,0.17,1,6
+AI_READI,Distribution,nature_metabolism_publication,publication,0.0,0,6
+AI_READI,Distribution,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Distribution,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Maintenance,ro_crate_metadata,RO-Crate,0.67,4,6
+AI_READI,Maintenance,fairhub_dataset_v3_api,structured metadata,5.67,34,6
+AI_READI,Maintenance,fairhub_dataset,data resource,0.83,5,6
+AI_READI,Maintenance,fairhub_dataset_v3,data resource,1.17,7,6
+AI_READI,Maintenance,dataset_documentation,documentation,0.17,1,6
+AI_READI,Maintenance,dataset_documentation_v3,documentation,0.17,1,6
+AI_READI,Maintenance,dataset_license,license,0.0,0,6
+AI_READI,Maintenance,irb_protocol,IRB,0.17,1,6
+AI_READI,Maintenance,bmj_protocol_publication,publication,0.5,3,6
+AI_READI,Maintenance,nature_metabolism_publication,publication,0.5,3,6
+AI_READI,Maintenance,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Maintenance,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Ethics,ro_crate_metadata,RO-Crate,2.0,12,6
+AI_READI,Ethics,fairhub_dataset_v3_api,structured metadata,4.0,24,6
+AI_READI,Ethics,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Ethics,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,Ethics,dataset_documentation,documentation,0.0,0,6
+AI_READI,Ethics,dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,Ethics,dataset_license,license,0.0,0,6
+AI_READI,Ethics,irb_protocol,IRB,0.83,5,6
+AI_READI,Ethics,bmj_protocol_publication,publication,2.0,12,6
+AI_READI,Ethics,nature_metabolism_publication,publication,0.17,1,6
+AI_READI,Ethics,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Ethics,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Human,ro_crate_metadata,RO-Crate,2.17,13,6
+AI_READI,Human,fairhub_dataset_v3_api,structured metadata,5.67,34,6
+AI_READI,Human,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Human,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,Human,dataset_documentation,documentation,0.0,0,6
+AI_READI,Human,dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,Human,dataset_license,license,0.0,0,6
+AI_READI,Human,irb_protocol,IRB,5.0,30,6
+AI_READI,Human,bmj_protocol_publication,publication,2.0,12,6
+AI_READI,Human,nature_metabolism_publication,publication,1.0,6,6
+AI_READI,Human,nih_reporter_project,NIH project page,0.17,1,6
+AI_READI,Human,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Variables,ro_crate_metadata,RO-Crate,0.83,5,6
+AI_READI,Variables,fairhub_dataset_v3_api,structured metadata,2.17,13,6
+AI_READI,Variables,fairhub_dataset,data resource,0.0,0,6
+AI_READI,Variables,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,Variables,dataset_documentation,documentation,0.0,0,6
+AI_READI,Variables,dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,Variables,dataset_license,license,0.0,0,6
+AI_READI,Variables,irb_protocol,IRB,0.17,1,6
+AI_READI,Variables,bmj_protocol_publication,publication,13.17,79,6
+AI_READI,Variables,nature_metabolism_publication,publication,0.17,1,6
+AI_READI,Variables,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Variables,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,FileCollection,ro_crate_metadata,RO-Crate,5.33,32,6
+AI_READI,FileCollection,fairhub_dataset_v3_api,structured metadata,29.33,176,6
+AI_READI,FileCollection,fairhub_dataset,data resource,0.0,0,6
+AI_READI,FileCollection,fairhub_dataset_v3,data resource,0.0,0,6
+AI_READI,FileCollection,dataset_documentation,documentation,0.0,0,6
+AI_READI,FileCollection,dataset_documentation_v3,documentation,0.0,0,6
+AI_READI,FileCollection,dataset_license,license,0.0,0,6
+AI_READI,FileCollection,irb_protocol,IRB,0.0,0,6
+AI_READI,FileCollection,bmj_protocol_publication,publication,0.0,0,6
+AI_READI,FileCollection,nature_metabolism_publication,publication,0.0,0,6
+AI_READI,FileCollection,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,FileCollection,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Dataset (top level),ro_crate_metadata,RO-Crate,1.67,10,6
+AI_READI,Dataset (top level),fairhub_dataset_v3_api,structured metadata,6.0,36,6
+AI_READI,Dataset (top level),fairhub_dataset,data resource,0.0,0,6
+AI_READI,Dataset (top level),fairhub_dataset_v3,data resource,1.17,7,6
+AI_READI,Dataset (top level),dataset_documentation,documentation,0.0,0,6
+AI_READI,Dataset (top level),dataset_documentation_v3,documentation,1.17,7,6
+AI_READI,Dataset (top level),dataset_license,license,0.17,1,6
+AI_READI,Dataset (top level),irb_protocol,IRB,1.5,9,6
+AI_READI,Dataset (top level),bmj_protocol_publication,publication,1.0,6,6
+AI_READI,Dataset (top level),nature_metabolism_publication,publication,0.5,3,6
+AI_READI,Dataset (top level),nih_reporter_project,NIH project page,0.83,5,6
+AI_READI,Dataset (top level),bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Metadata (Information),project_documentation,documentation,0.67,4,6
+CHORUS,Metadata (Information),nih_reporter_project,NIH project page,1.83,11,6
+CHORUS,Metadata (Information),cohort_2_webinar,tutorial,0.67,4,6
+CHORUS,Metadata (Information),github_organization_overview,historical documentation,0.17,1,6
+CHORUS,Metadata (Information),bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Motivation,project_documentation,documentation,2.67,16,6
+CHORUS,Motivation,nih_reporter_project,NIH project page,9.83,59,6
+CHORUS,Motivation,cohort_2_webinar,tutorial,3.83,23,6
+CHORUS,Motivation,github_organization_overview,historical documentation,2.0,12,6
+CHORUS,Motivation,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Composition,project_documentation,documentation,5.17,31,6
+CHORUS,Composition,nih_reporter_project,NIH project page,2.5,15,6
+CHORUS,Composition,cohort_2_webinar,tutorial,7.0,42,6
+CHORUS,Composition,github_organization_overview,historical documentation,3.5,21,6
+CHORUS,Composition,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Collection,project_documentation,documentation,0.83,5,6
+CHORUS,Collection,nih_reporter_project,NIH project page,1.17,7,6
+CHORUS,Collection,cohort_2_webinar,tutorial,1.83,11,6
+CHORUS,Collection,github_organization_overview,historical documentation,2.17,13,6
+CHORUS,Collection,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Preprocessing,project_documentation,documentation,0.17,1,6
+CHORUS,Preprocessing,nih_reporter_project,NIH project page,2.5,15,6
+CHORUS,Preprocessing,cohort_2_webinar,tutorial,0.17,1,6
+CHORUS,Preprocessing,github_organization_overview,historical documentation,4.33,26,6
+CHORUS,Preprocessing,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Uses,project_documentation,documentation,0.17,1,6
+CHORUS,Uses,nih_reporter_project,NIH project page,1.33,8,6
+CHORUS,Uses,cohort_2_webinar,tutorial,3.0,18,6
+CHORUS,Uses,github_organization_overview,historical documentation,0.33,2,6
+CHORUS,Uses,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Distribution,project_documentation,documentation,0.0,0,6
+CHORUS,Distribution,nih_reporter_project,NIH project page,0.0,0,6
+CHORUS,Distribution,cohort_2_webinar,tutorial,3.0,18,6
+CHORUS,Distribution,github_organization_overview,historical documentation,0.17,1,6
+CHORUS,Distribution,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Maintenance,project_documentation,documentation,1.67,10,6
+CHORUS,Maintenance,nih_reporter_project,NIH project page,0.0,0,6
+CHORUS,Maintenance,cohort_2_webinar,tutorial,0.0,0,6
+CHORUS,Maintenance,github_organization_overview,historical documentation,2.67,16,6
+CHORUS,Maintenance,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Ethics,project_documentation,documentation,1.0,6,6
+CHORUS,Ethics,nih_reporter_project,NIH project page,1.0,6,6
+CHORUS,Ethics,cohort_2_webinar,tutorial,0.0,0,6
+CHORUS,Ethics,github_organization_overview,historical documentation,0.17,1,6
+CHORUS,Ethics,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Human,project_documentation,documentation,0.17,1,6
+CHORUS,Human,nih_reporter_project,NIH project page,0.67,4,6
+CHORUS,Human,cohort_2_webinar,tutorial,0.0,0,6
+CHORUS,Human,github_organization_overview,historical documentation,0.5,3,6
+CHORUS,Human,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Variables,project_documentation,documentation,0.0,0,6
+CHORUS,Variables,nih_reporter_project,NIH project page,0.0,0,6
+CHORUS,Variables,cohort_2_webinar,tutorial,0.0,0,6
+CHORUS,Variables,github_organization_overview,historical documentation,0.0,0,6
+CHORUS,Variables,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,FileCollection,project_documentation,documentation,0.0,0,6
+CHORUS,FileCollection,nih_reporter_project,NIH project page,0.0,0,6
+CHORUS,FileCollection,cohort_2_webinar,tutorial,0.83,5,6
+CHORUS,FileCollection,github_organization_overview,historical documentation,0.0,0,6
+CHORUS,FileCollection,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Dataset (top level),project_documentation,documentation,2.0,12,6
+CHORUS,Dataset (top level),nih_reporter_project,NIH project page,0.5,3,6
+CHORUS,Dataset (top level),cohort_2_webinar,tutorial,2.0,12,6
+CHORUS,Dataset (top level),github_organization_overview,historical documentation,0.17,1,6
+CHORUS,Dataset (top level),bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Metadata (Information),june_2026_dataverse_release,data resource,5.83,35,6
+CM4AI,Metadata (Information),october_2025_dataverse_release,data resource,0.0,0,6
+CM4AI,Metadata (Information),data_release_documentation,documentation,0.67,4,6
+CM4AI,Metadata (Information),project_documentation,documentation,0.0,0,6
+CM4AI,Metadata (Information),dataset_license,license,0.33,2,6
+CM4AI,Metadata (Information),nature_publication,publication,0.0,0,6
+CM4AI,Metadata (Information),biorxiv_preprint,preprint,0.83,5,6
+CM4AI,Metadata (Information),nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Metadata (Information),june_2025_dataverse_release,historical data release,0.33,2,6
+CM4AI,Metadata (Information),march_2025_dataverse_release,historical data release,1.5,9,6
+CM4AI,Metadata (Information),bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Motivation,june_2026_dataverse_release,data resource,9.5,57,6
+CM4AI,Motivation,october_2025_dataverse_release,data resource,3.0,18,6
+CM4AI,Motivation,data_release_documentation,documentation,0.0,0,6
+CM4AI,Motivation,project_documentation,documentation,0.33,2,6
+CM4AI,Motivation,dataset_license,license,0.0,0,6
+CM4AI,Motivation,nature_publication,publication,1.0,6,6
+CM4AI,Motivation,biorxiv_preprint,preprint,5.83,35,6
+CM4AI,Motivation,nih_reporter_project,NIH project page,4.17,25,6
+CM4AI,Motivation,june_2025_dataverse_release,historical data release,6.17,37,6
+CM4AI,Motivation,march_2025_dataverse_release,historical data release,7.83,47,6
+CM4AI,Motivation,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Composition,june_2026_dataverse_release,data resource,5.17,31,6
+CM4AI,Composition,october_2025_dataverse_release,data resource,2.33,14,6
+CM4AI,Composition,data_release_documentation,documentation,0.33,2,6
+CM4AI,Composition,project_documentation,documentation,0.0,0,6
+CM4AI,Composition,dataset_license,license,0.0,0,6
+CM4AI,Composition,nature_publication,publication,2.33,14,6
+CM4AI,Composition,biorxiv_preprint,preprint,4.17,25,6
+CM4AI,Composition,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Composition,june_2025_dataverse_release,historical data release,5.33,32,6
+CM4AI,Composition,march_2025_dataverse_release,historical data release,2.17,13,6
+CM4AI,Composition,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Collection,june_2026_dataverse_release,data resource,1.17,7,6
+CM4AI,Collection,october_2025_dataverse_release,data resource,0.83,5,6
+CM4AI,Collection,data_release_documentation,documentation,0.0,0,6
+CM4AI,Collection,project_documentation,documentation,0.0,0,6
+CM4AI,Collection,dataset_license,license,0.0,0,6
+CM4AI,Collection,nature_publication,publication,0.17,1,6
+CM4AI,Collection,biorxiv_preprint,preprint,7.33,44,6
+CM4AI,Collection,nih_reporter_project,NIH project page,0.17,1,6
+CM4AI,Collection,june_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Collection,march_2025_dataverse_release,historical data release,0.67,4,6
+CM4AI,Collection,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Preprocessing,june_2026_dataverse_release,data resource,0.67,4,6
+CM4AI,Preprocessing,october_2025_dataverse_release,data resource,0.0,0,6
+CM4AI,Preprocessing,data_release_documentation,documentation,0.0,0,6
+CM4AI,Preprocessing,project_documentation,documentation,0.0,0,6
+CM4AI,Preprocessing,dataset_license,license,0.0,0,6
+CM4AI,Preprocessing,nature_publication,publication,3.17,19,6
+CM4AI,Preprocessing,biorxiv_preprint,preprint,1.17,7,6
+CM4AI,Preprocessing,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Preprocessing,june_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Preprocessing,march_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Preprocessing,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Uses,june_2026_dataverse_release,data resource,1.83,11,6
+CM4AI,Uses,october_2025_dataverse_release,data resource,0.17,1,6
+CM4AI,Uses,data_release_documentation,documentation,0.0,0,6
+CM4AI,Uses,project_documentation,documentation,0.0,0,6
+CM4AI,Uses,dataset_license,license,0.17,1,6
+CM4AI,Uses,nature_publication,publication,0.33,2,6
+CM4AI,Uses,biorxiv_preprint,preprint,1.33,8,6
+CM4AI,Uses,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Uses,june_2025_dataverse_release,historical data release,2.17,13,6
+CM4AI,Uses,march_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Uses,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Distribution,june_2026_dataverse_release,data resource,0.67,4,6
+CM4AI,Distribution,october_2025_dataverse_release,data resource,0.5,3,6
+CM4AI,Distribution,data_release_documentation,documentation,0.17,1,6
+CM4AI,Distribution,project_documentation,documentation,0.0,0,6
+CM4AI,Distribution,dataset_license,license,0.0,0,6
+CM4AI,Distribution,nature_publication,publication,0.0,0,6
+CM4AI,Distribution,biorxiv_preprint,preprint,0.0,0,6
+CM4AI,Distribution,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Distribution,june_2025_dataverse_release,historical data release,0.17,1,6
+CM4AI,Distribution,march_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Distribution,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Maintenance,june_2026_dataverse_release,data resource,0.83,5,6
+CM4AI,Maintenance,october_2025_dataverse_release,data resource,0.5,3,6
+CM4AI,Maintenance,data_release_documentation,documentation,1.67,10,6
+CM4AI,Maintenance,project_documentation,documentation,1.33,8,6
+CM4AI,Maintenance,dataset_license,license,0.0,0,6
+CM4AI,Maintenance,nature_publication,publication,0.33,2,6
+CM4AI,Maintenance,biorxiv_preprint,preprint,0.17,1,6
+CM4AI,Maintenance,nih_reporter_project,NIH project page,0.17,1,6
+CM4AI,Maintenance,june_2025_dataverse_release,historical data release,1.0,6,6
+CM4AI,Maintenance,march_2025_dataverse_release,historical data release,0.33,2,6
+CM4AI,Maintenance,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Ethics,june_2026_dataverse_release,data resource,0.33,2,6
+CM4AI,Ethics,october_2025_dataverse_release,data resource,0.33,2,6
+CM4AI,Ethics,data_release_documentation,documentation,0.0,0,6
+CM4AI,Ethics,project_documentation,documentation,0.0,0,6
+CM4AI,Ethics,dataset_license,license,0.0,0,6
+CM4AI,Ethics,nature_publication,publication,0.0,0,6
+CM4AI,Ethics,biorxiv_preprint,preprint,0.5,3,6
+CM4AI,Ethics,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Ethics,june_2025_dataverse_release,historical data release,0.5,3,6
+CM4AI,Ethics,march_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Ethics,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Human,june_2026_dataverse_release,data resource,0.5,3,6
+CM4AI,Human,october_2025_dataverse_release,data resource,0.17,1,6
+CM4AI,Human,data_release_documentation,documentation,0.0,0,6
+CM4AI,Human,project_documentation,documentation,0.0,0,6
+CM4AI,Human,dataset_license,license,0.0,0,6
+CM4AI,Human,nature_publication,publication,0.0,0,6
+CM4AI,Human,biorxiv_preprint,preprint,0.5,3,6
+CM4AI,Human,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Human,june_2025_dataverse_release,historical data release,0.67,4,6
+CM4AI,Human,march_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Human,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Variables,june_2026_dataverse_release,data resource,0.0,0,6
+CM4AI,Variables,october_2025_dataverse_release,data resource,0.0,0,6
+CM4AI,Variables,data_release_documentation,documentation,0.0,0,6
+CM4AI,Variables,project_documentation,documentation,0.0,0,6
+CM4AI,Variables,dataset_license,license,0.0,0,6
+CM4AI,Variables,nature_publication,publication,0.0,0,6
+CM4AI,Variables,biorxiv_preprint,preprint,0.0,0,6
+CM4AI,Variables,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Variables,june_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Variables,march_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Variables,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,FileCollection,june_2026_dataverse_release,data resource,12.0,72,6
+CM4AI,FileCollection,october_2025_dataverse_release,data resource,0.83,5,6
+CM4AI,FileCollection,data_release_documentation,documentation,0.0,0,6
+CM4AI,FileCollection,project_documentation,documentation,0.0,0,6
+CM4AI,FileCollection,dataset_license,license,0.0,0,6
+CM4AI,FileCollection,nature_publication,publication,0.0,0,6
+CM4AI,FileCollection,biorxiv_preprint,preprint,0.0,0,6
+CM4AI,FileCollection,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,FileCollection,june_2025_dataverse_release,historical data release,0.33,2,6
+CM4AI,FileCollection,march_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,FileCollection,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Dataset (top level),june_2026_dataverse_release,data resource,4.5,27,6
+CM4AI,Dataset (top level),october_2025_dataverse_release,data resource,0.5,3,6
+CM4AI,Dataset (top level),data_release_documentation,documentation,1.0,6,6
+CM4AI,Dataset (top level),project_documentation,documentation,1.0,6,6
+CM4AI,Dataset (top level),dataset_license,license,0.0,0,6
+CM4AI,Dataset (top level),nature_publication,publication,0.33,2,6
+CM4AI,Dataset (top level),biorxiv_preprint,preprint,1.5,9,6
+CM4AI,Dataset (top level),nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Dataset (top level),june_2025_dataverse_release,historical data release,0.0,0,6
+CM4AI,Dataset (top level),march_2025_dataverse_release,historical data release,1.0,6,6
+CM4AI,Dataset (top level),bundle preamble,bundle preamble,0.0,0,6
+VOICE,Metadata (Information),physionet_1_1,data resource,0.17,1,6
+VOICE,Metadata (Information),physionet_3_0_0,data resource,0.0,0,6
+VOICE,Metadata (Information),physionet_3_1_0,data resource,5.67,34,6
+VOICE,Metadata (Information),physionet_pediatric_1_1_0,data resource,0.17,1,6
+VOICE,Metadata (Information),documentation_repository,documentation,0.0,0,6
+VOICE,Metadata (Information),project_documentation,documentation,1.17,7,6
+VOICE,Metadata (Information),data_transfer_use_agreement,DUA,0.0,0,6
+VOICE,Metadata (Information),irb_protocol,IRB,0.33,2,6
+VOICE,Metadata (Information),feasibility_publication,publication,0.17,1,6
+VOICE,Metadata (Information),audiomics_white_paper,white paper,0.0,0,6
+VOICE,Metadata (Information),nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Metadata (Information),bundle preamble,bundle preamble,0.0,0,6
+VOICE,Motivation,physionet_1_1,data resource,0.17,1,6
+VOICE,Motivation,physionet_3_0_0,data resource,0.0,0,6
+VOICE,Motivation,physionet_3_1_0,data resource,1.33,8,6
+VOICE,Motivation,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,Motivation,documentation_repository,documentation,0.0,0,6
+VOICE,Motivation,project_documentation,documentation,8.5,51,6
+VOICE,Motivation,data_transfer_use_agreement,DUA,0.0,0,6
+VOICE,Motivation,irb_protocol,IRB,0.17,1,6
+VOICE,Motivation,feasibility_publication,publication,4.0,24,6
+VOICE,Motivation,audiomics_white_paper,white paper,2.83,17,6
+VOICE,Motivation,nih_reporter_project,NIH project page,3.0,18,6
+VOICE,Motivation,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Composition,physionet_1_1,data resource,1.83,11,6
+VOICE,Composition,physionet_3_0_0,data resource,2.17,13,6
+VOICE,Composition,physionet_3_1_0,data resource,6.83,41,6
+VOICE,Composition,physionet_pediatric_1_1_0,data resource,2.17,13,6
+VOICE,Composition,documentation_repository,documentation,1.5,9,6
+VOICE,Composition,project_documentation,documentation,26.5,159,6
+VOICE,Composition,data_transfer_use_agreement,DUA,0.33,2,6
+VOICE,Composition,irb_protocol,IRB,1.83,11,6
+VOICE,Composition,feasibility_publication,publication,0.33,2,6
+VOICE,Composition,audiomics_white_paper,white paper,0.17,1,6
+VOICE,Composition,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Composition,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Collection,physionet_1_1,data resource,0.33,2,6
+VOICE,Collection,physionet_3_0_0,data resource,0.67,4,6
+VOICE,Collection,physionet_3_1_0,data resource,1.67,10,6
+VOICE,Collection,physionet_pediatric_1_1_0,data resource,0.17,1,6
+VOICE,Collection,documentation_repository,documentation,0.0,0,6
+VOICE,Collection,project_documentation,documentation,7.67,46,6
+VOICE,Collection,data_transfer_use_agreement,DUA,0.5,3,6
+VOICE,Collection,irb_protocol,IRB,0.67,4,6
+VOICE,Collection,feasibility_publication,publication,0.17,1,6
+VOICE,Collection,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Collection,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Collection,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Preprocessing,physionet_1_1,data resource,0.67,4,6
+VOICE,Preprocessing,physionet_3_0_0,data resource,0.33,2,6
+VOICE,Preprocessing,physionet_3_1_0,data resource,5.33,32,6
+VOICE,Preprocessing,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,Preprocessing,documentation_repository,documentation,0.0,0,6
+VOICE,Preprocessing,project_documentation,documentation,5.83,35,6
+VOICE,Preprocessing,data_transfer_use_agreement,DUA,0.0,0,6
+VOICE,Preprocessing,irb_protocol,IRB,0.0,0,6
+VOICE,Preprocessing,feasibility_publication,publication,0.0,0,6
+VOICE,Preprocessing,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Preprocessing,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Preprocessing,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Uses,physionet_1_1,data resource,0.0,0,6
+VOICE,Uses,physionet_3_0_0,data resource,0.0,0,6
+VOICE,Uses,physionet_3_1_0,data resource,0.0,0,6
+VOICE,Uses,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,Uses,documentation_repository,documentation,0.0,0,6
+VOICE,Uses,project_documentation,documentation,6.67,40,6
+VOICE,Uses,data_transfer_use_agreement,DUA,1.33,8,6
+VOICE,Uses,irb_protocol,IRB,0.0,0,6
+VOICE,Uses,feasibility_publication,publication,0.17,1,6
+VOICE,Uses,audiomics_white_paper,white paper,0.17,1,6
+VOICE,Uses,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Uses,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Distribution,physionet_1_1,data resource,0.17,1,6
+VOICE,Distribution,physionet_3_0_0,data resource,0.83,5,6
+VOICE,Distribution,physionet_3_1_0,data resource,1.33,8,6
+VOICE,Distribution,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,Distribution,documentation_repository,documentation,0.0,0,6
+VOICE,Distribution,project_documentation,documentation,1.0,6,6
+VOICE,Distribution,data_transfer_use_agreement,DUA,0.17,1,6
+VOICE,Distribution,irb_protocol,IRB,0.0,0,6
+VOICE,Distribution,feasibility_publication,publication,0.0,0,6
+VOICE,Distribution,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Distribution,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Distribution,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Maintenance,physionet_1_1,data resource,1.83,11,6
+VOICE,Maintenance,physionet_3_0_0,data resource,2.0,12,6
+VOICE,Maintenance,physionet_3_1_0,data resource,2.83,17,6
+VOICE,Maintenance,physionet_pediatric_1_1_0,data resource,0.17,1,6
+VOICE,Maintenance,documentation_repository,documentation,0.0,0,6
+VOICE,Maintenance,project_documentation,documentation,4.83,29,6
+VOICE,Maintenance,data_transfer_use_agreement,DUA,1.0,6,6
+VOICE,Maintenance,irb_protocol,IRB,1.0,6,6
+VOICE,Maintenance,feasibility_publication,publication,0.0,0,6
+VOICE,Maintenance,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Maintenance,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Maintenance,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Ethics,physionet_1_1,data resource,0.0,0,6
+VOICE,Ethics,physionet_3_0_0,data resource,0.0,0,6
+VOICE,Ethics,physionet_3_1_0,data resource,0.67,4,6
+VOICE,Ethics,physionet_pediatric_1_1_0,data resource,0.17,1,6
+VOICE,Ethics,documentation_repository,documentation,0.0,0,6
+VOICE,Ethics,project_documentation,documentation,2.83,17,6
+VOICE,Ethics,data_transfer_use_agreement,DUA,0.0,0,6
+VOICE,Ethics,irb_protocol,IRB,1.17,7,6
+VOICE,Ethics,feasibility_publication,publication,0.0,0,6
+VOICE,Ethics,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Ethics,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Ethics,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Human,physionet_1_1,data resource,0.17,1,6
+VOICE,Human,physionet_3_0_0,data resource,0.0,0,6
+VOICE,Human,physionet_3_1_0,data resource,0.67,4,6
+VOICE,Human,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,Human,documentation_repository,documentation,0.0,0,6
+VOICE,Human,project_documentation,documentation,4.5,27,6
+VOICE,Human,data_transfer_use_agreement,DUA,0.33,2,6
+VOICE,Human,irb_protocol,IRB,6.83,41,6
+VOICE,Human,feasibility_publication,publication,0.17,1,6
+VOICE,Human,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Human,nih_reporter_project,NIH project page,0.17,1,6
+VOICE,Human,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Variables,physionet_1_1,data resource,0.0,0,6
+VOICE,Variables,physionet_3_0_0,data resource,0.33,2,6
+VOICE,Variables,physionet_3_1_0,data resource,1.67,10,6
+VOICE,Variables,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,Variables,documentation_repository,documentation,0.0,0,6
+VOICE,Variables,project_documentation,documentation,0.17,1,6
+VOICE,Variables,data_transfer_use_agreement,DUA,0.0,0,6
+VOICE,Variables,irb_protocol,IRB,0.0,0,6
+VOICE,Variables,feasibility_publication,publication,0.0,0,6
+VOICE,Variables,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Variables,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Variables,bundle preamble,bundle preamble,0.0,0,6
+VOICE,FileCollection,physionet_1_1,data resource,0.0,0,6
+VOICE,FileCollection,physionet_3_0_0,data resource,0.0,0,6
+VOICE,FileCollection,physionet_3_1_0,data resource,5.17,31,6
+VOICE,FileCollection,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,FileCollection,documentation_repository,documentation,0.0,0,6
+VOICE,FileCollection,project_documentation,documentation,0.5,3,6
+VOICE,FileCollection,data_transfer_use_agreement,DUA,0.0,0,6
+VOICE,FileCollection,irb_protocol,IRB,0.0,0,6
+VOICE,FileCollection,feasibility_publication,publication,0.0,0,6
+VOICE,FileCollection,audiomics_white_paper,white paper,0.0,0,6
+VOICE,FileCollection,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,FileCollection,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Dataset (top level),physionet_1_1,data resource,0.17,1,6
+VOICE,Dataset (top level),physionet_3_0_0,data resource,0.0,0,6
+VOICE,Dataset (top level),physionet_3_1_0,data resource,2.67,16,6
+VOICE,Dataset (top level),physionet_pediatric_1_1_0,data resource,0.17,1,6
+VOICE,Dataset (top level),documentation_repository,documentation,0.0,0,6
+VOICE,Dataset (top level),project_documentation,documentation,3.33,20,6
+VOICE,Dataset (top level),data_transfer_use_agreement,DUA,0.0,0,6
+VOICE,Dataset (top level),irb_protocol,IRB,0.83,5,6
+VOICE,Dataset (top level),feasibility_publication,publication,0.33,2,6
+VOICE,Dataset (top level),audiomics_white_paper,white paper,0.67,4,6
+VOICE,Dataset (top level),nih_reporter_project,NIH project page,0.17,1,6
+VOICE,Dataset (top level),bundle preamble,bundle preamble,0.0,0,6

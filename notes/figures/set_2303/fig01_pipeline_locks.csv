@@ -1,0 +1,6 @@
+box_id,hash_binding,documented_in
+inputs,bundle md5 + sha256; manifest md5; prompt sha256; schema digest md5 + schema sha256,src/data_sheets_schema/provenance.py
+outputs,"output sha256 (full, core, report)",src/data_sheets_schema/provenance.py
+phase3_native,registration sha256,notes/matched_cborg_2026-09-13/audit_controls/README.md
+eval_semantic,"instrument, context and input sha256",src/data_sheets_schema/evaluation/evaluate_d4d_llm.py
+eval_field,schema digest + specification sha256,src/data_sheets_schema/evidence_score.py

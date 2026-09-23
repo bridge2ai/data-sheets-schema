@@ -1,0 +1,21 @@
+id,label,model_call,documented_in
+arm_api,API arm: Messages SDK via CBORG; method claudecode_api; runtime 'Claude API (direct)',yes,src/data_sheets_schema/runs.py; notes/claudecode_direct/README.md
+arm_agentic,Agentic arm: Claude Code via local proxy to CBORG; method claudecode_agent; runtime 'Claude Code',yes,src/data_sheets_schema/runs.py; notes/claudecode_direct/README.md
+arm_direct,"Direct arm: Claude Code on the maintainer's subscription, direct to Anthropic; method claudecode_direct; runtime 'Claude Code (direct)'; registered; first canary (CHORUS, 2026-09-23) completed all four phases but was stopped and disqualified (a prescribed provenance command was denied, no provenance record); no accepted run",yes,src/data_sheets_schema/runs.py; notes/claudecode_direct/README.md; notes/claudecode_direct/CHORUS_direct_rep1_2026-09-23_stopped.md
+inputs,"Inputs: source bundle, source manifest, schema, prompt",no,"src/data_sheets_schema/provenance.py (inputs.bundle_md5/bundle_sha256, source_manifest.md5, prompts sha256, schema_facts)"
+phase1,Phase 1: generate the full record and its coverage receipt,yes,.claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'full')
+phase2,Phase 2: derive the core from the validated full record (derive_core.py),no,.claude/commands/d4d-full-core.md; src/data_sheets_schema/derive_core.py; src/data_sheets_schema/api_runner.py (PHASES 'core')
+phase3,Phase 3: audit the full record against the sources and provenance boundary,yes,.claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'audit')
+phase3_native,Native audit continuation: separately registered session; fresh-context worker batches; one integration step; one terminal source/evidence check,yes,notes/matched_cborg_2026-09-13/audit_controls/README.md
+phase4_rederive,Phase 4a: re-derive the core (no model),no,".claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'reconcile_core', repair_core)"
+phase4_checks,"Phase 4b: deterministic checks (pair checker, validators, receipts)",no,.claude/commands/d4d-full-core.md; src/data_sheets_schema/d4d_pair_consistency.py
+phase4_semantic,Phase 4c: semantic review the pair checker asks for; reconcile the full record,yes,.claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'reconcile_full')
+phase4_report,Phase 4d: reconciliation report and repair,yes,".claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'report', repair_full)"
+outputs,"Outputs: full record, core record, coverage receipt, audit, report; provenance record",no,src/data_sheets_schema/provenance.py (outputs.full/core/report sha256)
+crate_in,RO-Crate package: ro-crate-metadata.json,no,data/ro-crate_packages/README.md; crate_manifest.yaml
+crate_map,"d4d rocrate map: static mapping table, no inference (rocrate_map.py)",no,src/data_sheets_schema/rocrate_map.py; src/data_sheets_schema/cli/rocrate.py
+crate_out,rocrate_static_map record and mapping provenance report,no,"src/data_sheets_schema/cli/rocrate.py (emit-map-arm, method rocrate_static_map)"
+eval_presence,Presence evaluator: rubric10 / rubric20 field presence,no,src/data_sheets_schema/evaluation/evaluate_d4d.py; cli/evaluate.py (presence)
+eval_semantic,rubric10 / rubric20 semantic judges,yes,src/data_sheets_schema/evaluation/evaluate_d4d_llm.py; judge_contract.py
+eval_field,Field-level source-support (grounding) and schema-fitness judgements,yes,src/data_sheets_schema/evidence_score.py; fitness_schema.py
+eval_pair,Pair consistency check,no,src/data_sheets_schema/d4d_pair_consistency.py

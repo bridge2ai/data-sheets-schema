@@ -1,0 +1,11 @@
+characteristic,v7,v8
+generation runtime,Claude API (direct),Claude API (direct)
+generation provider,LBL CBORG (proxy to Anthropic),LBL CBORG (proxy to Anthropic)
+generation model,claude-opus-5,claude-opus-5
+prompt,generic-v7 prompt,generic-v8 prompt
+generation temperature,0.0,0.0
+evaluator requested,claude-opus-5[1m],claude-opus-5[1m]
+evaluator identified,claude-opus-5,claude-opus-5
+evaluator effort / temp.,high / unspecified,high / unspecified
+instrument versions,"1.0, 1.2","1.0, 1.2"
+denominators,"50 (rubric10), 88 (rubric20)","50 (rubric10), 88 (rubric20)"
