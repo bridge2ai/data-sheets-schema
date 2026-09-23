@@ -2853,11 +2853,14 @@ cause, and its dated evidence
 each instruction by sha256. On the canary's registered line (`b528bff7…`) the
 runtime refuses the expansion (reason `mode`) and admits the literal path and
 the `--prompt-text-env D4D_LAUNCH_INSTRUCTION` ending; removing `#` or
-parentheses from the specification changes nothing. On the exact line the
-next direct registration carries (the same specification with the key,
-`963ac922…`) the runtime admits it as written, and the recorder's subprocess
-receives `D4D_LAUNCH_INSTRUCTION`. No earlier native attempt reached this
-step, so the line is un-runnable as rendered on both Claude Code arms.
+parentheses from the specification changes nothing. The same registered
+specification re-rendered with the key (`963ac922…`) is admitted as written,
+and the process the line launches (a stub in place of the CLI) sees
+`D4D_LAUNCH_INSTRUCTION`; that the real recorder reads it is a unit test. A
+new registration's line differs in its label and paths, so the probe is run
+on that registration's own line before its launch (#2322). No earlier native
+attempt reached this step, so the line is un-runnable as rendered on both
+Claude Code arms.
 
 The change is opt-in and moves no existing rendering. `RunSpec` gains
 `prompt_text_env`, accepted only on agentic renderers 9 and later and

@@ -23,6 +23,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -214,10 +215,9 @@ def build(args):
             render_version=args.render_version, run_date=args.run_date,
             runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT, prompt_text_env=True)
     except ValueError as error:
-        # The key is refused outside agentic renderers 9 and later (#2313).
-        raise DirectStop(f"the direct arm must render the agentic instruction: {error}") from error
-    if not spec.is_agentic:
-        raise DirectStop("the direct arm must render the agentic instruction")
+        # Includes the key's refusal outside agentic renderers 9 and later
+        # (#2313), which is how a non-agentic rendering is refused (#2324).
+        raise DirectStop(f"the direct arm's rendering specification is refused: {error}") from error
     output = args.output.resolve()
     if output.exists():
         raise DirectStop(f"registration directory already exists: {output}")
@@ -252,6 +252,18 @@ def build(args):
     if any(Path(p).exists() for p in job["output_directories"]):
         raise DirectStop("planned output directory already exists; never overwrite an earlier run")
     instruction = output / "prompts" / f"{identifier}.md"
+    per_job = {"D4D_MANIFEST": case["manifest"], "D4D_PROFILE": case["profile"], "D4D_LAUNCH_INSTRUCTION": str(instruction)}
+    assert set(per_job) == set(PER_JOB_NAMES)
+    # The login is probed in the child's exact environment, in a throwaway
+    # configuration directory beside the registration directory, before
+    # anything of the registration is written: a refused login leaves
+    # nothing behind (#2317).
+    output.parent.mkdir(parents=True, exist_ok=True)
+    probe_config = Path(tempfile.mkdtemp(prefix=f".{output.name}.auth-probe-", dir=output.parent))
+    try:
+        auth = auth_evidence(str(executable), child_environment(probe_config, CHILD_ENVIRONMENT, per_job))
+    finally:
+        shutil.rmtree(probe_config, ignore_errors=True)
     instruction.parent.mkdir(parents=True)
     instruction.write_text(spec.instruction, encoding="utf-8")
     job.update(render_spec=spec.render_spec(), input_identity=spec.input_identity(),
@@ -275,16 +287,6 @@ def build(args):
                  system_prompt, instruction,
                  Path(case["manifest"]), Path(case["bundle"]), Path(case["chunks"]), executable]:
         pins[str(path)] = sha(path)
-    per_job = {"D4D_MANIFEST": case["manifest"], "D4D_PROFILE": case["profile"], "D4D_LAUNCH_INSTRUCTION": str(instruction)}
-    assert set(per_job) == set(PER_JOB_NAMES)
-    # The login is probed in the child's exact environment, in a throwaway
-    # configuration directory that leaves nothing behind.
-    probe_config = output / "auth_probe_config"
-    probe_config.mkdir(mode=0o700)
-    try:
-        auth = auth_evidence(str(executable), child_environment(probe_config, CHILD_ENVIRONMENT, per_job))
-    finally:
-        shutil.rmtree(probe_config, ignore_errors=True)
     registration = {
         "kind": "d4d_direct_arm_registration", "schema_version": 1,
         "registered_at": datetime.now(timezone.utc).isoformat(), "status": "prepared_awaiting_review_ci_and_launch_word",

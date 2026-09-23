@@ -148,8 +148,9 @@ def test_preparation_refuses_a_runtime_that_is_not_on_the_login(tmp_path, monkey
     monkeypatch.setattr(preparation, "auth_evidence", not_logged_in)
     with pytest.raises(preparation.DirectStop, match="claude.ai login"):
         preparation.build(arguments(tmp_path, fake, output=tmp_path / "r"))
-    assert not (tmp_path / "r" / "registration.json").exists()
-    assert not (tmp_path / "r" / "auth_probe_config").exists()
+    # A refused login leaves nothing: no registration directory, no probe directory (#2317).
+    assert not (tmp_path / "r").exists()
+    assert not list(tmp_path.glob(".r.auth-probe-*"))
 
 
 def test_the_preparer_refuses_the_wrong_directory_an_existing_registration_and_existing_output(tmp_path, monkeypatch):
@@ -234,8 +235,9 @@ def test_the_preparer_refuses_an_instruction_that_is_not_the_direct_arms(tmp_pat
     assert not (tmp_path / "r5").exists()
     monkeypatch.setattr(RunSpec, "render_spec", rendered)
     monkeypatch.setattr(RunSpec, "is_agentic", property(lambda self: False))
-    with pytest.raises(preparation.DirectStop, match="must render the agentic instruction"):
+    with pytest.raises(preparation.DirectStop, match="rendering specification is refused: prompt_text_env applies only to agentic"):
         preparation.build(arguments(tmp_path, fake, output=tmp_path / "r3"))
+    assert not (tmp_path / "r3").exists()
 
 
 def test_the_preparer_probes_the_login_in_the_childs_exact_environment(tmp_path, monkeypatch):
@@ -252,8 +254,9 @@ def test_the_preparer_probes_the_login_in_the_childs_exact_environment(tmp_path,
     per_job = registration["per_job_environment"][JOB]
     assert seen["executable"] == str(fake) and seen["probe_dir_existed"]
     assert seen["env"] == {**seen["env"], **preparation.CHILD_ENVIRONMENT, **per_job}
-    assert Path(seen["env"]["CLAUDE_CONFIG_DIR"]) == path.parent / "auth_probe_config"
-    assert not (path.parent / "auth_probe_config").exists()
+    probe_dir = Path(seen["env"]["CLAUDE_CONFIG_DIR"])
+    assert probe_dir.parent == path.parent.parent and probe_dir.name.startswith(f".{path.parent.name}.auth-probe-")
+    assert not probe_dir.exists()
     assert "UNRELATED_PARENT_VARIABLE" not in seen["env"]
     assert set(seen["env"]) <= set(preparation.PARENT_PASSTHROUGH) | set(preparation.CHILD_ENVIRONMENT) | set(per_job) | {"CLAUDE_CONFIG_DIR"}
 

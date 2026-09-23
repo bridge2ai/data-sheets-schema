@@ -24,7 +24,7 @@ made it (reason `mode`), and a run passes only if some case was admitted.
 Observed on 2026-09-23 (`recorder_permission_probe_2026-09-23.json`): on the
 first direct canary's registered line only the expansion is refused; the
 same specification re-rendered with `prompt_text_env` is admitted as written
-and the child sees the variable; the fixture's line, whose manifest path
+and the stub it launches sees the variable; the fixture's line, whose manifest path
 appears twice in its specification, is refused in every ending until the
 specification's apostrophes are removed, while one apostrophe in a small
 specification is admitted.
