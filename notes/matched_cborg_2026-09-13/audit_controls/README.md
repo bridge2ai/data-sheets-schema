@@ -70,8 +70,9 @@ own retry continues the same session. The ledger row carries the stall evidence,
 and the terminal result lists the debited requests under `stall_debited_requests`.
 
 A stall counts only when the exchange failed after the request was sent: a provider
-5xx, a read or write timeout or error, or a malformed or dropped response. A provider
-status below 500 is never a stall, whatever fails afterwards. A connection that was
+5xx, a read or write timeout or error, or a malformed or dropped response. Without
+complete-response buffering, a provider status below 500 is never a stall, whatever
+fails afterwards. A connection that was
 never made sent nothing, so it stops the attempt as before instead of spending the
 allowance during an outage. A failure after response bytes were relayed, a closed
 admission and every budget refusal also stop the attempt as before. So does the stall
@@ -86,6 +87,42 @@ is 455 seconds above the read bound. The policy is audit-only: generation, Phase
 and the evaluations refuse it. `native_controls/probe_native_stall.py` drives the
 real pinned executable against a scripted upstream that stalls, with no provider
 contact, and shows the client retrying to completion.
+
+A new audit can additionally select `--native-response-buffer PATH` (#2304).
+The strict JSON object is `{"kind":"complete_response_v1","max_bytes":16777216,
+"total_seconds":1200}` for a 16 MiB, 20-minute selection. This has no default and
+requires the registered stall policy, an explicit SDK timeout with margin, and
+the native fetch idle timer disabled. The byte limit must be a positive integer
+at most 64 MiB; the absolute exchange limit must be positive and no greater than
+the registered upstream read bound. Both limits are pinned in the registration
+and offline plan. Generation, Phase 4 and evaluation reject this selector.
+
+Under this option, the proxy withholds HTTP 200 headers and all response bytes
+from the native client until the upstream stream ends cleanly, its terminal
+usage is verified and its ledger row settles. It then delivers the original SSE
+bytes once. No partial tool call is exposed to the client. An eligible HTTP 200
+transport timeout before delivery can consume the same registered stall-debit
+allowance and return the fixed retryable response. The incomplete capture stays
+private evidence; it is never replayed or used as the next response. Its provider
+fee remains unknown and its full reservation remains accounted.
+
+The absolute limit covers the upstream exchange, including worker startup,
+request transmission, headers and the entire body. It also limits a stream that
+keeps sending keepalives. It does not measure earlier admission verification or
+time waiting for the proxy's serial request lock; SDK margin is a planning bound,
+not proof of an end-to-end deadline. The worker is killed and reaped before a
+retry. The size limit, invalid stream protocol, provider 4xx, local failures,
+accounting refusal, and any failure once client delivery starts remain terminal.
+The shared budget, per-attempt and worker caps, and debit limit still apply; the
+native client's retry limit can also end an attempt before the debit allowance
+is used. Omission preserves the original immediate streaming behavior.
+
+`native_controls/probe_native_buffered_stall.py` checks the pinned native runtime
+against a synthetic HTTP 200 response that ends during a tool turn. It verifies
+that the partial turn is withheld, the retry completes, each tool action occurs
+once and all synthetic ledger rows settle. It makes no provider requests. The
+separate bounded-stream tests exercise the absolute deadline using a local
+scripted server and the real killable I/O worker.
 
 Under this policy, counting and paid streaming use separate killable I/O workers
 (#2159). Counting has one total deadline, including process startup, DNS, TLS and

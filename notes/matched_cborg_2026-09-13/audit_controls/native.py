@@ -26,7 +26,7 @@ from native_control import CONTRACT, check_control_history, load_native_events
 from native_file_policy import FileAccess
 from native_proxy import NativeProxy
 from run_native_canary import execute_child
-from .registration import (native_api_force_idle_timeout, native_api_timeout, native_stall_policy,
+from .registration import (native_api_force_idle_timeout, native_api_timeout, native_stall_policy, native_response_buffer,
                            native_upstream_read_timeout, sha, strict_json)
 from .transport import provider_clients
 
@@ -640,6 +640,9 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     stall_policy = native_stall_policy(manifest)
     if stall_policy is not None and protocol is not None:
         raise BudgetStop('stall policy is restricted to the native audit controller')
+    response_buffer = native_response_buffer(manifest)
+    if response_buffer is not None and protocol is not None:
+        raise BudgetStop('response buffering is restricted to the native audit controller')
     selected = protocol or sys.modules[__name__]
     policy = selected.build_policy(manifest, context.registration_path)
     executable = verify_runtime(manifest)
@@ -676,7 +679,8 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
             prices=manifest['budget']['prices_per_token'], verify=admission, provider_key=key or 'offline-test-key',
             base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest), upstream=upstream,
             **({'upstream_read_timeout_seconds': upstream_timeout} if upstream_timeout is not None else {}),
-            **({'stall_policy': stall_policy} if stall_policy is not None else {}))
+            **({'stall_policy': stall_policy} if stall_policy is not None else {}),
+            **({'response_buffer': response_buffer} if response_buffer is not None else {}))
     except BaseException:
         # Before running() owns cleanup, close only resources created here.
         if owned_client:

@@ -9,7 +9,8 @@ import sys
 from data_sheets_schema import source_review
 from .registration import (BudgetStop, canonical_path, inspect_parent,
     native_api_force_idle_timeout as validate_native_idle_timeout, native_api_timeout,
-    native_stall_policy as validate_stall_policy, native_upstream_read_timeout, parent_path,
+    native_stall_policy as validate_stall_policy, native_response_buffer as validate_response_buffer,
+    native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .registration import (TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND,
                            CLAIM_CLARIFICATION_TRANSITION_KIND, DRAFT_GRAMMAR_TRANSITION_KIND,
@@ -79,7 +80,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
             schema_semantic_context=False, audit_batches=None, audit_batch_format=False, audit_batch_navigation=False,
-            audit_worker_navigation=False, budget_amendment=None):
+            audit_worker_navigation=False, budget_amendment=None, native_response_buffer=None):
     amendment = None
     if budget_amendment is not None:
         from budget_amendment import selection
@@ -150,6 +151,14 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if native_stall_policy is not None:
         upstream_selection['native_stall_policy'] = native_stall_policy
         validate_stall_policy({'kind': 'd4d_native_audit_continuation', **upstream_selection,
+            'native_runtime': {
+                **({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
+                **({'api_force_idle_timeout': native_api_force_idle_timeout}
+                   if native_api_force_idle_timeout is not None else {})},
+            'job': {'deadline_seconds': deadline_seconds}})
+    if native_response_buffer is not None:
+        upstream_selection['native_response_buffer'] = native_response_buffer
+        validate_response_buffer({'kind': 'd4d_native_audit_continuation', **upstream_selection,
             'native_runtime': {
                 **({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
                 **({'api_force_idle_timeout': native_api_force_idle_timeout}
@@ -346,6 +355,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         # Only a selecting condition gains this key; a legacy plan is unchanged (#2158).
         **({'native_stall_policy': {k: v for k, v in manifest['native_stall_policy'].items() if k != 'authorization'}}
            if 'native_stall_policy' in manifest else {}),
+        **({'native_response_buffer': manifest['native_response_buffer']}
+           if 'native_response_buffer' in manifest else {}),
         'provider_base_url': manifest['provider_base_url'],
         **({'audit_contract_context': manifest['audit_contract_context']}
            if 'audit_contract_context' in manifest else {}),
@@ -358,6 +369,19 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         'provider_transport': manifest.get('provider_transport', 'inherited_public_default'),
         'provider_calls': 0, 'scientific_acceptance': False, **batch_plan_fields})
     return path
+
+
+def read_response_buffer(path):
+    """A named response-buffer file must select an object, never implicit legacy behavior."""
+    try:
+        value = read_json(path)
+    except BudgetStop:
+        raise
+    except (OSError, ValueError) as exc:
+        raise BudgetStop(f'native response buffer file is unreadable: {type(exc).__name__}') from None
+    if not isinstance(value, dict):
+        raise BudgetStop('native response buffer file must hold one JSON object')
+    return value
 
 
 def read_stall_policy(path):
@@ -420,6 +444,8 @@ def main():
     parser.add_argument('--native-stall-policy',
         help='path to a JSON audit-only stall policy (bounded_in_attempt_v1): token-count tries, the maximum '
              'number of stalled requests counted at their whole reservation, and the quoted maintainer authorization')
+    parser.add_argument('--native-response-buffer',
+        help='path to strict audit-only complete_response_v1 JSON: max_bytes and total_seconds before delivery')
     parser.add_argument('--continuation-checkpoint')
     parser.add_argument('--continuation-source-registration')
     parser.add_argument('--continuation-reconciliation-receipt')
@@ -432,6 +458,8 @@ def main():
         args['native_api_force_idle_timeout'] = False
     if args['native_stall_policy'] is not None:
         args['native_stall_policy'] = read_stall_policy(args['native_stall_policy'])
+    if args['native_response_buffer'] is not None:
+        args['native_response_buffer'] = read_response_buffer(args['native_response_buffer'])
     if args['audit_batches'] is not None:
         from .batch_registration import read_selection
         args['audit_batches'] = read_selection(args['audit_batches'])

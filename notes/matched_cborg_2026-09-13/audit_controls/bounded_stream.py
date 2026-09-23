@@ -166,8 +166,9 @@ class _Worker:
 
 
 class _Response:
-    def __init__(self, worker, status, headers, read_timeout):
+    def __init__(self, worker, status, headers, read_timeout, total_deadline=None):
         self._worker, self._read_timeout = worker, read_timeout
+        self._total_deadline = total_deadline
         self.status_code = status
         self.headers = httpx.Headers([(key.encode("ascii"), value.encode("latin-1")) for key, value in headers])
         self._iterated = False
@@ -177,7 +178,14 @@ class _Response:
             raise httpx.StreamConsumed()
         self._iterated = True
         while True:
-            kind, payload = self._worker.receive(time.monotonic() + self._read_timeout)
+            deadline = time.monotonic() + self._read_timeout
+            if self._total_deadline is not None:
+                deadline = min(deadline, self._total_deadline)
+                if time.monotonic() >= deadline:
+                    raise self._worker.timeout()
+            kind, payload = self._worker.receive(deadline)
+            if self._total_deadline is not None and time.monotonic() >= self._total_deadline:
+                raise self._worker.timeout()
             if kind == b"D":
                 if not payload or len(payload) > CHUNK_BYTES:
                     raise BoundWorkerProtocolError("invalid bounded stream chunk", request=self._worker.request)
@@ -191,10 +199,12 @@ class _Response:
 class BoundedStreamClient:
     """Synchronous NativeProxy facade; GETs use only the supplied metadata client."""
     def __init__(self, delegate=None, *, ca_bundle=None, read_timeout_seconds=1800,
-                 connect_timeout_seconds=20):
+                 connect_timeout_seconds=20, total_timeout_seconds=None):
         self.delegate = delegate
         self.read_timeout = _positive(read_timeout_seconds)
         self.connect_timeout = _positive(connect_timeout_seconds)
+        self.total_timeout = (_positive(total_timeout_seconds)
+                              if total_timeout_seconds is not None else None)
         self.ca_data = Path(ca_bundle).read_text(encoding="ascii") if ca_bundle is not None else None
         self._lock = threading.Lock()
         self._closed = False
@@ -216,6 +226,11 @@ class BoundedStreamClient:
     def stream(self, method, url, *, content, headers, timeout=None):
         started = time.monotonic()
         deadline = started + self.read_timeout + self.connect_timeout
+        # Opt-in whole exchange bound (#2304): progress/pings cannot extend it.
+        # Counting and controller admission happen before stream(), outside it.
+        total_deadline = (started + self.total_timeout if self.total_timeout is not None else None)
+        if total_deadline is not None:
+            deadline = min(deadline, total_deadline)
         if not isinstance(content, bytes) or len(content) > MAX_REQUEST_BYTES:
             raise ValueError("bounded transport requires bounded exact request bytes")
         if timeout is not None:
@@ -250,7 +265,8 @@ class BoundedStreamClient:
                             or any(not isinstance(row, list) or len(row) != 2
                                    or any(not isinstance(s, str) for s in row) for row in value["headers"])):
                         raise ValueError()
-                    response = _Response(worker, value["status"], value["headers"], self.read_timeout)
+                    response = _Response(worker, value["status"], value["headers"], self.read_timeout,
+                                         total_deadline)
                 except (ValueError, TypeError, KeyError):
                     raise BoundWorkerProtocolError("invalid bounded transport headers", request=request) from None
                 worker.headers_received = True

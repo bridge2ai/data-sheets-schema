@@ -18,7 +18,7 @@ from . import batch_output as output
 from . import native
 from .batch_history import BatchHistory
 from .registration import (strict_json, sha, native_api_timeout, native_api_force_idle_timeout,
-                           native_stall_policy, native_upstream_read_timeout, audit_batch_navigation)
+                           native_stall_policy, native_upstream_read_timeout, native_response_buffer, audit_batch_navigation)
 from .output_parts import canonical, describe, read_regular, same_json
 from .transport import provider_clients
 
@@ -314,6 +314,7 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
             **({'upstream_read_timeout_seconds': native_upstream_read_timeout(manifest)}
                if native_upstream_read_timeout(manifest) is not None else {}),
             **({'stall_policy': native_stall_policy(manifest)} if native_stall_policy(manifest) is not None else {}),
+            **({'response_buffer': native_response_buffer(manifest)} if native_response_buffer(manifest) is not None else {}),
             **({'stage_cap': str(stage_cap)} if row['kind'] == 'worker' else {}))
         state['proxy'] = proxy
         environment = {k: v for k, v in os.environ.items() if k in {'PATH', 'HOME', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM'}}
