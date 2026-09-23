@@ -2802,10 +2802,11 @@ the header substitution table names `Claude Code (direct)` and the
 subscription provider beside the existing values, so a model cannot
 normalise the direct runtime string to the listed `Claude Code` (#2220);
 `d4d-agent.md`, a standalone method, defines its `{RUNTIME}` and
-`{PROVIDER}` tokens itself (#2227), and `d4d-full-core.md` states the registered-
+`{PROVIDER}` tokens itself (#2227; naming the header where there is one and the
+runtime actually run in otherwise, #2261), and `d4d-full-core.md` states the registered-
 specification rule for `--reasoning-effort` beside the flag's explanation:
 `.claude/commands/d4d-full-core.md` `a054b282…` → `13410f06…` and
-`.claude/commands/d4d-agent.md` `27e8ea15…` → `d0ebdf10…`. What moves
+`.claude/commands/d4d-agent.md` `27e8ea15…` → `acfbda81…`. What moves
 with them is a record's `playbooks.files[].sha256` and a registration's
 `pinned_files`, not the rendered instruction: the agentic toolchain records
 playbook paths, and the same specification renders byte-identical

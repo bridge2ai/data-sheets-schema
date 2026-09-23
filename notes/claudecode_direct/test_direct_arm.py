@@ -62,11 +62,10 @@ def test_the_fixture_cohort_is_one_production_does_not_produce_by_default(tmp_pa
     assert fixture.cohort.startswith("test_fixture_") and preparation.DEFAULT_COHORT == "generalized_direct_v1"
     assert fixture.cohort != arguments(tmp_path, tmp_path / "claude").cohort
     assert "-test-fixture-" not in preparation.DEFAULT_COHORT.replace("_", "-")
-    # The preparer's own parser default is the production cohort, not the fixture's.
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--cohort", default=preparation.DEFAULT_COHORT)
-    assert parser.parse_args([]).cohort != fixture.cohort
+    # The preparer's own parser default is the production cohort, not the fixture's (#2258).
+    parsed = preparation.parser().parse_args(["--output", "somewhere"])
+    assert parsed.cohort == preparation.DEFAULT_COHORT != fixture.cohort
+    assert (parsed.context_window, parsed.max_output_tokens) == (200000, 64000)
 
 
 def fake_runtime(tmp_path, version="2.1.272 (Claude Code)"):

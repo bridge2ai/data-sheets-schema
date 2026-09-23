@@ -203,10 +203,25 @@ class HeaderBasisForTheDirectRuntime(unittest.TestCase):
         self.assertEqual(data["model"]["reasoning_effort"], "max")            # the header stays recorded
         notes = [n for n in (data.get("notes") or []) if "Reasoning effort mismatch" in n]
         self.assertEqual(len(notes), 1)
-        self.assertIn("header says 'max'", notes[0]) and self.assertIn("launcher passed 'high'", notes[0])
+        self.assertIn("header says 'max'", notes[0])
+        self.assertIn("says 'high'", notes[0])                                   # two statements (#2256)
+        self.assertIn("not observed", notes[0])
         gap = [u for u in data["unverified"] if u["field"] == "model.reasoning_effort"]
         self.assertEqual(len(gap), 1)
         self.assertIn("disagree", gap[0]["reason"])
+        # The block names the standing the header has and never double-reports (#2257).
+        with mock.patch.dict(os.environ, {"CLAUDE_EFFORT": "max"}):
+            corroborated = self._record(reasoning_effort="high")
+        self.assertTrue(corroborated["model"]["reasoning_effort_basis"].startswith("observed"))
+        [note] = [n for n in (corroborated.get("notes") or []) if "Reasoning effort mismatch" in n]
+        self.assertIn("corroborated by CLAUDE_EFFORT", note)
+        [gap] = [u for u in corroborated["unverified"] if u["field"] == "model.reasoning_effort"]
+        self.assertIn("corroborated", gap["reason"]) ; self.assertNotIn("neither observed", gap["reason"])
+        with mock.patch.dict(os.environ, {"CLAUDE_EFFORT": "low"}):
+            twice = self._record(reasoning_effort="high")
+        [gap] = [u for u in twice["unverified"] if u["field"] == "model.reasoning_effort"]
+        self.assertIn("CLAUDE_EFFORT reads 'low'", gap["reason"])
+        self.assertIn("Also, the header says 'max'", gap["reason"])
         # An agreeing flag adds nothing.
         with mock.patch.dict(os.environ, {}, clear=False):
             os.environ.pop("CLAUDE_EFFORT", None)
@@ -330,6 +345,36 @@ def test_the_gate_refuses_an_effort_that_disagrees_with_the_registered_specifica
     assert result.exit_code != 0
     assert "--reasoning-effort conflicts with the registered specification" in result.output   # the flag's own spelling
     assert not direct.provenance_path.exists()
+
+
+def test_a_specification_asserting_an_unknown_effort_is_refused(direct_native):
+    """#2255: the specification route bypassed the flag's closed choice."""
+    import json
+    direct, command, cli = direct_native
+    at = command.index("--render-spec-json") + 1
+    spec = json.loads(command[at])
+    for bogus in ("bogus", "Max", ""):
+        forged = command[:at] + [json.dumps({**spec, "reasoning_effort": bogus})] + command[at + 1:]
+        result = CliRunner().invoke(cli, forged)
+        assert result.exit_code != 0, bogus
+        assert ("invalid recorded reasoning effort" in result.output) or (bogus == "" and "does not reproduce" in result.output), (bogus, result.output)
+        assert not direct.provenance_path.exists()
+    from data_sheets_schema.api_runner import RunSpec
+    with pytest.raises(ValueError, match="invalid recorded reasoning effort"):
+        RunSpec.from_render_spec({**spec, "reasoning_effort": "maximum"}, project=direct.project, method=direct.method,
+                                 label=direct.label)
+
+
+def test_the_renderer_3_receipt_section_renders_for_both_claude_code_runtimes(external):  # noqa: F811
+    """#2259: the one exact 'Claude Code' comparison left outside AGENTIC_RUNTIMES."""
+    from data_sheets_schema import api_runner as api
+    marker = "<!-- D4D prompt renderer version 3 -->"
+    tails = {}
+    for runtime in ("Claude Code", DIRECT, "Codex CLI"):
+        body = api.resolve_prompt(replace(external, runtime=runtime, render_version=3, chunk_manifest=external.chunk_manifest))
+        tails[runtime] = body.split(marker, 1)[1]
+    assert tails["Claude Code"] == tails[DIRECT] and tails[DIRECT].strip()
+    assert tails["Codex CLI"] != tails[DIRECT]
 
 
 def test_a_specification_that_asserts_no_effort_binds_none(native):  # noqa: F811

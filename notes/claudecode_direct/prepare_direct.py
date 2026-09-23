@@ -267,7 +267,8 @@ def build(args):
     return path
 
 
-def main():
+def parser():
+    """The command line, as a factory so a test can parse through the real one (#2258)."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="a fresh registration directory")
     parser.add_argument("--project", default="CHORUS")
@@ -282,7 +283,11 @@ def main():
     parser.add_argument("--context-window", type=int, default=EXPECTED_LIMITS["contextWindow"],
                         help="the context window the runtime is expected to report for the registered model (#2246)")
     parser.add_argument("--max-output-tokens", type=int, default=EXPECTED_LIMITS["maxOutputTokens"])
-    build(parser.parse_args())
+    return parser
+
+
+def main():
+    build(parser().parse_args())
 
 
 if __name__ == "__main__":

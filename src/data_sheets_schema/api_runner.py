@@ -446,8 +446,12 @@ BACKOFF_BASE_SECONDS = 2
 
 #: The runtime strings that follow the shared agentic playbook: the two
 #: Claude Code arms (#2202) and Codex. One set, read by `RunSpec.is_agentic`
-#: and by `backfill-spec`, so a runtime admitted here is admitted there (#2226).
+#: and by `backfill-spec`'s candidate loop, so a runtime admitted here is
+#: admitted there (#2226). The renderer-3 receipt-manifest section is the
+#: one site that reads the narrower `CLAUDE_CODE_RUNTIMES` (#2259): it was
+#: never rendered for Codex, and stays that way.
 AGENTIC_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Codex CLI"})
+CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)"})
 
 @dataclass
 class RunSpec:
@@ -635,6 +639,10 @@ class RunSpec:
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
                    provider=recorded.get("provider"),
                    reasoning_effort=recorded.get("reasoning_effort"), _replay_only=True)
+        if spec.reasoning_effort is not None and spec.reasoning_effort not in provenance._EFFORT_LADDER:
+            # The recorder's flag is a closed choice; the specification route
+            # must not admit what the flag refuses (#2255).
+            raise ValueError(f"invalid recorded reasoning effort: {spec.reasoning_effort!r}")
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
@@ -1080,7 +1088,7 @@ def resolve_prompt(spec: RunSpec) -> str:
         # Keep replay/backfill unambiguous even when no explicit chunk
         # selection needs the new pre-provenance receipt command.
         body += f"\n\n<!-- D4D prompt renderer version {spec.render_version} -->\n"
-    if spec.render_version == 3 and spec.runtime == "Claude Code" and spec.chunk_manifest is not None:
+    if spec.render_version == 3 and spec.runtime in CLAUDE_CODE_RUNTIMES and spec.chunk_manifest is not None:
         import shlex
         args = ["poetry", "run", "d4d"]
         if spec.manifest is not None:

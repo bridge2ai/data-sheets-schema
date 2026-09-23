@@ -494,7 +494,8 @@ def canonical_runs(concat_dir: Path | None = None,
 
     A canonical mark is scoped to a runtime (#690, v8 plan D6): the API
     and agentic arms each keep one canonical per project, side by side.
-    `runtime` (`api` / `agentic`) picks one; without it a project marked
+    `runtime` (one of `RUNTIME_CHOICES`: `api`, `agentic`, `direct`) picks
+    one; without it a project marked
     under both runtimes is ambiguous and refused, naming both, exactly as a
     project marked under two configurations is.
 
