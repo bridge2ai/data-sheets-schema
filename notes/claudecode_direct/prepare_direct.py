@@ -23,6 +23,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -206,14 +207,17 @@ def build(args):
     job = {**case, "id": identifier, "execution_arm": EXECUTION_ARM, "runtime": RUNTIME, "method": METHOD,
            "replicate": 1, "canary": True, "run_date": args.run_date, "render_version": args.render_version,
            "label": f"{args.label_date}_{MODEL}-{EXECUTION_ARM}-{args.cohort.replace('_', '-')}-{project.lower()}_rep1"}
-    spec = generation.api_runner.RunSpec(
-        project=project, arm="baseline", method=METHOD, bundle=Path(case["bundle"]), label=job["label"],
-        condition=args.condition, manifest=Path(case["manifest"]), chunk_manifest=Path(case["chunks"]),
-        profile=case["profile"], profile_basis="stated by the registered caller",
-        render_version=args.render_version, run_date=args.run_date,
-        runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT)
-    if not spec.is_agentic:
-        raise DirectStop("the direct arm must render the agentic instruction")
+    try:
+        spec = generation.api_runner.RunSpec(
+            project=project, arm="baseline", method=METHOD, bundle=Path(case["bundle"]), label=job["label"],
+            condition=args.condition, manifest=Path(case["manifest"]), chunk_manifest=Path(case["chunks"]),
+            profile=case["profile"], profile_basis="stated by the registered caller",
+            render_version=args.render_version, run_date=args.run_date,
+            runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT, prompt_text_env=True)
+    except ValueError as error:
+        # Includes the key's refusal outside agentic renderers 9 and later
+        # (#2313), which is how a non-agentic rendering is refused (#2324).
+        raise DirectStop(f"the direct arm's rendering specification is refused: {error}") from error
     output = args.output.resolve()
     if output.exists():
         raise DirectStop(f"registration directory already exists: {output}")
@@ -225,22 +229,47 @@ def build(args):
                     if limits == EXPECTED_LIMITS else
                     "given on the preparer's command line (--context-window / --max-output-tokens); not the native "
                     "registration's observation and not observed on this transport until the first run (#2267)")
+    # Every check on the rendering runs before anything is written (#2317).
+    if "--reasoning-effort " + EFFORT not in spec.instruction:
+        raise DirectStop("the rendered recorder line does not assert the registered effort")
+    if (f"# Provider: {PROVIDER}" not in spec.instruction or f"# Agent runtime: {RUNTIME}" not in spec.instruction
+            or f"# Model: {MODEL}" not in spec.instruction):
+        raise DirectStop("the rendered header does not state the direct arm's runtime, provider and model")
+    recorder = [line for line in spec.instruction.splitlines() if " -m data_sheets_schema.cli provenance record" in line]
+    # The runtime refuses a prescribed line carrying a shell expansion under
+    # dontAsk (#2282). It also refused, in every ending, a line whose
+    # specification carried a manifest path with an apostrophe (twice in the
+    # specification, quoted by the shell as '"'"'), while admitting one
+    # apostrophe in a small specification; the trigger is uncharacterised,
+    # so any apostrophe is refused here, conservatively (#2308). Either would
+    # disqualify the run at its last step.
+    if not recorder or any("${" in line or "--prompt-text-env D4D_LAUNCH_INSTRUCTION" not in line for line in recorder):
+        raise DirectStop("the rendered recorder line must read the launch instruction by --prompt-text-env, with no shell expansion")
+    if "'" in json.dumps(spec.render_spec()):
+        raise DirectStop("the render specification carries an apostrophe, which the runtime refuses in a prescribed line")
     job["output_directory"] = str(spec.metadata_dir)
     job["output_directories"] = sorted({str(spec.full_path.parent), str(spec.core_path.parent)})
     if any(Path(p).exists() for p in job["output_directories"]):
         raise DirectStop("planned output directory already exists; never overwrite an earlier run")
     instruction = output / "prompts" / f"{identifier}.md"
+    per_job = {"D4D_MANIFEST": case["manifest"], "D4D_PROFILE": case["profile"], "D4D_LAUNCH_INSTRUCTION": str(instruction)}
+    assert set(per_job) == set(PER_JOB_NAMES)
+    # The login is probed in the child's exact environment, in a throwaway
+    # configuration directory beside the registration directory, before
+    # anything of the registration is written: a refused login leaves
+    # nothing behind (#2317).
+    output.parent.mkdir(parents=True, exist_ok=True)
+    probe_config = Path(tempfile.mkdtemp(prefix=f".{output.name}.auth-probe-", dir=output.parent))
+    try:
+        auth = auth_evidence(str(executable), child_environment(probe_config, CHILD_ENVIRONMENT, per_job))
+    finally:
+        shutil.rmtree(probe_config, ignore_errors=True)
     instruction.parent.mkdir(parents=True)
     instruction.write_text(spec.instruction, encoding="utf-8")
     job.update(render_spec=spec.render_spec(), input_identity=spec.input_identity(),
                instruction=str(instruction), instruction_sha256=sha(instruction),
                outputs={"full": str(spec.full_path), "core": str(spec.core_path),
                         "provenance": str(spec.provenance_path), "report": str(spec.report_path)})
-    if "--reasoning-effort " + EFFORT not in spec.instruction:
-        raise DirectStop("the rendered recorder line does not assert the registered effort")
-    if (f"# Provider: {PROVIDER}" not in spec.instruction or f"# Agent runtime: {RUNTIME}" not in spec.instruction
-            or f"# Model: {MODEL}" not in spec.instruction):
-        raise DirectStop("the rendered header does not state the direct arm's runtime, provider and model")
     python = sys.executable
     policy = build_command_policy(job, python, str(repository))
     system_prompt = HERE / "system.md"
@@ -258,16 +287,6 @@ def build(args):
                  system_prompt, instruction,
                  Path(case["manifest"]), Path(case["bundle"]), Path(case["chunks"]), executable]:
         pins[str(path)] = sha(path)
-    per_job = {"D4D_MANIFEST": case["manifest"], "D4D_PROFILE": case["profile"], "D4D_LAUNCH_INSTRUCTION": str(instruction)}
-    assert set(per_job) == set(PER_JOB_NAMES)
-    # The login is probed in the child's exact environment, in a throwaway
-    # configuration directory that leaves nothing behind.
-    probe_config = output / "auth_probe_config"
-    probe_config.mkdir(mode=0o700)
-    try:
-        auth = auth_evidence(str(executable), child_environment(probe_config, CHILD_ENVIRONMENT, per_job))
-    finally:
-        shutil.rmtree(probe_config, ignore_errors=True)
     registration = {
         "kind": "d4d_direct_arm_registration", "schema_version": 1,
         "registered_at": datetime.now(timezone.utc).isoformat(), "status": "prepared_awaiting_review_ci_and_launch_word",

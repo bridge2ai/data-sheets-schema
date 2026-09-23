@@ -2837,3 +2837,79 @@ independent review of the registration, CI on the exact commit and the
 maintainer's launch word for that registration's hash; Kids First follows
 only after an accepted CHORUS pair. An audit produced by this arm over the
 other arm's frozen draft would be a mixed condition and is not planned.
+
+### The recorder reads the launch instruction by variable name (#2282; 2026-09-23)
+
+The first direct-arm canary (`CHORUS_direct_rep1`, 2026-09-23) completed all
+four phases and was then disqualified at its last step: the runtime refused
+the prescribed `provenance record` line under `--permission-mode dontAsk`,
+although the registered allow rule covers it and the controller did not deny
+it. Every agentic instruction at renderers 9 to 23 ends that line with
+`--prompt-text "${D4D_LAUNCH_INSTRUCTION:?...}"`. An offline probe
+(`notes/claudecode_direct/probe_recorder_permission.py`: the pinned 2.1.272
+binary against a scripted local provider, no key, no model call) observed the
+cause, and its dated evidence
+(`notes/claudecode_direct/recorder_permission_probe_2026-09-23.json`) names
+each instruction by sha256. On the canary's registered line (`b528bff7…`) the
+runtime refuses the expansion (reason `mode`) and admits the literal path and
+the `--prompt-text-env D4D_LAUNCH_INSTRUCTION` ending; removing `#` or
+parentheses from the specification changes nothing. The same registered
+specification re-rendered with the key (`963ac922…`) is admitted as written,
+and the process the line launches (a stub in place of the CLI) sees
+`D4D_LAUNCH_INSTRUCTION`; that the real recorder reads it is a unit test. A
+new registration's line differs in its label and paths, so the probe is run
+on that registration's own line before its launch (#2322). No earlier native
+attempt reached this step, so the line is un-runnable as rendered on both
+Claude Code arms.
+
+The change is opt-in and moves no existing rendering. `RunSpec` gains
+`prompt_text_env`, accepted only on agentic renderers 9 and later and
+recorded only as `true` (#2313, #2315); unset, the line and the
+specification render exactly as before, which the review checked on 184
+renders (four runtimes, renderers 1 to 23, two efforts). Set, the
+specification carries `"prompt_text_env": true`, the recorder line ends
+`--prompt-text-env D4D_LAUNCH_INSTRUCTION`, and one sentence after the
+launcher note tells the model to run the line as written. `d4d provenance
+record --prompt-text-env D4D_LAUNCH_INSTRUCTION` reads the path from that
+one variable and never prints its value (#2312); it refuses an unset or
+empty variable, a missing file and `--prompt-text` beside it, then passes
+the same render-spec gate: the file must reproduce the registered
+instruction. The replay route (`from_render_spec`, `verify_request`, review
+packs) restores the key, so a record made this way reads `match`. The
+renderer version is unchanged: a new one would carry the audit renderers 18
+to 23 into generation.
+
+What this is for each arm. **Direct arm:** its preparer sets the key,
+refuses a recorder line with an expansion and a specification with an
+apostrophe before writing anything (#2317), and its launcher refuses a job
+without the key; its next registration differs from the first canary's in
+the recorder line's ending, the specification's one key and the one
+sentence, and in nothing the model is asked to extract or judge.
+**Agentic (CBORG) arm:** unchanged, and it cannot adopt the key by a
+registration choice alone: `prepare_registration.spec_for` never passes the
+key and its launcher re-derives the specification through that function and
+refuses a mismatch, so adopting it is a change to a pinned native-control
+file followed by a new registration (#2306, #2307). Until then a native run
+that reaches the provenance step is expected to be refused the same way
+(expected, not observed on that arm). **API arm:** its rendering is
+unaffected, since the line is agentic-only; `api_runner.py` itself changes,
+so an audit registered before this merge is finalized from its own
+checkout, whose file identity the finalization gate compares, as with every
+change to that file (#2320). **Evaluation:** no instrument reads the
+recorder line; evaluations and the review agent read records and the rules
+the review pack extracts, which are the same with and without the key.
+Records made with and without the key are comparable on every generated
+field and differ in the instruction's sha256, which is recorded and not
+compared by `compare-arms`.
+
+Two limits stay filed. A specification carrying apostrophes can be refused
+in every ending: the fixture's, whose manifest path appears once in
+`--manifest` and twice in the specification, is refused until the
+specification's two are removed, while one apostrophe in a small
+specification is admitted, and no checkout path was tested; the trigger is
+uncharacterised, so the direct preparer refuses any apostrophe in the
+specification (#2308). And `d4d-full-core.md` still prescribes only
+`--prompt-text`; saying there to run the rendered recorder line verbatim
+moves the playbook hash every agentic record and registration pins, so it
+waits for the next registered condition boundary (#2316). Binding the flag
+to the specification in the recorder is optional hardening (#2314).

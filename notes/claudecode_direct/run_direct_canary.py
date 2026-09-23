@@ -83,7 +83,7 @@ def spec_for(job):
         label=job["label"], condition=job["render_spec"]["condition"], manifest=Path(job["manifest"]),
         chunk_manifest=Path(job["chunks"]), profile=job["profile"], profile_basis="stated by the registered caller",
         render_version=job["render_version"], run_date=job["run_date"], runtime=job["runtime"],
-        provider=preparation.PROVIDER, reasoning_effort=preparation.EFFORT)
+        provider=preparation.PROVIDER, reasoning_effort=preparation.EFFORT, prompt_text_env=True)
 
 
 def under_direct_roots(path):
@@ -149,6 +149,9 @@ def verify_registration(registration, path):
             raise BudgetStop("a registered job would write outside the direct arm's directories")
         if job["render_spec"].get("reasoning_effort") != preparation.EFFORT:
             raise BudgetStop("a registered job does not assert the registered effort")
+        if job["render_spec"].get("prompt_text_env") is not True:
+            # A recorder line with a shell expansion cannot run under dontAsk (#2282).
+            raise BudgetStop("a registered job's recorder line does not read the launch instruction by --prompt-text-env")
     for file, expected in registration["pinned_files"].items():
         if not Path(file).is_file() or sha(file) != expected:
             raise BudgetStop(f"a registered pin changed: {Path(file).name}")

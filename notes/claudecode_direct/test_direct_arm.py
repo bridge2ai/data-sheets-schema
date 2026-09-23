@@ -110,6 +110,9 @@ def test_the_registration_names_the_arm_and_asserts_its_effort_in_the_rendered_i
     assert "# Provider: Anthropic (Claude subscription, direct)" in instruction
     assert "provenance record" in instruction and "--reasoning-effort max" in instruction
     assert job["render_spec"]["reasoning_effort"] == "max"
+    # The recorder reads the launch instruction by variable name: no shell expansion (#2282).
+    assert job["render_spec"]["prompt_text_env"] is True
+    assert "--prompt-text-env D4D_LAUNCH_INSTRUCTION" in instruction and "${D4D_LAUNCH_INSTRUCTION" not in instruction
     assert (job["method"], job["runtime"], job["execution_arm"]) == ("claudecode_direct", "Claude Code (direct)", "direct")
     # Output paths are checkout-relative, as in every registration; the launcher
     # verifies it runs from the registered checkout before it resolves them.
@@ -145,8 +148,9 @@ def test_preparation_refuses_a_runtime_that_is_not_on_the_login(tmp_path, monkey
     monkeypatch.setattr(preparation, "auth_evidence", not_logged_in)
     with pytest.raises(preparation.DirectStop, match="claude.ai login"):
         preparation.build(arguments(tmp_path, fake, output=tmp_path / "r"))
-    assert not (tmp_path / "r" / "registration.json").exists()
-    assert not (tmp_path / "r" / "auth_probe_config").exists()
+    # A refused login leaves nothing: no registration directory, no probe directory (#2317).
+    assert not (tmp_path / "r").exists()
+    assert not list(tmp_path.glob(".r.auth-probe-*"))
 
 
 def test_the_preparer_refuses_the_wrong_directory_an_existing_registration_and_existing_output(tmp_path, monkeypatch):
@@ -203,9 +207,37 @@ def test_the_preparer_refuses_an_instruction_that_is_not_the_direct_arms(tmp_pat
         assert not (tmp_path / "r").exists() or not (tmp_path / "r" / "registration.json").exists()
         shutil.rmtree(tmp_path / "r", ignore_errors=True)
     monkeypatch.setattr(RunSpec, "instruction", real)
+    # A recorder line with a shell expansion, or an apostrophe in the specification, cannot run (#2282).
+    expansion = real.func                    # `instruction` is a cached_property
+    monkeypatch.setattr(RunSpec, "instruction", property(lambda self: expansion(self).replace(
+        "--prompt-text-env D4D_LAUNCH_INSTRUCTION", '--prompt-text "${D4D_LAUNCH_INSTRUCTION:?x}"')))
+    with pytest.raises(preparation.DirectStop, match="must read the launch instruction by --prompt-text-env"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r4"))
+    assert not (tmp_path / "r4").exists()                     # refused before anything is written
+    # Both the flag and an expansion on one line: the expansion alone refuses it.
+    monkeypatch.setattr(RunSpec, "instruction", property(lambda self: expansion(self).replace(
+        "--prompt-text-env D4D_LAUNCH_INSTRUCTION", '--prompt-text-env D4D_LAUNCH_INSTRUCTION "${HOME}"')))
+    with pytest.raises(preparation.DirectStop, match="must read the launch instruction by --prompt-text-env"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r4b"))
+    assert not (tmp_path / "r4b").exists()
+    # No recorder line at all, with the effort still stated elsewhere.
+    monkeypatch.setattr(RunSpec, "instruction", property(lambda self: "\n".join(
+        "note: --reasoning-effort max" if " -m data_sheets_schema.cli provenance record" in line else line
+        for line in expansion(self).splitlines())))
+    with pytest.raises(preparation.DirectStop, match="must read the launch instruction by --prompt-text-env"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r4c"))
+    assert not (tmp_path / "r4c").exists()
+    monkeypatch.setattr(RunSpec, "instruction", real)
+    rendered = RunSpec.render_spec
+    monkeypatch.setattr(RunSpec, "render_spec", lambda self: {**rendered(self), "manifest_line": "# child's manifest"})
+    with pytest.raises(preparation.DirectStop, match="carries an apostrophe"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r5"))
+    assert not (tmp_path / "r5").exists()
+    monkeypatch.setattr(RunSpec, "render_spec", rendered)
     monkeypatch.setattr(RunSpec, "is_agentic", property(lambda self: False))
-    with pytest.raises(preparation.DirectStop, match="must render the agentic instruction"):
+    with pytest.raises(preparation.DirectStop, match="rendering specification is refused: prompt_text_env applies only to agentic"):
         preparation.build(arguments(tmp_path, fake, output=tmp_path / "r3"))
+    assert not (tmp_path / "r3").exists()
 
 
 def test_the_preparer_probes_the_login_in_the_childs_exact_environment(tmp_path, monkeypatch):
@@ -222,8 +254,9 @@ def test_the_preparer_probes_the_login_in_the_childs_exact_environment(tmp_path,
     per_job = registration["per_job_environment"][JOB]
     assert seen["executable"] == str(fake) and seen["probe_dir_existed"]
     assert seen["env"] == {**seen["env"], **preparation.CHILD_ENVIRONMENT, **per_job}
-    assert Path(seen["env"]["CLAUDE_CONFIG_DIR"]) == path.parent / "auth_probe_config"
-    assert not (path.parent / "auth_probe_config").exists()
+    probe_dir = Path(seen["env"]["CLAUDE_CONFIG_DIR"])
+    assert probe_dir.parent == path.parent.parent and probe_dir.name.startswith(f".{path.parent.name}.auth-probe-")
+    assert not probe_dir.exists()
     assert "UNRELATED_PARENT_VARIABLE" not in seen["env"]
     assert set(seen["env"]) <= set(preparation.PARENT_PASSTHROUGH) | set(preparation.CHILD_ENVIRONMENT) | set(per_job) | {"CLAUDE_CONFIG_DIR"}
 
@@ -738,6 +771,7 @@ def test_the_review_binding_is_checked_in_every_respect(offline_launch, monkeypa
     ("job-method", lambda r: r["generation"]["jobs"][0].update(method="claudecode_agent"), "belongs to another arm"),
     ("job-runtime", lambda r: r["generation"]["jobs"][0].update(runtime="Claude Code"), "belongs to another arm"),
     ("job-effort", lambda r: r["generation"]["jobs"][0]["render_spec"].update(reasoning_effort="high"), "does not assert the registered effort"),
+    ("job-expansion", lambda r: r["generation"]["jobs"][0]["render_spec"].pop("prompt_text_env"), "by --prompt-text-env"),
     ("outputs", lambda r: r["generation"]["jobs"][0].update(
         output_directories=[d.replace("claudecode_direct", "claudecode_agent") for d in r["generation"]["jobs"][0]["output_directories"]]),
      "outside the direct arm's directories"),
@@ -1075,3 +1109,26 @@ def test_the_binding_helper_writes_records_only_for_this_exact_registration(prep
     review_ok = json.loads(out.read_text()); word_ok = json.loads(word.read_text())
     assert review_ok["verdict"] == "approve" and review_ok["ci_conclusion"] == "success"
     assert word_ok["exact_response"].strip() and word_ok["registration_sha256"] == digest
+
+
+def test_the_recorder_permission_probe_builds_its_cases_offline(tmp_path):
+    """The probe's case builders, without the binary: every variant keeps the line's command and prefix (#2282)."""
+    import shlex
+    import probe_recorder_permission as probe
+    spec = {"manifest_line": "# Source manifest: m.yaml", "provider": "Anthropic (Claude subscription, direct)",
+            "runtime": "Claude Code (direct)"}
+    line = ("/py -m data_sheets_schema.cli provenance record --project X --render-spec-json "
+            + shlex.quote(json.dumps(spec)) + ' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?Set it}"')
+    cases = {c["id"]: c["command"] for c in probe.isolation_cases(line, tmp_path / "i.md")}
+    assert cases["real_as_given"] == line and cases["real_expansion"].endswith(probe.EXPANSION)
+    assert cases["real_env_flag"].endswith(probe.ENV_FLAG) and "${" not in cases["real_env_flag"]
+    # The env-form line the fix renders is accepted as well (#2310): its "as given" case is itself.
+    env_line = line.rpartition(' --prompt-text "')[0] + " " + probe.ENV_FLAG
+    env_cases = {c["id"]: c["command"] for c in probe.isolation_cases(env_line, tmp_path / "i.md")}
+    assert env_cases["real_as_given"] == env_line and env_cases["real_expansion"] == cases["real_expansion"]
+    with pytest.raises(RuntimeError, match="neither launch-instruction form"):
+        probe.isolation_cases(line.rpartition(' --prompt-text "')[0], tmp_path / "i.md")
+    assert all(c.startswith("/py -m data_sheets_schema.cli provenance record") for c in cases.values())
+    assert "#" not in cases["real_env_flag_no_hash"] and "(" not in cases["real_env_flag_no_parens"]
+    fixture = {c["id"] for c in probe.recorder_cases(line, tmp_path / "i.md")}
+    assert {"expansion", "literal_path", "env_flag", "bare", "stem_only"} <= fixture
