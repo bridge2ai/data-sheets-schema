@@ -375,9 +375,10 @@ def _rejected_write(source):
     session = '12345678-1234-1234-1234-123456789abc'
     target = source.parent / 'out' / 'record.yaml'
     target.write_text('EXISTING_RECORD\n')
-    # An unresolved spelling of the same file, so a recorder that resolved the
-    # path would be seen to (#2330).
-    literal = str(source.parent / 'out' / '.' / '..' / 'out' / 'record.yaml')
+    # An unresolved spelling of the same file, built as a string because
+    # pathlib drops a '.' segment: a recorder that normalised the path, by
+    # pathlib or by os.path, would be seen to (#2330).
+    literal = f"{source.parent / 'out'}/./../out/record.yaml"
     call = {'type': 'assistant', 'session_id': session, 'parent_tool_use_id': None,
             'message': {'role': 'assistant', 'content': [
                 {'type': 'tool_use', 'id': 'rejected_write', 'name': 'Write',
@@ -397,7 +398,7 @@ def test_an_unread_file_write_refused_by_the_runtime_is_an_unexecuted_call(run_c
     code, events, checked = _run_corrected_read(run_case, _rejected_write(source))
     assert code == 0 and not stops and checked['checked'] and checked['problems'] == []
     rejection, = checked['input_rejections']
-    literal = str(source.parent / 'out' / '.' / '..' / 'out' / 'record.yaml')
+    literal = f"{source.parent / 'out'}/./../out/record.yaml"
     assert (rejection['tool_use_id'], rejection['tool'], rejection['rejection'], rejection['file_path']) == \
         ('rejected_write', 'Write', 'file_not_read', literal)                     # the literal target (#2330)
     assert rejection['session_id'] == '12345678-1234-1234-1234-123456789abc'

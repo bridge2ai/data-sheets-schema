@@ -2917,8 +2917,9 @@ to the specification in the recorder is optional hardening (#2314).
 ### Before the next registration on either Claude Code arm (#2283–#2285, #2307, #2314, #2316, #2325; 2026-09-23)
 
 What the first direct canary and the #2282 review left for the next
-registration, in one boundary. Every file below is pinned by registrations,
-overlays and the audit and evaluation registrations, so each registration
+registration, in one boundary. Every code and playbook file below is pinned
+by registrations, overlays and the audit and evaluation registrations (the
+two READMEs are not), so each registration
 made before this keeps its own pinned copy and each one made after pins the
 new bytes; nothing existing re-runs under the new code.
 
@@ -2929,7 +2930,8 @@ with nothing added. The launcher records the receipt acceptance itself and,
 from renderer 13, the phase history, which native records carry on the
 launcher receipt and not in `phase_log`. A renderer 9 to 12 registered run
 records no phase history anywhere: both launchers gate it at renderer 13,
-and the preparer's default renderer is 9 (#2345). Native receipts blocks
+and the CBORG preparer's default renderer is 9 (the direct preparer's is 17)
+(#2345). Native receipts blocks
 read `expected: false` (deriving it from the registered specification is
 #2350).
 Every other launched run completes its concrete line with the template's

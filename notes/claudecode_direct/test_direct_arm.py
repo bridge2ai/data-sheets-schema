@@ -1138,11 +1138,12 @@ def test_the_recorder_permission_probe_builds_its_cases_offline(tmp_path):
 
 
 
+# Synthetic values in the runtime's event shape; no reading from a real attempt.
 RATE = {"type": "rate_limit_event", "rate_limit_info": {
-    "status": "allowed_warning", "resetsAt": 1790380800, "rateLimitType": "seven_day", "utilization": 0.94,
-    "isUsingOverage": False, "surpassedThreshold": 0.75,
-    "unifiedWindows": {"five_hour": {"utilization": 0.13, "resetsAt": 1790151000},
-                       "seven_day": {"utilization": 0.94, "resetsAt": 1790380800}}}}
+    "status": "allowed_warning", "resetsAt": 2000000000, "rateLimitType": "seven_day", "utilization": 0.62,
+    "isUsingOverage": False, "surpassedThreshold": 0.5,
+    "unifiedWindows": {"five_hour": {"utilization": 0.27, "resetsAt": 1999990000},
+                       "seven_day": {"utilization": 0.62, "resetsAt": 2000000000}}}}
 
 
 def rate_event(windows, **info):
@@ -1152,19 +1153,19 @@ def rate_event(windows, **info):
 def test_the_receipt_keeps_the_runtimes_rate_limit_reports(offline_launch, monkeypatch):
     """#2283, #2335: first, last and highest per window, each with its own reset."""
     launch = offline_launch
-    early = rate_event({"seven_day": {"utilization": 0.91, "resetsAt": 1790380800}})
+    early = rate_event({"seven_day": {"utilization": 0.58, "resetsAt": 2000000000}})
     monkeypatch.setattr(launcher.native, "execute_child", fake_child(extra_events=[early, RATE], write_outputs=launch.write_outputs))
     assert run(launch) == 0
     limits = receipt_of(launch)["rate_limits"]
     assert limits["events"] == 2 and limits["statuses"] == ["allowed_warning"] and limits["overage_used"] is False
     week = limits["windows"]["seven_day"]
-    assert (week["first"]["utilization"], week["last"]["utilization"], week["max"]["utilization"]) == (0.91, 0.94, 0.94)
-    assert limits["windows"]["five_hour"]["first"] == {"utilization": 0.13, "resets_at": 1790151000}
+    assert (week["first"]["utilization"], week["last"]["utilization"], week["max"]["utilization"]) == (0.58, 0.62, 0.62)
+    assert limits["windows"]["five_hour"]["first"] == {"utilization": 0.27, "resets_at": 1999990000}
     # A stopped attempt keeps them too.
     reset(launch)
     receipt = stopped(launch, monkeypatch, fake_child(result=False, extra_events=[RATE]),
                       "native runtime initialization or terminal result is missing or ambiguous")
-    assert receipt["rate_limits"]["windows"]["seven_day"]["max"]["utilization"] == 0.94
+    assert receipt["rate_limits"]["windows"]["seven_day"]["max"]["utilization"] == 0.62
 
 
 def test_rate_limits_keep_a_falling_window_and_its_reset_apart(tmp_path):
