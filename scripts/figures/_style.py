@@ -61,8 +61,12 @@ def apply() -> None:
 
 
 def commit() -> str:
+    """Short HEAD, with "-dirty" appended when scripts/figures or the data tree has uncommitted changes."""
     try:
-        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, text=True).strip()
+        head = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, text=True).strip()
+        dirty = subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no", "--", "scripts/figures", "data", "notes/reference_rescore_2026-09-12_cborg_runtime", "notes/claudecode_direct", "notes/matched_cborg_2026-09-13"],
+                                        cwd=ROOT, text=True).strip()
+        return head + ("-dirty" if dirty else "")
     except Exception:  # pragma: no cover
         return "unknown"
 
@@ -93,6 +97,7 @@ def save(fig, stem: str, tables: dict[str, list[dict]] | None = None, basis: str
             w.writeheader()
             w.writerows(rows)
     print(f"wrote {svg.relative_to(ROOT)}")
+    plt.close(fig)
     return svg
 
 

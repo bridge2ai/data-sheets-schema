@@ -71,7 +71,7 @@ def procedure_table(manifest, rows):
         def uniq(key):
             vals = sorted({h.get(key, "?") for h in hdrs})
             return vals[0] if len(vals) == 1 else " / ".join(vals)
-        versions = sorted({str(r["instrument_version"]) for r in rows if r["cohort"] == c})
+        versions = sorted({f'{r["rubric"].split("-")[0]} v{r["instrument_version"]}' for r in rows if r["cohort"] == c})
         cols[c] = {
             "generation runtime": uniq("Agent runtime"),
             "generation provider": uniq("Provider"),
@@ -116,11 +116,12 @@ def main() -> int:
                     y = primary[0]["adjusted_pct"] if primary else ratings[0]["adjusted_pct"]
                     if repeats:  # whisker spans all ratings of the same record bytes
                         ys = [r["adjusted_pct"] for r in ratings]
-                        ax.plot([x, x], [min(ys), max(ys)], color=st.ARM_COLOR["api"], linewidth=1.4,
-                                solid_capstyle="round", zorder=2, alpha=0.9)
-                        for r in repeats:
-                            ax.plot(x, r["adjusted_pct"], marker="_", markersize=7, color=st.ARM_COLOR["api"],
-                                    markeredgewidth=1.2, linestyle="none", zorder=3)
+                        xw = x + 0.12
+                        ax.plot([xw, xw], [min(ys), max(ys)], color=st.INK["primary"], linewidth=1.1,
+                                solid_capstyle="butt", zorder=5)
+                        for yy in ys:
+                            ax.plot(xw, yy, marker="_", markersize=6, color=st.INK["primary"],
+                                    markeredgewidth=1.1, linestyle="none", zorder=5)
                     ax.plot(x, y, marker=MARK[cohort], markersize=6.5, color=st.ARM_COLOR["api"],
                             markeredgecolor=st.INK["surface"], markeredgewidth=1, linestyle="none", zorder=4)
                     if abs(primary[0]["fixed_pct"] - y) > 1e-9 if primary else False:
@@ -144,13 +145,13 @@ def main() -> int:
     # legend built by hand so identity is never color-alone
     h = [plt.Line2D([], [], marker="o", color=st.ARM_COLOR["api"], linestyle="none", markersize=6.5, label="v7 prompt, one generation replicate"),
          plt.Line2D([], [], marker="s", color=st.ARM_COLOR["api"], linestyle="none", markersize=6.5, label="v8 prompt, one generation replicate"),
-         plt.Line2D([], [], marker="_", color=st.ARM_COLOR["api"], linestyle="-", linewidth=1.4, markersize=7, label="repeated ratings of the same record bytes (rubric10, v7 rep 1)"),
+         plt.Line2D([], [], marker="_", color=st.INK["primary"], linestyle="-", linewidth=1.1, markersize=6, label="three ratings of the same record bytes (rubric10, v7 rep 1)"),
          plt.Line2D([], [], marker="o", markerfacecolor="none", markeredgecolor=st.ARM_COLOR["api"], linestyle="none", markersize=6.5, label="fixed-base percentage, where it differs from adjusted")]
     axes[0].legend(handles=h, loc="upper left", bbox_to_anchor=(-0.02, -0.09), ncol=1, handletextpad=0.6)
     fixed_differs = sum(1 for r in rows if abs(r["fixed_pct"] - r["adjusted_pct"]) > 1e-9)
     note = ("All ratings in this cohort are API-arm records; agentic and direct arms have no ratings under a "
             "compatible instrument yet and are not drawn. Fixed-base and adjusted percentages coincide for "
-            f"{n_ratings - fixed_differs} of {n_ratings} ratings (no item excluded); hollow markers would show the fixed base where they differ.")
+            f"{n_ratings - fixed_differs} of {n_ratings} ratings (no item excluded); hollow markers show the fixed base where they differ.")
     fig.text(0.53, 0.415, textwrap.fill(note, 88), fontsize=7.2, color=st.INK["secondary"], ha="left", va="top")
     # procedure table
     axt = fig.add_subplot(gs[1, :]); axt.axis("off")

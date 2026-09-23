@@ -10,7 +10,13 @@ per-record cost the repository can state is a catalogue estimate (usage x CBORG 
 observed 2026-09-14, the same formula the v9 canary review used), which is not an invoice
 and is drawn hollow. Native (agentic/direct) ledgers exist only under ignored local draft
 directories and are not part of the record set; those arms are drawn as explicit
-"not recorded" placeholders. Nothing is summed across providers or subscriptions.
+"not recorded" placeholders. The one native-arm source is the outcome note of the first
+direct-arm canary (notes/claudecode_direct/CHORUS_direct_rep1_2026-09-23_stopped.md): that
+attempt was disqualified (no provenance record) and is not in the corpus, so its runtime's own
+terminal accounting is drawn as a separately labelled estimate, never pooled with anything
+settled. Nothing is summed across providers or subscriptions. Prices are the CBORG catalogue
+rate for the google route of claude-opus-5; provenance does not record which upstream route
+served a request, and the amazon route lists higher rates.
 """
 from __future__ import annotations
 
@@ -30,10 +36,10 @@ from scripts.figures import _style as st  # noqa: E402
 ARCH = st.ROOT / "notes" / "reference_rescore_2026-09-12_cborg_runtime"
 CATALOGUE = st.ROOT / "notes" / "matched_cborg_2026-09-13" / "model_catalogue.json"
 CATALOGUE_MODEL = "claude-opus-5"           # the route string the provenance records name; same list prices as google/claude-opus-5
+ALT_CATALOGUE_MODEL = "amazon/claude-opus-5"  # the other upstream route CBORG lists; provenance does not say which route served a request
 PHASES = ["full", "full_readdress", "audit", "reconcile_full", "report", "repair_full", "report_after_repair", "report_regate"]
 PHASE_SHORT = {"full": "full", "full_readdress": "full\nreaddress", "audit": "audit", "reconcile_full": "reconcile",
                "report": "report", "repair_full": "repair", "report_after_repair": "report\nafter repair", "report_regate": "report\nregate"}
-EXPECTED = {"full", "audit", "reconcile_full", "report", "repair_full", "report_after_repair"}
 MARK = {"v7": "o", "v8": "s"}
 DIRECT_NOTE = st.ROOT / "notes" / "claudecode_direct" / "CHORUS_direct_rep1_2026-09-23_stopped.md"
 
@@ -48,22 +54,22 @@ def direct_canary() -> dict | None:
     if not DIRECT_NOTE.exists():
         return None
     text = DIRECT_NOTE.read_text()
-    def grab(pattern):
+    def grab(pattern, numeric=False):
         m = re.search(pattern, text)
         if not m:
             raise RuntimeError(f"direct canary note lacks {pattern!r}")
-        return m.group(1).replace(",", "")
+        return m.group(1).replace(",", "") if numeric else m.group(1)
     started = datetime.fromisoformat(grab(r"Started (\S+), finished"))
     finished = datetime.fromisoformat(grab(r"finished (\S+)\."))
     return {
         "project": "CHORUS", "cohort": "direct-v1", "generation_rep": 1,
         "label": grab(r"label `([^`]+)`"), "arm": "direct", "runtime": grab(r"runtime `([^`]+)`"),
         "provider": grab(r"provider `([^`]+)`"), "model": grab(r"model `([^`]+)`"),
-        "usd_runtime_estimate": float(grab(r"estimate \$([0-9.]+)")),
-        "input_tokens": int(grab(r"`inputTokens` ([0-9,]+)")), "output_tokens": int(grab(r"`outputTokens` ([0-9,]+)")),
-        "thinking_tokens": int(grab(r"\(thinking ([0-9,]+)\)")), "cache_read": int(grab(r"cache read ([0-9,]+)")),
-        "cache_write": int(grab(r"cache creation ([0-9,]+)")), "turns": int(grab(r"([0-9]+) turns")),
-        "minutes": int(grab(r"([0-9]+) minutes")), "seconds": (finished - started).total_seconds(),
+        "usd_runtime_estimate": float(grab(r"estimate \$([0-9.]+)", numeric=True)),
+        "input_tokens": int(grab(r"`inputTokens` ([0-9,]+)", numeric=True)), "output_tokens": int(grab(r"`outputTokens` ([0-9,]+)", numeric=True)),
+        "thinking_tokens": int(grab(r"\(thinking ([0-9,]+)\)", numeric=True)), "cache_read": int(grab(r"cache read ([0-9,]+)", numeric=True)),
+        "cache_write": int(grab(r"cache creation ([0-9,]+)", numeric=True)), "turns": int(grab(r"([0-9]+) turns", numeric=True)),
+        "minutes": int(grab(r"([0-9]+) minutes", numeric=True)), "seconds": (finished - started).total_seconds(),
         "status": "disqualified canary: no provenance record, not in corpus",
     }
 
@@ -78,6 +84,7 @@ def load():
     audit = json.loads((ARCH / "completion_audit.json").read_text())
     cat = json.loads(CATALOGUE.read_text())
     prices = next(m for m in cat["models"] if m["model"] == CATALOGUE_MODEL)["capabilities"]
+    alt_prices = next(m for m in cat["models"] if m["model"] == ALT_CATALOGUE_MODEL)["capabilities"]
     jobs = {j["id"]: j for j in manifest["jobs"]}
     r20 = {}
     for r in audit["ratings"]:
@@ -105,7 +112,7 @@ def load():
                   + (u.get("cache_write") or 0) * prices["cache_creation_input_token_cost"]
                   + (u.get("cache_read") or 0) * prices["cache_read_input_token_cost"] for u in rows)
         skipped = prov.get("phases_skipped") or []
-        complete = EXPECTED.issubset(set(phases)) and not skipped
+        complete = not skipped          # a resumed run skips phases already on disk and records no usage for them
         records[j["input"]] = {
             "project": j["project"], "cohort": j["cohort"], "generation_rep": j["generation_rep"], "label": j["label"],
             "arm": "api", "runtime": prov["model"].get("agent_runtime"), "provider": prov["model"].get("provider"),
@@ -115,19 +122,20 @@ def load():
             "usd_partial_estimate": usd if not complete else None,
             "rubric20_adjusted_pct": r20.get(j["input"]),
         }
-    return manifest, audit, prices, records
+    return manifest, audit, prices, alt_prices, records
 
 
 def main() -> int:
     st.apply()
-    manifest, audit, prices, records = load()
+    manifest, audit, prices, alt_prices, records = load()
+    n_ratings = len(audit["ratings"])
     canary = direct_canary()
     recs = sorted(records.values(), key=lambda r: (st.PROJECTS.index(r["project"]), r["cohort"], r["generation_rep"]))
     n = len(recs)
     blue = st.ARM_COLOR["api"]
 
-    fig = plt.figure(figsize=(11.6, 12.4))
-    gs = fig.add_gridspec(4, 2, height_ratios=[1.25, 1.0, 1.0, 0.85], hspace=0.62, wspace=0.25, top=0.94, bottom=0.05)
+    fig = plt.figure(figsize=(11.6, 13.4))
+    gs = fig.add_gridspec(4, 2, height_ratios=[1.25, 1.0, 1.0, 1.15], hspace=0.62, wspace=0.25, top=0.94, bottom=0.04)
 
     # ---- (A) tokens in/out per phase, one panel per arm ----
     gsA = gs[0, :].subgridspec(1, 3, width_ratios=[3.2, 1, 1], wspace=0.12)
@@ -166,9 +174,7 @@ def main() -> int:
                loc="upper right", fontsize=7)
     for k, arm in enumerate(("agentic", "direct")):
         ax = fig.add_subplot(gsA[0, k + 1], sharey=axA)
-        ax.add_patch(Rectangle((-0.35, 0), 0.7, axA.get_ylim()[1] * 0.35, facecolor="none", edgecolor=st.ARM_COLOR[arm],
-                               hatch=st.HATCH, linewidth=1.0, zorder=2))
-        ax.text(0, axA.get_ylim()[1] * 0.4, "not recorded\nper phase", ha="center", va="bottom", fontsize=7, color=st.INK["secondary"])
+        ax.text(0.5, 0.5, "not recorded\nper phase", transform=ax.transAxes, ha="center", va="center", fontsize=7.5, color=st.INK["secondary"])
         ax.set_xlim(-0.8, 0.8); ax.set_xticks([]); ax.tick_params(labelleft=False)
         ax.set_title(st.ARM_LABEL[arm].replace(" (", "\n("), fontsize=8, pad=8)
         sub = "0 records in set"
@@ -243,8 +249,8 @@ def main() -> int:
         })
     for pi, proj in enumerate(st.PROJECTS):
         xt.append(pi * 7 + 2.5); xl.append(proj.replace("_", "-"))
-        axC.text(pi * 7 + 1, 1.08, "v7", ha="center", va="bottom", fontsize=6.6, color=st.INK["muted"])
-        axC.text(pi * 7 + 4, 1.08, "v8", ha="center", va="bottom", fontsize=6.6, color=st.INK["muted"])
+        axC.text(pi * 7 + 1, -0.02, "v7", transform=axC.get_xaxis_transform(), ha="center", va="top", fontsize=6.6, color=st.INK["muted"])
+        axC.text(pi * 7 + 4, -0.02, "v8", transform=axC.get_xaxis_transform(), ha="center", va="top", fontsize=6.6, color=st.INK["muted"])
         if pi:
             axC.axvline(pi * 7 - 0.75, color=st.INK["grid"], linewidth=0.6, zorder=0)
     ymax = max(v for v in (r["usd_catalogue_estimate"] or r["usd_partial_estimate"] for r in recs))
@@ -253,10 +259,8 @@ def main() -> int:
         axC.axvline(xc - 1.75, color=st.INK["grid"], linewidth=0.6, zorder=0)
         axC.plot(xc, canary["usd_runtime_estimate"], marker="D", markersize=8, markerfacecolor="none",
                  markeredgecolor=st.ARM_COLOR["direct"], markeredgewidth=1.2, linestyle="none", zorder=3)
-        axC.add_patch(Rectangle((xc - 0.6, canary["usd_runtime_estimate"] * 0.86), 1.2, canary["usd_runtime_estimate"] * 0.3,
-                                facecolor="none", edgecolor=st.ARM_COLOR["direct"], hatch=st.HATCH, linewidth=0.0, zorder=2))
-        axC.annotate("disqualified canary,\nruntime estimate", (xc, canary["usd_runtime_estimate"]), xytext=(-4, 12),
-                     textcoords="offset points", fontsize=6.2, color=st.INK["secondary"], ha="right", va="bottom")
+        axC.annotate("disqualified canary,\nruntime estimate", (xc, canary["usd_runtime_estimate"]), xytext=(-9, 0),
+                     textcoords="offset points", fontsize=6.2, color=st.INK["secondary"], ha="right", va="center")
         xt.append(xc); xl.append("direct\ncanary")
         ymax = max(ymax, canary["usd_runtime_estimate"])
         main_rows.append({
@@ -273,7 +277,7 @@ def main() -> int:
             "cost_basis": "runtime terminal accounting (estimate)",
             "rubric20_adjusted_pct": None,
         })
-    axC.set_xticks(xt); axC.set_xticklabels(xl, fontsize=7.5); axC.tick_params(axis="x", length=0)
+    axC.set_xticks(xt); axC.set_xticklabels(xl, fontsize=7.5); axC.tick_params(axis="x", length=0, pad=14)
     axC.set_yscale("log"); axC.set_ylim(1, ymax * 2.2)
     axC.set_yticks([1, 2, 5, 10, 20, 50]); axC.set_yticklabels(["1", "2", "5", "10", "20", "50"])
     axC.set_ylabel("USD per record (log; all values unsettled)")
@@ -283,7 +287,7 @@ def main() -> int:
                         plt.Line2D([], [], marker="s", markerfacecolor="none", markeredgecolor=blue, linestyle="none", markersize=6.5, label="v8 record, API arm, catalogue estimate (unsettled)"),
                         plt.Line2D([], [], marker="o", markerfacecolor=st.INK["mid"], markeredgecolor=st.INK["muted"], linestyle="none", markersize=6.5, label="partial estimate (usage record incomplete)"),
                         plt.Line2D([], [], marker="D", markerfacecolor="none", markeredgecolor=st.ARM_COLOR["direct"], linestyle="none", markersize=7, label="direct-arm canary, runtime estimate (disqualified, not in corpus)")],
-               loc="upper left", fontsize=6.4)
+               loc="upper left", bbox_to_anchor=(0.0, -0.2), fontsize=6.4, ncol=2)
 
     # ---- (D) rubric20 adjusted % vs USD ----
     axD = fig.add_subplot(gs[2, 1])
@@ -299,36 +303,37 @@ def main() -> int:
     axD.set_ylabel("rubric20 applicability-adjusted score (%)")
     axD.set_title(f"D  rubric20 score vs estimated cost ({drawn} records; {omitted} omitted, usage incomplete)", pad=8)
     if canary is not None:
-        axD.text(0.02, 0.91, "direct-arm canary not drawn: no rating (not in corpus)", transform=axD.transAxes, fontsize=6.6,
-                 color=st.INK["secondary"], ha="left", va="top")
+        axD.text(1.0, -0.37, "direct-arm canary not drawn: no rating (not in corpus)", transform=axD.transAxes, fontsize=6.6,
+                 color=st.INK["secondary"], ha="right", va="top")
     axD.set_xlim(left=0)
     st.hairline_grid(axD, "both")
     axD.legend(handles=[plt.Line2D([], [], marker="o", markerfacecolor="none", markeredgecolor=blue, linestyle="none", markersize=6.5, label="v7, API arm"),
                         plt.Line2D([], [], marker="s", markerfacecolor="none", markeredgecolor=blue, linestyle="none", markersize=6.5, label="v8, API arm")],
                loc="lower right", fontsize=7)
-    axD.text(0.02, 0.97, "no record has a settled charge; hollow markers are estimates", transform=axD.transAxes, fontsize=6.6,
-             color=st.INK["secondary"], ha="left", va="top")
+    axD.text(1.0, -0.3, "no record has a settled charge; hollow markers are estimates", transform=axD.transAxes, fontsize=6.6,
+             color=st.INK["secondary"], ha="right", va="top")
 
     # ---- cost basis table ----
     axT = fig.add_subplot(gs[3, :]); axT.axis("off")
     eval_cost = audit["known_terminal_cli_cost_usd"]
+    n_partial = sum(1 for r in recs if not r["usage_complete"])
     basis_rows = [
-        ["API arm generation (24 records)", "LBL CBORG (proxy), claude-opus-5",
-         f"catalogue estimate only: api_usage tokens x list prices (in {prices['input_cost_per_token']*1e6:g}, out {prices['output_cost_per_token']*1e6:g}, "
-         f"cache write {prices['cache_creation_input_token_cost']*1e6:g}, cache read {prices['cache_read_input_token_cost']*1e6:g} USD per 1M tokens); "
-         "not an invoice; 1 resumed record partial"],
+        [f"API arm generation ({n} records)", "LBL CBORG (proxy), claude-opus-5",
+         f"catalogue estimate only: api_usage tokens x google-route list prices (in {prices['input_cost_per_token']*1e6:g}, out {prices['output_cost_per_token']*1e6:g}, "
+         f"cache write {prices['cache_creation_input_token_cost']*1e6:g}, cache read {prices['cache_read_input_token_cost']*1e6:g} USD per 1M tokens); provenance does not "
+         f"record the upstream route, and the amazon route lists in {alt_prices['input_cost_per_token']*1e6:g} / out {alt_prices['output_cost_per_token']*1e6:g}; "
+         f"not an invoice; {n_partial} resumed record{'s' if n_partial != 1 else ''} partial"],
         ["Agentic arm generation", "Claude Code via proxy", "0 records in this set; no ledger outside ignored local drafts; drawn as not recorded"],
         ["Direct arm generation", "Claude Code, subscription",
          ("0 records in this set; subscription usage carries no per-record charge; drawn as not recorded" if canary is None else
-          f"0 records in this set. 1 disqualified canary ({canary['project']}, 2026-09-23; no provenance record, not in corpus): runtime terminal accounting "
-          f"estimate {canary['usd_runtime_estimate']:.2f} USD, {canary['minutes']} min, {canary['turns']} turns, in {canary['input_tokens']:,} + cache read "
-          f"{canary['cache_read']:,} + cache write {canary['cache_write']:,}, out {canary['output_tokens']:,} (thinking {canary['thinking_tokens']:,}); "
-          "subscription, not a charge; never pooled")],
-        ["Reference rescore evaluation (56 ratings)", "LBL CBORG, claude-opus-5 CLI sessions",
+          f"0 records in this set; 1 disqualified canary ({canary['project']}, 2026-09-23, no provenance record, not in corpus): runtime terminal "
+          f"accounting estimate {canary['usd_runtime_estimate']:.2f} USD, {canary['minutes']} min, {canary['turns']} turns "
+          f"(token totals in the CSV); subscription, not a charge; never pooled")],
+        [f"Reference rescore evaluation ({n_ratings} ratings)", "LBL CBORG, claude-opus-5 CLI sessions",
          f"known terminal CLI subtotal {eval_cost:.2f} USD over {audit['actual_model_calls']} sessions; {audit['attempts_without_reported_cost']} interrupted sessions unpriced; "
          "total unknown; not per record; not reconciled with CBORG"],
     ]
-    wrapped = [[a, textwrap.fill(b, 30), textwrap.fill(c, 110)] for a, b, c in basis_rows]
+    wrapped = [[textwrap.fill(a, 28), textwrap.fill(b, 30), textwrap.fill(c, 100)] for a, b, c in basis_rows]
     tbl = axT.table(cellText=wrapped, colLabels=["cost basis", "provider / route", "what the repository can state"],
                     loc="upper left", cellLoc="left", colLoc="left", bbox=[0.0, 0.0, 1.0, 1.0])
     tbl.auto_set_font_size(False); tbl.set_fontsize(6.9)
@@ -343,11 +348,11 @@ def main() -> int:
             cl.set_width(0.2)
         else:
             cl.set_width(0.58)
-    fig.suptitle("Generation tokens, wall time and cost per record for the reference rescore records (API arm; other arms not recorded)",
+    fig.suptitle("Generation tokens, wall time and cost per record for the reference rescore records (API arm), plus one disqualified direct-arm canary (runtime estimate)",
                  x=0.01, ha="left", fontsize=11, fontweight="bold", y=0.992)
-    basis = (f"Record set: reference rescore 2026-09-12 (CBORG runtime), {n} API-arm full records; usage from <project>_provenance.yaml api_usage; "
+    basis = (f"Record set: reference rescore 2026-09-12 (CBORG runtime), {n} API-arm full records, {n_ratings} ratings; usage from <project>_provenance.yaml api_usage; "
              "catalogue prices from notes/matched_cborg_2026-09-13/model_catalogue.json; evaluation cost from completion_audit.json; no native ledgers in set; "
-             "direct canary from notes/claudecode_direct/CHORUS_direct_rep1_2026-09-23_stopped.md")
+             "one native-arm source: the direct canary note notes/claudecode_direct/CHORUS_direct_rep1_2026-09-23_stopped.md (disqualified, not in corpus)")
     st.save(fig, "fig10_cost_latency", {"main": main_rows, "phases": phase_rows,
                                         "cost_basis": [{"cost_basis": a, "provider": b, "statement": c} for a, b, c in basis_rows]}, basis)
     return 0

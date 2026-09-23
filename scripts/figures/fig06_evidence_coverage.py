@@ -18,6 +18,11 @@ bundle from context, so "partially opened" is not observable here: a chunk is ei
 closed status or has no entry. Panel B: receipted fields by schema module x source document, per
 project, mean over the 6 runs of that project; only receipt slots that still resolve in the final
 record are counted. Panel C: populated slots by receipt status after audit/repair (from provenance).
+
+Colour rules: Panel A keeps the ordinal blue ramp on purpose - the four dispositions are nominal, but
+the ramp order encodes review depth (extracted > redundant > nothing relevant > duplicate), and the
+legend says so. Panel C uses categorical slots 3+ (st.SERIES[3:]) for the support statuses with gray
+for exempt; slots 0-2 stay reserved for the arms across the figure set.
 """
 from __future__ import annotations
 
@@ -51,8 +56,8 @@ SUPPORT_LABEL = {"with_receipt": "receipted (snippet attested in the bundle)",
                  "added_after_receipt": "added after the receipt (audit/repair), no receipt",
                  "never_receipted": "populated, never receipted",
                  "exempt": "exempt (commentary, own identifiers)"}
-SUPPORT_COLOR = {"with_receipt": st.SERIES[0], "added_after_receipt": st.SERIES[3],
-                 "never_receipted": st.SERIES[1], "exempt": st.INK["axis"]}
+SUPPORT_COLOR = {"with_receipt": st.SERIES[3], "added_after_receipt": st.SERIES[4],
+                 "never_receipted": st.SERIES[5], "exempt": st.INK["axis"]}
 MODULE_ORDER = ["Metadata (Information)", "Motivation", "Composition", "Collection", "Preprocessing", "Uses",
                 "Distribution", "Data governance", "Maintenance", "Ethics", "Human", "Variables",
                 "FileCollection", "Dataset (top level)"]
@@ -211,7 +216,10 @@ def analyse():
                      "receipt": str(r["receipt_path"].relative_to(st.ROOT)),
                      "provenance": str(r["provenance_path"].relative_to(st.ROOT))})
         support_rows.append({**base, "populated": sl["populated"], **{k: sl[k] for k in SUPPORT},
-                             "receiptable": sl["receiptable"], "value_changed_after_receipt": sl["value_changed_after_receipt_count"]})
+                             "receiptable": sl["receiptable"],
+                             "share_receipted_of_populated": round(sl["with_receipt"] / sl["populated"], 4),
+                             "share_receipted_of_receiptable": round(sl["with_receipt"] / sl["receiptable"], 4),
+                             "value_changed_after_receipt": sl["value_changed_after_receipt_count"]})
     return rows, support_rows, attr_long
 
 
@@ -268,7 +276,9 @@ def draw_panel_a(ax, rows, ys, ticks, labels, headers):
     handles = [Rectangle((0, 0), 1, 1, facecolor=DISP_COLOR[d], label=DISP_LABEL[d]) for d in DISPOSITIONS]
     handles.append(Rectangle((0, 0), 1, 1, facecolor=st.INK["surface"], edgecolor=st.INK["muted"], hatch=st.HATCH,
                              linewidth=0.6, label=DISP_LABEL["no_entry"] + " - none in this set"))
-    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.0, -0.09), ncol=1, handlelength=1.4)
+    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.0, -0.09), ncol=1, handlelength=1.4,
+              title="ramp order = review depth: extracted > redundant > nothing relevant > duplicate",
+              title_fontsize=7, alignment="left")
 
 
 def draw_panel_c(ax, support_rows, ys, ticks, labels, headers):
@@ -283,7 +293,7 @@ def draw_panel_c(ax, support_rows, ys, ticks, labels, headers):
         ax.text(-8, y, text, ha="right", va="center", fontsize=8, fontweight="bold", color=st.INK["secondary"],
                 clip_on=False)
     ax.set_xlim(0, 640)
-    ax.set_xlabel("populated slots in the final record (label: share receipted)")
+    ax.set_xlabel("populated slots in the final record; label = share of populated slots receipted (exempt included)")
     ax.set_title("C  Slot support status after audit and repair (receipt check on the final record)", pad=8)
     st.hairline_grid(ax, "x")
     ax.tick_params(axis="y", length=0)

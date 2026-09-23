@@ -5,8 +5,18 @@ Record set: the 24 API-arm full records of the frozen CBORG reference rescore
 (notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json, jobs[].input; v7 under
 claudecode_agent/, v8 under claudecode_api/), plus the 12 most recent agentic-arm full
 records (data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep{1,2,3}),
-plus an explicit empty placeholder for the direct arm (registered, no runs under
-data/d4d_concatenated/claudecode_direct/ at build time).
+plus the direct arm: full records under data/d4d_concatenated/claudecode_direct/<label>/
+are drawn as a column group only when their <label>_core/<P>_provenance.yaml sibling exists
+(the provenance record is the acceptance signal: the first direct-arm canary,
+notes/claudecode_direct/CHORUS_direct_rep1_2026-09-23_stopped.md, was disqualified because
+no provenance record was written, and its records are not in the corpus). A direct-arm
+record without that sibling is drawn blank and labelled "disqualified / not in corpus";
+when the directory is absent or empty the group is an explicit "direct: no runs" placeholder.
+
+Arm attribution is verified from provenance, not from the directory or cohort: every drawn
+record's <method>_core/<label>/<P>_provenance.yaml model.agent_runtime must map through
+runs.RUNTIME_KEYS to the arm it is drawn under ("claude api (direct)" -> api, "claude code"
+-> agentic, "claude code (direct)" -> direct); a mismatch stops the build.
 
 Slots: class Dataset's induced slots from the merged schema (SchemaView over
 data_sheets_schema_all.yaml). Every Dataset slot is declared in the root schema file, so
@@ -40,6 +50,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.figures import _style as st  # noqa: E402
 
 sys.path.insert(0, str(st.ROOT / "src"))
+from data_sheets_schema.runs import RUNTIME_KEYS  # noqa: E402
 from data_sheets_schema.schema_view import shared_view  # noqa: E402
 
 ARCH = st.ROOT / "notes" / "reference_rescore_2026-09-12_cborg_runtime"
@@ -60,6 +71,35 @@ BASE = "Base / root"
 COLOR = {"populated": st.ORDINAL[6], "caveat_only": st.ORDINAL[0], "empty": st.INK["mid"]}
 ARMS = [("api", "v7"), ("api", "v8"), ("agentic", "v6"), ("direct", "")]
 ARM_TEXT = {("api", "v7"): "API v7", ("api", "v8"): "API v8", ("agentic", "v6"): "agentic v6", ("direct", ""): "direct"}
+
+
+def provenance_path(full_record: str) -> Path:
+    """data/d4d_concatenated/<method>/<label>/<P>_d4d.yaml -> <method>_core/<label>/<P>_provenance.yaml"""
+    rel = Path(full_record)
+    method, label, name = rel.parts[-3], rel.parts[-2], rel.name
+    assert name.endswith("_d4d.yaml"), full_record
+    return st.ROOT / "data" / "d4d_concatenated" / f"{method}_core" / label / (name[: -len("_d4d.yaml")] + "_provenance.yaml")
+
+
+def verify_arm(full_record: str, arm: str) -> str:
+    """The runtime key recorded in the provenance file; must equal the arm the column is drawn under."""
+    prov = provenance_path(full_record)
+    assert prov.exists(), f"no provenance record for {full_record}: {prov}"
+    runtime = (yaml.safe_load(prov.read_text()).get("model") or {}).get("agent_runtime")
+    key = RUNTIME_KEYS.get(str(runtime).strip().lower())
+    assert key == arm, f"{full_record}: provenance agent_runtime {runtime!r} maps to {key!r}, drawn under {arm!r}"
+    return str(runtime)
+
+
+def direct_records(proj: str) -> list[dict]:
+    """Direct-arm full records for a project, newest label first; accepted only with a provenance sibling."""
+    out = []
+    if not DIRECT_DIR.is_dir():
+        return out
+    for p in sorted(DIRECT_DIR.glob(f"*/{proj}_d4d.yaml"), reverse=True):
+        rel = os.path.relpath(p, st.ROOT)
+        out.append({"path": rel, "accepted": provenance_path(rel).exists(), "label": p.parent.name})
+    return out
 
 
 def empty(v) -> bool:
@@ -123,8 +163,14 @@ def records():
                     cols.append({"project": proj, "arm": arm, "cohort": cohort, "rep": rep,
                                  "path": os.path.relpath(hit[0], st.ROOT) if hit else None})
             else:
-                assert not DIRECT_DIR.exists(), "direct-arm records exist now; draw them instead of the placeholder"
-                cols.append({"project": proj, "arm": arm, "cohort": "", "rep": None, "path": None})
+                found = direct_records(proj)
+                if not found:
+                    cols.append({"project": proj, "arm": arm, "cohort": "", "rep": None, "path": None, "direct": "no runs"})
+                for k, d in enumerate(found, 1):
+                    m = re.search(r"_rep(\d+)", d["label"])
+                    cols.append({"project": proj, "arm": arm, "cohort": "", "rep": int(m.group(1)) if m else k,
+                                 "path": d["path"] if d["accepted"] else None,
+                                 "direct": "accepted" if d["accepted"] else "disqualified / not in corpus"})
     return cols
 
 
@@ -153,9 +199,13 @@ def main() -> int:
         if c["path"]:
             doc = yaml.safe_load((st.ROOT / c["path"]).read_text())
             assert isinstance(doc, dict) and doc, c["path"]
+            c["runtime"] = verify_arm(c["path"], c["arm"])
             c["state"] = classify(doc, all_slots)
         else:
             c["state"] = None
+            c["runtime"] = ""
+    n_direct = sum(1 for c in cols if c["arm"] == "direct" and c["path"])
+    n_disq = sum(1 for c in cols if c["arm"] == "direct" and c.get("direct", "").startswith("disqualified"))
     n_rec = sum(1 for c in cols if c["path"])
     n_api = sum(1 for c in cols if c["arm"] == "api" and c["path"])
     n_agentic = sum(1 for c in cols if c["arm"] == "agentic" and c["path"])
@@ -246,9 +296,13 @@ def main() -> int:
             ax_top.add_patch(Rectangle((a + 0.08, 1.24), b - a - 0.16, 0.07, facecolor=st.ARM_COLOR[arm],
                                        transform=ax_top.get_xaxis_transform(), clip_on=False))
             label = ARM_TEXT[(arm, cohort)]
-            if arm == "direct":  # the placeholder column: name it inside its empty bar slot
-                ax_top.text((a + b) / 2, 0.5, "direct: no runs", ha="center", va="center", fontsize=5.8,
-                            color=st.INK["secondary"], rotation=90, transform=ax_top.get_xaxis_transform())
+            if arm == "direct":
+                for c, x0 in zip(cols, xs):  # name each direct column inside its bar slot unless it is an accepted run
+                    if c["project"] == proj and c["arm"] == arm and c["direct"] != "accepted":
+                        ax_top.text(x0 + 0.5, 0.5, f'direct: {c["direct"]}', ha="center", va="center", fontsize=5.8,
+                                    color=st.INK["secondary"], rotation=90, transform=ax_top.get_xaxis_transform())
+                ax_top.text((a + b) / 2, 1.14, label, ha="center", va="center", fontsize=6.5, color=st.INK["secondary"],
+                            transform=ax_top.get_xaxis_transform())
             else:
                 ax_top.text((a + b) / 2, 1.14, label, ha="center", va="center", fontsize=6.5, color=st.INK["secondary"],
                             transform=ax_top.get_xaxis_transform())
@@ -270,7 +324,7 @@ def main() -> int:
                     if state == "caveat_only":
                         ax_slot.plot(x0 + 0.5, y + 0.5, marker="o", markersize=2.2, color=st.INK["primary"], linestyle="none")
                 rows_main.append({"project": c["project"], "arm": c["arm"], "cohort": c["cohort"], "rep": c["rep"],
-                                  "path": c["path"] or "", "module": m, "slot": s, "state": state})
+                                  "path": c["path"] or "", "agent_runtime": c["runtime"], "module": m, "slot": s, "state": state})
             y += 1
         sep_rows.append(y)
     ax_slot.set_ylim(y, 0)
@@ -323,13 +377,16 @@ def main() -> int:
     for sp in cax.spines.values():
         sp.set_visible(False)
     cax.set_title("module fraction populated", fontsize=6.5, pad=2, loc="left", fontweight="normal", color=st.INK["secondary"])
+    direct_note = ("registered, no runs" if n_direct == 0 and n_disq == 0 else
+                   f"{n_direct} accepted run(s), {n_disq} disqualified / not in corpus")
     fig.text(0.19, 0.958, "arm strip: blue = API arm (Messages SDK via CBORG), orange = agentic arm (Claude Code via proxy), "
-             "green = direct arm (Claude Code, subscription): registered, no runs",
+             f"aqua = direct arm (Claude Code, subscription): {direct_note}; arm of every drawn record verified from its "
+             "provenance agent_runtime",
              fontsize=6.8, color=st.INK["secondary"], ha="left", va="bottom")
     fig.suptitle("Populated D4D schema content per record, by module and by Dataset slot",
                  x=0.01, ha="left", fontsize=11, fontweight="bold", y=0.99)
     basis = (f"Record set: {n_api} API-arm full records (reference rescore 2026-09-12 manifest, v7 + v8) + {n_agentic} agentic-arm "
-             f"full records (2026-08-28 claudecode-generic-v6 rep1-3); direct arm: no records; {len(all_slots)} Dataset slots "
+             f"full records (2026-08-28 claudecode-generic-v6 rep1-3); direct arm: {direct_note}; {len(all_slots)} Dataset slots "
              f"from data_sheets_schema_all.yaml, grouped by the module file defining each slot's range class")
     st.save(fig, "fig02_content_coverage", {"main": rows_main, "modules": rows_mod, "records": rows_rec}, basis)
     print(f"records {n_rec}, slots {len(all_slots)}, groups " + ", ".join(f"{m}={len(g)}" for m, g in groups.items()))

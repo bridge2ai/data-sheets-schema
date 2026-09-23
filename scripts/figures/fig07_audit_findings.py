@@ -44,8 +44,9 @@ MATCHED = st.ROOT / "notes" / "matched_cborg_2026-09-13"
 
 CATEGORIES = ["unsupported claim", "missing supported information", "inconsistent identifier/count",
               "dataset/release/temporal scope error", "other"]
-CAT_COLOR = {"unsupported claim": st.SERIES[0], "missing supported information": st.SERIES[1],
-             "inconsistent identifier/count": st.SERIES[2], "dataset/release/temporal scope error": st.SERIES[3],
+# categorical slots 3+ in fixed order; slots 0-2 stay reserved for the arms across the figure set
+CAT_COLOR = {"unsupported claim": st.SERIES[3], "missing supported information": st.SERIES[4],
+             "inconsistent identifier/count": st.SERIES[5], "dataset/release/temporal scope error": st.SERIES[6],
              "other": st.INK["axis"]}
 CAT_LABEL = {"other": "other (schema shape, wrong field, style, confirmatory notes)"}
 # (category, regex on the issue text, lower-cased); first match wins; the confirmatory rule is tested first.
@@ -227,7 +228,7 @@ def main() -> int:
 
     fig = plt.figure(figsize=(12.6, 0.128 * n + 4.4))
     gs = fig.add_gridspec(2, 5, width_ratios=[2.2, 0.7, 0.7, 0.7, 0.7], height_ratios=[n * 0.128, 1.1],
-                          hspace=0.34, wspace=0.18, left=0.2, right=0.985, top=0.93, bottom=0.06)
+                          hspace=0.34, wspace=0.18, left=0.2, right=0.985, top=0.92, bottom=0.06)
     ax_a = fig.add_subplot(gs[0, 0])
     ys = list(range(n))
     labels = []
@@ -277,9 +278,12 @@ def main() -> int:
             ax.spines[sp].set_visible(False)
         if mi == 0:
             pos = ax.get_position()
-            fig.text(pos.x0, pos.y1 + 30 / (fig.get_size_inches()[1] * 72),
-                     "B  Before/after diff: Phase 1 full record vs final full record", fontsize=9.5,
-                     fontweight="bold", color=st.INK["primary"], ha="left", va="bottom")
+            h = fig.get_size_inches()[1] * 72
+            fig.text(pos.x0, pos.y1 + 42 / h, "B  Before/after diff: Phase 1 full record vs final full record",
+                     fontsize=9.5, fontweight="bold", color=st.INK["primary"], ha="left", va="bottom")
+            fig.text(pos.x0, pos.y1 + 30 / h, "leaf-path diff: a list reindex counts as one removal plus one addition, "
+                     "so the tallest removed/added bars are reindexing cases",
+                     fontsize=7, color=st.INK["secondary"], ha="left", va="bottom")
     n_no_before = sum(1 for r in drawn if r["fields_removed"] is None)
 
     # Panel C: placeholder for the batch audit grid
@@ -303,7 +307,8 @@ def main() -> int:
     note = (f"{n} records drawn: {n_accepted} audits applied by Phase 4a, {n - n_accepted} written but never applied "
             f"(flagged). * = record later superseded as canonical ({n_super}). No integration object (retain/replace/drop/new) "
             f"exists for any record, so no disposition hatching. {n_no_before} records lack a pre-repair artifact. "
-            "Categories are keyword rules over the finding text (see script and CSV), not an audit-declared type.")
+            "Categories are keyword rules over the finding text (see script and CSV), not an audit-declared type. "
+            "Panel B diffs leaf paths, not entities: a list reindex counts as one removal plus one addition.")
     fig.text(0.2, ax_c.get_position().y0 - 0.006, "\n".join(textwrap.wrap(note, 170)), fontsize=6.8,
              color=st.INK["secondary"], ha="left", va="top")
     fig.suptitle("Phase 3 audit findings and Phase 4 repair diff per record (API-runner runs with an audit artifact at HEAD)",

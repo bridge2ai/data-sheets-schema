@@ -5,13 +5,26 @@ The verdict caches under data/evaluation_llm/judgement_cache/ are keyed by (slot
 value), not by record, so records are joined to verdicts by exact slot value. Which records the
 caches were built for is established by that join:
 
-- fitness (`<project>_fitness.jsonl`, 1,441 entries, axis=fitness): the July 2026 Claude Code
-  records 2026-07-28_claude-opus-5-generic rep1-3 (v1) and 2026-07-31_claude-opus-5-generic-v2
-  rep1-3 (v2), all four projects; nearly every populated slot matches.
+- fitness (`<project>_fitness.jsonl`, 1,441 entries, axis=fitness): the July 2026 records
+  2026-07-28_claude-opus-5-generic rep1-3 (v1) and 2026-07-31_claude-opus-5-generic-v2 rep1-3
+  (v2), all four projects; nearly every populated slot matches. Their provenance records the
+  agent runtime as "Claude Code" and the provider as "Anthropic"; runs.py folds that runtime
+  string to the agentic key, and the transport is not established from provenance, so the
+  records are described by those strings and not assigned to an arm here.
 - support (`CM4AI.jsonl`, 116 legacy entries with `supported`, no axis/rubric/corpus fields):
   the CM4AI v1 replicates under evidence_score.build_plan's stable/divergent partition, i.e.
   slots populated identically-by-presence in all three replicates were judged once on rep1's
-  value and propagated; all 78 planned judgements are in the cache.
+  value and propagated; all 78 planned judgements are in the cache. A propagated support
+  verdict is never crossed with the replicate's own fitness verdict: the mosaic covers only
+  slots whose support was judged on that replicate's value, and propagated slots are drawn as
+  a separate fitness-only segment that also reports how many of them differ in value from rep1.
+
+Module attribution: a slot declared at top level in exactly one D4D_*.yaml module belongs to
+it; otherwise the module declaring the slot's range class (from the current merged schema).
+D4D_Base_import.yaml declares the shared descriptive and identity slots that every Information
+subclass carries (title, doi, license, keywords, version, publisher, status, download_url,
+created_on, issued, was_derived_from, ...), so those 21 slots form one "Base (shared
+descriptive slots)" group, the counterpart of fig02's "Base / root".
 - the 24 reference-rescore records (2026-09 v7/v8) match only a handful of slots each; they are
   not drawn, and the join counts are exported (`_reference_join.csv`). This agrees with
   notes/fitness_cache_decision_2026-09-11.md: the caches carry an older schema digest and are not
@@ -45,8 +58,8 @@ COHORTS = [("v1", "2026-07-28_claude-opus-5-generic"), ("v2", "2026-07-31_claude
 COHORT_NAME = {"v1": "generic (v1)", "v2": "generic-v2"}
 SUPPORT_COHORT = "v1"                  # the only cohort with grounding judgements (CM4AI)
 SUPPORT_THRESHOLD = 0.75
-ARM = "direct"                         # Claude Code runtime, provider Anthropic (read from provenance below)
-FIT, UNFIT = st.ARM_COLOR[ARM], st.STATUS["serious"]
+FIT, UNFIT = st.SERIES[6], st.SERIES[7]   # verdict colours: fixed categorical slots 7 and 8, not arm or status hues
+MODULE_NAME = {"Base_import": "Base (shared descriptive slots)"}
 NOVERDICT = st.INK["axis"]
 
 
@@ -132,7 +145,8 @@ def join_records(fitness, support):
                 m = provenance_model(project, label, rep)
                 runtime[(m.get("agent_runtime"), m.get("provider"), m.get("model"))] += 1
                 cell = {"project": project, "cohort": cohort, "rep": rep, "label": f"{label}_rep{rep}", "slots": len(rec),
-                        "fit": 0, "unfit": 0, "no_fitness": 0, "both": Counter(), "support_judged": 0, "no_support": 0}
+                        "fit": 0, "unfit": 0, "no_fitness": 0, "both": Counter(), "support_judged": 0, "no_support": 0,
+                        "support_own": 0, "support_propagated": 0, "propagated_value_differs": 0, "prop": Counter()}
                 for slot, value in rec.items():
                     key = (slot, canonical(value))
                     f = fitness[project].get(key)
@@ -140,7 +154,8 @@ def join_records(fitness, support):
                            "value_sha256_12": hashlib.sha256(key[1].encode()).hexdigest()[:12],
                            "fitness_judged": f is not None, "fitness": None if f is None else f["fitness"],
                            "failure": None if f is None else f["failure"], "fit": None if f is None else (f["failure"] == "none"),
-                           "support_judged": False, "supported": None, "supported_bool": None, "support_source": ""}
+                           "support_judged": False, "supported": None, "supported_bool": None, "support_source": "",
+                           "propagated_value_differs": None}
                     if f is None:
                         cell["no_fitness"] += 1
                     elif row["fit"]:
@@ -151,11 +166,21 @@ def join_records(fitness, support):
                         src_rep = plan.representative.get(slot, f"rep{rep}")
                         s = support.get((slot, canonical(recs[int(src_rep[3:])].get(slot))))
                         if s is not None:
+                            propagated = src_rep != f"rep{rep}"
+                            differs = propagated and canonical(recs[1].get(slot)) != key[1]
                             row.update(support_judged=True, supported=s["supported"], supported_bool=s["supported"] >= SUPPORT_THRESHOLD,
-                                       support_source=("propagated from rep1" if src_rep != f"rep{rep}" else "judged on this replicate"))
+                                       support_source=("propagated from rep1" if propagated else "judged on this replicate"),
+                                       propagated_value_differs=(differs if propagated else None))
                             cell["support_judged"] += 1
-                            if f is not None:
-                                cell["both"][(row["supported_bool"], row["fit"])] += 1
+                            if propagated:
+                                cell["support_propagated"] += 1
+                                cell["propagated_value_differs"] += int(differs)
+                                if f is not None:
+                                    cell["prop"][row["fit"]] += 1
+                            else:
+                                cell["support_own"] += 1
+                                if f is not None:
+                                    cell["both"][(row["supported_bool"], row["fit"])] += 1
                         else:
                             cell["no_support"] += 1
                     rows.append(row)
@@ -180,7 +205,7 @@ def draw_cell(ax, cell, wmax):
     """One record. Lengths share one scale (slots / wmax); area of the mosaic = slots judged on both axes."""
     ax.set_xlim(0, 1.06); ax.set_ylim(0, 1); ax.axis("off")
     h = 0.34
-    if cell["support_judged"]:
+    if cell["support_own"]:
         both = cell["both"]; n = sum(both.values())
         w = n / wmax
         n_sup = both[(True, True)] + both[(True, False)]
@@ -191,15 +216,24 @@ def draw_cell(ax, cell, wmax):
                 continue
             cw = w * nn / n
             fit_n = both[(supported, True)]
-            for is_fit, y0, hh in ((True, 0.32, h * fit_n / nn), (False, 0.32 + h * fit_n / nn, h * (nn - fit_n) / nn)):
+            for is_fit, y0, hh in ((True, 0.5, h * fit_n / nn), (False, 0.5 + h * fit_n / nn, h * (nn - fit_n) / nn)):
                 if hh <= 0:
                     continue
                 ax.add_patch(Rectangle((x0, y0), cw, hh, facecolor=FIT if is_fit else UNFIT,
                                        edgecolor=st.INK["surface"], linewidth=1.0, hatch=None if supported else st.HATCH, zorder=2))
             x0 += cw + 0.01
-        ax.text(0, 0.72, f"both axes: {n} slots", fontsize=6.4, color=st.INK["secondary"], va="bottom")
-        ax.text(0, 0.22, f"unsupported {n_uns}, unfit {both[(True, False)] + both[(False, False)]}, no fitness verdict {cell['no_fitness']}",
+        ax.text(0, 0.88, f"both axes on own value: {n} slots", fontsize=6.4, color=st.INK["secondary"], va="bottom")
+        ax.text(0, 0.47, f"unsupported {n_uns}, unfit {both[(True, False)] + both[(False, False)]}, no fitness verdict {cell['no_fitness']}",
                 fontsize=5.8, color=st.INK["muted"], va="top")
+        if cell["support_propagated"]:
+            pn = cell["prop"][True] + cell["prop"][False]
+            pw = pn / wmax
+            ax.add_patch(Rectangle((0, 0.04), pw * cell["prop"][True] / max(pn, 1), h * 0.5, facecolor=FIT, edgecolor=st.INK["surface"], linewidth=1.0, zorder=2))
+            ax.add_patch(Rectangle((pw * cell["prop"][True] / max(pn, 1), 0.04), pw * cell["prop"][False] / max(pn, 1), h * 0.5, facecolor=UNFIT,
+                                   edgecolor=st.INK["surface"], linewidth=1.0, zorder=2))
+            ax.add_patch(Rectangle((0, 0.04), max(pw, 0.02), h * 0.5, facecolor="none", edgecolor=NOVERDICT, linestyle=(0, (2, 2)), linewidth=0.8, zorder=3))
+            ax.text(0, 0.04 + h * 0.5 + 0.02, f"support propagated from rep1: {pn} slots\n(value differs for {cell['propagated_value_differs']}); fitness only, not crossed",
+                    fontsize=5.6, color=st.INK["muted"], va="bottom", linespacing=1.1)
     else:
         n = cell["fit"] + cell["unfit"]
         w = n / wmax
@@ -219,7 +253,7 @@ def main() -> int:
     rows, cells, runtime = join_records(fitness, support)
     module_of = module_map()
     for r in rows:
-        r["module"] = module_of(r["slot"])
+        r["module"] = MODULE_NAME.get(module_of(r["slot"]), module_of(r["slot"]))
     ref = reference_join(fitness, support)
     wmax = max(c["slots"] for c in cells.values())
     n_records = len(cells)
@@ -244,14 +278,15 @@ def main() -> int:
                 if ci == 0 and rep == 1:
                     ax.text(-0.04, 0.5, project.replace("_", "-"), transform=ax.transAxes, rotation=90, ha="right", va="center",
                             fontsize=8.5, fontweight="bold", color=st.INK["secondary"])
-    fig.text(0.06, 0.935, "A  Per record: fitness verdicts for every matched slot; support x fitness mosaic where both axes were judged (CM4AI v1)",
+    fig.text(0.06, 0.935, "A  Per record: fitness verdicts for every matched slot; support x fitness mosaic where both axes were judged on the replicate's own value (CM4AI v1)",
              fontsize=9.5, fontweight="bold", ha="left", va="bottom")
     handles = [Patch(facecolor=FIT, label="fit (judge failure = none)"),
                Patch(facecolor=UNFIT, label="unfit (failure = form, target or substance)"),
-               Patch(facecolor=FIT, hatch=st.HATCH, edgecolor=st.INK["surface"], label=f"hatched column: unsupported (supported < {SUPPORT_THRESHOLD})"),
-               Patch(facecolor="none", edgecolor=NOVERDICT, hatch=st.HATCH, label="populated slot with no cached fitness verdict"),
-               Patch(facecolor="none", edgecolor=NOVERDICT, linestyle=(0, (2, 2)), label="axis not judged for this record")]
-    fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.06, 0.985), ncol=3, fontsize=7, frameon=False, handlelength=1.6)
+               Patch(facecolor=FIT, hatch=st.HATCH, edgecolor=st.INK["surface"], linewidth=1.0, label=f"hatched column: unsupported (supported < {SUPPORT_THRESHOLD})"),
+               Patch(facecolor="none", edgecolor=NOVERDICT, hatch=st.HATCH, linewidth=1.0, label="populated slot with no cached fitness verdict"),
+               Patch(facecolor="none", edgecolor=NOVERDICT, linestyle=(0, (2, 2)), linewidth=1.0, label="axis not judged for this record (dashed)"),
+               Patch(facecolor=FIT, edgecolor=NOVERDICT, linestyle=(0, (2, 2)), linewidth=1.0, label="fitness only: support verdict propagated from rep1, not crossed")]
+    fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.06, 0.985), ncol=3, fontsize=7, frameon=False, handlelength=1.8, handleheight=1.1)
 
     # ---- (B) per schema module ----
     axB = fig.add_subplot(gs[1])
@@ -283,8 +318,8 @@ def main() -> int:
     st.hairline_grid(axB, "x")
 
     (rt, prov, model), = [k for k, _ in runtime.most_common(1)]
-    note = (f"Record set: {n_records} Claude Code full records (agent runtime {rt}, provider {prov}, model {model}), 4 projects x v1/v2 x 3 replicates, "
-            f"generated 2026-07-28 and 2026-07-31; {n_fit_judged} slot fitness verdicts and {n_sup_judged} support verdicts matched by (slot, canonical JSON value). "
+    note = (f"Record set: {n_records} full records, 4 projects x v1/v2 x 3 replicates, generated 2026-07-28 and 2026-07-31; records: {rt} runtime, "
+            f"provider recorded as {prov}, model {model} (July 2026); runs.py maps that runtime string to the agentic key; transport not established from provenance. {n_fit_judged} slot fitness verdicts and {n_sup_judged} support verdicts matched by (slot, canonical JSON value). "
             f"Evaluator for both axes: {fit_model}. Fitness cache context: axis={fit_axis}, rubric digest {fit_rubric}, schema digest {fit_schema}. "
             f"Support cache: legacy entries without axis/rubric/corpus fields (axis={sup_axis}, rubric={sup_rubric}, corpus={sup_corpus}); "
             f"stable slots judged once on rep1 and propagated (evidence_score.build_plan); {n_partial} partial (0.5-0.74) judgements counted unsupported. "
@@ -293,9 +328,10 @@ def main() -> int:
     fig.text(0.06, 0.022, textwrap.fill(note, 200), fontsize=6.6, color=st.INK["secondary"], ha="left", va="bottom")
     fig.suptitle("Field-level support and fitness verdicts from the judgement caches, per record and per schema module",
                  x=0.06, ha="left", fontsize=11, fontweight="bold", y=0.998)
-    basis = (f"Record set: {n_records} July-2026 Claude Code records matched to data/evaluation_llm/judgement_cache (fitness all projects; support CM4AI v1 only); "
-             "verdict thresholds fit=failure none, supported>=0.75; join by exact slot value")
-    st.save(fig, "fig08_support_fitness", {"main": rows, "records": [{k: v for k, v in c.items() if k != "both"} | {"both_axes": sum(c["both"].values())} for c in cells.values()],
+    basis = (f"Record set: {n_records} July-2026 records (Claude Code runtime, provider recorded as Anthropic; runs.py maps that runtime string to the agentic key; "
+             "transport not established from provenance) matched to data/evaluation_llm/judgement_cache (fitness all projects; support CM4AI v1 only); "
+             "fit=failure none, supported>=0.75; join by exact slot value")
+    st.save(fig, "fig08_support_fitness", {"main": rows, "records": [{k: v for k, v in c.items() if k not in ("both", "prop")} | {"both_axes_own_value": sum(c["both"].values())} for c in cells.values()],
                                            "modules": module_rows, "reference_join": ref}, basis)
     return 0
 

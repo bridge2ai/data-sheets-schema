@@ -37,7 +37,7 @@ STATUS_COL = {"filled": st.SEQ[8], "empty": st.SEQ[3], "unresolvable": None, "un
 LOSS = ["none", "minimal", "moderate", "high"]
 LOSS_COL = dict(zip(LOSS, [st.ORDINAL[0], st.ORDINAL[3], st.ORDINAL[6], st.ORDINAL[9]]))
 MAPTYPES = ["exactMatch", "closeMatch", "relatedMatch", "narrowMatch"]
-MAP_COL = {"exactMatch": st.SERIES[6], "closeMatch": st.SERIES[3], "relatedMatch": st.SERIES[4], "narrowMatch": st.SERIES[5]}  # non-blue slots, so the ramp beside them stays unambiguous
+MAP_COL = {"exactMatch": st.SERIES[3], "closeMatch": st.SERIES[4], "relatedMatch": st.SERIES[5], "narrowMatch": st.SERIES[6]}  # slots 3.. in fixed order; 0-2 are the arms
 EMPTY = (None, "", [], {})
 
 
@@ -84,17 +84,20 @@ def overlap(project: str, mapped: Path, gen: Path) -> tuple[dict, list[dict]]:
     full = yaml.safe_load(gen.read_text())
     ck = {k for k, v in crate.items() if v not in EMPTY}
     gk = {k for k, v in full.items() if v not in EMPTY}
-    detail, counts = [], {"both_agree": 0, "both_differ": 0, "crate_only": 0, "generated_only": 0}
+    detail, counts = [], {"both_agree": 0, "both_differ_scalar": 0, "both_differ_nested": 0, "crate_only": 0, "generated_only": 0}
     for k in sorted(ck | gk):
+        kind = "nested" if any(isinstance(v, (dict, list)) for v in (crate.get(k), full.get(k))) else "scalar"
         if k in ck and k in gk:
             agree = norm(crate[k]) == norm(full[k])
-            state = "both_agree" if agree else "both_differ"
+            state = "both_agree" if agree else f"both_differ_{kind}"
         elif k in ck:
             state = "crate_only"
         else:
             state = "generated_only"
         counts[state] += 1
-        detail.append({"project": project, "slot": k, "state": state})
+        detail.append({"project": project, "slot": k, "state": state, "value_kind": kind,
+                       "crate_value": norm(crate[k])[:120] if k in ck else "",
+                       "generated_value": norm(full[k])[:120] if k in gk else ""})
     return counts, detail
 
 
@@ -118,10 +121,10 @@ def main() -> int:
                            **{f"outcome_{s}": per_project[p]["outcome"].get(s) for s in STATUSES},
                            **{f"loss_{s}": per_project[p]["loss"].get(s, 0 if per_project[p]["outcome"] else None) for s in LOSS},
                            **{f"maptype_{s}": per_project[p]["maptype"].get(s, 0 if per_project[p]["outcome"] else None) for s in MAPTYPES},
-                           **{f"overlap_{s}": per_project[p]["overlap"].get(s) for s in ("both_agree", "both_differ", "crate_only", "generated_only")},
+                           **{f"overlap_{s}": per_project[p]["overlap"].get(s) for s in ("both_agree", "both_differ_scalar", "both_differ_nested", "crate_only", "generated_only")},
                            "generated_record": per_project[p]["generated"]})
 
-    fig = plt.figure(figsize=(10.8, 8.2))
+    fig = plt.figure(figsize=(10.8, 8.6))
     gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.05], hspace=0.62, wspace=0.28)
     axA = fig.add_subplot(gs[0, 0]); axB = fig.add_subplot(gs[0, 1]); axC = fig.add_subplot(gs[1, :])
     xs = range(len(st.PROJECTS))
@@ -195,10 +198,11 @@ def main() -> int:
                loc="upper left", bbox_to_anchor=(0, -0.16), fontsize=6.8, ncol=2, handlelength=1.4)
 
     # --- C: overlap with a generated record --------------------------------
-    OV = [("both_agree", "both populated, values agree", st.SEQ[9], None),
-          ("both_differ", "both populated, values differ", st.SEQ[4], None),
-          ("crate_only", "crate-mapped only", st.SERIES[4], None),
-          ("generated_only", "generated only", st.SERIES[3], None)]
+    OV = [("both_agree", "both populated, values agree", st.SEQ[10], None),
+          ("both_differ_scalar", "both populated, scalar values differ", st.SEQ[6], None),
+          ("both_differ_nested", "both populated, nested values differ (serialisation rarely identical)", st.SEQ[2], None),
+          ("crate_only", "crate-mapped only", st.SERIES[3], None),
+          ("generated_only", "generated only", st.SERIES[4], None)]
     for i, p in enumerate(st.PROJECTS):
         d = per_project[p]
         if not d["overlap"]:
@@ -212,7 +216,7 @@ def main() -> int:
             axC.barh(i, v, left=base, height=bw, color=c, edgecolor=st.INK["surface"], linewidth=0.8, zorder=2)
             if v >= 3:
                 axC.text(base + v / 2, i, str(v), ha="center", va="center", fontsize=6.8,
-                         color=st.INK["surface"] if key == "both_agree" else st.INK["primary"])
+                         color=st.INK["surface"] if key in ("both_agree", "both_differ_scalar") else st.INK["primary"])
             base += v
         axC.text(base + 0.8, i, f"{base} populated top-level slots in either", va="center", fontsize=6.6, color=st.INK["secondary"])
     axC.set_yticks(list(xs)); axC.set_yticklabels(labels); axC.invert_yaxis()
@@ -220,11 +224,19 @@ def main() -> int:
     axC.set_xlim(0, 110)
     st.hairline_grid(axC, "x"); axC.tick_params(axis="y", length=0)
     axC.set_title("C  Populated top-level slots: crate-mapped record vs generated record (generic-v8, rep 1, API arm)", pad=6)
-    axC.legend(handles=[Patch(color=c, label=l) for _, l, c, _ in OV], loc="upper left", bbox_to_anchor=(0, -0.2), ncol=4, fontsize=6.8, handlelength=1.4)
+    axC.legend(handles=[Patch(color=c, label=l) for _, l, c, _ in OV], loc="upper left", bbox_to_anchor=(0, -0.2), ncol=3, fontsize=6.8, handlelength=1.4)
+    voice = {r["slot"]: r for r in detail if r["project"] == "VOICE"}
+    vc = yaml.safe_load((PKG / "VOICE" / "processed" / "VOICE_crate_mapped_d4d.yaml").read_text())
+    vg = yaml.safe_load((ROOT / gen["VOICE"]).read_text())
+    caveat = ("'Values differ' is a ceiling on disagreement: 'agree' requires identical normalised YAML, so two nested values that state the "
+              "same facts in different structure count as differing. Scalar differences can be real: the VOICE crate describes release "
+              f"{vc['version']} (doi {str(vc['doi']).replace('https://doi.org/', '')}) while the generated record describes "
+              f"{vg['version']} (doi {str(vg['doi']).replace('doi:', '')}).")
+    fig.text(0.08, 0.075, textwrap.fill(caveat, 175), fontsize=6.6, color=st.INK["secondary"], ha="left", va="top")
 
     fig.suptitle("Deterministic crate mapping per project: outcomes, fidelity, and overlap with a generated record",
                  x=0.01, ha="left", fontsize=11, fontweight="bold", y=0.985)
-    fig.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.17)
+    fig.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.2)
     basis = ("Record set: crate mapping reports under data/ro-crate_packages/<P>/processed/ (" + ", ".join(mapped) +
              "); generated records = reference rescore 2026-09-12 v8 rep 1 (claudecode_api/2026-09-04f and 04g); value agreement = normalised YAML equality")
     st.save(fig, "fig09_crate_vs_generation", {"main": panel_rows, "overlap_slots": detail}, basis)

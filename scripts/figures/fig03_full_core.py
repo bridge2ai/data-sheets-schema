@@ -187,11 +187,14 @@ def main() -> int:
     axp.text(-0.6, -1.15, "errors", ha="right", va="center", fontsize=6.6, color=st.INK["muted"])
     res_n = sum(r["full_resources"] for r in rows)
     dial_n = sum(1 for r in rows if r["dialect_derived"])
-    handles = [Patch(color=COL["shared"], label="shared slots (schema-identical in Dataset and CoreDataset): copied to the core"),
-               Patch(color=COL["resources"], label=f"resources: projected by id, full-only nested slots dropped ({res_n} leaves in this set)"),
-               Patch(facecolor="none", edgecolor=st.INK["muted"], linewidth=0.6, hatch=st.HATCH, label="full-only slots (file_collections and others): not carried"),
-               Patch(color=COL["constructed"], label="constructed in the core: distributions from file_collections, dialect, per-record slots"),
-               Patch(facecolor="none", edgecolor=COL["constructed"], linewidth=0.8, label="core distribution with no deterministic file-collection match (hollow)")]
+    unm_n = sum(r["unmatched_core_distributions"] or 0 for r in rows)
+    handles = [Patch(color=COL["shared"], label="shared slots (schema-identical in Dataset and CoreDataset): copied to the core")]
+    if res_n:  # drawn only when some record in the set has a top-level resources slot
+        handles.append(Patch(color=COL["resources"], label="resources: projected by id, full-only nested slots dropped"))
+    handles += [Patch(facecolor="none", edgecolor=st.INK["muted"], linewidth=0.6, hatch=st.HATCH, label="full-only slots (file_collections and others): not carried"),
+                Patch(color=COL["constructed"], label="constructed in the core: distributions from file_collections, dialect, per-record slots")]
+    if unm_n:  # hollow segment exists only when a core distribution has no file-collection match
+        handles.append(Patch(facecolor="none", edgecolor=COL["constructed"], linewidth=0.8, label="core distribution with no deterministic file-collection match (hollow)"))
     ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.0, -0.06), ncol=1, fontsize=7.2, handlelength=1.6)
     eq = sum(1 for r in rows if r["derived_equals_sibling"])
     errs = sum(r["pair_errors"] for r in rows)
@@ -200,8 +203,8 @@ def main() -> int:
             f"{errs} errors across the {n} pairs; {sem} of {n} pairs carry the checker's 'semantic-review-required' "
             f"warning (file_collections vs distributions), which Phase 4 answers with a model review not run here. "
             f"Shared slots: {len(ps.identity_slots)}; projected: {', '.join(ps.projected_slots)}; per-record: {', '.join(ps.per_record_slots)}. "
-            f"No record in this set has a top-level resources slot; dialect was derived for {dial_n} of {n}.")
-    fig.text(0.62, 0.14, textwrap.fill(note, 64), fontsize=6.9, color=st.INK["secondary"], ha="left", va="top")
+            f"Not drawn because their count is zero here: projected resources leaves ({res_n}) and unmatched core distributions ({unm_n}); dialect derived for {dial_n} of {n}.")
+    fig.text(0.62, 0.15, textwrap.fill(note, 66), fontsize=6.9, color=st.INK["secondary"], ha="left", va="top")
     fig.suptitle("What the derived core keeps of each full record, and what the deterministic pair check reports",
                  x=0.01, ha="left", fontsize=11, fontweight="bold", y=0.985)
     fig.subplots_adjust(left=0.13, right=0.99, top=0.915, bottom=0.21)
