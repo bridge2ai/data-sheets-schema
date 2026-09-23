@@ -145,7 +145,12 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
                                     '--review', str(review), '--job', job['id']])
     if binding == 'unkeyed':
         # A renderer-9+ job whose recorder line carries the refused expansion
-        # stops before credentials, ledger or runtime (#2341).
+        # stops before credentials, ledger or runtime (#2341): with no key in
+        # the environment and a runtime check that fails if reached, only the
+        # guard's own refusal can come out.
+        monkeypatch.delenv('CBORG_API_KEY', raising=False)
+        monkeypatch.setattr(runner, 'verified_executable', lambda *a: pytest.fail('runtime check reached'))
+        monkeypatch.setattr(runner.subprocess, 'check_output', lambda *a, **k: pytest.fail('runtime version reached'))
         with pytest.raises(BudgetStop, match='renders a shell expansion Claude Code refuses'):
             runner.main()
         assert observed == {}

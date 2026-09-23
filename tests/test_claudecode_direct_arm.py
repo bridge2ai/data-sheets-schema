@@ -626,3 +626,37 @@ def test_the_agentic_cborg_arm_can_register_the_env_form(native):  # noqa: F811
     assert recorder_line(spec_for({**agentic, "render_version": 9}).instruction).endswith(ENV_FLAG)
     import inspect
     assert "new_job(case, identifier, arm, runtime, method, replicate, args)" in inspect.getsource(module["main"])
+
+
+
+def test_the_agentic_preparer_writes_keyed_agentic_jobs(tmp_path, monkeypatch):
+    """#2342: main() itself, offline (--render-only, the two subprocess calls stood in for): every
+    agentic job and its render specification carry the key and the env-form recorder line; no API
+    job does."""
+    import runpy
+    import subprocess
+    import sys as _sys
+    root = Path(__file__).resolve().parents[1]
+    real = subprocess.check_output
+
+    def offline(argv, *a, **k):
+        if list(argv[:2]) == ["git", "rev-parse"]:
+            return "0" * 40 + "\n"
+        if list(argv[-1:]) == ["--version"]:
+            return "2.1.272 (Claude Code)\n"
+        return real(argv, *a, **k)
+    monkeypatch.setattr(subprocess, "check_output", offline)
+    monkeypatch.chdir(root)
+    module = runpy.run_path(str(root / "notes/matched_cborg_2026-09-13/prepare_registration.py"))
+    out = tmp_path / "registration"
+    monkeypatch.setattr(_sys, "argv", ["prepare_registration", "--render-only", "--output", str(out),
+                                       "--render-version", "14"])
+    module["main"]()
+    jobs = json.loads((out / "rendered_jobs.json").read_text())["generation"]["jobs"]
+    agentic = [j for j in jobs if j["execution_arm"] == "agentic"]
+    api = [j for j in jobs if j["execution_arm"] == "api"]
+    assert agentic and api
+    for job in agentic:
+        assert job["prompt_text_env"] is True and job["render_spec"]["prompt_text_env"] is True
+        assert recorder_line(Path(job["instruction"]).read_text()).endswith(ENV_FLAG)
+    assert not any("prompt_text_env" in j or "prompt_text_env" in j["render_spec"] for j in api)

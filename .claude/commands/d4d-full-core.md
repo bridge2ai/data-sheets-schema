@@ -366,7 +366,9 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    is a denied call that buys nothing.
 5. **Before Phase 2 — not optional, and not deferred to the end of the
    run** — run `poetry run d4d receipts check --label {VERSION}
-   --project {PROJECT} --strict` and do not begin Phase 2 until it reports
+   --project {PROJECT} --strict` (under a launch instruction, run the
+   instruction's own spelling of it; see "Registered commands take
+   precedence" below) and do not begin Phase 2 until it reports
    every manifest chunk reviewed. No provenance record exists yet; the
    command then reads the bundle named in the full record's `# Source
    bundle:` header as it is on disk (pass `--bundle` if the header is not
@@ -756,9 +758,11 @@ After Phase 4 validates, emit a machine-readable provenance record.
 **A registered recorder line is run exactly as written.** Where the launch
 instruction's `provenance record` line carries `--render-spec-json`, run that
 line as written and add nothing: it carries the registered specification,
-the launcher records the phase history and the receipt acceptance itself,
-and where the line ends `--prompt-text-env D4D_LAUNCH_INSTRUCTION` the
-recorder reads the launch instruction from that variable. Every other
+the launcher records the receipt acceptance itself and, from renderer 13,
+the phase history (a renderer 9 to 12 registered run records no phase
+history, #2345), and where the line ends `--prompt-text-env
+D4D_LAUNCH_INSTRUCTION` the recorder reads the launch instruction from that
+variable. Every other
 launched run completes its concrete line with the template's flags below
 (#2345). Under Claude Code, never add a shell expansion to `--prompt-text` or
 to any other prescribed command: the `${…:?…}` form is observed refused under

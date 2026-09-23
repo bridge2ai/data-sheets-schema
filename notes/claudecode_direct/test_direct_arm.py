@@ -1290,3 +1290,54 @@ def test_child_completed_uses_the_launchers_own_predicate(tmp_path, terminal, ex
     two = tmp_path / "two.jsonl"
     two.write_text((json.dumps({"type": "result", **terminal}) + "\n") * 2)
     assert launcher.child_outcome(two, tmp_path / "c.jsonl", 0)["child_completed"] is False
+
+
+
+def test_the_first_disqualifying_denial_leads_and_only_the_exact_evidence_stop_is_relabelled(offline_launch, monkeypatch):
+    """#2339: which denial leads; exact equality of the evidence-stop reason; #2334: a pin change stays the reason."""
+    launch = offline_launch
+    job = launch.registration["generation"]["jobs"][0]
+    receipts = next(line.strip() for line in Path(job["instruction"]).read_text().splitlines()
+                    if " -m data_sheets_schema.cli" in line and "receipts check" in line)
+    second = {"tool_name": "Bash", "tool_use_id": "denied_receipts", "tool_input": {"command": receipts}}
+    evidence = BudgetStop("native control session ended without complete evidence")
+    monkeypatch.setattr(launcher.native, "execute_child", fake_child(
+        terminal={"subtype": "success", "permission_denials": [recorder_denial(launch), second]},
+        write_outputs=launch.write_outputs, raise_after=evidence))
+    assert run(launch) == 1
+    receipt = receipt_of(launch)
+    assert len(receipt["disqualifying_denials"]) == 2
+    assert receipt["reason"] == "disqualified: " + receipt["disqualifying_denials"][0]
+    assert "provenance record" in receipt["reason"]
+    for stop in (BudgetStop("native input rejection has contradictory execution evidence"),
+                 BudgetStop("a registered pin changed: instruction.md")):
+        reset(launch)
+        monkeypatch.setattr(launcher.native, "execute_child", fake_child(
+            terminal={"subtype": "success", "permission_denials": [recorder_denial(launch)]},
+            write_outputs=launch.write_outputs, raise_after=stop))
+        assert run(launch) == 1
+        receipt = receipt_of(launch)
+        assert receipt["reason"] == str(stop) and receipt["reason_source"] == "controller"
+        assert "controller_reason" not in receipt and receipt["disqualifying_denials"]
+
+
+def test_the_outcome_and_rate_readers_skip_malformed_shapes(tmp_path):
+    """#2339: the window, decision-record and content-block guards; #2340: an aborted scan names itself."""
+    rates = tmp_path / "rates.jsonl"
+    rates.write_text(json.dumps(rate_event({"odd": 5, "seven_day": {"utilization": 0.5, "resetsAt": 1}})) + "\n")
+    windows = launcher.rate_limits(rates)["windows"]
+    assert "odd" not in windows and windows["seven_day"]["max"] == {"utilization": 0.5, "resets_at": 1}
+    transcript, control_log = tmp_path / "t.jsonl", tmp_path / "c.jsonl"
+    events = [{"type": "assistant", "message": {"content": ["plain text", {"type": "tool_use", "id": "a", "name": "Read"},
+                                                             {"type": "tool_use", "id": "b", "name": "Read"}]}}]
+    transcript.write_text("".join(json.dumps(e) + "\n" for e in events))
+    control_log.write_text("".join(json.dumps(r) + "\n" for r in [
+        {"kind": "decision", "request": "text"},                                          # request not a mapping
+        {"kind": "decision", "request": {"request": "text"}},                             # inner not a mapping
+        {"kind": "decision", "request": {"request": {"input": ["a"]}}},                   # input not a mapping
+        {"kind": "decision", "request": {"request": {"input": {"tool_use_id": ["a"]}}}},  # id not a string
+        {"kind": "decision", "request": {"request": {"input": {"tool_use_id": "b"}}}}]))
+    outcome = launcher.child_outcome(transcript, control_log)
+    assert [e["tool_use_id"] for e in outcome["uncovered_tool_calls"]] == ["a"]
+    aborted = launcher.child_outcome(tmp_path, control_log)                               # a directory, not a file
+    assert aborted["uncovered_tool_calls"] is None and aborted["child_outcome_note"].startswith("outcome unreadable:")

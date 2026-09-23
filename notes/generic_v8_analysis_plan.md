@@ -2923,12 +2923,15 @@ made before this keeps its own pinned copy and each one made after pins the
 new bytes; nothing existing re-runs under the new code.
 
 **Playbook (condition boundary for every agentic run).**
-`.claude/commands/d4d-full-core.md` `13410f06…` → `723a2d6d…`. A registered
+`.claude/commands/d4d-full-core.md` `13410f06…` → `5e7abd16…`. A registered
 recorder line, one carrying `--render-spec-json`, is run exactly as written
-with nothing added: the launcher records the phase history and the receipt
-acceptance itself, so native records carry their phase history on the
-launcher receipt and no `phase_log`, and their receipts block reads
-`expected: false` (deriving it from the registered specification is #2350).
+with nothing added. The launcher records the receipt acceptance itself and,
+from renderer 13, the phase history, which native records carry on the
+launcher receipt and not in `phase_log`. A renderer 9 to 12 registered run
+records no phase history anywhere: both launchers gate it at renderer 13,
+and the preparer's default renderer is 9 (#2345). Native receipts blocks
+read `expected: false` (deriving it from the registered specification is
+#2350).
 Every other launched run completes its concrete line with the template's
 flags, as before (#2345). Under Claude Code no shell expansion is added to a
 prescribed command: the `${…:?…}` form is observed refused under dontAsk and
@@ -2948,8 +2951,10 @@ runtime refusal beside the Read type rejection: a Write of a file the session
 has not read, matched exactly on its two arguments, the error wrapper and the
 plain error text, recorded with the literal target path (#2285, #2330). In
 the first direct canary one such Write, refused before the hook fired, left
-305 decisions for 306 calls and stopped the evidence check; the same refusal
-appears in the v10q and v10r CBORG transcripts. Earlier Read rejection
+305 decisions for 306 calls and stopped the evidence check. The #2327 review
+found the same refusal in the private attempt evidence of the v10q and v10r
+CBORG runs; no public file shows it, and #2282 records only where those runs
+stopped (#2351). Earlier Read rejection
 records re-check unchanged. The native evaluation harness shares this
 control: an evaluation registered after it accepts a runtime-refused Write of
 a file other than its candidate and still stops on a refused Write of the
