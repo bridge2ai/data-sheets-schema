@@ -24,7 +24,7 @@ SELECTOR='fitness_schema_guidance'
 
 
 @pytest.fixture
-def selected_composite(tmp_path, monkeypatch):
+def selected_composite(tmp_path, monkeypatch, request):
     import test_source_pair
     original = test_source_pair.final_fixture
     # The old minimal accounting fixture omits repository; actual accepted
@@ -37,7 +37,7 @@ def selected_composite(tmp_path, monkeypatch):
             result['pinned_files'].update({str(path):reg.sha(path) for _,path,_ in snapshot.sources})
         return result
     monkeypatch.setattr(test_source_pair, 'final_fixture', complete_fixture)
-    return composite.__wrapped__(tmp_path, monkeypatch)
+    return composite.__wrapped__(tmp_path, monkeypatch, request)
 
 
 def write(path,value):
