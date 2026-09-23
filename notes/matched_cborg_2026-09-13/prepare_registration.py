@@ -45,7 +45,11 @@ def spec_for(job):
         profile=job["profile"], profile_basis="stated by the registered caller",
         render_version=job.get("render_version", job.get("render_spec", {}).get("render_version", 9)),
         run_date=job.get("run_date", "2026-09-14"),
-        runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)")
+        runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)",
+        # A job registered with the key renders its recorder line with
+        # `--prompt-text-env` (#2282); every registration made before this
+        # carries no key and re-derives exactly as it was registered (#2307).
+        prompt_text_env=job.get("prompt_text_env") is True)
 
 
 def positive_seconds(text):
@@ -75,6 +79,10 @@ def build_parser():
     parser.add_argument("--per-job-attempt-caps", type=Path,
                         help="JSON mapping of explicitly approved job IDs to whole-attempt USD caps; preparation grants no launch approval")
     parser.add_argument("--render-only", action="store_true")
+    parser.add_argument("--prompt-text-env", action="store_true",
+                        help="render each agentic job's recorder line with --prompt-text-env "
+                             "D4D_LAUNCH_INSTRUCTION instead of the shell expansion Claude Code refuses "
+                             "under dontAsk (#2282, #2307); requires renderer 9 or later; API jobs are unaffected")
     parser.add_argument("--agentic-deadline-seconds", type=positive_seconds, default=1800,
                         help="wall-clock limit of one native attempt; 1800 is what v10q and v10r "
                              "registered, and it stopped the v10r CHORUS attempt in Phase 3 (#2010)")
@@ -166,6 +174,8 @@ def main():
                        "canary": replicate == 1 and case["project"] in {"CHORUS", "KIDS_FIRST"},
                        "run_date": args.run_date, "render_version": args.render_version,
                        "label": f"{args.label_date}_claude-opus-5-{arm}-{args.cohort.replace('_','-')}-{case['project'].lower()}_rep{replicate}"}
+                if args.prompt_text_env and arm == "agentic":
+                    job["prompt_text_env"] = True
                 spec = spec_for(job)
                 # Use the public CLI's corpus layout so provenance/receipt
                 # helpers resolve the same full/core files as generation.

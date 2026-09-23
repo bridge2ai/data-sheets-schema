@@ -366,7 +366,10 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    is a denied call that buys nothing.
 5. **Before Phase 2 — not optional, and not deferred to the end of the
    run** — run `poetry run d4d receipts check --label {VERSION}
-   --project {PROJECT} --strict` and do not begin Phase 2 until it reports
+   --project {PROJECT} --strict` (where the launch instruction gives this
+   check as a concrete command with a registered interpreter, run that
+   command exactly as written; a `poetry run` spelling of it is refused
+   there, #2325) and do not begin Phase 2 until it reports
    every manifest chunk reviewed. No provenance record exists yet; the
    command then reads the bundle named in the full record's `# Source
    bundle:` header as it is on disk (pass `--bundle` if the header is not
@@ -751,7 +754,15 @@ deterministic checks, semantic related-content review, and reporting.
 
 ## Provenance record (required, per project)
 
-After Phase 4 validates, emit a machine-readable provenance record:
+After Phase 4 validates, emit a machine-readable provenance record. Where
+the launch instruction gives a concrete `provenance record` line, run that
+line exactly as written and nothing else: it carries the registered
+specification and, where it ends `--prompt-text-env D4D_LAUNCH_INSTRUCTION`,
+the recorder reads the launch instruction from that variable itself. Never
+put a shell expansion (`$VAR`, `${VAR}`) into `--prompt-text` or any other
+prescribed command: Claude Code refuses such a command under `dontAsk`, and a
+refused prescribed command disqualifies the run (#2282, #2316). The template
+below is for a run with no launch instruction:
 
 ```bash
 poetry run d4d provenance record \

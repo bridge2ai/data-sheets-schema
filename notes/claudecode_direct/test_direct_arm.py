@@ -383,7 +383,7 @@ LIMITS = {"contextWindow": 200000, "maxOutputTokens": 64000}
 
 def fake_child(*, apikey="none", result=True, denials=(), write_outputs=None, tools=("Read", "Write", "Bash"),
                model_usage=None, efforts=("max",), seen=None, terminal=None, results=1, model="claude-opus-5",
-               version="2.1.272", inits=1, exit_code=0, control_lines=None, extra_events=()):
+               version="2.1.272", inits=1, exit_code=0, control_lines=None, extra_events=(), raise_after=None):
     def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
                       command_policy=None, phase_spec=None, command_classifier=None, event_observer=None):
         verify_launch()
@@ -406,6 +406,8 @@ def fake_child(*, apikey="none", result=True, denials=(), write_outputs=None, to
         (attempt / "control.jsonl").write_text("".join(line + "\n" for line in lines))
         if write_outputs:
             write_outputs()
+        if raise_after is not None:
+            raise raise_after
         return exit_code
     return execute_child
 
@@ -1132,3 +1134,80 @@ def test_the_recorder_permission_probe_builds_its_cases_offline(tmp_path):
     assert "#" not in cases["real_env_flag_no_hash"] and "(" not in cases["real_env_flag_no_parens"]
     fixture = {c["id"] for c in probe.recorder_cases(line, tmp_path / "i.md")}
     assert {"expansion", "literal_path", "env_flag", "bare", "stem_only"} <= fixture
+
+
+
+RATE = {"type": "rate_limit_event", "rate_limit_info": {
+    "status": "allowed_warning", "resetsAt": 1790380800, "rateLimitType": "seven_day", "utilization": 0.94,
+    "isUsingOverage": False, "surpassedThreshold": 0.75,
+    "unifiedWindows": {"five_hour": {"utilization": 0.13, "resetsAt": 1790151000},
+                       "seven_day": {"utilization": 0.94, "resetsAt": 1790380800}}}}
+
+
+def test_the_receipt_keeps_the_runtimes_rate_limit_reports(offline_launch, monkeypatch):
+    """#2283: the first canary ended at 94% of the weekly window with nothing on its receipt."""
+    launch = offline_launch
+    early = {"type": "rate_limit_event", "rate_limit_info": {**RATE["rate_limit_info"], "utilization": 0.91,
+             "unifiedWindows": {"seven_day": {"utilization": 0.91, "resetsAt": 1790380800}}}}
+    monkeypatch.setattr(launcher.native, "execute_child", fake_child(extra_events=[early, RATE], write_outputs=launch.write_outputs))
+    assert run(launch) == 0
+    limits = receipt_of(launch)["rate_limits"]
+    assert limits["events"] == 2 and limits["statuses"] == ["allowed_warning"] and limits["overage_used"] is False
+    assert limits["max_utilization"] == {"seven_day": 0.94, "five_hour": 0.13}
+    assert limits["resets_at"] == {"seven_day": 1790380800, "five_hour": 1790151000}
+    # A stopped attempt keeps them too.
+    reset(launch)
+    receipt = stopped(launch, monkeypatch, fake_child(result=False, extra_events=[RATE]),
+                      "native runtime initialization or terminal result is missing or ambiguous")
+    assert receipt["rate_limits"]["max_utilization"]["seven_day"] == 0.94
+
+
+def test_rate_limits_never_raise(tmp_path):
+    assert launcher.rate_limits(tmp_path / "absent.jsonl")["note"] == "no transcript"
+    garbage = tmp_path / "garbage.jsonl"
+    garbage.write_bytes(b"\xff\n[1]\n" + json.dumps({"type": "rate_limit_event", "rate_limit_info": "x"}).encode() + b"\n")
+    assert launcher.rate_limits(garbage)["events"] == 0
+
+
+def test_a_stopped_receipt_leads_with_the_disqualifying_denial_and_says_the_child_completed(offline_launch, monkeypatch):
+    """#2285: the first canary's receipt led with an evidence gap and never said the child completed."""
+    launch = offline_launch
+    job = launch.registration["generation"]["jobs"][0]
+    recorder = next(line.strip() for line in Path(job["instruction"]).read_text().splitlines()
+                    if " -m data_sheets_schema.cli provenance record" in line)
+    denial = {"tool_name": "Bash", "tool_use_id": "denied_recorder", "tool_input": {"command": recorder}}
+    child = fake_child(terminal={"subtype": "success", "permission_denials": [denial]}, write_outputs=launch.write_outputs,
+                       raise_after=BudgetStop("native control session ended without complete evidence"))
+    monkeypatch.setattr(launcher.native, "execute_child", child)
+    assert run(launch) == 1
+    receipt = receipt_of(launch)
+    assert receipt["status"] == "stopped" and receipt["child_completed"] is True
+    assert receipt["reason_source"] == "denial" and receipt["reason"].startswith("disqualified: denied prescribed call")
+    assert receipt["controller_reason"] == "native control session ended without complete evidence"
+    assert receipt["controller_reason_source"] == "controller"
+    # Without a disqualifying denial the controller's reason stands and nothing is relabelled.
+    reset(launch)
+    child = fake_child(terminal={"subtype": "success"}, write_outputs=launch.write_outputs,
+                       raise_after=BudgetStop("native control session ended without complete evidence"))
+    monkeypatch.setattr(launcher.native, "execute_child", child)
+    assert run(launch) == 1
+    receipt = receipt_of(launch)
+    assert receipt["reason"] == "native control session ended without complete evidence"
+    assert "controller_reason" not in receipt and receipt["child_completed"] is True
+
+
+def test_the_child_outcome_names_calls_no_decision_covers(tmp_path):
+    transcript, control_log = tmp_path / "t.jsonl", tmp_path / "c.jsonl"
+    events = [{"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "a", "name": "Read"},
+                                                             {"type": "tool_use", "id": "b", "name": "Write"},
+                                                             {"type": "tool_use", "id": "c", "name": "Write"}]}},
+              {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "b",
+                                                        "content": "<tool_use_error>rejected</tool_use_error>"}]}},
+              {"type": "result", "subtype": "success", "is_error": False}]
+    transcript.write_text("".join(json.dumps(e) + "\n" for e in events))
+    control_log.write_text(json.dumps({"kind": "decision", "request": {"request": {"input": {"tool_use_id": "a"}}}}) + "\n"
+                           + json.dumps({"kind": "input_rejected_before_callback", "tool_use_id": "c"}) + "\n")
+    outcome = launcher.child_outcome(transcript, control_log)
+    assert outcome == {"child_completed": True, "uncovered_tool_calls": [
+        {"tool": "Write", "result_head": "<tool_use_error>rejected</tool_use_error>"}]}
+    assert launcher.child_outcome(tmp_path / "absent.jsonl", control_log)["child_completed"] is False

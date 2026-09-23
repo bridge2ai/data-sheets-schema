@@ -434,6 +434,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             registered = RunSpec.from_render_spec(supplied, project=project, method=method, label=label)
             if not registered.is_agentic or registered.render_version < 9:
                 raise ValueError("--render-spec-json requires a native renderer-9-or-newer specification")
+            if registered.prompt_text_env and prompt_text_env is None:
+                # One way only (#2314): a line rendered with the env form is
+                # run as written. The other direction stays open, so an
+                # expansion-form run can still be re-recorded by hand.
+                raise ValueError("the registered specification renders --prompt-text-env "
+                                 "D4D_LAUNCH_INSTRUCTION; run the recorder line as written")
             if registered.render_spec() != supplied or registered.instruction != supplied_text:
                 raise ValueError("registered rendering specification does not reproduce the supplied instruction")
             # The registered specification is the launcher's assertion; a

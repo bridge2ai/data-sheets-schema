@@ -2913,3 +2913,53 @@ specification (#2308). And `d4d-full-core.md` still prescribes only
 moves the playbook hash every agentic record and registration pins, so it
 waits for the next registered condition boundary (#2316). Binding the flag
 to the specification in the recorder is optional hardening (#2314).
+
+### Before the next registration on either Claude Code arm (#2283–#2285, #2307, #2314, #2316, #2325; 2026-09-23)
+
+What the first direct canary and the #2282 review left for the next
+registration, in one boundary.
+
+**Playbook (condition boundary for every agentic run).**
+`.claude/commands/d4d-full-core.md` `13410f06…` → `bdbd5832…`. Two sentences: where
+the launch instruction gives a concrete `provenance record` line, run it
+exactly as written, and never put a shell expansion into `--prompt-text` or
+any prescribed command (#2316); where it gives the receipts check as a
+concrete command with a registered interpreter, run that command, since the
+playbook's `poetry run` spelling is refused there (#2325). Every agentic
+record and registration hashes this playbook, so records made before it
+report the drift under `d4d runs check`, as with every playbook edit; a
+registration made after it pins the new bytes. The rendered instructions do
+not change: they name the playbook by path, not by content.
+
+**Native control (a controls change for both Claude Code arms and the
+audits).** `native_controls/native_control.py` `f87a5bfe…` → `79dfc4c0…`.
+`input_validation_rejection` recognises one more unexecuted runtime
+refusal beside the Read type rejection: a Write of a file the session has
+not read, matched exactly on its two arguments, the error wrapper and the
+plain error text (#2285). In the first direct canary one such Write,
+refused before the hook fired, left 305 decisions for 306 calls and stopped
+the evidence check; the recorded rejection is a new record shape
+(`tool: Write`, `rejection: file_not_read`) and every earlier record
+re-checks unchanged. Registrations and audits made before this keep their
+pinned copy.
+
+**Agentic (CBORG) arm opt-in (#2307).**
+`prepare_registration.py` `7ec98a3d…` → `841e8f7c…`. `spec_for` passes
+`prompt_text_env` from a job key, and `--prompt-text-env` sets that key on
+agentic jobs only, so the arm can register the env-form recorder line and
+its launcher re-derives it. Without the flag every job renders exactly as
+before; whether the arm's next registration uses it is that arm's call.
+
+**Recorder (#2314).** A registered specification that renders
+`--prompt-text-env` refuses a literal `--prompt-text`, so the line is run
+as written; the other direction stays open for re-recording an older run.
+
+**Direct launcher (#2283, #2285) and README (#2284).** The receipt keeps
+the runtime's `rate_limit_event` reports (count, highest utilization and
+reset per window, statuses, overage); a stopped receipt says whether the
+child completed, lists the calls no decision covers, and leads with a
+disqualifying denial, keeping the controller's reason beside it; the README
+states what the first canary observed instead of what was expected.
+
+**Evaluation.** Unaffected: no instrument reads the playbook's recorder
+paragraph, the control evidence or the launcher receipt.

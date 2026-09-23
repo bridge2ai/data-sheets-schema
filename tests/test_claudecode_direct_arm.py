@@ -440,6 +440,10 @@ class PlaybookWording(unittest.TestCase):
         self.assertIn("`Claude Code (direct)`", agent)
         # The registered-specification rule for the effort is stated where the flag is explained (#2225).
         self.assertIn("Under a registered specification that asserts an effort", core)
+        # Run the instruction's concrete recorder line and receipts check as written (#2316, #2325).
+        self.assertIn("launch instruction gives a concrete `provenance record` line, run that\nline exactly as written", core)
+        self.assertIn("Never\nput a shell expansion (`$VAR`, `${VAR}`) into `--prompt-text`", core)
+        self.assertIn("a `poetry run` spelling of it is refused\n   there, #2325", core)
 
 
 if __name__ == "__main__":
@@ -558,3 +562,49 @@ def test_a_different_file_in_the_variable_is_refused_by_the_render_gate(env_nati
     result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(other)})
     assert result.exit_code != 0 and "does not reproduce the supplied instruction" in result.output
     assert not direct.provenance_path.exists()
+
+
+
+def test_a_specification_rendering_the_env_form_requires_the_flag(env_native):
+    """#2314: one way only; a line rendered with --prompt-text-env is run as written."""
+    direct, sent, command, cli = env_native
+    literal = [*command[:-2], "--prompt-text", str(sent)]
+    result = CliRunner().invoke(cli, literal)
+    assert result.exit_code != 0 and "run the recorder line as written" in result.output
+    assert not direct.provenance_path.exists()
+
+
+def test_an_expansion_form_run_can_still_be_re_recorded_with_the_flag(native):  # noqa: F811
+    """#2314: the other direction stays open, so an old run is re-recorded by hand."""
+    from data_sheets_schema.cli import cli
+    spec, sent, command = native
+    at = command.index("--prompt-text")
+    swapped = command[:at] + ["--prompt-text-env", "D4D_LAUNCH_INSTRUCTION"] + command[at + 2:]
+    result = CliRunner().invoke(cli, swapped, env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+    assert result.exit_code == 0, (result.output, result.exception)
+    assert "prompt_text_env" not in yaml.safe_load(spec.provenance_path.read_text())["prompts"]["request"]["spec"]
+
+
+def test_the_agentic_cborg_arm_can_register_the_env_form(native):  # noqa: F811
+    """#2307: a job registered with the key re-derives with it; a job without it is unchanged."""
+    import runpy
+    root = Path(__file__).resolve().parents[1]
+    module = runpy.run_path(str(root / "notes/matched_cborg_2026-09-13/prepare_registration.py"))
+    spec_for, parser = module["spec_for"], module["build_parser"]()
+    spec, _, _ = native
+    job = {"project": spec.project, "method": spec.method, "bundle": str(spec.bundle), "label": spec.label,
+           "manifest": str(spec.manifest), "chunks": str(spec.chunk_manifest), "profile": spec.profile,
+           "runtime": "Claude Code", "render_version": 9, "run_date": "2026-09-15"}
+    plain = spec_for(job)
+    assert "prompt_text_env" not in plain.render_spec()
+    assert 'D4D_LAUNCH_INSTRUCTION:?' in recorder_line(plain.instruction)
+    keyed = spec_for({**job, "prompt_text_env": True})
+    assert keyed.render_spec() == {**plain.render_spec(), "prompt_text_env": True}
+    assert recorder_line(keyed.instruction).endswith(ENV_FLAG)
+    # The launcher re-derives through the same function from the registered job, key included.
+    assert spec_for({**job, "prompt_text_env": True, "render_spec": keyed.render_spec()}).render_spec() == keyed.render_spec()
+    # Only a literal true opts in; the flag is off by default and never touches API jobs.
+    assert "prompt_text_env" not in spec_for({**job, "prompt_text_env": "yes"}).render_spec()
+    assert parser.parse_args([]).prompt_text_env is False and parser.parse_args(["--prompt-text-env"]).prompt_text_env is True
+    with pytest.raises(ValueError, match="applies only to agentic renderers 9 and later"):
+        spec_for({**job, "runtime": "Claude API (direct)", "prompt_text_env": True})
