@@ -39,13 +39,20 @@ def keep(path, text):
 
 
 def spec_for(job):
+    if "prompt_text_env" in job and job["prompt_text_env"] is not True:
+        # Recorded only as true, like the render specification's key (#2315, #2343).
+        raise ValueError(f"job prompt_text_env is recorded only as true: {job['prompt_text_env']!r}")
     return api_runner.RunSpec(project=job["project"], arm="baseline", method=job["method"],
         bundle=Path(job["bundle"]), label=job["label"], condition="generic_v9",
         manifest=Path(job["manifest"]), chunk_manifest=Path(job["chunks"]),
         profile=job["profile"], profile_basis="stated by the registered caller",
         render_version=job.get("render_version", job.get("render_spec", {}).get("render_version", 9)),
         run_date=job.get("run_date", "2026-09-14"),
-        runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)")
+        runtime=job["runtime"], provider="LBL CBORG (proxy to Anthropic)",
+        # A job registered with the key renders its recorder line with
+        # `--prompt-text-env` (#2282); every registration made before this
+        # carries no key and re-derives exactly as it was registered (#2307).
+        prompt_text_env=job.get("prompt_text_env") is True)
 
 
 def positive_seconds(text):
@@ -83,6 +90,22 @@ def build_parser():
                              "independent acceptance of every earlier one. Existing registrations keep "
                              "the API-first default; a native-first sequence names the agentic job first.")
     return parser
+
+
+def new_job(case, identifier, arm, runtime, method, replicate, args):
+    """One registered job. Every agentic job renders its recorder line with
+    `--prompt-text-env D4D_LAUNCH_INSTRUCTION` (#2307): the expansion form is
+    refused by the pinned runtime under dontAsk (#2282), and the launcher
+    refuses an agentic job without the key (#2341). API jobs carry no
+    recorder line and no key."""
+    job = {**case, "id": identifier, "execution_arm": arm, "runtime": runtime,
+           "method": method, "replicate": replicate,
+           "canary": replicate == 1 and case["project"] in {"CHORUS", "KIDS_FIRST"},
+           "run_date": args.run_date, "render_version": args.render_version,
+           "label": f"{args.label_date}_claude-opus-5-{arm}-{args.cohort.replace('_','-')}-{case['project'].lower()}_rep{replicate}"}
+    if arm == "agentic":
+        job["prompt_text_env"] = True
+    return job
 
 
 def generation_deadline(args):
@@ -161,11 +184,7 @@ def main():
             for arm, runtime, method in [("api", "Claude API (direct)", "claudecode_api"),
                                          ("agentic", "Claude Code", "claudecode_agent")]:
                 identifier = f"{case['project']}_{arm}_rep{replicate}"
-                job = {**case, "id": identifier, "execution_arm": arm, "runtime": runtime,
-                       "method": method, "replicate": replicate,
-                       "canary": replicate == 1 and case["project"] in {"CHORUS", "KIDS_FIRST"},
-                       "run_date": args.run_date, "render_version": args.render_version,
-                       "label": f"{args.label_date}_claude-opus-5-{arm}-{args.cohort.replace('_','-')}-{case['project'].lower()}_rep{replicate}"}
+                job = new_job(case, identifier, arm, runtime, method, replicate, args)
                 spec = spec_for(job)
                 # Use the public CLI's corpus layout so provenance/receipt
                 # helpers resolve the same full/core files as generation.

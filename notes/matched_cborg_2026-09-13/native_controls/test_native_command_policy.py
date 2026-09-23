@@ -195,7 +195,7 @@ def test_controller_rejects_a_widened_policy_before_credentials_or_attempt_creat
     monkeypatch.setattr(runner, 'verify', lambda *args: None)
     monkeypatch.setattr(runner, 'verify_history', lambda *args: None)
     monkeypatch.setattr(runner, 'spec_for', lambda *args: SimpleNamespace(
-        render_spec=lambda: job['render_spec'], input_identity=lambda: {}, render_version=12))
+        render_spec=lambda: job['render_spec'], input_identity=lambda: {}, render_version=12, prompt_text_env=True))
     monkeypatch.delenv('CBORG_API_KEY', raising=False)
     monkeypatch.setattr(sys, 'argv', ['run_native_canary', '--overlay', str(overlay),
                                     '--review', str(review), '--job', job['id']])

@@ -107,7 +107,14 @@ validation error and error-only result must agree with the original argument,
 unique call/result identity, prior session initialization and event order.
 This records `input_rejected_before_callback`, without granting access or
 inventing a permission decision. Any callback or conflicting execution evidence
-prevents that exemption. Other missing callbacks remain unexplained. Live
+prevents that exemption. A second narrow exception covers the runtime's refusal
+to overwrite a file the session has not read (#2285): a `Write` with exactly
+`file_path` and `content` whose result is exactly the
+`<tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>`
+wrapper and its `Error: …` plain text is recorded the same way, as
+`input_rejected_before_callback` with `tool: Write`, `rejection: file_not_read`
+and the literal target path, under the same identity, session and order
+conditions. Other missing callbacks remain unexplained. Live
 completion and retrospective review verify the same rejection evidence.
 Transcript loading preserves physical line numbers; blank frames make history
 uncheckable, and malformed or incomplete frames are rejected. The

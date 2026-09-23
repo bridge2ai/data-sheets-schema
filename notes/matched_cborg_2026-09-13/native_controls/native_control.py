@@ -73,8 +73,19 @@ def hook_output(classification, basis):
         'permissionDecisionReason': 'Outside the registered tool policy: ' + basis}}
 
 
+#: The native runtime's refusal to overwrite a file this session has not
+#: read (#2285): observed in the first direct-arm canary on a Write of the
+#: full record, with no PreToolUse callback and no write.
+UNREAD_WRITE_MESSAGE = 'File has not been read yet. Read it first before writing to it.'
+
+
 def input_validation_rejection(call_event, call, result_event, call_line, result_line, session):
-    """Recognize the evidenced, unexecuted Read numeric-string rejection.
+    """Recognize the evidenced, unexecuted Read numeric-string rejection,
+    and the evidenced, unexecuted Write of an unread file (#2285).
+
+    For the Write, the call carries exactly `file_path` and `content` and the
+    result is exactly the runtime's unread-file wrapper and its plain error
+    text; the record keeps the literal, unresolved target path (#2330).
 
     This is native runtime evidence, not a permission decision. Both the
     typed envelope and its error-only wrapper must match the original input.
@@ -89,7 +100,7 @@ def input_validation_rejection(call_event, call, result_event, call_line, result
     call_message = call_event.get('message')
     if (call_event.get('type') != 'assistant' or not isinstance(call_message, dict) or
         call_message.get('role') != 'assistant' or
-        call.get('type') != 'tool_use' or call.get('name') != 'Read' or
+        call.get('type') != 'tool_use' or call.get('name') not in ('Read', 'Write') or
         not isinstance(call.get('id'), str) or not call['id'] or
         not call_line < result_line):
         return None
@@ -114,6 +125,22 @@ def input_validation_rejection(call_event, call, result_event, call_line, result
         result['is_error'] is not True):
         return None
     payload = call.get('input')
+    if call.get('name') == 'Write':
+        # Exactly the runtime's unread-file refusal: the Write carried its
+        # two arguments, the result is the error wrapper and the plain error
+        # text, and nothing else. The call never reached the hook, so no
+        # decision exists and no file was written (#2285).
+        if (not isinstance(payload, dict) or set(payload) != {'file_path', 'content'} or
+            not isinstance(payload['file_path'], str) or not payload['file_path'] or
+            not isinstance(payload['content'], str) or
+            result['content'] != f'<tool_use_error>{UNREAD_WRITE_MESSAGE}</tool_use_error>' or
+            result_event.get('tool_use_result') != f'Error: {UNREAD_WRITE_MESSAGE}'):
+            return None
+        return {'kind': 'input_rejected_before_callback', 'tool_use_id': call['id'],
+                'tool': 'Write', 'rejection': 'file_not_read', 'file_path': payload['file_path'],
+                'session_id': call_session,
+                'call_line': call_line, 'result_line': result_line,
+                'call_sha256': digest(call_event), 'result_sha256': digest(result_event)}
     if (not isinstance(payload, dict) or
         set(payload) - {'file_path', 'offset', 'limit', 'pages'} or
         not isinstance(payload.get('file_path'), str) or not payload['file_path'] or

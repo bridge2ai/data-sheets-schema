@@ -73,8 +73,11 @@ controller's own stop state.
 - **Auxiliary model.** The reference-rescore runs of Claude Code 2.1.269
   through CBORG, requested as `claude-opus-5[1m]`, report a second model,
   `claude-haiku-4-5`, in their terminal accounting for the runtime's own
-  auxiliary calls; a subscription session is expected to as well, which the
-  first run will show (#2268). The proxied arm's proxy stops the run on a request for
+  auxiliary calls (#2268). The first subscription canary (2026-09-23, 320
+  turns) reported none: `modelUsage` named only `claude-opus-5`, with
+  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` set; whether the flag is what
+  removed the auxiliary calls is not established, since the first canary is
+  the only run that set it (#2248, #2284, #2336). The proxied arm's proxy stops the run on a request for
   any model but the registered one, so an auxiliary request there would have
   stopped a run rather than gone unrecorded; none is recorded. The
   registration names the auxiliary models it permits, their usage is recorded
@@ -84,10 +87,29 @@ controller's own stop state.
   generation as the registered one, which is what a main-loop fallback
   would look like (#2247, #2271). The difference between the terminal's
   output total and the sum over the per-model figures is recorded under
-  `accounting_reconciliation` and not gated, since whether the runtime
-  means them to agree is not established.
-  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` is set; its effect on those
-  calls is not established, since no recorded run has set it (#2248).
+  `accounting_reconciliation` and not gated: in the first canary the
+  terminal reported 746,122 output tokens and the registered model 859,206,
+  so the two are not the same measure (#2284).
+- **Rate limits.** The runtime reports its subscription windows as
+  `rate_limit_event` lines; the receipt keeps their count and, per window,
+  the first, last and highest utilization, each with the reset it was
+  reported against, and the statuses seen and whether overage was used,
+  under `rate_limits` (#2283, #2335). The first canary started at 91% of its
+  seven-day window and ended at 94%. Nothing offline can read the utilization
+  before the first call, so whether to launch near the cap is the
+  maintainer's call.
+- **Stop receipt.** A stopped receipt says whether the child itself
+  completed (`child_completed`, by the launcher's own completion predicate,
+  with the result's subtype, terminal and stop reasons) and lists the tool
+  calls no control decision covers, by id and transcript line (#2285, #2337,
+  #2338). Where the child completed and the controller stopped for missing
+  evidence, a disqualifying denial leads it (`reason_source: denial`) with
+  the controller's reason kept as `controller_reason`; any other controller
+  stop keeps the headline (#2334). The runtime's
+  refusal to overwrite a file the session has not read is recognised as an
+  unexecuted call, like the Read type rejection, rather than as missing
+  evidence: in the first canary one such Write, rejected before the hook,
+  left 305 decisions for 306 calls and stopped the evidence check (#2285).
 - **Runtime limits.** The registration states the `contextWindow` and
   `maxOutputTokens` the runtime is expected to report for the registered
   model, taken from the native registration's offline observation of the
@@ -99,9 +121,11 @@ controller's own stop state.
   (#2246). Every recorded 1M-context run of Claude Code names its model
   `claude-opus-5[1m]` in the init line and the accounting, so the child is
   given `CLAUDE_CODE_DISABLE_1M_CONTEXT=1` and asked for the 200k build the
-  native arm observed; whether it honours that on the subscription is
-  observed only by the first run, and a `[1m]` init line stops the run as a
-  different model, with the observed model named, after the spend (#2266).
+  native arm observed; a `[1m]` init line stops the run as a different
+  model, with the observed model named (#2266). The first canary's init line
+  named `claude-opus-5` and its accounting reported `contextWindow` 200,000
+  and `maxOutputTokens` 64,000: the setting held on the subscription, and
+  the run compacted its context ten times (#2284).
 - **Effort.** `--effort max` is passed to the runtime and `--reasoning-effort
   max` is rendered into the instruction's own recorder line, so the record
   carries it as asserted by the launcher. The runtime does report the active

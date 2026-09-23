@@ -364,6 +364,7 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 raise FileNotFoundError('evidence/audit.json')
             monkeypatch.setattr(runner, 'native_evidence_check', unreadable)
             monkeypatch.setattr(run, 'render_version', 12)   # the renderer that checks evidence (>= 9)
+            monkeypatch.setattr(run, 'prompt_text_env', True)   # every renderer-9+ native job is keyed (#2341)
         argv=['run_native_canary','--overlay',str(overlay),'--review',str(review),'--job',job['id']]
     review.write_text(json.dumps(verdict));monkeypatch.setattr(sys,'argv',argv)
     before={p:p.read_bytes() for p in run.full_path.parent.rglob('*') if p.is_file()}

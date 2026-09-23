@@ -2913,3 +2913,79 @@ specification (#2308). And `d4d-full-core.md` still prescribes only
 moves the playbook hash every agentic record and registration pins, so it
 waits for the next registered condition boundary (#2316). Binding the flag
 to the specification in the recorder is optional hardening (#2314).
+
+### Before the next registration on either Claude Code arm (#2283–#2285, #2307, #2314, #2316, #2325; 2026-09-23)
+
+What the first direct canary and the #2282 review left for the next
+registration, in one boundary. Every code and playbook file below is pinned
+by registrations, overlays and the audit and evaluation registrations (the
+two READMEs are not), so each registration
+made before this keeps its own pinned copy and each one made after pins the
+new bytes; nothing existing re-runs under the new code.
+
+**Playbook (condition boundary for every agentic run).**
+`.claude/commands/d4d-full-core.md` `13410f06…` → `5e7abd16…`. A registered
+recorder line, one carrying `--render-spec-json`, is run exactly as written
+with nothing added. The launcher records the receipt acceptance itself and,
+from renderer 13, the phase history, which native records carry on the
+launcher receipt and not in `phase_log`. A renderer 9 to 12 registered run
+records no phase history anywhere: both launchers gate it at renderer 13,
+and the CBORG preparer's default renderer is 9 (the direct preparer's is 17)
+(#2345). Native receipts blocks
+read `expected: false` (deriving it from the registered specification is
+#2350).
+Every other launched run completes its concrete line with the template's
+flags, as before (#2345). Under Claude Code no shell expansion is added to a
+prescribed command: the `${…:?…}` form is observed refused under dontAsk and
+a bare `$VAR` is unprobed (#2316, #2348); a registered line that already
+carries the expansion is reported, never rewritten (#2346). Wherever the
+instruction or the executable playbook view gives a command with the
+registered interpreter, that command is run: the file's `poetry run`
+spellings are refused under the native command policy (#2325, #2347).
+Records made before report the playbook drift under `d4d runs check`,
+informational and outside `--strict`; the rendered instructions do not
+change, since they name the playbook by path.
+
+**Native control (both Claude Code arms, the audits and the native
+evaluation harness).** `native_controls/native_control.py` `f87a5bfe…` →
+`d83919c2…`. `input_validation_rejection` recognises one more unexecuted
+runtime refusal beside the Read type rejection: a Write of a file the session
+has not read, matched exactly on its two arguments, the error wrapper and the
+plain error text, recorded with the literal target path (#2285, #2330). In
+the first direct canary one such Write, refused before the hook fired, left
+305 decisions for 306 calls and stopped the evidence check. The #2327 review
+found the same refusal in the private attempt evidence of the v10q and v10r
+CBORG runs; no public file shows it, and #2282 records only where those runs
+stopped (#2351). Earlier Read rejection
+records re-check unchanged. The native evaluation harness shares this
+control: an evaluation registered after it accepts a runtime-refused Write of
+a file other than its candidate and still stops on a refused Write of the
+candidate (#2333).
+
+**Agentic (CBORG) arm adoption (#2307).** `prepare_registration.py`
+`7ec98a3d…` → `06a31323…` and `native_controls/run_native_canary.py`
+`9eaa2fe4…` → `5339a1e7…`. The preparer keys every agentic job with
+`prompt_text_env`, so its recorder line ends `--prompt-text-env
+D4D_LAUNCH_INSTRUCTION`, the form the arm's pinned 2.1.272 runtime admits
+(#2291's probe); `spec_for` refuses a key other than literal true (#2343);
+and the native launcher refuses a renderer-9-or-later job without the key
+before credentials, ledger or runtime, since that line would be refused at
+the run's last step (#2341). API jobs carry no recorder line and no key.
+
+**Recorder (#2314, #2344).** A registered specification that renders
+`--prompt-text-env` refuses a literal `--prompt-text` and, run with its ending
+dropped, says to run the line as written; the other direction stays open for
+re-recording an older run.
+
+**Direct launcher (#2283, #2285) and README (#2284).** The receipt keeps the
+runtime's `rate_limit_event` reports (per window the first, last and highest
+utilization, each with its reset); a stopped receipt says whether the child
+completed by the launcher's own predicate and lists the calls no decision
+covers by id and line; a disqualifying denial leads only where the child
+completed and the controller stopped for missing evidence (#2334); the README
+states what the first canary observed.
+
+**Evaluation.** The scoring instruments, rubric agents and review packs are
+unaffected: none reads the playbook's recorder paragraph, the control
+evidence or the launcher receipt. The native evaluation harness is affected
+as above.

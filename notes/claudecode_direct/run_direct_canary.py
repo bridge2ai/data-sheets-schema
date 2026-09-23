@@ -187,6 +187,114 @@ def observed_efforts(control_log):
     return sorted(levels)
 
 
+def _events(path):
+    """Decoded JSON objects of a JSON-lines file, one per line; a line that
+    does not decode to an object, or nests too deep to decode, is skipped
+    (#2340)."""
+    with Path(path).open("rb") as handle:
+        for number, raw in enumerate(handle, 1):
+            try:
+                event = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError, RecursionError):
+                continue
+            if isinstance(event, dict):
+                yield number, event
+
+
+def rate_limits(transcript):
+    """What the runtime reported about the subscription's rate-limit windows
+    (#2283): per window the first, last and highest utilization, each with the
+    reset it was reported against, so a window that resets mid-run is not
+    paired across the reset (#2335). Never raises: a diagnostic must not
+    displace the stop it sits beside."""
+    out = {"events": 0, "windows": {}, "statuses": [], "overage_used": False}
+    try:
+        for _, event in _events(transcript):
+            if event.get("type") != "rate_limit_event":
+                continue
+            info = event.get("rate_limit_info")
+            if not isinstance(info, dict):
+                continue
+            out["events"] += 1
+            if isinstance(info.get("status"), str) and info["status"] not in out["statuses"]:
+                out["statuses"].append(info["status"])
+            out["overage_used"] = out["overage_used"] or info.get("isUsingOverage") is True
+            windows = dict(info["unifiedWindows"]) if isinstance(info.get("unifiedWindows"), dict) else {}
+            if isinstance(info.get("rateLimitType"), str) and info["rateLimitType"] not in windows:
+                windows[info["rateLimitType"]] = info
+            for name, window in windows.items():
+                if not isinstance(name, str) or not isinstance(window, dict):
+                    continue
+                utilization = window.get("utilization")
+                if type(utilization) not in (int, float):
+                    continue
+                reading = {"utilization": utilization,
+                           "resets_at": window["resetsAt"] if type(window.get("resetsAt")) is int else None}
+                entry = out["windows"].setdefault(name, {"first": reading, "last": reading, "max": reading})
+                entry["last"] = reading
+                if utilization > entry["max"]["utilization"]:
+                    entry["max"] = reading
+    except FileNotFoundError:
+        return {**out, "note": "no transcript"}
+    except Exception as error:
+        return {**out, "note": f"transcript unreadable: {type(error).__name__}"}
+    return out
+
+
+def child_outcome(transcript, control_log, exit_code=None):
+    """Whether the child itself completed, by the launcher's own completion
+    predicate (#2337), and which tool calls no control decision covers, named
+    by id and transcript line (#2338). Never raises; a scan that cannot finish
+    reports `uncovered_tool_calls: None` with `child_outcome_note` (#2340)."""
+    out = {"child_completed": False, "result_subtype": None, "terminal_reason": None, "stop_reason": None,
+           "uncovered_tool_calls": []}
+    try:
+        events = list(_events(transcript))
+        results = [event for _, event in events if event.get("type") == "result"]
+        if len(results) == 1:
+            final = results[0]
+            out.update(result_subtype=final.get("subtype"), terminal_reason=final.get("terminal_reason"),
+                       stop_reason=final.get("stop_reason"))
+            out["child_completed"] = (final.get("is_error") is False and final.get("terminal_reason") == "completed"
+                                      and final.get("stop_reason") == "end_turn" and exit_code in (None, 0))
+        decided, rejected = set(), set()
+        try:
+            for _, record in _events(control_log):
+                if record.get("kind") == "decision":
+                    request = record.get("request")
+                    inner = request.get("request") if isinstance(request, dict) else None
+                    data = inner.get("input") if isinstance(inner, dict) else None
+                    if isinstance(data, dict) and isinstance(data.get("tool_use_id"), str):
+                        decided.add(data["tool_use_id"])
+                elif record.get("kind") == "input_rejected_before_callback" and isinstance(record.get("tool_use_id"), str):
+                    rejected.add(record["tool_use_id"])
+        except FileNotFoundError:
+            out["control_log_missing"] = True
+
+        def blocks(event):
+            message = event.get("message")
+            content = message.get("content") if isinstance(message, dict) else None
+            return [block for block in content if isinstance(block, dict)] if isinstance(content, list) else []
+        answers = {}
+        for _, event in events:
+            for block in blocks(event):
+                if block.get("type") == "tool_result" and isinstance(block.get("tool_use_id"), str):
+                    content = block.get("content")
+                    answers[block["tool_use_id"]] = content if isinstance(content, str) else json.dumps(content)
+        for line, event in events:
+            for block in blocks(event):
+                identity = block.get("id")
+                if (block.get("type") == "tool_use" and isinstance(identity, str)
+                        and identity not in decided and identity not in rejected):
+                    out["uncovered_tool_calls"].append({"tool_use_id": identity, "tool": block.get("name"),
+                                                        "transcript_line": line,
+                                                        "result_head": (answers.get(identity) or "")[:160]})
+    except Exception as error:
+        out["uncovered_tool_calls"] = None
+        out["child_outcome_note"] = f"outcome unreadable: {type(error).__name__}"
+    return out
+
+
 def counted(entry, key):
     """A non-negative integer token count from a model-usage entry, else None."""
     value = entry.get(key) if isinstance(entry, dict) else None
@@ -460,8 +568,22 @@ def main(argv=None):
             receipt["disqualifying_denials"] = native.denial_problems(receipt["permission_denials"])
         else:
             receipt.update(native.stopped_denials(attempt / "transcript.jsonl", classify))
+        # Say whether the child itself completed and which calls no decision
+        # covers (#2285). A disqualifying denial leads the receipt only where
+        # the child completed and the controller stopped for missing evidence,
+        # the case of the first canary; any other controller stop (a deadline,
+        # a pin change, another model) is the run's cause and keeps the
+        # headline, with the denials beside it (#2334).
+        receipt.update(child_outcome(attempt / "transcript.jsonl", attempt / "control.jsonl", receipt.get("exit_code")))
+        if (receipt.get("disqualifying_denials") and receipt.get("child_completed")
+                and receipt.get("reason") == "native control session ended without complete evidence"):
+            receipt["controller_reason"] = receipt.get("reason")
+            receipt["controller_reason_source"] = receipt.get("reason_source")
+            receipt["reason"] = "disqualified: " + receipt["disqualifying_denials"][0]
+            receipt["reason_source"] = "denial"
         native.retain_traceback(attempt, exc)
     finally:
+        receipt["rate_limits"] = rate_limits(attempt / "transcript.jsonl")
         receipt.update(finished_at=now(),
                        artifacts={str(p): sha(p) for folder in job["output_directories"]
                                   for p in sorted(Path(folder).rglob("*")) if p.is_file()})

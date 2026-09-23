@@ -440,6 +440,13 @@ class PlaybookWording(unittest.TestCase):
         self.assertIn("`Claude Code (direct)`", agent)
         # The registered-specification rule for the effort is stated where the flag is explained (#2225).
         self.assertIn("Under a registered specification that asserts an effort", core)
+        # A registered recorder line is run as written; every other launched run completes its
+        # line with the template (#2316, #2345); registered commands beat poetry spellings (#2325, #2347).
+        self.assertIn("provenance record` line carries `--render-spec-json`, run that\nline as written and add nothing", core)
+        self.assertIn("Every other\nlaunched run completes its concrete line with the template's flags below", core)
+        self.assertIn("the `${…:?…}` form is observed refused under\n`dontAsk` (#2282), a bare `$VAR` is unprobed", core)
+        self.assertIn("do not\nrewrite it, run nothing in its place, and report it (#2346)", core)
+        self.assertIn("every `poetry run` spelling in this file is refused under the native command\npolicy", core)
 
 
 if __name__ == "__main__":
@@ -558,3 +565,98 @@ def test_a_different_file_in_the_variable_is_refused_by_the_render_gate(env_nati
     result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(other)})
     assert result.exit_code != 0 and "does not reproduce the supplied instruction" in result.output
     assert not direct.provenance_path.exists()
+
+
+
+def test_a_specification_rendering_the_env_form_requires_the_flag(env_native):
+    """#2314: one way only; a line rendered with --prompt-text-env is run as written."""
+    direct, sent, command, cli = env_native
+    literal = [*command[:-2], "--prompt-text", str(sent)]
+    result = CliRunner().invoke(cli, literal)
+    assert result.exit_code != 0 and "run the recorder line as written" in result.output
+    assert not direct.provenance_path.exists()
+    # Its ending dropped altogether: told to run the line as written, not to add --prompt-text (#2344).
+    result = CliRunner().invoke(cli, command[:-2])
+    assert result.exit_code != 0 and "run the recorder line as written" in result.output
+    assert "requires an object and --prompt-text" not in result.output
+    assert not direct.provenance_path.exists()
+
+
+def test_an_expansion_form_run_can_still_be_re_recorded_with_the_flag(native):  # noqa: F811
+    """#2314: the other direction stays open, so an old run is re-recorded by hand."""
+    from data_sheets_schema.cli import cli
+    spec, sent, command = native
+    at = command.index("--prompt-text")
+    swapped = command[:at] + ["--prompt-text-env", "D4D_LAUNCH_INSTRUCTION"] + command[at + 2:]
+    result = CliRunner().invoke(cli, swapped, env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+    assert result.exit_code == 0, (result.output, result.exception)
+    assert "prompt_text_env" not in yaml.safe_load(spec.provenance_path.read_text())["prompts"]["request"]["spec"]
+
+
+def test_the_agentic_cborg_arm_can_register_the_env_form(native):  # noqa: F811
+    """#2307: a job registered with the key re-derives with it; a job without it is unchanged."""
+    import runpy
+    root = Path(__file__).resolve().parents[1]
+    module = runpy.run_path(str(root / "notes/matched_cborg_2026-09-13/prepare_registration.py"))
+    spec_for, parser = module["spec_for"], module["build_parser"]()
+    spec, _, _ = native
+    job = {"project": spec.project, "method": spec.method, "bundle": str(spec.bundle), "label": spec.label,
+           "manifest": str(spec.manifest), "chunks": str(spec.chunk_manifest), "profile": spec.profile,
+           "runtime": "Claude Code", "render_version": 9, "run_date": "2026-09-15"}
+    plain = spec_for(job)
+    assert "prompt_text_env" not in plain.render_spec()
+    assert 'D4D_LAUNCH_INSTRUCTION:?' in recorder_line(plain.instruction)
+    keyed = spec_for({**job, "prompt_text_env": True})
+    assert keyed.render_spec() == {**plain.render_spec(), "prompt_text_env": True}
+    assert recorder_line(keyed.instruction).endswith(ENV_FLAG)
+    # The launcher re-derives through the same function from the registered job, key included.
+    assert spec_for({**job, "prompt_text_env": True, "render_spec": keyed.render_spec()}).render_spec() == keyed.render_spec()
+    # The key is recorded only as true (#2343), and never on an API job.
+    for bad in ("yes", "true", 1, False):
+        with pytest.raises(ValueError, match="recorded only as true"):
+            spec_for({**job, "prompt_text_env": bad})
+    with pytest.raises(ValueError, match="applies only to agentic renderers 9 and later"):
+        spec_for({**job, "runtime": "Claude API (direct)", "prompt_text_env": True})
+    # The preparer keys every agentic job and no API job (#2307, #2342).
+    args = parser.parse_args([])
+    case = {k: job[k] for k in ("project", "manifest", "bundle", "chunks", "profile")}
+    agentic = module["new_job"](case, "X_agentic_rep1", "agentic", "Claude Code", "claudecode_agent", 1, args)
+    api = module["new_job"](case, "X_api_rep1", "api", "Claude API (direct)", "claudecode_api", 1, args)
+    assert agentic["prompt_text_env"] is True and "prompt_text_env" not in api
+    assert recorder_line(spec_for({**agentic, "render_version": 9}).instruction).endswith(ENV_FLAG)
+    import inspect
+    assert "new_job(case, identifier, arm, runtime, method, replicate, args)" in inspect.getsource(module["main"])
+
+
+
+def test_the_agentic_preparer_writes_keyed_agentic_jobs(tmp_path, monkeypatch):
+    """#2342: main() itself, offline (--render-only, the two subprocess calls stood in for): every
+    agentic job and its render specification carry the key and the env-form recorder line; no API
+    job does."""
+    import runpy
+    import subprocess
+    import sys as _sys
+    root = Path(__file__).resolve().parents[1]
+    real = subprocess.check_output
+
+    def offline(argv, *a, **k):
+        if list(argv[:2]) == ["git", "rev-parse"]:
+            return "0" * 40 + "\n"
+        if list(argv[-1:]) == ["--version"]:
+            return "2.1.272 (Claude Code)\n"
+        return real(argv, *a, **k)
+    monkeypatch.setattr(subprocess, "check_output", offline)
+    monkeypatch.chdir(root)
+    module = runpy.run_path(str(root / "notes/matched_cborg_2026-09-13/prepare_registration.py"))
+    out = tmp_path / "registration"
+    monkeypatch.setattr(_sys, "argv", ["prepare_registration", "--render-only", "--output", str(out),
+                                       "--render-version", "14"])
+    module["main"]()
+    jobs = json.loads((out / "rendered_jobs.json").read_text())["generation"]["jobs"]
+    agentic = [j for j in jobs if j["execution_arm"] == "agentic"]
+    api = [j for j in jobs if j["execution_arm"] == "api"]
+    assert agentic and api
+    for job in agentic:
+        assert job["prompt_text_env"] is True and job["render_spec"]["prompt_text_env"] is True
+        assert recorder_line(Path(job["instruction"]).read_text()).endswith(ENV_FLAG)
+    assert not any("prompt_text_env" in j or "prompt_text_env" in j["render_spec"] for j in api)
