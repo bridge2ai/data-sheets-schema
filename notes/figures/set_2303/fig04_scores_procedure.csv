@@ -7,5 +7,5 @@ generation temperature,0.0,0.0
 evaluator requested,claude-opus-5[1m],claude-opus-5[1m]
 evaluator identified,claude-opus-5,claude-opus-5
 evaluator effort / temp.,high / unspecified,high / unspecified
-instrument versions,"1.0, 1.2","1.0, 1.2"
+instrument versions,"rubric10 v1.2, rubric20 v1.0","rubric10 v1.2, rubric20 v1.0"
 denominators,"50 (rubric10), 88 (rubric20)","50 (rubric10), 88 (rubric20)"

@@ -1,5 +1,5 @@
 module,fit,unfit,supported,unsupported
-Base_import,264,18,31,3
+Base (shared descriptive slots),264,18,31,3
 Composition,222,34,29,0
 Collection,145,19,20,0
 Core/other,126,6,13,1
