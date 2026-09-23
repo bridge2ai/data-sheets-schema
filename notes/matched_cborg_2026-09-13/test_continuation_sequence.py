@@ -33,7 +33,7 @@ def finish_registration(manifest, registration):
     return sequence.sha(registration)
 
 
-def fixture(tmp_path, cost='2.1'):
+def fixture(tmp_path, cost='2.1', *, amended=False):
     root = tmp_path.resolve()
     generation_path = root/'origin/registration.json'
     origin_ledger = root/'origin/billing.json'
@@ -42,13 +42,31 @@ def fixture(tmp_path, cost='2.1'):
         'generation': {'jobs': [{'id':'frozen'}]}}
     origin_ref = save(generation_path, generation)
     save(origin_ledger, {'historical': 'left untouched'})
+    if amended:
+        from test_budget_amendment import make_fixture
+        prior_cost=min(Decimal(cost)/2,Decimal(5))
+        proof, _, anchor, proof_manifest=make_fixture(root/'amendment',generation=generation,
+            generation_path=generation_path,rows=[{'id':'synthetic-budget-anchor','attempt':'ancestor',
+                'status':'settled','cost_usd':str(prior_cost),
+                'provider_charge_confirmed':False,'provider_charge_usd':None}])
     audit_path = root/'audit/registration.json'
     audit_ledger = root/'audit/billing.json'
     audit = {'kind':'d4d_native_audit_continuation', 'parent':{'registration':str(generation_path)},
         'budget':{'ledger_path':str(audit_ledger)}, 'job':{'id':'audit','audit_path':str(root/'audit/audit.json')}}
+    if amended:
+        audit['budget_amendment']=deepcopy(proof)
+        audit['pinned_files']=deepcopy(proof_manifest['pinned_files'])
+        audit['budget'].update(additional_usd='500',per_attempt_usd='5',
+            continuation={'checkpoint':proof['predecessor_ledger']['path'],
+                          'sha256':proof['predecessor_ledger']['sha256']})
     audit_ref = save(audit_path, audit)
-    ledger = Ledger(audit_ledger, manifest_sha256=audit_ref['sha256'], total_cap='400', attempt_cap='5')
+    ledger = Ledger(audit_ledger, manifest_sha256=audit_ref['sha256'], total_cap='500' if amended else '400', attempt_cap='5')
     remaining,index=Decimal(cost),0
+    if amended:
+        ledger.continue_from(proof['predecessor_ledger']['path'],
+            expected_sha256=proof['predecessor_ledger']['sha256'],
+            expected_cost_usd=str(prior_cost),budget_amendment=proof)
+        remaining-=prior_cost
     while remaining:
         amount=min(remaining,Decimal(5));index+=1
         ticket = ledger.reserve(audit_ref['sha256']+f':previous{index}', amount, 'earlier-request')
@@ -82,6 +100,10 @@ def fixture(tmp_path, cost='2.1'):
             'origin':{'registration':origin_ref,'ledger_path':str(origin_ledger)},
             'predecessor':deepcopy(predecessor),'audit_origin':deepcopy(predecessor)},
         'pinned_files':{str(Path(sequence.__file__).resolve()):sequence.sha(sequence.__file__)}}
+    if amended:
+        manifest['budget_amendment']=deepcopy(proof)
+        manifest['budget']['additional_usd']='500'
+        manifest['pinned_files'].update(proof_manifest['pinned_files'])
     for ref in (origin_ref,audit_ref,ledger_ref,result_ref,acceptance_ref,snapshot_ref,artifact):
         manifest['pinned_files'][ref['path']]=ref['sha256']
     seal_ref = save(root/'audit-closed.json',sequence.seal_document(manifest))

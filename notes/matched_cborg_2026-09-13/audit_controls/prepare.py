@@ -79,7 +79,11 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
             schema_semantic_context=False, audit_batches=None, audit_batch_format=False, audit_batch_navigation=False,
-            audit_worker_navigation=False):
+            audit_worker_navigation=False, budget_amendment=None):
+    amendment = None
+    if budget_amendment is not None:
+        from budget_amendment import selection
+        amendment = selection(budget_amendment)
     from sequence_claim import select
     claim_selection = {}; select(claim_selection, durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -160,6 +164,32 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         raise BudgetStop('prepare from the execution repository root')
     destination = Path(destination).absolute()
     canonical_path(str(destination))
+    if amendment is not None:
+        # Validate the exact authorization and settled predecessor before creating
+        # even an offline destination. Old evidence is never rewritten.
+        from budget_amendment import effective_total, validate_predecessor
+        origin = read_json(parent_registration)
+        prior_path = str(Path(continuation_checkpoint or reconciled_checkpoint).resolve())
+        predecessor = read_json(prior_path)
+        candidate = {'kind': 'd4d_native_audit_continuation',
+            'parent': {'registration': str(Path(parent_registration).resolve())},
+            'budget_amendment': amendment,
+            'budget': {'additional_usd': amendment['total_usd'],
+                'per_attempt_usd': origin['budget']['per_attempt_usd'],
+                'continuation': {'checkpoint': prior_path, 'sha256': sha(prior_path),
+                    'cost_usd': str(sum((Decimal(row['cost_usd']) for row in predecessor['requests']), Decimal(0)))}},
+            'pinned_files': {}}
+        if continuation_source_registration:
+            source_path = str(Path(continuation_source_registration).resolve())
+            source = read_json(source_path)
+            candidate['budget']['continuation']['reconciliation'] = {
+                'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
+                'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
+                'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
+        effective_total(candidate, origin, require_pins=False)
+        validate_predecessor(candidate, predecessor, checkpoint_sha256=sha(prior_path), require_pins=False)
+        from .registration import validate_budget_amendment_predecessor
+        validate_budget_amendment_predecessor(candidate, predecessor, require_pins=False)
     destination.mkdir(parents=True, exist_ok=False)
     path = destination / 'registration.json'
     generation = read_json(parent_registration)
@@ -229,6 +259,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
                 'cost_usd': str(sum((Decimal(row['cost_usd']) for row in prior['requests']), Decimal(0)))}},
         'sequence_state': str(parent_path(parent, generation['budget']['ledger_path']).with_name('audit_sequence.json')),
         'pinned_files': {}}
+    if amendment is not None:
+        manifest['budget_amendment'] = amendment
+        manifest['budget']['additional_usd'] = amendment['total_usd']
     manifest.update(claim_selection)
     manifest.update(upstream_selection)
     if audit_batches is not None:
@@ -390,6 +423,8 @@ def main():
     parser.add_argument('--continuation-checkpoint')
     parser.add_argument('--continuation-source-registration')
     parser.add_argument('--continuation-reconciliation-receipt')
+    parser.add_argument('--budget-amendment', type=Path,
+        help='strict JSON proof of an explicitly authorized additive shared allocation; never edits prior ledgers')
     parser.add_argument('--provider-base-url')
     parser.add_argument('--provider-ca-bundle')
     args = vars(parser.parse_args())
@@ -400,6 +435,9 @@ def main():
     if args['audit_batches'] is not None:
         from .batch_registration import read_selection
         args['audit_batches'] = read_selection(args['audit_batches'])
+    if args['budget_amendment'] is not None:
+        from budget_amendment import selection
+        args['budget_amendment'] = selection(read_json(args['budget_amendment']))
     args['attempt_cap'] = str(args['attempt_cap'])
     path = prepare(**args)
     print(json.dumps({'registration': str(path), 'sha256': sha(path)}))

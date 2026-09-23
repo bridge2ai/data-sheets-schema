@@ -318,9 +318,17 @@ def _validate(manifest, registration_path, registration_sha):
     _require(checkpoint['checkpoint'] == block['predecessor']['ledger']['path']
              and checkpoint['sha256'] == block['predecessor']['ledger']['sha256']
              and _money(checkpoint['cost_usd']) == cost, 'handoff does not carry its exact real predecessor ledger')
-    for key, old_key in (('additional_usd', 'additional_cap_usd'), ('per_attempt_usd', 'attempt_cap_usd')):
-        _require(_money(budget[key]) > 0 and str(budget[key]) == str(generation['budget'][key])
-                 and str(budget[key]) == str(previous[old_key]), 'handoff changes original budget caps')
+    predecessor_registration = read(_ref(manifest, block['predecessor']['registration']))
+    if 'budget_amendment' in manifest or 'budget_amendment' in predecessor_registration:
+        from budget_amendment import effective_total, validate_predecessor
+        _require(canonical(manifest.get('budget_amendment')) == canonical(predecessor_registration.get('budget_amendment')),
+                 'handoff changes inherited budget amendment')
+        effective_total(manifest, generation)
+        validate_predecessor(manifest, previous, checkpoint_sha256=checkpoint['sha256'])
+    else:
+        for key, old_key in (('additional_usd', 'additional_cap_usd'), ('per_attempt_usd', 'attempt_cap_usd')):
+            _require(_money(budget[key]) > 0 and str(budget[key]) == str(generation['budget'][key])
+                     and str(budget[key]) == str(previous[old_key]), 'handoff changes original budget caps')
     _require(cost <= _money(budget['additional_usd']), 'predecessor exceeds approved allocation')
     target = path(budget['ledger_path'])
     _require(target == registration_path.parent / 'billing.json' and str(target) not in manifest['pinned_files']

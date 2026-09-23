@@ -21,12 +21,12 @@ from test_api import setup_job, mock_sdk
 from budgeted_cborg import attempt_identity, write_new
 
 
-def completed_evaluation(tmp_path, monkeypatch, *, form=True):
+def completed_evaluation(tmp_path, monkeypatch, *, form=True, amended=False):
     """Synthetic source ancestry; actual requests, scoring library and billing."""
     # The source/complete scientific roster is covered by test_source_pair.
     # Here two actual API jobs isolate the accounting and closure boundaries.
     monkeypatch.setattr(source_pair, 'validate_roster', lambda manifest: None)
-    m, r, state = foundation.fixture(tmp_path)
+    m, r, state = foundation.fixture(tmp_path, cost='410' if amended else '2.1', amended=amended)
     with foundation.enter(m, r):
         pass
     e, er = foundation.evaluation_successor(m, r, state)
@@ -46,6 +46,8 @@ def completed_evaluation(tmp_path, monkeypatch, *, form=True):
         source_pair={'kind': 'synthetic_source_for_accounting_fixture'},
         context_path=contexts[0].job['context_path'], canary_acceptances={},
         model=contexts[0].manifest['model'])
+    if amended:
+        e['source_pair']['original_generation']={'registration':e['budget_sequence']['origin']['registration']}
     e['budget']['prices_per_token'] = contexts[0].manifest['budget']['prices_per_token']
     for context in contexts:
         cell = context.job['canary_group']
@@ -92,6 +94,53 @@ def completed_evaluation(tmp_path, monkeypatch, *, form=True):
             'registration_sha256':sha(er), 'job_id':job['id'], 'canary_group':job['canary_group'],
             'receipt_sha256':sha(receipt_path), 'output_sha256':sha(output)})
     return e, er, state
+
+
+def test_amended_aggregate_and_subtype_keep_effective_cap_and_history(tmp_path, monkeypatch):
+    e, er, state = completed_evaluation(tmp_path, monkeypatch, amended=True)
+    proof=e['budget_amendment']
+    before={Path(proof[k]['path']):Path(proof[k]['path']).read_bytes()
+            for k in ('origin_registration','predecessor_registration','predecessor_ledger','predecessor_owner','authorization')}
+    result=closure.build_aggregate(e,er)
+    assert Decimal(result['settled_cost_usd']) > 400
+    assert closure.validate_aggregate(e,er,result,read_json(e['budget']['ledger_path']))==result
+    args=prepare_from_fixture(e,er,state,tmp_path,monkeypatch)
+    owner_before=state.read_bytes(); ledger_before=Path(e['budget']['ledger_path']).read_bytes()
+    prepared=prepare_subtype.prepare(**args)
+    subtype=read_json(prepared['registration'])
+    assert subtype['budget_amendment']==proof
+    assert subtype['budget']['additional_usd']=='500' and subtype['budget']['per_attempt_usd']=='5'
+    assert Decimal(prepared['remaining_allocation_usd'])==Decimal(500)-Decimal(result['settled_cost_usd'])
+    assert state.read_bytes()==owner_before and Path(e['budget']['ledger_path']).read_bytes()==ledger_before
+    with foundation.enter(subtype,Path(prepared['registration'])) as owner:
+        ledger=read_json(owner.ledger.path)
+        assert ledger['additional_cap_usd']=='500'
+        assert ledger['requests']==read_json(e['budget']['ledger_path'])['requests']
+    assert all(p.read_bytes()==raw for p,raw in before.items())
+    with pytest.raises(BudgetStop):
+        with foundation.enter(e,er): pass
+
+
+def test_amended_aggregate_still_refuses_cost_above_authorized_cap(tmp_path, monkeypatch):
+    e,er,_=completed_evaluation(tmp_path,monkeypatch,amended=True)
+    ledger=read_json(e['budget']['ledger_path'])
+    ledger['requests'][-1]['cost_usd']='501'
+    foundation.save(Path(e['budget']['ledger_path']),ledger)
+    with pytest.raises(BudgetStop,match='aggregate settled accounting is invalid'):
+        closure.build_aggregate(e,er)
+
+
+def test_amended_closed_aggregate_rejects_boolean_history_changed_to_number(tmp_path,monkeypatch):
+    e,er,_=completed_evaluation(tmp_path,monkeypatch,amended=True)
+    assert closure.build_aggregate(e,er)['validation']['passed'] is True
+    ledger=read_json(e['budget']['ledger_path'])
+    assert ledger['requests'][0]['provider_charge_confirmed'] is False
+    ledger['requests'][0]['provider_charge_confirmed']=0
+    foundation.save(Path(e['budget']['ledger_path']),ledger)
+    # Python container equality considers False and 0 equal. Frozen accounting
+    # evidence must retain their distinct JSON types even after owner shutdown.
+    with pytest.raises(BudgetStop,match='aggregate lost carried charge history'):
+        closure.build_aggregate(e,er)
 
 
 def test_complete_actual_api_results_and_cleanup_aggregate(tmp_path, monkeypatch):

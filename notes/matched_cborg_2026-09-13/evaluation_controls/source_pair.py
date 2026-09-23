@@ -204,6 +204,8 @@ def validate(manifest):
         raise Stop('evaluation changes accepted model, transport policy or profile')
     if manifest.get('provider_transport') != phase.get('provider_transport'):
         raise Stop('evaluation changes accepted pinned provider trust')
+    if ('budget_amendment' in manifest) != ('budget_amendment' in phase) or manifest.get('budget_amendment') != phase.get('budget_amendment'):
+        raise Stop('evaluation changes the accepted budget amendment')
     if digest(manifest['budget'].get('prices_per_token')) != digest(phase['budget']['prices_per_token']):
         raise Stop('evaluation changes accepted provider prices')
     if manifest['project'] != source['project'] or manifest['method'] != source['method']:
