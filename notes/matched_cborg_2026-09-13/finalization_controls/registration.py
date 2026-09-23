@@ -155,6 +155,8 @@ def validate_scientific_identity(manifest, accepted):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
+    if 'native_response_buffer' in manifest:
+        raise BudgetStop('native_response_buffer is audit-only; Phase 4 cannot select it')
     if 'audit_batch_navigation' in manifest:
         raise BudgetStop('audit_batch_navigation is audit-only; Phase 4 cannot select it')
     if 'audit_batches' in manifest:

@@ -28,7 +28,7 @@ def good():
     return httpx.Response(200, content=wire(events()), headers={'content-type': 'text/event-stream'})
 
 
-def proxy_with(tmp_path, script, *, policy=POLICY, count=None, cap=5, pause='instant'):
+def proxy_with(tmp_path, script, *, policy=POLICY, count=None, cap=5, pause='instant', response_buffer=None):
     """`script` yields one upstream outcome per paid request: a Response, or an exception to raise."""
     calls, outcomes = [], iter(script)
     def respond(request):
@@ -44,7 +44,8 @@ def proxy_with(tmp_path, script, *, policy=POLICY, count=None, cap=5, pause='ins
         model=REQUEST['model'], prices=PRICES, verify=lambda: None, provider_key='offline-provider-key',
         base_url='https://api.cborg.lbl.gov', upstream=httpx.Client(transport=httpx.MockTransport(respond)),
         **({'stall_policy': policy, **({'count_pause': lambda seconds: None} if pause == 'instant' else {})}
-           if policy is not None else {}))
+           if policy is not None else {}),
+        **({'response_buffer': response_buffer} if response_buffer is not None else {}))
     return proxy, ledger, calls
 
 

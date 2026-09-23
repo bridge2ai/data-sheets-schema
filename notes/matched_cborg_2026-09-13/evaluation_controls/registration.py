@@ -371,6 +371,8 @@ def group(job):
 
 
 def verify_manifest(manifest, path, digest):
+    if 'native_response_buffer' in manifest:
+        raise BudgetStop('native_response_buffer is audit-only; evaluation cannot select it')
     _fitness_selection(manifest)
     if 'audit_batch_navigation' in manifest:
         raise BudgetStop('audit_batch_navigation is audit-only; evaluation cannot select it')
