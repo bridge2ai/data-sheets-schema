@@ -440,10 +440,13 @@ class PlaybookWording(unittest.TestCase):
         self.assertIn("`Claude Code (direct)`", agent)
         # The registered-specification rule for the effort is stated where the flag is explained (#2225).
         self.assertIn("Under a registered specification that asserts an effort", core)
-        # Run the instruction's concrete recorder line and receipts check as written (#2316, #2325).
-        self.assertIn("launch instruction gives a concrete `provenance record` line, run that\nline exactly as written", core)
-        self.assertIn("Never\nput a shell expansion (`$VAR`, `${VAR}`) into `--prompt-text`", core)
-        self.assertIn("a `poetry run` spelling of it is refused\n   there, #2325", core)
+        # A registered recorder line is run as written; every other launched run completes its
+        # line with the template (#2316, #2345); registered commands beat poetry spellings (#2325, #2347).
+        self.assertIn("provenance record` line carries `--render-spec-json`, run that\nline as written and add nothing", core)
+        self.assertIn("Every other\nlaunched run completes its concrete line with the template's flags below", core)
+        self.assertIn("the `${…:?…}` form is observed refused under\n`dontAsk` (#2282), a bare `$VAR` is unprobed", core)
+        self.assertIn("do not\nrewrite it, run nothing in its place, and report it (#2346)", core)
+        self.assertIn("every `poetry run` spelling in this file is refused under the native command\npolicy", core)
 
 
 if __name__ == "__main__":
@@ -572,6 +575,11 @@ def test_a_specification_rendering_the_env_form_requires_the_flag(env_native):
     result = CliRunner().invoke(cli, literal)
     assert result.exit_code != 0 and "run the recorder line as written" in result.output
     assert not direct.provenance_path.exists()
+    # Its ending dropped altogether: told to run the line as written, not to add --prompt-text (#2344).
+    result = CliRunner().invoke(cli, command[:-2])
+    assert result.exit_code != 0 and "run the recorder line as written" in result.output
+    assert "requires an object and --prompt-text" not in result.output
+    assert not direct.provenance_path.exists()
 
 
 def test_an_expansion_form_run_can_still_be_re_recorded_with_the_flag(native):  # noqa: F811
@@ -603,8 +611,18 @@ def test_the_agentic_cborg_arm_can_register_the_env_form(native):  # noqa: F811
     assert recorder_line(keyed.instruction).endswith(ENV_FLAG)
     # The launcher re-derives through the same function from the registered job, key included.
     assert spec_for({**job, "prompt_text_env": True, "render_spec": keyed.render_spec()}).render_spec() == keyed.render_spec()
-    # Only a literal true opts in; the flag is off by default and never touches API jobs.
-    assert "prompt_text_env" not in spec_for({**job, "prompt_text_env": "yes"}).render_spec()
-    assert parser.parse_args([]).prompt_text_env is False and parser.parse_args(["--prompt-text-env"]).prompt_text_env is True
+    # The key is recorded only as true (#2343), and never on an API job.
+    for bad in ("yes", "true", 1, False):
+        with pytest.raises(ValueError, match="recorded only as true"):
+            spec_for({**job, "prompt_text_env": bad})
     with pytest.raises(ValueError, match="applies only to agentic renderers 9 and later"):
         spec_for({**job, "runtime": "Claude API (direct)", "prompt_text_env": True})
+    # The preparer keys every agentic job and no API job (#2307, #2342).
+    args = parser.parse_args([])
+    case = {k: job[k] for k in ("project", "manifest", "bundle", "chunks", "profile")}
+    agentic = module["new_job"](case, "X_agentic_rep1", "agentic", "Claude Code", "claudecode_agent", 1, args)
+    api = module["new_job"](case, "X_api_rep1", "api", "Claude API (direct)", "claudecode_api", 1, args)
+    assert agentic["prompt_text_env"] is True and "prompt_text_env" not in api
+    assert recorder_line(spec_for({**agentic, "render_version": 9}).instruction).endswith(ENV_FLAG)
+    import inspect
+    assert "new_job(case, identifier, arm, runtime, method, replicate, args)" in inspect.getsource(module["main"])

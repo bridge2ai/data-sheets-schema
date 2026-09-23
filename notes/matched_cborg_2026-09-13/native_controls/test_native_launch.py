@@ -69,7 +69,7 @@ def test_launch_verification_failure_never_starts_process(tmp_path):
 @pytest.mark.parametrize('override, expected', [(None, '5'), (15, '15')])
 @pytest.mark.parametrize('bypass', [False, True])
 @pytest.mark.parametrize('render_version, binding', [(7, 'omitted'), (9, 'matched'),
-                                                   (9, 'omitted'), (9, 'different')])
+                                                   (9, 'omitted'), (9, 'different'), (9, 'unkeyed')])
 def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeypatch, override, expected,
                                                             render_version, binding, bypass):
     import anthropic
@@ -94,7 +94,7 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     registration.write_text(json.dumps(base))
     overlay = tmp_path / 'overlay.json'
     environment = ({} if binding == 'omitted' else {'D4D_LAUNCH_INSTRUCTION':
-                   str(instruction) if binding == 'matched' else str(tmp_path / 'another.md')})
+                   str(instruction) if binding in ('matched', 'unkeyed') else str(tmp_path / 'another.md')})
     overlay.write_text(json.dumps({'registration': str(registration),
         'registration_sha256': sha(registration), 'allowed_jobs': [job['id']],
         'pinned_files': {}, 'environment': {}, 'per_job_environment': {job['id']: environment},
@@ -132,7 +132,8 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     monkeypatch.setattr(runner, 'verified_executable', lambda *args: sys.executable)
     monkeypatch.setattr(runner.subprocess, 'check_output', lambda *args, **kwargs: 'test-version')
     monkeypatch.setattr(runner, 'spec_for', lambda *args: SimpleNamespace(
-        render_spec=lambda: {}, input_identity=lambda: {}, render_version=render_version))
+        render_spec=lambda: {}, input_identity=lambda: {}, render_version=render_version,
+        prompt_text_env=render_version >= 9 and binding != 'unkeyed'))
     def sdk(**kwargs):
         assert kwargs['default_headers'] == ({'x-headroom-bypass': 'true'} if bypass else {})
         return object()
@@ -142,6 +143,14 @@ def test_native_cli_receives_the_same_attempt_cap_as_its_proxy(tmp_path, monkeyp
     monkeypatch.setenv('CBORG_API_KEY', 'synthetic-never-sent')
     monkeypatch.setattr(sys, 'argv', ['run_native_canary', '--overlay', str(overlay),
                                     '--review', str(review), '--job', job['id']])
+    if binding == 'unkeyed':
+        # A renderer-9+ job whose recorder line carries the refused expansion
+        # stops before credentials, ledger or runtime (#2341).
+        with pytest.raises(BudgetStop, match='renders a shell expansion Claude Code refuses'):
+            runner.main()
+        assert observed == {}
+        assert not (tmp_path / 'billing.json').exists()
+        return
     if render_version >= 9 and binding != 'matched':
         with pytest.raises(BudgetStop, match='exact registered launch instruction'):
             runner.main()

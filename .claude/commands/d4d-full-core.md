@@ -366,10 +366,7 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    is a denied call that buys nothing.
 5. **Before Phase 2 — not optional, and not deferred to the end of the
    run** — run `poetry run d4d receipts check --label {VERSION}
-   --project {PROJECT} --strict` (where the launch instruction gives this
-   check as a concrete command with a registered interpreter, run that
-   command exactly as written; a `poetry run` spelling of it is refused
-   there, #2325) and do not begin Phase 2 until it reports
+   --project {PROJECT} --strict` and do not begin Phase 2 until it reports
    every manifest chunk reviewed. No provenance record exists yet; the
    command then reads the bundle named in the full record's `# Source
    bundle:` header as it is on disk (pass `--bundle` if the header is not
@@ -754,15 +751,28 @@ deterministic checks, semantic related-content review, and reporting.
 
 ## Provenance record (required, per project)
 
-After Phase 4 validates, emit a machine-readable provenance record. Where
-the launch instruction gives a concrete `provenance record` line, run that
-line exactly as written and nothing else: it carries the registered
-specification and, where it ends `--prompt-text-env D4D_LAUNCH_INSTRUCTION`,
-the recorder reads the launch instruction from that variable itself. Never
-put a shell expansion (`$VAR`, `${VAR}`) into `--prompt-text` or any other
-prescribed command: Claude Code refuses such a command under `dontAsk`, and a
-refused prescribed command disqualifies the run (#2282, #2316). The template
-below is for a run with no launch instruction:
+After Phase 4 validates, emit a machine-readable provenance record.
+
+**A registered recorder line is run exactly as written.** Where the launch
+instruction's `provenance record` line carries `--render-spec-json`, run that
+line as written and add nothing: it carries the registered specification,
+the launcher records the phase history and the receipt acceptance itself,
+and where the line ends `--prompt-text-env D4D_LAUNCH_INSTRUCTION` the
+recorder reads the launch instruction from that variable. Every other
+launched run completes its concrete line with the template's flags below
+(#2345). Under Claude Code, never add a shell expansion to `--prompt-text` or
+to any other prescribed command: the `${…:?…}` form is observed refused under
+`dontAsk` (#2282), a bare `$VAR` is unprobed, and a refused prescribed
+command disqualifies the run (#2316, #2348). A registered line that already
+carries `${D4D_LAUNCH_INSTRUCTION:?…}` is a registration defect: do not
+rewrite it, run nothing in its place, and report it (#2346).
+
+**Registered commands take precedence over this file's spellings.** Wherever
+the launch instruction or the executable playbook view (`agents playbook`)
+gives a command with the registered interpreter
+(`<python> -m data_sheets_schema.cli …`, `<python> -c …`), run that command:
+every `poetry run` spelling in this file is refused under the native command
+policy (#2325, #2347).
 
 ```bash
 poetry run d4d provenance record \

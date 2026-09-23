@@ -75,7 +75,9 @@ controller's own stop state.
   `claude-haiku-4-5`, in their terminal accounting for the runtime's own
   auxiliary calls (#2268). The first subscription canary (2026-09-23, 320
   turns) reported none: `modelUsage` named only `claude-opus-5`, with
-  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` set (#2284). The proxied arm's proxy stops the run on a request for
+  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` set; whether the flag is what
+  removed the auxiliary calls is not established, since the first canary is
+  the only run that set it (#2248, #2284, #2336). The proxied arm's proxy stops the run on a request for
   any model but the registered one, so an auxiliary request there would have
   stopped a run rather than gone unrecorded; none is recorded. The
   registration names the auxiliary models it permits, their usage is recorded
@@ -89,23 +91,25 @@ controller's own stop state.
   terminal reported 746,122 output tokens and the registered model 859,206,
   so the two are not the same measure (#2284).
 - **Rate limits.** The runtime reports its subscription windows as
-  `rate_limit_event` lines; the receipt keeps their count, the highest
-  utilization and the reset time per window, the statuses seen and whether
-  overage was used, under `rate_limits` (#2283). The first canary ended at
-  94% of its seven-day window. Nothing offline can read the utilization
+  `rate_limit_event` lines; the receipt keeps their count and, per window,
+  the first, last and highest utilization, each with the reset it was
+  reported against, and the statuses seen and whether overage was used,
+  under `rate_limits` (#2283, #2335). The first canary started at 91% of its
+  seven-day window and ended at 94%. Nothing offline can read the utilization
   before the first call, so whether to launch near the cap is the
   maintainer's call.
 - **Stop receipt.** A stopped receipt says whether the child itself
-  completed (`child_completed`) and lists the tool calls no control decision
-  covers; a disqualifying denial leads it (`reason_source: denial`) with the
-  controller's reason kept as `controller_reason` (#2285). The runtime's
+  completed (`child_completed`, by the launcher's own completion predicate,
+  with the result's subtype, terminal and stop reasons) and lists the tool
+  calls no control decision covers, by id and transcript line (#2285, #2337,
+  #2338). Where the child completed and the controller stopped for missing
+  evidence, a disqualifying denial leads it (`reason_source: denial`) with
+  the controller's reason kept as `controller_reason`; any other controller
+  stop keeps the headline (#2334). The runtime's
   refusal to overwrite a file the session has not read is recognised as an
   unexecuted call, like the Read type rejection, rather than as missing
   evidence: in the first canary one such Write, rejected before the hook,
   left 305 decisions for 306 calls and stopped the evidence check (#2285).
-  `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` is set; whether it is what
-  removed them is not established, since the first canary is the only run
-  that set it (#2248, #2284).
 - **Runtime limits.** The registration states the `contextWindow` and
   `maxOutputTokens` the runtime is expected to report for the registered
   model, taken from the native registration's offline observation of the

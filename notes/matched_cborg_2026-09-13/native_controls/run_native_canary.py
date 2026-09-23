@@ -539,6 +539,12 @@ def main():
         raise BudgetStop('native generation instruction or input identity changed')
     if spec.render_version >= 9 and overlay['per_job_environment'][job['id']].get('D4D_LAUNCH_INSTRUCTION') != job['instruction']:
         raise BudgetStop('native provenance must read the exact registered launch instruction')
+    if spec.render_version >= 9 and spec.prompt_text_env is not True:
+        # The expansion form of the recorder line is refused by the pinned
+        # runtime under dontAsk (#2282): a run would be disqualified at its
+        # last step, after the whole generation spend (#2341).
+        raise BudgetStop("a registered job's recorder line renders a shell expansion Claude Code refuses "
+                         "under dontAsk (#2282); register it with prompt_text_env")
     try:
         command_policy=validated_command_policy(overlay,base,job)
     except (KeyError, OSError, ValueError, TypeError, SyntaxError) as error:

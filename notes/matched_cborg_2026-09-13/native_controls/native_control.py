@@ -83,6 +83,10 @@ def input_validation_rejection(call_event, call, result_event, call_line, result
     """Recognize the evidenced, unexecuted Read numeric-string rejection,
     and the evidenced, unexecuted Write of an unread file (#2285).
 
+    For the Write, the call carries exactly `file_path` and `content` and the
+    result is exactly the runtime's unread-file wrapper and its plain error
+    text; the record keeps the literal, unresolved target path (#2330).
+
     This is native runtime evidence, not a permission decision. Both the
     typed envelope and its error-only wrapper must match the original input.
     Other failures (including range errors and other invalid types) remain
@@ -133,7 +137,7 @@ def input_validation_rejection(call_event, call, result_event, call_line, result
             result_event.get('tool_use_result') != f'Error: {UNREAD_WRITE_MESSAGE}'):
             return None
         return {'kind': 'input_rejected_before_callback', 'tool_use_id': call['id'],
-                'tool': 'Write', 'rejection': 'file_not_read',
+                'tool': 'Write', 'rejection': 'file_not_read', 'file_path': payload['file_path'],
                 'session_id': call_session,
                 'call_line': call_line, 'result_line': result_line,
                 'call_sha256': digest(call_event), 'result_sha256': digest(result_event)}
