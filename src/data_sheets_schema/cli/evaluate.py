@@ -9,6 +9,7 @@ from data_sheets_schema.registry import project_choice
 import sys
 from pathlib import Path
 from data_sheets_schema.constants import METHODS, RUBRIC_TYPES
+from data_sheets_schema.runs import RUNTIME_CHOICES
 
 @click.group()
 def evaluate():
@@ -202,8 +203,8 @@ def llm(file, project, method, rubric, output_dir, context):
               help="Restrict to one run config (label prefix).")
 @click.option("--paths-only", is_flag=True,
               help="One record path per line, for piping into a sweep.")
-@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
-              help="which runtime's canonical set (#690); required where a project is marked under both")
+@click.option("--runtime", type=click.Choice(list(RUNTIME_CHOICES)), default=None,
+              help="which runtime's canonical set (#690); required where a project is marked under more than one")
 @click.option("--all-replicates", is_flag=True,
               help="Every replicate of the canonical config, not one record "
                    "per project (#287). Buys a within-config variance estimate "
@@ -253,7 +254,7 @@ def plan_cmd(config, paths_only, all_replicates, runtime):
 
 
 @evaluate.command("related-datasets")
-@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
+@click.option("--runtime", type=click.Choice(list(RUNTIME_CHOICES)), default=None,
               help="which runtime's canonical set (#690), where no records are given")
 @click.argument("records", nargs=-1, type=click.Path(exists=True))
 @click.option("--project", default=None,

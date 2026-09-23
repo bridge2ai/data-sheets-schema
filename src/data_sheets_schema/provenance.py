@@ -384,7 +384,9 @@ def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str 
     return out or None if ok else None
 
 
-_EFFORT_LADDER = ("minimal", "low", "medium", "high")
+#: `xhigh` and `max` are Claude Code session levels (#2202); no CBORG route
+#: names them, so they reach a record only as an asserted launcher value.
+_EFFORT_LADDER = ("minimal", "low", "medium", "high", "xhigh", "max")
 
 
 def _effort_from_route(model_name: str | None) -> tuple[str | None, str | None]:
@@ -1775,7 +1777,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # exposes. Recording it as though it were measured would be the same class
     # of false claim this module exists to prevent.
     from data_sheets_schema.agentic_runtime import UNOBSERVED_TEMPERATURE
-    runtime = (model.get("agent_runtime") or "").strip().lower()
+    from data_sheets_schema.runs import is_claude_code_runtime   # lazy: runs imports this module
+    # Either Claude Code arm (#2213): the direct arm's runtime string differs
+    # in its transport suffix, and its header values have the same standing.
+    claude_code = is_claude_code_runtime(model.get("agent_runtime"))
     if model.get("temperature") == UNOBSERVED_TEMPERATURE:
         model["temperature"] = None
         model["temperature_basis"] = "not observed from the agent runtime"
@@ -1785,7 +1790,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                        "was not observed; neither a prompt example nor the shared "
                        "API configuration supplies an observed setting"),
         })
-    elif model.get("temperature") and runtime == "claude code":
+    elif model.get("temperature") and claude_code:
         model["temperature_basis"] = "asserted by the generating agent, not observed"
         unverified.append({
             "field": "model.temperature",
@@ -1811,6 +1816,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # can be established the field stays absent and the gap is named in
     # `unverified`, because a run that did not choose an effort is a different
     # claim from a run whose effort is unknown.
+    header_effort_value = str(model.get("reasoning_effort") or "").strip().lower() or None
     if not model.get("reasoning_effort"):
         derived, basis = _effort_from_route(model.get("model"))
         if derived and reasoning_effort and derived != reasoning_effort:
@@ -1849,7 +1855,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                            "applied. That is not a value this run chose, and it "
                            "is not comparable with a run that named one."),
             })
-    elif (model.get("agent_runtime") or "").strip().lower() == "claude code":
+    elif claude_code:
         # Not the same standing as the temperature it sits beside (#449). The
         # Claude Code runtime exposes no temperature knob, so that header value
         # can only ever be a restatement of the prompt template. It *does*
@@ -1882,6 +1888,35 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         else:
             model.setdefault("reasoning_effort_basis",
                              "asserted by the generating agent, not observed")
+    if header_effort_value and reasoning_effort and header_effort_value != reasoning_effort.strip().lower():
+        # A header effort and a launcher flag that disagree (#2221): the
+        # header is what the record says and stays recorded, as the route
+        # does above, but the disagreement is not erased. Under a registered
+        # specification the flag is the specification's own assertion
+        # (#2216), so this is the one route by which a generated header can
+        # contradict the launcher unnoticed. The note names the standing the
+        # header already has, and the field gets one `unverified` entry at
+        # most (#2257): the flag may have been typed, or taken from the
+        # registered specification when the copied recorder line dropped it.
+        corroborated = str(model.get("reasoning_effort_basis") or "").startswith("observed")
+        standing = ("corroborated by CLAUDE_EFFORT in the recording session" if corroborated
+                    else "the generating agent's assertion, not observed")
+        notes.append(
+            f"Reasoning effort mismatch: the record header says "
+            f"{header_effort_value!r} ({standing}) while the launcher's flag, "
+            f"or the registered specification the copied recorder line "
+            f"carries, says {reasoning_effort!r}. The header is recorded; the "
+            "launcher's value is what the run was declared to run at.")
+        reason = (f"the header says {header_effort_value!r} while the launcher's "
+                  f"flag or the registered specification says {reasoning_effort!r}; "
+                  + ("the header is corroborated by the recording session's CLAUDE_EFFORT and the flag is not"
+                     if corroborated else "the two disagree and neither observed the runtime"))
+        existing = next((u for u in unverified if u.get("field") == "model.reasoning_effort"), None)
+        if existing is None:
+            unverified.append({"field": "model.reasoning_effort", "value": model.get("reasoning_effort"),
+                               "reason": reason})
+        else:
+            existing["reason"] = existing["reason"].rstrip(".") + ". Also, " + reason
 
     cfg = load_generation_config()
     declared = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}

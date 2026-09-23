@@ -213,8 +213,8 @@ When multiple sources describe the same dataset:
 ```yaml
 # D4D Datasheet for {PROJECT} Dataset
 # Generation Method: schema-grounded agentic, phase 1
-# Agent runtime: {Claude Code|Codex CLI}
-# Provider: {Anthropic|OpenAI}
+# Agent runtime: {RUNTIME}
+# Provider: {PROVIDER}
 # Model: {MODEL}
 # Reasoning effort: {EFFORT}
 # Mode: {MODE}
@@ -225,6 +225,15 @@ When multiple sources describe the same dataset:
 # Temperature: unknown (not observed from the agent runtime)
 # Generated: {DATE}
 ```
+
+`{RUNTIME}` and `{PROVIDER}` are the `Agent runtime` and `Provider` lines
+exactly as the launch instruction header states them where a launch
+instruction exists; where none does, the runtime you are actually running
+in and the provider it actually reaches: `Claude Code`,
+`Claude Code (direct)` or `Codex CLI`, and `Anthropic`,
+`Anthropic (Claude subscription, direct)`, `OpenAI` or the proxy actually
+reached. Never shorten one to another, and never carry a value over from a
+different runtime.
 
 ## Settings
 

@@ -10,6 +10,7 @@ from data_sheets_schema.corpus import anchored as _corpus_path
 from data_sheets_schema.registry import project_choice, projects_for
 
 from data_sheets_schema.constants import PROJECTS
+from data_sheets_schema.runs import RUNTIME_CHOICES
 
 
 @click.group()
@@ -151,7 +152,8 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
         if len(families) > 1:
             raise click.ClickException(f"labels live under {sorted(families)}; pass --method")
         if not families:
-            raise click.ClickException("none of the labels lives under claudecode_agent_core or claudecode_api_core; pass --method")
+            raise click.ClickException("none of the labels lives under a claudecode_agent_core, claudecode_api_core "
+                                       "or claudecode_direct_core directory; pass --method")   # #2229
         method = families.pop()
     base = full_output_baseline(method, list(labels), list(projects) or projects_for(click.get_current_context()))
     if as_json:
@@ -439,8 +441,8 @@ def restore(labels, projects, execute):
               help="Print record paths and nothing else, for piping.")
 @click.option("--missing", is_flag=True,
               help="List projects that have no canonical record instead.")
-@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
-              help="Which runtime's canonical (#690); required where a project is marked under both.")
+@click.option("--runtime", type=click.Choice(list(RUNTIME_CHOICES)), default=None,
+              help="Which runtime's canonical (#690); required where a project is marked under more than one.")
 def canonical_cmd(project, config, paths_only, missing, runtime):
     """Which record is the datasheet, per project.
 
@@ -1752,7 +1754,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                    "same statement (default 0.6)")
 @click.option("--show", default=3, type=int, show_default=True,
               help="example restatements to print per project")
-@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
+@click.option("--runtime", type=click.Choice(list(RUNTIME_CHOICES)), default=None,
               help="which runtime's canonical set, where no label is given (#690)")
 def redundancy_cmd(method, label, project, threshold, show, runtime):
     """How often one fact is stated in more than one slot (#501).
