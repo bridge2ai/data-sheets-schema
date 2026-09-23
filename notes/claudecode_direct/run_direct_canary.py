@@ -22,6 +22,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -42,6 +43,14 @@ from run_api_canary import sha, check_canary_receipts                 # noqa: E4
 import prepare_direct as preparation                                  # noqa: E402
 
 DIRECT_ROOTS = ("data/d4d_concatenated/claudecode_direct/", "data/d4d_concatenated/claudecode_direct_core/")
+#: A job id is one path component of the preparer's shape (#2252): it names
+#: the attempt directory and nothing else may.
+JOB_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
+LIMIT_KEYS = ("contextWindow", "maxOutputTokens")
+
+
+def is_hex(text, length):
+    return isinstance(text, str) and re.fullmatch(rf"[0-9a-f]{{{length}}}", text) is not None
 
 
 def now():
@@ -100,21 +109,31 @@ def verify_registration(registration, path):
         raise BudgetStop("registration names another model or effort")
     if set(model.get("auxiliary_models_permitted", [])) != set(preparation.AUXILIARY_MODELS):
         raise BudgetStop("registration names other auxiliary models")
+    limits = model.get("limits_expected")
+    if (not isinstance(limits, dict) or set(limits) != set(LIMIT_KEYS)
+            or not all(type(value) is int and value > 0 for value in limits.values())):
+        raise BudgetStop("registration does not state the expected runtime limits")
     runtime = registration["native_runtime"]
     if runtime["environment"] != preparation.CHILD_ENVIRONMENT:
         raise BudgetStop("the registered child environment differs from the preparer's")
+    if runtime.get("forbidden_environment") != list(preparation.FORBIDDEN_ENVIRONMENT):
+        raise BudgetStop("the registered forbidden environment differs from the preparer's")
     if runtime["cli_flags"] != preparation.CLI_FLAGS + ["--effort", preparation.EFFORT]:
         raise BudgetStop("the registered CLI flags differ from the preparer's")
     if runtime["expected_api_key_source"] != "none":
         raise BudgetStop("the direct arm expects a login, not a key")
     for job in registration["generation"]["jobs"]:
+        if not isinstance(job.get("id"), str) or not JOB_ID.fullmatch(job["id"]):
+            raise BudgetStop("a registered job id is not a single path component")
         # The job, not only the arm block, must be the direct arm's (#2205):
         # the job's fields drive the instruction and every write.
         if (job["method"], job["runtime"], job["execution_arm"]) != (
                 preparation.METHOD, preparation.RUNTIME, preparation.EXECUTION_ARM):
             raise BudgetStop("a registered job belongs to another arm")
+        if not job["output_directories"]:
+            raise BudgetStop("a registered job names no output directory")
         targets = list(job["output_directories"]) + list(job["outputs"].values())
-        if not job["output_directories"] or not all(under_direct_roots(p) for p in targets):
+        if not all(under_direct_roots(p) for p in targets):
             raise BudgetStop("a registered job would write outside the direct arm's directories")
         if job["render_spec"].get("reasoning_effort") != preparation.EFFORT:
             raise BudgetStop("a registered job does not assert the registered effort")
@@ -130,7 +149,9 @@ def verify_environment():
 
 
 def observed_efforts(control_log):
-    """Every effort level the runtime reported on a tool callback (#2208)."""
+    """Every effort level the runtime reported on a tool callback (#2208).
+    A line that is not a decision record, or not a mapping at any level, is
+    skipped like an undecodable one (#2250)."""
     levels = set()
     with Path(control_log).open("rb") as handle:
         for raw in handle:
@@ -138,9 +159,12 @@ def observed_efforts(control_log):
                 record = json.loads(raw.decode("utf-8"))
             except (UnicodeDecodeError, ValueError):
                 continue
-            if record.get("kind") != "decision":
+            if not isinstance(record, dict) or record.get("kind") != "decision":
                 continue
-            effort = (((record.get("request") or {}).get("request") or {}).get("input") or {}).get("effort")
+            request = record.get("request")
+            inner = request.get("request") if isinstance(request, dict) else None
+            inputs = inner.get("input") if isinstance(inner, dict) else None
+            effort = inputs.get("effort") if isinstance(inputs, dict) else None
             if isinstance(effort, dict) and isinstance(effort.get("level"), str):
                 levels.add(effort["level"])
             elif isinstance(effort, str):
@@ -148,19 +172,44 @@ def observed_efforts(control_log):
     return sorted(levels)
 
 
+def counted(entry, key):
+    """A non-negative integer token count from a model-usage entry, else None."""
+    value = entry.get(key) if isinstance(entry, dict) else None
+    return value if type(value) is int and value >= 0 else None
+
+
 def model_accounting(terminal, registration):
     """The registered model's usage, the auxiliary models' usage, and any
-    model the registration does not permit (#2207)."""
-    usage = terminal.get("modelUsage") or {}
+    model the registration does not permit (#2207). Presence is not enough
+    (#2247): the registered model must carry the work, and no auxiliary
+    model may carry more generation than it, which is what a main-loop
+    fallback would look like."""
+    usage = terminal.get("modelUsage")
+    if not isinstance(usage, dict):
+        raise BudgetStop("native terminal model accounting is missing")
     registered = registration["model"]["model"]
     permitted = set(registration["model"].get("auxiliary_models_permitted", []))
     if registered not in usage:
         raise BudgetStop("native terminal accounting does not name the registered model")
+    own = usage[registered]
+    if not isinstance(own, dict):
+        raise BudgetStop("native terminal accounting for the registered model is not a mapping")
+    read = [counted(own, key) for key in ("inputTokens", "cacheReadInputTokens", "cacheCreationInputTokens")]
+    generated = counted(own, "outputTokens")
+    if generated is None or any(value is None for value in read):
+        raise BudgetStop("native terminal accounting for the registered model is incomplete")
+    if generated == 0 or sum(read) == 0:
+        raise BudgetStop("native terminal accounting shows no work on the registered model")
     auxiliary = {name: value for name, value in usage.items() if name != registered}
     foreign = sorted(name for name in auxiliary if name not in permitted)
     if foreign:
         raise BudgetStop("native terminal accounting names a model the registration does not permit: " + ", ".join(foreign))
-    return usage[registered], auxiliary
+    for name, entry in sorted(auxiliary.items()):
+        if not isinstance(entry, dict) or counted(entry, "outputTokens") is None:
+            raise BudgetStop(f"native terminal accounting for an auxiliary model is incomplete: {name}")
+        if counted(entry, "outputTokens") >= generated:
+            raise BudgetStop(f"an auxiliary model carried at least as much generation as the registered model: {name}")
+    return own, auxiliary
 
 
 def main(argv=None):
@@ -179,6 +228,14 @@ def main(argv=None):
     if (review.get("verdict") != "approve" or review.get("ci_conclusion") != "success"
             or review.get("registration_sha256") != registration_sha or args.job not in review.get("allowed_jobs", [])):
         raise BudgetStop("this registration and job need independent approval and CI")
+    # The binder's whole record, not four keys of it (#2245): the CI run it
+    # names must be on the registered commit, and it must name a run and the
+    # independent review it bound.
+    if not is_hex(registration.get("code_commit"), 40) or review.get("ci_head") != registration["code_commit"]:
+        raise BudgetStop("the review's CI evidence is not on the registered code commit")
+    if (type(review.get("ci_run_id")) is not int or review["ci_run_id"] <= 0
+            or not is_hex(review.get("independent_review_sha256"), 64)):
+        raise BudgetStop("the review does not bind a CI run and an independent review")
     if word.get("registration_sha256") != registration_sha or not str(word.get("exact_response", "")).strip():
         raise BudgetStop("the maintainer's launch word for this exact registration is required")
     verify_environment()
@@ -191,10 +248,16 @@ def main(argv=None):
     spec = spec_for(job)
     if spec.render_spec() != job["render_spec"] or spec.input_identity() != job["input_identity"]:
         raise BudgetStop("direct generation instruction or input identity changed")
-    per_job = registration["per_job_environment"][job["id"]]
+    per_job = registration["per_job_environment"].get(job["id"])
+    if not isinstance(per_job, dict):
+        raise BudgetStop("the registered job environment is not a mapping")
     if per_job.get("D4D_LAUNCH_INSTRUCTION") != job["instruction"]:
         raise BudgetStop("provenance must read the exact registered launch instruction")
-    command_policy = build_command_policy(job, registration["python"], registration["repository"])
+    try:
+        command_policy = build_command_policy(job, registration["python"], registration["repository"])
+    except (KeyError, OSError, ValueError, TypeError, SyntaxError) as error:
+        # The same named stop the native launcher gives (#2251).
+        raise BudgetStop(f"the registered command policy cannot be built: {error}") from error
     if registration["per_job_command_policy"].get(job["id"]) != command_policy:
         raise BudgetStop("the command policy differs from the registered job")
     runtime = registration["native_runtime"]
@@ -276,9 +339,11 @@ def main(argv=None):
         # The runtime's own accounting stands in for the ledger. It must be
         # complete; its cost figure is the runtime's estimate and is kept
         # as such.
-        usage = terminal.get("usage") or {}
-        if not all(type(usage.get(k)) is int and usage[k] >= 0 for k in ("input_tokens", "output_tokens")):
+        usage = terminal.get("usage")
+        if not isinstance(usage, dict) or not all(
+                type(usage.get(k)) is int and usage[k] >= 0 for k in ("input_tokens", "output_tokens")):
             raise BudgetStop("native terminal usage is incomplete")
+        receipt["runtime_limits_observed"] = {key: registered_usage.get(key) for key in LIMIT_KEYS}
         if not all(Path(p).is_file() for p in job["outputs"].values()):
             raise BudgetStop("native generation did not produce every registered artifact")
         from data_sheets_schema import api_runner, agentic_observed
@@ -291,7 +356,9 @@ def main(argv=None):
         if spec.render_version >= 9:
             try:
                 evidence = native.native_evidence_check(spec)
-                evidence_problem = None if evidence["checked"] and not evidence["findings"] else "explicit evidence assertions failed"
+                evidence_problem = (None if evidence["checked"] and not evidence["findings"]
+                                    else "explicit evidence assertions failed" if evidence["checked"]
+                                    else "explicit evidence assertions were not checked")
             except Exception as error:
                 evidence = {"checked": False, "error_type": type(error).__name__}
                 evidence_problem = f"explicit evidence assertions could not be checked ({type(error).__name__})"
@@ -302,15 +369,27 @@ def main(argv=None):
         problems = (list(problems) + native.observation_problems(observed) + native.denial_problems(receipt["permission_denials"])
                     + receipt["command_history"]["problems"] + receipt["pretool_control"]["problems"]
                     + receipt.get("phase_history", {}).get("problems", []))
-        if receipt["effort_observed"] != [registration["model"]["effort"]]:
+        # An unreported effort and a downgraded one are different findings (#2249).
+        if not receipt["effort_observed"]:
+            problems = list(problems) + [
+                f"the runtime reported no effort on any tool callback; the registration asserts {registration['model']['effort']!r}"]
+        elif receipt["effort_observed"] != [registration["model"]["effort"]]:
             problems = list(problems) + [
                 f"the runtime reported effort {receipt['effort_observed']} where the registration asserts {registration['model']['effort']!r}"]
+        if receipt["runtime_limits_observed"] != registration["model"]["limits_expected"]:
+            # A different context window is a different instrument (#2246).
+            problems = list(problems) + [
+                f"the runtime reported limits {receipt['runtime_limits_observed']} where the registration expects "
+                f"{registration['model']['limits_expected']}"]
+        if not pair or not pair.get("ran"):
+            problems = list(problems) + ["the full and core records were not checked for consistency"]
+        elif not pair.get("consistent"):
+            problems = list(problems) + ["the full and core records are not consistent"]
         receipt.update(validation_problems=problems, pair_consistency=pair, native_observed=observed,
                        runtime_reported_cost_usd=terminal.get("total_cost_usd"), runtime_usage=usage,
                        runtime_model_usage=registered_usage, auxiliary_model_usage=auxiliary_usage,
                        num_turns=terminal.get("num_turns"),
-                       status="validation_failed" if problems or not pair or not pair.get("ran") or not pair.get("consistent")
-                       else "completed_pending_independent_review")
+                       status="validation_failed" if problems else "completed_pending_independent_review")
         verify_registration(registration, registration_path)
     except BaseException as exc:
         receipt.update(status="stopped", error_type=type(exc).__name__)
@@ -334,7 +413,7 @@ def main(argv=None):
         if "effort_observed" not in receipt:
             try:
                 receipt["effort_observed"] = observed_efforts(attempt / "control.jsonl")
-            except OSError:
+            except (OSError, ValueError, TypeError):
                 receipt["effort_observed"] = []
         if "permission_denials" in receipt:
             receipt["disqualifying_denials"] = native.denial_problems(receipt["permission_denials"])

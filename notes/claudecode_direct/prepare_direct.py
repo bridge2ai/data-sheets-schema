@@ -57,12 +57,35 @@ CHILD_ENVIRONMENT = {"DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1", "CLAUDE_CODE_DISA
                      # maintainer's own login item. No token enters the env.
                      "CLAUDE_SECURESTORAGE_CONFIG_DIR": ""}
 #: Never present in the child's environment: the run must authenticate by the
-#: maintainer's login, never by a key, and must never be redirected.
-FORBIDDEN_ENVIRONMENT = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "CBORG_API_KEY",
-                         "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_CUSTOM_HEADERS", "CLAUDE_CODE_USE_BEDROCK",
-                         "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY")
+#: maintainer's login, never by a key, and must never be redirected. Every
+#: name here is one the pinned 2.1.272 binary reads (#2244): keys and tokens,
+#: base URLs and cloud-provider switches, proxies in both spellings, TLS
+#: overrides and model overrides. A second layer behind `PER_JOB_NAMES`.
+FORBIDDEN_ENVIRONMENT = (
+    "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN", "CBORG_API_KEY", "AWS_BEARER_TOKEN_BEDROCK",
+    "ANTHROPIC_BASE_URL", "ANTHROPIC_BEDROCK_BASE_URL", "ANTHROPIC_VERTEX_BASE_URL", "ANTHROPIC_FOUNDRY_BASE_URL",
+    "ANTHROPIC_CUSTOM_HEADERS", "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY",
+    "CLAUDE_CODE_SKIP_BEDROCK_AUTH", "CLAUDE_CODE_SKIP_VERTEX_AUTH", "CLAUDE_CODE_SKIP_FOUNDRY_AUTH",
+    "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy",
+    "GLOBAL_AGENT_HTTP_PROXY", "GLOBAL_AGENT_HTTPS_PROXY", "GLOBAL_AGENT_NO_PROXY",
+    "NODE_EXTRA_CA_CERTS", "NODE_TLS_REJECT_UNAUTHORIZED", "CLAUDE_CODE_CLIENT_CERT", "CLAUDE_CODE_CLIENT_KEY",
+    "ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+    "ANTHROPIC_SMALL_FAST_MODEL", "CLAUDE_CODE_SUBAGENT_MODEL")
 #: What the launcher's own process may pass through to the child.
 PARENT_PASSTHROUGH = ("PATH", "HOME", "USER", "SHELL", "TMPDIR", "LANG", "LC_ALL", "TERM")
+#: The only names a registration's job may add to the child's environment
+#: (#2244): what the recorder reads to find the manifest, the profile and the
+#: launch instruction. Any other name is refused whatever its value, so a
+#: registration cannot add a proxy, a base URL, a TLS or model override, or
+#: shadow a registered constant.
+PER_JOB_NAMES = ("D4D_MANIFEST", "D4D_PROFILE", "D4D_LAUNCH_INSTRUCTION")
+#: What the runtime is expected to report as the registered model's limits
+#: (#2246): the native registration's offline observation of the same model
+#: through CBORG (`native_controls/prepare_overlay.py`). Asserted, not
+#: observed on this transport, until the first run; a difference is a
+#: validation problem, since a different context window is a different
+#: instrument.
+EXPECTED_LIMITS = {"contextWindow": 200000, "maxOutputTokens": 64000}
 #: The runtime's own auxiliary calls (titles, summaries) use a second model
 #: (#2207). They are not the datasheet's model; they are recorded, and any
 #: model outside this set fails the run.
@@ -88,13 +111,26 @@ def child_environment(config_dir, registered=None, per_job=None):
     """The child's exact environment: the parent's pass-through names, the
     registered child environment, the job's variables and the isolated
     config directory. Every forbidden name is refused wherever it comes from
-    (#2204), and a registered environment must equal the preparer's."""
+    (#2204), the job may add only `PER_JOB_NAMES` (#2244), and a registered
+    environment must equal the preparer's."""
     if registered is not None and registered != CHILD_ENVIRONMENT:
         raise DirectStop("the registered child environment differs from the preparer's")
+    per_job = dict(per_job or {})
+    forbidden = sorted(name for name in FORBIDDEN_ENVIRONMENT if name in per_job)
+    if forbidden:
+        raise DirectStop("the child environment must not carry provider keys or redirection: " + ", ".join(forbidden))
+    unexpected = sorted(set(per_job) - set(PER_JOB_NAMES))
+    if unexpected:
+        raise DirectStop("a job may add only " + ", ".join(PER_JOB_NAMES)
+                         + " to the child's environment; refused: " + ", ".join(unexpected))
+    if not all(isinstance(value, str) for value in per_job.values()):
+        raise DirectStop("a job's environment values must be strings")
     env = {k: v for k, v in os.environ.items() if k in PARENT_PASSTHROUGH}
     env.update(CHILD_ENVIRONMENT)
-    env.update(per_job or {})
+    env.update(per_job)
     env.update(CLAUDE_CONFIG_DIR=str(config_dir))
+    # Reached only if a constant above is edited to admit one: kept as the
+    # last check on the environment as assembled.
     present = sorted(name for name in FORBIDDEN_ENVIRONMENT if name in env)
     if present:
         raise DirectStop("the child environment must not carry provider keys or redirection: " + ", ".join(present))
@@ -143,6 +179,9 @@ def build(args):
     output = args.output.resolve()
     if output.exists():
         raise DirectStop(f"registration directory already exists: {output}")
+    limits = {"contextWindow": int(args.context_window), "maxOutputTokens": int(args.max_output_tokens)}
+    if any(value <= 0 for value in limits.values()):
+        raise DirectStop("the expected runtime limits must be positive")
     job["output_directory"] = str(spec.metadata_dir)
     job["output_directories"] = sorted({str(spec.full_path.parent), str(spec.core_path.parent)})
     if any(Path(p).exists() for p in job["output_directories"]):
@@ -177,6 +216,7 @@ def build(args):
                  Path(case["manifest"]), Path(case["bundle"]), Path(case["chunks"]), executable]:
         pins[str(path)] = sha(path)
     per_job = {"D4D_MANIFEST": case["manifest"], "D4D_PROFILE": case["profile"], "D4D_LAUNCH_INSTRUCTION": str(instruction)}
+    assert set(per_job) == set(PER_JOB_NAMES)
     # The login is probed in the child's exact environment, in a throwaway
     # configuration directory that leaves nothing behind.
     probe_config = output / "auth_probe_config"
@@ -195,7 +235,10 @@ def build(args):
         "python": python, "python_version": sys.version,
         "model": {"model": MODEL, "effort": EFFORT, "auxiliary_models_permitted": list(AUXILIARY_MODELS),
                   "effort_basis": "asserted by the launcher through --effort and recorded through --reasoning-effort; "
-                                  "checked after the run against the effort the runtime reports on every tool callback"},
+                                  "checked after the run against the effort the runtime reports on every tool callback",
+                  "limits_expected": limits,
+                  "limits_basis": "asserted from the native registration's offline observation of the same model "
+                                  "through CBORG; not observed on this transport until the first run (#2246)"},
         "native_runtime": {"executable": str(executable), "version": version,
                            "cli_flags": CLI_FLAGS + ["--effort", EFFORT], "environment": CHILD_ENVIRONMENT,
                            "forbidden_environment": list(FORBIDDEN_ENVIRONMENT),
@@ -236,6 +279,9 @@ def main():
     parser.add_argument("--run-date", default=datetime.now(timezone.utc).date().isoformat())
     parser.add_argument("--deadline-seconds", type=int, default=21600)
     parser.add_argument("--runaway-guard-usd", default="60")
+    parser.add_argument("--context-window", type=int, default=EXPECTED_LIMITS["contextWindow"],
+                        help="the context window the runtime is expected to report for the registered model (#2246)")
+    parser.add_argument("--max-output-tokens", type=int, default=EXPECTED_LIMITS["maxOutputTokens"])
     build(parser.parse_args())
 
 
