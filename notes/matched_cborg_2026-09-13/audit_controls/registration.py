@@ -557,6 +557,7 @@ def validate_registration(path):
     native_api_timeout(manifest)
     native_api_force_idle_timeout(manifest)
     native_stall_policy(manifest)
+    native_response_buffer(manifest)
     budget = manifest['budget']
     previous = read_json(budget['continuation']['checkpoint'])
     costs = [Decimal(str(row.get('cost_usd', 'NaN'))) for row in previous['requests']]
@@ -681,6 +682,31 @@ def native_stall_policy(manifest):
         if native_api_force_idle_timeout(manifest) is not False:
             raise BudgetStop('stall debits need the native fetch idle timer registered off')
     return {'count_attempts': value['count_attempts'], 'max_stall_debits': value['max_stall_debits']}
+
+
+def native_response_buffer(manifest):
+    """Opt-in complete-response delivery; never expose an incomplete turn (#2304)."""
+    key = 'native_response_buffer'
+    if key not in manifest:
+        return None
+    value = manifest[key]
+    if (manifest.get('kind') != 'd4d_native_audit_continuation' or
+            not isinstance(value, dict) or set(value) != {'kind', 'max_bytes', 'total_seconds'} or
+            value['kind'] != 'complete_response_v1' or
+            type(value['max_bytes']) is not int or not 1 <= value['max_bytes'] <= 64 * 1024 * 1024 or
+            type(value['total_seconds']) is not int or value['total_seconds'] <= 0):
+        raise BudgetStop('native response buffering is audit-only: complete_response_v1 with bounded bytes and time')
+    policy = native_stall_policy(manifest)
+    if policy is None:
+        raise BudgetStop('native response buffering requires the registered stall policy')
+    read_bound = native_upstream_read_timeout(manifest) or LEGACY_UPSTREAM_READ_SECONDS
+    if value['total_seconds'] > read_bound:
+        raise BudgetStop('complete-response deadline must not exceed the registered upstream read bound')
+    outer = native_api_timeout(manifest)
+    if (outer is None or outer < stall_policy_minimum_api_timeout_ms(manifest, policy['count_attempts']) or
+            native_api_force_idle_timeout(manifest) is not False):
+        raise BudgetStop('native response buffering needs bounded SDK timeout margin and the idle timer off')
+    return dict(value)
 
 
 def native_api_force_idle_timeout(manifest):

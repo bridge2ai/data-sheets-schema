@@ -6,7 +6,8 @@ from httpx import Client, Timeout
 from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, LEGACY_UPSTREAM_READ_SECONDS,
                             POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS,
                             cborg_client, provider_context_headers)
-from .registration import canonical_path, pinned, native_stall_policy, native_upstream_read_timeout
+from .registration import (canonical_path, pinned, native_stall_policy,
+                           native_upstream_read_timeout, native_response_buffer)
 
 
 def transport_paths(manifest):
@@ -18,6 +19,7 @@ def transport_paths(manifest):
         enabled(manifest)
     native_upstream_read_timeout(manifest)
     native_stall_policy(manifest)
+    native_response_buffer(manifest)
     endpoint = manifest.get('provider_base_url')
     if endpoint not in CBORG_ENDPOINTS:
         raise BudgetStop('audit requires a documented CBORG endpoint')
@@ -63,9 +65,11 @@ def provider_clients(manifest, api_key):
             sdk = BoundedCountClient(api_key=api_key, base_url=manifest['provider_base_url'],
                 ca_bundle=ca, default_headers=provider_context_headers(manifest),
                 timeout_seconds=POLICY_COUNT_TRY_SECONDS)
+            buffer = native_response_buffer(manifest)
             upstream = BoundedStreamClient(metadata, ca_bundle=ca,
                 read_timeout_seconds=native_upstream_read_timeout(manifest) or LEGACY_UPSTREAM_READ_SECONDS,
-                connect_timeout_seconds=UPSTREAM_CONNECT_SECONDS)
+                connect_timeout_seconds=UPSTREAM_CONNECT_SECONDS,
+                **({'total_timeout_seconds': buffer['total_seconds']} if buffer is not None else {}))
         except BaseException:
             if sdk is not None:
                 sdk.close()

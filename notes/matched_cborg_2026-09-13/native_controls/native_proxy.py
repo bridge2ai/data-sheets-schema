@@ -8,9 +8,13 @@ from contextlib import contextmanager
 from decimal import Decimal, InvalidOperation
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import hashlib
+import os
 from pathlib import Path
 import re
 import secrets
+import stat
+import tempfile
 import threading
 from types import SimpleNamespace
 from urllib.parse import urlsplit
@@ -156,14 +160,49 @@ def validated_stall_policy(value):
     return dict(value)
 
 
+def validated_response_buffer(value):
+    """Explicit bounded complete-response delivery; None retains streaming (#2304)."""
+    if value is None:
+        return None
+    if (type(value) is not dict or set(value) != {"kind", "max_bytes", "total_seconds"}
+            or value["kind"] != "complete_response_v1"
+            or type(value["max_bytes"]) is not int or not 1 <= value["max_bytes"] <= 64 * 1024 * 1024
+            or type(value["total_seconds"]) is not int or value["total_seconds"] <= 0):
+        raise BudgetStop("invalid native complete-response buffer policy")
+    return dict(value)
+
+
+def verify_buffer_evidence(path, size, identity):
+    """Check retained bytes before releasing the handler's private replay spool."""
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, "rb") as source:
+        info = os.fstat(source.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size != size:
+            raise BudgetStop("native response buffer evidence changed")
+        observed = hashlib.sha256()
+        remaining = size
+        while remaining:
+            chunk = source.read(min(65536, remaining))
+            if not chunk:
+                raise BudgetStop("native response buffer evidence changed")
+            observed.update(chunk)
+            remaining -= len(chunk)
+        if source.read(1) or observed.hexdigest() != identity:
+            raise BudgetStop("native response buffer evidence changed")
+
+
 class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
                  provider_key, base_url, upstream=None, request_headers=None,
-                 upstream_read_timeout_seconds=None, stall_policy=None, count_pause=None, stage_cap=None):
+                 upstream_read_timeout_seconds=None, stall_policy=None, count_pause=None, stage_cap=None,
+                 response_buffer=None):
         if base_url not in CBORG_ENDPOINTS:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
         # Opt-in only: None keeps every legacy path byte for byte (#2150).
         self.stall_policy = validated_stall_policy(stall_policy)
+        self.response_buffer = validated_response_buffer(response_buffer)
+        if self.response_buffer is not None and self.stall_policy is None:
+            raise BudgetStop("native response buffering requires a registered stall policy")
         self.stalls_survived = 0
         if upstream_read_timeout_seconds is not None and (
                 type(upstream_read_timeout_seconds) is not int or upstream_read_timeout_seconds <= 0):
@@ -311,6 +350,10 @@ class NativeProxy:
             def _post_serially(self):
                 self.connection.settimeout(20)
                 sent = False
+                buffering = False
+                buffered_bytes = 0
+                buffered_digest = hashlib.sha256()
+                replay_spool = None
                 ticket = folder = upstream_status = None
                 try:
                     supplied = self.headers.get("x-api-key", "")
@@ -377,33 +420,94 @@ class NativeProxy:
                             raise BudgetStop(UNCONFIRMED_CHARGE)
                         if "text/event-stream" not in response.headers.get("content-type", ""):
                             raise BudgetStop("unregistered upstream response format")
-                        self.send_response(200)
-                        self.send_header("Content-Type", "text/event-stream")
-                        self.end_headers()
-                        sent = True
-                        deferred = []
-                        owner.capture(folder / "response.sse", b"")
-                        for chunk in response.iter_bytes():
-                            owner.capture(folder / "response.sse", chunk, append=True)
-                            completion.feed(chunk)
-                            if completion.stopped:
-                                deferred.append(chunk)
-                            else:
-                                self.wfile.write(chunk); self.wfile.flush()
+                        if owner.response_buffer is not None:
+                            # No local headers or assistant/tool bytes escape before
+                            # complete validated accounting. Spool exact wire bytes;
+                            # do not accumulate a second in-memory response (#2304).
+                            buffering = True
+                            # Anonymous disk spool has no path the child could
+                            # substitute between validation and exact delivery.
+                            replay_spool = tempfile.TemporaryFile(mode="w+b")
+                            owner.capture(folder / "response.sse", b"")
+                            for chunk in response.iter_bytes():
+                                if buffered_bytes + len(chunk) > owner.response_buffer["max_bytes"]:
+                                    raise BudgetStop("native response buffer byte limit exceeded")
+                                owner.capture(folder / "response.sse", chunk, append=True)
+                                replay_spool.write(chunk)
+                                buffered_bytes += len(chunk)
+                                buffered_digest.update(chunk)
+                                completion.feed(chunk)
+                            complete = completion.final()
+                            replay_spool.flush()
+                            replay_spool.seek(0)
+                            # EOF/parser/accounting/local failures are not remote stalls.
+                            buffering = False
+                        else:
+                            self.send_response(200)
+                            self.send_header("Content-Type", "text/event-stream")
+                            self.end_headers()
+                            sent = True
+                            deferred = []
+                            owner.capture(folder / "response.sse", b"")
+                            for chunk in response.iter_bytes():
+                                owner.capture(folder / "response.sse", chunk, append=True)
+                                completion.feed(chunk)
+                                if completion.stopped:
+                                    deferred.append(chunk)
+                                else:
+                                    self.wfile.write(chunk); self.wfile.flush()
+                            with owner.state:
+                                owner.require_writable()
+                                owner.messages.finish(ticket, folder, completion.final(), stream_complete=True)
+                            # Do not let the child issue its next request before
+                            # the preceding completed request has been accounted.
+                            for chunk in deferred:
+                                self.wfile.write(chunk)
+                            self.wfile.flush()
+                    if owner.response_buffer is not None:
+                        # Upstream worker/context is closed before settlement or
+                        # retry. Settlement may finish after admission closes, but
+                        # completed data must never be delivered after that close.
                         with owner.state:
                             owner.require_writable()
-                            owner.messages.finish(ticket, folder, completion.final(), stream_complete=True)
-                        # Do not let the child issue its next request before
-                        # the preceding completed request has been accounted.
-                        for chunk in deferred:
+                            owner.messages.finish(ticket, folder, complete, stream_complete=True)
+                            owner.require_open()
+                            verify_buffer_evidence(folder / "response.sse", buffered_bytes,
+                                                   buffered_digest.hexdigest())
+                            owner.capture_json(folder / "buffered_response.json", {
+                                "kind": "complete_response_v1", "response_bytes": buffered_bytes,
+                                "response_sha256": buffered_digest.hexdigest(),
+                                "response_buffer": owner.response_buffer,
+                                "complete_and_settled_before_delivery": True})
+                            # Conservative delivery boundary: even a partial header
+                            # write makes all later failures terminal, never retried.
+                            sent = True
+                        self.send_response(200)
+                        self.send_header("Content-Type", "text/event-stream")
+                        self.send_header("Content-Length", str(buffered_bytes))
+                        self.end_headers()
+                        for chunk in iter(lambda: replay_spool.read(65536), b""):
+                            with owner.state:
+                                owner.require_writable()
+                                owner.require_open()
                             self.wfile.write(chunk)
                         self.wfile.flush()
+                        verify_buffer_evidence(folder / "response.sse", buffered_bytes,
+                                               buffered_digest.hexdigest())
                 except Exception as exc:
                     if not sent and owner.stall_policy is not None:
                         # Nothing reached the child, so its own retry can
                         # continue the session once the charge is counted.
                         try:
-                            owner.survive_stall(ticket, folder, stall_evidence(exc, upstream_status))
+                            evidence = stall_evidence(exc, upstream_status)
+                            if (buffering and upstream_status == 200
+                                    and isinstance(exc, POST_SEND_FAILURES)):
+                                evidence = {"kind": "upstream_transport", "error_type": type(exc).__name__,
+                                    "http_status": 200, "response_buffer": owner.response_buffer,
+                                    "response_delivery_started": False,
+                                    "buffered_bytes": buffered_bytes,
+                                    "buffered_sha256": buffered_digest.hexdigest()}
+                            owner.survive_stall(ticket, folder, evidence)
                         except Exception:
                             pass
                         else:
@@ -419,6 +523,11 @@ class NativeProxy:
                         except (OSError, BrokenPipeError):
                             pass
                 finally:
+                    if replay_spool is not None:
+                        try:
+                            replay_spool.close()
+                        except Exception as cleanup_error:
+                            owner.fail(cleanup_error)
                     self.close_connection = True
             def do_GET(self):
                 self.reply(404, {"type":"error", "error":{"type":"not_found_error", "message":"no registered read endpoint"}})
