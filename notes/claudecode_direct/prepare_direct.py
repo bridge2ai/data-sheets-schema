@@ -211,7 +211,7 @@ def build(args):
         condition=args.condition, manifest=Path(case["manifest"]), chunk_manifest=Path(case["chunks"]),
         profile=case["profile"], profile_basis="stated by the registered caller",
         render_version=args.render_version, run_date=args.run_date,
-        runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT)
+        runtime=RUNTIME, provider=PROVIDER, reasoning_effort=EFFORT, prompt_text_env=True)
     if not spec.is_agentic:
         raise DirectStop("the direct arm must render the agentic instruction")
     output = args.output.resolve()
@@ -241,6 +241,15 @@ def build(args):
     if (f"# Provider: {PROVIDER}" not in spec.instruction or f"# Agent runtime: {RUNTIME}" not in spec.instruction
             or f"# Model: {MODEL}" not in spec.instruction):
         raise DirectStop("the rendered header does not state the direct arm's runtime, provider and model")
+    recorder = [line for line in spec.instruction.splitlines() if " -m data_sheets_schema.cli provenance record" in line]
+    # The runtime refuses a prescribed line carrying a shell expansion under
+    # dontAsk (#2282), and, observed with the pinned binary, one whose render
+    # specification carries an apostrophe (a path with one, quoted by the
+    # shell as '"'"'). Either would disqualify the run at its last step.
+    if not recorder or any("${" in line or "--prompt-text-env D4D_LAUNCH_INSTRUCTION" not in line for line in recorder):
+        raise DirectStop("the rendered recorder line must read the launch instruction by --prompt-text-env, with no shell expansion")
+    if "'" in json.dumps(spec.render_spec()):
+        raise DirectStop("the render specification carries an apostrophe, which the runtime refuses in a prescribed line")
     python = sys.executable
     policy = build_command_policy(job, python, str(repository))
     system_prompt = HERE / "system.md"

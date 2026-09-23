@@ -121,6 +121,14 @@ controller's own stop state.
   before the attempt directory exists, so a refusal never consumes the job
   identity.
 
+- **Recorder line.** The instruction's provenance line reads the launch
+  instruction by variable name (`--prompt-text-env D4D_LAUNCH_INSTRUCTION`)
+  rather than a shell expansion, which the runtime refuses under dontAsk:
+  the first canary was disqualified at that step (#2282). The preparer
+  refuses a recorder line with an expansion or a specification with an
+  apostrophe, and the launcher refuses a job without the key.
+  `probe_recorder_permission.py` observes the runtime's decision offline.
+
 ## Running one canary
 
 ```bash

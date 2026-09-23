@@ -2837,3 +2837,54 @@ independent review of the registration, CI on the exact commit and the
 maintainer's launch word for that registration's hash; Kids First follows
 only after an accepted CHORUS pair. An audit produced by this arm over the
 other arm's frozen draft would be a mixed condition and is not planned.
+
+### The recorder reads the launch instruction by variable name (#2282; 2026-09-23)
+
+The first direct-arm canary (`CHORUS_direct_rep1`, 2026-09-23) completed all
+four phases and was then disqualified at its last step: the runtime refused
+the prescribed `provenance record` line under `--permission-mode dontAsk`,
+although the registered allow rule covers it and the controller did not deny
+it. Every agentic instruction at renderers 9 to 23 ends that line with
+`--prompt-text "${D4D_LAUNCH_INSTRUCTION:?...}"`. An offline probe
+(`notes/claudecode_direct/probe_recorder_permission.py`: the pinned 2.1.272
+binary against a scripted local provider, no key, no model call) observed the
+cause on the registered line itself: with the expansion it is refused; with
+the literal path, or ending `--prompt-text-env D4D_LAUNCH_INSTRUCTION`, it is
+admitted; removing the `#` or the parentheses from its render specification
+changes nothing. No earlier native attempt reached this step, so the line is
+un-runnable as rendered on both Claude Code arms.
+
+The change is opt-in and moves no existing rendering. `RunSpec` gains
+`prompt_text_env`; unset, the line and the specification render exactly as
+before (tested byte for byte). Set, the specification carries
+`"prompt_text_env": true`, the recorder line ends `--prompt-text-env
+D4D_LAUNCH_INSTRUCTION`, and one sentence follows the launcher note telling
+the model to run the line as written. `d4d provenance record
+--prompt-text-env NAME` reads the path from that variable, refuses an unset
+or empty variable, a missing file and a name that is not a variable, is
+exclusive with `--prompt-text`, and then passes the same render-spec gate:
+the file must reproduce the registered instruction. The replay route
+(`from_render_spec`, `verify_request`, review packs) restores the key, so a
+record made this way reads `match`. The renderer version is unchanged: a new
+version would carry the audit renderers 18 to 23 into generation.
+
+What this is for each arm. **Direct arm:** its preparer sets the key and
+refuses to register a recorder line with a shell expansion, and its launcher
+refuses a job without the key; the instruction of its next registration
+differs from the first canary's in the recorder line's ending, the
+specification's one key and the one sentence, and in nothing the model is
+asked to extract or judge. **Agentic (CBORG) arm:** unchanged by this
+change; its registrations render the expansion, and a run that reaches the
+provenance step under dontAsk is expected to be refused the same way
+(expected, not observed on that arm); its next registration should set the
+key, which is that arm's registration decision. **API arm:** unaffected;
+the line is rendered only for agentic runtimes. **Evaluation:** no
+instrument reads the recorder line; evaluations read records. Records made
+with and without the key are comparable on every generated field; they
+differ in the instruction's sha256, which is recorded, not compared by
+`compare-arms`.
+
+A second limit the probe found: a render specification carrying an
+apostrophe (a checkout or manifest path with one, quoted by the shell as
+`'"'"'`) is refused even in the env form. The direct preparer refuses such a
+registration; no current checkout carries one.

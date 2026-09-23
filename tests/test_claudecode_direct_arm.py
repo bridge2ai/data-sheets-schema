@@ -444,3 +444,98 @@ class PlaybookWording(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# --- #2282: the recorder reads the launch instruction by variable name ---------------------------
+
+ENV_FLAG = "--prompt-text-env D4D_LAUNCH_INSTRUCTION"
+EXPANSION = '--prompt-text "${D4D_LAUNCH_INSTRUCTION:?'
+
+
+def test_the_env_form_changes_only_the_recorder_line_and_its_note(native):  # noqa: F811
+    """#2282: opt-in; without the key every rendering is byte-identical, with it only the recorder ending moves."""
+    from data_sheets_schema.api_runner import resolve_prompt
+    spec, _, _ = native
+    direct = replace(spec, runtime=DIRECT, provider=DIRECT_PROVIDER, reasoning_effort="max")
+    before, after = resolve_prompt(direct), resolve_prompt(replace(direct, prompt_text_env=True))
+    assert "prompt_text_env" not in direct.render_spec()
+    assert replace(direct, prompt_text_env=True).render_spec() == {**direct.render_spec(), "prompt_text_env": True}
+    old_line, new_line = recorder_line(before), recorder_line(after)
+    assert old_line.endswith("launch instruction}\"") and EXPANSION in old_line
+    assert new_line.endswith(ENV_FLAG) and "${" not in new_line
+    # The render specification in the line carries the key; everything before it is the same command.
+    old_tokens, new_tokens = shlex.split(old_line), shlex.split(new_line)
+    at = old_tokens.index("--render-spec-json")
+    assert new_tokens[:at] == old_tokens[:at]
+    assert json.loads(new_tokens[at + 1]) == {**json.loads(old_tokens[at + 1]), "prompt_text_env": True}
+    assert new_tokens[at + 2:] == ["--prompt-text-env", "D4D_LAUNCH_INSTRUCTION"]
+    # Outside the recorder line, the only change is one appended sentence.
+    old_rest = before.replace(old_line, "@@")
+    new_rest = after.replace(new_line, "@@")
+    added = "The provenance command reads that variable itself: run the line exactly as written, and do not expand or replace the variable in the shell.\n"
+    assert new_rest.replace(added, "", 1) == old_rest
+
+
+def test_the_env_key_round_trips_and_a_non_boolean_is_refused(native):  # noqa: F811
+    from data_sheets_schema.api_runner import RunSpec
+    spec, _, _ = native
+    recorded = replace(spec, prompt_text_env=True).render_spec()
+    kw = dict(project=spec.project, method=spec.method, label=spec.label)
+    assert RunSpec.from_render_spec(recorded, **kw).prompt_text_env is True
+    assert RunSpec.from_render_spec({k: v for k, v in recorded.items() if k != "prompt_text_env"}, **kw).prompt_text_env is False
+    for bad in ("yes", 1, None):
+        with pytest.raises(ValueError, match="invalid recorded prompt_text_env"):
+            RunSpec.from_render_spec({**recorded, "prompt_text_env": bad}, **kw)
+
+
+@pytest.fixture
+def env_native(native, tmp_path):  # noqa: F811
+    """The registered native fixture re-rendered in the env form, as the direct arm registers it."""
+    from data_sheets_schema.cli import cli
+    spec, _, _ = native
+    direct = replace(spec, runtime=DIRECT, provider=DIRECT_PROVIDER, reasoning_effort="max", prompt_text_env=True)
+    sent = tmp_path / "exact env-form launch instruction.txt"
+    sent.write_text(direct.instruction)
+    header_text = (f"# Agent runtime: {DIRECT}\n# Provider: {DIRECT_PROVIDER}\n"
+                   "# Model: synthetic-model\n# Temperature: not observed\n")
+    for path in (direct.full_path, direct.core_path):
+        path.write_text(header_text + "id: https://example.org/cohort\nname: Example\n")
+    argv = shlex.split(recorder_line(direct.instruction))
+    assert argv[-2:] == ["--prompt-text-env", "D4D_LAUNCH_INSTRUCTION"]
+    return direct, sent, argv[3:], cli
+
+
+def test_the_recorder_reads_the_instruction_from_the_named_variable(env_native):
+    """#2282: the line runs verbatim; the recorder, not the shell, resolves the variable."""
+    direct, sent, command, cli = env_native
+    result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+    assert result.exit_code == 0, (result.output, result.exception)
+    record = yaml.safe_load(direct.provenance_path.read_text())
+    assert record["prompts"]["request"]["spec"]["prompt_text_env"] is True
+    assert record["model"]["reasoning_effort"] == "max"
+
+
+def test_the_named_variable_must_be_set_to_an_existing_file(env_native, tmp_path):
+    direct, sent, command, cli = env_native
+    for env, message in (({"D4D_LAUNCH_INSTRUCTION": ""}, "is not set"),
+                         ({"D4D_LAUNCH_INSTRUCTION": str(tmp_path / "absent.md")}, "names no file")):
+        result = CliRunner().invoke(cli, command, env=env)
+        assert result.exit_code != 0 and message in result.output, result.output
+        assert not direct.provenance_path.exists()
+    unset = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": None})
+    assert unset.exit_code != 0 and "is not set" in unset.output
+    both = CliRunner().invoke(cli, command + ["--prompt-text", str(sent)], env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+    assert both.exit_code != 0 and "exclusive" in both.output
+    bad_name = [*command[:-1], "d4d-launch"]
+    named = CliRunner().invoke(cli, bad_name, env={"d4d-launch": str(sent)})
+    assert named.exit_code != 0 and "names no environment variable" in named.output
+    assert not direct.provenance_path.exists()
+
+
+def test_a_different_file_in_the_variable_is_refused_by_the_render_gate(env_native, tmp_path):
+    direct, sent, command, cli = env_native
+    other = tmp_path / "edited instruction.txt"
+    other.write_text(sent.read_text() + "\nedited\n")
+    result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(other)})
+    assert result.exit_code != 0 and "does not reproduce the supplied instruction" in result.output
+    assert not direct.provenance_path.exists()

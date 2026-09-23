@@ -452,6 +452,9 @@ BACKOFF_BASE_SECONDS = 2
 #: never rendered for Codex, and stays that way.
 AGENTIC_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Codex CLI"})
 CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)"})
+#: The variable a launcher sets to the exact saved launch instruction; the
+#: recorder reads it with `--prompt-text-env` (#2282).
+LAUNCH_INSTRUCTION_VARIABLE = "D4D_LAUNCH_INSTRUCTION"
 
 @dataclass
 class RunSpec:
@@ -525,6 +528,15 @@ class RunSpec:
     # the recorder still marks it asserted, not observed. None renders
     # nothing, which keeps every existing render spec byte-identical.
     reasoning_effort: str | None = None
+    # Render the agentic recorder line's launch instruction as the name of
+    # the variable that carries it (`--prompt-text-env D4D_LAUNCH_INSTRUCTION`)
+    # rather than as the shell expansion `"${D4D_LAUNCH_INSTRUCTION:?...}"`
+    # (#2282). Claude Code refuses a command carrying a parameter expansion
+    # under `--permission-mode dontAsk` whatever the allow rules say, so the
+    # expansion form can never run on a Claude Code arm; observed offline
+    # with the pinned binary. False renders the expansion, which keeps every
+    # existing render spec byte-identical; True is emitted into the spec.
+    prompt_text_env: bool = False
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
@@ -638,7 +650,10 @@ class RunSpec:
                    manifest=None,
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
                    provider=recorded.get("provider"),
-                   reasoning_effort=recorded.get("reasoning_effort"), _replay_only=True)
+                   reasoning_effort=recorded.get("reasoning_effort"),
+                   prompt_text_env=recorded.get("prompt_text_env", False), _replay_only=True)
+        if not isinstance(spec.prompt_text_env, bool):
+            raise ValueError(f"invalid recorded prompt_text_env: {spec.prompt_text_env!r}")
         if spec.reasoning_effort is not None and spec.reasoning_effort not in provenance._EFFORT_LADDER:
             # The recorder's flag is a closed choice; the specification route
             # must not admit what the flag refuses (#2255).
@@ -760,6 +775,7 @@ class RunSpec:
                 "provider": self.provider or provider_identity()["provider"]
                 or PROVIDER,
                 **({"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}),
+                **({"prompt_text_env": True} if self.prompt_text_env else {}),
                 "bundle": str(self.bundle)}
 
     @cached_property
@@ -1179,14 +1195,18 @@ def resolve_prompt(spec: RunSpec) -> str:
             # specification itself must never be rewritten by a text adapter.
             import shlex
             payload = shlex.quote(json.dumps(spec.render_spec(), sort_keys=True, separators=(",", ":")))
+            source = (" --prompt-text-env " + LAUNCH_INSTRUCTION_VARIABLE if spec.prompt_text_env
+                      else ' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?Set D4D_LAUNCH_INSTRUCTION to the exact saved launch instruction}"')
             body = re.sub(
                 r"(?m)^([^\n]* -m data_sheets_schema\.cli provenance record[^\n]*)$",
-                lambda match: match.group(1) + " --render-spec-json " + payload
-                + ' --prompt-text "${D4D_LAUNCH_INSTRUCTION:?Set D4D_LAUNCH_INSTRUCTION to the exact saved launch instruction}"',
+                lambda match: match.group(1) + " --render-spec-json " + payload + source,
                 body)
             body += ("\nThe launcher must set D4D_LAUNCH_INSTRUCTION to the exact saved instruction "
                      "file supplied on stdin. The provenance command verifies that file against "
                      "the registered rendering specification. Do not reconstruct or edit it.\n")
+            if spec.prompt_text_env:
+                body += ("The provenance command reads that variable itself: run the line exactly as "
+                         "written, and do not expand or replace the variable in the shell.\n")
     if spec.render_version >= 10:
         # Both arms receive the same complete output contracts. API requests
         # also put the applicable contract after their carried artifacts.

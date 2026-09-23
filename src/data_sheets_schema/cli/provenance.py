@@ -2,6 +2,8 @@
 
 import functools
 
+import os
+import re
 import click
 
 from data_sheets_schema.corpus import anchored as _corpus_path
@@ -318,6 +320,10 @@ def _parse_phases(specs) -> list[dict]:
                    '`d4d api render-prompt --out`. Hashed as prompts.request. '
                    'The file is what an instruction was built from; this is '
                    'what it became.')
+@click.option('--prompt-text-env', 'prompt_text_env', default=None, metavar='VARIABLE',
+              help='Read the --prompt-text path from this environment variable, so a '
+                   'prescribed command carries no shell expansion; Claude Code refuses '
+                   'one under dontAsk (#2282). Exclusive with --prompt-text.')
 @click.option('--condition', default=None, type=click.Choice(sorted(_CONDITIONS_FOR_RECORD())),
               help='Condition the instruction was rendered under. With --arm '
                    'and --runtime this reconstructs the render spec, so the '
@@ -379,7 +385,7 @@ def _parse_phases(specs) -> list[dict]:
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
            reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
-           stated_profile=None, render_spec_json=None):
+           stated_profile=None, render_spec_json=None, prompt_text_env=None):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -400,6 +406,19 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
     registered = None
+    if prompt_text_env is not None:
+        # The path comes from the named variable, not from the shell (#2282).
+        if prompt_text is not None:
+            raise click.ClickException("--prompt-text and --prompt-text-env are exclusive")
+        if not re.fullmatch(r"[A-Z_][A-Z0-9_]*", prompt_text_env):
+            raise click.ClickException(f"--prompt-text-env names no environment variable: {prompt_text_env!r}")
+        value = os.environ.get(prompt_text_env, "")
+        if not value.strip():
+            raise click.ClickException(f"--prompt-text-env: {prompt_text_env} is not set; the launcher sets it "
+                                       "to the exact saved launch instruction")
+        if not Path(value).is_file():
+            raise click.ClickException(f"--prompt-text-env: {prompt_text_env} names no file: {value}")
+        prompt_text = value
     supplied_text = ((Path(prompt_text).read_bytes().decode("utf-8") if render_spec_json is not None
                       else Path(prompt_text).read_text(encoding="utf-8")) if prompt_text else None)
     if render_spec_json is not None:

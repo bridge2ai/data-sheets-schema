@@ -1,0 +1,45 @@
+{
+  "probe": "notes/claudecode_direct/probe_recorder_permission.py",
+  "date": "2026-09-23",
+  "runtime": "Claude Code 2.1.272",
+  "permission_mode": "dontAsk",
+  "provider": "scripted local provider; no key, no model call",
+  "runs": {
+    "real": {
+      "line": "the first direct-arm canary's registered recorder line",
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "real_provider_requests": 0,
+      "cases": {
+        "real_expansion": "refused",
+        "real_literal_path": "admitted",
+        "real_env_flag": "admitted",
+        "real_env_flag_no_hash": "admitted",
+        "real_env_flag_no_parens": "admitted",
+        "real_env_flag_neither": "admitted",
+        "tiny_hash_after_space": "admitted",
+        "tiny_hash_no_space": "admitted",
+        "tiny_parens": "admitted",
+        "tiny_apostrophe": "admitted",
+        "real_env_flag_no_apostrophe": "admitted"
+      }
+    },
+    "fixture": {
+      "line": "the native permission probe's fixture line (a manifest path with an apostrophe)",
+      "runtime_sha256": "195e24e8e1f9bf46f1eaee72d434a33e18f9f5796f29a6348a00d16c5f8aee75",
+      "real_provider_requests": 0,
+      "cases": {
+        "real_expansion": "refused",
+        "real_literal_path": "refused",
+        "real_env_flag": "refused",
+        "real_env_flag_no_hash": "refused",
+        "real_env_flag_no_parens": "refused",
+        "real_env_flag_neither": "refused",
+        "tiny_hash_after_space": "admitted",
+        "tiny_hash_no_space": "admitted",
+        "tiny_parens": "admitted",
+        "tiny_apostrophe": "admitted",
+        "real_env_flag_no_apostrophe": "admitted"
+      }
+    }
+  }
+}
