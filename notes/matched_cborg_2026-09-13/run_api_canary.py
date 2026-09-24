@@ -20,6 +20,8 @@ def sha(path):
 
 
 def verify(manifest, path, expected_sha):
+    if 'audit_worker_checkpoint' in manifest:
+        raise BudgetStop('audit_worker_checkpoint is audit-only; generation cannot select it')
     if "audit_batch_navigation" in manifest:
         raise BudgetStop("audit_batch_navigation is audit-only; generation cannot select it")
     if "audit_batches" in manifest:

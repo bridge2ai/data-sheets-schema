@@ -126,7 +126,7 @@ def prepare_integration(manifest, identity):
         output._exclusive(path, raw)
     output._exclusive(block['integration_index'], audit_batches.canonical_bytes(index))
     instruction = audit_batch_context.render_integration_context(**args, worker_index=index,
-        worker_artifacts={r['id']: Path(r['proposal_path']) for r in block['children'] if r['kind'] == 'worker'},
+        worker_artifacts=output.worker_artifacts(manifest),
         row_artifacts=artifacts, **({'audit_batch_navigation': audit_batch_navigation(manifest)}
                                   if 'audit_batch_navigation' in manifest else {}))
     output._exclusive(row['instruction'], instruction.encode('utf-8'))
@@ -142,7 +142,7 @@ def verify_integration(manifest, identity):
     row = output.child(manifest, 'integration')
     index, artifacts, views, bindings, args = integration_material(manifest)
     instruction = audit_batch_context.render_integration_context(**args, worker_index=index,
-        worker_artifacts={r['id']: Path(r['proposal_path']) for r in manifest['audit_batches']['children'] if r['kind'] == 'worker'},
+        worker_artifacts=output.worker_artifacts(manifest),
         row_artifacts=artifacts, **({'audit_batch_navigation': audit_batch_navigation(manifest)}
                                   if 'audit_batch_navigation' in manifest else {})).encode('utf-8')
     for path, raw in views.items():
@@ -163,6 +163,32 @@ def verify_integration(manifest, identity):
     return expected
 
 
+def verify_checkpoint_context(manifest, source):
+    """Rebuild original-locator prompts without reading old integration text.
+
+    Proof validation has already bound the original condition and every frozen
+    file. Only complete worker proposals, canonical worker rows and scientific
+    inputs enter this reconstruction. Its hashes must match the old instruction
+    and persistent system; notes-level template drift cannot hide behind an
+    unchanged numeric scientific version or source-package pin.
+    """
+    from data_sheets_schema import audit_batch_context
+    from .batch_registration import child_system
+    original = source.manifest
+    row = output.child(original, 'integration')
+    system = child_system(original, 'integration').encode('utf-8')
+    if hashlib.sha256(system).hexdigest() != original['pinned_files'].get(row['system_prompt']):
+        raise BudgetStop('checkpoint changes the original integration system duties')
+    index, artifacts, _, _, args = integration_material(original)
+    instruction = audit_batch_context.render_integration_context(**args, worker_index=index,
+        worker_artifacts=output.worker_artifacts(original), row_artifacts=artifacts,
+        audit_batch_navigation=audit_batch_navigation(original)).encode('utf-8')
+    expected = manifest['pinned_files'].get(row['instruction'])
+    if (Path(row['instruction']) not in source.evidence_paths
+            or hashlib.sha256(instruction).hexdigest() != expected):
+        raise BudgetStop('checkpoint changes the original integration scientific context')
+
+
 def build_policy(manifest, registration_path, child_id):
     from .registration import batch_authority_paths, pinned
     row = output.child(manifest, child_id)
@@ -176,7 +202,7 @@ def build_policy(manifest, registration_path, child_id):
         row_views = context['row_views']
         reads.update(row_views)
         reads.add(manifest['audit_batches']['integration_index'])
-        reads.update(r['proposal_path'] for r in manifest['audit_batches']['children'] if r['kind'] == 'worker')
+        reads.update(str(p) for p in output.worker_artifacts(manifest).values())
     commands = [r['check_argv'] for r in row['rounds']] + [row['seal_argv']]
     validator = manifest['job']['validator_argv'] if child_id == 'integration' else []
     assembly = manifest['audit_batches']['assemble_argv'] if child_id == 'integration' else []
@@ -287,6 +313,11 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
                 break
             verify_child_closure(manifest, identity, prior['id'])
         if row['id'] == 'integration':
+            # In the checkpoint mode there are no new worker children to walk.
+            # Rebind every inherited worker under its original registration.
+            from .worker_checkpoint import KEY
+            if KEY in manifest:
+                output.worker_closures(manifest, identity)
             verify_integration(manifest, identity)
         history.verify_admission()
         if clock() >= deadline:
@@ -445,6 +476,9 @@ def execute_job(context, *, client=None, upstream=None, clock=None, child_runner
         assembly = output.validate_output(manifest)
         evidence = {'batch_children': [{'id': r['child_id'], 'closure_sha256': r['closure_sha256']} for r in completed],
                     'assembly': assembly, 'aggregate_elapsed_seconds': manifest['job']['deadline_seconds'] - (deadline - clock())}
+        from .worker_checkpoint import KEY
+        if KEY in manifest:
+            evidence['worker_checkpoint'] = output.checkpoint_lineage(manifest, output.worker_closures(manifest, identity))
         runtime = {'exit_code': 0, 'native_version': manifest['native_runtime']['version'],
             'model': manifest['model']['model'], 'effort': 'native_default',
             'proxy_initialized': True, 'proxy_shutdown_complete': True, 'unfinished_handlers': 0,
@@ -531,6 +565,7 @@ def require_closed_batch_runtime(manifest, result):
 
 
 def verify_aggregate_closure(manifest, registration_path, result):
+    from .worker_checkpoint import KEY, validate as validate_checkpoint
     identity = _identity(manifest)
     if sha(registration_path) != identity or result.get('registration_sha256') != identity or result.get('job_id') != manifest['job']['id']:
         raise BudgetStop('batch aggregate closure names another registration or job')
@@ -548,12 +583,36 @@ def verify_aggregate_closure(manifest, registration_path, result):
         raise BudgetStop('batch aggregate requests lack exact one-child settled membership')
     cost = sum((Decimal(r['cost_usd']) for r in rows), Decimal(0))
     parent_cap = Decimal(str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]))
-    workers = [r for c in closed[:-1] for r in c['request_rows']]
-    worker_cap = Decimal(block['worker_total_cap_usd'])
-    if cost > parent_cap or sum((Decimal(r['cost_usd']) for r in workers), Decimal(0)) > worker_cap:
-        raise BudgetStop('batch aggregate or worker spending exceeds its registered ceiling')
-    if any(Decimal(r['attempt_cap_usd']) != parent_cap or Decimal(r.get('stage_cap_usd', '-1')) != worker_cap for r in workers):
-        raise BudgetStop('batch worker reservations did not bind both registered ceilings')
+    inherited_paths = set()
+    if KEY in manifest:
+        source = validate_checkpoint(manifest)
+        inherited = output.worker_closures(manifest, identity)
+        lineage = output.checkpoint_lineage(manifest, inherited)
+        if not same_json(result.get('evidence', {}).get('worker_checkpoint'), lineage):
+            raise BudgetStop('aggregate omits or changes inherited worker identities')
+        old_ids = [r['id'] for c in inherited for r in c['request_rows']]
+        if len(set(old_ids)) != len(old_ids) or set(old_ids) & set(ids):
+            raise BudgetStop('checkpoint reattributes or duplicates an inherited worker request')
+        prior = strict_json(read_regular(manifest[KEY]['source_ledger']['path'], output.MAX_DOCUMENT))['requests']
+        all_rows = _rows(manifest)
+        all_ids = [r.get('id') for r in all_rows]
+        if any(type(value) is not str or not value for value in all_ids) or len(set(all_ids)) != len(all_ids):
+            raise BudgetStop('checkpoint aggregate duplicates a historical request identity')
+        if not same_json(all_rows[:len(prior)], prior) or not same_json(all_rows[len(prior):], rows):
+            raise BudgetStop('checkpoint aggregate rewrites history or omits current request membership')
+        if (cost > parent_cap or any(Decimal(r['attempt_cap_usd']) != parent_cap
+                                    or 'stage_cap_usd' in r for r in rows)):
+            raise BudgetStop('checkpoint integration spending differs from its new attempt ceiling')
+        inherited_paths.update(source.evidence_paths)
+    else:
+        if 'worker_checkpoint' in result.get('evidence', {}):
+            raise BudgetStop('fresh batch aggregate claims unselected inherited workers')
+        workers = [r for c in closed[:-1] for r in c['request_rows']]
+        worker_cap = Decimal(block['worker_total_cap_usd'])
+        if cost > parent_cap or sum((Decimal(r['cost_usd']) for r in workers), Decimal(0)) > worker_cap:
+            raise BudgetStop('batch aggregate or worker spending exceeds its registered ceiling')
+        if any(Decimal(r['attempt_cap_usd']) != parent_cap or Decimal(r.get('stage_cap_usd', '-1')) != worker_cap for r in workers):
+            raise BudgetStop('batch worker reservations did not bind both registered ceilings')
     policy = native_stall_policy(manifest)
     if policy is not None and sum(r.get('settlement_basis') == STALL_DEBIT_BASIS for r in rows) > policy['max_stall_debits']:
         raise BudgetStop('batch aggregate stall allowance was exceeded')
@@ -567,7 +626,8 @@ def verify_aggregate_closure(manifest, registration_path, result):
             or not same_json(result.get('validation'), final_validation)):
         raise BudgetStop('batch aggregate final validation/assembly differs from typed child evidence')
     paths = {Path(manifest['job']['audit_path']), Path(assembly['lineage']['path']),
-             *output.assembly_paths(manifest)[:2], Path(manifest['job']['attempt_dir']) / 'validation.json'}
+             *output.assembly_paths(manifest)[:2], Path(manifest['job']['attempt_dir']) / 'validation.json',
+             *inherited_paths}
     for row, receipt in zip(block['children'], closed):
         root = Path(row['attempt_dir'])
         paths.add(root / 'closed.json')

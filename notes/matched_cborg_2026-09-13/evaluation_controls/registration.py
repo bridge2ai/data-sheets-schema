@@ -374,6 +374,8 @@ def verify_manifest(manifest, path, digest):
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; evaluation cannot select it')
     _fitness_selection(manifest)
+    if 'audit_worker_checkpoint' in manifest:
+        raise BudgetStop('audit_worker_checkpoint is audit-only; evaluation cannot select it')
     if 'audit_batch_navigation' in manifest:
         raise BudgetStop('audit_batch_navigation is audit-only; evaluation cannot select it')
     if manifest.get('render_version') in (22, '22', 23, '23'):

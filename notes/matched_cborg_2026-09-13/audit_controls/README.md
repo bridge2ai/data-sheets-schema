@@ -724,3 +724,49 @@ renderer 20/21/22 bytes. Generation and evaluation refuse renderer 23 and the
 active selector. Phase 4 binds an accepted renderer-23 instrument without
 activating navigation. Existing attempts and their evidence must remain intact;
 this change does not authorize resuming a stopped worker or reusing its proposal.
+
+### Collective closed-worker checkpoint (#2386)
+
+A new `--audit-worker-checkpoint PATH` registration may select one fresh
+integration from the complete immutable worker set of its immediate, fully
+settled predecessor. It requires explicit batch-format, batch-navigation,
+worker-navigation and durable-sequence-claim options, and is mutually exclusive
+with `--audit-batches`. The strict `collective_closed_workers_v1` proof selects
+the new `closed_worker_checkpoint_integrated_v1` layout: only integration is an
+active child. Protocol 7 / renderer 23 scientific duties and context content
+remain unchanged; this is an explicit new execution condition.
+
+The source must be an ordinary fresh batch, never another checkpoint. Every
+worker must have successful immutable tool/runtime closure under its original
+registration. The complete source tree, including hidden/ignored files and
+internal hardlinks, is bound; no old file is edited, copied as a new worker or
+relabelled. Original attempt/worker caps, stage reservations and stall-debit
+limits remain enforced even though the aggregate stopped (#2387). A strict
+private operational scan must establish complete tool/control correspondence
+and zero terminal scientific-check attempts. An absent, ambiguous or nonzero
+proof refuses preparation. No failed integration prompt, draft, decision or
+scientific-check feedback supplies the new model context.
+
+The proof references the original registration, settled ledger, immutable
+consumed owner and claim, stopped result, normalized complete frozen inventory
+and every ordered worker closure. The inventory is
+`audit_batch_checkpoint_inventory_v1`, with `root`, relative `files` entries
+containing `sha256`, `bytes`, `links`, sorted `directories`, and exact internal
+`hardlink_groups`. A caller-provided eligibility boolean is not accepted.
+Preparation checks current ownership before creating its destination; later
+historical proof verification uses the immutable owner snapshot. All previous
+charges and unknown-fee flags stay consumed. New requests belong only to the
+fresh integration attempt; this grants no new money and does not reset the
+source attempt. Any new deadline/debit allowance is explicitly registered and
+must not be described as the old attempt's unused allowance.
+
+The original parent job, complete plan, inputs, scientific source/prompt/schema
+bytes, interpreter and dependency identity must match (#2388). Integration
+regenerates the full index, canonical row views and findings from every original
+worker proposal. All successful row Reads, finding dispositions, grammar/seal,
+assembly, terminal scientific check and independent acceptance remain required.
+Worker closure verification stays bound to the old identity; accepted aggregate
+lineage explicitly links those workers to the new integration. Phase4 and
+evaluations retain that transitive evidence across execution checkouts (#2389),
+but generation, Phase4 and evaluation refuse the active checkpoint selector,
+including a null value. Existing registrations never inherit this mode.

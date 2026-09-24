@@ -147,6 +147,21 @@ def render_parent_instruction(manifest):
     from .batch_output import configuration, plan
     block = configuration(manifest)
     roster = plan(manifest)
+    if 'audit_worker_checkpoint' in manifest:
+        from .worker_checkpoint import selection
+        proof = selection(manifest['audit_worker_checkpoint'])
+        return ('# Registered collective-worker checkpoint integration\n\n'
+                'This parent identity is not supplied to a model. The controller verifies every '
+                'immutable worker under its original registration and runs one fresh integration. '
+                'Historical charges remain consumed; only the new integration uses the new '
+                'attempt, deadline and debit allowance. There is one terminal source check.\n\n'
+                + json.dumps({'kind': block['kind'], 'protocol_version': 7, 'render_version': 23,
+                    'plan_sha256': roster['sha256'], 'children': ['integration'],
+                    'source_registration_sha256': proof['source_registration']['sha256'],
+                    'inherited_workers': [w['id'] for w in proof['workers']],
+                    'deadline_seconds': manifest['job']['deadline_seconds'],
+                    'generation_instrument_unchanged': True, 'audit_instrument_unchanged': False},
+                    sort_keys=True, ensure_ascii=False, indent=2) + '\n')
     return ('# Registered fresh-context native audit\n\n'
             'This parent instruction is an orchestration identity and is not a model request. '
             'The controller runs the pinned worker contexts in order and then the one explicit '
@@ -197,6 +212,30 @@ def prepare_inputs(manifest, registration_path, config):
         _write(child['system_prompt'], child_system(manifest, child['id']))
 
 
+def prepare_checkpoint_inputs(manifest, registration_path):
+    from data_sheets_schema import audit_batch_context
+    from . import batch_output, worker_checkpoint
+    proof = worker_checkpoint.selection(manifest['audit_worker_checkpoint'])
+    source_path = proof['source_registration']['path']
+    if sha(source_path) != proof['source_registration']['sha256']:
+        raise BudgetStop('worker checkpoint source registration changed before rendering')
+    source = read_json(source_path)
+    path = canonical_path(str(Path(registration_path).absolute()))
+    plan_path = path.parent / 'batch-plan.json'
+    original_plan = source['audit_batches']['plan_path']
+    if sha(original_plan) != source['pinned_files'].get(original_plan):
+        raise BudgetStop('worker checkpoint original plan changed before rendering')
+    _write(plan_path, Path(original_plan).read_bytes().decode('utf-8'))
+    manifest['audit_batches'] = batch_output.specification(manifest, path,
+        worker_total_cap_usd=None, plan_path=plan_path)
+    worker_checkpoint.validate(manifest, require_pins=False)
+    args = scientific_arguments(manifest)
+    _write(manifest['audit_batches']['integration_base'],
+           audit_batch_context.render_integration_base_context(**args))
+    row = batch_output.child(manifest, 'integration')
+    _write(row['system_prompt'], child_system(manifest, 'integration'))
+
+
 def validate_selection(manifest, registration_path):
     from .batch_output import configuration
     block = configuration(manifest, registration_path)
@@ -228,7 +267,13 @@ def offline_plan_fields(manifest):
                 'actual payload and atomically enforces the aggregate and worker caps.',
             'audit_batch_inputs': rows,
             'controller_instruction_bytes': len(Path(manifest['job']['instruction']).read_bytes()),
-            'worker_total_cap_usd': block['worker_total_cap_usd'],
+            **({'worker_total_cap_usd': block['worker_total_cap_usd']}
+               if 'audit_worker_checkpoint' not in manifest else {
+                   'new_worker_count': 0,
+                   'inherited_worker_count': len(manifest['audit_worker_checkpoint']['workers']),
+                   'integration_attempt_cap_usd': str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]),
+                   'historical_accounted_usd': manifest['budget']['continuation']['cost_usd'],
+                   'historical_costs_preserved': True}),
             **({'budget_admission_plan': {
                 'worker_ceiling_usd': block['worker_total_cap_usd'],
                 'attempt_ceiling_usd': str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]),
@@ -245,7 +290,7 @@ def offline_plan_fields(manifest):
                     'fit the worker ceiling and remaining shared allocation. Integration uses the '
                     'remaining attempt allowance; no stopped worker is reused.',
                 'workload_and_retry_costs_known': False}}
-               if 'budget_amendment' in manifest else {}),
+               if 'budget_amendment' in manifest and 'audit_worker_checkpoint' not in manifest else {}),
             'complete_workload_cost_estimate_available': False}
 
 
