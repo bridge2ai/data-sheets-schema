@@ -10,7 +10,7 @@ from data_sheets_schema import source_review
 from .registration import (BudgetStop, canonical_path, inspect_parent,
     native_api_force_idle_timeout as validate_native_idle_timeout, native_api_timeout,
     native_stall_policy as validate_stall_policy, native_response_buffer as validate_response_buffer,
-    native_upstream_read_timeout, parent_path,
+    native_history_control as validate_history_control, native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .registration import (TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND,
                            CLAIM_CLARIFICATION_TRANSITION_KIND, DRAFT_GRAMMAR_TRANSITION_KIND,
@@ -81,7 +81,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
             schema_semantic_context=False, audit_batches=None, audit_batch_format=False, audit_batch_navigation=False,
             audit_worker_navigation=False, budget_amendment=None, native_response_buffer=None,
-            audit_worker_checkpoint=None):
+            audit_worker_checkpoint=None, native_history_control=False):
     checkpoint_selection = None
     if audit_worker_checkpoint is not None:
         from .worker_checkpoint import selection
@@ -152,7 +152,15 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if native_api_timeout_ms is not None:
         native_api_timeout({'native_runtime': {'api_timeout_ms': native_api_timeout_ms},
                             'job': {'deadline_seconds': deadline_seconds}})
+    if type(native_history_control) is not bool:
+        raise BudgetStop('native history control requires an explicit boolean')
+    if native_history_control and not batch_selected:
+        raise BudgetStop('native history control requires explicit audit batches')
     upstream_selection = {}
+    if native_history_control:
+        upstream_selection['native_history_control'] = {'kind': 'responsive_history_v1'}
+        validate_history_control({'kind': 'd4d_native_audit_continuation',
+                                  'audit_batches': {}, **upstream_selection})
     if native_upstream_read_timeout_seconds is not None:
         upstream_selection['native_upstream_read_timeout_seconds'] = native_upstream_read_timeout_seconds
         native_upstream_read_timeout({'kind': 'd4d_native_audit_continuation', **upstream_selection,
@@ -231,7 +239,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             'effort': 'native_default'}
         if native_api_timeout_ms is not None: candidate['native_runtime']['api_timeout_ms'] = native_api_timeout_ms
         if native_api_force_idle_timeout is not None: candidate['native_runtime']['api_force_idle_timeout'] = native_api_force_idle_timeout
-        for key in ('native_stall_policy', 'native_response_buffer', 'native_upstream_read_timeout_seconds', 'provider_transport', 'budget_amendment'):
+        for key in ('native_stall_policy', 'native_response_buffer', 'native_history_control', 'native_upstream_read_timeout_seconds', 'provider_transport', 'budget_amendment'):
             candidate.pop(key, None)
         candidate.update(upstream_selection)
         candidate['provider_base_url'] = provider_base_url or generation_candidate['provider_base_url']
@@ -418,6 +426,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
            if 'native_stall_policy' in manifest else {}),
         **({'native_response_buffer': manifest['native_response_buffer']}
            if 'native_response_buffer' in manifest else {}),
+        **({'native_history_control': manifest['native_history_control']}
+           if 'native_history_control' in manifest else {}),
         'provider_base_url': manifest['provider_base_url'],
         **({'audit_contract_context': manifest['audit_contract_context']}
            if 'audit_contract_context' in manifest else {}),
@@ -497,6 +507,8 @@ def main():
     parser.add_argument('--schema-semantic-context', action='store_true',
         help='with --draft-audit-grammar, select renderer 19 and exact nested schema semantics for the frozen pair')
     parser.add_argument('--repository', default=str(Path.cwd()))
+    parser.add_argument('--native-history-control', action='store_true',
+        help='select responsive history verification for audit batch integration only')
     parser.add_argument('--attempt-cap', type=Decimal, default=Decimal(20))
     parser.add_argument('--deadline-seconds', type=int, default=10800)
     parser.add_argument('--native-api-timeout-ms', type=int,

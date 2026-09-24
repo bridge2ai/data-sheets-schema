@@ -155,6 +155,8 @@ def validate_scientific_identity(manifest, accepted):
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
+    if 'native_history_control' in manifest:
+        raise BudgetStop('native_history_control is audit-only; Phase 4 cannot select it')
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; Phase 4 cannot select it')
     if 'audit_worker_checkpoint' in manifest:

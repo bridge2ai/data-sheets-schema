@@ -22,11 +22,11 @@ sys.path.insert(0, str(BASE / 'native_controls'))
 from budgeted_cborg import (BudgetStop, STALL_DEBIT_BASIS, attempt_identity, now,
     provider_context_headers, write_new)
 from native_command_policy import _simple_command, _literal_rule, permission_arguments
-from native_control import CONTRACT, check_control_history, load_native_events
+from native_control import CONTRACT, HISTORY_CONTRACT, check_control_history, load_native_events
 from native_file_policy import FileAccess
 from native_proxy import NativeProxy
 from run_native_canary import execute_child
-from .registration import (native_api_force_idle_timeout, native_api_timeout, native_stall_policy, native_response_buffer,
+from .registration import (native_api_force_idle_timeout, native_api_timeout, native_stall_policy, native_response_buffer, native_history_control,
                            native_upstream_read_timeout, sha, strict_json)
 from .transport import provider_clients
 
@@ -140,6 +140,43 @@ class AuditHistory:
         self.last_write, self.validator, self.validation = None, None, None
         self.line = 0
         self.recovery_reads = []
+        self.responsive_control = policy.get('pretool_control') == HISTORY_CONTRACT
+        self.admission_cancelled = None
+
+    @property
+    def result_wait_seconds(self):
+        return (HISTORY_CONTRACT['runtime_callback_timeout_seconds']
+                if self.responsive_control else VALIDATOR_RESULT_WAIT_SECONDS)
+
+    def _check_admission_cancelled(self):
+        if self.admission_cancelled is not None and self.admission_cancelled.is_set():
+            raise BudgetStop('native admission is closed')
+
+    @contextmanager
+    def admission_lock(self):
+        """Selected verification never waits unboundedly to acquire history.
+
+        File verification itself can still block. Its caller must not hold
+        the proxy lifecycle lock; cancellation is rechecked before mutation.
+        """
+        if not self.responsive_control:
+            with self.lock:
+                yield
+            return
+        deadline = time.monotonic() + self.result_wait_seconds
+        while True:
+            self._check_admission_cancelled()
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise BudgetStop('native history admission lock timed out')
+            if self.lock.acquire(timeout=min(.05, remaining)):
+                break
+        try:
+            self._check_admission_cancelled()
+            yield
+            self._check_admission_cancelled()
+        finally:
+            self.lock.release()
 
     def _artifact_hash(self):
         return self.last_write and self.last_write['sha256']
@@ -169,9 +206,10 @@ class AuditHistory:
         HTTP before the controller reads stdout. The result, not elapsed time,
         releases this bounded wait (#2104).
         """
-        with self.lock:
-            deadline = time.monotonic() + VALIDATOR_RESULT_WAIT_SECONDS
+        with self.admission_lock():
+            deadline = time.monotonic() + self.result_wait_seconds
             while True:
+                self._check_admission_cancelled()
                 if self.problem:
                     raise BudgetStop(self.problem)
                 if self.failure.exists():
@@ -457,13 +495,31 @@ class AuditProxy(NativeProxy):
     def __init__(self, *, audit_history, **kwargs):
         self.audit_history = audit_history
         super().__init__(**kwargs)
+        self.history_preflight = getattr(self.audit_history, 'responsive_control', False)
+        if getattr(self.audit_history, 'responsive_control', False):
+            self.audit_history.admission_cancelled = self.admission_closed
+            self.control_shutdown = {'control_initialized': False,
+                'control_shutdown_complete': True, 'unfinished_control_workers': 0}
+
+    def preflight_open(self):
+        if getattr(self.audit_history, 'responsive_control', False):
+            self.audit_history.verify_admission()
 
     def require_open(self):
         super().require_open()
-        self.audit_history.verify_admission()
+        if not getattr(self.audit_history, 'responsive_control', False):
+            self.audit_history.verify_admission()
 
     @contextmanager
     def mutation_guard(self, phase):
+        if phase == 'admit' and getattr(self.audit_history, 'responsive_control', False):
+            # Always history -> proxy, never proxy -> expensive history. Keep
+            # the verified history stable through the reservation operation.
+            with self.audit_history.admission_lock():
+                self.audit_history.verify_admission()
+                with super().mutation_guard(phase):
+                    yield
+            return
         with super().mutation_guard(phase):
             if phase == 'admit':
                 self.audit_history.verify_admission()
@@ -566,8 +622,19 @@ def shutdown_evidence(proxy):
     count = proxy.unfinished_handlers if finalized else None
     if type(count) is not int or count < 0:
         count = None
-    return {'proxy_initialized': proxy is not None,
-            'proxy_shutdown_complete': finalized, 'unfinished_handlers': count}
+    result = {'proxy_initialized': proxy is not None,
+              'proxy_shutdown_complete': finalized, 'unfinished_handlers': count}
+    control = getattr(proxy, 'control_shutdown', None)
+    if control is not None:
+        initialized = control.get('control_initialized')
+        complete, workers = control.get('control_shutdown_complete'), control.get('unfinished_control_workers')
+        valid = (type(initialized) is bool and type(complete) is bool
+                 and type(workers) is int and workers >= 0 and complete == (workers == 0)
+                 and (initialized or complete))
+        result.update(control_initialized=initialized if type(initialized) is bool else None,
+                      control_shutdown_complete=complete if valid else False,
+                      unfinished_control_workers=workers if valid else None)
+    return result
 
 
 def cleanup_error(source, error):
@@ -595,6 +662,7 @@ def controller_primary(state, error):
 
 
 def execute_job(context, *, client=None, upstream=None, protocol=None):
+    native_history_control(context.manifest)
     if 'audit_batches' in context.manifest:
         if protocol is not None:
             raise BudgetStop('audit batches are restricted to the native audit controller')

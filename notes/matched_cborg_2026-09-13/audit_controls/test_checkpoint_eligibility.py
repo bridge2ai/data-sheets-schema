@@ -359,6 +359,7 @@ CONTROL_SHA = {
     'legacy': 'f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e',
     'current': 'd83919c2afbf56fa79eacee7655635cd78b61079b4f106366ea103be6ce51fdc',
 }
+RESPONSIVE_CONTROL_SHA = 'e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36'
 
 
 def control_source(raw, version):
@@ -366,6 +367,12 @@ def control_source(raw, version):
     # No Git object or external execution checkout is needed by this fixture.
     assert version in CONTROL_SHA
     identity = hashlib.sha256(raw).hexdigest()
+    if identity == RESPONSIVE_CONTROL_SHA:
+        # Exact public pre-v3 fixture retains both historical whole-file
+        # compatibility cases without depending on Git history (#2422).
+        raw = (SOURCE/'audit_controls/test_fixtures/native_control_v2.txt').read_bytes()
+        identity = hashlib.sha256(raw).hexdigest()
+        assert identity == CONTROL_SHA['current']
     assert identity in CONTROL_SHA.values()
     if identity == CONTROL_SHA[version]:
         return raw
@@ -442,3 +449,46 @@ def test_callback_free_write_is_unsupported_for_both_versions(history, pure):
     for functions in (current, legacy):
         with pytest.raises(ValueError, match='unsupported_callback_free_tool'):
             report(history, functions)
+
+
+def test_responsive_implementation_preserves_v2_default_projection(history, pure):
+    """#2422: approved source compatibility does not select a new protocol."""
+    assert hashlib.sha256((SOURCE/'native_controls/native_control.py').read_bytes()).hexdigest() == RESPONSIVE_CONTROL_SHA
+    assert pure['initialize_frame']() == both_pure_versions()['current']['initialize_frame']()
+    assert pure['control_contract']({'pretool_control': pure['CONTRACT']}) == pure['CONTRACT']
+    for implementation in [pure, *both_pure_versions().values()]:
+        current = copy.deepcopy(history)
+        add_call(current, implementation, 'Bash', shlex.join(current[2]['audit_batches']['children'][0]['rounds'][0]['check_argv']))
+        projected = report(current, implementation)
+        assert projected['zero_terminal_source_check'] is True
+        assert projected['permission_decisions'] == 1
+
+
+@pytest.mark.parametrize('selection', [None, {'kind':'responsive_history_v1'}])
+def test_v3_selector_refuses_before_any_operational_history_decoding(frozen_history, monkeypatch, selection):
+    m, reg, inv, _, _ = frozen_history
+    m['native_history_control'] = selection
+    rewrite(frozen_history)
+    def forbidden(*args): pytest.fail('unsupported source selector decoded operational history')
+    monkeypatch.setattr(p, '_frames', forbidden)
+    with pytest.raises(BudgetStop): p.verify(m, reg, inv)
+
+
+@pytest.mark.parametrize('which', ['initialization', 'callback', 'both'])
+def test_v3_history_cannot_masquerade_as_selector_absent_v2(frozen_history, pure, which):
+    m, reg, inv, events, records = frozen_history
+    if which in ('initialization', 'both'):
+        records[0]['frame'] = pure['initialize_frame'](pure['HISTORY_CONTRACT'])
+    if which in ('callback', 'both'):
+        event = next(e for e in events if e['type'] == 'control_request')
+        event['request']['callback_id'] = pure['HISTORY_CONTRACT']['callback_id']
+        next(r for r in records if r['kind'] == 'decision')['request'] = copy.deepcopy(event)
+    rewrite(frozen_history)
+    with pytest.raises(BudgetStop): p.verify(m, reg, inv)
+
+
+def test_new_pure_contract_dependencies_reject_unknown_selection(pure):
+    unknown = {**pure['HISTORY_CONTRACT'], 'callback_timeout_seconds': 9}
+    with pytest.raises(BudgetStop): pure['initialize_frame'](unknown)
+    # No controller/FileAccess/history implementation was executed or exposed.
+    assert 'NativeControl' not in pure and 'FileAccess' not in pure and 'AuditHistory' not in pure
