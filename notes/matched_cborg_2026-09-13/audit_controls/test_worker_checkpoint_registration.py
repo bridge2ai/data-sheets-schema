@@ -96,6 +96,25 @@ def test_real_preparer_creates_only_integration_static_inputs(prepared_source,tm
     assert freeze(original.parent) == frozen and Path(source['sequence_state']).read_bytes() == state
     assert worker_checkpoint.validate(manifest).sha256 == sha(original)
     assert checked_contexts == [sha(original), sha(original)]
+    # #2391: the controller wrapper is not the integration model's input.
+    plan = registration.read_json(path.parent/'offline_plan.json')
+    assert plan['new_worker_count'] == 0
+    assert plan['inherited_worker_count'] == len(source['audit_batches']['children']) - 1
+    assert plan['historical_accounted_usd'] == manifest['budget']['continuation']['cost_usd']
+    assert plan['historical_costs_preserved'] is True
+    assert plan['integration_attempt_cap_usd'] == '20'
+    assert 'worker_total_cap_usd' not in plan
+    rows = plan['audit_batch_inputs']
+    assert [r['id'] for r in rows] == ['integration']
+    system_bytes = len(Path(block['children'][0]['system_prompt']).read_bytes())
+    user_bytes = len(Path(block['integration_base']).read_bytes())
+    assert rows[0]['system_bytes'] == system_bytes
+    assert rows[0]['known_user_bytes'] == user_bytes
+    assert plan['inline_instruction_bytes'] == user_bytes
+    assert plan['input_estimate_tokens'] == (system_bytes + user_bytes + 3) // 4
+    assert plan['controller_instruction_bytes'] == len(Path(manifest['job']['instruction']).read_bytes())
+    assert rows[0]['dynamic_proposal_inputs_pending'] is True
+    assert plan['complete_workload_cost_estimate_available'] is False
 
 
 def test_stale_owner_refused_before_destination_creation(prepared_source,tmp_path):

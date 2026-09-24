@@ -398,7 +398,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     save(path, manifest)
     validate_registration(path)
     batch_plan_fields = {}
-    if audit_batches is not None:
+    if batch_selected:
         from .batch_registration import offline_plan_fields
         batch_plan_fields = offline_plan_fields(manifest)
     save(destination / 'offline_plan.json', {'registration_sha256': sha(path),
