@@ -13,6 +13,7 @@ A positive predicate is necessary, never sufficient, for checkpoint eligibility.
 """
 import ast
 from collections import Counter
+from copy import deepcopy
 import hashlib
 import json
 import math
@@ -29,9 +30,14 @@ from budgeted_cborg import BudgetStop
 SUPPORTED_SOURCES = {
     'native_controls/native_control.py': frozenset({
         'f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e',
-        'd83919c2afbf56fa79eacee7655635cd78b61079b4f106366ea103be6ce51fdc'}),
+        'd83919c2afbf56fa79eacee7655635cd78b61079b4f106366ea103be6ce51fdc',
+        # The new implementation retains exact v2 projection semantics;
+        # selected v3 source histories remain ineligible (#2422).
+        'e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36'}),
     'native_controls/native_command_policy.py': frozenset({'9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640'}),
-    'audit_controls/native.py': frozenset({'fc6f3aa8175634b9b4eece74a4ae8e2082c262a3155a7f6bd857431a1d53fcbb'}),
+    'audit_controls/native.py': frozenset({
+        'fc6f3aa8175634b9b4eece74a4ae8e2082c262a3155a7f6bd857431a1d53fcbb',
+        'ec56d375f8036fa3c8c13385c5e6de019d83228ea4af2af57121a63dd572636c'}),
 }
 HEX = re.compile('[0-9a-f]{64}')
 MAX_DOCUMENT = 32 * 1024 * 1024
@@ -93,11 +99,17 @@ def _pure_source_functions(raw_sources):
       'native_controls/native_control.py': {'digest', 'initialize_frame', 'hook_output', 'input_validation_rejection'},
       'native_controls/native_command_policy.py': {'_shell_tokens', '_simple_command'},
       'audit_controls/native.py': {'classify_command'}}
-    env = {'json': json, 'hashlib': hashlib, 'shlex': shlex,
+    env = {'json': json, 'hashlib': hashlib, 'shlex': shlex, 'deepcopy': deepcopy, 'BudgetStop': BudgetStop,
       'OPERATOR_CHARS': frozenset(';&|<>()'),
       'FORBIDDEN_SHELL': 'shell operators, redirection or substitution the system prompt forbids'}
     native_tree = ast.parse(raw_sources['native_controls/native_control.py'])
-    for name in ('CONTRACT', 'INIT_ID'):
+    constants = ['CONTRACT', 'INIT_ID']
+    if any(isinstance(n, ast.FunctionDef) and n.name == 'control_contract' for n in native_tree.body):
+        # Pure dependencies of the new optional initialize_frame argument.
+        # _project still calls its exact default and accepts v2 only.
+        chosen['native_controls/native_control.py'].add('control_contract')
+        constants.append('HISTORY_CONTRACT')
+    for name in constants:
         values = [n.value for n in native_tree.body if isinstance(n, ast.Assign)
                   and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name]
         require(len(values) == 1, 'source_constant'); env[name] = ast.literal_eval(values[0])
@@ -120,6 +132,7 @@ def _frames(raw, strict_json):
 def _project(events, records, manifest, pure):
     """Strict correlation only; no FileAccess or scientific history replay."""
     require(type(events) is list and events and type(records) is list and records, 'empty_history')
+    require('native_history_control' not in manifest, 'unsupported_control_contract')
     children = manifest['audit_batches']['children']
     integration = [c for c in children if c['id'] == 'integration']
     require(len(integration) == 1, 'integration_identity'); child = integration[0]
@@ -246,6 +259,7 @@ def _verify(source_manifest, registration_path, inventory):
     require(type(source_manifest) is dict and typed_equal(_strict_json(registration_raw), source_manifest), 'registration_binding')
     m = source_manifest
     require(m.get('kind') == 'd4d_native_audit_continuation' and 'audit_worker_checkpoint' not in m
+            and 'native_history_control' not in m
             and type(m.get('protocol_version')) is int and m['protocol_version'] == 7
             and type(m.get('render_version')) is int and m['render_version'] == 23
             and m.get('scientific_contract_transition') == {'kind':'frozen_pair_child_navigation_v1'}

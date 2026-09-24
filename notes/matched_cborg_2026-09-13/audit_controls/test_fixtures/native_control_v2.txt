@@ -5,8 +5,7 @@ remains available. It checks tool inputs without rewriting commands or
 overriding the runtime's own permissions. No SDK package is needed: retain
 the original CLI JSONL and implement only initialization and this callback.
 """
-from collections import Counter, deque
-from copy import deepcopy
+from collections import Counter
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -25,16 +24,8 @@ TOOLS = frozenset({'Bash', 'Read', 'Write'})
 CONTRACT = {'version': 2, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
             'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 30,
             'callback_timeout_seconds': 2, 'runtime_callback_timeout_seconds': 3}
-# Explicit opt-in; legacy initialization/replay stays byte-identical (#2420).
-HISTORY_CONTRACT = {'version': 3, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
-                    'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 30,
-                    'callback_timeout_seconds': 2, 'observer_timeout_seconds': 120,
-                    'runtime_callback_timeout_seconds': 125}
 INIT_ID = 'd4d_initialize_v1'
 MAX_FRAME_BYTES = 16 * 1024 * 1024
-MAX_HISTORY_QUEUE_BYTES = 32 * 1024 * 1024
-MAX_HISTORY_QUEUE_FRAMES = 64
-CONTROL_WORKER_JOIN_SECONDS = .25
 BLANK_FRAME_TYPE = 'd4d_blank_native_frame'
 
 
@@ -68,24 +59,11 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
-def control_contract(policy):
-    """Select only a complete known contract, including exact JSON field types."""
-    value = policy.get('pretool_control') if type(policy) is dict else None
-    try:
-        known = type(value) is dict and any(digest(value) == digest(item) for item in (CONTRACT, HISTORY_CONTRACT))
-    except (TypeError, ValueError, OverflowError):
-        known = False
-    if not known:
-        raise BudgetStop('missing or changed native control contract')
-    return deepcopy(value)
-
-
-def initialize_frame(contract=None):
-    contract = CONTRACT if contract is None else control_contract({'pretool_control': contract})
+def initialize_frame():
     return {'type': 'control_request', 'request_id': INIT_ID, 'request': {
-        'subtype': 'initialize', 'hooks': {contract['event']: [{
-            'matcher': contract['matcher'], 'hookCallbackIds': [contract['callback_id']],
-            'timeout': contract['runtime_callback_timeout_seconds']}]}}}
+        'subtype': 'initialize', 'hooks': {CONTRACT['event']: [{
+            'matcher': CONTRACT['matcher'], 'hookCallbackIds': [CONTRACT['callback_id']],
+            'timeout': CONTRACT['runtime_callback_timeout_seconds']}]}}}
 
 
 def hook_output(classification, basis):
@@ -215,7 +193,8 @@ def input_validation_rejection(call_event, call, result_event, call_line, result
 
 class NativeControl:
     def __init__(self, policy, classify, config_root=None, event_observer=None):
-        self.contract = control_contract(policy)
+        if policy.get('pretool_control') != CONTRACT:
+            raise BudgetStop('missing or changed native control contract')
         self.policy, self.classify = policy, classify
         self.event_observer = event_observer
         self.files = FileAccess(policy, config_root)
@@ -230,17 +209,6 @@ class NativeControl:
         self.event_line = self.transcript_line = 0
         self.replies = queue.Queue()
         self.started = time.monotonic()
-        self.history_control = self.contract == HISTORY_CONTRACT
-        self._stopped = threading.Event()
-        self._publication_lock = threading.Lock()
-        self._events = deque()
-        self._event_bytes = 0
-        self._work_thread = self._active_work = self._work_result = None
-        self._work_replies = queue.Queue(maxsize=1)
-        self._callback_intake = {}
-        self._pending_response_id = None
-        self._stdout_eof = False
-        self._shutdown_snapshot = None
 
     def start(self, process, transcript, evidence, instruction):
         self.process, self.transcript, self.evidence = process, transcript, evidence
@@ -250,27 +218,16 @@ class NativeControl:
         os.set_blocking(process.stdin.fileno(), False)
         self.selector.register(process.stdout, selectors.EVENT_READ, 'stdout')
         self.record({'kind': 'initialize_sent', 'policy_sha256': digest(self.policy),
-                     'frame': initialize_frame(self.contract)})
-        self.send(initialize_frame(self.contract))
+                     'frame': initialize_frame()})
+        self.send(initialize_frame())
 
     def record(self, value):
-        if self.history_control and self._stopped.is_set():
-            raise BudgetStop('native history control is stopped')
         value = {'at': datetime.now(timezone.utc).isoformat(), **value}
         self.evidence.write(json.dumps(value) + '\n')
         self.evidence.flush()
 
     def send(self, value):
-        if self.history_control and self._stopped.is_set():
-            raise BudgetStop('native history control is stopped')
-        raw = (json.dumps(value) + '\n').encode()
-        if self.history_control and len(self.outgoing) + len(raw) > MAX_HISTORY_QUEUE_BYTES:
-            raise BudgetStop('native history outgoing queue exceeds its bound')
-        self.outgoing += raw
-        if self.history_control:
-            # Selected service polls writes after the observer barrier. Keeping
-            # a writable FD registered while that barrier waits would spin.
-            return
+        self.outgoing += (json.dumps(value) + '\n').encode()
         try:
             self.selector.get_key(self.process.stdin)
         except KeyError:
@@ -330,22 +287,13 @@ class NativeControl:
                         if rejection is not None:
                             self.input_rejections[identity] = rejection
                             self.record(rejection)
-        if self.history_control:
-            self._start_work('observer', event, lambda: self._observe_event(event))
-        else:
-            observed = self.files.observe(event, self.calls, self.classifications)
-            if observed is not None:
-                self.record(observed)
-            if self.event_observer is not None:
-                self.event_observer(event)
-
-    def _observe_event(self, event):
         observed = self.files.observe(event, self.calls, self.classifications)
+        if observed is not None:
+            self.record(observed)
         if self.event_observer is not None:
-            # Ordered observation must succeed before any following callback
-            # authorization (#2067); selected mode moves work, not this barrier.
+            # The phase reviewer sees the retained native event before a
+            # following tool callback can authorize execution (#2067).
             self.event_observer(event)
-        return observed
 
     def callback(self, frame):
         request = frame.get('request')
@@ -356,8 +304,8 @@ class NativeControl:
         if (not isinstance(request_id, str) or not request_id or request_id == INIT_ID or
             request_id in self.pending or request_id in self.decided or
             request.get('subtype') != 'hook_callback' or
-            request.get('callback_id') != self.contract['callback_id'] or
-            not isinstance(data, dict) or data.get('hook_event_name') != self.contract['event'] or
+            request.get('callback_id') != CONTRACT['callback_id'] or
+            not isinstance(data, dict) or data.get('hook_event_name') != CONTRACT['event'] or
             data.get('tool_name') not in TOOLS or not isinstance(data.get('tool_input'), dict)):
             raise BudgetStop('native callback is malformed or unregistered')
         identity = data.get('tool_use_id')
@@ -374,222 +322,29 @@ class NativeControl:
             raise BudgetStop('native callback arrived after its tool result')
         self.pending[request_id] = (time.monotonic(), frame)
 
-        if self.history_control:
-            self._callback_intake.setdefault(request_id, self.pending[request_id][0])
-            return  # This frame's observer barrier must also finish first.
-
         def evaluate():
             try:
-                value = self._classify_frame(frame)
+                if tool != 'Bash' and not self.files.matches(tool, self.calls[identity]['input'], payload):
+                    raise BudgetStop('native callback does not match an observed tool call')
+                if tool == 'Bash':
+                    command = payload.get('command')
+                    if not isinstance(command, str):
+                        raise ValueError('Bash command is not text')
+                    value = self.classify(command, self.policy['python'], set(), self.policy)
+                else:
+                    value = self.files.classify(tool, payload)
             except BaseException as error:
                 value = error
             self.replies.put((request_id, value))
-        # Preserve the legacy classifier's behavior and closed evidence.
+        # The classifier only reads paths/syntax. A stalled filesystem lookup
+        # must not stop the parent from enforcing deadlines and terminating.
         threading.Thread(target=evaluate, daemon=True).start()
 
-    def _classify_frame(self, frame):
-        data = frame['request']['input']
-        identity, tool, payload = data['tool_use_id'], data['tool_name'], data['tool_input']
-        if tool != 'Bash' and not self.files.matches(tool, self.calls[identity]['input'], payload):
-            raise BudgetStop('native callback does not match an observed tool call')
-        if tool == 'Bash':
-            command = payload.get('command')
-            if not isinstance(command, str):
-                raise ValueError('Bash command is not text')
-            return self.classify(command, self.policy['python'], set(), self.policy)
-        return self.files.classify(tool, payload)
-
-    @property
-    def unfinished_control_workers(self):
-        if self._shutdown_snapshot is not None:
-            return self._shutdown_snapshot[0]
-        return int(self._work_thread is not None and self._work_thread.is_alive())
-
-    @property
-    def control_shutdown_complete(self):
-        return self._shutdown_snapshot is not None and self._shutdown_snapshot[1]
-
-    def _stop_history(self):
-        # Never acquire the phase/history lock here. Stop/deadline servicing
-        # must remain possible while the verifier owns that lock (#2420).
-        with self._publication_lock:
-            self._stopped.set()
-            self.outgoing = b''
-            self._events.clear()
-            self._event_bytes = 0
-            while True:
-                try:
-                    self._work_replies.get_nowait()
-                except queue.Empty:
-                    break
-            self._work_result = None
-
-    def _start_work(self, kind, event, operation):
-        if self._stopped.is_set() or self._active_work is not None:
-            raise BudgetStop('native history worker ordering changed')
-        started = time.monotonic()
-        self._active_work = (kind, started, event)
-        def evaluate():
-            try:
-                value = operation()
-            except BaseException as error:
-                value = error
-            finished = time.monotonic()
-            # Worker never journals, grants a tool or writes to the child.
-            # An unfinished non-daemon worker prevents completed shutdown.
-            with self._publication_lock:
-                if not self._stopped.is_set():
-                    self._work_replies.put_nowait((finished, value))
-        self._work_thread = threading.Thread(target=evaluate, daemon=False)
-        self._work_thread.start()
-
-    def _collect_work(self):
-        if self._active_work is None:
-            return
-        kind, started, event = self._active_work
-        limit = self.contract['observer_timeout_seconds' if kind == 'observer' else 'callback_timeout_seconds']
-        if self._work_result is None:
-            try:
-                self._work_result = self._work_replies.get_nowait()
-            except queue.Empty:
-                if time.monotonic() - started >= limit:
-                    raise BudgetStop('native ' + kind + ' verification timed out before execution')
-                return
-        finished, value = self._work_result
-        # Judge completion time, not the later instant when the pump observed
-        # an already completed result. Waiting for prior history is separate.
-        if finished - started >= limit:
-            raise BudgetStop('native ' + kind + ' verification timed out before execution')
-        if self._work_thread.is_alive():
-            return
-        self._work_thread.join(0)
-        self._active_work = self._work_thread = self._work_result = None
-        if isinstance(value, BudgetStop):
-            raise value
-        if isinstance(value, BaseException):
-            raise BudgetStop('native ' + kind + ' verification failed before execution') from value
-        if kind == 'observer':
-            if value is not None:
-                self.record(value)
-            if event.get('type') == 'control_request':
-                self._start_work('classifier', event, lambda: self._classify_frame(event))
-        else:
-            if (not isinstance(value, tuple) or len(value) != 2 or
-                    value[0] not in ('prescribed', 'not_prescribed') or not isinstance(value[1], str)):
-                raise BudgetStop('native command classification returned a malformed decision')
-            self._check_response_bounds()
-            request_id = event['request_id']
-            _, request = self.pending.pop(request_id)
-            classification, basis = value
-            response = {'type': 'control_response', 'response': {'subtype': 'success',
-                        'request_id': request_id, 'response': hook_output(classification, basis)}}
-            self.record({'kind': 'decision', 'request': request, 'response': response,
-                         'classification': classification, 'basis': basis})
-            self.decided.add(request_id)
-            self.decided_tools.add(request['request']['input']['tool_use_id'])
-            self.classifications[request['request']['input']['tool_use_id']] = classification
-            self._pending_response_id = request_id
-            self.send(response)
-
-    def _check_response_bounds(self):
-        now = time.monotonic()
-        if any(now - received >= self.contract['runtime_callback_timeout_seconds']
-               for received in self._callback_intake.values()):
-            raise BudgetStop('native history callback response window elapsed')
-
-    def _intake_history(self):
-        # One bounded pipe chunk per service pass. Cancellation is detected
-        # while observation/classification runs, before any queued grant flush.
-        try:
-            raw = os.read(self.process.stdout.fileno(), 65536)
-        except BlockingIOError:
-            return
-        if not raw:
-            self.selector.unregister(self.process.stdout)
-            self._stdout_eof = True
-            if self.buffer.strip():
-                raise BudgetStop('native transcript ends inside a JSON frame')
-            return
-        self.transcript.write(raw)
-        self.transcript.flush()
-        self.buffer += raw
-        while b'\n' in self.buffer:
-            line, self.buffer = self.buffer.split(b'\n', 1)
-            self.transcript_line += 1
-            if len(line) > MAX_FRAME_BYTES:
-                raise BudgetStop('native control frame exceeds its size limit')
-            if not line.strip():
-                continue
-            try:
-                event = json.loads(line)
-            except (ValueError, UnicodeError) as error:
-                raise BudgetStop('native control received malformed JSON') from error
-            if not isinstance(event, dict):
-                raise BudgetStop('native control received a non-object event')
-            if event.get('type') == 'control_cancel_request':
-                raise BudgetStop('native control callback was cancelled or timed out')
-            if len(self._events) >= MAX_HISTORY_QUEUE_FRAMES or self._event_bytes + len(line) > MAX_HISTORY_QUEUE_BYTES:
-                raise BudgetStop('native history input queue exceeds its bound')
-            received = time.monotonic()
-            if event.get('type') == 'control_request' and isinstance(event.get('request_id'), str):
-                self._callback_intake.setdefault(event['request_id'], received)
-            self._events.append((self.transcript_line, event, len(line)))
-            self._event_bytes += len(line)
-        if len(self.buffer) > MAX_FRAME_BYTES:
-            raise BudgetStop('native control frame exceeds its size limit')
-
-    def _service_history(self):
-        if self._stopped.is_set():
-            raise BudgetStop('native history control is stopped')
-        if not self.initialized and time.monotonic() - self.started >= self.contract['initialize_timeout_seconds']:
-            raise BudgetStop('native control initialization timed out before the prompt')
-        ready = self.selector.select(.05)
-        for key, _ in ready:
-            if key.data == 'stdout':
-                self._intake_history()
-        self._check_response_bounds()
-        self._collect_work()
-        # Process at most one ordered event, never while a prior observation,
-        # classifier or response is unfinished. Intake above remains responsive.
-        if self._active_work is None and not self.outgoing and self._events:
-            number, event, size = self._events.popleft()
-            self._event_bytes -= size
-            self.handle(event, line_number=number)
-        self._check_response_bounds()
-        # Prompt/decision bytes are written only on the main thread, after all
-        # required prior observations. No event after a latched error is handled.
-        # A cancellation may follow a legal frame larger than this pass's
-        # 64KiB read. Drain bounded passes before releasing a queued response;
-        # the callback's finite response window still prevents starvation.
-        input_waiting = bool(self.buffer) or any(key.data == 'stdout'
-                                                for key, _ in self.selector.select(0))
-        if self.outgoing and self._active_work is None and not input_waiting:
-            try:
-                count = os.write(self.process.stdin.fileno(), self.outgoing)
-            except BlockingIOError:
-                count = 0
-            self.outgoing = self.outgoing[count:]
-            if not self.outgoing:
-                if self._pending_response_id is not None:
-                    self._callback_intake.pop(self._pending_response_id, None)
-                    self._pending_response_id = None
-        self.stdout_closed = (self._stdout_eof and not self._events and
-                              self._active_work is None and not self.outgoing)
-        if self.terminal and self._active_work is None and not self.outgoing and not self.process.stdin.closed:
-            self.process.stdin.close()
-
-
     def service(self):
-        if self.history_control:
-            try:
-                return self._service_history()
-            except BaseException:
-                self._stop_history()
-                raise
         now = time.monotonic()
-        if not self.initialized and now - self.started >= self.contract['initialize_timeout_seconds']:
+        if not self.initialized and now - self.started >= CONTRACT['initialize_timeout_seconds']:
             raise BudgetStop('native control initialization timed out before the prompt')
-        if any(now - started >= self.contract['callback_timeout_seconds'] for started, _ in self.pending.values()):
+        if any(now - started >= CONTRACT['callback_timeout_seconds'] for started, _ in self.pending.values()):
             raise BudgetStop('native command classification timed out before execution')
         while True:
             try:
@@ -652,8 +407,6 @@ class NativeControl:
             self.process.stdin.close()
 
     def finish(self):
-        if self.history_control and (self._stopped.is_set() or self._events or self._active_work is not None or self.outgoing):
-            raise BudgetStop('native history control session ended before verified delivery')
         for identity, recorded in self.input_rejections.items():
             call_line, call_event = self.call_frames[identity]
             result_line, result_event = self.results[identity]
@@ -667,24 +420,12 @@ class NativeControl:
             raise BudgetStop('native control session ended without complete evidence')
 
     def close(self):
-        incomplete = False
-        if self.history_control:
-            self._stop_history()
-            if self._shutdown_snapshot is None:
-                worker = self._work_thread
-                if worker is not None:
-                    worker.join(CONTROL_WORKER_JOIN_SECONDS)
-                unfinished = int(worker is not None and worker.is_alive())
-                self._shutdown_snapshot = (unfinished, not unfinished)
-            incomplete = not self._shutdown_snapshot[1]
         self.selector.close()
         process = getattr(self, 'process', None)
         if process:
             for stream in (process.stdin, process.stdout):
                 if stream and not stream.closed:
                     stream.close()
-        if incomplete:
-            raise BudgetStop('native control worker remains active; closure incomplete')
 
     def retain_pipe_tail(self, path):
         """After child termination, preserve bytes the parser had not consumed.
@@ -709,7 +450,6 @@ def check_control_history(events, path, policy, classify, config_root=None):
     """Reconcile every tool with parent decisions in native event order."""
     problems = []
     try:
-        contract = control_contract(policy)
         blank_lines = [line for line, event in enumerate(events, 1)
                        if event.get('type') == BLANK_FRAME_TYPE]
         if blank_lines:
@@ -721,7 +461,7 @@ def check_control_history(events, path, policy, classify, config_root=None):
             problems.append('native control evidence contains an unrecognized record')
         sent = [r for r in records if r.get('kind') == 'initialize_sent']
         ack = [r for r in records if r.get('kind') == 'initialize_ack']
-        if len(sent) != 1 or sent[0].get('frame') != initialize_frame(contract) or sent[0].get('policy_sha256') != digest(policy):
+        if len(sent) != 1 or sent[0].get('frame') != initialize_frame() or sent[0].get('policy_sha256') != digest(policy):
             problems.append('native control initialization does not bind this policy')
         if (len(ack) != 1 or ack[0].get('frame') not in events or
             ack[0]['frame'].get('response', {}).get('subtype') != 'success' or
@@ -776,8 +516,8 @@ def check_control_history(events, path, policy, classify, config_root=None):
                 expected = {'type': 'control_response', 'response': {'subtype': 'success',
                             'request_id': request_id, 'response': hook_output(classification, basis)}}
                 if (record['request'] != event or not call_line < line or
-                    request.get('subtype') != 'hook_callback' or request.get('callback_id') != contract['callback_id'] or
-                    data.get('hook_event_name') != contract['event'] or data.get('tool_name') != tool or
+                    request.get('subtype') != 'hook_callback' or request.get('callback_id') != CONTRACT['callback_id'] or
+                    data.get('hook_event_name') != CONTRACT['event'] or data.get('tool_name') != tool or
                     data.get('cwd') != policy['readonly_lookups']['repository'] or
                     not files.matches(tool, payload, data.get('tool_input', {})) or request.get('tool_use_id') not in (None, identity) or
                     record.get('classification') != classification or record.get('basis') != basis or
