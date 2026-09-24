@@ -446,7 +446,15 @@ class PlaybookWording(unittest.TestCase):
         self.assertIn("Every other\nlaunched run completes its concrete line with the template's flags below", core)
         self.assertIn("the `${…:?…}` form is observed refused under\n`dontAsk` (#2282), a bare `$VAR` is unprobed", core)
         self.assertIn("do not\nrewrite it, run nothing in its place, and report it (#2346)", core)
-        self.assertIn("every `poetry run` spelling in this file is refused under the native command\npolicy", core)
+        self.assertIn("Every `poetry run` spelling in this file is refused under\nthe native command policy", core)
+        # Commands run on one line as registered; the view's templates are not spellings, and a
+        # refusal of another spelling does not disqualify (#2369).
+        self.assertIn("run every command with the registered interpreter, on one\nline, spelled as registered", core)
+        self.assertIn("double-quoted programs and backslash-continued lines are templates, not\nspellings to run", core)
+        self.assertIn("that refusal names the registered spelling and\ndoes not disqualify the run", core)
+        # The receipt expectation of a registered line comes from its specification (#2350).
+        self.assertIn("a registered recorder line takes it from the registered\n  specification and is run as written (#2350)", core)
+        self.assertNotIn("(the\n  `--receipt-expected` flag) so the canary gate", core)
 
 
 if __name__ == "__main__":
@@ -660,3 +668,42 @@ def test_the_agentic_preparer_writes_keyed_agentic_jobs(tmp_path, monkeypatch):
         assert job["prompt_text_env"] is True and job["render_spec"]["prompt_text_env"] is True
         assert recorder_line(Path(job["instruction"]).read_text()).endswith(ENV_FLAG)
     assert not any("prompt_text_env" in j or "prompt_text_env" in j["render_spec"] for j in api)
+
+
+# --- #2350: a registered recorder line records the receipt expectation it cannot carry -----------
+
+def test_a_registered_line_as_written_records_the_receipt_expectation(env_native):
+    """#2350: the registered line carries no --receipt-expected and is run as written; the
+    specification binds the receipt's destination, so the record says a receipt was expected."""
+    direct, sent, command, cli = env_native
+    assert "--receipt-expected" not in command
+    result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+    assert result.exit_code == 0, (result.output, result.exception)
+    record = yaml.safe_load(direct.provenance_path.read_text())
+    assert record["inputs"]["receipt_expected"] is True
+    assert record["receipts"]["expected"] is True
+
+
+def test_a_redundant_receipt_flag_on_a_registered_line_is_accepted(env_native):
+    """#2350: adding the flag to a line that already implies it is harmless, never a last-step stop."""
+    direct, sent, command, cli = env_native
+    result = CliRunner().invoke(cli, command + ["--receipt-expected"], env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+    assert result.exit_code == 0, (result.output, result.exception)
+    assert yaml.safe_load(direct.provenance_path.read_text())["inputs"]["receipt_expected"] is True
+
+
+def test_writes_receipt_is_one_answer_for_the_record_and_the_launcher(native, tmp_path):  # noqa: F811
+    """#2350: an agentic specification that binds the receipt's destination writes one whatever its
+    condition; any other run writes one only under a receipt condition (#710)."""
+    from data_sheets_schema.api_runner import RECEIPT_CONDITIONS, RunSpec
+    from tests.test_evidence_generation_gate import specification
+    spec, _, _ = native
+    assert spec.is_agentic and "receipt" in spec.render_spec()["agentic_artifact_paths"]
+    assert spec.writes_receipt is True
+    assert replace(spec, condition="generic_v6").writes_receipt is True      # not a receipt condition
+    assert replace(spec, render_version=3).writes_receipt is (spec.condition in RECEIPT_CONDITIONS)
+    (tmp_path / "api").mkdir()
+    api = specification(tmp_path / "api", "Claude API (direct)")
+    assert not api.is_agentic
+    for condition in ("generic", "generic_v6", *sorted(RECEIPT_CONDITIONS)):
+        assert replace(api, condition=condition).writes_receipt is (condition in RECEIPT_CONDITIONS)

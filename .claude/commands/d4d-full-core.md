@@ -771,12 +771,17 @@ command disqualifies the run (#2316, #2348). A registered line that already
 carries `${D4D_LAUNCH_INSTRUCTION:?…}` is a registration defect: do not
 rewrite it, run nothing in its place, and report it (#2346).
 
-**Registered commands take precedence over this file's spellings.** Wherever
-the launch instruction or the executable playbook view (`agents playbook`)
-gives a command with the registered interpreter
-(`<python> -m data_sheets_schema.cli …`, `<python> -c …`), run that command:
-every `poetry run` spelling in this file is refused under the native command
-policy (#2325, #2347).
+**Registered commands take precedence over this file's spellings.** Under a
+launch instruction, run every command with the registered interpreter, on one
+line, spelled as registered: `<python> -m data_sheets_schema.cli …` with the
+instruction's own words and quoting, and each inline `<python> -c …` program
+exactly as the system prompt's registered inline Python commands give it. The
+executable playbook view (`agents playbook`) names the same commands, but its
+double-quoted programs and backslash-continued lines are templates, not
+spellings to run. Every `poetry run` spelling in this file is refused under
+the native command policy (#2325, #2347), and so is any other spelling of a
+registered command (#2369); that refusal names the registered spelling and
+does not disqualify the run.
 
 ```bash
 poetry run d4d provenance record \
@@ -942,8 +947,10 @@ reconciliation report rather than pinning the edit to make the check pass.
 - The Phase 3/4 reconciliation report is present.
 - The coverage receipt is present and `d4d receipts check --strict` passes
   the registered receipt floors, with reported diagnostics reviewed separately. The
-  provenance record carries `inputs.receipt_expected: true` (the
-  `--receipt-expected` flag) so the canary gate holds the run to it.
+  provenance record carries `inputs.receipt_expected: true` so the canary gate
+  holds the run to it: a registered recorder line takes it from the registered
+  specification and is run as written (#2350); every other launched run passes
+  the template's `--receipt-expected` flag.
 - The live provenance record is present and its `record_mode` is `live`, and it
   names both the prompt files and the instruction as sent.
 - `d4d runs check --strict` passes for the run. **Recording provenance is not the

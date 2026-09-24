@@ -19,8 +19,10 @@ from run_native_canary import classify_denials, denial_problems
 
 @pytest.fixture
 def registered(external, tmp_path):
+    # Every registrable agentic job renders the env form (#2307); the
+    # expansion form is refused at preparation (#2369).
     spec = replace(external, method='claudecode_agent', runtime='Claude Code',
-                   condition='generic_v9', render_version=12)
+                   condition='generic_v9', render_version=12, prompt_text_env=True)
     instruction = tmp_path / 'instruction.md'
     instruction.write_text(spec.instruction, encoding='utf-8')
     job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
@@ -202,3 +204,133 @@ def test_controller_rejects_a_widened_policy_before_credentials_or_attempt_creat
     with pytest.raises(BudgetStop, match='command policy is invalid'):
         runner.main()
     assert not (tmp_path / 'attempts').exists()
+
+
+# --- #2369: the controller refuses a spelling the runtime's rules would not admit -----------------
+
+import re
+
+from native_command_policy import (LITERAL_ADMISSION, POLICY_VERSION, _runtime_rules, _unread_shell,
+                                   classify_program_command, runtime_literal_problem)
+
+
+def _roster(policy, *words, manifest=None):
+    return shlex.join([policy['python'], '-m', 'data_sheets_schema.cli',
+                       *(['--manifest', manifest] if manifest else []), *words])
+
+
+def _legacy(policy):
+    """The same policy as a version-4 recording carries it."""
+    return {**{k: v for k, v in policy.items() if k != 'literal_admission'}, 'version': 4}
+
+
+def test_every_registered_spelling_is_admitted_as_written(registered):
+    base, job, policy = registered
+    assert policy['version'] == POLICY_VERSION == 5 and policy['literal_admission'] == LITERAL_ADMISSION
+    python = policy['python']
+    lines = [line.strip() for line in Path(job['instruction']).read_text().splitlines()]
+    led = [line for line in lines if line.startswith(python + ' ') and not line.startswith(python + ' -c ')
+           and not re.search(r'<[a-z_]+>', line)]
+    assert any(' provenance record ' in line for line in led) and any(' receipts check ' in line for line in led)
+    for command in [*policy['command_examples'], *led]:
+        assert runtime_literal_problem(command, policy) is None, command[:160]
+        assert classify_program_command(command, python, set(), policy)[0] == 'prescribed', command[:160]
+
+
+def test_the_rules_decode_to_the_registered_spellings(registered):
+    _, _, policy = registered
+    exact, prefixes = _runtime_rules(policy)
+    python = policy['python']
+    for program in policy['programs']:
+        spelling = shlex.join([python, '-c', program['code']])
+        if program['arguments']:
+            assert re.sub(r'[ \t]+', ' ', spelling) in prefixes
+        else:
+            assert spelling in exact
+    for example in policy['command_examples']:
+        assert example in exact or any(re.sub(r'[ \t]+', ' ', example).startswith(p + ' ') for p in prefixes)
+
+
+RESPELLINGS = ['reflowed', 'comment', 'double_quoted_manifest', 'variable', 'braced_variable',
+               'continuation', 'glob', 'carriage_return', 'unicode_space']
+
+
+@pytest.mark.parametrize('name', RESPELLINGS)
+def test_a_respelling_is_refused_by_the_controller_and_does_not_disqualify(registered, name):
+    _, _, policy = registered
+    python = policy['python']
+    fixed = next(p['code'] for p in policy['programs'] if not p['arguments'])
+    manifest = policy['manifest_paths'][0]
+    receipts = _roster(policy, 'receipts', 'check', manifest=manifest)
+    command = {
+        'reflowed': shlex.join([python, '-c', fixed + '\n\n']),
+        'comment': shlex.join([python, '-c', fixed]) + ' # checked',
+        'double_quoted_manifest': ' '.join([shlex.join([python, '-m', 'data_sheets_schema.cli']),
+                                            '--manifest', '"' + manifest + '"', 'receipts', 'check']),
+        'variable': receipts + ' --label $LABEL',
+        'braced_variable': receipts + ' --label "${LABEL}"',
+        'continuation': receipts + ' \\\n  --strict',
+        'glob': receipts + ' --label x*',
+        'carriage_return': receipts + ' --label x\ry',
+        'unicode_space': receipts + ' --label x',
+    }[name]
+    # The same meaning, as a version-4 recording classifies it: the replay of
+    # earlier evidence is unchanged, and this is the call #2369 names.
+    assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
+    verdict, basis = classify_program_command(command, python, set(), policy)
+    assert verdict == 'not_prescribed', basis
+    assert 'respelled' in basis and 'does not disqualify the attempt' in basis
+    assert denial_problems(classify(policy, command)) == []
+
+
+def test_runs_of_spaces_between_registered_words_are_admitted(registered):
+    _, _, policy = registered
+    python = policy['python']
+    for sep in ('  ', '\t', ' \t '):
+        command = sep.join([shlex.quote(python), '-m', 'data_sheets_schema.cli', 'receipts', 'check', '--strict'])
+        assert classify_program_command(command, python, set(), policy)[0] == 'prescribed', repr(sep)
+
+
+def test_the_refusal_names_the_registered_spelling(registered):
+    _, _, policy = registered
+    python = policy['python']
+    fixed = next(p['code'] for p in policy['programs'] if not p['arguments'])
+    example = next(e for e in policy['command_examples'] if shlex.split(e)[2] == fixed)
+    _, basis = classify_program_command(shlex.join([python, '-c', fixed + '\n\n']), python, set(), policy)
+    assert basis.endswith('run the registered spelling exactly: ' + example)
+    manifest = policy['manifest_paths'][0]
+    receipts = _roster(policy, 'receipts', 'check', manifest=manifest)
+    _, basis = classify_program_command(receipts + ' --label $X', python, set(), policy)
+    assert basis.endswith('run the registered spelling exactly: ' + receipts + ' …')
+
+
+def test_a_registration_whose_recorder_line_the_runtime_would_refuse_is_refused_at_build(external, tmp_path):
+    """#2369, #2282: the expansion form would be refused at the run's last step; preparation refuses it."""
+    spec = replace(external, method='claudecode_agent', runtime='Claude Code',
+                   condition='generic_v9', render_version=12)
+    assert '${D4D_LAUNCH_INSTRUCTION' in spec.instruction
+    instruction = tmp_path / 'instruction.md'
+    instruction.write_text(spec.instruction, encoding='utf-8')
+    job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
+           'manifest': str(spec.manifest), 'bundle': str(spec.bundle), 'render_spec': spec.render_spec(),
+           'outputs': {'full': str(spec.full_path), 'core': str(spec.core_path), 'report': str(spec.report_path)}}
+    with pytest.raises(ValueError, match='not admitted as written .*a \\$ variable or expansion.*provenance record'):
+        build_command_policy(job, sys.executable, tmp_path)
+
+
+def test_the_guidance_says_a_respelling_refusal_does_not_disqualify(registered):
+    _, _, policy = registered
+    assert 'refused before it runs' in command_guidance(policy)
+    assert 'does not disqualify the attempt' in command_guidance(policy)
+    assert 'does not disqualify' not in command_guidance(_legacy(policy))
+
+
+@pytest.mark.parametrize('text, reason', [
+    ("a '$HOME' b", None), ("a 'x'\"'\"'y' b", None), ('a "x y" b', None), ('a x#y', None),
+    ("a 'multi\nline'", None), ('a "$X"', 'a $ variable or expansion'), ('a `x`', 'a backtick'),
+    ("a 'x", 'an unterminated quote'), ('a #y', 'a comment'), ('a\nb', 'a line break outside quotes'),
+    ('a "\\x"', 'a backslash escape or line continuation'), ('a ~/x', 'a glob, brace or tilde expansion'),
+    ('a {b,c}', 'a glob, brace or tilde expansion'), ('a b', 'a control character or non-ASCII whitespace'),
+])
+def test_what_the_runtime_reads_literally(text, reason):
+    assert _unread_shell(text) == reason

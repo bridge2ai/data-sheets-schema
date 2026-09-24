@@ -40,7 +40,7 @@ def fixture(work):
     spec = api_runner.RunSpec(project='EXTERNAL', arm='baseline', method='claudecode_agent',
         bundle=bundle, manifest=manifest, chunk_manifest=chunks, out_dir=work / 'outputs',
         label='offline-native-permissions', condition='generic_v9', profile='neutral',
-        render_version=12, runtime='Claude Code')
+        render_version=12, runtime='Claude Code', prompt_text_env=True)
     instruction = work / 'instruction.md'
     instruction.write_text(spec.instruction)
     job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
@@ -114,6 +114,22 @@ def cases_for(job, policy):
     bad['modified_program'] = [policy['python'], '-c', report + '\nprint("EXTRA")']
     bad['other_record'] = [policy['python'], '-c', report.replace(job['outputs']['full'], '/another/record.yaml')]
     cases.extend({'id': name, 'allow': False, 'command': shlex.join(argv)} for name, argv in bad.items())
+    # Respellings of registered commands the runtime's rules would not admit
+    # as written: the controller refuses them first, without disqualifying
+    # (#2369). Runs of spaces between registered words are admitted, as the
+    # runtime's matcher reads them as one space.
+    cases.extend([
+        {'id': 'respelled_manifest_double_quoted', 'allow': False,
+         'command': ' '.join([shlex.join(cli), '--manifest', '"' + job['manifest'] + '"', 'receipts', 'check'])},
+        {'id': 'respelled_roster_variable', 'allow': False,
+         'command': shlex.join([*cli, 'agents', 'playbook']) + ' --out "$HOME"'},
+        {'id': 'respelled_program_reflowed', 'allow': False,
+         'command': shlex.join([policy['python'], '-c', report + '\n'])},
+        {'id': 'respelled_continuation', 'allow': False,
+         'command': shlex.join([*cli, 'agents']) + ' \\\n  playbook'},
+        {'id': 'roster_runs_of_spaces', 'allow': True,
+         'command': '  '.join([shlex.quote(policy['python']), '-m', 'data_sheets_schema.cli', 'agents', 'playbook'])},
+    ])
     cases.extend([
         {'id': 'multiple_print_ranges', 'allow': False,
          'command': shlex.join(['sed', '-n', '1p;2p', job['bundle']])},

@@ -265,13 +265,20 @@ def build(args):
     finally:
         shutil.rmtree(probe_config, ignore_errors=True)
     instruction.parent.mkdir(parents=True)
-    instruction.write_text(spec.instruction, encoding="utf-8")
-    job.update(render_spec=spec.render_spec(), input_identity=spec.input_identity(),
-               instruction=str(instruction), instruction_sha256=sha(instruction),
-               outputs={"full": str(spec.full_path), "core": str(spec.core_path),
-                        "provenance": str(spec.provenance_path), "report": str(spec.report_path)})
     python = sys.executable
-    policy = build_command_policy(job, python, str(repository))
+    try:
+        instruction.write_text(spec.instruction, encoding="utf-8")
+        job.update(render_spec=spec.render_spec(), input_identity=spec.input_identity(),
+                   instruction=str(instruction), instruction_sha256=sha(instruction),
+                   outputs={"full": str(spec.full_path), "core": str(spec.core_path),
+                            "provenance": str(spec.provenance_path), "report": str(spec.report_path)})
+        policy = build_command_policy(job, python, str(repository))
+    except ValueError as error:
+        # A registered spelling the runtime would refuse, or any policy that
+        # cannot be built, leaves nothing behind (#2317, #2369): the
+        # registration directory did not exist before this call.
+        shutil.rmtree(output, ignore_errors=True)
+        raise DirectStop(f"the registered command policy cannot be built: {error}") from error
     system_prompt = HERE / "system.md"
     pins = {}
     for directory, suffixes in [(repository / "src/data_sheets_schema", {".py", ".yaml", ".json"}),
