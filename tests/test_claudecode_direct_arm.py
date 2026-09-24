@@ -454,6 +454,7 @@ class PlaybookWording(unittest.TestCase):
         self.assertNotIn("registered interpreter, on one\nline", core)
         self.assertIn("double-quoted programs and backslash-continued lines are templates, not\nspellings to run", core)
         self.assertIn("Such a refusal is the controller's and does not\ndisqualify the run", core)
+        self.assertIn("where the call keeps the registered interpreter and\ncommand, it names the registered spelling", core)
         # The receipt expectation of a registered line comes from its specification (#2350).
         self.assertIn("a registered recorder line takes it from the registered\n  specification and is run as written (#2350)", core)
         self.assertNotIn("(the\n  `--receipt-expected` flag) so the canary gate", core)

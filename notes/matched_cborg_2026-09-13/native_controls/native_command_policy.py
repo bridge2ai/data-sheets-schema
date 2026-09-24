@@ -191,8 +191,19 @@ _RUNTIME_PARSE_LIMIT = 10_000
 _BRACE_WITH_QUOTE = re.compile('\\{[^}]*[\'"]')
 #: `ii`, tested on the raw text of an argument joined from adjacent pieces:
 #: a quoted JSON object written `--opt='{…,…}'`, or one an apostrophe splits
-#: into `'…'"'"'…'`, is read as brace expansion. The #2308 refusal.
-_CONCATENATED_BRACE = re.compile(r'\{[^\s]*(,|\.\.)[^\s]*\}')
+#: into `'…'"'"'…'`, is read as brace expansion. The #2308 refusal. The class
+#: is JavaScript's `\s`, spelled out: Python's also matches U+0085 (#2398).
+_JS_SPACE = '\\t\\n\\v\\f\\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff'
+_CONCATENATED_BRACE = re.compile('\\{[^' + _JS_SPACE + ']*(,|\\.\\.)[^' + _JS_SPACE + ']*\\}')
+#: `si` and `ai`: a joined argument whose brace body carries an escaped brace.
+_CONCATENATED_ESCAPED_BRACE = (re.compile(r'\{[^{]*\\}'), re.compile(r'\{[^}]*\\\{'))
+#: `oin` and `sin`, tested again on a joined argument's value with its quotes
+#: removed (post-collapse).
+_COLLAPSED_TOO_COMPLEX = ((re.compile(r'~\['), 'a zsh ~[ expansion once quotes are removed'),
+                          (re.compile(r'(?:^|[\s;&|])=[a-zA-Z_]'), 'a zsh =command expansion once quotes are removed'))
+#: `t6n`: an argument naming a process environment is a semantics failure.
+_PROC_ENVIRON = re.compile(r'/proc/.*/environ')
+
 #: Text the runtime re-quotes from its arguments before matching an argument
 #: rule (`ep`): a newline, or `$` and a name, even inside single quotes.
 _REBUILT_FROM_ARGUMENTS = re.compile(r'\$[A-Za-z_]')
@@ -253,42 +264,62 @@ def _mask_quoted_braces(text):
 
 
 def _raw_words(text):
-    """Each word's raw text, quotes included, with the number of adjacent
-    pieces (an unquoted run, a single- or double-quoted string) it joins."""
-    words, current, pieces, piece, quote = [], [], 0, None, None
+    """Each word's raw text, quotes included, the number of adjacent pieces
+    (an unquoted run, a single- or double-quoted string) it joins, and its
+    value with the quotes removed."""
+    words, current, value, pieces, piece, quote = [], [], [], 0, None, None
     for ch in text:
         if quote:
             current.append(ch)
             if ch == quote:
                 quote, piece = None, None
+            else:
+                value.append(ch)
             continue
         if ch in ' \t\n':
             if current:
-                words.append((''.join(current), pieces))
-            current, pieces, piece = [], 0, None
+                words.append((''.join(current), pieces, ''.join(value)))
+            current, value, pieces, piece = [], [], 0, None
             continue
         if ch in '\'"':
             quote, pieces = ch, pieces + 1
-        elif piece != 'bare':
-            piece, pieces = 'bare', pieces + 1
+        else:
+            if piece != 'bare':
+                piece, pieces = 'bare', pieces + 1
+            value.append(ch)
         current.append(ch)
     if current:
-        words.append((''.join(current), pieces))
+        words.append((''.join(current), pieces, ''.join(value)))
     return words
+
+
+def _utf16_length(text):
+    """The length JavaScript reports, without encoding: a lone surrogate
+    cannot be encoded, and the runtime refuses it rather than failing."""
+    return sum(2 if ord(ch) > 0xFFFF else 1 for ch in text)
 
 
 def _too_complex(text):
     """Why the runtime would find `text` too complex to match by an argument
     rule, from its own pre-parse and argument checks, else None."""
-    if len(text.encode('utf-16-le')) // 2 > _RUNTIME_PARSE_LIMIT:
+    if _utf16_length(text) > _RUNTIME_PARSE_LIMIT:
         return 'longer than the runtime parses (10,000 characters)'
     for pattern, reason in _RAW_TOO_COMPLEX:
         if pattern.search(text):
             return reason
     if _BRACE_WITH_QUOTE.search(_mask_quoted_braces(text)):
         return 'a brace followed by a quote'
-    if any(pieces > 1 and _CONCATENATED_BRACE.search(word) for word, pieces in _raw_words(text)):
-        return 'a brace pattern in an argument joined from quoted pieces'
+    for word, pieces, value in _raw_words(text):
+        if pieces == 1 and word == '=':
+            return 'a bare = argument the runtime cannot parse'
+        if pieces > 1:
+            if _CONCATENATED_BRACE.search(word):
+                return 'a brace pattern in an argument joined from quoted pieces'
+            if any(pattern.search(word) for pattern in _CONCATENATED_ESCAPED_BRACE):
+                return 'an escaped brace in an argument joined from quoted pieces'
+            for pattern, reason in _COLLAPSED_TOO_COMPLEX:
+                if pattern.search(value):
+                    return reason
     return None
 
 
@@ -309,6 +340,9 @@ def runtime_literal_problem(command, policy):
         return reason
     if '\n' in text or _REBUILT_FROM_ARGUMENTS.search(text):
         return 'text the runtime re-quotes from its arguments before matching an argument rule'
+    tokens, _ = _simple_command(text)
+    if any(_PROC_ENVIRON.search(token) for token in tokens or ()):
+        return 'an argument naming a process environment, which the runtime refuses'
     normal = re.sub(r'[ \t]+', ' ', text)
     if any(normal == prefix or normal.startswith(prefix + ' ') for prefix in prefixes):
         return None

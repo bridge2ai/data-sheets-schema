@@ -35,9 +35,8 @@ the runtime's matcher. The child's controller therefore runs without that
 check, and every case records both the runtime's decision and the checked
 controller's prediction (`controller_admits`). A case the runtime refused
 that the checked controller would have admitted is an under-refusal: under a
-launch it would disqualify the run. With `--instruction` the probe fails on
-any; on the fixture's own line they are reported, since its apostrophes are
-the uncharacterised refusal of #2308.
+launch it would disqualify the run, so the probe fails on any, in either
+mode (#2398 review).
 """
 import argparse
 import json
@@ -250,7 +249,7 @@ def main():
                "passed": len(terminals) == 1 and any(not o["denied"] for o in observed) and all(
                    (o["denied"] and o["denial_reason"] == "mode" and not o["ran_cli_stub"])
                    or (not o["denied"] and o["ran_cli_stub"] and o["child_saw_variable"]) for o in observed)
-                   and (args.instruction is None or not under),
+                   and not under,
                # Runtime refusals the checked controller would have let
                # through (disqualifying under a launch), and runtime
                # admissions it refuses first (one retry, never disqualifying).

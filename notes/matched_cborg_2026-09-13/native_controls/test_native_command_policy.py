@@ -438,7 +438,84 @@ def test_a_program_too_deep_to_parse_is_refused_not_a_controller_failure(registe
 
 def test_the_runtime_helpers_read_quotes_as_the_runtime_does():
     assert _mask_quoted_braces("a '{x}' \"{y}\" {z}") == "a ' x}' \" y}\" {z}"
-    assert _raw_words("a 'b c' --o='{x,y}' \"d\"'e'") == [('a', 1), ("'b c'", 1), ("--o='{x,y}'", 2), ('"d"\'e\'', 2)]
+    assert _raw_words("a 'b c' --o='{x,y}' \"d\"'e'") == [
+        ('a', 1, 'a'), ("'b c'", 1, 'b c'), ("--o='{x,y}'", 2, '--o={x,y}'), ('"d"\'e\'', 2, 'de')]
     assert _too_complex("x '{\"a\":1,\"b\":2}'") is None                 # one quoted piece: admitted
     assert _too_complex("x --o='{\"a\":1,\"b\":2}'") == 'a brace pattern in an argument joined from quoted pieces'
     assert _too_complex('x {"a"}') == 'a brace followed by a quote'
+
+
+# --- #2398 verification: the rest of the joined-argument checks, the boundary and the handlers -----
+
+JOINED_REFUSED = {
+    'collapsed_equals': "--label '='x",
+    'collapsed_equals_after_empty': '--label ""=y',
+    'collapsed_equals_after_space': '--note "a "=b',
+    'collapsed_tilde_bracket': "--label '~''['",
+    'escaped_brace_joined': "--pattern='\\{x\\}'",
+    'escaped_close_brace': "--label a'{\\}'",
+    'escaped_open_brace': "--label x'{\\{'",
+    'range_joined': "--label='{1..3}'",
+    'nel_inside_joined_brace': "--label x'{a" + chr(0x85) + ",b}'",
+    'bare_equals': '--label =',
+    'proc_environ': '--label /proc/self/environ',
+    'proc_environ_quoted': "--label '/proc/1/environ'",
+    'lone_surrogate': "--label '" + chr(0xD800) + "'",
+}
+
+
+@pytest.mark.parametrize('name', sorted(JOINED_REFUSED))
+def test_the_rest_of_what_the_runtime_refuses_is_refused_first(registered, name):
+    """The runtime's joined-argument checks (`si`, `ai`, `oin` and `sin` once quotes are removed,
+    `ii` with JavaScript's whitespace), its parse error on a bare `=`, its /proc/*/environ check,
+    and its lone-surrogate check, which must refuse, not crash the controller."""
+    _, _, policy = registered
+    python = policy['python']
+    command = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' ' + JOINED_REFUSED[name]
+    assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
+    verdict, basis = classify_program_command(command, python, set(), policy)
+    assert verdict == 'not_prescribed' and 'does not disqualify the attempt' in basis, basis
+
+
+@pytest.mark.parametrize('code', [0xA0, 0x3000, 0x0D, 0x0B, 0x0C])
+def test_trailing_characters_the_runtime_checks_before_trimming_are_refused(registered, code):
+    """The Kjn and zm checks read the untrimmed text: a trailing one on an argument-rule command is
+    refused even though the trim removes it before the rule is matched."""
+    _, _, policy = registered
+    python = policy['python']
+    command = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' --strict' + chr(code)
+    assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
+    assert classify_program_command(command, python, set(), policy)[0] == 'not_prescribed'
+
+
+def test_the_parse_limit_is_ten_thousand_utf16_units(registered):
+    _, _, policy = registered
+    python = policy['python']
+    base = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' --label '
+    judge = lambda command: classify_program_command(command, python, set(), policy)[0]
+    assert judge(base + 'x' * (10_000 - len(base))) == 'prescribed'
+    assert judge(base + 'x' * (10_001 - len(base))) == 'not_prescribed'
+    astral = chr(0x1F600)                                               # one code point, two UTF-16 units
+    assert judge(base + 'x' * (10_000 - len(base) - 2) + astral) == 'prescribed'
+    assert judge(base + 'x' * (10_000 - len(base) - 1) + astral) == 'not_prescribed'
+
+
+def test_a_parser_out_of_memory_is_refused_not_a_controller_failure(registered, monkeypatch):
+    import native_command_policy as ncp
+    _, _, policy = registered
+    python = policy['python']
+    real = ncp.program_key
+
+    def exhausted(program):
+        if 'EXHAUSTED' in program:
+            raise MemoryError('Parser stack overflowed')
+        return real(program)
+    monkeypatch.setattr(ncp, 'program_key', exhausted)
+    verdict, basis = classify_program_command(shlex.join([python, '-c', 'EXHAUSTED = 1']), python, set(), policy)
+    assert (verdict, basis) == ('not_prescribed', 'an invalid inline Python program')
+
+
+def test_the_guidance_names_when_a_refusal_carries_the_spelling(registered):
+    _, _, policy = registered
+    assert 'where the call keeps the registered interpreter and command, it names the registered spelling' \
+        in command_guidance(policy)

@@ -2999,10 +2999,10 @@ the code before this change, at a75bb2a91; their registrations pin the
 earlier bytes and are not affected.
 
 **Native controller (both Claude Code arms).**
-`native_controls/native_command_policy.py` `9353027a…` → `14ead4eb…` is
+`native_controls/native_command_policy.py` `9353027a…` → `98e2d679…` is
 pinned by native overlays, direct registrations and the audit, evaluation
 and finalization registrations. `probe_native_permissions.py` `f6181c87…` →
-`3e62e1e0…` and `test_native_command_policy.py` `8a62fb11…` → `73a85683…`
+`3e62e1e0…` and `test_native_command_policy.py` `8a62fb11…` → `812a1649…`
 are pinned by the direct, audit, evaluation and finalization registrations;
 the native overlay's explicit list does not name them. Policy version 5
 (`literal_admission: 1`) refuses before execution a prescribed call the
@@ -3021,19 +3021,21 @@ trim. The review of #2398 read the binary and found what it checks before
 matching, now ported: the raw-text checks, applied inside quotes too (a
 backslash before whitespace, `=`, `~[` and `<N-M>` forms, zero-width and other
 non-ASCII whitespace, control characters, a newline and `#` inside an
-argument), the 10,000-character parse limit, and a brace check on an argument
-joined from quoted pieces. That brace check is the refusal of #2308: an
-apostrophe splits a single-quoted JSON specification into pieces, as does
-`--opt='{…}'`. Text the runtime re-quotes from its arguments before
+argument), the 10,000-unit parse limit counted in UTF-16, a bare `=`
+argument, an argument naming `/proc/*/environ`, and the checks on an
+argument joined from quoted pieces: a brace pattern, an escaped brace, and
+`=` or `~[` once its quotes are removed. The brace pattern is the refusal of
+#2308: an apostrophe splits a single-quoted JSON specification into pieces,
+as does `--opt='{…}'`. Text the runtime re-quotes from its arguments before
 matching, a newline or `$` and a name, is admitted only by an exact rule.
 Not modelled: the parser's time and node budget. Preparation refuses a
 registration whose own spellings the check would refuse, which now includes
 a render specification the runtime refuses for its apostrophe, on either arm
-(#2393); the direct preparer (`350f64eb…`) makes that a named stop that leaves nothing
-behind. The recorder probe (`0a63a9f2…`) observes the runtime with the check
-off and fails, on a registered instruction, when the runtime refuses a case
-the checked controller would admit. The audit checkpoint check (#2390,
-`audit_controls/checkpoint_eligibility.py` `46a9b7d8…` → `5a0b284a…`) pins the
+(#2393); the direct preparer (`034c8851…`) makes that a named stop that leaves nothing
+behind. The recorder probe (`7415e320…`) observes the runtime with the check
+off and fails, in either mode, when the runtime refuses a case the checked
+controller would admit. The audit checkpoint check (#2390,
+`audit_controls/checkpoint_eligibility.py` `46a9b7d8…` → `b869268e…`) pins the
 controller module's hash and executes only `_shell_tokens` and
 `_simple_command` from it; both are byte-identical here, so the new hash
 joins its supported sources.

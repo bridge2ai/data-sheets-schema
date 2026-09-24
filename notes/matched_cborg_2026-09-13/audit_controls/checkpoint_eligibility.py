@@ -34,7 +34,7 @@ SUPPORTED_SOURCES = {
     # `_simple_command`, the only definitions executed here, are byte-identical.
     'native_controls/native_command_policy.py': frozenset({
         '9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640',
-        '14ead4eb64e7588e84f2df03813bbf1b125c0b164d16977a3c89d2c04edbb0a4'}),
+        '98e2d679942bc207ada352353cc7d89edb25efc17160c3cae22d134903313699'}),
     'audit_controls/native.py': frozenset({'fc6f3aa8175634b9b4eece74a4ae8e2082c262a3155a7f6bd857431a1d53fcbb'}),
 }
 HEX = re.compile('[0-9a-f]{64}')

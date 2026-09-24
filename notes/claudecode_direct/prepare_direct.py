@@ -240,9 +240,11 @@ def build(args):
     # dontAsk (#2282). It also refused, in every ending, a line whose
     # specification carried a manifest path with an apostrophe (twice in the
     # specification, quoted by the shell as '"'"'), while admitting one
-    # apostrophe in a small specification; the trigger is uncharacterised,
-    # so any apostrophe is refused here, conservatively (#2308). Either would
-    # disqualify the run at its last step.
+    # apostrophe in a small specification. The trigger is the runtime's brace
+    # check on an argument joined from quoted pieces, which the command
+    # policy's literal check now models (#2308, #2399); refusing any
+    # apostrophe here stays as a second layer. Either would disqualify the
+    # run at its last step.
     if not recorder or any("${" in line or "--prompt-text-env D4D_LAUNCH_INSTRUCTION" not in line for line in recorder):
         raise DirectStop("the rendered recorder line must read the launch instruction by --prompt-text-env, with no shell expansion")
     if "'" in json.dumps(spec.render_spec()):
