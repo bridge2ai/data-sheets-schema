@@ -30,7 +30,11 @@ SUPPORTED_SOURCES = {
     'native_controls/native_control.py': frozenset({
         'f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e',
         'd83919c2afbf56fa79eacee7655635cd78b61079b4f106366ea103be6ce51fdc'}),
-    'native_controls/native_command_policy.py': frozenset({'9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640'}),
+    # The #2369 version adds a literal-admission check; `_shell_tokens` and
+    # `_simple_command`, the only definitions executed here, are byte-identical.
+    'native_controls/native_command_policy.py': frozenset({
+        '9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640',
+        'dd9ac4b1b51f5ed6d3d1937b94650f3d4a0cf158b7e1aba6627ac516eef14691'}),
     'audit_controls/native.py': frozenset({'fc6f3aa8175634b9b4eece74a4ae8e2082c262a3155a7f6bd857431a1d53fcbb'}),
 }
 HEX = re.compile('[0-9a-f]{64}')

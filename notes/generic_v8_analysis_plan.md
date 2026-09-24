@@ -3048,5 +3048,10 @@ informational.
 **Evaluation.** Scoring instruments, rubric agents and review packs are
 unaffected. The native evaluation, audit and finalization harnesses share
 the controller module but carry version-1 policies, so their decisions are
-unchanged; their pins move.
+unchanged; their pins move. The audit checkpoint check (#2390,
+`audit_controls/checkpoint_eligibility.py` `46a9b7d8…` → `72824bce…`) pins the
+controller module's hash and executes only `_shell_tokens` and
+`_simple_command` from it; both are byte-identical in the new version, which
+is added to its supported sources. #2392 files the harnesses' own exposure
+of the #2369 class.
 
