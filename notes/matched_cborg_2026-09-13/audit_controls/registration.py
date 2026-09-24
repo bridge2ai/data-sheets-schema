@@ -416,13 +416,37 @@ def schema_semantic_paths(manifest):
     return paths
 
 
+def registered_profile(manifest):
+    """Resolve a local profile against its registration, never replay cwd (#2396).
+
+    Relative declarations belong to the registered repository. Explicit absolute
+    profile overrides remain absolute, including external authorities. Callers
+    retain their existing pin/hash gates; offline preparation can discover the
+    authority before constructing its pin map. No global profile or cwd changes.
+    """
+    from dataclasses import replace
+    from data_sheets_schema.profiles import profile_named
+    profile = profile_named(manifest['profile'])
+    if profile.vocabulary_pin is None:
+        return profile
+    if profile.tracks_digest_pin:
+        from data_sheets_schema import schema_digest
+        declared = Path(schema_digest.VOCABULARY_PIN)
+    else:
+        declared = Path(profile.vocabulary_pin)
+    if not declared.is_absolute():
+        declared = canonical_path(manifest['repository'], exists=True) / declared
+    authority = canonical_path(str(declared), exists=True)
+    return replace(profile, vocabulary_pin=authority, tracks_digest_pin=False)
+
+
 def batch_authority_paths(manifest):
     """Exact complete schema imports and the selected profile vocabulary only."""
     scientific_contract(manifest)
     if manifest['render_version'] not in (20, 21, 22, 23):
         return set()
-    from data_sheets_schema.profiles import profile_named, vocabulary_bytes
-    profile = profile_named(manifest['profile'])
+    from data_sheets_schema.profiles import vocabulary_bytes
+    profile = registered_profile(manifest)
     vocabulary_bytes(profile)  # Declared-but-missing vocabularies fail closed.
     paths = schema_semantic_paths(manifest)
     if profile.pin_path is not None:
