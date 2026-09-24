@@ -15,6 +15,7 @@ from .draft_output import (_directory, _encoded, _exclusive, _preserve, _witness
 from .registration import strict_json
 
 KIND = 'fresh_context_integrated_v1'
+CHECKPOINT_KIND = 'closed_worker_checkpoint_integrated_v1'
 MAX_ROUNDS, MAX_PARTS, MAX_PART_BYTES = 2, 64, 32768
 MAX_BYTES = MAX_PARTS * MAX_PART_BYTES
 MAX_DOCUMENT = 32 * 1024 * 1024
@@ -31,7 +32,7 @@ def plan(manifest):
 
 @lru_cache(maxsize=32)
 def _layout_json(registration_path, plan_path, attempt_dir, python, worker_cap, worker_ids,
-                 max_rounds, max_parts, max_part_bytes):
+                 max_rounds, max_parts, max_part_bytes, checkpoint=False):
     """Pure layout only: no file bytes, manifests, evidence or validation cached.
 
     Return immutable JSON; callers receive a fresh parsed value so a mutation
@@ -41,7 +42,7 @@ def _layout_json(registration_path, plan_path, attempt_dir, python, worker_cap, 
     path, root = Path(registration_path), Path(attempt_dir)
     command = [python, '-m', 'audit_controls.batch_output', '--registration', str(path)]
     children = []
-    for name in [*worker_ids, 'integration']:
+    for name in ([*worker_ids, 'integration'] if not checkpoint else ['integration']):
         child = root / 'children' / name
         output = child / 'output'
         static = path.parent / 'batch-inputs' / name
@@ -60,21 +61,33 @@ def _layout_json(registration_path, plan_path, attempt_dir, python, worker_cap, 
             'children': children, 'integration_base': str(path.parent / 'batch-inputs/integration/base.md'),
             'integration_index': str(root / 'children/integration/proposal-index.json'),
             'assemble_argv': [*command, '--child', 'integration', '--assemble']}
+    if checkpoint:
+        value['kind'] = CHECKPOINT_KIND
+        del value['worker_total_cap_usd']
     return json.dumps(value, ensure_ascii=False, separators=(',', ':'))
 
 
-def specification(manifest, registration_path, *, worker_total_cap_usd, plan_path=None):
+def specification(manifest, registration_path, *, worker_total_cap_usd=None, plan_path=None):
+    from .worker_checkpoint import KEY, selection
+    checkpoint = KEY in manifest
+    if checkpoint:
+        selection(manifest[KEY])
+        if worker_total_cap_usd is not None:
+            raise BudgetStop('a closed-worker checkpoint has no new worker allowance')
     path = canonical(registration_path)
     plan_path = canonical(plan_path or path.parent / 'batch-plan.json')
     value = strict_json(read_regular(plan_path, MAX_DOCUMENT))
     root = canonical(manifest['job']['attempt_dir'])
     return json.loads(_layout_json(str(path), str(plan_path), str(root), manifest['python'],
         str(worker_total_cap_usd), tuple(r['id'] for r in value['workers']),
-        MAX_ROUNDS, MAX_PARTS, MAX_PART_BYTES))
+        MAX_ROUNDS, MAX_PARTS, MAX_PART_BYTES, checkpoint))
 
 
 def configuration(manifest, registration_path=None):
+    from .worker_checkpoint import KEY, selection
     if 'audit_batches' not in manifest:
+        if KEY in manifest:
+            raise BudgetStop('a worker checkpoint requires explicit batch integration')
         return None
     from .registration import scientific_contract, audit_batch_navigation
     scientific_contract(manifest)
@@ -85,17 +98,24 @@ def configuration(manifest, registration_path=None):
             or any(k in manifest for k in ('audit_output', 'audit_drafting', 'context_recovery', 'audit_contract_context'))):
         raise BudgetStop('fresh batch integration requires only a selected native audit 7/20, 7/21, 7/22 or 7/23 mode')
     block = manifest['audit_batches']
-    if type(block) is not dict or type(block.get('worker_total_cap_usd')) is not str:
+    checkpoint = KEY in manifest
+    if checkpoint:
+        selection(manifest[KEY])
+        if (manifest['render_version'] != 23 or type(block) is not dict
+                or block.get('kind') != CHECKPOINT_KIND or 'worker_total_cap_usd' in block):
+            raise BudgetStop('closed-worker integration requires the exact selected 7/23 layout')
+    elif type(block) is not dict or type(block.get('worker_total_cap_usd')) is not str:
         raise BudgetStop('audit batch selector requires an explicit worker reservation ceiling')
     try:
-        cap = Decimal(block['worker_total_cap_usd'])
+        cap = None if checkpoint else Decimal(block['worker_total_cap_usd'])
         parent = Decimal(str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]))
     except (KeyError, TypeError, ValueError, InvalidOperation) as error:
         raise BudgetStop('audit batch worker ceiling is invalid') from error
-    if not cap.is_finite() or not parent.is_finite() or not 0 < cap < parent:
+    if (not parent.is_finite() or parent <= 0
+            or (not checkpoint and (not cap.is_finite() or not 0 < cap < parent))):
         raise BudgetStop('audit batch workers must reserve a positive portion below the parent cap')
     path = canonical(registration_path or Path(manifest['job']['attempt_dir']).parent.parent / 'registration.json')
-    expected = specification(manifest, path, worker_total_cap_usd=block['worker_total_cap_usd'],
+    expected = specification(manifest, path, worker_total_cap_usd=block.get('worker_total_cap_usd'),
                              plan_path=block.get('plan_path'))
     if not same_json(block, expected):
         raise BudgetStop('audit batch selector differs from its exact deterministic layout')
@@ -195,9 +215,19 @@ def read_round(manifest, child_id, number, allow_empty=False):
     return b''.join(pieces), parts
 
 
+def worker_artifacts(manifest):
+    """Resolve complete worker drafts without assigning old work a new identity."""
+    from .worker_checkpoint import KEY, validate
+    configuration(manifest)
+    if KEY in manifest:
+        source = validate(manifest)
+        return {r['id']: Path(source.proposal_refs[r['id']]['path']) for r in source.workers}
+    return {r['id']: Path(r['proposal_path'])
+            for r in manifest['audit_batches']['children'] if r['kind'] == 'worker'}
+
+
 def proposals(manifest):
-    return {r['id']: read_regular(r['proposal_path'], MAX_BYTES)
-            for r in configuration(manifest)['children'] if r['kind'] == 'worker'}
+    return {name: read_regular(path, MAX_BYTES) for name, path in worker_artifacts(manifest).items()}
 
 
 def _grammar(manifest, child_id, raw):
@@ -337,9 +367,36 @@ def seal(manifest, identity, child_id):
 
 
 def worker_closures(manifest, identity):
-    from .batch_native import verify_child_closure
+    from .batch_native import verify_child_closure, verify_checkpoint_context
+    from .worker_checkpoint import KEY, validate
+    if KEY in manifest:
+        source = validate(manifest)
+        verify_checkpoint_context(manifest, source)
+        closed = []
+        for row in source.workers:
+            receipt = verify_child_closure(source.manifest, source.sha256, row['id'])
+            if receipt['closure_sha256'] != source.closure_refs[row['id']]['sha256']:
+                raise BudgetStop('inherited worker closure changed')
+            closed.append(receipt)
+        return closed
     return [verify_child_closure(manifest, identity, r['id'])
             for r in configuration(manifest)['children'] if r['kind'] == 'worker']
+
+
+def checkpoint_lineage(manifest, closed):
+    """Explicit old registration identities; no old charge becomes current work."""
+    from .worker_checkpoint import KEY, validate
+    if KEY not in manifest:
+        return None
+    source = validate(manifest)
+    expected = [(r['id'], source.closure_refs[r['id']]['sha256']) for r in source.workers]
+    if [(r['child_id'], r['closure_sha256']) for r in closed] != expected:
+        raise BudgetStop('checkpoint lineage omits or changes an original worker')
+    return {'kind': 'collective_closed_workers_v1', 'proof_sha256': source.proof_sha256,
+            'source_registration': {'path': str(source.registration_path), 'sha256': source.sha256},
+            'workers': [{'id': r['child_id'], 'registration_sha256': source.sha256,
+                         'closure': source.closure_refs[r['child_id']],
+                         'proposal': source.proposal_refs[r['child_id']]} for r in closed]}
 
 
 def _assembled(manifest, identity):
@@ -351,11 +408,15 @@ def _assembled(manifest, identity):
     if len(raw) > MAX_DOCUMENT:
         raise BudgetStop('assembled batch audit exceeds the registered bound')
     lineage_raw = _encoded(lineage)
-    return raw, lineage_raw, {'schema_version': 1, 'operation': 'assemble_audit_batches', 'passed': True,
+    receipt = {'schema_version': 1, 'operation': 'assemble_audit_batches', 'passed': True,
         'job_id': manifest['job']['id'], 'registration_sha256': identity,
         'workers': [{'id': r['child_id'], 'closure_sha256': r['closure_sha256']} for r in workers],
         'integration': integration['proposal'], 'audit': describe(manifest['job']['audit_path'], raw),
         'lineage': describe(Path(manifest['job']['output_dir']) / 'integration-lineage.json', lineage_raw)}
+    inherited = checkpoint_lineage(manifest, workers)
+    if inherited is not None:
+        receipt['worker_checkpoint'] = inherited
+    return raw, lineage_raw, receipt
 
 
 def assemble_output(manifest, identity):

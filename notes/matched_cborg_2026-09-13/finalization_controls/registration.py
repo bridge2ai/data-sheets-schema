@@ -157,6 +157,8 @@ def validate_registration(path):
     manifest = read_json(path)
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; Phase 4 cannot select it')
+    if 'audit_worker_checkpoint' in manifest:
+        raise BudgetStop('audit_worker_checkpoint is audit-only; Phase 4 cannot select it')
     if 'audit_batch_navigation' in manifest:
         raise BudgetStop('audit_batch_navigation is audit-only; Phase 4 cannot select it')
     if 'audit_batches' in manifest:
