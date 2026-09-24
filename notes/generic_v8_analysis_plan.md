@@ -3037,7 +3037,7 @@ a render specification the runtime refuses for its apostrophe, on either arm
 behind. The recorder probe (`7415e320…`) observes the runtime with the check
 off and fails, in either mode, when the runtime refuses a case the checked
 controller would admit. The audit checkpoint check (#2390,
-`audit_controls/checkpoint_eligibility.py` `46a9b7d8…` → `b869268e…`) pins the
+`audit_controls/checkpoint_eligibility.py` `605e7dd2…` → `e12f8703…`) pins the
 controller module's hash and executes only `_shell_tokens` and
 `_simple_command` from it; both are byte-identical here, so the new hash
 joins its supported sources.
