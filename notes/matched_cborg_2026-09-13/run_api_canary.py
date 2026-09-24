@@ -36,6 +36,8 @@ def verify(manifest, path, expected_sha):
         raise BudgetStop("native_upstream_read_timeout_seconds is audit-only; generation cannot select it")
     if "native_stall_policy" in manifest:
         raise BudgetStop("native_stall_policy is audit-only; generation cannot select it")
+    if 'native_history_control' in manifest:
+        raise BudgetStop('native_history_control is audit-only; generation cannot select it')
     if "native_response_buffer" in manifest:
         raise BudgetStop("native_response_buffer is audit-only; generation cannot select it")
     generation = manifest.get("generation")

@@ -13,12 +13,12 @@ from types import SimpleNamespace
 
 from budgeted_cborg import BudgetStop, STALL_DEBIT_BASIS, attempt_identity, now, provider_context_headers, write_new
 from native_command_policy import _literal_rule, permission_arguments
-from native_control import CONTRACT, load_native_events
+from native_control import CONTRACT, HISTORY_CONTRACT, load_native_events
 from . import batch_output as output
 from . import native
 from .batch_history import BatchHistory
 from .registration import (strict_json, sha, native_api_timeout, native_api_force_idle_timeout,
-                           native_stall_policy, native_upstream_read_timeout, native_response_buffer, audit_batch_navigation)
+                           native_stall_policy, native_upstream_read_timeout, native_response_buffer, native_history_control, audit_batch_navigation)
 from .output_parts import canonical, describe, read_regular, same_json
 from .transport import provider_clients
 
@@ -228,6 +228,7 @@ def verify_checkpoint_context(manifest, source):
 
 
 def build_policy(manifest, registration_path, child_id):
+    selected = native_history_control(manifest)
     from .registration import batch_authority_paths, pinned
     row = output.child(manifest, child_id)
     reads = set(manifest['inputs'].values()) | {row['instruction'], row['system_prompt'], manifest['audit_batches']['plan_path']}
@@ -244,7 +245,8 @@ def build_policy(manifest, registration_path, child_id):
     commands = [r['check_argv'] for r in row['rounds']] + [row['seal_argv']]
     validator = manifest['job']['validator_argv'] if child_id == 'integration' else []
     assembly = manifest['audit_batches']['assemble_argv'] if child_id == 'integration' else []
-    return {'version': 1, 'pretool_control': CONTRACT, 'python': manifest['python'],
+    control = HISTORY_CONTRACT if selected is not None and child_id == 'integration' else CONTRACT
+    return {'version': 1, 'pretool_control': dict(control), 'python': manifest['python'],
         'programs': [], 'manifest_paths': [], 'validator_argv': validator, 'assemble_argv': assembly,
         'draft_argv': commands, 'allowed_tools': ['Read', 'Write', *[_literal_rule(shlex.join(a))
             for a in [*commands, *([assembly, validator] if child_id == 'integration' else [])]]],
@@ -270,6 +272,20 @@ def _inspect(manifest, identity, row, policy):
     return evidence
 
 
+def _responsive_child(manifest, child_id):
+    return child_id == 'integration' and native_history_control(manifest) is not None
+
+
+def _require_control_closed(manifest, runtime, *, child_id='integration', require_initialized=True):
+    if _responsive_child(manifest, child_id) and (
+            type(runtime) is not dict or runtime.get('control_shutdown_complete') is not True
+            or type(runtime.get('control_initialized')) is not bool
+            or (require_initialized and runtime['control_initialized'] is not True)
+            or type(runtime.get('unfinished_control_workers')) is not int
+            or runtime['unfinished_control_workers'] != 0):
+        raise BudgetStop('batch native control worker lacks complete closed evidence')
+
+
 def verify_child_closure(manifest, identity, child_id):
     row = output.child(manifest, child_id)
     root = Path(row['attempt_dir'])
@@ -285,6 +301,7 @@ def verify_child_closure(manifest, identity, child_id):
             or type(receipt['runtime'].get('unfinished_handlers')) is not int
             or receipt['runtime']['unfinished_handlers'] != 0):
         raise BudgetStop('batch child lacks exact successful closed runtime evidence')
+    _require_control_closed(manifest, receipt['runtime'], child_id=child_id)
     if not same_json(_tree(root), receipt.get('frozen_evidence')):
         raise BudgetStop('batch child evidence changed after closure')
     policy = build_policy(manifest, Path(manifest['job']['attempt_dir']).parent.parent / 'registration.json', child_id)
@@ -421,6 +438,7 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
                 raise primary from None
         runtime = {'exit_code': exit_code, 'native_version': manifest['native_runtime']['version'],
             'model': manifest['model']['model'], 'effort': 'native_default', **native.shutdown_evidence(proxy)}
+        _require_control_closed(manifest, runtime, child_id=row['id'])
         if proxy.failed.is_set() or type(exit_code) is not int or exit_code != 0 or runtime['unfinished_handlers'] != 0:
             raise BudgetStop('batch child did not close successfully')
         _remaining(context, deadline, clock); context.verify()
@@ -442,6 +460,8 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
     except BaseException as error:
         primary = state.get('primary_error', error)
         runtime = native.shutdown_evidence(proxy)
+        if proxy is None and _responsive_child(manifest, row['id']):
+            runtime.update(control_initialized=False, control_shutdown_complete=True, unfinished_control_workers=0)
         primary.native_stop = {'stop_source': state.get('first_stop_source') or
             ('native_proxy' if proxy is not None and proxy.failed.is_set() else 'batch_controller'),
             'runtime': runtime, 'batch_child': row['id'],
@@ -484,6 +504,7 @@ def finish_deadline(context, result):
 
 def execute_job(context, *, client=None, upstream=None, clock=None, child_runner=None):
     manifest, identity = context.manifest, context.manifest_sha256
+    native_history_control(manifest)
     block = output.configuration(manifest, context.registration_path)
     if block is None:
         raise BudgetStop('audit batches were not explicitly selected')
@@ -521,6 +542,10 @@ def execute_job(context, *, client=None, upstream=None, clock=None, child_runner
             'model': manifest['model']['model'], 'effort': 'native_default',
             'proxy_initialized': True, 'proxy_shutdown_complete': True, 'unfinished_handlers': 0,
             'children_closed': len(completed)}
+        if native_history_control(manifest) is not None:
+            for receipt in completed:
+                _require_control_closed(manifest, receipt['runtime'], child_id=receipt['child_id'])
+            runtime.update(control_initialized=True, control_shutdown_complete=True, unfinished_control_workers=0)
         candidate = {'registration_sha256': identity, 'job_id': manifest['job']['id'],
             'audit_sha256': assembly['audit']['sha256'], 'evidence': evidence, 'runtime': runtime,
             'validation': validation}
@@ -580,6 +605,14 @@ def stopped_runtime_snapshot(manifest):
             valid = runtime.get('unfinished_handlers') is None
         if not valid:
             raise BudgetStop('stopped batch child runtime has contradictory shutdown state')
+        if _responsive_child(manifest, row['id']):
+            initialized = runtime.get('control_initialized')
+            complete = runtime.get('control_shutdown_complete')
+            workers = runtime.get('unfinished_control_workers')
+            if (type(initialized) is not bool or type(complete) is not bool
+                    or type(workers) is not int or workers < 0 or complete != (workers == 0)
+                    or (not initialized and not complete)):
+                raise BudgetStop('stopped batch child lacks typed native control shutdown state')
         snapshots.append({'id': row['id'], 'receipt': describe(paths[0], raw),
                           'runtime': runtime, 'known': True})
     runtimes = [r['runtime'] for r in snapshots]
@@ -588,8 +621,22 @@ def stopped_runtime_snapshot(manifest):
     closed = complete and all(r.get('proxy_initialized') is False or r.get('proxy_shutdown_complete') is True for r in runtimes)
     counts = [r.get('unfinished_handlers') for r in runtimes if r.get('proxy_initialized') is not False] if complete else [None]
     known_counts = all(type(n) is int and n >= 0 for n in counts)
-    return snapshots, {'proxy_initialized': bool(initialized), 'proxy_shutdown_complete': bool(closed),
-        'unfinished_handlers': sum(counts) if closed and known_counts else None}
+    aggregate = {'proxy_initialized': bool(initialized), 'proxy_shutdown_complete': bool(closed),
+                 'unfinished_handlers': sum(counts) if closed and known_counts else None}
+    if native_history_control(manifest) is not None:
+        selected = [r for r in snapshots if r['id'] == 'integration']
+        # A complete known worker-only namespace roster proves the sequential
+        # integrator was never constructed. An extant unknown child cannot.
+        known_roster = bool(snapshots) and all(r['known'] for r in snapshots)
+        complete = known_roster and all(r['known'] and
+            r['runtime'].get('control_shutdown_complete') is True for r in selected)
+        counts = [r['runtime'].get('unfinished_control_workers') for r in selected if r['known']]
+        known = known_roster and len(counts) == len(selected) and all(type(n) is int and n >= 0 for n in counts)
+        initialized = (any(r['runtime'].get('control_initialized') is True for r in selected)
+                       if known else None)
+        aggregate.update(control_initialized=initialized, control_shutdown_complete=complete,
+                         unfinished_control_workers=sum(counts) if known else None)
+    return snapshots, aggregate
 
 
 def require_closed_batch_runtime(manifest, result):
@@ -599,6 +646,7 @@ def require_closed_batch_runtime(manifest, result):
         raise BudgetStop('stopped aggregate runtime does not bind every extant child')
     if aggregate['proxy_shutdown_complete'] is not True or aggregate['unfinished_handlers'] != 0:
         raise BudgetStop('stopped audit has an unclosed or unknown child runtime')
+    _require_control_closed(manifest, aggregate, require_initialized=False)
     return {Path(r['receipt']['path']) for r in snapshots if r['receipt'] is not None}
 
 
@@ -607,6 +655,7 @@ def verify_aggregate_closure(manifest, registration_path, result):
     identity = _identity(manifest)
     if sha(registration_path) != identity or result.get('registration_sha256') != identity or result.get('job_id') != manifest['job']['id']:
         raise BudgetStop('batch aggregate closure names another registration or job')
+    _require_control_closed(manifest, result.get('runtime'))
     block = output.configuration(manifest, registration_path)
     roots = output._directory(Path(manifest['job']['attempt_dir']) / 'children')
     if {p.name for p in roots} != {r['id'] for r in block['children']} or any(not p.is_dir() or p.is_symlink() for p in roots):

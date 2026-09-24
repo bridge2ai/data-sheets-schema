@@ -264,6 +264,7 @@ class NativeProxy:
         does not cover it; the caller then stops the attempt as before."""
         if self.stall_policy is None or ticket is None or evidence is None:
             raise BudgetStop("no registered stall policy covers this failure")
+        self.preflight_open()
         with self.state:
             self.require_writable()
             self.require_open()
@@ -294,6 +295,9 @@ class NativeProxy:
     def require_open(self):
         if self.closed:
             raise BudgetStop("native admission is closed")
+
+    def preflight_open(self):
+        """Optional verification outside the lifecycle lock; default unchanged."""
 
     def require_writable(self):
         if self.frozen:
@@ -364,6 +368,7 @@ class NativeProxy:
                         return
                     if owner.failed.is_set():
                         raise BudgetStop("native attempt previously stopped")
+                    owner.preflight_open()
                     with owner.state:
                         owner.require_open()
                     path = urlsplit(self.path).path
@@ -400,6 +405,7 @@ class NativeProxy:
                             headers[name] = self.headers[name]
                     owner.capture_json(folder / "request_protocol.json", {k:v for k,v in headers.items() if k != "x-api-key"})
                     completion = Completion()
+                    owner.preflight_open()
                     with owner.state:
                         owner.require_open()
                     with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers,
@@ -468,9 +474,16 @@ class NativeProxy:
                         # Upstream worker/context is closed before settlement or
                         # retry. Settlement may finish after admission closes, but
                         # completed data must never be delivered after that close.
+                        responsive = getattr(owner, 'history_preflight', False)
+                        if responsive:
+                            with owner.state:
+                                owner.require_writable()
+                                owner.messages.finish(ticket, folder, complete, stream_complete=True)
+                            owner.preflight_open()
                         with owner.state:
                             owner.require_writable()
-                            owner.messages.finish(ticket, folder, complete, stream_complete=True)
+                            if not responsive:
+                                owner.messages.finish(ticket, folder, complete, stream_complete=True)
                             owner.require_open()
                             verify_buffer_evidence(folder / "response.sse", buffered_bytes,
                                                    buffered_digest.hexdigest())
@@ -487,6 +500,7 @@ class NativeProxy:
                         self.send_header("Content-Length", str(buffered_bytes))
                         self.end_headers()
                         for chunk in iter(lambda: replay_spool.read(65536), b""):
+                            owner.preflight_open()
                             with owner.state:
                                 owner.require_writable()
                                 owner.require_open()

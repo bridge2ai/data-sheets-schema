@@ -162,13 +162,14 @@ class BatchHistory(AuditHistory):
                 raise BudgetStop('integration requires complete successful Reads of every prior worker row')
 
     def verify_admission(self):
-        with self.lock:
-            deadline = time.monotonic() + VALIDATOR_RESULT_WAIT_SECONDS
+        with self.admission_lock():
+            deadline = time.monotonic() + self.result_wait_seconds
             while not self.problem and (self.checker is not None or
                     (self.sealer is not None and self.seal is None) or
                     (self.assembler is not None and self.assembly is None) or
                     (self.validator is not None and self.validation is None) or
                     any(self.calls[k][1]['name'] == 'Write' for k in self.pending)):
+                self._check_admission_cancelled()
                 left = deadline - time.monotonic()
                 if left <= 0:
                     raise BudgetStop('batch tool has no observed successful result; no request admitted')
