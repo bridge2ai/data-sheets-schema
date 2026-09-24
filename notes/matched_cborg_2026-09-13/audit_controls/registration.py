@@ -352,6 +352,9 @@ def required_paths(manifest):
         from budget_amendment import paths as amendment_paths
         paths.update(amendment_paths(manifest))
         paths.add(budget_amendment_predecessor_path(manifest))
+    if 'audit_worker_checkpoint' in manifest:
+        from .worker_checkpoint import proof_paths
+        paths.update(proof_paths(manifest))
     if 'audit_batches' in manifest:
         from .batch_output import required_paths as batch_paths
         paths.update(batch_paths(manifest))
@@ -492,6 +495,9 @@ def validate_registration(path):
     audit_batch_navigation(manifest)
     if manifest['protocol_version'] == 6 and 'audit_drafting' not in manifest:
         raise BudgetStop('protocol-6 audit requires its explicit bounded drafting registration')
+    if 'audit_worker_checkpoint' in manifest:
+        from .worker_checkpoint import validate as validate_worker_checkpoint
+        checkpoint_source = validate_worker_checkpoint(manifest)
     if manifest['protocol_version'] == 7 and 'audit_batches' not in manifest:
         raise BudgetStop('protocol-7 audit requires its explicit batch registration')
     if 'audit_batches' in manifest:
@@ -597,6 +603,9 @@ def validate_registration(path):
     if 'audit_batches' in manifest:
         from .batch_registration import verify_rendered_inputs
         verify_rendered_inputs(manifest, path)
+    if 'audit_worker_checkpoint' in manifest:
+        from .batch_native import verify_checkpoint_context
+        verify_checkpoint_context(manifest, checkpoint_source)
     return manifest
 
 

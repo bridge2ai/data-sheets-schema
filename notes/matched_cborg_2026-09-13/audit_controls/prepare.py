@@ -80,7 +80,16 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
             schema_semantic_context=False, audit_batches=None, audit_batch_format=False, audit_batch_navigation=False,
-            audit_worker_navigation=False, budget_amendment=None, native_response_buffer=None):
+            audit_worker_navigation=False, budget_amendment=None, native_response_buffer=None,
+            audit_worker_checkpoint=None):
+    checkpoint_selection = None
+    if audit_worker_checkpoint is not None:
+        from .worker_checkpoint import selection
+        checkpoint_selection = selection(audit_worker_checkpoint)
+        if audit_batches is not None or not (audit_batch_format and audit_batch_navigation
+                and audit_worker_navigation and durable_sequence_claim):
+            raise BudgetStop('worker checkpoint requires explicit 7/23 navigation and durable claim, without fresh batches')
+    batch_selected = audit_batches is not None or checkpoint_selection is not None
     amendment = None
     if budget_amendment is not None:
         from budget_amendment import selection
@@ -113,17 +122,18 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         raise BudgetStop('audit worker navigation requires explicit audit batch navigation')
     if audit_batch_navigation and not audit_batch_format:
         raise BudgetStop('audit batch navigation requires explicit audit batch format')
-    if audit_batch_format and audit_batches is None:
+    if audit_batch_format and not batch_selected:
         raise BudgetStop('audit batch format requires explicit audit batches')
-    if audit_batches is not None:
-        from .batch_registration import selection
-        audit_batches = selection(audit_batches)
+    if batch_selected:
+        if audit_batches is not None:
+            from .batch_registration import selection
+            audit_batches = selection(audit_batches)
         if any((context_recovery, staged_audit_output, persistent_audit_contract,
                 upgrade_evidence_protocol, source_metadata_evidence,
                 clarify_source_claims, draft_audit_grammar, schema_semantic_context)):
             raise BudgetStop('audit batches select their own protocol, context and output modes exclusively')
         cap = Decimal(str(attempt_cap))
-        if not cap.is_finite() or not Decimal(audit_batches['worker_total_cap_usd']) < cap:
+        if not cap.is_finite() or cap <= 0 or (audit_batches is not None and not Decimal(audit_batches['worker_total_cap_usd']) < cap):
             raise BudgetStop('batch workers must leave a positive integration allowance')
     if schema_semantic_context and not draft_audit_grammar:
         raise BudgetStop('schema semantic context requires explicit draft audit grammar')
@@ -199,6 +209,52 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         validate_predecessor(candidate, predecessor, checkpoint_sha256=sha(prior_path), require_pins=False)
         from .registration import validate_budget_amendment_predecessor
         validate_budget_amendment_predecessor(candidate, predecessor, require_pins=False)
+    if checkpoint_selection is not None:
+        # Full read-only checkpoint validation and current-tip freshness precede
+        # any preparation output. This does not claim or advance ownership.
+        from copy import deepcopy
+        from .worker_checkpoint import validate as validate_checkpoint
+        original = read_json(checkpoint_selection['source_registration']['path'])
+        if (str(Path(parent_registration).resolve()) != original['parent']['registration']
+                or str(Path(parent_overlay).resolve()) != original['parent']['overlay']
+                or parent_job_id != original['parent']['job_id']
+                or continuation_source_registration or continuation_reconciliation_receipt):
+            raise BudgetStop('worker checkpoint changes its original parent or ordinary predecessor')
+        generation_candidate, overlay_candidate = read_json(parent_registration), read_json(parent_overlay)
+        candidate = deepcopy(original)
+        candidate['repository'] = str(repository)
+        candidate['audit_worker_checkpoint'] = checkpoint_selection
+        candidate['job'] = {**original['job'], 'id': job_id, 'deadline_seconds': deadline_seconds}
+        candidate['pinned_files'] = {}
+        candidate['native_runtime'] = {'executable': overlay_candidate['claude_executable'],
+            'version': overlay_candidate['claude_version'], **overlay_candidate['native_limits_observed_offline'],
+            'effort': 'native_default'}
+        if native_api_timeout_ms is not None: candidate['native_runtime']['api_timeout_ms'] = native_api_timeout_ms
+        if native_api_force_idle_timeout is not None: candidate['native_runtime']['api_force_idle_timeout'] = native_api_force_idle_timeout
+        for key in ('native_stall_policy', 'native_response_buffer', 'native_upstream_read_timeout_seconds', 'provider_transport', 'budget_amendment'):
+            candidate.pop(key, None)
+        candidate.update(upstream_selection)
+        candidate['provider_base_url'] = provider_base_url or generation_candidate['provider_base_url']
+        if provider_ca_bundle is not None:
+            candidate['provider_transport'] = {'kind': 'pinned_ca_v1', 'ca_bundle': str(Path(provider_ca_bundle).resolve())}
+        candidate['budget'] = {**original['budget'],
+            'additional_usd': generation_candidate['budget']['additional_usd'],
+            'per_attempt_usd': generation_candidate['budget']['per_attempt_usd'],
+            'prices_per_token': generation_candidate['budget']['prices_per_token'],
+            'per_job_attempt_usd': {job_id: str(attempt_cap)},
+            'continuation': {'checkpoint': str(Path(continuation_checkpoint or reconciled_checkpoint).resolve()),
+                'sha256': sha(continuation_checkpoint or reconciled_checkpoint),
+                'cost_usd': str(sum((Decimal(r['cost_usd']) for r in read_json(continuation_checkpoint or reconciled_checkpoint)['requests']), Decimal(0)))}}
+        if amendment is not None:
+            candidate['budget_amendment'] = amendment
+            candidate['budget']['additional_usd'] = amendment['total_usd']
+        source = validate_checkpoint(candidate, require_pins=False)
+        from .registration import SequenceLock
+        state = Path(source.manifest['sequence_state'])
+        with SequenceLock(str(state) + '.lock').acquire(timeout=0):
+            if (not state.is_file() or state.is_symlink()
+                    or sha(state) != checkpoint_selection['source_owner']['sha256']):
+                raise BudgetStop('worker checkpoint predecessor is not the current sequence owner')
     destination.mkdir(parents=True, exist_ok=False)
     path = destination / 'registration.json'
     generation = read_json(parent_registration)
@@ -236,10 +292,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v5.md')
     if draft_audit_grammar:
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v6.md')
-    if audit_batches is not None:
+    if batch_selected:
         inputs['protocol'] = str(repository / 'src/download/prompts/evidence_protocol_v7.md')
     inventory_text = (Path(inputs['original_full']).read_bytes().decode('utf-8')
-                      if audit_batches is not None else Path(inputs['original_full']).read_text())
+                      if batch_selected else Path(inputs['original_full']).read_text())
     save(inputs['source_inventory'], source_review.inventory(inventory_text, 'original_full'))
     attempt = destination / 'attempts' / job_id
     job = {'id': job_id, 'attempt_dir': str(attempt), 'output_dir': str(attempt / 'output'),
@@ -273,7 +329,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         manifest['budget']['additional_usd'] = amendment['total_usd']
     manifest.update(claim_selection)
     manifest.update(upstream_selection)
-    if audit_batches is not None:
+    if batch_selected:
         manifest.update(protocol_version=7, render_version=21 if audit_batch_format else 20)
         manifest[TRANSITION] = {'kind': BATCH_FORMAT_TRANSITION_KIND if audit_batch_format else BATCH_TRANSITION_KIND}
         if audit_batch_navigation:
@@ -323,8 +379,13 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
             'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
             'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
+    if checkpoint_selection is not None:
+        manifest['audit_worker_checkpoint'] = checkpoint_selection
     save(parent['phase2_proof'], inspect_parent(manifest))
-    if audit_batches is not None:
+    if checkpoint_selection is not None:
+        from .batch_registration import prepare_checkpoint_inputs
+        prepare_checkpoint_inputs(manifest, path)
+    elif audit_batches is not None:
         from .batch_registration import prepare_inputs
         prepare_inputs(manifest, path, audit_batches)
     instruction = render_instruction(manifest)
@@ -337,7 +398,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     save(path, manifest)
     validate_registration(path)
     batch_plan_fields = {}
-    if audit_batches is not None:
+    if batch_selected:
         from .batch_registration import offline_plan_fields
         batch_plan_fields = offline_plan_fields(manifest)
     save(destination / 'offline_plan.json', {'registration_sha256': sha(path),
@@ -362,6 +423,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
            if 'audit_contract_context' in manifest else {}),
         **({'audit_drafting': manifest['audit_drafting']} if 'audit_drafting' in manifest else {}),
         **({'audit_batches': manifest['audit_batches']} if 'audit_batches' in manifest else {}),
+        **({'audit_worker_checkpoint': manifest['audit_worker_checkpoint']} if 'audit_worker_checkpoint' in manifest else {}),
         **({TRANSITION: manifest[TRANSITION], 'protocol_version': manifest['protocol_version'],
             'render_version': manifest['render_version'],
             'parent_render_version': 14, 'scientific_instrument_unchanged': False}
@@ -424,6 +486,8 @@ def main():
         help='select protocol 6/renderer 18 and at most two immutable grammar drafts before terminal validation')
     scientific.add_argument('--audit-batches', type=Path,
         help='JSON configuration selecting protocol 7/renderer 20 fresh workers and explicit final integration')
+    scientific.add_argument('--audit-worker-checkpoint', type=Path,
+        help='strict one-hop proof selecting all frozen closed workers and one fresh integration')
     parser.add_argument('--audit-batch-format', action='store_true',
         help='with --audit-batches, select renderer 21 and an exact source-blind JSON format contract')
     parser.add_argument('--audit-batch-navigation', action='store_true',
@@ -454,6 +518,9 @@ def main():
     parser.add_argument('--provider-base-url')
     parser.add_argument('--provider-ca-bundle')
     args = vars(parser.parse_args())
+    if args['audit_worker_checkpoint'] is not None:
+        from .worker_checkpoint import selection
+        args['audit_worker_checkpoint'] = selection(read_json(args['audit_worker_checkpoint']))
     if args['native_api_force_idle_timeout'] is not None:
         args['native_api_force_idle_timeout'] = False
     if args['native_stall_policy'] is not None:
