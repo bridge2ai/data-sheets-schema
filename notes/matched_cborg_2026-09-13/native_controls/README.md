@@ -58,6 +58,25 @@ callback now applies the same classifier used by the terminal audit (#2055).
 It denies commands outside the registered grammar without changing them.
 Prescribed commands still pass through the runtime's own permission check.
 
+That check admits only the registered text, while the classifier matches a
+program by its meaning and a roster command by its words. From policy
+version 5 the callback also refuses, before execution, a prescribed call the
+job's permission rules would not admit as written (#2369): a double-quoted or
+reflowed program, a `$` variable or expansion, a line continuation, a
+comment, a glob, or any spelling no rule matches. It mirrors the pinned
+runtime's matcher: the rule envelope's escapes, exact rules, argument rules
+that read runs of spaces as one, and the text the runtime parses as too
+complex. The refusal names the registered spelling, and a refusal by the
+controller does not disqualify the run, so the model can copy the spelling
+and continue. Before #2369 such a call reached the runtime, which refused
+it, and the refusal counted as a denied prescribed command. Preparation
+refuses a registration whose own spellings the check would refuse.
+Recorded version-4 policies, and the audit, evaluation and finalization
+policies, replay unchanged. What the check does not model stays exposed:
+the uncharacterised apostrophe refusal (#2308), which the direct preparer
+refuses conservatively, and a matcher change in a newly pinned runtime,
+which the offline probes must be rerun against first.
+
 The same callback now checks `Read` and `Write` targets (#2061). File reads are
 limited to the registered input/playbook closure and this job's output files;
 writes are limited to output files. The provenance inventory of other agent

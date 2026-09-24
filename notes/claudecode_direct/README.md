@@ -155,7 +155,17 @@ controller's own stop state.
   `probe_recorder_permission.py` observes the runtime's decision offline and
   shows whether the variable reaches the recorder; run it with
   `--instruction <the registered instruction>` on each new registration
-  before its launch, with the interpreter the instruction names.
+  before its launch, with the interpreter the instruction names. Since
+  #2369 the child's controller runs without the literal-admission check, so
+  the runtime's own decision is what is observed, and each case also records
+  whether the checked controller would admit it. With `--instruction` the
+  probe fails on an under-refusal: a case the runtime refused that the
+  controller would have let through.
+- **Respelled commands.** From policy version 5 the controller refuses a
+  prescribed command whose spelling the runtime's rules would not admit, and
+  names the registered spelling; that refusal does not disqualify the run
+  (#2369). A registered line run as written records the receipt expectation
+  from its specification (#2350).
 
 ## Running one canary
 

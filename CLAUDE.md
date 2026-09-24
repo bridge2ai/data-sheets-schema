@@ -693,7 +693,9 @@ phase (#652).
 
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing
-playbook passes — an unchecked receipt is UNMEASURABLE and any unreviewed
+playbook passes, or implied by a registered `--render-spec-json`
+specification that binds a receipt (`RunSpec.writes_receipt`, #2350) — an
+unchecked receipt is UNMEASURABLE and any unreviewed
 chunk, unverified snippet, finding, or vacuous receipt (zero snippets over a
 non-empty bundle) is a regression against a floor of 0. A snippet that is
 verbatim in the bundle but in a chunk other than the one cited is

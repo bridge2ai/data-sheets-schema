@@ -2989,3 +2989,64 @@ states what the first canary observed.
 unaffected: none reads the playbook's recorder paragraph, the control
 evidence or the launcher receipt. The native evaluation harness is affected
 as above.
+### Respelled commands and the receipt expectation (#2369, #2350; 2026-09-24)
+
+Both found by the independent review of the second direct CHORUS
+registration and filed for the next registered change. That canary was
+launched on 2026-09-24 at 00:53 UTC under the code before this change, at
+a75bb2a91; its registration pins the earlier bytes and is not affected.
+
+**Native controller (both Claude Code arms).**
+`native_controls/native_command_policy.py` `9353027a…` → `dd9ac4b1…`, with
+`probe_native_permissions.py` `f6181c87…` → `39deadbc…` and
+`test_native_command_policy.py` `8a62fb11…` → `928360bc…`, all pinned by
+native overlays, direct registrations and the audit, evaluation and
+finalization registrations. Policy version 5 (`literal_admission: 1`)
+refuses before execution a prescribed call the job's permission rules would
+not admit as written. Such a call used to reach the runtime, which refused
+it under dontAsk, and the refusal counted as a denied prescribed command,
+disqualifying the run. Now it is the controller's refusal, which names the
+registered spelling and does not disqualify. The appended command guidance
+says so, so the effective system prompt moves. Recorded version-4 policies,
+and the audit, evaluation and finalization policies, replay unchanged.
+Preparation refuses a registration whose own spellings the check would
+refuse, and the direct preparer (`350f64eb…`) makes that a named stop that
+leaves nothing behind. The recorder probe (`53122467…`) now observes the
+runtime with the check off and fails, on a registered instruction, when the
+runtime refuses a case the checked controller would admit.
+
+Offline evidence against the pinned 2.1.272 binary, with no model call:
+the broad probe's four respellings were refused by the controller and runs
+of spaces between registered words were admitted by the runtime, as
+predicted. On the second direct registration's exact recorder line the
+recorder probe found no under- or over-refusal. On the fixture's own line,
+whose specification carries apostrophes, the runtime refused two endings
+the controller would admit. That is the uncharacterised refusal of #2308,
+which the check does not model and the direct preparer refuses
+conservatively; the native preparer does not.
+
+**Recorder and launcher (#2350).** `src/data_sheets_schema/api_runner.py`
+`0357e1b3…` → `bb8ca8c3…` and `cli/provenance.py` `5b31564c…` → `4b3431ad…`.
+`RunSpec.writes_receipt` is one answer for the record and the launcher's
+receipt block: an agentic specification that binds the receipt's
+destination writes one, any other run only under a receipt condition. For
+every registration on disk the answer is unchanged. The recorder takes it
+from a registered specification, as it takes the effort. Native and direct
+records made after this therefore read `receipt_expected: true`, and the
+canary gate applies their receipt floors instead of reporting them as
+not applicable. No existing record is rewritten: no record was ever written
+through `--render-spec-json`.
+
+**Playbook.** `.claude/commands/d4d-full-core.md` `5e7abd16…` → `2d472d8a…`.
+Commands run on one line, spelled as registered. The executable view's
+double-quoted programs and backslash-continued lines are templates, and a
+refusal of another spelling does not disqualify (#2369). The receipt
+checklist says where a registered line's expectation comes from (#2350).
+Earlier records report playbook drift under `d4d runs check`, which is
+informational.
+
+**Evaluation.** Scoring instruments, rubric agents and review packs are
+unaffected. The native evaluation, audit and finalization harnesses share
+the controller module but carry version-1 policies, so their decisions are
+unchanged; their pins move.
+
