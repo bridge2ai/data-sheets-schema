@@ -136,6 +136,7 @@ def test_cross_checkout_vocabulary_preserves_original_locator_and_hash(
     original_profile = profiles.BRIDGE2AI
     original_cwd = Path.cwd()
     index, artifacts, _, _, args = runtime.integration_material(fixture.original)
+    args['profile'] = fixture.original['profile']  # Deliberately restore the old ambient selection.
     # The unfixed named-profile replay really differs, despite identical bytes:
     # this exercises the resource resolver rather than mocking its selected path.
     plain = audit_batch_context.render_integration_context(**args, worker_index=index,

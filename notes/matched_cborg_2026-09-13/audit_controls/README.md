@@ -770,3 +770,11 @@ lineage explicitly links those workers to the new integration. Phase4 and
 evaluations retain that transitive evidence across execution checkouts (#2389),
 but generation, Phase4 and evaluation refuse the active checkpoint selector,
 including a null value. Existing registrations never inherit this mode.
+
+Historical batch policy and context replay resolve a relative profile vocabulary
+against that registration's repository, not the replay process's working
+directory (#2396). Explicit absolute external vocabulary authorities retain their
+registered paths. A local profile copy keeps shared configuration unchanged;
+the existing vocabulary pins, original policy digest and complete context hashes
+still govern replay. This applies to inherited workers and to complete aggregate
+closure collected from later Phase4/evaluation checkouts.
