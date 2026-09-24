@@ -164,8 +164,10 @@ controller's own stop state.
 - **Respelled commands.** From policy version 5 the controller refuses a
   prescribed command whose spelling the runtime's rules would not admit, and
   names the registered spelling; that refusal does not disqualify the run
-  (#2369). A registered line run as written records the receipt expectation
-  from its specification (#2350).
+  (#2369). The same check refuses a specification the runtime would split
+  into quoted pieces, the apostrophe refusal of #2308, so the preparer's own
+  apostrophe refusal is now a second layer. A registered line run as written
+  records the receipt expectation from its specification (#2350).
 
 ## Running one canary
 

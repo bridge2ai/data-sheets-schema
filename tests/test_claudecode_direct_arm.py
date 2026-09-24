@@ -449,9 +449,11 @@ class PlaybookWording(unittest.TestCase):
         self.assertIn("Every `poetry run` spelling in this file is refused under\nthe native command policy", core)
         # Commands run on one line as registered; the view's templates are not spellings, and a
         # refusal of another spelling does not disqualify (#2369).
-        self.assertIn("run every command with the registered interpreter, on one\nline, spelled as registered", core)
+        self.assertIn("run every command with the registered interpreter,\nspelled as registered", core)
+        self.assertIn("across its lines where it has several", core)
+        self.assertNotIn("registered interpreter, on one\nline", core)
         self.assertIn("double-quoted programs and backslash-continued lines are templates, not\nspellings to run", core)
-        self.assertIn("that refusal names the registered spelling and\ndoes not disqualify the run", core)
+        self.assertIn("Such a refusal is the controller's and does not\ndisqualify the run", core)
         # The receipt expectation of a registered line comes from its specification (#2350).
         self.assertIn("a registered recorder line takes it from the registered\n  specification and is run as written (#2350)", core)
         self.assertNotIn("(the\n  `--receipt-expected` flag) so the canary gate", core)

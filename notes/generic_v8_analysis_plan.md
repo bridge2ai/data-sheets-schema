@@ -2991,39 +2991,61 @@ evidence or the launcher receipt. The native evaluation harness is affected
 as above.
 ### Respelled commands and the receipt expectation (#2369, #2350; 2026-09-24)
 
-Both found by the independent review of the second direct CHORUS
-registration and filed for the next registered change. That canary was
-launched on 2026-09-24 at 00:53 UTC under the code before this change, at
-a75bb2a91; its registration pins the earlier bytes and is not affected.
+#2369 was found by the independent review of the second direct CHORUS
+registration. #2350 was filed from the review of PR #2327; that registration
+review confirmed it applies and found the playbook checklist contradicting
+it. The second direct canary and its retry were launched on 2026-09-24 under
+the code before this change, at a75bb2a91; their registrations pin the
+earlier bytes and are not affected.
 
 **Native controller (both Claude Code arms).**
-`native_controls/native_command_policy.py` `9353027a…` → `dd9ac4b1…`, with
-`probe_native_permissions.py` `f6181c87…` → `39deadbc…` and
-`test_native_command_policy.py` `8a62fb11…` → `928360bc…`, all pinned by
-native overlays, direct registrations and the audit, evaluation and
-finalization registrations. Policy version 5 (`literal_admission: 1`)
-refuses before execution a prescribed call the job's permission rules would
-not admit as written. Such a call used to reach the runtime, which refused
-it under dontAsk, and the refusal counted as a denied prescribed command,
-disqualifying the run. Now it is the controller's refusal, which names the
-registered spelling and does not disqualify. The appended command guidance
-says so, so the effective system prompt moves. Recorded version-4 policies,
-and the audit, evaluation and finalization policies, replay unchanged.
-Preparation refuses a registration whose own spellings the check would
-refuse, and the direct preparer (`350f64eb…`) makes that a named stop that
-leaves nothing behind. The recorder probe (`53122467…`) now observes the
-runtime with the check off and fails, on a registered instruction, when the
-runtime refuses a case the checked controller would admit.
+`native_controls/native_command_policy.py` `9353027a…` → `14ead4eb…` is
+pinned by native overlays, direct registrations and the audit, evaluation
+and finalization registrations. `probe_native_permissions.py` `f6181c87…` →
+`3e62e1e0…` and `test_native_command_policy.py` `8a62fb11…` → `73a85683…`
+are pinned by the direct, audit, evaluation and finalization registrations;
+the native overlay's explicit list does not name them. Policy version 5
+(`literal_admission: 1`) refuses before execution a prescribed call the
+job's permission rules would not admit as written. Such a call used to reach
+the runtime, which refused it under dontAsk, and the refusal counted as a
+denied prescribed command, disqualifying the run. Now it is the controller's
+refusal, which does not disqualify; where the call keeps the registered
+interpreter and command, it names the registered spelling. The appended
+command guidance says so, so the effective system prompt moves. Recorded
+version-4 policies, and the audit, evaluation and finalization policies,
+replay unchanged.
 
-Offline evidence against the pinned 2.1.272 binary, with no model call:
-the broad probe's four respellings were refused by the controller and runs
-of spaces between registered words were admitted by the runtime, as
-predicted. On the second direct registration's exact recorder line the
-recorder probe found no under- or over-refusal. On the fixture's own line,
-whose specification carries apostrophes, the runtime refused two endings
-the controller would admit. That is the uncharacterised refusal of #2308,
-which the check does not model and the direct preparer refuses
-conservatively; the native preparer does not.
+The check mirrors the pinned 2.1.272 matcher: the rule envelope's escapes,
+exact rules, argument rules that read runs of spaces as one, and JavaScript's
+trim. The review of #2398 read the binary and found what it checks before
+matching, now ported: the raw-text checks, applied inside quotes too (a
+backslash before whitespace, `=`, `~[` and `<N-M>` forms, zero-width and other
+non-ASCII whitespace, control characters, a newline and `#` inside an
+argument), the 10,000-character parse limit, and a brace check on an argument
+joined from quoted pieces. That brace check is the refusal of #2308: an
+apostrophe splits a single-quoted JSON specification into pieces, as does
+`--opt='{…}'`. Text the runtime re-quotes from its arguments before
+matching, a newline or `$` and a name, is admitted only by an exact rule.
+Not modelled: the parser's time and node budget. Preparation refuses a
+registration whose own spellings the check would refuse, which now includes
+a render specification the runtime refuses for its apostrophe, on either arm
+(#2393); the direct preparer (`350f64eb…`) makes that a named stop that leaves nothing
+behind. The recorder probe (`0a63a9f2…`) observes the runtime with the check
+off and fails, on a registered instruction, when the runtime refuses a case
+the checked controller would admit. The audit checkpoint check (#2390,
+`audit_controls/checkpoint_eligibility.py` `46a9b7d8…` → `5a0b284a…`) pins the
+controller module's hash and executes only `_shell_tokens` and
+`_simple_command` from it; both are byte-identical here, so the new hash
+joins its supported sources.
+
+Offline evidence against the pinned binary, with a scripted local provider
+and no model call. The broad probe passed: its five respellings were refused
+by the controller, never by the runtime, and runs of spaces between
+registered words were admitted by the runtime. The recorder probe found no
+under- or over-refusal in either mode. On the retry registration's exact
+recorder line, the `--opt='{…}'` form was refused by the runtime and by the
+checked controller alike. The fixture's manifest no longer carries an
+apostrophe, because preparation now refuses that registration.
 
 **Recorder and launcher (#2350).** `src/data_sheets_schema/api_runner.py`
 `0357e1b3…` → `bb8ca8c3…` and `cli/provenance.py` `5b31564c…` → `4b3431ad…`.
@@ -3031,27 +3053,26 @@ conservatively; the native preparer does not.
 receipt block: an agentic specification that binds the receipt's
 destination writes one, any other run only under a receipt condition. For
 every registration on disk the answer is unchanged. The recorder takes it
-from a registered specification, as it takes the effort. Native and direct
-records made after this therefore read `receipt_expected: true`, and the
-canary gate applies their receipt floors instead of reporting them as
-not applicable. No existing record is rewritten: no record was ever written
-through `--render-spec-json`.
+from a registered specification, as it takes the effort, so native and
+direct records made after this read `receipt_expected: true` and the canary
+gate applies their receipt floors. No record is rewritten. The second direct
+canary's retry, made under the earlier code, is the first record written
+through `--render-spec-json` if it reaches its recorder line: its
+`inputs.receipt_expected` reads false, while the launcher's receipt block
+computes `expected: true` from its condition.
 
-**Playbook.** `.claude/commands/d4d-full-core.md` `5e7abd16…` → `2d472d8a…`.
-Commands run on one line, spelled as registered. The executable view's
-double-quoted programs and backslash-continued lines are templates, and a
-refusal of another spelling does not disqualify (#2369). The receipt
-checklist says where a registered line's expectation comes from (#2350).
-Earlier records report playbook drift under `d4d runs check`, which is
-informational.
+**Playbook.** `.claude/commands/d4d-full-core.md` `5e7abd16…` → `669d3f53…`.
+Commands run spelled as registered: a CLI command on one line, an inline
+program exactly as given, across its lines where it has several. The
+executable view's double-quoted programs and backslash-continued lines are
+templates, and a refusal of another spelling does not disqualify (#2369).
+The receipt checklist says where a registered line's expectation comes from
+(#2350). Earlier records report playbook drift under `d4d runs check`, which
+is informational.
 
 **Evaluation.** Scoring instruments, rubric agents and review packs are
 unaffected. The native evaluation, audit and finalization harnesses share
 the controller module but carry version-1 policies, so their decisions are
-unchanged; their pins move. The audit checkpoint check (#2390,
-`audit_controls/checkpoint_eligibility.py` `46a9b7d8…` → `72824bce…`) pins the
-controller module's hash and executes only `_shell_tokens` and
-`_simple_command` from it; both are byte-identical in the new version, which
-is added to its supported sources. #2392 files the harnesses' own exposure
-of the #2369 class.
+unchanged; their pins move, and #2392 files their own exposure of the #2369
+class.
 

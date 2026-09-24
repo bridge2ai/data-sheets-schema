@@ -124,7 +124,12 @@ def isolation_cases(line, instruction_path):
             {"id": "tiny_parens", "command": prefix + " --render-spec-json '{\"a\":\"x (y)\"}'"},
             {"id": "tiny_apostrophe", "command": prefix + " --render-spec-json " + shlex.quote('{"a":"child\'s manifest"}')},
             {"id": "real_env_flag_no_apostrophe", "command": with_spec(
-                {k: (v.replace("'", "") if isinstance(v, str) else v) for k, v in spec.items()})}]
+                {k: (v.replace("'", "") if isinstance(v, str) else v) for k, v in spec.items()})},
+            # The same specification joined to its option (`--opt='{…}'`): one
+            # argument of two pieces, which the runtime reads as brace
+            # expansion (#2308); the checked controller refuses it too.
+            {"id": "real_env_flag_equals_form", "command": stem + " --render-spec-json=" + shlex.quote(
+                json.dumps(spec, sort_keys=True, separators=(",", ":"))) + " " + ENV_FLAG}]
 
 
 def main():

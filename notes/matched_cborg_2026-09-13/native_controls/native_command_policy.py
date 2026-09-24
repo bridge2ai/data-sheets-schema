@@ -129,7 +129,7 @@ def _runtime_rules(policy):
 
 #: Whitespace the runtime's parser treats as too complex to match literally.
 _UNICODE_SPACES = frozenset('\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008'
-                            '\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff')
+                            '\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\ufeff')
 
 
 def _unread_shell(text):
@@ -172,19 +172,143 @@ def _unread_shell(text):
     return 'an unterminated quote' if quote else None
 
 
+#: What the pinned runtime (Claude Code 2.1.272) checks on the raw command
+#: text before it parses, whatever the quoting (`oEe`, copied from the
+#: binary; #2369, #2398 review). Any match makes the command too complex, and
+#: a too-complex command is admitted only by an exact rule equal to it.
+_RAW_TOO_COMPLEX = (
+    (re.compile('[\ud800-\udfff]'), 'a lone surrogate'),
+    (re.compile(r'[\x00-\x08\x0B-\x1F\x7F]'), 'a control character'),
+    (re.compile('[\u00a0\u1680\u2000-\u200b\u2028\u2029\u202f\u205f\u3000\ufeff]'), 'non-ASCII whitespace'),
+    (re.compile(r'\\[ \t]|(?:^|[^ \t\\])(?:\\\\)*\\\n|[ \t](?:\\\\)+\\\n'), 'backslash-escaped whitespace'),
+    (re.compile(r'~\['), 'a zsh ~[ expansion'),
+    (re.compile(r'(?:^|[\s;&|])=[a-zA-Z_]'), 'a zsh =command expansion'),
+    (re.compile(r'<\d*-\d*>'), 'a zsh <N-M> range'),
+)
+#: The runtime does not parse a command longer than this many UTF-16 units.
+_RUNTIME_PARSE_LIMIT = 10_000
+#: `Gm`, tested on the text with quoted braces masked (`Hm`).
+_BRACE_WITH_QUOTE = re.compile('\\{[^}]*[\'"]')
+#: `ii`, tested on the raw text of an argument joined from adjacent pieces:
+#: a quoted JSON object written `--opt='{…,…}'`, or one an apostrophe splits
+#: into `'…'"'"'…'`, is read as brace expansion. The #2308 refusal.
+_CONCATENATED_BRACE = re.compile(r'\{[^\s]*(,|\.\.)[^\s]*\}')
+#: Text the runtime re-quotes from its arguments before matching an argument
+#: rule (`ep`): a newline, or `$` and a name, even inside single quotes.
+_REBUILT_FROM_ARGUMENTS = re.compile(r'\$[A-Za-z_]')
+#: What JavaScript's `trim()` removes, which is not Python's `strip()`.
+_JS_TRIM = '\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff'
+
+
+def _mask_quoted_braces(text):
+    """The runtime's `Hm`: braces inside quotes, backticks or comments hidden."""
+    if '{' not in text:
+        return text
+    out = []
+    single = double = backtick = False
+    word_start = True
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ''
+        if backtick:
+            if ch == '\\' and nxt in ('`', '\\', '$'):
+                out += [ch, nxt]; i += 2
+            else:
+                if ch == '`':
+                    backtick = False
+                out.append(' ' if ch == '{' else ch); i += 1
+        elif single:
+            if ch == "'":
+                single = False
+            out.append(' ' if ch == '{' else ch); i += 1
+        elif double:
+            if ch == '\\' and nxt in ('"', '\\', '`'):
+                out += [ch, nxt]; i += 2
+            elif ch == '`':
+                backtick = True; out.append(ch); i += 1
+            else:
+                if ch == '"':
+                    double = False
+                out.append(' ' if ch == '{' else ch); i += 1
+        elif ch == '\\' and i + 1 < len(text):
+            out += [ch, nxt]
+            if nxt != '\n':
+                word_start = False
+            i += 2
+        elif ch == '#' and word_start:
+            while i < len(text) and text[i] != '\n':
+                out.append(text[i]); i += 1
+            word_start = True
+        elif ch == '`':
+            backtick = True; word_start = False; out.append(ch); i += 1
+        else:
+            if ch == "'":
+                single = True
+            elif ch == '"':
+                double = True
+            word_start = ch in ' \t\n;|&()<>'
+            out.append(ch); i += 1
+    return ''.join(out)
+
+
+def _raw_words(text):
+    """Each word's raw text, quotes included, with the number of adjacent
+    pieces (an unquoted run, a single- or double-quoted string) it joins."""
+    words, current, pieces, piece, quote = [], [], 0, None, None
+    for ch in text:
+        if quote:
+            current.append(ch)
+            if ch == quote:
+                quote, piece = None, None
+            continue
+        if ch in ' \t\n':
+            if current:
+                words.append((''.join(current), pieces))
+            current, pieces, piece = [], 0, None
+            continue
+        if ch in '\'"':
+            quote, pieces = ch, pieces + 1
+        elif piece != 'bare':
+            piece, pieces = 'bare', pieces + 1
+        current.append(ch)
+    if current:
+        words.append((''.join(current), pieces))
+    return words
+
+
+def _too_complex(text):
+    """Why the runtime would find `text` too complex to match by an argument
+    rule, from its own pre-parse and argument checks, else None."""
+    if len(text.encode('utf-16-le')) // 2 > _RUNTIME_PARSE_LIMIT:
+        return 'longer than the runtime parses (10,000 characters)'
+    for pattern, reason in _RAW_TOO_COMPLEX:
+        if pattern.search(text):
+            return reason
+    if _BRACE_WITH_QUOTE.search(_mask_quoted_braces(text)):
+        return 'a brace followed by a quote'
+    if any(pieces > 1 and _CONCATENATED_BRACE.search(word) for word, pieces in _raw_words(text)):
+        return 'a brace pattern in an argument joined from quoted pieces'
+    return None
+
+
 def runtime_literal_problem(command, policy):
     """Why the runtime's permission rules would not admit `command` as
-    written, else None (#2369). Mirrors the pinned runtime's matcher closely
-    enough to refuse whatever it refuses; a form it would also admit (a
-    wrapper, an allowlisted variable assignment) may be refused here too,
-    which costs the model one retry and never disqualifies the run."""
-    text = command.strip()
+    written, else None (#2369). Mirrors the pinned runtime's matcher and the
+    checks before it closely enough to refuse whatever it refuses; where
+    fidelity is uncertain it refuses too, which costs the model one retry and
+    never disqualifies the run. An exact rule admits its own text even when
+    the runtime finds that text too complex; an argument rule admits only
+    text it parses and does not re-quote."""
+    text = command.strip(_JS_TRIM)
     exact, prefixes = _runtime_rules(policy)
     if text in exact:
         return None
-    reason = _unread_shell(text)
+    reason = _too_complex(command) or _unread_shell(text)
     if reason:
         return reason
+    if '\n' in text or _REBUILT_FROM_ARGUMENTS.search(text):
+        return 'text the runtime re-quotes from its arguments before matching an argument rule'
     normal = re.sub(r'[ \t]+', ' ', text)
     if any(normal == prefix or normal.startswith(prefix + ' ') for prefix in prefixes):
         return None
@@ -290,8 +414,9 @@ def command_guidance(policy):
     """Give the runtime the exact shell spellings its permissions admit."""
     literal = ('Any other spelling of a registered command (a double-quoted or '
                'reflowed program, a $ variable or expansion, a line continuation, '
-               'a comment) is refused before it runs; that refusal names the '
-               'registered spelling and does not disqualify the attempt, so run '
+               'a comment) is refused before it runs. That refusal does not '
+               'disqualify the attempt; where the call keeps the registered '
+               'interpreter and command, it names the registered spelling, so run '
                'the command again exactly as registered. '
                if policy.get('literal_admission') == LITERAL_ADMISSION else '')
     return (
@@ -461,7 +586,9 @@ def _classify_by_meaning(command, python, programs, command_policy=None):
         if command_policy is not None:
             try:
                 key = program_key(tokens[2])
-            except (SyntaxError, ValueError, TypeError):
+            except (SyntaxError, ValueError, TypeError, RecursionError, MemoryError):
+                # A program nested too deeply to parse is refused, not a
+                # controller failure that stops the run (#2398 review).
                 return 'not_prescribed', 'an invalid inline Python program'
             for program in command_policy['programs']:
                 if key == program_key(program['code']):

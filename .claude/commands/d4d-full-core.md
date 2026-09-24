@@ -772,16 +772,18 @@ carries `${D4D_LAUNCH_INSTRUCTION:?…}` is a registration defect: do not
 rewrite it, run nothing in its place, and report it (#2346).
 
 **Registered commands take precedence over this file's spellings.** Under a
-launch instruction, run every command with the registered interpreter, on one
-line, spelled as registered: `<python> -m data_sheets_schema.cli …` with the
-instruction's own words and quoting, and each inline `<python> -c …` program
-exactly as the system prompt's registered inline Python commands give it. The
+launch instruction, run every command with the registered interpreter,
+spelled as registered: each `<python> -m data_sheets_schema.cli …` command on
+one line with the instruction's own words and quoting, and each inline
+`<python> -c …` program exactly as the system prompt's registered inline
+Python commands give it, across its lines where it has several. The
 executable playbook view (`agents playbook`) names the same commands, but its
 double-quoted programs and backslash-continued lines are templates, not
 spellings to run. Every `poetry run` spelling in this file is refused under
 the native command policy (#2325, #2347), and so is any other spelling of a
-registered command (#2369); that refusal names the registered spelling and
-does not disqualify the run.
+registered command (#2369). Such a refusal is the controller's and does not
+disqualify the run; where the call keeps the registered interpreter and
+command, it names the registered spelling to run instead.
 
 ```bash
 poetry run d4d provenance record \

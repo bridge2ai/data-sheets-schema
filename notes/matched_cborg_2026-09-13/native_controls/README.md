@@ -72,10 +72,18 @@ and continue. Before #2369 such a call reached the runtime, which refused
 it, and the refusal counted as a denied prescribed command. Preparation
 refuses a registration whose own spellings the check would refuse.
 Recorded version-4 policies, and the audit, evaluation and finalization
-policies, replay unchanged. What the check does not model stays exposed:
-the uncharacterised apostrophe refusal (#2308), which the direct preparer
-refuses conservatively, and a matcher change in a newly pinned runtime,
-which the offline probes must be rerun against first.
+policies, replay unchanged. The check also ports the runtime's own checks on
+the raw text before it parses (a backslash before whitespace, `=` or `~[` or
+`<N-M>` forms, zero-width and other non-ASCII whitespace, a newline and `#`
+inside an argument, the 10,000-character parse limit) and its brace check on
+an argument joined from quoted pieces. That brace check is the apostrophe
+refusal of #2308: an apostrophe splits a single-quoted JSON specification
+into pieces, and so does `--opt='{…}'`. Text the runtime re-quotes from its
+arguments before matching (a newline, or `$` and a name) is admitted only by
+an exact rule. The review of #2398 found these checks by reading the pinned
+binary; a newly pinned runtime must be checked the same way, and the offline
+probes rerun, before registering. Not modelled: the parser's time and node
+budget (#2398 review).
 
 The same callback now checks `Read` and `Write` targets (#2061). File reads are
 limited to the registered input/playbook closure and this job's output files;

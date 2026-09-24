@@ -272,7 +272,7 @@ def test_a_respelling_is_refused_by_the_controller_and_does_not_disqualify(regis
         'continuation': receipts + ' \\\n  --strict',
         'glob': receipts + ' --label x*',
         'carriage_return': receipts + ' --label x\ry',
-        'unicode_space': receipts + ' --label x',
+        'unicode_space': receipts + ' --label\u00a0x',
     }[name]
     # The same meaning, as a version-4 recording classifies it: the replay of
     # earlier evidence is unchanged, and this is the call #2369 names.
@@ -330,7 +330,115 @@ def test_the_guidance_says_a_respelling_refusal_does_not_disqualify(registered):
     ("a 'multi\nline'", None), ('a "$X"', 'a $ variable or expansion'), ('a `x`', 'a backtick'),
     ("a 'x", 'an unterminated quote'), ('a #y', 'a comment'), ('a\nb', 'a line break outside quotes'),
     ('a "\\x"', 'a backslash escape or line continuation'), ('a ~/x', 'a glob, brace or tilde expansion'),
-    ('a {b,c}', 'a glob, brace or tilde expansion'), ('a b', 'a control character or non-ASCII whitespace'),
+    ('a {b,c}', 'a glob, brace or tilde expansion'), ('a\u2003b', 'a control character or non-ASCII whitespace'),
 ])
 def test_what_the_runtime_reads_literally(text, reason):
     assert _unread_shell(text) == reason
+
+
+# --- #2398 review: the runtime's own checks before matching, and the surviving mutants ----------
+
+from native_command_policy import _JS_TRIM, _literal_rule, _mask_quoted_braces, _raw_words, _too_complex
+
+
+RUNTIME_REFUSED = {
+    'escaped_space': "--label 'a\\ b'",
+    'zsh_equals': '--label =x',
+    'zsh_equals_quoted': "--label ' =x'",
+    'zsh_range': "--label '<1-2>'",
+    'zsh_tilde_bracket': "--label 'a~[b'",
+    'zero_width_space_quoted': "--label 'a\u200bb'",
+    'zero_width_space': '--label a\u200bb',
+    'newline_hash_single': "--label 'a\n#b'",
+    'newline_hash_double': '--label "a\n#b"',
+    'brace_in_joined_argument': "--label='{\"a\":1,\"b\":2}'",
+    'brace_after_apostrophe': "--label 'x'\"'\"'{a,b}'",
+    'name_inside_single_quotes': "--label 'a$HOME'",
+    'newline_inside_quotes': "--label 'a\nb'",
+}
+
+
+@pytest.mark.parametrize('name', sorted(RUNTIME_REFUSED))
+def test_what_the_runtime_refuses_before_matching_is_refused_first(registered, name):
+    """The pinned runtime's pre-parse checks read the raw text inside quotes too; its brace check
+    reads an argument joined from pieces; it re-quotes text with a newline or $NAME before matching."""
+    _, _, policy = registered
+    python = policy['python']
+    command = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' ' + RUNTIME_REFUSED[name]
+    assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
+    verdict, basis = classify_program_command(command, python, set(), policy)
+    assert verdict == 'not_prescribed' and 'does not disqualify the attempt' in basis, basis
+
+
+def test_trimming_follows_javascript_not_python(registered):
+    """The runtime trims with JavaScript's trim(), which keeps \\x1c-\\x1f and \\x85."""
+    _, _, policy = registered
+    python = policy['python']
+    fixed = next(p['code'] for p in policy['programs'] if not p['arguments'])
+    example = shlex.join([python, '-c', fixed])
+    for tail in ('\x1f', '\x1c', '\x85'):
+        assert (example + tail).strip() == example and (example + tail).strip(_JS_TRIM) != example
+        assert classify_program_command(example + tail, python, set(), _legacy(policy))[0] == 'prescribed'
+        assert classify_program_command(example + tail, python, set(), policy)[0] == 'not_prescribed', repr(tail)
+    for tail in (' ', '\t', '\n', '\u00a0'):                            # trimmed by both
+        assert classify_program_command(example + tail, python, set(), policy)[0] == 'prescribed', repr(tail)
+
+
+def test_a_command_longer_than_the_runtime_parses_is_refused(registered):
+    _, _, policy = registered
+    python = policy['python']
+    base = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0])
+    assert classify_program_command(base + ' --label ' + 'x' * (9_990 - len(base)), python, set(), policy)[0] == 'prescribed'
+    assert classify_program_command(base + ' --label ' + 'x' * 10_000, python, set(), policy)[0] == 'not_prescribed'
+
+
+def _argument_program_policy(code):
+    python = sys.executable
+    prefix = shlex.join([python, '-c', code])
+    return python, prefix, {'version': 5, 'literal_admission': LITERAL_ADMISSION, 'python': python,
+                            'manifest_paths': [], 'programs': [{'code': code, 'arguments': True}],
+                            'command_examples': [prefix + ' out/full.yaml'],
+                            'allowed_tools': [_literal_rule(prefix, arguments=True)]}
+
+
+def test_an_argument_rule_reads_backslash_pairs_as_the_runtime_does():
+    """Surviving mutant M03: the runtime reads `\\\\` in an argument rule as one backslash, so a
+    registered program carrying two is refused as written; one is admitted."""
+    python, prefix, policy = _argument_program_policy('print("a\\nb")')
+    assert runtime_literal_problem(prefix + ' out/full.yaml', policy) is None
+    python, prefix, policy = _argument_program_policy('print("a\\\\b")')
+    assert runtime_literal_problem(prefix + ' out/full.yaml', policy) == 'a spelling no registered permission rule admits'
+
+
+def test_an_argument_rule_reads_runs_of_spaces_as_one():
+    """Surviving mutant M02: the rule's own prefix is normalised like the command."""
+    python, prefix, policy = _argument_program_policy('x  =\t1;print(x)')
+    assert runtime_literal_problem(prefix + ' out/full.yaml', policy) is None
+    assert runtime_literal_problem(prefix.replace('  ', ' ') + ' out/full.yaml', policy) is None
+
+
+def test_a_bound_inline_program_the_runtime_would_refuse_fails_preparation(registered, tmp_path):
+    """Surviving mutant M14c: the bound examples are checked, not only the instruction's CLI lines."""
+    base, job, _ = registered
+    python = base['python']
+    instruction = Path(job['instruction'])
+    extra = tmp_path / 'with_program.md'
+    extra.write_text(instruction.read_text() + '\n' + python + ' -c ' + shlex.quote('print("a\\\\b")') + ' <full_file>\n')
+    with pytest.raises(ValueError, match='not admitted as written'):
+        build_command_policy({**job, 'instruction': str(extra)}, python, tmp_path)
+
+
+def test_a_program_too_deep_to_parse_is_refused_not_a_controller_failure(registered):
+    _, _, policy = registered
+    python = policy['python']
+    for program in ('1' + '+1' * 5000, 'not ' * 5000 + 'x'):
+        verdict, basis = classify_program_command(shlex.join([python, '-c', program]), python, set(), policy)
+        assert (verdict, basis) == ('not_prescribed', 'an invalid inline Python program')
+
+
+def test_the_runtime_helpers_read_quotes_as_the_runtime_does():
+    assert _mask_quoted_braces("a '{x}' \"{y}\" {z}") == "a ' x}' \" y}\" {z}"
+    assert _raw_words("a 'b c' --o='{x,y}' \"d\"'e'") == [('a', 1), ("'b c'", 1), ("--o='{x,y}'", 2), ('"d"\'e\'', 2)]
+    assert _too_complex("x '{\"a\":1,\"b\":2}'") is None                 # one quoted piece: admitted
+    assert _too_complex("x --o='{\"a\":1,\"b\":2}'") == 'a brace pattern in an argument joined from quoted pieces'
+    assert _too_complex('x {"a"}') == 'a brace followed by a quote'
