@@ -355,48 +355,90 @@ def test_stable_output_has_no_private_paths_or_values(frozen_history):
         assert forbidden not in raw
 
 
-def legacy_control_source(raw):
-    # Exact released older bytes from the reviewed source-only delta. This
-    # fixture needs no historical Git object or private execution checkout.
+CONTROL_SHA = {
+    'legacy': 'f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e',
+    'current': 'd83919c2afbf56fa79eacee7655635cd78b61079b4f106366ea103be6ce51fdc',
+}
+
+
+def control_source(raw, version):
+    # Reconstruct either exact reviewed public version from either checkout.
+    # No Git object or external execution checkout is needed by this fixture.
+    assert version in CONTROL_SHA
+    identity = hashlib.sha256(raw).hexdigest()
+    assert identity in CONTROL_SHA.values()
+    if identity == CONTROL_SHA[version]:
+        return raw
     text = raw.decode()
     substitutions = (("#: The native runtime's refusal to overwrite a file this session has not\n#: read (#2285): observed in the first direct-arm canary on a Write of the\n#: full record, with no PreToolUse callback and no write.\nUNREAD_WRITE_MESSAGE = 'File has not been read yet. Read it first before writing to it.'\n\n\n", ''), ('    """Recognize the evidenced, unexecuted Read numeric-string rejection,\n    and the evidenced, unexecuted Write of an unread file (#2285).\n\n    For the Write, the call carries exactly `file_path` and `content` and the\n    result is exactly the runtime\'s unread-file wrapper and its plain error\n    text; the record keeps the literal, unresolved target path (#2330).\n', '    """Recognize the evidenced, unexecuted Read numeric-string rejection.\n'), ("        call.get('type') != 'tool_use' or call.get('name') not in ('Read', 'Write') or\n", "        call.get('type') != 'tool_use' or call.get('name') != 'Read' or\n"), ("    if call.get('name') == 'Write':\n        # Exactly the runtime's unread-file refusal: the Write carried its\n        # two arguments, the result is the error wrapper and the plain error\n        # text, and nothing else. The call never reached the hook, so no\n        # decision exists and no file was written (#2285).\n        if (not isinstance(payload, dict) or set(payload) != {'file_path', 'content'} or\n            not isinstance(payload['file_path'], str) or not payload['file_path'] or\n            not isinstance(payload['content'], str) or\n            result['content'] != f'<tool_use_error>{UNREAD_WRITE_MESSAGE}</tool_use_error>' or\n            result_event.get('tool_use_result') != f'Error: {UNREAD_WRITE_MESSAGE}'):\n            return None\n        return {'kind': 'input_rejected_before_callback', 'tool_use_id': call['id'],\n                'tool': 'Write', 'rejection': 'file_not_read', 'file_path': payload['file_path'],\n                'session_id': call_session,\n                'call_line': call_line, 'result_line': result_line,\n                'call_sha256': digest(call_event), 'result_sha256': digest(result_event)}\n", ''))
-    for current, historical in substitutions:
-        assert text.count(current) == 1
-        text = text.replace(current, historical, 1)
+    # Empty deletions gain a unique unchanged anchor, making reversal exact.
+    constant_anchor = 'def input_validation_rejection('
+    payload_anchor = "    payload = call.get('input')\n"
+    anchored = ((substitutions[0][0] + constant_anchor, constant_anchor),
+                *substitutions[1:3],
+                (payload_anchor + substitutions[3][0], payload_anchor))
+    for current, historical in anchored:
+        before, after = ((current, historical) if version == 'legacy'
+                         else (historical, current))
+        assert text.count(before) == 1
+        text = text.replace(before, after, 1)
     result = text.encode()
-    assert hashlib.sha256(result).hexdigest() == 'f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e'
+    assert hashlib.sha256(result).hexdigest() == CONTROL_SHA[version]
     return result
 
 
-def test_exact_legacy_source_version_is_accepted(frozen_history):
+def both_pure_versions():
+    sources = {name: (SOURCE/name).read_bytes() for name in p.SUPPORTED_SOURCES}
+    rel = 'native_controls/native_control.py'
+    raw = sources[rel]
+    return {version: p._pure_source_functions({**sources, rel: control_source(raw, version)})
+            for version in CONTROL_SHA}
+
+
+@pytest.mark.parametrize('initial', CONTROL_SHA)
+@pytest.mark.parametrize('target', CONTROL_SHA)
+def test_fixture_reconstructs_exact_versions_from_either_checkout(initial, target):
+    raw = (SOURCE/'native_controls/native_control.py').read_bytes()
+    start = control_source(raw, initial)
+    result = control_source(start, target)
+    assert hashlib.sha256(result).hexdigest() == CONTROL_SHA[target]
+    assert control_source(result, initial) == start
+
+
+def test_fixture_does_not_accept_unknown_source_bytes():
+    raw = (SOURCE/'native_controls/native_control.py').read_bytes() + b'\n# unknown\n'
+    with pytest.raises(AssertionError):
+        control_source(raw, 'legacy')
+
+
+@pytest.mark.parametrize('version', CONTROL_SHA)
+def test_exact_supported_source_version_is_accepted(frozen_history, version):
     m, reg, inv, _, _ = frozen_history
     rel = 'native_controls/native_control.py'
     path = Path(m['repository'])/'notes/matched_cborg_2026-09-13'/rel
-    path.write_bytes(legacy_control_source(path.read_bytes()))
+    path.write_bytes(control_source(path.read_bytes(), version))
     m['pinned_files'][str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
     rewrite(frozen_history)
     result = p.verify(m, reg, inv)
     assert result['zero_terminal_source_check'] is True
-    assert result['source_sha256'][rel] == 'f87a5bfe77e37a8ac2961487355b2a31d4b8a7d556fc095531e4c4056ee08a3e'
+    assert result['source_sha256'][rel] == CONTROL_SHA[version]
 
 
 def test_pure_read_recognition_and_classifier_behavior_identical(history, pure):
-    sources = {name:(SOURCE/name).read_bytes() for name in p.SUPPORTED_SOURCES}
-    sources['native_controls/native_control.py'] = legacy_control_source(sources['native_controls/native_control.py'])
-    legacy = p._pure_source_functions(sources)
+    versions = both_pure_versions()
+    legacy, current = versions['legacy'], versions['current']
     test_read_runtime_numeric_string_rejection_is_recognized_without_execution(copy.deepcopy(history), legacy)
-    test_read_runtime_numeric_string_rejection_is_recognized_without_execution(copy.deepcopy(history), pure)
+    test_read_runtime_numeric_string_rejection_is_recognized_without_execution(copy.deepcopy(history), current)
     for command in [shlex.join(history[2]['job']['validator_argv']), 'not-prescribed', 'x; y']:
         fixture = copy.deepcopy(history); add_call(fixture, pure, 'Bash', command)
-        assert report(fixture, pure) == report(fixture, legacy)
+        assert report(fixture, current) == report(fixture, legacy)
 
 
 def test_callback_free_write_is_unsupported_for_both_versions(history, pure):
-    sources = {name:(SOURCE/name).read_bytes() for name in p.SUPPORTED_SOURCES}
-    sources['native_controls/native_control.py'] = legacy_control_source(sources['native_controls/native_control.py'])
-    legacy = p._pure_source_functions(sources)
+    versions = both_pure_versions()
+    legacy, current = versions['legacy'], versions['current']
     add_call(history, pure, 'Write'); history[0].pop(3); history[1].pop()
     history[0][-1]['message']['content'][0]['is_error'] = True
-    for functions in (pure, legacy):
+    for functions in (current, legacy):
         with pytest.raises(ValueError, match='unsupported_callback_free_tool'):
             report(history, functions)
