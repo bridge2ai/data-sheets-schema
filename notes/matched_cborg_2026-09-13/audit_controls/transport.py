@@ -7,7 +7,7 @@ from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, LEGACY_UPSTREAM_READ_SE
                             POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS,
                             cborg_client, provider_context_headers)
 from .registration import (canonical_path, pinned, native_stall_policy,
-                           native_upstream_read_timeout, native_response_buffer)
+                           native_upstream_read_timeout, native_response_buffer, native_history_control)
 
 
 def transport_paths(manifest):
@@ -20,6 +20,7 @@ def transport_paths(manifest):
     native_upstream_read_timeout(manifest)
     native_stall_policy(manifest)
     native_response_buffer(manifest)
+    native_history_control(manifest)
     endpoint = manifest.get('provider_base_url')
     if endpoint not in CBORG_ENDPOINTS:
         raise BudgetStop('audit requires a documented CBORG endpoint')

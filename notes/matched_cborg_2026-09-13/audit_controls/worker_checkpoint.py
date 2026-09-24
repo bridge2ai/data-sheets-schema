@@ -375,7 +375,7 @@ def _validate(manifest, *, require_pins):
     for key in ('kind', 'protocol_version', 'render_version', 'scientific_contract_transition',
                 'audit_batch_navigation', 'model', 'native_runtime', 'profile', 'provider_base_url',
                 'provider_context_policy', 'provider_transport', 'native_stall_policy',
-                'native_upstream_read_timeout_seconds', 'native_response_buffer', 'sequence_state',
+                'native_upstream_read_timeout_seconds', 'native_response_buffer', 'native_history_control', 'sequence_state',
                 'python', 'python_identity', 'python_version'):
         _require(_same(manifest.get(key), source.get(key)), 'checkpoint changes registered scientific/runtime settings')
     _require(_same({k:v for k,v in manifest['parent'].items() if k != 'phase2_proof'},

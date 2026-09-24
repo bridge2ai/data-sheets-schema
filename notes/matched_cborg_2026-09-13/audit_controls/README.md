@@ -778,3 +778,40 @@ registered paths. A local profile copy keeps shared configuration unchanged;
 the existing vocabulary pins, original policy digest and complete context hashes
 still govern replay. This applies to inherited workers and to complete aggregate
 closure collected from later Phase4/evaluation checkouts.
+
+
+### Responsive integration control (#2420)
+
+A new batch registration may explicitly select `--native-history-control`, which
+records `native_history_control: {kind: responsive_history_v1}`. Only its
+integration child uses the version-3 pre-tool contract. Workers retain version 2;
+without the selector all existing behavior and replay identities remain unchanged.
+Generation, Phase 4 and evaluation reject this selector. A worker checkpoint must
+retain its source registration's selection; this option does not authorize reuse
+from an otherwise ineligible stopped attempt. The existing checkpoint scanner
+remains limited to version-2 histories; selecting version 3 does not expand its
+eligibility rules.
+
+The selected controller observes history serially outside the pipe service loop.
+It continues reading cancellation and deadline events and servicing queued replies
+while that verification runs. Every authorization waits for all preceding history
+to pass. The controller waits up to 120 seconds for verification; the native
+callback has a 125-second bound, and command classification retains its separate
+2-second bound. A filesystem operation may outlive that wait and remains an
+unclosed worker until it finishes or the controller process is terminated. Frame and
+queue limits stop unbounded intake. Expired or cancelled requests receive no late
+approval. File, provenance and scientific checks are unchanged.
+
+On stop, admission closes and the native process is terminated. A history worker
+that has not finished is reported explicitly as unclosed; proxy shutdown alone
+cannot establish a completed runtime or permit later closure. The worker cannot
+publish a late decision, and its condition remains unavailable for acceptance.
+The setting changes execution control only; it does not repeat a terminal source
+validator or authorize repairing a failed scientific result.
+
+`native_controls/probe_native_history.py` exercises the pinned 2.1.272 executable
+against an in-memory upstream and invented local tool. It checks a four-second
+history barrier, rejection, cancellation, the aggregate deadline and legacy
+behavior. Cancellation in one case is an explicitly injected control frame.
+The compact report contains source hashes and operational results, not runtime
+text or local paths. It is an offline control probe, not a scientific canary.

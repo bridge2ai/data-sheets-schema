@@ -25,7 +25,7 @@ from native_command_policy import command_guidance, permission_arguments, progra
 from native_command_policy import (classify_program_command, _shell_tokens, _simple_command,
                                    _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL)
 from native_readonly import lookup_command, registered_input_paths
-from native_control import NativeControl, check_control_history, load_native_events, digest as control_digest
+from native_control import NativeControl, HISTORY_CONTRACT, check_control_history, load_native_events, digest as control_digest
 from native_phase_history import PhaseHistory, phase_history
 
 
@@ -439,6 +439,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                   command_policy=None, phase_spec=None, command_classifier=None, event_observer=None):
     process = None
     control = None
+    primary_error = None
     deadline = time.monotonic() + deadline_seconds
     try:
         with ExitStack() as stack:
@@ -458,8 +459,14 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                             raise BudgetStop('native phase history: ' + '; '.join(problems))
                     if event_observer is not None:
                         event_observer(event)
+                if command_policy.get('pretool_control') == HISTORY_CONTRACT:
+                    proxy.control_shutdown = {'control_initialized': False,
+                        'control_shutdown_complete': True, 'unfinished_control_workers': 0}
                 control = NativeControl(command_policy, command_classifier or _classify_command, env.get('CLAUDE_CONFIG_DIR'),
                                         event_observer=review_event if phase_review is not None or event_observer is not None else None)
+                if control.contract == HISTORY_CONTRACT:
+                    proxy.control_shutdown = {'control_initialized': True,
+                        'control_shutdown_complete': False, 'unfinished_control_workers': None}
                 evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
             verify_launch()  # Bind the executable immediately before Popen.
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
@@ -481,6 +488,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             raise BudgetStop(proxy.failure)
         return process.returncode
     except BaseException as exc:
+        primary_error = exc
         # Record every controller-originated failure before shutdown (#2042). An
         # in-flight counter can otherwise write "admission is closed" first
         # and hide an interrupt or unexpected exception behind that symptom.
@@ -492,13 +500,38 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
         raise
     finally:
         # This runs INSIDE proxy.running(), before server/pool cleanup.
-        proxy.close_admission()
-        terminate_group(process)
-        if control:
-            try:
-                control.retain_pipe_tail(attempt/'transcript.jsonl')
-            finally:
-                control.close()
+        if control is None or control.contract != HISTORY_CONTRACT:
+            # Preserve the historical v2 cleanup ordering and exception shape.
+            proxy.close_admission()
+            terminate_group(process)
+            if control:
+                try:
+                    control.retain_pipe_tail(attempt/'transcript.jsonl')
+                finally:
+                    control.close()
+        else:
+            _close_responsive_control(proxy, process, control, attempt, primary_error)
+
+
+def _close_responsive_control(proxy, process, control, attempt, primary_error):
+    """Latch admission, reap the CLI, then retain the bounded worker snapshot."""
+    cleanup_error = None
+    actions = [proxy.close_admission, lambda: terminate_group(process),
+               lambda: control.retain_pipe_tail(attempt/'transcript.jsonl'), control.close]
+    for action in actions:
+        try:
+            action()
+        except BaseException as error:
+            if cleanup_error is None:
+                cleanup_error = error
+    # close() freezes these values even when its bounded join fails. A
+    # non-daemon worker may remain alive; proxy closure is not controller closure.
+    proxy.control_shutdown = {
+        'control_initialized': True,
+        'control_shutdown_complete': control.control_shutdown_complete,
+        'unfinished_control_workers': control.unfinished_control_workers}
+    if primary_error is None and cleanup_error is not None:
+        raise cleanup_error
 
 
 def main():

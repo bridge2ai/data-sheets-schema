@@ -588,6 +588,7 @@ def validate_registration(path):
     native_api_force_idle_timeout(manifest)
     native_stall_policy(manifest)
     native_response_buffer(manifest)
+    native_history_control(manifest)
     budget = manifest['budget']
     previous = read_json(budget['continuation']['checkpoint'])
     costs = [Decimal(str(row.get('cost_usd', 'NaN'))) for row in previous['requests']]
@@ -715,6 +716,19 @@ def native_stall_policy(manifest):
         if native_api_force_idle_timeout(manifest) is not False:
             raise BudgetStop('stall debits need the native fetch idle timer registered off')
     return {'count_attempts': value['count_attempts'], 'max_stall_debits': value['max_stall_debits']}
+
+
+def native_history_control(manifest):
+    """Explicit responsive control for batch integration; historical workers stay v2."""
+    key = 'native_history_control'
+    if key not in manifest:
+        return None
+    value = manifest[key]
+    if (manifest.get('kind') != 'd4d_native_audit_continuation' or
+            'audit_batches' not in manifest or type(value) is not dict or
+            value != {'kind': 'responsive_history_v1'}):
+        raise BudgetStop('native history control is audit-batch-only: responsive_history_v1')
+    return dict(value)
 
 
 def native_response_buffer(manifest):
