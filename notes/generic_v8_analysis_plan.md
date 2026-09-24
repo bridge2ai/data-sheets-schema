@@ -2994,9 +2994,11 @@ as above.
 #2369 was found by the independent review of the second direct CHORUS
 registration. #2350 was filed from the review of PR #2327; that registration
 review confirmed it applies and found the playbook checklist contradicting
-it. The second direct canary and its retry were launched on 2026-09-24 under
-the code before this change, at a75bb2a91; their registrations pin the
-earlier bytes and are not affected.
+it. The second direct canary and its retry ran on 2026-09-24 under the code
+before this change, at a75bb2a91; their registrations pin the earlier bytes
+and are not affected. Neither reached its recorder line: the first stopped
+on a network failure while the machine slept, the retry at its terminal
+evidence check (#2427).
 
 **Native controller (both Claude Code arms).**
 `native_controls/native_command_policy.py` `9353027a…` → `98e2d679…` is
@@ -3057,11 +3059,9 @@ destination writes one, any other run only under a receipt condition. For
 every registration on disk the answer is unchanged. The recorder takes it
 from a registered specification, as it takes the effort, so native and
 direct records made after this read `receipt_expected: true` and the canary
-gate applies their receipt floors. No record is rewritten. The second direct
-canary's retry, made under the earlier code, is the first record written
-through `--render-spec-json` if it reaches its recorder line: its
-`inputs.receipt_expected` reads false, while the launcher's receipt block
-computes `expected: true` from its condition.
+gate applies their receipt floors. No record is rewritten, and none has been
+written through `--render-spec-json`: neither 2026-09-24 attempt reached its
+recorder line.
 
 **Playbook.** `.claude/commands/d4d-full-core.md` `5e7abd16…` → `669d3f53…`.
 Commands run spelled as registered: a CLI command on one line, an inline
