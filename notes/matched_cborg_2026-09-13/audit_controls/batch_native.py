@@ -177,23 +177,16 @@ def _checkpoint_profile(manifest, original):
     profile = profile_named(original['profile'])
     if profile.vocabulary_pin is None:
         return profile
-    # Historical closure may be verified from a third checkout (Phase 4/eval).
-    # Derive the declared resource without consulting the ambient cwd resolver.
-    if profile.tracks_digest_pin:
-        from data_sheets_schema import schema_digest
-        pin = Path(schema_digest.VOCABULARY_PIN)
-    else:
-        pin = Path(profile.vocabulary_pin)
+    from .registration import registered_profile
     try:
+        if manifest['profile'] != original['profile']:
+            raise BudgetStop('checkpoint profile vocabulary authority changed')
+        current_pin = registered_profile(manifest).pin_path
         current_root = Path(manifest['repository'])
         original_root = Path(original['repository'])
-        if '..' in pin.parts:
-            raise BudgetStop('checkpoint profile vocabulary authority is not canonical')
-        current_pin = pin if pin.is_absolute() else current_root / pin
         original_pin = original_root / current_pin.relative_to(current_root)
         expected = original['pinned_files'].get(str(original_pin))
-        if (manifest['profile'] != original['profile']
-                or any(not p.is_absolute() or p.resolve() != p
+        if (any(not p.is_absolute() or p.resolve() != p
                        for p in (current_root, original_root, current_pin, original_pin))
                 or not expected
                 or manifest['pinned_files'].get(str(original_pin)) != expected
@@ -201,7 +194,7 @@ def _checkpoint_profile(manifest, original):
                 or any(hashlib.sha256(read_regular(p, output.MAX_DOCUMENT)).hexdigest() != expected
                        for p in (original_pin, current_pin))):
             raise BudgetStop('checkpoint profile vocabulary authority changed')
-    except (KeyError, ValueError, OSError) as exc:
+    except (BudgetStop, KeyError, ValueError, OSError) as exc:
         raise BudgetStop('checkpoint profile vocabulary authority is unavailable') from exc
     return replace(profile, vocabulary_pin=original_pin, tracks_digest_pin=False)
 
@@ -222,8 +215,9 @@ def verify_checkpoint_context(manifest, source):
     system = child_system(original, 'integration').encode('utf-8')
     if hashlib.sha256(system).hexdigest() != original['pinned_files'].get(row['system_prompt']):
         raise BudgetStop('checkpoint changes the original integration system duties')
+    profile = _checkpoint_profile(manifest, original)
     index, artifacts, _, _, args = integration_material(original)
-    args['profile'] = _checkpoint_profile(manifest, original)
+    args['profile'] = profile
     instruction = audit_batch_context.render_integration_context(**args, worker_index=index,
         worker_artifacts=output.worker_artifacts(original), row_artifacts=artifacts,
         audit_batch_navigation=audit_batch_navigation(original)).encode('utf-8')

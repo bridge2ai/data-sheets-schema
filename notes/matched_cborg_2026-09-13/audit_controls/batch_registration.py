@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 import json
 from pathlib import Path
 
-from .registration import BudgetStop, canonical_path, parent_job, read_json, sha
+from .registration import BudgetStop, canonical_path, parent_job, read_json, registered_profile, sha
 
 KIND = 'fresh_context_integrated_v1'
 LIMITS = {'max_paths': 96, 'max_inventory_bytes': 16384, 'max_workers': 16}
@@ -56,7 +56,7 @@ def scientific_arguments(manifest):
     if not isinstance(job.get('project'), str) or not job['project'].strip():
         raise BudgetStop('batch scientific context requires the inherited project')
     return {'inputs': {key: Path(value) for key, value in manifest['inputs'].items()},
-            'profile': manifest['profile'], 'project': job['project'], 'plan': plan(manifest)}
+            'profile': registered_profile(manifest), 'project': job['project'], 'plan': plan(manifest)}
 
 
 def child_system(manifest, child_id):
