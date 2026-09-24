@@ -16,7 +16,7 @@ from types import SimpleNamespace
 import pytest
 
 from budgeted_cborg import BudgetStop
-from data_sheets_schema import audit_batches, audit_batch_context
+from data_sheets_schema import audit_batches, audit_batch_context, profiles
 from . import batch_native as runtime, batch_output as output, batch_registration
 from .test_batch_runtime import batch
 from tests.test_audit_batch_context import staged, proposals as context_proposals
@@ -95,6 +95,161 @@ def forbid_old_integration_reads(monkeypatch, fixture):
     for module, name in ((builtins, 'open'), (io, 'open'), (os, 'open')):
         monkeypatch.setattr(module, name, protect(getattr(module, name)))
     return opened
+
+
+@pytest.fixture
+def vocabulary_checkpoint(context_checkpoint, tmp_path, monkeypatch):
+    """Two real resource-resolver checkouts with equal, invented vocabularies."""
+    fixture = context_checkpoint
+    roots = [tmp_path / name for name in ('original-checkout', 'current-checkout')]
+    relative_pin = Path('src/data_sheets_schema/b2ai_registry_vocabularies.yaml')
+    raw = b'vocabularies: {}\n# Identical synthetic profile resource in both checkouts.\n'
+    for root in roots:
+        pin = root / relative_pin
+        pin.parent.mkdir(parents=True)
+        pin.write_bytes(raw)
+        (root / 'pyproject.toml').write_text('[project]\nname = "data-sheets-schema"\n')
+    old_root, new_root = roots
+    old_pin, new_pin = [root / relative_pin for root in roots]
+    fixture.original.update(repository=str(old_root), profile='bridge2ai')
+    fixture.original['pinned_files'][str(old_pin)] = digest(raw)
+    fixture.current.update(repository=str(new_root), profile='bridge2ai')
+    fixture.current['pinned_files'].update({str(old_pin): digest(raw), str(new_pin): digest(raw)})
+    monkeypatch.chdir(old_root)
+    assert profiles.BRIDGE2AI.pin_path.absolute() == old_pin
+    fixture.system = batch_registration.child_system(fixture.original, 'integration').encode()
+    fixture.original['pinned_files'][fixture.row['system_prompt']] = digest(fixture.system)
+    index, artifacts, _, _, args = runtime.integration_material(fixture.original)
+    fixture.instruction = audit_batch_context.render_integration_context(**args,
+        worker_index=index, worker_artifacts=output.worker_artifacts(fixture.original),
+        row_artifacts=artifacts, audit_batch_navigation='explicit_child_reads_v1').encode()
+    fixture.current['pinned_files'][fixture.row['instruction']] = digest(fixture.instruction)
+    monkeypatch.chdir(new_root)
+    assert profiles.BRIDGE2AI.pin_path.absolute() == new_pin
+    fixture.old_pin, fixture.new_pin = old_pin, new_pin
+    return fixture
+
+
+def test_cross_checkout_vocabulary_preserves_original_locator_and_hash(
+        vocabulary_checkpoint, monkeypatch):
+    fixture = vocabulary_checkpoint
+    original_profile = profiles.BRIDGE2AI
+    original_cwd = Path.cwd()
+    index, artifacts, _, _, args = runtime.integration_material(fixture.original)
+    # The unfixed named-profile replay really differs, despite identical bytes:
+    # this exercises the resource resolver rather than mocking its selected path.
+    plain = audit_batch_context.render_integration_context(**args, worker_index=index,
+        worker_artifacts=output.worker_artifacts(fixture.original), row_artifacts=artifacts,
+        audit_batch_navigation='explicit_child_reads_v1').encode()
+    assert digest(plain) != digest(fixture.instruction)
+    old_context = json.loads(fixture.instruction.split(b'\n', 1)[0])
+    current_context = json.loads(plain.split(b'\n', 1)[0])
+    old_authority = old_context['profile_vocabulary_authority']
+    new_authority = current_context['profile_vocabulary_authority']
+    assert old_authority == {**new_authority, 'path': str(fixture.old_pin)}
+    assert old_authority['path'] != new_authority['path']
+    opened = forbid_old_integration_reads(monkeypatch, fixture)
+    def forbidden_chdir(*args):
+        pytest.fail('reconstruction must not change process working directory')
+    monkeypatch.setattr(os, 'chdir', forbidden_chdir)
+    assert runtime.verify_checkpoint_context(fixture.current, fixture.source) is None
+    assert Path.cwd() == original_cwd
+    assert profiles.BRIDGE2AI is original_profile
+    assert original_profile.tracks_digest_pin is True
+    assert original_profile.pin_path.absolute() == fixture.new_pin
+    assert fixture.old_pin in opened and fixture.new_pin in opened
+    rebound = runtime._checkpoint_profile(fixture.current, fixture.original)
+    assert rebound.pin_path == fixture.old_pin and not rebound.tracks_digest_pin
+    assert vars(rebound) == {**vars(original_profile),
+                            'vocabulary_pin': fixture.old_pin, 'tracks_digest_pin': False}
+
+
+def test_historical_context_reconstruction_ignores_third_checkout_vocabulary(
+        vocabulary_checkpoint, tmp_path, monkeypatch):
+    fixture = vocabulary_checkpoint
+    third_root = tmp_path / 'later-evaluation-checkout'
+    third_pin = third_root / 'src/data_sheets_schema/b2ai_registry_vocabularies.yaml'
+    third_pin.parent.mkdir(parents=True)
+    third_pin.write_bytes(b'vocabularies: {}\n# Unrelated later checkout resource.\n')
+    (third_root / 'pyproject.toml').write_text('[project]\nname = "data-sheets-schema"\n')
+    monkeypatch.chdir(third_root)
+    assert profiles.BRIDGE2AI.pin_path.absolute() == third_pin
+    opened = forbid_old_integration_reads(monkeypatch, fixture)
+    def forbidden_chdir(*args):
+        pytest.fail('historical reconstruction must not change process cwd')
+    monkeypatch.setattr(os, 'chdir', forbidden_chdir)
+    assert runtime.verify_checkpoint_context(fixture.current, fixture.source) is None
+    assert fixture.old_pin in opened and fixture.new_pin in opened
+    assert third_pin not in opened
+    assert Path.cwd() == third_root
+
+
+@pytest.mark.parametrize('override', ['registered_absolute', 'outside_absolute', 'relative_escape'])
+def test_declared_vocabulary_overrides_require_exact_registered_mapping(
+        vocabulary_checkpoint, tmp_path, monkeypatch, override):
+    from data_sheets_schema import schema_digest
+    fixture = vocabulary_checkpoint
+    value = (fixture.new_pin if override == 'registered_absolute' else
+             tmp_path / 'outside-vocabulary.yaml' if override == 'outside_absolute' else
+             Path('../current-checkout/src/data_sheets_schema/b2ai_registry_vocabularies.yaml'))
+    monkeypatch.setattr(schema_digest, 'VOCABULARY_PIN', value)
+    forbid_old_integration_reads(monkeypatch, fixture)
+    if override == 'registered_absolute':
+        assert runtime.verify_checkpoint_context(fixture.current, fixture.source) is None
+    else:
+        with pytest.raises(BudgetStop, match='vocabulary authority'):
+            runtime.verify_checkpoint_context(fixture.current, fixture.source)
+
+
+@pytest.mark.parametrize('damage', ['old_bytes', 'new_bytes', 'both_bytes_repinned',
+    'old_pin_missing', 'current_old_pin_missing', 'current_new_pin_missing',
+    'different_pins', 'unmapped_current_repository', 'different_profile'])
+def test_cross_checkout_vocabulary_authority_changes_refuse(
+        vocabulary_checkpoint, monkeypatch, damage):
+    fixture = vocabulary_checkpoint
+    if damage in ('old_bytes', 'new_bytes'):
+        path = fixture.old_pin if damage == 'old_bytes' else fixture.new_pin
+        path.write_bytes(b'vocabularies: {}\n# Altered vocabulary bytes.\n')
+    elif damage == 'both_bytes_repinned':
+        raw = b'vocabularies: {}\n# Both copies changed, but frozen context did not.\n'
+        for path in (fixture.old_pin, fixture.new_pin):
+            path.write_bytes(raw)
+            fixture.current['pinned_files'][str(path)] = digest(raw)
+        fixture.original['pinned_files'][str(fixture.old_pin)] = digest(raw)
+    elif damage == 'old_pin_missing':
+        del fixture.original['pinned_files'][str(fixture.old_pin)]
+    elif damage == 'current_old_pin_missing':
+        del fixture.current['pinned_files'][str(fixture.old_pin)]
+    elif damage == 'current_new_pin_missing':
+        del fixture.current['pinned_files'][str(fixture.new_pin)]
+    elif damage == 'different_pins':
+        fixture.current['pinned_files'][str(fixture.new_pin)] = '0' * 64
+    elif damage == 'unmapped_current_repository':
+        fixture.current['repository'] = str(fixture.old_pin.parent)
+    else:
+        fixture.current['profile'] = 'neutral'
+    forbid_old_integration_reads(monkeypatch, fixture)
+    with pytest.raises(BudgetStop, match='vocabulary authority|scientific context'):
+        runtime.verify_checkpoint_context(fixture.current, fixture.source)
+
+
+@pytest.mark.parametrize('template', ['persistent_system', 'scientific_context'])
+def test_cross_checkout_vocabulary_does_not_mask_template_drift(
+        vocabulary_checkpoint, monkeypatch, template):
+    fixture = vocabulary_checkpoint
+    module, name = ((batch_registration, 'child_system') if template == 'persistent_system'
+                   else (audit_batch_context, 'render_integration_context'))
+    render = getattr(module, name)
+    monkeypatch.setattr(module, name, lambda *args, **kwargs:
+        render(*args, **kwargs) + '\nChanged synthetic duty.\n')
+    forbid_old_integration_reads(monkeypatch, fixture)
+    with pytest.raises(BudgetStop, match='original integration'):
+        runtime.verify_checkpoint_context(fixture.current, fixture.source)
+
+
+def test_neutral_profile_reconstruction_needs_no_vocabulary_pin(context_checkpoint):
+    fixture = context_checkpoint
+    assert runtime._checkpoint_profile(fixture.current, fixture.original) is profiles.NEUTRAL
 
 
 def test_exact_original_locator_context_reconstructs_without_old_body_reads(
