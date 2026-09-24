@@ -22,6 +22,9 @@ Independent accounting and scientific/runtime reviews identified and resolved:
   repository before creating a preparation destination.
 - #2389: retain immutable historical evidence pins while allowing a later
   finalization/evaluation checkout to pin its own verifier implementation.
+- #2391: size the new integration's actual static inputs in the offline plan,
+  with the complete inherited worker count and preserved historical charges.
+  The controller wrapper is not a model input or a workload cost estimate.
 
 Regression coverage includes real worker closure replay, identical scientific
 assembly bytes, original-locator prompt equivalence, complete source and finding
