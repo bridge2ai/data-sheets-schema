@@ -16,6 +16,10 @@ from budgeted_cborg import BudgetStop
 KEY = 'budget_amendment'
 KIND = 'additive_sequence_budget_v1'
 SECOND_KIND = 'additive_sequence_budget_v2'
+#: One further increase after any earlier ones, each link naming its
+#: predecessor proof (#2468). v1 and v2 proofs validate exactly as before.
+CHAIN_KIND = 'additive_sequence_budget_chain_v1'
+CHAIN_RECEIPT_VERSION = 3
 REFS = ('origin_registration', 'predecessor_registration', 'predecessor_ledger',
         'predecessor_owner', 'authorization')
 AMOUNTS = ('prior_total_usd', 'increase_usd', 'total_usd', 'default_attempt_usd')
@@ -54,6 +58,8 @@ def selection(value):
     """Validate the exact optional descriptor without reading its documents."""
     if type(value) is dict and value.get('kind') == SECOND_KIND:
         return _second_selection(value)
+    if type(value) is dict and value.get('kind') == CHAIN_KIND:
+        return _chain_selection(value)
     _require(type(value) is dict and set(value) == {'kind', *REFS, *AMOUNTS}
              and value['kind'] == KIND, 'unsupported budget amendment selection')
     for key in REFS:
@@ -77,6 +83,8 @@ def paths(manifest):
     proof = selection(manifest[KEY])
     if proof['kind'] == SECOND_KIND:
         return {Path(__file__).resolve(), *(Path(path) for path in _second_refs(proof))}
+    if proof['kind'] == CHAIN_KIND:
+        return {Path(__file__).resolve(), *(Path(path) for path in _chain_refs(proof))}
     return {Path(__file__).resolve(), *(_path(proof[key]['path']) for key in REFS)}
 
 
@@ -132,6 +140,8 @@ def _proof_documents(value):
     proof = selection(value)
     if proof['kind'] == SECOND_KIND:
         return _second_documents(proof)
+    if proof['kind'] == CHAIN_KIND:
+        return _increase_documents(proof, 'chained', CHAIN_RECEIPT_VERSION)
     documents = {key: _read(proof[key]) for key in REFS}
     origin, previous, ledger, owner, authority = (documents[key] for key in REFS)
     old, new, default = (_money(proof[key]) for key in ('prior_total_usd', 'total_usd', 'default_attempt_usd'))
@@ -192,6 +202,9 @@ def _manifest_proof(manifest, *, require_pins):
                  'budget amendment authority is unpinned')
         if proof['kind'] == SECOND_KIND:
             _require(all(pins.get(path) == identity for path, identity in _second_refs(proof).items()),
+                     'prior budget amendment authority is unpinned')
+        if proof['kind'] == CHAIN_KIND:
+            _require(all(pins.get(path) == identity for path, identity in _chain_refs(proof).items()),
                      'prior budget amendment authority is unpinned')
     origin = proof['origin_registration']
     if 'budget_sequence' in manifest:
@@ -307,6 +320,13 @@ def _second_documents(proof):
     stay unchanged. The caller still owns live-owner freshness and claims;
     this read-only proof never grants any per-attempt exception.
     """
+    return _increase_documents(proof, 'second', 2)
+
+
+def _increase_documents(proof, name, receipt_version):
+    """The documents of one increase after an earlier proof: v2 after v1, or a
+    chained link after any proof (#2468). Only the receipt version and the
+    wording of refusals differ."""
     prior, prior_documents = _proof(proof['prior_amendment'])
     documents = {key: _read(proof[key]) for key in REFS}
     origin, previous, ledger, owner, authority = (documents[key] for key in REFS)
@@ -314,7 +334,7 @@ def _second_documents(proof):
     _require(_canonical(origin) == _canonical(prior_documents['origin_registration'])
              and KEY not in origin and previous.get('kind') == 'd4d_native_audit_continuation'
              and _canonical(previous.get(KEY)) == _canonical(prior),
-             'second amendment changes its original allocation or exact prior authority')
+             f'{name} amendment changes its original allocation or exact prior authority')
     _require(_money(previous['budget']['additional_usd']) == old
              and _money(ledger['additional_cap_usd']) == old
              and all(_money(x) == default for x in (origin['budget']['per_attempt_usd'],
@@ -324,11 +344,11 @@ def _second_documents(proof):
              and type(previous['budget'].get('prices_per_token')) is dict
              and _canonical(previous['budget'].get('prices_per_token')) ==
                  _canonical(origin['budget'].get('prices_per_token')),
-             'second amendment changes historical caps or prices')
+             f'{name} amendment changes historical caps or prices')
     _require(previous.get('parent', {}).get('registration') == proof['origin_registration']['path']
              and previous['budget']['ledger_path'] == proof['predecessor_ledger']['path']
              and ledger.get('manifest_sha256') == proof['predecessor_registration']['sha256'],
-             'second amendment does not name its exact immediate ledger')
+             f'{name} amendment does not name its exact immediate ledger')
     _require(proof['predecessor_owner']['path'] != previous.get('sequence_state'),
              'amendment requires an immutable owner snapshot, not the live owner')
     expected_owner = {'schema_version': 1,
@@ -337,22 +357,22 @@ def _second_documents(proof):
         'source_registration_sha256': proof['origin_registration']['sha256'],
         'parent_checkpoint_sha256': previous['budget']['continuation']['sha256']}
     _require(_canonical(owner) == _canonical(expected_owner),
-             'second amendment owner is not its consumed immediate predecessor')
+             f'{name} amendment owner is not its consumed immediate predecessor')
     _checkpoint(prior, prior_documents, ledger, proof['predecessor_ledger']['sha256'])
     rows, cost = _settled(ledger)
-    _require(type(authority.get('schema_version')) is int and authority['schema_version'] == 2
+    _require(type(authority.get('schema_version')) is int and authority['schema_version'] == receipt_version
              and authority.get('kind') == 'audit_sequence_additional_budget_authorization_receipt',
-             'unsupported second amendment authorization receipt')
+             f'unsupported {name} amendment authorization receipt')
     expected_authorization = {'additional_budget_authorized': True, 'currency': 'USD',
         'user_quote': proof['authorization_quote'], 'prior_shared_cap_usd': proof['prior_total_usd'],
         'additional_authorized_usd': proof['increase_usd'], 'new_shared_cap_usd': proof['total_usd']}
     _require(_canonical(authority.get('authorization')) == _canonical(expected_authorization),
-             'second amendment lacks exact quoted budget authorization')
+             f'{name} amendment lacks exact quoted budget authorization')
     expected_lineage = {'origin_registration': proof['origin_registration'],
         'prior_amendment_sha256': hashlib.sha256(_canonical(prior)).hexdigest(),
         'original_shared_cap_usd': str(_money(origin['budget']['additional_usd']))}
     _require(_canonical(authority.get('lineage')) == _canonical(expected_lineage),
-             'second authorization changes the immutable prior amendment')
+             f'{name} authorization changes the immutable prior amendment')
     expected_predecessor = {'registration_path': proof['predecessor_registration']['path'],
         'registration_sha256': proof['predecessor_registration']['sha256'],
         'ledger_path': proof['predecessor_ledger']['path'], 'ledger_sha256': proof['predecessor_ledger']['sha256'],
@@ -360,5 +380,54 @@ def _second_documents(proof):
         'registered_predecessor_shared_cap_usd': proof['prior_total_usd'],
         'sequence_settled_rows': len(rows), 'sequence_accounted_usd': str(cost)}
     _require(_canonical(authority.get('predecessor')) == _canonical(expected_predecessor),
-             'second authorization names another full accounting checkpoint')
+             f'{name} authorization names another full accounting checkpoint')
     return proof, documents
+
+
+def _chain_selection(value):
+    """Select one increase after any number of earlier ones (#2468).
+
+    The prior proof may be v1, v2 or another chained link, and is validated
+    recursively. Each link is one quoted authorization; the new cap is its
+    prior's total plus this increase, never an amount to add again.
+    """
+    _require(set(value) == {'kind', *REFS, *AMOUNTS, 'prior_amendment', 'authorization_quote'},
+             'unsupported chained budget amendment selection')
+    prior = selection(value['prior_amendment'])
+    base = {key: value[key] for key in ('kind', *REFS, *AMOUNTS)}
+    base['kind'] = KIND
+    selection(base)
+    _require(type(value['authorization_quote']) is str and bool(value['authorization_quote'].strip()),
+             'chained amendment quote must be exact nonblank text')
+    _require(_canonical(value['origin_registration']) == _canonical(prior['origin_registration'])
+             and _money(value['default_attempt_usd']) == _money(prior['default_attempt_usd'])
+             and _money(value['prior_total_usd']) == _money(prior['total_usd']),
+             'chained amendment changes origin, prior allocation or default cap')
+    _chain_refs(value)
+    return deepcopy(value)
+
+
+def _links(proof):
+    """Every proof in the chain, oldest first."""
+    links = [proof]
+    while links[-1]['kind'] != KIND:
+        links.append(links[-1]['prior_amendment'])
+    return links[::-1]
+
+
+def _chain_refs(proof):
+    """Every document the chain names. Only the origin is shared; no later
+    link reuses an earlier link's path or the identity of its authority,
+    predecessor, ledger or owner."""
+    references, identities = {}, set()
+    for link in _links(proof):
+        for key in REFS:
+            ref = link[key]
+            _require(ref['path'] not in references or
+                     (key == 'origin_registration' and references[ref['path']] == ref['sha256']),
+                     'chained amendment reuses or conflicts with earlier evidence')
+            references[ref['path']] = ref['sha256']
+        current = {link[key]['sha256'] for key in REFS[1:]}
+        _require(not current & identities, 'chained amendment reuses earlier authority or predecessor identity')
+        identities |= current
+    return references

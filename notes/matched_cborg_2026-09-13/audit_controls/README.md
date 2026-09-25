@@ -615,6 +615,26 @@ It does not replace or modify the earlier proof. Only the exact authorized
 checkpoint can first enter the new absolute ceiling; same-cap audit, Phase 4
 and evaluation descendants inherit the same proof without another increase.
 
+`additive_sequence_budget_chain_v1` (#2468) supports any number of later
+increases. Each link has v2's fields: the five references, the amounts and an
+exact `authorization_quote`. Its `prior_amendment` may be any valid proof: the
+v1, the v2 or an earlier link. The prior proof is validated recursively, and
+the new link's prior allocation must equal that prior proof's total. Only the
+origin registration may be shared across links. No link reuses an earlier
+link's path, or the identity of its authorization, predecessor, ledger or
+owner. Every reference of every link must be pinned.
+
+The documents are checked by the same routine as v2's, with a schema-3
+receipt:
+- the immediate predecessor carries the prior proof exactly;
+- its full settled ledger preserves that proof's historical prefix;
+- its immutable owner snapshot is the consumed one;
+- the receipt binds the quote, the original allocation, the prior proof's
+  digest and the predecessor's full accounting.
+
+v1 and v2 proofs validate exactly as before, and a v2 still takes only a v1.
+Each further increase is data, a new link, with no code change.
+
 An increased shared ceiling does not authorize a larger per-stage attempt.
 Each launch must retain its separately approved cap and scientific scope.
 The original generation cap, default attempt cap, prices and ownership rules
