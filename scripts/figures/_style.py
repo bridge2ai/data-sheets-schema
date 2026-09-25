@@ -77,8 +77,32 @@ def footer(fig, basis: str) -> None:
              fontsize=6.5, color=INK["muted"], ha="left", va="bottom")
 
 
+BARE = OUT / "bare"
+BARE_MAX_MEGAPIXELS = 20.0            # Google Docs refuses inline images above 25 MP
+BARE_MAX_DPI = 300
+
+
+def save_bare(fig, stem: str) -> None:
+    """Title-free, footer-free SVG and PNG for embedding in a document whose legend
+    carries the title and record set. Called before the footer is drawn."""
+    BARE.mkdir(parents=True, exist_ok=True)
+    sup = getattr(fig, "_suptitle", None)
+    visible = sup.get_visible() if sup is not None else None
+    if sup is not None:
+        sup.set_visible(False)
+    try:
+        fig.savefig(BARE / f"{stem}.svg", format="svg", bbox_inches="tight", pad_inches=0.1)
+        w, h = fig.get_size_inches()
+        dpi = int(min(BARE_MAX_DPI, (BARE_MAX_MEGAPIXELS * 1e6 / (w * h)) ** 0.5))
+        fig.savefig(BARE / f"{stem}.png", format="png", dpi=dpi, bbox_inches="tight", pad_inches=0.1)
+    finally:
+        if sup is not None:
+            sup.set_visible(visible)
+
+
 def save(fig, stem: str, tables: dict[str, list[dict]] | None = None, basis: str = "") -> Path:
     OUT.mkdir(parents=True, exist_ok=True)
+    save_bare(fig, stem)
     if basis:
         footer(fig, basis)
     svg = OUT / f"{stem}.svg"
