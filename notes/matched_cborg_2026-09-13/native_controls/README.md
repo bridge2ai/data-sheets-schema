@@ -157,6 +157,79 @@ output directory for each run. Scientific acceptance still inspects actual
 successful calls, read targets and denied calls; a permission grant alone
 does not establish instruction adherence (#2049).
 
+## Transport probe, 2026-09-25
+
+Audit27's ninth worker request returned HTTP 500 seven times, at 272 to 277
+seconds. CBORG's catalogue lists `stream_timeout: 270` for the Opus 5 routes.
+Hidden thinking can delay a response's first byte past that. Claude Code
+2.1.272 accepts `--thinking-display summarized`, which asks for streamed
+thinking summaries. `transport_probe.py` (#2463) tests whether that setting
+gets such a response through.
+
+The probe resends one retained request once. It uses the source
+registration's provider transport through the registered native proxy, and
+refuses to run if those modules differ from the source's pins. The only
+change is `thinking.display`. It keeps its own stall policy: three count
+attempts and one debit. It records:
+- when the response headers, first chunk, first thinking text and last
+  byte arrived;
+- per-event arrival times;
+- named CBORG diagnostic headers;
+- the accounting.
+
+`result.json` keeps no request, response or thinking text. The proxy's
+evidence folders under `attempt/requests/` keep the full request and
+response, including any thinking summaries, as every native attempt does.
+Header times include the bounded worker's start and upload. It is one
+sample with no control, and the replayed history's thinking blocks were
+produced with thinking omitted.
+
+The probe is a link in the lineage:
+- **Registration.** It has an audit continuation's budget block and
+  carries the tip's budget amendment. The audit's own validators check its
+  predecessor: `validate_audit_reconciliation` for a reconciled checkpoint,
+  and `validate_predecessor` for the amendment.
+- **Before the tip moves.** Holding the sequence lock, it does all free work
+  first: the clients, the proxy, free counts of the retained request and of
+  the probe request, and the import of the checkpoint into its own ledger. The retained request is
+  counted first as a control. A 400, 413 or 422 on the probe's count, when
+  the control counted, is recorded as the finding `count_refused`, and
+  nothing is claimed or spent. A failure before the ledger import writes
+  nothing and leaves the probe runnable. From the import on, the
+  registration is consumed, and the tip moves only with the claim.
+- **The paid request.** It then takes the tip with a durable sequence
+  claim, continues the checkpoint and admits the one request. It never
+  resends.
+- **Settlement.** A 5xx is counted at its whole reservation. A row left
+  pending is settled at its whole reservation in `reconciled_billing.json`
+  with a `debit_receipt.json`, under the maintainer's standing
+  authorization. This happens only once the proxy has closed with no
+  handler running. Otherwise `transport_probe.py settle` applies it once no
+  handler can write: the proxy froze, or the process recorded in
+  `result.json` has exited. The receipt keeps the observed runtime and
+  names that inference. The ledger is left as written.
+- **`result.json`.** Once the tip is claimed, it is written whatever
+  happens, including after an interrupt, and also for a failed claim. It,
+  or `settlement_after_exit.json` when `settle` ran, names the settled
+  checkpoint the next registration continues from. An audit prepared from the earlier tip fails at its
+  sequence guard. Audits accept a probe predecessor only after #2469.
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls \
+  python notes/matched_cborg_2026-09-13/native_controls/transport_probe.py prepare \
+  --out DIR --source-registration R --source-request REQUEST_DIR --tip-checkpoint C \
+  --tip-reconciliation-receipt RECEIPT --sequence-state S --origin-registration O --authorization A
+# review DIR/registration.json, then, with CBORG_API_KEY set and the same interpreter:
+... transport_probe.py run --registration DIR/registration.json --sha256 HEX
+# only if result.json defers settlement to a person, after the run has exited:
+... transport_probe.py settle --registration DIR/registration.json --sha256 HEX
+```
+
+Point `--out` at an ignored private location. The directory keeps the
+request and response. The registration pins every file audit27 pinned, and
+many of those live under `/private/tmp`. A reboot between `prepare` and
+`run` therefore needs a fresh preparation.
+
 ## Command policy 6, 2026-09-25
 
 Two kinds of call used to end a run with no record. Policy 6 has the
