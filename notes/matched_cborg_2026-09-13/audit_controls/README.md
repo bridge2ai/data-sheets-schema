@@ -599,6 +599,28 @@ increase from the original allocation. Another increase would require a
 separately reviewed protocol. Proof files are pinned controller evidence and
 are not added to scientific model inputs.
 
+`additive_sequence_budget_v2` (#2426) explicitly supports a second increase.
+Its `prior_amendment` embeds the complete original v1 descriptor, including its
+unchanged authorization and predecessor references. A v2 predecessor proof is
+refused, so this does not enable a third increase or an arbitrary chain. All
+references at both levels must be pinned. The immediate audit predecessor must
+carry that exact v1 proof, and its complete settled ledger must preserve the
+v1 historical prefix, including the types and unknown-fee flags of each row.
+
+The second proof retains the five references and amount strings above and adds
+an exact `authorization_quote`. Its schema-2 authorization receipt binds that
+quote, the original allocation and registration, the digest of the prior v1
+descriptor, and the immediate predecessor's immutable owner and full accounting.
+It does not replace or modify the earlier proof. Only the exact authorized
+checkpoint can first enter the new absolute ceiling; same-cap audit, Phase 4
+and evaluation descendants inherit the same proof without another increase.
+
+An increased shared ceiling does not authorize a larger per-stage attempt.
+Each launch must retain its separately approved cap and scientific scope.
+The original generation cap, default attempt cap, prices and ownership rules
+are unchanged. Preparing a financial proof neither claims the sequence nor
+contacts a provider.
+
 For batch audits with an amendment, the offline plan also states the worker,
 attempt and shared ceilings, remaining shared allocation, minimum integration
 allowance and maximum stall-debit count. These are admission limits, not a
