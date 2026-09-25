@@ -15,6 +15,7 @@ from budgeted_cborg import BudgetStop
 
 KEY = 'budget_amendment'
 KIND = 'additive_sequence_budget_v1'
+SECOND_KIND = 'additive_sequence_budget_v2'
 REFS = ('origin_registration', 'predecessor_registration', 'predecessor_ledger',
         'predecessor_owner', 'authorization')
 AMOUNTS = ('prior_total_usd', 'increase_usd', 'total_usd', 'default_attempt_usd')
@@ -51,6 +52,8 @@ def _path(value):
 
 def selection(value):
     """Validate the exact optional descriptor without reading its documents."""
+    if type(value) is dict and value.get('kind') == SECOND_KIND:
+        return _second_selection(value)
     _require(type(value) is dict and set(value) == {'kind', *REFS, *AMOUNTS}
              and value['kind'] == KIND, 'unsupported budget amendment selection')
     for key in REFS:
@@ -72,6 +75,8 @@ def paths(manifest):
     if KEY not in manifest:
         return set()
     proof = selection(manifest[KEY])
+    if proof['kind'] == SECOND_KIND:
+        return {Path(__file__).resolve(), *(Path(path) for path in _second_refs(proof))}
     return {Path(__file__).resolve(), *(_path(proof[key]['path']) for key in REFS)}
 
 
@@ -125,6 +130,8 @@ def _proof(value):
 
 def _proof_documents(value):
     proof = selection(value)
+    if proof['kind'] == SECOND_KIND:
+        return _second_documents(proof)
     documents = {key: _read(proof[key]) for key in REFS}
     origin, previous, ledger, owner, authority = (documents[key] for key in REFS)
     old, new, default = (_money(proof[key]) for key in ('prior_total_usd', 'total_usd', 'default_attempt_usd'))
@@ -183,6 +190,9 @@ def _manifest_proof(manifest, *, require_pins):
         # inherited registration may have pinned the same helper elsewhere.
         _require(all(pins.get(proof[key]['path']) == proof[key]['sha256'] for key in REFS),
                  'budget amendment authority is unpinned')
+        if proof['kind'] == SECOND_KIND:
+            _require(all(pins.get(path) == identity for path, identity in _second_refs(proof).items()),
+                     'prior budget amendment authority is unpinned')
     origin = proof['origin_registration']
     if 'budget_sequence' in manifest:
         _require(manifest['budget_sequence']['origin']['registration'] == origin,
@@ -252,3 +262,103 @@ def validate_ledger_transition(value, previous, *, checkpoint_sha256, total_cap,
              'ledger differs from the authorized amendment ceiling')
     changed = _checkpoint(proof, documents, previous, checkpoint_sha256)
     return hashlib.sha256(_canonical(proof)).hexdigest() if changed else None
+
+
+def _second_selection(value):
+    """Select exactly a second increase, never a recursive amendment chain."""
+    _require(set(value) == {'kind', *REFS, *AMOUNTS, 'prior_amendment', 'authorization_quote'},
+             'unsupported second budget amendment selection')
+    prior = value['prior_amendment']
+    _require(type(prior) is dict and prior.get('kind') == KIND,
+             'second amendment requires exactly one prior v1 amendment')
+    prior = selection(prior)
+    base = {key: value[key] for key in ('kind', *REFS, *AMOUNTS)}
+    base['kind'] = KIND
+    selection(base)
+    _require(type(value['authorization_quote']) is str and bool(value['authorization_quote'].strip()),
+             'second amendment quote must be exact nonblank text')
+    _require(_canonical(value['origin_registration']) == _canonical(prior['origin_registration'])
+             and _money(value['default_attempt_usd']) == _money(prior['default_attempt_usd'])
+             and _money(value['prior_total_usd']) == _money(prior['total_usd']),
+             'second amendment changes origin, prior allocation or default cap')
+    _second_refs(value)
+    return deepcopy(value)
+
+
+def _second_refs(proof):
+    references = {}
+    for node in (proof['prior_amendment'], proof):
+        for key in REFS:
+            ref = node[key]
+            _require(ref['path'] not in references or
+                     (key == 'origin_registration' and references[ref['path']] == ref['sha256']),
+                     'second amendment reuses or conflicts with earlier evidence')
+            references[ref['path']] = ref['sha256']
+    for key in REFS[1:]:
+        _require(proof[key]['sha256'] != proof['prior_amendment'][key]['sha256'],
+                 'second amendment reuses earlier authority or predecessor identity')
+    return references
+
+
+def _second_documents(proof):
+    """Bind a new quoted authority to the full immediate audit checkpoint.
+
+    The prior proof is v1 only. Its origin and every earlier accounting row
+    stay unchanged. The caller still owns live-owner freshness and claims;
+    this read-only proof never grants any per-attempt exception.
+    """
+    prior, prior_documents = _proof(proof['prior_amendment'])
+    documents = {key: _read(proof[key]) for key in REFS}
+    origin, previous, ledger, owner, authority = (documents[key] for key in REFS)
+    old, new, default = (_money(proof[key]) for key in ('prior_total_usd', 'total_usd', 'default_attempt_usd'))
+    _require(_canonical(origin) == _canonical(prior_documents['origin_registration'])
+             and KEY not in origin and previous.get('kind') == 'd4d_native_audit_continuation'
+             and _canonical(previous.get(KEY)) == _canonical(prior),
+             'second amendment changes its original allocation or exact prior authority')
+    _require(_money(previous['budget']['additional_usd']) == old
+             and _money(ledger['additional_cap_usd']) == old
+             and all(_money(x) == default for x in (origin['budget']['per_attempt_usd'],
+                 previous['budget']['per_attempt_usd'], ledger['attempt_cap_usd']))
+             and type(origin['budget'].get('prices_per_token')) is dict
+             and bool(origin['budget']['prices_per_token'])
+             and type(previous['budget'].get('prices_per_token')) is dict
+             and _canonical(previous['budget'].get('prices_per_token')) ==
+                 _canonical(origin['budget'].get('prices_per_token')),
+             'second amendment changes historical caps or prices')
+    _require(previous.get('parent', {}).get('registration') == proof['origin_registration']['path']
+             and previous['budget']['ledger_path'] == proof['predecessor_ledger']['path']
+             and ledger.get('manifest_sha256') == proof['predecessor_registration']['sha256'],
+             'second amendment does not name its exact immediate ledger')
+    _require(proof['predecessor_owner']['path'] != previous.get('sequence_state'),
+             'amendment requires an immutable owner snapshot, not the live owner')
+    expected_owner = {'schema_version': 1,
+        'registration_sha256': proof['predecessor_registration']['sha256'],
+        'ledger_path': proof['predecessor_ledger']['path'],
+        'source_registration_sha256': proof['origin_registration']['sha256'],
+        'parent_checkpoint_sha256': previous['budget']['continuation']['sha256']}
+    _require(_canonical(owner) == _canonical(expected_owner),
+             'second amendment owner is not its consumed immediate predecessor')
+    _checkpoint(prior, prior_documents, ledger, proof['predecessor_ledger']['sha256'])
+    rows, cost = _settled(ledger)
+    _require(type(authority.get('schema_version')) is int and authority['schema_version'] == 2
+             and authority.get('kind') == 'audit_sequence_additional_budget_authorization_receipt',
+             'unsupported second amendment authorization receipt')
+    expected_authorization = {'additional_budget_authorized': True, 'currency': 'USD',
+        'user_quote': proof['authorization_quote'], 'prior_shared_cap_usd': proof['prior_total_usd'],
+        'additional_authorized_usd': proof['increase_usd'], 'new_shared_cap_usd': proof['total_usd']}
+    _require(_canonical(authority.get('authorization')) == _canonical(expected_authorization),
+             'second amendment lacks exact quoted budget authorization')
+    expected_lineage = {'origin_registration': proof['origin_registration'],
+        'prior_amendment_sha256': hashlib.sha256(_canonical(prior)).hexdigest(),
+        'original_shared_cap_usd': str(_money(origin['budget']['additional_usd']))}
+    _require(_canonical(authority.get('lineage')) == _canonical(expected_lineage),
+             'second authorization changes the immutable prior amendment')
+    expected_predecessor = {'registration_path': proof['predecessor_registration']['path'],
+        'registration_sha256': proof['predecessor_registration']['sha256'],
+        'ledger_path': proof['predecessor_ledger']['path'], 'ledger_sha256': proof['predecessor_ledger']['sha256'],
+        'canonical_owner_sha256': proof['predecessor_owner']['sha256'],
+        'registered_predecessor_shared_cap_usd': proof['prior_total_usd'],
+        'sequence_settled_rows': len(rows), 'sequence_accounted_usd': str(cost)}
+    _require(_canonical(authority.get('predecessor')) == _canonical(expected_predecessor),
+             'second authorization names another full accounting checkpoint')
+    return proof, documents
