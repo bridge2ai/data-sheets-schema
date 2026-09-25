@@ -67,9 +67,9 @@ AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,prohibited_uses,754bf867958f
 AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_formats,98be2e043a5b,True,0.65,target,False,False,,,,,Distribution
 AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_dates,f895a9712ce4,True,0.9,none,True,False,,,,,Distribution
 AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,third_party_sharing,0aa2f60e8f68,True,0.95,none,True,False,,,,,Distribution
-AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,3ab2a23be32f,True,0.95,none,True,False,,,,,Data_Governance
-AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,ip_restrictions,9b1b3157ffbd,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,be162409c99d,True,0.95,none,True,False,,,,,Data_Governance
+AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,3ab2a23be32f,True,0.95,none,True,False,,,,,Data Governance
+AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,ip_restrictions,9b1b3157ffbd,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,be162409c99d,True,0.95,none,True,False,,,,,Data Governance
 AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,maintainers,75ebddb326fd,True,0.9,none,True,False,,,,,Maintenance
 AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,updates,fcc6a29ab309,True,1.0,none,True,False,,,,,Maintenance
 AI_READI,v1,1,2026-07-28_claude-opus-5-generic_rep1,retention_limit,ef4ef006daa0,True,0.95,none,True,False,,,,,Maintenance
@@ -145,9 +145,9 @@ AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,prohibited_uses,f9499ad50717
 AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,distribution_formats,a85dd0088b36,True,0.85,none,True,False,,,,,Distribution
 AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,distribution_dates,fd283024d740,True,0.8,form,False,False,,,,,Distribution
 AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,third_party_sharing,ed23d7ea44eb,True,0.95,none,True,False,,,,,Distribution
-AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,d1c99aaa2f30,True,0.95,none,True,False,,,,,Data_Governance
-AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,ip_restrictions,22ef0062cbd4,True,0.95,none,True,False,,,,,Data_Governance
-AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,cead379fa3dd,True,0.85,none,True,False,,,,,Data_Governance
+AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,d1c99aaa2f30,True,0.95,none,True,False,,,,,Data Governance
+AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,ip_restrictions,22ef0062cbd4,True,0.95,none,True,False,,,,,Data Governance
+AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,cead379fa3dd,True,0.85,none,True,False,,,,,Data Governance
 AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,maintainers,4ad1c84ba44b,True,0.9,none,True,False,,,,,Maintenance
 AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,updates,06db46df04e7,True,1.0,none,True,False,,,,,Maintenance
 AI_READI,v1,2,2026-07-28_claude-opus-5-generic_rep2,retention_limit,01d56b4b6bf1,True,0.95,none,True,False,,,,,Maintenance
@@ -224,9 +224,9 @@ AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,prohibited_uses,03cf5208ca31
 AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,distribution_formats,4a3f8e8f3a4c,True,0.65,form,False,False,,,,,Distribution
 AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,distribution_dates,be6eee3e8a5c,True,0.85,none,True,False,,,,,Distribution
 AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,third_party_sharing,d74404f1a167,True,0.95,none,True,False,,,,,Distribution
-AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,9a33ddc95f20,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,ip_restrictions,06a4df9ca4fe,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,5fea7a25ead9,True,0.95,none,True,False,,,,,Data_Governance
+AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,9a33ddc95f20,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,ip_restrictions,06a4df9ca4fe,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,5fea7a25ead9,True,0.95,none,True,False,,,,,Data Governance
 AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,maintainers,6dcef0d40258,True,0.9,none,True,False,,,,,Maintenance
 AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,updates,c080188711f9,True,1.0,none,True,False,,,,,Maintenance
 AI_READI,v1,3,2026-07-28_claude-opus-5-generic_rep3,retention_limit,038f59b21860,True,0.9,none,True,False,,,,,Maintenance
@@ -291,9 +291,9 @@ AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,raw_data_sources,db02175c
 AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,distribution_formats,842623fc9d5c,True,0.7,form,False,False,,,,,Distribution
 AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,distribution_dates,7d1bb4dbd208,True,0.7,form,False,False,,,,,Distribution
 AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,third_party_sharing,8631c4fb8ac9,True,0.85,none,True,False,,,,,Distribution
-AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,7d007ae11a17,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ip_restrictions,1a82ec14328d,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,regulatory_restrictions,433ea1eb03f4,True,0.78,none,True,False,,,,,Data_Governance
+AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,7d007ae11a17,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ip_restrictions,1a82ec14328d,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,regulatory_restrictions,433ea1eb03f4,True,0.78,none,True,False,,,,,Data Governance
 AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,intended_uses,173dfd729f38,True,0.95,none,True,False,,,,,Uses
 AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,other_tasks,2477018db18d,True,0.75,none,True,False,,,,,Uses
 AI_READI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,prohibited_uses,d08100cc8249,True,0.95,none,True,False,,,,,Uses
@@ -365,9 +365,9 @@ AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,future_use_impacts,7f9a02
 AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,distribution_formats,79a3c0319e3a,True,0.95,none,True,False,,,,,Distribution
 AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,distribution_dates,6c6723479f9a,True,0.75,form,False,False,,,,,Distribution
 AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,third_party_sharing,cb71fc8f8a7e,True,0.95,none,True,False,,,,,Distribution
-AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,b2a083c9b0cc,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,ip_restrictions,1e57cb3fa081,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,regulatory_restrictions,681d404157e4,True,0.88,none,True,False,,,,,Data_Governance
+AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,b2a083c9b0cc,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,ip_restrictions,1e57cb3fa081,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,regulatory_restrictions,681d404157e4,True,0.88,none,True,False,,,,,Data Governance
 AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,related_datasets,e654b597bb60,True,1.0,none,True,False,,,,,Composition
 AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,maintainers,b9bf39bfb6d1,True,0.85,none,True,False,,,,,Maintenance
 AI_READI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,updates,760165257284,True,0.9,none,True,False,,,,,Maintenance
@@ -434,9 +434,9 @@ AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,participant_privacy,45eb1
 AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,distribution_dates,fbb4fae1afad,True,0.7,form,False,False,,,,,Distribution
 AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,distribution_formats,0ff3b6270fad,True,0.8,none,True,False,,,,,Distribution
 AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,third_party_sharing,3b88b09fabbb,True,0.85,none,True,False,,,,,Distribution
-AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,7c697cf6df11,True,0.9,none,True,False,,,,,Data_Governance
-AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,ip_restrictions,f96c53293cb3,True,0.95,none,True,False,,,,,Data_Governance
-AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,regulatory_restrictions,988d2488af02,True,0.85,none,True,False,,,,,Data_Governance
+AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,7c697cf6df11,True,0.9,none,True,False,,,,,Data Governance
+AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,ip_restrictions,f96c53293cb3,True,0.95,none,True,False,,,,,Data Governance
+AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,regulatory_restrictions,988d2488af02,True,0.85,none,True,False,,,,,Data Governance
 AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,maintainers,b7cd79662303,True,0.6,form,False,False,,,,,Maintenance
 AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,updates,5c0dfad9e8d5,True,0.9,none,True,False,,,,,Maintenance
 AI_READI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,version_access,21122912a9a2,True,0.85,none,True,False,,,,,Maintenance
@@ -494,8 +494,8 @@ CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,future_use_impacts,a94269c6000
 CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,third_party_sharing,9cd592afb605,True,0.9,none,True,False,,,,,Distribution
 CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_formats,02285d2e54b4,True,0.75,none,True,False,,,,,Distribution
 CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_dates,8931ff180fb4,True,0.5,substance,False,False,,,,,Distribution
-CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,49062a6b12ad,True,0.95,none,True,False,,,,,Data_Governance
-CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,dfa36791b460,True,0.75,none,True,False,,,,,Data_Governance
+CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,49062a6b12ad,True,0.95,none,True,False,,,,,Data Governance
+CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,dfa36791b460,True,0.75,none,True,False,,,,,Data Governance
 CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,maintainers,f59e8bb35cb2,True,0.9,none,True,False,,,,,Maintenance
 CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,updates,ebf590d3aa58,True,0.9,none,True,False,,,,,Maintenance
 CHORUS,v1,1,2026-07-28_claude-opus-5-generic_rep1,version_access,fcaf033ae2f7,True,0.85,none,True,False,,,,,Maintenance
@@ -548,8 +548,8 @@ CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,future_use_impacts,48132ccf795
 CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,intended_uses,7ea1a2c07515,True,0.85,none,True,False,,,,,Uses
 CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,distribution_formats,b94bcc0a604a,True,0.65,target,False,False,,,,,Distribution
 CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,third_party_sharing,327dbc790d8b,True,0.9,none,True,False,,,,,Distribution
-CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,2f373bc58613,True,0.9,none,True,False,,,,,Data_Governance
-CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,fbf798a2795f,True,0.75,substance,False,False,,,,,Data_Governance
+CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,2f373bc58613,True,0.9,none,True,False,,,,,Data Governance
+CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,fbf798a2795f,True,0.75,substance,False,False,,,,,Data Governance
 CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,maintainers,dee4d141d32d,True,0.8,none,True,False,,,,,Maintenance
 CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,updates,e59f46c450f1,True,0.9,none,True,False,,,,,Maintenance
 CHORUS,v1,2,2026-07-28_claude-opus-5-generic_rep2,extension_mechanism,6153d5503122,True,0.95,none,True,False,,,,,Maintenance
@@ -599,8 +599,8 @@ CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,other_tasks,99ff27a81592,True,
 CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,future_use_impacts,4f3db2ad17a0,True,0.75,form,False,False,,,,,Uses
 CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,distribution_formats,e6acf2e9b4d4,True,0.9,none,True,False,,,,,Distribution
 CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,third_party_sharing,53721adfb54b,True,0.9,none,True,False,,,,,Distribution
-CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,bbaea414aaec,True,0.95,none,True,False,,,,,Data_Governance
-CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,b0e1de0ec876,True,0.8,none,True,False,,,,,Data_Governance
+CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,bbaea414aaec,True,0.95,none,True,False,,,,,Data Governance
+CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,b0e1de0ec876,True,0.8,none,True,False,,,,,Data Governance
 CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,maintainers,503253bc7a07,True,0.95,none,True,False,,,,,Maintenance
 CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,updates,6841567c8785,True,0.85,none,True,False,,,,,Maintenance
 CHORUS,v1,3,2026-07-28_claude-opus-5-generic_rep3,version_access,b8e61d4482ae,True,0.7,target,False,False,,,,,Maintenance
@@ -651,7 +651,7 @@ CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,machine_annotation_tools,05
 CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,is_deidentified,2441c8dcb209,True,0.85,none,True,False,,,,,Composition
 CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ethical_reviews,ffe2412d1212,True,0.4,target,False,False,,,,,Ethics
 CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,human_subject_research,65b6e5d5b55e,True,0.8,none,True,False,,,,,Human
-CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,67bc81b2e94f,True,0.8,none,True,False,,,,,Data_Governance
+CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,67bc81b2e94f,True,0.8,none,True,False,,,,,Data Governance
 CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,distribution_formats,d9c9c4a92928,True,0.8,none,True,False,,,,,Distribution
 CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,third_party_sharing,31a9e05ecd98,True,0.85,none,True,False,,,,,Distribution
 CHORUS,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,updates,d92785949171,True,0.85,none,True,False,,,,,Maintenance
@@ -702,7 +702,7 @@ CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,future_use_impacts,fc2ac0ce
 CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,distribution_formats,7fd23ac07d1f,True,0.8,none,True,False,,,,,Distribution
 CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,distribution_dates,7f7fc5febf2f,True,0.65,form,False,False,,,,,Distribution
 CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,third_party_sharing,b8cd47ebf568,True,0.8,none,True,False,,,,,Distribution
-CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,3b0b0d533e2d,True,0.85,none,True,False,,,,,Data_Governance
+CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,3b0b0d533e2d,True,0.85,none,True,False,,,,,Data Governance
 CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,updates,449501743a14,True,0.85,none,True,False,,,,,Maintenance
 CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,extension_mechanism,0d8410c17574,True,0.95,none,True,False,,,,,Maintenance
 CHORUS,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,file_collections,a76b408f1e41,True,0.85,none,True,False,,,,,FileCollection
@@ -747,7 +747,7 @@ CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,confidential_elements,47083
 CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,sensitive_elements,6469379d140e,True,0.9,none,True,False,,,,,Composition
 CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,human_subject_research,22d23cbff64a,True,0.75,none,True,False,,,,,Human
 CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,known_limitations,7614047e985f,True,0.95,none,True,False,,,,,Composition
-CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,380281a666ef,True,0.8,none,True,False,,,,,Data_Governance
+CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,380281a666ef,True,0.8,none,True,False,,,,,Data Governance
 CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,third_party_sharing,0a1851f3eea0,True,0.8,none,True,False,,,,,Distribution
 CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,distribution_formats,8084357d7803,True,0.7,form,False,False,,,,,Distribution
 CHORUS,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,maintainers,17b451db516d,True,0.7,form,False,False,,,,,Maintenance
@@ -803,9 +803,9 @@ CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,prohibited_uses,c51daee3f95c,Tr
 CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_formats,efa060f3b6c1,True,0.9,none,True,True,0.97,True,judged on this replicate,,Distribution
 CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_dates,89e489b6eddd,True,0.8,form,False,True,0.98,True,judged on this replicate,,Distribution
 CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,third_party_sharing,7b72cd4b1c0a,True,0.95,none,True,True,1.0,True,judged on this replicate,,Distribution
-CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,f3ffcca9cfca,True,0.95,none,True,True,0.98,True,judged on this replicate,,Data_Governance
-CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,ip_restrictions,bd36451cb00d,True,0.95,none,True,True,1.0,True,judged on this replicate,,Data_Governance
-CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,6b238479bb5e,True,0.85,none,True,True,0.98,True,judged on this replicate,,Data_Governance
+CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,f3ffcca9cfca,True,0.95,none,True,True,0.98,True,judged on this replicate,,Data Governance
+CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,ip_restrictions,bd36451cb00d,True,0.95,none,True,True,1.0,True,judged on this replicate,,Data Governance
+CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,6b238479bb5e,True,0.85,none,True,True,0.98,True,judged on this replicate,,Data Governance
 CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,maintainers,6fc77bec0772,True,0.95,none,True,True,0.92,True,judged on this replicate,,Maintenance
 CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,errata,e6316463d6a2,True,0.85,none,True,True,0.95,True,judged on this replicate,,Maintenance
 CM4AI,v1,1,2026-07-28_claude-opus-5-generic_rep1,updates,542b49e195af,True,0.9,none,True,True,1.0,True,judged on this replicate,,Maintenance
@@ -863,9 +863,9 @@ CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,future_use_impacts,2544a204db7f
 CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,distribution_formats,9da04f241d8c,True,1.0,none,True,True,0.97,True,propagated from rep1,True,Distribution
 CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,distribution_dates,a87ee9bd38e6,True,0.85,none,True,True,0.98,True,propagated from rep1,True,Distribution
 CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,third_party_sharing,a1919dbeffb8,True,0.9,none,True,True,1.0,True,propagated from rep1,True,Distribution
-CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,a850cae978c7,True,0.98,none,True,True,0.98,True,propagated from rep1,True,Data_Governance
-CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,ip_restrictions,fc24d5902f41,True,1.0,none,True,True,1.0,True,propagated from rep1,True,Data_Governance
-CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,9525ce484b8d,True,0.9,none,True,True,0.98,True,propagated from rep1,True,Data_Governance
+CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,a850cae978c7,True,0.98,none,True,True,0.98,True,propagated from rep1,True,Data Governance
+CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,ip_restrictions,fc24d5902f41,True,1.0,none,True,True,1.0,True,propagated from rep1,True,Data Governance
+CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,9525ce484b8d,True,0.9,none,True,True,0.98,True,propagated from rep1,True,Data Governance
 CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,ethical_reviews,316d4c8491af,True,0.8,none,True,True,0.97,True,propagated from rep1,True,Ethics
 CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,human_subject_research,f4b0a18f8198,True,0.95,none,True,True,0.98,True,propagated from rep1,True,Human
 CM4AI,v1,2,2026-07-28_claude-opus-5-generic_rep2,is_deidentified,b58f8b06b1b3,True,0.95,none,True,True,0.98,True,propagated from rep1,True,Composition
@@ -928,9 +928,9 @@ CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,future_use_impacts,a33dadb28da1
 CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,distribution_formats,148b61b817b0,True,0.95,none,True,True,0.97,True,propagated from rep1,True,Distribution
 CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,distribution_dates,020fcf75cd88,True,0.7,form,False,True,0.98,True,propagated from rep1,True,Distribution
 CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,third_party_sharing,27d002a4a65a,True,0.9,none,True,True,1.0,True,propagated from rep1,True,Distribution
-CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,b470a2e97382,True,0.95,none,True,True,0.98,True,propagated from rep1,True,Data_Governance
-CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,ip_restrictions,0a120007802c,True,0.95,none,True,True,1.0,True,propagated from rep1,True,Data_Governance
-CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,bd790ec2e3ca,True,0.85,none,True,True,0.98,True,propagated from rep1,True,Data_Governance
+CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,b470a2e97382,True,0.95,none,True,True,0.98,True,propagated from rep1,True,Data Governance
+CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,ip_restrictions,0a120007802c,True,0.95,none,True,True,1.0,True,propagated from rep1,True,Data Governance
+CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,bd790ec2e3ca,True,0.85,none,True,True,0.98,True,propagated from rep1,True,Data Governance
 CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,ethical_reviews,e2a2207db794,True,0.75,target,False,True,0.97,True,propagated from rep1,True,Ethics
 CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,data_protection_impacts,55ad7f4db352,True,0.5,target,False,True,1.0,True,judged on this replicate,,Ethics
 CM4AI,v1,3,2026-07-28_claude-opus-5-generic_rep3,human_subject_research,7aefa3fe4e35,True,0.9,none,True,True,0.98,True,propagated from rep1,True,Human
@@ -999,9 +999,9 @@ CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,is_deidentified,0b4d37e8053c
 CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,sensitive_elements,884c54809587,True,0.8,none,True,False,,,,,Composition
 CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ethical_reviews,c92a2cfabe98,True,0.7,target,False,False,,,,,Ethics
 CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,confidential_elements,58ec63a77c8f,True,0.85,none,True,False,,,,,Composition
-CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,1108a58439bf,True,0.95,none,True,False,,,,,Data_Governance
-CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ip_restrictions,a3f42f580921,True,0.9,none,True,False,,,,,Data_Governance
-CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,regulatory_restrictions,584f5e964e69,True,0.85,none,True,False,,,,,Data_Governance
+CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,1108a58439bf,True,0.95,none,True,False,,,,,Data Governance
+CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ip_restrictions,a3f42f580921,True,0.9,none,True,False,,,,,Data Governance
+CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,regulatory_restrictions,584f5e964e69,True,0.85,none,True,False,,,,,Data Governance
 CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,distribution_formats,041bdc846c76,True,0.95,none,True,False,,,,,Distribution
 CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,distribution_dates,8da7fcd967dd,True,0.8,form,False,False,,,,,Distribution
 CM4AI,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,third_party_sharing,4eff37d3f5a3,True,0.9,none,True,False,,,,,Distribution
@@ -1081,9 +1081,9 @@ CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,third_party_sharing,05099d50
 CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,version_access,c93ba75a4d01,True,0.9,none,True,False,,,,,Maintenance
 CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,updates,1d4eca90e7bb,True,0.85,none,True,False,,,,,Maintenance
 CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,retention_limit,e5c68620b2f3,True,0.85,none,True,False,,,,,Maintenance
-CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,f147e1f65720,True,1.0,none,True,False,,,,,Data_Governance
-CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,ip_restrictions,dcf4e19114aa,True,0.95,none,True,False,,,,,Data_Governance
-CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,regulatory_restrictions,44576e288982,True,0.85,none,True,False,,,,,Data_Governance
+CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,f147e1f65720,True,1.0,none,True,False,,,,,Data Governance
+CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,ip_restrictions,dcf4e19114aa,True,0.95,none,True,False,,,,,Data Governance
+CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,regulatory_restrictions,44576e288982,True,0.85,none,True,False,,,,,Data Governance
 CM4AI,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,extension_mechanism,7214428ee1ab,True,0.8,none,True,False,,,,,Maintenance
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,id,d15e7ff48c27,True,1.0,none,True,False,,,,,Core/other
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,name,09238b0cef1c,True,1.0,none,True,False,,,,,Core/other
@@ -1143,9 +1143,9 @@ CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,machine_annotation_tools,76c
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,distribution_formats,8c4ee60e58c8,True,0.9,none,True,False,,,,,Distribution
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,distribution_dates,537ffa152d6c,True,0.75,form,False,False,,,,,Distribution
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,third_party_sharing,df15baa985d9,True,0.9,none,True,False,,,,,Distribution
-CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,7429568dc9c4,True,0.95,none,True,False,,,,,Data_Governance
-CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,ip_restrictions,a8dbd7342cf3,True,0.95,none,True,False,,,,,Data_Governance
-CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,regulatory_restrictions,eab89610bd2d,True,0.85,none,True,False,,,,,Data_Governance
+CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,7429568dc9c4,True,0.95,none,True,False,,,,,Data Governance
+CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,ip_restrictions,a8dbd7342cf3,True,0.95,none,True,False,,,,,Data Governance
+CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,regulatory_restrictions,eab89610bd2d,True,0.85,none,True,False,,,,,Data Governance
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,is_deidentified,e5e3947879d4,True,0.85,none,True,False,,,,,Composition
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,human_subject_research,ddca4f8b5bc6,True,0.85,none,True,False,,,,,Human
 CM4AI,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,ethical_reviews,72e2aa14e903,True,0.7,target,False,False,,,,,Ethics
@@ -1213,9 +1213,9 @@ VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,prohibited_uses,61007fd6297d,Tr
 VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_formats,c4f7135e7b1e,True,0.8,none,True,False,,,,,Distribution
 VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,distribution_dates,13b2f6eedffd,True,0.8,none,True,False,,,,,Distribution
 VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,third_party_sharing,df36132f9d05,True,0.95,none,True,False,,,,,Distribution
-VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,ce0857042e76,True,0.95,none,True,False,,,,,Data_Governance
-VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,ip_restrictions,4b6eb1bd45af,True,0.95,none,True,False,,,,,Data_Governance
-VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,56e1aa184dd9,True,0.95,none,True,False,,,,,Data_Governance
+VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,license_and_use_terms,ce0857042e76,True,0.95,none,True,False,,,,,Data Governance
+VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,ip_restrictions,4b6eb1bd45af,True,0.95,none,True,False,,,,,Data Governance
+VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,regulatory_restrictions,56e1aa184dd9,True,0.95,none,True,False,,,,,Data Governance
 VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,human_subject_research,72b34948b9f9,True,1.0,none,True,False,,,,,Human
 VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,ethical_reviews,c2be3a33598c,True,1.0,none,True,False,,,,,Ethics
 VOICE,v1,1,2026-07-28_claude-opus-5-generic_rep1,data_protection_impacts,2cc2225a55f1,True,0.65,substance,False,False,,,,,Ethics
@@ -1298,9 +1298,9 @@ VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,prohibited_uses,1cb55273ddd4,Tr
 VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,distribution_formats,fe3cb9b21f3f,True,0.75,target,False,False,,,,,Distribution
 VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,distribution_dates,7f6378cf3f35,True,0.9,none,True,False,,,,,Distribution
 VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,third_party_sharing,b7398a333dc4,True,0.95,none,True,False,,,,,Distribution
-VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,89ab40816d31,True,0.97,none,True,False,,,,,Data_Governance
-VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,ip_restrictions,57821264e150,True,0.97,none,True,False,,,,,Data_Governance
-VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,2b7edf21ffb6,True,0.95,none,True,False,,,,,Data_Governance
+VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,license_and_use_terms,89ab40816d31,True,0.97,none,True,False,,,,,Data Governance
+VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,ip_restrictions,57821264e150,True,0.97,none,True,False,,,,,Data Governance
+VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,regulatory_restrictions,2b7edf21ffb6,True,0.95,none,True,False,,,,,Data Governance
 VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,maintainers,6f3cacc91ac6,True,0.9,none,True,False,,,,,Maintenance
 VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,errata,e728cec93b76,True,0.8,none,True,False,,,,,Maintenance
 VOICE,v1,2,2026-07-28_claude-opus-5-generic_rep2,updates,36d67f9d330c,True,0.95,none,True,False,,,,,Maintenance
@@ -1370,9 +1370,9 @@ VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,prohibited_uses,c809de5a7389,Tr
 VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,distribution_formats,2b300dccbee1,True,0.8,none,True,False,,,,,Distribution
 VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,distribution_dates,a913d1b5c5e3,True,0.85,none,True,False,,,,,Distribution
 VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,third_party_sharing,03a67aceeece,True,0.95,none,True,False,,,,,Distribution
-VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,da92691c5ccd,True,0.98,none,True,False,,,,,Data_Governance
-VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,ip_restrictions,710c72b41701,True,0.95,none,True,False,,,,,Data_Governance
-VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,6270d2579242,True,0.95,none,True,False,,,,,Data_Governance
+VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,license_and_use_terms,da92691c5ccd,True,0.98,none,True,False,,,,,Data Governance
+VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,ip_restrictions,710c72b41701,True,0.95,none,True,False,,,,,Data Governance
+VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,regulatory_restrictions,6270d2579242,True,0.95,none,True,False,,,,,Data Governance
 VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,maintainers,27455fe940d9,True,0.9,none,True,False,,,,,Maintenance
 VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,errata,1b19192d9a45,True,0.7,form,False,False,,,,,Maintenance
 VOICE,v1,3,2026-07-28_claude-opus-5-generic_rep3,updates,1cb0be9ddcb3,True,0.95,none,True,False,,,,,Maintenance
@@ -1440,9 +1440,9 @@ VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,future_use_impacts,2cce3ef42
 VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,distribution_formats,ebc61202198a,True,0.78,form,False,False,,,,,Distribution
 VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,distribution_dates,0987d75e8b3c,True,0.7,form,False,False,,,,,Distribution
 VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,third_party_sharing,7668ed6531f6,True,0.9,none,True,False,,,,,Distribution
-VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,57103541a9aa,True,0.9,none,True,False,,,,,Data_Governance
-VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ip_restrictions,55628511d848,True,0.95,none,True,False,,,,,Data_Governance
-VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,regulatory_restrictions,1384f107e2f4,True,0.9,none,True,False,,,,,Data_Governance
+VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,license_and_use_terms,57103541a9aa,True,0.9,none,True,False,,,,,Data Governance
+VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ip_restrictions,55628511d848,True,0.95,none,True,False,,,,,Data Governance
+VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,regulatory_restrictions,1384f107e2f4,True,0.9,none,True,False,,,,,Data Governance
 VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,ethical_reviews,9955eda3424c,True,0.8,none,True,False,,,,,Ethics
 VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,informed_consent,75bba44c6d58,True,0.8,form,False,False,,,,,Human
 VOICE,v2,1,2026-07-31_claude-opus-5-generic-v2_rep1,collection_consents,a51b9b08a080,True,0.95,none,True,False,,,,,Ethics
@@ -1511,9 +1511,9 @@ VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,is_deidentified,58ea0d053f90
 VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,sensitive_elements,98838ac4e968,True,0.95,none,True,False,,,,,Composition
 VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,confidential_elements,3e7e80907ef6,True,0.95,none,True,False,,,,,Composition
 VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,content_warnings,e4ada5bb8d8d,True,1.0,none,True,False,,,,,Composition
-VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,ip_restrictions,66c677db3cf1,True,0.95,none,True,False,,,,,Data_Governance
-VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,2bacff8f3083,True,0.9,none,True,False,,,,,Data_Governance
-VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,regulatory_restrictions,6efef73ff334,True,0.92,none,True,False,,,,,Data_Governance
+VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,ip_restrictions,66c677db3cf1,True,0.95,none,True,False,,,,,Data Governance
+VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,license_and_use_terms,2bacff8f3083,True,0.9,none,True,False,,,,,Data Governance
+VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,regulatory_restrictions,6efef73ff334,True,0.92,none,True,False,,,,,Data Governance
 VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,retention_limit,5287e94fd602,True,0.95,none,True,False,,,,,Maintenance
 VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,updates,d0bd9823bca5,True,0.95,none,True,False,,,,,Maintenance
 VOICE,v2,2,2026-07-31_claude-opus-5-generic-v2_rep2,version_access,a808c2095929,True,0.9,none,True,False,,,,,Maintenance
@@ -1604,9 +1604,9 @@ VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,participant_privacy,2f987a69
 VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,at_risk_populations,a72db02aa7bb,True,0.85,none,True,False,,,,,Human
 VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,human_subject_research,ccd787c2b8ec,True,0.85,none,True,False,,,,,Human
 VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,is_deidentified,16ce7a57ac7f,True,0.85,none,True,False,,,,,Composition
-VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,8e15851b85b4,True,0.9,none,True,False,,,,,Data_Governance
-VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,ip_restrictions,b8d1bf5d6144,True,0.95,none,True,False,,,,,Data_Governance
-VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,regulatory_restrictions,0fe14229469e,True,0.9,none,True,False,,,,,Data_Governance
+VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,license_and_use_terms,8e15851b85b4,True,0.9,none,True,False,,,,,Data Governance
+VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,ip_restrictions,b8d1bf5d6144,True,0.95,none,True,False,,,,,Data Governance
+VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,regulatory_restrictions,0fe14229469e,True,0.9,none,True,False,,,,,Data Governance
 VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,retention_limit,2980eb49c667,True,0.95,none,True,False,,,,,Maintenance
 VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,updates,bfca3cfd7353,True,0.9,none,True,False,,,,,Maintenance
 VOICE,v2,3,2026-07-31_claude-opus-5-generic-v2_rep3,version_access,e6de1778049a,True,0.85,none,True,False,,,,,Maintenance

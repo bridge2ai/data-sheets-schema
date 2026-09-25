@@ -83,6 +83,18 @@ AI_READI,Distribution,bmj_protocol_publication,publication,0.17,1,6
 AI_READI,Distribution,nature_metabolism_publication,publication,0.0,0,6
 AI_READI,Distribution,nih_reporter_project,NIH project page,0.0,0,6
 AI_READI,Distribution,bundle preamble,bundle preamble,0.0,0,6
+AI_READI,Data Governance,ro_crate_metadata,RO-Crate,3.17,19,6
+AI_READI,Data Governance,fairhub_dataset_v3_api,structured metadata,4.0,24,6
+AI_READI,Data Governance,fairhub_dataset,data resource,0.33,2,6
+AI_READI,Data Governance,fairhub_dataset_v3,data resource,0.5,3,6
+AI_READI,Data Governance,dataset_documentation,documentation,0.0,0,6
+AI_READI,Data Governance,dataset_documentation_v3,documentation,0.5,3,6
+AI_READI,Data Governance,dataset_license,license,4.0,24,6
+AI_READI,Data Governance,irb_protocol,IRB,0.33,2,6
+AI_READI,Data Governance,bmj_protocol_publication,publication,1.17,7,6
+AI_READI,Data Governance,nature_metabolism_publication,publication,0.0,0,6
+AI_READI,Data Governance,nih_reporter_project,NIH project page,0.0,0,6
+AI_READI,Data Governance,bundle preamble,bundle preamble,0.0,0,6
 AI_READI,Maintenance,ro_crate_metadata,RO-Crate,0.67,4,6
 AI_READI,Maintenance,fairhub_dataset_v3_api,structured metadata,5.67,34,6
 AI_READI,Maintenance,fairhub_dataset,data resource,0.83,5,6
@@ -190,6 +202,11 @@ CHORUS,Distribution,nih_reporter_project,NIH project page,0.0,0,6
 CHORUS,Distribution,cohort_2_webinar,tutorial,3.0,18,6
 CHORUS,Distribution,github_organization_overview,historical documentation,0.17,1,6
 CHORUS,Distribution,bundle preamble,bundle preamble,0.0,0,6
+CHORUS,Data Governance,project_documentation,documentation,0.17,1,6
+CHORUS,Data Governance,nih_reporter_project,NIH project page,0.33,2,6
+CHORUS,Data Governance,cohort_2_webinar,tutorial,2.33,14,6
+CHORUS,Data Governance,github_organization_overview,historical documentation,1.83,11,6
+CHORUS,Data Governance,bundle preamble,bundle preamble,0.0,0,6
 CHORUS,Maintenance,project_documentation,documentation,1.67,10,6
 CHORUS,Maintenance,nih_reporter_project,NIH project page,0.0,0,6
 CHORUS,Maintenance,cohort_2_webinar,tutorial,0.0,0,6
@@ -297,6 +314,17 @@ CM4AI,Distribution,nih_reporter_project,NIH project page,0.0,0,6
 CM4AI,Distribution,june_2025_dataverse_release,historical data release,0.17,1,6
 CM4AI,Distribution,march_2025_dataverse_release,historical data release,0.0,0,6
 CM4AI,Distribution,bundle preamble,bundle preamble,0.0,0,6
+CM4AI,Data Governance,june_2026_dataverse_release,data resource,0.83,5,6
+CM4AI,Data Governance,october_2025_dataverse_release,data resource,0.33,2,6
+CM4AI,Data Governance,data_release_documentation,documentation,0.0,0,6
+CM4AI,Data Governance,project_documentation,documentation,0.0,0,6
+CM4AI,Data Governance,dataset_license,license,1.5,9,6
+CM4AI,Data Governance,nature_publication,publication,0.0,0,6
+CM4AI,Data Governance,biorxiv_preprint,preprint,3.0,18,6
+CM4AI,Data Governance,nih_reporter_project,NIH project page,0.0,0,6
+CM4AI,Data Governance,june_2025_dataverse_release,historical data release,0.83,5,6
+CM4AI,Data Governance,march_2025_dataverse_release,historical data release,0.17,1,6
+CM4AI,Data Governance,bundle preamble,bundle preamble,0.0,0,6
 CM4AI,Maintenance,june_2026_dataverse_release,data resource,0.83,5,6
 CM4AI,Maintenance,october_2025_dataverse_release,data resource,0.5,3,6
 CM4AI,Maintenance,data_release_documentation,documentation,1.67,10,6
@@ -447,6 +475,18 @@ VOICE,Distribution,feasibility_publication,publication,0.0,0,6
 VOICE,Distribution,audiomics_white_paper,white paper,0.0,0,6
 VOICE,Distribution,nih_reporter_project,NIH project page,0.0,0,6
 VOICE,Distribution,bundle preamble,bundle preamble,0.0,0,6
+VOICE,Data Governance,physionet_1_1,data resource,0.33,2,6
+VOICE,Data Governance,physionet_3_0_0,data resource,0.33,2,6
+VOICE,Data Governance,physionet_3_1_0,data resource,0.67,4,6
+VOICE,Data Governance,physionet_pediatric_1_1_0,data resource,0.0,0,6
+VOICE,Data Governance,documentation_repository,documentation,0.0,0,6
+VOICE,Data Governance,project_documentation,documentation,3.17,19,6
+VOICE,Data Governance,data_transfer_use_agreement,DUA,4.67,28,6
+VOICE,Data Governance,irb_protocol,IRB,0.0,0,6
+VOICE,Data Governance,feasibility_publication,publication,0.0,0,6
+VOICE,Data Governance,audiomics_white_paper,white paper,0.0,0,6
+VOICE,Data Governance,nih_reporter_project,NIH project page,0.0,0,6
+VOICE,Data Governance,bundle preamble,bundle preamble,0.0,0,6
 VOICE,Maintenance,physionet_1_1,data resource,1.83,11,6
 VOICE,Maintenance,physionet_3_0_0,data resource,2.0,12,6
 VOICE,Maintenance,physionet_3_1_0,data resource,2.83,17,6

@@ -7,7 +7,7 @@ phase1,Phase 1: generate the full record and its coverage receipt,yes,.claude/co
 phase2,Phase 2: derive the core from the validated full record (derive_core.py),no,.claude/commands/d4d-full-core.md; src/data_sheets_schema/derive_core.py; src/data_sheets_schema/api_runner.py (PHASES 'core')
 phase3,Phase 3: audit the full record against the sources and provenance boundary,yes,.claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'audit')
 phase3_native,Native audit continuation: separately registered session; fresh-context worker batches; one integration step; one terminal source/evidence check,yes,notes/matched_cborg_2026-09-13/audit_controls/README.md
-phase4_rederive,Phase 4a: re-derive the core (no model),no,".claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'reconcile_core', repair_core)"
+phase4_rederive,Phase 4: re-derive the core (no model),no,".claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'reconcile_core', repair_core)"
 phase4_checks,"Phase 4b: deterministic checks (pair checker, validators, receipts)",no,.claude/commands/d4d-full-core.md; src/data_sheets_schema/d4d_pair_consistency.py
 phase4_semantic,Phase 4c: semantic review the pair checker asks for; reconcile the full record,yes,.claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'reconcile_full')
 phase4_report,Phase 4d: reconciliation report and repair,yes,".claude/commands/d4d-full-core.md; src/data_sheets_schema/api_runner.py (PHASES 'report', repair_full)"
@@ -17,5 +17,5 @@ crate_map,"d4d rocrate map: static mapping table, no inference (rocrate_map.py)"
 crate_out,rocrate_static_map record and mapping provenance report,no,"src/data_sheets_schema/cli/rocrate.py (emit-map-arm, method rocrate_static_map)"
 eval_presence,Presence evaluator: rubric10 / rubric20 field presence,no,src/data_sheets_schema/evaluation/evaluate_d4d.py; cli/evaluate.py (presence)
 eval_semantic,rubric10 / rubric20 semantic judges,yes,src/data_sheets_schema/evaluation/evaluate_d4d_llm.py; judge_contract.py
-eval_field,Field-level source-support (grounding) and schema-fitness judgements,yes,src/data_sheets_schema/evidence_score.py; fitness_schema.py
+eval_field,Field-level source-support (grounding) and schema-fitness judgments,yes,src/data_sheets_schema/evidence_score.py; fitness_schema.py
 eval_pair,Pair consistency check,no,src/data_sheets_schema/d4d_pair_consistency.py
