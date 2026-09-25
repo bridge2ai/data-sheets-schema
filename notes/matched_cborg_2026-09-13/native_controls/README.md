@@ -191,10 +191,12 @@ The probe is a link in the lineage:
   and `validate_predecessor` for the amendment.
 - **Before the tip moves.** Holding the sequence lock, it does all free work
   first: the clients, the proxy, one free count of the exact request and the
-  import of the checkpoint into its own ledger. A 400, 413 or 422 on that
-  count is recorded as the finding `count_refused`, and nothing is claimed
-  or spent. Any other failure before the claim writes nothing and leaves the
-  probe runnable.
+  import of the checkpoint into its own ledger. The retained request is
+  counted first as a control. A 400, 413 or 422 on the probe's count, when
+  the control counted, is recorded as the finding `count_refused`, and
+  nothing is claimed or spent. A failure before the ledger import writes
+  nothing and leaves the probe runnable. From the import on, the
+  registration is consumed, and the tip moves only with the claim.
 - **The paid request.** It then takes the tip with a durable sequence
   claim, continues the checkpoint and admits the one request. It never
   resends.
@@ -202,8 +204,9 @@ The probe is a link in the lineage:
   pending is settled at its whole reservation in `reconciled_billing.json`
   with a `debit_receipt.json`, under the maintainer's standing
   authorization. This happens only once the proxy has closed with no
-  handler running; otherwise a person settles it. The ledger is left as
-  written.
+  handler running. Otherwise `transport_probe.py settle` applies it after
+  the probe's process has exited; a free sequence lock shows that. The
+  ledger is left as written.
 - **`result.json`.** Once the tip is claimed, it is written whatever
   happens, including after an interrupt, and also for a failed claim. It
   names the settled checkpoint the next registration continues from, and

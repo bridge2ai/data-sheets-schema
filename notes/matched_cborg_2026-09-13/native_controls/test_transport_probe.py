@@ -156,15 +156,15 @@ class Clock:
 
 
 class Upstream:
-    def __init__(self, reply, *, clock=None, count=None):
-        self.reply, self.clock, self.count = reply, clock, count
+    def __init__(self, reply, *, clock=None, count=None, display_only=False):
+        self.reply, self.clock, self.count, self.display_only = reply, clock, count, display_only
         self.requests, self.counts, self.tips = [], [], []
 
     def clients(self, manifest, key):
         assert key == 'offline-provider-key'
         def count_tokens(**fields):
             self.counts.append(fields)
-            if self.count is not None:
+            if self.count is not None and (not self.display_only or 'display' in fields['thinking']):
                 raise self.count
             return SimpleNamespace(input_tokens=100)
         sdk = SimpleNamespace(messages=SimpleNamespace(count_tokens=count_tokens),
@@ -230,8 +230,9 @@ def test_a_completed_probe_claims_the_tip_before_it_sends_and_times_the_stream(p
     assert sent.content == probe.derive_request(lin.raw) and sent.url.raw_path == b'/v1/messages?beta=true'
     assert sent.headers['anthropic-beta'] == BETA and sent.headers['x-headroom-bypass'] == 'true'
     assert sent.headers['x-api-key'] == 'offline-provider-key'
-    # One free count before the tip moved, one the proxy made; both of the exact request.
-    assert len(upstream.counts) == 2 and all(c['thinking'] == probe.VARIATION['to'] for c in upstream.counts)
+    # The retained request as a control, the probe request before the tip moved, then the proxy's own count.
+    assert [c['thinking'] for c in upstream.counts] == [probe.VARIATION['from'], probe.VARIATION['to'],
+                                                        probe.VARIATION['to']]
     [exchange] = result['provider_exchanges']
     assert exchange['headers_seconds'] == 300.0 and exchange['first_chunk_seconds'] == 301.0
     assert exchange['headers_to_first_chunk_seconds'] == 1.0 and exchange['last_chunk_seconds'] == 310.0
@@ -331,9 +332,10 @@ def test_a_count_refusal_is_a_finding_with_the_tip_untouched(prepared):
     before = prepared.state.read_bytes()
     refusal = anthropic.BadRequestError('count refused', body=None,
         response=httpx.Response(400, request=httpx.Request('POST', 'https://offline.invalid')))
-    upstream = Upstream(lambda request, clock: pytest.fail('provider reached'), count=refusal)
+    upstream = Upstream(lambda request, clock: pytest.fail('provider reached'), count=refusal, display_only=True)
     result = run(prepared, upstream)
     assert (result['finding'], result['tip_claimed'], result['count_error']) == ('count_refused', False, 'BadRequestError')
+    assert result['count_status'] == 400 and result['control_count'] == 100
     assert prepared.state.read_bytes() == before and not (prepared.root / 'probe' / 'billing.json').exists()
     assert not (prepared.root / 'probe' / 'sequence_claim').exists()
 
@@ -519,6 +521,7 @@ def test_a_snapshot_failure_still_settles_and_writes_the_record(prepared, monkey
     monkeypatch.setattr(probe, 'relative', lambda record: (_ for _ in ()).throw(RuntimeError('changed size')))
     result = run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
     assert result['provider_exchanges'] is None and result['settlement']['status'] == 'reconciled'
+    assert result['finding'] == 'unrecorded'
 
 
 def test_no_standing_debit_while_a_handler_may_still_hold_the_request(prepared, monkeypatch):
@@ -554,7 +557,7 @@ def test_a_registration_with_another_attempt_cap_is_refused(prepared):
 
 def test_the_source_interpreter_is_recorded(prepared):
     manifest = json.loads(prepared.registration.read_text())
-    assert set(manifest['source_python']) == {'path', 'resolved', 'sha256', 'same_binary'}
+    assert set(manifest['source_python']) == {'path', 'resolved', 'sha256', 'same_binary', 'same_environment'}
 
 
 # --- a tip whose own ledger is settled, with no reconciliation -----------------------------------
@@ -643,3 +646,92 @@ def test_the_timing_wrapper_over_the_real_bounded_worker(prepared):
     assert seen == ['/v1/messages?beta=true'] and result['finding'] == 'completed'
     assert exchange['headers_seconds'] >= 0.3 and exchange['diagnostics'] == {'x-litellm-attempted-retries': '2'}
     assert exchange['thinking_text_chars'] == len(THINKING)
+
+
+
+# --- the third review (#2493) --------------------------------------------------------------------
+
+def test_a_400_on_the_original_request_too_is_not_a_finding(prepared):
+    """A key or budget error refuses both counts, and says nothing about the display."""
+    refusal = anthropic.BadRequestError('budget exceeded', body=None,
+        response=httpx.Response(400, request=httpx.Request('POST', 'https://offline.invalid')))
+    with pytest.raises(anthropic.BadRequestError):
+        run(prepared, Upstream(lambda request, clock: pytest.fail('provider reached'), count=refusal))
+    assert not any((prepared.root / 'probe' / name).exists() for name in ('result.json', 'billing.json'))
+
+
+def _unfinished(monkeypatch):
+    from contextlib import contextmanager
+    from native_proxy import NativeProxy
+    real = NativeProxy.running
+    @contextmanager
+    def running(self, **kwargs):
+        with real(self, **kwargs) as url:
+            yield url
+        self.unfinished_handlers = 1
+    monkeypatch.setattr(NativeProxy, 'running', running)
+
+
+def test_settled_rows_need_no_closed_runtime(prepared, monkeypatch):
+    _unfinished(monkeypatch)
+    result = run(prepared, Upstream(ok_stream))
+    assert result['settlement'] == {'status': 'settled'}
+    assert result['successor_continues_from'] == str(prepared.root / 'probe' / 'billing.json')
+
+
+def test_settle_applies_the_deferred_debit_after_the_process_has_exited(prepared, monkeypatch):
+    _unfinished(monkeypatch)
+    result = run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
+    assert result['settlement']['reason'] == probe.HANDLER_RUNNING
+    with SequenceLock(str(prepared.state) + '.lock').acquire(timeout=0):
+        with pytest.raises(BudgetStop, match='still running'):
+            probe.settle(prepared.registration, prepared.identity)
+    settlement = probe.settle(prepared.registration, prepared.identity)
+    assert settlement['status'] == 'reconciled' and settlement['successor_continues_from'] == settlement['path']
+    receipt = json.loads(Path(settlement['receipt']).read_text())
+    assert receipt['runtime_at_settlement']['basis'].startswith('the probe process had exited')
+    with pytest.raises(BudgetStop, match='no settlement deferred'):
+        probe.settle(prepared.registration, prepared.identity)
+
+
+def test_the_single_use_guard_is_checked_again_under_the_lock(prepared, monkeypatch):
+    real = SequenceLock.acquire
+    def racing(self, timeout=0):
+        (prepared.root / 'probe' / 'billing.json').write_text('{}')   # another run got here first
+        return real(self, timeout=timeout)
+    monkeypatch.setattr(SequenceLock, 'acquire', racing)
+    with pytest.raises(BudgetStop, match='runs once'):
+        run(prepared, Upstream(lambda request, clock: pytest.fail('provider reached')))
+
+
+def test_a_failed_state_replace_removes_the_probes_temporary(prepared, monkeypatch):
+    before = prepared.state.read_bytes()
+    real = Path.replace
+    def failing(self, target):
+        if Path(target) == prepared.state:
+            raise OSError('replace refused')
+        return real(self, target)
+    monkeypatch.setattr(Path, 'replace', failing)
+    with pytest.raises(OSError):
+        run(prepared, Upstream(lambda request, clock: pytest.fail('provider reached')))
+    assert prepared.state.read_bytes() == before
+    assert not prepared.state.with_name(prepared.state.name + '.tmp').exists()
+    result = json.loads((prepared.root / 'probe' / 'result.json').read_text())
+    assert (result['finding'], result['tip_claimed']) == ('claim_failed', False)
+
+
+def test_a_controller_error_is_not_called_an_interrupt(prepared, monkeypatch):
+    monkeypatch.setattr(httpx.Client, 'post', lambda self, *a, **k: (_ for _ in ()).throw(RuntimeError('bind')))
+    with pytest.raises(RuntimeError):
+        run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
+    assert json.loads((prepared.root / 'probe' / 'result.json').read_text())['finding'] == 'controller_error'
+
+
+@pytest.mark.parametrize('field, value', [('registration_sha256', 'f' * 64), ('ledger_path', '/elsewhere/billing.json'),
+                                          ('source_registration_sha256', 'e' * 64), ('schema_version', 2)])
+def test_each_field_of_the_tip_must_name_the_predecessor(prepared, field, value):
+    manifest = json.loads(prepared.registration.read_text())
+    tip = json.loads(prepared.state.read_text())
+    probe.check_tip_state(manifest, json.dumps(tip).encode())
+    with pytest.raises(BudgetStop, match='not the probe'):
+        probe.check_tip_state(manifest, json.dumps({**tip, field: value}).encode())

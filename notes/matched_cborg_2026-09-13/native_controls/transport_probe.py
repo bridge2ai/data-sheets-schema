@@ -25,6 +25,7 @@ the earlier tip fails at its sequence guard instead of forking the budget
           --tip-checkpoint C --sequence-state S --origin-registration O
           [--tip-reconciliation-receipt RECEIPT] --authorization A
   run --registration DIR/registration.json --sha256 HEX
+  settle --registration DIR/registration.json --sha256 HEX
 
 `run` executes at most once per registration and never resends. The proxy's
 stall policy counts a 5xx, or a failure after the request left, at its whole
@@ -33,8 +34,11 @@ reservation in a separate checkpoint with its own debit receipt, under the
 maintainer's standing authorization, once the proxy has closed with no
 handler running. The ledger itself is never rewritten. `result.json` is
 written after the tip is claimed, whatever happens, and for a refused or
-failed claim. A failure before the claim writes nothing and leaves the probe
-runnable.
+failed claim. A failure before the ledger import writes nothing and leaves the
+probe runnable. From the import on, the registration is consumed; the tip
+moves only with the claim. When a proxy handler outlived shutdown with a row
+still pending, `settle` applies the deferred debit once the probe's process
+has exited.
 `result.json` records sizes, times, event types, bounded CBORG diagnostic
 headers and accounting, and no request, response or thinking text. The
 proxy's evidence folders under `attempt/requests/` keep the full request and
@@ -95,6 +99,8 @@ STALL_POLICY = {'count_attempts': 3, 'max_stall_debits': 1}
 CLIENT_MARGIN_SECONDS = 120
 DEBIT_KIND = 'user_authorized_full_reservation_debit'
 AUTHORIZATIONS = ('probe', 'full_reservation_debit')
+RUN_ONCE = ('attempt', 'billing.json', 'result.json', 'reconciled_billing.json', 'sequence_claim',
+            'sequence_claim_failed.json')
 QUOTE_FIELDS = ('exact_response', 'quoted_request', 'recorded_at')
 LIBRARIES = ('httpx', 'httpcore', 'h11', 'anthropic', 'certifi')
 # The transport the source registration pinned; the probe runs the same bytes.
@@ -196,7 +202,9 @@ def source_python(source):
     resolved = Path(path).resolve() if isinstance(path, str) and Path(path).exists() else None
     return {'path': path, 'resolved': str(resolved) if resolved else None,
             'sha256': sha(resolved) if resolved else None,
-            'same_binary': bool(resolved) and sha(resolved) == sha(Path(sys.executable).resolve())}
+            'same_binary': bool(resolved) and sha(resolved) == sha(Path(sys.executable).resolve()),
+            # The same base binary can run another environment's libraries.
+            'same_environment': path == sys.executable}
 
 
 def client_timeout(source):
@@ -564,8 +572,6 @@ def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, run
     so the timing record is always written (#2473). A handler still running at
     shutdown could still hold the request, so it is left to a person, as the
     audit's own reconciliation check requires a closed runtime."""
-    if runtime['unfinished_handlers'] != 0 or runtime['proxy_shutdown_complete'] is not True:
-        return {'status': 'needs_person', 'reason': 'a proxy handler was still running at shutdown'}
     raw = ledger_path.read_bytes()
     state = strict_json(raw)
     rows = state.get('requests') if isinstance(state, dict) else None
@@ -574,6 +580,9 @@ def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, run
     unsettled = [row for row in rows if row.get('status') != 'settled']
     if not unsettled:
         return {'status': 'settled'}
+    if runtime['unfinished_handlers'] != 0 or runtime['proxy_shutdown_complete'] is not True:
+        # `settle` applies the debit once the probe's process has exited.
+        return {'status': 'needs_person', 'reason': HANDLER_RUNNING}
     if len(unsettled) != 1 or unsettled[0].get('status') != 'pending' or unsettled[0].get('attempt') != attempt:
         return {'status': 'needs_person', 'reason': 'unsettled rows the standing debit does not cover',
                 'rows': [{k: row.get(k) for k in ('id', 'status', 'reserved_usd', 'cost_usd')} for row in unsettled]}
@@ -608,9 +617,9 @@ def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, run
             'receipt_sha256': sha(receipt_path), 'request_id': row['id'], 'budget_debit_usd': row['reserved_usd']}
 
 
-def free_count(sdk, probe):
-    """One free count of the exact request before anything is claimed (#2472)."""
-    request = strict_json(probe)
+def free_count(sdk, raw):
+    """One free count of a request exactly as it would be sent (#2472)."""
+    request = strict_json(raw)
     fields = {k: v for k, v in request.items() if k in COUNT_FIELDS}
     return sdk.messages.count_tokens(**fields, timeout=POLICY_COUNT_TRY_SECONDS).input_tokens
 
@@ -647,8 +656,7 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
     ledger_path = Path(manifest['budget']['ledger_path'])
     if ledger_path != out / 'billing.json':
         raise BudgetStop('probe ledger is not beside its registration')
-    if any((out / name).exists() for name in ('attempt', 'billing.json', 'result.json', 'reconciled_billing.json',
-                                             'sequence_claim', 'sequence_claim_failed.json')):
+    if any((out / name).exists() for name in RUN_ONCE):
         raise BudgetStop('probe already ran; a probe runs once')
     verify_pins(manifest)
     if not set(implementation_paths()) <= set(manifest['pinned_files']):
@@ -675,6 +683,8 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
     origin = {'registration_sha256': sha(manifest['parent']['registration']), 'ledger_path': lineage['origin_ledger']}
     lock = audit_registration.SequenceLock(str(state_path) + '.lock')
     with lock.acquire(timeout=0):
+        if any((out / name).exists() for name in RUN_ONCE):
+            raise BudgetStop('probe already ran; a probe runs once')
         previous_raw = state_path.read_bytes()
         if digest(previous_raw) != lineage['sequence_state_sha256']:
             raise BudgetStop('the lineage tip moved since the probe was prepared')
@@ -694,23 +704,28 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
                                 upstream_read_timeout_seconds=source.get('native_upstream_read_timeout_seconds'),
                                 stall_policy=manifest['transport']['stall_policy'],
                                 response_buffer=source.get('native_response_buffer'))
+            # The retained request first, as a control: a key, budget or route
+            # error refuses it too, and leaves the probe runnable (#2493).
+            control = free_count(sdk, raw)
             counted = free_count(sdk, probe)
         except Exception as error:
             close_quietly(sdk, upstream)
-            if count_refused(error):
+            if 'control' in locals() and count_refused(error):
                 # The provider refused to count the request as it would be
                 # sent: a finding, with nothing claimed or spent. Anything
                 # else leaves nothing written, so the probe can run later.
                 result = {'kind': RESULT_KIND, 'registration_sha256': expected_sha256, 'code_commit': commit,
                           'started_at': started_at, 'ended_at': now(), 'finding': 'count_refused',
-                          'count_error': type(error).__name__, 'tip_claimed': False, 'provider_exchanges': [],
-                          'scope': SCOPE}
+                          'count_error': type(error).__name__,
+                          'count_status': getattr(error, 'status_code', None), 'control_count': control,
+                          'tip_claimed': False, 'provider_exchanges': [], 'scope': SCOPE}
                 write_new(out / 'result.json', result)
                 return result
             raise
-        # The ledger exists before the tip names it, as continuation_sequence
-        # orders it. A failure after this leaves the tip unchanged beside an
-        # unspent ledger, never a tip naming a ledger that does not exist.
+        # The ledger exists before the tip names it. A failure after this
+        # leaves the tip unchanged beside an unspent ledger that nothing reads
+        # and that consumes this registration, never a tip naming a ledger
+        # that does not exist.
         try:
             ledger.continue_from(continuation['checkpoint'], **carried)
         except BaseException:
@@ -719,15 +734,24 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
         value = {'schema_version': 1, 'registration_sha256': expected_sha256,
                  'ledger_path': budget['ledger_path'], 'parent_checkpoint_sha256': continuation['sha256'],
                  'source_registration_sha256': origin['registration_sha256']}
+        temporary, written = state_path.with_name(state_path.name + '.tmp'), False
         try:
-            temporary = state_path.with_name(state_path.name + '.tmp')
             with temporary.open('x') as handle:
+                written = True
                 json.dump(value, handle, indent=2)
                 handle.write('\n')
             temporary.replace(state_path)
+            written = False
             sequence_claim.record(claim, value, previous_raw)
         except BaseException as error:
             close_quietly(sdk, upstream)
+            if written:
+                # Our own temporary, never replaced: left behind it would
+                # block every later owner's claim.
+                try:
+                    temporary.unlink()
+                except OSError:
+                    pass
             try:
                 claimed = strict_json(state_path.read_bytes()).get('registration_sha256') == expected_sha256
             except Exception:
@@ -780,7 +804,9 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
             result = {
                 'kind': RESULT_KIND, 'registration_sha256': expected_sha256, 'code_commit': commit,
                 'started_at': started_at, 'ended_at': now(), 'tip_claimed': True, 'free_count': counted,
-                'finding': 'interrupted' if interrupted is not None else finding(snapshot, client),
+                'finding': ('interrupted' if isinstance(interrupted, (KeyboardInterrupt, SystemExit)) else
+                            'controller_error' if interrupted is not None else
+                            'unrecorded' if exchanges is None else finding(snapshot, client)),
                 'client': client, 'interrupted': type(interrupted).__name__ if interrupted is not None else None,
                 'provider_exchanges': exchanges, 'exchanges_complete': runtime['unfinished_handlers'] == 0,
                 'runtime': runtime, 'thinking_display': thinking_display(snapshot),
@@ -798,6 +824,40 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
         return result
 
 
+HANDLER_RUNNING = 'a proxy handler was still running at shutdown'
+
+
+def settle(registration, expected_sha256):
+    """Apply the standing debit the runtime gate deferred, once the probe's process has exited (#2493).
+
+    A running probe holds the sequence lock for its whole run, so holding it
+    here shows the process, and with it every proxy handler, has ended."""
+    registration = Path(registration).resolve()
+    if digest(registration.read_bytes()) != expected_sha256:
+        raise BudgetStop('probe registration differs from the bound hash')
+    manifest = read_json(registration)
+    out = registration.parent
+    result = read_json(out / 'result.json')
+    if (manifest.get('kind') != KIND or (result.get('settlement') or {}).get('reason') != HANDLER_RUNNING
+            or (out / 'reconciled_billing.json').exists() or (out / 'settlement_after_exit.json').exists()):
+        raise BudgetStop('this probe has no settlement deferred for a running handler')
+    state_path = Path(manifest['sequence_state'])
+    try:
+        lock = audit_registration.SequenceLock(str(state_path) + '.lock').acquire(timeout=0)
+    except Exception as error:
+        raise BudgetStop('the sequence lock is held; the probe or another owner is still running') from error
+    with lock:
+        runtime = {'proxy_initialized': True, 'proxy_shutdown_complete': True, 'unfinished_handlers': 0,
+                   'basis': 'the probe process had exited: its sequence lock was free'}
+        settlement = settle_pending(Path(manifest['budget']['ledger_path']), out, manifest, expected_sha256,
+                                    f'{expected_sha256}:{ATTEMPT}', runtime)
+        settlement['successor_continues_from'] = (settlement['path'] if settlement['status'] == 'reconciled' else
+                                                  manifest['budget']['ledger_path']
+                                                  if settlement['status'] == 'settled' else None)
+        write_new(out / 'settlement_after_exit.json', settlement)
+    return settlement
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     commands = parser.add_subparsers(dest='command', required=True)
@@ -809,7 +869,13 @@ def main(argv=None):
     go = commands.add_parser('run')
     go.add_argument('--registration', required=True)
     go.add_argument('--sha256', required=True)
+    later = commands.add_parser('settle')
+    later.add_argument('--registration', required=True)
+    later.add_argument('--sha256', required=True)
     args = parser.parse_args(argv)
+    if args.command == 'settle':
+        print(json.dumps(settle(args.registration, args.sha256), indent=2))
+        return 0
     if args.command == 'prepare':
         path, identity = prepare(args.out, source_registration=args.source_registration,
                                  source_request=args.source_request, tip_checkpoint=args.tip_checkpoint,
