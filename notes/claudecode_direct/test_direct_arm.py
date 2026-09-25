@@ -1342,3 +1342,38 @@ def test_the_outcome_and_rate_readers_skip_malformed_shapes(tmp_path):
     assert [e["tool_use_id"] for e in outcome["uncovered_tool_calls"]] == ["a"]
     aborted = launcher.child_outcome(tmp_path, control_log)                               # a directory, not a file
     assert aborted["uncovered_tool_calls"] is None and aborted["child_outcome_note"].startswith("outcome unreadable:")
+
+
+def test_a_command_policy_that_cannot_be_built_is_a_named_stop_that_leaves_nothing(tmp_path, monkeypatch):
+    """#2369, #2317: a registered spelling the runtime would refuse stops preparation before anything stays."""
+    monkeypatch.chdir(ROOT)
+    for name in preparation.FORBIDDEN_ENVIRONMENT:
+        monkeypatch.delenv(name, raising=False)
+    fake = fake_runtime(tmp_path)
+    monkeypatch.setattr(preparation, "auth_evidence", lambda executable, env: dict(AUTH))
+
+    def refused(job, python, repository):
+        raise ValueError("a registered command is not admitted as written (synthetic): x")
+    monkeypatch.setattr(preparation, "build_command_policy", refused)
+    with pytest.raises(preparation.DirectStop, match="command policy cannot be built: a registered command is not admitted"):
+        preparation.build(arguments(tmp_path, fake, output=tmp_path / "r"))
+    assert not (tmp_path / "r").exists()
+    assert not list(tmp_path.glob(".r.auth-probe-*"))
+
+
+def test_a_respelled_prescribed_call_denied_by_the_controller_does_not_disqualify(prepared):
+    """#2369: under the registered version-5 policy a respelling is the controller's refusal."""
+    path, registration, fake = prepared
+    job = registration["generation"]["jobs"][0]
+    policy = registration["per_job_command_policy"][job["id"]]
+    assert policy["version"] == 5 and policy["literal_admission"] == 1
+    receipts = next(line.strip() for line in Path(job["instruction"]).read_text().splitlines()
+                    if " -m data_sheets_schema.cli" in line and "receipts check" in line)
+    classified = launcher.native.classify_denials(
+        [{"tool_name": "Bash", "tool_use_id": "respelled", "tool_input": {"command": receipts + " --label $X"}},
+         {"tool_name": "Bash", "tool_use_id": "registered", "tool_input": {"command": receipts}}],
+        instruction_text="", python=policy["python"], repository="/unused", output_directories=[],
+        readable_inputs=[], command_policy=policy)
+    assert [d["classification"] for d in classified] == ["not_prescribed", "prescribed"]
+    assert launcher.native.denial_problems(classified) == [
+        f"denied prescribed call (Bash): {classified[1]['basis']}"]

@@ -18,7 +18,13 @@ from native_readonly import PROGRAMS, lookup_policy, lookup_guidance
 from native_control import CONTRACT
 
 
-POLICY_VERSION = 4
+POLICY_VERSION = 5
+
+#: A policy carrying this marker has the controller refuse, before
+#: execution, a prescribed call the runtime's own permission rules would not
+#: admit as written (#2369). Recorded policies without it (versions 1 to 4,
+#: and the audit, evaluation and finalization policies) replay unchanged.
+LITERAL_ADMISSION = 1
 
 
 def program_key(program):
@@ -101,6 +107,265 @@ def permission_arguments(policy):
                                     separators=(',', ':'))]
 
 
+def _runtime_rules(policy):
+    """The job's Bash permission rules as the pinned runtime reads them
+    (Claude Code 2.1.272, #2369): the rule envelope's escapes decoded in the
+    runtime's order, `\\(` and `\\)` before `\\\\`. A rule ending ` *`
+    admits its text alone or followed by a space and anything, with runs of
+    spaces and tabs read as one space and `\\\\` and `\\*` read as escapes;
+    any other rule admits exactly its text."""
+    exact, prefixes = set(), []
+    for rule in policy.get('allowed_tools') or ():
+        if not (isinstance(rule, str) and rule.startswith('Bash(') and rule.endswith(')')):
+            continue
+        content = rule[5:-1].replace('\\(', '(').replace('\\)', ')').replace('\\\\', '\\')
+        if content.endswith(' *'):
+            prefix = re.sub(r'\\([\\*])', r'\1', content[:-2])
+            prefixes.append(re.sub(r'[ \t]+', ' ', prefix))
+        else:
+            exact.add(content)
+    return exact, prefixes
+
+
+#: Whitespace the runtime's parser treats as too complex to match literally.
+_UNICODE_SPACES = frozenset('\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008'
+                            '\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\ufeff')
+
+
+def _unread_shell(text):
+    """Why the runtime would not read `text` literally, else None (#2369).
+
+    The pinned runtime parses a command before matching it, and a command it
+    finds too complex is admitted only by an exact rule equal to it: any `$`
+    expansion or variable, a backtick, a backslash escape or continuation, a
+    comment, a glob, brace or tilde, a control character or non-ASCII
+    whitespace. The shell's own quoting decides which characters count: none
+    inside single quotes, `$`, backtick and backslash inside double quotes.
+    Registered spellings never contain any of these outside single quotes:
+    `shlex.join` quotes every such character."""
+    quote = None
+    word_start = True
+    for ch in text:
+        if (ord(ch) < 0x20 and ch not in '\t\n') or ch == '\x7f' or ch in _UNICODE_SPACES:
+            return 'a control character or non-ASCII whitespace'
+        if quote == "'":
+            quote = None if ch == "'" else quote
+            continue
+        if ch == '$':
+            return 'a $ variable or expansion'
+        if ch == '`':
+            return 'a backtick'
+        if ch == '\\':
+            return 'a backslash escape or line continuation'
+        if quote == '"':
+            quote = None if ch == '"' else quote
+            continue
+        if ch == '\n':
+            return 'a line break outside quotes'
+        if ch == '#' and word_start:
+            return 'a comment'
+        if ch in '{}*?[]~':
+            return 'a glob, brace or tilde expansion'
+        if ch in '\'"':
+            quote = ch
+        word_start = ch in ' \t'
+    return 'an unterminated quote' if quote else None
+
+
+#: What the pinned runtime (Claude Code 2.1.272) checks on the raw command
+#: text before it parses, whatever the quoting (`oEe`, copied from the
+#: binary; #2369, #2398 review). Any match makes the command too complex, and
+#: a too-complex command is admitted only by an exact rule equal to it.
+_RAW_TOO_COMPLEX = (
+    (re.compile('[\ud800-\udfff]'), 'a lone surrogate'),
+    (re.compile(r'[\x00-\x08\x0B-\x1F\x7F]'), 'a control character'),
+    (re.compile('[\u00a0\u1680\u2000-\u200b\u2028\u2029\u202f\u205f\u3000\ufeff]'), 'non-ASCII whitespace'),
+    (re.compile(r'\\[ \t]|(?:^|[^ \t\\])(?:\\\\)*\\\n|[ \t](?:\\\\)+\\\n'), 'backslash-escaped whitespace'),
+    (re.compile(r'~\['), 'a zsh ~[ expansion'),
+    (re.compile(r'(?:^|[\s;&|])=[a-zA-Z_]'), 'a zsh =command expansion'),
+    (re.compile(r'<\d*-\d*>'), 'a zsh <N-M> range'),
+)
+#: The runtime does not parse a command longer than this many UTF-16 units.
+_RUNTIME_PARSE_LIMIT = 10_000
+#: `Gm`, tested on the text with quoted braces masked (`Hm`).
+_BRACE_WITH_QUOTE = re.compile('\\{[^}]*[\'"]')
+#: `ii`, tested on the raw text of an argument joined from adjacent pieces:
+#: a quoted JSON object written `--opt='{…,…}'`, or one an apostrophe splits
+#: into `'…'"'"'…'`, is read as brace expansion. The #2308 refusal. The class
+#: is JavaScript's `\s`, spelled out: Python's also matches U+0085 (#2398).
+_JS_SPACE = '\\t\\n\\v\\f\\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff'
+_CONCATENATED_BRACE = re.compile('\\{[^' + _JS_SPACE + ']*(,|\\.\\.)[^' + _JS_SPACE + ']*\\}')
+#: `si` and `ai`: a joined argument whose brace body carries an escaped brace.
+_CONCATENATED_ESCAPED_BRACE = (re.compile(r'\{[^{]*\\}'), re.compile(r'\{[^}]*\\\{'))
+#: `oin` and `sin`, tested again on a joined argument's value with its quotes
+#: removed (post-collapse).
+_COLLAPSED_TOO_COMPLEX = ((re.compile(r'~\['), 'a zsh ~[ expansion once quotes are removed'),
+                          (re.compile(r'(?:^|[\s;&|])=[a-zA-Z_]'), 'a zsh =command expansion once quotes are removed'))
+#: `t6n`: an argument naming a process environment is a semantics failure.
+_PROC_ENVIRON = re.compile(r'/proc/.*/environ')
+
+#: Text the runtime re-quotes from its arguments before matching an argument
+#: rule (`ep`): a newline, or `$` and a name, even inside single quotes.
+_REBUILT_FROM_ARGUMENTS = re.compile(r'\$[A-Za-z_]')
+#: What JavaScript's `trim()` removes, which is not Python's `strip()`.
+_JS_TRIM = '\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff'
+
+
+def _mask_quoted_braces(text):
+    """The runtime's `Hm`: braces inside quotes, backticks or comments hidden."""
+    if '{' not in text:
+        return text
+    out = []
+    single = double = backtick = False
+    word_start = True
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ''
+        if backtick:
+            if ch == '\\' and nxt in ('`', '\\', '$'):
+                out += [ch, nxt]; i += 2
+            else:
+                if ch == '`':
+                    backtick = False
+                out.append(' ' if ch == '{' else ch); i += 1
+        elif single:
+            if ch == "'":
+                single = False
+            out.append(' ' if ch == '{' else ch); i += 1
+        elif double:
+            if ch == '\\' and nxt in ('"', '\\', '`'):
+                out += [ch, nxt]; i += 2
+            elif ch == '`':
+                backtick = True; out.append(ch); i += 1
+            else:
+                if ch == '"':
+                    double = False
+                out.append(' ' if ch == '{' else ch); i += 1
+        elif ch == '\\' and i + 1 < len(text):
+            out += [ch, nxt]
+            if nxt != '\n':
+                word_start = False
+            i += 2
+        elif ch == '#' and word_start:
+            while i < len(text) and text[i] != '\n':
+                out.append(text[i]); i += 1
+            word_start = True
+        elif ch == '`':
+            backtick = True; word_start = False; out.append(ch); i += 1
+        else:
+            if ch == "'":
+                single = True
+            elif ch == '"':
+                double = True
+            word_start = ch in ' \t\n;|&()<>'
+            out.append(ch); i += 1
+    return ''.join(out)
+
+
+def _raw_words(text):
+    """Each word's raw text, quotes included, the number of adjacent pieces
+    (an unquoted run, a single- or double-quoted string) it joins, and its
+    value with the quotes removed."""
+    words, current, value, pieces, piece, quote = [], [], [], 0, None, None
+    for ch in text:
+        if quote:
+            current.append(ch)
+            if ch == quote:
+                quote, piece = None, None
+            else:
+                value.append(ch)
+            continue
+        if ch in ' \t\n':
+            if current:
+                words.append((''.join(current), pieces, ''.join(value)))
+            current, value, pieces, piece = [], [], 0, None
+            continue
+        if ch in '\'"':
+            quote, pieces = ch, pieces + 1
+        else:
+            if piece != 'bare':
+                piece, pieces = 'bare', pieces + 1
+            value.append(ch)
+        current.append(ch)
+    if current:
+        words.append((''.join(current), pieces, ''.join(value)))
+    return words
+
+
+def _utf16_length(text):
+    """The length JavaScript reports, without encoding: a lone surrogate
+    cannot be encoded, and the runtime refuses it rather than failing."""
+    return sum(2 if ord(ch) > 0xFFFF else 1 for ch in text)
+
+
+def _too_complex(text):
+    """Why the runtime would find `text` too complex to match by an argument
+    rule, from its own pre-parse and argument checks, else None."""
+    if _utf16_length(text) > _RUNTIME_PARSE_LIMIT:
+        return 'longer than the runtime parses (10,000 characters)'
+    for pattern, reason in _RAW_TOO_COMPLEX:
+        if pattern.search(text):
+            return reason
+    if _BRACE_WITH_QUOTE.search(_mask_quoted_braces(text)):
+        return 'a brace followed by a quote'
+    for word, pieces, value in _raw_words(text):
+        if pieces == 1 and word == '=':
+            return 'a bare = argument the runtime cannot parse'
+        if pieces > 1:
+            if _CONCATENATED_BRACE.search(word):
+                return 'a brace pattern in an argument joined from quoted pieces'
+            if any(pattern.search(word) for pattern in _CONCATENATED_ESCAPED_BRACE):
+                return 'an escaped brace in an argument joined from quoted pieces'
+            for pattern, reason in _COLLAPSED_TOO_COMPLEX:
+                if pattern.search(value):
+                    return reason
+    return None
+
+
+def runtime_literal_problem(command, policy):
+    """Why the runtime's permission rules would not admit `command` as
+    written, else None (#2369). Mirrors the pinned runtime's matcher and the
+    checks before it closely enough to refuse whatever it refuses; where
+    fidelity is uncertain it refuses too, which costs the model one retry and
+    never disqualifies the run. An exact rule admits its own text even when
+    the runtime finds that text too complex; an argument rule admits only
+    text it parses and does not re-quote."""
+    text = command.strip(_JS_TRIM)
+    exact, prefixes = _runtime_rules(policy)
+    if text in exact:
+        return None
+    reason = _too_complex(command) or _unread_shell(text)
+    if reason:
+        return reason
+    if '\n' in text or _REBUILT_FROM_ARGUMENTS.search(text):
+        return 'text the runtime re-quotes from its arguments before matching an argument rule'
+    tokens, _ = _simple_command(text)
+    if any(_PROC_ENVIRON.search(token) for token in tokens or ()):
+        return 'an argument naming a process environment, which the runtime refuses'
+    normal = re.sub(r'[ \t]+', ' ', text)
+    if any(normal == prefix or normal.startswith(prefix + ' ') for prefix in prefixes):
+        return None
+    return 'a spelling no registered permission rule admits'
+
+
+def _registered_spelling(tokens, python, policy):
+    """The registered spelling of the command `tokens` means, for a refusal
+    to name (#2369)."""
+    if tokens[1] == '-c':
+        key = program_key(tokens[2])
+        codes = [p['code'] for p in policy['programs'] if program_key(p['code']) == key]
+        spellings = [e for e in policy['command_examples']
+                     if (lambda words: len(words) > 2 and words[2] in codes)(shlex.split(e))]
+        return ' or '.join(spellings) if spellings else shlex.join([python, '-c', *codes[:1]])
+    if tokens[2] == 'data_sheets_schema.cli':
+        args = tokens[3:]
+        root = args[:2] if args[:1] == ['--manifest'] else []
+        roster = _roster_command(args[len(root):])
+        return shlex.join([python, '-m', 'data_sheets_schema.cli', *root, *roster.split()]) + ' …'
+    return shlex.join([python, '-m', tokens[2]]) + ' …'
+
+
 def build_command_policy(job, python, repository):
     """Freeze one policy from the actual instruction and its selected playbook."""
     spec = job['render_spec']
@@ -154,15 +419,40 @@ def build_command_policy(job, python, repository):
         rules.append(_literal_rule(shlex.join([python, '-m', f'data_sheets_schema.{module}']), arguments=True))
     for program, arguments in sorted(programs.items()):
         rules.append(_literal_rule(shlex.join([python, '-c', program]), arguments=arguments))
-    return {'version': POLICY_VERSION, 'pretool_control': dict(CONTRACT),
-            'python': python, 'manifest_paths': sorted(manifests),
-            'programs': [{'code': code, 'arguments': arguments} for code, arguments in sorted(programs.items())],
-            'command_examples': sorted(examples), 'allowed_tools': rules,
-            'readonly_lookups': lookup_policy(job, repository)}
+    policy = {'version': POLICY_VERSION, 'literal_admission': LITERAL_ADMISSION,
+              'pretool_control': dict(CONTRACT),
+              'python': python, 'manifest_paths': sorted(manifests),
+              'programs': [{'code': code, 'arguments': arguments} for code, arguments in sorted(programs.items())],
+              'command_examples': sorted(examples), 'allowed_tools': rules,
+              'readonly_lookups': lookup_policy(job, repository)}
+    # Every registered spelling must be admitted as written, or the run would
+    # be refused at that step after the spend before it (#2282, #2369): the
+    # bound inline programs, and every command line of the instruction that
+    # begins with the registered interpreter. Inline programs and lines with
+    # a placeholder are covered by the bound examples.
+    heads = sorted({python, shlex.quote(python)}, key=len, reverse=True)
+    lines = [line.strip() for line in instruction.splitlines()]
+    candidates = sorted(examples) + [
+        line for line in lines
+        if any(line.startswith(head + ' ') for head in heads)
+        and not any(line.startswith(head + ' -c ') for head in heads)
+        and not re.search(r'<[a-z_]+>', line)]
+    for command in candidates:
+        verdict, basis = classify_program_command(command, python, set(), policy)
+        if verdict != 'prescribed':
+            raise ValueError(f'a registered command is not admitted as written ({basis}): {command[:200]}')
+    return policy
 
 
 def command_guidance(policy):
     """Give the runtime the exact shell spellings its permissions admit."""
+    literal = ('Any other spelling of a registered command (a double-quoted or '
+               'reflowed program, a $ variable or expansion, a line continuation, '
+               'a comment) is refused before it runs. That refusal does not '
+               'disqualify the attempt; where the call keeps the registered '
+               'interpreter and command, it names the registered spelling, so run '
+               'the command again exactly as registered. '
+               if policy.get('literal_admission') == LITERAL_ADMISSION else '')
     return (
         '\n\n## Registered inline Python commands\n\n'
         'Use the exact commands below for the instruction and executable playbook\'s '
@@ -172,7 +462,7 @@ def command_guidance(policy):
         'adjusted for the registered full/core paths and schemas only. Other '
         'Python programs are not permitted. CLI roster commands retain the '
         'instruction\'s arguments; a root --manifest option must name this job\'s '
-        'registered manifest.\n\n' +
+        'registered manifest. ' + literal + '\n\n' +
         '\n\n'.join('```bash\n' + command + '\n```' for command in policy['command_examples']) + '\n' +
         lookup_guidance() +
         '\n\n## File tools\n\n'
@@ -303,6 +593,21 @@ def _roster_command(args):
 
 # This classifier is pure: path-based lookups stay in the timed controller worker.
 def classify_program_command(command, python, programs, command_policy=None):
+    verdict, basis = _classify_by_meaning(command, python, programs, command_policy)
+    if (verdict == 'prescribed' and isinstance(command_policy, dict)
+            and command_policy.get('literal_admission') == LITERAL_ADMISSION):
+        # The meaning is registered, but the runtime admits only the
+        # registered text (#2369). A refusal here is the controller's, which
+        # does not disqualify the run and lets the model copy the spelling.
+        problem = runtime_literal_problem(command, command_policy)
+        if problem:
+            spelling = _registered_spelling(_simple_command(command)[0], python, command_policy)
+            return 'not_prescribed', (f'{basis}, respelled: {problem}. This refusal does not disqualify '
+                                      f'the attempt; run the registered spelling exactly: {spelling}')
+    return verdict, basis
+
+
+def _classify_by_meaning(command, python, programs, command_policy=None):
     tokens, reason = _simple_command(command)
     if tokens is None:
         return 'not_prescribed', reason
@@ -315,7 +620,9 @@ def classify_program_command(command, python, programs, command_policy=None):
         if command_policy is not None:
             try:
                 key = program_key(tokens[2])
-            except (SyntaxError, ValueError, TypeError):
+            except (SyntaxError, ValueError, TypeError, RecursionError, MemoryError):
+                # A program nested too deeply to parse is refused, not a
+                # controller failure that stops the run (#2398 review).
                 return 'not_prescribed', 'an invalid inline Python program'
             for program in command_policy['programs']:
                 if key == program_key(program['code']):

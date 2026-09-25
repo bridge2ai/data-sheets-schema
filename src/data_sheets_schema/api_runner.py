@@ -634,6 +634,20 @@ class RunSpec:
         """Whether the runtime follows the shared agentic playbook."""
         return self.runtime in AGENTIC_RUNTIMES
 
+    @property
+    def writes_receipt(self) -> bool:
+        """Whether this run's procedure writes a coverage receipt (#2350).
+
+        An agentic specification that binds the receipt's destination
+        (renderer 4 and later) prescribes the receipt check whatever its
+        condition, as the playbook does (#709). Any other run writes one only
+        under a receipt condition (#710). One answer for the record the
+        recorder writes and the block the launcher recomputes, so the two
+        agree by construction."""
+        if self.is_agentic and self._agentic_artifact_paths is not None:
+            return "receipt" in self._agentic_artifact_paths
+        return self.condition in RECEIPT_CONDITIONS
+
     @classmethod
     def from_render_spec(cls, recorded: dict[str, Any], *, project: str,
                          method: str, label: str) -> "RunSpec":
@@ -2361,7 +2375,7 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
     # (#1367 review, must-fix 6).
     return block_for(spec.full_path, _receipt_path(spec), spec.bundle,
                      inputs.get("bundle_md5"),
-                     spec.condition in RECEIPT_CONDITIONS,
+                     spec.writes_receipt,
                      manifest=(Path(chunks["path"]) if chunks and chunks.get("path")
                                else spec.chunk_manifest),
                      bundle_rel_path=inputs.get("bundle_path"),
@@ -6626,7 +6640,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         schema_digest_md5=schema_digest.fingerprint(
             schema_digest.digest_text("Dataset", profile=spec.profile_obj)),
         profile=spec.profile_selection,
-        receipt_expected=spec.condition in RECEIPT_CONDITIONS,
+        receipt_expected=spec.writes_receipt,
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "
              "was set on the request and is therefore observed, not asserted."

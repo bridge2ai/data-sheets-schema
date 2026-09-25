@@ -58,6 +58,33 @@ callback now applies the same classifier used by the terminal audit (#2055).
 It denies commands outside the registered grammar without changing them.
 Prescribed commands still pass through the runtime's own permission check.
 
+That check admits only the registered text, while the classifier matches a
+program by its meaning and a roster command by its words. From policy
+version 5 the callback also refuses, before execution, a prescribed call the
+job's permission rules would not admit as written (#2369): a double-quoted or
+reflowed program, a `$` variable or expansion, a line continuation, a
+comment, a glob, or any spelling no rule matches. It mirrors the pinned
+runtime's matcher: the rule envelope's escapes, exact rules, argument rules
+that read runs of spaces as one, and the text the runtime parses as too
+complex. The refusal names the registered spelling, and a refusal by the
+controller does not disqualify the run, so the model can copy the spelling
+and continue. Before #2369 such a call reached the runtime, which refused
+it, and the refusal counted as a denied prescribed command. Preparation
+refuses a registration whose own spellings the check would refuse.
+Recorded version-4 policies, and the audit, evaluation and finalization
+policies, replay unchanged. The check also ports the runtime's own checks on
+the raw text before it parses (a backslash before whitespace, `=` or `~[` or
+`<N-M>` forms, zero-width and other non-ASCII whitespace, a newline and `#`
+inside an argument, the 10,000-character parse limit) and its brace check on
+an argument joined from quoted pieces. That brace check is the apostrophe
+refusal of #2308: an apostrophe splits a single-quoted JSON specification
+into pieces, and so does `--opt='{…}'`. Text the runtime re-quotes from its
+arguments before matching (a newline, or `$` and a name) is admitted only by
+an exact rule. The review of #2398 found these checks by reading the pinned
+binary; a newly pinned runtime must be checked the same way, and the offline
+probes rerun, before registering. Not modelled: the parser's time and node
+budget (#2398 review).
+
 The same callback now checks `Read` and `Write` targets (#2061). File reads are
 limited to the registered input/playbook closure and this job's output files;
 writes are limited to output files. The provenance inventory of other agent

@@ -32,7 +32,10 @@ from data_sheets_schema import api_runner, chunking
 def fixture(work):
     bundle = work / 'source.txt'
     bundle.write_text('Synthetic external clinical cohort protocol.\n' * 12)
-    manifest = work / "source child's manifest.yaml"
+    # No apostrophe: a render specification that carries one is split into
+    # quoted pieces the runtime reads as brace expansion, so preparation now
+    # refuses it (#2308, #2398 review). The space stays.
+    manifest = work / "source child manifest.yaml"
     manifest.write_text(yaml.safe_dump({'projects': {'EXTERNAL': {
         'bundle': str(bundle), 'sources': [{'id': 'protocol', 'source_type': 'documentation', 'priority': 1}]}},
         'naming': {'EXTERNAL': {'canonical_label': 'External cohort'}}}))
@@ -40,7 +43,7 @@ def fixture(work):
     spec = api_runner.RunSpec(project='EXTERNAL', arm='baseline', method='claudecode_agent',
         bundle=bundle, manifest=manifest, chunk_manifest=chunks, out_dir=work / 'outputs',
         label='offline-native-permissions', condition='generic_v9', profile='neutral',
-        render_version=12, runtime='Claude Code')
+        render_version=12, runtime='Claude Code', prompt_text_env=True)
     instruction = work / 'instruction.md'
     instruction.write_text(spec.instruction)
     job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
@@ -114,6 +117,24 @@ def cases_for(job, policy):
     bad['modified_program'] = [policy['python'], '-c', report + '\nprint("EXTRA")']
     bad['other_record'] = [policy['python'], '-c', report.replace(job['outputs']['full'], '/another/record.yaml')]
     cases.extend({'id': name, 'allow': False, 'command': shlex.join(argv)} for name, argv in bad.items())
+    # Respellings of registered commands the runtime's rules would not admit
+    # as written: the controller refuses them first, without disqualifying
+    # (#2369). Runs of spaces between registered words are admitted, as the
+    # runtime's matcher reads them as one space.
+    cases.extend([
+        {'id': 'respelled_brace_argument', 'allow': False, 'by': 'controller',
+         'command': shlex.join([*cli, 'agents', 'playbook']) + " --out='{a,b}'"},
+        {'id': 'respelled_manifest_double_quoted', 'allow': False, 'by': 'controller',
+         'command': ' '.join([shlex.join(cli), '--manifest', '"' + job['manifest'] + '"', 'receipts', 'check'])},
+        {'id': 'respelled_roster_variable', 'allow': False, 'by': 'controller',
+         'command': shlex.join([*cli, 'agents', 'playbook']) + ' --out "$HOME"'},
+        {'id': 'respelled_program_reflowed', 'allow': False, 'by': 'controller',
+         'command': shlex.join([policy['python'], '-c', report + '\n'])},
+        {'id': 'respelled_continuation', 'allow': False, 'by': 'controller',
+         'command': shlex.join([*cli, 'agents']) + ' \\\n  playbook'},
+        {'id': 'roster_runs_of_spaces', 'allow': True,
+         'command': '  '.join([shlex.quote(policy['python']), '-m', 'data_sheets_schema.cli', 'agents', 'playbook'])},
+    ])
     cases.extend([
         {'id': 'multiple_print_ranges', 'allow': False,
          'command': shlex.join(['sed', '-n', '1p;2p', job['bundle']])},
@@ -312,10 +333,21 @@ def main():
     denied = {d['tool_use_id'] for d in terminals[0].get('permission_denials', [])}
     results = {c['tool_use_id']: c for e in events if isinstance(e.get('message'), dict)
                for c in e['message'].get('content', []) if isinstance(c, dict) and c.get('type') == 'tool_result'}
+    runtime_denials = {e.get('tool_use_id') for e in events
+                       if e.get('type') == 'system' and e.get('subtype') == 'permission_denied'}
+
+    def by_controller(case):
+        """A respelling must be the controller's refusal, never the runtime's (#2369)."""
+        if case.get('by') != 'controller':
+            return True
+        content = results.get(case['id'], {}).get('content')
+        text = content if isinstance(content, str) else json.dumps(content)
+        return case['id'] not in runtime_denials and text.startswith('Outside the registered tool policy')
     checked = [{**case, 'denied': case['id'] in denied,
                 'tool_result_error': results.get(case['id'], {}).get('is_error'),
                 'passed': case['id'] in results and ((case['id'] not in denied) == case['allow'])
-                          and (not case['allow'] or bool(results[case['id']].get('is_error')) == case.get('expected_error', False))} for case in cases]
+                          and (not case['allow'] or bool(results[case['id']].get('is_error')) == case.get('expected_error', False))
+                          and by_controller(case)} for case in cases]
     conformance = command_history(events, policy, terminals[0].get('permission_denials', []))
     controls = check_control_history(events, root/'control.jsonl', policy, _classify_command, config)
     from data_sheets_schema import agentic_observed
