@@ -660,15 +660,17 @@ It stages the receipt and the reconciled checkpoint. The receipt names the
 authorization record by path and hash, and the file its accounting
 observation hashes. It then runs `validate_audit_reconciliation` on them, as
 the next registration will. If the validator refuses, nothing is left
-behind. If it accepts:
+behind but the markers directory itself. If it accepts:
 1. the tool creates the output directory exclusively;
 2. it writes the marker;
 3. it links the files into place, with the files, the marker and the output
    directory fsynced.
 
 A crash after the marker leaves it naming what to inspect. A rerun then
-reports whether that output was published. The output may not sit inside
-the stopped audit's tree or beside the sequence state.
+reports whether that output was published. A marker that cannot be written
+removes itself, the output directory and the staged files. The output may
+not sit inside the stopped audit's tree, or inside the sequence state's
+directory.
 
 Only this tool writes markers. A reconciliation made any other way, such as
 audit27's by hand, carries none, so do not run the tool on a stop that

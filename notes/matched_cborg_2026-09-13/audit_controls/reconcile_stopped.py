@@ -16,8 +16,9 @@ first requires:
 
 The recording is an exclusive marker beside the sequence state. It is written
 after the staged files validate and before they are published, so a crash
-leaves a marker that names what to inspect. A stop reconciled by hand before this tool existed
-carries no marker, so do not run the tool on it. The stopped audit's
+leaves a marker that names what to inspect. Only this tool writes markers: a
+reconciliation made any other way, such as audit27's by hand, carries none, so
+do not run the tool on a stop that already has one. The stopped audit's
 registration, ledger, result and evidence are never modified.
 
   python -m audit_controls.reconcile_stopped --registration STOPPED/registration.json --out NEW_DIR
@@ -37,6 +38,8 @@ from pathlib import Path
 import shutil
 import sys
 import tempfile
+
+from filelock import Timeout
 
 from budgeted_cborg import BudgetStop, attempt_identity
 from . import registration as r
@@ -80,20 +83,27 @@ def evidence(folder, row):
         raise BudgetStop('the evidence folder does not hold the pending request')
     for name in ('http_status.json', 'admission.json'):
         path = folder / name
-        if path.is_symlink():
-            raise BudgetStop('the pending request\'s evidence is a symlink')
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise BudgetStop('the pending request\'s evidence is not a regular file')
         if path.is_file():
             return {'file': name, 'sha256': r.sha(path)}
     raise BudgetStop('the pending request has no accounting observation')
 
 
 def _write(path, value):
-    """Exclusive, durable write of a new file."""
+    """Exclusive, durable write of a new file; a failed write removes what it created."""
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644)
-    with os.fdopen(descriptor, 'w') as stream:
-        stream.write(json.dumps(value, indent=2) + '\n')
-        stream.flush()
-        os.fsync(stream.fileno())
+    try:
+        with os.fdopen(descriptor, 'w') as stream:
+            stream.write(json.dumps(value, indent=2) + '\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+    except BaseException:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+        raise
 
 
 def _sync(directory):
@@ -124,8 +134,6 @@ def reconcile(source_path, out, *, recorded_at=None):
     if Path(out).is_symlink():
         raise BudgetStop('the reconciliation directory is a symlink')
     out = Path(out).resolve()
-    if out.exists():
-        raise BudgetStop('reconciliation directory already exists; a reconciliation is written once')
     if source_path.parent == out or source_path.parent in out.parents:
         raise BudgetStop('the reconciliation is written outside the stopped audit\'s tree')
     source = r.read_json(source_path)
@@ -139,9 +147,14 @@ def reconcile(source_path, out, *, recorded_at=None):
     markers = state_path.parent / MARKERS
     if out == state_path.parent or state_path.parent in out.parents:
         raise BudgetStop('the reconciliation is written outside the sequence state\'s directory')
+    if out.exists():
+        # A rerun into the same directory says what an earlier run left.
+        earlier = markers / f'{source_sha}.json'
+        raise BudgetStop(previous_reconciliation(earlier) if earlier.exists() else
+                         'reconciliation directory already exists; a reconciliation is written once')
     try:
         lock = r.SequenceLock(str(state_path) + '.lock').acquire(timeout=0)
-    except Exception as error:
+    except Timeout as error:
         raise BudgetStop('the sequence lock is held; another registration or reconciliation is running') from error
     with lock:
         tip = r.read_json(state_path)
@@ -214,7 +227,10 @@ def reconcile(source_path, out, *, recorded_at=None):
                             'checkpoint_sha256': hashes['checkpoint'], 'receipt_sha256': hashes['receipt'],
                             'recorded_at': recorded_at})
         except BaseException:
-            os.rmdir(out)
+            try:
+                os.rmdir(out)
+            except OSError:
+                pass
             shutil.rmtree(scratch, ignore_errors=True)
             raise
         _sync(markers)

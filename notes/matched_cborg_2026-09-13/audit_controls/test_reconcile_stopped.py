@@ -272,5 +272,55 @@ def test_a_symlinked_observation_is_refused_not_skipped(stopped, tmp_path):
     moved = tmp_path / 'http_status.json'
     (folder / 'http_status.json').rename(moved)
     os.symlink(moved, folder / 'http_status.json')
-    with pytest.raises(BudgetStop, match='symlink'):
+    with pytest.raises(BudgetStop, match='not a regular file'):
+        reconcile(reg, reg.parent.parent / 'reconciliation')
+
+
+# --- the final review (#2499) --------------------------------------------------------------------
+
+def test_a_marker_that_cannot_be_written_leaves_nothing_and_a_rerun_reconciles(stopped, monkeypatch):
+    m, first, reg, request_id, folder = stopped
+    out = reg.parent.parent / 'reconciliation'
+    real = tool.os.fsync
+    calls = []
+    def failing(descriptor):
+        calls.append(descriptor)
+        if len(calls) == 3:                   # receipt, checkpoint, then the marker
+            raise OSError('disk full')
+        return real(descriptor)
+    monkeypatch.setattr(tool.os, 'fsync', failing)
+    with pytest.raises(OSError):
+        reconcile(reg, out)
+    monkeypatch.undo()
+    assert not out.exists() and not list(out.parent.glob('.reconciliation-*'))
+    assert not list((Path(first['sequence_state']).parent / tool.MARKERS).glob('*'))
+    assert reconcile(reg, out)['request_id'] == request_id
+
+
+def test_an_unwritable_markers_directory_refuses_before_staging(stopped):
+    m, first, reg, request_id, folder = stopped
+    markers = Path(first['sequence_state']).parent / tool.MARKERS
+    markers.mkdir()
+    markers.chmod(0o500)
+    try:
+        with pytest.raises(BudgetStop, match='not a writable directory'):
+            reconcile(reg, reg.parent.parent / 'reconciliation')
+    finally:
+        markers.chmod(0o700)
+    assert not list(reg.parent.parent.glob('.reconciliation-*'))
+
+
+def test_a_rerun_into_the_same_directory_reports_the_earlier_reconciliation(stopped):
+    m, first, reg, request_id, folder = stopped
+    out = reg.parent.parent / 'reconciliation'
+    reconcile(reg, out)
+    with pytest.raises(BudgetStop, match='already reconciled; its checkpoint is in'):
+        reconcile(reg, out)
+
+
+def test_an_observation_that_is_not_a_regular_file_is_refused(stopped):
+    m, first, reg, request_id, folder = stopped
+    (folder / 'http_status.json').unlink()
+    (folder / 'http_status.json').mkdir()
+    with pytest.raises(BudgetStop, match='not a regular file'):
         reconcile(reg, reg.parent.parent / 'reconciliation')
