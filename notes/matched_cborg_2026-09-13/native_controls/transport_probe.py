@@ -5,39 +5,50 @@ the source registration's own provider transport, changing exactly one field:
 `thinking` gains `"display": "summarized"`. It records when the provider's
 response headers, first event, first thinking text and last byte arrived, so a
 stream that outlives CBORG's advertised 270-second first-chunk limit can be
-told from one that does not.
+told from one that does not. One request, one sample, no control: a result
+before 270 seconds says nothing about whether the display made the difference.
 
-The probe is a link in the native lineage, not a side charge. Holding the
-lineage's sequence lock, it checks that the tip is still the one it was
-prepared against, takes the tip with a durable sequence claim (#2137),
-continues the tip's settled checkpoint in its own ledger under the same caps,
-and admits one request. A successor must continue from the probe's settled
-ledger. An audit prepared from the old tip fails at its sequence guard instead
-of forking the budget.
+The probe is a link in the native lineage, not a side charge. Its
+registration has an audit continuation's budget block and carries the tip's
+budget amendment, so the audit's own validators check its predecessor: the
+settled checkpoint, its reconciliation (`validate_audit_reconciliation`) and
+the amendment (`validate_predecessor`). Holding the lineage's sequence lock,
+it does all free work first: a dry import of the checkpoint, the clients, the
+proxy and one free token count of the exact request. Only then does it take
+the tip with a durable sequence claim (#2137), continue the checkpoint in its
+own ledger and admit the one paid request. A successor continues from the
+probe's settled ledger. An audit prepared from the earlier tip fails at its
+sequence guard instead of forking the budget (#2469).
 
   prepare --out DIR --source-registration R --source-request DIR
           --tip-checkpoint C --sequence-state S --origin-registration O
-          --authorization A
+          [--tip-reconciliation-receipt RECEIPT] --authorization A
   run --registration DIR/registration.json --sha256 HEX
 
 `run` executes at most once per registration and never resends. The proxy's
 stall policy counts a 5xx, or a failure after the request left, at its whole
 reservation. A row still pending afterwards is settled at its whole
-reservation in a separate reconciled checkpoint, under the maintainer's
-standing authorization. The ledger itself is never rewritten. Nothing of the
-request, response or thinking text is printed or copied into the result. The
-result records sizes, times, event types and accounting only.
+reservation in a separate checkpoint with its own debit receipt, under the
+maintainer's standing authorization. The ledger itself is never rewritten.
+`result.json` records sizes, times, event types, bounded CBORG diagnostic
+headers and accounting, and no request, response or thinking text. The
+proxy's evidence folders under `attempt/requests/` keep the full request and
+response, including any thinking summaries, as every native attempt does.
 """
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 import argparse
 import hashlib
+import importlib.metadata
 import json
 import os
 from pathlib import Path
+import re
+import ssl
 import subprocess
 import sys
+import tempfile
 import time
 
 import httpx
@@ -48,17 +59,21 @@ for _path in (str(HERE), str(BASE)):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
+import budget_amendment  # noqa: E402
 from budgeted_cborg import (BudgetStop, LEGACY_UPSTREAM_READ_SECONDS, Ledger, POLICY_COUNT_PAUSE_SECONDS,  # noqa: E402
-                            POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS, provider_context_headers, write_new)
+                            POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS, provider_context_headers,
+                            write_new)
 import native_proxy  # noqa: E402
 from native_proxy import NativeProxy  # noqa: E402
 import sequence_claim  # noqa: E402
+import audit_controls  # noqa: E402
 from audit_controls import bounded_stream, bounded_transport  # noqa: E402
 from audit_controls import registration as audit_registration  # noqa: E402
 from audit_controls import transport as audit_transport  # noqa: E402
 
 KIND = 'd4d_native_transport_probe_v1'
 RESULT_KIND = 'd4d_native_transport_probe_result_v1'
+AUDIT_KIND = 'd4d_native_audit_continuation'
 ATTEMPT = 'transport_probe'
 STAGE = 'transport_probe'
 ORIGINAL_THINKING = b'"thinking":{"type":"adaptive"}'
@@ -68,12 +83,30 @@ VARIATION = {'field': 'thinking', 'from': {'type': 'adaptive'},
 # Claude Code 2.1.272 posts its model requests to this path (#2463).
 REQUEST_PATH = '/v1/messages?beta=true'
 PROTOCOL_HEADERS = ('anthropic-version', 'anthropic-beta')
+COUNT_FIELDS = ('model', 'system', 'messages', 'tools', 'tool_choice', 'thinking')
 PROBE_CAP_USD = '5'
+# The probe's own policy: one debit covers its one request.
 STALL_POLICY = {'count_attempts': 3, 'max_stall_debits': 1}
 CLIENT_MARGIN_SECONDS = 120
-STANDING_DEBIT_BASIS = 'standing_authorized_full_reservation_debit'
+DEBIT_KIND = 'user_authorized_full_reservation_debit'
 AUTHORIZATIONS = ('probe', 'full_reservation_debit')
 QUOTE_FIELDS = ('exact_response', 'quoted_request', 'recorded_at')
+LIBRARIES = ('httpx', 'httpcore', 'h11', 'anthropic', 'certifi')
+# The transport the source registration pinned; the probe runs the same bytes.
+TRANSPORT_MODULES = ('notes/matched_cborg_2026-09-13/native_controls/native_proxy.py',
+                     'notes/matched_cborg_2026-09-13/budgeted_cborg.py',
+                     'notes/matched_cborg_2026-09-13/audit_controls/transport.py',
+                     'notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py',
+                     'notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py')
+# Provider diagnostics kept in the result: named headers, bounded plain values.
+DIAGNOSTIC_HEADERS = ('x-litellm-call-id', 'x-litellm-attempted-retries', 'x-litellm-attempted-fallbacks',
+                      'x-litellm-response-duration-ms', 'x-litellm-overhead-duration-ms', 'x-litellm-version',
+                      'x-litellm-model-group', 'x-litellm-model-id', 'x-litellm-timeout', 'retry-after')
+DIAGNOSTIC_VALUE = re.compile(r'[A-Za-z0-9._:+-]{1,96}')
+NOT_SENT = frozenset({'ConnectError', 'ConnectTimeout', 'PoolTimeout', 'UnsupportedProtocol'})
+SCOPE = ('One request and one sample, with no control. The replayed history\'s thinking blocks were '
+         'produced with thinking omitted, so this tests the same history under a new display. Header '
+         'times include the bounded worker\'s start and upload.')
 
 
 def sha(path):
@@ -136,10 +169,19 @@ def derive_request(raw):
 def implementation_paths():
     """Every module whose bytes decide what the probe sends, counts or records."""
     modules = [Path(__file__), Path(native_proxy.__file__), Path(sys.modules[Ledger.__module__].__file__),
-               Path(sequence_claim.__file__), Path(audit_registration.__file__), Path(audit_transport.__file__),
-               Path(bounded_stream.__file__), Path(bounded_transport.__file__),
-               Path(sys.modules['data_sheets_schema.stream_evidence'].__file__)]
+               Path(budget_amendment.__file__), Path(sequence_claim.__file__), Path(audit_controls.__file__),
+               Path(audit_registration.__file__), Path(audit_transport.__file__), Path(bounded_stream.__file__),
+               Path(bounded_transport.__file__), Path(sys.modules['data_sheets_schema.stream_evidence'].__file__)]
     return sorted({str(p.resolve()) for p in modules} | {str(p) for p in sequence_claim.IMPLEMENTATIONS})
+
+
+def interpreter():
+    """The interpreter and libraries the bounded workers run under (#2475)."""
+    executable = Path(sys.executable).resolve()
+    return {'executable': sys.executable, 'resolved': str(executable), 'sha256': sha(executable),
+            'version': sys.version,
+            'libraries': {name: importlib.metadata.version(name) for name in LIBRARIES},
+            'openssl': ssl.OPENSSL_VERSION}
 
 
 def client_timeout(source):
@@ -165,6 +207,18 @@ def repository_state(paths, *, require_clean):
     return str(root), commit
 
 
+def source_transport(source):
+    """The source registration's pins for the transport modules, which must be this checkout's bytes."""
+    root, repository = Path(__file__).resolve().parents[3], Path(source['repository'])
+    pins = {}
+    for relative in TRANSPORT_MODULES:
+        pinned = source['pinned_files'].get(str(repository / relative))
+        if pinned is None or sha(root / relative) != pinned:
+            raise BudgetStop('probe transport differs from the source registration\'s pinned transport')
+        pins[relative] = pinned
+    return pins
+
+
 def validated_authorization(value):
     if not isinstance(value, dict) or set(value) != set(AUTHORIZATIONS):
         raise BudgetStop('probe authorization needs the probe and the full-reservation debit quotes')
@@ -176,40 +230,62 @@ def validated_authorization(value):
     return value
 
 
-def settled_total(state):
+def check_lineage(manifest):
+    """The predecessor, checked by the audit's own validators; returns (source, checkpoint state).
+
+    The checkpoint is the tip ledger itself, or its reconciliation, which
+    `validate_audit_reconciliation` recomputes from the source ledger and
+    receipt (#2471). Caps must equal the tip's in the checkpoint and the
+    source registration alike, and the inherited amendment must prove the
+    checkpoint (#2474)."""
+    budget = manifest['budget']
+    continuation = budget['continuation']
+    checkpoint = audit_registration.pinned(manifest, continuation['checkpoint'], continuation['sha256'])
+    bridge = continuation.get('reconciliation')
+    if bridge is not None:
+        state = audit_registration.validate_audit_reconciliation(manifest)
+        source_path = audit_registration.pinned(manifest, bridge['source_registration'])
+    else:
+        state = read_json(checkpoint)
+        source_path = audit_registration.pinned(manifest, str(checkpoint.with_name('registration.json')))
+    source = read_json(source_path)
     rows = state.get('requests')
-    if not isinstance(rows, list) or any(not isinstance(r, dict) or r.get('status') != 'settled' for r in rows):
-        raise BudgetStop('lineage tip checkpoint has an unsettled charge')
-    return sum((money(r.get('cost_usd')) for r in rows), Decimal(0))
+    if (source.get('kind') != AUDIT_KIND or state.get('manifest_sha256') != sha(source_path)
+            or not isinstance(rows, list) or any(not isinstance(r, dict) or r.get('status') != 'settled' for r in rows)):
+        raise BudgetStop('lineage tip checkpoint is not a settled audit checkpoint')
+    if bridge is None and Path(source['budget']['ledger_path']) != checkpoint:
+        raise BudgetStop('an unreconciled checkpoint must be the tip\'s own ledger')
+    origin = audit_registration.pinned(manifest, manifest['parent']['registration'])
+    if sha(Path(source['parent']['registration'])) != sha(origin):
+        raise BudgetStop('the tip descends from another origin')
+    for mine, tip, theirs in (('additional_usd', 'additional_cap_usd', 'additional_usd'),
+                              ('per_attempt_usd', 'attempt_cap_usd', 'per_attempt_usd')):
+        if not money(budget[mine]) == money(state[tip]) == money(source['budget'][theirs]):
+            raise BudgetStop('probe caps differ from the tip checkpoint or its registration')
+    if manifest.get('budget_amendment') != source.get('budget_amendment'):
+        raise BudgetStop('probe drops or changes its tip\'s budget amendment')
+    if 'budget_amendment' in manifest:
+        budget_amendment.validate_predecessor(manifest, state, checkpoint_sha256=continuation['sha256'])
+    total = sum((money(r.get('cost_usd')) for r in rows), Decimal(0))
+    if total != money(continuation['cost_usd']) or total + money(PROBE_CAP_USD) > money(budget['additional_usd']):
+        raise BudgetStop('probe cost or cap exceeds the lineage\'s remaining budget')
+    return source, state
 
 
-def check_tip(checkpoint, ledger, state, *, source_sha, origin_sha, ledger_sha):
-    """The checkpoint is the tip ledger with at most its one pending row settled at full reservation."""
-    if (state.get('schema_version') != 1 or state.get('registration_sha256') != source_sha
-            or state.get('source_registration_sha256') != origin_sha
-            or checkpoint.get('manifest_sha256') != source_sha or ledger.get('manifest_sha256') != source_sha):
-        raise BudgetStop('lineage tip does not name the source registration')
-    old, new = ledger.get('requests'), checkpoint.get('requests')
-    if not isinstance(old, list) or not isinstance(new, list) or len(old) != len(new):
-        raise BudgetStop('tip checkpoint rows differ from the tip ledger')
-    changed = [(a, b) for a, b in zip(old, new) if a != b]
-    if any(a.get('id') != b.get('id') for a, b in zip(old, new)):
-        raise BudgetStop('tip checkpoint reorders or replaces tip ledger rows')
-    if not changed:
-        return
-    if len(changed) != 1:
-        raise BudgetStop('tip checkpoint changes more than one tip ledger row')
-    before, after = changed[0]
-    reconciled = checkpoint.get('reconciled_from') or {}
-    if (before.get('status') != 'pending' or after.get('status') != 'settled'
-            or after.get('cost_usd') != before.get('reserved_usd') or after.get('provider_charge_confirmed') is not False
-            or after.get('request_sha256') != before.get('request_sha256')
-            or reconciled.get('checkpoint_sha256') != ledger_sha or reconciled.get('request_id') != before.get('id')):
-        raise BudgetStop('tip checkpoint does not settle the tip ledger\'s pending row at its reservation')
+def check_tip_state(manifest, raw):
+    """The live tip names the probe's predecessor."""
+    state, source = strict_json(raw), manifest['budget']['continuation']
+    tip = source['reconciliation']['source_registration'] if 'reconciliation' in source else str(
+        Path(source['checkpoint']).with_name('registration.json'))
+    ledger = source['reconciliation']['source_ledger'] if 'reconciliation' in source else source['checkpoint']
+    if (state.get('schema_version') != 1 or state.get('registration_sha256') != sha(tip)
+            or state.get('ledger_path') != ledger
+            or state.get('source_registration_sha256') != sha(manifest['parent']['registration'])):
+        raise BudgetStop('the lineage tip is not the probe\'s predecessor')
 
 
 def prepare(out, *, source_registration, source_request, tip_checkpoint, sequence_state, origin_registration,
-            authorization, require_clean=True):
+            authorization, tip_reconciliation_receipt=None, require_clean=True):
     out = Path(out).resolve()
     if out.exists():
         raise BudgetStop('probe directory already exists; a probe is prepared once')
@@ -217,58 +293,76 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
     checkpoint_path, state_path = Path(tip_checkpoint).resolve(), Path(sequence_state).resolve()
     origin_path, authorization_path = Path(origin_registration).resolve(), Path(authorization).resolve()
     source, origin = read_json(source_path), read_json(origin_path)
-    ledger_path = source_path.parent / 'billing.json'
     origin_ledger = Path(origin['budget']['ledger_path']).resolve()
     if origin_ledger.with_name('audit_sequence.json') != state_path:
         raise BudgetStop('sequence state is not the origin ledger\'s')
-    state, checkpoint, tip_ledger = read_json(state_path), read_json(checkpoint_path), read_json(ledger_path)
-    if Path(state.get('ledger_path', '')).resolve() != ledger_path:
-        raise BudgetStop('lineage tip names another ledger')
-    check_tip(checkpoint, tip_ledger, state, source_sha=sha(source_path), origin_sha=sha(origin_path),
-              ledger_sha=sha(ledger_path))
-    total = settled_total(checkpoint)
-    cap = money(checkpoint.get('additional_cap_usd'))
-    if total + money(PROBE_CAP_USD) > cap:
-        raise BudgetStop('probe cap exceeds the lineage\'s remaining budget')
+    tip_ledger = Path(source['budget']['ledger_path']).resolve()
     native, protocol = request_dir / 'native_request.json', request_dir / 'request_protocol.json'
     raw = native.read_bytes()
     probe = derive_request(raw)
-    if canonical_sha(raw) not in {row.get('request_sha256') for row in checkpoint['requests']}:
-        raise BudgetStop('retained request is not one the lineage admitted')
     if strict_json(raw).get('model') != source['model']['model']:
         raise BudgetStop('retained request model differs from its registration')
     headers = read_json(protocol)
     if any(not isinstance(headers.get(name), str) or not headers[name] for name in PROTOCOL_HEADERS):
         raise BudgetStop('retained request lacks its protocol headers')
     quotes = validated_authorization(read_json(authorization_path))
-    pinned = [source_path, native, protocol, checkpoint_path, ledger_path, origin_path, authorization_path]
-    ca = (source.get('provider_transport') or {}).get('ca_bundle')
-    if ca is not None:
-        pinned.append(Path(ca).resolve())
+    checkpoint = read_json(checkpoint_path)
+    continuation = {'checkpoint': str(checkpoint_path), 'sha256': sha(checkpoint_path),
+                    'cost_usd': str(sum((money(r.get('cost_usd')) for r in checkpoint['requests']), Decimal(0)))}
+    pinned = [source_path, native, protocol, checkpoint_path, tip_ledger, origin_path, authorization_path]
+    if checkpoint_path != tip_ledger:
+        if tip_reconciliation_receipt is None:
+            raise BudgetStop('a reconciled tip checkpoint needs its reconciliation receipt')
+        result = Path(source['job']['attempt_dir']) / 'result.json'
+        continuation['reconciliation'] = {'source_registration': str(source_path), 'source_ledger': str(tip_ledger),
+                                          'receipt': str(Path(tip_reconciliation_receipt).resolve()),
+                                          'result': str(result)}
+        pinned += [Path(tip_reconciliation_receipt).resolve(), result]
     implementation = implementation_paths()
     repository, commit = repository_state(implementation, require_clean=require_clean)
     manifest = {
         'kind': KIND, 'schema_version': 1, 'issue': 2463, 'prepared_at': now(),
-        'repository': repository, 'code_commit': commit, 'attempt': ATTEMPT,
+        'repository': repository, 'code_commit': commit, 'require_clean': require_clean,
+        'attempt': ATTEMPT, 'scope': SCOPE,
+        'parent': {'registration': str(origin_path)},
+        'sequence_state': str(state_path),
         'source': {'registration': str(source_path), 'registration_sha256': sha(source_path),
                    'request_dir': str(request_dir), 'native_request_sha256': digest(raw),
                    'canonical_request_sha256': canonical_sha(raw), 'request_protocol_sha256': sha(protocol)},
         'request': {'path': REQUEST_PATH, 'headers': {name: headers[name] for name in PROTOCOL_HEADERS},
                     'native_sha256': digest(probe), 'canonical_sha256': canonical_sha(probe),
                     'bytes': len(probe), 'variation': VARIATION},
-        'lineage': {'sequence_state': str(state_path), 'sequence_state_sha256': sha(state_path),
-                    'tip_ledger': str(ledger_path), 'tip_ledger_sha256': sha(ledger_path),
-                    'tip_checkpoint': str(checkpoint_path), 'tip_checkpoint_sha256': sha(checkpoint_path),
-                    'tip_cost_usd': str(total), 'origin_registration': str(origin_path),
-                    'origin_registration_sha256': sha(origin_path), 'origin_ledger': str(origin_ledger)},
-        'budget': {'ledger_path': str(out / 'billing.json'),
-                   'additional_cap_usd': checkpoint['additional_cap_usd'], 'attempt_cap_usd': PROBE_CAP_USD,
-                   'prices_per_token': source['budget']['prices_per_token']},
-        'transport': {'stall_policy': STALL_POLICY, 'client_timeout_seconds': client_timeout(source)},
+        'lineage': {'sequence_state_sha256': sha(state_path), 'origin_ledger': str(origin_ledger)},
+        # An audit continuation's budget block, so successor validators read it (#2474).
+        'budget': {'additional_usd': checkpoint['additional_cap_usd'],
+                   'per_attempt_usd': checkpoint['attempt_cap_usd'],
+                   'per_job_attempt_usd': {ATTEMPT: PROBE_CAP_USD},
+                   'prices_per_token': source['budget']['prices_per_token'],
+                   'ledger_path': str(out / 'billing.json'), 'continuation': continuation},
+        'transport': {'stall_policy': STALL_POLICY, 'client_timeout_seconds': client_timeout(source),
+                      'source_pins': source_transport(source)},
+        'runtime': interpreter(),
         'authorization': quotes,
         'sequence_claim': {'protocol': sequence_claim.PROTOCOL},
-        'pinned_files': {str(p): sha(p) for p in sorted({*map(str, pinned), *implementation})},
     }
+    budget_amendment.inherit(source, manifest)
+    pins = {str(p): sha(p) for p in {*map(str, pinned), *implementation, manifest['runtime']['resolved']}}
+    if 'budget_amendment' in manifest:
+        pins.update({str(p): sha(p) for p in budget_amendment.paths(manifest)})
+    ca = (source.get('provider_transport') or {}).get('ca_bundle')
+    if ca is not None:
+        pins[str(Path(ca).resolve())] = sha(ca)
+    if 'reconciliation' in continuation and 'audit_batches' in source:
+        # The reconciliation check re-verifies the stopped batch's closure
+        # through the source's own pins, as an audit successor's does.
+        from audit_controls.batch_native import require_closed_batch_runtime
+        pins.update(source['pinned_files'])
+        pins.update({str(p): sha(p) for p in require_closed_batch_runtime(source, read_json(result))})
+    manifest['pinned_files'] = dict(sorted(pins.items()))
+    source, state = check_lineage(manifest)
+    check_tip_state(manifest, state_path.read_bytes())
+    if canonical_sha(raw) not in {row.get('request_sha256') for row in state['requests']}:
+        raise BudgetStop('retained request is not one the lineage admitted')
     out.mkdir(parents=True)
     raw_manifest = (json.dumps(manifest, indent=2, sort_keys=True) + '\n').encode()
     (out / 'registration.json').write_bytes(raw_manifest)
@@ -276,18 +370,23 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
 
 
 class EventTimes:
-    """Arrival times of the stream's events; keeps counts, never text."""
+    """Arrival times of the stream's events; keeps counts, never text, and never raises (#2473)."""
     def __init__(self, record, clock):
         self.record, self.clock, self.buffer = record, clock, b''
         record.update(chunks=0, bytes=0, first_chunk=None, last_chunk=None, largest_gap_seconds=0.0,
-                      events={}, unparsed_frames=0, thinking_text_chars=0, first_thinking_text=None,
-                      output_tokens=None, stop_reason=None, message_usage=None)
+                      events={}, unparsed_frames=0, timing_errors=0, thinking_text_chars=0,
+                      first_thinking_text=None, output_tokens=None, stop_reason=None, message_usage=None)
 
     def chunk(self, raw):
+        try:
+            self._chunk(raw)
+        except Exception:
+            self.record['timing_errors'] += 1
+
+    def _chunk(self, raw):
         at, record = self.clock(), self.record
-        previous = record['last_chunk'] if record['last_chunk'] is not None else record['headers']
-        if previous is not None:
-            record['largest_gap_seconds'] = max(record['largest_gap_seconds'], at - previous)
+        if record['last_chunk'] is not None:
+            record['largest_gap_seconds'] = max(record['largest_gap_seconds'], at - record['last_chunk'])
         record['chunks'] += 1
         record['bytes'] += len(raw)
         if record['first_chunk'] is None:
@@ -305,29 +404,33 @@ class EventTimes:
         try:
             value = json.loads(data)
             kind = value['type']
+            if not isinstance(kind, str):
+                raise TypeError
         except (ValueError, TypeError, KeyError):
             record['unparsed_frames'] += 1
             return
+        mapping = lambda name: value.get(name) if isinstance(value.get(name), dict) else {}
         key = kind
         if kind == 'content_block_start':
-            key += ':' + str((value.get('content_block') or {}).get('type'))
+            key += ':' + str(mapping('content_block').get('type'))
         elif kind == 'content_block_delta':
-            delta = value.get('delta') or {}
+            delta = mapping('delta')
             key += ':' + str(delta.get('type'))
-            if delta.get('type') == 'thinking_delta':
-                chars = len(delta.get('thinking') or '')
-                record['thinking_text_chars'] += chars
-                if chars and record['first_thinking_text'] is None:
+            if delta.get('type') == 'thinking_delta' and isinstance(delta.get('thinking'), str):
+                record['thinking_text_chars'] += len(delta['thinking'])
+                if delta['thinking'] and record['first_thinking_text'] is None:
                     record['first_thinking_text'] = at
         elif kind == 'message_start':
-            usage = (value.get('message') or {}).get('usage') or {}
-            record['message_usage'] = {k: v for k, v in usage.items() if type(v) is int}
+            usage = mapping('message').get('usage')
+            record['message_usage'] = ({k: v for k, v in usage.items() if type(v) is int}
+                                       if isinstance(usage, dict) else None)
         elif kind == 'message_delta':
-            usage = value.get('usage') or {}
+            usage = mapping('usage')
             if type(usage.get('output_tokens')) is int:
                 record['output_tokens'] = usage['output_tokens']
-            record['stop_reason'] = (value.get('delta') or {}).get('stop_reason')
-        entry = record['events'].setdefault(key, {'count': 0, 'first': at, 'last': at})
+            stop = mapping('delta').get('stop_reason')
+            record['stop_reason'] = stop if isinstance(stop, str) else None
+        entry = record['events'].setdefault(key[:80], {'count': 0, 'first': at, 'last': at})
         entry['count'] += 1
         entry['last'] = at
 
@@ -347,6 +450,16 @@ class TimedResponse:
         return getattr(self._response, name)
 
 
+def diagnostics(headers):
+    """Named CBORG diagnostic headers with bounded plain values (#2478)."""
+    kept = {}
+    for name in DIAGNOSTIC_HEADERS:
+        value = headers.get(name)
+        if isinstance(value, str) and DIAGNOSTIC_VALUE.fullmatch(value):
+            kept[name] = value
+    return kept
+
+
 class TimedUpstream:
     """Pass-through upstream that notes when bytes arrived; the bytes are the inner client's."""
     def __init__(self, inner, clock=time.monotonic):
@@ -358,14 +471,20 @@ class TimedUpstream:
     @contextmanager
     def stream(self, method, url, **kwargs):
         record = {'started': self.clock(), 'started_at': now(), 'headers': None, 'status': None,
-                  'error': None, 'error_at': None, 'ended': None}
+                  'diagnostics': {}, 'error': None, 'error_reason': None, 'error_at': None, 'ended': None}
         self.exchanges.append(record)
         try:
             with self.inner.stream(method, url, **kwargs) as response:
                 record['headers'], record['status'] = self.clock(), response.status_code
+                try:
+                    record['diagnostics'] = diagnostics(response.headers)
+                except Exception:
+                    pass
                 yield TimedResponse(response, record, self.clock)
         except BaseException as error:
             record['error'], record['error_at'] = type(error).__name__, self.clock()
+            if isinstance(error, BudgetStop):
+                record['error_reason'] = str(error)          # controller-authored, never provider text
             raise
         finally:
             record['ended'] = self.clock()
@@ -376,42 +495,19 @@ def relative(record):
     start = record['started']
     def at(value):
         return None if value is None else round(value - start, 3)
-    out = {k: v for k, v in record.items() if k not in {'started', 'headers', 'first_chunk', 'last_chunk',
-                                                        'first_thinking_text', 'error_at', 'ended', 'events'}}
-    out.update(headers_seconds=at(record['headers']), first_chunk_seconds=at(record.get('first_chunk')),
+    hidden = {'started', 'headers', 'first_chunk', 'last_chunk', 'first_thinking_text', 'error_at', 'ended', 'events'}
+    out = {k: v for k, v in record.items() if k not in hidden}
+    headers, first = record['headers'], record.get('first_chunk')
+    out.update(headers_seconds=at(headers), first_chunk_seconds=at(first),
+               headers_to_first_chunk_seconds=(None if headers is None or first is None else round(first - headers, 3)),
                last_chunk_seconds=at(record.get('last_chunk')),
                first_thinking_text_seconds=at(record.get('first_thinking_text')),
                error_seconds=at(record['error_at']), ended_seconds=at(record['ended']),
-               largest_gap_seconds=round(record.get('largest_gap_seconds') or 0.0, 3),
+               largest_gap_between_chunks_seconds=round(record.get('largest_gap_seconds') or 0.0, 3),
                events={k: {'count': v['count'], 'first_seconds': at(v['first']), 'last_seconds': at(v['last'])}
                        for k, v in (record.get('events') or {}).items()})
+    out.pop('largest_gap_seconds', None)
     return out
-
-
-def settle_pending(ledger_path, out, manifest, attempt):
-    """Settle the probe's one pending row at its whole reservation, in a new checkpoint."""
-    raw = ledger_path.read_bytes()
-    state = strict_json(raw)
-    open_rows = [row for row in state['requests'] if row.get('status') != 'settled']
-    if not open_rows:
-        return None
-    if len(open_rows) != 1 or open_rows[0].get('status') != 'pending' or open_rows[0].get('attempt') != attempt:
-        raise BudgetStop('probe ledger needs a person\'s reconciliation')
-    row = dict(open_rows[0])
-    quote = manifest['authorization']['full_reservation_debit']
-    row.update(status='settled', cost_usd=row['reserved_usd'], settled_at=now(),
-               settlement_basis=STANDING_DEBIT_BASIS, provider_charge_confirmed=False,
-               provider_charge_usd=None, provider_usage_is_final=False, released_excess_reservation_usd='0',
-               standing_authorization=dict(quote))
-    reconciled = {**state, 'requests': [row if r.get('id') == row['id'] else r for r in state['requests']],
-                  'reconciled_from': {'checkpoint_sha256': digest(raw), 'request_id': row['id'],
-                                      'previous_status': 'pending', 'settlement_basis': STANDING_DEBIT_BASIS,
-                                      'budget_debit_usd': row['reserved_usd'], 'provider_charge_confirmed': False,
-                                      'source_attempt_completed': False}}
-    path = out / 'reconciled_billing.json'
-    write_new(path, reconciled)
-    return {'path': str(path), 'sha256': sha(path), 'request_id': row['id'], 'basis': STANDING_DEBIT_BASIS,
-            'budget_debit_usd': row['reserved_usd']}
 
 
 def thinking_display(exchanges):
@@ -423,14 +519,92 @@ def thinking_display(exchanges):
 
 
 def finding(exchanges, client):
+    """One label for the provider exchange (#2473)."""
     if not exchanges:
-        return 'refused_before_send'
+        return 'not_sent'
     last = exchanges[-1]
-    if last['status'] == 200 and last.get('stop_reason') is not None and client.get('status') == 200:
-        return 'completed'
-    if last['status'] is not None and last['status'] != 200:
+    events = last.get('events') or {}
+    if last['status'] is None:
+        return 'not_sent' if last['error'] in NOT_SENT else 'no_response_headers'
+    if last['status'] != 200:
         return f"upstream_http_{last['status']}"
-    return 'transport_failure' if last['error'] else 'incomplete'
+    if 'error' in events:
+        return 'stream_error_event'
+    if 'message_stop' in events:
+        return 'completed' if client.get('status') == 200 else 'completed_not_delivered'
+    if not last.get('chunks'):
+        return 'no_stream'
+    return 'stream_cut' if last['error'] else 'stream_ended_without_stop'
+
+
+def settle_pending(ledger_path, out, manifest, registration_sha256, attempt):
+    """Settle the probe's one pending row at its whole reservation, in a new checkpoint.
+
+    Returns what happened; never raises on an outcome a person must resolve,
+    so the timing record is always written (#2473)."""
+    raw = ledger_path.read_bytes()
+    state = strict_json(raw)
+    rows = state.get('requests') if isinstance(state, dict) else None
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        return {'status': 'needs_person', 'reason': 'probe ledger is malformed'}
+    unsettled = [row for row in rows if row.get('status') != 'settled']
+    if not unsettled:
+        return {'status': 'settled'}
+    if len(unsettled) != 1 or unsettled[0].get('status') != 'pending' or unsettled[0].get('attempt') != attempt:
+        return {'status': 'needs_person', 'reason': 'unsettled rows the standing debit does not cover',
+                'rows': [{k: row.get(k) for k in ('id', 'status', 'reserved_usd', 'cost_usd')} for row in unsettled]}
+    row = dict(unsettled[0])
+    quote = manifest['authorization']['full_reservation_debit']
+    observation = ledger_path.parent / 'attempt' / 'requests' / row['id'] / 'admission.json'
+    receipt = {'kind': DEBIT_KIND, 'attempt': attempt, 'request_id': row['id'],
+               'request_sha256': row['request_sha256'], 'previous_reservation_usd': row['reserved_usd'],
+               'budget_debit_usd': row['reserved_usd'], 'released_excess_reservation_usd': '0',
+               'provider_charge_confirmed': False, 'provider_charge_usd': None, 'provider_usage_is_final': False,
+               'accounting_observation_sha256': sha(observation), 'new_provider_requests': 0,
+               'scientific_acceptance': False, 'source_attempt_completed': False,
+               'source_attempt_kind': ATTEMPT, 'source_ledger_modified': False,
+               'source_ledger_sha256': digest(raw), 'source_registration_sha256': registration_sha256,
+               'recorded_at': now(), 'user_authorization': {**quote, 'standing': True}}
+    receipt_path = out / 'debit_receipt.json'
+    write_new(receipt_path, receipt)
+    row.update(status='settled', cost_usd=row['reserved_usd'], settled_at=receipt['recorded_at'],
+               settlement_basis=DEBIT_KIND, reconciliation_receipt_sha256=sha(receipt_path),
+               accounting_observation_sha256=receipt['accounting_observation_sha256'],
+               provider_charge_confirmed=False, provider_charge_usd=None, provider_usage_is_final=False,
+               released_excess_reservation_usd='0', source_attempt_kind=ATTEMPT, source_attempt_outcome='stopped')
+    reconciled = {**state, 'requests': [row if r.get('id') == row['id'] else r for r in rows],
+                  'reconciled_from': {'checkpoint_sha256': digest(raw), 'receipt_sha256': sha(receipt_path),
+                                      'request_id': row['id'], 'previous_status': 'pending',
+                                      'budget_debit_usd': row['reserved_usd'], 'settlement_basis': DEBIT_KIND,
+                                      'provider_charge_confirmed': False, 'source_attempt_completed': False}}
+    path = out / 'reconciled_billing.json'
+    write_new(path, reconciled)
+    return {'status': 'reconciled', 'path': str(path), 'sha256': sha(path), 'receipt': str(receipt_path),
+            'receipt_sha256': sha(receipt_path), 'request_id': row['id'], 'budget_debit_usd': row['reserved_usd']}
+
+
+def free_count(sdk, probe):
+    """One free count of the exact request before anything is claimed (#2472)."""
+    request = strict_json(probe)
+    fields = {k: v for k, v in request.items() if k in COUNT_FIELDS}
+    return sdk.messages.count_tokens(**fields, timeout=POLICY_COUNT_TRY_SECONDS).input_tokens
+
+
+def count_refused(error):
+    """A definitive refusal of the request as it would be sent: a 4xx other than a rate limit."""
+    import anthropic
+    return (isinstance(error, anthropic.APIStatusError) and 400 <= error.status_code < 500
+            and error.status_code != 429)
+
+
+def close_quietly(*resources):
+    for resource in resources:
+        try:
+            close = getattr(resource, 'close', None)
+            if close:
+                close()
+        except Exception:
+            pass
 
 
 def run(registration, expected_sha256, *, clients=None, key=None, require_clean=True, clock=time.monotonic):
@@ -441,17 +615,22 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
     manifest = strict_json(raw_manifest)
     if manifest.get('kind') != KIND or registration.name != 'registration.json':
         raise BudgetStop('not a transport probe registration')
+    if manifest.get('require_clean') is not require_clean:
+        raise BudgetStop('probe runs under the clean-tree rule it was prepared with')
     out = registration.parent
-    attempt_dir, ledger_path = out / 'attempt', Path(manifest['budget']['ledger_path'])
+    ledger_path = Path(manifest['budget']['ledger_path'])
     if ledger_path != out / 'billing.json':
         raise BudgetStop('probe ledger is not beside its registration')
-    if attempt_dir.exists() or ledger_path.exists() or (out / 'result.json').exists():
+    if any((out / name).exists() for name in ('attempt', 'billing.json', 'result.json', 'reconciled_billing.json',
+                                             'sequence_claim', 'sequence_claim_failed.json')):
         raise BudgetStop('probe already ran; a probe runs once')
     verify_pins(manifest)
     if not set(implementation_paths()) <= set(manifest['pinned_files']):
         raise BudgetStop('probe implementation is not the registered one')
+    if interpreter() != manifest['runtime']:
+        raise BudgetStop('probe interpreter or libraries differ from the registered ones')
     _, commit = repository_state(implementation_paths(), require_clean=require_clean)
-    source = read_json(manifest['source']['registration'])
+    source, state = check_lineage(manifest)
     raw = (Path(manifest['source']['request_dir']) / 'native_request.json').read_bytes()
     probe = derive_request(raw)
     if digest(probe) != manifest['request']['native_sha256']:
@@ -459,74 +638,115 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
     key = key or os.environ.get('CBORG_API_KEY')
     if not key:
         raise BudgetStop('CBORG_API_KEY is required')
-    lineage = manifest['lineage']
-    state_path = Path(lineage['sequence_state'])
-    origin = {'registration_sha256': lineage['origin_registration_sha256'], 'ledger_path': lineage['origin_ledger']}
+    budget, lineage, continuation = manifest['budget'], manifest['lineage'], manifest['budget']['continuation']
+    attempt = f'{expected_sha256}:{ATTEMPT}'
+    identity = dict(manifest_sha256=expected_sha256, total_cap=budget['additional_usd'],
+                    attempt_cap=budget['per_attempt_usd'], attempt_caps_usd={attempt: budget['per_job_attempt_usd'][ATTEMPT]})
+    carried = dict(expected_sha256=continuation['sha256'], expected_cost_usd=continuation['cost_usd'],
+                   **(budget_amendment.ledger_bridge(manifest, state, checkpoint_sha256=continuation['sha256'])
+                      if 'budget_amendment' in manifest else {}))
+    state_path = Path(manifest['sequence_state'])
+    origin = {'registration_sha256': sha(manifest['parent']['registration']), 'ledger_path': lineage['origin_ledger']}
     lock = audit_registration.SequenceLock(str(state_path) + '.lock')
     with lock.acquire(timeout=0):
         previous_raw = state_path.read_bytes()
         if digest(previous_raw) != lineage['sequence_state_sha256']:
             raise BudgetStop('the lineage tip moved since the probe was prepared')
+        check_tip_state(manifest, previous_raw)
         claim = sequence_claim.context(manifest, registration, expected_sha256, state_path, origin, STAGE)
+        # Everything that can fail without cost happens before the tip changes hands (#2472).
+        with tempfile.TemporaryDirectory() as scratch:
+            Ledger(Path(scratch) / 'billing.json', **identity).continue_from(continuation['checkpoint'], **carried)
+        ledger = Ledger(ledger_path, **identity)
+        sdk, upstream = (clients or audit_transport.provider_clients)(source, key)
+        started_at, client, exchanges_complete, interrupted = now(), {}, True, None
+        timed = TimedUpstream(upstream, clock)
+        try:
+            proxy = NativeProxy(sdk=sdk, ledger=ledger, attempt=attempt, evidence=out / 'attempt' / 'requests',
+                                model=source['model']['model'], prices=budget['prices_per_token'],
+                                verify=lambda: verify_pins(manifest), provider_key=key,
+                                base_url=source['provider_base_url'], request_headers=provider_context_headers(source),
+                                upstream=timed,
+                                upstream_read_timeout_seconds=source.get('native_upstream_read_timeout_seconds'),
+                                stall_policy=manifest['transport']['stall_policy'],
+                                response_buffer=source.get('native_response_buffer'))
+            counted = free_count(sdk, probe)
+        except Exception as error:
+            close_quietly(sdk, upstream)
+            if count_refused(error):
+                # The provider refused to count the request as it would be
+                # sent: a finding, with nothing claimed or spent. Anything
+                # else leaves nothing written, so the probe can run later.
+                result = {'kind': RESULT_KIND, 'registration_sha256': expected_sha256, 'code_commit': commit,
+                          'started_at': started_at, 'ended_at': now(), 'finding': 'count_refused',
+                          'count_error': type(error).__name__, 'tip_claimed': False, 'provider_exchanges': [],
+                          'scope': SCOPE}
+                write_new(out / 'result.json', result)
+                return result
+            raise
+        # Take the tip, then continue the checkpoint exactly as the dry import did.
         value = {'schema_version': 1, 'registration_sha256': expected_sha256,
-                 'ledger_path': manifest['budget']['ledger_path'],
-                 'parent_checkpoint_sha256': lineage['tip_checkpoint_sha256'],
-                 'source_registration_sha256': lineage['origin_registration_sha256']}
+                 'ledger_path': budget['ledger_path'], 'parent_checkpoint_sha256': continuation['sha256'],
+                 'source_registration_sha256': origin['registration_sha256']}
         temporary = state_path.with_name(state_path.name + '.tmp')
         with temporary.open('x') as handle:
             json.dump(value, handle, indent=2)
             handle.write('\n')
         temporary.replace(state_path)
         sequence_claim.record(claim, value, previous_raw)
-        # The probe now owns the tip; any failure from here leaves it consumed.
-        attempt_dir.mkdir()
-        budget = manifest['budget']
-        ledger = Ledger(ledger_path, manifest_sha256=expected_sha256,
-                        total_cap=budget['additional_cap_usd'], attempt_cap=budget['attempt_cap_usd'])
-        ledger.continue_from(lineage['tip_checkpoint'], expected_sha256=lineage['tip_checkpoint_sha256'],
-                             expected_cost_usd=lineage['tip_cost_usd'])
-        attempt = f'{expected_sha256}:{ATTEMPT}'
-        sdk, upstream = (clients or audit_transport.provider_clients)(source, key)
-        timed = TimedUpstream(upstream, clock)
-        proxy = NativeProxy(sdk=sdk, ledger=ledger, attempt=attempt, evidence=attempt_dir / 'requests',
-                            model=source['model']['model'], prices=budget['prices_per_token'],
-                            verify=lambda: verify_pins(manifest), provider_key=key,
-                            base_url=source['provider_base_url'], request_headers=provider_context_headers(source),
-                            upstream=timed,
-                            upstream_read_timeout_seconds=source.get('native_upstream_read_timeout_seconds'),
-                            stall_policy=manifest['transport']['stall_policy'],
-                            response_buffer=source.get('native_response_buffer'))
-        started_at, client = now(), {}
-        with proxy.running() as url:
-            headers = {'x-api-key': proxy.token, 'content-type': 'application/json',
-                       **manifest['request']['headers']}
-            begun = clock()
+        try:
+            ledger.continue_from(continuation['checkpoint'], **carried)
+            with proxy.running() as url:
+                headers = {'x-api-key': proxy.token, 'content-type': 'application/json',
+                           **manifest['request']['headers']}
+                begun = clock()
+                try:
+                    with httpx.Client(timeout=httpx.Timeout(manifest['transport']['client_timeout_seconds'],
+                                                            connect=10), trust_env=False) as local:
+                        response = local.post(url + manifest['request']['path'], content=probe, headers=headers)
+                    client = {'status': response.status_code, 'bytes': len(response.content),
+                              'retry_advised': response.headers.get('x-should-retry')}
+                except httpx.HTTPError as error:
+                    client = {'status': None, 'error': type(error).__name__}
+                client['elapsed_seconds'] = round(clock() - begun, 3)
+        except BaseException as error:
+            interrupted = error
+            client.setdefault('error', type(error).__name__)
+        finally:
+            exchanges_complete = proxy.unfinished_handlers == 0
+            exchanges = [relative(dict(record)) for record in list(timed.exchanges)]
             try:
-                with httpx.Client(timeout=httpx.Timeout(manifest['transport']['client_timeout_seconds'], connect=10),
-                                  trust_env=False) as local:
-                    response = local.post(url + manifest['request']['path'], content=probe, headers=headers)
-                client = {'status': response.status_code, 'bytes': len(response.content),
-                          'retry_advised': response.headers.get('x-should-retry')}
-            except httpx.HTTPError as error:
-                client = {'status': None, 'error': type(error).__name__}
-            client['elapsed_seconds'] = round(clock() - begun, 3)
-        reconciled = settle_pending(ledger_path, out, manifest, attempt)
-        rows = [row for row in read_json(ledger_path)['requests'] if row.get('attempt') == attempt]
-        result = {
-            'kind': RESULT_KIND, 'registration_sha256': expected_sha256, 'code_commit': commit,
-            'started_at': started_at,
-            'ended_at': now(), 'finding': finding(timed.exchanges, client), 'client': client,
-            'provider_exchanges': [relative(record) for record in timed.exchanges],
-            'thinking_display': thinking_display(timed.exchanges),
-            'proxy_failure': proxy.failure, 'stalls_survived': proxy.stalls_survived,
-            'count_retries': proxy.messages.count_retries, 'unfinished_handlers': proxy.unfinished_handlers,
-            'probe_rows': [{k: row.get(k) for k in ('id', 'status', 'reserved_usd', 'cost_usd', 'settlement_basis',
-                                                    'provider_charge_confirmed', 'usage')} for row in rows],
-            'ledger': {'path': str(ledger_path), 'sha256': sha(ledger_path)},
-            'reconciled_checkpoint': reconciled,
-            'successor_continues_from': reconciled['path'] if reconciled else str(ledger_path),
-        }
-        write_new(out / 'result.json', result)
+                settlement = settle_pending(ledger_path, out, manifest, expected_sha256, attempt)
+            except Exception as error:
+                settlement = {'status': 'needs_person', 'reason': type(error).__name__}
+            rows, successor, successor_cost = [], None, None
+            try:
+                rows = [row for row in read_json(ledger_path)['requests'] if row.get('attempt') == attempt]
+                successor = (settlement['path'] if settlement['status'] == 'reconciled' else
+                             str(ledger_path) if settlement['status'] == 'settled' else None)
+                if successor:
+                    successor_cost = str(sum((money(r['cost_usd']) for r in read_json(successor)['requests']),
+                                             Decimal(0)))
+            except Exception:
+                pass
+            result = {
+                'kind': RESULT_KIND, 'registration_sha256': expected_sha256, 'code_commit': commit,
+                'started_at': started_at, 'ended_at': now(), 'tip_claimed': True, 'free_count': counted,
+                'finding': finding(timed.exchanges, client), 'client': client,
+                'interrupted': type(interrupted).__name__ if interrupted is not None else None,
+                'provider_exchanges': exchanges, 'exchanges_complete': exchanges_complete,
+                'thinking_display': thinking_display(timed.exchanges),
+                'proxy_failure': proxy.failure, 'stalls_survived': proxy.stalls_survived,
+                'probe_rows': [{k: row.get(k) for k in ('id', 'status', 'reserved_usd', 'cost_usd',
+                                                        'settlement_basis', 'provider_charge_confirmed', 'usage')}
+                               for row in rows],
+                'settlement': settlement,
+                'successor_continues_from': successor, 'successor_cost_usd': successor_cost,
+                'scope': SCOPE,
+            }
+            write_new(out / 'result.json', result)
+        if interrupted is not None:
+            raise interrupted
         return result
 
 
@@ -537,6 +757,7 @@ def main(argv=None):
     for name in ('out', 'source-registration', 'source-request', 'tip-checkpoint', 'sequence-state',
                  'origin-registration', 'authorization'):
         make.add_argument('--' + name, required=True)
+    make.add_argument('--tip-reconciliation-receipt')
     go = commands.add_parser('run')
     go.add_argument('--registration', required=True)
     go.add_argument('--sha256', required=True)
@@ -545,18 +766,21 @@ def main(argv=None):
         path, identity = prepare(args.out, source_registration=args.source_registration,
                                  source_request=args.source_request, tip_checkpoint=args.tip_checkpoint,
                                  sequence_state=args.sequence_state, origin_registration=args.origin_registration,
-                                 authorization=args.authorization)
+                                 authorization=args.authorization,
+                                 tip_reconciliation_receipt=args.tip_reconciliation_receipt)
         print(json.dumps({'registration': str(path), 'sha256': identity}))
         return 0
     result = run(args.registration, args.sha256)
-    summary = {k: result[k] for k in ('finding', 'client', 'thinking_display', 'proxy_failure',
-                                      'stalls_survived', 'successor_continues_from')}
+    summary = {k: result.get(k) for k in ('finding', 'client', 'thinking_display', 'proxy_failure',
+                                          'stalls_survived', 'settlement', 'successor_continues_from',
+                                          'successor_cost_usd', 'tip_claimed')}
     summary['provider_exchanges'] = [{k: e.get(k) for k in ('status', 'headers_seconds', 'first_chunk_seconds',
                                                             'first_thinking_text_seconds', 'last_chunk_seconds',
-                                                            'largest_gap_seconds', 'error', 'error_seconds')}
-                                     for e in result['provider_exchanges']]
+                                                            'largest_gap_between_chunks_seconds', 'error',
+                                                            'error_seconds', 'diagnostics')}
+                                     for e in result.get('provider_exchanges', [])]
     summary['probe_rows'] = [{k: r.get(k) for k in ('status', 'cost_usd', 'settlement_basis')}
-                             for r in result['probe_rows']]
+                             for r in result.get('probe_rows', [])]
     print(json.dumps(summary, indent=2))
     return 0 if result['finding'] == 'completed' else 1
 

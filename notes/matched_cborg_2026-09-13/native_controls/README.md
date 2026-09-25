@@ -159,35 +159,58 @@ does not establish instruction adherence (#2049).
 
 ## Transport probe, 2026-09-25
 
-Audit27's ninth worker request returned HTTP 500 seven times at 272 to 277
-seconds. CBORG's catalogue lists `stream_timeout: 270` for the Opus 5 routes,
-and hidden thinking can delay a response's first byte past that. Claude Code
+Audit27's ninth worker request returned HTTP 500 seven times, at 272 to 277
+seconds. CBORG's catalogue lists `stream_timeout: 270` for the Opus 5 routes.
+Hidden thinking can delay a response's first byte past that. Claude Code
 2.1.272 accepts `--thinking-display summarized`, which asks for streamed
-thinking summaries (#2463). `transport_probe.py` tests whether that setting
-gets a response through.
+thinking summaries. `transport_probe.py` (#2463) tests whether that setting
+gets such a response through.
 
 The probe resends one retained request once. It uses the source
-registration's own transport, stall policy and response buffer, through the
-registered native proxy. The only change is `thinking.display`. It records when
-the response headers, first event, first thinking text and last byte arrived,
-but keeps no text. It runs once per registration and never resends. A 5xx is
-counted at its whole reservation. A row still pending afterwards is settled at
-its whole reservation in a separate `reconciled_billing.json`, under the
-maintainer's standing authorization, and the ledger is left as written.
+registration's provider transport through the registered native proxy, and
+refuses to run if those modules differ from the source's pins. The only
+change is `thinking.display`. It keeps its own stall policy: three count
+attempts and one debit. It records:
+- when the response headers, first chunk, first thinking text and last
+  byte arrived;
+- per-event arrival times;
+- named CBORG diagnostic headers;
+- the accounting.
 
-The probe is a link in the lineage. Holding the sequence lock, it takes the
-tip with a durable sequence claim and continues the tip's settled checkpoint
-under the same caps. The next registration continues from the probe's
-`result.json` `successor_continues_from`. An audit prepared from the earlier
-tip fails at its sequence guard. Audits accept a probe predecessor only after
-#2469.
+`result.json` keeps no request, response or thinking text. The proxy's
+evidence folders under `attempt/requests/` keep the full request and
+response, including any thinking summaries, as every native attempt does.
+Header times include the bounded worker's start and upload. It is one
+sample with no control, and the replayed history's thinking blocks were
+produced with thinking omitted.
+
+The probe is a link in the lineage:
+- **Registration.** It has an audit continuation's budget block and
+  carries the tip's budget amendment. The audit's own validators check its
+  predecessor: `validate_audit_reconciliation` for a reconciled checkpoint,
+  and `validate_predecessor` for the amendment.
+- **Before the tip moves.** Holding the sequence lock, it does all free work
+  first: a dry import of the checkpoint, the clients, the proxy and one free
+  count of the exact request. A 4xx on that count is recorded as the
+  finding `count_refused`, and nothing is claimed or spent.
+- **The paid request.** It then takes the tip with a durable sequence
+  claim, continues the checkpoint and admits the one request. It never
+  resends.
+- **Settlement.** A 5xx is counted at its whole reservation. A row left
+  pending is settled at its whole reservation in `reconciled_billing.json`
+  with a `debit_receipt.json`, under the maintainer's standing
+  authorization. The ledger is left as written.
+- **`result.json`.** It is always written, including after an interrupt.
+  It names the settled checkpoint the next registration continues from,
+  and its cost. An audit prepared from the earlier tip fails at its
+  sequence guard. Audits accept a probe predecessor only after #2469.
 
 ```bash
 PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls \
   python notes/matched_cborg_2026-09-13/native_controls/transport_probe.py prepare \
   --out DIR --source-registration R --source-request REQUEST_DIR --tip-checkpoint C \
-  --sequence-state S --origin-registration O --authorization A
-# review DIR/registration.json, then, with CBORG_API_KEY set:
+  --tip-reconciliation-receipt RECEIPT --sequence-state S --origin-registration O --authorization A
+# review DIR/registration.json, then, with CBORG_API_KEY set and the same interpreter:
 ... transport_probe.py run --registration DIR/registration.json --sha256 HEX
 ```
 
