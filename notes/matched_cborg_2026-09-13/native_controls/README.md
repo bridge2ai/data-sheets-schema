@@ -190,19 +190,24 @@ The probe is a link in the lineage:
   predecessor: `validate_audit_reconciliation` for a reconciled checkpoint,
   and `validate_predecessor` for the amendment.
 - **Before the tip moves.** Holding the sequence lock, it does all free work
-  first: a dry import of the checkpoint, the clients, the proxy and one free
-  count of the exact request. A 4xx on that count is recorded as the
-  finding `count_refused`, and nothing is claimed or spent.
+  first: the clients, the proxy, one free count of the exact request and the
+  import of the checkpoint into its own ledger. A 400, 413 or 422 on that
+  count is recorded as the finding `count_refused`, and nothing is claimed
+  or spent. Any other failure before the claim writes nothing and leaves the
+  probe runnable.
 - **The paid request.** It then takes the tip with a durable sequence
   claim, continues the checkpoint and admits the one request. It never
   resends.
 - **Settlement.** A 5xx is counted at its whole reservation. A row left
   pending is settled at its whole reservation in `reconciled_billing.json`
   with a `debit_receipt.json`, under the maintainer's standing
-  authorization. The ledger is left as written.
-- **`result.json`.** It is always written, including after an interrupt.
-  It names the settled checkpoint the next registration continues from,
-  and its cost. An audit prepared from the earlier tip fails at its
+  authorization. This happens only once the proxy has closed with no
+  handler running; otherwise a person settles it. The ledger is left as
+  written.
+- **`result.json`.** Once the tip is claimed, it is written whatever
+  happens, including after an interrupt, and also for a failed claim. It
+  names the settled checkpoint the next registration continues from, and
+  its cost. An audit prepared from the earlier tip fails at its
   sequence guard. Audits accept a probe predecessor only after #2469.
 
 ```bash
@@ -213,6 +218,11 @@ PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/nat
 # review DIR/registration.json, then, with CBORG_API_KEY set and the same interpreter:
 ... transport_probe.py run --registration DIR/registration.json --sha256 HEX
 ```
+
+Point `--out` at an ignored private location. The directory keeps the
+request and response. The registration pins every file audit27 pinned, and
+many of those live under `/private/tmp`. A reboot between `prepare` and
+`run` therefore needs a fresh preparation.
 
 ## Phase checks for renderer 13, 2026-09-17
 

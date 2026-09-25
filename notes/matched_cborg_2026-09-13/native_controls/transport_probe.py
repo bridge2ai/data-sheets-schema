@@ -13,12 +13,13 @@ registration has an audit continuation's budget block and carries the tip's
 budget amendment, so the audit's own validators check its predecessor: the
 settled checkpoint, its reconciliation (`validate_audit_reconciliation`) and
 the amendment (`validate_predecessor`). Holding the lineage's sequence lock,
-it does all free work first: a dry import of the checkpoint, the clients, the
-proxy and one free token count of the exact request. Only then does it take
-the tip with a durable sequence claim (#2137), continue the checkpoint in its
-own ledger and admit the one paid request. A successor continues from the
-probe's settled ledger. An audit prepared from the earlier tip fails at its
-sequence guard instead of forking the budget (#2469).
+it does all free work first: the clients, the proxy, one free token count of
+the exact request, and the import of the checkpoint into its own ledger. Only
+then does it take the tip with a durable sequence claim (#2137) and admit the
+one paid request. A failure before the claim leaves the tip unchanged. A
+successor continues from the probe's settled ledger. An audit prepared from
+the earlier tip fails at its sequence guard instead of forking the budget
+(#2469).
 
   prepare --out DIR --source-registration R --source-request DIR
           --tip-checkpoint C --sequence-state S --origin-registration O
@@ -29,13 +30,18 @@ sequence guard instead of forking the budget (#2469).
 stall policy counts a 5xx, or a failure after the request left, at its whole
 reservation. A row still pending afterwards is settled at its whole
 reservation in a separate checkpoint with its own debit receipt, under the
-maintainer's standing authorization. The ledger itself is never rewritten.
+maintainer's standing authorization, once the proxy has closed with no
+handler running. The ledger itself is never rewritten. `result.json` is
+written after the tip is claimed, whatever happens, and for a refused or
+failed claim. A failure before the claim writes nothing and leaves the probe
+runnable.
 `result.json` records sizes, times, event types, bounded CBORG diagnostic
 headers and accounting, and no request, response or thinking text. The
 proxy's evidence folders under `attempt/requests/` keep the full request and
 response, including any thinking summaries, as every native attempt does.
 """
 from contextlib import contextmanager
+import copy
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 import argparse
@@ -48,7 +54,6 @@ import re
 import ssl
 import subprocess
 import sys
-import tempfile
 import time
 
 import httpx
@@ -103,6 +108,7 @@ DIAGNOSTIC_HEADERS = ('x-litellm-call-id', 'x-litellm-attempted-retries', 'x-lit
                       'x-litellm-response-duration-ms', 'x-litellm-overhead-duration-ms', 'x-litellm-version',
                       'x-litellm-model-group', 'x-litellm-model-id', 'x-litellm-timeout', 'retry-after')
 DIAGNOSTIC_VALUE = re.compile(r'[A-Za-z0-9._:+-]{1,96}')
+REQUEST_REFUSALS = frozenset({400, 413, 422})
 NOT_SENT = frozenset({'ConnectError', 'ConnectTimeout', 'PoolTimeout', 'UnsupportedProtocol'})
 SCOPE = ('One request and one sample, with no control. The replayed history\'s thinking blocks were '
          'produced with thinking omitted, so this tests the same history under a new display. Header '
@@ -182,6 +188,15 @@ def interpreter():
             'version': sys.version,
             'libraries': {name: importlib.metadata.version(name) for name in LIBRARIES},
             'openssl': ssl.OPENSSL_VERSION}
+
+
+def source_python(source):
+    """The interpreter the source ran under, beside this one, for the record (#2475)."""
+    path = source.get('python')
+    resolved = Path(path).resolve() if isinstance(path, str) and Path(path).exists() else None
+    return {'path': path, 'resolved': str(resolved) if resolved else None,
+            'sha256': sha(resolved) if resolved else None,
+            'same_binary': bool(resolved) and sha(resolved) == sha(Path(sys.executable).resolve())}
 
 
 def client_timeout(source):
@@ -266,8 +281,12 @@ def check_lineage(manifest):
         raise BudgetStop('probe drops or changes its tip\'s budget amendment')
     if 'budget_amendment' in manifest:
         budget_amendment.validate_predecessor(manifest, state, checkpoint_sha256=continuation['sha256'])
+    if (budget['per_job_attempt_usd'] != {ATTEMPT: PROBE_CAP_USD}
+            or money(PROBE_CAP_USD) > money(budget['per_attempt_usd'])):
+        raise BudgetStop('probe attempt cap differs from its registration')
     total = sum((money(r.get('cost_usd')) for r in rows), Decimal(0))
-    if total != money(continuation['cost_usd']) or total + money(PROBE_CAP_USD) > money(budget['additional_usd']):
+    cap = money(budget['per_job_attempt_usd'][ATTEMPT])
+    if total != money(continuation['cost_usd']) or total + cap > money(budget['additional_usd']):
         raise BudgetStop('probe cost or cap exceeds the lineage\'s remaining budget')
     return source, state
 
@@ -342,6 +361,7 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
         'transport': {'stall_policy': STALL_POLICY, 'client_timeout_seconds': client_timeout(source),
                       'source_pins': source_transport(source)},
         'runtime': interpreter(),
+        'source_python': source_python(source),
         'authorization': quotes,
         'sequence_claim': {'protocol': sequence_claim.PROTOCOL},
     }
@@ -537,11 +557,15 @@ def finding(exchanges, client):
     return 'stream_cut' if last['error'] else 'stream_ended_without_stop'
 
 
-def settle_pending(ledger_path, out, manifest, registration_sha256, attempt):
+def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, runtime):
     """Settle the probe's one pending row at its whole reservation, in a new checkpoint.
 
     Returns what happened; never raises on an outcome a person must resolve,
-    so the timing record is always written (#2473)."""
+    so the timing record is always written (#2473). A handler still running at
+    shutdown could still hold the request, so it is left to a person, as the
+    audit's own reconciliation check requires a closed runtime."""
+    if runtime['unfinished_handlers'] != 0 or runtime['proxy_shutdown_complete'] is not True:
+        return {'status': 'needs_person', 'reason': 'a proxy handler was still running at shutdown'}
     raw = ledger_path.read_bytes()
     state = strict_json(raw)
     rows = state.get('requests') if isinstance(state, dict) else None
@@ -564,7 +588,8 @@ def settle_pending(ledger_path, out, manifest, registration_sha256, attempt):
                'scientific_acceptance': False, 'source_attempt_completed': False,
                'source_attempt_kind': ATTEMPT, 'source_ledger_modified': False,
                'source_ledger_sha256': digest(raw), 'source_registration_sha256': registration_sha256,
-               'recorded_at': now(), 'user_authorization': {**quote, 'standing': True}}
+               'recorded_at': now(), 'user_authorization': {**quote, 'standing': True},
+               'runtime_at_settlement': dict(runtime)}
     receipt_path = out / 'debit_receipt.json'
     write_new(receipt_path, receipt)
     row.update(status='settled', cost_usd=row['reserved_usd'], settled_at=receipt['recorded_at'],
@@ -591,10 +616,11 @@ def free_count(sdk, probe):
 
 
 def count_refused(error):
-    """A definitive refusal of the request as it would be sent: a 4xx other than a rate limit."""
+    """A refusal of the request as it would be sent. A key, permission or route
+    error (401, 403, 404) says nothing about the display and leaves the probe
+    runnable."""
     import anthropic
-    return (isinstance(error, anthropic.APIStatusError) and 400 <= error.status_code < 500
-            and error.status_code != 429)
+    return isinstance(error, anthropic.APIStatusError) and error.status_code in REQUEST_REFUSALS
 
 
 def close_quietly(*resources):
@@ -655,11 +681,9 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
         check_tip_state(manifest, previous_raw)
         claim = sequence_claim.context(manifest, registration, expected_sha256, state_path, origin, STAGE)
         # Everything that can fail without cost happens before the tip changes hands (#2472).
-        with tempfile.TemporaryDirectory() as scratch:
-            Ledger(Path(scratch) / 'billing.json', **identity).continue_from(continuation['checkpoint'], **carried)
         ledger = Ledger(ledger_path, **identity)
         sdk, upstream = (clients or audit_transport.provider_clients)(source, key)
-        started_at, client, exchanges_complete, interrupted = now(), {}, True, None
+        started_at, client, interrupted = now(), {}, None
         timed = TimedUpstream(upstream, clock)
         try:
             proxy = NativeProxy(sdk=sdk, ledger=ledger, attempt=attempt, evidence=out / 'attempt' / 'requests',
@@ -684,18 +708,36 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
                 write_new(out / 'result.json', result)
                 return result
             raise
-        # Take the tip, then continue the checkpoint exactly as the dry import did.
+        # The ledger exists before the tip names it, as continuation_sequence
+        # orders it. A failure after this leaves the tip unchanged beside an
+        # unspent ledger, never a tip naming a ledger that does not exist.
+        try:
+            ledger.continue_from(continuation['checkpoint'], **carried)
+        except BaseException:
+            close_quietly(sdk, upstream)
+            raise
         value = {'schema_version': 1, 'registration_sha256': expected_sha256,
                  'ledger_path': budget['ledger_path'], 'parent_checkpoint_sha256': continuation['sha256'],
                  'source_registration_sha256': origin['registration_sha256']}
-        temporary = state_path.with_name(state_path.name + '.tmp')
-        with temporary.open('x') as handle:
-            json.dump(value, handle, indent=2)
-            handle.write('\n')
-        temporary.replace(state_path)
-        sequence_claim.record(claim, value, previous_raw)
         try:
-            ledger.continue_from(continuation['checkpoint'], **carried)
+            temporary = state_path.with_name(state_path.name + '.tmp')
+            with temporary.open('x') as handle:
+                json.dump(value, handle, indent=2)
+                handle.write('\n')
+            temporary.replace(state_path)
+            sequence_claim.record(claim, value, previous_raw)
+        except BaseException as error:
+            close_quietly(sdk, upstream)
+            try:
+                claimed = strict_json(state_path.read_bytes()).get('registration_sha256') == expected_sha256
+            except Exception:
+                claimed = None
+            write_new(out / 'result.json', {'kind': RESULT_KIND, 'registration_sha256': expected_sha256,
+                'code_commit': commit, 'started_at': started_at, 'ended_at': now(), 'finding': 'claim_failed',
+                'claim_error': type(error).__name__, 'tip_claimed': claimed, 'free_count': counted,
+                'provider_exchanges': [], 'successor_continues_from': None, 'scope': SCOPE})
+            raise
+        try:
             with proxy.running() as url:
                 headers = {'x-api-key': proxy.token, 'content-type': 'application/json',
                            **manifest['request']['headers']}
@@ -713,10 +755,16 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
             interrupted = error
             client.setdefault('error', type(error).__name__)
         finally:
-            exchanges_complete = proxy.unfinished_handlers == 0
-            exchanges = [relative(dict(record)) for record in list(timed.exchanges)]
+            runtime = {'proxy_initialized': True, 'proxy_shutdown_complete': proxy.frozen is True,
+                       'unfinished_handlers': proxy.unfinished_handlers}
             try:
-                settlement = settle_pending(ledger_path, out, manifest, expected_sha256, attempt)
+                # A handler still running could be writing these records.
+                snapshot = copy.deepcopy(list(timed.exchanges))
+                exchanges = [relative(record) for record in snapshot]
+            except Exception:
+                snapshot, exchanges = [], None
+            try:
+                settlement = settle_pending(ledger_path, out, manifest, expected_sha256, attempt, runtime)
             except Exception as error:
                 settlement = {'status': 'needs_person', 'reason': type(error).__name__}
             rows, successor, successor_cost = [], None, None
@@ -732,10 +780,10 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
             result = {
                 'kind': RESULT_KIND, 'registration_sha256': expected_sha256, 'code_commit': commit,
                 'started_at': started_at, 'ended_at': now(), 'tip_claimed': True, 'free_count': counted,
-                'finding': finding(timed.exchanges, client), 'client': client,
-                'interrupted': type(interrupted).__name__ if interrupted is not None else None,
-                'provider_exchanges': exchanges, 'exchanges_complete': exchanges_complete,
-                'thinking_display': thinking_display(timed.exchanges),
+                'finding': 'interrupted' if interrupted is not None else finding(snapshot, client),
+                'client': client, 'interrupted': type(interrupted).__name__ if interrupted is not None else None,
+                'provider_exchanges': exchanges, 'exchanges_complete': runtime['unfinished_handlers'] == 0,
+                'runtime': runtime, 'thinking_display': thinking_display(snapshot),
                 'proxy_failure': proxy.failure, 'stalls_survived': proxy.stalls_survived,
                 'probe_rows': [{k: row.get(k) for k in ('id', 'status', 'reserved_usd', 'cost_usd',
                                                         'settlement_basis', 'provider_charge_confirmed', 'usage')}

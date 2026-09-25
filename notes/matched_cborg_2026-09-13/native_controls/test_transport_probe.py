@@ -321,7 +321,7 @@ def test_an_interrupt_writes_the_record_settles_and_is_raised(prepared, monkeypa
     with pytest.raises(KeyboardInterrupt):
         run(prepared, upstream)
     result = json.loads((prepared.root / 'probe' / 'result.json').read_text())
-    assert result['interrupted'] == 'KeyboardInterrupt' and result['finding'] == 'not_sent'
+    assert result['interrupted'] == 'KeyboardInterrupt' and result['finding'] == 'interrupted'
     assert result['settlement'] == {'status': 'settled'} and result['tip_claimed'] is True
 
 
@@ -400,8 +400,10 @@ def test_preparation_refuses_what_the_lineage_does_not_support(lineage, monkeypa
     (other / 'request_protocol.json').write_text((lineage.request_dir / 'request_protocol.json').read_text())
     refused('not one the lineage admitted', source_request=other)
     with monkeypatch.context() as patch:
+        # A probe cap above the lineage's per-attempt cap; the shared cap is
+        # also enforced by the ledger at reservation.
         patch.setattr(probe, 'PROBE_CAP_USD', '396')
-        refused('remaining budget')
+        refused('attempt cap')
     with monkeypatch.context() as patch:
         patch.setattr(probe, 'TRANSPORT_MODULES', (*probe.TRANSPORT_MODULES, 'notes/matched_cborg_2026-09-13/sequence_claim.py'))
         refused('pinned transport')
@@ -449,3 +451,195 @@ def test_only_named_diagnostic_headers_with_plain_values_are_kept():
     assert probe.diagnostics(headers) == {'x-litellm-call-id': 'd768a75f-b5bf',
                                           'x-litellm-response-duration-ms': '272585.1',
                                           'x-litellm-attempted-retries': '0'}
+
+
+# --- round two (#2470 review) ------------------------------------------------------------------
+
+def ok_stream(request, clock):
+    return httpx.Response(200, content=wire(summarized_stream()), headers={'content-type': 'text/event-stream'})
+
+
+def test_preparation_refuses_a_tip_that_is_no_longer_the_predecessor(lineage):
+    """Without this check the probe would displace a newer tip and drop its charges."""
+    other = save(lineage.root / 'audit28' / 'registration.json', {'kind': probe.AUDIT_KIND, 'n': 28})
+    ledger = save(lineage.root / 'audit28' / 'billing.json', {'requests': []})
+    lineage.state.write_text(json.dumps({'schema_version': 1, 'registration_sha256': sha(other),
+        'ledger_path': str(ledger), 'parent_checkpoint_sha256': sha(lineage.checkpoint),
+        'source_registration_sha256': sha(lineage.origin)}, indent=2) + '\n')
+    with pytest.raises(BudgetStop, match='not the probe'):
+        prepare(lineage)
+    assert not (lineage.root / 'probe').exists()
+
+
+@pytest.mark.parametrize('kind, status', [(anthropic.AuthenticationError, 401),
+                                          (anthropic.PermissionDeniedError, 403), (anthropic.NotFoundError, 404)])
+def test_a_key_or_route_error_on_the_count_is_not_a_finding_and_leaves_the_probe_runnable(prepared, kind, status):
+    error = kind('count failed', body=None,
+                 response=httpx.Response(status, request=httpx.Request('POST', 'https://offline.invalid')))
+    with pytest.raises(kind):
+        run(prepared, Upstream(lambda request, clock: pytest.fail('provider reached'), count=error))
+    assert not any((prepared.root / 'probe' / name).exists() for name in ('result.json', 'billing.json'))
+    assert run(prepared, Upstream(ok_stream))['finding'] == 'completed'
+
+
+def test_a_ledger_failure_leaves_the_tip_unchanged_and_the_probe_runnable(prepared, monkeypatch):
+    before = prepared.state.read_bytes()
+    real = Ledger.continue_from
+    calls = []
+    def flaky(self, *args, **kwargs):
+        calls.append(1)
+        if len(calls) == 1:
+            raise OSError('disk full')
+        return real(self, *args, **kwargs)
+    monkeypatch.setattr(Ledger, 'continue_from', flaky)
+    with pytest.raises(OSError):
+        run(prepared, Upstream(lambda request, clock: pytest.fail('provider reached')))
+    assert prepared.state.read_bytes() == before
+    assert not any((prepared.root / 'probe' / name).exists() for name in ('result.json', 'billing.json'))
+    assert run(prepared, Upstream(ok_stream))['finding'] == 'completed'
+
+
+def test_a_claim_that_cannot_be_preserved_is_recorded_and_closes_the_clients(prepared, monkeypatch):
+    upstream = Upstream(lambda request, clock: pytest.fail('provider reached'))
+    made, original = {}, upstream.clients
+    def clients(manifest, key):
+        sdk, client = original(manifest, key)
+        made['client'] = client
+        return sdk, client
+    upstream.clients = clients
+    monkeypatch.setattr(sequence_claim, '_fsync', lambda descriptor: (_ for _ in ()).throw(OSError('fsync')))
+    with pytest.raises(BudgetStop, match='owner remains consumed'):
+        run(prepared, upstream)
+    result = json.loads((prepared.root / 'probe' / 'result.json').read_text())
+    assert result['finding'] == 'claim_failed' and result['tip_claimed'] is True
+    assert result['successor_continues_from'] is None and made['client'].is_closed
+
+
+def test_a_snapshot_failure_still_settles_and_writes_the_record(prepared, monkeypatch):
+    monkeypatch.setattr(probe, 'relative', lambda record: (_ for _ in ()).throw(RuntimeError('changed size')))
+    result = run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
+    assert result['provider_exchanges'] is None and result['settlement']['status'] == 'reconciled'
+
+
+def test_no_standing_debit_while_a_handler_may_still_hold_the_request(prepared, monkeypatch):
+    from contextlib import contextmanager
+    from native_proxy import NativeProxy
+    real = NativeProxy.running
+    @contextmanager
+    def running(self, **kwargs):
+        with real(self, **kwargs) as url:
+            yield url
+        self.unfinished_handlers = 1
+    monkeypatch.setattr(NativeProxy, 'running', running)
+    result = run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
+    assert result['exchanges_complete'] is False and result['runtime']['unfinished_handlers'] == 1
+    assert result['settlement']['status'] == 'needs_person' and result['successor_continues_from'] is None
+    assert not (prepared.root / 'probe' / 'reconciled_billing.json').exists()
+
+
+def test_the_debit_receipt_records_the_closed_runtime(prepared):
+    result = run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
+    receipt = json.loads(Path(result['settlement']['receipt']).read_text())
+    assert receipt['runtime_at_settlement'] == {'proxy_initialized': True, 'proxy_shutdown_complete': True,
+                                                'unfinished_handlers': 0}
+    assert 'runtime_closure' not in receipt       # that key names reviewed reboot evidence in the audit
+
+
+def test_a_registration_with_another_attempt_cap_is_refused(prepared):
+    manifest = json.loads(prepared.registration.read_text())
+    manifest['budget']['per_job_attempt_usd'] = {probe.ATTEMPT: '6'}
+    with pytest.raises(BudgetStop, match='attempt cap'):
+        probe.check_lineage(manifest)
+
+
+def test_the_source_interpreter_is_recorded(prepared):
+    manifest = json.loads(prepared.registration.read_text())
+    assert set(manifest['source_python']) == {'path', 'resolved', 'sha256', 'same_binary'}
+
+
+# --- a tip whose own ledger is settled, with no reconciliation -----------------------------------
+
+def test_a_settled_tip_prepares_and_runs_without_a_reconciliation(accounting):
+    m, _, _, _, reg = accounting
+    first = copy.deepcopy(m)
+    first.update(kind=probe.AUDIT_KIND, repository=str(REPOSITORY), repository_commit='a' * 40,
+                 model={'model': 'claude-opus-5'}, provider_base_url='https://api.cborg.lbl.gov',
+                 provider_context_policy='headroom_bypass_v1')
+    first['budget']['prices_per_token'] = PRICES
+    first['job']['attempt_dir'] = str(reg.parent / 'attempts' / first['job']['id'])
+    first['pinned_files'].update({str(REPOSITORY / rel): sha(REPOSITORY / rel) for rel in probe.TRANSPORT_MODULES})
+    save(reg, first)
+    source_sha = r.sha(reg)
+    raw = native_request()
+    identity = (json.dumps(json.loads(raw), sort_keys=True, ensure_ascii=False) + '\n').encode()
+    with r.sequence_guard(first, source_sha):
+        ledger = r.open_audit_ledger(first, reg, source_sha)
+        ticket = ledger.reserve(r.attempt_identity(source_sha, first['job']['id']), Decimal('2.4535'),
+                                hashlib.sha256(identity).hexdigest())
+        ledger.settle(ticket, Decimal('1.0'), response_sha256='f' * 64, usage={'input_tokens': 1, 'output_tokens': 1})
+    requests = Path(first['job']['attempt_dir']) / 'requests' / ticket
+    requests.mkdir(parents=True)
+    (requests / 'native_request.json').write_bytes(raw)
+    save(requests / 'request_protocol.json', {'anthropic-version': '2023-06-01', 'anthropic-beta': BETA})
+    authorization = save(reg.parent.parent / 'authorization.json', {
+        name: {'exact_response': 'y', 'quoted_request': 'q?', 'recorded_at': '2026-09-25T18:00:31Z'}
+        for name in probe.AUTHORIZATIONS})
+    tip = SimpleNamespace(root=reg.parent.parent, state=Path(m['sequence_state']))
+    tip.registration, tip.identity = probe.prepare(
+        tip.root / 'probe', source_registration=reg, source_request=requests,
+        tip_checkpoint=Path(first['budget']['ledger_path']), sequence_state=tip.state,
+        origin_registration=Path(m['parent']['registration']), authorization=authorization, require_clean=False)
+    assert 'reconciliation' not in json.loads(tip.registration.read_text())['budget']['continuation']
+    assert run(tip, Upstream(ok_stream))['finding'] == 'completed'
+
+
+# --- the real bounded stream worker under the timing wrapper, against a local fake ---------------
+
+def test_the_timing_wrapper_over_the_real_bounded_worker(prepared):
+    from contextlib import contextmanager
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    import threading
+    import time
+    from audit_controls.bounded_stream import BoundedStreamClient
+    seen = []
+    class Fake(BaseHTTPRequestHandler):
+        protocol_version = 'HTTP/1.0'
+        def log_message(self, *args):
+            pass
+        def do_POST(self):
+            self.rfile.read(int(self.headers['content-length']))
+            seen.append(self.path)
+            time.sleep(0.3)
+            self.send_response(200)
+            self.send_header('content-type', 'text/event-stream')
+            self.send_header('x-litellm-attempted-retries', '2')
+            self.end_headers()
+            for value in summarized_stream():
+                self.wfile.write(wire([value]))
+                self.wfile.flush()
+    server = ThreadingHTTPServer(('127.0.0.1', 0), Fake)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    local = f'http://127.0.0.1:{server.server_port}'
+    class Redirect:
+        def __init__(self, inner):
+            self.inner = inner
+        def __getattr__(self, name):
+            return getattr(self.inner, name)
+        @contextmanager
+        def stream(self, method, url, **kwargs):
+            with self.inner.stream(method, local + url[len('https://api.cborg.lbl.gov'):], **kwargs) as response:
+                yield response
+    def clients(manifest, key):
+        sdk = SimpleNamespace(messages=SimpleNamespace(count_tokens=lambda **fields: SimpleNamespace(input_tokens=100)),
+                              default_headers={'x-headroom-bypass': 'true'})
+        return sdk, Redirect(BoundedStreamClient(None, read_timeout_seconds=1200, connect_timeout_seconds=20,
+                                                 total_timeout_seconds=1200))
+    try:
+        result = probe.run(prepared.registration, prepared.identity, clients=clients, key='offline-provider-key',
+                           require_clean=False)
+    finally:
+        server.shutdown()
+    [exchange] = result['provider_exchanges']
+    assert seen == ['/v1/messages?beta=true'] and result['finding'] == 'completed'
+    assert exchange['headers_seconds'] >= 0.3 and exchange['diagnostics'] == {'x-litellm-attempted-retries': '2'}
+    assert exchange['thinking_text_chars'] == len(THINKING)
