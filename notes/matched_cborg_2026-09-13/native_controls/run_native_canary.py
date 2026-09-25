@@ -23,8 +23,9 @@ from run_api_canary import verify, verify_history, sha, check_canary_receipts
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 from native_command_policy import command_guidance, permission_arguments, program_key, validated_command_policy
 from native_command_policy import (classify_program_command, _shell_tokens, _simple_command,
-                                   _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL)
-from native_readonly import lookup_command, registered_input_paths
+                                   _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL,
+                                   LOOKUP_LITERAL_ADMISSION, PHASE_HISTORY_RENDERER, _PROC_ENVIRON, _too_complex)
+from native_readonly import lookup_command, pipeline_parts, registered_input_paths
 from native_control import NativeControl, HISTORY_CONTRACT, check_control_history, load_native_events, digest as control_digest
 from native_phase_history import PhaseHistory, phase_history
 
@@ -67,6 +68,23 @@ def prescribed_programs(instruction_text, python):
 
 def _classify_command(command, python, programs, command_policy=None):
     if lookup_command(command, (command_policy or {}).get('readonly_lookups'), _simple_command):
+        if (isinstance(command_policy, dict)
+                and command_policy.get('lookup_literal_admission') == LOOKUP_LITERAL_ADMISSION):
+            # The runtime admits lookups by argument rules, so a spelling it
+            # finds too complex is refused there and would read as a denied
+            # prescribed call. The controller refuses it first (#2443), with
+            # only the runtime's own checks (too complex; an environ argument):
+            # replayed transcripts show it runs double-quoted patterns the
+            # stricter reading refuses (#2483).
+            problem = _too_complex(command) or (
+                'an argument naming a process environment, which the runtime refuses'
+                if any(_PROC_ENVIRON.search(word) for part in pipeline_parts(command)
+                       for word in (_simple_command(part)[0] or ())) else None)
+            if problem:
+                return 'not_prescribed', (f'a registered read-only lookup, spelled so the runtime refuses it: '
+                                          f'{problem}. This refusal does not disqualify the attempt; quote each '
+                                          'argument with single quotes and name literal paths, or use the Read '
+                                          'tool')
         return 'prescribed', 'a registered read-only lookup of this job\'s inputs or outputs'
     return classify_program_command(command, python, programs, command_policy)
 
@@ -450,7 +468,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 if '--input-format' not in argv or argv[argv.index('--input-format') + 1] != 'stream-json':
                     raise BudgetStop('native control requires registered stream-json input')
                 phase_review = (PhaseHistory(phase_spec, repository=cwd, command_policy=command_policy)
-                                if phase_spec is not None and phase_spec.render_version >= 13 else None)
+                                if phase_spec is not None and phase_spec.render_version >= PHASE_HISTORY_RENDERER else None)
                 def review_event(event):
                     if phase_review is not None:
                         phase_review.observe(event)
@@ -647,7 +665,7 @@ def main():
         runtime_reads[:] = receipt['pretool_control'].get('persisted_output_paths', [])
         receipt['permission_denials']=classify(terminal.get('permission_denials'))
         receipt['command_history']=command_history(events, command_policy, receipt['permission_denials'])
-        if spec.render_version >= 13:
+        if spec.render_version >= PHASE_HISTORY_RENDERER:
             receipt['phase_history'] = phase_history(events, spec, complete=True, repository=base['repository'],
                                                      command_policy=command_policy)
         if receipt['exit_code'] or terminal.get('is_error') or terminal.get('terminal_reason')!='completed' or terminal.get('stop_reason')!='end_turn':
@@ -707,7 +725,7 @@ def main():
                 runtime_reads[:] = receipt['pretool_control'].get('persisted_output_paths', [])
             except (OSError, ValueError, TypeError):
                 receipt['pretool_control'] = {'checked': False, 'problems': ['stopped native transcript is unreadable']}
-        if spec.render_version >= 13 and 'phase_history' not in receipt:
+        if spec.render_version >= PHASE_HISTORY_RENDERER and 'phase_history' not in receipt:
             try:
                 phase_events = load_native_events(attempt/'transcript.jsonl')
                 receipt['phase_history'] = phase_history(phase_events, spec, complete=False,

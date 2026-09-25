@@ -1362,11 +1362,12 @@ def test_a_command_policy_that_cannot_be_built_is_a_named_stop_that_leaves_nothi
 
 
 def test_a_respelled_prescribed_call_denied_by_the_controller_does_not_disqualify(prepared):
-    """#2369: under the registered version-5 policy a respelling is the controller's refusal."""
+    """#2369: under the registered policy a respelling is the controller's refusal."""
     path, registration, fake = prepared
     job = registration["generation"]["jobs"][0]
     policy = registration["per_job_command_policy"][job["id"]]
-    assert policy["version"] == 5 and policy["literal_admission"] == 1
+    assert policy["version"] == 6 and policy["literal_admission"] == 1
+    assert policy["lookup_literal_admission"] == 1 and "helper_arguments" in policy     # #2443, #2444
     receipts = next(line.strip() for line in Path(job["instruction"]).read_text().splitlines()
                     if " -m data_sheets_schema.cli" in line and "receipts check" in line)
     classified = launcher.native.classify_denials(

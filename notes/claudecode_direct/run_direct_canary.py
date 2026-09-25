@@ -35,7 +35,8 @@ CONTROLS = ROOT / "notes" / "matched_cborg_2026-09-13"
 sys.path[:0] = [str(ROOT / "src"), str(CONTROLS), str(CONTROLS / "native_controls")]
 
 from budgeted_cborg import BudgetStop, write_new                       # noqa: E402
-from native_command_policy import build_command_policy, command_guidance, permission_arguments  # noqa: E402
+from native_command_policy import (PHASE_HISTORY_RENDERER, build_command_policy, command_guidance,  # noqa: E402
+                                   permission_arguments)
 from native_control import check_control_history, load_native_events, digest as control_digest  # noqa: E402
 from native_phase_history import phase_history                        # noqa: E402
 import run_native_canary as native                                    # noqa: E402
@@ -470,7 +471,7 @@ def main(argv=None):
         runtime_reads[:] = receipt["pretool_control"].get("persisted_output_paths", [])
         receipt["permission_denials"] = classify(terminal.get("permission_denials"))
         receipt["command_history"] = native.command_history(events, command_policy, receipt["permission_denials"])
-        if spec.render_version >= 13:
+        if spec.render_version >= PHASE_HISTORY_RENDERER:
             receipt["phase_history"] = phase_history(events, spec, complete=True, repository=registration["repository"],
                                                      command_policy=command_policy)
         receipt["effort_observed"] = observed_efforts(attempt / "control.jsonl")
@@ -553,7 +554,7 @@ def main(argv=None):
                 runtime_reads[:] = receipt["pretool_control"].get("persisted_output_paths", [])
             except (OSError, ValueError, TypeError):
                 receipt["pretool_control"] = {"checked": False, "problems": ["stopped native transcript is unreadable"]}
-        if spec.render_version >= 13 and "phase_history" not in receipt:
+        if spec.render_version >= PHASE_HISTORY_RENDERER and "phase_history" not in receipt:
             try:
                 receipt["phase_history"] = phase_history(load_native_events(attempt / "transcript.jsonl"), spec, complete=False,
                                                          repository=registration["repository"], command_policy=command_policy)
