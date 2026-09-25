@@ -668,6 +668,55 @@ attempt restarts every worker. Token counts, later turns and integration inputs
 remain unknown until their actual payloads exist. The plan does not claim that
 the registered maximum number of retries is affordable.
 
+## Standing full-reservation debit at stop (#2467)
+
+A native audit that stops with one unconfirmed charge leaves that request
+pending. The next registration can continue only from a reconciled
+checkpoint. On 2026-09-25 the maintainer authorized these charges, once for
+all such stops, at their whole reservation with the provider fee left
+unknown. The authorization is the committed record
+`standing_full_reservation_debit_2026-09-25.json`, which `reconcile_stopped`
+pins by hash and applies at once:
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls \
+  python -m audit_controls.reconcile_stopped --registration STOPPED/registration.json --out NEW_DIR
+```
+
+Holding the lineage's sequence lock, it requires:
+- the stopped audit to be the live tip, so no successor has continued from it;
+- no earlier reconciliation of it, recorded as a marker under
+  `reconciliations/` beside the sequence state;
+- exactly one pending row, of the audit's own attempt, which is the
+  result's only unresolved request;
+- one evidence folder, matched by exact name and not a symlink, whose
+  `request.json` hashes to the ledger's request digest.
+
+It stages the receipt and the reconciled checkpoint. The receipt names the
+authorization record by path and hash, and the file its accounting
+observation hashes. It then runs `validate_audit_reconciliation` on them, as
+the next registration will. If the validator refuses, nothing is left
+behind but the markers directory itself. If it accepts:
+1. the tool creates the output directory exclusively;
+2. it writes the marker;
+3. it links the files into place, with the files, the marker and the output
+   directory fsynced.
+
+A crash after the marker leaves it naming what to inspect. A rerun then
+reports whether that output was published. A marker that cannot be written
+removes itself, the output directory and the staged files. The output may
+not sit inside the stopped audit's tree, or inside the sequence state's
+directory.
+
+Only this tool writes markers. A reconciliation made any other way, such as
+audit27's by hand, carries none, so do not run the tool on a stop that
+already has one. The successor's validator does not yet read the marker or
+the pinned record (#2492). The stopped audit's files are never modified. The tool
+neither claims the sequence nor contacts a provider. The printed paths and
+hashes are the next preparation's continuation checkpoint, source
+registration and reconciliation receipt. Running it automatically when an
+audit stops remains open in #2467.
+
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
 A new registration may select `--audit-batches PATH` (#2192). The JSON file must
