@@ -365,6 +365,91 @@ def _run_corrected_read(run_case, frames, **options):
                 'read_log': str(path/'executed_read'), **options})
 
 
+
+def _rejected_write(source):
+    """The native 2.1.272 unread-file Write refusal observed in the first direct-arm
+    canary (#2285): no PreToolUse callback, fixture IDs and paths. The target is an
+    existing file in the registered output directory, as in every observed refusal
+    (#2331); the synthetic child never executes replayed frames, so its bytes are
+    unchanged whatever the controller does."""
+    session = '12345678-1234-1234-1234-123456789abc'
+    target = source.parent / 'out' / 'record.yaml'
+    target.write_text('EXISTING_RECORD\n')
+    # An unresolved spelling of the same file, built as a string because
+    # pathlib drops a '.' segment: a recorder that normalised the path, by
+    # pathlib or by os.path, would be seen to (#2330).
+    literal = f"{source.parent / 'out'}/./../out/record.yaml"
+    call = {'type': 'assistant', 'session_id': session, 'parent_tool_use_id': None,
+            'message': {'role': 'assistant', 'content': [
+                {'type': 'tool_use', 'id': 'rejected_write', 'name': 'Write',
+                 'input': {'file_path': literal, 'content': 'NEVER_WRITTEN_MARKER\n'}}]}}
+    result = {'type': 'user', 'session_id': session, 'parent_tool_use_id': None,
+              'message': {'role': 'user', 'content': [
+                  {'type': 'tool_result', 'tool_use_id': 'rejected_write', 'is_error': True,
+                   'content': f'<tool_use_error>{control.UNREAD_WRITE_MESSAGE}</tool_use_error>'}]},
+              'tool_use_result': f'Error: {control.UNREAD_WRITE_MESSAGE}'}
+    return [{'type': 'system', 'subtype': 'init', 'cwd': str(source.parent), 'session_id': session},
+            call, result]
+
+
+def test_an_unread_file_write_refused_by_the_runtime_is_an_unexecuted_call(run_case):
+    """#2285: the canary's evidence check stopped on exactly this call."""
+    run, path, source, policy, closed, stops = run_case
+    code, events, checked = _run_corrected_read(run_case, _rejected_write(source))
+    assert code == 0 and not stops and checked['checked'] and checked['problems'] == []
+    rejection, = checked['input_rejections']
+    literal = f"{source.parent / 'out'}/./../out/record.yaml"
+    assert (rejection['tool_use_id'], rejection['tool'], rejection['rejection'], rejection['file_path']) == \
+        ('rejected_write', 'Write', 'file_not_read', literal)                     # the literal target (#2330)
+    assert rejection['session_id'] == '12345678-1234-1234-1234-123456789abc'
+    # The record is tied to the transcript's own bytes, not only to itself (#2328).
+    raw_lines = (path/'transcript.jsonl').read_text().splitlines()
+    for name in ('call', 'result'):
+        original = json.loads(raw_lines[rejection[name+'_line']-1])
+        assert control.digest(original) == rejection[name+'_sha256']
+    assert rejection['call_line'] < rejection['result_line']
+    assert (source.parent / 'out' / 'record.yaml').read_text() == 'EXISTING_RECORD\n'
+    rows = [json.loads(line) for line in (path/'control.jsonl').read_text().splitlines()]
+    recorded, = [{k: v for k, v in row.items() if k != 'at'} for row in rows
+                 if row['kind'] == 'input_rejected_before_callback']
+    assert recorded == rejection
+
+
+@pytest.mark.parametrize('change', ['other_message', 'plain_text_only', 'wrapper_only', 'extra_argument',
+                                    'missing_content', 'content_not_text', 'empty_path', 'not_error',
+                                    'extra_result_field', 'wrong_session',
+                                    # the wrapper and the path type on their own (#2329)
+                                    'other_wrapper_same_plain', 'wrapper_extra_content', 'path_not_text'])
+def test_only_the_exact_unread_file_refusal_is_recognised(run_case, change):
+    run, path, source, policy, closed, stops = run_case
+    frames = _rejected_write(source)
+    call, result = frames[1], frames[2]
+    payload = call['message']['content'][0]['input']
+    block = result['message']['content'][0]
+    if change == 'other_message':
+        block['content'] = '<tool_use_error>File has been modified since read.</tool_use_error>'
+        result['tool_use_result'] = 'Error: File has been modified since read.'
+    elif change == 'plain_text_only':result['tool_use_result'] = 'Error: something else'
+    elif change == 'wrapper_only':block['content'] = control.UNREAD_WRITE_MESSAGE
+    elif change == 'extra_argument':payload['mode'] = 'append'
+    elif change == 'missing_content':payload.pop('content')
+    elif change == 'content_not_text':payload['content'] = ['x']
+    elif change == 'empty_path':payload['file_path'] = ''
+    elif change == 'not_error':block['is_error'] = False
+    elif change == 'extra_result_field':result['extra'] = True
+    elif change == 'wrong_session':result['session_id'] = 'another-session'
+    elif change == 'other_wrapper_same_plain':
+        block['content'] = '<tool_use_error>File has been modified since read.</tool_use_error>'
+    elif change == 'wrapper_extra_content':
+        block['content'] = f'<tool_use_error>{control.UNREAD_WRITE_MESSAGE} Also this.</tool_use_error>'
+    elif change == 'path_not_text':payload['file_path'] = ['x']
+    with pytest.raises(BudgetStop):
+        _run_corrected_read(run_case, frames)
+    assert closed and stops
+    events = [json.loads(line) for line in (path/'transcript.jsonl').read_text().splitlines()]
+    assert control.check_control_history(events, path/'control.jsonl', policy, runner._classify_command)['problems']
+
+
 @pytest.mark.parametrize('field', ['offset', 'limit'])
 def test_native_input_rejection_then_corrected_read_has_distinct_complete_evidence(run_case, field):
     run, path, source, policy, closed, stops = run_case
