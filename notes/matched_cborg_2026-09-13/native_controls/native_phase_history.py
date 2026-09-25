@@ -8,8 +8,11 @@ artifacts and scientific acceptance are checked separately. Partial observations
 fail merely because a Phase 1 correction or tool result is still pending.
 """
 from pathlib import Path
+from types import SimpleNamespace
 
 from native_command_policy import classify_program_command, _simple_command
+
+HELPER_ARGUMENTS = 1
 
 
 def _options(tokens, flags=()):
@@ -44,7 +47,6 @@ def _classify(command, spec, repository, command_policy):
     if not isinstance(command, str):
         return None, None
     path = lambda value: _path(value, repository)
-    paths = spec._agentic_artifact_paths
     python = spec._agentic_toolchain['python']
     tokens, _ = _simple_command(command)
     if tokens is None:
@@ -55,7 +57,15 @@ def _classify(command, spec, repository, command_policy):
         # These commands will be denied by the permission controller. They
         # cannot satisfy or violate a phase gate through a helper they never
         # execute. Keep their call/result bookkeeping for the separate audit.
+        # Under a policy that records the helper arguments, that includes a
+        # helper called with other arguments (#2444).
         return None, None
+    return _helper_arguments(tokens, spec, path)
+
+
+def _helper_arguments(tokens, spec, path):
+    """The helper a `python -m` command runs and whether its arguments are the selected run's."""
+    paths = spec._agentic_artifact_paths
     module, args = tokens[2], tokens[3:]
     if module == 'data_sheets_schema.cli':
         root = {}
@@ -120,6 +130,33 @@ def _classify(command, spec, repository, command_policy):
         return kind, None
     except (ValueError, KeyError):
         return kind, 'helper arguments differ from the selected run'
+
+
+def helper_expectations(spec, repository):
+    """What `_helper_arguments` reads from a run specification, as plain values a
+    command policy can carry, so the controller can refuse a helper call with
+    other arguments before it runs instead of stopping on it afterwards (#2444)."""
+    return {'version': HELPER_ARGUMENTS, 'repository': _path(repository),
+            'python': spec._agentic_toolchain['python'], 'method': spec.method, 'label': spec.label,
+            'project': spec.project, 'bundle': str(spec.bundle), 'chunk_manifest': str(spec.chunk_manifest),
+            'manifest': None if spec.manifest is None else str(spec.manifest),
+            'manifest_used': bool(spec.manifest_used), 'render_version': spec.render_version,
+            'artifact_paths': {key: str(value) for key, value in spec._agentic_artifact_paths.items()}}
+
+
+def helper_argument_problem(command, policy):
+    """(kind, problem) for a registered helper called with other arguments, else (kind, None)."""
+    view = policy['helper_arguments']
+    if not isinstance(view, dict) or view.get('version') != HELPER_ARGUMENTS:
+        raise ValueError('unsupported registered helper arguments')
+    tokens, _ = _simple_command(command) if isinstance(command, str) else (None, None)
+    if tokens is None or tokens[:2] != [view['python'], '-m'] or len(tokens) < 3:
+        return None, None
+    spec = SimpleNamespace(_agentic_artifact_paths=view['artifact_paths'], method=view['method'],
+                           label=view['label'], project=view['project'], bundle=view['bundle'],
+                           chunk_manifest=view['chunk_manifest'], manifest=view['manifest'],
+                           manifest_used=view['manifest_used'], render_version=view['render_version'])
+    return _helper_arguments(tokens, spec, lambda value: _path(value, view['repository']))
 
 
 class PhaseHistory:

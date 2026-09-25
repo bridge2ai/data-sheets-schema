@@ -18,16 +18,25 @@ from run_native_canary import classify_denials, denial_problems
 
 
 @pytest.fixture
-def registered(external, tmp_path):
+def registered(external, tmp_path, monkeypatch):
     # Every registrable agentic job renders the env form (#2307); the
-    # expansion form is refused at preparation (#2369).
+    # expansion form is refused at preparation (#2369). Jobs are rendered
+    # from the corpus root, as the preparers are, so the artifact paths keep
+    # their portable spelling wherever the policy is later rebuilt (#2444).
+    monkeypatch.chdir(tmp_path)
+    # Registered jobs keep the default output paths, which the launcher's run
+    # specification recomputes (#2444); no preparer sets out_dir.
     spec = replace(external, method='claudecode_agent', runtime='Claude Code',
-                   condition='generic_v9', render_version=12, prompt_text_env=True)
+                   condition='generic_v9', render_version=12, prompt_text_env=True, out_dir=None)
     instruction = tmp_path / 'instruction.md'
     instruction.write_text(spec.instruction, encoding='utf-8')
     job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
            'manifest': str(spec.manifest), 'bundle': str(spec.bundle),
            'render_spec': spec.render_spec(),
+           # What a rendered job carries for the launcher's run specification (#2444).
+           'project': spec.project, 'method': spec.method, 'label': spec.label,
+           'chunks': str(spec.chunk_manifest), 'profile': spec.profile, 'runtime': spec.runtime,
+           'run_date': spec.run_date, 'prompt_text_env': True,
            'outputs': {'full': str(spec.full_path), 'core': str(spec.core_path),
                        'report': str(spec.report_path)}}
     base = {'python': sys.executable, 'repository': str(tmp_path)}
@@ -102,7 +111,7 @@ def test_registered_manifest_has_no_any_subcommand_rule(registered):
     base, job, policy = registered
     py = base['python']
     prefix = [py, '-m', 'data_sheets_schema.cli']
-    good = [shlex.join([*prefix, '--manifest', path, 'receipts', 'check'])
+    good = [shlex.join([*prefix, '--manifest', path, 'runs', 'check'])
             for path in policy['manifest_paths']]
     bad = [shlex.join([*prefix, '--manifest', job['manifest'], 'runs', 'select']),
            shlex.join([*prefix, '--manifest', '/another/manifest.yaml', 'runs', 'list'])]
@@ -131,11 +140,26 @@ def test_policy_must_rebuild_exactly_before_launch(registered, mutation):
         validated_command_policy(overlay, base, job)
 
 
-def test_paths_with_quotes_remain_literals_when_binding_python(registered):
+def test_paths_with_quotes_remain_literals_when_binding_python(registered, monkeypatch):
+    import prepare_registration
     base, job, _ = registered
     special = "out/children's dataset/full.yaml"
+    # The instruction's registered helper lines name the same path, shell-quoted (#2444).
+    instruction = Path(job['instruction'])
+    def rebound(line):
+        words = shlex.split(line) if line.strip().startswith(base['python'] + ' -m ') else None
+        if not words or job['outputs']['full'] not in words:
+            return line
+        return shlex.join([special if word == job['outputs']['full'] else word for word in words])
+    instruction.write_text('\n'.join(rebound(line) for line in instruction.read_text().split('\n')))
     job['outputs']['full'] = special
     job['render_spec']['agentic_artifact_paths']['full'] = special
+    real = prepare_registration.spec_for
+    def launched(value):
+        spec = real(value)
+        spec._agentic_artifact_paths = {**spec._agentic_artifact_paths, 'full': special}
+        return spec
+    monkeypatch.setattr(prepare_registration, 'spec_for', launched)
     policy = build_command_policy(job, base['python'], base['repository'])
     report = next(p['code'] for p in policy['programs'] if 'check_report' in p['code'])
     import ast
@@ -221,12 +245,13 @@ def _roster(policy, *words, manifest=None):
 
 def _legacy(policy):
     """The same policy as a version-4 recording carries it."""
-    return {**{k: v for k, v in policy.items() if k != 'literal_admission'}, 'version': 4}
+    later = ('literal_admission', 'lookup_literal_admission', 'helper_arguments')
+    return {**{k: v for k, v in policy.items() if k not in later}, 'version': 4}
 
 
 def test_every_registered_spelling_is_admitted_as_written(registered):
     base, job, policy = registered
-    assert policy['version'] == POLICY_VERSION == 5 and policy['literal_admission'] == LITERAL_ADMISSION
+    assert policy['version'] == POLICY_VERSION == 6 and policy['literal_admission'] == LITERAL_ADMISSION
     python = policy['python']
     lines = [line.strip() for line in Path(job['instruction']).read_text().splitlines()]
     led = [line for line in lines if line.startswith(python + ' ') and not line.startswith(python + ' -c ')
@@ -261,12 +286,12 @@ def test_a_respelling_is_refused_by_the_controller_and_does_not_disqualify(regis
     python = policy['python']
     fixed = next(p['code'] for p in policy['programs'] if not p['arguments'])
     manifest = policy['manifest_paths'][0]
-    receipts = _roster(policy, 'receipts', 'check', manifest=manifest)
+    receipts = _roster(policy, 'runs', 'check', manifest=manifest)
     command = {
         'reflowed': shlex.join([python, '-c', fixed + '\n\n']),
         'comment': shlex.join([python, '-c', fixed]) + ' # checked',
         'double_quoted_manifest': ' '.join([shlex.join([python, '-m', 'data_sheets_schema.cli']),
-                                            '--manifest', '"' + manifest + '"', 'receipts', 'check']),
+                                            '--manifest', '"' + manifest + '"', 'runs', 'check']),
         'variable': receipts + ' --label $LABEL',
         'braced_variable': receipts + ' --label "${LABEL}"',
         'continuation': receipts + ' \\\n  --strict',
@@ -287,7 +312,7 @@ def test_runs_of_spaces_between_registered_words_are_admitted(registered):
     _, _, policy = registered
     python = policy['python']
     for sep in ('  ', '\t', ' \t '):
-        command = sep.join([shlex.quote(python), '-m', 'data_sheets_schema.cli', 'receipts', 'check', '--strict'])
+        command = sep.join([shlex.quote(python), '-m', 'data_sheets_schema.cli', 'runs', 'check', '--strict'])
         assert classify_program_command(command, python, set(), policy)[0] == 'prescribed', repr(sep)
 
 
@@ -299,7 +324,7 @@ def test_the_refusal_names_the_registered_spelling(registered):
     _, basis = classify_program_command(shlex.join([python, '-c', fixed + '\n\n']), python, set(), policy)
     assert basis.endswith('run the registered spelling exactly: ' + example)
     manifest = policy['manifest_paths'][0]
-    receipts = _roster(policy, 'receipts', 'check', manifest=manifest)
+    receipts = _roster(policy, 'runs', 'check', manifest=manifest)
     _, basis = classify_program_command(receipts + ' --label $X', python, set(), policy)
     assert basis.endswith('run the registered spelling exactly: ' + receipts + ' …')
 
@@ -307,12 +332,15 @@ def test_the_refusal_names_the_registered_spelling(registered):
 def test_a_registration_whose_recorder_line_the_runtime_would_refuse_is_refused_at_build(external, tmp_path):
     """#2369, #2282: the expansion form would be refused at the run's last step; preparation refuses it."""
     spec = replace(external, method='claudecode_agent', runtime='Claude Code',
-                   condition='generic_v9', render_version=12)
+                   condition='generic_v9', render_version=12, out_dir=None)
     assert '${D4D_LAUNCH_INSTRUCTION' in spec.instruction
     instruction = tmp_path / 'instruction.md'
     instruction.write_text(spec.instruction, encoding='utf-8')
     job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
            'manifest': str(spec.manifest), 'bundle': str(spec.bundle), 'render_spec': spec.render_spec(),
+           'project': spec.project, 'method': spec.method, 'label': spec.label,
+           'chunks': str(spec.chunk_manifest), 'profile': spec.profile, 'runtime': spec.runtime,
+           'run_date': spec.run_date,
            'outputs': {'full': str(spec.full_path), 'core': str(spec.core_path), 'report': str(spec.report_path)}}
     with pytest.raises(ValueError, match='not admitted as written .*a \\$ variable or expansion.*provenance record'):
         build_command_policy(job, sys.executable, tmp_path)
@@ -364,7 +392,7 @@ def test_what_the_runtime_refuses_before_matching_is_refused_first(registered, n
     reads an argument joined from pieces; it re-quotes text with a newline or $NAME before matching."""
     _, _, policy = registered
     python = policy['python']
-    command = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' ' + RUNTIME_REFUSED[name]
+    command = _roster(policy, 'runs', 'check', manifest=policy['manifest_paths'][0]) + ' ' + RUNTIME_REFUSED[name]
     assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
     verdict, basis = classify_program_command(command, python, set(), policy)
     assert verdict == 'not_prescribed' and 'does not disqualify the attempt' in basis, basis
@@ -387,7 +415,7 @@ def test_trimming_follows_javascript_not_python(registered):
 def test_a_command_longer_than_the_runtime_parses_is_refused(registered):
     _, _, policy = registered
     python = policy['python']
-    base = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0])
+    base = _roster(policy, 'runs', 'check', manifest=policy['manifest_paths'][0])
     assert classify_program_command(base + ' --label ' + 'x' * (9_990 - len(base)), python, set(), policy)[0] == 'prescribed'
     assert classify_program_command(base + ' --label ' + 'x' * 10_000, python, set(), policy)[0] == 'not_prescribed'
 
@@ -471,7 +499,7 @@ def test_the_rest_of_what_the_runtime_refuses_is_refused_first(registered, name)
     and its lone-surrogate check, which must refuse, not crash the controller."""
     _, _, policy = registered
     python = policy['python']
-    command = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' ' + JOINED_REFUSED[name]
+    command = _roster(policy, 'runs', 'check', manifest=policy['manifest_paths'][0]) + ' ' + JOINED_REFUSED[name]
     assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
     verdict, basis = classify_program_command(command, python, set(), policy)
     assert verdict == 'not_prescribed' and 'does not disqualify the attempt' in basis, basis
@@ -483,7 +511,7 @@ def test_trailing_characters_the_runtime_checks_before_trimming_are_refused(regi
     refused even though the trim removes it before the rule is matched."""
     _, _, policy = registered
     python = policy['python']
-    command = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' --strict' + chr(code)
+    command = _roster(policy, 'runs', 'check', manifest=policy['manifest_paths'][0]) + ' --strict' + chr(code)
     assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
     assert classify_program_command(command, python, set(), policy)[0] == 'not_prescribed'
 
@@ -491,7 +519,7 @@ def test_trailing_characters_the_runtime_checks_before_trimming_are_refused(regi
 def test_the_parse_limit_is_ten_thousand_utf16_units(registered):
     _, _, policy = registered
     python = policy['python']
-    base = _roster(policy, 'receipts', 'check', manifest=policy['manifest_paths'][0]) + ' --label '
+    base = _roster(policy, 'runs', 'check', manifest=policy['manifest_paths'][0]) + ' --label '
     judge = lambda command: classify_program_command(command, python, set(), policy)[0]
     assert judge(base + 'x' * (10_000 - len(base))) == 'prescribed'
     assert judge(base + 'x' * (10_001 - len(base))) == 'not_prescribed'
@@ -519,3 +547,78 @@ def test_the_guidance_names_when_a_refusal_carries_the_spelling(registered):
     _, _, policy = registered
     assert 'where the call keeps the registered interpreter and command, it names the registered spelling' \
         in command_guidance(policy)
+
+
+# --- #2443: a read-only lookup the runtime would refuse is refused first ---------------------------
+
+def test_a_lookup_the_runtime_refuses_is_refused_first_without_disqualifying(registered):
+    from run_native_canary import _classify_command
+    base, job, policy = registered
+    python, bundle = policy['python'], job['bundle']
+    escaped = 'grep -n Data\\ Use ' + shlex.quote(bundle)
+    verdict, basis = _classify_command(escaped, python, set(), policy)
+    assert verdict == 'not_prescribed' and 'does not disqualify the attempt' in basis, basis
+    assert denial_problems(classify(policy, escaped)) == []
+    # A version-5 recording replays exactly as it was registered.
+    assert _classify_command(escaped, python, set(), {k: v for k, v in policy.items()
+                                                      if k != 'lookup_literal_admission'})[0] == 'prescribed'
+    for admitted in ('grep -n ' + shlex.quote('Data Use') + ' ' + shlex.quote(bundle) + ' | head -5',
+                     "sed -n '1,20p' " + shlex.quote(bundle), 'wc -l ' + shlex.quote(bundle)):
+        assert _classify_command(admitted, python, set(), policy)[0] == 'prescribed', admitted
+
+
+# --- #2444: a helper called with other arguments is refused before it runs ------------------------
+
+def _helper_spec(job):
+    from prepare_registration import spec_for
+    return spec_for(job)
+
+
+def test_a_helper_with_other_arguments_is_refused_first_and_named_its_registered_spelling(registered):
+    base, job, policy = registered
+    python = policy['python']
+    spellings = policy['helper_arguments']['spellings']
+    assert set(spellings) >= {'receipts', 'derive'}
+    for command in (line for lines in spellings.values() for line in lines):
+        assert classify_program_command(command, python, set(), policy)[0] == 'prescribed', command
+    bare = shlex.join([python, '-m', 'data_sheets_schema.cli', 'receipts', 'check', '--strict'])
+    derived = shlex.join([python, '-m', 'data_sheets_schema.cli', 'derive', 'core',
+                          '--full', job['outputs']['full'], '--out', '/elsewhere/core.yaml'])
+    for command, kind in ((bare, 'receipts'), (derived, 'derive')):
+        verdict, basis = classify_program_command(command, python, set(), policy)
+        assert verdict == 'not_prescribed' and 'does not disqualify the attempt' in basis, basis
+        assert basis.endswith('run a registered spelling exactly: ' + ' or '.join(spellings[kind]))
+        assert denial_problems(classify(policy, command)) == []
+        # A recording without the helper arguments replays unchanged.
+        assert classify_program_command(command, python, set(), _legacy(policy))[0] == 'prescribed'
+    guidance = command_guidance(policy)
+    assert '## Registered helper commands' in guidance
+    assert all(line in guidance for lines in spellings.values() for line in lines)
+    assert '## Registered helper commands' not in command_guidance(_legacy(policy))
+
+
+def test_the_phase_history_no_longer_stops_on_a_helper_the_controller_refuses(registered):
+    from native_phase_history import PhaseHistory
+    base, job, policy = registered
+    bare = shlex.join([policy['python'], '-m', 'data_sheets_schema.cli', 'receipts', 'check', '--strict'])
+    event = {'type': 'assistant', 'message': {'content': [
+        {'type': 'tool_use', 'id': 'variant', 'name': 'Bash', 'input': {'command': bare}}]}}
+    current = PhaseHistory(_helper_spec(job), repository=base['repository'], command_policy=policy)
+    current.observe(event)
+    assert current.report()['problems'] == []
+    legacy = PhaseHistory(_helper_spec(job), repository=base['repository'], command_policy=_legacy(policy))
+    legacy.observe(event)
+    assert any('helper arguments differ' in problem for problem in legacy.report()['problems'])
+
+
+def test_a_launcher_spec_that_disagrees_with_the_rendered_paths_fails_preparation(registered, monkeypatch):
+    import prepare_registration
+    base, job, _ = registered
+    real = prepare_registration.spec_for
+    def moved(value):
+        spec = real(value)
+        spec._agentic_artifact_paths = {**spec._agentic_artifact_paths, 'core': '/elsewhere/core.yaml'}
+        return spec
+    monkeypatch.setattr(prepare_registration, 'spec_for', moved)
+    with pytest.raises(ValueError, match="launcher's run specification"):
+        build_command_policy(job, base['python'], base['repository'])

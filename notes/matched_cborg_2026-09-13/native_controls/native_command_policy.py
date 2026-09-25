@@ -18,13 +18,17 @@ from native_readonly import PROGRAMS, lookup_policy, lookup_guidance
 from native_control import CONTRACT
 
 
-POLICY_VERSION = 5
+POLICY_VERSION = 6
 
 #: A policy carrying this marker has the controller refuse, before
 #: execution, a prescribed call the runtime's own permission rules would not
 #: admit as written (#2369). Recorded policies without it (versions 1 to 4,
 #: and the audit, evaluation and finalization policies) replay unchanged.
 LITERAL_ADMISSION = 1
+
+#: A policy carrying this marker applies the same check to the registered
+#: read-only lookups, which the runtime admits by argument rules too (#2443).
+LOOKUP_LITERAL_ADMISSION = 1
 
 
 def program_key(program):
@@ -368,6 +372,8 @@ def _registered_spelling(tokens, python, policy):
 
 def build_command_policy(job, python, repository):
     """Freeze one policy from the actual instruction and its selected playbook."""
+    from native_phase_history import helper_argument_problem, helper_expectations
+    from prepare_registration import spec_for
     spec = job['render_spec']
     environment = validate_toolchain(spec['agentic_toolchain'])
     if environment['python'] != python:
@@ -375,6 +381,12 @@ def build_command_policy(job, python, repository):
     artifacts = spec['agentic_artifact_paths']
     if any(job['outputs'][key] != artifacts[key] for key in ('full', 'core', 'report')):
         raise ValueError('registered outputs and agentic artifact paths disagree')
+    # The launcher reviews phase history against spec_for(job); its helper
+    # expectations are the ones the controller enforces (#2444).
+    launched = spec_for(job)
+    compared = ('full', 'core', 'report', *(('receipt',) if 'receipt' in artifacts else ()))
+    if any(str(launched._agentic_artifact_paths.get(key)) != artifacts[key] for key in compared):
+        raise ValueError("the launcher's run specification and the registered artifact paths disagree")
     replacements = {
         '<full_file>': artifacts['full'], '<full>': artifacts['full'],
         '<core_file>': artifacts['core'], '<core>': artifacts['core'],
@@ -424,7 +436,9 @@ def build_command_policy(job, python, repository):
               'python': python, 'manifest_paths': sorted(manifests),
               'programs': [{'code': code, 'arguments': arguments} for code, arguments in sorted(programs.items())],
               'command_examples': sorted(examples), 'allowed_tools': rules,
-              'readonly_lookups': lookup_policy(job, repository)}
+              'readonly_lookups': lookup_policy(job, repository),
+              'lookup_literal_admission': LOOKUP_LITERAL_ADMISSION,
+              'helper_arguments': helper_expectations(launched, repository)}
     # Every registered spelling must be admitted as written, or the run would
     # be refused at that step after the spend before it (#2282, #2369): the
     # bound inline programs, and every command line of the instruction that
@@ -437,6 +451,12 @@ def build_command_policy(job, python, repository):
         if any(line.startswith(head + ' ') for head in heads)
         and not any(line.startswith(head + ' -c ') for head in heads)
         and not re.search(r'<[a-z_]+>', line)]
+    spellings = {}
+    for command in candidates:
+        kind, problem = helper_argument_problem(command, policy)
+        if kind and not problem:
+            spellings.setdefault(kind, set()).add(command)
+    policy['helper_arguments']['spellings'] = {kind: sorted(lines) for kind, lines in sorted(spellings.items())}
     for command in candidates:
         verdict, basis = classify_program_command(command, python, set(), policy)
         if verdict != 'prescribed':
@@ -453,6 +473,16 @@ def command_guidance(policy):
                'interpreter and command, it names the registered spelling, so run '
                'the command again exactly as registered. '
                if policy.get('literal_admission') == LITERAL_ADMISSION else '')
+    helpers = (policy.get('helper_arguments') or {}).get('spellings') or {}
+    helper_guidance = ((
+        '\n\n## Registered helper commands\n\n'
+        'The receipt check, core derivation, source review and evidence '
+        'assertion helpers run only with the instruction\'s registered '
+        'arguments, spelled as below. Other arguments, including the executable '
+        'playbook\'s generic forms, are refused before they run; that refusal '
+        'does not disqualify the attempt.\n\n' +
+        '\n\n'.join('```bash\n' + command + '\n```' for kind in sorted(helpers) for command in helpers[kind]) + '\n')
+        if helpers else '')
     return (
         '\n\n## Registered inline Python commands\n\n'
         'Use the exact commands below for the instruction and executable playbook\'s '
@@ -464,6 +494,7 @@ def command_guidance(policy):
         'instruction\'s arguments; a root --manifest option must name this job\'s '
         'registered manifest. ' + literal + '\n\n' +
         '\n\n'.join('```bash\n' + command + '\n```' for command in policy['command_examples']) + '\n' +
+        helper_guidance +
         lookup_guidance() +
         '\n\n## File tools\n\n'
         'The parent checks every Read and Write target before execution. Read '
@@ -604,6 +635,16 @@ def classify_program_command(command, python, programs, command_policy=None):
             spelling = _registered_spelling(_simple_command(command)[0], python, command_policy)
             return 'not_prescribed', (f'{basis}, respelled: {problem}. This refusal does not disqualify '
                                       f'the attempt; run the registered spelling exactly: {spelling}')
+    if verdict == 'prescribed' and isinstance(command_policy, dict) and 'helper_arguments' in command_policy:
+        # The phase history stops a run on a helper called with arguments
+        # other than the selected run's. Under a policy that records those
+        # arguments, the controller refuses the call before it runs (#2444).
+        from native_phase_history import helper_argument_problem
+        kind, problem = helper_argument_problem(command, command_policy)
+        if problem:
+            spellings = command_policy['helper_arguments'].get('spellings', {}).get(kind) or []
+            return 'not_prescribed', (f'{basis}, {problem}. This refusal does not disqualify the attempt; '
+                                      'run a registered spelling exactly: ' + ' or '.join(spellings))
     return verdict, basis
 
 

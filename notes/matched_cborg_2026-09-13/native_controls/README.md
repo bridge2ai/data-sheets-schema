@@ -157,6 +157,32 @@ output directory for each run. Scientific acceptance still inspects actual
 successful calls, read targets and denied calls; a permission grant alone
 does not establish instruction adherence (#2049).
 
+## Command policy 6, 2026-09-25
+
+Two kinds of call used to end a run with no record. Policy 6 has the
+controller refuse both before they run, with guidance. The refusal does not
+disqualify the attempt.
+
+- **Lookups the runtime refuses (#2443).** The runtime admits read-only
+  lookups by argument rules, so it refuses a spelling it finds too complex,
+  such as `grep -n Data\ Use FILE`. The controller had admitted it, so the
+  final classification counted the denial as prescribed. Under
+  `lookup_literal_admission` the controller applies the #2369 check to
+  admitted lookups.
+- **Helper arguments (#2444).** The phase history stopped the run on a
+  receipt check, core derivation, source review or evidence-assertion call
+  whose arguments differed from the selected run's. One example is the
+  playbook's bare `receipts check --strict`. `helper_arguments` records what
+  the phase history checks, taken from the launcher's own `spec_for(job)`.
+  The controller refuses a variant and names the instruction's registered
+  spelling. The system prompt lists those spellings. Preparation fails if
+  the launcher's specification and the rendered artifact paths disagree, or
+  if a registered helper line would be refused.
+
+Both checks key on their own policy fields. Recorded policies without them
+replay unchanged. A launch needs a fresh overlay, because the policy
+recomputed at launch must equal the registered one.
+
 ## Phase checks for renderer 13, 2026-09-17
 
 Renderer 13 separates Phase 1 corrections from terminal Phase 3/4 failures

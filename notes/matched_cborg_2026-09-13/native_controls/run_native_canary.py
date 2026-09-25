@@ -23,7 +23,8 @@ from run_api_canary import verify, verify_history, sha, check_canary_receipts
 from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 from native_command_policy import command_guidance, permission_arguments, program_key, validated_command_policy
 from native_command_policy import (classify_program_command, _shell_tokens, _simple_command,
-                                   _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL)
+                                   _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL,
+                                   LOOKUP_LITERAL_ADMISSION, runtime_literal_problem)
 from native_readonly import lookup_command, registered_input_paths
 from native_control import NativeControl, HISTORY_CONTRACT, check_control_history, load_native_events, digest as control_digest
 from native_phase_history import PhaseHistory, phase_history
@@ -67,6 +68,16 @@ def prescribed_programs(instruction_text, python):
 
 def _classify_command(command, python, programs, command_policy=None):
     if lookup_command(command, (command_policy or {}).get('readonly_lookups'), _simple_command):
+        if (isinstance(command_policy, dict)
+                and command_policy.get('lookup_literal_admission') == LOOKUP_LITERAL_ADMISSION):
+            # The runtime admits lookups by argument rules, so a spelling it
+            # finds too complex is refused there and would read as a denied
+            # prescribed call. The controller refuses it first (#2443).
+            problem = runtime_literal_problem(command, command_policy)
+            if problem:
+                return 'not_prescribed', (f'a registered read-only lookup, spelled so the runtime refuses it: '
+                                          f'{problem}. This refusal does not disqualify the attempt; quote each '
+                                          'argument with single quotes and name literal paths')
         return 'prescribed', 'a registered read-only lookup of this job\'s inputs or outputs'
     return classify_program_command(command, python, programs, command_policy)
 

@@ -212,6 +212,15 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     for name in ['verify','verify_history']:
         monkeypatch.setattr(runner, name, lambda *args: None)
     monkeypatch.setattr(runner, 'spec_for', lambda *args: run)
+    # The policy's helper arguments come from the launcher's agentic run
+    # specification (#2444); this synthetic job stands in for one.
+    import prepare_registration
+    agentic = SimpleNamespace(_agentic_artifact_paths=dict(rendered.get('agentic_artifact_paths', {})),
+        _agentic_toolchain=rendered.get('agentic_toolchain') or {'python': sys.executable},
+        method=run.method, label=run.label, project=run.project, bundle=run.bundle,
+        chunk_manifest=run.chunk_manifest, manifest=job.get('manifest'), manifest_used=False,
+        render_version=run.render_version)
+    monkeypatch.setattr(prepare_registration, 'spec_for', lambda *args: agentic)
     monkeypatch.setenv('CBORG_API_KEY', 'offline-never-sent')
     import anthropic
     monkeypatch.setattr(anthropic, 'Anthropic', lambda **kw: object())
@@ -262,8 +271,10 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d1',
                     'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli --help'}}]
             if case in ('prescribed_denial', 'late_stop_denial'):
+                # A roster command prescribed by meaning; a helper with other
+                # arguments is refused first instead (#2444).
                 terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d2',
-                    'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli receipts check --label L'}}]
+                    'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli runs check --label L'}}]
             if case.startswith('playbook_'):
                 name = {'playbook_term_denial': 'linkml_term_validator',
                         'playbook_grounding_denial': 'check_run',
