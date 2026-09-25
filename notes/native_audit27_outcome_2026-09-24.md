@@ -9,7 +9,7 @@ on September 25 UTC.
 The execution used commit
 [`98cae7e1eb6949daaba4c24e35edfd1123679d9e`](https://github.com/bridge2ai/data-sheets-schema/commit/98cae7e1eb6949daaba4c24e35edfd1123679d9e).
 It used the registered bounded retry policy described in the
-[audit controls](matched_cborg_2026-09-13/audit_controls/README.md).
+[audit controls at that commit](https://github.com/bridge2ai/data-sheets-schema/blob/98cae7e1eb6949daaba4c24e35edfd1123679d9e/notes/matched_cborg_2026-09-13/audit_controls/README.md).
 The earlier [retry history](native_audit_retry_2026-09-21.md) remains a record
 of its own attempts and approvals.
 
@@ -30,8 +30,12 @@ complete evidence freeze were verified. The first worker did not finish;
 these observations do not establish scientific acceptance.
 
 A subsequent read-only CBORG catalogue check listed `stream_timeout: 270.0`
-for the registered `claude-opus-5` Vertex route. At that check the route was
-reachable, and its registered model capabilities and prices were unchanged.
+for the registered `claude-opus-5` Vertex route. The catalogue endpoint
+responded successfully; the model listing retained the registered route,
+capabilities and prices. No model request was made by that check, so it does
+not establish model-route availability or streaming reliability. This
+clarifies the broader reachability wording in the original issue update
+([#2462](https://github.com/bridge2ai/data-sheets-schema/issues/2462)).
 
 ## Interpretation and next step
 
