@@ -1,5 +1,10 @@
 # CHORUS native audit history and retry policy — September 21, 2026
 
+This dated note records the earlier attempts and approvals below. The later
+[audit27 transport outcome](native_audit27_outcome_2026-09-24.md) records a
+stopped batch with repeated HTTP 500 responses; it does not supersede these
+historical accounting entries or establish an accepted audit.
+
 The nine CHORUS audit continuations did not produce an accepted Phase 3 audit. Their stopped evidence remains preserved. Audit9 wrote six native output parts, but never assembled or validated a final audit. It stopped on a token-counting timeout after all 26 paid requests had settled; that does not show that its longer generation read timeout expired.
 
 The nine continuations account for $45.34993425 across 145 admitted requests. The table separates the amount charged against the budget from the treatment of each interrupted request; attempt totals include the other settled requests.
