@@ -20,6 +20,8 @@ SECOND_KIND = 'additive_sequence_budget_v2'
 #: predecessor proof (#2468). v1 and v2 proofs validate exactly as before.
 CHAIN_KIND = 'additive_sequence_budget_chain_v1'
 CHAIN_RECEIPT_VERSION = 3
+#: A bound on validation work; a real lineage adds one link per authorization.
+MAX_CHAIN_LINKS = 16
 REFS = ('origin_registration', 'predecessor_registration', 'predecessor_ledger',
         'predecessor_owner', 'authorization')
 AMOUNTS = ('prior_total_usd', 'increase_usd', 'total_usd', 'default_attempt_usd')
@@ -141,7 +143,9 @@ def _proof_documents(value):
     if proof['kind'] == SECOND_KIND:
         return _second_documents(proof)
     if proof['kind'] == CHAIN_KIND:
-        return _increase_documents(proof, 'chained', CHAIN_RECEIPT_VERSION)
+        proof, documents = _increase_documents(proof, 'chained', CHAIN_RECEIPT_VERSION)
+        _distinct_receipt_quotes(proof)
+        return proof, documents
     documents = {key: _read(proof[key]) for key in REFS}
     origin, previous, ledger, owner, authority = (documents[key] for key in REFS)
     old, new, default = (_money(proof[key]) for key in ('prior_total_usd', 'total_usd', 'default_attempt_usd'))
@@ -393,12 +397,21 @@ def _chain_selection(value):
     """
     _require(set(value) == {'kind', *REFS, *AMOUNTS, 'prior_amendment', 'authorization_quote'},
              'unsupported chained budget amendment selection')
+    depth, node = 0, value
+    while type(node) is dict and node.get('kind') == CHAIN_KIND:
+        depth += 1
+        _require(depth < MAX_CHAIN_LINKS, 'budget amendment chain is longer than its bound')
+        node = node.get('prior_amendment')
     prior = selection(value['prior_amendment'])
     base = {key: value[key] for key in ('kind', *REFS, *AMOUNTS)}
     base['kind'] = KIND
     selection(base)
     _require(type(value['authorization_quote']) is str and bool(value['authorization_quote'].strip()),
              'chained amendment quote must be exact nonblank text')
+    # The quote must state this increase, so one message cannot be recorded
+    # as a larger or a different one (#2488).
+    _require(re.search(r'\$\s?' + re.escape(value['increase_usd']) + r'(?![0-9.])', value['authorization_quote'])
+             is not None, 'chained amendment quote does not state its increase')
     _require(_canonical(value['origin_registration']) == _canonical(prior['origin_registration'])
              and _money(value['default_attempt_usd']) == _money(prior['default_attempt_usd'])
              and _money(value['prior_total_usd']) == _money(prior['total_usd']),
@@ -411,8 +424,13 @@ def _links(proof):
     """Every proof in the chain, oldest first."""
     links = [proof]
     while links[-1]['kind'] != KIND:
+        _require(len(links) < MAX_CHAIN_LINKS, 'budget amendment chain is longer than its bound')
         links.append(links[-1]['prior_amendment'])
     return links[::-1]
+
+
+def _quote(text):
+    return ' '.join(text.split()).casefold()
 
 
 def _chain_refs(proof):
@@ -430,4 +448,18 @@ def _chain_refs(proof):
         current = {link[key]['sha256'] for key in REFS[1:]}
         _require(not current & identities, 'chained amendment reuses earlier authority or predecessor identity')
         identities |= current
+    # One quoted authorization funds one increase (#2488).
+    quotes = [_quote(link['authorization_quote']) for link in _links(proof) if 'authorization_quote' in link]
+    _require(len(set(quotes)) == len(quotes), 'chained amendment reuses an earlier authorization quote')
     return references
+
+
+def _distinct_receipt_quotes(proof):
+    """Every link's receipt quotes a different message, the v1 receipt included (#2488)."""
+    quotes = []
+    for link in _links(proof):
+        authorization = _read(link['authorization']).get('authorization')
+        _require(type(authorization) is dict and type(authorization.get('user_quote')) is str,
+                 'amendment receipt lacks its quoted authorization')
+        quotes.append(_quote(authorization['user_quote']))
+    _require(len(set(quotes)) == len(quotes), 'chained amendment reuses an earlier authorization quote')

@@ -193,3 +193,65 @@ def test_every_link_of_the_chain_is_pinned(tmp_path, depth):
     with pytest.raises(BudgetStop, match='unpinned'):
         amendment.effective_total(manifest, origin)
     assert amendment.effective_total(manifest, origin, require_pins=False) == Decimal(800)
+
+
+# --- review round (#2488, #2489) -------------------------------------------------------------------
+
+def test_the_chain_kind_and_receipt_version_are_the_registered_ones():
+    assert amendment.CHAIN_KIND == 'additive_sequence_budget_chain_v1'
+    assert amendment.CHAIN_RECEIPT_VERSION == 3
+
+
+def test_one_quoted_authorization_funds_one_increase(tmp_path):
+    first = make_chain_fixture(tmp_path / 'first', quote='increase the budget by $200')
+    # The same message recorded again as the next increase.
+    again, _, _, _ = make_chain_fixture(tmp_path / 'again', prior=first, increase='200',
+                                        quote='Increase the  budget by $200')
+    with pytest.raises(BudgetStop, match='reuses an earlier authorization quote'):
+        amendment.selection(again)
+    # A link quoting the message behind the original v1 receipt, which only
+    # the receipts carry: the proofs' quotes are distinct.
+    v1_quote = json.loads(Path(links(first[0])[0]['authorization']['path']).read_bytes())['authorization']['user_quote']
+    assert v1_quote == 'Approve synthetic $100'
+    proof, origin, _, manifest = make_chain_fixture(tmp_path / 'v1', increase='100', quote=v1_quote)
+    amendment.selection(proof)
+    with pytest.raises(BudgetStop, match='reuses an earlier authorization quote'):
+        amendment.effective_total(manifest, origin)
+
+
+@pytest.mark.parametrize('quote', ['increase the budget', 'increase the budget by $2000',
+                                   'increase the budget by $200.50', 'increase the budget by 200'])
+def test_a_chained_quote_must_state_its_increase(tmp_path, quote):
+    proof, _, _, _ = make_chain_fixture(tmp_path, increase='200', quote=quote)
+    with pytest.raises(BudgetStop, match='does not state its increase'):
+        amendment.selection(proof)
+
+
+def test_an_overlong_chain_is_refused_before_it_is_walked(tmp_path, monkeypatch):
+    proof, _, _, _ = make_chain_fixture(tmp_path)
+    monkeypatch.setattr(amendment, '_read', lambda _: pytest.fail('selection read evidence'))
+    deep = proof
+    for i in range(amendment.MAX_CHAIN_LINKS + 2):
+        deep = dict(deep, prior_amendment=deep, authorization_quote=f'link {i} $200')
+    with pytest.raises(BudgetStop, match='longer than its bound'):
+        amendment.selection(deep)
+
+
+@pytest.mark.parametrize('mutation', ['live_owner', 'over_cap'])
+def test_a_chained_link_refuses_the_live_owner_and_an_overspent_predecessor(tmp_path, mutation):
+    proof, origin, ledger, manifest = make_chain_fixture(tmp_path)
+    previous = json.loads(Path(proof['predecessor_registration']['path']).read_bytes())
+    if mutation == 'live_owner':
+        previous['sequence_state'] = proof['predecessor_owner']['path']
+    else:
+        ledger['requests'].append({'id': 'overspent', 'attempt': 'preceding', 'status': 'settled', 'cost_usd': '700'})
+    proof['predecessor_registration'] = write(proof['predecessor_registration']['path'], previous)
+    ledger['manifest_sha256'] = proof['predecessor_registration']['sha256']
+    owner = json.loads(Path(proof['predecessor_owner']['path']).read_bytes())
+    owner['registration_sha256'] = proof['predecessor_registration']['sha256']
+    proof['predecessor_owner'] = write(proof['predecessor_owner']['path'], owner)
+    proof['predecessor_ledger'] = write(proof['predecessor_ledger']['path'], ledger)
+    proof['authorization'] = write(proof['authorization']['path'], chain_authority(proof, origin, ledger))
+    repin(manifest)
+    with pytest.raises(BudgetStop):
+        amendment.effective_total(manifest, origin)
