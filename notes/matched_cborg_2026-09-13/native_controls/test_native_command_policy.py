@@ -653,7 +653,9 @@ def test_double_quoted_lookup_patterns_the_runtime_runs_stay_admitted(registered
     assert _classify_command('grep -n /proc/ ' + bundle + ' | grep /environ', policy['python'], set(),
                              policy)[0] == 'prescribed'
     guidance = command_guidance(policy)
-    assert 'Quote each lookup pattern and path with single quotes' in guidance
+    assert ('\nQuote each lookup pattern and path with single quotes, or use the Read tool; a spelling the '
+            'runtime cannot read literally is refused before it runs, and that refusal does not disqualify '
+            'the attempt.\n') in guidance
 
 
 def test_renderers_without_phase_history_keep_their_helper_admission(registered):

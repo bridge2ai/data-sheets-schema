@@ -262,10 +262,8 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
                 terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d1',
                     'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli --help'}}]
             if case in ('prescribed_denial', 'late_stop_denial'):
-                # A roster command prescribed by meaning; a helper with other
-                # arguments is refused first instead (#2444).
                 terminal['permission_denials']=[{'tool_name':'Bash','tool_use_id':'d2',
-                    'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli runs check --label L'}}]
+                    'tool_input':{'command':sys.executable+' -m data_sheets_schema.cli receipts check --label L'}}]
             if case.startswith('playbook_'):
                 name = {'playbook_term_denial': 'linkml_term_validator',
                         'playbook_grounding_denial': 'check_run',

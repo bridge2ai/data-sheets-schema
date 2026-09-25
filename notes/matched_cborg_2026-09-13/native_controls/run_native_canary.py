@@ -73,8 +73,9 @@ def _classify_command(command, python, programs, command_policy=None):
             # The runtime admits lookups by argument rules, so a spelling it
             # finds too complex is refused there and would read as a denied
             # prescribed call. The controller refuses it first (#2443), with
-            # only the runtime's own pre-parse checks: replayed transcripts show
-            # it runs double-quoted patterns the stricter reading refuses (#2483).
+            # only the runtime's own checks (too complex; an environ argument):
+            # replayed transcripts show it runs double-quoted patterns the
+            # stricter reading refuses (#2483).
             problem = _too_complex(command) or (
                 'an argument naming a process environment, which the runtime refuses'
                 if any(_PROC_ENVIRON.search(word) for part in pipeline_parts(command)

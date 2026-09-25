@@ -26,8 +26,9 @@ POLICY_VERSION = 6
 #: and the audit, evaluation and finalization policies) replay unchanged.
 LITERAL_ADMISSION = 1
 
-#: A policy carrying this marker applies the same check to the registered
-#: read-only lookups, which the runtime admits by argument rules too (#2443).
+#: A policy carrying this marker applies the runtime's own too-complex and
+#: /proc/*/environ checks to the registered read-only lookups, which the
+#: runtime admits by argument rules too (#2443, #2483).
 LOOKUP_LITERAL_ADMISSION = 1
 
 #: The renderer from which the launcher reviews phase history, and so the

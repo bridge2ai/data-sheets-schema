@@ -168,7 +168,7 @@ disqualify the attempt.
   such as `grep -n Data\ Use FILE`. The controller had admitted it, so the
   final classification counted the denial as prescribed. Under
   `lookup_literal_admission` the controller now applies only the runtime's
-  own pre-parse checks to admitted lookups: `_too_complex`, and a
+  own checks to admitted lookups: `_too_complex`, and a
   `/proc/*/environ` argument. The full #2369 check is not applied, because
   replayed 2.1.272 transcripts show the runtime running double-quoted
   patterns it would refuse (#2483). The guidance asks for single-quoted
