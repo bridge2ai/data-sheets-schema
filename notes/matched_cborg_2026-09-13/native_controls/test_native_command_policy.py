@@ -646,8 +646,12 @@ def test_double_quoted_lookup_patterns_the_runtime_runs_stay_admitted(registered
     for command in ('grep -n -E "audit\\.json|receipt" ' + bundle, 'grep -n "^MIT$\\|License" ' + bundle,
                     "grep -n 'Data Use' " + bundle + ' | head -5'):
         assert _classify_command(command, policy['python'], set(), policy)[0] == 'prescribed', command
-    for refused in ('grep -n Data\\ Use ' + bundle, 'cat /proc/1/environ'):
-        assert _classify_command(refused, policy['python'], set(), policy)[0] == 'not_prescribed', refused
+    for refused in ('grep -n Data\\ Use ' + bundle, "grep -n '/proc/self/environ' " + bundle):
+        verdict, basis = _classify_command(refused, policy['python'], set(), policy)
+        assert verdict == 'not_prescribed' and 'or use the Read tool' in basis, refused
+    # The environ check reads each argument, as the runtime does.
+    assert _classify_command('grep -n /proc/ ' + bundle + ' | grep /environ', policy['python'], set(),
+                             policy)[0] == 'prescribed'
     guidance = command_guidance(policy)
     assert 'Quote each lookup pattern and path with single quotes' in guidance
 
@@ -702,3 +706,27 @@ def test_the_evidence_protocol_version_is_read_from_the_recorded_policy(phased, 
     monkeypatch.setattr(evidence, 'protocol_for_renderer', lambda version: 999)
     for command in registered:
         assert classify_program_command(command, policy['python'], set(), policy)[0] == 'prescribed', command
+
+
+
+# --- the third review (#2494) --------------------------------------------------------------------
+
+def test_the_helper_check_starts_where_the_launchers_review_phase_history(external, tmp_path, monkeypatch):
+    import run_native_canary
+    from native_command_policy import PHASE_HISTORY_RENDERER
+    assert run_native_canary.PHASE_HISTORY_RENDERER is PHASE_HISTORY_RENDERER == 13
+    _, _, at = _registered(external, tmp_path, monkeypatch, PHASE_HISTORY_RENDERER)
+    assert 'helper_arguments' in at
+
+
+def test_a_launcher_spec_naming_another_interpreter_fails_preparation(phased, monkeypatch):
+    import prepare_registration
+    base, job, _ = phased
+    real = prepare_registration.spec_for
+    def elsewhere(value):
+        spec = real(value)
+        spec._agentic_toolchain = {**spec._agentic_toolchain, 'python': '/elsewhere/python'}
+        return spec
+    monkeypatch.setattr(prepare_registration, 'spec_for', elsewhere)
+    with pytest.raises(ValueError, match='another interpreter'):
+        build_command_policy(job, base['python'], base['repository'])

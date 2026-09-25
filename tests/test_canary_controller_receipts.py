@@ -212,15 +212,6 @@ def test_controller_completion_requires_current_receipt_floors(tmp_path, monkeyp
     for name in ['verify','verify_history']:
         monkeypatch.setattr(runner, name, lambda *args: None)
     monkeypatch.setattr(runner, 'spec_for', lambda *args: run)
-    # The policy's helper arguments come from the launcher's agentic run
-    # specification (#2444); this synthetic job stands in for one.
-    import prepare_registration
-    agentic = SimpleNamespace(_agentic_artifact_paths=dict(rendered.get('agentic_artifact_paths', {})),
-        _agentic_toolchain=rendered.get('agentic_toolchain') or {'python': sys.executable},
-        method=run.method, label=run.label, project=run.project, bundle=run.bundle,
-        chunk_manifest=run.chunk_manifest, manifest=job.get('manifest'), manifest_used=False,
-        render_version=run.render_version)
-    monkeypatch.setattr(prepare_registration, 'spec_for', lambda *args: agentic)
     monkeypatch.setenv('CBORG_API_KEY', 'offline-never-sent')
     import anthropic
     monkeypatch.setattr(anthropic, 'Anthropic', lambda **kw: object())

@@ -167,21 +167,33 @@ disqualify the attempt.
   lookups by argument rules, so it refuses a spelling it finds too complex,
   such as `grep -n Data\ Use FILE`. The controller had admitted it, so the
   final classification counted the denial as prescribed. Under
-  `lookup_literal_admission` the controller applies the #2369 check to
-  admitted lookups.
-- **Helper arguments (#2444).** The phase history stopped the run on a
-  receipt check, core derivation, source review or evidence-assertion call
-  whose arguments differed from the selected run's. One example is the
-  playbook's bare `receipts check --strict`. `helper_arguments` records what
-  the phase history checks, taken from the launcher's own `spec_for(job)`.
-  The controller refuses a variant and names the instruction's registered
-  spelling. The system prompt lists those spellings. Preparation fails if
-  the launcher's specification and the rendered artifact paths disagree, or
-  if a registered helper line would be refused.
+  `lookup_literal_admission` the controller now applies only the runtime's
+  own pre-parse checks to admitted lookups: `_too_complex`, and a
+  `/proc/*/environ` argument. The full #2369 check is not applied, because
+  replayed 2.1.272 transcripts show the runtime running double-quoted
+  patterns it would refuse (#2483). The guidance asks for single-quoted
+  patterns, or the Read tool.
+- **Helper arguments (#2444).** From renderer 13 (`PHASE_HISTORY_RENDERER`,
+  which the launchers' phase-history gates also use), the phase history
+  stopped the run on a receipt check, core derivation, source review or
+  evidence-assertion call whose arguments differed from the selected run's.
+  `helper_arguments` records what the phase history checks, taken from the
+  launcher's own `spec_for(job)`, including the evidence protocol version
+  (#2490). The controller refuses a variant and names the instruction's
+  registered spelling. The system prompt lists those spellings. Renderers 9
+  to 12 have no phase history and keep their admission.
+
+  Preparation fails if:
+  - the launcher's specification disagrees with the rendered artifact paths
+    or the registered interpreter;
+  - a registered helper line would be refused.
+
+  So a render 13+ policy is built under the registered interpreter.
 
 Both checks key on their own policy fields. Recorded policies without them
 replay unchanged. A launch needs a fresh overlay, because the policy
-recomputed at launch must equal the registered one.
+recomputed at launch must equal the registered one. The offline permission
+probes render at 12; a render 13+ probe case is #2495.
 
 ## Phase checks for renderer 13, 2026-09-17
 

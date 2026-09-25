@@ -41,7 +41,7 @@ SUPPORTED_SOURCES = {
         '98e2d679942bc207ada352353cc7d89edb25efc17160c3cae22d134903313699',
         # #2443/#2444 change policy building and classification only; the
         # two definitions executed here are byte-identical.
-        '3ae55906f500bd26817335c77ebc2c12a047eeeb100fea7a4f2ae351573a8045'}),
+        '3348bd3d6963444b73902d887fbb43859f617acedab6d3b555da53bc8d47b41e'}),
     'audit_controls/native.py': frozenset({
         'fc6f3aa8175634b9b4eece74a4ae8e2082c262a3155a7f6bd857431a1d53fcbb',
         'ec56d375f8036fa3c8c13385c5e6de019d83228ea4af2af57121a63dd572636c'}),

@@ -508,9 +508,9 @@ def command_guidance(policy):
         '\n\n'.join('```bash\n' + command + '\n```' for command in policy['command_examples']) + '\n' +
         helper_guidance +
         lookup_guidance() +
-        ('Quote each lookup pattern and path with single quotes; a spelling the '
-         'runtime cannot read literally is refused before it runs, and that '
-         'refusal does not disqualify the attempt.'
+        ('\nQuote each lookup pattern and path with single quotes, or use the Read '
+         'tool; a spelling the runtime cannot read literally is refused before '
+         'it runs, and that refusal does not disqualify the attempt.\n'
          if policy.get('lookup_literal_admission') == LOOKUP_LITERAL_ADMISSION else '') +
         '\n\n## File tools\n\n'
         'The parent checks every Read and Write target before execution. Read '
