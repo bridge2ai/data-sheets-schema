@@ -124,7 +124,10 @@ def _helper_arguments(tokens, spec, path):
                 required['--project'] = spec.project
                 _require(options.get('--project') == spec.project)
             if spec.render_version >= 11:
-                required['--protocol-version'] = str(protocol_for_renderer(spec.render_version))
+                # A policy view carries the version recorded when it was built (#2490).
+                recorded = getattr(spec, 'protocol_version', None)
+                required['--protocol-version'] = str(recorded if recorded is not None
+                                                     else protocol_for_renderer(spec.render_version))
                 _require(options.get('--protocol-version') == required['--protocol-version'])
             _require(set(options) == set(required))
         return kind, None
@@ -141,7 +144,15 @@ def helper_expectations(spec, repository):
             'project': spec.project, 'bundle': str(spec.bundle), 'chunk_manifest': str(spec.chunk_manifest),
             'manifest': None if spec.manifest is None else str(spec.manifest),
             'manifest_used': bool(spec.manifest_used), 'render_version': spec.render_version,
-            'artifact_paths': {key: str(value) for key, value in spec._agentic_artifact_paths.items()}}
+            'artifact_paths': {key: str(value) for key, value in spec._agentic_artifact_paths.items()},
+            'protocol_version': _protocol_version(spec.render_version)}
+
+
+def _protocol_version(render_version):
+    if render_version < 11:
+        return None
+    from data_sheets_schema.evidence_assertions import protocol_for_renderer
+    return protocol_for_renderer(render_version)
 
 
 def helper_argument_problem(command, policy):
@@ -155,7 +166,8 @@ def helper_argument_problem(command, policy):
     spec = SimpleNamespace(_agentic_artifact_paths=view['artifact_paths'], method=view['method'],
                            label=view['label'], project=view['project'], bundle=view['bundle'],
                            chunk_manifest=view['chunk_manifest'], manifest=view['manifest'],
-                           manifest_used=view['manifest_used'], render_version=view['render_version'])
+                           manifest_used=view['manifest_used'], render_version=view['render_version'],
+                           protocol_version=view.get('protocol_version'))
     return _helper_arguments(tokens, spec, lambda value: _path(value, view['repository']))
 
 

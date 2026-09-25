@@ -1,4 +1,5 @@
 """Native permissions and denial judgments share the registered job (#2035/#2041)."""
+import copy
 from copy import deepcopy
 from dataclasses import replace
 import json
@@ -17,8 +18,7 @@ from native_command_policy import (build_command_policy, command_guidance,
 from run_native_canary import classify_denials, denial_problems
 
 
-@pytest.fixture
-def registered(external, tmp_path, monkeypatch):
+def _registered(external, tmp_path, monkeypatch, render_version):
     # Every registrable agentic job renders the env form (#2307); the
     # expansion form is refused at preparation (#2369). Jobs are rendered
     # from the corpus root, as the preparers are, so the artifact paths keep
@@ -27,7 +27,7 @@ def registered(external, tmp_path, monkeypatch):
     # Registered jobs keep the default output paths, which the launcher's run
     # specification recomputes (#2444); no preparer sets out_dir.
     spec = replace(external, method='claudecode_agent', runtime='Claude Code',
-                   condition='generic_v9', render_version=12, prompt_text_env=True, out_dir=None)
+                   condition='generic_v9', render_version=render_version, prompt_text_env=True, out_dir=None)
     instruction = tmp_path / 'instruction.md'
     instruction.write_text(spec.instruction, encoding='utf-8')
     job = {'id': 'EXTERNAL_agentic_rep1', 'instruction': str(instruction),
@@ -41,6 +41,17 @@ def registered(external, tmp_path, monkeypatch):
                        'report': str(spec.report_path)}}
     base = {'python': sys.executable, 'repository': str(tmp_path)}
     return base, job, build_command_policy(job, sys.executable, tmp_path)
+
+
+@pytest.fixture
+def registered(external, tmp_path, monkeypatch):
+    return _registered(external, tmp_path, monkeypatch, 12)
+
+
+@pytest.fixture
+def phased(external, tmp_path, monkeypatch):
+    """A renderer with phase history, whose helper arguments the controller enforces (#2444)."""
+    return _registered(external, tmp_path, monkeypatch, 15)
 
 
 def classify(policy, *commands):
@@ -574,8 +585,8 @@ def _helper_spec(job):
     return spec_for(job)
 
 
-def test_a_helper_with_other_arguments_is_refused_first_and_named_its_registered_spelling(registered):
-    base, job, policy = registered
+def test_a_helper_with_other_arguments_is_refused_first_and_named_its_registered_spelling(phased):
+    base, job, policy = phased
     python = policy['python']
     spellings = policy['helper_arguments']['spellings']
     assert set(spellings) >= {'receipts', 'derive'}
@@ -597,9 +608,9 @@ def test_a_helper_with_other_arguments_is_refused_first_and_named_its_registered
     assert '## Registered helper commands' not in command_guidance(_legacy(policy))
 
 
-def test_the_phase_history_no_longer_stops_on_a_helper_the_controller_refuses(registered):
+def test_the_phase_history_no_longer_stops_on_a_helper_the_controller_refuses(phased):
     from native_phase_history import PhaseHistory
-    base, job, policy = registered
+    base, job, policy = phased
     bare = shlex.join([policy['python'], '-m', 'data_sheets_schema.cli', 'receipts', 'check', '--strict'])
     event = {'type': 'assistant', 'message': {'content': [
         {'type': 'tool_use', 'id': 'variant', 'name': 'Bash', 'input': {'command': bare}}]}}
@@ -611,9 +622,9 @@ def test_the_phase_history_no_longer_stops_on_a_helper_the_controller_refuses(re
     assert any('helper arguments differ' in problem for problem in legacy.report()['problems'])
 
 
-def test_a_launcher_spec_that_disagrees_with_the_rendered_paths_fails_preparation(registered, monkeypatch):
+def test_a_launcher_spec_that_disagrees_with_the_rendered_paths_fails_preparation(phased, monkeypatch):
     import prepare_registration
-    base, job, _ = registered
+    base, job, _ = phased
     real = prepare_registration.spec_for
     def moved(value):
         spec = real(value)
@@ -622,3 +633,72 @@ def test_a_launcher_spec_that_disagrees_with_the_rendered_paths_fails_preparatio
     monkeypatch.setattr(prepare_registration, 'spec_for', moved)
     with pytest.raises(ValueError, match="launcher's run specification"):
         build_command_policy(job, base['python'], base['repository'])
+
+
+
+# --- the second review of policy 6 (#2483, #2485) ------------------------------------------------
+
+def test_double_quoted_lookup_patterns_the_runtime_runs_stay_admitted(registered):
+    """Replayed 2.1.272 transcripts ran these; only the runtime's own pre-parse checks refuse (#2483)."""
+    from run_native_canary import _classify_command
+    base, job, policy = registered
+    bundle = shlex.quote(job['bundle'])
+    for command in ('grep -n -E "audit\\.json|receipt" ' + bundle, 'grep -n "^MIT$\\|License" ' + bundle,
+                    "grep -n 'Data Use' " + bundle + ' | head -5'):
+        assert _classify_command(command, policy['python'], set(), policy)[0] == 'prescribed', command
+    for refused in ('grep -n Data\\ Use ' + bundle, 'cat /proc/1/environ'):
+        assert _classify_command(refused, policy['python'], set(), policy)[0] == 'not_prescribed', refused
+    guidance = command_guidance(policy)
+    assert 'Quote each lookup pattern and path with single quotes' in guidance
+
+
+def test_renderers_without_phase_history_keep_their_helper_admission(registered):
+    base, job, policy = registered
+    assert 'helper_arguments' not in policy and policy['lookup_literal_admission'] == 1
+    bare = shlex.join([policy['python'], '-m', 'data_sheets_schema.cli', 'receipts', 'check', '--strict'])
+    assert classify_program_command(bare, policy['python'], set(), policy)[0] == 'prescribed'
+    assert '## Registered helper commands' not in command_guidance(policy)
+
+
+def test_a_helper_the_run_does_not_register_is_refused_without_an_empty_spelling(phased):
+    base, job, policy = phased
+    view = copy.deepcopy(policy)
+    view['helper_arguments']['spellings'].pop('receipts')
+    bare = shlex.join([policy['python'], '-m', 'data_sheets_schema.cli', 'receipts', 'check', '--strict'])
+    verdict, basis = classify_program_command(bare, policy['python'], set(), view)
+    assert verdict == 'not_prescribed' and basis.endswith('this run registers no call to this helper; do not call it')
+    assert '--write' in command_guidance(policy)
+
+
+def test_helper_paths_resolve_against_the_registered_repository(phased, tmp_path, monkeypatch):
+    """A relative spelling matches only as the child, whose cwd is the repository, would resolve it."""
+    base, job, policy = phased
+    receipts = policy['helper_arguments']['spellings']['receipts'][0]
+    words = shlex.split(receipts)
+    bundle = words.index('--bundle') + 1
+    relative = os.path.relpath(words[bundle], base['repository'])
+    words[bundle] = relative
+    command = shlex.join(words)
+    elsewhere = tmp_path / 'elsewhere'
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    assert classify_program_command(command, policy['python'], set(), policy)[0] == 'prescribed'
+
+
+def test_a_rendered_receipt_path_the_launcher_does_not_share_fails_preparation(phased):
+    base, job, _ = phased
+    job['render_spec']['agentic_artifact_paths']['receipt'] = '/elsewhere/receipt.yaml'
+    with pytest.raises(ValueError, match="launcher's run specification"):
+        build_command_policy(job, base['python'], base['repository'])
+
+
+def test_the_evidence_protocol_version_is_read_from_the_recorded_policy(phased, monkeypatch):
+    """A later commit that remaps renderers to protocols does not change a recorded policy's verdicts (#2490)."""
+    import data_sheets_schema.evidence_assertions as evidence
+    base, job, policy = phased
+    assert policy['helper_arguments']['protocol_version'] == evidence.protocol_for_renderer(15)
+    registered = policy['helper_arguments']['spellings'].get('evidence')
+    assert registered
+    monkeypatch.setattr(evidence, 'protocol_for_renderer', lambda version: 999)
+    for command in registered:
+        assert classify_program_command(command, policy['python'], set(), policy)[0] == 'prescribed', command

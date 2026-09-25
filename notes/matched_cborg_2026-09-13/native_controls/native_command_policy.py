@@ -30,6 +30,10 @@ LITERAL_ADMISSION = 1
 #: read-only lookups, which the runtime admits by argument rules too (#2443).
 LOOKUP_LITERAL_ADMISSION = 1
 
+#: The renderer from which the launcher reviews phase history, and so the
+#: first whose helper arguments the controller enforces (#2444).
+PHASE_HISTORY_RENDERER = 13
+
 
 def program_key(program):
     """Compare Python syntax without executing it or treating code as a glob."""
@@ -381,12 +385,17 @@ def build_command_policy(job, python, repository):
     artifacts = spec['agentic_artifact_paths']
     if any(job['outputs'][key] != artifacts[key] for key in ('full', 'core', 'report')):
         raise ValueError('registered outputs and agentic artifact paths disagree')
-    # The launcher reviews phase history against spec_for(job); its helper
-    # expectations are the ones the controller enforces (#2444).
-    launched = spec_for(job)
-    compared = ('full', 'core', 'report', *(('receipt',) if 'receipt' in artifacts else ()))
-    if any(str(launched._agentic_artifact_paths.get(key)) != artifacts[key] for key in compared):
-        raise ValueError("the launcher's run specification and the registered artifact paths disagree")
+    # From renderer 13 the launcher reviews phase history against
+    # spec_for(job); its helper expectations are the ones the controller
+    # enforces (#2444). Earlier renderers have no phase history to agree with.
+    render_version = job.get('render_version', spec.get('render_version', 9))
+    launched = spec_for(job) if render_version >= PHASE_HISTORY_RENDERER else None
+    if launched is not None:
+        compared = ('full', 'core', 'report', *(('receipt',) if 'receipt' in artifacts else ()))
+        if any(str(launched._agentic_artifact_paths.get(key)) != artifacts[key] for key in compared):
+            raise ValueError("the launcher's run specification and the registered artifact paths disagree")
+        if launched._agentic_toolchain['python'] != python:
+            raise ValueError("the launcher's run specification names another interpreter")
     replacements = {
         '<full_file>': artifacts['full'], '<full>': artifacts['full'],
         '<core_file>': artifacts['core'], '<core>': artifacts['core'],
@@ -437,8 +446,9 @@ def build_command_policy(job, python, repository):
               'programs': [{'code': code, 'arguments': arguments} for code, arguments in sorted(programs.items())],
               'command_examples': sorted(examples), 'allowed_tools': rules,
               'readonly_lookups': lookup_policy(job, repository),
-              'lookup_literal_admission': LOOKUP_LITERAL_ADMISSION,
-              'helper_arguments': helper_expectations(launched, repository)}
+              'lookup_literal_admission': LOOKUP_LITERAL_ADMISSION}
+    if launched is not None:
+        policy['helper_arguments'] = helper_expectations(launched, repository)
     # Every registered spelling must be admitted as written, or the run would
     # be refused at that step after the spend before it (#2282, #2369): the
     # bound inline programs, and every command line of the instruction that
@@ -451,12 +461,13 @@ def build_command_policy(job, python, repository):
         if any(line.startswith(head + ' ') for head in heads)
         and not any(line.startswith(head + ' -c ') for head in heads)
         and not re.search(r'<[a-z_]+>', line)]
-    spellings = {}
-    for command in candidates:
-        kind, problem = helper_argument_problem(command, policy)
-        if kind and not problem:
-            spellings.setdefault(kind, set()).add(command)
-    policy['helper_arguments']['spellings'] = {kind: sorted(lines) for kind, lines in sorted(spellings.items())}
+    if 'helper_arguments' in policy:
+        spellings = {}
+        for command in candidates:
+            kind, problem = helper_argument_problem(command, policy)
+            if kind and not problem:
+                spellings.setdefault(kind, set()).add(command)
+        policy['helper_arguments']['spellings'] = {kind: sorted(lines) for kind, lines in sorted(spellings.items())}
     for command in candidates:
         verdict, basis = classify_program_command(command, python, set(), policy)
         if verdict != 'prescribed':
@@ -477,8 +488,9 @@ def command_guidance(policy):
     helper_guidance = ((
         '\n\n## Registered helper commands\n\n'
         'The receipt check, core derivation, source review and evidence '
-        'assertion helpers run only with the instruction\'s registered '
-        'arguments, spelled as below. Other arguments, including the executable '
+        'assertion helpers run only with this run\'s registered arguments, as '
+        'in the lines below; the receipt check may add --write where the '
+        'instruction asks for it. Other arguments, including the executable '
         'playbook\'s generic forms, are refused before they run; that refusal '
         'does not disqualify the attempt.\n\n' +
         '\n\n'.join('```bash\n' + command + '\n```' for kind in sorted(helpers) for command in helpers[kind]) + '\n')
@@ -496,6 +508,10 @@ def command_guidance(policy):
         '\n\n'.join('```bash\n' + command + '\n```' for command in policy['command_examples']) + '\n' +
         helper_guidance +
         lookup_guidance() +
+        ('Quote each lookup pattern and path with single quotes; a spelling the '
+         'runtime cannot read literally is refused before it runs, and that '
+         'refusal does not disqualify the attempt.'
+         if policy.get('lookup_literal_admission') == LOOKUP_LITERAL_ADMISSION else '') +
         '\n\n## File tools\n\n'
         'The parent checks every Read and Write target before execution. Read '
         'only the registered inputs below, your files inside the output directories, '
@@ -643,8 +659,10 @@ def classify_program_command(command, python, programs, command_policy=None):
         kind, problem = helper_argument_problem(command, command_policy)
         if problem:
             spellings = command_policy['helper_arguments'].get('spellings', {}).get(kind) or []
+            advice = ('run a registered spelling exactly: ' + ' or '.join(spellings) if spellings
+                      else 'this run registers no call to this helper; do not call it')
             return 'not_prescribed', (f'{basis}, {problem}. This refusal does not disqualify the attempt; '
-                                      'run a registered spelling exactly: ' + ' or '.join(spellings))
+                                      + advice)
     return verdict, basis
 
 

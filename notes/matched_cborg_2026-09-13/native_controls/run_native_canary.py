@@ -24,7 +24,7 @@ from prepare_overlay_roster import PLAYBOOK_COMMANDS, MODULE_ENTRY_POINTS
 from native_command_policy import command_guidance, permission_arguments, program_key, validated_command_policy
 from native_command_policy import (classify_program_command, _shell_tokens, _simple_command,
                                    _roster_command, OPERATOR_CHARS, FORBIDDEN_SHELL,
-                                   LOOKUP_LITERAL_ADMISSION, runtime_literal_problem)
+                                   LOOKUP_LITERAL_ADMISSION, _PROC_ENVIRON, _too_complex)
 from native_readonly import lookup_command, registered_input_paths
 from native_control import NativeControl, HISTORY_CONTRACT, check_control_history, load_native_events, digest as control_digest
 from native_phase_history import PhaseHistory, phase_history
@@ -72,8 +72,12 @@ def _classify_command(command, python, programs, command_policy=None):
                 and command_policy.get('lookup_literal_admission') == LOOKUP_LITERAL_ADMISSION):
             # The runtime admits lookups by argument rules, so a spelling it
             # finds too complex is refused there and would read as a denied
-            # prescribed call. The controller refuses it first (#2443).
-            problem = runtime_literal_problem(command, command_policy)
+            # prescribed call. The controller refuses it first (#2443), with
+            # only the runtime's own pre-parse checks: replayed transcripts show
+            # it runs double-quoted patterns the stricter reading refuses (#2483).
+            problem = _too_complex(command) or (
+                'an argument naming a process environment, which the runtime refuses'
+                if _PROC_ENVIRON.search(command) else None)
             if problem:
                 return 'not_prescribed', (f'a registered read-only lookup, spelled so the runtime refuses it: '
                                           f'{problem}. This refusal does not disqualify the attempt; quote each '
