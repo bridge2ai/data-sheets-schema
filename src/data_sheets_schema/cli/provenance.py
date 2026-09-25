@@ -381,7 +381,8 @@ def _parse_phases(specs) -> list[dict]:
 @click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
               help='this run\'s procedure wrote a coverage receipt (#708); the '
                    'canary gate then treats a missing or failing one as a stop '
-                   'rather than as not-applicable')
+                   'rather than as not-applicable. Implied by a --render-spec-json '
+                   'specification that binds a receipt (#2350)')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
            reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
@@ -470,6 +471,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         # line is copied by hand, and a dropped flag must not drop the
         # effort the launcher asserted (#2216).
         reasoning_effort = reasoning_effort or registered.reasoning_effort
+        # Likewise the receipt expectation: the registered line is run as
+        # written and carries no flag, and a specification that binds the
+        # receipt's destination is a procedure that writes one (#2350).
+        receipt_expected = receipt_expected or registered.writes_receipt
         if manifest is None:
             manifest = str(registered.manifest) if registered.manifest is not None else "none"
         if chunk_manifest is None:

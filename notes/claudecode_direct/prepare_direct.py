@@ -240,9 +240,11 @@ def build(args):
     # dontAsk (#2282). It also refused, in every ending, a line whose
     # specification carried a manifest path with an apostrophe (twice in the
     # specification, quoted by the shell as '"'"'), while admitting one
-    # apostrophe in a small specification; the trigger is uncharacterised,
-    # so any apostrophe is refused here, conservatively (#2308). Either would
-    # disqualify the run at its last step.
+    # apostrophe in a small specification. The trigger is the runtime's brace
+    # check on an argument joined from quoted pieces, which the command
+    # policy's literal check now models (#2308, #2399); refusing any
+    # apostrophe here stays as a second layer. Either would disqualify the
+    # run at its last step.
     if not recorder or any("${" in line or "--prompt-text-env D4D_LAUNCH_INSTRUCTION" not in line for line in recorder):
         raise DirectStop("the rendered recorder line must read the launch instruction by --prompt-text-env, with no shell expansion")
     if "'" in json.dumps(spec.render_spec()):
@@ -265,13 +267,20 @@ def build(args):
     finally:
         shutil.rmtree(probe_config, ignore_errors=True)
     instruction.parent.mkdir(parents=True)
-    instruction.write_text(spec.instruction, encoding="utf-8")
-    job.update(render_spec=spec.render_spec(), input_identity=spec.input_identity(),
-               instruction=str(instruction), instruction_sha256=sha(instruction),
-               outputs={"full": str(spec.full_path), "core": str(spec.core_path),
-                        "provenance": str(spec.provenance_path), "report": str(spec.report_path)})
     python = sys.executable
-    policy = build_command_policy(job, python, str(repository))
+    try:
+        instruction.write_text(spec.instruction, encoding="utf-8")
+        job.update(render_spec=spec.render_spec(), input_identity=spec.input_identity(),
+                   instruction=str(instruction), instruction_sha256=sha(instruction),
+                   outputs={"full": str(spec.full_path), "core": str(spec.core_path),
+                            "provenance": str(spec.provenance_path), "report": str(spec.report_path)})
+        policy = build_command_policy(job, python, str(repository))
+    except ValueError as error:
+        # A registered spelling the runtime would refuse, or any policy that
+        # cannot be built, leaves nothing behind (#2317, #2369): the
+        # registration directory did not exist before this call.
+        shutil.rmtree(output, ignore_errors=True)
+        raise DirectStop(f"the registered command policy cannot be built: {error}") from error
     system_prompt = HERE / "system.md"
     pins = {}
     for directory, suffixes in [(repository / "src/data_sheets_schema", {".py", ".yaml", ".json"}),

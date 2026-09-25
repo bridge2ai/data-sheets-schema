@@ -34,7 +34,11 @@ SUPPORTED_SOURCES = {
         # The new implementation retains exact v2 projection semantics;
         # selected v3 source histories remain ineligible (#2422).
         'e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36'}),
-    'native_controls/native_command_policy.py': frozenset({'9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640'}),
+    # The #2369 version adds a literal-admission check; `_shell_tokens` and
+    # `_simple_command`, the only definitions executed here, are byte-identical.
+    'native_controls/native_command_policy.py': frozenset({
+        '9353027adace478977b0eb47ea8b0a5a321dfe2d617c251ce59f1527d3918640',
+        '98e2d679942bc207ada352353cc7d89edb25efc17160c3cae22d134903313699'}),
     'audit_controls/native.py': frozenset({
         'fc6f3aa8175634b9b4eece74a4ae8e2082c262a3155a7f6bd857431a1d53fcbb',
         'ec56d375f8036fa3c8c13385c5e6de019d83228ea4af2af57121a63dd572636c'}),

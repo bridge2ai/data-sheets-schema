@@ -28,6 +28,15 @@ and the stub it launches sees the variable; the fixture's line, whose manifest p
 appears twice in its specification, is refused in every ending until the
 specification's apostrophes are removed, while one apostrophe in a small
 specification is admitted.
+
+Since #2369 the controller refuses, before execution, a prescribed call the
+runtime's rules would not admit as written, so an expansion would never reach
+the runtime's matcher. The child's controller therefore runs without that
+check, and every case records both the runtime's decision and the checked
+controller's prediction (`controller_admits`). A case the runtime refused
+that the checked controller would have admitted is an under-refusal: under a
+launch it would disqualify the run, so the probe fails on any, in either
+mode (#2398 review).
 """
 import argparse
 import json
@@ -46,7 +55,7 @@ sys.path[:0] = [str(ROOT / "src"), str(CONTROLS), str(CONTROLS / "native_control
 
 from budgeted_cborg import Ledger                                        # noqa: E402
 from native_proxy import NativeProxy                                     # noqa: E402
-from run_native_canary import execute_child, verified_executable, sha   # noqa: E402
+from run_native_canary import execute_child, verified_executable, sha, _classify_command  # noqa: E402
 from native_command_policy import command_guidance, permission_arguments  # noqa: E402
 import probe_native_permissions as native_probe                          # noqa: E402
 
@@ -114,7 +123,12 @@ def isolation_cases(line, instruction_path):
             {"id": "tiny_parens", "command": prefix + " --render-spec-json '{\"a\":\"x (y)\"}'"},
             {"id": "tiny_apostrophe", "command": prefix + " --render-spec-json " + shlex.quote('{"a":"child\'s manifest"}')},
             {"id": "real_env_flag_no_apostrophe", "command": with_spec(
-                {k: (v.replace("'", "") if isinstance(v, str) else v) for k, v in spec.items()})}]
+                {k: (v.replace("'", "") if isinstance(v, str) else v) for k, v in spec.items()})},
+            # The same specification joined to its option (`--opt='{…}'`): one
+            # argument of two pieces, which the runtime reads as brace
+            # expansion (#2308); the checked controller refuses it too.
+            {"id": "real_env_flag_equals_form", "command": stem + " --render-spec-json=" + shlex.quote(
+                json.dumps(spec, sort_keys=True, separators=(",", ":"))) + " " + ENV_FLAG}]
 
 
 def main():
@@ -129,6 +143,8 @@ def main():
     work = root / "work"
     work.mkdir()
     job, policy = native_probe.fixture(work)
+    # The runtime's own matcher is what this probe observes (#2369).
+    runtime_policy = {k: v for k, v in policy.items() if k != "literal_admission"}
     instruction = Path(job["instruction"])
     cases = recorder_cases(instruction.read_text(encoding="utf-8"), instruction)
     if args.instruction is not None:
@@ -146,6 +162,7 @@ def main():
         'import os\nprint("CLI_STUB_OK", "LAUNCH_VARIABLE_SET" if os.environ.get("D4D_LAUNCH_INSTRUCTION") else "LAUNCH_VARIABLE_UNSET")\n')
     (root / "cases.json").write_text(json.dumps(cases, indent=2) + "\n")
     (root / "policy.json").write_text(json.dumps(policy, indent=2) + "\n")
+    (root / "runtime_policy.json").write_text(json.dumps(runtime_policy, indent=2) + "\n")
     cli = str(args.claude_executable.resolve(strict=True))
     pin = {"claude_executable": cli, "pinned_files": {cli: sha(cli)}}
     calls = []
@@ -194,13 +211,14 @@ def main():
     argv = [cli, "--print", "--safe-mode", "--restricted", "--strict-mcp-config", "--no-session-persistence",
             "--model", "claude-opus-5", "--name", "d4d-offline-recorder-permission", "--disable-slash-commands",
             "--max-budget-usd", "5", "--prompt-suggestions", "false", "--output-format", "stream-json", "--verbose",
-            "--permission-mode", "dontAsk", "--tools", "Read,Write,Bash", *permission_arguments(policy),
+            "--permission-mode", "dontAsk", "--tools", "Read,Write,Bash", *permission_arguments(runtime_policy),
             "--system-prompt", "Synthetic offline capability probe. Do not access other files or networks."
             + command_guidance(policy)]
     with proxy.running() as url:
         env["ANTHROPIC_BASE_URL"] = url
         code = execute_child(argv, proxy=proxy, instruction=prompt, attempt=root, cwd=work, env=env,
-                             deadline_seconds=120, verify_launch=lambda: verified_executable(pin), command_policy=policy)
+                             deadline_seconds=120, verify_launch=lambda: verified_executable(pin),
+                             command_policy=runtime_policy)
     events = [json.loads(line) for line in (root / "transcript.jsonl").read_text(encoding="utf-8").splitlines()
               if line.strip()]
     terminals = [e for e in events if e.get("type") == "result"]
@@ -217,7 +235,11 @@ def main():
     observed = [{"id": c["id"], "denied": c["id"] in denied, "denial_reason": reasons.get(c["id"]),
                  "ran_cli_stub": c["id"] in results and "CLI_STUB_OK" in text(results[c["id"]]),
                  "child_saw_variable": c["id"] in results and "LAUNCH_VARIABLE_SET" in text(results[c["id"]]),
-                 "result_head": (text(results[c["id"]])[:160] if c["id"] in results else None)} for c in cases]
+                 "result_head": (text(results[c["id"]])[:160] if c["id"] in results else None),
+                 "controller_admits": _classify_command(c["command"], policy["python"], set(), policy)[0] == "prescribed"}
+                for c in cases]
+    under = [o["id"] for o in observed if o["denied"] and o["denial_reason"] == "mode" and o["controller_admits"]]
+    over = [o["id"] for o in observed if not o["denied"] and not o["controller_admits"]]
     # A refusal counts only when the runtime's own matcher made it (reason
     # `mode`); an admitted case counts only when the child ran and saw the
     # variable. Anything else observed nothing.
@@ -226,7 +248,12 @@ def main():
                # everything (another interpreter, a broken rule) observed nothing.
                "passed": len(terminals) == 1 and any(not o["denied"] for o in observed) and all(
                    (o["denied"] and o["denial_reason"] == "mode" and not o["ran_cli_stub"])
-                   or (not o["denied"] and o["ran_cli_stub"] and o["child_saw_variable"]) for o in observed),
+                   or (not o["denied"] and o["ran_cli_stub"] and o["child_saw_variable"]) for o in observed)
+                   and not under,
+               # Runtime refusals the checked controller would have let
+               # through (disqualifying under a launch), and runtime
+               # admissions it refuses first (one retry, never disqualifying).
+               "under_refusals": under, "over_refusals": over,
                "instruction_sha256": sha(args.instruction) if args.instruction is not None else None,
                "allow_rules": [r for r in policy.get("allowed_tools", []) if "provenance record" in r],
                "scripted_requests": len(calls), "real_provider_requests": 0, "runtime_sha256": sha(cli),
