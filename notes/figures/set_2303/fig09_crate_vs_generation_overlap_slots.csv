@@ -1,0 +1,221 @@
+project,slot,state,value_kind,crate_value,generated_value
+CHORUS,acquisition_methods,both_differ_nested,nested,"- description: ""Data are derived from routine clinical care at participating hospitals\ \ under IRB oversight. Collectio",- acquisition_details: Retrospective acquisition of clinical data recorded in the course of care at contributing hospita
+CHORUS,addressing_gaps,generated_only,nested,,- response: There is an urgent need for infrastructure to support artificial intelligence and machine learning in critic
+CHORUS,at_risk_populations,generated_only,nested,,at_risk_groups_included: true notes: Admissions from pediatric intensive care units and neonatal intensive care units ar
+CHORUS,citation,crate_only,scalar,"'The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal",
+CHORUS,cleaning_strategies,generated_only,nested,,- cleaning_details: Characterization reports are produced and returned to contributing sites following their data submis
+CHORUS,collection_mechanisms,both_differ_nested,nested,"- description: ""Data are derived from routine clinical care at participating hospitals\ \ under IRB oversight. Collectio",- mechanism_details: Contributing sites create and upload a CHoRUS Data Extract using the tooling in the chorus-extract-
+CHORUS,collection_timeframes,generated_only,nested,,- source_caveats: The source documents do not state the calendar range of the clinical encounters included in the datase
+CHORUS,confidential_elements,both_differ_nested,nested,- name: CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls. - name: De-identification,- confidential_elements_present: true confidentiality_details: 'Clinical note text is treated as not releasable: notes a
+CHORUS,conforms_to,generated_only,scalar,,"Structured electronic health record data (demographics, medication administration, procedures, nursing flowsheets and di"
+CHORUS,conforms_to_class,generated_only,scalar,,Dataset ...
+CHORUS,conforms_to_schema,generated_only,scalar,,https://w3id.org/bridge2ai/data-sheets-schema ...
+CHORUS,conforms_to_standard,generated_only,nested,,- OMOP_CDM - DICOM - WFDB - OTHER
+CHORUS,created_by,both_differ_scalar,scalar,"'Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5),",CHoRUS Consortium ...
+CHORUS,creators,both_differ_nested,nested,"- description: 'Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), As",- affiliations: - name: Massachusetts General Hospital name: Eric Rosenthal notes: Listed on the Bridge2AI CHoRUS Leader
+CHORUS,data_collectors,generated_only,nested,,- collector_details: Fourteen of the twenty academic centers in the CHoRUS Network contribute as Data Acquisition center
+CHORUS,data_governance,generated_only,nested,,access_review_process: All data types are controlled access. For the AIM-AHEAD Bridge2AI for Clinical Care Training Prog
+CHORUS,description,both_differ_scalar,scalar,'The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network develo,"The CHoRUS dataset is a multicenter, multimodal, high-resolution, controlled-access dataset of acute and critical care h"
+CHORUS,direct_collection,generated_only,nested,,- collection_details: Data are acquired retrospectively from clinical systems at contributing hospitals rather than gath
+CHORUS,distribution_formats,generated_only,nested,,"- format: OMOP Common Data Model notes: Demographics, medication administration, procedures, nursing flowsheets and diag"
+CHORUS,doi,crate_only,scalar,https://doi.org/10.18130/V3/XNBOPG ...,
+CHORUS,download_url,crate_only,scalar,http://chorus4ai.org/dataset ...,
+CHORUS,ethical_reviews,both_differ_nested,nested,"- description: Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and Barbara J. Evans in collaboration",- review_details: Ethics is one of three project pillars (Ethical and Trustworthy AI). The project performs community-fa
+CHORUS,existing_uses,generated_only,nested,,"- examples: - As of the September 2025 cohort-2 informational webinar, the datasets are being used for training activiti"
+CHORUS,extension_mechanism,both_differ_nested,nested,name: Data Use Agreement available at 'https://chorus4ai.org/dataset/',contribution_url: https://github.com/chorus-ai extension_details: Clinical collaborators can contribute to semantic mapp
+CHORUS,external_resources,generated_only,nested,,"- external_resources: - https://github.com/chorus-ai — the CHoRUS for Equitable AI GitHub organization, holding 28 repos"
+CHORUS,file_collections,generated_only,nested,,- collection_type: processed_data conforms_to: OMOP Common Data Model conforms_to_standard: - OMOP_CDM description: Stru
+CHORUS,funders,both_differ_nested,nested,- name: NIH Common Fund OT2OD032701,"- grantor: National Institutes of Health, Common Fund Bridge2AI program grants: - grant_number: OT2OD032701 notes: NIH R"
+CHORUS,human_subject_research,generated_only,nested,,involves_human_subjects: true source_caveats: Human subject involvement follows from the dataset being built from hospit
+CHORUS,id,both_differ_scalar,scalar,https://doi.org/10.18130/V3/XNBOPG ...,https://chorus4ai.org/ ...
+CHORUS,instances,generated_only,nested,,- counts: 50000 data_topic: B2AI_TOPIC:9 instance_type: Hospital admission of a critically ill patient notes: The curren
+CHORUS,intended_uses,generated_only,nested,,- usage_notes: The dataset is assembled so that models can be built to improve the care and outcomes of patients requiri
+CHORUS,ip_restrictions,crate_only,nested,name: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx,
+CHORUS,is_deidentified,generated_only,nested,,"deidentification_details: As of August 2025, 1000 images were available with de-identification in process for a larger i"
+CHORUS,issued,crate_only,scalar,'2026-04-03T00:00:00Z',
+CHORUS,keywords,both_differ_nested,nested,- Bridge2AI - CHoRUS - Electronic health records - physiological data - medical images,- critical care - intensive care - acute illness - electronic health records - OMOP Common Data Model - waveform telemet
+CHORUS,known_biases,crate_only,nested,"- description: ""•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeconomic\ \ and demographic distribu",
+CHORUS,known_limitations,both_differ_nested,nested,"- description: ""•\tObservational data; and not randomized; collected as real-world\ \ clinical data, not through prospec",- limitation_description: 'Modality coverage is incomplete in the current release relative to the anticipated final data
+CHORUS,labeling_strategies,generated_only,nested,,- labeling_details: The CHoRUS Network states that a visualization and annotation environment will label data with targe
+CHORUS,license,crate_only,scalar,Data Use Agreement available at 'https://chorus4ai.org/dataset/' ...,
+CHORUS,license_and_use_terms,both_differ_nested,nested,name: Data Use Agreement available at 'https://chorus4ai.org/dataset/',license_terms: 'Access to the dataset is controlled and conditioned on a signed licensing agreement: all participants in
+CHORUS,maintainers,generated_only,nested,,"- maintainer_details: Ciera McCrary, Program Manager, Massachusetts General Hospital, is listed as the contact on the pr"
+CHORUS,missing_data_documentation,crate_only,nested,- name: Variable sampling rates across real-world data from hospital waveform systems and middleware,
+CHORUS,name,both_differ_scalar,scalar,CHoRUS RO-Crate Package ...,CHoRUS ...
+CHORUS,notes,generated_only,scalar,,"The project website carries the banner ""This repoitory is under review for potential modification in compliance with Adm"
+CHORUS,page,generated_only,scalar,,https://chorus4ai.org/ ...
+CHORUS,participant_privacy,generated_only,nested,,- anonymization_method: Tokenization of unstructured electronic health record data and transformation of data using appr
+CHORUS,preprocessing_strategies,generated_only,nested,,- preprocessing_details: Site data are standardized to the OMOP Common Data Model using validated semantic mappings that
+CHORUS,publisher,crate_only,scalar,B2AI CHoRUS ...,
+CHORUS,purposes,generated_only,nested,,"- response: Generate data for ML/AI applications aimed at characterizing acute and critical care illness, predicting com"
+CHORUS,raw_data_sources,generated_only,nested,,- access_details: Only the standardized site extract is delivered to CHoRUS; access to the delivered data is controlled.
+CHORUS,regulatory_restrictions,both_differ_nested,nested,name: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx,confidentiality_level: restricted regulatory_restrictions: - Every data type in the project's data inventory is listed w
+CHORUS,resources,crate_only,nested,- id: 08cf7419-b94d-4508-8f64-c99c557351d7 name: CHoRUS RO-Crate EHR SubRoCrate - id: b9b41c72-0895-4ec2-9e39-8de2a83abc,
+CHORUS,retention_limit,crate_only,nested,name: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx,
+CHORUS,sampling_strategies,generated_only,nested,,- source_caveats: Both statements describe intended sampling approaches; the source documents do not report the sampling
+CHORUS,sensitive_elements,both_differ_nested,nested,- name: CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls. - name: De-identification,- sensitive_elements_present: true sensitivity_details: The dataset comprises hospital clinical data on critically ill p
+CHORUS,source_caveats,generated_only,scalar,,'Sources disagree on the size of the released cohort: the project documentation at chorus4ai.org reports a current relea
+CHORUS,splits,generated_only,nested,,- source_caveats: This is described in the award abstract as a planned capability; the source documents do not report th
+CHORUS,status,generated_only,scalar,,partially released ...
+CHORUS,subpopulations,generated_only,nested,,"- identification: Admissions to intensive care units (ICU). source_caveats: The released figure of 50,000 patient admiss"
+CHORUS,subsets,crate_only,nested,- id: 08cf7419-b94d-4508-8f64-c99c557351d7 name: CHoRUS RO-Crate EHR SubRoCrate - id: b9b41c72-0895-4ec2-9e39-8de2a83abc,
+CHORUS,tasks,generated_only,nested,,- response: Characterizing acute and critical care illness. - response: Predicting complications and clinical deteriorat
+CHORUS,title,both_differ_scalar,scalar,CHoRUS RO-Crate Package ...,CHoRUS Dataset ...
+CHORUS,updates,both_differ_nested,nested,"description: ""\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes\ \ documenting schema changes, harmon",source_caveats: The source documents do not state a release cadence or versioning policy for the dataset itself. update_
+CHORUS,version,crate_only,scalar,1.0 Beta ...,
+CHORUS,version_access,crate_only,nested,name: 1.0 Beta,
+CHORUS,was_derived_from,generated_only,scalar,,"Clinical source systems at the 14 CHoRUS data contributing hospitals, comprising electronic health records, PACS imaging"
+CM4AI,acquisition_methods,both_differ_nested,nested,"- description: 'Data collection processes are generally described in Clark T et al. (2024) ""Cell Maps for Artificial Int",- acquisition_details: 'Primary experimental measurement on cultured human cell lines: affinity purification mass spectr
+CM4AI,addressing_gaps,generated_only,nested,,"- response: In genomics and precision medicine, machine learning models are often ""black boxes"" that predict phenotypes "
+CM4AI,citation,both_differ_scalar,scalar,Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forge,Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forge
+CM4AI,collection_mechanisms,both_differ_nested,nested,"- description: 'Data collection processes are generally described in Clark T et al. (2024) ""Cell Maps for Artificial Int","- mechanism_details: Affinity purification mass spectrometry (AP-MS) performed on endogenously tagged cell lines, for pr"
+CM4AI,collection_timeframes,both_differ_nested,nested,- name: 9/1/2022 - name: 6/1/2026,- timeframe_details: The release record gives a data creation date of 2025-02-27 and a deposit date of 2025-02-27. The f
+CM4AI,compression,generated_only,scalar,,zip ...
+CM4AI,confidential_elements,generated_only,nested,,- confidential_elements_present: true confidentiality_details: Some component datasets are under temporary pre-publicati
+CM4AI,conforms_to,generated_only,scalar,,"RO-Crate packaging with provenance graphs and rich metadata, produced using the FAIRSCAPE framework. ..."
+CM4AI,conforms_to_class,generated_only,scalar,,Dataset ...
+CM4AI,conforms_to_schema,generated_only,scalar,,https://w3id.org/bridge2ai/data-sheets-schema ...
+CM4AI,conforms_to_standard,generated_only,nested,,- RO_CRATE
+CM4AI,created_by,crate_only,scalar,'{''@id'': ''https://orcid.org/0000-0003-4060-7360''}; {''@id'': ''https://orcid.org/0000-0003-4535-3486''}; {''@id'': ',
+CM4AI,created_on,generated_only,scalar,,'2025-02-27T00:00:00Z'
+CM4AI,creators,both_differ_nested,nested,- id: https://orcid.org/0000-0003-4060-7360 - id: https://orcid.org/0000-0003-4535-3486 - id: https://orcid.org/0000-000,- affiliations: - name: University of Virginia id: ORCID:0000-0003-4060-7360 name: Clark T - affiliations: - name: Unive
+CM4AI,data_collectors,generated_only,nested,,- collector_details: 'University of California San Francisco: mass spectrometry based protein-protein interaction data. 
+CM4AI,data_governance,generated_only,nested,,"committee_contact: affiliation: - name: University of California, San Diego email: jillianparker@health.ucsd.edu id: ORC"
+CM4AI,description,both_differ_scalar,scalar,"This dataset is the June 2026 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional G","'The June 2026 Data Release (Beta) of Cell Maps for Artificial Intelligence (CM4AI), the Functional Genomics Grand Chall"
+CM4AI,direct_collection,generated_only,nested,,- collection_details: 'Data were not collected from individuals. All measurements were made on established human cell li
+CM4AI,discouraged_uses,crate_only,nested,- description: These laboratory data are not to be used in clinical decision-making or in any context involving patient ,
+CM4AI,distribution_dates,generated_only,nested,,- release_dates: - 2026-06-17 (version 2.0 published; seven of the ten archives published on this date) - 2026-07-15 (th
+CM4AI,distribution_formats,both_differ_nested,nested,- name: .d - name: .d directory group - name: .tsv - name: .xml - name: TSV - name: csv - name: executable - name: fastq,- format: ZIP media_type: application/zip notes: All ten files are distributed as ZIP archives through the University of
+CM4AI,doi,both_differ_scalar,scalar,https://doi.org/10.18130/V3/HIGT4C ...,10.18130/V3/HIGT4C ...
+CM4AI,download_url,crate_only,scalar,ftp://massive-ftp.ucsd.edu/v10/MSV000098237/ ...,
+CM4AI,ethical_reviews,both_differ_nested,nested,- name: Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pipon jean-christophe_belisle-pipon@,- contact_person: affiliation: - name: University of Montreal email: ravitskyv@thehastingscenter.org id: ORCID:0000-0002
+CM4AI,existing_uses,both_differ_nested,nested,"- description: 'AI-ready datasets to support research in functional genomics, AI/machine learning model training, cellul","- examples: - Nourreddine S, Doctor Y, Dailamy A, Forget A, Lee YH, Chinn B, Khaliq H, Polacco B, Muralidharan M, Pan E,"
+CM4AI,extension_mechanism,crate_only,nested,name: https://creativecommons.org/licenses/by-nc-sa/4.0/,
+CM4AI,external_resources,generated_only,nested,,"- external_resources: - 'Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A"
+CM4AI,file_collections,generated_only,nested,,- description: Two ZIP archives of affinity purification mass spectrometry data for MDA-MB-468 breast cancer cells treat
+CM4AI,funders,both_differ_nested,nested,"- description: 'National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS131560, U54CA274502, #S10 OD026929. De",- grantor: National Institutes of Health grants: - grant_number: 1OT2OD032742-01 notes: Bridge2AI Functional Genomics aw
+CM4AI,human_subject_research,generated_only,nested,,"involves_human_subjects: false regulatory_compliance: - 'The release record states ""Human Subjects: No"" and ""FDA Regulat"
+CM4AI,id,both_differ_scalar,scalar,https://doi.org/10.18130/V3/HIGT4C ...,doi:10.18130/V3/HIGT4C ...
+CM4AI,informed_consent,crate_only,nested,- description: Not applicable — data collected from commercially available de-identified human cell lines (KOLF2.1J iPSC,
+CM4AI,instances,generated_only,nested,,- data_substrate: B2AI_SUBSTRATE:19 data_topic: B2AI_TOPIC:19 instance_type: Immunofluorescence confocal microscopy imag
+CM4AI,intended_uses,both_differ_nested,nested,"- description: 'AI-ready datasets to support research in functional genomics, AI/machine learning model training, cellul",- use_category: AI-ready datasets to support research in functional genomics - use_category: AI model training - use_cat
+CM4AI,ip_restrictions,both_differ_nested,nested,description: Attribution is required to the copyright holders and the authors. Any publications referencing this data or,"restrictions: - Commercial use requires a separate license negotiation with the copyright holder (UCSD, Stanford, and/or"
+CM4AI,is_deidentified,generated_only,nested,,"deidentification_details: 'The release record answers ""De-identified Samples: Yes"". The project preprint states that CM4"
+CM4AI,issued,both_differ_scalar,scalar,'2026-06-30T00:00:00Z','2026-06-17T00:00:00Z'
+CM4AI,keywords,both_differ_nested,nested,- AI - affinity purification - AP-MS - artificial intelligence - breast cancer - Bridge2AI - cardiomyocyte - CM4AI - CRI,- AI - affinity purification - AP-MS - artificial intelligence - breast cancer - Bridge2AI - cardiomyocyte - CM4AI - CRI
+CM4AI,known_biases,both_differ_nested,nested,"- description: Data in this release was derived from commercially available de-identified human cell lines, and does not","- affected_subsets: - 'All modalities in the release, which derive from two cell lines: MDA-MB-468, a triple negative br"
+CM4AI,known_limitations,both_differ_nested,nested,"- description: This is an interim release. It does not contain predicted cell maps, which will be added in future releas",- limitation_description: This is an interim release; the data are not yet in completed final form. limitation_type: sco
+CM4AI,license,both_differ_scalar,scalar,https://creativecommons.org/licenses/by-nc-sa/4.0/ ...,CC BY-NC-SA 4.0 ...
+CM4AI,license_and_use_terms,both_differ_nested,nested,name: https://creativecommons.org/licenses/by-nc-sa/4.0/,contact_person: affiliation: - name: University of California San Diego id: ORCID:0000-0002-1708-8454 name: Trey Ideker 
+CM4AI,maintainers,generated_only,nested,,"- maintainer_details: Long term preservation is provided by the University of Virginia Dataverse (LibraData), supported "
+CM4AI,missing_data_documentation,crate_only,nested,"- description: Some datasets are under temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein ",
+CM4AI,name,both_agree,scalar,Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) ...,Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) ...
+CM4AI,notes,generated_only,scalar,,"Deposited to the University of Virginia Dataverse by Justin Niestroy, with a deposit date of 2025-02-27. The CM4AI proje"
+CM4AI,other_tasks,crate_only,nested,"- description: 'AI-ready datasets to support research in functional genomics, AI/machine learning model training, cellul",
+CM4AI,page,both_differ_scalar,scalar,https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=ad8b8084f5b14af5bafac70fdd42a577 ...,https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C ...
+CM4AI,preprocessing_strategies,generated_only,nested,,- preprocessing_details: Perturb-seq data are distributed both as a processed CRISPRi perturbation cell atlas and as the
+CM4AI,prohibited_uses,both_differ_nested,nested,- description: These laboratory data are not to be used in clinical decision-making or in any context involving patient ,- prohibition_reason: These laboratory data are not to be used in clinical decision-making or in any context involving p
+CM4AI,publisher,crate_only,scalar,https://dataverse.lib.virginia.edu/ ...,
+CM4AI,purposes,both_differ_nested,nested,"- description: 'AI-ready datasets to support research in functional genomics, AI/machine learning model training, cellul","- response: To deliver machine-readable hierarchical maps of cell architecture as AI-Ready data, produced from multimoda"
+CM4AI,raw_data_sources,generated_only,nested,,"- access_details: Available from ATCC. source_description: MDA-MB-468 (RRID:CVCL_0419), a triple negative breast cancer "
+CM4AI,raw_sources,generated_only,nested,,"- raw_data_details: Raw size-exclusion chromatography mass spectrometry data for KOLF2.1J iPSCs (undifferentiated, NPC, "
+CM4AI,regulatory_restrictions,crate_only,nested,description: Attribution is required to the copyright holders and the authors. Any publications referencing this data or,
+CM4AI,related_datasets,generated_only,nested,,"- notes: Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta), the most recent entry in the CM4AI re"
+CM4AI,resources,crate_only,nested,- id: https://orcid.org/0000-0003-4060-7360 - id: https://orcid.org/0000-0003-4535-3486 - id: https://orcid.org/0000-000,
+CM4AI,retention_limit,both_differ_nested,nested,description: Attribution is required to the copyright holders and the authors. Any publications referencing this data or,"retention_details: Long term preservation in the University of Virginia Dataverse, supported by committed institutional "
+CM4AI,sampling_strategies,generated_only,nested,,- is_random: false is_sample: true source_caveats: The 200-gene and 523-protein figures are given on the CM4AI project p
+CM4AI,sensitive_elements,generated_only,nested,,- sensitive_elements_present: false sensitivity_details: The release record states that the dataset does not involve hum
+CM4AI,source_caveats,generated_only,scalar,,"'The CM4AI project portal lists this release under the heading ""June 2026 Data Release (Beta)"" but gives ""Released on: J"
+CM4AI,status,generated_only,scalar,,Beta ...
+CM4AI,subsets,crate_only,nested,- id: https://orcid.org/0000-0003-4060-7360 - id: https://orcid.org/0000-0003-4535-3486 - id: https://orcid.org/0000-000,
+CM4AI,tasks,both_differ_nested,nested,"- description: 'AI-ready datasets to support research in functional genomics, AI/machine learning model training, cellul","- response: Interpretable genotype-phenotype learning, in which predictions are traced to multi-scale cell and tissue ar"
+CM4AI,third_party_sharing,generated_only,nested,,- is_shared: true notes: 'Corresponding raw data are deposited outside the University of Virginia Dataverse: raw mass sp
+CM4AI,title,both_agree,scalar,Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) ...,Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) ...
+CM4AI,total_file_count,generated_only,scalar,,10 ...
+CM4AI,total_size_bytes,crate_only,scalar,21051331945400 ...,
+CM4AI,updates,both_differ_nested,nested,description: Dataset will be regularly updated and augmented on a quarterly basis through the end of the project (Novemb,frequency: Quarterly update_details: The dataset will be regularly updated and augmented through the end of the project 
+CM4AI,version,both_differ_scalar,scalar,'1.0','2.0'
+CM4AI,version_access,both_differ_nested,nested,name: '1.0',"latest_version_doi: doi:10.18130/V3/HIGT4C version_details: CM4AI issues quarterly data releases, each deposited in the "
+VOICE,acquisition_methods,both_differ_nested,nested,- description: Prospective observational study conducted at multiple specialty clinics and academic hospitals across Nor,- acquisition_details: Acoustic tasks were recorded and questionnaires administered during a standardized collection ses
+VOICE,addressing_gaps,generated_only,nested,,"- response: The absence of large-scale, diverse and well-documented voice data for clinical machine-learning application"
+VOICE,annotation_analyses,crate_only,nested,"- description: Questionnaire-based labels are generated using the standard scoring rules for each validated instrument, ",
+VOICE,anomalies,generated_only,nested,,"- anomaly_details: Different sites have different collection configurations, and the collection protocol changed over th"
+VOICE,at_risk_populations,generated_only,nested,,"assent_procedures: Where assent applies, the protocol provides that it be documented on a dedicated form; for young chil"
+VOICE,citation,both_differ_scalar,scalar,"'Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J.","'Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J."
+VOICE,cleaning_strategies,both_differ_nested,nested,"- description: Prior to release, data are transformed to reduce re-identification risk and align with regulatory and eth",- cleaning_details: 'An audit protocol was applied: generate missingness tables; check distributions and outliers; check
+VOICE,collection_consents,generated_only,nested,,- consent_details: All participants were duly informed and agreed to the collection and use of their data via prospectiv
+VOICE,collection_mechanisms,both_differ_nested,nested,- description: Prospective observational study conducted at multiple specialty clinics and academic hospitals across Nor,"- mechanism_details: A custom Bridge2AI-Voice application running on a tablet, with a head-mounted headset and microphon"
+VOICE,collection_notifications,generated_only,nested,,- notification_details: 'Individuals were notified about the data collection: participants went through an IRB-approved 
+VOICE,collection_timeframes,both_differ_nested,nested,- description: Data collection for the adult flagship cohort began after project launch in 2023 and is ongoing across fi,"- source_caveats: Neither the documentation nor the PhysioNet release states start and end dates for collection, and the"
+VOICE,confidential_elements,both_differ_nested,nested,"- description: The dataset encodes health-related information including diagnostic categories for voice disorders, neuro",- confidential_elements_present: false confidentiality_details: The project documentation records that the dataset does 
+VOICE,conforms_to_class,generated_only,scalar,,Dataset ...
+VOICE,conforms_to_schema,generated_only,scalar,,https://w3id.org/bridge2ai/data-sheets-schema ...
+VOICE,consent_revocations,generated_only,nested,,- revocation_details: Consenting participants are informed that they may withdraw from the study at any point. If a part
+VOICE,content_warnings,generated_only,nested,,- content_warnings_present: true source_caveats: The warning about free speech transcriptions is the project documentati
+VOICE,created_by,both_differ_scalar,scalar,Yael Bensoussan; Alexandros Sigaras; Anais Rameau; Olivier Elemento; Maria Powell; David Dorr; Philip Payne; Vardit Ravi,Bridge2AI-Voice Consortium ...
+VOICE,creators,both_differ_nested,nested,- name: Yael Bensoussan - name: Alexandros Sigaras - name: Anais Rameau - name: Olivier Elemento - name: Maria Powell - ,"- affiliations: - name: USF Health Morsani College of Medicine, University of South Florida description: Co-principal in"
+VOICE,data_collectors,generated_only,nested,,"- collector_details: Research teams, which may include medical, graduate or undergraduate students, coordinated with cli"
+VOICE,data_governance,generated_only,nested,,access_review_process: 'Access to the feature-only release is granted through registered access: users register on Physi
+VOICE,data_protection_impacts,both_differ_nested,nested,"- description: The project aims to create an ethically sourced, diverse voice dataset to support research on using voice",- impact_details: The project documentation answers directly that no analysis of the potential impact of the dataset and
+VOICE,description,both_differ_scalar,scalar,"""The human voice contains complex acoustic markers which have been linked to important\ \ health conditions including de","'Bridge2AI-Voice is an ethically sourced, multi-site dataset of voice, speech, breathing and cough data linked to demogr"
+VOICE,direct_collection,generated_only,nested,,- collection_details: Data was collected directly from the individuals concerned during a clinic session rather than obt
+VOICE,discouraged_uses,generated_only,nested,,"- discouragement_details: Non-clinical and non-research applications such as hiring decisions, insurance premium adjustm"
+VOICE,distribution_dates,generated_only,nested,,- notes: Version 1.0 was published earlier on the Health Data Nexus platform; the documentation records that the data wa
+VOICE,distribution_formats,generated_only,nested,,- access_urls: - https://physionet.org/content/b2ai-voice/3.1.0/ description: 'Tab-delimited tables: the phenotype table
+VOICE,doi,both_differ_scalar,scalar,https://doi.org/10.13026/k81f-qr68 ...,10.13026/8xbn-nq66 ...
+VOICE,download_url,crate_only,scalar,file:///features/ppgs.parquet ...,
+VOICE,errata,generated_only,nested,,- erratum_details: Version 2.0 reprocessed the spectrograms to fix minor issues identified in the previous release and r
+VOICE,ethical_reviews,both_differ_nested,nested,- name: Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics,- review_details: Data collection and sharing for the released dataset was approved by the University of South Florida I
+VOICE,existing_uses,both_differ_nested,nested,"- description: 'Development, training and fine-tuning of machine-learning models that associate voice-derived features w",- examples: - A restricted version of the dataset containing raw audio has been used in the Bridge2AI Summer School and 
+VOICE,extension_mechanism,both_differ_nested,nested,name: https://physionet.org/content/b2ai-voice/view-license/3.0.0/,contribution_url: https://github.com/sensein/b2aiprep extension_details: Others may publish a derivative dataset that re
+VOICE,external_resources,generated_only,nested,,"- external_resources: - b2aiprep, the library used to organize and preprocess the dataset, to process the raw audio into"
+VOICE,file_collections,generated_only,nested,,- collection_type: processed_data description: Audio-derived features for each recording. Dense features are distributed
+VOICE,funders,both_differ_nested,nested,- name: 'Funded by the NIH Common Fund. Award #3Tf-OTOD03272001S2',"- grantor: National Institutes of Health Common Fund, Bridge2AI Program grants: - grant_number: 3OT2OD032720-01S1 notes:"
+VOICE,future_use_impacts,both_differ_nested,nested,"- description: The project aims to create an ethically sourced, diverse voice dataset to support research on using voice","- impact_details: The dataset has skews based on disorder category, site and other demographic factors, so users should "
+VOICE,human_subject_research,generated_only,nested,,ethics_review_board: University of South Florida Institutional Review Board involves_human_subjects: true irb_approval: 
+VOICE,id,both_differ_scalar,scalar,https://doi.org/10.13026/k81f-qr68 ...,doi:10.13026/8xbn-nq66 ...
+VOICE,informed_consent,generated_only,nested,,"- consent_documentation: Paper consent documents are uploaded and saved electronically in REDCap, and all paper and elec"
+VOICE,instances,generated_only,nested,,- counts: 833 data_substrate: B2AI_SUBSTRATE:41 data_topic: B2AI_TOPIC:25 instance_type: human participant label: true l
+VOICE,intended_uses,both_differ_nested,nested,"- description: 'Development, training and fine-tuning of machine-learning models that associate voice-derived features w",- examples: - AI model pretraining - fine-tuning - benchmarking - validation usage_notes: The dataset is primarily inten
+VOICE,ip_restrictions,both_differ_nested,nested,name: https://physionet.org/content/b2ai-voice/view-dua/3.0.0/,"restrictions: - The data may be protected by copyright and other rights, including other intellectual property rights; n"
+VOICE,is_deidentified,generated_only,nested,,deidentification_details: All raw voice data was removed because it has the potential to cause individual re-identificat
+VOICE,issued,both_differ_scalar,scalar,'2025-12-16T00:00:00Z','2026-05-01T00:00:00Z'
+VOICE,keywords,both_differ_nested,nested,- voice - Voice as a biomarker - Voice dataset - Acoustic biomarker - Speech analysis - Voice recording - Human voice - ,- health - biomarkers - bridge2ai - voice
+VOICE,known_biases,both_differ_nested,nested,- description: 'Sampling bias: participants are recruited from specialty clinics and associated institutions using a non,- bias_description: Participants were recruited at a small number of high volume expert clinics; groups that have less t
+VOICE,known_limitations,both_differ_nested,nested,"- description: 'The feature-only release does not include raw audio waveforms or free-speech transcripts, which limits c","- limitation_description: The dataset is a non-probability sample of a larger, ongoing collection and is not representat"
+VOICE,labeling_strategies,both_differ_nested,nested,- description: Annotations for this dataset consist primarily of clinical labels and questionnaire-derived measures asso,"- annotations_per_item: 1 annotator_demographics: - Typically the clinician at the site of data collection, or a clinici"
+VOICE,language,generated_only,scalar,,English ...
+VOICE,license,both_differ_scalar,scalar,https://physionet.org/content/b2ai-voice/view-license/3.0.0/ ...,Bridge2AI Voice Registered Access License ...
+VOICE,license_and_use_terms,both_differ_nested,nested,name: https://physionet.org/content/b2ai-voice/view-license/3.0.0/,data_use_permission: general_research_use license_terms: The files are released under the Bridge2AI Voice Registered Acc
+VOICE,machine_annotation_tools,generated_only,nested,,"- tool_accuracy: - Certain aspects of the data, for example transcription, were generated using off-the-shelf models tha"
+VOICE,maintainers,generated_only,nested,,"- maintainer_details: PhysioNet, maintained by the MIT Laboratory for Computational Physiology, hosts the release and pr"
+VOICE,missing_data_documentation,both_differ_nested,nested,"- description: Phenotype tables include a row for a participant only when at least one variable is non-missing, and part","- handling_strategy: The dataset was audited internally for missingness and consistency by the data release team, and a "
+VOICE,name,both_differ_scalar,scalar,"'B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information'",Bridge2AI-Voice ...
+VOICE,other_tasks,both_differ_nested,nested,"- description: 'Development, training and fine-tuning of machine-learning models that associate voice-derived features w",- task_details: 'Cohort selection: the questionnaire-derived phenotype tables distributed in the phenotype folder can be
+VOICE,page,generated_only,scalar,,https://physionet.org/content/b2ai-voice/3.1.0/ ...
+VOICE,participant_compensation,generated_only,nested,,- compensation_amount: 40 US dollars for a data collection session taking less than 90 minutes and 80 US dollars for a s
+VOICE,participant_privacy,generated_only,nested,,"- anonymization_method: Removal of direct identifiers, removal of indirect identifiers where their combination with othe"
+VOICE,preprocessing_strategies,both_differ_nested,nested,- description: Raw audio waveforms are converted to mono and resampled to 16 kHz using anti-aliasing filtering; they are,- preprocessing_details: Raw audio was standardized by converting to monaural and resampling to 16 kHz with a Butterwort
+VOICE,prohibited_uses,generated_only,nested,,"- notes: The dataset is not to be used to attempt to re-identify research participants, nor for any actions that could r"
+VOICE,publisher,both_differ_scalar,scalar,PhysioNet ...,https://physionet.org/ ...
+VOICE,purposes,both_differ_nested,nested,"- description: 'Development, training and fine-tuning of machine-learning models that associate voice-derived features w",- response: To create an ethically sourced flagship dataset that enables future research in artificial intelligence and 
+VOICE,raw_data_sources,both_differ_nested,nested,"- source_description: The original raw data consist of high-quality voice, speech and respiratory audio waveforms record",- access_details: Not included in the PhysioNet release. Retained but not publicly accessible; disseminated through cont
+VOICE,raw_sources,crate_only,nested,"- description: The original raw data consist of high-quality voice, speech and respiratory audio waveforms recorded on t",
+VOICE,regulatory_restrictions,both_differ_nested,nested,name: https://physionet.org/content/b2ai-voice/view-dua/3.0.0/,confidentiality_level: restricted hipaa_compliant: compliant other_compliance: HIPAA de-identification rules were applie
+VOICE,related_datasets,generated_only,nested,,"- notes: Version 3.0.0 of the same dataset, published 16 December 2025, which added data for 391 participants over versi"
+VOICE,relationships,generated_only,nested,,- relationship_details: Relationships between individual participants are not made explicit; the participants are unrela
+VOICE,retention_limit,both_differ_nested,nested,name: https://physionet.org/content/b2ai-voice/view-dua/3.0.0/,"retention_details: 'Once data is contributed, the data will be retained as long as it is useful for research purposes, p"
+VOICE,sampling_strategies,generated_only,nested,,- is_representative: false is_sample: true representative_verification: - No verification of representativeness is repor
+VOICE,sensitive_elements,both_differ_nested,nested,"- description: The dataset encodes health-related information including diagnostic categories for voice disorders, neuro",- sensitive_elements_present: true sensitivity_details: The dataset includes race and ethnicity information and sexual o
+VOICE,source_caveats,generated_only,scalar,,"'This record describes the adult Bridge2AI-Voice dataset at PhysioNet version 3.1.0, published 2026-05-01, which is the "
+VOICE,splits,generated_only,nested,,"- split_details: No recommended train, validation or test splits are predefined. Researchers are encouraged to create th"
+VOICE,status,generated_only,scalar,,published ...
+VOICE,subpopulations,generated_only,nested,,"- distribution: The public data releases do not contain an equal distribution of the disease categories, and the dataset"
+VOICE,tasks,both_differ_nested,nested,"- description: 'Development, training and fine-tuning of machine-learning models that associate voice-derived features w","- response: Training machine-learning models for disease detection and classification using voice data, with labels draw"
+VOICE,third_party_sharing,generated_only,nested,,"- is_shared: true notes: The dataset is distributed broadly to individuals outside the entity that created it, through a"
+VOICE,title,both_differ_scalar,scalar,"'B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information'","'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information'"
+VOICE,updates,both_differ_nested,nested,"description: 'Dataset releases follow a static versioning scheme managed through PhysioNet and related platforms, with v",update_details: The project documentation states that further versions of the dataset will be released on a semi-annual 
+VOICE,variables,generated_only,nested,,"- data_type: identifier description: Unique identifier for the participant, carried by every feature file and phenotype "
+VOICE,version,both_differ_scalar,scalar,3.0.0 ...,3.1.0 ...
+VOICE,version_access,both_differ_nested,nested,name: 3.0.0,"latest_version_doi: doi:10.13026/37yb-1t42 version_details: Each version of the dataset has a unique DOI, and by default"
+VOICE,was_derived_from,generated_only,scalar,,"Raw audio recordings of standardized acoustic tasks captured by the Bridge2AI-Voice tablet application, together with qu"
