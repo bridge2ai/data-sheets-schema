@@ -19,7 +19,7 @@ Sources checked on 2026-09-23 (see BOXES for the per-box file):
 - src/data_sheets_schema/evaluation/evaluate_d4d.py (presence, no model client),
   evaluate_d4d_llm.py (instrument_sha256, context_sha256, input_sha256)
 - src/data_sheets_schema/evidence_score.py (grounding and fitness axes, schema digest
-  and specification sha256 on each judgement)
+  and specification sha256 on each judgment)
 - notes/matched_cborg_2026-09-13/audit_controls/README.md (native audit continuation,
   fresh-context worker batches, one integration, one terminal evidence check,
   registration sha256)
@@ -55,7 +55,7 @@ BOXES = [
     ("phase2", "Phase 2: derive the core from the validated full record (derive_core.py)", "no", f"{CMD}; src/data_sheets_schema/derive_core.py; {RUNNER} (PHASES 'core')"),
     ("phase3", "Phase 3: audit the full record against the sources and provenance boundary", "yes", f"{CMD}; {RUNNER} (PHASES 'audit')"),
     ("phase3_native", "Native audit continuation: separately registered session; fresh-context worker batches; one integration step; one terminal source/evidence check", "yes", AUDITC),
-    ("phase4_rederive", "Phase 4a: re-derive the core (no model)", "no", f"{CMD}; {RUNNER} (PHASES 'reconcile_core', repair_core)"),
+    ("phase4_rederive", "Phase 4: re-derive the core (no model)", "no", f"{CMD}; {RUNNER} (PHASES 'reconcile_core', repair_core)"),
     ("phase4_checks", "Phase 4b: deterministic checks (pair checker, validators, receipts)", "no", f"{CMD}; src/data_sheets_schema/d4d_pair_consistency.py"),
     ("phase4_semantic", "Phase 4c: semantic review the pair checker asks for; reconcile the full record", "yes", f"{CMD}; {RUNNER} (PHASES 'reconcile_full')"),
     ("phase4_report", "Phase 4d: reconciliation report and repair", "yes", f"{CMD}; {RUNNER} (PHASES 'report', repair_full)"),
@@ -65,12 +65,12 @@ BOXES = [
     ("crate_out", "rocrate_static_map record and mapping provenance report", "no", "src/data_sheets_schema/cli/rocrate.py (emit-map-arm, method rocrate_static_map)"),
     ("eval_presence", "Presence evaluator: rubric10 / rubric20 field presence", "no", "src/data_sheets_schema/evaluation/evaluate_d4d.py; cli/evaluate.py (presence)"),
     ("eval_semantic", "rubric10 / rubric20 semantic judges", "yes", "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py; judge_contract.py"),
-    ("eval_field", "Field-level source-support (grounding) and schema-fitness judgements", "yes", "src/data_sheets_schema/evidence_score.py; fitness_schema.py"),
+    ("eval_field", "Field-level source-support (grounding) and schema-fitness judgments", "yes", "src/data_sheets_schema/evidence_score.py; fitness_schema.py"),
     ("eval_pair", "Pair consistency check", "no", "src/data_sheets_schema/d4d_pair_consistency.py"),
 ]
 LOCKS = [
     ("inputs", "bundle md5 + sha256; manifest md5; prompt sha256; schema digest md5 + schema sha256", PROV),
-    ("outputs", "output sha256 (full, core, report)", PROV),
+    ("outputs", "output hashes (full, core, report)", PROV),
     ("phase3_native", "registration sha256", AUDITC),
     ("eval_semantic", "instrument, context and input sha256", "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py"),
     ("eval_field", "schema digest + specification sha256", "src/data_sheets_schema/evidence_score.py"),
@@ -157,7 +157,7 @@ def main() -> int:
     box(ax, 47, 37, 34, 12, "Outputs", ["full record · core record · coverage receipt", "audit · reconciliation report",
                                           "provenance record binds them by hash"], model=False)
     arrow(ax, (119, py), (119, 43), ); arrow(ax, (119, 43), (81, 43))
-    lock(ax, 47.4, 35.0, "output sha256 (full, core, report)")
+    lock(ax, 47.4, 35.0, "output hashes (full, core, report)")
 
     # --- deterministic side route (bottom left) ---------------------------
     box(ax, 2, 20, 18, 9, "RO-Crate package", ["ro-crate-metadata.json", "(4 projects hold one)"], model=False)
@@ -193,7 +193,7 @@ def main() -> int:
     ax.add_patch(FancyBboxPatch((lx + 31, ly), 5, 2.4, boxstyle="round,pad=0,rounding_size=0.5", facecolor=st.INK["surface"], edgecolor=EDGE_MODEL, linewidth=0.9, linestyle=(0, (3, 2))))
     ax.text(lx + 37, ly + 1.2, "registered / optional path, no accepted run", va="center", fontsize=7.2, color=st.INK["primary"])
     lock(ax, lx, ly - 3.2, "hash binds identity (what the provenance or evaluation record stores)")
-    ax.text(lx, ly - 5.6, "Arms: blue = API, orange = agentic, aqua = direct (swatch at the arm box's left edge); Phase 2 and 4a are pure functions of the full record.",
+    ax.text(lx, ly - 5.6, "Arms: blue = API, orange = agentic, aqua = direct (swatch at the arm box's left edge); Phase 2 and the Phase 4 core re-derivation are pure functions of the full record.",
             fontsize=6.6, color=st.INK["muted"], va="top")
 
     fig.suptitle("Generation arms, the four-phase full/core pipeline, the deterministic crate route, and the evaluation branches",

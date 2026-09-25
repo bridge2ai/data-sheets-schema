@@ -11,7 +11,7 @@ are drawn as a column group only when their <label>_core/<P>_provenance.yaml sib
 notes/claudecode_direct/CHORUS_direct_rep1_2026-09-23_stopped.md, was disqualified because
 no provenance record was written, and its records are not in the corpus). A direct-arm
 record without that sibling is drawn blank and labelled "disqualified / not in corpus";
-when the directory is absent or empty the group is an explicit "direct: no runs" placeholder.
+when the directory is absent or empty the group is an explicit "direct: no accepted run" placeholder.
 
 Arm attribution is verified from provenance, not from the directory or cohort: every drawn
 record's <method>_core/<label>/<P>_provenance.yaml model.agent_runtime must map through
@@ -165,7 +165,7 @@ def records():
             else:
                 found = direct_records(proj)
                 if not found:
-                    cols.append({"project": proj, "arm": arm, "cohort": "", "rep": None, "path": None, "direct": "no runs"})
+                    cols.append({"project": proj, "arm": arm, "cohort": "", "rep": None, "path": None, "direct": "no accepted run"})
                 for k, d in enumerate(found, 1):
                     m = re.search(r"_rep(\d+)", d["label"])
                     cols.append({"project": proj, "arm": arm, "cohort": "", "rep": int(m.group(1)) if m else k,
@@ -377,7 +377,7 @@ def main() -> int:
     for sp in cax.spines.values():
         sp.set_visible(False)
     cax.set_title("module fraction populated", fontsize=6.5, pad=2, loc="left", fontweight="normal", color=st.INK["secondary"])
-    direct_note = ("registered, no runs" if n_direct == 0 and n_disq == 0 else
+    direct_note = ("registered, no accepted run" if n_direct == 0 and n_disq == 0 else
                    f"{n_direct} accepted run(s), {n_disq} disqualified / not in corpus")
     fig.text(0.19, 0.958, "arm strip: blue = API arm (Messages SDK via CBORG), orange = agentic arm (Claude Code via proxy), "
              f"aqua = direct arm (Claude Code, subscription): {direct_note}; arm of every drawn record verified from its "

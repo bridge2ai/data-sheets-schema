@@ -7,14 +7,15 @@ caches were built for is established by that join:
 
 - fitness (`<project>_fitness.jsonl`, 1,441 entries, axis=fitness): the July 2026 records
   2026-07-28_claude-opus-5-generic rep1-3 (v1) and 2026-07-31_claude-opus-5-generic-v2 rep1-3
-  (v2), all four projects; nearly every populated slot matches. Their provenance records the
-  agent runtime as "Claude Code" and the provider as "Anthropic"; runs.py folds that runtime
-  string to the agentic key, and the transport is not established from provenance, so the
-  records are described by those strings and not assigned to an arm here.
+  (v2), all four projects; nearly every populated slot matches. Their provenance runtime,
+  provider and model differ between the two runs and are read per run and printed in the
+  figure note (runs.py RUNTIME_KEYS gives the key each runtime string folds to); transport is
+  not established from provenance, so the records are described by those strings and not
+  assigned to an arm here.
 - support (`CM4AI.jsonl`, 116 legacy entries with `supported`, no axis/rubric/corpus fields):
   the CM4AI v1 replicates under evidence_score.build_plan's stable/divergent partition, i.e.
   slots populated identically-by-presence in all three replicates were judged once on rep1's
-  value and propagated; all 78 planned judgements are in the cache. A propagated support
+  value and propagated; all 78 planned judgments are in the cache. A propagated support
   verdict is never crossed with the replicate's own fitness verdict: the mosaic covers only
   slots whose support was judged on that replicate's value, and propagated slots are drawn as
   a separate fitness-only segment that also reports how many of them differ in value from rep1.
@@ -59,7 +60,7 @@ COHORT_NAME = {"v1": "generic (v1)", "v2": "generic-v2"}
 SUPPORT_COHORT = "v1"                  # the only cohort with grounding judgements (CM4AI)
 SUPPORT_THRESHOLD = 0.75
 FIT, UNFIT = st.SERIES[6], st.SERIES[7]   # verdict colours: fixed categorical slots 7 and 8, not arm or status hues
-MODULE_NAME = {"Base_import": "Base (shared descriptive slots)"}
+MODULE_NAME = {"Base_import": "Base (shared descriptive slots)", "Data_Governance": "Data Governance"}
 NOVERDICT = st.INK["axis"]
 
 
@@ -136,14 +137,14 @@ def module_map():
 
 def join_records(fitness, support):
     rows, cells = [], {}
-    runtime = Counter()
+    runtime = defaultdict(Counter)       # cohort -> (agent_runtime, provider, model) -> records
     for project in st.PROJECTS:
         for cohort, label in COHORTS:
             recs = {rep: load_record(record_path(project, label, rep)) for rep in (1, 2, 3)}
             plan = build_plan(project, {f"rep{r}": v for r, v in recs.items()}, representative_label="rep1") if (project == "CM4AI" and cohort == SUPPORT_COHORT) else None
             for rep, rec in recs.items():
                 m = provenance_model(project, label, rep)
-                runtime[(m.get("agent_runtime"), m.get("provider"), m.get("model"))] += 1
+                runtime[cohort][(m.get("agent_runtime"), m.get("provider"), m.get("model"))] += 1
                 cell = {"project": project, "cohort": cohort, "rep": rep, "label": f"{label}_rep{rep}", "slots": len(rec),
                         "fit": 0, "unfit": 0, "no_fitness": 0, "both": Counter(), "support_judged": 0, "no_support": 0,
                         "support_own": 0, "support_propagated": 0, "propagated_value_differs": 0, "prop": Counter()}
@@ -317,19 +318,20 @@ def main() -> int:
     axB.set_title("B  Verdicts per schema module (slot attributed by declaring module, else by the module declaring its range class)", pad=8)
     st.hairline_grid(axB, "x")
 
-    (rt, prov, model), = [k for k, _ in runtime.most_common(1)]
-    note = (f"Record set: {n_records} full records, 4 projects x v1/v2 x 3 replicates, generated 2026-07-28 and 2026-07-31; records: {rt} runtime, "
-            f"provider recorded as {prov}, model {model} (July 2026); runs.py maps that runtime string to the agentic key; transport not established from provenance. {n_fit_judged} slot fitness verdicts and {n_sup_judged} support verdicts matched by (slot, canonical JSON value). "
+    from data_sheets_schema.runs import RUNTIME_KEYS
+    groups = "; ".join(f"{COHORT_NAME[c]}: {rt} runtime ({RUNTIME_KEYS.get(str(rt).lower(), 'unmapped')} key in runs.py), provider recorded as {prov}, model {model}"
+                       for c, _ in COHORTS for (rt, prov, model) in sorted(runtime[c]))
+    note = (f"Record set: {n_records} full records, 4 projects x v1/v2 x 3 replicates, generated 2026-07-28 and 2026-07-31; {groups}; "
+            f"provider strings as recorded in provenance. {n_fit_judged} slot fitness verdicts and {n_sup_judged} support verdicts matched by (slot, canonical JSON value). "
             f"Evaluator for both axes: {fit_model}. Fitness cache context: axis={fit_axis}, rubric digest {fit_rubric}, schema digest {fit_schema}. "
             f"Support cache: legacy entries without axis/rubric/corpus fields (axis={sup_axis}, rubric={sup_rubric}, corpus={sup_corpus}); "
-            f"stable slots judged once on rep1 and propagated (evidence_score.build_plan); {n_partial} partial (0.5-0.74) judgements counted unsupported. "
+            f"stable slots judged once on rep1 and propagated (evidence_score.build_plan); {n_partial} verdicts from partial (0.5-0.74) support scores counted unsupported. "
             f"Reference-rescore records (2026-09 v7/v8) match only {min(r['fitness_matched'] for r in ref)}-{max(r['fitness_matched'] for r in ref)} "
             f"fitness slots each and are not drawn (see _reference_join.csv).")
     fig.text(0.06, 0.022, textwrap.fill(note, 200), fontsize=6.6, color=st.INK["secondary"], ha="left", va="bottom")
-    fig.suptitle("Field-level support and fitness verdicts from the judgement caches, per record and per schema module",
+    fig.suptitle("Field-level support and fitness verdicts from the judgment caches, per record and per schema module",
                  x=0.06, ha="left", fontsize=11, fontweight="bold", y=0.998)
-    basis = (f"Record set: {n_records} July-2026 records (Claude Code runtime, provider recorded as Anthropic; runs.py maps that runtime string to the agentic key; "
-             "transport not established from provenance) matched to data/evaluation_llm/judgement_cache (fitness all projects; support CM4AI v1 only); "
+    basis = (f"Record set: {n_records} July-2026 records (runtime, provider and model per run as recorded in provenance, in the note above) matched to data/evaluation_llm/judgement_cache (fitness all projects; support CM4AI v1 only); "
              "fit=failure none, supported>=0.75; join by exact slot value")
     st.save(fig, "fig08_support_fitness", {"main": rows, "records": [{k: v for k, v in c.items() if k not in ("both", "prop")} | {"both_axes_own_value": sum(c["both"].values())} for c in cells.values()],
                                            "modules": module_rows, "reference_join": ref}, basis)

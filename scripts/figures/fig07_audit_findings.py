@@ -163,7 +163,7 @@ def records():
             "label": label, "project": project, "method": method,
             "arm": (prov.get("run") or {}).get("arm", ""), "date": label[:10],
             "audit_artifact": str(audit.relative_to(st.ROOT)),
-            "audit_status": ("accepted: applied by Phase 4a (reconcile_full)" if reconcile.exists()
+            "audit_status": ("accepted: applied to the full record (reconcile_full)" if reconcile.exists()
                              else "audit written, never applied (no reconcile_full)"),
             "drawn": label != "gate_test",
             "exclusion": "" if label != "gate_test" else "runner gate test, not an experiment",
@@ -282,7 +282,7 @@ def main() -> int:
             fig.text(pos.x0, pos.y1 + 42 / h, "B  Before/after diff: Phase 1 full record vs final full record",
                      fontsize=9.5, fontweight="bold", color=st.INK["primary"], ha="left", va="bottom")
             fig.text(pos.x0, pos.y1 + 30 / h, "leaf-path diff: a list reindex counts as one removal plus one addition, "
-                     "so the tallest removed/added bars are reindexing cases",
+                     "so removed and added counts include shifted list items",
                      fontsize=7, color=st.INK["secondary"], ha="left", va="bottom")
     n_no_before = sum(1 for r in drawn if r["fields_removed"] is None)
 
@@ -292,19 +292,17 @@ def main() -> int:
                              hatch=st.HATCH, linewidth=0.6, transform=ax_c.transAxes, alpha=0.5))
     ax_c.text(0.0, 0.93, "C  Fresh-context batch audit: workers x top-level fields", fontsize=9.5, fontweight="bold",
               color=st.INK["primary"], ha="left", va="bottom", transform=ax_c.transAxes)
-    msg = (f"No completed batch audit at this revision. The registered native series "
-           f"'{plan['series']}' (registration.json, {str(plan['registered_at'])[:10]}) has status "
-           f"'{plan['status']}'; its fresh-context batch plan defaults are max_workers = {plan['max_workers']} and "
-           f"max_paths = {plan['max_paths']} (audit_controls/README.md). The only native audit.json at HEAD is the "
-           "rejected canary CHORUS_api_rep1 (controller verdict: reject), which carries no findings or integration object. "
-           "No worker assignment or integration row-replacement can be drawn.")
+    msg = ("No batch audit completed in a separately registered session has an integration record "
+           f"at this revision, so no worker assignment or integration row replacement can be drawn. The registered "
+           f"fresh-context batch plan defaults are max_workers = {plan['max_workers']} and max_paths = {plan['max_paths']} "
+           "(audit_controls/README.md).")
     import textwrap
     ax_c.text(0.02, 0.72, "\n".join(textwrap.wrap(msg, 150)), fontsize=7.5, color=st.INK["secondary"], ha="left",
               va="top", transform=ax_c.transAxes)
 
     n_accepted = sum(1 for r in drawn if r["audit_status"].startswith("accepted"))
     n_super = sum(1 for r in drawn if r["canonical"] != "canonical")
-    note = (f"{n} records drawn: {n_accepted} audits applied by Phase 4a, {n - n_accepted} written but never applied "
+    note = (f"{n} records drawn: {n_accepted} audits applied to the full record (reconcile_full), {n - n_accepted} written but never applied "
             f"(flagged). * = record later superseded as canonical ({n_super}). No integration object (retain/replace/drop/new) "
             f"exists for any record, so no disposition hatching. {n_no_before} records lack a pre-repair artifact. "
             "Categories are keyword rules over the finding text (see script and CSV), not an audit-declared type. "

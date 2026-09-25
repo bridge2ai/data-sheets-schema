@@ -139,8 +139,8 @@ def main() -> int:
     for i, r in enumerate(order):
         if i and r["project"] != order[i - 1]["project"]:
             y += 0.9
-        # full bar (upper), core bar (lower)
-        yf, yc = y + bh / 2 + 0.03, y - bh / 2 - 0.03
+        # full bar (upper), core bar (lower): the y axis is inverted below, so the smaller y is drawn on top
+        yf, yc = y - bh / 2 - 0.03, y + bh / 2 + 0.03
         x = 0
         for key, c in (("full_shared", COL["shared"]), ("full_resources", COL["resources"])):
             ax.barh(yf, r[key], left=x, height=bh, color=c, edgecolor=st.INK["surface"], linewidth=0.8, zorder=2)
@@ -178,7 +178,7 @@ def main() -> int:
     ax.set_xlim(0, max(r["full_total"] for r in rows) * 1.12)
     st.hairline_grid(ax, "x")
     ax.set_title("Per record: full record (upper bar) and the derived core (lower bar)", pad=8)
-    axp.set_xlabel("core distributions matched to a file collection")
+    axp.set_xlabel("core distributions matched to a file collection or one of its files")
     axp.set_xlim(0, max((r["distribution_matches"] or 0) + (r["unmatched_core_distributions"] or 0) for r in rows) * 1.9)
     axp.tick_params(axis="y", left=False, labelleft=False)
     axp.spines["left"].set_visible(False)

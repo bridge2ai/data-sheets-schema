@@ -8,10 +8,10 @@ table and the two Fidelity tables), written by `d4d rocrate map` (rocrate_map.py
 no model). Panel C compares the top-level Dataset slots populated in
 <P>_crate_mapped_d4d.yaml with those populated in the generic-v8 rep 1 full record
 of the same project from the reference rescore set (manifest jobs with cohort v8,
-generation_rep 1). Where both hold a value, "agree" means the YAML-serialised values
-are identical after whitespace normalisation; anything else is "differ". Nested
-values (lists of objects) rarely serialise identically, so "differ" is a ceiling on
-disagreement, not a judgement of fact. Projects with a crate package but no mapper
+generation_rep 1). Where both hold a value, "agree" means the YAML-serialized values
+are identical after whitespace normalization; anything else is "differ". Nested
+values (lists of objects) rarely serialize identically, so "differ" is a ceiling on
+disagreement, not a judgment of fact. Projects with a crate package but no mapper
 output are drawn as an explicit placeholder.
 """
 from __future__ import annotations
@@ -151,9 +151,9 @@ def main() -> int:
                 axA.text(i, base + v / 2, str(v), ha="center", va="center", fontsize=6.6,
                          color=st.INK["surface"] if s == "filled" else st.INK["primary"])
             base += v
-        axA.text(i, base + 2, f"{base} rows", ha="center", va="bottom", fontsize=6.6, color=st.INK["secondary"])
+        axA.text(i, base + 2, f"{base} entries", ha="center", va="bottom", fontsize=6.6, color=st.INK["secondary"])
     axA.set_xticks(list(xs)); axA.set_xticklabels(labels)
-    axA.set_ylabel("mapping-table rows"); axA.set_ylim(0, 160)
+    axA.set_ylabel("mapper report entries"); axA.set_ylim(0, 160)
     st.hairline_grid(axA); axA.tick_params(axis="x", length=0)
     axA.set_title("A  Outcome of every mapping-table row", pad=6)
     axA.legend(handles=[Patch(color=STATUS_COL["filled"], label="filled: path resolved, value placed"),
@@ -200,7 +200,7 @@ def main() -> int:
     # --- C: overlap with a generated record --------------------------------
     OV = [("both_agree", "both populated, values agree", st.SEQ[10], None),
           ("both_differ_scalar", "both populated, scalar values differ", st.SEQ[6], None),
-          ("both_differ_nested", "both populated, nested values differ (serialisation rarely identical)", st.SEQ[2], None),
+          ("both_differ_nested", "both populated, nested values differ (serialization rarely identical)", st.SEQ[2], None),
           ("crate_only", "crate-mapped only", st.SERIES[3], None),
           ("generated_only", "generated only", st.SERIES[4], None)]
     for i, p in enumerate(st.PROJECTS):
@@ -228,7 +228,7 @@ def main() -> int:
     voice = {r["slot"]: r for r in detail if r["project"] == "VOICE"}
     vc = yaml.safe_load((PKG / "VOICE" / "processed" / "VOICE_crate_mapped_d4d.yaml").read_text())
     vg = yaml.safe_load((ROOT / gen["VOICE"]).read_text())
-    caveat = ("'Values differ' is a ceiling on disagreement: 'agree' requires identical normalised YAML, so two nested values that state the "
+    caveat = ("'Values differ' is a ceiling on disagreement: 'agree' requires identical normalized YAML, so two nested values that state the "
               "same facts in different structure count as differing. Scalar differences can be real: the VOICE crate describes release "
               f"{vc['version']} (doi {str(vc['doi']).replace('https://doi.org/', '')}) while the generated record describes "
               f"{vg['version']} (doi {str(vg['doi']).replace('doi:', '')}).")
@@ -238,7 +238,7 @@ def main() -> int:
                  x=0.01, ha="left", fontsize=11, fontweight="bold", y=0.985)
     fig.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.2)
     basis = ("Record set: crate mapping reports under data/ro-crate_packages/<P>/processed/ (" + ", ".join(mapped) +
-             "); generated records = reference rescore 2026-09-12 v8 rep 1 (claudecode_api/2026-09-04f and 04g); value agreement = normalised YAML equality")
+             "); generated records = reference rescore 2026-09-12 v8 rep 1 (claudecode_api/2026-09-04f and 04g); value agreement = normalized YAML equality")
     st.save(fig, "fig09_crate_vs_generation", {"main": panel_rows, "overlap_slots": detail}, basis)
     return 0
 

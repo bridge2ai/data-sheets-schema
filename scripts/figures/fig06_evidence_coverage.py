@@ -19,7 +19,7 @@ closed status or has no entry. Panel B: receipted fields by schema module x sour
 project, mean over the 6 runs of that project; only receipt slots that still resolve in the final
 record are counted. Panel C: populated slots by receipt status after audit/repair (from provenance).
 
-Colour rules: Panel A keeps the ordinal blue ramp on purpose - the four dispositions are nominal, but
+Color rules: Panel A keeps the ordinal blue ramp on purpose - the four dispositions are nominal, but
 the ramp order encodes review depth (extracted > redundant > nothing relevant > duplicate), and the
 legend says so. Panel C uses categorical slots 3+ (st.SERIES[3:]) for the support statuses with gray
 for exempt; slots 0-2 stay reserved for the arms across the figure set.
@@ -52,14 +52,14 @@ DISP_LABEL = {"extracted": "extracted (slot + verbatim snippet)", "redundant_wit
 DISP_COLOR = {"extracted": st.ORDINAL[8], "redundant_with": st.ORDINAL[5], "nothing_relevant": st.ORDINAL[2],
               "duplicate_of": st.ORDINAL[0]}
 SUPPORT = ["with_receipt", "added_after_receipt", "never_receipted", "exempt"]
-SUPPORT_LABEL = {"with_receipt": "receipted (snippet attested in the bundle)",
+SUPPORT_LABEL = {"with_receipt": "receipted (receipt path with a snippet)",
                  "added_after_receipt": "added after the receipt (audit/repair), no receipt",
                  "never_receipted": "populated, never receipted",
                  "exempt": "exempt (commentary, own identifiers)"}
 SUPPORT_COLOR = {"with_receipt": st.SERIES[3], "added_after_receipt": st.SERIES[4],
                  "never_receipted": st.SERIES[5], "exempt": st.INK["axis"]}
 MODULE_ORDER = ["Metadata (Information)", "Motivation", "Composition", "Collection", "Preprocessing", "Uses",
-                "Distribution", "Data governance", "Maintenance", "Ethics", "Human", "Variables",
+                "Distribution", "Data Governance", "Maintenance", "Ethics", "Human", "Variables",
                 "FileCollection", "Dataset (top level)"]
 TYPE_ORDER = ["RO-Crate", "structured metadata", "data resource", "documentation", "license", "DUA", "IRB",
               "publication", "preprint", "white paper", "NIH project page", "tutorial",

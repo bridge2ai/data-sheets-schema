@@ -12,7 +12,7 @@ The number of issues matching two or more rules is reported on the figure, and t
 the full description, the winning rule's matched span and every other matching code, so each
 coding can be reproduced and challenged.
 
-Panels A, B and E count primary ratings only (one rating per record and rubric, 24 each), so
+Panels A, B and D count primary ratings only (one rating per record and rubric, 24 each), so
 the two rubrics are comparable and the eight rubric10 repeat ratings of CHORUS v7 rep1 do not
 count that record several times. Panel C shows every accepted rating.
 """
@@ -169,7 +169,7 @@ def main() -> int:
     axE.set_xlim(0, max(by_type_rub.values()) * 1.3)
     axE.tick_params(axis="y", length=0)
     axE.set_xlabel("issues (count)")
-    axE.set_title("E  Evaluator `type`\n(primary ratings)", pad=8, fontsize=9)
+    axE.set_title("B  Evaluator type\n(primary ratings)", pad=8, fontsize=9)
     st.hairline_grid(axE, "x")
 
     # ---- (C) consistency-check outcomes per rating (all accepted ratings) ----
@@ -239,11 +239,11 @@ def main() -> int:
         st.hairline_grid(ax, "x")
         if pi == 1:
             ax.set_xlabel("issues detected in primary ratings (count), same category rows as panel A; rubric10 upper bar, rubric20 lower bar", loc="left")
-    fig.text(0.17, 0.395, "B  Issue categories per project (primary ratings)", fontsize=9.5, fontweight="bold", ha="left", va="bottom")
+    fig.text(0.17, 0.395, "D  Issue categories per project (primary ratings)", fontsize=9.5, fontweight="bold", ha="left", va="bottom")
 
     n_primary_issues = len(primary)
-    note = (f"{len(issues)} issues from {n_ratings} accepted ratings ({n_primary_issues} from the {sum(n_primary.values())} primary ratings drawn in A, B and E); "
-            f"{n_other} coded `other` (no rule matched); {n_multi} of {len(issues)} issues match 2+ rules, first rule wins. Rules are keyword/regex matches on "
+    note = (f"{len(issues)} issues from {n_ratings} accepted ratings ({n_primary_issues} from the {sum(n_primary.values())} primary ratings drawn in A, B and D); "
+            f"{n_other} coded other (no rule matched); {n_multi} of {len(issues)} issues match 2+ rules, first rule wins. Rules are keyword/regex matches on "
             "type + description in the order listed in issue_codes.csv; the CSV keeps the matched span and every other matching code.")
     fig.text(0.17, 0.955, textwrap.fill(note, 150), fontsize=7.2, color=st.INK["secondary"], ha="left", va="top")
     fig.suptitle("Issues raised by the semantic rubric evaluators on the reference rescore, coded by a fixed keyword table",
