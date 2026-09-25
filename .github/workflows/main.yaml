@@ -84,6 +84,7 @@ jobs:
           notes/matched_cborg_2026-09-13/native_controls/test_native_phase_control.py
           notes/matched_cborg_2026-09-13/native_controls/test_native_stall_policy.py
           notes/matched_cborg_2026-09-13/native_controls/test_native_response_buffer.py
+          notes/matched_cborg_2026-09-13/native_controls/test_transport_probe.py
           notes/claudecode_direct/test_direct_arm.py
           -q -p no:cacheprovider --junitxml=test-results/native.xml
 

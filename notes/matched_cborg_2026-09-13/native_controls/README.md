@@ -157,6 +157,40 @@ output directory for each run. Scientific acceptance still inspects actual
 successful calls, read targets and denied calls; a permission grant alone
 does not establish instruction adherence (#2049).
 
+## Transport probe, 2026-09-25
+
+Audit27's ninth worker request returned HTTP 500 seven times at 272 to 277
+seconds. CBORG's catalogue lists `stream_timeout: 270` for the Opus 5 routes,
+and hidden thinking can delay a response's first byte past that. Claude Code
+2.1.272 accepts `--thinking-display summarized`, which asks for streamed
+thinking summaries (#2463). `transport_probe.py` tests whether that setting
+gets a response through.
+
+The probe resends one retained request once. It uses the source
+registration's own transport, stall policy and response buffer, through the
+registered native proxy. The only change is `thinking.display`. It records when
+the response headers, first event, first thinking text and last byte arrived,
+but keeps no text. It runs once per registration and never resends. A 5xx is
+counted at its whole reservation. A row still pending afterwards is settled at
+its whole reservation in a separate `reconciled_billing.json`, under the
+maintainer's standing authorization, and the ledger is left as written.
+
+The probe is a link in the lineage. Holding the sequence lock, it takes the
+tip with a durable sequence claim and continues the tip's settled checkpoint
+under the same caps. The next registration continues from the probe's
+`result.json` `successor_continues_from`. An audit prepared from the earlier
+tip fails at its sequence guard. Audits accept a probe predecessor only after
+#2469.
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls \
+  python notes/matched_cborg_2026-09-13/native_controls/transport_probe.py prepare \
+  --out DIR --source-registration R --source-request REQUEST_DIR --tip-checkpoint C \
+  --sequence-state S --origin-registration O --authorization A
+# review DIR/registration.json, then, with CBORG_API_KEY set:
+... transport_probe.py run --registration DIR/registration.json --sha256 HEX
+```
+
 ## Phase checks for renderer 13, 2026-09-17
 
 Renderer 13 separates Phase 1 corrections from terminal Phase 3/4 failures
