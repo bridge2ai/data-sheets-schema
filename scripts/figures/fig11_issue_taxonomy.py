@@ -13,8 +13,8 @@ the full description, the winning rule's matched span and every other matching c
 coding can be reproduced and challenged.
 
 Panels A, B and D count primary ratings only (one rating per record and rubric, 24 each), so
-the two rubrics are comparable and the eight rubric10 repeat ratings of CHORUS v7 rep1 do not
-count that record several times. Panel C shows every accepted rating.
+the two rubrics are comparable and the eight rubric10 repeat ratings (two of each project's v7
+rep1 record) do not count those records several times. Panel C shows every accepted rating.
 """
 from __future__ import annotations
 
