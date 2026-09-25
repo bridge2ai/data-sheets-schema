@@ -615,8 +615,8 @@ It does not replace or modify the earlier proof. Only the exact authorized
 checkpoint can first enter the new absolute ceiling; same-cap audit, Phase 4
 and evaluation descendants inherit the same proof without another increase.
 
-`additive_sequence_budget_chain_v1` (#2468) supports any number of later
-increases. Each link has v2's fields: the five references, the amounts and an
+`additive_sequence_budget_chain_v1` (#2468) supports further increases, up to
+16 proofs in all, v1 and v2 included. Each link has v2's fields: the five references, the amounts and an
 exact `authorization_quote`. Its `prior_amendment` may be any valid proof: the
 v1, the v2 or an earlier link. The prior proof is validated recursively, and
 the new link's prior allocation must equal that prior proof's total. Only the
@@ -631,6 +631,15 @@ receipt:
 - its immutable owner snapshot is the consumed one;
 - the receipt binds the quote, the original allocation, the prior proof's
   digest and the predecessor's full accounting.
+
+One quoted authorization funds one increase (#2488):
+- each link's quote must state, in dollars, its increase or the new cap it
+  reaches;
+- no earlier link's proof or receipt may quote the same message, compared
+  after collapsing whitespace and ignoring case.
+
+The quote is verbatim, so these checks catch reuse and misstatement, not a
+reworded copy. The receipt review remains the guard against that.
 
 v1 and v2 proofs validate exactly as before, and a v2 still takes only a v1.
 Each further increase is data, a new link, with no code change.

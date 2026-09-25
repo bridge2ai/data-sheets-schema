@@ -389,10 +389,12 @@ def _increase_documents(proof, name, receipt_version):
 
 
 def _chain_selection(value):
-    """Select one increase after any number of earlier ones (#2468).
+    """Select one increase after earlier ones (#2468), up to MAX_CHAIN_LINKS proofs in all.
 
     The prior proof may be v1, v2 or another chained link, and is validated
-    recursively. Each link is one quoted authorization; the new cap is its
+    recursively. Each link is one quoted authorization: its quote states the
+    increase or the new cap in dollars, and no earlier link's proof or receipt
+    quotes the same message (whitespace and case aside). The new cap is its
     prior's total plus this increase, never an amount to add again.
     """
     _require(set(value) == {'kind', *REFS, *AMOUNTS, 'prior_amendment', 'authorization_quote'},
@@ -408,10 +410,12 @@ def _chain_selection(value):
     selection(base)
     _require(type(value['authorization_quote']) is str and bool(value['authorization_quote'].strip()),
              'chained amendment quote must be exact nonblank text')
-    # The quote must state this increase, so one message cannot be recorded
-    # as a larger or a different one (#2488).
-    _require(re.search(r'\$\s?' + re.escape(value['increase_usd']) + r'(?![0-9.])', value['authorization_quote'])
-             is not None, 'chained amendment quote does not state its increase')
+    # The quote must state this increase or the cap it reaches, so one
+    # message cannot be recorded as a larger or a different one (#2488).
+    stated = {_money(amount.replace(',', '')) for amount in
+              re.findall(r'\$\s?([0-9][0-9,]*(?:\.[0-9]+)?)', value['authorization_quote'])}
+    _require(bool(stated & {_money(value['increase_usd']), _money(value['total_usd'])}),
+             'chained amendment quote does not state its increase or new cap')
     _require(_canonical(value['origin_registration']) == _canonical(prior['origin_registration'])
              and _money(value['default_attempt_usd']) == _money(prior['default_attempt_usd'])
              and _money(value['prior_total_usd']) == _money(prior['total_usd']),
@@ -448,10 +452,20 @@ def _chain_refs(proof):
         current = {link[key]['sha256'] for key in REFS[1:]}
         _require(not current & identities, 'chained amendment reuses earlier authority or predecessor identity')
         identities |= current
-    # One quoted authorization funds one increase (#2488).
-    quotes = [_quote(link['authorization_quote']) for link in _links(proof) if 'authorization_quote' in link]
-    _require(len(set(quotes)) == len(quotes), 'chained amendment reuses an earlier authorization quote')
+    # One quoted authorization funds one increase (#2488): each chained link
+    # quotes a message no earlier link quoted. Earlier v1/v2 history is taken
+    # as it was validated.
+    _chain_quotes_are_new([(link['kind'], link.get('authorization_quote')) for link in _links(proof)])
     return references
+
+
+def _chain_quotes_are_new(quotes):
+    seen = set()
+    for kind, quote in quotes:
+        normal = _quote(quote) if isinstance(quote, str) else None
+        _require(kind != CHAIN_KIND or normal not in seen, 'chained amendment reuses an earlier authorization quote')
+        if normal is not None:
+            seen.add(normal)
 
 
 def _distinct_receipt_quotes(proof):
@@ -461,5 +475,5 @@ def _distinct_receipt_quotes(proof):
         authorization = _read(link['authorization']).get('authorization')
         _require(type(authorization) is dict and type(authorization.get('user_quote')) is str,
                  'amendment receipt lacks its quoted authorization')
-        quotes.append(_quote(authorization['user_quote']))
-    _require(len(set(quotes)) == len(quotes), 'chained amendment reuses an earlier authorization quote')
+        quotes.append((link['kind'], authorization['user_quote']))
+    _chain_quotes_are_new(quotes)

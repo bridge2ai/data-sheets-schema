@@ -223,8 +223,36 @@ def test_one_quoted_authorization_funds_one_increase(tmp_path):
                                    'increase the budget by $200.50', 'increase the budget by 200'])
 def test_a_chained_quote_must_state_its_increase(tmp_path, quote):
     proof, _, _, _ = make_chain_fixture(tmp_path, increase='200', quote=quote)
-    with pytest.raises(BudgetStop, match='does not state its increase'):
+    with pytest.raises(BudgetStop, match='does not state its increase or new cap'):
         amendment.selection(proof)
+
+
+@pytest.mark.parametrize('quote', ['increase the budget by $200.', 'yes, $200.00 more',
+                                   'raise the cap to $800', 'add $ 200 please',
+                                   'increase the budget by $200 howerer we need to swtich development to native '
+                                   'agentic, also for efficiency and speed'])
+def test_ordinary_statements_of_the_increase_or_the_new_cap_are_accepted(tmp_path, quote):
+    proof, _, _, _ = make_chain_fixture(tmp_path, increase='200', quote=quote)
+    assert amendment.selection(proof)['total_usd'] == '800'
+
+
+def test_a_thousands_separator_is_read(tmp_path):
+    proof, _, _, _ = make_chain_fixture(tmp_path, increase='2000', quote='approve $2,000 more')
+    assert amendment.selection(proof)['total_usd'] == '2600'
+
+
+def test_the_chain_bound_is_sixteen_proofs():
+    assert amendment.MAX_CHAIN_LINKS == 16
+
+
+def test_matching_v1_and_v2_quotes_are_taken_as_validated(tmp_path):
+    """Pre-chain history is not re-judged: only a chained link must quote a new message."""
+    assert amendment._chain_quotes_are_new([(amendment.KIND, 'approve $100'),
+                                            (amendment.SECOND_KIND, 'Approve  $100'),
+                                            (amendment.CHAIN_KIND, 'increase the budget by $200')]) is None
+    with pytest.raises(BudgetStop, match='reuses an earlier authorization quote'):
+        amendment._chain_quotes_are_new([(amendment.KIND, 'approve $100'),
+                                         (amendment.CHAIN_KIND, 'APPROVE $100')])
 
 
 def test_an_overlong_chain_is_refused_before_it_is_walked(tmp_path, monkeypatch):

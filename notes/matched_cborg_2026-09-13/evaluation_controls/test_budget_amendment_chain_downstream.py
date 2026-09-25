@@ -2,7 +2,6 @@
 
 Ported from the v2 downstream tests; every artifact is invented and no provider is contacted.
 """
-from collections import Counter
 from copy import deepcopy
 from decimal import Decimal
 from pathlib import Path
@@ -16,7 +15,7 @@ import budget_amendment as amendment
 import continuation_sequence as sequence
 from budgeted_cborg import BudgetStop, attempt_identity
 from audit_controls import registration as audit_registration
-from audit_controls.test_second_budget_amendment_registration import ancestry, second_approved, prepare_second, save, reference, unchanged  # noqa
+from audit_controls.test_second_budget_amendment_registration import ancestry, second_approved, prepare_second, save, unchanged  # noqa
 from audit_controls.test_budget_amendment_chain_registration import chained
 from finalization_controls import prepare as fprepare, registration as fregistration
 from finalization_controls.native import lineage
@@ -83,10 +82,13 @@ def test_a_chained_phase4_carries_the_proof_at_its_cap(chain_phase4):
     f = chain_phase4; m = f['manifest']; c = f['case']; path = f['path']
     assert m['budget_amendment'] == c['proof'] and m['budget']['additional_usd'] == '800'
     assert amendment.paths(m) <= fregistration.required_paths(m)
+    audit_rows = sequence.read(f['audit_ledger'])['requests']
     with sequence.owned_sequence(m, path, sequence.sha(path)) as owner:
         state = sequence.read(owner.ledger.path)
         assert state['additional_cap_usd'] == '800'
         assert 'budget_amendment_sha256' not in state['continued_from']
+        assert amendment._canonical(state['requests'][:len(audit_rows)]) == amendment._canonical(audit_rows)
+    unchanged(c, state=False)
 
 
 @pytest.mark.parametrize('damage', ['drop', 'replace_with_v2', 'unpin_v1_authority', 'unpin_v2_authority'])
