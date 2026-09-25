@@ -83,7 +83,7 @@ def test_real_chained_preparation_refuses_a_proof_that_does_not_bind_its_predece
     elif damage == 'stale_prior':
         proof['prior_amendment'] = deepcopy(c['first'])       # skips the $600 link
     else:
-        proof['authorization_quote'] = 'a different response'
+        proof['authorization_quote'] = 'a different response approving $200'   # states the amount; the receipt disagrees
     with pytest.raises(BudgetStop):
         prepare_second(c, tmp_path / 'refused', continuation_checkpoint=checkpoint, budget_amendment=proof)
     assert not (tmp_path / 'refused').exists()

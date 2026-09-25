@@ -413,7 +413,8 @@ def _chain_selection(value):
     # The quote must state this increase or the cap it reaches, so one
     # message cannot be recorded as a larger or a different one (#2488).
     stated = {_money(amount.replace(',', '')) for amount in
-              re.findall(r'\$\s?([0-9][0-9,]*(?:\.[0-9]+)?)', value['authorization_quote'])}
+              re.findall(r'\$\s?((?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\.[0-9]+)?)(?!,?[0-9])',
+                         value['authorization_quote'])}
     _require(bool(stated & {_money(value['increase_usd']), _money(value['total_usd'])}),
              'chained amendment quote does not state its increase or new cap')
     _require(_canonical(value['origin_registration']) == _canonical(prior['origin_registration'])
@@ -469,7 +470,7 @@ def _chain_quotes_are_new(quotes):
 
 
 def _distinct_receipt_quotes(proof):
-    """Every link's receipt quotes a different message, the v1 receipt included (#2488)."""
+    """Each chained link's receipt quotes a message no earlier receipt quoted, v1's included (#2488, #2496)."""
     quotes = []
     for link in _links(proof):
         authorization = _read(link['authorization']).get('authorization')

@@ -638,11 +638,18 @@ One quoted authorization funds one increase (#2488):
 - no earlier link's proof or receipt may quote the same message, compared
   after collapsing whitespace and ignoring case.
 
-The quote is verbatim, so these checks catch reuse and misstatement, not a
-reworded copy. The receipt review remains the guard against that.
+These checks catch a message recorded twice and an amount the quote never
+states in dollars. The receipt review must still catch:
+- which stated figure is the increase;
+- a negation ("do not add $200");
+- an unrelated amount that happens to match;
+- a reworded or excerpted copy of an earlier message.
+
+Only chained links are checked; v1 and v2 are taken as they were validated.
 
 v1 and v2 proofs validate exactly as before, and a v2 still takes only a v1.
-Each further increase is data, a new link, with no code change.
+Each further increase, up to the bound, is data: a new link, with no code
+change.
 
 An increased shared ceiling does not authorize a larger per-stage attempt.
 Each launch must retain its separately approved cap and scientific scope.

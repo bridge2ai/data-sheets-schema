@@ -283,3 +283,44 @@ def test_a_chained_link_refuses_the_live_owner_and_an_overspent_predecessor(tmp_
     repin(manifest)
     with pytest.raises(BudgetStop):
         amendment.effective_total(manifest, origin)
+
+
+# --- the final review (#2500) --------------------------------------------------------------------
+
+def _second_quoting(root, quote):
+    """The v2 fixture with its quote replaced, receipt rewritten to match."""
+    proof, origin, ledger, manifest = make_second_fixture(root)
+    proof['authorization_quote'] = quote
+    proof['authorization'] = write(proof['authorization']['path'], second_authority(proof, origin, ledger))
+    manifest['pinned_files'] = {node[key]['path']: node[key]['sha256']
+                                for node in (proof, proof['prior_amendment']) for key in amendment.REFS}
+    implementation = Path(amendment.__file__).resolve()
+    manifest['pinned_files'][str(implementation)] = hashlib.sha256(implementation.read_bytes()).hexdigest()
+    return proof, origin, ledger, manifest
+
+
+def test_matching_historical_receipt_quotes_do_not_block_a_new_link(tmp_path):
+    """v1's and v2's receipts quoting one message was valid history (#2496)."""
+    second = _second_quoting(tmp_path / 'second', 'Approve synthetic $100')
+    assert amendment.effective_total(second[3], second[1]) == Decimal(600)
+    proof, origin, _, manifest = make_chain_fixture(tmp_path / 'chain', prior=second)
+    assert amendment.effective_total(manifest, origin) == Decimal(800)
+    repeat, origin, _, manifest = make_chain_fixture(tmp_path / 'repeat', prior=second, increase='100',
+                                                     quote='approve  SYNTHETIC $100')
+    with pytest.raises(BudgetStop, match='reuses an earlier authorization quote'):
+        amendment.selection(repeat)
+
+
+def test_a_link_repeating_v2s_quote_is_refused(tmp_path):
+    first = make_second_fixture(tmp_path / 'second')
+    proof, _, _, _ = make_chain_fixture(tmp_path / 'chain', prior=first, increase='100',
+                                        quote=first[0]['authorization_quote'])
+    with pytest.raises(BudgetStop, match='reuses an earlier authorization quote'):
+        amendment.selection(proof)
+
+
+@pytest.mark.parametrize('quote', ['we are at $600', 'approve $2,00 more', 'approve $20,0 more'])
+def test_the_prior_cap_or_a_malformed_amount_states_nothing(tmp_path, quote):
+    proof, _, _, _ = make_chain_fixture(tmp_path, increase='200', quote=quote)
+    with pytest.raises(BudgetStop, match='does not state its increase or new cap'):
+        amendment.selection(proof)
