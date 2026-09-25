@@ -632,6 +632,38 @@ attempt restarts every worker. Token counts, later turns and integration inputs
 remain unknown until their actual payloads exist. The plan does not claim that
 the registered maximum number of retries is affordable.
 
+## Standing full-reservation debit at stop (#2467)
+
+A native audit that stops with one unconfirmed charge leaves that request
+pending. The next registration can continue only from a reconciled
+checkpoint. The maintainer authorized these charges on 2026-09-25, once for
+all such stops, at their whole reservation with the provider fee left
+unknown. `reconcile_stopped` applies that authorization at once:
+
+```bash
+PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls \
+  python -m audit_controls.reconcile_stopped --registration STOPPED/registration.json \
+  --authorization STANDING.json --out NEW_DIR
+```
+
+It requires:
+- exactly one pending row, of the stopped audit's own attempt;
+- that row to be the result's only unresolved request;
+- a single evidence folder for the request;
+- a standing authorization file with its kind, exact response, quoted
+  request and time.
+
+It stages a `user_authorized_full_reservation_debit` receipt and the
+reconciled checkpoint. The receipt marks the authorization as standing, and
+its accounting observation is the request's HTTP status record. It then runs
+`validate_audit_reconciliation` on them, which recomputes the checkpoint from
+the stopped ledger and checks the runtime closure. It publishes the directory
+only if the validator accepts. The stopped registration, ledger, result and
+evidence are never modified. The printed paths and hashes are the next
+preparation's continuation checkpoint, source registration and
+reconciliation receipt. It neither claims the sequence nor contacts a
+provider.
+
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
 A new registration may select `--audit-batches PATH` (#2192). The JSON file must
