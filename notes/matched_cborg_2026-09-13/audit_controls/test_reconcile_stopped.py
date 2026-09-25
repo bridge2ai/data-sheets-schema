@@ -110,10 +110,9 @@ def test_a_stop_a_successor_has_continued_from_is_not_reconciled_again(stopped):
 
 
 def test_the_sequence_lock_serialises_reconciliation(stopped):
-    from filelock import Timeout
     m, first, reg, request_id, folder = stopped
     with r.SequenceLock(first['sequence_state'] + '.lock').acquire(timeout=0):
-        with pytest.raises(Timeout):
+        with pytest.raises(BudgetStop, match='sequence lock is held'):
             reconcile(reg, reg.parent.parent / 'reconciliation')
 
 
@@ -148,19 +147,22 @@ def test_nothing_is_published_for_a_stop_the_standing_debit_does_not_cover(stopp
         reg.write_text(json.dumps(value))
     else:
         out.mkdir()
-    with pytest.raises(BudgetStop):
+    with pytest.raises(BudgetStop, match={'kind': 'only a native audit', 'existing_out': 'already exists',
+                                          'inside_tree': "stopped audit's tree"}.get(damage, '')):
         reconcile(reg, out)
     assert damage == 'existing_out' or not out.exists()
     assert not list(out.parent.glob('.reconciliation-*'))
-    assert not (Path(first['sequence_state']).parent / tool.MARKERS).exists()
+    assert not list((Path(first['sequence_state']).parent / tool.MARKERS).glob('*.json'))
 
 
-def test_a_changed_authorization_record_is_refused(stopped, tmp_path):
+def test_a_changed_authorization_record_is_refused(stopped, tmp_path, monkeypatch):
     m, first, reg, request_id, folder = stopped
     copied = tmp_path / 'authorization.json'
     copied.write_text(tool.STANDING_AUTHORIZATION.read_text().replace('3- approved', 'approved'))
+    monkeypatch.setattr(tool, 'STANDING_AUTHORIZATION', copied)
     with pytest.raises(BudgetStop, match='standing authorization'):
-        reconcile(reg, reg.parent.parent / 'reconciliation', authorization=copied)
+        reconcile(reg, reg.parent.parent / 'reconciliation')
+    monkeypatch.undo()
     assert json.loads(tool.STANDING_AUTHORIZATION.read_text())['exact_response'] == '3- approved'
     assert r.sha(tool.STANDING_AUTHORIZATION) == tool.STANDING_AUTHORIZATION_SHA256
 
@@ -175,7 +177,7 @@ def test_a_validator_refusal_leaves_nothing_behind_and_a_corrected_stop_reconcil
     with pytest.raises(BudgetStop, match='closed runtime'):
         reconcile(reg, out)
     assert not out.exists() and not list(out.parent.glob('.reconciliation-*'))
-    assert not (Path(first['sequence_state']).parent / tool.MARKERS).exists()
+    assert not list((Path(first['sequence_state']).parent / tool.MARKERS).glob('*.json'))
     result.write_text(original)
     assert reconcile(reg, out)['request_id'] == request_id
 
@@ -206,3 +208,69 @@ def test_a_batch_audit_pins_the_source_and_its_closure_for_the_validator(stopped
     monkeypatch.setattr(batch_native, 'require_closed_batch_runtime', closed)
     assert reconcile(reg, reg.parent.parent / 'reconciliation')['request_id'] == request_id
     assert seen == [{'synthetic': True}, {'synthetic': True}]       # the tool's pins and the validator's check
+
+
+
+# --- the second review (#2491) ------------------------------------------------------------------
+
+def test_a_second_run_while_the_audit_is_still_the_tip_is_refused_by_its_marker(stopped):
+    m, first, reg, request_id, folder = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    with pytest.raises(BudgetStop, match='already reconciled; its checkpoint is in'):
+        reconcile(reg, reg.parent.parent / 'second')
+    assert not (reg.parent.parent / 'second').exists()
+    Path(value['marker']).unlink()                    # without it, the same stop would reconcile again
+    reconcile(reg, reg.parent.parent / 'third')
+
+
+def test_an_output_made_meanwhile_is_refused_without_a_marker(stopped, monkeypatch):
+    m, first, reg, request_id, folder = stopped
+    out = reg.parent.parent / 'reconciliation'
+    real = tool.verify
+    def racing(*args):
+        real(*args)
+        out.mkdir()
+    monkeypatch.setattr(tool, 'verify', racing)
+    with pytest.raises(FileExistsError):
+        reconcile(reg, out)
+    monkeypatch.undo()
+    assert not (Path(first['sequence_state']).parent / tool.MARKERS / f'{r.sha(reg)}.json').exists()
+    assert not list(out.parent.glob('.reconciliation-*'))
+    out.rmdir()
+    assert reconcile(reg, out)['request_id'] == request_id
+
+
+def test_an_interrupt_after_the_marker_is_reported_as_unpublished(stopped, monkeypatch):
+    m, first, reg, request_id, folder = stopped
+    out = reg.parent.parent / 'reconciliation'
+    monkeypatch.setattr(tool.os, 'link', lambda *a, **k: (_ for _ in ()).throw(KeyboardInterrupt))
+    with pytest.raises(KeyboardInterrupt):
+        reconcile(reg, out)
+    monkeypatch.undo()
+    with pytest.raises(BudgetStop, match='recorded but not published'):
+        reconcile(reg, reg.parent.parent / 'again')
+
+
+def test_a_marker_directory_that_is_not_a_directory_refuses_before_staging(stopped):
+    m, first, reg, request_id, folder = stopped
+    blocker = Path(first['sequence_state']).parent / tool.MARKERS
+    blocker.write_text('not a directory')
+    out = reg.parent.parent / 'reconciliation'
+    with pytest.raises((BudgetStop, FileExistsError)):
+        reconcile(reg, out)
+    assert not out.exists() and not list(out.parent.glob('.reconciliation-*'))
+
+
+def test_the_output_is_not_written_beside_the_sequence_state(stopped):
+    m, first, reg, request_id, folder = stopped
+    with pytest.raises(BudgetStop, match="sequence state's directory"):
+        reconcile(reg, Path(first['sequence_state']).parent / 'reconciliation')
+
+
+def test_a_symlinked_observation_is_refused_not_skipped(stopped, tmp_path):
+    m, first, reg, request_id, folder = stopped
+    moved = tmp_path / 'http_status.json'
+    (folder / 'http_status.json').rename(moved)
+    os.symlink(moved, folder / 'http_status.json')
+    with pytest.raises(BudgetStop, match='symlink'):
+        reconcile(reg, reg.parent.parent / 'reconciliation')

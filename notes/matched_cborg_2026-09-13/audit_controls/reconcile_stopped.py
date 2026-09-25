@@ -49,9 +49,9 @@ QUOTE_FIELDS = ('exact_response', 'quoted_request', 'recorded_at')
 MARKERS = 'reconciliations'
 
 
-def standing_authorization(path=STANDING_AUTHORIZATION, expected=STANDING_AUTHORIZATION_SHA256):
+def standing_authorization():
     """The committed record of the maintainer's standing authorization, exactly as pinned."""
-    path = Path(path)
+    path, expected = STANDING_AUTHORIZATION, STANDING_AUTHORIZATION_SHA256
     if path.is_symlink() or not path.is_file() or r.sha(path) != expected:
         raise BudgetStop('the standing authorization record is missing or changed')
     value = r.read_json(path)
@@ -80,7 +80,9 @@ def evidence(folder, row):
         raise BudgetStop('the evidence folder does not hold the pending request')
     for name in ('http_status.json', 'admission.json'):
         path = folder / name
-        if path.is_file() and not path.is_symlink():
+        if path.is_symlink():
+            raise BudgetStop('the pending request\'s evidence is a symlink')
+        if path.is_file():
             return {'file': name, 'sha256': r.sha(path)}
     raise BudgetStop('the pending request has no accounting observation')
 
@@ -102,29 +104,57 @@ def _sync(directory):
         os.close(descriptor)
 
 
-def reconcile(source_path, out, *, recorded_at=None, authorization=STANDING_AUTHORIZATION,
-              authorization_sha256=STANDING_AUTHORIZATION_SHA256):
+def previous_reconciliation(marker):
+    """Why an earlier run blocks this one, naming whether it published."""
+    try:
+        record = r.read_json(marker)
+        out = Path(record['out'])
+        published = all((out / name).is_file() and r.sha(out / name) == record[key] for name, key in (
+            ('charge_reconciliation_receipt.json', 'receipt_sha256'), ('reconciled_billing.json', 'checkpoint_sha256')))
+    except Exception:
+        return f'this stopped audit has an unreadable reconciliation marker; inspect {marker}'
+    if published:
+        return f'this stopped audit was already reconciled; its checkpoint is in {out}'
+    return (f'an earlier reconciliation of this stopped audit was recorded but not published; '
+            f'inspect {marker} and its staged files in {record.get("staged")}')
+
+
+def reconcile(source_path, out, *, recorded_at=None):
     source_path = r.canonical_path(str(Path(source_path).resolve()), exists=True)
+    if Path(out).is_symlink():
+        raise BudgetStop('the reconciliation directory is a symlink')
     out = Path(out).resolve()
-    if out.exists() or out.is_symlink():
+    if out.exists():
         raise BudgetStop('reconciliation directory already exists; a reconciliation is written once')
     if source_path.parent == out or source_path.parent in out.parents:
         raise BudgetStop('the reconciliation is written outside the stopped audit\'s tree')
     source = r.read_json(source_path)
     if source.get('kind') != 'd4d_native_audit_continuation':
         raise BudgetStop('only a native audit registration is reconciled here')
-    quote, reference = standing_authorization(authorization, authorization_sha256)
+    quote, reference = standing_authorization()
     source_sha, job = r.sha(source_path), source['job']
     ledger_path = r.canonical_path(source['budget']['ledger_path'], exists=True)
     result_path = Path(job['attempt_dir']) / 'result.json'
     state_path = r.canonical_path(source['sequence_state'], exists=True)
-    with r.SequenceLock(str(state_path) + '.lock').acquire(timeout=0):
+    markers = state_path.parent / MARKERS
+    if out == state_path.parent or state_path.parent in out.parents:
+        raise BudgetStop('the reconciliation is written outside the sequence state\'s directory')
+    try:
+        lock = r.SequenceLock(str(state_path) + '.lock').acquire(timeout=0)
+    except Exception as error:
+        raise BudgetStop('the sequence lock is held; another registration or reconciliation is running') from error
+    with lock:
         tip = r.read_json(state_path)
         if tip.get('registration_sha256') != source_sha or tip.get('ledger_path') != str(ledger_path):
             raise BudgetStop('the stopped audit is no longer the sequence tip; a successor has continued from it')
-        marker = state_path.parent / MARKERS / f'{source_sha}.json'
+        # The marker directory is checked before anything is staged, so a
+        # refusal there cannot leave a validated pair without a marker.
+        markers.mkdir(exist_ok=True)
+        if markers.is_symlink() or not markers.is_dir() or not os.access(markers, os.W_OK):
+            raise BudgetStop('the reconciliation marker directory is not a writable directory')
+        marker = markers / f'{source_sha}.json'
         if marker.exists() or marker.is_symlink():
-            raise BudgetStop('this stopped audit was already reconciled: ' + str(marker))
+            raise BudgetStop(previous_reconciliation(marker))
         ledger, result = r.read_json(ledger_path), r.read_json(result_path)
         pending = [row for row in ledger['requests'] if row.get('status') != 'settled']
         if (len(pending) != 1 or pending[0].get('status') != 'pending'
@@ -169,19 +199,25 @@ def reconcile(source_path, out, *, recorded_at=None, authorization=STANDING_AUTH
             # The successor's own check. Neither file names its own path, so
             # the staged bytes are the published bytes.
             verify(source, source_path, ledger_path, result_path, staged['receipt'], staged['checkpoint'])
+            hashes = {name: r.sha(path) for name, path in staged.items()}
+            # The output directory is created before the marker, so a
+            # directory someone else made meanwhile refuses without a marker.
+            os.mkdir(out)
         except BaseException:
             shutil.rmtree(scratch, ignore_errors=True)
             raise
-        hashes = {name: r.sha(path) for name, path in staged.items()}
-        # Record the reconciliation before publishing it, so a crash fails
-        # closed: the marker names what a person must inspect.
-        marker.parent.mkdir(exist_ok=True)
-        _write(marker, {'source_registration': str(source_path), 'source_registration_sha256': source_sha,
-                        'request_id': row['id'], 'out': str(out), 'staged': str(scratch),
-                        'checkpoint_sha256': hashes['checkpoint'], 'receipt_sha256': hashes['receipt'],
-                        'recorded_at': recorded_at})
-        _sync(marker.parent)
-        os.mkdir(out)
+        # Record the reconciliation before publishing it, so a crash from
+        # here fails closed: the marker names what a person must inspect.
+        try:
+            _write(marker, {'source_registration': str(source_path), 'source_registration_sha256': source_sha,
+                            'request_id': row['id'], 'out': str(out), 'staged': str(scratch),
+                            'checkpoint_sha256': hashes['checkpoint'], 'receipt_sha256': hashes['receipt'],
+                            'recorded_at': recorded_at})
+        except BaseException:
+            os.rmdir(out)
+            shutil.rmtree(scratch, ignore_errors=True)
+            raise
+        _sync(markers)
         final = {name: out / path.name for name, path in staged.items()}
         for name in staged:
             os.link(staged[name], final[name], follow_symlinks=False)
