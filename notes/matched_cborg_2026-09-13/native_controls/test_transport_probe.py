@@ -684,14 +684,18 @@ def test_settle_applies_the_deferred_debit_after_the_process_has_exited(prepared
     result = run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
     assert result['settlement']['reason'] == probe.HANDLER_RUNNING
     with SequenceLock(str(prepared.state) + '.lock').acquire(timeout=0):
-        with pytest.raises(BudgetStop, match='still running'):
+        with pytest.raises(BudgetStop, match='lock is held'):
             probe.settle(prepared.registration, prepared.identity)
     settlement = probe.settle(prepared.registration, prepared.identity)
     assert settlement['status'] == 'reconciled' and settlement['successor_continues_from'] == settlement['path']
+    assert settlement['result_sha256'] == sha(prepared.root / 'probe' / 'result.json')
     receipt = json.loads(Path(settlement['receipt']).read_text())
-    assert receipt['runtime_at_settlement']['basis'].startswith('the probe process had exited')
-    with pytest.raises(BudgetStop, match='no settlement deferred'):
+    # The runtime as observed, and the inference that made the debit safe, kept apart.
+    assert receipt['runtime_at_settlement']['unfinished_handlers'] == 1
+    assert receipt['closure_basis'].startswith('the proxy froze')
+    with pytest.raises(BudgetStop, match='already been settled'):
         probe.settle(prepared.registration, prepared.identity)
+    assert (prepared.root / 'probe' / 'settlement_after_exit.json').exists()
 
 
 def test_the_single_use_guard_is_checked_again_under_the_lock(prepared, monkeypatch):
@@ -735,3 +739,48 @@ def test_each_field_of_the_tip_must_name_the_predecessor(prepared, field, value)
     probe.check_tip_state(manifest, json.dumps(tip).encode())
     with pytest.raises(BudgetStop, match='not the probe'):
         probe.check_tip_state(manifest, json.dumps({**tip, field: value}).encode())
+
+
+# --- the final review (#2498) --------------------------------------------------------------------
+
+def test_settle_waits_for_the_recorded_process_when_the_proxy_never_froze(prepared, monkeypatch):
+    import os
+    import subprocess
+    _unfinished(monkeypatch)
+    run(prepared, Upstream(lambda request, clock: httpx.Response(400, json={})))
+    path = prepared.root / 'probe' / 'result.json'
+    result = json.loads(path.read_text())
+    result['runtime']['proxy_shutdown_complete'] = False
+    result['pid'] = os.getpid()                                    # still alive
+    path.write_text(json.dumps(result))
+    with pytest.raises(BudgetStop, match='may still be running'):
+        probe.settle(prepared.registration, prepared.identity)
+    finished = subprocess.run([sys.executable, '-c', 'import os; print(os.getpid())'], capture_output=True, text=True)
+    result['pid'] = int(finished.stdout)                           # exited
+    path.write_text(json.dumps(result))
+    settlement = probe.settle(prepared.registration, prepared.identity)
+    assert settlement['closure_basis'].startswith(f"the probe process {result['pid']} has exited")
+
+
+def test_an_unfrozen_proxy_defers_the_debit(prepared):
+    ledger = prepared.root / 'pending.json'
+    save(ledger, {'requests': [{'id': 'x', 'attempt': 'a', 'status': 'pending', 'reserved_usd': '1'}]})
+    deferred = probe.settle_pending(ledger, prepared.root, {}, 'r', 'a',
+                                    {'unfinished_handlers': 0, 'proxy_shutdown_complete': False})
+    assert deferred == {'status': 'needs_person', 'reason': probe.HANDLER_RUNNING}
+
+
+def test_another_owners_temporary_is_left_alone(prepared):
+    other = prepared.state.with_name(prepared.state.name + '.tmp')
+    other.write_text('ANOTHER OWNER\n')
+    with pytest.raises(FileExistsError):
+        run(prepared, Upstream(lambda request, clock: pytest.fail('provider reached')))
+    assert other.read_text() == 'ANOTHER OWNER\n'
+    assert json.loads((prepared.root / 'probe' / 'result.json').read_text())['finding'] == 'claim_failed'
+
+
+def test_the_result_records_the_process_and_the_control_count(prepared):
+    import os
+    result = run(prepared, Upstream(ok_stream))
+    assert result['pid'] == os.getpid() and result['control_count'] == 100 and result['free_count'] == 100
+    assert probe.source_python({'python': '/another/environment/bin/python'})['same_environment'] is False

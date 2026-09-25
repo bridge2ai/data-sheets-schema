@@ -13,8 +13,9 @@ registration has an audit continuation's budget block and carries the tip's
 budget amendment, so the audit's own validators check its predecessor: the
 settled checkpoint, its reconciliation (`validate_audit_reconciliation`) and
 the amendment (`validate_predecessor`). Holding the lineage's sequence lock,
-it does all free work first: the clients, the proxy, one free token count of
-the exact request, and the import of the checkpoint into its own ledger. Only
+it does all free work first: the clients, the proxy, free token counts of the
+retained request (a control) and of the probe request, and the import of the
+checkpoint into its own ledger. Only
 then does it take the tip with a durable sequence claim (#2137) and admit the
 one paid request. A failure before the claim leaves the tip unchanged. A
 successor continues from the probe's settled ledger. An audit prepared from
@@ -116,9 +117,9 @@ DIAGNOSTIC_HEADERS = ('x-litellm-call-id', 'x-litellm-attempted-retries', 'x-lit
 DIAGNOSTIC_VALUE = re.compile(r'[A-Za-z0-9._:+-]{1,96}')
 REQUEST_REFUSALS = frozenset({400, 413, 422})
 NOT_SENT = frozenset({'ConnectError', 'ConnectTimeout', 'PoolTimeout', 'UnsupportedProtocol'})
-SCOPE = ('One request and one sample, with no control. The replayed history\'s thinking blocks were '
-         'produced with thinking omitted, so this tests the same history under a new display. Header '
-         'times include the bounded worker\'s start and upload.')
+SCOPE = ('One paid request and one sample, with no paid control run of the original request. The '
+         'replayed history\'s thinking blocks were produced with thinking omitted, so this tests the same '
+         'history under a new display. Header times include the bounded worker\'s start and upload.')
 
 
 def sha(path):
@@ -565,7 +566,7 @@ def finding(exchanges, client):
     return 'stream_cut' if last['error'] else 'stream_ended_without_stop'
 
 
-def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, runtime):
+def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, runtime, closure=None):
     """Settle the probe's one pending row at its whole reservation, in a new checkpoint.
 
     Returns what happened; never raises on an outcome a person must resolve,
@@ -580,7 +581,7 @@ def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, run
     unsettled = [row for row in rows if row.get('status') != 'settled']
     if not unsettled:
         return {'status': 'settled'}
-    if runtime['unfinished_handlers'] != 0 or runtime['proxy_shutdown_complete'] is not True:
+    if closure is None and (runtime['unfinished_handlers'] != 0 or runtime['proxy_shutdown_complete'] is not True):
         # `settle` applies the debit once the probe's process has exited.
         return {'status': 'needs_person', 'reason': HANDLER_RUNNING}
     if len(unsettled) != 1 or unsettled[0].get('status') != 'pending' or unsettled[0].get('attempt') != attempt:
@@ -598,7 +599,7 @@ def settle_pending(ledger_path, out, manifest, registration_sha256, attempt, run
                'source_attempt_kind': ATTEMPT, 'source_ledger_modified': False,
                'source_ledger_sha256': digest(raw), 'source_registration_sha256': registration_sha256,
                'recorded_at': now(), 'user_authorization': {**quote, 'standing': True},
-               'runtime_at_settlement': dict(runtime)}
+               'runtime_at_settlement': dict(runtime), **({'closure_basis': closure} if closure else {})}
     receipt_path = out / 'debit_receipt.json'
     write_new(receipt_path, receipt)
     row.update(status='settled', cost_usd=row['reserved_usd'], settled_at=receipt['recorded_at'],
@@ -803,7 +804,8 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
                 pass
             result = {
                 'kind': RESULT_KIND, 'registration_sha256': expected_sha256, 'code_commit': commit,
-                'started_at': started_at, 'ended_at': now(), 'tip_claimed': True, 'free_count': counted,
+                'started_at': started_at, 'ended_at': now(), 'tip_claimed': True, 'pid': os.getpid(),
+                'control_count': control, 'free_count': counted,
                 'finding': ('interrupted' if isinstance(interrupted, (KeyboardInterrupt, SystemExit)) else
                             'controller_error' if interrupted is not None else
                             'unrecorded' if exchanges is None else finding(snapshot, client)),
@@ -828,34 +830,58 @@ HANDLER_RUNNING = 'a proxy handler was still running at shutdown'
 
 
 def settle(registration, expected_sha256):
-    """Apply the standing debit the runtime gate deferred, once the probe's process has exited (#2493).
+    """Apply the standing debit the runtime gate deferred, once no handler can still write (#2493).
 
-    A running probe holds the sequence lock for its whole run, so holding it
-    here shows the process, and with it every proxy handler, has ended."""
+    A handler can write the ledger only while the probe's process lives and
+    its proxy has not frozen. So this requires the recorded process to be gone,
+    or the proxy to have frozen, and it holds the sequence lock so no probe run
+    is active. The receipt keeps the runtime as observed at shutdown and names
+    this inference separately."""
+    from filelock import Timeout
     registration = Path(registration).resolve()
     if digest(registration.read_bytes()) != expected_sha256:
         raise BudgetStop('probe registration differs from the bound hash')
     manifest = read_json(registration)
     out = registration.parent
-    result = read_json(out / 'result.json')
-    if (manifest.get('kind') != KIND or (result.get('settlement') or {}).get('reason') != HANDLER_RUNNING
-            or (out / 'reconciled_billing.json').exists() or (out / 'settlement_after_exit.json').exists()):
+    result_path = out / 'result.json'
+    result = read_json(result_path)
+    if manifest.get('kind') != KIND or (result.get('settlement') or {}).get('reason') != HANDLER_RUNNING:
         raise BudgetStop('this probe has no settlement deferred for a running handler')
+    runtime = result.get('runtime') or {}
+    pid = result.get('pid')
+    if runtime.get('proxy_shutdown_complete') is True:
+        basis = 'the proxy froze at shutdown, so no handler could write the ledger afterwards'
+    elif type(pid) is int and not _alive(pid):
+        basis = f'the probe process {pid} has exited, and with it every proxy handler'
+    else:
+        raise BudgetStop('the probe process may still be running; settle after it has exited')
     state_path = Path(manifest['sequence_state'])
     try:
         lock = audit_registration.SequenceLock(str(state_path) + '.lock').acquire(timeout=0)
-    except Exception as error:
-        raise BudgetStop('the sequence lock is held; the probe or another owner is still running') from error
+    except Timeout as error:
+        raise BudgetStop('the sequence lock is held; a probe or another owner is running') from error
     with lock:
-        runtime = {'proxy_initialized': True, 'proxy_shutdown_complete': True, 'unfinished_handlers': 0,
-                   'basis': 'the probe process had exited: its sequence lock was free'}
+        if (out / 'reconciled_billing.json').exists() or (out / 'settlement_after_exit.json').exists():
+            raise BudgetStop('this probe has already been settled')
         settlement = settle_pending(Path(manifest['budget']['ledger_path']), out, manifest, expected_sha256,
-                                    f'{expected_sha256}:{ATTEMPT}', runtime)
-        settlement['successor_continues_from'] = (settlement['path'] if settlement['status'] == 'reconciled' else
-                                                  manifest['budget']['ledger_path']
-                                                  if settlement['status'] == 'settled' else None)
+                                    f'{expected_sha256}:{ATTEMPT}', runtime, closure=basis)
+        settlement.update(result_sha256=sha(result_path), closure_basis=basis,
+                          code_commit=repository_state([], require_clean=False)[1],
+                          successor_continues_from=(settlement['path'] if settlement['status'] == 'reconciled' else
+                                                    manifest['budget']['ledger_path']
+                                                    if settlement['status'] == 'settled' else None))
         write_new(out / 'settlement_after_exit.json', settlement)
     return settlement
+
+
+def _alive(pid):
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
 
 
 def main(argv=None):
@@ -874,8 +900,9 @@ def main(argv=None):
     later.add_argument('--sha256', required=True)
     args = parser.parse_args(argv)
     if args.command == 'settle':
-        print(json.dumps(settle(args.registration, args.sha256), indent=2))
-        return 0
+        settlement = settle(args.registration, args.sha256)
+        print(json.dumps(settlement, indent=2))
+        return 0 if settlement['status'] in ('settled', 'reconciled') else 1
     if args.command == 'prepare':
         path, identity = prepare(args.out, source_registration=args.source_registration,
                                  source_request=args.source_request, tip_checkpoint=args.tip_checkpoint,
@@ -892,7 +919,7 @@ def main(argv=None):
                                                             'first_thinking_text_seconds', 'last_chunk_seconds',
                                                             'largest_gap_between_chunks_seconds', 'error',
                                                             'error_seconds', 'diagnostics')}
-                                     for e in result.get('provider_exchanges', [])]
+                                     for e in result.get('provider_exchanges') or []]
     summary['probe_rows'] = [{k: r.get(k) for k in ('status', 'cost_usd', 'settlement_basis')}
                              for r in result.get('probe_rows', [])]
     print(json.dumps(summary, indent=2))

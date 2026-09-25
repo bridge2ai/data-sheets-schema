@@ -190,8 +190,8 @@ The probe is a link in the lineage:
   predecessor: `validate_audit_reconciliation` for a reconciled checkpoint,
   and `validate_predecessor` for the amendment.
 - **Before the tip moves.** Holding the sequence lock, it does all free work
-  first: the clients, the proxy, one free count of the exact request and the
-  import of the checkpoint into its own ledger. The retained request is
+  first: the clients, the proxy, free counts of the retained request and of
+  the probe request, and the import of the checkpoint into its own ledger. The retained request is
   counted first as a control. A 400, 413 or 422 on the probe's count, when
   the control counted, is recorded as the finding `count_refused`, and
   nothing is claimed or spent. A failure before the ledger import writes
@@ -204,13 +204,14 @@ The probe is a link in the lineage:
   pending is settled at its whole reservation in `reconciled_billing.json`
   with a `debit_receipt.json`, under the maintainer's standing
   authorization. This happens only once the proxy has closed with no
-  handler running. Otherwise `transport_probe.py settle` applies it after
-  the probe's process has exited; a free sequence lock shows that. The
-  ledger is left as written.
+  handler running. Otherwise `transport_probe.py settle` applies it once no
+  handler can write: the proxy froze, or the process recorded in
+  `result.json` has exited. The receipt keeps the observed runtime and
+  names that inference. The ledger is left as written.
 - **`result.json`.** Once the tip is claimed, it is written whatever
-  happens, including after an interrupt, and also for a failed claim. It
-  names the settled checkpoint the next registration continues from, and
-  its cost. An audit prepared from the earlier tip fails at its
+  happens, including after an interrupt, and also for a failed claim. It,
+  or `settlement_after_exit.json` when `settle` ran, names the settled
+  checkpoint the next registration continues from. An audit prepared from the earlier tip fails at its
   sequence guard. Audits accept a probe predecessor only after #2469.
 
 ```bash
@@ -220,6 +221,8 @@ PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/nat
   --tip-reconciliation-receipt RECEIPT --sequence-state S --origin-registration O --authorization A
 # review DIR/registration.json, then, with CBORG_API_KEY set and the same interpreter:
 ... transport_probe.py run --registration DIR/registration.json --sha256 HEX
+# only if result.json defers settlement to a person, after the run has exited:
+... transport_probe.py settle --registration DIR/registration.json --sha256 HEX
 ```
 
 Point `--out` at an ignored private location. The directory keeps the
