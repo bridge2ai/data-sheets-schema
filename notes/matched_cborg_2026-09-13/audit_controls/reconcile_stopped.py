@@ -1,27 +1,38 @@
-"""Settle a stopped audit's one unconfirmed charge under a standing authorization (#2467).
+"""Settle a stopped audit's one unconfirmed charge under the standing authorization (#2467).
 
 When a native audit stops with one request whose charge the provider never
 confirmed, the next registration can continue only from a reconciled
-checkpoint. The maintainer has authorized that charge, once for all such
-stops, at its whole reservation with the provider fee left unknown. This tool
-writes the receipt and the reconciled checkpoint in exactly the form
-`registration.validate_audit_reconciliation` recomputes. It then runs that
-validator on them and publishes the pair only if it accepts. The stopped
-audit's ledger, result and evidence are never modified.
+checkpoint. On 2026-09-25 the maintainer authorized such charges, once for all
+stops, at their whole reservation with the provider fee left unknown. The
+authorization is the committed record `STANDING_AUTHORIZATION`, pinned here by
+its hash.
 
-  python -m audit_controls.reconcile_stopped --registration STOPPED/registration.json \\
-      --authorization STANDING.json --out NEW_DIR
+This tool writes the receipt and the reconciled checkpoint in exactly the form
+`registration.validate_audit_reconciliation` recomputes. It runs that
+validator on them before publishing. Holding the lineage's sequence lock, it
+first requires:
+- the stopped audit to be the live tip, so no successor has continued from it;
+- no reconciliation of that audit to have been recorded before.
+
+The recording is an exclusive marker beside the sequence state. It is written
+after the staged files validate and before they are published, so a crash
+leaves a marker that names what to inspect. A stop reconciled by hand before this tool existed
+carries no marker, so do not run the tool on it. The stopped audit's
+registration, ledger, result and evidence are never modified.
+
+  python -m audit_controls.reconcile_stopped --registration STOPPED/registration.json --out NEW_DIR
 
 The printed paths and hashes are what the next preparation passes as
 `--continuation-checkpoint`, `--continuation-source-registration` and
-`--continuation-reconciliation-receipt`. The tool neither claims the sequence
-nor contacts a provider.
+`--continuation-reconciliation-receipt`. The tool never claims the sequence
+and never contacts a provider.
 """
 import argparse
 import copy
 from datetime import datetime, timezone
 from decimal import Decimal
 import json
+import os
 from pathlib import Path
 import shutil
 import sys
@@ -32,98 +43,157 @@ from . import registration as r
 
 KIND = 'user_authorized_full_reservation_debit'
 AUTHORIZATION_KIND = 'standing_full_reservation_debit_authorization'
+STANDING_AUTHORIZATION = Path(__file__).resolve().with_name('standing_full_reservation_debit_2026-09-25.json')
+STANDING_AUTHORIZATION_SHA256 = '5e5baa54f34e359e07a6ffb2ad8743bf1aabe41950e07dc9f672f9479b9d578d'
 QUOTE_FIELDS = ('exact_response', 'quoted_request', 'recorded_at')
+MARKERS = 'reconciliations'
 
 
-def standing_authorization(path):
+def standing_authorization(path=STANDING_AUTHORIZATION, expected=STANDING_AUTHORIZATION_SHA256):
+    """The committed record of the maintainer's standing authorization, exactly as pinned."""
+    path = Path(path)
+    if path.is_symlink() or not path.is_file() or r.sha(path) != expected:
+        raise BudgetStop('the standing authorization record is missing or changed')
     value = r.read_json(path)
     if (not isinstance(value, dict) or set(value) != {'kind', *QUOTE_FIELDS} or value['kind'] != AUTHORIZATION_KIND
             or any(not isinstance(value[k], str) or not value[k].strip() for k in QUOTE_FIELDS)):
         raise BudgetStop('standing authorization needs its kind, exact response, quoted request and time')
-    return value
+    return value, {'path': str(path), 'sha256': expected}
 
 
 def request_folder(attempt_dir, request_id):
     """The one evidence folder of the pending request, in a single or batch attempt."""
-    matches = [p for p in Path(attempt_dir).rglob(request_id)
-               if p.is_dir() and not p.is_symlink() and p.parent.name == 'requests']
-    if len(matches) != 1:
+    matches = []
+    for root, directories, _ in os.walk(attempt_dir, followlinks=False):
+        for name in directories:
+            if name == request_id and Path(root).name == 'requests':
+                matches.append(Path(root) / name)
+    if len(matches) != 1 or matches[0].is_symlink():
         raise BudgetStop('the pending request has no single evidence folder')
     return matches[0]
 
 
-def observation(folder):
-    """The provider-side record of the stopped request: its HTTP status where one arrived."""
+def evidence(folder, row):
+    """The request bytes the ledger names, and its provider-side record."""
+    request = folder / 'request.json'
+    if request.is_symlink() or not request.is_file() or r.sha(request) != row['request_sha256']:
+        raise BudgetStop('the evidence folder does not hold the pending request')
     for name in ('http_status.json', 'admission.json'):
-        if (folder / name).is_file():
-            return r.sha(folder / name)
+        path = folder / name
+        if path.is_file() and not path.is_symlink():
+            return {'file': name, 'sha256': r.sha(path)}
     raise BudgetStop('the pending request has no accounting observation')
 
 
-def reconcile(source_path, authorization_path, out, *, recorded_at=None):
+def _write(path, value):
+    """Exclusive, durable write of a new file."""
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644)
+    with os.fdopen(descriptor, 'w') as stream:
+        stream.write(json.dumps(value, indent=2) + '\n')
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def _sync(directory):
+    descriptor = os.open(directory, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def reconcile(source_path, out, *, recorded_at=None, authorization=STANDING_AUTHORIZATION,
+              authorization_sha256=STANDING_AUTHORIZATION_SHA256):
     source_path = r.canonical_path(str(Path(source_path).resolve()), exists=True)
     out = Path(out).resolve()
-    if out.exists():
+    if out.exists() or out.is_symlink():
         raise BudgetStop('reconciliation directory already exists; a reconciliation is written once')
+    if source_path.parent == out or source_path.parent in out.parents:
+        raise BudgetStop('the reconciliation is written outside the stopped audit\'s tree')
     source = r.read_json(source_path)
     if source.get('kind') != 'd4d_native_audit_continuation':
         raise BudgetStop('only a native audit registration is reconciled here')
-    quote = standing_authorization(authorization_path)
+    quote, reference = standing_authorization(authorization, authorization_sha256)
     source_sha, job = r.sha(source_path), source['job']
     ledger_path = r.canonical_path(source['budget']['ledger_path'], exists=True)
     result_path = Path(job['attempt_dir']) / 'result.json'
-    ledger, result = r.read_json(ledger_path), r.read_json(result_path)
-    pending = [row for row in ledger['requests'] if row.get('status') != 'settled']
-    if (len(pending) != 1 or pending[0].get('status') != 'pending'
-            or pending[0].get('attempt') != attempt_identity(source_sha, job['id'])
-            or result.get('unresolved_requests') != [pending[0]['id']]):
-        raise BudgetStop('the stopped audit does not have exactly one pending charge of its own')
-    row = pending[0]
-    folder = request_folder(job['attempt_dir'], row['id'])
-    recorded_at = recorded_at or datetime.now(timezone.utc).isoformat()
-    receipt = {'kind': KIND, 'source_attempt_kind': 'phase3_audit_only',
-               'source_registration_sha256': source_sha, 'source_ledger_sha256': r.sha(ledger_path),
-               'stopped_result_sha256': r.sha(result_path), 'request_id': row['id'], 'attempt': row['attempt'],
-               'request_sha256': row['request_sha256'], 'previous_reservation_usd': row['reserved_usd'],
-               'budget_debit_usd': row['reserved_usd'], 'released_excess_reservation_usd': '0',
-               'provider_charge_confirmed': False, 'provider_charge_usd': None, 'provider_usage_is_final': False,
-               'source_attempt_completed': False, 'scientific_acceptance': False, 'source_ledger_modified': False,
-               'new_provider_requests': 0, 'accounting_observation_sha256': observation(folder),
-               'recorded_at': recorded_at,
-               'user_authorization': {'exact_response': quote['exact_response'],
-                                      'quoted_request': quote['quoted_request'],
-                                      'recorded_at': quote['recorded_at'], 'standing': True,
-                                      'source_record': str(Path(authorization_path).resolve())}}
-    scratch = Path(tempfile.mkdtemp(prefix='.' + out.name + '-', dir=out.parent)).resolve()
-    try:
-        receipt_path = scratch / 'charge_reconciliation_receipt.json'
-        receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
-        reconciled = copy.deepcopy(ledger)
-        target = next(x for x in reconciled['requests'] if x['id'] == row['id'])
-        target.update(status='settled', cost_usd=row['reserved_usd'], settled_at=recorded_at,
-                      settlement_basis=KIND, reconciliation_receipt_sha256=r.sha(receipt_path),
-                      accounting_observation_sha256=receipt['accounting_observation_sha256'],
-                      provider_charge_confirmed=False, provider_charge_usd=None, provider_usage_is_final=False,
-                      released_excess_reservation_usd='0', source_attempt_kind='phase3_audit_only',
-                      source_attempt_outcome='stopped')
-        reconciled['reconciled_from'] = {'checkpoint_sha256': r.sha(ledger_path), 'receipt_sha256': r.sha(receipt_path),
-                                         'request_id': row['id'], 'previous_status': 'pending',
-                                         'budget_debit_usd': row['reserved_usd'], 'settlement_basis': KIND,
-                                         'provider_charge_confirmed': False, 'source_attempt_completed': False}
-        checkpoint_path = scratch / 'reconciled_billing.json'
-        checkpoint_path.write_text(json.dumps(reconciled, indent=2) + '\n')
-        # The successor's own check. Neither file names its own path, so the
-        # staged bytes are the published bytes.
-        verify(source, source_path, ledger_path, result_path, receipt_path, checkpoint_path)
-        scratch.rename(out)
-    except BaseException:
+    state_path = r.canonical_path(source['sequence_state'], exists=True)
+    with r.SequenceLock(str(state_path) + '.lock').acquire(timeout=0):
+        tip = r.read_json(state_path)
+        if tip.get('registration_sha256') != source_sha or tip.get('ledger_path') != str(ledger_path):
+            raise BudgetStop('the stopped audit is no longer the sequence tip; a successor has continued from it')
+        marker = state_path.parent / MARKERS / f'{source_sha}.json'
+        if marker.exists() or marker.is_symlink():
+            raise BudgetStop('this stopped audit was already reconciled: ' + str(marker))
+        ledger, result = r.read_json(ledger_path), r.read_json(result_path)
+        pending = [row for row in ledger['requests'] if row.get('status') != 'settled']
+        if (len(pending) != 1 or pending[0].get('status') != 'pending'
+                or pending[0].get('attempt') != attempt_identity(source_sha, job['id'])
+                or result.get('unresolved_requests') != [pending[0]['id']]):
+            raise BudgetStop('the stopped audit does not have exactly one pending charge of its own')
+        row = pending[0]
+        observation = evidence(request_folder(job['attempt_dir'], row['id']), row)
+        recorded_at = recorded_at or datetime.now(timezone.utc).isoformat()
+        receipt = {'kind': KIND, 'source_attempt_kind': 'phase3_audit_only',
+                   'source_registration_sha256': source_sha, 'source_ledger_sha256': r.sha(ledger_path),
+                   'stopped_result_sha256': r.sha(result_path), 'request_id': row['id'], 'attempt': row['attempt'],
+                   'request_sha256': row['request_sha256'], 'previous_reservation_usd': row['reserved_usd'],
+                   'budget_debit_usd': row['reserved_usd'], 'released_excess_reservation_usd': '0',
+                   'provider_charge_confirmed': False, 'provider_charge_usd': None, 'provider_usage_is_final': False,
+                   'source_attempt_completed': False, 'scientific_acceptance': False,
+                   'source_ledger_modified': False, 'new_provider_requests': 0,
+                   'accounting_observation_sha256': observation['sha256'], 'accounting_observation': observation,
+                   'recorded_at': recorded_at,
+                   'user_authorization': {**{k: quote[k] for k in QUOTE_FIELDS}, 'standing': True,
+                                          'source_record': reference}}
+        # Stage and validate first: a refusal leaves nothing behind.
+        scratch = Path(tempfile.mkdtemp(prefix='.' + out.name + '-', dir=out.parent)).resolve()
+        try:
+            staged = {'receipt': scratch / 'charge_reconciliation_receipt.json',
+                      'checkpoint': scratch / 'reconciled_billing.json'}
+            _write(staged['receipt'], receipt)
+            reconciled = copy.deepcopy(ledger)
+            target = next(x for x in reconciled['requests'] if x['id'] == row['id'])
+            target.update(status='settled', cost_usd=row['reserved_usd'], settled_at=recorded_at,
+                          settlement_basis=KIND, reconciliation_receipt_sha256=r.sha(staged['receipt']),
+                          accounting_observation_sha256=observation['sha256'],
+                          provider_charge_confirmed=False, provider_charge_usd=None, provider_usage_is_final=False,
+                          released_excess_reservation_usd='0', source_attempt_kind='phase3_audit_only',
+                          source_attempt_outcome='stopped')
+            reconciled['reconciled_from'] = {'checkpoint_sha256': r.sha(ledger_path),
+                                             'receipt_sha256': r.sha(staged['receipt']), 'request_id': row['id'],
+                                             'previous_status': 'pending', 'budget_debit_usd': row['reserved_usd'],
+                                             'settlement_basis': KIND, 'provider_charge_confirmed': False,
+                                             'source_attempt_completed': False}
+            _write(staged['checkpoint'], reconciled)
+            # The successor's own check. Neither file names its own path, so
+            # the staged bytes are the published bytes.
+            verify(source, source_path, ledger_path, result_path, staged['receipt'], staged['checkpoint'])
+        except BaseException:
+            shutil.rmtree(scratch, ignore_errors=True)
+            raise
+        hashes = {name: r.sha(path) for name, path in staged.items()}
+        # Record the reconciliation before publishing it, so a crash fails
+        # closed: the marker names what a person must inspect.
+        marker.parent.mkdir(exist_ok=True)
+        _write(marker, {'source_registration': str(source_path), 'source_registration_sha256': source_sha,
+                        'request_id': row['id'], 'out': str(out), 'staged': str(scratch),
+                        'checkpoint_sha256': hashes['checkpoint'], 'receipt_sha256': hashes['receipt'],
+                        'recorded_at': recorded_at})
+        _sync(marker.parent)
+        os.mkdir(out)
+        final = {name: out / path.name for name, path in staged.items()}
+        for name in staged:
+            os.link(staged[name], final[name], follow_symlinks=False)
+        _sync(out)
         shutil.rmtree(scratch, ignore_errors=True)
-        raise
-    checkpoint, receipt_final = out / 'reconciled_billing.json', out / 'charge_reconciliation_receipt.json'
-    return {'checkpoint': str(checkpoint), 'checkpoint_sha256': r.sha(checkpoint),
+    if any(r.sha(final[name]) != hashes[name] for name in final):
+        raise BudgetStop('the published reconciliation differs from the validated bytes')
+    return {'checkpoint': str(final['checkpoint']), 'checkpoint_sha256': hashes['checkpoint'],
             'cost_usd': str(sum((Decimal(x['cost_usd']) for x in reconciled['requests']), Decimal(0))),
-            'source_registration': str(source_path), 'receipt': str(receipt_final),
-            'receipt_sha256': r.sha(receipt_final), 'request_id': row['id'], 'budget_debit_usd': row['reserved_usd']}
+            'source_registration': str(source_path), 'receipt': str(final['receipt']),
+            'receipt_sha256': hashes['receipt'], 'request_id': row['id'], 'budget_debit_usd': row['reserved_usd'],
+            'marker': str(marker)}
 
 
 def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoint_path):
@@ -146,10 +216,9 @@ def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoi
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     parser.add_argument('--registration', required=True)
-    parser.add_argument('--authorization', required=True)
     parser.add_argument('--out', required=True)
     args = parser.parse_args(argv)
-    print(json.dumps(reconcile(args.registration, args.authorization, args.out), indent=2))
+    print(json.dumps(reconcile(args.registration, args.out), indent=2))
     return 0
 
 

@@ -636,33 +636,42 @@ the registered maximum number of retries is affordable.
 
 A native audit that stops with one unconfirmed charge leaves that request
 pending. The next registration can continue only from a reconciled
-checkpoint. The maintainer authorized these charges on 2026-09-25, once for
+checkpoint. On 2026-09-25 the maintainer authorized these charges, once for
 all such stops, at their whole reservation with the provider fee left
-unknown. `reconcile_stopped` applies that authorization at once:
+unknown. The authorization is the committed record
+`standing_full_reservation_debit_2026-09-25.json`, which `reconcile_stopped`
+pins by hash and applies at once:
 
 ```bash
 PYTHONPATH=src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls \
-  python -m audit_controls.reconcile_stopped --registration STOPPED/registration.json \
-  --authorization STANDING.json --out NEW_DIR
+  python -m audit_controls.reconcile_stopped --registration STOPPED/registration.json --out NEW_DIR
 ```
 
-It requires:
-- exactly one pending row, of the stopped audit's own attempt;
-- that row to be the result's only unresolved request;
-- a single evidence folder for the request;
-- a standing authorization file with its kind, exact response, quoted
-  request and time.
+Holding the lineage's sequence lock, it requires:
+- the stopped audit to be the live tip, so no successor has continued from it;
+- no earlier reconciliation of it, recorded as a marker under
+  `reconciliations/` beside the sequence state;
+- exactly one pending row, of the audit's own attempt, which is the
+  result's only unresolved request;
+- one evidence folder, matched by exact name and not a symlink, whose
+  `request.json` hashes to the ledger's request digest.
 
-It stages a `user_authorized_full_reservation_debit` receipt and the
-reconciled checkpoint. The receipt marks the authorization as standing, and
-its accounting observation is the request's HTTP status record. It then runs
-`validate_audit_reconciliation` on them, which recomputes the checkpoint from
-the stopped ledger and checks the runtime closure. It publishes the directory
-only if the validator accepts. The stopped registration, ledger, result and
-evidence are never modified. The printed paths and hashes are the next
-preparation's continuation checkpoint, source registration and
-reconciliation receipt. It neither claims the sequence nor contacts a
-provider.
+It stages the receipt and the reconciled checkpoint. The receipt names the
+authorization record by path and hash, and the file its accounting
+observation hashes. It then runs `validate_audit_reconciliation` on them, as
+the next registration will. If the validator refuses, nothing is left
+behind. If it accepts:
+1. the tool writes the marker;
+2. it creates the output directory exclusively;
+3. it links the files into place, all fsynced.
+
+A crash after the marker leaves it naming what to inspect. A stop
+reconciled by hand before this tool existed carries no marker, so do not run
+the tool on it. The stopped audit's files are never modified. The tool
+neither claims the sequence nor contacts a provider. The printed paths and
+hashes are the next preparation's continuation checkpoint, source
+registration and reconciliation receipt. Running it automatically when an
+audit stops remains open in #2467.
 
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
