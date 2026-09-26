@@ -56,8 +56,18 @@ def _files(root):
                                            'settlement_after_exit.json')}
 
 
+_MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError)
+
+
 def paths(manifest):
     """What an audit following a probe pins: the probe's link and the audit before it."""
+    try:
+        return _paths(manifest)
+    except _MALFORMED as error:
+        raise BudgetStop('probe predecessor is malformed or unavailable') from error
+
+
+def _paths(manifest):
     if not is_probe_predecessor(manifest):
         return set()
     files = _files(predecessor_path(manifest).parent)
@@ -77,14 +87,15 @@ def _probe_source(probe):
     return source, checkpoint
 
 
-def _settlement(files, result):
+def _settlement(files, result, pinned):
     """The settlement that decided the successor checkpoint: the deferred one, when `settle` applied it."""
     after = files['settlement_after_exit.json']
     settlement = result.get('settlement')
     if after.is_file():
         _require(isinstance(settlement, dict) and settlement.get('reason') == HANDLER_RUNNING,
                  'probe settlement after exit without a deferred settlement')
-        later = read_json(after)
+        later = read_json(pinned(None, str(after)))
+        _require(isinstance(later, dict), 'probe settlement after exit is malformed')
         _require(later.get('result_sha256') == sha(files['result.json']),
                  'probe settlement after exit names another result')
         return later, True
@@ -136,15 +147,32 @@ def _reconciled(probe, identity, files, deferred):
     return expected
 
 
+def validate_predecessor(manifest, *, require_pins=True):
+    """Validate the link when the audit's predecessor is a probe; None otherwise."""
+    try:
+        probe = is_probe_predecessor(manifest)
+    except _MALFORMED as error:
+        raise BudgetStop('audit predecessor registration is malformed or unavailable') from error
+    return validate_link(manifest, require_pins=require_pins) if probe else None
+
+
 def validate_link(manifest, *, require_pins=True):
+    try:
+        return _validate_link(manifest, require_pins=require_pins)
+    except _MALFORMED as error:
+        raise BudgetStop('probe predecessor is malformed or unavailable') from error
+
+
+def _validate_link(manifest, *, require_pins=True):
     """Validate the probe named by an audit's continuation; return its settled checkpoint.
 
     Every file read is pinned in the audit's registration, so a successor
     audit binds the exact link it follows. Preparation checks the same link
     before any pins exist (`require_pins=False`).
     """
-    def pinned(manifest, value):
-        return (_pinned(manifest, value) if require_pins else canonical_path(value, exists=True))
+    audit = manifest
+    def pinned(_, value):
+        return (_pinned(audit, value) if require_pins else canonical_path(value, exists=True))
     continuation = manifest['budget']['continuation']
     bridge = continuation.get('reconciliation')
     registration = pinned(manifest, str(predecessor_path(manifest)))
@@ -154,6 +182,8 @@ def validate_link(manifest, *, require_pins=True):
     _require(probe.get('kind') == KIND and type(probe.get('schema_version')) is int
              and probe['schema_version'] == 1 and registration.name == 'registration.json',
              'audit predecessor is not a transport probe registration')
+    _require(isinstance(manifest.get('sequence_state'), str) and bool(manifest['sequence_state']),
+             'audit names no sequence state to check its probe predecessor against')
     _require(probe.get('parent', {}).get('registration') == manifest['parent']['registration']
              and probe.get('sequence_state') == manifest['sequence_state']
              and canonical_path(probe['budget']['ledger_path']) == files['billing.json'],
@@ -161,6 +191,7 @@ def validate_link(manifest, *, require_pins=True):
     ledger_path = pinned(manifest, str(files['billing.json']))
     result_path = pinned(manifest, str(files['result.json']))
     ledger, result = read_json(ledger_path), read_json(result_path)
+    _require(isinstance(ledger, dict) and isinstance(result, dict), 'probe ledger or result is malformed')
     _require(result.get('kind') == RESULT_KIND and result.get('registration_sha256') == identity
              and result.get('tip_claimed') is True,
              'probe predecessor did not claim the tip it would hand on')
@@ -168,14 +199,14 @@ def validate_link(manifest, *, require_pins=True):
     # its ledger carries that checkpoint's rows unchanged.
     source_path, before = _probe_source(probe)
     source_path, before = pinned(manifest, str(source_path)), pinned(manifest, str(before))
-    probe_pins = probe.get('pinned_files', {})
-    _require(probe_pins.get(str(source_path)) == sha(source_path)
-             and probe_pins.get(str(before)) == sha(before) == probe['budget']['continuation']['sha256'],
-             'probe predecessor\'s own predecessor changed since the probe was registered')
     source = read_json(source_path)
     _require(source.get('kind') == AUDIT_KIND
              and sha(source['parent']['registration']) == sha(manifest['parent']['registration']),
              'probe predecessor did not follow an audit of this origin')
+    probe_pins = probe.get('pinned_files', {})
+    _require(probe_pins.get(str(source_path)) == sha(source_path)
+             and probe_pins.get(str(before)) == sha(before) == probe['budget']['continuation']['sha256'],
+             'probe predecessor\'s own predecessor changed since the probe was registered')
     carried = read_json(before)['requests']
     rows = ledger.get('requests')
     _require(ledger.get('manifest_sha256') == identity
@@ -187,7 +218,7 @@ def validate_link(manifest, *, require_pins=True):
              'probe ledger does not carry its predecessor checkpoint and at most its one request')
     for field in ('additional_cap_usd', 'attempt_cap_usd'):
         _require(ledger.get(field) == read_json(before).get(field), 'probe ledger changes the lineage caps')
-    settlement, deferred = _settlement(files, result)
+    settlement, deferred = _settlement(files, result, pinned)
     status = settlement.get('status') if isinstance(settlement, dict) else None
     checkpoint = canonical_path(continuation['checkpoint'], exists=True)
     if status == 'settled':

@@ -385,7 +385,13 @@ def required_paths(manifest):
                   'reconciliation_receipt', 'reconciled_checkpoint'))
     for record in (read_json(parent['registration']), read_json(parent['overlay'])):
         paths.update(canonical_path(str(parent_path(parent, name).resolve()), exists=True) for name in record['pinned_files'])
-    paths.add(canonical_path(manifest['budget']['continuation']['checkpoint'], exists=True))
+    paths.update(continuation_paths(manifest))
+    return paths
+
+
+def continuation_paths(manifest):
+    """The predecessor evidence an audit pins: its checkpoint, a probe link, a reconciliation bridge."""
+    paths = {canonical_path(manifest['budget']['continuation']['checkpoint'], exists=True)}
     from .probe_predecessor import paths as probe_paths
     paths.update(probe_paths(manifest))
     bridge = manifest['budget']['continuation'].get('reconciliation')
@@ -618,6 +624,9 @@ def validate_registration(path):
         raise BudgetStop('audit budget cap, pricing or ledger location differs')
     pinned(manifest, budget['continuation']['checkpoint'], budget['continuation']['sha256'])
     validate_audit_reconciliation(manifest)
+    # A settled, unamended probe link is checked here too, not only at launch (#2505).
+    from .probe_predecessor import validate_predecessor
+    validate_predecessor(manifest)
     checkpoint = validate_reconciliation(manifest)
     if canonical_json(previous['requests'][:len(checkpoint['requests'])]) != canonical_json(checkpoint['requests']):
         raise BudgetStop('audit predecessor does not preserve reconciled source charges')
@@ -853,9 +862,8 @@ def sequence_guard(manifest, registration_sha):
                         sha(previous['ledger_path']) != checkpoint['sha256']):
                     raise BudgetStop('audit billing fork: predecessor is not the current sequence tip')
                 state = read_json(previous['ledger_path'])
-                from .probe_predecessor import is_probe_predecessor, validate_link
-                if is_probe_predecessor(manifest):
-                    validate_link(manifest)
+                from .probe_predecessor import validate_predecessor
+                validate_predecessor(manifest)
             else:
                 bridge = checkpoint['reconciliation']
                 if (bridge['source_ledger'] != previous['ledger_path'] or

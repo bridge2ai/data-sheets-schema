@@ -171,13 +171,17 @@ def test_a_settled_probe_is_not_continued_through_a_bridge(prepared):
         probe_predecessor.validate_link(manifest)
 
 
-def test_the_probes_own_predecessor_must_be_an_unchanged_audit_of_the_origin(prepared):
+@pytest.mark.parametrize('change, match', [
+    (lambda v: v.update(kind='something_else'), 'did not follow an audit of this origin'),
+    (lambda v: v.update(note='edited after the probe'), 'own predecessor changed'),
+])
+def test_the_probes_own_predecessor_must_be_an_unchanged_audit_of_the_origin(prepared, change, match):
     manifest, _ = successor(prepared, completed(prepared))
     source = r.read_json(prepared.source)
-    source['kind'] = 'something_else'
+    change(source)
     save(prepared.source, source)
     repin(manifest)
-    with pytest.raises(BudgetStop, match='own predecessor changed'):
+    with pytest.raises(BudgetStop, match=match):
         probe_predecessor.validate_link(manifest)
 
 
@@ -208,4 +212,99 @@ def test_an_audit_continues_after_a_debit_settle_applied_once_the_probe_exited(p
     save(after, {**r.read_json(after), 'result_sha256': '0' * 64})
     repin(manifest)
     with pytest.raises(BudgetStop, match='names another result'):
+        probe_predecessor.validate_link(manifest)
+
+
+# --- the wiring, each through its real caller (#2506) ------------------------------------------
+
+def test_the_sequence_guard_refuses_a_changed_settled_probe_link(prepared):
+    manifest, path = successor(prepared, completed(prepared))
+    _tamper(prepared, manifest, 'billing.json', lambda v: v['requests'][0].update(cost_usd='0'))
+    save(path, manifest)
+    before = prepared.state.read_bytes()
+    with pytest.raises(BudgetStop, match='carry its predecessor checkpoint'):
+        with r.sequence_guard(manifest, r.sha(path)):
+            pass
+    assert prepared.state.read_bytes() == before
+
+
+@pytest.mark.parametrize('outcome', [completed, refused])
+def test_the_registration_pins_every_file_of_the_probe_link(prepared, outcome):
+    manifest, _ = successor(prepared, outcome(prepared))
+    out = prepared.root / 'probe'
+    expected = {out / 'registration.json', out / 'billing.json', out / 'result.json', prepared.source}
+    if outcome is refused:
+        expected |= {out / 'reconciled_billing.json', out / 'debit_receipt.json'}
+    assert expected <= r.continuation_paths(manifest)
+
+
+def test_the_settlement_after_exit_is_pinned_and_checked(prepared, monkeypatch):
+    from test_transport_probe import _unfinished
+    from decimal import Decimal
+    _unfinished(monkeypatch)
+    refused(prepared)
+    settlement = probe.settle(prepared.registration, prepared.identity)
+    cost = str(sum((Decimal(row['cost_usd']) for row in r.read_json(settlement['path'])['requests']), Decimal(0)))
+    manifest, _ = successor(prepared, {'successor_continues_from': settlement['path'], 'successor_cost_usd': cost})
+    after = prepared.root / 'probe' / 'settlement_after_exit.json'
+    assert after in r.continuation_paths(manifest)
+    save(after, {**r.read_json(after), 'closure_basis': 'edited'})
+    with pytest.raises(BudgetStop, match='registered input'):
+        probe_predecessor.validate_link(manifest)
+
+
+def test_prepare_bridges_to_the_probes_own_result(prepared):
+    from audit_controls.prepare import _bridge_result
+    refused(prepared)
+    registration = prepared.root / 'probe' / 'registration.json'
+    assert _bridge_result(registration, r.read_json(registration)) == str(prepared.root / 'probe' / 'result.json')
+    first = r.read_json(prepared.source)
+    assert _bridge_result(prepared.source, first) == str(Path(first['job']['attempt_dir']) / 'result.json')
+
+
+def test_the_amendment_candidate_names_the_sequence_state_the_registration_will(tmp_path):
+    from audit_controls.prepare import amendment_candidate
+    ledger = save(tmp_path / 'origin' / 'billing.json', {'requests': [{'cost_usd': '1.5'}]})
+    origin = save(tmp_path / 'origin' / 'registration.json',
+                  {'budget': {'ledger_path': str(ledger), 'per_attempt_usd': '5'}})
+    candidate = amendment_candidate(origin, {'total_usd': '600'}, ledger)
+    assert candidate['sequence_state'] == str(ledger.with_name('audit_sequence.json'))
+    assert candidate['budget']['continuation']['cost_usd'] == '1.5'
+
+
+def _v1_on(reference, total='400'):
+    """A v1 selection whose predecessor is `reference`; its other documents are never read here."""
+    ref = {'path': str(reference), 'sha256': sha(reference)}
+    other = lambda name: {'path': str(reference.parent / name), 'sha256': '0' * 64}
+    return {'kind': 'additive_sequence_budget_v1', 'origin_registration': other('origin.json'),
+            'predecessor_registration': ref, 'predecessor_ledger': other('ledger.json'),
+            'predecessor_owner': other('owner.json'), 'authorization': other('authority.json'),
+            'prior_total_usd': total, 'increase_usd': '200', 'total_usd': str(int(total) + 200),
+            'default_attempt_usd': '5'}
+
+
+@pytest.mark.parametrize('outcome', [completed, refused])
+def test_an_amended_audit_may_name_the_probe_as_its_predecessor(prepared, outcome):
+    manifest, _ = successor(prepared, outcome(prepared))
+    registration = prepared.root / 'probe' / 'registration.json'
+    candidate = {key: manifest[key] for key in ('kind', 'parent', 'budget', 'sequence_state')}
+    candidate.update(budget_amendment=_v1_on(registration), pinned_files={})
+    previous = r.read_json(manifest['budget']['continuation']['checkpoint'])
+    assert r.validate_budget_amendment_predecessor(candidate, previous, require_pins=False) == registration
+    # Naming the audit before the probe as the predecessor is refused.
+    candidate['budget_amendment'] = _v1_on(prepared.source)
+    with pytest.raises(BudgetStop, match='authorized predecessor'):
+        r.validate_budget_amendment_predecessor(candidate, previous, require_pins=False)
+    # A candidate that names no sequence state is refused, never a KeyError (#2504).
+    del candidate['sequence_state']
+    with pytest.raises(BudgetStop, match='no sequence state'):
+        r.validate_budget_amendment_predecessor(candidate, previous, require_pins=False)
+
+
+@pytest.mark.parametrize('name', ['billing.json', 'settlement_after_exit.json'])
+def test_a_malformed_probe_file_is_a_budget_stop(prepared, name):
+    manifest, _ = successor(prepared, completed(prepared))
+    (prepared.root / 'probe' / name).write_text('[]\n')
+    repin(manifest)
+    with pytest.raises(BudgetStop):
         probe_predecessor.validate_link(manifest)
