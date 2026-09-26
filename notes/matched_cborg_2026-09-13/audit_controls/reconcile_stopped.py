@@ -248,6 +248,54 @@ def reconcile(source_path, out, *, recorded_at=None):
             'marker': str(marker)}
 
 
+#: The registration block that applies the standing debit when the audit stops (#2467).
+SELECTION_KIND = 'standing_full_reservation_debit_at_stop_v1'
+SELECTION_KEY = 'automatic_stop_reconciliation'
+#: Beside the stopped audit's own directory: outside its tree and, for every
+#: registration layout in use, outside the sequence state's directory.
+AUTOMATIC_SUFFIX = '_stop_reconciliation'
+
+
+def selection():
+    """The exact block a registration carries to opt in; it names the pinned authorization record."""
+    _, reference = standing_authorization()
+    return {'kind': SELECTION_KIND, 'authorization': reference}
+
+
+def validated_selection(value):
+    if value != selection():
+        raise BudgetStop('automatic stop reconciliation must name the pinned standing authorization exactly')
+    return dict(value)
+
+
+def automatic_out(registration_path):
+    folder = Path(registration_path).resolve().parent
+    return folder.with_name(folder.name + AUTOMATIC_SUFFIX)
+
+
+def reconcile_at_stop(registration_path, manifest):
+    """Apply the standing debit to an audit that just stopped, once its sequence lock is released.
+
+    Never raises: a stop the debit does not cover, or any refusal, is
+    reported and left to a person, exactly as without this selection. The
+    reviewed `reconcile` does every check, including the successor's own
+    validator, before it publishes anything.
+    """
+    try:
+        validated_selection(manifest.get(SELECTION_KEY))
+        result_path = Path(manifest['job']['attempt_dir']) / 'result.json'
+        if not result_path.is_file():
+            return {'status': 'not_applicable', 'reason': 'the audit wrote no result'}
+        result = r.read_json(result_path)
+        if result.get('status') != 'stopped' or len(result.get('unresolved_requests') or []) != 1:
+            return {'status': 'not_applicable', 'reason': 'the stop left no single unconfirmed charge'}
+        return {'status': 'reconciled', **reconcile(registration_path, automatic_out(registration_path))}
+    except BudgetStop as error:
+        return {'status': 'refused', 'reason': str(error)}
+    except Exception as error:
+        return {'status': 'refused', 'reason': type(error).__name__}
+
+
 def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoint_path):
     """Run `validate_audit_reconciliation` exactly as the next registration will."""
     pins = {str(p): r.sha(p) for p in (source_path, ledger_path, result_path, receipt_path, checkpoint_path)}

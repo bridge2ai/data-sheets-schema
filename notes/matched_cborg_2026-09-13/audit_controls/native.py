@@ -849,6 +849,33 @@ def run_job(registration_path, review_path, *, adapter=None):
             raise BudgetStop('audit registration needs independent review and passing CI for its single job')
     verify_all(); build_policy(manifest, registration_path); verify_runtime(manifest)
     attempt = Path(job['attempt_dir'])
+    try:
+        return _run_guarded(manifest, registration_path, manifest_sha256, review_sha256, job, attempt,
+                            verify_all, adapter, sequence_guard, open_audit_ledger)
+    except BaseException as stop:
+        after_stop(stop, registration_path, manifest)
+        raise
+
+
+def after_stop(stop, registration_path, manifest):
+    """Once the sequence lock is released, the standing debit settles a single
+    unconfirmed charge the stop left, when the registration selected it (#2467).
+    An interrupt is honoured as it is: nothing more runs after it. Returns the
+    outcome, also printed and attached to the exception; never raises."""
+    if 'automatic_stop_reconciliation' not in manifest or isinstance(stop, (KeyboardInterrupt, SystemExit)):
+        return None
+    from .reconcile_stopped import reconcile_at_stop
+    outcome = reconcile_at_stop(registration_path, manifest)
+    try:
+        print(json.dumps({'automatic_stop_reconciliation': outcome}), file=sys.stderr)
+        stop.automatic_stop_reconciliation = outcome
+    except Exception:
+        pass
+    return outcome
+
+
+def _run_guarded(manifest, registration_path, manifest_sha256, review_sha256, job, attempt, verify_all, adapter,
+                 sequence_guard, open_audit_ledger):
     with sequence_guard(manifest, manifest_sha256):
         if attempt.exists() or Path(job['output_dir']).exists():
             raise BudgetStop('audit attempt already exists; never overwrite or resume')

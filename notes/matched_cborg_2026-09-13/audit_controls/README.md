@@ -743,6 +743,27 @@ anchored on a probe's own settled ledger as on an audit's
 (`budget_amendment.PREDECESSOR_KINDS`). As with an audit, an increase cannot
 be anchored on a reconciled checkpoint (#2502).
 
+### Applied at stop (`--automatic-stop-reconciliation`)
+
+A registration prepared with `--automatic-stop-reconciliation` carries
+`automatic_stop_reconciliation`, which names the pinned authorization record
+exactly. `required_paths` pins that record.
+
+When such an audit stops, `run_job` releases the sequence lock and then calls
+`reconcile_stopped.reconcile_at_stop`:
+- **When it runs:** only when the result is `stopped` with exactly one
+  unresolved request. Nothing runs after an interrupt (`KeyboardInterrupt` or
+  `SystemExit`).
+- **Where it writes:** the receipt, checkpoint and marker are written exactly as
+  `reconcile` writes them, into `<audit dir>_stop_reconciliation` beside the
+  audit's directory.
+- **What it reports:** the outcome is printed to stderr and attached to the
+  stop's exception as `automatic_stop_reconciliation`. The outcome is one of
+  `reconciled` (with the paths and hashes the next preparation passes),
+  `not_applicable` or `refused`.
+- **Failure:** it never raises. A refusal publishes nothing and leaves the stop
+  to be reconciled by hand, exactly as without the selection.
+
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
 A new registration may select `--audit-batches PATH` (#2192). The JSON file must

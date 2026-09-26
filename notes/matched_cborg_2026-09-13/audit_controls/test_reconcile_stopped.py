@@ -324,3 +324,72 @@ def test_an_observation_that_is_not_a_regular_file_is_refused(stopped):
     (folder / 'http_status.json').mkdir()
     with pytest.raises(BudgetStop, match='not a regular file'):
         reconcile(reg, reg.parent.parent / 'reconciliation')
+
+
+# --- applied automatically at stop when the registration selects it (#2467) ------------------
+
+def selected(first, reg):
+    value = copy.deepcopy(first)
+    value[tool.SELECTION_KEY] = tool.selection()
+    return value
+
+
+def test_the_selected_debit_is_applied_at_stop_in_the_form_the_successor_accepts(stopped):
+    m, first, reg, request_id, _ = stopped
+    from audit_controls.native import after_stop
+    stop = r.BudgetStop('upstream HTTP response did not confirm a completed charge')
+    outcome = after_stop(stop, reg, selected(first, reg))
+    assert outcome['status'] == 'reconciled' and stop.automatic_stop_reconciliation == outcome
+    assert Path(outcome['checkpoint']).parent == reg.parent.with_name(reg.parent.name + tool.AUTOMATIC_SUFFIX)
+    assert outcome['request_id'] == request_id and outcome['budget_debit_usd'] == '2.4535'
+    successor, path = successor_of(m, reg, first, outcome)
+    assert r.validate_audit_reconciliation(successor) == r.read_json(outcome['checkpoint'])
+
+
+def test_without_the_selection_or_after_an_interrupt_nothing_is_applied(stopped):
+    _, first, reg, _, _ = stopped
+    from audit_controls.native import after_stop
+    assert after_stop(r.BudgetStop('stopped'), reg, first) is None
+    assert after_stop(KeyboardInterrupt(), reg, selected(first, reg)) is None
+    assert not reg.parent.with_name(reg.parent.name + tool.AUTOMATIC_SUFFIX).exists()
+
+
+def test_a_stop_the_debit_does_not_cover_is_reported_and_left_alone(stopped):
+    _, first, reg, _, _ = stopped
+    result = Path(first['job']['attempt_dir']) / 'result.json'
+    value = r.read_json(result)
+    save(result, {**value, 'unresolved_requests': []})
+    assert tool.reconcile_at_stop(reg, selected(first, reg))['status'] == 'not_applicable'
+    result.unlink()
+    assert tool.reconcile_at_stop(reg, selected(first, reg)) == {
+        'status': 'not_applicable', 'reason': 'the audit wrote no result'}
+
+
+def test_a_refusal_is_returned_not_raised_and_publishes_nothing(stopped):
+    _, first, reg, _, _ = stopped
+    state = Path(first['sequence_state'])
+    save(state, {**r.read_json(state), 'registration_sha256': '0' * 64})       # a successor took the tip
+    outcome = tool.reconcile_at_stop(reg, selected(first, reg))
+    assert outcome['status'] == 'refused' and 'no longer the sequence tip' in outcome['reason']
+    assert not reg.parent.with_name(reg.parent.name + tool.AUTOMATIC_SUFFIX).exists()
+
+
+@pytest.mark.parametrize('change', [
+    lambda v: v.update(kind='another'), lambda v: v['authorization'].update(sha256='0' * 64),
+    lambda v: v['authorization'].update(path='/elsewhere.json'), lambda v: v.update(extra=True)])
+def test_the_selection_must_name_the_pinned_authorization_exactly(stopped, change):
+    _, first, reg, _, _ = stopped
+    manifest = selected(first, reg)
+    change(manifest[tool.SELECTION_KEY])
+    with pytest.raises(BudgetStop, match='pinned standing authorization'):
+        r.automatic_stop_reconciliation(manifest)
+    assert tool.reconcile_at_stop(reg, manifest)['status'] == 'refused'
+
+
+def test_the_selection_is_audit_only_and_pinned(stopped):
+    _, first, reg, _, _ = stopped
+    manifest = selected(first, reg)
+    assert r.automatic_stop_reconciliation(manifest) == tool.selection()
+    assert r.automatic_stop_reconciliation(first) is None
+    with pytest.raises(BudgetStop, match='audit-only'):
+        r.automatic_stop_reconciliation({**manifest, 'kind': 'd4d_native_generation'})

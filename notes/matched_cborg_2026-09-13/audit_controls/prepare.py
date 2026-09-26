@@ -124,6 +124,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             continuation_source_registration=None, continuation_reconciliation_receipt=None,
             provider_base_url=None, provider_ca_bundle=None, native_api_timeout_ms=None,
             native_api_force_idle_timeout=None, context_recovery=False, durable_sequence_claim=False,
+            automatic_stop_reconciliation=False,
             staged_audit_output=False, native_upstream_read_timeout_seconds=None,
             native_stall_policy=None, persistent_audit_contract=False, upgrade_evidence_protocol=False,
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
@@ -364,6 +365,11 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         manifest['budget_amendment'] = amendment
         manifest['budget']['additional_usd'] = amendment['total_usd']
     manifest.update(claim_selection)
+    if type(automatic_stop_reconciliation) is not bool:
+        raise BudgetStop('automatic stop reconciliation requires an explicit boolean')
+    if automatic_stop_reconciliation:
+        from .reconcile_stopped import SELECTION_KEY, selection as stop_selection
+        manifest[SELECTION_KEY] = stop_selection()
     manifest.update(upstream_selection)
     if batch_selected:
         manifest.update(protocol_version=7, render_version=21 if audit_batch_format else 20)
@@ -507,6 +513,8 @@ def main():
         parser.add_argument('--' + name, required=True)
     parser.add_argument('--context-recovery', action='store_true',
         help='pin bounded instruction/input recovery and persistent stage locators for this new condition')
+    parser.add_argument('--automatic-stop-reconciliation', action='store_true',
+        help='settle a single unconfirmed charge at stop under the standing authorization (#2467)')
     parser.add_argument('--durable-sequence-claim', action='store_true',
         help='require exact-byte durable ownership evidence before this new condition admits spending')
     parser.add_argument('--staged-audit-output', action='store_true',

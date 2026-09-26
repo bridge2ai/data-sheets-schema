@@ -44,7 +44,10 @@ SUPPORTED_SOURCES = {
         '99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc'}),
     'audit_controls/native.py': frozenset({
         'fc6f3aa8175634b9b4eece74a4ae8e2082c262a3155a7f6bd857431a1d53fcbb',
-        'ec56d375f8036fa3c8c13385c5e6de019d83228ea4af2af57121a63dd572636c'}),
+        'ec56d375f8036fa3c8c13385c5e6de019d83228ea4af2af57121a63dd572636c',
+        # #2467 adds the opt-in stop reconciliation around run_job;
+        # `classify_command`, the only definition executed here, is byte-identical.
+        'a0b2b5618725060464e666cd123fe7bf959ba7f850589c91f5d2366e50128d63'}),
 }
 HEX = re.compile('[0-9a-f]{64}')
 MAX_DOCUMENT = 32 * 1024 * 1024

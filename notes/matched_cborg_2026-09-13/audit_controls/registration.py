@@ -352,6 +352,8 @@ def required_paths(manifest):
         from budget_amendment import paths as amendment_paths
         paths.update(amendment_paths(manifest))
         paths.add(budget_amendment_predecessor_path(manifest))
+    if automatic_stop_reconciliation(manifest) is not None:
+        paths.add(canonical_path(manifest['automatic_stop_reconciliation']['authorization']['path'], exists=True))
     if 'audit_worker_checkpoint' in manifest:
         from .worker_checkpoint import proof_paths
         paths.update(proof_paths(manifest))
@@ -597,6 +599,7 @@ def validate_registration(path):
     native_stall_policy(manifest)
     native_response_buffer(manifest)
     native_history_control(manifest)
+    automatic_stop_reconciliation(manifest)
     budget = manifest['budget']
     previous = read_json(budget['continuation']['checkpoint'])
     costs = [Decimal(str(row.get('cost_usd', 'NaN'))) for row in previous['requests']]
@@ -727,6 +730,16 @@ def native_stall_policy(manifest):
         if native_api_force_idle_timeout(manifest) is not False:
             raise BudgetStop('stall debits need the native fetch idle timer registered off')
     return {'count_attempts': value['count_attempts'], 'max_stall_debits': value['max_stall_debits']}
+
+
+def automatic_stop_reconciliation(manifest):
+    """The opt-in standing debit at stop (#2467); None when not selected."""
+    if 'automatic_stop_reconciliation' not in manifest:
+        return None
+    if manifest.get('kind') != 'd4d_native_audit_continuation':
+        raise BudgetStop('automatic stop reconciliation is audit-only')
+    from .reconcile_stopped import validated_selection
+    return validated_selection(manifest['automatic_stop_reconciliation'])
 
 
 def native_history_control(manifest):
