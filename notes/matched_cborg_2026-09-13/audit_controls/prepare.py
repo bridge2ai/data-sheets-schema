@@ -70,6 +70,14 @@ def save(path, value):
         handle.write('\n')
 
 
+def _bridge_result(source_path, source):
+    """The stopped predecessor's result: an audit's job result, or a probe's own (#2469)."""
+    from .probe_predecessor import KIND as PROBE_KIND
+    if source.get('kind') == PROBE_KIND:
+        return str(Path(source_path).parent / 'result.json')
+    return str(Path(source['job']['attempt_dir']) / 'result.json')
+
+
 def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliation_receipt,
             reconciled_checkpoint, destination, job_id, repository, attempt_cap=20,
             deadline_seconds=10800, continuation_checkpoint=None,
@@ -212,7 +220,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             candidate['budget']['continuation']['reconciliation'] = {
                 'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
                 'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
-                'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
+                'result': _bridge_result(source_path, source)}
         effective_total(candidate, origin, require_pins=False)
         validate_predecessor(candidate, predecessor, checkpoint_sha256=sha(prior_path), require_pins=False)
         from .registration import validate_budget_amendment_predecessor
@@ -386,7 +394,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         manifest['budget']['continuation']['reconciliation'] = {
             'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
             'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
-            'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
+            'result': _bridge_result(source_path, source)}
     if checkpoint_selection is not None:
         manifest['audit_worker_checkpoint'] = checkpoint_selection
     save(parent['phase2_proof'], inspect_parent(manifest))

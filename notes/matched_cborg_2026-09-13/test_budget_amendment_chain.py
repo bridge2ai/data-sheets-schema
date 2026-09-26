@@ -34,7 +34,8 @@ def chain_authority(proof, origin, ledger):
     return value
 
 
-def make_chain_fixture(root, *, prior=None, increase='200', quote='increase the budget by $200'):
+def make_chain_fixture(root, *, prior=None, increase='200', quote='increase the budget by $200',
+                       kind='d4d_native_audit_continuation'):
     """One chained link on `prior` (a fixture tuple): the immediate audit at the prior total,
     its settled ledger carrying every earlier row, and a manifest at the new total."""
     root = Path(root)
@@ -43,7 +44,7 @@ def make_chain_fixture(root, *, prior=None, increase='200', quote='increase the 
     prior_proof, origin, prior_ledger, _ = prior
     old = Decimal(prior_proof['total_usd'])
     ledger_path = root / 'immediate/billing.json'
-    previous = {'kind': 'd4d_native_audit_continuation',
+    previous = {'kind': kind,
         'parent': {'registration': prior_proof['origin_registration']['path']},
         'sequence_state': str(root / 'live-owner.json'), amendment.KEY: deepcopy(prior_proof),
         'budget': {'additional_usd': str(old), 'per_attempt_usd': '5', 'per_job_attempt_usd': {'preceding': '40'},
@@ -324,3 +325,13 @@ def test_the_prior_cap_or_a_malformed_amount_states_nothing(tmp_path, quote):
     proof, _, _, _ = make_chain_fixture(tmp_path, increase='200', quote=quote)
     with pytest.raises(BudgetStop, match='does not state its increase or new cap'):
         amendment.selection(proof)
+
+
+def test_an_increase_may_be_anchored_on_a_transport_probe_and_on_nothing_else(tmp_path):
+    """A probe is a lineage link (#2469): the next audit may carry an increase anchored on its ledger."""
+    proof, origin, previous, manifest = make_chain_fixture(tmp_path / 'probe', kind='d4d_native_transport_probe_v1')
+    assert amendment.effective_total(manifest, origin) == Decimal(800)
+    amendment.ledger_bridge(manifest, previous, checkpoint_sha256=proof['predecessor_ledger']['sha256'])
+    proof, origin, previous, manifest = make_chain_fixture(tmp_path / 'other', kind='d4d_native_generation')
+    with pytest.raises(BudgetStop, match='exact prior authority'):
+        amendment.effective_total(manifest, origin)

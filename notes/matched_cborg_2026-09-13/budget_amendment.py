@@ -20,6 +20,9 @@ SECOND_KIND = 'additive_sequence_budget_v2'
 #: predecessor proof (#2468). v1 and v2 proofs validate exactly as before.
 CHAIN_KIND = 'additive_sequence_budget_chain_v1'
 CHAIN_RECEIPT_VERSION = 3
+#: An increase is anchored on the immediate predecessor's own settled ledger:
+#: an audit, or a transport probe, which is a lineage link too (#2469).
+PREDECESSOR_KINDS = ('d4d_native_audit_continuation', 'd4d_native_transport_probe_v1')
 #: A bound on validation work; a real lineage adds one link per authorization.
 MAX_CHAIN_LINKS = 16
 REFS = ('origin_registration', 'predecessor_registration', 'predecessor_ledger',
@@ -336,7 +339,7 @@ def _increase_documents(proof, name, receipt_version):
     origin, previous, ledger, owner, authority = (documents[key] for key in REFS)
     old, new, default = (_money(proof[key]) for key in ('prior_total_usd', 'total_usd', 'default_attempt_usd'))
     _require(_canonical(origin) == _canonical(prior_documents['origin_registration'])
-             and KEY not in origin and previous.get('kind') == 'd4d_native_audit_continuation'
+             and KEY not in origin and previous.get('kind') in PREDECESSOR_KINDS
              and _canonical(previous.get(KEY)) == _canonical(prior),
              f'{name} amendment changes its original allocation or exact prior authority')
     _require(_money(previous['budget']['additional_usd']) == old

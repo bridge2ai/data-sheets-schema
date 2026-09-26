@@ -717,6 +717,32 @@ hashes are the next preparation's continuation checkpoint, source
 registration and reconciliation receipt. Running it automatically when an
 audit stops remains open in #2467.
 
+## An audit after a transport probe (#2469)
+
+The transport probe (#2463) claims the sequence tip, so the next audit
+continues from the probe's checkpoint, never from the audit before it (that
+is a fork, refused at `sequence_guard`). `probe_predecessor.validate_link`
+checks the link one hop further, to the audit the probe followed:
+
+- the probe registration names this origin and sequence, its result claimed
+  the tip, and its own predecessor is an unchanged audit of the origin;
+- its ledger carries that audit's checkpoint rows unchanged, plus at most
+  its one request;
+- a settled probe is continued from its own `billing.json`, with no
+  reconciliation;
+- a probe whose one row was debited under the standing authorization is
+  continued through a reconciliation bridge (`registration.json`,
+  `billing.json`, `debit_receipt.json`, `result.json`) to
+  `reconciled_billing.json`. That checkpoint is recomputed from the ledger
+  and receipt, and it must be the one the probe's settlement named: in
+  `result.json`, or in `settlement_after_exit.json` when `settle` applied the
+  debit after the process exited.
+
+`required_paths` pins every file this reads. A budget increase may be
+anchored on a probe's own settled ledger as on an audit's
+(`budget_amendment.PREDECESSOR_KINDS`). As with an audit, an increase cannot
+be anchored on a reconciled checkpoint (#2502).
+
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
 A new registration may select `--audit-batches PATH` (#2192). The JSON file must

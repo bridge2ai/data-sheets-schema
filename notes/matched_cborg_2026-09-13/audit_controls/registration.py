@@ -386,6 +386,8 @@ def required_paths(manifest):
     for record in (read_json(parent['registration']), read_json(parent['overlay'])):
         paths.update(canonical_path(str(parent_path(parent, name).resolve()), exists=True) for name in record['pinned_files'])
     paths.add(canonical_path(manifest['budget']['continuation']['checkpoint'], exists=True))
+    from .probe_predecessor import paths as probe_paths
+    paths.update(probe_paths(manifest))
     bridge = manifest['budget']['continuation'].get('reconciliation')
     if bridge is not None:
         if not isinstance(bridge, dict) or set(bridge) != {'source_registration', 'source_ledger', 'receipt', 'result'}:
@@ -851,6 +853,9 @@ def sequence_guard(manifest, registration_sha):
                         sha(previous['ledger_path']) != checkpoint['sha256']):
                     raise BudgetStop('audit billing fork: predecessor is not the current sequence tip')
                 state = read_json(previous['ledger_path'])
+                from .probe_predecessor import is_probe_predecessor, validate_link
+                if is_probe_predecessor(manifest):
+                    validate_link(manifest)
             else:
                 bridge = checkpoint['reconciliation']
                 if (bridge['source_ledger'] != previous['ledger_path'] or
@@ -955,7 +960,11 @@ def validate_budget_amendment_predecessor(manifest, previous, *, require_pins=Tr
         raise BudgetStop('amended audit checkpoint differs from its exact registered predecessor')
     source = read_json(source_path)
     expected_ledger = checkpoint if bridge is None else canonical_path(bridge['source_ledger'], exists=True)
-    if (source.get('kind') != 'd4d_native_audit_continuation'
+    from .probe_predecessor import KIND as PROBE_KIND, validate_link
+    if source.get('kind') == PROBE_KIND:
+        # A probe is a link too (#2469): its checkpoint is checked through to the audit before it.
+        validate_link(manifest, require_pins=require_pins)
+    if (source.get('kind') not in ('d4d_native_audit_continuation', PROBE_KIND)
             or sha(source_path) != previous.get('manifest_sha256')
             or canonical_path(source['budget']['ledger_path']) != expected_ledger
             or source.get('parent', {}).get('registration') != manifest['parent']['registration']
@@ -1034,6 +1043,10 @@ def validate_audit_reconciliation(manifest):
     paths = {key: pinned(manifest, bridge[key]) for key in keys}
     checkpoint_path = pinned(manifest, continuation['checkpoint'], continuation['sha256'])
     source_reg = read_json(paths['source_registration'])
+    from .probe_predecessor import KIND as PROBE_KIND, validate_link
+    if source_reg.get('kind') == PROBE_KIND:
+        # The probe's own debit, recomputed from its ledger and receipt (#2469).
+        return validate_link(manifest)
     if source_reg.get('kind') != 'd4d_native_audit_continuation':
         raise BudgetStop('reconciled audit predecessor must be a native audit registration')
     source_sha = sha(paths['source_registration'])
