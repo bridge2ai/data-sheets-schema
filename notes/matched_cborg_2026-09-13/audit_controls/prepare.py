@@ -217,10 +217,10 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         validate_native_idle_timeout({'native_runtime': {
             'api_force_idle_timeout': native_api_force_idle_timeout,
             **({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {})},
-            'job': {'deadline_seconds': deadline_seconds}})
+            'job': {'id': job_id, 'deadline_seconds': deadline_seconds}, 'budget': {'per_job_attempt_usd': {job_id: str(attempt_cap)}}})
     if native_api_timeout_ms is not None:
         native_api_timeout({'native_runtime': {'api_timeout_ms': native_api_timeout_ms},
-                            'job': {'deadline_seconds': deadline_seconds}})
+                            'job': {'id': job_id, 'deadline_seconds': deadline_seconds}, 'budget': {'per_job_attempt_usd': {job_id: str(attempt_cap)}}})
     if type(native_history_control) is not bool:
         raise BudgetStop('native history control requires an explicit boolean')
     if native_history_control and not batch_selected:
@@ -234,7 +234,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         upstream_selection['native_upstream_read_timeout_seconds'] = native_upstream_read_timeout_seconds
         native_upstream_read_timeout({'kind': 'd4d_native_audit_continuation', **upstream_selection,
             'native_runtime': ({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
-            'job': {'deadline_seconds': deadline_seconds}})
+            'job': {'id': job_id, 'deadline_seconds': deadline_seconds}, 'budget': {'per_job_attempt_usd': {job_id: str(attempt_cap)}}})
     if native_stall_policy is not None:
         upstream_selection['native_stall_policy'] = native_stall_policy
         validate_stall_policy({'kind': 'd4d_native_audit_continuation', **upstream_selection,
@@ -242,7 +242,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
                 **({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
                 **({'api_force_idle_timeout': native_api_force_idle_timeout}
                    if native_api_force_idle_timeout is not None else {})},
-            'job': {'deadline_seconds': deadline_seconds}})
+            'job': {'id': job_id, 'deadline_seconds': deadline_seconds}, 'budget': {'per_job_attempt_usd': {job_id: str(attempt_cap)}}})
     if native_response_buffer is not None:
         upstream_selection['native_response_buffer'] = native_response_buffer
         validate_response_buffer({'kind': 'd4d_native_audit_continuation', **upstream_selection,
@@ -250,7 +250,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
                 **({'api_timeout_ms': native_api_timeout_ms} if native_api_timeout_ms is not None else {}),
                 **({'api_force_idle_timeout': native_api_force_idle_timeout}
                    if native_api_force_idle_timeout is not None else {})},
-            'job': {'deadline_seconds': deadline_seconds}})
+            'job': {'id': job_id, 'deadline_seconds': deadline_seconds}, 'budget': {'per_job_attempt_usd': {job_id: str(attempt_cap)}}})
     if bool(continuation_source_registration) != bool(continuation_reconciliation_receipt):
         raise BudgetStop('an audit reconciliation requires both source registration and receipt')
     if continuation_source_registration and not continuation_checkpoint:
