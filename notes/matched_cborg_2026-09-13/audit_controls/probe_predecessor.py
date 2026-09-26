@@ -64,7 +64,8 @@ def paths(manifest):
     try:
         return _paths(manifest)
     except _MALFORMED as error:
-        raise BudgetStop('probe predecessor is malformed or unavailable') from error
+        # The predecessor may be an ordinary audit; say only what failed (#2513).
+        raise BudgetStop('audit predecessor evidence is malformed or unavailable') from error
 
 
 def _paths(manifest):

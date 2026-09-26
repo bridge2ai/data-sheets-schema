@@ -270,6 +270,12 @@ def test_the_amendment_candidate_names_the_sequence_state_the_registration_will(
     candidate = amendment_candidate(origin, {'total_usd': '600'}, ledger)
     assert candidate['sequence_state'] == str(ledger.with_name('audit_sequence.json'))
     assert candidate['budget']['continuation']['cost_usd'] == '1.5'
+    # A relative origin ledger resolves against the origin's repository, as the registration's does.
+    relative = save(tmp_path / 'origin' / 'relative.json',
+                    {'repository': str(tmp_path / 'repo'), 'budget': {'ledger_path': 'runs/billing.json',
+                                                                      'per_attempt_usd': '5'}})
+    assert amendment_candidate(relative, {'total_usd': '600'}, ledger)['sequence_state'] == str(
+        tmp_path / 'repo' / 'runs' / 'audit_sequence.json')
 
 
 def _v1_on(reference, total='400'):
@@ -301,10 +307,31 @@ def test_an_amended_audit_may_name_the_probe_as_its_predecessor(prepared, outcom
         r.validate_budget_amendment_predecessor(candidate, previous, require_pins=False)
 
 
-@pytest.mark.parametrize('name', ['billing.json', 'settlement_after_exit.json'])
-def test_a_malformed_probe_file_is_a_budget_stop(prepared, name):
+def test_a_malformed_probe_ledger_is_a_budget_stop(prepared):
     manifest, _ = successor(prepared, completed(prepared))
-    (prepared.root / 'probe' / name).write_text('[]\n')
+    (prepared.root / 'probe' / 'billing.json').write_text('[]\n')
     repin(manifest)
-    with pytest.raises(BudgetStop):
+    with pytest.raises(BudgetStop, match='malformed'):
+        probe_predecessor.validate_link(manifest)
+
+
+def test_a_settlement_after_exit_without_a_deferred_settlement_is_refused(prepared):
+    manifest, _ = successor(prepared, completed(prepared))
+    save(prepared.root / 'probe' / 'settlement_after_exit.json', {'status': 'settled'})
+    repin(manifest)
+    with pytest.raises(BudgetStop, match='without a deferred settlement'):
+        probe_predecessor.validate_link(manifest)
+
+
+def test_a_malformed_settlement_after_exit_is_a_budget_stop(prepared, monkeypatch):
+    from test_transport_probe import _unfinished
+    from decimal import Decimal
+    _unfinished(monkeypatch)
+    refused(prepared)
+    settlement = probe.settle(prepared.registration, prepared.identity)
+    cost = str(sum((Decimal(row['cost_usd']) for row in r.read_json(settlement['path'])['requests']), Decimal(0)))
+    manifest, _ = successor(prepared, {'successor_continues_from': settlement['path'], 'successor_cost_usd': cost})
+    (prepared.root / 'probe' / 'settlement_after_exit.json').write_text('[]\n')
+    repin(manifest)
+    with pytest.raises(BudgetStop, match='settlement after exit is malformed'):
         probe_predecessor.validate_link(manifest)
