@@ -849,11 +849,15 @@ def run_job(registration_path, review_path, *, adapter=None):
             raise BudgetStop('audit registration needs independent review and passing CI for its single job')
     verify_all(); build_policy(manifest, registration_path); verify_runtime(manifest)
     attempt = Path(job['attempt_dir'])
+    started = {}
     try:
         return _run_guarded(manifest, registration_path, manifest_sha256, review_sha256, job, attempt,
-                            verify_all, adapter, sequence_guard, open_audit_ledger)
+                            verify_all, adapter, sequence_guard, open_audit_ledger, started)
     except BaseException as stop:
-        after_stop(stop, registration_path, manifest)
+        # Only the stop of the attempt this invocation created: a refused
+        # relaunch never acts on an earlier run's result (#2527).
+        if started.get('attempt'):
+            after_stop(stop, registration_path, manifest)
         raise
 
 
@@ -864,8 +868,11 @@ def after_stop(stop, registration_path, manifest):
     outcome, also printed and attached to the exception; never raises."""
     if 'automatic_stop_reconciliation' not in manifest or isinstance(stop, (KeyboardInterrupt, SystemExit)):
         return None
-    from .reconcile_stopped import reconcile_at_stop
-    outcome = reconcile_at_stop(registration_path, manifest)
+    try:
+        from .reconcile_stopped import reconcile_at_stop
+        outcome = reconcile_at_stop(registration_path, manifest)
+    except Exception as error:
+        outcome = {'status': 'refused', 'reason': type(error).__name__}
     try:
         print(json.dumps({'automatic_stop_reconciliation': outcome}), file=sys.stderr)
         stop.automatic_stop_reconciliation = outcome
@@ -875,7 +882,7 @@ def after_stop(stop, registration_path, manifest):
 
 
 def _run_guarded(manifest, registration_path, manifest_sha256, review_sha256, job, attempt, verify_all, adapter,
-                 sequence_guard, open_audit_ledger):
+                 sequence_guard, open_audit_ledger, started):
     with sequence_guard(manifest, manifest_sha256):
         if attempt.exists() or Path(job['output_dir']).exists():
             raise BudgetStop('audit attempt already exists; never overwrite or resume')
@@ -883,7 +890,7 @@ def _run_guarded(manifest, registration_path, manifest_sha256, review_sha256, jo
         billing_attempt = attempt_identity(manifest_sha256, job['id'])
         ledger.require_resolved(billing_attempt)
         verify_all()
-        attempt.mkdir(parents=True, exist_ok=False); Path(job['output_dir']).mkdir()
+        attempt.mkdir(parents=True, exist_ok=False); started['attempt'] = True; Path(job['output_dir']).mkdir()
         receipt = {'schema_version': 1, 'job_id': job['id'], 'registration_sha256': manifest_sha256,
             'review_sha256': review_sha256, 'status': 'incomplete', 'started_at': now(),
             'billing_attempt': billing_attempt, 'scope': 'phase3_audit_only', 'phase1_phase2_performed_here': False}

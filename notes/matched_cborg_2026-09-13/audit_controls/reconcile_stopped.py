@@ -251,26 +251,49 @@ def reconcile(source_path, out, *, recorded_at=None):
 #: The registration block that applies the standing debit when the audit stops (#2467).
 SELECTION_KIND = 'standing_full_reservation_debit_at_stop_v1'
 SELECTION_KEY = 'automatic_stop_reconciliation'
-#: Beside the stopped audit's own directory: outside its tree and, for every
-#: registration layout in use, outside the sequence state's directory.
+#: The default output: beside the audit's own directory. It is registered, and
+#: refused at preparation where it would fall inside the audit's tree or the
+#: sequence state's directory, where `reconcile` would refuse it at stop (#2529).
 AUTOMATIC_SUFFIX = '_stop_reconciliation'
 
 
-def selection():
-    """The exact block a registration carries to opt in; it names the pinned authorization record."""
-    _, reference = standing_authorization()
-    return {'kind': SELECTION_KIND, 'authorization': reference}
-
-
-def validated_selection(value):
-    if value != selection():
-        raise BudgetStop('automatic stop reconciliation must name the pinned standing authorization exactly')
-    return dict(value)
-
-
-def automatic_out(registration_path):
-    folder = Path(registration_path).resolve().parent
+def default_output_dir(destination):
+    folder = Path(destination).resolve()
     return folder.with_name(folder.name + AUTOMATIC_SUFFIX)
+
+
+def check_output_dir(value, *, registration_dir, sequence_state):
+    """An absolute canonical directory that `reconcile` can write at stop."""
+    if type(value) is not str or not value or not Path(value).is_absolute() or str(Path(value).resolve()) != value:
+        raise BudgetStop('automatic stop reconciliation needs an absolute canonical output directory')
+    out = Path(value)
+    for root, name in ((Path(registration_dir).resolve(), 'the audit\'s own tree'),
+                       (Path(sequence_state).resolve().parent, 'the sequence state\'s directory')):
+        if out == root or root in out.parents:
+            raise BudgetStop(f'automatic stop reconciliation output lies inside {name}; '
+                             'choose another --automatic-stop-reconciliation-dir')
+    return out
+
+
+def selection(output_dir):
+    """The exact block a registration carries to opt in: the pinned authorization record and where to write."""
+    _, reference = standing_authorization()
+    return {'kind': SELECTION_KIND, 'authorization': reference, 'output_dir': str(output_dir)}
+
+
+def validated_selection(value, manifest):
+    """The selection exactly as `selection` makes it, with an output the stop can write."""
+    if (not isinstance(value, dict) or set(value) != {'kind', 'authorization', 'output_dir'}
+            or {k: value[k] for k in ('kind', 'authorization')} !=
+               {k: v for k, v in selection('').items() if k != 'output_dir'}):
+        raise BudgetStop('automatic stop reconciliation must name the pinned standing authorization exactly')
+    try:
+        registration_dir = Path(manifest['job']['attempt_dir']).parent.parent
+        state = manifest['sequence_state']
+    except (KeyError, TypeError) as error:
+        raise BudgetStop('automatic stop reconciliation needs the registered attempt and sequence state') from error
+    check_output_dir(value['output_dir'], registration_dir=registration_dir, sequence_state=state)
+    return dict(value)
 
 
 def reconcile_at_stop(registration_path, manifest):
@@ -282,14 +305,14 @@ def reconcile_at_stop(registration_path, manifest):
     validator, before it publishes anything.
     """
     try:
-        validated_selection(manifest.get(SELECTION_KEY))
+        chosen = validated_selection(manifest.get(SELECTION_KEY), manifest)
         result_path = Path(manifest['job']['attempt_dir']) / 'result.json'
         if not result_path.is_file():
             return {'status': 'not_applicable', 'reason': 'the audit wrote no result'}
         result = r.read_json(result_path)
         if result.get('status') != 'stopped' or len(result.get('unresolved_requests') or []) != 1:
             return {'status': 'not_applicable', 'reason': 'the stop left no single unconfirmed charge'}
-        return {'status': 'reconciled', **reconcile(registration_path, automatic_out(registration_path))}
+        return {'status': 'reconciled', **reconcile(registration_path, chosen['output_dir'])}
     except BudgetStop as error:
         return {'status': 'refused', 'reason': str(error)}
     except Exception as error:

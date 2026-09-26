@@ -739,7 +739,7 @@ def automatic_stop_reconciliation(manifest):
     if manifest.get('kind') != 'd4d_native_audit_continuation':
         raise BudgetStop('automatic stop reconciliation is audit-only')
     from .reconcile_stopped import validated_selection
-    return validated_selection(manifest['automatic_stop_reconciliation'])
+    return validated_selection(manifest['automatic_stop_reconciliation'], manifest)
 
 
 def native_history_control(manifest):
