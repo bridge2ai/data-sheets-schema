@@ -277,11 +277,11 @@ class NativeProxy:
                 index = self.messages.debit_stall(ticket, maximum=self.stall_policy["max_stall_debits"],
                     evidence=evidence, **({"identical_stop": self.stall_policy["identical_stall_stop"]}
                                          if "identical_stall_stop" in self.stall_policy else {}))
-            except RepeatedStall:
+            except RepeatedStall as repeated:
                 # Debited and stopped: the child is not asked to resend, and
                 # the stall is not one the attempt survived (#2465, #2525).
                 try:
-                    write_new(folder / "stall.json", {"at": now(), **evidence,
+                    write_new(folder / "stall.json", {"at": now(), "stall_index": repeated.stall_index, **evidence,
                         "settlement": "whole reservation counted; provider charge unconfirmed; "
                                       "attempt stopped on a repeated identical stall",
                         "child_reply_attempted": 402})

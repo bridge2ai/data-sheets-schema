@@ -716,6 +716,8 @@ def native_stall_policy(manifest):
         raise BudgetStop('a repeated-stall stop needs 2 to max_stall_debits identical stalls')
     # Optional (#2466): stall debits are charged to their own allowance before the attempt cap.
     from budgeted_cborg import validated_stall_allowance
+    if 'stall_allowance_usd' in value and value['stall_allowance_usd'] is None:
+        raise BudgetStop('a stall allowance, when present, must be a positive plain decimal string')   # #2532
     allowance = (validated_stall_allowance(value['stall_allowance_usd'])
                  if 'stall_allowance_usd' in value else None)
     if allowance is not None and value['max_stall_debits'] == 0:
@@ -764,7 +766,10 @@ def stall_allowance(manifest):
     policy = manifest.get('native_stall_policy')
     if not isinstance(policy, dict) or 'stall_allowance_usd' not in policy:
         return Decimal(0)
-    return validated_stall_allowance(policy['stall_allowance_usd'])
+    allowance = validated_stall_allowance(policy['stall_allowance_usd'])
+    if allowance is None:
+        raise BudgetStop('a stall allowance, when present, must be a positive plain decimal string')   # #2532
+    return allowance
 
 
 def native_history_control(manifest):

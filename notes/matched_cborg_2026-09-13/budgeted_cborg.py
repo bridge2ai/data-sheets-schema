@@ -100,8 +100,9 @@ REPEATED_STALL_REASON = "the same request stalled repeatedly; the attempt stops 
 class RepeatedStall(BudgetStop):
     """The debit was recorded and the attempt stopped: resending identical bytes
     that stalled before is not retried again (#2465)."""
-    def __init__(self):
+    def __init__(self, stall_index=None):
         super().__init__(REPEATED_STALL_REASON)
+        self.stall_index = stall_index
 
 
 def attempt_spend(rows, stall_allowance=Decimal(0)):
@@ -352,7 +353,7 @@ class Ledger:
         if not allowed:
             raise BudgetStop("registered stall allowance is exhausted; reservation retained")
         if repeated:
-            raise RepeatedStall()
+            raise RepeatedStall(prior + 1)
         return prior + 1
 
 

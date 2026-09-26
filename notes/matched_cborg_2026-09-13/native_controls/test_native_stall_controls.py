@@ -45,8 +45,9 @@ def test_a_second_stall_of_the_same_bytes_is_debited_and_ends_the_attempt(tmp_pa
     assert stop['repeated_request_sha256'] == state['requests'][0]['request_sha256']
     assert all(type(r['stall_evidence']['upstream_elapsed_seconds']) is float for r in state['requests'])
     # Both stalls keep their evidence beside the request, the stopping one included (#2525).
-    replies = sorted(json.loads(p.read_text())['child_reply_attempted'] for p in (tmp_path / 'requests').rglob('stall.json'))
-    assert replies == [402, 503]
+    replies = sorted((json.loads(p.read_text())['child_reply_attempted'], json.loads(p.read_text())['stall_index'])
+                     for p in (tmp_path / 'requests').rglob('stall.json'))
+    assert replies == [(402, 2), (503, 1)]      # the stopping stall keeps its index (#2533)
 
 
 def test_different_request_bytes_are_not_a_repeat(tmp_path):
@@ -281,8 +282,21 @@ def test_a_batch_child_launches_on_the_stage_the_allowance_left(tmp_path, monkey
     row = {'id': 'w2', 'kind': 'worker', 'attempt_dir': str(tmp_path / 'w2'), 'output_dir': str(tmp_path / 'w2out'),
            'rounds': [], 'system_prompt': str(tmp_path / 'system.md')}
     (tmp_path / 'system.md').write_text('synthetic')
+    # Offline: the stubbed clients never send, and CI has no key (#2517 CI).
+    monkeypatch.setenv('CBORG_API_KEY', 'offline-test-key')
     # Launch is interrupted at its record; the stubbed runtime's cleanup then fails, which is not under test.
-    with pytest.raises(BaseException):
+    with pytest.raises(BaseException) as stopped:
         batch_native._execute_child(context, row, deadline=10**9, clock=lambda: 0)
+    assert launched, f'the child never reached its launch record: {stopped.value!r}'
     # $6 stage, $1.20 counted: the child's own budget is the $4.80 the ledger would admit.
     assert Decimal(launched['child_cli_cap_usd']) == Decimal('4.8') and launched['stage_cap_usd'] == '6'
+
+
+
+def test_a_present_null_allowance_is_refused_everywhere():
+    """#2532: null is not 'no allowance'; registration and the batch reader both refuse it."""
+    with pytest.raises(BudgetStop, match='when present'):
+        registration.native_stall_policy(_with(stall_allowance_usd=None))
+    with pytest.raises(BudgetStop, match='when present'):
+        registration.stall_allowance({'native_stall_policy': {'stall_allowance_usd': None}})
+    assert registration.stall_allowance({'native_stall_policy': {}}) == Decimal(0)
