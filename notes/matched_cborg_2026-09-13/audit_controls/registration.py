@@ -600,6 +600,7 @@ def validate_registration(path):
     native_response_buffer(manifest)
     native_history_control(manifest)
     automatic_stop_reconciliation(manifest)
+    native_thinking_display(manifest)
     budget = manifest['budget']
     previous = read_json(budget['continuation']['checkpoint'])
     costs = [Decimal(str(row.get('cost_usd', 'NaN'))) for row in previous['requests']]
@@ -783,6 +784,25 @@ def automatic_stop_reconciliation(manifest):
         raise BudgetStop('automatic stop reconciliation is audit-only')
     from .reconcile_stopped import validated_selection
     return validated_selection(manifest['automatic_stop_reconciliation'], manifest)
+
+
+#: The Claude Code version whose replay of summarized thinking was checked offline (#2464).
+THINKING_DISPLAY_RUNTIMES = frozenset({'2.1.272 (Claude Code)'})
+
+
+def native_thinking_display(manifest):
+    """Opt-in summarized thinking display, added by the proxy (#2464); None when absent."""
+    if 'native_thinking_display' not in manifest:
+        return None
+    from native_proxy import validated_thinking_display
+    value = manifest['native_thinking_display']
+    if manifest.get('kind') != 'd4d_native_audit_continuation' or value is None:
+        raise BudgetStop('native thinking display is audit-only: thinking_display_v1, summarized, proxy_substitution')
+    value = validated_thinking_display(value)
+    runtime = manifest.get('native_runtime')
+    if not isinstance(runtime, dict) or runtime.get('version') not in THINKING_DISPLAY_RUNTIMES:
+        raise BudgetStop('native thinking display is registered only for Claude Code 2.1.272')
+    return value
 
 
 def native_history_control(manifest):

@@ -37,7 +37,7 @@ def _ledger_admits(tmp_path):
     return True
 
 
-def build(metadata_ancestry, tmp_path, monkeypatch, *, with_stalls, allowance='5'):
+def build(metadata_ancestry, tmp_path, monkeypatch, *, with_stalls, allowance='5', source_extra=None):
     from audit_controls import batch_native, checkpoint_eligibility
     monkeypatch.setattr(checkpoint_eligibility, 'verify', lambda *args: {'zero_terminal_source_check': True})
     monkeypatch.setattr(batch_native, 'verify_checkpoint_context', lambda *args: None)
@@ -47,7 +47,8 @@ def build(metadata_ancestry, tmp_path, monkeypatch, *, with_stalls, allowance='5
                     native_stall_policy=deepcopy(POLICY), native_api_timeout_ms=3600000,
                     native_api_force_idle_timeout=False)
     path = prepare.prepare(**args, destination=tmp_path/'source',
-        audit_batches={'kind':'fresh_context_integrated_v1', 'worker_total_cap_usd':'12'}, **selected)
+        audit_batches={'kind':'fresh_context_integrated_v1', 'worker_total_cap_usd':'12'},
+        **selected, **(source_extra or {}))
     source = registration.read_json(path); identity = sha(path)
     assert source['native_stall_policy']['stall_allowance_usd'] == allowance
     job = source['job']; attempt = Path(job['attempt_dir']); owner_id = attempt_identity(identity, job['id'])

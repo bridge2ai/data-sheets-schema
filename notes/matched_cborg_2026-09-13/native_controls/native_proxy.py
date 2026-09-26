@@ -177,6 +177,225 @@ def validated_response_buffer(value):
     return dict(value)
 
 
+#: The one registrable thinking display (#2464). Claude Code 2.1.272 drops a
+#: display under the registered CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1, so the
+#: proxy adds it to what it forwards: byte for byte the change the #2463 probe
+#: sent live, with the child's own bytes kept beside the forwarded ones.
+THINKING_DISPLAY = {"kind": "thinking_display_v1", "display": "summarized", "delivery": "proxy_substitution"}
+ADAPTIVE_THINKING = b'"thinking":{"type":"adaptive"}'
+DISPLAYED_THINKING = b'"thinking":{"type":"adaptive","display":"summarized"}'
+DISABLED_THINKING = {"type": "disabled"}
+THINKING_EVIDENCE = ("thinking_request.json", "forwarded_request.json", "stream_timing.json")
+
+
+def validated_thinking_display(value):
+    """None, or exactly the registrable thinking display (#2464)."""
+    if value is None:
+        return None
+    if type(value) is not dict or value != THINKING_DISPLAY:
+        raise BudgetStop("native thinking display must be thinking_display_v1, summarized, proxy_substitution")
+    return dict(value)
+
+
+def expected_thinking(value):
+    return {"type": "adaptive", "display": value["display"]}
+
+
+def substitute_thinking(raw, request, value):
+    """What to forward for one child request, and why (#2464).
+
+    `{"type":"adaptive"}` gains the registered display, changing only those
+    bytes; a side call with thinking disabled is forwarded as it is. Anything
+    else is refused before it is counted, reserved or sent. In JSON the quotes
+    of text inside a string are escaped, so the unescaped byte pattern can
+    only be the setting itself; it must occur exactly once.
+    """
+    thinking = request.get("thinking")
+    if "thinking" in request and thinking == {"type": "adaptive"}:
+        forwarded = raw.replace(ADAPTIVE_THINKING, DISPLAYED_THINKING)
+        if (raw.count(ADAPTIVE_THINKING) != 1 or DISPLAYED_THINKING in raw
+                or json.loads(forwarded) != {**request, "thinking": expected_thinking(value)}):
+            raise BudgetStop("native request thinking cannot be given the registered display exactly")
+        return forwarded, "substituted"
+    if "thinking" in request and thinking == DISABLED_THINKING:
+        return raw, "disabled_forwarded"
+    raise BudgetStop("native request thinking is neither the registered adaptive setting nor disabled")
+
+
+class StreamTiming:
+    """When one upstream exchange's bytes arrived (#2464). Counts and times only,
+    never text; every method swallows its own failure, so observing can never
+    change what is settled or delivered."""
+    def __init__(self, clock, begun):
+        self.clock, self.begun, self.last, self.buffer = clock, begun, None, b""
+        self.value = {"kind": "native_stream_timing_v1", "upstream_status": None, "headers_seconds": None,
+                      "first_chunk_seconds": None, "first_thinking_block_seconds": None,
+                      "first_thinking_text_seconds": None, "first_output_block_seconds": None,
+                      "last_chunk_seconds": None, "largest_gap_between_chunks_seconds": 0.0,
+                      "child_headers_seconds": None, "chunks": 0, "bytes": 0, "thinking_text_chars": 0,
+                      "events": {}, "observer_errors": 0}
+
+    def _at(self):
+        return round(self.clock() - self.begun, 3)
+
+    def headers(self, status):
+        try:
+            self.value.update(upstream_status=status, headers_seconds=self._at())
+        except Exception:
+            self.value["observer_errors"] += 1
+
+    def child_headers(self):
+        try:
+            self.value["child_headers_seconds"] = self._at()
+        except Exception:
+            self.value["observer_errors"] += 1
+
+    def chunk(self, raw):
+        try:
+            self._chunk(raw)
+        except Exception:
+            self.value["observer_errors"] += 1
+
+    def _chunk(self, raw):
+        at, value = self._at(), self.value
+        if self.last is not None:
+            value["largest_gap_between_chunks_seconds"] = round(max(value["largest_gap_between_chunks_seconds"],
+                                                                    at - self.last), 3)
+        self.last = at
+        value["chunks"] += 1
+        value["bytes"] += len(raw)
+        if value["first_chunk_seconds"] is None:
+            value["first_chunk_seconds"] = at
+        value["last_chunk_seconds"] = at
+        self.buffer = (self.buffer + raw).replace(b"\r\n", b"\n")
+        while b"\n\n" in self.buffer:
+            frame, self.buffer = self.buffer.split(b"\n\n", 1)
+            lines = [line[5:].lstrip(b" ") for line in frame.split(b"\n") if line.startswith(b"data:")]
+            if lines:
+                self._event(b"\n".join(lines), at)
+
+    def _event(self, data, at):
+        value = self.value
+        try:
+            event = json.loads(data)
+            kind = event["type"]
+            if not isinstance(kind, str):
+                raise TypeError
+        except (ValueError, TypeError, KeyError):
+            value["observer_errors"] += 1
+            return
+        mapping = lambda name: event.get(name) if isinstance(event.get(name), dict) else {}
+        key = kind
+        if kind == "content_block_start":
+            block = str(mapping("content_block").get("type"))
+            key += ":" + block
+            if block in ("thinking", "redacted_thinking") and value["first_thinking_block_seconds"] is None:
+                value["first_thinking_block_seconds"] = at
+            if block in ("text", "tool_use") and value["first_output_block_seconds"] is None:
+                value["first_output_block_seconds"] = at
+        elif kind == "content_block_delta":
+            delta = mapping("delta")
+            key += ":" + str(delta.get("type"))
+            if delta.get("type") == "thinking_delta" and isinstance(delta.get("thinking"), str):
+                value["thinking_text_chars"] += len(delta["thinking"])
+                if delta["thinking"] and value["first_thinking_text_seconds"] is None:
+                    value["first_thinking_text_seconds"] = at
+        entry = value["events"].setdefault(key[:80], {"count": 0, "first_seconds": at, "last_seconds": at})
+        entry["count"] += 1
+        entry["last_seconds"] = at
+
+    def result(self, outcome, error_type):
+        try:
+            value = dict(self.value)
+            started = value["first_thinking_block_seconds"] is not None
+            value.update(outcome=outcome, error_type=error_type,
+                         thinking_display_observed=(None if not started else
+                                                    "summarized_text" if value["thinking_text_chars"] else "no_text"))
+            return value
+        except Exception:
+            return {"kind": "native_stream_timing_v1", "observer_errors": -1, "outcome": outcome}
+
+
+TIMING_FIELDS = ("upstream_status", "headers_seconds", "first_thinking_block_seconds", "first_thinking_text_seconds",
+                 "last_chunk_seconds", "largest_gap_between_chunks_seconds", "thinking_display_observed", "outcome")
+
+
+def _strict_object(raw):
+    def unique(pairs):
+        out = {}
+        for key, item in pairs:
+            if key in out:
+                raise BudgetStop("duplicate key in thinking display evidence")
+            out[key] = item
+        return out
+    value = json.loads(raw, object_pairs_hook=unique)
+    if not isinstance(value, dict):
+        raise BudgetStop("thinking display evidence is not an object")
+    return value
+
+
+def _thinking_request_evidence(folder, value):
+    """Prove, from the retained bytes, how one admitted request was handled."""
+    native = (folder / "native_request.json").read_bytes()
+    record = _strict_object((folder / "thinking_request.json").read_bytes())
+    child = _strict_object(native)
+    canonical = _strict_object((folder / "request.json").read_bytes())
+    disposition = record.get("disposition")
+    if (record.get("kind") != "thinking_display_request_v1" or record.get("registered") != value
+            or record.get("native_request_sha256") != digest(native)):
+        raise BudgetStop("thinking record does not name the retained child request")
+    if disposition == "substituted":
+        forwarded = (folder / "forwarded_request.json").read_bytes()
+        if (record.get("forwarded_request_sha256") != digest(forwarded) or child.get("thinking") != {"type": "adaptive"}
+                or _strict_object(forwarded) != {**child, "thinking": expected_thinking(value)}
+                or forwarded != native.replace(ADAPTIVE_THINKING, DISPLAYED_THINKING)
+                or canonical != _strict_object(forwarded)):
+            raise BudgetStop("forwarded request is not the child request with only the registered display")
+    elif disposition == "disabled_forwarded":
+        if ((folder / "forwarded_request.json").exists() or child.get("thinking") != DISABLED_THINKING
+                or record.get("forwarded_request_sha256") != digest(native) or canonical != child):
+            raise BudgetStop("a disabled-thinking side call was not forwarded unchanged")
+    else:
+        raise BudgetStop("unknown thinking disposition")
+    timing = folder / "stream_timing.json"
+    observed = _strict_object(timing.read_bytes()) if timing.is_file() else None
+    return {"id": folder.name, "disposition": disposition,
+            "timing": None if observed is None else {k: observed.get(k) for k in TIMING_FIELDS}}
+
+
+def thinking_display_evidence(requests_root, value, *, strict):
+    """What a receipt keeps about the registered display (#2464), re-read from the bytes.
+
+    Strict, for a completed run, raises unless every admitted request proves its
+    handling. Otherwise it reports, and never raises, so a stopped run's
+    receipt is still written.
+    """
+    summary = {"kind": "thinking_display_summary_v1", "registered": value, "requests": [], "problems": [],
+               "refusals": 0}
+    try:
+        value = validated_thinking_display(value)
+        root = Path(requests_root)
+        folders = sorted(p for p in root.iterdir() if p.is_dir() and not p.is_symlink()) if root.is_dir() else []
+        refusals = root.parent / "thinking_refusals"
+        summary["refusals"] = len([p for p in refusals.iterdir() if p.is_file()]) if refusals.is_dir() else 0
+    except Exception as error:
+        if strict:
+            raise BudgetStop("thinking display evidence is unreadable") from error
+        summary["problems"].append({"id": None, "reason": type(error).__name__})
+        return summary
+    for folder in folders:
+        try:
+            summary["requests"].append(_thinking_request_evidence(folder, value))
+        except Exception as error:
+            reason = str(error) if isinstance(error, BudgetStop) else type(error).__name__
+            if strict:
+                raise BudgetStop(f"thinking display of request {folder.name} is not proven: {reason}") from error
+            summary["problems"].append({"id": folder.name, "reason": reason})
+    if strict and summary["refusals"]:
+        raise BudgetStop("a completed run cannot carry a refused thinking setting")
+    return summary
+
+
 def verify_buffer_evidence(path, size, identity):
     """Check retained bytes before releasing the handler's private replay spool."""
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
@@ -200,7 +419,7 @@ class NativeProxy:
     def __init__(self, *, sdk, ledger, attempt, evidence, model, prices, verify,
                  provider_key, base_url, upstream=None, request_headers=None,
                  upstream_read_timeout_seconds=None, stall_policy=None, count_pause=None, stage_cap=None,
-                 response_buffer=None):
+                 response_buffer=None, thinking_display=None, clock=time.monotonic):
         if base_url not in CBORG_ENDPOINTS:
             raise BudgetStop("native runtime requires the registered CBORG endpoint")
         # Opt-in only: None keeps every legacy path byte for byte (#2150).
@@ -209,6 +428,9 @@ class NativeProxy:
         if self.response_buffer is not None and self.stall_policy is None:
             raise BudgetStop("native response buffering requires a registered stall policy")
         self.stalls_survived = 0
+        # Opt-in (#2464): None forwards every request exactly as the child sent it.
+        self.thinking_display = validated_thinking_display(thinking_display)
+        self.clock = clock
         if upstream_read_timeout_seconds is not None and (
                 type(upstream_read_timeout_seconds) is not int or upstream_read_timeout_seconds <= 0):
             raise BudgetStop('native upstream read timeout must be positive whole seconds')
@@ -298,6 +520,23 @@ class NativeProxy:
             except Exception:
                 pass
 
+    def record_thinking_refusal(self, raw, request):
+        """Best effort, beside the requests folder: nothing was counted, reserved or sent."""
+        try:
+            observed = request.get("thinking", None) if isinstance(request, dict) else None
+            shown = json.dumps(observed, sort_keys=True)
+            folder = Path(self.messages.evidence).parent / "thinking_refusals"
+            with self.state:
+                self.require_writable()
+                folder.mkdir(parents=True, exist_ok=True)
+                write_new(folder / f"{secrets.token_hex(8)}.json", {
+                    "at": now(), "registered": self.thinking_display,
+                    "observed_present": isinstance(request, dict) and "thinking" in request,
+                    "observed": observed if len(shown) <= 512 else {"omitted_bytes": len(shown)},
+                    "native_request_sha256": digest(raw), "paid_request": False})
+        except Exception:
+            pass
+
     def stall_reply(self, handler):
         """Tell the child its request may be repeated. Nothing of the
         provider's reply is forwarded."""
@@ -376,7 +615,8 @@ class NativeProxy:
                 buffered_bytes = 0
                 buffered_digest = hashlib.sha256()
                 replay_spool = None
-                ticket = folder = upstream_status = begun = None
+                ticket = folder = upstream_status = begun = timing = error_type = None
+                outcome = None
                 try:
                     supplied = self.headers.get("x-api-key", "")
                     if not supplied:
@@ -413,8 +653,25 @@ class NativeProxy:
                         raise BudgetStop("native runtime must use reviewed streamed transport")
                     if request.get("service_tier") not in (None, "auto", "standard_only"):
                         raise BudgetStop("unregistered native service tier")
+                    forwarded, disposition = raw, None
+                    if owner.thinking_display is not None:
+                        try:
+                            forwarded, disposition = substitute_thinking(raw, request, owner.thinking_display)
+                        except BudgetStop:
+                            owner.record_thinking_refusal(raw, request)
+                            raise
+                        if disposition == "substituted":
+                            # Counted, reserved and bound in the ledger as it is sent.
+                            request = json.loads(forwarded)
                     ticket, folder = owner.messages.prepare(request)
                     owner.capture(folder / "native_request.json", raw)
+                    if disposition is not None:
+                        if disposition == "substituted":
+                            owner.capture(folder / "forwarded_request.json", forwarded)
+                        owner.capture_json(folder / "thinking_request.json", {
+                            "kind": "thinking_display_request_v1", "registered": owner.thinking_display,
+                            "disposition": disposition, "native_request_sha256": digest(raw),
+                            "forwarded_request_sha256": digest(forwarded)})
                     headers = {"x-api-key":owner.key, "content-type":"application/json", "accept":"text/event-stream"}
                     # Set by the registered controller; the child cannot override it.
                     headers.update(owner.request_headers)
@@ -427,9 +684,13 @@ class NativeProxy:
                     with owner.state:
                         owner.require_open()
                     # Elapsed time is the provider exchange's, from the send, not the count's (#2522).
-                    begun = time.monotonic()
-                    with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers,
+                    begun = owner.clock()
+                    if owner.thinking_display is not None:
+                        timing = StreamTiming(owner.clock, begun)
+                    with owner.upstream.stream("POST", owner.base_url + self.path, content=forwarded, headers=headers,
                                                **owner.stream_options) as response:
+                        if timing is not None:
+                            timing.headers(response.status_code)
                         owner.capture_json(folder / "http_status.json", response_metadata(response))
                         upstream_status = response.status_code
                         if response.status_code != 200:
@@ -456,6 +717,8 @@ class NativeProxy:
                             replay_spool = tempfile.TemporaryFile(mode="w+b")
                             owner.capture(folder / "response.sse", b"")
                             for chunk in response.iter_bytes():
+                                if timing is not None:
+                                    timing.chunk(chunk)
                                 if buffered_bytes + len(chunk) > owner.response_buffer["max_bytes"]:
                                     raise BudgetStop("native response buffer byte limit exceeded")
                                 owner.capture(folder / "response.sse", chunk, append=True)
@@ -469,6 +732,8 @@ class NativeProxy:
                             # EOF/parser/accounting/local failures are not remote stalls.
                             buffering = False
                         else:
+                            if timing is not None:
+                                timing.child_headers()
                             self.send_response(200)
                             self.send_header("Content-Type", "text/event-stream")
                             self.end_headers()
@@ -476,6 +741,8 @@ class NativeProxy:
                             deferred = []
                             owner.capture(folder / "response.sse", b"")
                             for chunk in response.iter_bytes():
+                                if timing is not None:
+                                    timing.chunk(chunk)
                                 owner.capture(folder / "response.sse", chunk, append=True)
                                 completion.feed(chunk)
                                 if completion.stopped:
@@ -515,6 +782,8 @@ class NativeProxy:
                             # Conservative delivery boundary: even a partial header
                             # write makes all later failures terminal, never retried.
                             sent = True
+                        if timing is not None:
+                            timing.child_headers()
                         self.send_response(200)
                         self.send_header("Content-Type", "text/event-stream")
                         self.send_header("Content-Length", str(buffered_bytes))
@@ -528,7 +797,9 @@ class NativeProxy:
                         self.wfile.flush()
                         verify_buffer_evidence(folder / "response.sse", buffered_bytes,
                                                buffered_digest.hexdigest())
+                    outcome = "completed"
                 except Exception as exc:
+                    outcome, error_type = "failed", type(exc).__name__
                     if not sent and owner.stall_policy is not None:
                         # Nothing reached the child, so its own retry can
                         # continue the session once the charge is counted.
@@ -544,13 +815,14 @@ class NativeProxy:
                             if (evidence is not None and begun is not None
                                     and "identical_stall_stop" in owner.stall_policy):
                                 # Buffered stalls too (#2521).
-                                evidence["upstream_elapsed_seconds"] = round(time.monotonic() - begun, 1)
+                                evidence["upstream_elapsed_seconds"] = round(owner.clock() - begun, 1)
                             owner.survive_stall(ticket, folder, evidence)
                         except RepeatedStall as repeated:
                             exc = repeated
                         except Exception:
                             pass
                         else:
+                            outcome = "stalled_survived"
                             try:
                                 owner.stall_reply(self)
                             except (OSError, BrokenPipeError):
@@ -568,6 +840,12 @@ class NativeProxy:
                             replay_spool.close()
                         except Exception as cleanup_error:
                             owner.fail(cleanup_error)
+                    if timing is not None and folder is not None:
+                        # Frozen evidence refuses the write; nothing may escape here.
+                        try:
+                            owner.capture_json(folder / "stream_timing.json", timing.result(outcome, error_type))
+                        except Exception:
+                            pass
                     self.close_connection = True
             def do_GET(self):
                 self.reply(404, {"type":"error", "error":{"type":"not_found_error", "message":"no registered read endpoint"}})

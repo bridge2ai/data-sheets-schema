@@ -699,6 +699,28 @@ attempt restarts every worker. Token counts, later turns and integration inputs
 remain unknown until their actual payloads exist. The plan does not claim that
 the registered maximum number of retries is affordable.
 
+## Registered thinking display (`--native-thinking-display summarized`, #2464)
+
+`prepare --native-thinking-display summarized` registers
+`native_thinking_display`. The proxy of the audit and of every batch child
+(workers and integration alike) then adds `"display":"summarized"` to each
+forwarded adaptive-thinking request. `native_controls/README.md` describes
+the mechanism and the evidence it keeps.
+- **Where it is allowed:** it is audit-only and requires Claude Code 2.1.272.
+  Phase 4, evaluation and generation refuse it, even as `null`.
+- **Checkpoint successors:** a worker-checkpoint successor must restate its
+  source's value exactly.
+- **Preparation:** a malformed value, or another runtime version, is refused
+  before the destination exists.
+- **When a run completes:** a completed audit, and each batch child's closure,
+  re-reads every admitted request's bytes. A refused request anywhere fails
+  that check.
+- **When a run stops:** `result.json` or `stopped.json` reports the same
+  summary and never raises.
+- **The transport probe:** a source registered with the display cannot be
+  probed, because its retained child bytes lack the display its proxy
+  forwarded.
+
 ## Standing full-reservation debit at stop (#2467)
 
 A native audit that stops with one unconfirmed charge leaves that request

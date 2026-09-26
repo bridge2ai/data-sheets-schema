@@ -321,6 +321,9 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
     checkpoint_path, state_path = Path(tip_checkpoint).resolve(), Path(sequence_state).resolve()
     origin_path, authorization_path = Path(origin_registration).resolve(), Path(authorization).resolve()
     source, origin = read_json(source_path), read_json(origin_path)
+    if 'native_thinking_display' in source:
+        # Its retained child bytes lack the display its proxy forwarded (#2464).
+        raise BudgetStop('a source registered with a thinking display cannot be probed for one')
     origin_ledger = Path(origin['budget']['ledger_path']).resolve()
     if origin_ledger.with_name('audit_sequence.json') != state_path:
         raise BudgetStop('sequence state is not the origin ledger\'s')

@@ -784,3 +784,14 @@ def test_the_result_records_the_process_and_the_control_count(prepared):
     result = run(prepared, Upstream(ok_stream))
     assert result['pid'] == os.getpid() and result['control_count'] == 100 and result['free_count'] == 100
     assert probe.source_python({'python': '/another/environment/bin/python'})['same_environment'] is False
+
+
+def test_a_source_registered_with_a_thinking_display_cannot_be_probed(lineage):
+    """Its retained child bytes lack the display its proxy forwarded (#2464)."""
+    source = json.loads(lineage.source.read_text())
+    source['native_thinking_display'] = {'kind': 'thinking_display_v1', 'display': 'summarized',
+                                         'delivery': 'proxy_substitution'}
+    save(lineage.source, source)
+    with pytest.raises(BudgetStop, match='cannot be probed'):
+        prepare(lineage)
+    assert not (lineage.root / 'probe').exists()
