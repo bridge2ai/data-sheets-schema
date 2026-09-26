@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 import hashlib
 import json
+import re
 import math
 import time
 from pathlib import Path
@@ -91,9 +92,44 @@ def money(value):
     return Decimal(str(value))
 
 
+#: A stall debit that ends its attempt: the same request bytes stalled this
+#: many times in the attempt (#2465).
+REPEATED_STALL_REASON = "the same request stalled repeatedly; the attempt stops instead of resending it"
+
+
+class RepeatedStall(BudgetStop):
+    """The debit was recorded and the attempt stopped: resending identical bytes
+    that stalled before is not retried again (#2465)."""
+    def __init__(self, stall_index=None):
+        super().__init__(REPEATED_STALL_REASON)
+        self.stall_index = stall_index
+
+
+def attempt_spend(rows, stall_allowance=Decimal(0)):
+    """What an attempt's settled rows count against its cap.
+
+    Stall debits are charged first to the registered stall allowance, and only
+    what exceeds it to the attempt's own cap (#2466). The sequence cap still
+    counts every row. With no allowance this is the plain sum, and like the
+    plain sum it refuses a row without a cost (#2526).
+    """
+    stalls = sum((money(r['cost_usd']) for r in rows if r.get('settlement_basis') == STALL_DEBIT_BASIS), Decimal(0))
+    others = sum((money(r['cost_usd']) for r in rows if r.get('settlement_basis') != STALL_DEBIT_BASIS), Decimal(0))
+    return others + max(Decimal(0), stalls - money(stall_allowance))
+
+
+def validated_stall_allowance(value):
+    """None, or a positive plain decimal string, such as '12.5' (#2466, #2524)."""
+    if value is None:
+        return None
+    if type(value) is not str or not re.fullmatch(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?", value) or money(value) <= 0:
+        raise BudgetStop("stall allowance must be a positive plain decimal string")
+    return money(value)
+
+
 class Ledger:
     def __init__(self, path, *, manifest_sha256, total_cap=200, attempt_cap=5,
-                 attempt_caps_usd=None):
+                 attempt_caps_usd=None, stall_allowance_usd=None):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.lock = FileLock(str(self.path) + ".lock", timeout=0)
@@ -120,6 +156,10 @@ class Ledger:
         if self.attempt_caps_usd:
             self.identity["attempt_caps_usd"] = {
                 attempt: str(cap) for attempt, cap in sorted(self.attempt_caps_usd.items())}
+        # Opt-in: absent, every ledger reads and writes exactly as before (#2466).
+        self.stall_allowance = validated_stall_allowance(stall_allowance_usd)
+        if self.stall_allowance is not None:
+            self.identity["stall_allowance_usd"] = stall_allowance_usd
 
     def limit_for_attempt(self, attempt):
         return self.attempt_caps_usd.get(attempt, self.attempt_cap)
@@ -129,7 +169,9 @@ class Ledger:
         with self.lock:
             state = json.loads(self.path.read_bytes()) if self.path.exists() else {**self.identity, "requests": []}
             if (any(state.get(k) != v for k, v in self.identity.items())
-                    or state.get("attempt_caps_usd", {}) != self.identity.get("attempt_caps_usd", {})):
+                    or state.get("attempt_caps_usd", {}) != self.identity.get("attempt_caps_usd", {})
+                    # Both ways: a ledger never drops or gains its allowance on reopen (#2523).
+                    or state.get("stall_allowance_usd") != self.identity.get("stall_allowance_usd")):
                 raise BudgetStop("ledger registration or budget changed")
             yield state
             temporary = self.path.with_suffix(".tmp")
@@ -145,7 +187,8 @@ class Ledger:
             if any(row["status"] != "settled" for row in state["requests"]):
                 raise BudgetStop("an earlier charge is pending or unknown; reconcile before continuing")
             total = sum((money(row["cost_usd"]) for row in state["requests"]), Decimal(0))
-            used = sum((money(row["cost_usd"]) for row in state["requests"] if row["attempt"] == attempt), Decimal(0))
+            used = attempt_spend([row for row in state["requests"] if row["attempt"] == attempt],
+                                 self.stall_allowance or Decimal(0))
             canonical_cap = self.limit_for_attempt(attempt)
             cap = canonical_cap
             if stage_cap is not None:
@@ -267,16 +310,23 @@ class Ledger:
         if row["status"] != "settled":
             raise BudgetStop("observed charge exceeded its conservative reservation; stop and reconcile")
 
-    def debit_unconfirmed(self, ticket, *, maximum, evidence):
+    def debit_unconfirmed(self, ticket, *, maximum, evidence, identical_stop=None):
         """Count a stalled request at its whole reservation and keep going (#2150).
 
         The reservation is an upper bound on the provider fee, so the budget
         can only be over-counted. Nothing is released and no provider charge
         is asserted. At most `maximum` such debits are allowed per attempt;
         beyond that the row stays pending and the attempt stops as before.
+
+        With `identical_stop`, the debit that makes that many stalls of the
+        same request bytes in the attempt is still recorded, and the attempt
+        then stops rather than resend them (#2465): no row is left pending.
         """
         if type(maximum) is not int or maximum < 0:
             raise BudgetStop("stall allowance must be a non-negative whole number")
+        if identical_stop is not None and (type(identical_stop) is not int or identical_stop < 2):
+            raise BudgetStop("a repeated-stall stop needs a whole number of at least two")
+        repeated = False
         with self.transaction() as state:
             row = next(row for row in state["requests"] if row["id"] == ticket)
             if row["status"] != "pending":
@@ -291,8 +341,19 @@ class Ledger:
                            stall_evidence=evidence, provider_charge_confirmed=False,
                            provider_charge_usd=None, provider_usage_is_final=False,
                            released_excess_reservation_usd="0")
+                same = sum(1 for other in state["requests"] if other["attempt"] == row["attempt"]
+                           and other.get("settlement_basis") == STALL_DEBIT_BASIS
+                           and other.get("request_sha256") == row["request_sha256"])
+                if identical_stop is not None and same >= identical_stop:
+                    repeated = True
+                    state.setdefault("stopped_attempts", {})[row["attempt"]] = {
+                        "stopped_at": now(), "reason": REPEATED_STALL_REASON,
+                        "repeated_request_sha256": row["request_sha256"], "identical_stalls": same,
+                        "last_request_id": row["id"], "paid_request": True}
         if not allowed:
             raise BudgetStop("registered stall allowance is exhausted; reservation retained")
+        if repeated:
+            raise RepeatedStall(prior + 1)
         return prior + 1
 
 
@@ -418,9 +479,10 @@ class CappedMessages:
                 with self.mutation_guard("admit"):
                     pass
 
-    def debit_stall(self, ticket, *, maximum, evidence):
+    def debit_stall(self, ticket, *, maximum, evidence, identical_stop=None):
         with self.mutation_guard("settle"):
-            return self.ledger.debit_unconfirmed(ticket, maximum=maximum, evidence=evidence)
+            return self.ledger.debit_unconfirmed(ticket, maximum=maximum, evidence=evidence,
+                                                 **({"identical_stop": identical_stop} if identical_stop else {}))
 
     def finish(self, ticket, folder, response, *, stream_complete=None):
         with self.stopping_on_error(), self.mutation_guard("settle"):

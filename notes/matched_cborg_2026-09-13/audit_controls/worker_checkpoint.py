@@ -316,7 +316,9 @@ def _validate(manifest, *, require_pins):
              'source did not stop at unpaid budget admission')
     own = [r for r in rows if r.get('attempt') == owner_id]
     own_cap = _money(budget['per_job_attempt_usd'][job['id']])
-    _require(bool(own) and sum((_money(r['cost_usd']) for r in own), Decimal(0)) <= own_cap
+    from budgeted_cborg import attempt_spend, validated_stall_allowance
+    allowance = validated_stall_allowance(source.get('native_stall_policy', {}).get('stall_allowance_usd'))
+    _require(bool(own) and attempt_spend(own, allowance or Decimal(0)) <= own_cap
              and all(_money(r.get('attempt_cap_usd')) == own_cap for r in own),
              'source own accounting exceeds or changes its attempt ceiling')
     maximum = source.get('native_stall_policy', {}).get('max_stall_debits', 0)
@@ -358,7 +360,7 @@ def _validate(manifest, *, require_pins):
         proposals[row['id']] = {'path': str(proposal), 'sha256': inventory['files'][relative]['sha256']}
     worker_cap = _money(source['audit_batches']['worker_total_cap_usd'])
     _require(0 < worker_cap < own_cap
-             and sum((_money(r['cost_usd']) for r in worker_rows), Decimal(0)) <= worker_cap
+             and attempt_spend(worker_rows, allowance or Decimal(0)) <= worker_cap
              and all(_money(r.get('stage_cap_usd')) == worker_cap for r in worker_rows),
              'source workers exceed or change their cumulative reservation ceiling')
     current = manifest['budget']; previous = current['continuation']

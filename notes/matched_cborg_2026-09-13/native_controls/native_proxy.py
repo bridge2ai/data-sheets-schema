@@ -16,12 +16,13 @@ import secrets
 import stat
 import tempfile
 import threading
+import time
 from types import SimpleNamespace
 from urllib.parse import urlsplit
 
 import httpx
 
-from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, CappedMessages, LEGACY_UPSTREAM_READ_SECONDS,
+from budgeted_cborg import (BudgetStop, CBORG_ENDPOINTS, CappedMessages, RepeatedStall, LEGACY_UPSTREAM_READ_SECONDS,
                             POLICY_COUNT_TRY_SECONDS, UPSTREAM_CONNECT_SECONDS, digest, now, write_new)
 from data_sheets_schema.stream_evidence import CORRELATION_HEADERS, _identifier
 
@@ -150,13 +151,17 @@ def stall_evidence(exc, upstream_status=None):
 
 
 def validated_stall_policy(value):
-    """{count_attempts: 1..5, max_stall_debits: 0..10} or None (#2150)."""
+    """{count_attempts: 1..5, max_stall_debits: 0..10[, identical_stall_stop: 2..max]} or None (#2150, #2465)."""
     if value is None:
         return None
-    if (not isinstance(value, dict) or set(value) != {"count_attempts", "max_stall_debits"}
+    required = {"count_attempts", "max_stall_debits"}
+    if (not isinstance(value, dict) or not required <= set(value) <= required | {"identical_stall_stop"}
             or type(value["count_attempts"]) is not int or not 1 <= value["count_attempts"] <= 5
             or type(value["max_stall_debits"]) is not int or not 0 <= value["max_stall_debits"] <= 10):
         raise BudgetStop("native stall policy needs count_attempts 1-5 and max_stall_debits 0-10")
+    stop = value.get("identical_stall_stop")
+    if "identical_stall_stop" in value and (type(stop) is not int or not 2 <= stop <= value["max_stall_debits"]):
+        raise BudgetStop("a repeated-stall stop needs 2 to max_stall_debits identical stalls")
     return dict(value)
 
 
@@ -268,8 +273,21 @@ class NativeProxy:
         with self.state:
             self.require_writable()
             self.require_open()
-            index = self.messages.debit_stall(ticket, maximum=self.stall_policy["max_stall_debits"],
-                                              evidence=evidence)
+            try:
+                index = self.messages.debit_stall(ticket, maximum=self.stall_policy["max_stall_debits"],
+                    evidence=evidence, **({"identical_stop": self.stall_policy["identical_stall_stop"]}
+                                         if "identical_stall_stop" in self.stall_policy else {}))
+            except RepeatedStall as repeated:
+                # Debited and stopped: the child is not asked to resend, and
+                # the stall is not one the attempt survived (#2465, #2525).
+                try:
+                    write_new(folder / "stall.json", {"at": now(), "stall_index": repeated.stall_index, **evidence,
+                        "settlement": "whole reservation counted; provider charge unconfirmed; "
+                                      "attempt stopped on a repeated identical stall",
+                        "child_reply_attempted": 402})
+                except Exception:
+                    pass
+                raise
             self.stalls_survived = index
             try:
                 # The ledger row already carries this evidence, so a failed
@@ -358,7 +376,7 @@ class NativeProxy:
                 buffered_bytes = 0
                 buffered_digest = hashlib.sha256()
                 replay_spool = None
-                ticket = folder = upstream_status = None
+                ticket = folder = upstream_status = begun = None
                 try:
                     supplied = self.headers.get("x-api-key", "")
                     if not supplied:
@@ -408,6 +426,8 @@ class NativeProxy:
                     owner.preflight_open()
                     with owner.state:
                         owner.require_open()
+                    # Elapsed time is the provider exchange's, from the send, not the count's (#2522).
+                    begun = time.monotonic()
                     with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers,
                                                **owner.stream_options) as response:
                         owner.capture_json(folder / "http_status.json", response_metadata(response))
@@ -521,7 +541,13 @@ class NativeProxy:
                                     "response_delivery_started": False,
                                     "buffered_bytes": buffered_bytes,
                                     "buffered_sha256": buffered_digest.hexdigest()}
+                            if (evidence is not None and begun is not None
+                                    and "identical_stall_stop" in owner.stall_policy):
+                                # Buffered stalls too (#2521).
+                                evidence["upstream_elapsed_seconds"] = round(time.monotonic() - begun, 1)
                             owner.survive_stall(ticket, folder, evidence)
+                        except RepeatedStall as repeated:
+                            exc = repeated
                         except Exception:
                             pass
                         else:
