@@ -716,9 +716,18 @@ def native_stall_policy(manifest):
         raise BudgetStop('a repeated-stall stop needs 2 to max_stall_debits identical stalls')
     # Optional (#2466): stall debits are charged to their own allowance before the attempt cap.
     from budgeted_cborg import validated_stall_allowance
-    allowance = validated_stall_allowance(value.get('stall_allowance_usd'))
+    allowance = (validated_stall_allowance(value['stall_allowance_usd'])
+                 if 'stall_allowance_usd' in value else None)
     if allowance is not None and value['max_stall_debits'] == 0:
         raise BudgetStop('a stall allowance needs a policy that allows stall debits')
+    if allowance is not None:
+        # No more than the debits the policy allows could ever cost (#2524).
+        try:
+            cap = Decimal(str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]))
+        except (KeyError, TypeError, ArithmeticError) as error:
+            raise BudgetStop('a stall allowance needs the registered job attempt cap') from error
+        if not cap.is_finite() or allowance > value['max_stall_debits'] * cap:
+            raise BudgetStop('a stall allowance may not exceed max_stall_debits times the job attempt cap')
     authorization = value['authorization']
     if value['max_stall_debits'] == 0:
         if authorization is not None:
@@ -747,11 +756,15 @@ def native_stall_policy(manifest):
 
 
 def stall_allowance(manifest):
-    """The registered allowance for stall debits, as a Decimal, or 0 (#2466)."""
+    """The registered allowance for stall debits, as a Decimal, or 0 (#2466).
+
+    It reads the one field; `native_stall_policy` validates the whole policy
+    when the registration is validated."""
     from budgeted_cborg import validated_stall_allowance
-    native_stall_policy(manifest)
-    value = manifest.get('native_stall_policy', {}).get('stall_allowance_usd')
-    return validated_stall_allowance(value) or Decimal(0)
+    policy = manifest.get('native_stall_policy')
+    if not isinstance(policy, dict) or 'stall_allowance_usd' not in policy:
+        return Decimal(0)
+    return validated_stall_allowance(policy['stall_allowance_usd'])
 
 
 def native_history_control(manifest):

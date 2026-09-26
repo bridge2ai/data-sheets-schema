@@ -355,7 +355,8 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
     state = {'first_stop_source': None, 'proxy': None}
     before = _own_rows(manifest, identity)
     initial_left = _remaining(context, deadline, clock)
-    used = sum((Decimal(r['cost_usd']) for r in before), Decimal(0))
+    # Stall debits the registered allowance absorbed do not shrink the stage (#2520).
+    used = attempt_spend(before, stall_allowance(manifest))
     stage_cap = (Decimal(manifest['audit_batches']['worker_total_cap_usd'])
                  if row['kind'] == 'worker' else context.ledger.limit_for_attempt(owner))
     if stage_cap <= used:
@@ -668,7 +669,6 @@ def verify_aggregate_closure(manifest, registration_path, result):
     rows = _own_rows(manifest, identity)
     if len(set(ids)) != len(ids) or ids != [r['id'] for r in rows] or any(r['status'] != 'settled' for r in rows):
         raise BudgetStop('batch aggregate requests lack exact one-child settled membership')
-    cost = sum((Decimal(r['cost_usd']) for r in rows), Decimal(0))
     parent_cap = Decimal(str(manifest['budget']['per_job_attempt_usd'][manifest['job']['id']]))
     inherited_paths = set()
     if KEY in manifest:

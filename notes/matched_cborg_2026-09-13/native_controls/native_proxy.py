@@ -278,8 +278,15 @@ class NativeProxy:
                     evidence=evidence, **({"identical_stop": self.stall_policy["identical_stall_stop"]}
                                          if "identical_stall_stop" in self.stall_policy else {}))
             except RepeatedStall:
-                # Debited and stopped: the child is not asked to resend (#2465).
-                self.stalls_survived += 1
+                # Debited and stopped: the child is not asked to resend, and
+                # the stall is not one the attempt survived (#2465, #2525).
+                try:
+                    write_new(folder / "stall.json", {"at": now(), **evidence,
+                        "settlement": "whole reservation counted; provider charge unconfirmed; "
+                                      "attempt stopped on a repeated identical stall",
+                        "child_reply_attempted": 402})
+                except Exception:
+                    pass
                 raise
             self.stalls_survived = index
             try:
@@ -369,8 +376,7 @@ class NativeProxy:
                 buffered_bytes = 0
                 buffered_digest = hashlib.sha256()
                 replay_spool = None
-                ticket = folder = upstream_status = None
-                begun = time.monotonic()
+                ticket = folder = upstream_status = begun = None
                 try:
                     supplied = self.headers.get("x-api-key", "")
                     if not supplied:
@@ -420,6 +426,8 @@ class NativeProxy:
                     owner.preflight_open()
                     with owner.state:
                         owner.require_open()
+                    # Elapsed time is the provider exchange's, from the send, not the count's (#2522).
+                    begun = time.monotonic()
                     with owner.upstream.stream("POST", owner.base_url + self.path, content=raw, headers=headers,
                                                **owner.stream_options) as response:
                         owner.capture_json(folder / "http_status.json", response_metadata(response))
@@ -526,8 +534,6 @@ class NativeProxy:
                         # continue the session once the charge is counted.
                         try:
                             evidence = stall_evidence(exc, upstream_status)
-                            if evidence is not None and "identical_stall_stop" in owner.stall_policy:
-                                evidence["elapsed_seconds"] = round(time.monotonic() - begun, 1)
                             if (buffering and upstream_status == 200
                                     and isinstance(exc, POST_SEND_FAILURES)):
                                 evidence = {"kind": "upstream_transport", "error_type": type(exc).__name__,
@@ -535,6 +541,10 @@ class NativeProxy:
                                     "response_delivery_started": False,
                                     "buffered_bytes": buffered_bytes,
                                     "buffered_sha256": buffered_digest.hexdigest()}
+                            if (evidence is not None and begun is not None
+                                    and "identical_stall_stop" in owner.stall_policy):
+                                # Buffered stalls too (#2521).
+                                evidence["upstream_elapsed_seconds"] = round(time.monotonic() - begun, 1)
                             owner.survive_stall(ticket, folder, evidence)
                         except RepeatedStall as repeated:
                             exc = repeated

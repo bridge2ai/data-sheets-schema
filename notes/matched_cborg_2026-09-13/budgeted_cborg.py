@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 import hashlib
 import json
+import re
 import math
 import time
 from pathlib import Path
@@ -104,29 +105,25 @@ class RepeatedStall(BudgetStop):
 
 
 def attempt_spend(rows, stall_allowance=Decimal(0)):
-    """What an attempt's rows count against its cap.
+    """What an attempt's settled rows count against its cap.
 
     Stall debits are charged first to the registered stall allowance, and only
     what exceeds it to the attempt's own cap (#2466). The sequence cap still
-    counts every row. With no allowance this is the plain sum.
+    counts every row. With no allowance this is the plain sum, and like the
+    plain sum it refuses a row without a cost (#2526).
     """
     stalls = sum((money(r['cost_usd']) for r in rows if r.get('settlement_basis') == STALL_DEBIT_BASIS), Decimal(0))
-    others = sum((money(r['cost_usd']) for r in rows if r.get('settlement_basis') != STALL_DEBIT_BASIS
-                  and r.get('cost_usd') is not None), Decimal(0))
+    others = sum((money(r['cost_usd']) for r in rows if r.get('settlement_basis') != STALL_DEBIT_BASIS), Decimal(0))
     return others + max(Decimal(0), stalls - money(stall_allowance))
 
 
 def validated_stall_allowance(value):
-    """None, or a positive decimal-string allowance for stall debits (#2466)."""
+    """None, or a positive plain decimal string, such as '12.5' (#2466, #2524)."""
     if value is None:
         return None
-    try:
-        amount = money(value) if type(value) is str else None
-    except (ArithmeticError, ValueError):
-        amount = None
-    if amount is None or not amount.is_finite() or amount <= 0:
-        raise BudgetStop("stall allowance must be a positive decimal string")
-    return amount
+    if type(value) is not str or not re.fullmatch(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?", value) or money(value) <= 0:
+        raise BudgetStop("stall allowance must be a positive plain decimal string")
+    return money(value)
 
 
 class Ledger:
@@ -171,7 +168,9 @@ class Ledger:
         with self.lock:
             state = json.loads(self.path.read_bytes()) if self.path.exists() else {**self.identity, "requests": []}
             if (any(state.get(k) != v for k, v in self.identity.items())
-                    or state.get("attempt_caps_usd", {}) != self.identity.get("attempt_caps_usd", {})):
+                    or state.get("attempt_caps_usd", {}) != self.identity.get("attempt_caps_usd", {})
+                    # Both ways: a ledger never drops or gains its allowance on reopen (#2523).
+                    or state.get("stall_allowance_usd") != self.identity.get("stall_allowance_usd")):
                 raise BudgetStop("ledger registration or budget changed")
             yield state
             temporary = self.path.with_suffix(".tmp")

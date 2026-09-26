@@ -360,7 +360,7 @@ def _validate(manifest, *, require_pins):
         proposals[row['id']] = {'path': str(proposal), 'sha256': inventory['files'][relative]['sha256']}
     worker_cap = _money(source['audit_batches']['worker_total_cap_usd'])
     _require(0 < worker_cap < own_cap
-             and sum((_money(r['cost_usd']) for r in worker_rows), Decimal(0)) <= worker_cap
+             and attempt_spend(worker_rows, allowance or Decimal(0)) <= worker_cap
              and all(_money(r.get('stage_cap_usd')) == worker_cap for r in worker_rows),
              'source workers exceed or change their cumulative reservation ceiling')
     current = manifest['budget']; previous = current['continuation']

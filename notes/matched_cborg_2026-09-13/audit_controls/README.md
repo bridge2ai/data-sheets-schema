@@ -79,9 +79,11 @@ Two optional fields bound what stalls may cost.
   - Nothing is left pending, so the stop needs no reconciliation.
   - Audit27 sent one request seven times, and each failed at 272–277 s; with a
     stop at 2, five of those resends would not have been sent.
-  - Under this field the stall evidence also records `elapsed_seconds`. The stop
-    itself does not compare elapsed times: identical bytes that stall twice are
-    enough.
+  - Under this field the stall evidence also records `upstream_elapsed_seconds`,
+    measured from the send to the provider and not including token counting.
+    That covers buffered stalls too. The stopping stall keeps its `stall.json`,
+    recording the 402 reply. The stop itself does not compare elapsed times:
+    identical bytes that stall twice are enough.
 - **`stall_allowance_usd`** (#2466) is a positive decimal string. Stall debits
   are charged to it first, and only what exceeds it counts against the
   attempt's cap (`budgeted_cborg.attempt_spend`).
@@ -89,8 +91,12 @@ Two optional fields bound what stalls may cost.
   - The allowance is money the attempt may spend beyond its cap, so the
     authorization must also carry `authorized_stall_allowance_usd` with the
     same string.
-  - The audit ledger records it as `stall_allowance_usd`.
-  - The batch and worker-checkpoint ceiling checks read spend the same way.
+  - It must be a plain decimal such as `12.5`, and no more than
+    `max_stall_debits` times the job's attempt cap.
+  - The audit ledger records it as `stall_allowance_usd`, and a reopen with a
+    different allowance, or with none, is refused.
+  - The batch child launch gate, the batch ceiling checks and the
+    worker-checkpoint ceiling checks read spend the same way.
   - Audits 22, 24 and 25 stopped between $0.003 and $0.49 short of their caps,
     after stall debits of $4.84 to $10.63.
 
