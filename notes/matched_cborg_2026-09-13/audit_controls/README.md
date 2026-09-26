@@ -69,6 +69,31 @@ own retry continues the same session. The ledger row carries the stall evidence,
 `stall.json` beside the request repeats it and records that a reply was attempted,
 and the terminal result lists the debited requests under `stall_debited_requests`.
 
+Two optional fields bound what stalls may cost.
+
+- **`identical_stall_stop`** (#2465) is a whole number from 2 to
+  `max_stall_debits`.
+  - When the same request bytes have stalled that many times in the attempt,
+    the last stall is still debited, and then the attempt stops instead of
+    replying with a retryable status.
+  - Nothing is left pending, so the stop needs no reconciliation.
+  - Audit27 sent one request seven times, and each failed at 272–277 s; with a
+    stop at 2, five of those resends would not have been sent.
+  - Under this field the stall evidence also records `elapsed_seconds`. The stop
+    itself does not compare elapsed times: identical bytes that stall twice are
+    enough.
+- **`stall_allowance_usd`** (#2466) is a positive decimal string. Stall debits
+  are charged to it first, and only what exceeds it counts against the
+  attempt's cap (`budgeted_cborg.attempt_spend`).
+  - The sequence cap still counts every debit.
+  - The allowance is money the attempt may spend beyond its cap, so the
+    authorization must also carry `authorized_stall_allowance_usd` with the
+    same string.
+  - The audit ledger records it as `stall_allowance_usd`.
+  - The batch and worker-checkpoint ceiling checks read spend the same way.
+  - Audits 22, 24 and 25 stopped between $0.003 and $0.49 short of their caps,
+    after stall debits of $4.84 to $10.63.
+
 A stall counts only when the exchange failed after the request was sent: a provider
 5xx, a read or write timeout or error, or a malformed or dropped response. Without
 complete-response buffering, a provider status below 500 is never a stall, whatever

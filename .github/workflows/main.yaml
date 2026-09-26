@@ -84,6 +84,7 @@ jobs:
           notes/matched_cborg_2026-09-13/native_controls/test_native_phase_history.py
           notes/matched_cborg_2026-09-13/native_controls/test_native_phase_control.py
           notes/matched_cborg_2026-09-13/native_controls/test_native_stall_policy.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_stall_controls.py
           notes/matched_cborg_2026-09-13/native_controls/test_native_response_buffer.py
           notes/matched_cborg_2026-09-13/native_controls/test_transport_probe.py
           notes/matched_cborg_2026-09-13/native_controls/test_audit_after_probe.py

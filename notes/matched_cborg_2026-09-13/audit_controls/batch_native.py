@@ -11,13 +11,13 @@ import stat
 import time
 from types import SimpleNamespace
 
-from budgeted_cborg import BudgetStop, STALL_DEBIT_BASIS, attempt_identity, now, provider_context_headers, write_new
+from budgeted_cborg import BudgetStop, STALL_DEBIT_BASIS, attempt_identity, attempt_spend, now, provider_context_headers, write_new
 from native_command_policy import _literal_rule, permission_arguments
 from native_control import CONTRACT, HISTORY_CONTRACT, load_native_events
 from . import batch_output as output
 from . import native
 from .batch_history import BatchHistory
-from .registration import (strict_json, sha, native_api_timeout, native_api_force_idle_timeout,
+from .registration import (strict_json, sha, native_api_timeout, native_api_force_idle_timeout, stall_allowance,
                            native_stall_policy, native_upstream_read_timeout, native_response_buffer, native_history_control, audit_batch_navigation)
 from .output_parts import canonical, describe, read_regular, same_json
 from .transport import provider_clients
@@ -687,7 +687,7 @@ def verify_aggregate_closure(manifest, registration_path, result):
             raise BudgetStop('checkpoint aggregate duplicates a historical request identity')
         if not same_json(all_rows[:len(prior)], prior) or not same_json(all_rows[len(prior):], rows):
             raise BudgetStop('checkpoint aggregate rewrites history or omits current request membership')
-        if (cost > parent_cap or any(Decimal(r['attempt_cap_usd']) != parent_cap
+        if (attempt_spend(rows, stall_allowance(manifest)) > parent_cap or any(Decimal(r['attempt_cap_usd']) != parent_cap
                                     or 'stage_cap_usd' in r for r in rows)):
             raise BudgetStop('checkpoint integration spending differs from its new attempt ceiling')
         inherited_paths.update(source.evidence_paths)
@@ -696,7 +696,8 @@ def verify_aggregate_closure(manifest, registration_path, result):
             raise BudgetStop('fresh batch aggregate claims unselected inherited workers')
         workers = [r for c in closed[:-1] for r in c['request_rows']]
         worker_cap = Decimal(block['worker_total_cap_usd'])
-        if cost > parent_cap or sum((Decimal(r['cost_usd']) for r in workers), Decimal(0)) > worker_cap:
+        allowance = stall_allowance(manifest)
+        if attempt_spend(rows, allowance) > parent_cap or attempt_spend(workers, allowance) > worker_cap:
             raise BudgetStop('batch aggregate or worker spending exceeds its registered ceiling')
         if any(Decimal(r['attempt_cap_usd']) != parent_cap or Decimal(r.get('stage_cap_usd', '-1')) != worker_cap for r in workers):
             raise BudgetStop('batch worker reservations did not bind both registered ceilings')

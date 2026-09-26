@@ -700,22 +700,38 @@ def native_stall_policy(manifest):
     if key not in manifest:
         return None
     value = manifest[key]
+    base = {'kind', 'count_attempts', 'max_stall_debits', 'authorization'}
     if (manifest.get('kind') != 'd4d_native_audit_continuation' or not isinstance(value, dict) or
-            set(value) != {'kind', 'count_attempts', 'max_stall_debits', 'authorization'} or
+            not base <= set(value) <= base | {'identical_stall_stop', 'stall_allowance_usd'} or
             value['kind'] != 'bounded_in_attempt_v1' or
             type(value['count_attempts']) is not int or not 1 <= value['count_attempts'] <= 5 or
             type(value['max_stall_debits']) is not int or not 0 <= value['max_stall_debits'] <= 10):
         raise BudgetStop('native stall policy is audit-only: bounded_in_attempt_v1, count_attempts 1-5, max_stall_debits 0-10')
     if not isinstance(manifest.get('native_runtime'), dict) or not isinstance(manifest.get('job'), dict):
         raise BudgetStop('native stall policy needs the registered native runtime and job')
+    # Optional (#2465): stop, with the debit recorded, when the same request
+    # bytes have stalled this many times, rather than have the child resend them.
+    if 'identical_stall_stop' in value and (type(value['identical_stall_stop']) is not int or
+            not 2 <= value['identical_stall_stop'] <= value['max_stall_debits']):
+        raise BudgetStop('a repeated-stall stop needs 2 to max_stall_debits identical stalls')
+    # Optional (#2466): stall debits are charged to their own allowance before the attempt cap.
+    from budgeted_cborg import validated_stall_allowance
+    allowance = validated_stall_allowance(value.get('stall_allowance_usd'))
+    if allowance is not None and value['max_stall_debits'] == 0:
+        raise BudgetStop('a stall allowance needs a policy that allows stall debits')
     authorization = value['authorization']
     if value['max_stall_debits'] == 0:
         if authorization is not None:
             raise BudgetStop('a stall policy without debits carries no debit authorization')
     else:
         texts = ('exact_response', 'quoted_request', 'recorded_at')
+        expected = {*texts, 'authorized_max_stall_debits'} | (
+            {'authorized_stall_allowance_usd'} if allowance is not None else set())
+        if allowance is not None and (not isinstance(authorization, dict) or
+                authorization.get('authorized_stall_allowance_usd') != value['stall_allowance_usd']):
+            raise BudgetStop('a stall allowance needs the maintainer\'s quoted authorization for exactly that amount')
         if (not isinstance(authorization, dict) or
-                set(authorization) != {*texts, 'authorized_max_stall_debits'} or
+                set(authorization) != expected or
                 any(not isinstance(authorization[name], str) or not authorization[name].strip() for name in texts) or
                 type(authorization['authorized_max_stall_debits']) is not int or
                 authorization['authorized_max_stall_debits'] != value['max_stall_debits']):
@@ -726,7 +742,16 @@ def native_stall_policy(manifest):
                              'the token-count tries and the connect allowance')
         if native_api_force_idle_timeout(manifest) is not False:
             raise BudgetStop('stall debits need the native fetch idle timer registered off')
-    return {'count_attempts': value['count_attempts'], 'max_stall_debits': value['max_stall_debits']}
+    return {'count_attempts': value['count_attempts'], 'max_stall_debits': value['max_stall_debits'],
+            **({'identical_stall_stop': value['identical_stall_stop']} if 'identical_stall_stop' in value else {})}
+
+
+def stall_allowance(manifest):
+    """The registered allowance for stall debits, as a Decimal, or 0 (#2466)."""
+    from budgeted_cborg import validated_stall_allowance
+    native_stall_policy(manifest)
+    value = manifest.get('native_stall_policy', {}).get('stall_allowance_usd')
+    return validated_stall_allowance(value) or Decimal(0)
 
 
 def native_history_control(manifest):
@@ -1003,9 +1028,11 @@ def open_audit_ledger(manifest, registration_path, manifest_sha256):
     if 'budget_amendment' in manifest:
         from budget_amendment import ledger_bridge
         bridge = ledger_bridge(manifest, previous, checkpoint_sha256=prior['sha256'])
+    allowance = manifest.get('native_stall_policy', {}).get('stall_allowance_usd')
     ledger = Ledger(location, manifest_sha256=manifest_sha256,
         total_cap=budget['additional_usd'], attempt_cap=budget['per_attempt_usd'],
-        attempt_caps_usd={attempt_identity(manifest_sha256, job['id']): budget['per_job_attempt_usd'][job['id']]})
+        attempt_caps_usd={attempt_identity(manifest_sha256, job['id']): budget['per_job_attempt_usd'][job['id']]},
+        **({'stall_allowance_usd': allowance} if allowance is not None else {}))
     ledger.continue_from(prior['checkpoint'], expected_sha256=prior['sha256'], expected_cost_usd=prior['cost_usd'], **bridge)
     return ledger
 

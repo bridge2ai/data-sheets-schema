@@ -316,7 +316,9 @@ def _validate(manifest, *, require_pins):
              'source did not stop at unpaid budget admission')
     own = [r for r in rows if r.get('attempt') == owner_id]
     own_cap = _money(budget['per_job_attempt_usd'][job['id']])
-    _require(bool(own) and sum((_money(r['cost_usd']) for r in own), Decimal(0)) <= own_cap
+    from budgeted_cborg import attempt_spend, validated_stall_allowance
+    allowance = validated_stall_allowance(source.get('native_stall_policy', {}).get('stall_allowance_usd'))
+    _require(bool(own) and attempt_spend(own, allowance or Decimal(0)) <= own_cap
              and all(_money(r.get('attempt_cap_usd')) == own_cap for r in own),
              'source own accounting exceeds or changes its attempt ceiling')
     maximum = source.get('native_stall_policy', {}).get('max_stall_debits', 0)
