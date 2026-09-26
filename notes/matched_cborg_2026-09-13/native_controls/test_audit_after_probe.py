@@ -335,3 +335,27 @@ def test_a_malformed_settlement_after_exit_is_a_budget_stop(prepared, monkeypatc
     repin(manifest)
     with pytest.raises(BudgetStop, match='settlement after exit is malformed'):
         probe_predecessor.validate_link(manifest)
+
+
+
+def test_relabelling_the_probe_does_not_skip_its_link_check(prepared):
+    """#2515: the predecessor's registration is bound to its checkpoint before its kind is read."""
+    manifest, path = successor(prepared, completed(prepared))
+    _tamper(prepared, manifest, 'billing.json', lambda v: v['requests'][0].update(cost_usd='0'))
+    _tamper(prepared, manifest, 'registration.json', lambda v: v.update(kind='something_else'))
+    save(path, manifest)
+    before = prepared.state.read_bytes()
+    with pytest.raises(BudgetStop, match='not the one its checkpoint names'):
+        probe_predecessor.validate_predecessor(manifest)
+    with pytest.raises(BudgetStop):
+        with r.sequence_guard(manifest, r.sha(path)):
+            pass
+    assert prepared.state.read_bytes() == before
+
+
+def test_a_bridge_source_relabelled_as_an_audit_is_a_budget_stop(prepared):
+    """#2516: a relabelled reconciled probe has no job; refused, never a KeyError."""
+    manifest, _ = successor(prepared, refused(prepared))
+    _tamper(prepared, manifest, 'registration.json', lambda v: v.update(kind='d4d_native_audit_continuation'))
+    with pytest.raises(BudgetStop, match='names no job'):
+        r.validate_audit_reconciliation(manifest)

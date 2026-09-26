@@ -149,8 +149,21 @@ def _reconciled(probe, identity, files, deferred):
 
 
 def validate_predecessor(manifest, *, require_pins=True):
-    """Validate the link when the audit's predecessor is a probe; None otherwise."""
+    """Validate the link when the audit's predecessor is a probe; None otherwise.
+
+    The predecessor's registration is first bound to the checkpoint it
+    wrote, so its kind cannot be relabelled to skip this check (#2515).
+    A first audit continues the generation's checkpoint and has no
+    registration beside it to bind.
+    """
     try:
+        continuation = manifest['budget']['continuation']
+        checkpoint = canonical_path(continuation['checkpoint'], exists=True)
+        first = str(checkpoint) == manifest.get('parent', {}).get('reconciled_checkpoint')
+        path = predecessor_path(manifest)
+        if not first and path.is_file():
+            _require(sha(path) == read_json(checkpoint).get('manifest_sha256'),
+                     'audit predecessor registration is not the one its checkpoint names')
         probe = is_probe_predecessor(manifest)
     except _MALFORMED as error:
         raise BudgetStop('audit predecessor registration is malformed or unavailable') from error

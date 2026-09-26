@@ -1058,7 +1058,9 @@ def validate_audit_reconciliation(manifest):
     if source_reg.get('kind') != 'd4d_native_audit_continuation':
         raise BudgetStop('reconciled audit predecessor must be a native audit registration')
     source_sha = sha(paths['source_registration'])
-    job = source_reg['job']
+    job = source_reg.get('job')
+    if not isinstance(job, dict) or not isinstance(job.get('id'), str) or not isinstance(job.get('attempt_dir'), str):
+        raise BudgetStop('reconciled audit predecessor names no job')
     if (paths['source_ledger'] != paths['source_registration'].parent / 'billing.json' or
             paths['source_ledger'] != canonical_path(source_reg['budget']['ledger_path']) or
             checkpoint_path == paths['source_ledger'] or
