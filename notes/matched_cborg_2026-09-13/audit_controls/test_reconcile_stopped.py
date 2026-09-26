@@ -412,3 +412,43 @@ def test_an_output_the_stop_could_not_write_is_refused_at_registration(stopped, 
     with pytest.raises(BudgetStop, match='output'):
         r.automatic_stop_reconciliation(manifest)
     assert tool.reconcile_at_stop(reg, manifest)['status'] == 'refused'
+
+
+
+def _case_variant(path):
+    path = Path(path)
+    variant = path.with_name(path.name.swapcase())
+    if variant == path or not variant.exists():
+        pytest.skip('the filesystem is case-sensitive; no case variant names the same directory')
+    return variant
+
+
+@pytest.mark.parametrize('root', ['audit_tree', 'state_dir'])
+def test_a_case_variant_of_a_protected_directory_is_refused(stopped, root):
+    """#2536: on a case-insensitive filesystem a differently cased path is the same directory."""
+    _, first, reg, _, _ = stopped
+    protected = reg.parent if root == 'audit_tree' else Path(first['sequence_state']).parent
+    out = _case_variant(protected) / 'inside'
+    manifest = selected(first, reg)
+    manifest[tool.SELECTION_KEY]['output_dir'] = str(out)
+    with pytest.raises(BudgetStop, match='lies inside'):
+        r.automatic_stop_reconciliation(manifest)
+    with pytest.raises(BudgetStop, match='written outside'):
+        tool.reconcile(reg, out)
+    assert not (protected / 'inside').exists()
+
+
+def test_within_compares_by_identity_through_a_symlink(tmp_path):
+    root = tmp_path / 'root'; root.mkdir()
+    link = tmp_path / 'link'; link.symlink_to(root)
+    assert tool._within(link / 'new' / 'out', root) and tool._within(root, root)
+    assert not tool._within(tmp_path / 'elsewhere' / 'out', root)
+
+
+def test_a_refusal_names_the_error_it_hit(stopped):
+    """#2535: the reason carries the error's own text, not only its class."""
+    _, first, reg, _, _ = stopped
+    manifest = selected(first, reg)
+    manifest[tool.SELECTION_KEY]['output_dir'] = str(reg.parent.parent / 'not_yet' / 'out')
+    outcome = tool.reconcile_at_stop(reg, manifest)
+    assert outcome['status'] == 'refused' and outcome['reason'].startswith('FileNotFoundError: ')

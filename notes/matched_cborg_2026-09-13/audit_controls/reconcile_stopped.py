@@ -129,12 +129,33 @@ def previous_reconciliation(marker):
             f'inspect {marker} and its staged files in {record.get("staged")}')
 
 
+def _within(path, root):
+    """Whether `path` is `root` or lies under it, by spelling or by filesystem identity.
+
+    `Path.resolve()` keeps letter case, so on a case-insensitive filesystem
+    `/X/Audit/out` and `/X/audit/out` name one directory (#2536). Every existing
+    ancestor is compared with `root` by identity; an error reads as inside.
+    """
+    path, root = Path(path), Path(root)
+    if path == root or root in path.parents:
+        return True
+    if not root.exists():
+        return False
+    for candidate in (path, *path.parents):
+        try:
+            if candidate.exists() and os.path.samefile(candidate, root):
+                return True
+        except OSError:
+            return True
+    return False
+
+
 def reconcile(source_path, out, *, recorded_at=None):
     source_path = r.canonical_path(str(Path(source_path).resolve()), exists=True)
     if Path(out).is_symlink():
         raise BudgetStop('the reconciliation directory is a symlink')
     out = Path(out).resolve()
-    if source_path.parent == out or source_path.parent in out.parents:
+    if _within(out, source_path.parent):
         raise BudgetStop('the reconciliation is written outside the stopped audit\'s tree')
     source = r.read_json(source_path)
     if source.get('kind') != 'd4d_native_audit_continuation':
@@ -145,7 +166,7 @@ def reconcile(source_path, out, *, recorded_at=None):
     result_path = Path(job['attempt_dir']) / 'result.json'
     state_path = r.canonical_path(source['sequence_state'], exists=True)
     markers = state_path.parent / MARKERS
-    if out == state_path.parent or state_path.parent in out.parents:
+    if _within(out, state_path.parent):
         raise BudgetStop('the reconciliation is written outside the sequence state\'s directory')
     if out.exists():
         # A rerun into the same directory says what an earlier run left.
@@ -262,16 +283,23 @@ def default_output_dir(destination):
     return folder.with_name(folder.name + AUTOMATIC_SUFFIX)
 
 
-def check_output_dir(value, *, registration_dir, sequence_state):
-    """An absolute canonical directory that `reconcile` can write at stop."""
+def check_output_dir(value, *, registration_dir, sequence_state, preparing=False):
+    """An absolute canonical directory outside the audit's tree and the sequence state's directory.
+
+    When the registration is prepared, its parent must already be a directory and
+    the output must not exist yet, as `reconcile` needs at stop (#2535). Later
+    validations do not ask this, since the stop itself creates the directory.
+    """
     if type(value) is not str or not value or not Path(value).is_absolute() or str(Path(value).resolve()) != value:
         raise BudgetStop('automatic stop reconciliation needs an absolute canonical output directory')
     out = Path(value)
     for root, name in ((Path(registration_dir).resolve(), 'the audit\'s own tree'),
                        (Path(sequence_state).resolve().parent, 'the sequence state\'s directory')):
-        if out == root or root in out.parents:
+        if _within(out, root):
             raise BudgetStop(f'automatic stop reconciliation output lies inside {name}; '
                              'choose another --automatic-stop-reconciliation-dir')
+    if preparing and (not out.parent.is_dir() or out.exists() or out.is_symlink()):
+        raise BudgetStop('automatic stop reconciliation output must not exist yet, in a directory that does')
     return out
 
 
@@ -316,7 +344,7 @@ def reconcile_at_stop(registration_path, manifest):
     except BudgetStop as error:
         return {'status': 'refused', 'reason': str(error)}
     except Exception as error:
-        return {'status': 'refused', 'reason': type(error).__name__}
+        return {'status': 'refused', 'reason': f'{type(error).__name__}: {error}'}      # #2535
 
 
 def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoint_path):

@@ -83,7 +83,7 @@ def _stop_reconciliation_dir(selected, explicit, destination, parent_registratio
     state = parent_path({'repository': generation.get('repository', '')},
                         generation['budget']['ledger_path']).with_name('audit_sequence.json')
     value = str(Path(explicit).resolve()) if explicit is not None else str(default_output_dir(destination))
-    check_output_dir(value, registration_dir=Path(destination).resolve(), sequence_state=state)
+    check_output_dir(value, registration_dir=Path(destination).resolve(), sequence_state=state, preparing=True)
     return value
 
 

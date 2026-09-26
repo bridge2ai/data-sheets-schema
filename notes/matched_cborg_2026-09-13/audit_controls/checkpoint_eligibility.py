@@ -47,7 +47,7 @@ SUPPORTED_SOURCES = {
         'ec56d375f8036fa3c8c13385c5e6de019d83228ea4af2af57121a63dd572636c',
         # #2467 adds the opt-in stop reconciliation around run_job;
         # `classify_command`, the only definition executed here, is byte-identical.
-        '31b99995e40bbcc134ad1afd3b58c22afaf3bad4d07f79bdf00416e618fcbd17'}),
+        '263522c8e3a0e15fe44c2ace6879d54900724dc7892c7317485ed95237a5abc6'}),
 }
 HEX = re.compile('[0-9a-f]{64}')
 MAX_DOCUMENT = 32 * 1024 * 1024

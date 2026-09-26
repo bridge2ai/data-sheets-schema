@@ -861,12 +861,26 @@ def run_job(registration_path, review_path, *, adapter=None):
         raise
 
 
+def _interrupted(stop):
+    """Whether an interrupt is the stop or anywhere in its cause or context chain (#2537)."""
+    pending, seen = [stop], set()
+    while pending:
+        node = pending.pop()
+        if node is None or id(node) in seen:
+            continue
+        seen.add(id(node))
+        if isinstance(node, (KeyboardInterrupt, SystemExit)):
+            return True
+        pending += [node.__cause__, node.__context__]
+    return False
+
+
 def after_stop(stop, registration_path, manifest):
     """Once the sequence lock is released, the standing debit settles a single
     unconfirmed charge the stop left, when the registration selected it (#2467).
     An interrupt is honoured as it is: nothing more runs after it. Returns the
     outcome, also printed and attached to the exception; never raises."""
-    if 'automatic_stop_reconciliation' not in manifest or isinstance(stop, (KeyboardInterrupt, SystemExit)):
+    if 'automatic_stop_reconciliation' not in manifest or _interrupted(stop):
         return None
     try:
         from .reconcile_stopped import reconcile_at_stop

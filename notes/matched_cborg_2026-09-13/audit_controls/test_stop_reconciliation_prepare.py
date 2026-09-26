@@ -30,11 +30,25 @@ def test_a_default_output_inside_the_sequence_directory_is_refused_before_anythi
     assert not (tmp_path/'auto').exists()
 
 
-@pytest.mark.parametrize('arguments', [{'automatic_stop_reconciliation': 1},
-                                       {'automatic_stop_reconciliation_dir': '/tmp/x'}])
-def test_a_malformed_selection_is_refused_before_the_destination_exists(ancestry, tmp_path, arguments):
-    with pytest.raises(BudgetStop):
+@pytest.mark.parametrize('arguments, match', [
+    ({'automatic_stop_reconciliation': 1}, 'explicit boolean'),                     # #2538
+    ({'automatic_stop_reconciliation_dir': '/tmp/x'}, 'needs --automatic-stop-reconciliation')])
+def test_a_malformed_selection_is_refused_before_the_destination_exists(ancestry, tmp_path, arguments, match):
+    with pytest.raises(BudgetStop, match=match):
         prepare.prepare(**ancestry[0], destination=tmp_path/'auto', **arguments)
+    assert not (tmp_path/'auto').exists()
+
+
+@pytest.mark.parametrize('shape', ['existing_dir', 'missing_parent'])
+def test_an_output_the_stop_could_not_create_is_refused_at_preparation(ancestry, tmp_path, tmp_path_factory, shape):
+    """#2535: refused before anything exists, not discovered at stop."""
+    outside = tmp_path_factory.mktemp('outside')
+    out = outside / 'missing' / 'out' if shape == 'missing_parent' else outside / 'exists'
+    if shape == 'existing_dir':
+        out.mkdir()
+    with pytest.raises(BudgetStop, match='must not exist yet'):
+        prepare.prepare(**ancestry[0], destination=tmp_path/'auto', automatic_stop_reconciliation=True,
+                        automatic_stop_reconciliation_dir=str(out))
     assert not (tmp_path/'auto').exists()
 
 

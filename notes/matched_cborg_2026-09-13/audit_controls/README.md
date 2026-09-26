@@ -759,6 +759,12 @@ record exactly, and also the output directory.
   outside both the audit's own tree and the sequence state's directory.
   Otherwise `reconcile` would refuse it at stop, and the feature would be
   silently inert (#2529).
+- **Compared as files, not spellings:** "inside" is decided by filesystem
+  identity of every existing ancestor, so a differently cased path on a
+  case-insensitive filesystem, or a symlinked path, does not escape the check.
+  `reconcile`'s own two checks use the same comparison (#2536).
+- **Ready to write:** at preparation the output must not exist yet, in a
+  parent directory that does (#2535).
 - **Pinned:** `required_paths` pins the authorization record.
 
 When the audit **this invocation launched** stops, `run_job` releases the
@@ -766,7 +772,8 @@ sequence lock and calls `reconcile_stopped.reconcile_at_stop` (#2527).
 - **Not triggered:** a relaunch refused before it creates an attempt ("already
   consumed", "attempt already exists", a held lock) never acts on an earlier
   run's result. Nothing runs after an interrupt (`KeyboardInterrupt` or
-  `SystemExit`).
+  `SystemExit`), including one carried as the stop's cause or context, as when
+  a Ctrl-C arrives after a stop reason was recorded (#2537).
 - **When it acts:** only on a `stopped` result with exactly one unresolved
   request.
 - **What it writes:** the receipt, checkpoint and marker are written exactly as

@@ -112,3 +112,31 @@ def test_the_original_stop_is_raised_unchanged_even_if_the_debit_cannot_load(fre
     with pytest.raises(BudgetStop) as error:
         native.run_job(reg, review, adapter=stopping_adapter(exc=original))
     assert error.value is original and error.value.automatic_stop_reconciliation['status'] == 'refused'
+
+
+
+def test_a_relaunch_refused_because_its_attempt_exists_never_debits(fresh):
+    """#2538: pins where the created-attempt flag is set (after the exclusive mkdir)."""
+    m, first, reg, review = fresh
+    with pytest.raises(KeyboardInterrupt):
+        native.run_job(reg, review, adapter=stopping_adapter(exc=KeyboardInterrupt()))
+    Path(first['sequence_state']).unlink()            # a reset lineage lets the relaunch reach the attempt check
+    with pytest.raises(BudgetStop, match='attempt already exists') as second:
+        native.run_job(reg, review, adapter=lambda _: pytest.fail('must not launch'))
+    assert not hasattr(second.value, 'automatic_stop_reconciliation')
+    assert not out_of(reg).exists()
+
+
+def test_an_interrupt_behind_a_recorded_stop_is_still_an_interrupt(fresh):
+    """#2537: an operator's Ctrl-C carried as the stop's context is honoured."""
+    m, first, reg, review = fresh
+    def adapter(context):
+        try:
+            stopping_adapter(exc=KeyboardInterrupt())(context)
+        except KeyboardInterrupt:
+            raise BudgetStop('upstream HTTP response did not confirm a completed charge')
+    with pytest.raises(BudgetStop) as error:
+        native.run_job(reg, review, adapter=adapter)
+    assert isinstance(error.value.__context__, KeyboardInterrupt)
+    assert not hasattr(error.value, 'automatic_stop_reconciliation') and not out_of(reg).exists()
+    assert native._interrupted(error.value) and not native._interrupted(BudgetStop('plain'))
