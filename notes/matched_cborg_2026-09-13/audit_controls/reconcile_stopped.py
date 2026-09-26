@@ -129,12 +129,33 @@ def previous_reconciliation(marker):
             f'inspect {marker} and its staged files in {record.get("staged")}')
 
 
+def _within(path, root):
+    """Whether `path` is `root` or lies under it, by spelling or by filesystem identity.
+
+    `Path.resolve()` keeps letter case, so on a case-insensitive filesystem
+    `/X/Audit/out` and `/X/audit/out` name one directory (#2536). Every existing
+    ancestor is compared with `root` by identity; an error reads as inside.
+    """
+    path, root = Path(path), Path(root)
+    if path == root or root in path.parents:
+        return True
+    if not root.exists():
+        return False
+    for candidate in (path, *path.parents):
+        try:
+            if candidate.exists() and os.path.samefile(candidate, root):
+                return True
+        except OSError:
+            return True
+    return False
+
+
 def reconcile(source_path, out, *, recorded_at=None):
     source_path = r.canonical_path(str(Path(source_path).resolve()), exists=True)
     if Path(out).is_symlink():
         raise BudgetStop('the reconciliation directory is a symlink')
     out = Path(out).resolve()
-    if source_path.parent == out or source_path.parent in out.parents:
+    if _within(out, source_path.parent):
         raise BudgetStop('the reconciliation is written outside the stopped audit\'s tree')
     source = r.read_json(source_path)
     if source.get('kind') != 'd4d_native_audit_continuation':
@@ -145,7 +166,7 @@ def reconcile(source_path, out, *, recorded_at=None):
     result_path = Path(job['attempt_dir']) / 'result.json'
     state_path = r.canonical_path(source['sequence_state'], exists=True)
     markers = state_path.parent / MARKERS
-    if out == state_path.parent or state_path.parent in out.parents:
+    if _within(out, state_path.parent):
         raise BudgetStop('the reconciliation is written outside the sequence state\'s directory')
     if out.exists():
         # A rerun into the same directory says what an earlier run left.
@@ -246,6 +267,84 @@ def reconcile(source_path, out, *, recorded_at=None):
             'source_registration': str(source_path), 'receipt': str(final['receipt']),
             'receipt_sha256': hashes['receipt'], 'request_id': row['id'], 'budget_debit_usd': row['reserved_usd'],
             'marker': str(marker)}
+
+
+#: The registration block that applies the standing debit when the audit stops (#2467).
+SELECTION_KIND = 'standing_full_reservation_debit_at_stop_v1'
+SELECTION_KEY = 'automatic_stop_reconciliation'
+#: The default output: beside the audit's own directory. It is registered, and
+#: refused at preparation where it would fall inside the audit's tree or the
+#: sequence state's directory, where `reconcile` would refuse it at stop (#2529).
+AUTOMATIC_SUFFIX = '_stop_reconciliation'
+
+
+def default_output_dir(destination):
+    folder = Path(destination).resolve()
+    return folder.with_name(folder.name + AUTOMATIC_SUFFIX)
+
+
+def check_output_dir(value, *, registration_dir, sequence_state, preparing=False):
+    """An absolute canonical directory outside the audit's tree and the sequence state's directory.
+
+    When the registration is prepared, its parent must already be a directory and
+    the output must not exist yet, as `reconcile` needs at stop (#2535). Later
+    validations do not ask this, since the stop itself creates the directory.
+    """
+    if type(value) is not str or not value or not Path(value).is_absolute() or str(Path(value).resolve()) != value:
+        raise BudgetStop('automatic stop reconciliation needs an absolute canonical output directory')
+    out = Path(value)
+    for root, name in ((Path(registration_dir).resolve(), 'the audit\'s own tree'),
+                       (Path(sequence_state).resolve().parent, 'the sequence state\'s directory')):
+        if _within(out, root):
+            raise BudgetStop(f'automatic stop reconciliation output lies inside {name}; '
+                             'choose another --automatic-stop-reconciliation-dir')
+    if preparing and (not out.parent.is_dir() or out.exists() or out.is_symlink()):
+        raise BudgetStop('automatic stop reconciliation output must not exist yet, in a directory that does')
+    return out
+
+
+def selection(output_dir):
+    """The exact block a registration carries to opt in: the pinned authorization record and where to write."""
+    _, reference = standing_authorization()
+    return {'kind': SELECTION_KIND, 'authorization': reference, 'output_dir': str(output_dir)}
+
+
+def validated_selection(value, manifest):
+    """The selection exactly as `selection` makes it, with an output the stop can write."""
+    if (not isinstance(value, dict) or set(value) != {'kind', 'authorization', 'output_dir'}
+            or {k: value[k] for k in ('kind', 'authorization')} !=
+               {k: v for k, v in selection('').items() if k != 'output_dir'}):
+        raise BudgetStop('automatic stop reconciliation must name the pinned standing authorization exactly')
+    try:
+        registration_dir = Path(manifest['job']['attempt_dir']).parent.parent
+        state = manifest['sequence_state']
+    except (KeyError, TypeError) as error:
+        raise BudgetStop('automatic stop reconciliation needs the registered attempt and sequence state') from error
+    check_output_dir(value['output_dir'], registration_dir=registration_dir, sequence_state=state)
+    return dict(value)
+
+
+def reconcile_at_stop(registration_path, manifest):
+    """Apply the standing debit to an audit that just stopped, once its sequence lock is released.
+
+    Never raises: a stop the debit does not cover, or any refusal, is
+    reported and left to a person, exactly as without this selection. The
+    reviewed `reconcile` does every check, including the successor's own
+    validator, before it publishes anything.
+    """
+    try:
+        chosen = validated_selection(manifest.get(SELECTION_KEY), manifest)
+        result_path = Path(manifest['job']['attempt_dir']) / 'result.json'
+        if not result_path.is_file():
+            return {'status': 'not_applicable', 'reason': 'the audit wrote no result'}
+        result = r.read_json(result_path)
+        if result.get('status') != 'stopped' or len(result.get('unresolved_requests') or []) != 1:
+            return {'status': 'not_applicable', 'reason': 'the stop left no single unconfirmed charge'}
+        return {'status': 'reconciled', **reconcile(registration_path, chosen['output_dir'])}
+    except BudgetStop as error:
+        return {'status': 'refused', 'reason': str(error)}
+    except Exception as error:
+        return {'status': 'refused', 'reason': f'{type(error).__name__}: {error}'}      # #2535
 
 
 def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoint_path):

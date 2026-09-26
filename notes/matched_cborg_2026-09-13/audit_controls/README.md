@@ -745,8 +745,46 @@ already has one. The successor's validator does not yet read the marker or
 the pinned record (#2492). The stopped audit's files are never modified. The tool
 neither claims the sequence nor contacts a provider. The printed paths and
 hashes are the next preparation's continuation checkpoint, source
-registration and reconciliation receipt. Running it automatically when an
-audit stops remains open in #2467.
+registration and reconciliation receipt.
+
+### Applied at stop (`--automatic-stop-reconciliation`)
+
+A registration prepared with `--automatic-stop-reconciliation` carries an
+`automatic_stop_reconciliation` block. The block names the pinned authorization
+record exactly, and also the output directory.
+- **Output directory:** by default it sits beside the destination; set it with
+  `--automatic-stop-reconciliation-dir`.
+- **Checked twice:** at preparation, before anything is created, and again by
+  `validate_registration`. The directory must be absolute and canonical, and
+  outside both the audit's own tree and the sequence state's directory.
+  Otherwise `reconcile` would refuse it at stop, and the feature would be
+  silently inert (#2529).
+- **Compared as files, not spellings:** "inside" is decided by filesystem
+  identity of every existing ancestor, so a differently cased path on a
+  case-insensitive filesystem, or a symlinked path, does not escape the check.
+  `reconcile`'s own two checks use the same comparison (#2536).
+- **Ready to write:** at preparation the output must not exist yet, in a
+  parent directory that does (#2535).
+- **Pinned:** `required_paths` pins the authorization record.
+
+When the audit **this invocation launched** stops, `run_job` releases the
+sequence lock and calls `reconcile_stopped.reconcile_at_stop` (#2527).
+- **Not triggered:** a relaunch refused before it creates an attempt ("already
+  consumed", "attempt already exists", a held lock) never acts on an earlier
+  run's result. Nothing runs after an interrupt (`KeyboardInterrupt` or
+  `SystemExit`), including one carried as the stop's cause or context, as when
+  a Ctrl-C arrives after a stop reason was recorded (#2537).
+- **When it acts:** only on a `stopped` result with exactly one unresolved
+  request.
+- **What it writes:** the receipt, checkpoint and marker are written exactly as
+  `reconcile` writes them, into the registered directory.
+- **What it reports:** the outcome is printed to stderr and attached to the
+  stop's exception as `automatic_stop_reconciliation`. It is one of `reconciled`
+  (with the paths and hashes the next preparation passes), `not_applicable` or
+  `refused`.
+- **Failure:** it never raises, and the original exception is re-raised
+  unchanged. A refusal publishes nothing and leaves the stop to be reconciled
+  by hand, as without the selection.
 
 ## An audit after a transport probe (#2469)
 
