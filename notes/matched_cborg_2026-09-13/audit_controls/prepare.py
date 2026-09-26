@@ -70,6 +70,54 @@ def save(path, value):
         handle.write('\n')
 
 
+def _bridge_result(source_path, source):
+    """The stopped predecessor's result: an audit's job result, or a probe's own (#2469)."""
+    from .probe_predecessor import KIND as PROBE_KIND
+    if source.get('kind') == PROBE_KIND:
+        return str(Path(source_path).parent / 'result.json')
+    return str(Path(source['job']['attempt_dir']) / 'result.json')
+
+
+def amendment_candidate(parent_registration, amendment, checkpoint, source_registration=None, reconciliation_receipt=None):
+    """The fields of an amended audit that its predecessor checks read, before any pins exist.
+
+    It carries the sequence state the registration will name, so a probe
+    predecessor is checked against it (#2504).
+    """
+    origin = read_json(parent_registration)
+    prior_path = str(Path(checkpoint).resolve())
+    predecessor = read_json(prior_path)
+    candidate = {'kind': 'd4d_native_audit_continuation',
+        'parent': {'registration': str(Path(parent_registration).resolve())},
+        'budget_amendment': amendment,
+        'budget': {'additional_usd': amendment['total_usd'],
+            'per_attempt_usd': origin['budget']['per_attempt_usd'],
+            'continuation': {'checkpoint': prior_path, 'sha256': sha(prior_path),
+                'cost_usd': str(sum((Decimal(row['cost_usd']) for row in predecessor['requests']), Decimal(0)))}},
+        'sequence_state': str(parent_path({'repository': origin.get('repository', '')},
+                                          origin['budget']['ledger_path']).with_name('audit_sequence.json')),
+        'pinned_files': {}}
+    if source_registration:
+        source_path = str(Path(source_registration).resolve())
+        source = read_json(source_path)
+        candidate['budget']['continuation']['reconciliation'] = {
+            'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
+            'receipt': str(Path(reconciliation_receipt).resolve()),
+            'result': _bridge_result(source_path, source)}
+    return candidate
+
+
+def validate_amendment_candidate(candidate):
+    """Validate the exact authorization and settled predecessor, reading only."""
+    from budget_amendment import effective_total, validate_predecessor
+    from .registration import validate_budget_amendment_predecessor
+    continuation = candidate['budget']['continuation']
+    predecessor = read_json(continuation['checkpoint'])
+    effective_total(candidate, read_json(candidate['parent']['registration']), require_pins=False)
+    validate_predecessor(candidate, predecessor, checkpoint_sha256=continuation['sha256'], require_pins=False)
+    validate_budget_amendment_predecessor(candidate, predecessor, require_pins=False)
+
+
 def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliation_receipt,
             reconciled_checkpoint, destination, job_id, repository, attempt_cap=20,
             deadline_seconds=10800, continuation_checkpoint=None,
@@ -194,29 +242,9 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
     if amendment is not None:
         # Validate the exact authorization and settled predecessor before creating
         # even an offline destination. Old evidence is never rewritten.
-        from budget_amendment import effective_total, validate_predecessor
-        origin = read_json(parent_registration)
-        prior_path = str(Path(continuation_checkpoint or reconciled_checkpoint).resolve())
-        predecessor = read_json(prior_path)
-        candidate = {'kind': 'd4d_native_audit_continuation',
-            'parent': {'registration': str(Path(parent_registration).resolve())},
-            'budget_amendment': amendment,
-            'budget': {'additional_usd': amendment['total_usd'],
-                'per_attempt_usd': origin['budget']['per_attempt_usd'],
-                'continuation': {'checkpoint': prior_path, 'sha256': sha(prior_path),
-                    'cost_usd': str(sum((Decimal(row['cost_usd']) for row in predecessor['requests']), Decimal(0)))}},
-            'pinned_files': {}}
-        if continuation_source_registration:
-            source_path = str(Path(continuation_source_registration).resolve())
-            source = read_json(source_path)
-            candidate['budget']['continuation']['reconciliation'] = {
-                'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
-                'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
-                'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
-        effective_total(candidate, origin, require_pins=False)
-        validate_predecessor(candidate, predecessor, checkpoint_sha256=sha(prior_path), require_pins=False)
-        from .registration import validate_budget_amendment_predecessor
-        validate_budget_amendment_predecessor(candidate, predecessor, require_pins=False)
+        validate_amendment_candidate(amendment_candidate(
+            parent_registration, amendment, continuation_checkpoint or reconciled_checkpoint,
+            continuation_source_registration, continuation_reconciliation_receipt))
     if checkpoint_selection is not None:
         # Full read-only checkpoint validation and current-tip freshness precede
         # any preparation output. This does not claim or advance ownership.
@@ -386,7 +414,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         manifest['budget']['continuation']['reconciliation'] = {
             'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
             'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
-            'result': str(Path(source['job']['attempt_dir']) / 'result.json')}
+            'result': _bridge_result(source_path, source)}
     if checkpoint_selection is not None:
         manifest['audit_worker_checkpoint'] = checkpoint_selection
     save(parent['phase2_proof'], inspect_parent(manifest))
