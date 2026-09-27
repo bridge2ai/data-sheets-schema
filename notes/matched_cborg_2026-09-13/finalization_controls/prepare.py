@@ -29,7 +29,8 @@ def render_system(manifest):
 
 
 def prepare(*,accepted_audit_registration,acceptance,destination,job_id,repository,
-            attempt_cap='20',deadline_seconds=10800,context_recovery=False,durable_sequence_claim=False):
+            attempt_cap='20',deadline_seconds=10800,context_recovery=False,durable_sequence_claim=False,
+            native_thinking_display=None):
     from sequence_claim import select
     claim_selection={};select(claim_selection,durable_sequence_claim)
     if type(context_recovery) is not bool:
@@ -60,6 +61,10 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
         budget_amendment.effective_total(accepted,read_json(accepted['parent']['registration']))
         budget_amendment.inherit(accepted,budget_candidate)
     validate_budget_identity(budget_candidate,accepted)
+    if native_thinking_display is not None:
+        # Phase 4 selects its own display, checked before the destination exists; never inherited (#2541).
+        from audit_controls.registration import stage_thinking_display
+        native_thinking_display=stage_thinking_display(native_thinking_display,accepted['native_runtime'].get('version'))
     destination=canonical_path(str(Path(destination).absolute()))
     destination.mkdir(parents=True,exist_ok=False)
     registration=destination/'registration.json'
@@ -99,6 +104,7 @@ def prepare(*,accepted_audit_registration,acceptance,destination,job_id,reposito
     if 'budget_amendment' in accepted:
         budget_amendment.inherit(accepted,manifest)
     manifest.update(claim_selection)
+    if native_thinking_display is not None:manifest['native_thinking_display']=native_thinking_display
     for p in [old_path,old_result,old_ledger,acceptance,snapshot,generation_path,*map(Path,manifest['inputs'].values())]:
         manifest['pinned_files'][str(p)]=sha(p)
     seal=destination/'audit_closed.json';save(seal,seal_document(manifest));manifest['budget_sequence']['seal']=ref(seal)
@@ -130,7 +136,13 @@ def main():
         help='require durable exact-byte ownership evidence before spending')
     parser.add_argument('--repository',default=str(Path.cwd()))
     parser.add_argument('--attempt-cap',default='20');parser.add_argument('--deadline-seconds',type=int,default=10800)
-    print(prepare(**vars(parser.parse_args())))
+    parser.add_argument('--native-thinking-display',choices=('summarized',),
+        help='the proxy adds display: summarized to each forwarded adaptive-thinking request (#2541)')
+    args=vars(parser.parse_args())
+    if args['native_thinking_display'] is not None:
+        from native_proxy import THINKING_DISPLAY
+        args['native_thinking_display']=dict(THINKING_DISPLAY)
+    print(prepare(**args))
 
 
 if __name__=='__main__':main()

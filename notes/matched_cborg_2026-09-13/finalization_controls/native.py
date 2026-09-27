@@ -304,6 +304,12 @@ def complete(context,evidence,runtime_evidence):
             'artifacts':validation['artifacts']}
 
 
+def thinking_display(manifest):
+    """Phase 4's own registered display for the shared controller (#2541)."""
+    from .registration import finalization_thinking_display
+    return finalization_thinking_display(manifest)
+
+
 def execute_job(context,*,client=None,upstream=None):
     return runtime.execute_job(context,client=client,upstream=upstream,protocol=sys.modules[__name__])
 
@@ -378,6 +384,10 @@ def run_job(registration_path,review_path,*,adapter=None):
             receipt.update(finished_at=now(),requests_admitted=len(rows),
                 settled_cost_usd=str(sum((Decimal(r['cost_usd']) for r in rows if r['status']=='settled'),Decimal(0))),
                 unresolved_requests=[r['id'] for r in rows if r['status']!='settled'])
+            if 'native_thinking_display' in manifest:
+                # Reported for every outcome; never raises (#2541).
+                from native_proxy import thinking_display_evidence
+                receipt['thinking_display']=thinking_display_evidence(attempt/'requests',manifest['native_thinking_display'],strict=False)
             write_new(attempt/'result.json',receipt)
         if error:raise error
         return receipt

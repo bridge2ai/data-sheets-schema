@@ -728,8 +728,9 @@ the registered maximum number of retries is affordable.
 (workers and integration alike) then adds `"display":"summarized"` to each
 forwarded adaptive-thinking request. `native_controls/README.md` describes
 the mechanism and the evidence it keeps.
-- **Where it is allowed:** it is audit-only and requires Claude Code 2.1.272.
-  Phase 4, evaluation and generation refuse it, even as `null`.
+- **Where it is allowed:** it requires Claude Code 2.1.272. Evaluation and
+  generation refuse this audit key, even as `null`. Phase 4 and evaluation
+  select their own display instead (#2541); see their READMEs.
 - **Checkpoint successors:** a worker-checkpoint successor must restate its
   source's value exactly.
 - **Preparation:** a malformed value, or another runtime version, is refused
