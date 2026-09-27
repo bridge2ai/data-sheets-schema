@@ -45,8 +45,10 @@ def test_phase4_selects_its_own_display_and_never_inherits_the_audits(ancestry, 
         **({KEY: dict(THINKING_DISPLAY)} if selected else {}))
     m = final_registration.validate_registration(path)
     assert (KEY in m) is selected
+    # The selector the shared controller asks at run time, not only the manifest key (#2683).
+    assert final_native.thinking_display(m) == (THINKING_DISPLAY if selected else None)
     if selected:
-        assert m[KEY] == THINKING_DISPLAY and final_native.thinking_display(m) == THINKING_DISPLAY
+        assert m[KEY] == THINKING_DISPLAY
 
 
 @pytest.mark.parametrize('change, match', [
@@ -71,6 +73,20 @@ def test_the_phase4_registration_check_itself_refuses_a_changed_display(ancestry
         monkeypatch.setattr(audit_registration, 'THINKING_DISPLAY_RUNTIMES', frozenset({'2.1.272 (Claude Code)'}))
     with pytest.raises(BudgetStop, match=match):
         final_registration.validate_registration(path)
+
+
+@pytest.mark.parametrize('value', [{**THINKING_DISPLAY, 'extra': 1}, {**THINKING_DISPLAY, 'delivery': 'cli_flag'}],
+                         ids=['extra_key', 'other_delivery'])
+def test_phase4_preparation_refuses_a_malformed_display_on_a_registered_runtime(ancestry, tmp_path, monkeypatch, value):
+    """#2687: on a runtime the display is registered for, the value itself is checked, before
+    the destination exists; the version check alone would let it through."""
+    monkeypatch.setattr(audit_registration, 'THINKING_DISPLAY_RUNTIMES', frozenset({'synthetic-native-version'}))
+    accepted, acceptance = accepted_audit(ancestry, tmp_path / 'accepted')
+    with pytest.raises(BudgetStop, match='must be thinking_display_v1, summarized, proxy_substitution'):
+        final_prepare.prepare(accepted_audit_registration=accepted, acceptance=acceptance,
+            destination=tmp_path / 'phase4', job_id='synthetic_final', repository=ancestry[0]['repository'],
+            **{KEY: value})
+    assert not (tmp_path / 'phase4').exists()
 
 
 def test_phase4_preparation_refuses_before_its_destination_exists(ancestry, tmp_path):
@@ -167,18 +183,15 @@ def test_the_phase4_cli_refuses_any_other_display(tmp_path, monkeypatch, capsys)
     assert stop.value.code == 2 and 'invalid choice' in capsys.readouterr().err
 
 
-@pytest.mark.parametrize('registered', [True, False], ids=['registered', 'not_registered'])
-@pytest.mark.parametrize('admitted', [False, True], ids=['nothing_admitted', 'unproven_request'])
-def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch, admitted, registered):
-    """Stubs stand in for registration, review and ownership; the receipt code is the real one.
-
-    #2595: a stop after a request was admitted whose display is not proven still writes its
-    receipt, reports the problem and keeps the stop's own reason. #2649: a run registered
-    without a display writes no report at all."""
+def _phase4_run(tmp_path, monkeypatch, registered):
+    """A Phase 4 registration and review past stubbed validation, review and ownership; the
+    receipt code is the real one."""
     from finalization_controls import registration as final_reg
     attempt = tmp_path / 'attempts' / 'synthetic_final'
     manifest = {'job': {'id': 'synthetic_final', 'attempt_dir': str(attempt), 'output_dir': str(attempt / 'output')},
-                'repository_commit': 'a' * 40, **({KEY: dict(THINKING_DISPLAY)} if registered else {})}
+                'repository_commit': 'a' * 40, 'inputs': {}, 'pinned_files': {},
+                'budget_sequence': {'origin': {'registration': 'synthetic-origin'}, 'audit_origin': 'synthetic-audit'},
+                **({KEY: dict(THINKING_DISPLAY)} if registered else {})}
     path, review = tmp_path / 'registration.json', tmp_path / 'review.json'
     save(path, manifest)
     save(review, {'verdict': 'approve', 'registration_sha256': final_reg.sha(path), 'repository_commit': 'a' * 40,
@@ -192,6 +205,33 @@ def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch, admitted,
     monkeypatch.setattr(final_native, 'build_policy', lambda *args: None)
     monkeypatch.setattr(native, 'verify_runtime', lambda *args: None)
     monkeypatch.setattr(final_native, 'owned_sequence', owned)
+    return path, review, attempt
+
+
+@pytest.mark.parametrize('registered', [True, False], ids=['registered', 'not_registered'])
+def test_a_completed_phase4_receipt_reports_the_display(tmp_path, monkeypatch, registered):
+    """#2685: the summary is written for a completed run too, not only for a stop."""
+    path, review, attempt = _phase4_run(tmp_path, monkeypatch, registered)
+    def completes(context):
+        return {'validation': {'passed': True}, 'artifacts': {}, 'evidence': {'phase4': {'synthetic': True}},
+                'runtime': {'synthetic': True}}
+    receipt = final_native.run_job(path, review, adapter=completes)
+    stored = json.loads((attempt / 'result.json').read_text())
+    assert receipt['status'] == stored['status'] == 'completed_pending_independent_review'
+    if not registered:
+        assert 'thinking_display' not in stored
+        return
+    assert stored['thinking_display'] == {'kind': 'thinking_display_summary_v1', 'registered': THINKING_DISPLAY,
+                                          'requests': [], 'problems': [], 'refusals': 0}
+
+
+@pytest.mark.parametrize('registered', [True, False], ids=['registered', 'not_registered'])
+@pytest.mark.parametrize('admitted', [False, True], ids=['nothing_admitted', 'unproven_request'])
+def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch, admitted, registered):
+    """#2595: a stop after a request was admitted whose display is not proven still writes its
+    receipt, reports the problem and keeps the stop's own reason. #2649: a run registered
+    without a display writes no report at all."""
+    path, review, attempt = _phase4_run(tmp_path, monkeypatch, registered)
     def stops(context):
         if admitted:
             folder = context.attempt / 'requests' / 'synthetic-request'
