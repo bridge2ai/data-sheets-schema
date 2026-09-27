@@ -14,6 +14,12 @@ import yaml
 from data_sheets_schema import api_runner as api, usage_ledger as ledger
 from tests.test_download.test_api_runner import FakeClient, spec
 
+# A hang guard, not a measurement: these children and threads start an interpreter and
+# import api_runner or run a whole fake generation. Under a load of about 150 on 10 cores
+# the four interrupted-generation cases took 326 s between them and two exceeded a 90 s
+# bound; the tests assert what the run left behind, never how fast (#2726).
+HANG_GUARD_SECONDS = 900
+
 
 def row():
     return {"phase": "full", "attempt": 1, "started_at": "2026-09-11T00:00:00Z",
@@ -238,7 +244,7 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
     def pause_before_intent(run, *args):
         if not entered.is_set():
             entered.set()
-            assert release.wait(60), "concurrency test did not release the first run"
+            assert release.wait(HANG_GUARD_SECONDS), "concurrency test did not release the first run"
         return original(run, *args)
 
     monkeypatch.setattr(api, "_begin_usage_call", pause_before_intent)
@@ -246,7 +252,7 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
     with ThreadPoolExecutor(max_workers=1) as pool:
         future = pool.submit(api.execute, s, client=active)
         try:
-            assert entered.wait(60), "first run never reached the request boundary"
+            assert entered.wait(HANG_GUARD_SECONDS), "first run never reached the request boundary"
             before = ledger.ledger_path(s).read_bytes()
             for contender, resume in ((s, True), (s, False),
                                       (replace(s, label="another_rep1"), True)):
@@ -262,7 +268,7 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
                 pass
         finally:
             release.set()
-        result = future.result(timeout=60)
+        result = future.result(timeout=HANG_GUARD_SECONDS)
     assert len(active.messages.calls) == len(result["usage"]) == 4
     assert api.execute(s, client=active)["already_complete"]
     assert len(active.messages.calls) == 4
@@ -278,7 +284,7 @@ with exclusive_run(spec(out_dir=Path(sys.argv[1]))):
     os._exit(23)
 """
     result = subprocess.run([sys.executable, "-c", child, str(tmp_path)],
-                            capture_output=True, text=True, timeout=30)
+                            capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert result.returncode == 23, result.stderr
     with ledger.exclusive_run(spec(out_dir=tmp_path)):
         pass
@@ -412,7 +418,7 @@ api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
 """
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
     killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
-                            cwd=root, env=environment, capture_output=True, text=True, timeout=90)
+                            cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
     assert not s.provenance_path.exists()
     assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
@@ -521,7 +527,7 @@ api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
 """
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
     killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
-                            cwd=root, env=environment, capture_output=True, text=True, timeout=90)
+                            cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
     assert s.provenance_path.read_bytes() == old_provenance
     generation = ledger.generation_id(s)
