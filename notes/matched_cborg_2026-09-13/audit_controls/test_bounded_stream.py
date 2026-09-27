@@ -64,8 +64,9 @@ def processes(monkeypatch):
 
 
 #: The in-process gap from the parent deciding to close a worker to its SIGKILL. It
-#: holds no interpreter start-up, so load does not approach it (#2618).
-KILL_GAP_SECONDS = 2
+#: holds no interpreter start-up: measured at most 5 ms at load 290, so this keeps a
+#: 100-fold margin and still refuses any grace origin/main's totals refused (#2618, #2643).
+KILL_GAP_SECONDS = .5
 
 
 def killed_before_reaped(process, killed_at=None):
@@ -211,8 +212,8 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
     assert process.returncode == -signal.SIGKILL
     (waits,) = reaped
     assert waits and all(waits), "the worker was waited on before it was killed"
-    assert len(killed_at) == 1 and killed_at[0] - clock.expired_at < KILL_GAP_SECONDS, \
-        "the worker was killed long after its deadline"
+    assert len(killed_at) == 1, f"expected one SIGKILL, saw {len(killed_at)}"          # #2644
+    assert killed_at[0] - clock.expired_at < KILL_GAP_SECONDS, "the worker was killed long after its deadline"
     assert not client._workers
     client.close()
 
@@ -324,7 +325,8 @@ def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatc
     assert not drained, "the context waited for the withheld body"
     assert reads_after_headers == [], "the context read from the worker after its headers"
     assert waits and all(waits), "the context waited on a live worker before killing it"
-    assert len(killed_at) == 1 and killed_at[0] - leaving < KILL_GAP_SECONDS, "the kill came long after the close"
+    assert len(killed_at) == 1, f"expected one SIGKILL, saw {len(killed_at)}"          # #2644
+    assert killed_at[0] - leaving < KILL_GAP_SECONDS, "the kill came long after the close"
     assert not client._workers
     client.close()
 

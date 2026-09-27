@@ -503,7 +503,7 @@ def offline_launch(prepared, tmp_path, monkeypatch):
     for parent in dict.fromkeys(directory.parent for directory in absolute):
         try:
             remove_if_empty(parent)
-        except BaseException as error:   # noqa: B036 - pytest.fail raises a BaseException
+        except pytest.fail.Exception as error:   # a lock timeout; an interrupt still stops at once (#2645)
             failures.append(error)
     if failures:
         raise failures[0]
