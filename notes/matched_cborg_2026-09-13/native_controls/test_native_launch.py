@@ -163,12 +163,15 @@ def test_a_refused_signal_to_a_running_leader_is_raised_and_keeps_the_stop(monke
     Whatever the cleanup raises is caught here (#2603), so a regression that lets the
     interrupt through fails this test instead of ending the pytest session."""
     process = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(30)'], start_new_session=True)
+    sends = []
     def refuse(pid, sig):
+        sends.append(sig)
         raise PermissionError(errno.EPERM, 'Operation not permitted')
     monkeypatch.setattr(os, 'killpg', refuse)
     try:
         for unwinding in (BudgetStop('recorded stop'), KeyboardInterrupt()):
-            raised = None
+            raised, sends[:] = None, []
+            start = time.monotonic()
             try:
                 try:
                     raise unwinding
@@ -176,7 +179,10 @@ def test_a_refused_signal_to_a_running_leader_is_raised_and_keeps_the_stop(monke
                     terminate_group(process)
             except BaseException as error:   # noqa: B036 - the interrupt must not escape the test
                 raised = error
+            elapsed = time.monotonic() - start
             assert isinstance(raised, PermissionError), raised
+            # Raised at once after the first wait: one send, no re-sends, no longer wait (#2700).
+            assert sends == [signal.SIGTERM] and elapsed < 6, (sends, elapsed)
             chain, node = [], raised
             while node is not None:
                 chain.append(node); node = node.__context__
@@ -192,16 +198,20 @@ def test_a_live_leader_refusing_the_kill_step_is_raised(monkeypatch):
                                 'signal.SIG_IGN);print("ready",flush=True);time.sleep(30)'],
                                stdout=subprocess.PIPE, text=True, start_new_session=True)
     assert process.stdout.readline().strip() == 'ready'
-    signal_group = os.killpg
+    signal_group, kills = os.killpg, []
     def refuse_the_kill(pgid, sig):
         if sig == signal.SIGKILL:
+            kills.append(sig)
             raise PermissionError(errno.EPERM, 'Operation not permitted')
         return signal_group(pgid, sig)
     monkeypatch.setattr(os, 'killpg', refuse_the_kill)
     try:
+        start = time.monotonic()
         with pytest.raises(PermissionError):
             terminate_group(process)
+        elapsed = time.monotonic() - start
         assert process.returncode is None
+        assert kills == [signal.SIGKILL] and elapsed < 8, (kills, elapsed)       # raised at once (#2700)
     finally:
         monkeypatch.undo(); process.kill(); process.wait()
 
@@ -239,7 +249,7 @@ def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_i
     calls = []
     def member_refuses(pgid, sig):
         calls.append((sig, process.returncode))
-        if process.returncode is not None and after_reap == 'empties' and len(calls) > 2:
+        if process.returncode is not None and after_reap == 'empties' and len(calls) > 6:   # 5 re-sends (#2699)
             raise ProcessLookupError(errno.ESRCH, 'No such process')
         if process.returncode is not None and after_reap == 'accepts':
             return None
@@ -257,8 +267,12 @@ def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_i
             assert isinstance(error, PermissionError), error
             assert isinstance(error.__context__, BudgetStop), error.__context__   # the stop stays in the chain
             assert 2 <= elapsed < 4.5, elapsed                                    # the second bound is 2 s
+            # Paced, not a busy spin: about one send per 20 ms over the 2 s bound (#2699).
+            assert calls.count((signal.SIGTERM, 0)) <= 150, calls.count((signal.SIGTERM, 0))
         else:
             assert isinstance(error, BudgetStop)                                  # only the stop being unwound
+        if after_reap == 'empties':
+            assert elapsed < 1.5, elapsed                     # a refusal that clears is excused promptly (#2699)
         if after_reap == 'accepts':
             # Delivered once at each step, then done: no re-sends to the deadline.
             assert calls.count((signal.SIGTERM, 0)) == 1 and elapsed < 1.5, (calls, elapsed)
@@ -292,7 +306,7 @@ def test_a_refusal_after_the_leader_was_reaped_is_excused_only_once_the_group_is
         if sig != refused_signal:
             return signal_group(pgid, sig)             # SIGTERM ends the leader; terminate_group reaps it
         refusals.append(process.returncode)
-        if standing or len(refusals) < 3:
+        if standing or len(refusals) < 6:          # cleared after 5 re-sends, so pacing adds up (#2699)
             raise PermissionError(errno.EPERM, 'Operation not permitted')   # a member still exiting / refusing
         raise ProcessLookupError(errno.ESRCH, 'No such process')             # the group is gone
     monkeypatch.setattr(os, 'killpg', killpg)
@@ -304,7 +318,7 @@ def test_a_refusal_after_the_leader_was_reaped_is_excused_only_once_the_group_is
             assert elapsed >= 2, elapsed
         else:
             assert error is None, error
-            assert len(refusals) == 3
+            assert len(refusals) == 6 and elapsed < 1.5, (refusals, elapsed)   # excused promptly (#2699)
     finally:
         monkeypatch.undo()
         if process.stdout:
