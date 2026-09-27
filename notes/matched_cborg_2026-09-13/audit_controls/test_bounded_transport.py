@@ -4,6 +4,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import io
 import json
 from pathlib import Path
+import signal
 import ssl
 import sys
 import threading
@@ -91,7 +92,24 @@ def test_real_worker_returns_typed_count_and_registered_headers(children):
     assert len(children) == 1 and children[0].poll() == 0 and not client._active
 
 
-def test_progressing_response_cannot_outlive_total_count_deadline(children):
+#: From the count's deadline (its start plus the budget) to the worker's SIGKILL:
+#: the wake-up of the parent's timed wait and the kill, in-process (#2697).
+#: Measured median 7.7 ms, p99 105 ms, max 466 ms over 1,670 attempts at load up
+#: to 442. The review's own run measured max 1.17 s at load ~450, and this keeps
+#: threefold on that. It rejects a deadline enforced 3.5 s late or more, including
+#: start-up left uncharged whenever start-up takes that long. It does not reject a
+#: shorter lateness, which origin/main's `budget + 1.5` total only caught at loads
+#: where it also flaked.
+DEADLINE_KILL_SECONDS = 3.5
+
+#: The reap of the killed worker, which may still be starting its interpreter. It
+#: is a process-level cost, so it is kept out of the deadline bound and given only a
+#: hang guard (#2697). Measured median 89 ms, p99 633 ms, max 796 ms (load 356);
+#: the review measured max 1.56 s.
+REAP_SECONDS = 10
+
+
+def test_progressing_response_cannot_outlive_total_count_deadline(children, monkeypatch):
     # Every byte arrives well inside the SDK's inactivity bound. The complete
     # body takes twice the parent's total budget, so only that budget can end
     # the count. The budget also pays for starting the worker (by design,
@@ -99,12 +117,25 @@ def test_progressing_response_cannot_outlive_total_count_deadline(children):
     # seconds, so the request is never sent (#2569). Such an attempt still
     # proves the deadline but not a progressing response. What decides a
     # repeat with a doubled budget is the server's record of body bytes
-    # flushed before the deadline, not a guess about start-up. No assertion is
-    # retried: every attempt checks the typed timeout, the elapsed window, one
-    # reaped worker per count (the worker SDK never retries) and an empty
-    # registry, so a deadline that is not enforced fails on the first attempt.
-    body, attempts = b'{"input_tokens":100}', []
-    for budget in (2, 4, 8, 16):
+    # flushed before the deadline, not a guess about start-up; the ladder runs
+    # to 32 s because start-up reached about 14 s at load 450 (#2697). No
+    # assertion is retried: every attempt checks the typed timeout, that it was
+    # not early, the deadline-to-SIGKILL gap, a bounded reap, one reaped worker
+    # per count (the worker SDK never retries) and an empty registry, so a
+    # deadline that is not enforced fails on the first attempt.
+    body, attempts, killed_at = b'{"input_tokens":100}', [], []
+    launch = bounded.subprocess.Popen
+    def watched(*args, **kwargs):
+        child = launch(*args, **kwargs)
+        real_signal = child.send_signal
+        def send_signal(sig):
+            if sig == signal.SIGKILL:
+                killed_at.append(time.monotonic())
+            return real_signal(sig)
+        child.send_signal = send_signal
+        return child
+    monkeypatch.setattr(bounded.subprocess, 'Popen', watched)
+    for budget in (2, 4, 8, 16, 32):
         delay = 2 * budget / len(body)
         # Every gap is far inside the worker SDK's inactivity bound, which is
         # the budget itself (`payload['timeout']`).
@@ -112,11 +143,15 @@ def test_progressing_response_cannot_outlive_total_count_deadline(children):
         with server(body=body, delay=delay) as (url, seen):
             client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=budget)
             try:
+                killed_at.clear()
                 started = time.monotonic()
                 with pytest.raises(anthropic.APITimeoutError):
                     client.messages.count_tokens(**FIELDS)
                 elapsed = time.monotonic() - started
-                assert budget - .5 <= elapsed < budget + 1.5, (budget, elapsed, attempts)
+                assert elapsed >= budget - .5, (budget, elapsed, attempts)
+                assert len(killed_at) == 1, (budget, killed_at, attempts)
+                assert killed_at[0] - (started + budget) < DEADLINE_KILL_SECONDS, (budget, elapsed, attempts)
+                assert started + elapsed - killed_at[0] < REAP_SECONDS, (budget, elapsed, attempts)
                 assert len(children) == len(attempts) + 1, attempts
                 assert all(child.poll() is not None for child in children) and not client._active
             finally:
