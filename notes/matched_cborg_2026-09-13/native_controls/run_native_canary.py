@@ -412,14 +412,19 @@ def native_evidence_check(spec):
 
 
 def _signal_group(process, sig):
-    """Signal the child's session group; a group whose leader has exited is done.
+    """Signal the child's session group, excusing a refusal only once the group is gone.
 
     Darwin answers EPERM, not ESRCH, when the leader is exiting or exited but
     not yet reaped and no other member is live, and it can do so a moment
-    before waitpid reports the exit (#2571). So the leader's actual exit, waited
-    for within the existing bound, excuses the refusal; a leader still running
-    re-raises it. The refusal is raised outside any handler, so the exception
-    being unwound (a recorded stop, an interrupt) stays in its chain.
+    before waitpid reports the exit (#2571). So a refusal waits, within the
+    existing bound, for the leader's actual exit; a leader still running
+    re-raises it. The leader's exit alone does not show the group is empty: a
+    live member that refuses the signal also answers EPERM, on Darwin and on
+    Linux (#2614). So once the leader has exited, the signal is sent again,
+    within a second bound, until the group is gone (ESRCH); a refusal still
+    standing at the bound is raised. The refusal is raised outside any
+    handler, so the exception being unwound (a recorded stop, an interrupt)
+    stays in its chain.
     """
     try:
         os.killpg(process.pid, sig)
@@ -430,10 +435,23 @@ def _signal_group(process, sig):
         refusal = error
     try:
         process.wait(timeout=2)
-        return
+        exited = True
     except subprocess.TimeoutExpired:
-        pass
-    raise refusal
+        exited = False
+    refused, deadline = True, time.monotonic() + 2
+    while exited:
+        try:
+            os.killpg(process.pid, sig)
+            refused = False                   # a live member took it: not a refusal
+        except ProcessLookupError:
+            return
+        except PermissionError:
+            refused = True
+        if time.monotonic() >= deadline:
+            break
+        time.sleep(0.02)
+    if refused:
+        raise refusal
 
 
 def terminate_group(process):

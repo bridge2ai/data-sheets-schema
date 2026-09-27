@@ -108,18 +108,25 @@ def darwin_refusal(request, monkeypatch):
     return request.param
 
 
+#: How a leader ends: cleanly, with a failure status, or killed by a signal (#2615).
+EXITS = [pytest.param('pass', 0, id='exit_0'), pytest.param('raise SystemExit(3)', 3, id='exit_3'),
+         pytest.param('import os,signal;os.kill(os.getpid(),signal.SIGKILL)', -signal.SIGKILL, id='killed')]
+
+
+@pytest.mark.parametrize('code, returncode', EXITS)
 @pytest.mark.parametrize('darwin_refusal', REFUSALS, indirect=True)
-def test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error(darwin_refusal):
+def test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error(darwin_refusal, code, returncode):
     """#2571: the group whose only member is the exited, unreaped leader refuses the
-    signal with EPERM; terminate_group reaps the leader instead of raising."""
-    process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
+    signal with EPERM; terminate_group reaps the leader instead of raising, however the
+    leader ended."""
+    process = subprocess.Popen([sys.executable, '-c', code], start_new_session=True)
     try:
         wait_until_exited_unreaped(process.pid)
         assert process.returncode is None
         with pytest.raises(PermissionError):
             os.killpg(process.pid, 0)                                 # the state the fix must handle
         terminate_group(process)
-        assert process.returncode == 0
+        assert process.returncode == returncode
     finally:
         if process.returncode is None:
             process.kill(); process.wait()
@@ -133,6 +140,9 @@ def test_a_refusal_before_the_reported_exit_is_excused_by_the_exit(monkeypatch):
     calls = []
     def refuse_while_exiting(pid, sig):
         calls.append(sig)
+        if process.returncode is not None:
+            # Reaped: Darwin's zombie-only group is gone, as the kernel then answers (#2614).
+            raise ProcessLookupError(errno.ESRCH, 'No such process')
         if len(calls) == 1:
             # Still blocked on stdin: not exited, so the refusal comes before the exit.
             assert not process_state(pid).startswith('Z')
@@ -173,6 +183,59 @@ def test_a_refused_signal_to_a_running_leader_is_raised_and_keeps_the_stop(monke
             assert unwinding in chain, chain
     finally:
         monkeypatch.undo(); process.kill(); process.wait()
+
+
+def test_a_live_leader_refusing_the_kill_step_is_raised(monkeypatch):
+    """#2616: a leader that outlives SIGTERM and then refuses SIGKILL is a real refusal,
+    raised as the PermissionError, not a timeout from the final wait."""
+    process = subprocess.Popen([sys.executable, '-c', 'import signal,sys,time;signal.signal(signal.SIGTERM,'
+                                'signal.SIG_IGN);print("ready",flush=True);time.sleep(30)'],
+                               stdout=subprocess.PIPE, text=True, start_new_session=True)
+    assert process.stdout.readline().strip() == 'ready'
+    signal_group = os.killpg
+    def refuse_the_kill(pgid, sig):
+        if sig == signal.SIGKILL:
+            raise PermissionError(errno.EPERM, 'Operation not permitted')
+        return signal_group(pgid, sig)
+    monkeypatch.setattr(os, 'killpg', refuse_the_kill)
+    try:
+        with pytest.raises(PermissionError):
+            terminate_group(process)
+        assert process.returncode is None
+    finally:
+        monkeypatch.undo(); process.kill(); process.wait()
+
+
+@pytest.mark.parametrize('after_reap', ['refuses', 'empties', 'accepts'],
+                         ids=['member_lives_on', 'group_empties', 'member_takes_the_signal'])
+def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not(monkeypatch, after_reap):
+    """#2614: the leader's exit does not show the group is empty. A member that still
+    refuses once the leader is reaped (one that changed its credentials, say) is raised
+    within the bound. A group that empties (ESRCH) is done, and so is one whose
+    remaining member takes the signal: that is delivery, not a refusal."""
+    process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
+    calls = []
+    def member_refuses(pgid, sig):
+        calls.append(process.returncode)
+        if process.returncode is not None and after_reap == 'empties' and calls.count(0) > 2:
+            raise ProcessLookupError(errno.ESRCH, 'No such process')
+        if process.returncode is not None and after_reap == 'accepts':
+            return None
+        raise PermissionError(errno.EPERM, 'Operation not permitted')
+    monkeypatch.setattr(os, 'killpg', member_refuses)
+    try:
+        start = time.monotonic()
+        if after_reap == 'refuses':
+            with pytest.raises(PermissionError):
+                terminate_group(process)
+        else:
+            terminate_group(process)
+        assert time.monotonic() - start < 10
+        assert process.returncode == 0 and any(code == 0 for code in calls)   # re-sent after the reap
+    finally:
+        monkeypatch.undo()
+        if process.returncode is None:
+            process.kill(); process.wait()
 
 
 @pytest.mark.parametrize('darwin_refusal', REFUSALS, indirect=True)
