@@ -59,10 +59,13 @@ def _files(root):
                                            'settlement_after_exit.json')}
 
 
-# RecursionError: the JSON scanner's answer to deeply nested input (#2728).
-_MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError, RecursionError)
-# The errors a file itself causes: it cannot be opened or read, or does not decode or parse.
-_ABOUT_A_FILE = (OSError, ValueError, RecursionError)
+# RuntimeError: the JSON scanner's RecursionError on deeply nested input (#2728), and
+# pathlib's answer to a symlink loop before 3.13 (#2752). BudgetStop is a RuntimeError
+# too, so every wrapper passes a refusal through before it catches these.
+_MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError, RuntimeError)
+# The errors a file itself causes: it cannot be reached, opened or read, or does not
+# decode or parse.
+_ABOUT_A_FILE = (OSError, ValueError, RuntimeError)
 
 
 #: The controls' own code: a refusal is located in it, not in the library it called (#2641).
@@ -85,11 +88,11 @@ def _own(frame):
         return False
 
 
-def _named(value):
-    """A file a helper was given, quoted as the OSError form quotes one; nothing for a
-    value that is not a path, which a validator defect could pass (#2730)."""
+def _path_of(value):
+    """The file a helper was given; nothing for a value that is not a path, which a
+    validator defect could pass (#2730)."""
     try:
-        return repr(os.fspath(value)) if isinstance(value, (str, os.PathLike)) else None
+        return os.fspath(value) if isinstance(value, (str, os.PathLike)) else None
     except Exception:              # a path-like object whose __fspath__ raises
         return None
 
@@ -103,9 +106,14 @@ def _malformed(what, error):
     helper (reading, hashing, pinning or resolving a file) is instead located at the call
     that handed the helper its file, since the helper's own line says nothing about which
     of a dozen callers failed and one line can hand it two files (#2641, #2727). The
-    innermost frame, which may then be the helper's own, still follows `via`, and the
-    file is named unless the error already names it: an OSError from the open or resolve
-    carries its filename, one from the read itself may not."""
+    innermost frame, which may then be the helper's own, still follows `via`.
+
+    The file is named, quoted as an OSError quotes one, when the error is one a file
+    causes (it cannot be reached, opened, read, decoded or parsed; a KeyError on the audit
+    manifest inside `pinned` is not, #2743), the helper's argument is a path (#2730), and
+    the error does not already name that same file. An OSError from the open names it;
+    one from the read itself names nothing, and one from resolving names the component
+    it could not reach, a missing directory or a dangling link's target (#2753)."""
     # Read straight off the traceback, never through linecache: before 3.12 it raises
     # ValueError/UnicodeEncodeError for a filename os.stat refuses, which would make
     # the refusal raise here (#2689).
@@ -120,13 +128,11 @@ def _malformed(what, error):
         where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
     elif frames:
         where = f' at {_frame(frames[-1])}'
-    # Only an error about the file (it cannot be opened, read, decoded or parsed) names
-    # it; a KeyError on the audit manifest inside `pinned` is not the file's (#2743).
-    if (helper is not None and isinstance(error, _ABOUT_A_FILE)
-            and getattr(error, 'filename', None) is None):
+    if helper is not None and isinstance(error, _ABOUT_A_FILE):
         frame = walked[helper][0]
-        named = _named(frame.f_locals.get(_HELPERS[frame.f_code]))
-        where += f' reading {named}' if named else ''
+        path = _path_of(frame.f_locals.get(_HELPERS[frame.f_code]))
+        if path and getattr(error, 'filename', None) != path:
+            where += f' reading {path!r}'
     return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
 
 
@@ -134,6 +140,8 @@ def paths(manifest):
     """What an audit following a probe pins: the probe's link and the audit before it."""
     try:
         return _paths(manifest)
+    except BudgetStop:
+        raise
     except _MALFORMED as error:
         # The predecessor may be an ordinary audit; say only what failed (#2513).
         raise _malformed('audit predecessor evidence is malformed or unavailable', error) from error
@@ -236,6 +244,8 @@ def validate_predecessor(manifest, *, require_pins=True):
             _require(sha(path) == read_json(checkpoint).get('manifest_sha256'),
                      'audit predecessor registration is not the one its checkpoint names')
         probe = is_probe_predecessor(manifest)
+    except BudgetStop:
+        raise
     except _MALFORMED as error:
         raise _malformed('audit predecessor registration is malformed or unavailable', error) from error
     return validate_link(manifest, require_pins=require_pins) if probe else None
@@ -244,6 +254,8 @@ def validate_predecessor(manifest, *, require_pins=True):
 def validate_link(manifest, *, require_pins=True):
     try:
         return _validate_link(manifest, require_pins=require_pins)
+    except BudgetStop:
+        raise
     except _MALFORMED as error:
         raise _malformed('probe predecessor is malformed or unavailable', error) from error
 

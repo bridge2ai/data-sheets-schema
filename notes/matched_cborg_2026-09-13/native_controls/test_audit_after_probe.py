@@ -556,7 +556,10 @@ def test_every_file_helper_is_known():
     names = sorted(code.co_name for code in probe_predecessor._HELPERS)
     assert names == ['canonical_path', 'pinned', 'pinned', 'read_json', 'sha']
     assert registration.pinned.__code__ in probe_predecessor._HELPERS
+    # Each maps to the parameter that carries its file, not merely to some parameter (#2754).
+    expected = {'read_json': 'path', 'sha': 'path', 'canonical_path': 'value', 'pinned': 'value'}
     for code, argument in probe_predecessor._HELPERS.items():
+        assert argument == expected[code.co_name], (code.co_name, argument)
         assert argument in code.co_varnames[:code.co_argcount + code.co_kwonlyargcount], (code.co_name, argument)
 
 
@@ -755,3 +758,83 @@ def test_a_chained_increase_may_rest_on_a_debited_probes_reconciled_checkpoint(p
                                         {'predecessor': {'reconciliation': bridge}}) == bridge
     manifest, _ = successor(prepared, result)
     assert probe_predecessor.validate_link(manifest) == anchored
+
+
+@pytest.mark.parametrize('require_pins', [True, False])
+def test_an_unreachable_file_is_named_through_the_pinned_closure(prepared, monkeypatch, require_pins):
+    """#2754: the value-mapped helpers name their file too, on the production route that
+    pins (require_pins=True) and on preparation's; the EIO carries no filename."""
+    manifest, _ = successor(prepared, completed(prepared))
+    target = prepared.root / 'probe' / 'billing.json'
+    real = Path.resolve
+    def resolve(self, strict=False):
+        if strict and self == target:
+            raise OSError(5, 'Input/output error')
+        return real(self, strict=strict)
+    monkeypatch.setattr(Path, 'resolve', resolve)
+    with pytest.raises(BudgetStop, match=rf"\(OSError at probe_predecessor\.py:{_line_reading('ledger_path = pinned(manifest')} "
+                       rf"via test_audit_after_probe\.py:\d+ reading {re.escape(repr(str(target)))}: "
+                       r"\[Errno 5\] Input/output error\)$"):
+        probe_predecessor.validate_link(manifest, require_pins=require_pins)
+
+
+def test_a_dangling_link_names_the_registered_file_and_its_target(prepared, tmp_path):
+    """#2753: resolving a dangling link reports its target; the file the helper was
+    handed is named beside it."""
+    manifest, _ = successor(prepared, completed(prepared))
+    target = prepared.root / 'probe' / 'result.json'
+    gone = tmp_path / 'elsewhere' / 'gone.json'
+    target.unlink(); target.symlink_to(gone)
+    with pytest.raises(BudgetStop) as caught:
+        probe_predecessor.validate_link(manifest, require_pins=False)
+    message = str(caught.value)
+    assert f'reading {str(target)!r}' in message and str(gone.parent) in message, message
+
+
+@pytest.mark.parametrize('how', ['real_loop', 'runtime_error'])
+def test_a_symlink_loop_is_a_refusal_on_every_interpreter(prepared, monkeypatch, how):
+    """#2752: before 3.13 pathlib raises RuntimeError for a symlink loop, which the
+    wrappers now refuse like any file error; 3.13 raises OSError ELOOP. Both are named.
+    The RuntimeError case is modelled so every interpreter runs it."""
+    manifest, _ = successor(prepared, completed(prepared))
+    target = prepared.root / 'probe' / 'result.json'
+    if how == 'real_loop':
+        target.unlink(); target.symlink_to(target)
+    else:
+        real = Path.resolve
+        def resolve(self, strict=False):
+            if self == target:
+                raise RuntimeError(f'Symlink loop from {str(self)!r}')
+            return real(self, strict=strict)
+        monkeypatch.setattr(Path, 'resolve', resolve)
+    with pytest.raises(BudgetStop, match=r"^probe predecessor is malformed or unavailable \((RuntimeError|OSError) ") as caught:
+        probe_predecessor.validate_link(manifest, require_pins=False)
+    assert str(target) in str(caught.value)
+    if how == 'runtime_error':
+        assert f'reading {str(target)!r}: Symlink loop' in str(caught.value), str(caught.value)
+
+
+def test_a_refusal_raised_inside_the_wrappers_passes_through_unchanged(prepared):
+    """#2752: BudgetStop is a RuntimeError; catching RuntimeError must not rewrap refusals."""
+    manifest, _ = successor(prepared, completed(prepared))
+    manifest['sequence_state'] = ''
+    with pytest.raises(BudgetStop, match='^audit names no sequence state to check its probe predecessor against$'):
+        probe_predecessor.validate_link(manifest, require_pins=False)
+
+
+def test_a_path_like_whose_fspath_raises_names_nothing_and_never_raises():
+    """#2754: a ValueError is a file's error, so _malformed reaches _path_of, which must
+    not raise on a path-like whose __fspath__ does."""
+    import os
+    from audit_controls import registration
+    class Unrenderable(os.PathLike):
+        def __fspath__(self):
+            raise ValueError('no path')
+    try:
+        registration.read_json(Unrenderable())
+    except ValueError as error:
+        refusal = probe_predecessor._malformed('probe', error)
+    assert isinstance(refusal, BudgetStop) and ' reading ' not in str(refusal), str(refusal)
+    assert probe_predecessor._path_of(Unrenderable()) is None
+    assert probe_predecessor._path_of({'a': 'contents'}) is None and probe_predecessor._path_of(b'/x') is None
+    assert probe_predecessor._path_of(Path('/x/y.json')) == '/x/y.json'
