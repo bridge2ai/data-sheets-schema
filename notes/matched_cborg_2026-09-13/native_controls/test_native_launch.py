@@ -698,7 +698,12 @@ class EventClock:
     reading after the event. execute_child takes its deadline from a reading, so
     `jumped - first < offset` shows that the real clock had not reached a
     deadline of `offset` when the event made it elapse. Durations measured wholly
-    after the jump, such as terminate_group's, are unchanged."""
+    after the jump, such as terminate_group's, are unchanged.
+
+    `assert_the_event_elapsed_it` names which of the two ways this failed (#2736):
+    the clock was never read after the event, so no deadline check could have
+    ended the run; or the real clock had already passed the deadline, so the
+    hang guard ended it."""
     def __init__(self, event, offset):
         self.event, self.offset, self.first, self.jumped = event, offset, None, None
 
@@ -716,8 +721,11 @@ class EventClock:
     def sleep(seconds):
         time.sleep(seconds)
 
-    def elapsed_on_the_event(self):
-        return self.jumped is not None and self.jumped - self.first < self.offset
+    def assert_the_event_elapsed_it(self):
+        assert self.jumped is not None, \
+            "the controller never read its clock after the event: its deadline was not checked"
+        assert self.jumped - self.first < self.offset, \
+            "the real clock passed the registered deadline before the event: the hang guard ended the run"
 
 
 def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, monkeypatch=None):
@@ -787,8 +795,8 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, monkeypa
         if clock is not None:
             rnc.time = real_time
     assert counting.is_set() and calls == []
-    # The count's start ended the child, never the hang guard.
-    assert clock is None or clock.elapsed_on_the_event(), "the registered deadline, not the count, stopped the child"
+    if clock is not None:
+        clock.assert_the_event_elapsed_it()   # the count's start ended the child, never the hang guard
     receipt['stops_at_close'] = at_close.get('stops')
     return receipt, json.loads(ledger.path.read_bytes()).get('stopped_attempts')
 

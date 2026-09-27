@@ -522,7 +522,8 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     def adapter(context):return native.execute_job(context,client=sdk,upstream=upstream)
     try:
         with pytest.raises(BudgetStop,match='deadline'):native.run_job(c.registration,review,adapter=adapter)
-        assert entered.is_set() and clock.elapsed_on_the_event()
+        assert entered.is_set()
+        clock.assert_the_event_elapsed_it()
         receipt=json.loads((c.attempt/'result.json').read_text())
         assert receipt['stop_source']=='native_controller' and receipt['status']=='stopped'
         assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':1}

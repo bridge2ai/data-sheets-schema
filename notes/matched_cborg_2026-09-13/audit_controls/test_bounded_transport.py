@@ -43,7 +43,9 @@ def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
                                          'bypass': self.headers.get('x-headroom-bypass')})
             observed['arrived'].set()
             if hold is not None:
-                hold.wait(timeout=HANG_SECONDS)   # released at the latest when the server stops
+                # Half the count's budget, so a count still waiting would see the
+                # response before its own deadline (#2733).
+                hold.wait(timeout=HANG_SECONDS / 2)
             try:
                 self.send_response(status)
                 self.send_header('Content-Type', 'application/json')
@@ -118,6 +120,19 @@ DEADLINE_KILL_SECONDS = 3.5
 #: the review measured max 1.56 s.
 REAP_SECONDS = 10
 
+#: From close() being called to the SIGKILL of the worker it cancels: taking the
+#: client's lock and the kill, in-process (#2733). Measured median 0.2 ms, p99
+#: 60 ms, max 98 ms over 768 closes under 256 concurrent copies at load 448-518.
+#: It rejects a grace of 0.5 s or more before the kill; a shorter one passes.
+CLOSE_KILL_SECONDS = .5
+
+#: From close() returning, its worker killed and reaped, to the cancelled count
+#: raising in its own thread: a thread wake-up and a raise, in-process (#2733).
+#: Measured median 5 ms, p99 58 ms, max 74 ms over the same 768 closes; the timed
+#: wait's wake-up in the progressing test above reached 1.17 s at load ~450. It
+#: rejects a release 1.5 s or more after close returns; a shorter one passes.
+RELEASE_SECONDS = 1.5
+
 
 def test_progressing_response_cannot_outlive_total_count_deadline(children, monkeypatch):
     # Every byte arrives well inside the SDK's inactivity bound. The complete
@@ -178,12 +193,27 @@ def test_progressing_response_cannot_outlive_total_count_deadline(children, monk
     assert progressed >= 2 and len(seen['requests']) == 1, attempts
 
 
-def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
-    # The server holds its response until the test ends, so a close that waited
-    # for the count instead of killing its worker would return only after the
-    # server let the response go. The verdict is that order (#2604): close
-    # returned while no response byte had left the server. The waits are hang
-    # guards; each returns as soon as its event happens.
+def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children, monkeypatch):
+    # close() must kill the active worker at once and release the count it
+    # cancels. Both are timed from in-process instants, so neither pays for the
+    # worker's start-up (#2604, #2733): the close call to the worker's SIGKILL,
+    # and close's return (the worker reaped) to the cancelled count raising. The
+    # reap is a process-level cost and has only the REAP_SECONDS hang guard. The
+    # server holds its response for half the count's budget, so a close that
+    # waited instead of killing would return only after the response had left
+    # the server. The waits for events are hang guards.
+    killed_at, released_at = [], []
+    launch = bounded.subprocess.Popen
+    def watched(*args, **kwargs):
+        child = launch(*args, **kwargs)
+        real_signal = child.send_signal
+        def send_signal(sig):
+            if sig == signal.SIGKILL:
+                killed_at.append(time.monotonic())
+            return real_signal(sig)
+        child.send_signal = send_signal
+        return child
+    monkeypatch.setattr(bounded.subprocess, 'Popen', watched)
     hold = threading.Event()
     with server(hold=hold) as (url, seen):
         client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=HANG_SECONDS)
@@ -192,18 +222,23 @@ def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
             try:
                 client.messages.count_tokens(**FIELDS)
             except Exception as exc:
+                released_at.append(time.monotonic())
                 errors.append(exc)
         thread = threading.Thread(target=count)
         thread.start()
         try:
             assert seen['arrived'].wait(timeout=HANG_SECONDS)   # the worker's start-up is in this wait
-            started = time.monotonic()
+            closing = time.monotonic()
             client.close()
-            assert not hold.is_set() and seen['sent'] == [], "close waited for the held response"
-            assert time.monotonic() - started < REAP_SECONDS
+            closed = time.monotonic()
+            assert seen['sent'] == [], "close waited for the held response"
+            assert killed_at and killed_at[0] >= closing, "close did not kill its worker"
+            assert killed_at[0] - closing < CLOSE_KILL_SECONDS, "close killed its worker long after it was called"
+            assert closed - closing < REAP_SECONDS
             assert all(child.poll() is not None for child in children)
             thread.join(timeout=HANG_SECONDS)
             assert not thread.is_alive() and len(errors) == 1
+            assert released_at[0] - closed < RELEASE_SECONDS, "the cancelled count returned long after close"
             assert isinstance(errors[0], bounded.CountClientClosed)
             assert not client._active
             with pytest.raises(bounded.CountClientClosed):

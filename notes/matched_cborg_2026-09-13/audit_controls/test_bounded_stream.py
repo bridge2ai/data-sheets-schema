@@ -89,13 +89,20 @@ KILL_GAP_SECONDS = .5
 #: them; a shorter one passes.
 PARENT_GAP_SECONDS = 2.5
 
-#: The read-inactivity bound given to a chunk the server has already flushed: from
-#: the parent's first read to the chunk's arrival, one worker-to-parent pipe hop
-#: (#2604). Measured median 0 ms, p99 99 ms, max 324 ms over 1,536 reads under
-#: 128-192 concurrent copies at load 82-272; the same hop for the headers
-#: (PARENT_GAP_SECONDS) reached 791 ms at load 336, and this keeps threefold on that.
-#: It rejects a first-chunk hop of 2.5 s or more, where origin/main's 0.3 s bound
-#: rejected one of 0.3 s; the read of the withheld chunk now ends after 2.5 s.
+#: The registered read timeout of the after-headers test. The worker applies it to
+#: every read (HTTPX's read-inactivity timeout) and the parent to every chunk, so it
+#: bounds two phases that must complete, not only the withheld read it ends
+#: (#2604, #2737):
+#: - the worker's wait for the headers once its request is written: the test
+#:   server's accept, handler thread and response, in the loaded pytest process.
+#:   Measured median 20-48 ms, p99 406-410 ms, max 588 ms over 1,536 exchanges
+#:   under 256 concurrent copies at load 176-477;
+#: - the first chunk's hop from the worker to the parent, already flushed by the
+#:   server. Measured max 373 ms over the same 1,536, and 324 ms over 1,536 more at
+#:   load 82-272; the same hop for the headers (PARENT_GAP_SECONDS) reached 791 ms
+#:   at load 336.
+#: This keeps threefold on all of them. A phase of 2.5 s or more fails the test,
+#: where origin/main's 0.3 s bound failed one of 0.3 s.
 READ_HOP_SECONDS = 2.5
 
 #: The whole call less the worker's start-up window (from just before Popen to the
@@ -104,6 +111,15 @@ READ_HOP_SECONDS = 2.5
 #: Measured median 207-278 ms, p99 870-911 ms, max 1129 ms (load 336). It rejects
 #: 3.5 s or more spent outside start-up; less passes.
 CALL_GAP_SECONDS = 3.5
+
+#: From a parent deadline to the refusal it raises: the wake-up of the parent's
+#: timed wait and, for the absolute bound, the entry into stream(), in-process
+#: (#2735). Measured median 15 ms, p99 72 ms, max 203 ms over 2,421 refusals under
+#: 256 concurrent copies at load 296-518, and max 156 ms over 2,702 at load 169-307;
+#: none was early. The timed wait's wake-up in the count test reached 1.17 s at load
+#: ~450 (#2697). It rejects a refusal 1.5 s late or more, at every rung of the
+#: buffered test's ladder; a later one than origin/main's 1.5 s total still passes.
+REFUSAL_GAP_SECONDS = 1.5
 
 #: The bounds a test gives a worker where no deadline is its subject. A pre-header
 #: bound also pays for the worker's interpreter start-up, which took about 14 s at
@@ -289,13 +305,15 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
 def test_after_headers_read_deadline_and_exact_incremental_chunks(processes):
     # The server flushes the first chunk with the headers and withholds the rest
     # until the test has its verdict, so only a read deadline can end the second
-    # read. A watchdog would release it after HANG_SECONDS, when a transport that
-    # never timed out a read would then complete the body and fail the raise; the
-    # test asserts that the watchdog did not fire. The pre-header bound is a hang
-    # guard, so the worker's start-up is no longer charged to a 1.3 s budget
-    # (#2604), and a first read that timed out fails on `received`: a ReadTimeout
-    # from anywhere but the second read is not the one this test is about.
-    first_sent, done, released = threading.Event(), threading.Event(), []
+    # read, and it must end it within READ_HOP_SECONDS plus the parent's wake-up
+    # (#2734). A watchdog would release the rest after HANG_SECONDS; the test
+    # asserts it did not. The parent's pre-header bound is a hang guard, so the
+    # worker's interpreter start-up is no longer charged to a 1.3 s budget
+    # (#2604); what READ_HOP_SECONDS does bound before the headers is said at its
+    # definition (#2737). A first read that timed out fails on `received`: a
+    # ReadTimeout from anywhere but the second read is not the one this test is
+    # about.
+    first_sent, done, released, waited = threading.Event(), threading.Event(), [], []
     def respond(handler, body):
         handler.send_response(200); handler.send_header("Content-Length", "10"); handler.end_headers()
         handler.wfile.write(b"first"); handler.wfile.flush(); first_sent.set()
@@ -310,11 +328,18 @@ def test_after_headers_read_deadline_and_exact_incremental_chunks(processes):
                     chunks = value.iter_bytes()
                     received.append(next(chunks))
                     assert first_sent.is_set()
-                    received.append(next(chunks))
+                    began = time.monotonic()
+                    try:
+                        received.append(next(chunks))
+                    finally:
+                        waited.append(time.monotonic() - began)   # before the context kills the worker
         finally:
             done.set()
     # Exactly the flushed chunk, yielded before the rest existed: nothing was buffered.
     assert received == [b"first"] and not released
+    # The read deadline ended the withheld read on time. Measured: at most 68 ms after
+    # READ_HOP_SECONDS over 1,536 reads at load up to 477 (#2734).
+    assert waited[0] < READ_HOP_SECONDS + REFUSAL_GAP_SECONDS, f"the read deadline fired {waited[0]:.2f} s after the read began"
     assert not client._workers
     client.close()
 

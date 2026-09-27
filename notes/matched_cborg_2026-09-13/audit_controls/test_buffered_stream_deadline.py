@@ -6,19 +6,7 @@ import httpx
 import pytest
 
 from audit_controls import bounded_stream as bounded
-from audit_controls.test_bounded_stream import endpoint, processes, HANG_SECONDS
-
-
-#: From the absolute bound (the test's start plus the bound) to the parent's own
-#: refusal: the entry into stream() and the wake-up of the parent's timed wait, both
-#: in-process (#2604). Measured median 12 ms, p99 35 ms, max 156 ms over 2,702
-#: refusals under 128-192 concurrent copies at load 169-307, none early. The same
-#: kind of wake-up in the count test reached 1.17 s at load ~450 (#2697), and this
-#: keeps threefold on that. It rejects a refusal 3.5 s late or more. origin/main's
-#: `elapsed < 3.5` at a 2 s bound also rejected one about 1.5-3.5 s late at normal
-#: load; this gives that up (at a 2 s bound a refusal 2 s late still fails, because
-#: the 4 s body then completes).
-REFUSAL_GAP_SECONDS = 3.5
+from audit_controls.test_bounded_stream import endpoint, processes, HANG_SECONDS, REFUSAL_GAP_SECONDS
 
 
 def test_progress_after_headers_does_not_extend_absolute_exchange_bound(processes, monkeypatch):
@@ -32,7 +20,8 @@ def test_progress_after_headers_does_not_extend_absolute_exchange_bound(processe
     # parent's own receipt of body bytes, which it yields only before the bound,
     # not a guess about start-up. No assertion is retried: every attempt checks
     # the timeout type, that the refusal was the parent's own, not early and not
-    # late, that the body was cut short, and that its worker was reaped.
+    # late (REFUSAL_GAP_SECONDS, which a bound 1.5 s late or more fails at every
+    # rung, #2735), that the body was cut short, and that its worker was reaped.
     refused_at = []
     real_timeout = bounded._Worker.timeout
     def timeout(worker):
