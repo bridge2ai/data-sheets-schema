@@ -2045,11 +2045,12 @@ def backfill(verified, dry_run):
 def reasoning_cmd(method, project, label, path):
     """Summarise captured model reasoning for generation runs.
 
-    Reports presence and availability separately on purpose. Through the CBORG
-    proxy every thinking block arrives signed but empty, so a summary that
-    conflated the two would read as "no reasoning happened" when what actually
-    happened is that the endpoint withheld it. The token estimate is the only
-    quantitative trace that survives in that case.
+    Reports presence and availability separately on purpose. A request that
+    names no thinking display, as every API-arm request, receives each thinking
+    block signed but empty, so a summary that conflated the two would read as
+    "no reasoning happened" when what actually happened is that no text was
+    requested (#2542). The token estimate is the only quantitative trace that
+    survives in that case.
     """
     from pathlib import Path as _Path
 
@@ -2209,8 +2210,9 @@ def reasoning_cmd(method, project, label, path):
                    f"{s['with_reasoning_text']} with reasoning text")
     if total and not any(e.get('reasoning_available') for e in total):
         click.echo("\nNo reasoning text was available in any entry. The blocks "
-                   "are signed but empty — the endpoint strips the plaintext. "
-                   "Runs made directly against the Anthropic API capture it.")
+                   "are signed but empty because the requests named no thinking "
+                   "display; a request naming display 'summarized' receives a "
+                   "summary, on any endpoint (#2542).")
 
 
 @provenance.command("backfill-effort")

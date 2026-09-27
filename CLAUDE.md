@@ -1178,10 +1178,12 @@ Code subagent has no access to its own token accounting, and a log carrying
 only the effort level would look comparable with the API path's and is not.
 **Its transcript does carry a measure** (#1000, 2026-09-04): usage per turn
 (`output_tokens`), signed thinking blocks (empty in the sampled generation
-transcripts, text in some others, and summarized text in native runs
-registered with the thinking display, #2464/#2541 — the observer records
-`thinking_text_chars` either way, so compare it only within one display
-condition), and — in transcripts written by recent
+transcripts, text in some others — the observer records
+`thinking_text_chars` either way; a native run registered with the thinking
+display, #2464, is expected to carry summarized text on its adaptive
+requests, as the #2463 probe did, though none has run yet, so compare
+`thinking_text_chars` only within one display condition), and — in
+transcripts written by recent
 Claude Code versions — `usage.output_tokens_details.thinking_tokens`. `scripts/agentic_observed.py`
 now emits `assistant_turns`, `output_tokens`, `thinking_blocks`,
 `thinking_text_chars`, `visible_text_chars`, `tool_input_chars`,
@@ -1248,21 +1250,26 @@ for all of them:
 no log has not spent zero reasoning; it has no measurement. Do not average the
 two, and do not read an absent figure for the agentic arm as a low one.
 
-⚠️ **Through CBORG, what a thinking block carries depends on the display the
-request names** (#2542). A request that names no display — every API-arm
-request (`{"type":"adaptive"}`), and every native run not registered with a
-display — receives the block with a valid `signature` and `thinking: ''`,
-streaming and non-streaming (verified 2026-07-29 on `google/claude-opus-5-high`
-and again 2026-09-04). The logs therefore record `reasoning_present: true,
-reasoning_available: false` — a deliberately different claim from "no
-reasoning happened". A request with `"display":"summarized"` receives
-**summarized** thinking text: the #2463 probe (2026-09-26) streamed 54,291
-characters in 4,536 thinking deltas through CBORG. Native audits, Phase 4 and
-evaluation registered with the thinking display (#2464, #2541) are such runs.
-Their text is a summary, not the full reasoning, so it is not comparable with
-the text a direct Anthropic run (`ANTHROPIC_API_KEY`) returns; and the earlier
-reading that the proxy strips the plaintext is superseded — the blocks were
-empty because no display was requested.
+⚠️ **What a thinking block carries depends on the display the request names,
+not on the endpoint** (#2542, #2608). A request that names no display — every
+API-arm request (`{"type":"adaptive"}`), and every native run not registered
+with a display — receives the block with a valid `signature` and
+`thinking: ''`, streaming and non-streaming (verified through CBORG 2026-07-29
+on `google/claude-opus-5-high` and again 2026-09-04; Anthropic documents the
+display as defaulting to omitted on this model family, so a direct
+`ANTHROPIC_API_KEY` run of the same request would be empty too). The logs
+therefore record `reasoning_present: true, reasoning_available: false` — a
+deliberately different claim from "no reasoning happened". A request with
+`"display":"summarized"` receives **summarized** thinking text on either
+endpoint: the #2463 probe (2026-09-26) streamed 54,291 characters in 4,536
+thinking deltas through CBORG (the counts are recorded on #2463). No display
+returns the raw reasoning. Native audits registered with the thinking display
+(#2464) send it on their adaptive requests; `{"type":"disabled"}` side calls
+are forwarded unchanged and carry no thinking. Phase 4 and evaluation select
+it from #2541. `thinking_text_chars` is comparable within one display
+condition, whichever endpoint served it. The earlier reading that the proxy
+strips the plaintext is superseded: the blocks were empty because no display
+was requested.
 
 **The count is available since 2026-09-04** (#999): CBORG returns
 `usage.output_tokens_details.thinking_tokens` in the non-streaming body and

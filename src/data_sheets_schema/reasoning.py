@@ -9,30 +9,32 @@ re-run is a different sample.
 ## What is actually available, measured
 
 Reasoning arrives as a `thinking` content block. Whether that block carries
-plaintext depends on the endpoint, so this module records what it observed
-rather than assuming:
+text depends on the display the request names, not on the endpoint (#2542,
+#2608), so this module records what it observed rather than assuming:
 
-- **Direct Anthropic** (`ANTHROPIC_API_KEY`) — `thinking` carries text.
-- **CBORG** (`google/claude-opus-5-high`, verified 2026-07-29) — for a request
-  that names no thinking display, as every request this runner sends, the
-  block arrives with a valid `signature` and `thinking: ''`. Not a streaming
-  artifact: a non-streaming `messages.create` returns the same empty block, and
-  the stream emits *no* `thinking_delta` events at all, only a `signature`
-  event. A request with `"display":"summarized"` does receive summarized
-  thinking text through CBORG (#2463 probe, 2026-09-26; #2542), so the empty
-  block follows from the request, not from the proxy stripping text.
+- **No display named** — every request this runner sends
+  (`{"type": "adaptive"}`). Through CBORG (`google/claude-opus-5-high`,
+  verified 2026-07-29) the block arrives with a valid `signature` and
+  `thinking: ''`. Not a streaming artifact: a non-streaming `messages.create`
+  returns the same empty block, and the stream emits *no* `thinking_delta`
+  events at all, only a `signature` event. Anthropic documents the display as
+  defaulting to omitted on this model family, so a direct `ANTHROPIC_API_KEY`
+  run of the same request would be empty too.
+- **`"display": "summarized"`** — the block carries a summary of the
+  reasoning, through CBORG as directly (#2463 probe, 2026-09-26). No display
+  returns the raw reasoning.
 
 So for the requests this runner sends, **the reasoning text is not
-obtainable**; summarized text would be a different, shorter claim than the
-full reasoning a direct run returns. Capturing it anyway is still worth the few lines: the
-record then states that a reasoning block existed, was signed, and was withheld
-— which is a different and more useful claim than silence — and the same code
-captures the real text unchanged if a run is ever pointed at the direct API.
+obtainable** on either endpoint. Capturing it anyway is still worth the few
+lines: the record then states that a reasoning block existed, was signed, and
+was empty — which is a different and more useful claim than silence — and the
+same code captures summarized text unchanged if a request ever names that
+display. Summarized text is comparable only with summarized text.
 
 **The count is obtainable** (verified 2026-09-04, #999): CBORG now returns
 `usage.output_tokens_details.thinking_tokens` — in the non-streaming body
-and on the stream's `message_delta` usage — while still withholding the
-text. The SDK's `get_final_message()` accumulates usage without that
+and on the stream's `message_delta` usage — beside a block whose text is
+empty because no display was requested. The SDK's `get_final_message()` accumulates usage without that
 field, so the runner reads it off the delta event and the capture records
 it as `reasoning_tokens_observed` beside the estimate, with the estimate's
 error where both exist. Records before this carry the estimate only.
@@ -284,7 +286,8 @@ def log_status(runtime: str | None, label: str, log_exists: bool,
     - ``recovered_from_transcript`` — a Claude Code agentic run whose
       ``run_observed`` block carries the transcript-derived measure (#1000):
       the subagent cannot report its own accounting, but its transcript
-      records usage per turn, signed (empty) thinking blocks, and — from
+      records usage per turn, signed thinking blocks (empty unless the run
+      requested a display, #2542), and — from
       recent runtimes — ``thinking_tokens``. Cache-inclusive runner
       accounting, one number per run: never averaged with ``api_usage``.
     - ``transcript_observation_invalid`` — a Claude Code agentic run whose
