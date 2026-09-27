@@ -420,11 +420,14 @@ def _signal_group(process, sig):
     existing bound, for the leader's actual exit; a leader still running
     re-raises it. The leader's exit alone does not show the group is empty: a
     live member that refuses the signal also answers EPERM, on Darwin and on
-    Linux (#2614). So once the leader has exited, the signal is sent again,
-    within a second bound, until the group is gone (ESRCH) or a member takes
-    it, which is delivery; a refusal still standing at the bound is raised. The refusal is raised outside any
-    handler, so the exception being unwound (a recorded stop, an interrupt)
-    stays in its chain.
+    Linux (#2614). So once the leader has exited, the group is probed with
+    signal 0, within a second bound, until it is gone (ESRCH) or a member can
+    take the signal, which is then sent once; a refusal still standing at the
+    bound is raised. Probing delivers nothing, so a group id recycled after
+    the reap is never signalled by the retries; at most one real signal
+    follows the reap, as terminate_group's SIGKILL step always sent (#2708).
+    The refusal is raised outside any handler, so the exception being unwound
+    (a recorded stop, an interrupt) stays in its chain.
     """
     try:
         os.killpg(process.pid, sig)
@@ -441,8 +444,9 @@ def _signal_group(process, sig):
     deadline = time.monotonic() + 2
     while exited:
         try:
-            os.killpg(process.pid, sig)
-            return                            # a live member took it: delivery, not a refusal
+            os.killpg(process.pid, 0)         # a probe: delivers nothing (#2708)
+            os.killpg(process.pid, sig)       # a member can take it: delivered once
+            return
         except ProcessLookupError:
             return
         except PermissionError:

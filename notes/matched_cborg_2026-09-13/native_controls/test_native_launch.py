@@ -262,13 +262,14 @@ def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_i
             terminate_group(process)
     try:
         error, elapsed = run_bounded(cleanup)
-        assert process.returncode == 0 and (signal.SIGTERM, 0) in calls        # re-sent after the reap
+        assert process.returncode == 0 and (0, 0) in calls                     # probed after the reap
         if after_reap == 'refuses':
             assert isinstance(error, PermissionError), error
             assert isinstance(error.__context__, BudgetStop), error.__context__   # the stop stays in the chain
             assert 2 <= elapsed < 4.5, elapsed                                    # the second bound is 2 s
-            # Paced, not a busy spin: about one send per 20 ms over the 2 s bound (#2699).
-            assert calls.count((signal.SIGTERM, 0)) <= 150, calls.count((signal.SIGTERM, 0))
+            # Paced, not a busy spin: about one probe per 20 ms over the 2 s bound (#2699),
+            # and no real signal to a group id that may have been recycled after the reap (#2708).
+            assert calls.count((0, 0)) <= 150 and (signal.SIGTERM, 0) not in calls, calls[-3:]
         else:
             assert isinstance(error, BudgetStop)                                  # only the stop being unwound
         if after_reap == 'empties':
@@ -303,7 +304,7 @@ def test_a_refusal_after_the_leader_was_reaped_is_excused_only_once_the_group_is
         refused_signal = signal.SIGKILL
     signal_group, refusals = os.killpg, []
     def killpg(pgid, sig):
-        if sig != refused_signal:
+        if sig not in (refused_signal, 0):
             return signal_group(pgid, sig)             # SIGTERM ends the leader; terminate_group reaps it
         refusals.append(process.returncode)
         if standing or len(refusals) < 6:          # cleared after 5 re-sends, so pacing adds up (#2699)
@@ -1055,3 +1056,30 @@ def test_the_pre_close_record_waits_for_a_handler_holding_the_proxy_state(tmp_pa
     proxy2, _, _ = fixture_proxy(tmp_path / 'second')
     record_then_close(proxy2, lambda reason: 1 / 0, 'x')
     assert proxy2.closed
+
+
+def test_the_second_bound_starts_when_the_leader_exits(monkeypatch):
+    """#2709: the leader exits about 1 s into the first wait and the group keeps refusing
+    for 1.5 s more; the refusal is excused, since the second 2 s bound runs from the
+    leader's exit, not from the first refusal."""
+    process = subprocess.Popen([sys.executable, '-c', 'import time;print("ready",flush=True);time.sleep(1.0)'],
+                               stdout=subprocess.PIPE, text=True, start_new_session=True)
+    assert process.stdout.readline().strip() == 'ready'
+    reaped_at = []
+    def refuse_until_after_the_exit(pgid, sig):
+        if process.returncode is None:
+            raise PermissionError(errno.EPERM, 'Operation not permitted')     # the leader is still running
+        if not reaped_at:
+            reaped_at.append(time.monotonic())
+        if time.monotonic() < reaped_at[0] + 1.5:
+            raise PermissionError(errno.EPERM, 'Operation not permitted')     # members still exiting
+        raise ProcessLookupError(errno.ESRCH, 'No such process')
+    monkeypatch.setattr(os, 'killpg', refuse_until_after_the_exit)
+    try:
+        error, elapsed = run_bounded(lambda: terminate_group(process))
+        assert error is None and process.returncode == 0, (error, elapsed)
+    finally:
+        monkeypatch.undo()
+        process.stdout.close()
+        if process.returncode is None:
+            process.kill(); process.wait()
