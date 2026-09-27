@@ -187,8 +187,16 @@ def append(path: Path, entry: dict[str, Any]) -> None:
     single JSON document rewritten each time would risk truncation mid-write.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(entry, ensure_ascii=False, default=str) + "\n")
+    line = (json.dumps(entry, ensure_ascii=False, default=str) + "\n").encode("utf-8")
+    with path.open("a+b") as fh:
+        # An interrupted write can leave a line without its newline; this entry
+        # would then join that line and neither would parse. End it first (#2740).
+        end = fh.seek(0, 2)
+        if end:
+            fh.seek(end - 1)
+            if fh.read(1) != b"\n":
+                line = b"\n" + line
+        fh.write(line)
 
 
 class UnreadableLog(ValueError):
@@ -212,9 +220,9 @@ def _parse(raw: bytes) -> Any:
 
 
 def read(path: Path) -> list[dict[str, Any]]:
-    """Every entry of a reasoning log. A line that does not decode or parse raises
-    UnreadableLog naming the file and the line, since usage accounting must not
-    skip a record it cannot read."""
+    """Every entry of a reasoning log. A line that does not decode, parse, or
+    parse to an object raises UnreadableLog naming the file and the line, since
+    usage accounting must not skip a record it cannot read."""
     if not Path(path).exists():
         return []
     entries = []
@@ -222,10 +230,14 @@ def read(path: Path) -> list[dict[str, Any]]:
         if not raw.strip():
             continue
         try:
-            entries.append(_parse(raw))
+            value = _parse(raw)
         except ValueError as error:
             raise UnreadableLog(f"{path}: line {number} is not a readable entry "
                                 f"({type(error).__name__}: {error})") from error
+        if not isinstance(value, dict):
+            # `append` writes objects only; read_lenient names this line too (#2739).
+            raise UnreadableLog(f"{path}: line {number} is not a readable entry (not a JSON object)")
+        entries.append(value)
     return entries
 
 

@@ -2215,10 +2215,12 @@ def reasoning_cmd(method, project, label, path):
                        + (f"; median |estimate_error| where the count is above 0: "
                           f"{s['estimate_error_median']:,}" if s.get('estimate_error_median') else ""))
 
-    if len(logs) > 1 and total:              # every selected log empty: nothing to aggregate (#2692)
+    # Every selected log empty: nothing to aggregate (#2692). Logs that hold only
+    # unreadable lines are not empty, and the count says so (#2742).
+    if len(logs) > 1 and (total or skipped):
         s = _reasoning.summarise(total)
         click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
-                   f"{s['with_reasoning_text']} with reasoning text"
+                   f"{s.get('with_reasoning_text', 0)} with reasoning text"
                    + (f", {skipped} unreadable line(s) skipped" if skipped else ""))
     if total and not any(e.get('reasoning_available') for e in total):
         if skipped:

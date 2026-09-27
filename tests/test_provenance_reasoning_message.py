@@ -186,18 +186,124 @@ def test_telemetry_refuses_an_unreadable_line_naming_it(tmp_path):
         run_telemetry._reasoning_entries(log)
 
 
-@pytest.mark.parametrize("command, patched", [
-    (["telemetry", "--label-prefix", "L", "--method", "claudecode_api"], "collect_report"),
-    (["full-output-baseline", "--method", "claudecode_api", "--label", "L", "--project", "CHORUS"],
-     "full_output_baseline"),
-], ids=["telemetry", "full_output_baseline"])
-def test_the_runs_commands_refuse_an_unreadable_line_by_name(tmp_path, monkeypatch, command, patched):
-    """#2723: the refusal is a named error, not the bare JSONDecodeError traceback of #2695."""
+BAD_LINES = {"partial": json.dumps(entry(True))[:40], "list": "[1]", "null": "null"}
+
+
+@pytest.fixture(params=sorted(BAD_LINES))
+def bad_run(request, tmp_path, monkeypatch):
+    """A real run directory whose only usage row is a core one, so the full-output
+    baseline consults the log, and whose log's second line is unreadable."""
+    import yaml
+    import data_sheets_schema.api_runner as api
+    from data_sheets_schema import run_telemetry
+    run = tmp_path / "claudecode_api_core" / "L1"
+    run.mkdir(parents=True)
+    (run / "CHORUS_provenance.yaml").write_text(yaml.safe_dump(
+        {"api_usage": [{"phase": "core", "attempt": 1, "output_tokens": 10, "input_tokens": 5,
+                        "stop_reason": "end_turn"}]}))
+    log = run / "CHORUS_reasoning.jsonl"
+    log.write_text(json.dumps({**entry(True), "phase": "core"}) + "\n" + BAD_LINES[request.param] + "\n")
+    monkeypatch.setattr(run_telemetry, "CONCAT_DIR", tmp_path)
+    monkeypatch.setattr(api, "CONCAT_DIR", tmp_path)
+    return run, log
+
+
+@pytest.mark.parametrize("function", ["run_telemetry", "accepted_full_output"])
+def test_telemetry_readers_refuse_an_unreadable_line_by_name(bad_run, function):
+    """#2723, #2739, #2741: through the real functions, a partial or non-object line is
+    refused with a named error, never read past or crashed on."""
     from data_sheets_schema import reasoning, run_telemetry
+    run, log = bad_run
+    with pytest.raises(reasoning.UnreadableLog, match=rf"^{re.escape(str(log))}: line 2 is not a readable entry"):
+        getattr(run_telemetry, function)(run, "CHORUS")
+
+
+@pytest.mark.parametrize("command", [
+    ["telemetry", "--label-prefix", "L1", "--method", "claudecode_api"],
+    ["full-output-baseline", "--method", "claudecode_api", "--label", "L1", "--project", "CHORUS"],
+], ids=["telemetry", "full_output_baseline"])
+def test_the_runs_commands_refuse_an_unreadable_line_by_name(bad_run, tmp_path, command):
+    """#2723, #2741: the whole command, not a stand-in: a named error, not a traceback,
+    and the run is not silently dropped from the report."""
+    from data_sheets_schema import reasoning
     from data_sheets_schema.cli.runs import runs as runs_cli
-    log = tmp_path / "CHORUS_reasoning.jsonl"
-    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps(entry(True))[:40])
-    monkeypatch.setattr(run_telemetry, patched, lambda *a, **k: reasoning.read(log))
-    result = CliRunner().invoke(runs_cli, command)
-    assert result.exit_code == 1 and not isinstance(result.exception, reasoning.UnreadableLog), result.output
+    _, log = bad_run
+    argv = command + (["--output", str(tmp_path / "report.yaml")] if command[0] == "telemetry" else [])
+    result = CliRunner().invoke(runs_cli, argv)
+    assert result.exit_code == 1 and not isinstance(result.exception, (reasoning.UnreadableLog, AttributeError)), \
+        result.output
     assert f"Error: {log}: line 2 is not a readable entry" in result.output
+    assert not (tmp_path / "report.yaml").exists()
+
+
+def test_usage_accounting_refuses_an_unreadable_line(tmp_path):
+    """#2739, #2741: api_runner's own accounting check, not the reader alone."""
+    import data_sheets_schema.api_runner as api
+    from data_sheets_schema import usage_ledger
+    from tests.test_download.test_api_runner import spec
+    s = spec(out_dir=tmp_path)
+    for bad in BAD_LINES.values():
+        path = api._reasoning_path(s)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(entry(True)) + "\n" + bad + "\n")
+        with pytest.raises(usage_ledger.UsageLedgerError, match="cannot establish surviving reasoning usage.*line 2"):
+            api._unrecorded_reasoning(s, {})
+
+
+def test_an_entry_left_without_its_newline_is_not_joined_by_the_next(tmp_path):
+    """#2740: an interrupted write can leave a complete entry without its newline; the
+    next append ends that line first, so both entries stay readable."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    reasoning.append(log, entry(True))
+    log.write_bytes(log.read_bytes() + json.dumps(entry(False)).encode())      # no newline
+    reasoning.append(log, {**entry(True), "phase": "core"})
+    assert reasoning.read(log) == [entry(True), entry(False), {**entry(True), "phase": "core"}]
+    assert log.read_bytes().endswith(b"\n") and b"\n\n" not in log.read_bytes()
+    # A partial line is ended too: it stays named, and the new entry is readable.
+    log.write_bytes(log.read_bytes() + json.dumps(entry(True)).encode()[:30])
+    reasoning.append(log, entry(False))
+    assert reasoning.read_lenient(log) == ([entry(True), entry(False), {**entry(True), "phase": "core"}, entry(False)],
+                                           [4])
+
+
+def _two_logs(tmp_path, monkeypatch, chorus, voice):
+    from types import SimpleNamespace
+    import data_sheets_schema.runs as runs
+    from data_sheets_schema.cli import provenance as module
+    run = SimpleNamespace(method="claudecode_api", label="L", projects=["CHORUS", "VOICE"],
+                          is_core=False, deterministic=False)
+    monkeypatch.setattr(runs, "discover", lambda *a, **k: [run])
+    monkeypatch.setattr(module, "_corpus_path", lambda *_: tmp_path)
+    folder = tmp_path / "claudecode_api_core" / "L"
+    folder.mkdir(parents=True)
+    (folder / "CHORUS_reasoning.jsonl").write_text(chorus)
+    (folder / "VOICE_reasoning.jsonl").write_text(voice)
+    return CliRunner().invoke(provenance, ["reasoning", "--label", "L"])
+
+
+def test_skipped_lines_are_summed_over_every_log(tmp_path, monkeypatch):
+    """#2741: two unreadable lines in the first log and one in the second are three."""
+    partial = json.dumps(entry(True))[:40]
+    result = _two_logs(tmp_path, monkeypatch,
+                       json.dumps(entry(False)) + "\n" + partial + "\n" + "[1]\n",
+                       json.dumps(entry(False)) + "\n" + partial)
+    assert result.exit_code == 0, result.output
+    assert "2 log(s), 2 entries, 0 with reasoning text, 3 unreadable line(s) skipped" in result.output
+    assert "3 unreadable line(s) skipped: what follows describes the readable entries only" in result.output
+
+
+def test_nothing_skipped_prints_no_count_and_no_caveat(tmp_path, monkeypatch):
+    """#2741: the count and the caveat appear only when a line was skipped."""
+    result = _two_logs(tmp_path, monkeypatch, json.dumps(entry(False)) + "\n", json.dumps(entry(False)) + "\n")
+    assert result.exit_code == 0, result.output
+    assert "2 log(s), 2 entries, 0 with reasoning text\n" in result.output
+    assert "unreadable" not in result.output and "No entry returned a thinking block" in result.output
+
+
+def test_logs_holding_only_unreadable_lines_are_counted(tmp_path, monkeypatch):
+    """#2742: logs killed during their first write are not empty; the aggregate says so."""
+    partial = json.dumps(entry(True))[:40]
+    result = _two_logs(tmp_path, monkeypatch, partial, partial)
+    assert result.exit_code == 0, result.output
+    assert "2 log(s), 0 entries, 0 with reasoning text, 2 unreadable line(s) skipped" in result.output
