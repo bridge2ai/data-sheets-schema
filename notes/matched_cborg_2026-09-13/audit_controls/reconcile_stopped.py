@@ -64,6 +64,62 @@ def standing_authorization():
     return value, {'path': str(path), 'sha256': expected}
 
 
+def names_standing_record(record):
+    """Whether `record` names the pinned standing record. The digest binds it;
+    the path is the file's own name in whichever checkout reconciled, so a
+    successor validated from another worktree accepts it (#2582)."""
+    return (isinstance(record, dict) and set(record) == {'path', 'sha256'}
+            and record['sha256'] == STANDING_AUTHORIZATION_SHA256
+            and isinstance(record['path'], str) and Path(record['path']).is_absolute()
+            and Path(record['path']).name == STANDING_AUTHORIZATION.name)
+
+
+def claims_standing(receipt):
+    """Whether a receipt invokes the standing authorization, in either field a person's
+    words are recorded in, `user_authorization` or `user_confirmation` (#2716): a
+    `standing` key of any value (#2583), a citation of the standing record by its digest
+    or its file name, or its exact response or request quoted (#2710). A per-charge
+    receipt names its own record in its own words and does none of these, as audit27's
+    does. A malformed field claims nothing here; the validator refuses it."""
+    if not isinstance(receipt, dict):
+        return False
+    return any(_cites_standing(receipt.get(field)) for field in ('user_authorization', 'user_confirmation'))
+
+
+def _cites_standing(authorization):
+    if not isinstance(authorization, dict):
+        return False
+    if 'standing' in authorization:
+        return True
+    record = authorization.get('source_record')
+    digest = record.get('sha256') if isinstance(record, dict) else None
+    if isinstance(digest, str):
+        # Any case, with or without an algorithm prefix: the same digest (#2715).
+        digest = digest.strip().lower().removeprefix('sha256:')
+    if isinstance(record, dict) and (digest == STANDING_AUTHORIZATION_SHA256
+                                     or (isinstance(record.get('path'), str)   # any case: a case-insensitive filesystem (#2712)
+                                         and Path(record['path']).name.casefold()
+                                         == STANDING_AUTHORIZATION.name.casefold())):
+        return True
+    quote, _ = standing_authorization()
+    return any(authorization.get(key) == quote[key] for key in ('exact_response', 'quoted_request'))
+
+
+def same_directory(value, directory):
+    """File identity, not spelling: a case-variant spelling on a case-insensitive
+    filesystem names the same directory (#2584)."""
+    try:
+        return isinstance(value, str) and os.path.samefile(value, directory)
+    except (OSError, ValueError):             # ValueError: an embedded NUL (#2655)
+        return False
+
+
+def marker_path(source_registration, source_sha):
+    """Where `reconcile` records its reconciliation of a stopped audit (#2492)."""
+    state = r.canonical_path(source_registration['sequence_state'], exists=True)
+    return state.parent / MARKERS / f'{source_sha}.json'
+
+
 def request_folder(attempt_dir, request_id):
     """The one evidence folder of the pending request, in a single or batch attempt."""
     matches = []
@@ -186,7 +242,7 @@ def reconcile(source_path, out, *, recorded_at=None):
         markers.mkdir(exist_ok=True)
         if markers.is_symlink() or not markers.is_dir() or not os.access(markers, os.W_OK):
             raise BudgetStop('the reconciliation marker directory is not a writable directory')
-        marker = markers / f'{source_sha}.json'
+        marker = marker_path(source, source_sha)
         if marker.exists() or marker.is_symlink():
             raise BudgetStop(previous_reconciliation(marker))
         ledger, result = r.read_json(ledger_path), r.read_json(result_path)
@@ -348,7 +404,8 @@ def reconcile_at_stop(registration_path, manifest):
 
 
 def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoint_path):
-    """Run `validate_audit_reconciliation` exactly as the next registration will."""
+    """Run `validate_audit_reconciliation` as the next registration will, except for the
+    marker, which is written only after this check passes (#2664)."""
     pins = {str(p): r.sha(p) for p in (source_path, ledger_path, result_path, receipt_path, checkpoint_path)}
     if 'audit_batches' in source:
         from .batch_native import require_closed_batch_runtime
@@ -361,7 +418,9 @@ def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoi
                                                                 'receipt': str(receipt_path),
                                                                 'result': str(result_path)}}},
                  'pinned_files': pins}
-    r.validate_audit_reconciliation(candidate)
+    # The marker is written after this check passes, so the successor's own
+    # marker requirement is the one thing not checked here (#2492).
+    r.validate_audit_reconciliation(candidate, require_marker=False)
 
 
 def main(argv=None):
