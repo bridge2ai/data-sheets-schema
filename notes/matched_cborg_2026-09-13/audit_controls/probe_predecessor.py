@@ -86,7 +86,12 @@ def _malformed(what, error):
     defect in this validator is not read as bad input (#2514). The place is the innermost
     frame in the controls' own code; an error raised inside a library it called (a JSON
     decoder, a path method) is also named after `via` (#2641)."""
-    frames = traceback.extract_tb(error.__traceback__)
+    # Read straight off the traceback, never through linecache: before 3.12 it raises
+    # ValueError/UnicodeEncodeError for a filename os.stat refuses, which would make
+    # the refusal raise here (#2689).
+    frames = [traceback.FrameSummary(frame.f_code.co_filename, lineno, frame.f_code.co_name,
+                                     lookup_line=False)
+              for frame, lineno in traceback.walk_tb(error.__traceback__)]
     own = [frame for frame in frames if _own(frame)]
     where = ''
     if own:

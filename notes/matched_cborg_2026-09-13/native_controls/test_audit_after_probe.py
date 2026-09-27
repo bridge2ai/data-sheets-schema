@@ -1,6 +1,5 @@
 """An audit whose immediate predecessor is a transport probe (#2469); synthetic lineages only."""
 import copy
-import os
 import json
 from pathlib import Path
 
@@ -365,9 +364,65 @@ def test_a_library_frame_is_never_resolved_against_the_working_directory(tmp_pat
 @pytest.mark.parametrize('filename', ['/controls/x\x00y.py', '/controls/\ud800.py'], ids=['nul', 'surrogate'])
 def test_a_frame_whose_path_cannot_be_resolved_is_not_the_controls_own(filename):
     """#2673: an absolute filename that resolve() refuses counts as not own, rather than
-    making the refusal raise inside the wrappers' handlers."""
+    making the refusal raise inside the wrappers' handlers. No source lookup, so the
+    frame is built on every interpreter (#2689)."""
     import traceback
-    assert not probe_predecessor._own(traceback.FrameSummary(filename, 1, 'f'))
+    assert not probe_predecessor._own(traceback.FrameSummary(filename, 1, 'f', lookup_line=False))
+
+
+def test_a_symlink_loop_frame_is_not_the_controls_own(monkeypatch):
+    """#2690: resolve() raises RuntimeError on a symlink loop up to 3.12; that counts as
+    not own too. Modelled on every interpreter."""
+    import traceback
+    def loop(self, strict=False):
+        raise RuntimeError(f'Symlink loop from {self}')
+    monkeypatch.setattr(Path, 'resolve', loop)
+    assert not probe_predecessor._own(traceback.FrameSummary('/controls/a.py', 1, 'f', lookup_line=False))
+
+
+def test_a_frame_imported_through_a_symlinked_path_is_the_controls_own(tmp_path):
+    """#2690: a frame's filename keeps the spelling it was imported by; the controls
+    imported through a symlink (macOS /tmp) are still their own."""
+    import traceback
+    alias = tmp_path / 'controls_alias'
+    alias.symlink_to(probe_predecessor._CONTROLS, target_is_directory=True)
+    frame = traceback.FrameSummary(str(alias / 'audit_controls' / 'probe_predecessor.py'), 1, 'f', lookup_line=False)
+    assert probe_predecessor._own(frame)
+
+
+def test_a_malformed_refusal_names_its_frame_without_reading_source():
+    """#2689: _malformed never looks up source lines, so a frame whose filename linecache
+    cannot stat still yields a named BudgetStop."""
+    import linecache
+    def refuse(*args, **kwargs):
+        raise UnicodeEncodeError('utf-8', '\ud800', 0, 1, 'surrogates not allowed')
+    try:
+        {}['k']
+    except KeyError as error:
+        caught = error
+    # linecache is patched only around the one call: pytest and the warnings
+    # machinery read source through it too.
+    saved = {name: getattr(linecache, name) for name in ('getline', 'updatecache', 'checkcache')}
+    try:
+        for name in saved:
+            setattr(linecache, name, refuse)
+        refusal = probe_predecessor._malformed('probe', caught)
+    finally:
+        for name, function in saved.items():
+            setattr(linecache, name, function)
+    assert isinstance(refusal, BudgetStop) and 'KeyError at test_audit_after_probe.py:' in str(refusal)
+
+
+def test_the_bridge_canonicalises_operator_paths(prepared, tmp_path, monkeypatch):
+    """#2690: the CLI passes the source registration and receipt as typed; relative
+    spellings are registered canonical."""
+    from audit_controls.prepare import continuation_bridge
+    refused(prepared)
+    out = prepared.root / 'probe'
+    monkeypatch.chdir(out.parent)
+    bridge = continuation_bridge('probe/registration.json', 'probe/debit_receipt.json')
+    assert bridge['source_registration'] == str(out / 'registration.json')
+    assert bridge['receipt'] == str(out / 'debit_receipt.json')
 
 
 
