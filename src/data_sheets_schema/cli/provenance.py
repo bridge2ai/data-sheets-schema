@@ -2047,10 +2047,11 @@ def reasoning_cmd(method, project, label, path):
 
     Reports presence and availability separately on purpose. A request that
     names no thinking display, as every API-arm request, receives each thinking
-    block signed but empty, so a summary that conflated the two would read as
-    "no reasoning happened" when what actually happened is that no text was
-    requested (#2542). The token estimate is the only quantitative trace that
-    survives in that case.
+    block signed but empty on the Opus 5 family, so a summary that conflated
+    the two would read as "no reasoning happened" when what actually happened
+    is that no text was requested (#2542). The quantitative traces left are the
+    token estimate and, since #999, the endpoint's own thinking-token count
+    (#2625).
     """
     from pathlib import Path as _Path
 
@@ -2209,10 +2210,16 @@ def reasoning_cmd(method, project, label, path):
         click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
                    f"{s['with_reasoning_text']} with reasoning text")
     if total and not any(e.get('reasoning_available') for e in total):
-        click.echo("\nNo reasoning text was available in any entry. The blocks "
-                   "are signed but empty because the requests named no thinking "
-                   "display; a request naming display 'summarized' receives a "
-                   "summary, on any endpoint (#2542).")
+        if any(e.get('reasoning_present') for e in total):
+            click.echo("\nNo reasoning text was available in any entry. The blocks "
+                       "are signed but empty because the requests named no thinking "
+                       "display; a request naming display 'summarized' receives a "
+                       "summary, on any endpoint (#2542).")
+        else:
+            # No block at all: thinking was skipped or not requested, so the
+            # display is not why there is no text (#2626).
+            click.echo("\nNo entry returned a thinking block, so there is no "
+                       "reasoning text to report.")
 
 
 @provenance.command("backfill-effort")

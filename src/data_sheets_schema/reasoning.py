@@ -9,12 +9,15 @@ re-run is a different sample.
 ## What is actually available, measured
 
 Reasoning arrives as a `thinking` content block. Whether that block carries
-text depends on the display the request names, not on the endpoint (#2542,
-#2608), so this module records what it observed rather than assuming:
+text depends on the effective display — the one the request names, else the
+model's default — not on the endpoint (#2542, #2608, #2623), so this module
+records what it observed rather than assuming:
 
-- **No display named** — every request this runner sends
-  (`{"type": "adaptive"}`). Through CBORG (`google/claude-opus-5-high`,
-  verified 2026-07-29) the block arrives with a valid `signature` and
+- **No display named, on the Claude Opus 5 family** — every request this
+  runner sends: no `thinking` parameter before #1047 (2026-09-08),
+  `{"type": "adaptive"}` since, and still none from the judging paths
+  (#2624). Through CBORG (`google/claude-opus-5-high`, verified 2026-07-29)
+  the block arrives with a valid `signature` and
   `thinking: ''`. Not a streaming artifact: a non-streaming `messages.create`
   returns the same empty block, and the stream emits *no* `thinking_delta`
   events at all, only a `signature` event. Anthropic documents the display as
@@ -24,8 +27,11 @@ text depends on the display the request names, not on the endpoint (#2542,
   reasoning, through CBORG as directly (#2463 probe, 2026-09-26). No display
   returns the raw reasoning.
 
-So for the requests this runner sends, **the reasoning text is not
-obtainable** on either endpoint. Capturing it anyway is still worth the few
+Opus 4.6 and Sonnet 4.6, which the runner also accepts, default to summarized
+instead, so a no-display request to them would carry a summary.
+
+So for the requests this runner sends to the Opus 5 family, **the reasoning
+text is not obtainable** on either endpoint. Capturing it anyway is still worth the few
 lines: the record then states that a reasoning block existed, was signed, and
 was empty — which is a different and more useful claim than silence — and the
 same code captures summarized text unchanged if a request ever names that

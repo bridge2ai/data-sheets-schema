@@ -1250,14 +1250,18 @@ for all of them:
 no log has not spent zero reasoning; it has no measurement. Do not average the
 two, and do not read an absent figure for the agentic arm as a low one.
 
-⚠️ **What a thinking block carries depends on the display the request names,
-not on the endpoint** (#2542, #2608). A request that names no display — every
-API-arm request (`{"type":"adaptive"}`), and every native run not registered
-with a display — receives the block with a valid `signature` and
-`thinking: ''`, streaming and non-streaming (verified through CBORG 2026-07-29
-on `google/claude-opus-5-high` and again 2026-09-04; Anthropic documents the
-display as defaulting to omitted on this model family, so a direct
-`ANTHROPIC_API_KEY` run of the same request would be empty too). The logs
+⚠️ **What a thinking block carries depends on the effective display — the one
+the request names, else the model's default — not on the endpoint** (#2542,
+#2608, #2623). On the Claude Opus 5 family every committed log uses, the
+default is omitted: a request that names no display receives the block with a
+valid `signature` and `thinking: ''`, streaming and non-streaming. That covers
+every API-arm request — no `thinking` parameter before #1047 (2026-09-08),
+`{"type":"adaptive"}` since, and none still from the judging paths such as
+`evidence_score` (#2624) — and every native run not registered with a display
+(verified through CBORG 2026-07-29 on `google/claude-opus-5-high` and again
+2026-09-04, both before #1047; Anthropic documents the same default for a
+direct `ANTHROPIC_API_KEY` run). Opus 4.6 and Sonnet 4.6, which the runner
+also accepts, default to summarized instead. The logs
 therefore record `reasoning_present: true, reasoning_available: false` — a
 deliberately different claim from "no reasoning happened". A request with
 `"display":"summarized"` receives **summarized** thinking text on either
