@@ -495,9 +495,18 @@ def offline_launch(prepared, tmp_path, monkeypatch):
     # Resolved now: a test that fails while chdir'd elsewhere must still clean the checkout's tree (#2277).
     absolute = [ROOT / d for d in job["output_directories"]]
     yield launch
+    # Every record tree first, then each method directory: a lock timeout on one
+    # removal neither stops the others nor leaves a synthetic record behind (#2620).
     for directory in absolute:
         shutil.rmtree(directory, ignore_errors=True)
-        remove_if_empty(directory.parent)
+    failures = []
+    for parent in dict.fromkeys(directory.parent for directory in absolute):
+        try:
+            remove_if_empty(parent)
+        except BaseException as error:   # noqa: B036 - pytest.fail raises a BaseException
+            failures.append(error)
+    if failures:
+        raise failures[0]
 
 
 def run(launch, review=None, word=None, job=JOB):

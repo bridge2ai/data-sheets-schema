@@ -63,19 +63,26 @@ def processes(monkeypatch):
     assert all(process.poll() is not None for process, _, _ in created), "child survived its transport context"
 
 
-def killed_before_reaped(process):
+#: The in-process gap from the parent deciding to close a worker to its SIGKILL. It
+#: holds no interpreter start-up, so load does not approach it (#2618).
+KILL_GAP_SECONDS = 2
+
+
+def killed_before_reaped(process, killed_at=None):
     """For each wait on `process`, whether it had been sent SIGKILL (or was
     already reaped) when the wait began (#2540, #2569 reviews).
 
-    A close that waits on a live worker first, as a grace period of any
-    length, records False. A wall-clock bound on leaving the context would
-    catch only waits longer than itself, and it would charge the verdict with
-    the scheduler's delays under load."""
+    A close that waits on a live worker first through `Popen.wait`, for any
+    length, records False. A grace spent some other way (a sleep, an event
+    wait) is not seen here (#2619): each test bounds it by the real time from
+    its close decision to the SIGKILL, appended to `killed_at` (#2618)."""
     killed, waits = [], []
     real_signal, real_wait = process.send_signal, process.wait
     def send_signal(sig):
         if sig == signal.SIGKILL:
             killed.append(sig)
+            if killed_at is not None:
+                killed_at.append(time.monotonic())
         return real_signal(sig)
     def wait(*args, **kwargs):
         waits.append(bool(killed) or process.returncode is not None)
@@ -128,7 +135,7 @@ class ParentClock:
     exactly the remaining time. A refactor to `selectors` or to sliced polls
     fails this test rather than slipping past it."""
     def __init__(self, *, startup, write, deadline, expire_when):
-        self.now, self.waits = 1000.0, []
+        self.now, self.waits, self.expired_at = 1000.0, [], None
         self.startup, self.write, self.deadline = startup, write, deadline
         self.expire_when, self._written = expire_when, False
 
@@ -148,7 +155,7 @@ class ParentClock:
         hang = time.monotonic() + 60
         while True:
             if not writable and self.now < self.deadline and self.expire_when():
-                self.now = self.deadline
+                self.now, self.expired_at = self.deadline, time.monotonic()   # real time, for the kill gap
             expired = self.now >= end
             ready = select.select(readable, writable, errors, 0 if expired else .01)
             if expired or any(ready):
@@ -172,11 +179,11 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
     clock = ParentClock(startup=.5, write=1, deadline=1000.0 + read + connect, expire_when=witnessed)
     monkeypatch.setattr(bounded, "time", SimpleNamespace(monotonic=clock.monotonic))
     monkeypatch.setattr(bounded, "select", SimpleNamespace(select=clock.select))
-    spawn, reaped = bounded.subprocess.Popen, []
+    spawn, reaped, killed_at = bounded.subprocess.Popen, [], []
     def charged(*args, **kwargs):
         clock.spawned()
         process = spawn(*args, **kwargs)
-        reaped.append(killed_before_reaped(process))
+        reaped.append(killed_before_reaped(process, killed_at))
         return process
     monkeypatch.setattr(bounded.subprocess, "Popen", charged)
     def respond(handler, body):
@@ -197,12 +204,15 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
     # Start-up, the request write and the dripping header all waited on one
     # deadline, read + connect after entry, and the clock reached it only
     # there: no phase moved it. The refusal is the parent's own, and the
-    # worker was killed at that deadline, not waited out.
+    # worker was killed once the deadline passed, within KILL_GAP_SECONDS of
+    # real time, and never waited on first (#2618).
     assert sent.is_set() and len(clock.waits) >= 3 and clock.now == clock.deadline
     (process, _, _), = processes
     assert process.returncode == -signal.SIGKILL
     (waits,) = reaped
     assert waits and all(waits), "the worker was waited on before it was killed"
+    assert len(killed_at) == 1 and killed_at[0] - clock.expired_at < KILL_GAP_SECONDS, \
+        "the worker was killed long after its deadline"
     assert not client._workers
     client.close()
 
@@ -281,9 +291,9 @@ def test_close_kills_and_reaps_an_inflight_worker_before_return(processes, monke
 def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatch):
     # The body is withheld until the context has exited; only a watchdog
     # releases it. The verdict is that ordering, the parent's reads from the
-    # worker after the headers, and killing before reaping, not a wall-clock
-    # total that also counted the worker's interpreter start-up (#2569). A
-    # bare sleep before the kill, shorter than the watchdog, is not covered.
+    # worker after the headers, killing before reaping, and the real time from
+    # leaving the context to the kill, not a wall-clock total that also
+    # counted the worker's interpreter start-up (#2569, #2618).
     exited, body_released = threading.Event(), threading.Event()
     reads_after_headers = []
     real_take = bounded._Worker._take
@@ -303,15 +313,18 @@ def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatc
     client = bounded.BoundedStreamClient(read_timeout_seconds=30, connect_timeout_seconds=10)
     with endpoint(respond) as url:
         try:
+            killed_at = []
             with client.stream("POST", url, content=b"synthetic", headers={}) as value:
                 assert value.status_code == 524
-                waits = killed_before_reaped(processes[0][0])
+                waits = killed_before_reaped(processes[0][0], killed_at)
+                leaving = time.monotonic()
             drained = body_released.is_set()
         finally:
             exited.set()
     assert not drained, "the context waited for the withheld body"
     assert reads_after_headers == [], "the context read from the worker after its headers"
     assert waits and all(waits), "the context waited on a live worker before killing it"
+    assert len(killed_at) == 1 and killed_at[0] - leaving < KILL_GAP_SECONDS, "the kill came long after the close"
     assert not client._workers
     client.close()
 
