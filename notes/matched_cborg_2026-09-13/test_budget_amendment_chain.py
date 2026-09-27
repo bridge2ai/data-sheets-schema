@@ -348,7 +348,8 @@ def stopped(ledger):
     return next(row for row in ledger['requests'] if row['id'] == 'stopped-charge')
 
 
-def make_reconciled_chain_fixture(root, *, proof_bridge=True, authority_bridge=True, edit=_keep):
+def make_reconciled_chain_fixture(root, *, proof_bridge=True, authority_bridge=True, edit=_keep,
+                                  kind='d4d_native_audit_continuation'):
     """The immediate predecessor stopped with one pending row, which a receipt settled in a
     separate reconciled checkpoint; the chained link is anchored on that checkpoint.
 
@@ -358,7 +359,7 @@ def make_reconciled_chain_fixture(root, *, proof_bridge=True, authority_bridge=T
     prior_proof, origin, prior_ledger, _ = make_second_fixture(root / 'second')
     old = Decimal(prior_proof['total_usd'])
     own_path = root / 'immediate/billing.json'
-    previous = {'kind': 'd4d_native_audit_continuation',
+    previous = {'kind': kind,
         'parent': {'registration': prior_proof['origin_registration']['path']},
         'sequence_state': str(root / 'live-owner.json'), amendment.KEY: deepcopy(prior_proof),
         'budget': {'additional_usd': str(old), 'per_attempt_usd': '5', 'per_job_attempt_usd': {'preceding': '40'},
@@ -422,8 +423,11 @@ def repin_all(manifest):
             manifest['pinned_files'][ref['path']] = ref['sha256']
 
 
-def test_an_increase_may_be_anchored_on_a_reconciled_checkpoint(tmp_path):
-    proof, origin, reconciled, manifest, _ = make_reconciled_chain_fixture(tmp_path)
+@pytest.mark.parametrize('kind', ['d4d_native_audit_continuation', 'd4d_native_transport_probe_v1'],
+                         ids=['audit', 'probe'])
+def test_an_increase_may_be_anchored_on_a_reconciled_checkpoint(tmp_path, kind):
+    """An audit's stop settled by reconcile_stopped, or a probe's by its own debit (#2636)."""
+    proof, origin, reconciled, manifest, _ = make_reconciled_chain_fixture(tmp_path, kind=kind)
     assert amendment.effective_total(manifest, origin) == Decimal(800)
     bridge = amendment.ledger_bridge(manifest, reconciled, checkpoint_sha256=proof['predecessor_ledger']['sha256'])
     ledger = Ledger(tmp_path / 'fresh.json', manifest_sha256='a' * 64, total_cap='800', attempt_cap='5')
@@ -509,6 +513,16 @@ RECONCILED_ANCHOR_GUARDS = {
                   'more than its one reconciled row'),
     'other_request': (_field('reconciled', lambda d: d['reconciled_from'].update(request_id='settled-link')),
                       'more than its one reconciled row'),
+    # the settled row renamed, reconciled_from following it (#2637)
+    'renamed_row': (_field('reconciled', lambda d: (stopped(d).update(id='renamed-charge'),
+                                                   d['reconciled_from'].update(request_id='renamed-charge'))),
+                    'more than its one reconciled row'),
+    # the settled row renamed while reconciled_from still names the original request (#2637)
+    'renamed_row_only': (_field('reconciled', lambda d: stopped(d).update(id='renamed-charge')),
+                         'more than its one reconciled row'),
+    # the source's pending row is another request than the settled one (#2637)
+    'other_pending_row': (_field('own', lambda d: stopped(d).update(id='another-pending')),
+                          'more than its one reconciled row'),
     'not_pending_before': (_field('own', lambda d: stopped(d).update(status='held')),
                            'more than its one reconciled row'),
     'not_settled_after': (_field('reconciled', lambda d: stopped(d).update(status='resolved')),
@@ -608,3 +622,59 @@ def test_a_v2_increase_is_never_anchored_on_a_reconciled_checkpoint(tmp_path):
     carried['reconciliation'] = {'source_ledger': own_ref, 'receipt': receipt_ref}
     with pytest.raises(BudgetStop, match='unsupported second budget amendment selection'):
         amendment.selection(carried)
+
+
+# --- review round 2 of #2570: #2634, #2635, #2637 ---------------------------------------------
+
+def test_a_later_link_still_pins_an_earlier_links_reconciliation(tmp_path):
+    """#2634: a +$150 link on the reconciled $800 link carries that link's source ledger and
+    receipt in its own evidence, and refuses when they are unpinned."""
+    first = make_reconciled_chain_fixture(tmp_path / 'reconciled')
+    proof, origin, reconciled, manifest, _ = first
+    later, origin, _, later_manifest = make_chain_fixture(tmp_path / 'later', prior=(proof, origin, reconciled, manifest),
+                                                         increase='150', quote='increase the budget by $150')
+    repin_all(later_manifest)
+    assert amendment.effective_total(later_manifest, origin) == Decimal(950)
+    earlier = {Path(ref['path']) for ref in proof['reconciliation'].values()}
+    assert earlier <= amendment.paths(later_manifest)
+    for ref in proof['reconciliation'].values():
+        pins = deepcopy(later_manifest)
+        pins['pinned_files'].pop(ref['path'])
+        with pytest.raises(BudgetStop, match='unpinned'):
+            amendment.effective_total(pins, origin)
+
+
+def test_a_reconciliation_ref_cannot_reuse_an_earlier_identity_at_a_new_path(tmp_path):
+    """#2634: the same bytes at another path are the same evidence; identity reuse is refused
+    at selection, before any document is read."""
+    proof, _, _, _, _ = make_reconciled_chain_fixture(tmp_path)
+    earlier = proof['prior_amendment']['authorization']
+    copy = tmp_path / 'copy' / 'receipt.json'
+    copy.parent.mkdir()
+    copy.write_bytes(Path(earlier['path']).read_bytes())
+    changed = deepcopy(proof)
+    changed['reconciliation']['receipt'] = {'path': str(copy), 'sha256': earlier['sha256']}
+    with pytest.raises(BudgetStop, match='reuses earlier authority or predecessor identity'):
+        amendment.selection(changed)
+
+
+def test_a_confirmed_charge_below_its_reservation_is_accepted(tmp_path):
+    """#2635: the registration's confirmed-charge path settles below the reservation."""
+    def confirmed(stage, document):
+        if stage == 'receipt':
+            document.update(kind='user_confirmed_provider_charge_reconciliation', confirmed_complete_charge_usd='2.00')
+        if stage == 'reconciled':
+            stopped(document).update(cost_usd='2.00')
+    proof, origin, reconciled, manifest, _ = make_reconciled_chain_fixture(tmp_path, edit=confirmed)
+    assert stopped(reconciled)['cost_usd'] == '2.00' and stopped(reconciled)['reserved_usd'] == '2.4535'
+    assert amendment.effective_total(manifest, origin) == Decimal(800)
+    amendment.ledger_bridge(manifest, reconciled, checkpoint_sha256=proof['predecessor_ledger']['sha256'])
+
+
+@pytest.mark.parametrize('value', [['source_ledger', 'receipt'], None, 'reconciliation'], ids=['list', 'null', 'string'])
+def test_a_reconciliation_that_is_not_a_mapping_is_a_budget_stop(tmp_path, value):
+    """#2637: refused as a BudgetStop, never a TypeError from indexing it."""
+    proof, _, _, _, _ = make_reconciled_chain_fixture(tmp_path)
+    proof['reconciliation'] = value
+    with pytest.raises(BudgetStop, match='invalid budget amendment reconciliation'):
+        amendment.selection(proof)

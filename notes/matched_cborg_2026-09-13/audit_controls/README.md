@@ -854,8 +854,8 @@ checks the link one hop further, to the audit the probe followed:
 `required_paths` pins every file this reads. A budget increase may be
 anchored on a probe's own settled ledger as on an audit's
 (`budget_amendment.PREDECESSOR_KINDS`). A chained link may also be anchored
-on a reconciled checkpoint, an audit's or a probe's; see the chain section
-below (#2502).
+on a reconciled checkpoint, an audit's or a probe's; see the chained-link
+rules under "Explicit additive budget authorization" above (#2502, #2638).
 
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
