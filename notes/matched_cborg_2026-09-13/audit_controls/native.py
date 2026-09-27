@@ -24,10 +24,10 @@ from budgeted_cborg import (BudgetStop, STALL_DEBIT_BASIS, attempt_identity, now
 from native_command_policy import _simple_command, _literal_rule, permission_arguments
 from native_control import CONTRACT, HISTORY_CONTRACT, check_control_history, load_native_events
 from native_file_policy import FileAccess
-from native_proxy import NativeProxy
+from native_proxy import NativeProxy, thinking_display_evidence
 from run_native_canary import execute_child
 from .registration import (native_api_force_idle_timeout, native_api_timeout, native_stall_policy, native_response_buffer, native_history_control,
-                           native_upstream_read_timeout, sha, strict_json)
+                           native_thinking_display, native_upstream_read_timeout, sha, strict_json)
 from .transport import provider_clients
 
 CLI_FLAGS = ['--print', '--safe-mode', '--restricted', '--strict-mcp-config',
@@ -711,6 +711,9 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     response_buffer = native_response_buffer(manifest)
     if response_buffer is not None and protocol is not None:
         raise BudgetStop('response buffering is restricted to the native audit controller')
+    thinking_display = native_thinking_display(manifest)
+    if thinking_display is not None and protocol is not None:
+        raise BudgetStop('thinking display is restricted to the native audit controller')
     selected = protocol or sys.modules[__name__]
     policy = selected.build_policy(manifest, context.registration_path)
     executable = verify_runtime(manifest)
@@ -748,7 +751,8 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
             base_url=manifest['provider_base_url'], request_headers=provider_context_headers(manifest), upstream=upstream,
             **({'upstream_read_timeout_seconds': upstream_timeout} if upstream_timeout is not None else {}),
             **({'stall_policy': stall_policy} if stall_policy is not None else {}),
-            **({'response_buffer': response_buffer} if response_buffer is not None else {}))
+            **({'response_buffer': response_buffer} if response_buffer is not None else {}),
+            **({'thinking_display': thinking_display} if thinking_display is not None else {}))
     except BaseException:
         # Before running() owns cleanup, close only resources created here.
         if owned_client:
@@ -816,6 +820,9 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     rows = [r for r in ledger_state['requests'] if r['attempt'] == billing_attempt]
     if not rows or any(r['status'] != 'settled' for r in rows):
         raise BudgetStop('native audit lacks fully settled model requests')
+    if thinking_display is not None:
+        # Every admitted request re-read from its retained bytes (#2464); a gate, not evidence.
+        thinking_display_evidence(attempt / 'requests', thinking_display, strict=True)
     evidence = selected.inspect_transcript(load_native_events(attempt/'transcript.jsonl'), policy, manifest,
         context.manifest_sha256, attempt/'control.jsonl', config)
     evidence['initial_context'] = verify_initial_context(context, rows)
@@ -942,6 +949,10 @@ def _run_guarded(manifest, registration_path, manifest_sha256, review_sha256, jo
                 # reservation; their provider fee is unknown (#2150).
                 receipt['stall_debited_requests'] = [r['id'] for r in rows
                                                      if r.get('settlement_basis') == STALL_DEBIT_BASIS]
+            if 'native_thinking_display' in manifest and 'audit_batches' not in manifest:
+                # Reported for every outcome; never raises, so a stop is still recorded (#2464).
+                receipt['thinking_display'] = thinking_display_evidence(
+                    Path(job['attempt_dir']) / 'requests', manifest['native_thinking_display'], strict=False)
             if 'audit_batches' in manifest and error is None:
                 from .batch_native import finish_deadline
                 try:

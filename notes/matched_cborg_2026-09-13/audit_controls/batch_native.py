@@ -18,7 +18,9 @@ from . import batch_output as output
 from . import native
 from .batch_history import BatchHistory
 from .registration import (strict_json, sha, native_api_timeout, native_api_force_idle_timeout, stall_allowance,
-                           native_stall_policy, native_upstream_read_timeout, native_response_buffer, native_history_control, audit_batch_navigation)
+                           native_stall_policy, native_upstream_read_timeout, native_response_buffer, native_history_control, audit_batch_navigation,
+                           native_thinking_display)
+from native_proxy import thinking_display_evidence
 from .output_parts import canonical, describe, read_regular, same_json
 from .transport import provider_clients
 
@@ -327,6 +329,12 @@ def verify_child_closure(manifest, identity, child_id):
     context = SimpleNamespace(attempt=root, job=row)
     if not same_json(native.verify_initial_context(context, selected), receipt.get('initial_context')):
         raise BudgetStop('batch child first context changed after closure')
+    display = native_thinking_display(manifest)
+    if display is not None or 'thinking_display' in receipt:
+        # Recomputed from the retained bytes; a legacy closure carries no such key (#2464).
+        if display is None or not same_json(thinking_display_evidence(root / 'requests', display, strict=True),
+                                            receipt.get('thinking_display')):
+            raise BudgetStop('batch child thinking display evidence differs from its closure receipt')
     return {**receipt, 'closure_sha256': hashlib.sha256(raw).hexdigest()}
 
 
@@ -402,6 +410,8 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
                if native_upstream_read_timeout(manifest) is not None else {}),
             **({'stall_policy': native_stall_policy(manifest)} if native_stall_policy(manifest) is not None else {}),
             **({'response_buffer': native_response_buffer(manifest)} if native_response_buffer(manifest) is not None else {}),
+            # Every child, workers and integration alike: a registration-wide condition (#2464).
+            **({'thinking_display': native_thinking_display(manifest)} if native_thinking_display(manifest) is not None else {}),
             **({'stage_cap': str(stage_cap)} if row['kind'] == 'worker' else {}))
         state['proxy'] = proxy
         environment = {k: v for k, v in os.environ.items() if k in {'PATH', 'HOME', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM'}}
@@ -455,6 +465,9 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
             'billing_attempt': owner, 'child_id': row['id'], 'status': 'completed_proposal',
             'finished_at': now(), 'runtime': runtime, 'policy_sha256': _digest(policy),
             'request_rows': selected, 'initial_context': first, 'evidence': evidence,
+            **({'thinking_display': thinking_display_evidence(root / 'requests', native_thinking_display(manifest),
+                                                               strict=True)}
+               if native_thinking_display(manifest) is not None else {}),
             'frozen_evidence': _tree(root)}
         write_new(root / 'closed.json', receipt)
         return verify_child_closure(manifest, identity, row['id'])
@@ -471,7 +484,10 @@ def _execute_child(context, row, deadline, *, clock=time.monotonic, client=None,
             primary.native_stop_reason = state['first_stop_reason']
         try:
             write_new(root / 'stopped.json', {'child_id': row['id'], 'registration_sha256': identity,
-                'status': 'stopped', 'error_type': type(primary).__name__, **primary.native_stop})
+                'status': 'stopped', 'error_type': type(primary).__name__, **primary.native_stop,
+                **({'thinking_display': thinking_display_evidence(root / 'requests', manifest['native_thinking_display'],
+                                                                  strict=False)}
+                   if 'native_thinking_display' in manifest else {})})
         except Exception:
             pass
         if proxy is None:

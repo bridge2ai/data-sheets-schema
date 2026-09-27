@@ -47,7 +47,9 @@ send({'type':'system','subtype':'init','session_id':session,'cwd':os.getcwd(),
 def request():
     body={'model':'claude-opus-5','max_tokens':1000,'stream':True,'system':case['system_prompt'],
           'messages':[{'role':'user','content':prompt['message']['content']}]}
-    req=urllib.request.Request(os.environ['ANTHROPIC_BASE_URL']+'/v1/messages',data=json.dumps(body).encode(),
+    if 'thinking' in case:body['thinking']=case['thinking']
+    raw=json.dumps(body,separators=(',',':')) if case.get('compact') else json.dumps(body)
+    req=urllib.request.Request(os.environ['ANTHROPIC_BASE_URL']+'/v1/messages',data=raw.encode(),
         headers={'x-api-key':os.environ['ANTHROPIC_API_KEY'],'Content-Type':'application/json'})
     try:
         timeout=float(os.environ.get('API_TIMEOUT_MS',case.get('default_timeout_ms',5000)))/1000

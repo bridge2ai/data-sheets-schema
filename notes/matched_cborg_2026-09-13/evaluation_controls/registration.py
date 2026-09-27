@@ -375,6 +375,8 @@ def verify_manifest(manifest, path, digest):
         raise BudgetStop('native_history_control is audit-only; evaluation cannot select it')
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; evaluation cannot select it')
+    if 'native_thinking_display' in manifest:
+        raise BudgetStop('native_thinking_display is audit-only; evaluation cannot select it')
     _fitness_selection(manifest)
     if 'audit_worker_checkpoint' in manifest:
         raise BudgetStop('audit_worker_checkpoint is audit-only; evaluation cannot select it')

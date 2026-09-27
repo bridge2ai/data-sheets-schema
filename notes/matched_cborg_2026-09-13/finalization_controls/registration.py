@@ -159,6 +159,8 @@ def validate_registration(path):
         raise BudgetStop('native_history_control is audit-only; Phase 4 cannot select it')
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; Phase 4 cannot select it')
+    if 'native_thinking_display' in manifest:
+        raise BudgetStop('native_thinking_display is audit-only; Phase 4 cannot select it')
     if 'audit_worker_checkpoint' in manifest:
         raise BudgetStop('audit_worker_checkpoint is audit-only; Phase 4 cannot select it')
     if 'audit_batch_navigation' in manifest:

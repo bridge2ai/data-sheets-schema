@@ -40,6 +40,8 @@ def verify(manifest, path, expected_sha):
         raise BudgetStop('native_history_control is audit-only; generation cannot select it')
     if "native_response_buffer" in manifest:
         raise BudgetStop("native_response_buffer is audit-only; generation cannot select it")
+    if "native_thinking_display" in manifest:
+        raise BudgetStop("native_thinking_display is audit-only; generation cannot select it")
     generation = manifest.get("generation")
     jobs = generation.get("jobs") if isinstance(generation, dict) else None
     if isinstance(jobs, list):

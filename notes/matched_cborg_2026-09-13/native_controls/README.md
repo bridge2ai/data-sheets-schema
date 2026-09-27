@@ -157,6 +157,55 @@ output directory for each run. Scientific acceptance still inspects actual
 successful calls, read targets and denied calls; a permission grant alone
 does not establish instruction adherence (#2049).
 
+## Registered thinking display (#2464)
+
+**What the probe showed.** On 2026-09-26 the probe (#2463) completed. With
+`"display":"summarized"`, CBORG sent headers and the first thinking text at
+7.4 s and finished at 605 s. The same request with thinking hidden had failed
+seven times at 272–277 s.
+
+**Why the proxy adds it.** Under the native launcher's registered
+environment, Claude Code 2.1.272 drops the display even when given
+`--thinking-display summarized`: its request builder gates the display on
+`CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` being unset. This was checked
+offline, with no provider contacted; enabling experimental betas turns on four
+more beta headers. The maintainer chose, on 2026-09-26, to have the proxy add
+the display instead. A registration selects it with
+`native_thinking_display = {"kind": "thinking_display_v1", "display":
+"summarized", "delivery": "proxy_substitution"}`. The setting is audit-only
+and registered for Claude Code 2.1.272.
+
+**What the proxy does with each child request:**
+- **`{"type":"adaptive"}`** gains the display, and only those bytes change.
+  The unescaped pattern must occur exactly once, and the parsed result must
+  equal the child request with only `thinking` replaced. The request is
+  counted, reserved and bound in the ledger as it is sent.
+- **`{"type":"disabled"}`** (a side call) is forwarded unchanged.
+- **Anything else** is refused before it is counted, reserved or sent. The
+  refusal is recorded under `thinking_refusals/` beside `requests/`, and the
+  attempt stops at no cost.
+
+In 2,304 retained native requests, 2,301 carried exactly
+`{"type":"adaptive"}` with that pattern once.
+
+**What each request folder keeps:**
+- `native_request.json`: the child's own bytes;
+- `forwarded_request.json`: the bytes sent, when the display was added. A
+  disabled side call keeps none, because its `native_request.json` is what was
+  sent (#2564);
+- `thinking_request.json`: the disposition and both hashes;
+- `stream_timing.json`: the arrival of headers, the first chunk, the first
+  thinking block, the first thinking text and the last chunk, plus
+  per-event counts. It holds counts and times, never text, and its observer
+  cannot change delivered bytes.
+
+`thinking_display_evidence` re-reads these bytes. A completed audit and every
+batch child closure require it to prove every admitted request; a stopped
+receipt reports it.
+
+**Replay.** The CLI replays a summarized thinking block, text and signature
+unchanged, in its next request (checked offline).
+
 ## Transport probe, 2026-09-25
 
 Audit27's ninth worker request returned HTTP 500 seven times, at 272 to 277

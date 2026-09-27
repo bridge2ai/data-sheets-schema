@@ -10,6 +10,7 @@ from data_sheets_schema import source_review
 from .registration import (BudgetStop, canonical_path, inspect_parent,
     native_api_force_idle_timeout as validate_native_idle_timeout, native_api_timeout,
     native_stall_policy as validate_stall_policy, native_response_buffer as validate_response_buffer,
+    native_thinking_display as validate_thinking_display,
     native_history_control as validate_history_control, native_upstream_read_timeout, parent_path,
     read_json, required_paths, sha, validate_registration)
 from .registration import (TRANSITION, TRANSITION_KIND, SOURCE_METADATA_TRANSITION_KIND,
@@ -147,6 +148,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             source_metadata_evidence=False, clarify_source_claims=False, draft_audit_grammar=False,
             schema_semantic_context=False, audit_batches=None, audit_batch_format=False, audit_batch_navigation=False,
             audit_worker_navigation=False, budget_amendment=None, native_response_buffer=None,
+            native_thinking_display=None,
             audit_worker_checkpoint=None, native_history_control=False):
     checkpoint_selection = None
     if audit_worker_checkpoint is not None:
@@ -251,6 +253,12 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
                 **({'api_force_idle_timeout': native_api_force_idle_timeout}
                    if native_api_force_idle_timeout is not None else {})},
             'job': {'id': job_id, 'deadline_seconds': deadline_seconds}, 'budget': {'per_job_attempt_usd': {job_id: str(attempt_cap)}}})
+    if native_thinking_display is not None:
+        # Checked before the destination exists (#2464): exact value, audit-only, pinned runtime.
+        upstream_selection['native_thinking_display'] = native_thinking_display
+        validate_thinking_display({'kind': 'd4d_native_audit_continuation',
+            'native_thinking_display': native_thinking_display,
+            'native_runtime': {'version': read_json(parent_overlay).get('claude_version')}})
     if bool(continuation_source_registration) != bool(continuation_reconciliation_receipt):
         raise BudgetStop('an audit reconciliation requires both source registration and receipt')
     if continuation_source_registration and not continuation_checkpoint:
@@ -288,7 +296,7 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
             'effort': 'native_default'}
         if native_api_timeout_ms is not None: candidate['native_runtime']['api_timeout_ms'] = native_api_timeout_ms
         if native_api_force_idle_timeout is not None: candidate['native_runtime']['api_force_idle_timeout'] = native_api_force_idle_timeout
-        for key in ('native_stall_policy', 'native_response_buffer', 'native_history_control', 'native_upstream_read_timeout_seconds', 'provider_transport', 'budget_amendment'):
+        for key in ('native_stall_policy', 'native_response_buffer', 'native_history_control', 'native_upstream_read_timeout_seconds', 'provider_transport', 'budget_amendment', 'native_thinking_display'):
             candidate.pop(key, None)
         candidate.update(upstream_selection)
         candidate['provider_base_url'] = provider_base_url or generation_candidate['provider_base_url']
@@ -480,6 +488,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
            if 'native_response_buffer' in manifest else {}),
         **({'native_history_control': manifest['native_history_control']}
            if 'native_history_control' in manifest else {}),
+        **({'native_thinking_display': manifest['native_thinking_display']}
+           if 'native_thinking_display' in manifest else {}),
         'provider_base_url': manifest['provider_base_url'],
         **({'audit_contract_context': manifest['audit_contract_context']}
            if 'audit_contract_context' in manifest else {}),
@@ -578,6 +588,8 @@ def main():
              'number of stalled requests counted at their whole reservation, and the quoted maintainer authorization')
     parser.add_argument('--native-response-buffer',
         help='path to strict audit-only complete_response_v1 JSON: max_bytes and total_seconds before delivery')
+    parser.add_argument('--native-thinking-display', choices=('summarized',),
+        help='the proxy adds display: summarized to each forwarded adaptive-thinking request (#2464)')
     parser.add_argument('--continuation-checkpoint')
     parser.add_argument('--continuation-source-registration')
     parser.add_argument('--continuation-reconciliation-receipt')
@@ -595,6 +607,9 @@ def main():
         args['native_stall_policy'] = read_stall_policy(args['native_stall_policy'])
     if args['native_response_buffer'] is not None:
         args['native_response_buffer'] = read_response_buffer(args['native_response_buffer'])
+    if args['native_thinking_display'] is not None:
+        from native_proxy import THINKING_DISPLAY
+        args['native_thinking_display'] = dict(THINKING_DISPLAY)
     if args['audit_batches'] is not None:
         from .batch_registration import read_selection
         args['audit_batches'] = read_selection(args['audit_batches'])
