@@ -87,7 +87,11 @@ def claims_standing(receipt):
     if 'standing' in authorization:
         return True
     record = authorization.get('source_record')
-    if isinstance(record, dict) and (record.get('sha256') == STANDING_AUTHORIZATION_SHA256
+    digest = record.get('sha256') if isinstance(record, dict) else None
+    if isinstance(digest, str):
+        # Any case, with or without an algorithm prefix: the same digest (#2715).
+        digest = digest.strip().lower().removeprefix('sha256:')
+    if isinstance(record, dict) and (digest == STANDING_AUTHORIZATION_SHA256
                                      or (isinstance(record.get('path'), str)   # any case: a case-insensitive filesystem (#2712)
                                          and Path(record['path']).name.casefold()
                                          == STANDING_AUTHORIZATION.name.casefold())):

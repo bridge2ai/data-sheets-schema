@@ -871,7 +871,8 @@ def test_validate_registration_asks_for_the_marker(ancestry, tmp_path, monkeypat
 
 # --- Codex review of #2568: a standing receipt stripped of its flag and digest (#2710) -----------
 
-@pytest.mark.parametrize('keep', ['file_name', 'file_name_other_case', 'exact_response', 'quoted_request'])
+@pytest.mark.parametrize('keep', ['file_name', 'file_name_other_case', 'exact_response', 'quoted_request',
+                                  'digest_upper_case', 'digest_mixed_case', 'digest_prefixed'])
 def test_a_receipt_reusing_the_standing_record_without_its_flag_is_a_standing_debit(stopped, keep):
     """A receipt that drops `standing` and changes the digest, but keeps the standing record's
     file name or one of its quoted words, still claims standing: it is refused, and it needs
@@ -884,7 +885,10 @@ def test_a_receipt_reusing_the_standing_record_without_its_flag_is_a_standing_de
         path = {'file_name': reference['path'],
                 'file_name_other_case': str(Path(reference['path']).with_name(Path(reference['path']).name.upper()))
                 }.get(keep, '/elsewhere/own_record.json')        # #2712: a case variant names the same file
-        a['source_record'] = {'path': path, 'sha256': '6' * 64}
+        digest = {'digest_upper_case': reference['sha256'].upper(),                    # #2715
+                  'digest_mixed_case': reference['sha256'][:32].upper() + reference['sha256'][32:],
+                  'digest_prefixed': 'sha256:' + reference['sha256']}.get(keep, '6' * 64)
+        a['source_record'] = {'path': path, 'sha256': digest}
         for key in ('exact_response', 'quoted_request'):
             a[key] = quote[key] if key == keep else f'own words: {key}'
     value = reauthorize(value, request_id, downgrade)

@@ -868,7 +868,8 @@ def test_a_probe_reads_the_content_of_the_marker_it_pins(lineage, tamper):
     assert not (lineage.root / 'probe').exists()
 
 
-def test_a_probe_refuses_a_standing_receipt_stripped_of_its_flag(lineage):
+@pytest.mark.parametrize('keep', ['exact_response', 'digest_upper_case'])
+def test_a_probe_refuses_a_standing_receipt_stripped_of_its_flag(lineage, keep):
     """#2710: a tip receipt that drops `standing` and changes the digest but keeps the standing
     record's exact response is still a standing debit: the probe pins its marker and refuses it."""
     from audit_controls import reconcile_stopped as tool
@@ -880,7 +881,10 @@ def test_a_probe_refuses_a_standing_receipt_stripped_of_its_flag(lineage):
     value = tool.reconcile(lineage.source, lineage.root / 'tool_reconciliation', recorded_at='2026-09-25T19:00:00+00:00')
     def downgrade(a):
         a.pop('standing')
-        a['source_record'] = {'path': '/elsewhere/own_record.json', 'sha256': '6' * 64}
+        digest = tool.STANDING_AUTHORIZATION_SHA256.upper() if keep == 'digest_upper_case' else '6' * 64
+        a['source_record'] = {'path': '/elsewhere/own_record.json', 'sha256': digest}
+        if keep != 'exact_response':
+            a['exact_response'], a['quoted_request'] = 'own words', 'own request'      # #2715
     value = reauthorize(value, value['request_id'], downgrade)
     with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
         prepare(lineage, tip_checkpoint=Path(value['checkpoint']), tip_reconciliation_receipt=Path(value['receipt']))
