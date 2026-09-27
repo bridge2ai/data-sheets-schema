@@ -916,41 +916,87 @@ def test_a_probe_refuses_standing_authority_relabelled_as_a_confirmed_charge(lin
     assert not (lineage.root / 'probe').exists()
 
 
-def test_the_probe_pins_every_repository_module_its_lineage_check_loads():
-    """#2628: what importing the probe and the batch lineage check actually loads from the
-    repository, in a fresh interpreter, is a subset of what the probe pins."""
+def test_the_probe_pins_every_repository_module_its_lineage_modules_load():
+    """#2628, #2751: importing the probe and the modules its lineage checks run (those
+    of a probe or reconciled tip, and for a batch tip batch_native and what it imports
+    inside a function) loads, in a fresh interpreter, only repository files the probe
+    pins. Import time only: that function-level imports are followed is the synthetic
+    test's to show."""
     import subprocess
     root = Path(probe.__file__).resolve().parents[3]
     code = ("import json, sys\n"
-            "import transport_probe, audit_controls.batch_native\n"
+            "import transport_probe\n"
+            "import audit_controls.reconcile_stopped, audit_controls.probe_predecessor\n"
+            "import audit_controls.runtime_closure, audit_controls.batch_native, audit_controls.worker_checkpoint\n"
             "print(json.dumps(sorted({m.__file__ for m in list(sys.modules.values())\n"
             "                         if getattr(m, '__file__', None)})))\n")
     result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, timeout=600,
                             cwd=root, env={**__import__('os').environ, 'PYTHONPATH': ':'.join(sys.path)})
     assert result.returncode == 0, result.stderr
+    environment = probe._environment()
     loaded = {str(Path(f).resolve()) for f in json.loads(result.stdout)
-              if Path(f).resolve().is_relative_to(root) and f.endswith('.py')}
-    assert loaded and loaded <= set(probe.implementation_paths()), sorted(loaded - set(probe.implementation_paths()))
+              if f.endswith('.py') and probe.repository_file(Path(f).resolve(), root, environment)}
+    names = {Path(f).name for f in loaded}
+    assert {'reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py', 'batch_native.py',
+            'worker_checkpoint.py'} <= names
+    assert loaded <= set(probe.implementation_paths()), sorted(loaded - set(probe.implementation_paths()))
 
 
-def test_the_import_closure_reads_source_and_imports_only_packages(tmp_path, monkeypatch):
-    """#2628: a function-level import counts; a relative one resolves against its package;
-    `from module import attribute` never executes the module; files outside the root, the
-    standard library and a name that is no module add nothing."""
+def test_the_import_closure_reads_source_and_imports_only_repository_packages(tmp_path, monkeypatch):
+    """#2628, #2748-#2750: a function-level import counts; a relative one resolves against
+    its package; `from module import attribute` never executes the module; a package in
+    a virtual environment inside the root, one outside the root, the standard library
+    and a name that is no module add nothing, and none of them is imported."""
     root = tmp_path / 'root'
+    marker = tmp_path / 'executed'
     package = root / 'closure_pkg_2628'
     package.mkdir(parents=True)
     (package / '__init__.py').write_text('')
     (package / 'inner.py').write_text('def later():\n    from . import deferred\n')
-    (package / 'deferred.py').write_text('import json\nfrom closure_top_2628 import attribute\n')
-    (root / 'closure_top_2628.py').write_text("raise RuntimeError('executed')\nattribute = 1\n")
-    (tmp_path / 'closure_outside_2628.py').write_text('')
+    (package / 'deferred.py').write_text('import json\nfrom closure_top_2628 import attribute\n'
+                                         'import closure_venv_2628.sub\n')
+    ran = f"open({str(marker)!r}, 'a').write(__name__ + '\\n')\n"
+    (root / 'closure_top_2628.py').write_text(ran + 'attribute = 1\n')
+    installed = root / '.venv' / 'lib' / 'python3.12' / 'site-packages'
+    (installed / 'closure_venv_2628').mkdir(parents=True)
+    (installed / 'closure_venv_2628' / '__init__.py').write_text(ran)
+    (installed / 'closure_venv_2628' / 'sub.py').write_text(ran)
+    (tmp_path / 'closure_outside_2628.py').write_text(ran)
     seed = root / 'seed.py'
     seed.write_text('import closure_pkg_2628.inner\nimport closure_outside_2628\nimport closure_missing_2628\n')
-    monkeypatch.syspath_prepend(str(tmp_path))
-    monkeypatch.syspath_prepend(str(root))
+    for place in (tmp_path, installed, root):
+        monkeypatch.syspath_prepend(str(place))
     files = probe.import_closure(seed, root.resolve())
     assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
         'seed.py', 'closure_pkg_2628/__init__.py', 'closure_pkg_2628/inner.py', 'closure_pkg_2628/deferred.py',
         'closure_top_2628.py'}
-    assert 'closure_top_2628' not in sys.modules and 'closure_pkg_2628.inner' not in sys.modules
+    assert not marker.exists(), marker.read_text()          # no module above ran, in or out of the root
+
+
+def test_the_interpreter_environment_is_not_repository_code(tmp_path, monkeypatch):
+    """#2748: an environment inside the root is excluded by its prefix even when its
+    directories are not named site-packages."""
+    root = tmp_path / 'root'
+    prefix = root / 'env'
+    (prefix / 'lib').mkdir(parents=True)
+    monkeypatch.setattr(sys, 'prefix', str(prefix))
+    environment = probe._environment()
+    assert not probe.repository_file((prefix / 'lib' / 'x.py').resolve(), root.resolve(), environment)
+    assert probe.repository_file((root / 'pkg' / 'x.py').resolve(), root.resolve(), environment)
+    # An environment that contains the root does not exclude the repository.
+    monkeypatch.setattr(sys, 'prefix', str(tmp_path))
+    assert probe.repository_file((root / 'pkg' / 'x.py').resolve(), root.resolve(), probe._environment())
+
+
+def test_a_repository_package_that_fails_to_import_fails_the_closure(tmp_path, monkeypatch):
+    """A repository package whose __init__ raises is not skipped: skipping would leave
+    what it imports unpinned, so the probe refuses rather than pin less (#2628)."""
+    root = tmp_path / 'root'
+    (root / 'closure_broken_2628').mkdir(parents=True)
+    (root / 'closure_broken_2628' / '__init__.py').write_text("raise RuntimeError('broken package')\n")
+    (root / 'closure_broken_2628' / 'mod.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_broken_2628.mod\n')
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(RuntimeError, match='broken package'):
+        probe.import_closure(seed, root.resolve())

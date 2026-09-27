@@ -197,10 +197,35 @@ def _imported_names(source, package):
     return names
 
 
-def _module_spec(name):
-    """The spec of a module name, or None. Only the packages above it are imported to
-    find it: a name under a plain module (`from module import attribute`) is not a
-    module, and that module is never executed to find out."""
+def _environment():
+    """Where the interpreter and its installed packages live. A virtual environment
+    may sit inside the repository, as CI's and the primary checkout's `.venv` does,
+    so lying under the root does not make a file repository code (#2748)."""
+    import site
+    places = [sys.prefix, sys.base_prefix, sys.exec_prefix, sys.base_exec_prefix]
+    for listing in (getattr(site, 'getsitepackages', None), getattr(site, 'getusersitepackages', None)):
+        if listing is not None:
+            found = listing()
+            places.extend([found] if isinstance(found, str) else found)
+    return {Path(place).resolve() for place in places if place}
+
+
+def repository_file(path, root, environment):
+    """Whether a resolved file is the repository's own code: under `root`, and neither
+    in the interpreter's environment (unless that contains the root) nor in any
+    site-packages or dist-packages directory."""
+    return (path.is_relative_to(root)
+            and not any(path.is_relative_to(place) for place in environment
+                        if place != root and not root.is_relative_to(place))
+            and not {'site-packages', 'dist-packages'} & set(path.relative_to(root).parts))
+
+
+def _module_spec(name, inside):
+    """The spec of a repository module name, or None. Only repository packages above it
+    are imported to find it, which runs their `__init__`: a name whose package is not
+    the repository's (the standard library, an installed package) is never looked
+    below, so nothing of theirs is imported (#2749), and a name under a plain module
+    (`from module import attribute`) is not a module, which is never executed to find out."""
     spec = None
     parts = name.split('.')
     for depth in range(1, len(parts) + 1):
@@ -212,15 +237,22 @@ def _module_spec(name):
             return None
         if spec is None:
             return None
+        places = [spec.origin] if spec.has_location and spec.origin else []
+        places.extend(spec.submodule_search_locations or [])
+        if not any(inside(Path(place).resolve()) for place in places):
+            return None
     return spec
 
 
 def import_closure(source, root):
-    """`source` and every file under `root` it imports, transitively, read from the
+    """`source` and every repository file it imports, transitively, read from the
     source rather than from what happens to be imported: an import inside a function
     counts, since the lineage check reaches batch_native only through one (#2628).
     Resolved as this interpreter would resolve it; a name that is not a module, or a
-    module outside `root` (the standard library, installed packages), adds nothing."""
+    module that is not the repository's own (`repository_file`), adds nothing."""
+    environment = _environment()
+    def inside(path):
+        return repository_file(path, root, environment)
     files, seen = {source.resolve()}, set()
     pending = _imported_names(source, '')
     while pending:
@@ -230,11 +262,11 @@ def import_closure(source, root):
         seen.add(name)
         parts = name.split('.')
         pending.extend('.'.join(parts[:i]) for i in range(1, len(parts)))     # the packages it runs
-        spec = _module_spec(name)
+        spec = _module_spec(name, inside)
         if spec is None or not spec.has_location or not spec.origin:
             continue
         origin = Path(spec.origin).resolve()
-        if origin.suffix != '.py' or not origin.is_relative_to(root) or origin in files:
+        if origin.suffix != '.py' or not inside(origin) or origin in files:
             continue
         files.add(origin)
         pending.extend(_imported_names(origin, spec.parent))
