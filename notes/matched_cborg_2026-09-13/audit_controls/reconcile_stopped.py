@@ -386,7 +386,8 @@ def reconcile_at_stop(registration_path, manifest):
 
 
 def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoint_path):
-    """Run `validate_audit_reconciliation` exactly as the next registration will."""
+    """Run `validate_audit_reconciliation` as the next registration will, except for the
+    marker, which is written only after this check passes (#2664)."""
     pins = {str(p): r.sha(p) for p in (source_path, ledger_path, result_path, receipt_path, checkpoint_path)}
     if 'audit_batches' in source:
         from .batch_native import require_closed_batch_runtime

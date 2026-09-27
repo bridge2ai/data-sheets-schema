@@ -714,7 +714,17 @@ def test_a_relocated_receipt_and_checkpoint_are_refused(stopped):
         r.validate_audit_reconciliation(successor)
 
 
-def test_the_marker_directory_is_compared_by_identity_on_any_filesystem(stopped):
+def keep_spelling(monkeypatch):
+    """Resolution that keeps a path's spelling, as a case-insensitive filesystem keeps a
+    case variant: a symlink alias then stays another spelling of one directory, so a
+    comparison of resolved spellings at a validator call site tells them apart while an
+    identity comparison does not, on any filesystem (#2662). It models the call-time
+    lookups `os.path.realpath` and `Path.resolve`; a function bound at import is not seen."""
+    monkeypatch.setattr(os.path, 'realpath', lambda path, *a, **k: os.fspath(path))
+    monkeypatch.setattr(Path, 'resolve', lambda self, strict=False: self)
+
+
+def test_the_marker_directory_is_compared_by_identity_on_any_filesystem(stopped, monkeypatch):
     """#2631: a marker naming the reconciliation directory through an alias is the same
     directory. The case-variant test below needs a case-insensitive filesystem; a symlink
     alias is another spelling of one directory that CI's filesystem also has."""
@@ -726,7 +736,9 @@ def test_the_marker_directory_is_compared_by_identity_on_any_filesystem(stopped)
     recorded = r.read_json(marker); recorded['out'] = str(alias)
     save(marker, recorded)
     successor, _ = successor_of(m, reg, first, value)
-    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+    expected = r.read_json(value['checkpoint'])
+    keep_spelling(monkeypatch)
+    assert r.validate_audit_reconciliation(successor) == expected
 
 
 def test_the_checkpoint_directory_is_compared_by_identity_on_any_filesystem(stopped, monkeypatch):
@@ -748,7 +760,9 @@ def test_the_checkpoint_directory_is_compared_by_identity_on_any_filesystem(stop
     monkeypatch.setattr(r, 'canonical_path', insensitive)
     spelled = {**value, 'checkpoint': str(alias / Path(value['checkpoint']).name)}
     successor, _ = successor_of(m, reg, first, spelled)
-    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+    expected = r.read_json(value['checkpoint'])
+    keep_spelling(monkeypatch)
+    assert r.validate_audit_reconciliation(successor) == expected
 
 
 def test_mixed_case_spellings_of_the_receipt_and_checkpoint_are_one_directory(stopped):
@@ -801,7 +815,8 @@ def test_same_directory_compares_identity_not_resolved_spelling(tmp_path, monkey
     """#2657: on a case-insensitive filesystem resolve() keeps the spelling it is given,
     so a resolve()-based comparison would call one directory two. Resolution that keeps
     an alias's spelling models that on any filesystem, CI's included; the identity
-    comparison still sees one directory."""
+    comparison still sees one directory. It catches a comparison that looks up
+    `os.path.realpath` or `Path.resolve` when called, not one bound at import (#2663)."""
     target = tmp_path / 'reconciliation'; target.mkdir()
     alias = tmp_path / 'alias'; alias.symlink_to(target)
     monkeypatch.setattr(os.path, 'realpath', lambda path, *a, **k: os.fspath(path))
