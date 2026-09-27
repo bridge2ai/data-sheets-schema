@@ -1,5 +1,6 @@
 """An audit whose immediate predecessor is a transport probe (#2469); synthetic lineages only."""
 import copy
+import os
 import json
 from pathlib import Path
 
@@ -335,8 +336,35 @@ def test_each_wrapper_names_the_error_it_caught(prepared, monkeypatch, wrapper, 
         raise KeyError('a key the wrapper forgot')
     monkeypatch.setattr(probe_predecessor, patched, defect)
     with pytest.raises(BudgetStop, match=rf"^{refusal} \(KeyError at test_audit_after_probe\.py:\d+: "
-                       r"'a key the wrapper forgot'\)$"):
+                       r"'a key the wrapper forgot'\)$") as caught:
         getattr(probe_predecessor, wrapper)(manifest)
+    assert isinstance(caught.value.__cause__, KeyError)          # the original stays chained (#2660)
+
+
+def test_a_library_frame_is_never_resolved_against_the_working_directory(tmp_path, monkeypatch):
+    """#2659: a pseudo-filename frame (`<frozen posixpath>`) is not taken for the controls'
+    own code when the working directory lies inside them, and a working directory that is
+    gone does not make the refusal itself raise."""
+    import traceback
+    probe_file = tmp_path / 'missing.json'
+    try:
+        Path(str(probe_file)).resolve(strict=True)
+    except OSError as error:
+        library_error = error
+    if all(os.path.isabs(frame.filename) for frame in traceback.extract_tb(library_error.__traceback__)):
+        pytest.skip('this interpreter shows no pseudo-filename frame for a failed resolve')
+    def read_missing():
+        return probe_predecessor.canonical_path(str(probe_file), exists=True)
+    try:
+        read_missing()
+    except OSError as error:
+        caught = error
+    monkeypatch.chdir(probe_predecessor._CONTROLS)
+    message = str(probe_predecessor._malformed('probe', caught))
+    assert ' at registration.py:' in message and ' via <frozen' in message, message   # canonical_path, then the library
+    gone = tmp_path / 'gone'; gone.mkdir(); monkeypatch.chdir(gone); gone.rmdir()
+    refusal = probe_predecessor._malformed('probe', caught)
+    assert isinstance(refusal, BudgetStop) and 'FileNotFoundError at ' in str(refusal)
 
 
 def test_an_error_raised_in_a_library_is_located_in_the_controls_code(prepared):

@@ -16,6 +16,7 @@ this module does not import (that would pull the proxy into every audit).
 """
 from copy import deepcopy
 from decimal import Decimal
+import os
 from pathlib import Path
 import traceback
 
@@ -68,13 +69,25 @@ def _frame(frame):
     return f'{Path(frame.filename).name}:{frame.lineno}'
 
 
+def _own(frame):
+    """Whether a frame is in the controls' own code. A pseudo-filename such as
+    `<frozen posixpath>` is relative and is never resolved, since resolving it would
+    consult the working directory, which may lie inside the controls or be gone (#2659)."""
+    if not os.path.isabs(frame.filename):
+        return False
+    try:
+        return Path(frame.filename).resolve().is_relative_to(_CONTROLS)
+    except (OSError, ValueError, RuntimeError):
+        return False
+
+
 def _malformed(what, error):
     """A refusal that still fails closed, naming the error and where it was raised, so a
     defect in this validator is not read as bad input (#2514). The place is the innermost
     frame in the controls' own code; an error raised inside a library it called (a JSON
     decoder, a path method) is also named after `via` (#2641)."""
     frames = traceback.extract_tb(error.__traceback__)
-    own = [frame for frame in frames if Path(frame.filename).resolve().is_relative_to(_CONTROLS)]
+    own = [frame for frame in frames if _own(frame)]
     where = ''
     if own:
         where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
