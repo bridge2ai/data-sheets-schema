@@ -75,13 +75,18 @@ def names_standing_record(record):
 
 
 def claims_standing(receipt):
-    """Whether a debit receipt invokes the standing authorization: it carries a
-    `standing` key of any value (#2583), or cites the standing record by its digest
-    or its file name, or quotes its exact response or request (#2710). A per-charge
-    receipt names its own record in its own words and does none of these, as
-    audit27's does. A malformed authorization claims nothing here; the validator
-    refuses it."""
-    authorization = receipt.get('user_authorization') if isinstance(receipt, dict) else None
+    """Whether a receipt invokes the standing authorization, in either field a person's
+    words are recorded in, `user_authorization` or `user_confirmation` (#2716): a
+    `standing` key of any value (#2583), a citation of the standing record by its digest
+    or its file name, or its exact response or request quoted (#2710). A per-charge
+    receipt names its own record in its own words and does none of these, as audit27's
+    does. A malformed field claims nothing here; the validator refuses it."""
+    if not isinstance(receipt, dict):
+        return False
+    return any(_cites_standing(receipt.get(field)) for field in ('user_authorization', 'user_confirmation'))
+
+
+def _cites_standing(authorization):
     if not isinstance(authorization, dict):
         return False
     if 'standing' in authorization:

@@ -889,3 +889,26 @@ def test_a_probe_refuses_a_standing_receipt_stripped_of_its_flag(lineage, keep):
     with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
         prepare(lineage, tip_checkpoint=Path(value['checkpoint']), tip_reconciliation_receipt=Path(value['receipt']))
     assert not (lineage.root / 'probe').exists()
+
+
+def test_a_probe_refuses_standing_authority_relabelled_as_a_confirmed_charge(lineage):
+    """#2716: a tip receipt keeping the standing authorization as a confirmed provider charge
+    of 0 is refused before the probe's folder exists."""
+    from audit_controls import reconcile_stopped as tool
+    folder = lineage.request_dir
+    (folder / 'request.json').write_bytes(
+        (json.dumps(json.loads(lineage.raw), sort_keys=True, ensure_ascii=False) + '\n').encode())
+    save(folder / 'http_status.json', {'status': 500})
+    value = tool.reconcile(lineage.source, lineage.root / 'tool_reconciliation', recorded_at='2026-09-25T19:00:00+00:00')
+    receipt, checkpoint = Path(value['receipt']), Path(value['checkpoint'])
+    body = json.loads(receipt.read_text())
+    body['user_confirmation'] = body.pop('user_authorization')
+    body.update(kind='user_confirmed_provider_charge_reconciliation', confirmed_complete_charge_usd='0')
+    save(receipt, body)
+    state = json.loads(checkpoint.read_text())
+    next(x for x in state['requests'] if x['id'] == value['request_id'])['reconciliation_receipt_sha256'] = sha(receipt)
+    state['reconciled_from']['receipt_sha256'] = sha(receipt)
+    save(checkpoint, state)
+    with pytest.raises(BudgetStop, match='permits only a full-reservation debit'):
+        prepare(lineage, tip_checkpoint=checkpoint, tip_reconciliation_receipt=receipt)
+    assert not (lineage.root / 'probe').exists()

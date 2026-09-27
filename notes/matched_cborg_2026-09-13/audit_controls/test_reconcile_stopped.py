@@ -897,3 +897,26 @@ def test_a_receipt_reusing_the_standing_record_without_its_flag_is_a_standing_de
     assert Path(value['marker']) in r.continuation_paths(successor)
     with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
         r.validate_audit_reconciliation(successor)
+
+
+# --- Codex re-review of #2568: standing authority relabelled as a confirmed charge (#2716) -------
+
+@pytest.mark.parametrize('field', ['user_confirmation', 'user_authorization'])
+def test_standing_authority_relabelled_as_a_confirmed_charge_is_refused(stopped, field):
+    """A receipt that keeps the standing authorization but calls itself a confirmed provider
+    charge of 0 would release the reservation; it is refused before the kind selects a path."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    receipt = Path(value['receipt']); body = r.read_json(receipt)
+    authorization = body.pop('user_authorization')
+    body.update(kind='user_confirmed_provider_charge_reconciliation', confirmed_complete_charge_usd='0')
+    body[field] = authorization
+    save(receipt, body)
+    checkpoint = Path(value['checkpoint']); state = r.read_json(checkpoint)
+    next(x for x in state['requests'] if x['id'] == request_id)['reconciliation_receipt_sha256'] = r.sha(receipt)
+    state['reconciled_from']['receipt_sha256'] = r.sha(receipt)
+    save(checkpoint, state)
+    successor, _ = successor_of(m, reg, first, {**value, 'checkpoint_sha256': r.sha(checkpoint)})
+    assert tool.claims_standing(body)
+    with pytest.raises(BudgetStop, match='permits only a full-reservation debit'):
+        r.validate_audit_reconciliation(successor)

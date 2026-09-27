@@ -1166,6 +1166,11 @@ def validate_audit_reconciliation(manifest, *, require_marker=True):
     source = read_json(paths['source_ledger'])
     result, receipt = read_json(paths['result']), read_json(paths['receipt'])
     exception = receipt.get('kind') == 'user_authorized_full_reservation_debit'
+    from .reconcile_stopped import claims_standing
+    if claims_standing(receipt) and not exception:
+        # The standing authorization permits only a full debit with the fee unknown;
+        # relabelled as a confirmed charge it would release reserved budget (#2716).
+        raise BudgetStop('the standing authorization permits only a full-reservation debit')
     if (source.get('manifest_sha256') != source_sha or
             result.get('registration_sha256') != source_sha or result.get('job_id') != job['id'] or
             result.get('scope') != 'phase3_audit_only' or result.get('status') != 'stopped' or
