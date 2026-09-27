@@ -143,7 +143,7 @@ class SyncCheckTest(unittest.TestCase):
         """If this fails, do not generate — regenerate and commit first."""
         rows = check()
         self.assertEqual(blocking(rows), [],
-                         "a merged schema is not built from current source")
+                         "a merged schema is stale or could not be checked (see the rows)")
         self.assertTrue(all(r["status"] == IN_SYNC for r in rows))
 
     def test_a_tampered_merged_schema_is_caught(self):
@@ -192,8 +192,6 @@ class GateTest(unittest.TestCase):
         self.assertLess(source.index("schema_sync"), source.index("_client()"))
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class RefusalWordingTest(unittest.TestCase):
@@ -216,14 +214,27 @@ class RefusalWordingTest(unittest.TestCase):
                                   "reason": "digest could not be computed: timed out after 600 seconds"}])
         self.assertTrue(message.startswith("the schema sync check could not run"), message)
         self.assertIn("CoreDataset: digest could not be computed", message)
+        self.assertIn("fix the cause named above, or retry if it was transient", message)
+        self.assertTrue(message.endswith("or check with `d4d schema check-digest`."), message)
         self.assertNotIn("not built from the current source", message)
         self.assertNotIn("make regen-all", message)
 
     def test_a_stale_row_is_still_called_stale(self):
         message = self._refusal([{"class": "Dataset", "status": STALE, "reason": "rebuild differs"}])
         self.assertTrue(message.startswith("the merged schema is not built from the current source"), message)
-        self.assertIn("make regen-all", message)
+        self.assertIn("Rebuild with `make regen-all`", message)
+        self.assertTrue(message.endswith("or check with `d4d schema check-digest`."), message)
         self.assertNotIn("could not run", message)
+
+    def test_a_stale_core_schema_is_told_how_to_rebuild_the_core(self):
+        """#2756: regen-all never rebuilds the core merged schema."""
+        message = self._refusal([{"class": "CoreDataset", "status": STALE, "reason": "rebuild differs"}])
+        self.assertIn("make gen-core-schema", message)
+        self.assertNotIn("make regen-all", message)
+        both = self._refusal([{"class": "CoreDataset", "status": STALE, "reason": "x"},
+                              {"class": "Dataset", "status": STALE, "reason": "y"}])
+        self.assertIn("make gen-core-schema", both)
+        self.assertIn("make regen-all", both)
 
     def test_both_causes_are_named_each_with_its_rows(self):
         message = self._refusal([{"class": "Dataset", "status": STALE, "reason": "rebuild differs"},
@@ -272,7 +283,16 @@ class CheckDigestSummaryTest(unittest.TestCase):
                 ([rows[0], rows[2]], ["1 of 2 merged schema(s) not current", "regen-all"], ["could not be checked"])):
             with mock.patch.object(schema_sync, "check", lambda **_: given):
                 result = CliRunner().invoke(schema_cli, ["check-digest"])
+                strict = CliRunner().invoke(schema_cli, ["check-digest", "--strict"])
             for text in says:
                 self.assertIn(text, result.output)
             for text in never:
                 self.assertNotIn(text, result.output)
+            # --strict fails on an unchecked schema as on a stale one: it is the gate (#2758).
+            self.assertEqual((result.exit_code, strict.exit_code), (0, 1), strict.output)
+        with mock.patch.object(schema_sync, "check", lambda **_: [rows[2]]):
+            self.assertEqual(CliRunner().invoke(schema_cli, ["check-digest", "--strict"]).exit_code, 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

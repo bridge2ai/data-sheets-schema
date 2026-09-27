@@ -168,7 +168,7 @@ def test_rebuild_digest_failure_blocks_generation(inputs, monkeypatch, failure):
 
     def failed(*args, **kwargs):
         if failure == "timeout":
-            raise subprocess.TimeoutExpired(args[0], 60)
+            raise subprocess.TimeoutExpired(args[0], kwargs["timeout"])     # the bound it was given (#2759)
         return subprocess.CompletedProcess(args[0], 1 if failure == "nonzero" else 0,
                                            stdout="unexpected output", stderr="digest failure")
 

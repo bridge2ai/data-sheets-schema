@@ -72,6 +72,27 @@ UNCHECKED = "unchecked"
 _REBUILT: dict[tuple, bytes] = {}
 _REBUILT_DIGESTS: dict[tuple, str] = {}
 
+#: How each merged schema is rebuilt. `make regen-all` never rebuilds the core merged
+#: schema, and `make gen-core-schema` rebuilds it only when older than its sources, so
+#: the core's advice removes it first (#2756).
+REBUILD = {
+    "Dataset": "make regen-all",
+    "CoreDataset": "rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema",
+}
+
+
+def rebuild_advice(rows: list[dict[str, Any]]) -> str:
+    """The commands that rebuild the merged schemas `rows` name, each once."""
+    commands = sorted({REBUILD.get(r["class"], "make regen-all") for r in rows})
+    return "; ".join(f"`{c}`" for c in commands)
+
+
+#: Advice for a check that could not run: some causes pass on a retry, others recur
+#: until someone fixes them (#2757).
+UNCHECKED_ADVICE = ("fix the cause named above, or retry if it was transient "
+                    "(a timeout, or inputs that changed during the check)")
+
+
 #: The digest child starts an interpreter and loads the merged schema; under load
 #: that took over 60 s. A hang guard, as the regeneration's is: a slow check that
 #: would have passed must not refuse the run (#2738).

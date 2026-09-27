@@ -6200,7 +6200,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # nothing to preserve by continuing.
     _rewrites: list[dict[str, Any]] = []
     _rewrite_token = _REWRITE_LOG.set(_rewrites)
-    from data_sheets_schema.schema_sync import STALE, blocking, check as _schema_check
+    from data_sheets_schema.schema_sync import (
+        STALE, UNCHECKED_ADVICE, blocking, check as _schema_check, rebuild_advice)
     stale = blocking(_schema_check(profile=spec.profile_obj))     # this run's instrument (#1463)
     if stale:
         def detail(rows):
@@ -6214,12 +6215,13 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             causes.append(
                 "the merged schema is not built from the current source, so this "
                 f"run would record a digest for a schema that does not exist — "
-                f"{detail(not_built)}. Run `make regen-all`, review the diff and commit it")
+                f"{detail(not_built)}. Rebuild with {rebuild_advice(not_built)}, review the "
+                "diff and commit it")
         if unchecked:
             causes.append(
                 "the schema sync check could not run, so this run cannot establish "
                 "that the digest it would record describes the current source — "
-                f"{detail(unchecked)}. Retry once the check can complete")
+                f"{detail(unchecked)}. To continue, {UNCHECKED_ADVICE}")
         raise RuntimeError("; ".join(causes) + ", or check with `d4d schema check-digest`.")
 
     from data_sheets_schema.provenance import build_record, record_path_for
