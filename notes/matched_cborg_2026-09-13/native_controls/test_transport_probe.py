@@ -835,3 +835,34 @@ def test_a_probe_of_a_tip_whose_standing_debit_has_no_marker_is_refused_by_name(
     with pytest.raises(BudgetStop, match='no reconciliation marker'):
         prepare(lineage, tip_checkpoint=Path(value['checkpoint']), tip_reconciliation_receipt=Path(value['receipt']))
     assert not (lineage.root / 'probe').exists()
+
+
+@pytest.mark.parametrize('tamper', ['receipt', 'request', 'out', 'relocated'])
+def test_a_probe_reads_the_content_of_the_marker_it_pins(lineage, tamper):
+    """#2701: a probe of a tool-reconciled tip checks what the marker names (the receipt, the
+    request, the output directory, and the checkpoint beside the receipt), not only that it
+    exists, before the probe's folder is made."""
+    from audit_controls import reconcile_stopped as tool
+    folder = lineage.request_dir
+    (folder / 'request.json').write_bytes(
+        (json.dumps(json.loads(lineage.raw), sort_keys=True, ensure_ascii=False) + '\n').encode())
+    save(folder / 'http_status.json', {'status': 500})
+    value = tool.reconcile(lineage.source, lineage.root / 'tool_reconciliation', recorded_at='2026-09-25T19:00:00+00:00')
+    marker, checkpoint, receipt = Path(value['marker']), Path(value['checkpoint']), Path(value['receipt'])
+    recorded = json.loads(marker.read_text())
+    if tamper == 'receipt':
+        recorded['receipt_sha256'] = '0' * 64
+    elif tamper == 'request':
+        recorded['request_id'] = 'another-request'
+    elif tamper == 'out':
+        other = lineage.root / 'other_directory'; other.mkdir()
+        recorded['out'] = str(other)
+    else:
+        moved = lineage.root / 'moved'; moved.mkdir()
+        for original in (checkpoint, receipt):
+            (moved / original.name).write_bytes(original.read_bytes())
+        checkpoint, receipt = moved / checkpoint.name, moved / receipt.name
+    save(marker, recorded)
+    with pytest.raises(BudgetStop, match='marker records'):
+        prepare(lineage, tip_checkpoint=checkpoint, tip_reconciliation_receipt=receipt)
+    assert not (lineage.root / 'probe').exists()

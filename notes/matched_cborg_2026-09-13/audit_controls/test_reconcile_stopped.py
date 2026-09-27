@@ -834,3 +834,36 @@ def test_a_malformed_standing_record_path_is_a_budget_stop(stopped, path):
     successor, _ = successor_of(m, reg, first, value)
     with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
         r.validate_audit_reconciliation(successor)
+
+
+# --- review round 5 of #2568: the successor's own entry points read the marker (#2702) ---------
+
+@pytest.mark.parametrize('field', ['receipt_sha256', 'request_id'])
+def test_the_sequence_claim_reads_the_marker_it_pins(stopped, field):
+    """The claim a successor makes on the sequence tip checks what the marker names, not only
+    its pin; a direct validator call is not the only route that does."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    marker = Path(value['marker'])
+    recorded = r.read_json(marker)
+    recorded[field] = '0' * 64 if field.endswith('sha256') else 'another-request'
+    save(marker, recorded)
+    successor, path = successor_of(m, reg, first, value)            # repinned: only the content can refuse
+    save(path, successor)
+    with pytest.raises(BudgetStop, match='marker records'):
+        with r.sequence_guard(successor, r.sha(path)):
+            pass
+
+
+from audit_controls.test_context_preparation import ancestry  # noqa: E402,F401  (fixture)
+
+
+def test_validate_registration_asks_for_the_marker(ancestry, tmp_path, monkeypatch):
+    """validate_registration keeps the validator's marker requirement: it passes no
+    require_marker=False, which only the tool's own pre-publication check may."""
+    from audit_controls import prepare
+    path = prepare.prepare(**ancestry[0], destination=tmp_path / 'audit')
+    seen = []
+    monkeypatch.setattr(r, 'validate_audit_reconciliation', lambda manifest, **kwargs: seen.append(kwargs))
+    r.validate_registration(path)
+    assert seen == [{}], seen
