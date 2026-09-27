@@ -352,15 +352,21 @@ def _increase_documents(proof, name, receipt_version):
              and _canonical(previous['budget'].get('prices_per_token')) ==
                  _canonical(origin['budget'].get('prices_per_token')),
              f'{name} amendment changes historical caps or prices')
+    # A chained link may be anchored on the checkpoint that reconciled the
+    # predecessor's own ledger, when its receipt binds that reconciliation (#2502).
+    reconciliation = (_reconciled_anchor(proof, previous, ledger, authority)
+                      if name == 'chained' and previous['budget']['ledger_path'] != proof['predecessor_ledger']['path']
+                      else None)
     _require(previous.get('parent', {}).get('registration') == proof['origin_registration']['path']
-             and previous['budget']['ledger_path'] == proof['predecessor_ledger']['path']
+             and (previous['budget']['ledger_path'] == proof['predecessor_ledger']['path'] or reconciliation is not None)
              and ledger.get('manifest_sha256') == proof['predecessor_registration']['sha256'],
              f'{name} amendment does not name its exact immediate ledger')
     _require(proof['predecessor_owner']['path'] != previous.get('sequence_state'),
              'amendment requires an immutable owner snapshot, not the live owner')
+    # The owner names the predecessor's own ledger, reconciled or not.
     expected_owner = {'schema_version': 1,
         'registration_sha256': proof['predecessor_registration']['sha256'],
-        'ledger_path': proof['predecessor_ledger']['path'],
+        'ledger_path': previous['budget']['ledger_path'],
         'source_registration_sha256': proof['origin_registration']['sha256'],
         'parent_checkpoint_sha256': previous['budget']['continuation']['sha256']}
     _require(_canonical(owner) == _canonical(expected_owner),
@@ -385,10 +391,46 @@ def _increase_documents(proof, name, receipt_version):
         'ledger_path': proof['predecessor_ledger']['path'], 'ledger_sha256': proof['predecessor_ledger']['sha256'],
         'canonical_owner_sha256': proof['predecessor_owner']['sha256'],
         'registered_predecessor_shared_cap_usd': proof['prior_total_usd'],
-        'sequence_settled_rows': len(rows), 'sequence_accounted_usd': str(cost)}
+        'sequence_settled_rows': len(rows), 'sequence_accounted_usd': str(cost),
+        **({'reconciliation': reconciliation} if reconciliation is not None else {})}
     _require(_canonical(authority.get('predecessor')) == _canonical(expected_predecessor),
              f'{name} authorization names another full accounting checkpoint')
     return proof, documents
+
+
+def _reconciled_anchor(proof, previous, ledger, authority):
+    """The reconciliation a chained link is anchored on, proven from the bytes (#2502).
+
+    The authorization names the predecessor's own ledger and the receipt that
+    settled its one pending row. The anchored checkpoint must say it was
+    reconciled from exactly those, and hold the same rows in the same order,
+    changed only in that one row, now settled at no more than its reservation.
+    """
+    bridge = (authority.get('predecessor') or {}).get('reconciliation')
+    _require(type(bridge) is dict and set(bridge) == {'source_ledger', 'receipt'}
+             and all(type(bridge[key]) is dict and set(bridge[key]) == {'path', 'sha256'} for key in bridge),
+             'a link anchored on a reconciled checkpoint must name the reconciliation it rests on')
+    _require(bridge['source_ledger']['path'] == previous['budget']['ledger_path']
+             and bridge['source_ledger']['path'] != proof['predecessor_ledger']['path'],
+             'a reconciled anchor must reconcile the predecessor\'s own ledger')
+    source, _ = _read(bridge['source_ledger']), _read(bridge['receipt'])
+    origin = ledger.get('reconciled_from')
+    _require(type(origin) is dict and origin.get('checkpoint_sha256') == bridge['source_ledger']['sha256']
+             and origin.get('receipt_sha256') == bridge['receipt']['sha256']
+             and origin.get('previous_status') == 'pending'
+             and source.get('manifest_sha256') == ledger.get('manifest_sha256'),
+             'the anchored checkpoint was not reconciled from the named ledger and receipt')
+    before, after = source.get('requests'), ledger.get('requests')
+    _require(type(before) is list and type(after) is list and len(before) == len(after),
+             'the anchored checkpoint changes the predecessor\'s rows')
+    changed = [(old, new) for old, new in zip(before, after) if _canonical(old) != _canonical(new)]
+    _require(len(changed) == 1 and changed[0][0].get('id') == changed[0][1].get('id') == origin.get('request_id')
+             and changed[0][0].get('status') == 'pending' and changed[0][1].get('status') == 'settled'
+             and _money(changed[0][1].get('cost_usd')) <= _money(changed[0][0].get('reserved_usd')),
+             'the anchored checkpoint changes more than its one reconciled row')
+    for key in ('additional_cap_usd', 'attempt_cap_usd'):
+        _require(source.get(key) == ledger.get(key), 'the anchored checkpoint changes its caps')
+    return deepcopy(bridge)
 
 
 def _chain_selection(value):

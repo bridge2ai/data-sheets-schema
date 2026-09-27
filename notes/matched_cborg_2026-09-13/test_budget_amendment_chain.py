@@ -335,3 +335,101 @@ def test_an_increase_may_be_anchored_on_a_transport_probe_and_on_nothing_else(tm
     proof, origin, previous, manifest = make_chain_fixture(tmp_path / 'other', kind='d4d_native_generation')
     with pytest.raises(BudgetStop, match='exact prior authority'):
         amendment.effective_total(manifest, origin)
+
+
+# --- an increase anchored on a reconciled checkpoint (#2502) -----------------------------------
+
+def make_reconciled_chain_fixture(root, *, bridge=True):
+    """The immediate predecessor stopped with one pending row, which a receipt settled in a
+    separate reconciled checkpoint; the chained link is anchored on that checkpoint."""
+    root = Path(root)
+    prior_proof, origin, prior_ledger, _ = make_second_fixture(root / 'second')
+    old = Decimal(prior_proof['total_usd'])
+    own_path = root / 'immediate/billing.json'
+    previous = {'kind': 'd4d_native_audit_continuation',
+        'parent': {'registration': prior_proof['origin_registration']['path']},
+        'sequence_state': str(root / 'live-owner.json'), amendment.KEY: deepcopy(prior_proof),
+        'budget': {'additional_usd': str(old), 'per_attempt_usd': '5', 'per_job_attempt_usd': {'preceding': '40'},
+                   'prices_per_token': deepcopy(origin['budget']['prices_per_token']), 'ledger_path': str(own_path),
+                   'continuation': {'sha256': prior_proof['predecessor_ledger']['sha256']}}}
+    previous_ref = write(root / 'immediate/registration.json', previous)
+    rows = deepcopy(prior_ledger['requests']) + [
+        {'id': 'settled-link', 'attempt': 'preceding', 'status': 'settled', 'cost_usd': '1.25'},
+        {'id': 'stopped-charge', 'attempt': 'preceding', 'status': 'pending', 'reserved_usd': '2.4535'}]
+    own = {'manifest_sha256': previous_ref['sha256'], 'additional_cap_usd': str(old), 'attempt_cap_usd': '5',
+           'requests': rows}
+    own_ref = write(own_path, own)
+    receipt_ref = write(root / 'reconciliation/debit_receipt.json', {'kind': 'user_authorized_full_reservation_debit',
+                                                                     'request_id': 'stopped-charge'})
+    reconciled = deepcopy(own)
+    reconciled['requests'][-1].update(status='settled', cost_usd='2.4535')
+    reconciled['reconciled_from'] = {'checkpoint_sha256': own_ref['sha256'], 'receipt_sha256': receipt_ref['sha256'],
+                                     'request_id': 'stopped-charge', 'previous_status': 'pending'}
+    anchor_ref = write(root / 'reconciliation/reconciled_billing.json', reconciled)
+    owner = {'schema_version': 1, 'registration_sha256': previous_ref['sha256'], 'ledger_path': str(own_path),
+             'source_registration_sha256': prior_proof['origin_registration']['sha256'],
+             'parent_checkpoint_sha256': prior_proof['predecessor_ledger']['sha256']}
+    proof = {'kind': amendment.CHAIN_KIND, 'origin_registration': deepcopy(prior_proof['origin_registration']),
+             'predecessor_registration': previous_ref, 'predecessor_ledger': anchor_ref,
+             'predecessor_owner': write(root / 'immediate/sequence_claim/owner.json', owner),
+             'prior_total_usd': str(old), 'increase_usd': '200', 'total_usd': str(old + Decimal(200)),
+             'default_attempt_usd': '5', 'prior_amendment': deepcopy(prior_proof),
+             'authorization_quote': 'increase the budget by $200'}
+    authority = chain_authority(proof, origin, reconciled)
+    if bridge:
+        authority['predecessor']['reconciliation'] = {'source_ledger': own_ref, 'receipt': receipt_ref}
+    proof['authorization'] = write(root / 'chain-authority.json', authority)
+    manifest = {'parent': {'registration': prior_proof['origin_registration']['path']}, amendment.KEY: proof,
+                'budget': {'additional_usd': proof['total_usd'], 'per_attempt_usd': '5',
+                           'per_job_attempt_usd': {'fresh': '60'}}, 'pinned_files': {}}
+    repin(manifest)
+    return proof, origin, reconciled, manifest, authority
+
+
+def test_an_increase_may_be_anchored_on_a_reconciled_checkpoint(tmp_path):
+    proof, origin, reconciled, manifest, _ = make_reconciled_chain_fixture(tmp_path)
+    assert amendment.effective_total(manifest, origin) == Decimal(800)
+    bridge = amendment.ledger_bridge(manifest, reconciled, checkpoint_sha256=proof['predecessor_ledger']['sha256'])
+    ledger = Ledger(tmp_path / 'fresh.json', manifest_sha256='a' * 64, total_cap='800', attempt_cap='5')
+    ledger.continue_from(proof['predecessor_ledger']['path'], expected_sha256=proof['predecessor_ledger']['sha256'],
+                         expected_cost_usd=cost(reconciled), **bridge)
+    assert json.loads(ledger.path.read_bytes())['additional_cap_usd'] == '800'
+
+
+def test_a_reconciled_anchor_needs_its_reconciliation_in_the_receipt(tmp_path):
+    proof, origin, _, manifest, _ = make_reconciled_chain_fixture(tmp_path, bridge=False)
+    with pytest.raises(BudgetStop, match='name the reconciliation it rests on'):
+        amendment.effective_total(manifest, origin)
+
+
+def _rewrite(tmp_path, change):
+    """Apply `change` to the fixture's documents, then re-hash every reference that names them."""
+    proof, origin, reconciled, manifest, authority = make_reconciled_chain_fixture(tmp_path)
+    change(proof, reconciled, authority)
+    anchor = write(proof['predecessor_ledger']['path'], reconciled)
+    proof['predecessor_ledger'] = anchor
+    authority['predecessor'].update(ledger_path=anchor['path'], ledger_sha256=anchor['sha256'],
+        sequence_settled_rows=len(reconciled['requests']),
+        sequence_accounted_usd=str(sum((Decimal(r['cost_usd']) for r in reconciled['requests']), Decimal(0))))
+    proof['authorization'] = write(proof['authorization']['path'], authority)
+    manifest[amendment.KEY] = proof
+    repin(manifest)
+    return origin, manifest
+
+
+@pytest.mark.parametrize('change, match', [
+    (lambda p, r, a: r['reconciled_from'].update(checkpoint_sha256='0' * 64), 'reconciled from the named'),
+    (lambda p, r, a: r['reconciled_from'].update(receipt_sha256='0' * 64), 'reconciled from the named'),
+    (lambda p, r, a: r['requests'][0].update(cost_usd='0'), 'more than its one reconciled row'),
+    (lambda p, r, a: r['requests'][-1].update(cost_usd='9'), 'more than its one reconciled row'),
+    (lambda p, r, a: r['requests'].append({'id': 'extra', 'attempt': 'x', 'status': 'settled', 'cost_usd': '0'}),
+     "changes the predecessor's rows"),
+    (lambda p, r, a: a['predecessor']['reconciliation'].update(source_ledger={'path': p['predecessor_ledger']['path'],
+                                                                              'sha256': p['predecessor_ledger']['sha256']}),
+     "predecessor's own ledger"),
+], ids=['other_source', 'other_receipt', 'earlier_row', 'over_reservation', 'added_row', 'self_named'])
+def test_a_reconciled_anchor_must_be_exactly_that_reconciliation(tmp_path, change, match):
+    origin, manifest = _rewrite(tmp_path, change)
+    with pytest.raises(BudgetStop, match=match):
+        amendment.effective_total(manifest, origin)
+
