@@ -88,8 +88,9 @@ def claims_standing(receipt):
         return True
     record = authorization.get('source_record')
     if isinstance(record, dict) and (record.get('sha256') == STANDING_AUTHORIZATION_SHA256
-                                     or (isinstance(record.get('path'), str)
-                                         and Path(record['path']).name == STANDING_AUTHORIZATION.name)):
+                                     or (isinstance(record.get('path'), str)   # any case: a case-insensitive filesystem (#2712)
+                                         and Path(record['path']).name.casefold()
+                                         == STANDING_AUTHORIZATION.name.casefold())):
         return True
     quote, _ = standing_authorization()
     return any(authorization.get(key) == quote[key] for key in ('exact_response', 'quoted_request'))
