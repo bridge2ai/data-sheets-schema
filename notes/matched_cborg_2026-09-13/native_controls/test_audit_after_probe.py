@@ -413,16 +413,55 @@ def test_a_malformed_refusal_names_its_frame_without_reading_source():
     assert isinstance(refusal, BudgetStop) and 'KeyError at test_audit_after_probe.py:' in str(refusal)
 
 
-def test_the_bridge_canonicalises_operator_paths(prepared, tmp_path, monkeypatch):
-    """#2690: the CLI passes the source registration and receipt as typed; relative
-    spellings are registered canonical."""
+@pytest.mark.parametrize('spelling', ['probe', 'other/../probe', 'link'], ids=['relative', 'dotdot', 'symlink'])
+def test_the_bridge_canonicalises_operator_paths(prepared, tmp_path, monkeypatch, spelling):
+    """#2690, #2705: the CLI passes the source registration and receipt as typed; relative,
+    `..` and symlinked spellings are all registered canonical, in every key of the bridge."""
     from audit_controls.prepare import continuation_bridge
     refused(prepared)
     out = prepared.root / 'probe'
+    (out.parent / 'other').mkdir(exist_ok=True)
+    if spelling == 'link':
+        (out.parent / 'link').symlink_to(out, target_is_directory=True)
     monkeypatch.chdir(out.parent)
-    bridge = continuation_bridge('probe/registration.json', 'probe/debit_receipt.json')
-    assert bridge['source_registration'] == str(out / 'registration.json')
-    assert bridge['receipt'] == str(out / 'debit_receipt.json')
+    bridge = continuation_bridge(f'{spelling}/registration.json', f'{spelling}/debit_receipt.json')
+    probe_registration = json.loads((out / 'registration.json').read_text())
+    assert bridge == {'source_registration': str(out / 'registration.json'),
+                      'source_ledger': probe_registration['budget']['ledger_path'],
+                      'receipt': str(out / 'debit_receipt.json'), 'result': str(out / 'result.json')}
+
+
+def test_controls_imported_through_a_symlink_still_name_their_own_frame(tmp_path):
+    """#2706: _CONTROLS is resolved, so controls imported through a symlinked spelling
+    (macOS /tmp, a symlinked home) still find their own frame in a refusal."""
+    import subprocess, sys
+    alias = tmp_path / 'controls_alias'
+    alias.symlink_to(probe_predecessor._CONTROLS, target_is_directory=True)
+    repository = probe_predecessor._CONTROLS.parents[1]
+    code = (
+        "import sys\n"
+        f"sys.path[:0] = [{str(alias)!r}, {str(alias / 'native_controls')!r}, {str(repository)!r}, "
+        f"{str(repository / 'src')!r}]\n"
+        "from audit_controls import probe_predecessor as p\n"
+        f"manifest = {{'budget': {{'continuation': {{'checkpoint': {str(tmp_path / 'missing.json')!r}}}}}}}\n"
+        "try:\n"
+        "    p.validate_predecessor(manifest)\n"
+        "except Exception as error:\n"
+        "    print(p._CONTROLS == p._CONTROLS.resolve(), error)\n")
+    result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, timeout=120)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.startswith('True ') and ' at registration.py:' in result.stdout, result.stdout
+
+
+def test_a_refusal_names_the_line_that_raised_in_a_frame_still_running():
+    """#2707: the refusal names the line where the error passed through the wrapper's own
+    frame, from the traceback, not the frame's current line (the handler's)."""
+    import inspect
+    lines, start = inspect.getsourcelines(probe_predecessor.validate_predecessor)
+    raised = start + next(i for i, line in enumerate(lines) if "manifest['budget']['continuation']" in line)
+    with pytest.raises(BudgetStop) as caught:
+        probe_predecessor.validate_predecessor({})
+    assert f'(KeyError at probe_predecessor.py:{raised}: ' in str(caught.value), str(caught.value)
 
 
 
