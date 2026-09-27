@@ -235,15 +235,15 @@ def run_bounded(cleanup, timeout=20):
 
 
 @pytest.mark.parametrize('after_reap', ['refuses', 'empties', 'accepts'],
-                         ids=['member_lives_on', 'group_empties', 'member_takes_the_signal'])
+                         ids=['member_lives_on', 'group_empties', 'an_unverified_member_answers'])
 def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not(monkeypatch, after_reap):
     """#2614: the leader's exit does not show the group is empty. A member that still
     refuses once the leader is reaped (one that changed its credentials, say) is raised
     once the second bound has passed, not before it (#2675), with the stop being unwound
-    still in its chain (#2652). A group that empties (ESRCH) is done, and so is one whose
-    remaining member takes the signal: that is delivery, not a refusal, and nothing is
-    re-sent after it (#2675). Either way the refusal was re-sent after the reap, at the
-    SIGTERM step itself (#2653)."""
+    still in its chain (#2652). A group that empties (ESRCH) is done. After the reap the
+    group is only probed, never signalled (#2708, #2713): a probe that suddenly succeeds
+    finds a member whose identity cannot be verified (the group id may have been reused),
+    and it is raised as the refusal rather than signalled."""
     process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
     wait_until_exited_unreaped(process.pid)            # exited before cleanup, bounded (#2653)
     calls = []
@@ -270,13 +270,14 @@ def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_i
             # Paced, not a busy spin: about one probe per 20 ms over the 2 s bound (#2699),
             # and no real signal to a group id that may have been recycled after the reap (#2708).
             assert calls.count((0, 0)) <= 150 and (signal.SIGTERM, 0) not in calls, calls[-3:]
-        else:
+        elif after_reap == 'empties':
             assert isinstance(error, BudgetStop)                                  # only the stop being unwound
         if after_reap == 'empties':
             assert elapsed < 1.5, elapsed                     # a refusal that clears is excused promptly (#2699)
         if after_reap == 'accepts':
-            # Delivered once at each step, then done: no re-sends to the deadline.
-            assert calls.count((signal.SIGTERM, 0)) == 1 and elapsed < 1.5, (calls, elapsed)
+            # Reported at once, never signalled (#2713).
+            assert isinstance(error, PermissionError) and isinstance(error.__context__, BudgetStop), error
+            assert (signal.SIGTERM, 0) not in calls and calls.count((0, 0)) == 1 and elapsed < 1.5, (calls, elapsed)
     finally:
         monkeypatch.undo()
         if process.returncode is None:

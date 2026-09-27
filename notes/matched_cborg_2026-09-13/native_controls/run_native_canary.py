@@ -421,11 +421,13 @@ def _signal_group(process, sig):
     re-raises it. The leader's exit alone does not show the group is empty: a
     live member that refuses the signal also answers EPERM, on Darwin and on
     Linux (#2614). So once the leader has exited, the group is probed with
-    signal 0, within a second bound, until it is gone (ESRCH) or a member can
-    take the signal, which is then sent once; a refusal still standing at the
-    bound is raised. Probing delivers nothing, so a group id recycled after
-    the reap is never signalled by the retries; at most one real signal
-    follows the reap, as terminate_group's SIGKILL step always sent (#2708).
+    signal 0, within a second bound, until it is gone (ESRCH), which excuses
+    the refusal. Nothing is sent after the reap: a group id released by the
+    reap may be reused, and a probe cannot tell whose group answers (#2708,
+    #2713). A refusal still standing at the bound is raised, and so is a probe
+    that suddenly succeeds, where the kernel had just refused every member:
+    that member cannot be verified as the child's, so it is reported rather
+    than signalled.
     The refusal is raised outside any handler, so the exception being unwound
     (a recorded stop, an interrupt) stays in its chain.
     """
@@ -445,15 +447,14 @@ def _signal_group(process, sig):
     while exited:
         try:
             os.killpg(process.pid, 0)         # a probe: delivers nothing (#2708)
-            os.killpg(process.pid, sig)       # a member can take it: delivered once
-            return
         except ProcessLookupError:
-            return
+            return                            # the group is gone
         except PermissionError:
-            pass
-        if time.monotonic() >= deadline:
-            break
-        time.sleep(0.02)
+            if time.monotonic() >= deadline:
+                break
+            time.sleep(0.02)
+            continue
+        break                                 # a member we cannot verify: reported, not signalled (#2713)
     raise refusal
 
 
