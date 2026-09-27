@@ -342,29 +342,33 @@ def test_each_wrapper_names_the_error_it_caught(prepared, monkeypatch, wrapper, 
 
 
 def test_a_library_frame_is_never_resolved_against_the_working_directory(tmp_path, monkeypatch):
-    """#2659: a pseudo-filename frame (`<frozen posixpath>`) is not taken for the controls'
-    own code when the working directory lies inside them, and a working directory that is
-    gone does not make the refusal itself raise."""
-    import traceback
-    probe_file = tmp_path / 'missing.json'
+    """#2659: a pseudo-filename frame (`<frozen ...>`) is not taken for the controls' own
+    code when the working directory lies inside them, and a working directory that is
+    gone does not make the refusal itself raise. The pseudo-filename frame is built here,
+    so the test runs on every interpreter, not only where posixpath is frozen (#2672)."""
+    library = compile('raise FileNotFoundError(2, "synthetic")', '<frozen synthetic>', 'exec')
+    own_file = probe_predecessor._CONTROLS / 'synthetic_own.py'
+    namespace = {'library': library}
+    exec(compile('def read_missing():\n    exec(library)\n', str(own_file), 'exec'), namespace)
     try:
-        Path(str(probe_file)).resolve(strict=True)
-    except OSError as error:
-        library_error = error
-    if all(os.path.isabs(frame.filename) for frame in traceback.extract_tb(library_error.__traceback__)):
-        pytest.skip('this interpreter shows no pseudo-filename frame for a failed resolve')
-    def read_missing():
-        return probe_predecessor.canonical_path(str(probe_file), exists=True)
-    try:
-        read_missing()
+        namespace['read_missing']()
     except OSError as error:
         caught = error
     monkeypatch.chdir(probe_predecessor._CONTROLS)
     message = str(probe_predecessor._malformed('probe', caught))
-    assert ' at registration.py:' in message and ' via <frozen' in message, message   # canonical_path, then the library
+    assert ' at synthetic_own.py:2 via <frozen synthetic>:1' in message, message
     gone = tmp_path / 'gone'; gone.mkdir(); monkeypatch.chdir(gone); gone.rmdir()
     refusal = probe_predecessor._malformed('probe', caught)
-    assert isinstance(refusal, BudgetStop) and 'FileNotFoundError at ' in str(refusal)
+    assert isinstance(refusal, BudgetStop) and 'FileNotFoundError at synthetic_own.py:2' in str(refusal)
+
+
+@pytest.mark.parametrize('filename', ['/controls/x\x00y.py', '/controls/\ud800.py'], ids=['nul', 'surrogate'])
+def test_a_frame_whose_path_cannot_be_resolved_is_not_the_controls_own(filename):
+    """#2673: an absolute filename that resolve() refuses counts as not own, rather than
+    making the refusal raise inside the wrappers' handlers."""
+    import traceback
+    assert not probe_predecessor._own(traceback.FrameSummary(filename, 1, 'f'))
+
 
 
 def test_an_error_raised_in_a_library_is_located_in_the_controls_code(prepared):
