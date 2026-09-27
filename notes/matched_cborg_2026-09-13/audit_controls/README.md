@@ -678,6 +678,28 @@ states in dollars. The receipt review must still catch:
 
 Only chained links are checked; v1 and v2 are taken as they were validated.
 
+A chained link may be anchored on the checkpoint that reconciled its
+predecessor's own ledger: a stop settled by a receipt, as `reconcile_stopped`
+or a probe's settlement (`settle_pending`, in `run` or through `settle`) writes (#2502, #2681). The link then carries a
+`reconciliation` of two references, `source_ledger` (the predecessor's own
+ledger, at the path its registration names) and `receipt`. Its schema-3
+receipt carries the same two under `predecessor.reconciliation`. Both are
+evidence of the chain: they are pinned like the five, and no later link
+reuses them (#2576). The proof checks that:
+- the anchored checkpoint's `reconciled_from` names that ledger and receipt,
+  from a pending row;
+- it was made for the same registration and carries the same caps;
+- its rows are the ledger's rows in the same order, and only the one
+  reconciled row changed, from pending to settled, at no more than its
+  reservation;
+- the receipt names that registration, ledger, request, attempt and
+  reservation, and the settled row names that receipt.
+
+The registration that imports the checkpoint still recomputes it from the
+receipt (`validate_audit_reconciliation`, or `probe_predecessor` for a probe).
+A link on its predecessor's own ledger names no reconciliation, and a v1 or
+v2 proof is never anchored on one.
+
 v1 and v2 proofs validate exactly as before, and a v2 still takes only a v1.
 Each further increase, up to the bound, is data: a new link, with no code
 change.
@@ -706,8 +728,9 @@ the registered maximum number of retries is affordable.
 (workers and integration alike) then adds `"display":"summarized"` to each
 forwarded adaptive-thinking request. `native_controls/README.md` describes
 the mechanism and the evidence it keeps.
-- **Where it is allowed:** it is audit-only and requires Claude Code 2.1.272.
-  Phase 4, evaluation and generation refuse it, even as `null`.
+- **Where it is allowed:** it requires Claude Code 2.1.272. Evaluation and
+  generation refuse this audit key, even as `null`. Phase 4 and evaluation
+  select their own display instead (#2541); see their READMEs.
 - **Checkpoint successors:** a worker-checkpoint successor must restate its
   source's value exactly.
 - **Preparation:** a malformed value, or another runtime version, is refused
@@ -855,8 +878,9 @@ checks the link one hop further, to the audit the probe followed:
 
 `required_paths` pins every file this reads. A budget increase may be
 anchored on a probe's own settled ledger as on an audit's
-(`budget_amendment.PREDECESSOR_KINDS`). As with an audit, an increase cannot
-be anchored on a reconciled checkpoint (#2502).
+(`budget_amendment.PREDECESSOR_KINDS`). A chained link may also be anchored
+on a reconciled checkpoint, an audit's or a probe's; see the chained-link
+rules under "Explicit additive budget authorization" above (#2502, #2638).
 
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 

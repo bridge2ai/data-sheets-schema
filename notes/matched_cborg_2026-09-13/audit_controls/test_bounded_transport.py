@@ -4,6 +4,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import io
 import json
 from pathlib import Path
+import signal
 import ssl
 import sys
 import threading
@@ -23,7 +24,8 @@ FIELDS = {'model': 'synthetic-count', 'messages': [{'role': 'user', 'content': '
 
 @contextmanager
 def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
-    observed = {'requests': [], 'arrived': threading.Event()}
+    # `sent` holds the monotonic instant at which each body byte was flushed.
+    observed = {'requests': [], 'arrived': threading.Event(), 'sent': []}
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -44,6 +46,7 @@ def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
                         time.sleep(delay)
                     self.wfile.write(bytes([byte]))
                     self.wfile.flush()
+                    observed['sent'].append(time.monotonic())
             except (BrokenPipeError, ConnectionResetError):
                 pass
     instance = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
@@ -89,19 +92,82 @@ def test_real_worker_returns_typed_count_and_registered_headers(children):
     assert len(children) == 1 and children[0].poll() == 0 and not client._active
 
 
-def test_progressing_response_cannot_outlive_total_count_deadline(children):
+#: From the count's deadline (its start plus the budget) to the worker's SIGKILL:
+#: the wake-up of the parent's timed wait and the kill, in-process (#2697).
+#: Measured median 7.7 ms, p99 105 ms, max 466 ms over 1,670 attempts at load up
+#: to 442. The review's own run measured max 1.17 s at load ~450, and this keeps
+#: threefold on that. It rejects a deadline enforced 3.5 s late or more, including
+#: start-up left uncharged whenever start-up takes that long. It does not reject a
+#: shorter lateness: origin/main's `budget + 1.5` total caught one of about 1.5-3.5 s
+#: at normal load (a deadline restarted once at expiry on the 2 s first rung, for
+#: example), and this bound gives that up so the test does not flake under heavy
+#: load (#2711).
+DEADLINE_KILL_SECONDS = 3.5
+
+#: The reap of the killed worker, which may still be starting its interpreter. It
+#: is a process-level cost, so it is kept out of the deadline bound and given only a
+#: hang guard (#2697). Measured median 89 ms, p99 633 ms, max 796 ms (load 356);
+#: the review measured max 1.56 s.
+REAP_SECONDS = 10
+
+
+def test_progressing_response_cannot_outlive_total_count_deadline(children, monkeypatch):
     # Every byte arrives well inside the SDK's inactivity bound. The complete
-    # body takes longer than the parent's two-second total budget.
-    with server(delay=0.2) as (url, seen):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=2)
-        started = time.monotonic()
-        with pytest.raises(anthropic.APITimeoutError):
-            client.messages.count_tokens(**FIELDS)
-        elapsed = time.monotonic() - started
-        assert seen['arrived'].is_set() and len(seen['requests']) == 1
-        assert 1.5 <= elapsed < 3.5
-        assert len(children) == 1 and children[0].poll() is not None and not client._active
-        client.close()
+    # body takes twice the parent's total budget, so only that budget can end
+    # the count. The budget also pays for starting the worker (by design,
+    # bounded_transport.py), and under load start-up alone can outlast two
+    # seconds, so the request is never sent (#2569). Such an attempt still
+    # proves the deadline but not a progressing response. What decides a
+    # repeat with a doubled budget is the server's record of body bytes
+    # flushed before the deadline, not a guess about start-up; the ladder runs
+    # to 32 s because start-up reached about 14 s at load 450 (#2697). No
+    # assertion is retried: every attempt checks the typed timeout, that it was
+    # not early, the deadline-to-SIGKILL gap, a bounded reap, one reaped worker
+    # per count (the worker SDK never retries) and an empty registry, so a
+    # deadline that is not enforced fails on the first attempt.
+    body, attempts, killed_at = b'{"input_tokens":100}', [], []
+    launch = bounded.subprocess.Popen
+    def watched(*args, **kwargs):
+        child = launch(*args, **kwargs)
+        real_signal = child.send_signal
+        def send_signal(sig):
+            if sig == signal.SIGKILL:
+                killed_at.append(time.monotonic())
+            return real_signal(sig)
+        child.send_signal = send_signal
+        return child
+    monkeypatch.setattr(bounded.subprocess, 'Popen', watched)
+    for budget in (2, 4, 8, 16, 32):
+        delay = 2 * budget / len(body)
+        # Every gap is far inside the worker SDK's inactivity bound, which is
+        # the budget itself (`payload['timeout']`).
+        assert delay <= budget / 10
+        with server(body=body, delay=delay) as (url, seen):
+            client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=budget)
+            try:
+                killed_at.clear()
+                started = time.monotonic()
+                with pytest.raises(anthropic.APITimeoutError):
+                    client.messages.count_tokens(**FIELDS)
+                elapsed = time.monotonic() - started
+                assert elapsed >= budget - .5, (budget, elapsed, attempts)
+                assert len(killed_at) == 1, (budget, killed_at, attempts)
+                assert killed_at[0] - (started + budget) < DEADLINE_KILL_SECONDS, (budget, elapsed, attempts)
+                assert started + elapsed - killed_at[0] < REAP_SECONDS, (budget, elapsed, attempts)
+                assert len(children) == len(attempts) + 1, attempts
+                assert all(child.poll() is not None for child in children) and not client._active
+            finally:
+                client.close()
+        assert len(seen['requests']) <= 1, attempts
+        # A byte flushed before started + budget went to a live worker: the
+        # parent's deadline is never earlier than that instant and the worker
+        # is killed only after it. A request that arrived at the deadline, with
+        # its bytes written into a killed worker's socket, does not count.
+        progressed = sum(instant < started + budget for instant in seen['sent'])
+        attempts.append({'budget': budget, 'elapsed': round(elapsed, 2), 'bytes_before_deadline': progressed})
+        if progressed >= 2:
+            break
+    assert progressed >= 2 and len(seen['requests']) == 1, attempts
 
 
 def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):

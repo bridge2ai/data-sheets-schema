@@ -152,6 +152,16 @@ def validate_scientific_identity(manifest, accepted):
             raise BudgetStop('finalization changes the accepted evidence protocol')
 
 
+def finalization_thinking_display(manifest):
+    """Phase 4's own thinking display (#2541): selected at preparation, never inherited; None when absent."""
+    if 'native_thinking_display' not in manifest:
+        return None
+    from audit_controls.registration import stage_thinking_display
+    runtime = manifest.get('native_runtime')
+    return stage_thinking_display(manifest['native_thinking_display'],
+                                  runtime.get('version') if isinstance(runtime, dict) else None)
+
+
 def validate_registration(path):
     path = canonical_path(str(Path(path).absolute()), exists=True)
     manifest = read_json(path)
@@ -159,8 +169,7 @@ def validate_registration(path):
         raise BudgetStop('native_history_control is audit-only; Phase 4 cannot select it')
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; Phase 4 cannot select it')
-    if 'native_thinking_display' in manifest:
-        raise BudgetStop('native_thinking_display is audit-only; Phase 4 cannot select it')
+    finalization_thinking_display(manifest)
     if 'audit_worker_checkpoint' in manifest:
         raise BudgetStop('audit_worker_checkpoint is audit-only; Phase 4 cannot select it')
     if 'audit_batch_navigation' in manifest:

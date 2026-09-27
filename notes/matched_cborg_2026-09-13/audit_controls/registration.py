@@ -802,19 +802,26 @@ def automatic_stop_reconciliation(manifest):
 THINKING_DISPLAY_RUNTIMES = frozenset({'2.1.272 (Claude Code)'})
 
 
+def stage_thinking_display(value, version):
+    """One stage's registered thinking display (#2464, #2541): exact, never null, pinned runtime."""
+    from native_proxy import validated_thinking_display
+    if value is None:
+        raise BudgetStop('a registered thinking display must be thinking_display_v1, summarized, proxy_substitution')
+    value = validated_thinking_display(value)
+    if version not in THINKING_DISPLAY_RUNTIMES:
+        raise BudgetStop('native thinking display is registered only for Claude Code 2.1.272')
+    return value
+
+
 def native_thinking_display(manifest):
     """Opt-in summarized thinking display, added by the proxy (#2464); None when absent."""
     if 'native_thinking_display' not in manifest:
         return None
-    from native_proxy import validated_thinking_display
     value = manifest['native_thinking_display']
     if manifest.get('kind') != 'd4d_native_audit_continuation' or value is None:
         raise BudgetStop('native thinking display is audit-only: thinking_display_v1, summarized, proxy_substitution')
-    value = validated_thinking_display(value)
     runtime = manifest.get('native_runtime')
-    if not isinstance(runtime, dict) or runtime.get('version') not in THINKING_DISPLAY_RUNTIMES:
-        raise BudgetStop('native thinking display is registered only for Claude Code 2.1.272')
-    return value
+    return stage_thinking_display(value, runtime.get('version') if isinstance(runtime, dict) else None)
 
 
 def native_history_control(manifest):

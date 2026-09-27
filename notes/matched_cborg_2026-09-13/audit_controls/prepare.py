@@ -88,12 +88,20 @@ def _stop_reconciliation_dir(selected, explicit, destination, parent_registratio
     return value
 
 
-def _bridge_result(source_path, source):
-    """The stopped predecessor's result: an audit's job result, or a probe's own (#2469)."""
+def continuation_bridge(source_registration, reconciliation_receipt):
+    """The reconciliation bridge an audit registers to continue a stopped predecessor.
+
+    The one builder for the registration and the amendment candidate (#2640).
+    The result is an audit's job result, or a probe's own beside its
+    registration (#2469).
+    """
     from .probe_predecessor import KIND as PROBE_KIND
-    if source.get('kind') == PROBE_KIND:
-        return str(Path(source_path).parent / 'result.json')
-    return str(Path(source['job']['attempt_dir']) / 'result.json')
+    source_path = str(Path(source_registration).resolve())
+    source = read_json(source_path)
+    result = (str(Path(source_path).parent / 'result.json') if source.get('kind') == PROBE_KIND
+              else str(Path(source['job']['attempt_dir']) / 'result.json'))
+    return {'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
+            'receipt': str(Path(reconciliation_receipt).resolve()), 'result': result}
 
 
 def amendment_candidate(parent_registration, amendment, checkpoint, source_registration=None, reconciliation_receipt=None):
@@ -116,12 +124,8 @@ def amendment_candidate(parent_registration, amendment, checkpoint, source_regis
                                           origin['budget']['ledger_path']).with_name('audit_sequence.json')),
         'pinned_files': {}}
     if source_registration:
-        source_path = str(Path(source_registration).resolve())
-        source = read_json(source_path)
-        candidate['budget']['continuation']['reconciliation'] = {
-            'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
-            'receipt': str(Path(reconciliation_receipt).resolve()),
-            'result': _bridge_result(source_path, source)}
+        candidate['budget']['continuation']['reconciliation'] = continuation_bridge(
+            source_registration, reconciliation_receipt)
     return candidate
 
 
@@ -441,12 +445,8 @@ def prepare(*, parent_registration, parent_overlay, parent_job_id, reconciliatio
         manifest['provider_transport'] = {'kind': 'pinned_ca_v1',
             'ca_bundle': str(Path(provider_ca_bundle).resolve())}
     if continuation_source_registration:
-        source_path = str(Path(continuation_source_registration).resolve())
-        source = read_json(source_path)
-        manifest['budget']['continuation']['reconciliation'] = {
-            'source_registration': source_path, 'source_ledger': source['budget']['ledger_path'],
-            'receipt': str(Path(continuation_reconciliation_receipt).resolve()),
-            'result': _bridge_result(source_path, source)}
+        manifest['budget']['continuation']['reconciliation'] = continuation_bridge(
+            continuation_source_registration, continuation_reconciliation_receipt)
     if checkpoint_selection is not None:
         manifest['audit_worker_checkpoint'] = checkpoint_selection
     save(parent['phase2_proof'], inspect_parent(manifest))

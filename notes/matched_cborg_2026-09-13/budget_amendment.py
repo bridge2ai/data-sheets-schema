@@ -21,13 +21,15 @@ SECOND_KIND = 'additive_sequence_budget_v2'
 CHAIN_KIND = 'additive_sequence_budget_chain_v1'
 CHAIN_RECEIPT_VERSION = 3
 #: An increase is anchored on the immediate predecessor's own settled ledger:
-#: an audit, or a transport probe, which is a lineage link too (#2469).
+#: an audit, or a transport probe, which is a lineage link too (#2469). A chained
+#: link may instead rest on the checkpoint that reconciled that ledger (#2502).
 PREDECESSOR_KINDS = ('d4d_native_audit_continuation', 'd4d_native_transport_probe_v1')
 #: A bound on validation work; a real lineage adds one link per authorization.
 MAX_CHAIN_LINKS = 16
 REFS = ('origin_registration', 'predecessor_registration', 'predecessor_ledger',
         'predecessor_owner', 'authorization')
 AMOUNTS = ('prior_total_usd', 'increase_usd', 'total_usd', 'default_attempt_usd')
+RECONCILIATION_REFS = ('source_ledger', 'receipt')
 
 
 def _require(ok, reason):
@@ -352,15 +354,23 @@ def _increase_documents(proof, name, receipt_version):
              and _canonical(previous['budget'].get('prices_per_token')) ==
                  _canonical(origin['budget'].get('prices_per_token')),
              f'{name} amendment changes historical caps or prices')
+    # A chained link may be anchored on the checkpoint that reconciled the
+    # predecessor's own ledger, when the proof and its receipt both name that
+    # reconciliation (#2502, #2576). v1 and v2 proofs never are.
+    reconciled = name == 'chained' and previous['budget']['ledger_path'] != proof['predecessor_ledger']['path']
+    _require(reconciled or 'reconciliation' not in proof,
+             'a link anchored on its predecessor\'s own ledger names no reconciliation')
+    reconciliation = _reconciled_anchor(proof, previous, ledger, authority) if reconciled else None
     _require(previous.get('parent', {}).get('registration') == proof['origin_registration']['path']
-             and previous['budget']['ledger_path'] == proof['predecessor_ledger']['path']
+             and (previous['budget']['ledger_path'] == proof['predecessor_ledger']['path'] or reconciliation is not None)
              and ledger.get('manifest_sha256') == proof['predecessor_registration']['sha256'],
              f'{name} amendment does not name its exact immediate ledger')
     _require(proof['predecessor_owner']['path'] != previous.get('sequence_state'),
              'amendment requires an immutable owner snapshot, not the live owner')
+    # The owner names the predecessor's own ledger, reconciled or not.
     expected_owner = {'schema_version': 1,
         'registration_sha256': proof['predecessor_registration']['sha256'],
-        'ledger_path': proof['predecessor_ledger']['path'],
+        'ledger_path': previous['budget']['ledger_path'],
         'source_registration_sha256': proof['origin_registration']['sha256'],
         'parent_checkpoint_sha256': previous['budget']['continuation']['sha256']}
     _require(_canonical(owner) == _canonical(expected_owner),
@@ -385,10 +395,56 @@ def _increase_documents(proof, name, receipt_version):
         'ledger_path': proof['predecessor_ledger']['path'], 'ledger_sha256': proof['predecessor_ledger']['sha256'],
         'canonical_owner_sha256': proof['predecessor_owner']['sha256'],
         'registered_predecessor_shared_cap_usd': proof['prior_total_usd'],
-        'sequence_settled_rows': len(rows), 'sequence_accounted_usd': str(cost)}
+        'sequence_settled_rows': len(rows), 'sequence_accounted_usd': str(cost),
+        **({'reconciliation': reconciliation} if reconciliation is not None else {})}
     _require(_canonical(authority.get('predecessor')) == _canonical(expected_predecessor),
              f'{name} authorization names another full accounting checkpoint')
     return proof, documents
+
+
+def _reconciled_anchor(proof, previous, ledger, authority):
+    """The reconciliation a chained link is anchored on, proven from the bytes (#2502).
+
+    The proof and its authorization name the predecessor's own ledger and the
+    receipt that settled its one pending row. The anchored checkpoint must say
+    it was reconciled from exactly those, and hold the same rows in the same
+    order, changed only in that one row, now settled at no more than its
+    reservation by that receipt. The registration that imports the checkpoint
+    re-derives it from the receipt; this proof binds the same documents.
+    """
+    bridge = proof.get('reconciliation')
+    _require(bridge is not None and _canonical((authority.get('predecessor') or {}).get('reconciliation'))
+             == _canonical(bridge),
+             'a link anchored on a reconciled checkpoint must name the reconciliation it rests on')
+    _require(bridge['source_ledger']['path'] == previous['budget']['ledger_path'],
+             'a reconciled anchor must reconcile the predecessor\'s own ledger')
+    source, receipt = _read(bridge['source_ledger']), _read(bridge['receipt'])
+    origin = ledger.get('reconciled_from')
+    _require(type(origin) is dict and origin.get('checkpoint_sha256') == bridge['source_ledger']['sha256']
+             and origin.get('receipt_sha256') == bridge['receipt']['sha256']
+             and origin.get('previous_status') == 'pending'
+             and source.get('manifest_sha256') == ledger.get('manifest_sha256'),
+             'the anchored checkpoint was not reconciled from the named ledger and receipt')
+    before, after = source.get('requests'), ledger.get('requests')
+    _require(type(before) is list and type(after) is list and len(before) == len(after),
+             'the anchored checkpoint changes the predecessor\'s rows')
+    changed = [(old, new) for old, new in zip(before, after) if _canonical(old) != _canonical(new)]
+    _require(len(changed) == 1 and type(changed[0][0]) is dict and type(changed[0][1]) is dict,
+             'the anchored checkpoint changes more than its one reconciled row')
+    old, new = changed[0]
+    _require(old.get('id') == new.get('id') == origin.get('request_id')
+             and old.get('status') == 'pending' and new.get('status') == 'settled'
+             and _money(new.get('cost_usd')) <= _money(old.get('reserved_usd')),
+             'the anchored checkpoint changes more than its one reconciled row')
+    _require(receipt.get('source_registration_sha256') == proof['predecessor_registration']['sha256']
+             and receipt.get('source_ledger_sha256') == bridge['source_ledger']['sha256']
+             and receipt.get('request_id') == old.get('id') and receipt.get('attempt') == old.get('attempt')
+             and receipt.get('previous_reservation_usd') == old.get('reserved_usd')
+             and new.get('reconciliation_receipt_sha256') == bridge['receipt']['sha256'],
+             'the reconciliation receipt does not settle that row of the predecessor\'s own ledger')
+    for key in ('additional_cap_usd', 'attempt_cap_usd'):
+        _require(source.get(key) == ledger.get(key), 'the anchored checkpoint changes its caps')
+    return deepcopy(bridge)
 
 
 def _chain_selection(value):
@@ -400,8 +456,10 @@ def _chain_selection(value):
     quotes the same message (whitespace and case aside). The new cap is its
     prior's total plus this increase, never an amount to add again.
     """
-    _require(set(value) == {'kind', *REFS, *AMOUNTS, 'prior_amendment', 'authorization_quote'},
+    _require(set(value) - {'reconciliation'} == {'kind', *REFS, *AMOUNTS, 'prior_amendment', 'authorization_quote'},
              'unsupported chained budget amendment selection')
+    if 'reconciliation' in value:
+        _reconciliation_selection(value['reconciliation'])
     depth, node = 0, value
     while type(node) is dict and node.get('kind') == CHAIN_KIND:
         depth += 1
@@ -428,6 +486,26 @@ def _chain_selection(value):
     return deepcopy(value)
 
 
+def _reconciliation_selection(value):
+    """A chained link anchored on a reconciled checkpoint names the ledger it
+    reconciled and the receipt that settled it, so descendants pin both (#2576)."""
+    _require(type(value) is dict and set(value) == set(RECONCILIATION_REFS)
+             and all(type(value[key]) is dict and set(value[key]) == {'path', 'sha256'}
+                     and type(value[key]['sha256']) is str and re.fullmatch('[0-9a-f]{64}', value[key]['sha256'])
+                     for key in RECONCILIATION_REFS),
+             'invalid budget amendment reconciliation')
+    for key in RECONCILIATION_REFS:
+        _path(value[key]['path'])
+
+
+def _link_refs(link):
+    """The references one link names: its five, and a reconciliation's two."""
+    refs = [(key, link[key]) for key in REFS]
+    if link['kind'] == CHAIN_KIND and 'reconciliation' in link:
+        refs += [(key, link['reconciliation'][key]) for key in RECONCILIATION_REFS]
+    return refs
+
+
 def _links(proof):
     """Every proof in the chain, oldest first."""
     links = [proof]
@@ -447,13 +525,13 @@ def _chain_refs(proof):
     predecessor, ledger or owner."""
     references, identities = {}, set()
     for link in _links(proof):
-        for key in REFS:
-            ref = link[key]
+        refs = _link_refs(link)
+        for key, ref in refs:
             _require(ref['path'] not in references or
                      (key == 'origin_registration' and references[ref['path']] == ref['sha256']),
                      'chained amendment reuses or conflicts with earlier evidence')
             references[ref['path']] = ref['sha256']
-        current = {link[key]['sha256'] for key in REFS[1:]}
+        current = {ref['sha256'] for key, ref in refs if key != 'origin_registration'}
         _require(not current & identities, 'chained amendment reuses earlier authority or predecessor identity')
         identities |= current
     # One quoted authorization funds one increase (#2488): each chained link

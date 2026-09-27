@@ -164,6 +164,12 @@ def run_job(registration_path, review_path, job_id, *, adapter=None):
             rows = [row for row in state['requests'] if row['attempt'] == billing_attempt]
             receipt.update(finished_at=now(), model_requests_admitted=len(rows),
                 unresolved_requests=[row['id'] for row in rows if row['status'] != 'settled'])
+            runtime_block = bound_job.get('native_runtime') if bound_job['style'] in NATIVE_STYLES else None
+            if isinstance(runtime_block, dict) and 'thinking_display' in runtime_block:
+                # Reported for every outcome; never raises (#2541).
+                from native_proxy import thinking_display_evidence
+                receipt['thinking_display'] = thinking_display_evidence(
+                    attempt / 'requests', runtime_block['thinking_display'], strict=False)
             write_new(attempt / 'result.json', receipt)
         if error is not None:
             raise error

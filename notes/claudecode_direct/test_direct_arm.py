@@ -11,12 +11,15 @@ walk, and the stop-path renderer bound every direct rendering satisfies.
 Every assertion on the child's environment is made on an input the guard
 has not already filtered.
 """
+from contextlib import contextmanager
+import fcntl
 import json
 import os
 from pathlib import Path
 import re
 import shutil
 import sys
+import time
 from types import SimpleNamespace
 import uuid
 
@@ -34,14 +37,58 @@ from budgeted_cborg import BudgetStop      # noqa: E402
 AUTH = {"loggedIn": True, "authMethod": "claude.ai", "apiProvider": "firstParty", "subscriptionType": "max"}
 JOB = "CHORUS_direct_rep1"
 LAUNCH_ONLY = {"CLAUDE_CONFIG_DIR", "PYTHONPATH", "VIRTUAL_ENV"}
+METHOD_LOCK_WAIT_SECONDS = 60
+
+
+@contextmanager
+def method_directories_held():
+    """Hold the corpus root while a method directory is created or removed (#2534).
+
+    The two method directories, `data/d4d_concatenated/claudecode_direct{,_core}`,
+    are shared by every xdist worker and every pytest session in this
+    checkout. `mkdir(parents=True)` creates a method directory and then a
+    label under it in two steps, and another worker's teardown can remove the
+    still-empty method directory in between (ENOENT, EEXIST, or EINVAL on
+    APFS). An exclusive flock on the tracked corpus root orders the two;
+    closing the descriptor releases it, so no lock file is left behind.
+
+    The fix is only as complete as its rule: every directory creation under
+    the method directories in this file goes through `make_directory`, and
+    every removal of a method directory through `remove_if_empty`. A bare
+    `.mkdir(parents=True)` there brings the race back silently. The
+    production child never takes this lock, so it does not protect a live
+    direct-arm launch in the same checkout (#2219): do not run this suite
+    while one is live."""
+    descriptor = os.open(ROOT / "data" / "d4d_concatenated", os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        until = time.monotonic() + METHOD_LOCK_WAIT_SECONDS
+        while True:
+            try:
+                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                # A stopped or debugged holder becomes a named failure, not an endless hang.
+                if time.monotonic() >= until:
+                    pytest.fail(f"the method-directory lock stayed held for {METHOD_LOCK_WAIT_SECONDS} s")
+                time.sleep(.01)
+        yield
+    finally:
+        os.close(descriptor)
+
+
+def make_directory(directory, exist_ok=False):
+    """The only way this file creates a directory under a method directory (#2534)."""
+    with method_directories_held():
+        Path(directory).mkdir(parents=True, exist_ok=exist_ok)
 
 
 def remove_if_empty(directory):
     """The two method directories exist only for these tests until the arm's first record (#2219)."""
-    try:
-        Path(directory).rmdir()
-    except OSError:
-        pass
+    with method_directories_held():
+        try:
+            Path(directory).rmdir()
+        except OSError:
+            pass
 
 
 def arguments(tmp_path, fake, **overrides):
@@ -166,7 +213,7 @@ def test_the_preparer_refuses_the_wrong_directory_an_existing_registration_and_e
         preparation.build(arguments(tmp_path, fake))
     cohort = f"test_fixture_{uuid.uuid4().hex[:8]}"
     planned = ROOT / f"data/d4d_concatenated/claudecode_direct/2026-09-22_claude-opus-5-direct-{cohort.replace('_', '-')}-chorus_rep1"
-    planned.mkdir(parents=True)
+    make_directory(planned)
     try:
         with pytest.raises(preparation.DirectStop, match="planned output directory already exists"):
             preparation.build(arguments(tmp_path, fake, output=tmp_path / "r2", cohort=cohort))
@@ -441,16 +488,25 @@ def offline_launch(prepared, tmp_path, monkeypatch):
     job = registration["generation"]["jobs"][0]
     def write_outputs():
         for target in job["outputs"].values():
-            Path(target).parent.mkdir(parents=True, exist_ok=True)
+            make_directory(Path(target).parent, exist_ok=True)
             Path(target).write_text("synthetic\n")
     launch = SimpleNamespace(path=path, registration=registration, review=review, word=word, write_outputs=write_outputs,
                              probes=probes, tmp_path=tmp_path)
     # Resolved now: a test that fails while chdir'd elsewhere must still clean the checkout's tree (#2277).
     absolute = [ROOT / d for d in job["output_directories"]]
     yield launch
+    # Every record tree first, then each method directory: a lock timeout on one
+    # removal neither stops the others nor leaves a synthetic record behind (#2620).
     for directory in absolute:
         shutil.rmtree(directory, ignore_errors=True)
-        remove_if_empty(directory.parent)
+    failures = []
+    for parent in dict.fromkeys(directory.parent for directory in absolute):
+        try:
+            remove_if_empty(parent)
+        except pytest.fail.Exception as error:   # a lock timeout; an interrupt still stops at once (#2645)
+            failures.append(error)
+    if failures:
+        raise failures[0]
 
 
 def run(launch, review=None, word=None, job=JOB):
@@ -895,7 +951,7 @@ def test_existing_output_or_a_consumed_attempt_is_never_overwritten(offline_laun
     launch = offline_launch
     monkeypatch.setattr(launcher.native, "execute_child", lambda *a, **k: pytest.fail("launched over existing output"))
     job = launch.registration["generation"]["jobs"][0]
-    Path(job["output_directories"][0]).mkdir(parents=True)
+    make_directory(job["output_directories"][0])
     with pytest.raises(BudgetStop, match="never overwrite or resume"):
         run(launch)
     assert not (launch.path.parent / "attempts").exists()
@@ -1212,8 +1268,9 @@ def test_a_stopped_receipt_leads_with_the_disqualifying_denial_only_for_the_evid
     monkeypatch.setattr(launcher.native, "execute_child", child)
     assert run(launch) == 1
     receipt = receipt_of(launch)
-    assert receipt["status"] == "stopped" and receipt["child_completed"] is True
-    assert receipt["reason_source"] == "denial" and receipt["reason"].startswith("disqualified: denied prescribed call")
+    cause = (receipt.get("reason"), receipt.get("error_type"))    # a recurrence of #2534 names itself
+    assert receipt["status"] == "stopped" and receipt["child_completed"] is True, cause
+    assert receipt["reason_source"] == "denial" and receipt["reason"].startswith("disqualified: denied prescribed call"), cause
     assert receipt["controller_reason"] == "native control session ended without complete evidence"
     assert receipt["controller_reason_source"] == "controller"
     # Without a disqualifying denial the controller's reason stands.
@@ -1222,7 +1279,8 @@ def test_a_stopped_receipt_leads_with_the_disqualifying_denial_only_for_the_evid
                         write_outputs=launch.write_outputs, raise_after=evidence))
     assert run(launch) == 1
     receipt = receipt_of(launch)
-    assert receipt["reason"] == "native control session ended without complete evidence" and "controller_reason" not in receipt
+    assert receipt["reason"] == "native control session ended without complete evidence" and "controller_reason" not in receipt, \
+        (receipt.get("reason"), receipt.get("error_type"))
     # Another controller stop beside a denial keeps the headline: a deadline after the result,
     # and a child that did not complete.
     for stop, terminal in ((BudgetStop("native attempt deadline elapsed"), {"subtype": "success"}),
@@ -1233,7 +1291,8 @@ def test_a_stopped_receipt_leads_with_the_disqualifying_denial_only_for_the_evid
             raise_after=stop))
         assert run(launch) == 1
         receipt = receipt_of(launch)
-        assert receipt["reason"] == str(stop) and receipt["reason_source"] == "controller" and "controller_reason" not in receipt
+        assert receipt["reason"] == str(stop) and receipt["reason_source"] == "controller" and "controller_reason" not in receipt, \
+            (receipt.get("reason"), receipt.get("error_type"))
         assert receipt["disqualifying_denials"]
 
 

@@ -711,9 +711,14 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
     response_buffer = native_response_buffer(manifest)
     if response_buffer is not None and protocol is not None:
         raise BudgetStop('response buffering is restricted to the native audit controller')
-    thinking_display = native_thinking_display(manifest)
-    if thinking_display is not None and protocol is not None:
-        raise BudgetStop('thinking display is restricted to the native audit controller')
+    if protocol is None:
+        thinking_display = native_thinking_display(manifest)
+    else:
+        # A protocol stage selects its own display, or none (#2541).
+        select = getattr(protocol, 'thinking_display', None)
+        if select is None and 'native_thinking_display' in manifest:
+            raise BudgetStop('thinking display is restricted to the native audit controller')
+        thinking_display = select(manifest) if select is not None else None
     selected = protocol or sys.modules[__name__]
     policy = selected.build_policy(manifest, context.registration_path)
     executable = verify_runtime(manifest)

@@ -16,7 +16,9 @@ this module does not import (that would pull the proxy into every audit).
 """
 from copy import deepcopy
 from decimal import Decimal
+import os
 from pathlib import Path
+import traceback
 
 from budgeted_cborg import BudgetStop
 
@@ -59,13 +61,53 @@ def _files(root):
 _MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError)
 
 
+#: The controls' own code: a refusal is located in it, not in the library it called (#2641).
+_CONTROLS = Path(__file__).resolve().parents[1]
+
+
+def _frame(frame):
+    return f'{Path(frame.filename).name}:{frame.lineno}'
+
+
+def _own(frame):
+    """Whether a frame is in the controls' own code. A pseudo-filename such as
+    `<frozen posixpath>` is relative and is never resolved, since resolving it would
+    consult the working directory, which may lie inside the controls or be gone (#2659)."""
+    if not os.path.isabs(frame.filename):
+        return False
+    try:
+        return Path(frame.filename).resolve().is_relative_to(_CONTROLS)
+    except (OSError, ValueError, RuntimeError):
+        return False
+
+
+def _malformed(what, error):
+    """A refusal that still fails closed, naming the error and where it was raised, so a
+    defect in this validator is not read as bad input (#2514). The place is the innermost
+    frame in the controls' own code; an error raised inside a library it called (a JSON
+    decoder, a path method) is also named after `via` (#2641)."""
+    # Read straight off the traceback, never through linecache: before 3.12 it raises
+    # ValueError/UnicodeEncodeError for a filename os.stat refuses, which would make
+    # the refusal raise here (#2689).
+    frames = [traceback.FrameSummary(frame.f_code.co_filename, lineno, frame.f_code.co_name,
+                                     lookup_line=False)
+              for frame, lineno in traceback.walk_tb(error.__traceback__)]
+    own = [frame for frame in frames if _own(frame)]
+    where = ''
+    if own:
+        where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
+    elif frames:
+        where = f' at {_frame(frames[-1])}'
+    return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
+
+
 def paths(manifest):
     """What an audit following a probe pins: the probe's link and the audit before it."""
     try:
         return _paths(manifest)
     except _MALFORMED as error:
         # The predecessor may be an ordinary audit; say only what failed (#2513).
-        raise BudgetStop('audit predecessor evidence is malformed or unavailable') from error
+        raise _malformed('audit predecessor evidence is malformed or unavailable', error) from error
 
 
 def _paths(manifest):
@@ -166,7 +208,7 @@ def validate_predecessor(manifest, *, require_pins=True):
                      'audit predecessor registration is not the one its checkpoint names')
         probe = is_probe_predecessor(manifest)
     except _MALFORMED as error:
-        raise BudgetStop('audit predecessor registration is malformed or unavailable') from error
+        raise _malformed('audit predecessor registration is malformed or unavailable', error) from error
     return validate_link(manifest, require_pins=require_pins) if probe else None
 
 
@@ -174,7 +216,7 @@ def validate_link(manifest, *, require_pins=True):
     try:
         return _validate_link(manifest, require_pins=require_pins)
     except _MALFORMED as error:
-        raise BudgetStop('probe predecessor is malformed or unavailable') from error
+        raise _malformed('probe predecessor is malformed or unavailable', error) from error
 
 
 def _validate_link(manifest, *, require_pins=True):

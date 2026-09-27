@@ -34,7 +34,7 @@ class Resp:
 class TestCapture(unittest.TestCase):
 
     def test_signed_but_empty_block_is_present_not_available(self):
-        """CBORG's shape: signature present, plaintext stripped."""
+        """A no-display request's shape: signature present, text empty (#2542)."""
         resp = Resp([Block(type="thinking", thinking="", signature="abc123"),
                      Block(type="text", text='{"supported": 1.0}')],
                     output_tokens=714)

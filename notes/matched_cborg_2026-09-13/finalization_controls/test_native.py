@@ -22,6 +22,17 @@ from run_native_canary import execute_child
 from . import contract,native,registration
 from .test_contract import final_fixture,write_report
 
+# The attempt deadline the fixture registers and the real-child test enforces
+# (#2572). It only guards against a hang: the complete case starts three
+# interpreters (the child and two helpers that import the finalization
+# contract) and makes two proxied model requests, and under heavy load that
+# outlasted the 60 s it used to be. Enforcement itself (the stop reason,
+# closed admission, the killed child) is asserted with a 0.2 s deadline by
+# native_controls/test_native_launch.py::test_deadline_closes_admission_and_kills_child_before_proxy_cleanup.
+# Here the deadline must never be what stops a run, and the test checks that.
+CHILD_DEADLINE_SECONDS=600
+DEADLINE_STOP='native attempt deadline elapsed'
+
 
 @pytest.fixture
 def case(tmp_path,monkeypatch):
@@ -31,7 +42,7 @@ def case(tmp_path,monkeypatch):
     manifest.update(repository=str(tmp_path),python=sys.executable,
         model={'model':'claude-opus-5'},native_runtime={'version':'2.1.272 (Claude Code)',
             'context_window':200000,'max_output_tokens':64000})
-    job.update(instruction=str(instruction),system_prompt=str(system),deadline_seconds=60,
+    job.update(instruction=str(instruction),system_prompt=str(system),deadline_seconds=CHILD_DEADLINE_SECONDS,
         readable_inputs=sorted(set(manifest['inputs'].values())|{str(instruction),str(system)}))
     for p in (instruction,system):manifest['pinned_files'][str(p)]=native.sha(p)
     path=tmp_path/'registration.json'
@@ -231,11 +242,13 @@ def test_real_child_http_control_history_and_terminal_checks(case,tmp_path,mode)
         with proxy.running() as url:
             env['ANTHROPIC_BASE_URL']=url
             return execute_child([sys.executable,'-c',READ_CHILD,str(child_case),'--input-format','stream-json'],
-                proxy=proxy,instruction=Path(c.job['instruction']),attempt=c.attempt,cwd=tmp_path,env=env,deadline_seconds=60,
+                proxy=proxy,instruction=Path(c.job['instruction']),attempt=c.attempt,cwd=tmp_path,env=env,deadline_seconds=c.job['deadline_seconds'],
                 verify_launch=history.verify_admission,command_policy=policy,command_classifier=native.classify_command,
                 event_observer=history.observe,record_stop=lambda why:ledger.stop_attempt(identity+':'+c.job['id'],why))
     if mode!='complete':
-        with pytest.raises(BudgetStop):run()
+        with pytest.raises(BudgetStop) as stopped:run()
+        # The mode's own check stopped the run, never the hang guard (#2572).
+        assert DEADLINE_STOP not in str(stopped.value)
         assert len(observed)==1
         if mode in ('core_write','context_write'):
             derivative=json.loads((c.attempt/'derivations'/'000001.json').read_text())
