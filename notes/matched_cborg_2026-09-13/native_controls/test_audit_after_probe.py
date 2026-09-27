@@ -253,13 +253,250 @@ def test_the_settlement_after_exit_is_pinned_and_checked(prepared, monkeypatch):
         probe_predecessor.validate_link(manifest)
 
 
-def test_prepare_bridges_to_the_probes_own_result(prepared):
-    from audit_controls.prepare import _bridge_result
-    refused(prepared)
-    registration = prepared.root / 'probe' / 'registration.json'
-    assert _bridge_result(registration, r.read_json(registration)) == str(prepared.root / 'probe' / 'result.json')
+@pytest.mark.parametrize('outcome', [refused])
+def test_an_amendment_candidate_bridges_to_the_probes_own_result(prepared, outcome, tmp_path):
+    """#2512: through the amendment candidate, which builds its bridge with the same
+    continuation_bridge prepare() registers (#2640). A probe's result sits beside its
+    registration; an audit's sits in its job's attempt directory."""
+    from audit_controls.prepare import amendment_candidate
+    result = outcome(prepared)
+    origin = tmp_path / 'origin.json'
+    save(origin, {'repository': str(prepared.root), 'budget': {'per_attempt_usd': '5',
+                                                             'ledger_path': str(prepared.root / 'origin_billing.json')}})
+    out = prepared.root / 'probe'
+    candidate = amendment_candidate(origin, {'total_usd': '800'}, result['successor_continues_from'],
+                                    source_registration=out / 'registration.json',
+                                    reconciliation_receipt=out / 'debit_receipt.json')
+    assert candidate['budget']['continuation']['reconciliation'] == {
+        'source_registration': str(out / 'registration.json'), 'source_ledger': str(out / 'billing.json'),
+        'receipt': str(out / 'debit_receipt.json'), 'result': str(out / 'result.json')}
     first = r.read_json(prepared.source)
-    assert _bridge_result(prepared.source, first) == str(Path(first['job']['attempt_dir']) / 'result.json')
+    candidate = amendment_candidate(origin, {'total_usd': '800'}, result['successor_continues_from'],
+                                    source_registration=prepared.source, reconciliation_receipt=out / 'debit_receipt.json')
+    assert candidate['budget']['continuation']['reconciliation']['result'] == \
+        str(Path(first['job']['attempt_dir']) / 'result.json')
+
+
+# --- the probe link on a complete registration (#2509, #2512) ---------------------------------
+# The synthetic probe lineage above is not a complete audit registration, so these prove the
+# wiring on a real prepared audit: validate_registration and required_paths reach the probe
+# link's check and pins. What those return for a probe is tested above.
+
+from audit_controls.test_context_preparation import ancestry  # noqa: E402,F401  (fixture)
+
+
+def test_validate_registration_checks_the_probe_link(ancestry, tmp_path, monkeypatch):
+    """#2509: deleting the #2505 call in validate_registration fails this test."""
+    from audit_controls import prepare
+    path = prepare.prepare(**ancestry[0], destination=tmp_path / 'audit')
+    seen = []
+
+    def checked(manifest, *, require_pins=True):
+        seen.append((manifest['budget']['continuation']['checkpoint'], require_pins))
+        raise BudgetStop('probe link checked')
+    monkeypatch.setattr(probe_predecessor, 'validate_predecessor', checked)
+    with pytest.raises(BudgetStop, match='probe link checked'):
+        r.validate_registration(path)
+    assert seen == [(r.read_json(path)['budget']['continuation']['checkpoint'], True)]
+
+
+def test_required_paths_pin_the_probe_link(ancestry, tmp_path, monkeypatch):
+    """#2512: the registration's own pin set, not only continuation_paths, carries the link."""
+    from audit_controls import prepare
+    path = prepare.prepare(**ancestry[0], destination=tmp_path / 'audit')
+    link = tmp_path / 'probe_link_file.json'
+    link.write_text('{}')
+    monkeypatch.setattr(probe_predecessor, 'paths', lambda manifest: {link})
+    assert link in r.required_paths(r.read_json(path))
+
+
+def test_a_validator_defect_is_named_with_its_error_and_place(prepared, monkeypatch):
+    """#2514: still a BudgetStop, but it says which error was raised where, and its message."""
+    manifest, _ = successor(prepared, completed(prepared))
+
+    def defect(manifest, *, require_pins=True):
+        return {}['a key the validator forgot']
+    monkeypatch.setattr(probe_predecessor, '_validate_link', defect)
+    with pytest.raises(BudgetStop, match=r"^probe predecessor is malformed or unavailable "
+                       r"\(KeyError at test_audit_after_probe\.py:\d+: 'a key the validator forgot'\)$") as caught:
+        probe_predecessor.validate_link(manifest)
+    assert isinstance(caught.value.__cause__, KeyError)
+
+
+@pytest.mark.parametrize('wrapper, patched, refusal', [
+    ('paths', '_paths', 'audit predecessor evidence is malformed or unavailable'),
+    ('validate_predecessor', 'predecessor_path', 'audit predecessor registration is malformed or unavailable'),
+], ids=['paths', 'validate_predecessor'])
+def test_each_wrapper_names_the_error_it_caught(prepared, monkeypatch, wrapper, patched, refusal):
+    """#2642: the other two wrappers carry the error's class, place and message too."""
+    manifest, _ = successor(prepared, completed(prepared))
+
+    def defect(*args, **kwargs):
+        raise KeyError('a key the wrapper forgot')
+    monkeypatch.setattr(probe_predecessor, patched, defect)
+    with pytest.raises(BudgetStop, match=rf"^{refusal} \(KeyError at test_audit_after_probe\.py:\d+: "
+                       r"'a key the wrapper forgot'\)$") as caught:
+        getattr(probe_predecessor, wrapper)(manifest)
+    assert isinstance(caught.value.__cause__, KeyError)          # the original stays chained (#2660)
+
+
+def test_a_library_frame_is_never_resolved_against_the_working_directory(tmp_path, monkeypatch):
+    """#2659: a pseudo-filename frame (`<frozen ...>`) is not taken for the controls' own
+    code when the working directory lies inside them, and a working directory that is
+    gone does not make the refusal itself raise. The pseudo-filename frame is built here,
+    so the test runs on every interpreter, not only where posixpath is frozen (#2672)."""
+    library = compile('raise FileNotFoundError(2, "synthetic")', '<frozen synthetic>', 'exec')
+    own_file = probe_predecessor._CONTROLS / 'synthetic_own.py'
+    namespace = {'library': library}
+    exec(compile('def read_missing():\n    exec(library)\n', str(own_file), 'exec'), namespace)
+    try:
+        namespace['read_missing']()
+    except OSError as error:
+        caught = error
+    monkeypatch.chdir(probe_predecessor._CONTROLS)
+    message = str(probe_predecessor._malformed('probe', caught))
+    assert ' at synthetic_own.py:2 via <frozen synthetic>:1' in message, message
+    gone = tmp_path / 'gone'; gone.mkdir(); monkeypatch.chdir(gone); gone.rmdir()
+    refusal = probe_predecessor._malformed('probe', caught)
+    assert isinstance(refusal, BudgetStop) and 'FileNotFoundError at synthetic_own.py:2' in str(refusal)
+
+
+@pytest.mark.parametrize('filename', ['/controls/x\x00y.py', '/controls/\ud800.py'], ids=['nul', 'surrogate'])
+def test_a_frame_whose_path_cannot_be_resolved_is_not_the_controls_own(filename):
+    """#2673: an absolute filename that resolve() refuses counts as not own, rather than
+    making the refusal raise inside the wrappers' handlers. No source lookup, so the
+    frame is built on every interpreter (#2689)."""
+    import traceback
+    assert not probe_predecessor._own(traceback.FrameSummary(filename, 1, 'f', lookup_line=False))
+
+
+def test_a_symlink_loop_frame_is_not_the_controls_own(monkeypatch):
+    """#2690: resolve() raises RuntimeError on a symlink loop up to 3.12; that counts as
+    not own too. Modelled on every interpreter."""
+    import traceback
+    def loop(self, strict=False):
+        raise RuntimeError(f'Symlink loop from {self}')
+    monkeypatch.setattr(Path, 'resolve', loop)
+    assert not probe_predecessor._own(traceback.FrameSummary('/controls/a.py', 1, 'f', lookup_line=False))
+
+
+def test_a_frame_imported_through_a_symlinked_path_is_the_controls_own(tmp_path):
+    """#2690: a frame's filename keeps the spelling it was imported by; the controls
+    imported through a symlink (macOS /tmp) are still their own."""
+    import traceback
+    alias = tmp_path / 'controls_alias'
+    alias.symlink_to(probe_predecessor._CONTROLS, target_is_directory=True)
+    frame = traceback.FrameSummary(str(alias / 'audit_controls' / 'probe_predecessor.py'), 1, 'f', lookup_line=False)
+    assert probe_predecessor._own(frame)
+
+
+def test_a_malformed_refusal_names_its_frame_without_reading_source():
+    """#2689: _malformed never looks up source lines, so a frame whose filename linecache
+    cannot stat still yields a named BudgetStop."""
+    import linecache
+    def refuse(*args, **kwargs):
+        raise UnicodeEncodeError('utf-8', '\ud800', 0, 1, 'surrogates not allowed')
+    try:
+        {}['k']
+    except KeyError as error:
+        caught = error
+    # linecache is patched only around the one call: pytest and the warnings
+    # machinery read source through it too.
+    saved = {name: getattr(linecache, name) for name in ('getline', 'updatecache', 'checkcache')}
+    try:
+        for name in saved:
+            setattr(linecache, name, refuse)
+        refusal = probe_predecessor._malformed('probe', caught)
+    finally:
+        for name, function in saved.items():
+            setattr(linecache, name, function)
+    assert isinstance(refusal, BudgetStop) and 'KeyError at test_audit_after_probe.py:' in str(refusal)
+
+
+@pytest.mark.parametrize('spelling', ['probe', 'other/../probe', 'link'], ids=['relative', 'dotdot', 'symlink'])
+def test_the_bridge_canonicalises_operator_paths(prepared, tmp_path, monkeypatch, spelling):
+    """#2690, #2705: the CLI passes the source registration and receipt as typed; relative,
+    `..` and symlinked spellings are all registered canonical, in every key of the bridge."""
+    from audit_controls.prepare import continuation_bridge
+    refused(prepared)
+    out = prepared.root / 'probe'
+    (out.parent / 'other').mkdir(exist_ok=True)
+    if spelling == 'link':
+        (out.parent / 'link').symlink_to(out, target_is_directory=True)
+    monkeypatch.chdir(out.parent)
+    bridge = continuation_bridge(f'{spelling}/registration.json', f'{spelling}/debit_receipt.json')
+    probe_registration = json.loads((out / 'registration.json').read_text())
+    assert bridge == {'source_registration': str(out / 'registration.json'),
+                      'source_ledger': probe_registration['budget']['ledger_path'],
+                      'receipt': str(out / 'debit_receipt.json'), 'result': str(out / 'result.json')}
+
+
+def test_controls_imported_through_a_symlink_still_name_their_own_frame(tmp_path):
+    """#2706: _CONTROLS is resolved, so controls imported through a symlinked spelling
+    (macOS /tmp, a symlinked home) still find their own frame in a refusal."""
+    import subprocess, sys
+    alias = tmp_path / 'controls_alias'
+    alias.symlink_to(probe_predecessor._CONTROLS, target_is_directory=True)
+    repository = probe_predecessor._CONTROLS.parents[1]
+    code = (
+        "import sys\n"
+        f"sys.path[:0] = [{str(alias)!r}, {str(alias / 'native_controls')!r}, {str(repository)!r}, "
+        f"{str(repository / 'src')!r}]\n"
+        "from audit_controls import probe_predecessor as p\n"
+        f"manifest = {{'budget': {{'continuation': {{'checkpoint': {str(tmp_path / 'missing.json')!r}}}}}}}\n"
+        "try:\n"
+        "    p.validate_predecessor(manifest)\n"
+        "except Exception as error:\n"
+        "    print(p._CONTROLS == p._CONTROLS.resolve(), error)\n")
+    result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, timeout=120)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.startswith('True ') and ' at registration.py:' in result.stdout, result.stdout
+
+
+def test_a_refusal_names_the_line_that_raised_in_a_frame_still_running():
+    """#2707: the refusal names the line where the error passed through the wrapper's own
+    frame, from the traceback, not the frame's current line (the handler's)."""
+    import inspect
+    lines, start = inspect.getsourcelines(probe_predecessor.validate_predecessor)
+    raised = start + next(i for i, line in enumerate(lines) if "manifest['budget']['continuation']" in line)
+    with pytest.raises(BudgetStop) as caught:
+        probe_predecessor.validate_predecessor({})
+    assert f'(KeyError at probe_predecessor.py:{raised}: ' in str(caught.value), str(caught.value)
+
+
+
+def test_an_error_raised_in_a_library_is_located_in_the_controls_code(prepared):
+    """#2641: a malformed probe file fails inside the JSON decoder; the refusal names the
+    controls' own frame that read it, and the decoder after `via`."""
+    manifest, _ = successor(prepared, completed(prepared))
+    (prepared.root / 'probe' / 'registration.json').write_bytes(b'not json')
+    with pytest.raises(BudgetStop, match=r"^probe predecessor is malformed or unavailable \(JSONDecodeError "
+                       r"at registration\.py:\d+ via decoder\.py:\d+: Expecting value"):
+        probe_predecessor.validate_link(manifest, require_pins=False)
+
+
+def test_prepare_registers_the_bridge_to_the_probes_own_result(ancestry, tmp_path, monkeypatch):
+    """#2640: prepare() builds the bridge it registers with continuation_bridge, the builder the
+    amendment candidate uses, so the probe case tested there is the one registered. The probe
+    link's own checks are stubbed here; they are tested above on a real probe lineage."""
+    from audit_controls import prepare as audit_prepare
+    args = ancestry[0]
+    probe = tmp_path / 'probe'
+    source = save(probe / 'registration.json', {'kind': probe_predecessor.KIND,
+                                                'budget': {'ledger_path': str(probe / 'billing.json')}})
+    save(probe / 'billing.json', {'synthetic': 'the probe ledger'})
+    save(probe / 'result.json', {'synthetic': 'the probe result'})
+    receipt = save(probe / 'debit_receipt.json', {'synthetic': 'the probe debit'})
+    monkeypatch.setattr(probe_predecessor, 'validate_predecessor', lambda manifest, **_: None)
+    monkeypatch.setattr(probe_predecessor, 'paths', lambda manifest: set())
+    built, real = [], audit_prepare.continuation_bridge
+    monkeypatch.setattr(audit_prepare, 'continuation_bridge', lambda *given: built.append(real(*given)) or built[-1])
+    path = audit_prepare.prepare(**args, destination=tmp_path / 'after_probe',
+                                 continuation_checkpoint=args['reconciled_checkpoint'],
+                                 continuation_source_registration=source, continuation_reconciliation_receipt=receipt)
+    registered = r.read_json(path)['budget']['continuation']['reconciliation']
+    assert built == [registered] == [{'source_registration': str(source), 'source_ledger': str(probe / 'billing.json'),
+                                      'receipt': str(receipt), 'result': str(probe / 'result.json')}]
 
 
 def test_the_amendment_candidate_names_the_sequence_state_the_registration_will(tmp_path):
