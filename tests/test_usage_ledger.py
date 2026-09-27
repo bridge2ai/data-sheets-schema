@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor
+import time
 
 import pytest
 import yaml
@@ -14,10 +14,11 @@ import yaml
 from data_sheets_schema import api_runner as api, usage_ledger as ledger
 from tests.test_download.test_api_runner import FakeClient, spec
 
-# A hang guard, not a measurement: these children and threads start an interpreter and
-# import api_runner or run a whole fake generation. Under a load of about 150 on 10 cores
-# the four interrupted-generation cases took 326 s between them and two exceeded a 90 s
-# bound; the tests assert what the run left behind, never how fast (#2726).
+# A hang guard, not a measurement: these tests assert what a run left behind, never how
+# fast. Under parallel load (-n 4, load 135-190 on 10 cores) the 90 s subprocess bound
+# ended two interrupted-generation children and entered.wait(60) one concurrency run,
+# with the ledgers correct (#2726). The subprocess bounds end a child that hangs; the
+# concurrency test polls its worker, a daemon thread, so it ends too (#2767, #2768).
 HANG_GUARD_SECONDS = 900
 
 
@@ -249,26 +250,47 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
 
     monkeypatch.setattr(api, "_begin_usage_call", pause_before_intent)
     active = FakeClient()
-    with ThreadPoolExecutor(max_workers=1) as pool:
-        future = pool.submit(api.execute, s, client=active)
+    outcome = {}
+
+    def first_run():
         try:
-            assert entered.wait(HANG_GUARD_SECONDS), "first run never reached the request boundary"
-            before = ledger.ledger_path(s).read_bytes()
-            for contender, resume in ((s, True), (s, False),
-                                      (replace(s, label="another_rep1"), True)):
-                client = FakeClient()
-                with pytest.raises(ledger.UsageLedgerError, match="already active"):
-                    api.execute(contender, resume=resume, client=client)
-                assert client.messages.calls == []
-                assert ledger.ledger_path(s).read_bytes() == before
-            assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
-            # Different output files do not share the exclusion.
-            other = spec(out_dir=tmp_path / "independent")
-            with ledger.exclusive_run(other):
-                pass
-        finally:
-            release.set()
-        result = future.result(timeout=HANG_GUARD_SECONDS)
+            outcome["result"] = api.execute(s, client=active)
+        except BaseException as error:              # raised again by the test below
+            outcome["error"] = error
+
+    # A daemon thread, not a pool whose exit joins it: a first run that hangs fails the
+    # test at the guard rather than hanging it (#2768).
+    worker = threading.Thread(target=first_run, daemon=True)
+    worker.start()
+    try:
+        # Poll the worker as well as the boundary: a first run that fails before the
+        # boundary fails the test at once, with its own exception (#2767).
+        deadline = time.monotonic() + HANG_GUARD_SECONDS
+        while not entered.wait(0.5):
+            if not worker.is_alive():
+                raise outcome.get("error") or AssertionError(
+                    "first run finished without reaching the request boundary")
+            assert time.monotonic() < deadline, "first run never reached the request boundary"
+        before = ledger.ledger_path(s).read_bytes()
+        for contender, resume in ((s, True), (s, False),
+                                  (replace(s, label="another_rep1"), True)):
+            client = FakeClient()
+            with pytest.raises(ledger.UsageLedgerError, match="already active"):
+                api.execute(contender, resume=resume, client=client)
+            assert client.messages.calls == []
+            assert ledger.ledger_path(s).read_bytes() == before
+        assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
+        # Different output files do not share the exclusion.
+        other = spec(out_dir=tmp_path / "independent")
+        with ledger.exclusive_run(other):
+            pass
+    finally:
+        release.set()
+    worker.join(HANG_GUARD_SECONDS)
+    assert not worker.is_alive(), "first run did not finish after its release"
+    if "error" in outcome:
+        raise outcome["error"]
+    result = outcome["result"]
     assert len(active.messages.calls) == len(result["usage"]) == 4
     assert api.execute(s, client=active)["already_complete"]
     assert len(active.messages.calls) == 4
