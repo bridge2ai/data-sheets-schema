@@ -385,3 +385,26 @@ def test_prepare_requires_complete_reconciliation_before_creating_condition(tmp_
             reconciliation_receipt='/unused', reconciled_checkpoint='/unused', destination=destination,
             job_id='new', repository=str(tmp_path), **kwargs)
     assert not destination.exists()
+
+
+@pytest.mark.parametrize('cite', ['standing_flag', 'exact_response', 'digest', 'file_name'])
+def test_a_first_audits_parent_confirmation_cannot_claim_the_standing_authorization(accounting, cite):
+    """#2717: a generation's confirmed charge (0 against its reservation) that claims the standing
+    authorization, which covers only a stopped audit's full debit, is refused."""
+    from audit_controls import reconcile_stopped as tool
+    m, _, receipt, _, _ = accounting
+    quote, reference = tool.standing_authorization()
+    record = r.read_json(receipt)
+    confirmation = record['user_confirmation']
+    if cite == 'standing_flag':
+        confirmation['standing'] = True
+    elif cite == 'exact_response':
+        confirmation['exact_response'] = quote['exact_response']
+    elif cite == 'digest':
+        confirmation['source_record'] = {'path': '/elsewhere/record.json', 'sha256': reference['sha256']}
+    else:
+        confirmation['source_record'] = {'path': reference['path'], 'sha256': '6' * 64}
+    record['confirmed_complete_charge_usd'] = '0'
+    save(receipt, record)
+    with pytest.raises(r.BudgetStop, match='permits only a full-reservation debit'):
+        r.validate_reconciliation(m)

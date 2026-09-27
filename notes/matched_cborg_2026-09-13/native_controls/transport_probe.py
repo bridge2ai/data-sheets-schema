@@ -180,11 +180,18 @@ def derive_request(raw):
 
 
 def implementation_paths():
-    """Every module whose bytes decide what the probe sends, counts or records."""
+    """The modules the probe pins and clean-checks: what it sends, counts and
+    records, and the lineage checks of a probe or reconciled tip. For a batch
+    tip, check_lineage also runs batch_native.py and its imports, which are not
+    yet pinned here (#2628)."""
     modules = [Path(__file__), Path(native_proxy.__file__), Path(sys.modules[Ledger.__module__].__file__),
                Path(budget_amendment.__file__), Path(sequence_claim.__file__), Path(audit_controls.__file__),
                Path(audit_registration.__file__), Path(audit_transport.__file__), Path(bounded_stream.__file__),
-               Path(bounded_transport.__file__), Path(sys.modules['data_sheets_schema.stream_evidence'].__file__)]
+               Path(bounded_transport.__file__), Path(sys.modules['data_sheets_schema.stream_evidence'].__file__),
+               # check_lineage decides with these for a probe or reconciled tip (#2586);
+               # a batch tip's batch_native closure is not yet among them (#2628)
+               *(Path(audit_controls.__file__).with_name(name) for name in
+                 ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py'))]
     return sorted({str(p.resolve()) for p in modules} | {str(p) for p in sequence_claim.IMPLEMENTATIONS})
 
 
@@ -349,6 +356,15 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
                                           'receipt': str(Path(tip_reconciliation_receipt).resolve()),
                                           'result': str(result)}
         pinned += [Path(tip_reconciliation_receipt).resolve(), result]
+        debit = read_json(Path(tip_reconciliation_receipt).resolve())
+        from audit_controls.reconcile_stopped import claims_standing, marker_path
+        if debit.get('kind') == DEBIT_KIND and claims_standing(debit):
+            # A standing debit is bound by its reconciliation marker (#2492).
+            marker = marker_path(source, sha(source_path))
+            if marker.is_symlink() or not marker.is_file():
+                raise BudgetStop(f'a standing debit has no reconciliation marker at {marker}; '
+                                 'only the reconcile tool applies one')
+            pinned.append(marker)
     implementation = implementation_paths()
     repository, commit = repository_state(implementation, require_clean=require_clean)
     manifest = {
