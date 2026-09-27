@@ -46,6 +46,21 @@ uses the shared owner's roster and ancestry gate. Earlier audit controllers see
 the permanent compatibility seal. A consumed attempt never reopens; pending
 charges, unknown shutdown state and stale predecessor evidence prevent transfer.
 
+## Registered thinking display (`--native-thinking-display summarized`, #2541)
+
+Phase 4 selects its own display with
+`prepare --native-thinking-display summarized`.
+- **Where it comes from:** it is not copied from the accepted audit, which may
+  carry its own. Phase 4 has a display only if it selects one here.
+- **Checks:** the value must be exact, never `null`, on Claude Code 2.1.272. It
+  is checked before the destination exists and again by
+  `validate_registration`.
+- **How it runs:** the shared controller asks the Phase 4 protocol for its
+  display (`finalization_controls.native.thinking_display`). The proxy then adds
+  `"display":"summarized"` to forwarded adaptive-thinking requests, as in
+  audits. A completed Phase 4 re-reads every admitted request's bytes, and its
+  result receipt reports the summary for every outcome.
+
 ## Scientific and procedural boundaries
 
 The registered native instruction replays the parent's renderer-14 instruction

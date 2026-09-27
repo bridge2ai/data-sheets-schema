@@ -92,6 +92,10 @@ def composite(tmp_path,monkeypatch,request):
             'continuation':{'checkpoint':str(audit_ledger),'sha256':reg.sha(audit_ledger),'cost_usd':'.01'}},
         budget_sequence={'protocol':'shared_sequence_v2','stage':'reconciliation','state_path':str(state),
             'origin':{'registration':origin,'ledger_path':str(original_ledger)},'predecessor':predecessor,'audit_origin':deepcopy(predecessor)})
+    if getattr(request, 'param', None) == 'displayed':
+        # Phase 4 selected its own display (#2541); an evaluation must not inherit it.
+        from native_proxy import THINKING_DISPLAY
+        phase['native_thinking_display']=dict(THINKING_DISPLAY)
     if amended:
         phase['budget_amendment']=deepcopy(proof)
         phase['budget']['additional_usd']='500'

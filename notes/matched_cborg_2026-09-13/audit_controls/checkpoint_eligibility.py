@@ -50,7 +50,10 @@ SUPPORTED_SOURCES = {
         '263522c8e3a0e15fe44c2ace6879d54900724dc7892c7317485ed95237a5abc6',
         # #2464 wires the thinking display through the audit controller;
         # `classify_command` is byte-identical.
-        'b7b810b53ec922c0b382edda90fdab5ba620243b39489aaee84cdb59cc87488b'}),
+        'b7b810b53ec922c0b382edda90fdab5ba620243b39489aaee84cdb59cc87488b',
+        # #2541 lets a protocol stage select its own thinking display;
+        # `classify_command` is byte-identical.
+        'e7279038e22984e0cb652c6cf2ef7576dc10c430224766cf1f18cbccf7a73ea5'}),
 }
 HEX = re.compile('[0-9a-f]{64}')
 MAX_DOCUMENT = 32 * 1024 * 1024

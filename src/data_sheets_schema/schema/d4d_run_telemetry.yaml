@@ -312,8 +312,10 @@ classes:
         range: integer
         description: >-
           Sum of per-attempt estimates (output tokens minus a chars/4 estimate
-          of visible text). Sound for comparison, not cost attribution — the
-          proxy withholds reasoning text, so the estimate is the only measure.
+          of visible text). Sound for comparison, not cost attribution. The
+          requests name no thinking display, so on the Opus 5 family, whose
+          default display is omitted, their thinking text is empty and this
+          estimate is the measure this report carries (#2542, #2622, #2669).
       approx_cost_usd:
         range: float
         description: >-
@@ -417,7 +419,7 @@ classes:
         range: integer
       reasoning_present:
         range: boolean
-        description: A thinking block came back, possibly with its text stripped.
+        description: A thinking block came back, whether or not it carried text.
       reasoning_available:
         range: boolean
         description: The thinking text itself was capturable, not just attested.
