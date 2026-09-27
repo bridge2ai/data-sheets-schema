@@ -200,9 +200,10 @@ In 2,304 retained native requests, 2,301 carried exactly
   per-event counts. It holds counts and times, never text, and its observer
   cannot change delivered bytes.
 
-`thinking_display_evidence` re-reads these bytes. A completed audit and every
-batch child closure require it to prove every admitted request; a stopped
-receipt reports it.
+`thinking_display_evidence` re-reads these bytes. A completed run of any
+stage that forwards a display (an audit and every batch child closure, Phase 4
+through the shared controller, and each native evaluation job) requires it to
+prove every admitted request; a stopped receipt reports it (#2541).
 
 **Replay.** The CLI replays a summarized thinking block, text and signature
 unchanged, in its next request (checked offline).

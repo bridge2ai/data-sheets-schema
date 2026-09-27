@@ -390,7 +390,8 @@ def verify_manifest(manifest, path, digest):
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; evaluation cannot select it')
     if 'native_thinking_display' in manifest:
-        raise BudgetStop('native_thinking_display is audit-only; evaluation cannot select it')
+        raise BudgetStop('native_thinking_display is the audit and Phase 4 key; evaluation selects its display '
+                         'per native job, in native_runtime.thinking_display (--native-thinking-display)')
     _fitness_selection(manifest)
     if 'audit_worker_checkpoint' in manifest:
         raise BudgetStop('audit_worker_checkpoint is audit-only; evaluation cannot select it')

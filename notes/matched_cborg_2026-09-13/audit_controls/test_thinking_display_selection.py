@@ -118,7 +118,7 @@ from audit_controls.test_source_metadata_upgrade import metadata_ancestry  # noq
 # --- later stages and generation never carry it ------------------------------------------------
 
 @pytest.mark.parametrize('stage, value, match', [
-    ('evaluation', THINKING_DISPLAY, 'audit-only'), ('evaluation', None, 'audit-only'),
+    ('evaluation', THINKING_DISPLAY, 'audit and Phase 4 key'), ('evaluation', None, 'audit and Phase 4 key'),
     # Phase 4 selects its own display now (#2541), but never a null one.
     ('phase4', None, 'thinking_display_v1')], ids=['evaluation-selection', 'evaluation-null', 'phase4-null'])
 def test_later_stages_refuse_the_audit_key_or_a_null_before_ownership(stage, value, match, tmp_path, monkeypatch):

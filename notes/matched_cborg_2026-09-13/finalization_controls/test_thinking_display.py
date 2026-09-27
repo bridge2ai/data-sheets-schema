@@ -6,13 +6,14 @@ from pathlib import Path
 import sys
 from types import SimpleNamespace
 
+import httpx
 import pytest
 
 BASE = Path(__file__).resolve().parent.parent
 sys.path[:0] = [str(BASE), str(BASE / 'native_controls')]
 from audit_controls import native, registration as audit_registration
 from audit_controls.test_context_preparation import ancestry, accepted_audit, save  # noqa: F401  (fixtures)
-from audit_controls.test_native import native_case, configure_execution  # noqa: F401  (fixture)
+from audit_controls.test_native import native_case, configure_execution, response_events  # noqa: F401  (fixture)
 from audit_controls.test_response_buffer_selection import ProxyBoundary, forbidden
 from budgeted_cborg import BudgetStop, Ledger
 from finalization_controls import native as final_native, prepare as final_prepare
@@ -75,8 +76,79 @@ def test_the_shared_controller_forwards_a_protocol_stages_own_display(native_cas
     assert calls[0]['thinking_display'] == THINKING_DISPLAY
 
 
-def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch):
-    """Stubs stand in for registration, review and ownership; the receipt code is the real one."""
+def _phase4_protocol(c, completed):
+    """A Phase 4 stand-in for the shared controller: the real display selector, the audit's
+    history and transcript checks, and a completion that records it was reached."""
+    def complete(context, evidence, runtime):
+        completed.append(runtime)
+        return {'completed': True}
+    return SimpleNamespace(build_policy=lambda manifest, path: c.policy, AuditHistory=native.AuditHistory,
+                           classify_command=native.classify_command, inspect_transcript=native.inspect_transcript,
+                           thinking_display=final_native.thinking_display, complete=complete)
+
+
+@pytest.mark.parametrize('proven', [True, False], ids=['proven', 'unproven'])
+def test_a_completed_phase4_run_passes_the_strict_gate_before_it_completes(native_case, monkeypatch, proven):
+    """#2593: a protocol stage's run reaches the shared controller's strict gate, and a failed
+    proof stops it before the stage's completion."""
+    c = native_case
+    c.case.update(thinking={'type': 'adaptive'}, compact=True)
+    context, sdk = configure_execution(c, monkeypatch)
+    c.manifest.update(kind='d4d_native_finalization', **{KEY: dict(THINKING_DISPLAY)})
+    sent = []
+    def respond(request):
+        sent.append(request.content)
+        return httpx.Response(200, content=response_events(), headers={'content-type': 'text/event-stream'})
+    checks, real = [], native.thinking_display_evidence
+    def gate(root, value, *, strict):
+        checks.append((Path(root), value, strict))
+        if not proven:
+            # The proof the gate re-reads fails: a request folder with no thinking record.
+            (Path(root) / 'unproven-request').mkdir()
+        return real(root, value, strict=strict)
+    monkeypatch.setattr(native, 'thinking_display_evidence', gate)
+    completed = []
+    protocol = _phase4_protocol(c, completed)
+    upstream = httpx.Client(transport=httpx.MockTransport(respond))
+    if proven:
+        assert native.execute_job(context, client=sdk, upstream=upstream, protocol=protocol) == {'completed': True}
+        assert len(completed) == 1
+    else:
+        with pytest.raises(BudgetStop, match='thinking display of request unproven-request is not proven'):
+            native.execute_job(context, client=sdk, upstream=upstream, protocol=protocol)
+        assert completed == []
+    assert checks == [(c.attempt / 'requests', THINKING_DISPLAY, True)]
+    assert sent and all(json.loads(body)['thinking'] == {'type': 'adaptive', 'display': 'summarized'} for body in sent)
+
+
+@pytest.mark.parametrize('selected', [False, True])
+def test_the_phase4_cli_delivers_the_exact_selection_or_none(selected, tmp_path, monkeypatch, capsys):
+    """#2596: the documented route, `prepare --native-thinking-display summarized`."""
+    calls = []
+    monkeypatch.setattr(final_prepare, 'prepare', lambda **kwargs: calls.append(kwargs) or tmp_path / 'registration.json')
+    argv = ['prepare', '--accepted-audit-registration', 'a.json', '--acceptance', 'b.json',
+            '--destination', str(tmp_path / 'phase4'), '--job-id', 'synthetic_final']
+    monkeypatch.setattr(sys, 'argv', argv + (['--native-thinking-display', 'summarized'] if selected else []))
+    final_prepare.main()
+    assert calls[0][KEY] == (THINKING_DISPLAY if selected else None)
+
+
+def test_the_phase4_cli_refuses_any_other_display(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(final_prepare, 'prepare', forbidden)
+    monkeypatch.setattr(sys, 'argv', ['prepare', '--accepted-audit-registration', 'a.json', '--acceptance', 'b.json',
+                                      '--destination', str(tmp_path / 'phase4'), '--job-id', 'synthetic_final',
+                                      '--native-thinking-display', 'omitted'])
+    with pytest.raises(SystemExit) as stop:
+        final_prepare.main()
+    assert stop.value.code == 2 and 'invalid choice' in capsys.readouterr().err
+
+
+@pytest.mark.parametrize('admitted', [False, True], ids=['nothing_admitted', 'unproven_request'])
+def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch, admitted):
+    """Stubs stand in for registration, review and ownership; the receipt code is the real one.
+
+    #2595: a stop after a request was admitted whose display is not proven still writes its
+    receipt, reports the problem and keeps the stop's own reason."""
     from finalization_controls import registration as final_reg
     attempt = tmp_path / 'attempts' / 'synthetic_final'
     manifest = {'job': {'id': 'synthetic_final', 'attempt_dir': str(attempt), 'output_dir': str(attempt / 'output')},
@@ -95,8 +167,15 @@ def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch):
     monkeypatch.setattr(native, 'verify_runtime', lambda *args: None)
     monkeypatch.setattr(final_native, 'owned_sequence', owned)
     def stops(context):
+        if admitted:
+            folder = context.attempt / 'requests' / 'synthetic-request'
+            folder.mkdir(parents=True)
+            (folder / 'request.json').write_text('{"synthetic": true}\n')
         raise BudgetStop('synthetic Phase 4 stop')
-    with pytest.raises(BudgetStop):
+    with pytest.raises(BudgetStop, match='synthetic Phase 4 stop'):
         final_native.run_job(path, review, adapter=stops)
-    report = json.loads((attempt / 'result.json').read_text())['thinking_display']
+    receipt = json.loads((attempt / 'result.json').read_text())
+    report = receipt['thinking_display']
     assert report['kind'] == 'thinking_display_summary_v1' and report['registered'] == THINKING_DISPLAY
+    assert receipt['status'] == 'stopped' and receipt['reason'] == 'synthetic Phase 4 stop'
+    assert [problem['id'] for problem in report['problems']] == (['synthetic-request'] if admitted else [])

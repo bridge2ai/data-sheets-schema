@@ -193,8 +193,8 @@ The value is placed on the runtime snapshot that every native job copies, as
   accepted;
 - the result receipt reports the summary for every outcome.
 
-The audit's own top-level `native_thinking_display` key is still refused in
-an evaluation registration.
+The top-level `native_thinking_display` key, which audits and Phase 4 use, is
+refused in an evaluation registration: evaluation selects per native job.
 
 ## Instruments and evidence
 
