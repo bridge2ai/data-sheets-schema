@@ -795,3 +795,21 @@ def test_a_source_registered_with_a_thinking_display_cannot_be_probed(lineage):
     with pytest.raises(BudgetStop, match='cannot be probed'):
         prepare(lineage)
     assert not (lineage.root / 'probe').exists()
+
+
+
+def test_a_probe_of_a_tool_reconciled_tip_pins_the_tools_marker(lineage):
+    """A standing debit made by reconcile_stopped is bound by its marker, for a probe too (#2492)."""
+    from audit_controls import reconcile_stopped as tool
+    source = json.loads(lineage.source.read_text())
+    row = [x for x in json.loads(lineage.tip_ledger.read_text())['requests'] if x['status'] == 'pending'][0]
+    folder = lineage.request_dir
+    identity = (json.dumps(json.loads(lineage.raw), sort_keys=True, ensure_ascii=False) + '\n').encode()
+    (folder / 'request.json').write_bytes(identity)
+    save(folder / 'http_status.json', {'status': 500})
+    value = tool.reconcile(lineage.source, lineage.root / 'tool_reconciliation', recorded_at='2026-09-25T19:00:00+00:00')
+    registration, identity = prepare(lineage, tip_checkpoint=Path(value['checkpoint']),
+                                     tip_reconciliation_receipt=Path(value['receipt']))
+    manifest = json.loads(registration.read_text())
+    assert manifest['pinned_files'][value['marker']] == sha(value['marker'])
+    probe.check_lineage(manifest)

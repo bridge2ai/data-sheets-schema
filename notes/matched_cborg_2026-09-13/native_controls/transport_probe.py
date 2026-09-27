@@ -349,6 +349,11 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
                                           'receipt': str(Path(tip_reconciliation_receipt).resolve()),
                                           'result': str(result)}
         pinned += [Path(tip_reconciliation_receipt).resolve(), result]
+        debit = read_json(Path(tip_reconciliation_receipt).resolve())
+        if debit.get('kind') == DEBIT_KIND and (debit.get('user_authorization') or {}).get('standing') is True:
+            # A standing debit is bound by its reconciliation marker (#2492).
+            from audit_controls.reconcile_stopped import marker_path
+            pinned.append(marker_path(source, sha(source_path)))
     implementation = implementation_paths()
     repository, commit = repository_state(implementation, require_clean=require_clean)
     manifest = {

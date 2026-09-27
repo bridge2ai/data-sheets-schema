@@ -763,8 +763,19 @@ directory.
 
 Only this tool writes markers. A reconciliation made any other way, such as
 audit27's by hand, carries none, so do not run the tool on a stop that
-already has one. The successor's validator does not yet read the marker or
-the pinned record (#2492). The stopped audit's files are never modified. The tool
+already has one. The successor's validator binds both (#2492):
+- **The record:** a receipt with `standing: true` must name the pinned
+  standing record `{path, sha256}` and quote its words exactly.
+- **The marker:** its `reconciliations/<source sha256>.json` marker must be
+  pinned in the successor and must name this receipt, this checkpoint, this
+  request and this output directory.
+
+The tool runs that validator on its staged files before the marker exists,
+so its own check skips only the marker requirement. A per-charge
+authorization has no `standing` key, as audit27's hand-made one does not; it
+keeps its own checks and needs no marker. A transport probe's debit is also
+marked `standing`, but it is proven by its link (#2469) rather than by a
+marker. The stopped audit's files are never modified. The tool
 neither claims the sequence nor contacts a provider. The printed paths and
 hashes are the next preparation's continuation checkpoint, source
 registration and reconciliation receipt.

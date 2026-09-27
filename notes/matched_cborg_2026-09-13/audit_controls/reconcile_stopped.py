@@ -64,6 +64,12 @@ def standing_authorization():
     return value, {'path': str(path), 'sha256': expected}
 
 
+def marker_path(source_registration, source_sha):
+    """Where `reconcile` records its reconciliation of a stopped audit (#2492)."""
+    state = r.canonical_path(source_registration['sequence_state'], exists=True)
+    return state.parent / MARKERS / f'{source_sha}.json'
+
+
 def request_folder(attempt_dir, request_id):
     """The one evidence folder of the pending request, in a single or batch attempt."""
     matches = []
@@ -186,7 +192,7 @@ def reconcile(source_path, out, *, recorded_at=None):
         markers.mkdir(exist_ok=True)
         if markers.is_symlink() or not markers.is_dir() or not os.access(markers, os.W_OK):
             raise BudgetStop('the reconciliation marker directory is not a writable directory')
-        marker = markers / f'{source_sha}.json'
+        marker = marker_path(source, source_sha)
         if marker.exists() or marker.is_symlink():
             raise BudgetStop(previous_reconciliation(marker))
         ledger, result = r.read_json(ledger_path), r.read_json(result_path)
@@ -361,7 +367,9 @@ def verify(source, source_path, ledger_path, result_path, receipt_path, checkpoi
                                                                 'receipt': str(receipt_path),
                                                                 'result': str(result_path)}}},
                  'pinned_files': pins}
-    r.validate_audit_reconciliation(candidate)
+    # The marker is written after this check passes, so the successor's own
+    # marker requirement is the one thing not checked here (#2492).
+    r.validate_audit_reconciliation(candidate, require_marker=False)
 
 
 def main(argv=None):

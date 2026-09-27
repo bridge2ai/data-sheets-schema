@@ -402,7 +402,16 @@ def continuation_paths(manifest):
             raise BudgetStop('invalid audit reconciliation identity fields')
         paths.update(canonical_path(value, exists=True) for value in bridge.values())
         from .runtime_closure import closure_paths
-        paths.update(closure_paths(read_json(bridge['receipt'])))
+        receipt = read_json(bridge['receipt'])
+        paths.update(closure_paths(receipt))
+        source_path = canonical_path(bridge['source_registration'], exists=True)
+        if (receipt.get('kind') == 'user_authorized_full_reservation_debit'
+                and (receipt.get('user_authorization') or {}).get('standing') is True
+                and read_json(source_path).get('kind') == 'd4d_native_audit_continuation'):
+            # The reconcile tool's marker binds a stopped audit's standing debit (#2492);
+            # a transport probe's own debit is proven by its link instead (#2469).
+            from .reconcile_stopped import marker_path
+            paths.add(canonical_path(str(marker_path(read_json(source_path), sha(source_path))), exists=True))
         source = read_json(bridge['source_registration'])
         if 'audit_batches' in source:
             from .batch_native import require_closed_batch_runtime
@@ -1117,8 +1126,13 @@ def _full_reservation_debit(receipt, row):
     return cost
 
 
-def validate_audit_reconciliation(manifest):
-    """A separately authorized copy can succeed stopped accounting without rewriting it."""
+def validate_audit_reconciliation(manifest, *, require_marker=True):
+    """A separately authorized copy can succeed stopped accounting without rewriting it.
+
+    A standing debit made by `reconcile_stopped` must name and quote the pinned
+    standing authorization exactly, and match the marker that tool recorded;
+    a per-charge authorization keeps its own checks (#2492).
+    """
     continuation = manifest['budget']['continuation']
     bridge = continuation.get('reconciliation')
     if bridge is None:
@@ -1162,6 +1176,22 @@ def validate_audit_reconciliation(manifest):
     if not isinstance(confirmation, dict) or any(not isinstance(confirmation.get(key), str) or not confirmation[key].strip()
            for key in ('exact_response', 'quoted_request')):
         raise BudgetStop('audit reconciliation lacks explicit confirmation evidence')
+    if exception and confirmation.get('standing') is True:
+        from .reconcile_stopped import QUOTE_FIELDS, marker_path, standing_authorization
+        quote, reference = standing_authorization()
+        if (confirmation.get('source_record') != reference
+                or any(confirmation.get(key) != quote[key] for key in QUOTE_FIELDS)):
+            raise BudgetStop('a standing debit must name and quote the pinned standing authorization exactly')
+        if require_marker:
+            marker = pinned(manifest, str(marker_path(source_reg, source_sha)))
+            recorded = read_json(marker)
+            if (recorded.get('source_registration_sha256') != source_sha
+                    or recorded.get('receipt_sha256') != sha(paths['receipt'])
+                    or recorded.get('checkpoint_sha256') != sha(checkpoint_path)
+                    or recorded.get('request_id') != receipt.get('request_id')
+                    or recorded.get('out') != str(paths['receipt'].parent)
+                    or checkpoint_path.parent != paths['receipt'].parent):
+                raise BudgetStop('a standing debit is not the reconciliation its marker records')
     expected = strict_json(canonical_json(source))
     pending = [row for row in expected['requests'] if row.get('status') != 'settled']
     if len(pending) != 1 or pending[0].get('status') != 'pending':

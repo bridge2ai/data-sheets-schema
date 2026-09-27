@@ -62,7 +62,7 @@ def successor_of(m, reg, first, value):
     successor['budget']['continuation'] = {'checkpoint': value['checkpoint'], 'sha256': value['checkpoint_sha256'],
         'cost_usd': value['cost_usd'], 'reconciliation': {'source_registration': str(reg),
         'source_ledger': str(ledger), 'receipt': value['receipt'], 'result': str(result)}}
-    for path in (reg, ledger, result, value['receipt'], value['checkpoint']):
+    for path in (reg, ledger, result, value['receipt'], value['checkpoint'], value['marker']):
         successor['pinned_files'][str(path)] = r.sha(path)
     return successor, folder / 'registration.json'
 
@@ -452,3 +452,79 @@ def test_a_refusal_names_the_error_it_hit(stopped):
     manifest[tool.SELECTION_KEY]['output_dir'] = str(reg.parent.parent / 'not_yet' / 'out')
     outcome = tool.reconcile_at_stop(reg, manifest)
     assert outcome['status'] == 'refused' and outcome['reason'].startswith('FileNotFoundError: ')
+
+
+
+# --- a standing debit is bound by the pinned record and the tool's marker (#2492) -------------
+
+def test_a_successor_must_pin_the_tools_marker(stopped):
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    successor, _ = successor_of(m, reg, first, value)
+    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+    assert Path(value['marker']) in r.continuation_paths(successor)
+    del successor['pinned_files'][value['marker']]
+    with pytest.raises(BudgetStop, match='registered input'):
+        r.validate_audit_reconciliation(successor)
+
+
+@pytest.mark.parametrize('field, changed', [('checkpoint_sha256', '0' * 64), ('receipt_sha256', '0' * 64),
+    ('request_id', 'another'), ('source_registration_sha256', '0' * 64), ('out', '/elsewhere')])
+def test_a_marker_naming_another_reconciliation_is_refused(stopped, field, changed):
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    marker = Path(value['marker'])
+    recorded = r.read_json(marker); recorded[field] = changed
+    save(marker, recorded)
+    successor, _ = successor_of(m, reg, first, value)            # repinned: only the content can refuse
+    with pytest.raises(BudgetStop, match='marker records'):
+        r.validate_audit_reconciliation(successor)
+
+
+def test_a_standing_debit_must_name_the_pinned_record_exactly(stopped, tmp_path, monkeypatch):
+    """A receipt written against another record, even with valid bytes, is refused."""
+    m, first, reg, _, _ = stopped
+    other = tmp_path / 'other_standing_record.json'
+    save(other, {'kind': tool.AUTHORIZATION_KIND,
+        'exact_response': 'another answer', 'quoted_request': 'another request', 'recorded_at': '2026-09-25T00:00:00Z'})
+    real = tool.standing_authorization
+    monkeypatch.setattr(tool, 'standing_authorization',
+                        lambda: (r.read_json(other), {'path': str(other), 'sha256': r.sha(other)}))
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    monkeypatch.setattr(tool, 'standing_authorization', real)
+    successor, _ = successor_of(m, reg, first, value)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
+
+
+def test_a_per_charge_debit_without_standing_keeps_its_own_checks(stopped):
+    """A hand-made per-charge receipt, as audit27's was, needs no marker (#2492)."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    receipt = Path(value['receipt']); body = r.read_json(receipt)
+    body['user_authorization'] = {'exact_response': 'yes, debit it', 'quoted_request': 'May I debit this charge?'}
+    save(receipt, body)
+    checkpoint = Path(value['checkpoint']); state = r.read_json(checkpoint)
+    row = next(x for x in state['requests'] if x['id'] == request_id)
+    row['reconciliation_receipt_sha256'] = r.sha(receipt)
+    state['reconciled_from']['receipt_sha256'] = r.sha(receipt)
+    save(checkpoint, state)
+    Path(value['marker']).unlink()
+    value = {**value, 'checkpoint_sha256': r.sha(checkpoint)}
+    successor, _ = successor_of(m, reg, first, {**value, 'marker': value['receipt']})
+    assert r.validate_audit_reconciliation(successor) == state
+
+
+
+def test_a_standing_debit_must_quote_the_pinned_record_exactly(stopped, monkeypatch):
+    """The right record named with other words is refused: the quote is checked on its own."""
+    m, first, reg, _, _ = stopped
+    real = tool.standing_authorization
+    quote, reference = real()
+    monkeypatch.setattr(tool, 'standing_authorization',
+                        lambda: ({**quote, 'exact_response': quote['exact_response'] + ' (edited)'}, reference))
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    monkeypatch.setattr(tool, 'standing_authorization', real)
+    successor, _ = successor_of(m, reg, first, value)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
