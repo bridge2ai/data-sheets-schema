@@ -23,7 +23,8 @@ FIELDS = {'model': 'synthetic-count', 'messages': [{'role': 'user', 'content': '
 
 @contextmanager
 def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
-    observed = {'requests': [], 'arrived': threading.Event()}
+    # `sent` holds the monotonic instant at which each body byte was flushed.
+    observed = {'requests': [], 'arrived': threading.Event(), 'sent': []}
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -44,6 +45,7 @@ def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
                         time.sleep(delay)
                     self.wfile.write(bytes([byte]))
                     self.wfile.flush()
+                    observed['sent'].append(time.monotonic())
             except (BrokenPipeError, ConnectionResetError):
                 pass
     instance = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
@@ -91,17 +93,44 @@ def test_real_worker_returns_typed_count_and_registered_headers(children):
 
 def test_progressing_response_cannot_outlive_total_count_deadline(children):
     # Every byte arrives well inside the SDK's inactivity bound. The complete
-    # body takes longer than the parent's two-second total budget.
-    with server(delay=0.2) as (url, seen):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=2)
-        started = time.monotonic()
-        with pytest.raises(anthropic.APITimeoutError):
-            client.messages.count_tokens(**FIELDS)
-        elapsed = time.monotonic() - started
-        assert seen['arrived'].is_set() and len(seen['requests']) == 1
-        assert 1.5 <= elapsed < 3.5
-        assert len(children) == 1 and children[0].poll() is not None and not client._active
-        client.close()
+    # body takes twice the parent's total budget, so only that budget can end
+    # the count. The budget also pays for starting the worker (by design,
+    # bounded_transport.py), and under load start-up alone can outlast two
+    # seconds, so the request is never sent (#2569). Such an attempt still
+    # proves the deadline but not a progressing response. What decides a
+    # repeat with a doubled budget is the server's record of body bytes
+    # flushed before the deadline, not a guess about start-up. No assertion is
+    # retried: every attempt checks the typed timeout, the elapsed window, one
+    # reaped worker per count (the worker SDK never retries) and an empty
+    # registry, so a deadline that is not enforced fails on the first attempt.
+    body, attempts = b'{"input_tokens":100}', []
+    for budget in (2, 4, 8, 16):
+        delay = 2 * budget / len(body)
+        # Every gap is far inside the worker SDK's inactivity bound, which is
+        # the budget itself (`payload['timeout']`).
+        assert delay <= budget / 10
+        with server(body=body, delay=delay) as (url, seen):
+            client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=budget)
+            try:
+                started = time.monotonic()
+                with pytest.raises(anthropic.APITimeoutError):
+                    client.messages.count_tokens(**FIELDS)
+                elapsed = time.monotonic() - started
+                assert budget - .5 <= elapsed < budget + 1.5, (budget, elapsed, attempts)
+                assert len(children) == len(attempts) + 1, attempts
+                assert all(child.poll() is not None for child in children) and not client._active
+            finally:
+                client.close()
+        assert len(seen['requests']) <= 1, attempts
+        # A byte flushed before started + budget went to a live worker: the
+        # parent's deadline is never earlier than that instant and the worker
+        # is killed only after it. A request that arrived at the deadline, with
+        # its bytes written into a killed worker's socket, does not count.
+        progressed = sum(instant < started + budget for instant in seen['sent'])
+        attempts.append({'budget': budget, 'elapsed': round(elapsed, 2), 'bytes_before_deadline': progressed})
+        if progressed >= 2:
+            break
+    assert progressed >= 2 and len(seen['requests']) == 1, attempts
 
 
 def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
