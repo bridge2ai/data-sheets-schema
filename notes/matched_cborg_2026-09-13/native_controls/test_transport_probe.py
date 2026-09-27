@@ -866,3 +866,22 @@ def test_a_probe_reads_the_content_of_the_marker_it_pins(lineage, tamper):
     with pytest.raises(BudgetStop, match='marker records'):
         prepare(lineage, tip_checkpoint=checkpoint, tip_reconciliation_receipt=receipt)
     assert not (lineage.root / 'probe').exists()
+
+
+def test_a_probe_refuses_a_standing_receipt_stripped_of_its_flag(lineage):
+    """#2710: a tip receipt that drops `standing` and changes the digest but keeps the standing
+    record's exact response is still a standing debit: the probe pins its marker and refuses it."""
+    from audit_controls import reconcile_stopped as tool
+    from audit_controls.test_reconcile_stopped import reauthorize
+    folder = lineage.request_dir
+    (folder / 'request.json').write_bytes(
+        (json.dumps(json.loads(lineage.raw), sort_keys=True, ensure_ascii=False) + '\n').encode())
+    save(folder / 'http_status.json', {'status': 500})
+    value = tool.reconcile(lineage.source, lineage.root / 'tool_reconciliation', recorded_at='2026-09-25T19:00:00+00:00')
+    def downgrade(a):
+        a.pop('standing')
+        a['source_record'] = {'path': '/elsewhere/own_record.json', 'sha256': '6' * 64}
+    value = reauthorize(value, value['request_id'], downgrade)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        prepare(lineage, tip_checkpoint=Path(value['checkpoint']), tip_reconciliation_receipt=Path(value['receipt']))
+    assert not (lineage.root / 'probe').exists()

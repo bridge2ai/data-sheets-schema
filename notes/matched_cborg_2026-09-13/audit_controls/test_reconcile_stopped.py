@@ -867,3 +867,27 @@ def test_validate_registration_asks_for_the_marker(ancestry, tmp_path, monkeypat
     monkeypatch.setattr(r, 'validate_audit_reconciliation', lambda manifest, **kwargs: seen.append(kwargs))
     r.validate_registration(path)
     assert seen == [{}], seen
+
+
+# --- Codex review of #2568: a standing receipt stripped of its flag and digest (#2710) -----------
+
+@pytest.mark.parametrize('keep', ['file_name', 'exact_response', 'quoted_request'])
+def test_a_receipt_reusing_the_standing_record_without_its_flag_is_a_standing_debit(stopped, keep):
+    """A receipt that drops `standing` and changes the digest, but keeps the standing record's
+    file name or one of its quoted words, still claims standing: it is refused, and it needs
+    the tool's marker, rather than passing as a per-charge debit."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    quote, reference = tool.standing_authorization()
+    def downgrade(a):
+        a.pop('standing')
+        a['source_record'] = {'path': reference['path'] if keep == 'file_name' else '/elsewhere/own_record.json',
+                              'sha256': '6' * 64}
+        for key in ('exact_response', 'quoted_request'):
+            a[key] = quote[key] if key == keep else f'own words: {key}'
+    value = reauthorize(value, request_id, downgrade)
+    successor, _ = successor_of(m, reg, first, value)
+    assert tool.claims_standing(r.read_json(value['receipt']))
+    assert Path(value['marker']) in r.continuation_paths(successor)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)

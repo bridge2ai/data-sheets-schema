@@ -76,15 +76,23 @@ def names_standing_record(record):
 
 def claims_standing(receipt):
     """Whether a debit receipt invokes the standing authorization: it carries a
-    `standing` key of any value, or cites the standing record (#2583). A per-charge
-    receipt does neither. A malformed authorization claims nothing here; the
-    validator refuses it."""
+    `standing` key of any value (#2583), or cites the standing record by its digest
+    or its file name, or quotes its exact response or request (#2710). A per-charge
+    receipt names its own record in its own words and does none of these, as
+    audit27's does. A malformed authorization claims nothing here; the validator
+    refuses it."""
     authorization = receipt.get('user_authorization') if isinstance(receipt, dict) else None
     if not isinstance(authorization, dict):
         return False
+    if 'standing' in authorization:
+        return True
     record = authorization.get('source_record')
-    return 'standing' in authorization or (isinstance(record, dict)
-                                          and record.get('sha256') == STANDING_AUTHORIZATION_SHA256)
+    if isinstance(record, dict) and (record.get('sha256') == STANDING_AUTHORIZATION_SHA256
+                                     or (isinstance(record.get('path'), str)
+                                         and Path(record['path']).name == STANDING_AUTHORIZATION.name)):
+        return True
+    quote, _ = standing_authorization()
+    return any(authorization.get(key) == quote[key] for key in ('exact_response', 'quoted_request'))
 
 
 def same_directory(value, directory):

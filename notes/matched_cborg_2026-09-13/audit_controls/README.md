@@ -765,7 +765,8 @@ Only this tool writes markers. A reconciliation made any other way, such as
 audit27's by hand, carries none, so do not run the tool on a stop that
 already has one. The successor's validator binds both (#2492):
 - **The record:** a debit receipt that carries a `standing` key of any value,
-  or cites the standing record, is a standing debit (#2583). It must say
+  or cites the standing record by digest or file name, or quotes its exact
+  response or request, is a standing debit (#2583, #2710). It must say
   `standing: true`, name the pinned record by its digest and file name, and
   quote all three of its fields exactly. The path is the record's absolute
   path in whichever checkout reconciled, so a successor or probe validated
