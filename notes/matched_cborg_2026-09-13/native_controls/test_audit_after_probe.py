@@ -1,6 +1,7 @@
 """An audit whose immediate predecessor is a transport probe (#2469); synthetic lineages only."""
 import copy
 import json
+import re
 from pathlib import Path
 
 import httpx
@@ -465,14 +466,43 @@ def test_a_refusal_names_the_line_that_raised_in_a_frame_still_running():
 
 
 
-def test_an_error_raised_in_a_library_is_located_in_the_controls_code(prepared):
+def _line_reading(fragment):
+    """The line of _validate_link that reads a probe file, found by its text."""
+    import inspect
+    lines, start = inspect.getsourcelines(probe_predecessor._validate_link)
+    return start + next(i for i, line in enumerate(lines) if fragment in line)
+
+
+@pytest.mark.parametrize('name, raw, error, via, fragment', [
+    ('registration.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'probe = read_json(registration)'),
+    ('registration.json', b'\xff\xfe\xfd', 'UnicodeDecodeError', r'[\w.]+\.py', 'probe = read_json(registration)'),
+    ('registration.json', b'{"kind": 1, "kind": 2}', 'ValueError', r'registration\.py', 'probe = read_json(registration)'),
+    # Two files are read on one line; only the file names which (#2641).
+    ('result.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)'),
+    ('billing.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)'),
+], ids=['not_json', 'not_utf8', 'duplicate_key', 'result_of_two', 'ledger_of_two'])
+def test_an_error_raised_reading_a_file_names_the_file_and_the_call(prepared, name, raw, error, via, fragment):
     """#2641: a malformed probe file fails inside the JSON decoder; the refusal names the
-    controls' own frame that read it, and the decoder after `via`."""
+    controls' own line that read it, the library frame after `via`, and the file."""
     manifest, _ = successor(prepared, completed(prepared))
-    (prepared.root / 'probe' / 'registration.json').write_bytes(b'not json')
-    with pytest.raises(BudgetStop, match=r"^probe predecessor is malformed or unavailable \(JSONDecodeError "
-                       r"at registration\.py:\d+ via decoder\.py:\d+: Expecting value"):
+    path = prepared.root / 'probe' / name
+    path.write_bytes(raw)
+    with pytest.raises(BudgetStop, match=rf"^probe predecessor is malformed or unavailable \({error} "
+                       rf"at probe_predecessor\.py:{_line_reading(fragment)} via {via}:\d+ "
+                       rf"reading {re.escape(str(path))}: "):
         probe_predecessor.validate_link(manifest, require_pins=False)
+
+
+def test_an_os_error_reading_a_file_names_it_once(prepared):
+    """#2641: an OSError already carries the filename; the refusal does not repeat it."""
+    manifest, _ = successor(prepared, completed(prepared))
+    path = prepared.root / 'probe' / 'result.json'
+    path.unlink(); path.mkdir()                     # exists, so canonical_path passes; read_bytes refuses
+    with pytest.raises(BudgetStop) as caught:
+        probe_predecessor.validate_link(manifest, require_pins=False)
+    message = str(caught.value)
+    assert f'at probe_predecessor.py:{_line_reading("read_json(result_path)")} via ' in message, message
+    assert message.count(str(path)) == 1 and ' reading ' not in message, message
 
 
 def test_prepare_registers_the_bridge_to_the_probes_own_result(ancestry, tmp_path, monkeypatch):

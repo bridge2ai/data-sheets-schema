@@ -65,6 +65,11 @@ _MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, Arithmet
 _CONTROLS = Path(__file__).resolve().parents[1]
 
 
+#: The shared JSON reader. An error inside it is bad input in the file it was reading, so
+#: the refusal names that file and is located at the call that read it (#2641).
+_READER = read_json.__code__
+
+
 def _frame(frame):
     return f'{Path(frame.filename).name}:{frame.lineno}'
 
@@ -85,19 +90,25 @@ def _malformed(what, error):
     """A refusal that still fails closed, naming the error and where it was raised, so a
     defect in this validator is not read as bad input (#2514). The place is the innermost
     frame in the controls' own code; an error raised inside a library it called (a JSON
-    decoder, a path method) is also named after `via` (#2641)."""
+    decoder, a path method) is also named after `via` (#2641). An error inside the shared
+    JSON reader is located at the call that read the file, and names the file unless the
+    error already does (an OSError carries its filename), since one line can read two."""
     # Read straight off the traceback, never through linecache: before 3.12 it raises
     # ValueError/UnicodeEncodeError for a filename os.stat refuses, which would make
     # the refusal raise here (#2689).
+    walked = list(traceback.walk_tb(error.__traceback__))
     frames = [traceback.FrameSummary(frame.f_code.co_filename, lineno, frame.f_code.co_name,
                                      lookup_line=False)
-              for frame, lineno in traceback.walk_tb(error.__traceback__)]
-    own = [frame for frame in frames if _own(frame)]
+              for frame, lineno in walked]
+    reading = next((i for i, (frame, _) in enumerate(walked) if frame.f_code is _READER), None)
+    own = [frame for frame in (frames if reading is None else frames[:reading]) if _own(frame)]
     where = ''
     if own:
         where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
     elif frames:
         where = f' at {_frame(frames[-1])}'
+    if reading is not None and getattr(error, 'filename', None) is None:
+        where += f" reading {walked[reading][0].f_locals.get('path')}"
     return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
 
 
