@@ -190,7 +190,9 @@ In 2,304 retained native requests, 2,301 carried exactly
 
 **What each request folder keeps:**
 - `native_request.json`: the child's own bytes;
-- `forwarded_request.json`: the bytes sent;
+- `forwarded_request.json`: the bytes sent, when the display was added. A
+  disabled side call keeps none, because its `native_request.json` is what was
+  sent (#2564);
 - `thinking_request.json`: the disposition and both hashes;
 - `stream_timing.json`: the arrival of headers, the first chunk, the first
   thinking block, the first thinking text and the last chunk, plus

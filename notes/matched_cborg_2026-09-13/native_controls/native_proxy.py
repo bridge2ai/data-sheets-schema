@@ -201,19 +201,20 @@ def expected_thinking(value):
     return {"type": "adaptive", "display": value["display"]}
 
 
-def substitute_thinking(raw, request, value):
+def substitute_thinking(raw, value):
     """What to forward for one child request, and why (#2464).
 
     `{"type":"adaptive"}` gains the registered display, changing only those
     bytes; a side call with thinking disabled is forwarded as it is. Anything
     else is refused before it is counted, reserved or sent. The body is parsed
     strictly, as the evidence gate re-reads it, so a duplicate key is refused
-    here rather than after it is paid for (#2544). Text inside a JSON string
-    has its quotes escaped, so the unescaped pattern can only be a JSON member
-    named `thinking` with exactly that value, at the top level or nested
-    (#2545). Requiring one occurrence, no already-displayed member, and a
-    parsed result equal to the child with only the top-level `thinking`
-    replaced refuses every body where the pattern is not the setting alone.
+    here rather than after it is paid for (#2544). The byte pattern is found
+    wherever those bytes occur: as the top-level setting, as a nested member
+    with that name and value, or after an escaped quote at the end of a
+    longer key (#2545, #2562). Requiring one occurrence, no already-displayed
+    member, and a parsed result equal to the child with only the top-level
+    `thinking` replaced refuses every body where the one replacement is not
+    the top-level setting itself.
     """
     child = _strict_object(raw)
     thinking = child.get("thinking")
@@ -681,7 +682,7 @@ class NativeProxy:
                     forwarded, disposition = raw, None
                     if owner.thinking_display is not None:
                         try:
-                            forwarded, disposition = substitute_thinking(raw, request, owner.thinking_display)
+                            forwarded, disposition = substitute_thinking(raw, owner.thinking_display)
                         except BudgetStop:
                             owner.record_thinking_refusal(raw, request)
                             raise

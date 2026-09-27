@@ -381,13 +381,17 @@ def test_a_real_child_controller_closes_with_the_display_evidence(batch, monkeyp
         # A child that fails after its paid request: stopped.json reports the display, never raises (#2551).
         def failing(argv, **kwargs):
             execute(argv, **kwargs)
+            # A later request was refused, as a thinking refusal stops a child (#2561).
+            refusals = Path(row['attempt_dir']) / 'thinking_refusals'; refusals.mkdir()
+            (refusals / 'synthetic.json').write_text(json.dumps({'paid_request': False}))
             raise BudgetStop('synthetic child failure after its request')
         monkeypatch.setattr(native, 'execute_child', failing)
         with pytest.raises(BudgetStop):
             runtime._execute_child(context, row, 21600, clock=lambda: 0)
         stopped = json.loads((Path(row['attempt_dir']) / 'stopped.json').read_text())
         report = stopped['thinking_display']
-        assert report['kind'] == 'thinking_display_summary_v1' and report['problems'] == []
+        # The report form: a refusal is counted, where the strict form would raise and lose stopped.json.
+        assert report['kind'] == 'thinking_display_summary_v1' and report['problems'] == [] and report['refusals'] == 1
         assert [r['disposition'] for r in report['requests']] == ['substituted']
         return
     runtime._execute_child(context, row, 21600, clock=lambda: 0)

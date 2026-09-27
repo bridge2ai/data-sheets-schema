@@ -204,7 +204,7 @@ def test_the_childs_own_count_passes_untouched(tmp_path):
 
 def test_substitution_proves_its_own_result():
     raw = compact(ADAPTIVE)
-    forwarded, disposition = substitute_thinking(raw, json.loads(raw), THINKING_DISPLAY)
+    forwarded, disposition = substitute_thinking(raw, THINKING_DISPLAY)
     assert disposition == 'substituted' and json.loads(forwarded)['thinking'] == DISPLAYED
 
 
@@ -349,7 +349,7 @@ def test_an_already_displayed_nested_member_is_refused(tmp_path):
     """#2549: the child cannot carry the displayed setting anywhere, even nested."""
     raw = compact({**ADAPTIVE, 'metadata': {'thinking': DISPLAYED}})
     with pytest.raises(BudgetStop, match='registered display exactly'):
-        substitute_thinking(raw, json.loads(raw), THINKING_DISPLAY)
+        substitute_thinking(raw, THINKING_DISPLAY)
 
 
 def _settled(tmp_path, body):
@@ -431,3 +431,51 @@ def test_an_unterminated_frame_beyond_the_bound_is_dropped_not_buffered(monkeypa
     assert timing.result('completed', None)['observer_errors'] == 1 and len(timing.buffer) == 0
     timing.chunk(wire(thinking_stream()))
     assert timing.result('completed', None)['thinking_display_observed'] == 'summarized_text'
+
+
+
+def _write_folder(folder, native, forwarded=None, *, disposition='substituted', canonical=None, forwarded_sha=None):
+    """Replace a settled folder's retained bytes with a consistent-looking set."""
+    (folder / 'native_request.json').write_bytes(native)
+    if forwarded is None:
+        (folder / 'forwarded_request.json').unlink(missing_ok=True)
+    else:
+        (folder / 'forwarded_request.json').write_bytes(forwarded)
+    sent = forwarded if forwarded is not None else native
+    (folder / 'request.json').write_text(json.dumps(canonical if canonical is not None else json.loads(sent),
+                                                    sort_keys=True) + '\n')
+    (folder / 'thinking_request.json').write_text(json.dumps({'kind': 'thinking_display_request_v1',
+        'registered': THINKING_DISPLAY, 'disposition': disposition, 'native_request_sha256': sha(native),
+        'forwarded_request_sha256': forwarded_sha or sha(sent)}))
+
+
+@pytest.mark.parametrize('case', ['wrong_forwarded_hash', 'already_displayed_child', 'doubly_rewritten'])
+def test_each_substituted_clause_refuses_on_its_own(tmp_path, case):
+    """#2559: the proof holds from the retained bytes, without assuming admission."""
+    folder = _settled(tmp_path, ADAPTIVE)
+    swap = lambda raw: raw.replace(b'"thinking":{"type":"adaptive"}', b'"thinking":{"type":"adaptive","display":"summarized"}')
+    if case == 'wrong_forwarded_hash':
+        native = compact(ADAPTIVE)
+        _write_folder(folder, native, swap(native), forwarded_sha='0' * 64)
+    elif case == 'already_displayed_child':
+        native = compact({**REQUEST, 'thinking': DISPLAYED})
+        _write_folder(folder, native, native)                        # the replace is a no-op
+    else:
+        native = compact({**ADAPTIVE, 'metadata': {'thinking': {'type': 'adaptive'}}})
+        _write_folder(folder, native, swap(native))                  # both occurrences rewritten
+    with pytest.raises(BudgetStop, match='only the registered display'):
+        thinking_display_evidence(tmp_path / 'requests', THINKING_DISPLAY, strict=True)
+
+
+@pytest.mark.parametrize('case', ['wrong_forwarded_hash', 'rewritten_request'])
+def test_each_disabled_clause_refuses_on_its_own(tmp_path, case):
+    """#2560: the side call's record hash and its canonical request are both proven."""
+    body = {**REQUEST, 'thinking': {'type': 'disabled'}}
+    folder = _settled(tmp_path, body)
+    native = compact(body)
+    if case == 'wrong_forwarded_hash':
+        _write_folder(folder, native, disposition='disabled_forwarded', forwarded_sha='0' * 64)
+    else:
+        _write_folder(folder, native, disposition='disabled_forwarded', canonical={**body, 'max_tokens': 7})
+    with pytest.raises(BudgetStop, match='forwarded unchanged'):
+        thinking_display_evidence(tmp_path / 'requests', THINKING_DISPLAY, strict=True)
