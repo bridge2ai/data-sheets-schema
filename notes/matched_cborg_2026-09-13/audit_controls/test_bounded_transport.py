@@ -98,8 +98,10 @@ def test_real_worker_returns_typed_count_and_registered_headers(children):
 #: to 442. The review's own run measured max 1.17 s at load ~450, and this keeps
 #: threefold on that. It rejects a deadline enforced 3.5 s late or more, including
 #: start-up left uncharged whenever start-up takes that long. It does not reject a
-#: shorter lateness, which origin/main's `budget + 1.5` total only caught at loads
-#: where it also flaked.
+#: shorter lateness: origin/main's `budget + 1.5` total caught one of about 1.5-3.5 s
+#: at normal load (a deadline restarted once at expiry on the 2 s first rung, for
+#: example), and this bound gives that up so the test does not flake under heavy
+#: load (#2711).
 DEADLINE_KILL_SECONDS = 3.5
 
 #: The reap of the killed worker, which may still be starting its interpreter. It
