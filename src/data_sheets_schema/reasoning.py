@@ -200,7 +200,8 @@ def append(path: Path, entry: dict[str, Any]) -> None:
 
 
 class UnreadableLog(ValueError):
-    """A reasoning log line that does not decode as UTF-8 or parse as JSON (#2695)."""
+    """A reasoning log line that does not decode as UTF-8, parse as JSON, or parse to
+    an object (#2695, #2739)."""
 
 
 def _lines(path: Path):

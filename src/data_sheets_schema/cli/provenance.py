@@ -2188,7 +2188,8 @@ def reasoning_cmd(method, project, label, path):
             click.echo(f"  ⚠️  {len(unreadable)} line(s) that are not a readable entry, skipped: "
                        f"{', '.join(map(str, unreadable))}")
         if not entries:
-            # A log created but never written, e.g. by a run killed at once (#2667).
+            # A log created but never written, e.g. by a run killed at once (#2667),
+            # or one whose only lines are unreadable, named above (#2766).
             click.echo("  entries 0")
             continue
         click.echo(f"  entries {s['entries']}, with a reasoning block "

@@ -307,3 +307,38 @@ def test_logs_holding_only_unreadable_lines_are_counted(tmp_path, monkeypatch):
     result = _two_logs(tmp_path, monkeypatch, partial, partial)
     assert result.exit_code == 0, result.output
     assert "2 log(s), 0 entries, 0 with reasoning text, 2 unreadable line(s) skipped" in result.output
+
+
+
+@pytest.mark.parametrize("kind, diagnosis", [
+    ("thinking", "The blocks are signed but empty"),
+    ("redacted_thinking", "redacted by the provider"),
+], ids=["signed_empty", "redacted"])
+def test_the_caveat_precedes_every_diagnosis(tmp_path, kind, diagnosis):
+    """#2764: the caveat is not tied to the no-block branch."""
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text(json.dumps(entry(True, kind)) + "\n" + json.dumps(entry(True))[:40])
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    caveat = "1 unreadable line(s) skipped: what follows describes the readable entries only"
+    assert caveat in result.output and diagnosis in result.output, result.output
+    assert result.output.index(caveat) < result.output.index(diagnosis)
+
+
+def test_several_empty_logs_print_no_aggregate(tmp_path, monkeypatch):
+    """#2764, #2692: logs that are all empty have nothing to aggregate."""
+    result = _two_logs(tmp_path, monkeypatch, "", "")
+    assert result.exit_code == 0, result.output
+    assert result.output.count("entries 0") == 2 and "2 log(s)," not in result.output
+
+
+def test_an_append_after_a_tail_cut_inside_a_character(tmp_path):
+    """#2765: the dangling tail may end inside a UTF-8 sequence; append checks bytes and
+    never decodes, so it neither raises nor joins the new entry to the tail."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    reasoning.append(log, entry(True))
+    raw = json.dumps({**entry(True), "note": "caf\u00e9"}, ensure_ascii=False).encode("utf-8")
+    log.write_bytes(log.read_bytes() + raw[:raw.index("\u00e9".encode("utf-8")) + 1])
+    reasoning.append(log, entry(False))
+    assert reasoning.read_lenient(log) == ([entry(True), entry(False)], [2])
