@@ -226,6 +226,8 @@ def _execute_job(context, state, *, client=None):
         raise BudgetStop('native evaluation uses the native default effort; no effort override is registered')
     if runtime.get('cli_flags') != CLI_FLAGS or runtime.get('environment') != ENVIRONMENT:
         raise BudgetStop('native evaluation requires isolated tools and environment flags')
+    from registration import evaluation_thinking_display
+    thinking_display = evaluation_thinking_display(job)
     if runtime.get('additional_directories') != additional_directories(manifest, job):
         raise BudgetStop('native restricted directories differ from the registered inputs and output')
     executable = pinned(manifest, runtime['executable'])
@@ -251,7 +253,8 @@ def _execute_job(context, state, *, client=None):
             ledger=context.ledger, attempt=billing_attempt, evidence=attempt / 'requests',
             model=manifest['model']['model'], prices=manifest['budget']['prices_per_token'],
             verify=context.verify, provider_key=key or 'offline-test-key', base_url=manifest['provider_base_url'],
-            request_headers=provider_context_headers(manifest), upstream=upstream)
+            request_headers=provider_context_headers(manifest), upstream=upstream,
+            **({'thinking_display': thinking_display} if thinking_display is not None else {}))
         state['proxy'] = proxy
     except BaseException:
         # running() owns both clients after construction; before that boundary,
@@ -287,6 +290,10 @@ def _execute_job(context, state, *, client=None):
         state['exit_code'] = exit_code
     if proxy.failed.is_set() or proxy.unfinished_handlers or exit_code:
         raise BudgetStop('native evaluator stopped or has unfinished request handlers')
+    if thinking_display is not None:
+        # Every admitted request re-read from its retained bytes (#2541); a gate, not evidence.
+        from native_proxy import thinking_display_evidence
+        thinking_display_evidence(attempt / 'requests', thinking_display, strict=True)
     events = load_native_events(attempt / 'transcript.jsonl')
     evidence = inspect_transcript(events, policy, job, manifest, attempt / 'control.jsonl', config)
     validation = validate_native(Path(job['candidate']), job, manifest)
