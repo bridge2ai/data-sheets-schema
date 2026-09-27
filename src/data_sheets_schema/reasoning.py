@@ -192,10 +192,34 @@ def append(path: Path, entry: dict[str, Any]) -> None:
 
 
 def read(path: Path) -> list[dict[str, Any]]:
+    """Every entry of a reasoning log; a line that does not parse raises, since
+    usage accounting must not skip a record it cannot read."""
     if not Path(path).exists():
         return []
     return [json.loads(line) for line in
             Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
+    """The entries that parse as JSON objects, and the numbers of the lines that
+    do not, for a read-only report. A run killed or out of disk mid-write can leave a partial
+    last line (#2695); a report names it rather than failing on it."""
+    if not Path(path).exists():
+        return [], []
+    entries: list[dict[str, Any]] = []
+    unreadable: list[int] = []
+    for number, line in enumerate(Path(path).read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            value = json.loads(line)
+        except ValueError:
+            value = None
+        if isinstance(value, dict):
+            entries.append(value)
+        else:
+            unreadable.append(number)
+    return entries, unreadable
 
 
 def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:

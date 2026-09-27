@@ -57,3 +57,34 @@ def test_several_empty_logs_are_reported_not_a_crash(tmp_path, monkeypatch):
     result = CliRunner().invoke(provenance, ["reasoning", "--label", "L"])
     assert result.exit_code == 0, result.output
     assert result.output.count("entries 0") == 2
+
+
+def test_a_partial_line_is_named_and_skipped_not_a_crash(tmp_path):
+    """#2695: a run killed mid-write can leave a partial last line."""
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps(entry(True))[:40])
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "1 line(s) that are not a readable entry, skipped: 2" in result.output
+    assert "entries 1" in result.output
+
+
+def test_usage_accounting_still_refuses_an_unreadable_line(tmp_path):
+    """The strict reader stays strict: usage accounting must not skip a record (#2695)."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text(json.dumps(entry(True)) + "\n{not json")
+    with pytest.raises(ValueError):
+        reasoning.read(log)
+    assert reasoning.read_lenient(log) == ([entry(True)], [2])
+
+
+def test_a_line_that_parses_but_is_not_an_entry_is_skipped(tmp_path):
+    """A partial line can still be valid JSON (a bare number): not an entry either (#2695)."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text("12\n" + json.dumps(entry(True)) + "\n[1]\n")
+    assert reasoning.read_lenient(log) == ([entry(True)], [1, 3])
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "2 line(s) that are not a readable entry, skipped: 1, 3" in result.output

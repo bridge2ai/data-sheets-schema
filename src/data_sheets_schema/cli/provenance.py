@@ -2177,10 +2177,14 @@ def reasoning_cmd(method, project, label, path):
 
     total: list[dict] = []
     for p in sorted(logs):
-        entries = _reasoning.read(p)
+        entries, unreadable = _reasoning.read_lenient(p)
         total.extend(entries)
         s = _reasoning.summarise(entries)
         click.echo(f"\n{p}")
+        if unreadable:
+            # A partial line from a run killed mid-write: named, not fatal (#2695).
+            click.echo(f"  ⚠️  {len(unreadable)} line(s) that are not a readable entry, skipped: "
+                       f"{', '.join(map(str, unreadable))}")
         if not entries:
             # A log created but never written, e.g. by a run killed at once (#2667).
             click.echo("  entries 0")
