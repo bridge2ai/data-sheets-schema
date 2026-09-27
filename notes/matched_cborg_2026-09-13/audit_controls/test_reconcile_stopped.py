@@ -481,20 +481,19 @@ def test_a_marker_naming_another_reconciliation_is_refused(stopped, field, chang
         r.validate_audit_reconciliation(successor)
 
 
-def test_a_standing_debit_must_name_the_pinned_record_exactly(stopped, tmp_path, monkeypatch):
-    """A receipt written against another record, even with valid bytes, is refused."""
-    m, first, reg, _, _ = stopped
+def test_the_tool_will_not_write_a_debit_against_another_record(stopped, tmp_path, monkeypatch):
+    """A receipt written against another record, even with valid bytes, is refused by the tool's
+    own check before anything is published (the successor's check is #2587's test)."""
+    _, first, reg, _, _ = stopped
     other = tmp_path / 'other_standing_record.json'
     save(other, {'kind': tool.AUTHORIZATION_KIND,
         'exact_response': 'another answer', 'quoted_request': 'another request', 'recorded_at': '2026-09-25T00:00:00Z'})
-    real = tool.standing_authorization
     monkeypatch.setattr(tool, 'standing_authorization',
                         lambda: (r.read_json(other), {'path': str(other), 'sha256': r.sha(other)}))
-    value = reconcile(reg, reg.parent.parent / 'reconciliation')
-    monkeypatch.setattr(tool, 'standing_authorization', real)
-    successor, _ = successor_of(m, reg, first, value)
+    out = reg.parent.parent / 'reconciliation'
     with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
-        r.validate_audit_reconciliation(successor)
+        reconcile(reg, out)
+    assert not out.exists() and not tool.marker_path(first, r.sha(reg)).exists()
 
 
 def test_a_per_charge_debit_without_standing_keeps_its_own_checks(stopped):
@@ -527,4 +526,140 @@ def test_a_standing_debit_must_quote_the_pinned_record_exactly(stopped, monkeypa
     monkeypatch.setattr(tool, 'standing_authorization', real)
     successor, _ = successor_of(m, reg, first, value)
     with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
+
+
+# --- review round 1 of #2568: #2582-#2590 -----------------------------------------------------
+
+def reauthorize(value, request_id, change):
+    """Apply `change` to the tool's receipt's user_authorization, then re-hash the checkpoint
+    and the marker that name it, so only the authorization itself can refuse."""
+    receipt = Path(value['receipt']); body = r.read_json(receipt)
+    change(body['user_authorization'])
+    save(receipt, body)
+    checkpoint = Path(value['checkpoint']); state = r.read_json(checkpoint)
+    next(x for x in state['requests'] if x['id'] == request_id)['reconciliation_receipt_sha256'] = r.sha(receipt)
+    state['reconciled_from']['receipt_sha256'] = r.sha(receipt)
+    save(checkpoint, state)
+    marker = Path(value['marker']); recorded = r.read_json(marker)
+    recorded.update(receipt_sha256=r.sha(receipt), checkpoint_sha256=r.sha(checkpoint))
+    save(marker, recorded)
+    return {**value, 'checkpoint_sha256': r.sha(checkpoint)}
+
+
+def test_a_standing_debit_made_in_another_checkout_is_accepted(stopped, tmp_path, monkeypatch):
+    """#2582: the reconciling checkout's copy of the record has the same bytes at another path."""
+    m, first, reg, _, _ = stopped
+    elsewhere = tmp_path / 'other_checkout' / 'audit_controls' / tool.STANDING_AUTHORIZATION.name
+    elsewhere.parent.mkdir(parents=True)
+    elsewhere.write_bytes(tool.STANDING_AUTHORIZATION.read_bytes())
+    monkeypatch.setattr(tool, 'STANDING_AUTHORIZATION', elsewhere)
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    monkeypatch.undo()
+    recorded = r.read_json(value['receipt'])['user_authorization']['source_record']
+    assert recorded == {'path': str(elsewhere), 'sha256': tool.STANDING_AUTHORIZATION_SHA256}
+    assert recorded['path'] != str(tool.STANDING_AUTHORIZATION)
+    successor, _ = successor_of(m, reg, first, value)
+    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+
+
+@pytest.mark.parametrize('record', [
+    lambda ref: {**ref, 'sha256': '0' * 64},                                   # other bytes, same name
+    lambda ref: {**ref, 'path': str(Path(ref['path']).with_name('other.json'))},  # same bytes, other name
+    lambda ref: {**ref, 'path': Path(ref['path']).name},                         # not absolute
+    lambda ref: {**ref, 'size': 1},                                               # not exactly a reference
+    lambda ref: None,
+], ids=['other_digest', 'other_name', 'relative', 'extra_key', 'missing'])
+def test_a_standing_debit_must_name_the_pinned_record_by_digest(stopped, record):
+    """#2587: the quote is the pinned record's exactly, so only the record reference can refuse."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    value = reauthorize(value, request_id, lambda a: a.update(source_record=record(a['source_record'])))
+    successor, _ = successor_of(m, reg, first, value)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
+
+
+@pytest.mark.parametrize('field', tool.QUOTE_FIELDS)
+def test_every_quoted_field_of_a_standing_debit_is_compared(stopped, field):
+    """#2590."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    value = reauthorize(value, request_id, lambda a: a.update({field: a[field] + ' (edited)'}))
+    successor, _ = successor_of(m, reg, first, value)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
+
+
+@pytest.mark.parametrize('standing', ['absent', 'true', 1, None, False])
+def test_a_receipt_citing_the_standing_record_is_a_standing_debit_whatever_its_flag(stopped, standing):
+    """#2583: citing the standing record, or carrying any `standing` key, invokes it; only
+    `standing: true` with the exact record and quote and the tool's marker passes."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    value = reauthorize(value, request_id, lambda a: a.pop('standing') if standing == 'absent'
+                        else a.update(standing=standing))
+    successor, _ = successor_of(m, reg, first, value)
+    assert Path(value['marker']) in r.continuation_paths(successor)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
+    Path(value['marker']).unlink()
+    with pytest.raises(BudgetStop, match='no reconciliation marker'):
+        r.continuation_paths(successor)
+
+
+def test_a_per_charge_debit_pins_no_marker(stopped):
+    """#2588: audit27's per-charge receipt names its own record and has no `standing` key."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    value = reauthorize(value, request_id, lambda a: (a.pop('standing'), a.update(
+        exact_response='yes, debit it', quoted_request='May I debit this charge?',
+        source_record={'path': '/elsewhere/user_authorization_2026-09-24.json', 'sha256': '6' * 64})))
+    marker = Path(value['marker'])
+    marker.unlink()
+    successor, _ = successor_of(m, reg, first, {**value, 'marker': value['receipt']})
+    paths = r.continuation_paths(successor)
+    assert not any(p.parent.name == tool.MARKERS for p in paths) and marker not in paths
+    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+
+
+def test_a_standing_debits_checkpoint_must_sit_beside_its_receipt(stopped):
+    """#2589: a byte-identical copy of the checkpoint in another directory is refused."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    moved = reg.parent.parent / 'moved' / 'reconciled_billing.json'
+    moved.parent.mkdir()
+    moved.write_bytes(Path(value['checkpoint']).read_bytes())
+    successor, _ = successor_of(m, reg, first, {**value, 'checkpoint': str(moved)})
+    with pytest.raises(BudgetStop, match='marker records'):
+        r.validate_audit_reconciliation(successor)
+
+
+def test_a_case_variant_spelling_of_the_reconciliation_directory_is_the_same_directory(stopped):
+    """#2584: on a case-insensitive filesystem the marker's directory is compared by identity."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'Reconciliation')
+    variant = reg.parent.parent / 'reconciliation'
+    if not variant.exists():
+        pytest.skip('case-sensitive filesystem: the variant spelling names no directory')
+    spelled = {**value, 'receipt': str(variant / Path(value['receipt']).name),
+               'checkpoint': str(variant / Path(value['checkpoint']).name)}
+    successor, _ = successor_of(m, reg, first, spelled)
+    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+
+
+def test_a_malformed_authorization_is_refused_with_a_budget_stop(stopped):
+    """#2585: continuation_paths does not raise AttributeError; the validator names the defect."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    receipt = Path(value['receipt']); body = r.read_json(receipt)
+    body['user_authorization'] = 'approved'
+    save(receipt, body)
+    checkpoint = Path(value['checkpoint']); state = r.read_json(checkpoint)
+    next(x for x in state['requests'] if x['id'] == request_id)['reconciliation_receipt_sha256'] = r.sha(receipt)
+    state['reconciled_from']['receipt_sha256'] = r.sha(receipt)
+    save(checkpoint, state)
+    successor, _ = successor_of(m, reg, first, {**value, 'checkpoint_sha256': r.sha(checkpoint)})
+    r.continuation_paths(successor)
+    with pytest.raises(BudgetStop, match='lacks explicit confirmation evidence'):
         r.validate_audit_reconciliation(successor)

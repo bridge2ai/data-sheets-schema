@@ -764,16 +764,25 @@ directory.
 Only this tool writes markers. A reconciliation made any other way, such as
 audit27's by hand, carries none, so do not run the tool on a stop that
 already has one. The successor's validator binds both (#2492):
-- **The record:** a receipt with `standing: true` must name the pinned
-  standing record `{path, sha256}` and quote its words exactly.
+- **The record:** a debit receipt that carries a `standing` key of any value,
+  or cites the standing record, is a standing debit (#2583). It must say
+  `standing: true`, name the pinned record by its digest and file name, and
+  quote all three of its fields exactly. The path is the record's absolute
+  path in whichever checkout reconciled, so a successor or probe validated
+  from another worktree accepts it (#2582).
 - **The marker:** its `reconciliations/<source sha256>.json` marker must be
   pinned in the successor and must name this receipt, this checkpoint, this
-  request and this output directory.
+  request and this output directory. The receipt and checkpoint must sit in
+  that directory, compared by file identity rather than spelling (#2584). A
+  missing marker is refused by name before anything is written (#2585).
 
 The tool runs that validator on its staged files before the marker exists,
 so its own check skips only the marker requirement. A per-charge
-authorization has no `standing` key, as audit27's hand-made one does not; it
-keeps its own checks and needs no marker. A transport probe's debit is also
+authorization has no `standing` key and cites its own record, as audit27's
+hand-made one does; it keeps its own checks and needs no marker. A transport
+probe pins `reconcile_stopped.py`, `probe_predecessor.py` and
+`runtime_closure.py` with its own code, since its lineage check runs them
+(#2586). A transport probe's debit is also
 marked `standing`, but it is proven by its link (#2469) rather than by a
 marker. The stopped audit's files are never modified. The tool
 neither claims the sequence nor contacts a provider. The printed paths and

@@ -813,3 +813,25 @@ def test_a_probe_of_a_tool_reconciled_tip_pins_the_tools_marker(lineage):
     manifest = json.loads(registration.read_text())
     assert manifest['pinned_files'][value['marker']] == sha(value['marker'])
     probe.check_lineage(manifest)
+    # #2586: the modules that decided the lineage are pinned with the probe's own code.
+    for name in ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py'):
+        assert str(Path(r.__file__).with_name(name).resolve()) in manifest['pinned_files']
+
+
+@pytest.mark.parametrize('flag', ['standing', 'citing_the_record'])
+def test_a_probe_of_a_tip_whose_standing_debit_has_no_marker_is_refused_by_name(lineage, flag):
+    """#2585: a standing debit with no marker is a BudgetStop that names it, before the probe's folder
+    exists; a receipt that cites the standing record without its flag is one too (#2583)."""
+    from audit_controls import reconcile_stopped as tool
+    from audit_controls.test_reconcile_stopped import reauthorize
+    folder = lineage.request_dir
+    (folder / 'request.json').write_bytes(
+        (json.dumps(json.loads(lineage.raw), sort_keys=True, ensure_ascii=False) + '\n').encode())
+    save(folder / 'http_status.json', {'status': 500})
+    value = tool.reconcile(lineage.source, lineage.root / 'tool_reconciliation', recorded_at='2026-09-25T19:00:00+00:00')
+    if flag == 'citing_the_record':
+        value = reauthorize(value, value['request_id'], lambda a: a.pop('standing'))
+    Path(value['marker']).unlink()
+    with pytest.raises(BudgetStop, match='no reconciliation marker'):
+        prepare(lineage, tip_checkpoint=Path(value['checkpoint']), tip_reconciliation_receipt=Path(value['receipt']))
+    assert not (lineage.root / 'probe').exists()

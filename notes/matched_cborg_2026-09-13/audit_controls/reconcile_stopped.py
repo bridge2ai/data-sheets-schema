@@ -64,6 +64,38 @@ def standing_authorization():
     return value, {'path': str(path), 'sha256': expected}
 
 
+def names_standing_record(record):
+    """Whether `record` names the pinned standing record. The digest binds it;
+    the path is the file's own name in whichever checkout reconciled, so a
+    successor validated from another worktree accepts it (#2582)."""
+    return (isinstance(record, dict) and set(record) == {'path', 'sha256'}
+            and record['sha256'] == STANDING_AUTHORIZATION_SHA256
+            and isinstance(record['path'], str) and Path(record['path']).is_absolute()
+            and Path(record['path']).name == STANDING_AUTHORIZATION.name)
+
+
+def claims_standing(receipt):
+    """Whether a debit receipt invokes the standing authorization: it carries a
+    `standing` key of any value, or cites the standing record (#2583). A per-charge
+    receipt does neither. A malformed authorization claims nothing here; the
+    validator refuses it."""
+    authorization = receipt.get('user_authorization') if isinstance(receipt, dict) else None
+    if not isinstance(authorization, dict):
+        return False
+    record = authorization.get('source_record')
+    return 'standing' in authorization or (isinstance(record, dict)
+                                          and record.get('sha256') == STANDING_AUTHORIZATION_SHA256)
+
+
+def same_directory(value, directory):
+    """File identity, not spelling: a case-variant spelling on a case-insensitive
+    filesystem names the same directory (#2584)."""
+    try:
+        return isinstance(value, str) and os.path.samefile(value, directory)
+    except OSError:
+        return False
+
+
 def marker_path(source_registration, source_sha):
     """Where `reconcile` records its reconciliation of a stopped audit (#2492)."""
     state = r.canonical_path(source_registration['sequence_state'], exists=True)
