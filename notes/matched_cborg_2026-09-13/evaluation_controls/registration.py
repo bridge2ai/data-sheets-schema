@@ -370,13 +370,28 @@ def group(job):
     return ':'.join((job['style'], job['variant'], job.get('rubric', 'slots')))
 
 
+def evaluation_thinking_display(job):
+    """A native evaluation job's own thinking display (#2541): exact, never null, never inherited."""
+    runtime = job.get('native_runtime')
+    if not isinstance(runtime, dict) or 'thinking_display' not in runtime:
+        return None
+    from audit_controls.registration import stage_thinking_display
+    return stage_thinking_display(runtime['thinking_display'], runtime.get('version'))
+
+
+def json_identity(value):
+    import json
+    return json.dumps(value, sort_keys=True)
+
+
 def verify_manifest(manifest, path, digest):
     if 'native_history_control' in manifest:
         raise BudgetStop('native_history_control is audit-only; evaluation cannot select it')
     if 'native_response_buffer' in manifest:
         raise BudgetStop('native_response_buffer is audit-only; evaluation cannot select it')
     if 'native_thinking_display' in manifest:
-        raise BudgetStop('native_thinking_display is audit-only; evaluation cannot select it')
+        raise BudgetStop('native_thinking_display is the audit and Phase 4 key; evaluation selects its display '
+                         'per native job, in native_runtime.thinking_display (--native-thinking-display)')
     _fitness_selection(manifest)
     if 'audit_worker_checkpoint' in manifest:
         raise BudgetStop('audit_worker_checkpoint is audit-only; evaluation cannot select it')
@@ -431,6 +446,10 @@ def verify_manifest(manifest, path, digest):
         raise BudgetStop('evaluation roster is empty')
     ids, outputs, candidates, cells = set(), set(), set(), {}
     attempts = canonical_path(manifest['attempts_dir'])
+    # One thinking display for every native job: one condition per registration (#2541).
+    displays = {json_identity(evaluation_thinking_display(job)) for job in jobs if job['style'] in NATIVE_STYLES}
+    if len(displays) > 1:
+        raise BudgetStop('native evaluation jobs register different thinking displays')
     for job in jobs:
         identity = job['id']
         if not isinstance(identity, str) or not IDENTIFIER.fullmatch(identity) or identity in ids:

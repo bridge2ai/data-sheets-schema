@@ -174,6 +174,28 @@ offline `not_applicable` selection receipt, with no paid roster or budget
 transfer. A nonempty successor needs its own exact registration review and
 class-group canary acceptance before dependent jobs.
 
+## Registered thinking display (`--native-thinking-display summarized`, #2541)
+
+Both preparers (`build_registration` and, for a pair accepted through Phase 4,
+`build_composite_registration`) accept `--native-thinking-display summarized`.
+The value is placed on the runtime snapshot that every native job copies, as
+`native_runtime.thinking_display`.
+- **How far it reaches:** one registration carries one display. Registration
+  refuses native jobs whose displays differ, and a `null` value.
+- **Where it comes from:** it is selected here and never inherited from the
+  audit or Phase 4.
+- **Runtime:** it requires Claude Code 2.1.272.
+- **Preparation:** a malformed value is refused before the destination exists.
+
+**What the evaluator's proxy does with it** (as in audits, `native_controls/README.md`):
+- it adds `"display":"summarized"` to each forwarded adaptive-thinking request;
+- a completed job re-reads every admitted request's bytes before it is
+  accepted;
+- the result receipt reports the summary for every outcome.
+
+The top-level `native_thinking_display` key, which audits and Phase 4 use, is
+refused in an evaluation registration: evaluation selects per native job.
+
 ## Instruments and evidence
 
 | Style | Execution and acceptance contract |

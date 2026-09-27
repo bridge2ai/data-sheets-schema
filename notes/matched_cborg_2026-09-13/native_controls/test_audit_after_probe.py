@@ -596,3 +596,25 @@ def test_a_bridge_source_relabelled_as_an_audit_is_a_budget_stop(prepared):
     _tamper(prepared, manifest, 'registration.json', lambda v: v.update(kind='d4d_native_audit_continuation'))
     with pytest.raises(BudgetStop, match='names no job'):
         r.validate_audit_reconciliation(manifest)
+
+
+def test_a_chained_increase_may_rest_on_a_debited_probes_reconciled_checkpoint(prepared):
+    """#2502/#2636: the relations a reconciled anchor proves hold for the ledger, debit receipt and
+    reconciled checkpoint a probe's settle writes, and the audit's own link check accepts them."""
+    import budget_amendment as amendment
+    result = refused(prepared)
+    out = prepared.root / 'probe'
+    registration = out / 'registration.json'
+    probe_registration = r.read_json(registration)
+    assert probe_registration['budget']['ledger_path'] == str(out / 'billing.json')
+    reference = lambda path: {'path': str(path), 'sha256': sha(path)}
+    bridge = {'source_ledger': reference(out / 'billing.json'), 'receipt': reference(out / 'debit_receipt.json')}
+    checkpoint = Path(result['successor_continues_from'])
+    assert checkpoint == out / 'reconciled_billing.json'
+    proof = {'reconciliation': copy.deepcopy(bridge), 'predecessor_registration': reference(registration),
+             'predecessor_ledger': reference(checkpoint)}
+    anchored = r.read_json(checkpoint)
+    assert amendment._reconciled_anchor(proof, probe_registration, anchored,
+                                        {'predecessor': {'reconciliation': bridge}}) == bridge
+    manifest, _ = successor(prepared, result)
+    assert probe_predecessor.validate_link(manifest) == anchored
