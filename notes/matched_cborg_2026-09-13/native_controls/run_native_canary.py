@@ -411,22 +411,63 @@ def native_evidence_check(spec):
         protocol_version=protocol_for_renderer(spec.render_version), **authority)
 
 
+def _signal_group(process, sig):
+    """Signal the child's session group, excusing a refusal only once the group is gone.
+
+    Darwin answers EPERM, not ESRCH, when the leader is exiting or exited but
+    not yet reaped and no other member is live, and it can do so a moment
+    before waitpid reports the exit (#2571). So a refusal waits, within the
+    existing bound, for the leader's actual exit; a leader still running
+    re-raises it. The leader's exit alone does not show the group is empty: a
+    live member that refuses the signal also answers EPERM, on Darwin and on
+    Linux (#2614). So once the leader has exited, the group is probed with
+    signal 0, within a second bound, until it is gone (ESRCH), which excuses
+    the refusal. Nothing is sent after the reap: a group id released by the
+    reap may be reused, and a probe cannot tell whose group answers (#2708,
+    #2713). A refusal still standing at the bound is raised, and so is a probe
+    that suddenly succeeds, where the kernel had just refused every member:
+    that member cannot be verified as the child's, so it is reported rather
+    than signalled.
+    The refusal is raised outside any handler, so the exception being unwound
+    (a recorded stop, an interrupt) stays in its chain.
+    """
+    try:
+        os.killpg(process.pid, sig)
+        return
+    except ProcessLookupError:
+        return
+    except PermissionError as error:
+        refusal = error
+    try:
+        process.wait(timeout=2)
+        exited = True
+    except subprocess.TimeoutExpired:
+        exited = False
+    deadline = time.monotonic() + 2
+    while exited:
+        try:
+            os.killpg(process.pid, 0)         # a probe: delivers nothing (#2708)
+        except ProcessLookupError:
+            return                            # the group is gone
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                break
+            time.sleep(0.02)
+            continue
+        break                                 # a member we cannot verify: reported, not signalled (#2713)
+    raise refusal
+
+
 def terminate_group(process):
     if process is None:
         return
-    try:
-        os.killpg(process.pid, signal.SIGTERM)
-    except ProcessLookupError:
-        pass
+    _signal_group(process, signal.SIGTERM)
     try:
         process.wait(timeout=2)
     except subprocess.TimeoutExpired:
         pass
     # Also remove descendants if the parent exited before them.
-    try:
-        os.killpg(process.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
+    _signal_group(process, signal.SIGKILL)
     process.wait(timeout=2)
 
 
