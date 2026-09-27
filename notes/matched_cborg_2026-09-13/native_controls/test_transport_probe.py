@@ -813,8 +813,10 @@ def test_a_probe_of_a_tool_reconciled_tip_pins_the_tools_marker(lineage):
     manifest = json.loads(registration.read_text())
     assert manifest['pinned_files'][value['marker']] == sha(value['marker'])
     probe.check_lineage(manifest)
-    # #2586: the modules that decided the lineage are pinned with the probe's own code.
-    for name in ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py'):
+    # #2586, #2628: the modules that decided the lineage are pinned with the probe's own
+    # code, and for a batch tip batch_native and the modules it imports.
+    for name in ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py', 'batch_native.py',
+                 'batch_output.py', 'batch_history.py', 'native.py', 'output_parts.py'):
         assert str(Path(r.__file__).with_name(name).resolve()) in manifest['pinned_files']
 
 
@@ -912,3 +914,43 @@ def test_a_probe_refuses_standing_authority_relabelled_as_a_confirmed_charge(lin
     with pytest.raises(BudgetStop, match='permits only a full-reservation debit'):
         prepare(lineage, tip_checkpoint=checkpoint, tip_reconciliation_receipt=receipt)
     assert not (lineage.root / 'probe').exists()
+
+
+def test_the_probe_pins_every_repository_module_its_lineage_check_loads():
+    """#2628: what importing the probe and the batch lineage check actually loads from the
+    repository, in a fresh interpreter, is a subset of what the probe pins."""
+    import subprocess
+    root = Path(probe.__file__).resolve().parents[3]
+    code = ("import json, sys\n"
+            "import transport_probe, audit_controls.batch_native\n"
+            "print(json.dumps(sorted({m.__file__ for m in list(sys.modules.values())\n"
+            "                         if getattr(m, '__file__', None)})))\n")
+    result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, timeout=600,
+                            cwd=root, env={**__import__('os').environ, 'PYTHONPATH': ':'.join(sys.path)})
+    assert result.returncode == 0, result.stderr
+    loaded = {str(Path(f).resolve()) for f in json.loads(result.stdout)
+              if Path(f).resolve().is_relative_to(root) and f.endswith('.py')}
+    assert loaded and loaded <= set(probe.implementation_paths()), sorted(loaded - set(probe.implementation_paths()))
+
+
+def test_the_import_closure_reads_source_and_imports_only_packages(tmp_path, monkeypatch):
+    """#2628: a function-level import counts; a relative one resolves against its package;
+    `from module import attribute` never executes the module; files outside the root, the
+    standard library and a name that is no module add nothing."""
+    root = tmp_path / 'root'
+    package = root / 'closure_pkg_2628'
+    package.mkdir(parents=True)
+    (package / '__init__.py').write_text('')
+    (package / 'inner.py').write_text('def later():\n    from . import deferred\n')
+    (package / 'deferred.py').write_text('import json\nfrom closure_top_2628 import attribute\n')
+    (root / 'closure_top_2628.py').write_text("raise RuntimeError('executed')\nattribute = 1\n")
+    (tmp_path / 'closure_outside_2628.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_pkg_2628.inner\nimport closure_outside_2628\nimport closure_missing_2628\n')
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.syspath_prepend(str(root))
+    files = probe.import_closure(seed, root.resolve())
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_pkg_2628/__init__.py', 'closure_pkg_2628/inner.py', 'closure_pkg_2628/deferred.py',
+        'closure_top_2628.py'}
+    assert 'closure_top_2628' not in sys.modules and 'closure_pkg_2628.inner' not in sys.modules

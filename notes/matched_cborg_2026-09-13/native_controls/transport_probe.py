@@ -50,8 +50,10 @@ import copy
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 import argparse
+import ast
 import hashlib
 import importlib.metadata
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -179,20 +181,79 @@ def derive_request(raw):
     return probe
 
 
+def _imported_names(source, package):
+    """Every module name a file's import statements can load, function-level ones
+    included, with relative names resolved against its package."""
+    names = []
+    for node in ast.walk(ast.parse(source.read_bytes(), str(source))):
+        if isinstance(node, ast.Import):
+            names.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            base = (importlib.util.resolve_name('.' * node.level + (node.module or ''), package)
+                    if node.level else node.module)
+            names.append(base)
+            # `from package import name` may load the submodule package.name.
+            names.extend(f'{base}.{alias.name}' for alias in node.names if alias.name != '*')
+    return names
+
+
+def _module_spec(name):
+    """The spec of a module name, or None. Only the packages above it are imported to
+    find it: a name under a plain module (`from module import attribute`) is not a
+    module, and that module is never executed to find out."""
+    spec = None
+    parts = name.split('.')
+    for depth in range(1, len(parts) + 1):
+        if spec is not None and spec.submodule_search_locations is None:
+            return None
+        try:
+            spec = importlib.util.find_spec('.'.join(parts[:depth]))
+        except (ImportError, ValueError):
+            return None
+        if spec is None:
+            return None
+    return spec
+
+
+def import_closure(source, root):
+    """`source` and every file under `root` it imports, transitively, read from the
+    source rather than from what happens to be imported: an import inside a function
+    counts, since the lineage check reaches batch_native only through one (#2628).
+    Resolved as this interpreter would resolve it; a name that is not a module, or a
+    module outside `root` (the standard library, installed packages), adds nothing."""
+    files, seen = {source.resolve()}, set()
+    pending = _imported_names(source, '')
+    while pending:
+        name = pending.pop()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        parts = name.split('.')
+        pending.extend('.'.join(parts[:i]) for i in range(1, len(parts)))     # the packages it runs
+        spec = _module_spec(name)
+        if spec is None or not spec.has_location or not spec.origin:
+            continue
+        origin = Path(spec.origin).resolve()
+        if origin.suffix != '.py' or not origin.is_relative_to(root) or origin in files:
+            continue
+        files.add(origin)
+        pending.extend(_imported_names(origin, spec.parent))
+    return files
+
+
 def implementation_paths():
-    """The modules the probe pins and clean-checks: what it sends, counts and
-    records, and the lineage checks of a probe or reconciled tip. For a batch
-    tip, check_lineage also runs batch_native.py and its imports, which are not
-    yet pinned here (#2628)."""
-    modules = [Path(__file__), Path(native_proxy.__file__), Path(sys.modules[Ledger.__module__].__file__),
+    """The modules the probe pins and clean-checks: this file and every repository
+    module it imports, transitively, so what it sends, counts and records and every
+    lineage check it runs are attested (#2586). For a batch tip that includes
+    batch_native.py and the modules it imports, which runtime_closure imports
+    only inside a function (#2628)."""
+    root = Path(__file__).resolve().parents[3]
+    modules = [Path(native_proxy.__file__), Path(sys.modules[Ledger.__module__].__file__),
                Path(budget_amendment.__file__), Path(sequence_claim.__file__), Path(audit_controls.__file__),
                Path(audit_registration.__file__), Path(audit_transport.__file__), Path(bounded_stream.__file__),
-               Path(bounded_transport.__file__), Path(sys.modules['data_sheets_schema.stream_evidence'].__file__),
-               # check_lineage decides with these for a probe or reconciled tip (#2586);
-               # a batch tip's batch_native closure is not yet among them (#2628)
-               *(Path(audit_controls.__file__).with_name(name) for name in
-                 ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py'))]
-    return sorted({str(p.resolve()) for p in modules} | {str(p) for p in sequence_claim.IMPLEMENTATIONS})
+               Path(bounded_transport.__file__), Path(sys.modules['data_sheets_schema.stream_evidence'].__file__)]
+    return sorted({str(p.resolve()) for p in modules} | {str(p) for p in import_closure(Path(__file__), root)}
+                  | {str(p) for p in sequence_claim.IMPLEMENTATIONS})
 
 
 def interpreter():

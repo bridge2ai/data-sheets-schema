@@ -806,10 +806,12 @@ The tool runs that validator on its staged files before the marker exists,
 so its own check skips only the marker requirement. A per-charge
 authorization has no `standing` key and cites its own record, as audit27's
 hand-made one does; it keeps its own checks and needs no marker. A transport
-probe pins `reconcile_stopped.py`, `probe_predecessor.py` and
-`runtime_closure.py` with its own code, since its lineage check runs them
-(#2586). For a batch tip that check also runs `batch_native.py` and the
-modules it imports; the probe does not yet pin those (#2628). A transport probe's debit is also
+probe pins and clean-checks its own code and every repository module it
+imports, transitively, read from the source so that an import inside a
+function counts: that covers `reconcile_stopped.py`, `probe_predecessor.py`
+and `runtime_closure.py`, which its lineage check runs (#2586), and, for a
+batch tip, `batch_native.py` and the modules it imports, which
+`runtime_closure.py` reaches only inside a function (#2628). A transport probe's debit is also
 marked `standing`, but it is proven by its link (#2469) rather than by a
 marker. The stopped audit's files are never modified. The tool
 neither claims the sequence nor contacts a provider. The printed paths and
