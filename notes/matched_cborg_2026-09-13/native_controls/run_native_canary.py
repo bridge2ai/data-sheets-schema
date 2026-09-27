@@ -411,22 +411,41 @@ def native_evidence_check(spec):
         protocol_version=protocol_for_renderer(spec.render_version), **authority)
 
 
+def _signal_group(process, sig):
+    """Signal the child's session group; a group whose leader has exited is done.
+
+    Darwin answers EPERM, not ESRCH, when the leader is exiting or exited but
+    not yet reaped and no other member is live, and it can do so a moment
+    before waitpid reports the exit (#2571). So the leader's actual exit, waited
+    for within the existing bound, excuses the refusal; a leader still running
+    re-raises it. The refusal is raised outside any handler, so the exception
+    being unwound (a recorded stop, an interrupt) stays in its chain.
+    """
+    try:
+        os.killpg(process.pid, sig)
+        return
+    except ProcessLookupError:
+        return
+    except PermissionError as error:
+        refusal = error
+    try:
+        process.wait(timeout=2)
+        return
+    except subprocess.TimeoutExpired:
+        pass
+    raise refusal
+
+
 def terminate_group(process):
     if process is None:
         return
-    try:
-        os.killpg(process.pid, signal.SIGTERM)
-    except ProcessLookupError:
-        pass
+    _signal_group(process, signal.SIGTERM)
     try:
         process.wait(timeout=2)
     except subprocess.TimeoutExpired:
         pass
     # Also remove descendants if the parent exited before them.
-    try:
-        os.killpg(process.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
+    _signal_group(process, signal.SIGKILL)
     process.wait(timeout=2)
 
 

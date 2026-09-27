@@ -13,7 +13,7 @@ from types import SimpleNamespace
 import pytest
 
 from budgeted_cborg import BudgetStop
-from run_native_canary import execute_child, sha, verified_executable
+from run_native_canary import execute_child, sha, terminate_group, verified_executable
 
 
 def executable(path, marker):
@@ -53,6 +53,79 @@ def test_deadline_closes_admission_and_kills_child_before_proxy_cleanup(tmp_path
             cwd=tmp_path,env=dict(os.environ),deadline_seconds=0.2,verify_launch=lambda:None)
     assert closed and time.monotonic()-start < 4
     with pytest.raises(ProcessLookupError):os.kill(int(pidfile.read_text()),0)
+
+
+def test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error():
+    """#2571: Darwin answers killpg on a group whose only member is an unreaped zombie with
+    EPERM. On Linux the signal succeeds, so there this is only a smoke test."""
+    process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
+    os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOWAIT)       # exited, not reaped
+    assert process.returncode is None
+    if sys.platform == 'darwin':
+        with pytest.raises(PermissionError):
+            os.killpg(process.pid, 0)                                 # the state the fix must handle
+    terminate_group(process)
+    assert process.returncode == 0
+
+
+def test_a_refusal_before_the_reported_exit_is_excused_by_the_exit(monkeypatch):
+    """#2571: the refusal can precede waitpid's report of the exit; the exit decides."""
+    process = subprocess.Popen([sys.executable, '-c', 'import sys;print("ready",flush=True);sys.stdin.read()'],
+                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, start_new_session=True)
+    assert process.stdout.readline().strip() == 'ready'
+    calls = []
+    def refuse_while_exiting(pid, sig):
+        calls.append(sig)
+        if len(calls) == 1:
+            # Still blocked on stdin: not exited, so the refusal comes before the exit.
+            assert os.waitid(os.P_PID, pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None
+            process.stdin.close()
+        raise PermissionError(1, 'Operation not permitted')
+    monkeypatch.setattr(os, 'killpg', refuse_while_exiting)
+    terminate_group(process)
+    assert calls and process.returncode == 0
+
+
+def test_a_refused_signal_to_a_running_leader_is_raised_and_keeps_the_stop(monkeypatch):
+    """A live leader's refusal is real; the exception being unwound stays in its chain."""
+    import errno
+    process = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(30)'], start_new_session=True)
+    def refuse(pid, sig):
+        raise PermissionError(errno.EPERM, 'Operation not permitted')
+    monkeypatch.setattr(os, 'killpg', refuse)
+    try:
+        for unwinding in (BudgetStop('recorded stop'), KeyboardInterrupt()):
+            with pytest.raises(PermissionError) as raised:
+                try:
+                    raise unwinding
+                finally:
+                    terminate_group(process)
+            chain, node = [], raised.value
+            while node is not None:
+                chain.append(node); node = node.__context__
+            assert unwinding in chain, chain
+    finally:
+        monkeypatch.undo(); process.kill(); process.wait()
+
+
+def test_a_stop_after_the_child_exited_is_not_replaced_by_group_cleanup(tmp_path):
+    """#2571 end to end: the child exits before the controller's cleanup, as a fast child
+    does under load; the stop raised is the recorded one and the child is reaped."""
+    instruction = tmp_path / 'input.txt'; instruction.write_text('offline')
+    pidfile = tmp_path / 'pid'
+    code = ('import os,pathlib,time\npathlib.Path("pid.tmp").write_text(str(os.getpid()))\n'
+            'os.replace("pid.tmp","pid")\nwhile not pathlib.Path("go").exists():time.sleep(0.01)\n')
+    def stop_once_the_child_has_exited():
+        while not pidfile.exists(): time.sleep(0.01)
+        (tmp_path / 'go').touch()
+        os.waitid(os.P_PID, int(pidfile.read_text()), os.WEXITED | os.WNOWAIT)   # an unreaped zombie
+        return True
+    proxy = SimpleNamespace(failed=SimpleNamespace(is_set=stop_once_the_child_has_exited),
+                            failure='synthetic stop raised after the child exited', close_admission=lambda: None)
+    with pytest.raises(BudgetStop, match='synthetic stop raised after the child exited'):
+        execute_child([sys.executable, '-c', code], proxy=proxy, instruction=instruction, attempt=tmp_path,
+                      cwd=tmp_path, env=dict(os.environ), deadline_seconds=60, verify_launch=lambda: None)
+    with pytest.raises(ProcessLookupError): os.kill(int(pidfile.read_text()), 0)
 
 
 def test_launch_verification_failure_never_starts_process(tmp_path):
