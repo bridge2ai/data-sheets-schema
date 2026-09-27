@@ -764,17 +764,50 @@ def test_mixed_case_spellings_of_the_receipt_and_checkpoint_are_one_directory(st
     assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
 
 
-@pytest.mark.parametrize('out', [None, ['x'], 7], ids=['null', 'list', 'int'])
+@pytest.mark.parametrize('out', [None, ['x'], 'descriptor', 'nul'], ids=['null', 'list', 'int_fd', 'nul'])
 def test_a_malformed_marker_directory_is_a_budget_stop(stopped, out):
-    """#2632: a marker whose `out` is not a path is refused by name, not with a TypeError."""
+    """#2632: a marker whose `out` is not a path is refused by name, not with a TypeError.
+    An integer is a file descriptor to os.path.samefile, so the case uses a real one open
+    on the reconciliation directory: without the string guard it would be taken for that
+    directory (#2656). A NUL in the spelling is refused too, not a ValueError (#2655)."""
     m, first, reg, _, _ = stopped
     value = reconcile(reg, reg.parent.parent / 'reconciliation')
     marker = Path(value['marker'])
-    recorded = r.read_json(marker); recorded['out'] = out
-    save(marker, recorded)
+    recorded = r.read_json(marker)
+    descriptor = os.open(Path(value['receipt']).parent, os.O_RDONLY)
+    try:
+        recorded['out'] = (descriptor if out == 'descriptor' else recorded['out'] + '\x00x' if out == 'nul'
+                           else out)
+        save(marker, recorded)
+        successor, _ = successor_of(m, reg, first, value)
+        with pytest.raises(BudgetStop, match='marker records'):
+            r.validate_audit_reconciliation(successor)
+    finally:
+        os.close(descriptor)
+
+
+@pytest.mark.parametrize('body', [[], 'x', 7, None], ids=['list', 'string', 'number', 'null'])
+def test_a_marker_that_is_not_an_object_is_a_budget_stop(stopped, body):
+    """#2655: a hand-edited marker body is refused by name, not with an AttributeError."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    save(Path(value['marker']), body)
     successor, _ = successor_of(m, reg, first, value)
     with pytest.raises(BudgetStop, match='marker records'):
         r.validate_audit_reconciliation(successor)
+
+
+def test_same_directory_compares_identity_not_resolved_spelling(tmp_path, monkeypatch):
+    """#2657: on a case-insensitive filesystem resolve() keeps the spelling it is given,
+    so a resolve()-based comparison would call one directory two. Resolution that keeps
+    an alias's spelling models that on any filesystem, CI's included; the identity
+    comparison still sees one directory."""
+    target = tmp_path / 'reconciliation'; target.mkdir()
+    alias = tmp_path / 'alias'; alias.symlink_to(target)
+    monkeypatch.setattr(os.path, 'realpath', lambda path, *a, **k: os.fspath(path))
+    monkeypatch.setattr(Path, 'resolve', lambda self, strict=False: self)
+    assert tool.same_directory(str(alias), target)
+    assert not tool.same_directory(str(tmp_path), target)
 
 
 @pytest.mark.parametrize('path', [None, 7, ['x']], ids=['null', 'int', 'list'])

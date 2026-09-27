@@ -1190,7 +1190,8 @@ def validate_audit_reconciliation(manifest, *, require_marker=True):
         if require_marker:
             marker = pinned(manifest, str(marker_path(source_reg, source_sha)))
             recorded = read_json(marker)
-            if (recorded.get('source_registration_sha256') != source_sha
+            if (not isinstance(recorded, dict)                      # a hand-edited marker body (#2655)
+                    or recorded.get('source_registration_sha256') != source_sha
                     or recorded.get('receipt_sha256') != sha(paths['receipt'])
                     or recorded.get('checkpoint_sha256') != sha(checkpoint_path)
                     or recorded.get('request_id') != receipt.get('request_id')

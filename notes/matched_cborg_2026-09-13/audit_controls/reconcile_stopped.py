@@ -92,7 +92,7 @@ def same_directory(value, directory):
     filesystem names the same directory (#2584)."""
     try:
         return isinstance(value, str) and os.path.samefile(value, directory)
-    except OSError:
+    except (OSError, ValueError):             # ValueError: an embedded NUL (#2655)
         return False
 
 
