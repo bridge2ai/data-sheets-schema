@@ -3,6 +3,8 @@ from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import select
+import signal
 import socket
 import ssl
 import struct
@@ -10,6 +12,7 @@ import subprocess
 import sys
 import threading
 import time
+from types import SimpleNamespace
 
 import httpx
 import pytest
@@ -60,6 +63,58 @@ def processes(monkeypatch):
     assert all(process.poll() is not None for process, _, _ in created), "child survived its transport context"
 
 
+# Real-time bounds on in-process gaps. None holds interpreter start-up, and each
+# keeps at least a threefold margin over its measured maximum. The measurements were
+# 768 runs of the two stream tests (the count test's in test_bounded_transport.py)
+# under 64-256 concurrent copies on 10 cores, at load 114-336 for these samples
+# (2026-09-27). Each bound gives up power against shorter delays: origin/main's
+# wall-clock totals caught delays of about 1.2-1.5 s, but flaked under load
+# (#2618, #2643, #2678, #2698).
+
+#: The parent's close decision (the deadline expiring, or leaving the context) to
+#: the worker's SIGKILL. Measured median 0.1 ms, p99 69 ms, max 141 ms (load 336).
+#: It rejects a grace of 0.5 s or more before the kill; a shorter one passes.
+KILL_GAP_SECONDS = .5
+
+#: Gaps around a running worker: the parent's spawn to its request write, the
+#: server's receipt of the request to the kill, and the server's header flush to the
+#: yielded response. A worker-to-parent pipe hop is in them (#2676, #2677). Measured
+#: maxima: spawn to the request written 216 ms, receipt to kill 102 ms, header flush to yield
+#: 791 ms (median 42 ms, p99 613 ms). It rejects a delay of 2.5 s or more in any of
+#: them; a shorter one passes.
+PARENT_GAP_SECONDS = 2.5
+
+#: The whole call less the worker's start-up window (from just before Popen to the
+#: server receiving the request, or flushing its headers). That covers every
+#: in-process step, including a wait before the spawn and one after the kill (#2696).
+#: Measured median 207-278 ms, p99 870-911 ms, max 1129 ms (load 336). It rejects
+#: 3.5 s or more spent outside start-up; less passes.
+CALL_GAP_SECONDS = 3.5
+
+
+def killed_before_reaped(process, killed_at=None):
+    """For each wait on `process`, whether it had been sent SIGKILL (or was
+    already reaped) when the wait began (#2540, #2569 reviews).
+
+    A close that waits on a live worker first through `Popen.wait`, for any
+    length, records False. A grace spent some other way (a sleep, an event
+    wait) is not seen here (#2619): each test bounds it by the real time from
+    its close decision to the SIGKILL, appended to `killed_at` (#2618)."""
+    killed, waits = [], []
+    real_signal, real_wait = process.send_signal, process.wait
+    def send_signal(sig):
+        if sig == signal.SIGKILL:
+            killed.append(sig)
+            if killed_at is not None:
+                killed_at.append(time.monotonic())
+        return real_signal(sig)
+    def wait(*args, **kwargs):
+        waits.append(bool(killed) or process.returncode is not None)
+        return real_wait(*args, **kwargs)
+    process.send_signal, process.wait = send_signal, wait
+    return waits
+
+
 def test_exact_bytes_status_headers_and_secret_only_in_pipe(processes, monkeypatch):
     request = b'{"data":"synthetic request"}'
     response = b'data: {"type":"ping"}\r\n\r\n' + bytes(range(256))
@@ -86,22 +141,125 @@ def test_exact_bytes_status_headers_and_secret_only_in_pipe(processes, monkeypat
     client.close()
 
 
-def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(processes):
+class ParentClock:
+    """The parent's monotonic time, moved only by the phases the test names (#2540).
+
+    The worker, its socket and the header drips stay real. Only the parent's
+    deadline accounting reads this clock, so a loaded scheduler can neither
+    spend the budget on a slow interpreter start nor move the instant of
+    refusal. Starting the worker and writing the request each spend a fixed
+    part of the budget, so both phases still count against the one deadline.
+    The clock reaches the deadline only from inside the parent's own wait,
+    once the server holds the request and the parent holds the sent witness.
+    Every move is on the parent's thread, so nothing moves the clock between
+    the parent reading it and waiting on it.
+
+    The exact-deadline check relies on the product reading
+    `bounded.time.monotonic` and waiting with `bounded.select.select` for
+    exactly the remaining time. A refactor to `selectors` or to sliced polls
+    fails this test rather than slipping past it."""
+    def __init__(self, *, startup, write, deadline, expire_when):
+        self.now, self.waits, self.expired_at = 1000.0, [], None
+        self.startup, self.write, self.deadline = startup, write, deadline
+        self.expire_when, self._written = expire_when, False
+
+    def monotonic(self):
+        return self.now
+
+    def spawned(self):
+        self.now += self.startup
+
+    def select(self, readable, writable, errors, timeout):
+        end = self.now + timeout
+        self.waits.append(end)
+        if end != pytest.approx(self.deadline, abs=1e-9):
+            raise AssertionError(f"the parent waits until {end}, not its one deadline {self.deadline}")
+        if writable and not self._written:
+            self._written, self.now = True, self.now + self.write
+        hang = time.monotonic() + 60
+        while True:
+            if not writable and self.now < self.deadline and self.expire_when():
+                self.now, self.expired_at = self.deadline, time.monotonic()   # real time, for the kill gap
+            expired = self.now >= end
+            ready = select.select(readable, writable, errors, 0 if expired else .01)
+            if expired or any(ready):
+                return ready
+            if time.monotonic() > hang:
+                raise AssertionError("the sent witness never arrived")
+
+
+def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(processes, monkeypatch):
     # Each byte arrives comfortably inside the HTTPX read-inactivity timeout.
-    # The entire header remains incomplete beyond the parent total deadline.
-    sent = threading.Event()
+    # The header stays incomplete for as long as the worker is connected, so
+    # only the parent's total deadline can refuse it. The parent's budget is
+    # virtual (ParentClock); the real-time limits bound only the worker, so
+    # they can be generous at no cost to the verdict.
+    read, connect = 5, 2
+    sent, stop = threading.Event(), threading.Event()
+    client = bounded.BoundedStreamClient(read_timeout_seconds=read, connect_timeout_seconds=connect)
+    def witnessed():
+        with client._lock:
+            return sent.is_set() and any(worker.sent for worker in client._workers)
+    clock = ParentClock(startup=.5, write=1, deadline=1000.0 + read + connect, expire_when=witnessed)
+    monkeypatch.setattr(bounded, "time", SimpleNamespace(monotonic=clock.monotonic))
+    monkeypatch.setattr(bounded, "select", SimpleNamespace(select=clock.select))
+    spawn, reaped, killed_at, spawned_at, written_at, sent_at = bounded.subprocess.Popen, [], [], [], [], []
+    popen_at = []
+    def charged(*args, **kwargs):
+        clock.spawned()
+        popen_at.append(time.monotonic())          # the start-up window opens here
+        process = spawn(*args, **kwargs)
+        spawned_at.append(time.monotonic())          # Popen returns before the interpreter starts
+        reaped.append(killed_before_reaped(process, killed_at))
+        return process
+    monkeypatch.setattr(bounded.subprocess, "Popen", charged)
+    real_send = bounded._Worker.send
+    def timed_send(worker, payload):
+        try:
+            return real_send(worker, payload)
+        finally:
+            written_at.append(time.monotonic())      # the request is in the worker's pipe
+    monkeypatch.setattr(bounded._Worker, "send", timed_send)
     def respond(handler, body):
+        sent_at.append(time.monotonic())
         sent.set()
-        for byte in b"HTTP/1.1 200 OK\r\nX-Slow: never-finished":
-            handler.wfile.write(bytes([byte])); handler.wfile.flush(); time.sleep(.05)
-    client = bounded.BoundedStreamClient(read_timeout_seconds=.45, connect_timeout_seconds=.25)
+        handler.close_connection = True  # no keep-alive read on the killed worker's socket
+        header = b"HTTP/1.1 200 OK\r\nX-Slow: never-finished"
+        for index in range(400):
+            handler.wfile.write(header[index:index + 1] or b"."); handler.wfile.flush()
+            if stop.wait(.05):
+                return
     with endpoint(respond) as url:
-        started = time.monotonic()
-        with pytest.raises(httpx.ReadTimeout):
-            with client.stream("POST", url, content=b"synthetic", headers={}):
-                pytest.fail("incomplete headers were accepted")
-        elapsed = time.monotonic() - started
-    assert sent.is_set() and .6 <= elapsed < 2
+        try:
+            with pytest.raises(httpx.ReadTimeout, match="bounded transport deadline exceeded"):
+                called = time.monotonic()
+                with client.stream("POST", url, content=b"synthetic", headers={}):
+                    pytest.fail("incomplete headers were accepted")
+            returned = time.monotonic()
+        finally:
+            stop.set()
+    # Start-up, the request write and the dripping header all waited on one
+    # deadline, read + connect after entry, and the clock reached it only
+    # there: no phase moved it. The refusal is the parent's own, and the
+    # worker was killed once the deadline passed, within KILL_GAP_SECONDS of
+    # real time, and never waited on first (#2618).
+    assert sent.is_set() and len(clock.waits) >= 3 and clock.now == clock.deadline
+    (process, _, _), = processes
+    assert process.returncode == -signal.SIGKILL
+    (waits,) = reaped
+    assert waits and all(waits), "the worker was waited on before it was killed"
+    assert len(killed_at) == 1, f"expected one SIGKILL, saw {len(killed_at)}"          # #2644
+    assert killed_at[0] - clock.expired_at < KILL_GAP_SECONDS, "the worker was killed long after its deadline"
+    # The virtual clock is charged only inside the parent's own waits, so real time the
+    # parent spends elsewhere is bounded here (#2677): from its spawn to the request write,
+    # and from the server's receipt of the request to the kill.
+    assert written_at[0] - spawned_at[0] < PARENT_GAP_SECONDS, "the request was written long after the spawn"
+    assert killed_at[0] - sent_at[0] < PARENT_GAP_SECONDS, "the worker was killed long after the request arrived"
+    # And the whole call less the worker's start-up window, from just before Popen to
+    # the server's receipt of the request: a wait before the spawn, or after the kill
+    # before the refusal reaches the caller, is in-process time too (#2696).
+    assert (returned - called) - (sent_at[0] - popen_at[0]) < CALL_GAP_SECONDS, \
+        "the call spent long outside the worker's start-up"
     assert not client._workers
     client.close()
 
@@ -177,16 +335,60 @@ def test_close_kills_and_reaps_an_inflight_worker_before_return(processes, monke
             pass
 
 
-def test_a_5xx_can_be_classified_without_draining_its_body(processes):
+def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatch):
+    # The body is withheld until the context has exited; only a watchdog
+    # releases it. The verdict is that ordering, the parent's reads from the
+    # worker after the headers, killing before reaping, and the real time from
+    # leaving the context to the kill, not a wall-clock total that also
+    # counted the worker's interpreter start-up (#2569, #2618).
+    exited, body_released = threading.Event(), threading.Event()
+    reads_after_headers = []
+    real_take = bounded._Worker._take
+    def take(worker, size, deadline):
+        if worker.headers_received:
+            reads_after_headers.append(size)
+        return real_take(worker, size, deadline)
+    monkeypatch.setattr(bounded._Worker, "_take", take)
+    spawn, popen_at = bounded.subprocess.Popen, []
+    def timed_spawn(*args, **kwargs):
+        popen_at.append(time.monotonic())          # the start-up window opens here
+        return spawn(*args, **kwargs)
+    monkeypatch.setattr(bounded.subprocess, "Popen", timed_spawn)
+    flushed = []
     def respond(handler, body):
         handler.send_response(524); handler.send_header("Content-Length", "500"); handler.end_headers()
-        handler.wfile.flush(); time.sleep(2)
-    client = bounded.BoundedStreamClient(read_timeout_seconds=.5, connect_timeout_seconds=1)
+        handler.wfile.flush()
+        flushed.append(time.monotonic())
+        if not exited.wait(timeout=10):
+            body_released.set(); handler.wfile.write(b"x" * 500); handler.wfile.flush()
+    # The read bound outlasts the watchdog, so a draining exit receives the
+    # body rather than timing out. read + connect is the pre-header deadline,
+    # which keeps a loaded interpreter start-up out of the verdict.
+    client = bounded.BoundedStreamClient(read_timeout_seconds=30, connect_timeout_seconds=10)
     with endpoint(respond) as url:
-        started = time.monotonic()
-        with client.stream("POST", url, content=b"synthetic", headers={}) as value:
-            assert value.status_code == 524
-        assert time.monotonic() - started < 1.5
+        try:
+            killed_at = []
+            called = time.monotonic()
+            with client.stream("POST", url, content=b"synthetic", headers={}) as value:
+                entered = time.monotonic()
+                assert value.status_code == 524
+                waits = killed_before_reaped(processes[0][0], killed_at)
+                leaving = time.monotonic()
+            exited_at = time.monotonic()
+            drained = body_released.is_set()
+        finally:
+            exited.set()
+    assert not drained, "the context waited for the withheld body"
+    assert reads_after_headers == [], "the context read from the worker after its headers"
+    assert waits and all(waits), "the context waited on a live worker before killing it"
+    assert len(killed_at) == 1, f"expected one SIGKILL, saw {len(killed_at)}"          # #2644
+    assert killed_at[0] - leaving < KILL_GAP_SECONDS, "the kill came long after the close"
+    # And from the headers leaving the server to the response reaching the caller (#2676).
+    assert entered - flushed[0] < PARENT_GAP_SECONDS, "the response was yielded long after its headers"
+    # And the whole call less the worker's start-up window, from just before Popen to
+    # the server's header flush: a wait before the spawn or after the kill (#2696).
+    assert (exited_at - called) - (flushed[0] - popen_at[0]) < CALL_GAP_SECONDS, \
+        "the call spent long outside the worker's start-up"
     assert not client._workers
     client.close()
 
