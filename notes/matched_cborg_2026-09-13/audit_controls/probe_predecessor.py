@@ -61,6 +61,8 @@ def _files(root):
 
 # RecursionError: the JSON scanner's answer to deeply nested input (#2728).
 _MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError, RecursionError)
+# The errors a file itself causes: it cannot be opened or read, or does not decode or parse.
+_ABOUT_A_FILE = (OSError, ValueError, RecursionError)
 
 
 #: The controls' own code: a refusal is located in it, not in the library it called (#2641).
@@ -118,7 +120,10 @@ def _malformed(what, error):
         where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
     elif frames:
         where = f' at {_frame(frames[-1])}'
-    if helper is not None and getattr(error, 'filename', None) is None:
+    # Only an error about the file (it cannot be opened, read, decoded or parsed) names
+    # it; a KeyError on the audit manifest inside `pinned` is not the file's (#2743).
+    if (helper is not None and isinstance(error, _ABOUT_A_FILE)
+            and getattr(error, 'filename', None) is None):
         frame = walked[helper][0]
         named = _named(frame.f_locals.get(_HELPERS[frame.f_code]))
         where += f' reading {named}' if named else ''
@@ -324,7 +329,8 @@ def _validate_link(manifest, *, require_pins=True):
 
 
 #: The shared file helpers, each with the argument that names its file. An error inside
-#: one is located at the call that handed it the file, which is named (#2641, #2727).
+#: one is located at the call that handed it the file (#2641, #2727); the file is named
+#: when the error is about it and does not already name it, and the argument is a path.
 #: `_validate_link`'s local `pinned` closure is one too: every call shares its code.
 _HELPERS = {read_json.__code__: 'path', sha.__code__: 'path', canonical_path.__code__: 'value',
             _pinned.__code__: 'value',

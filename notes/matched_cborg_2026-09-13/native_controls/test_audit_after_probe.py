@@ -478,13 +478,13 @@ def _line_reading(fragment):
 @pytest.mark.parametrize('name, raw, error, via, fragment, message', [
     ('registration.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'probe = read_json(registration)',
      'Expecting value'),
-    ('registration.json', b'{"a": "\xff"}', 'UnicodeDecodeError', r'[\w.]+\.py', 'probe = read_json(registration)',
+    ('registration.json', b'{"a": "\xff"}', 'UnicodeDecodeError', r'__init__\.py', 'probe = read_json(registration)',
      "'utf-8' codec can't decode"),
     ('registration.json', b'{"kind": 1, "kind": 2}', 'ValueError', r'registration\.py', 'probe = read_json(registration)',
      'duplicate JSON key'),
     # The JSON scanner refuses deep nesting with RecursionError, a BudgetStop too (#2728).
-    ('result.json', b'[' * 200000, 'RecursionError', r'[\w.]+\.py', 'read_json(ledger_path), read_json(result_path)',
-     ''),
+    ('result.json', b'[' * 200000, 'RecursionError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)',
+     'maximum recursion depth exceeded'),
     # Two files are read on one line; only the file names which (#2641).
     ('result.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)',
      'Expecting value'),
@@ -550,11 +550,49 @@ def test_an_error_in_a_file_helper_is_located_at_its_caller(prepared, remove, fr
 
 
 def test_every_file_helper_is_known():
-    """#2727: the closure is found by name; a rename would silently locate at its line."""
+    """#2727, #2744: the closure is found by name, and each helper's file is read from a
+    named argument; a rename of either would silently stop locating or naming."""
     from audit_controls import registration
     names = sorted(code.co_name for code in probe_predecessor._HELPERS)
     assert names == ['canonical_path', 'pinned', 'pinned', 'read_json', 'sha']
     assert registration.pinned.__code__ in probe_predecessor._HELPERS
+    for code, argument in probe_predecessor._HELPERS.items():
+        assert argument in code.co_varnames[:code.co_argcount + code.co_kwonlyargcount], (code.co_name, argument)
+
+
+@pytest.mark.parametrize('target, fragment', [
+    (lambda prepared, manifest: Path(manifest['parent']['registration']), "sha(source['parent']['registration'])"),
+    (lambda prepared, manifest: prepared.root / 'probe' / 'result.json', 'read_json(result_path)'),
+], ids=['sha', 'read_json'])
+def test_an_os_error_without_a_filename_inside_any_helper_names_the_file(prepared, monkeypatch, target, fragment):
+    """#2744: an EIO from the read itself carries no filename; the helper's argument names it."""
+    manifest, _ = successor(prepared, completed(prepared))
+    path = target(prepared, manifest)
+    real = Path.read_bytes
+    def read_bytes(self):
+        if self == path:
+            raise OSError(5, 'Input/output error')
+        return real(self)
+    monkeypatch.setattr(Path, 'read_bytes', read_bytes)
+    with pytest.raises(BudgetStop, match=rf"at probe_predecessor\.py:{_line_reading(fragment)} via "
+                       rf"test_audit_after_probe\.py:\d+ reading {re.escape(repr(str(path)))}: "
+                       r"\[Errno 5\] Input/output error\)$"):
+        probe_predecessor.validate_link(manifest, require_pins=False)
+
+
+@pytest.mark.parametrize('pins', [None, [], 'missing'], ids=['none', 'list', 'missing'])
+def test_a_manifest_defect_inside_pinned_names_no_probe_file(prepared, pins):
+    """#2743: a KeyError or AttributeError on the audit manifest inside `pinned` is not
+    the probe file's; it is located at the caller and names no file."""
+    manifest, _ = successor(prepared, completed(prepared))
+    if pins == 'missing':
+        del manifest['pinned_files']
+    else:
+        manifest['pinned_files'] = pins
+    with pytest.raises(BudgetStop, match=r"\((KeyError|AttributeError) at probe_predecessor\.py:\d+ via "
+                       r"registration\.py:\d+: ") as caught:
+        probe_predecessor.validate_link(manifest)
+    assert ' reading ' not in str(caught.value), str(caught.value)
 
 
 def test_a_helper_given_no_path_names_nothing():
