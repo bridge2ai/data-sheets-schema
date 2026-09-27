@@ -451,7 +451,9 @@ def test_controls_imported_through_a_symlink_still_name_their_own_frame(tmp_path
         "    print(p._CONTROLS == p._CONTROLS.resolve(), error)\n")
     result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, timeout=120)
     assert result.returncode == 0, result.stderr
-    assert result.stdout.startswith('True ') and ' at registration.py:' in result.stdout, result.stdout
+    # The missing checkpoint fails inside canonical_path, located at its caller (#2727);
+    # without the controls' own frame the place would be `<frozen posixpath>`.
+    assert result.stdout.startswith('True ') and ' at probe_predecessor.py:' in result.stdout, result.stdout
 
 
 def test_a_refusal_names_the_line_that_raised_in_a_frame_still_running():
@@ -473,28 +475,37 @@ def _line_reading(fragment):
     return start + next(i for i, line in enumerate(lines) if fragment in line)
 
 
-@pytest.mark.parametrize('name, raw, error, via, fragment', [
-    ('registration.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'probe = read_json(registration)'),
-    ('registration.json', b'\xff\xfe\xfd', 'UnicodeDecodeError', r'[\w.]+\.py', 'probe = read_json(registration)'),
-    ('registration.json', b'{"kind": 1, "kind": 2}', 'ValueError', r'registration\.py', 'probe = read_json(registration)'),
+@pytest.mark.parametrize('name, raw, error, via, fragment, message', [
+    ('registration.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'probe = read_json(registration)',
+     'Expecting value'),
+    ('registration.json', b'{"a": "\xff"}', 'UnicodeDecodeError', r'[\w.]+\.py', 'probe = read_json(registration)',
+     "'utf-8' codec can't decode"),
+    ('registration.json', b'{"kind": 1, "kind": 2}', 'ValueError', r'registration\.py', 'probe = read_json(registration)',
+     'duplicate JSON key'),
+    # The JSON scanner refuses deep nesting with RecursionError, a BudgetStop too (#2728).
+    ('result.json', b'[' * 200000, 'RecursionError', r'[\w.]+\.py', 'read_json(ledger_path), read_json(result_path)',
+     ''),
     # Two files are read on one line; only the file names which (#2641).
-    ('result.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)'),
-    ('billing.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)'),
-], ids=['not_json', 'not_utf8', 'duplicate_key', 'result_of_two', 'ledger_of_two'])
-def test_an_error_raised_reading_a_file_names_the_file_and_the_call(prepared, name, raw, error, via, fragment):
+    ('result.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)',
+     'Expecting value'),
+    ('billing.json', b'not json', 'JSONDecodeError', r'decoder\.py', 'read_json(ledger_path), read_json(result_path)',
+     'Expecting value'),
+], ids=['not_json', 'not_utf8', 'duplicate_key', 'deeply_nested', 'result_of_two', 'ledger_of_two'])
+def test_an_error_raised_reading_a_file_names_the_file_and_the_call(prepared, name, raw, error, via, fragment,
+                                                                    message):
     """#2641: a malformed probe file fails inside the JSON decoder; the refusal names the
-    controls' own line that read it, the library frame after `via`, and the file."""
+    controls' own line that read it, the innermost frame after `via`, and the file."""
     manifest, _ = successor(prepared, completed(prepared))
     path = prepared.root / 'probe' / name
     path.write_bytes(raw)
     with pytest.raises(BudgetStop, match=rf"^probe predecessor is malformed or unavailable \({error} "
                        rf"at probe_predecessor\.py:{_line_reading(fragment)} via {via}:\d+ "
-                       rf"reading {re.escape(str(path))}: "):
+                       rf"reading {re.escape(repr(str(path)))}: {re.escape(message)}"):
         probe_predecessor.validate_link(manifest, require_pins=False)
 
 
 def test_an_os_error_reading_a_file_names_it_once(prepared):
-    """#2641: an OSError already carries the filename; the refusal does not repeat it."""
+    """#2641: an OSError from the open carries the filename; the refusal does not repeat it."""
     manifest, _ = successor(prepared, completed(prepared))
     path = prepared.root / 'probe' / 'result.json'
     path.unlink(); path.mkdir()                     # exists, so canonical_path passes; read_bytes refuses
@@ -503,6 +514,64 @@ def test_an_os_error_reading_a_file_names_it_once(prepared):
     message = str(caught.value)
     assert f'at probe_predecessor.py:{_line_reading("read_json(result_path)")} via ' in message, message
     assert message.count(str(path)) == 1 and ' reading ' not in message, message
+
+
+def test_an_os_error_without_a_filename_names_the_file(prepared, monkeypatch):
+    """#2729: an OSError from the read itself (EIO) carries no filename; the file is named."""
+    manifest, _ = successor(prepared, completed(prepared))
+    path = prepared.root / 'probe' / 'result.json'
+    real = Path.read_bytes
+    def read_bytes(self):
+        if self == path:
+            raise OSError(5, 'Input/output error')
+        return real(self)
+    monkeypatch.setattr(Path, 'read_bytes', read_bytes)
+    with pytest.raises(BudgetStop, match=rf"^probe predecessor is malformed or unavailable \(OSError at "
+                       rf"probe_predecessor\.py:{_line_reading('read_json(result_path)')} via test_audit_after_probe\.py:\d+ "
+                       rf"reading {re.escape(repr(str(path)))}: \[Errno 5\] Input/output error\)$"):
+        probe_predecessor.validate_link(manifest, require_pins=False)
+
+
+@pytest.mark.parametrize('remove, fragment', [
+    # sha() of the origin registration: the hashing helper's line named no caller (#2727).
+    (lambda prepared, manifest: Path(manifest['parent']['registration']), "sha(source['parent']['registration'])"),
+    # _validate_link's local `pinned`, resolving the probe ledger before it is read (#2727).
+    (lambda prepared, manifest: prepared.root / 'probe' / 'billing.json', "ledger_path = pinned(manifest"),
+], ids=['sha', 'pinned_closure'])
+def test_an_error_in_a_file_helper_is_located_at_its_caller(prepared, remove, fragment):
+    """#2727: hashing, pinning and resolving helpers are located at the call that handed
+    them the file, as the reader is; the OSError already names the file."""
+    manifest, _ = successor(prepared, completed(prepared))
+    remove(prepared, manifest).unlink()
+    with pytest.raises(BudgetStop, match=rf"^probe predecessor is malformed or unavailable \(FileNotFoundError "
+                       rf"at probe_predecessor\.py:{_line_reading(fragment)} via ") as caught:
+        probe_predecessor.validate_link(manifest, require_pins=False)
+    assert ' reading ' not in str(caught.value), str(caught.value)
+
+
+def test_every_file_helper_is_known():
+    """#2727: the closure is found by name; a rename would silently locate at its line."""
+    from audit_controls import registration
+    names = sorted(code.co_name for code in probe_predecessor._HELPERS)
+    assert names == ['canonical_path', 'pinned', 'pinned', 'read_json', 'sha']
+    assert registration.pinned.__code__ in probe_predecessor._HELPERS
+
+
+def test_a_helper_given_no_path_names_nothing():
+    """#2730: a validator defect that hands a helper something other than a path is not
+    echoed into the refusal; a path-like whose __fspath__ raises does not make it raise."""
+    import os
+    from audit_controls import registration
+    class Unrenderable(os.PathLike):
+        def __fspath__(self):
+            raise RuntimeError('no path')
+    for value in ({'budget': {'secret': 'contents'}}, 123, b'/x/result.json', Unrenderable()):
+        try:
+            registration.read_json(value)
+        except Exception as error:          # TypeError, or the RuntimeError above
+            refusal = probe_predecessor._malformed('probe', error)
+        assert isinstance(refusal, BudgetStop) and ' reading ' not in str(refusal), str(refusal)
+        assert 'contents' not in str(refusal)
 
 
 def test_prepare_registers_the_bridge_to_the_probes_own_result(ancestry, tmp_path, monkeypatch):

@@ -19,6 +19,7 @@ from decimal import Decimal
 import os
 from pathlib import Path
 import traceback
+import types
 
 from budgeted_cborg import BudgetStop
 
@@ -58,16 +59,12 @@ def _files(root):
                                            'settlement_after_exit.json')}
 
 
-_MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError)
+# RecursionError: the JSON scanner's answer to deeply nested input (#2728).
+_MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError, RecursionError)
 
 
 #: The controls' own code: a refusal is located in it, not in the library it called (#2641).
 _CONTROLS = Path(__file__).resolve().parents[1]
-
-
-#: The shared JSON reader. An error inside it is bad input in the file it was reading, so
-#: the refusal names that file and is located at the call that read it (#2641).
-_READER = read_json.__code__
 
 
 def _frame(frame):
@@ -86,13 +83,27 @@ def _own(frame):
         return False
 
 
+def _named(value):
+    """A file a helper was given, quoted as the OSError form quotes one; nothing for a
+    value that is not a path, which a validator defect could pass (#2730)."""
+    try:
+        return repr(os.fspath(value)) if isinstance(value, (str, os.PathLike)) else None
+    except Exception:              # a path-like object whose __fspath__ raises
+        return None
+
+
 def _malformed(what, error):
     """A refusal that still fails closed, naming the error and where it was raised, so a
-    defect in this validator is not read as bad input (#2514). The place is the innermost
-    frame in the controls' own code; an error raised inside a library it called (a JSON
-    decoder, a path method) is also named after `via` (#2641). An error inside the shared
-    JSON reader is located at the call that read the file, and names the file unless the
-    error already does (an OSError carries its filename), since one line can read two."""
+    defect in this validator is not read as bad input (#2514).
+
+    The place is the innermost frame in the controls' own code, and the innermost frame
+    of all follows `via` when it is elsewhere (#2641). An error inside a shared file
+    helper (reading, hashing, pinning or resolving a file) is instead located at the call
+    that handed the helper its file, since the helper's own line says nothing about which
+    of a dozen callers failed and one line can hand it two files (#2641, #2727). The
+    innermost frame, which may then be the helper's own, still follows `via`, and the
+    file is named unless the error already names it: an OSError from the open or resolve
+    carries its filename, one from the read itself may not."""
     # Read straight off the traceback, never through linecache: before 3.12 it raises
     # ValueError/UnicodeEncodeError for a filename os.stat refuses, which would make
     # the refusal raise here (#2689).
@@ -100,15 +111,17 @@ def _malformed(what, error):
     frames = [traceback.FrameSummary(frame.f_code.co_filename, lineno, frame.f_code.co_name,
                                      lookup_line=False)
               for frame, lineno in walked]
-    reading = next((i for i, (frame, _) in enumerate(walked) if frame.f_code is _READER), None)
-    own = [frame for frame in (frames if reading is None else frames[:reading]) if _own(frame)]
+    helper = next((i for i, (frame, _) in enumerate(walked) if frame.f_code in _HELPERS), None)
+    own = [frame for frame in (frames if helper is None else frames[:helper]) if _own(frame)]
     where = ''
     if own:
         where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
     elif frames:
         where = f' at {_frame(frames[-1])}'
-    if reading is not None and getattr(error, 'filename', None) is None:
-        where += f" reading {walked[reading][0].f_locals.get('path')}"
+    if helper is not None and getattr(error, 'filename', None) is None:
+        frame = walked[helper][0]
+        named = _named(frame.f_locals.get(_HELPERS[frame.f_code]))
+        where += f' reading {named}' if named else ''
     return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
 
 
@@ -308,3 +321,12 @@ def _validate_link(manifest, *, require_pins=True):
         raise BudgetStop('probe predecessor has no settled checkpoint; its settlement needs a person')
     _require(sha(checkpoint) == continuation['sha256'], 'probe checkpoint differs from the registered continuation')
     return deepcopy(state)
+
+
+#: The shared file helpers, each with the argument that names its file. An error inside
+#: one is located at the call that handed it the file, which is named (#2641, #2727).
+#: `_validate_link`'s local `pinned` closure is one too: every call shares its code.
+_HELPERS = {read_json.__code__: 'path', sha.__code__: 'path', canonical_path.__code__: 'value',
+            _pinned.__code__: 'value',
+            **{code: 'value' for code in _validate_link.__code__.co_consts
+               if isinstance(code, types.CodeType) and code.co_name == 'pinned'}}
