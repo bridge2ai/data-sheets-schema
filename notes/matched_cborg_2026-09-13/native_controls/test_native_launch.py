@@ -683,10 +683,52 @@ def test_a_controller_stop_is_recorded_in_the_ledger(tmp_path):
     assert 'could not record' in record_controller_stop(Broken(), 'm:x', {'reason': 'x'})['ledger_stop_record_note']
 
 
+#: The controller's registered deadline in a test that orders its stop by an event.
+#: A hang guard, not a measurement: the real clock would reach it only if the event
+#: never came, and the tests assert that it did not (#2617).
+HANG_SECONDS = 600
+
+
+class EventClock:
+    """`run_native_canary`'s clock: the real monotonic clock until `event` is
+    set, and `offset` ahead of it from then on, so any deadline shorter than
+    `offset` elapses at the next reading after the event (#2617).
+
+    `first` is the real instant of the first reading, `jumped` that of the first
+    reading after the event. execute_child takes its deadline from a reading, so
+    `jumped - first < offset` shows that the real clock had not reached a
+    deadline of `offset` when the event made it elapse. Durations measured wholly
+    after the jump, such as terminate_group's, are unchanged."""
+    def __init__(self, event, offset):
+        self.event, self.offset, self.first, self.jumped = event, offset, None, None
+
+    def monotonic(self):
+        now = time.monotonic()
+        if self.first is None:
+            self.first = now
+        if not self.event.is_set():
+            return now
+        if self.jumped is None:
+            self.jumped = now
+        return now + self.offset
+
+    @staticmethod
+    def sleep(seconds):
+        time.sleep(seconds)
+
+    def elapsed_on_the_event(self):
+        return self.jumped is not None and self.jumped - self.first < self.offset
+
+
 def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, monkeypatch=None):
     """The real NativeProxy.running() and execute_child: the deadline fires
     while a /v1/messages handler is still counting tokens, so the handler
-    meets the admission the controller has just closed (#2023/#2024)."""
+    meets the admission the controller has just closed (#2023/#2024).
+
+    The deadline elapses when the count begins, by EventClock, not after one
+    real second that also paid for the child's interpreter start-up and its
+    request (#2617). The registered deadline is a hang guard; an interrupt arm
+    raises its interrupt at the count, long before it."""
     import threading, time
     from types import SimpleNamespace
     from test_native_proxy import fixture_proxy, REQUEST
@@ -706,6 +748,9 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, monkeypa
                 raise interrupt('private exception detail')
             time.sleep(seconds)
         monkeypatch.setattr(rnc, 'time', SimpleNamespace(monotonic=time.monotonic, sleep=interrupted_sleep))
+        clock = None
+    else:
+        clock = EventClock(counting, HANG_SECONDS)
     at_close = {}
     original_close = proxy.close_admission
     def close_and_snapshot():
@@ -724,17 +769,26 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, monkeypa
              "time.sleep(30)\n") % (REQUEST,)
     record = (lambda reason: rnc.record_controller_stop(ledger, 'native-offline', {'reason': reason})) if record_first else None
     receipt = {}
+    real_time = rnc.time
+    if clock is not None:
+        rnc.time = clock
     try:
         with proxy.running() as url:
             env = dict(os.environ, URL=url, TOKEN=proxy.token)
             rnc.execute_child([sys.executable, '-c', child], proxy=proxy, instruction=instruction, attempt=attempt,
-                              cwd=tmp_path, env=env, deadline_seconds=1.0, verify_launch=lambda: None, record_stop=record)
+                              cwd=tmp_path, env=env, deadline_seconds=HANG_SECONDS, verify_launch=lambda: None,
+                              record_stop=record)
     except BaseException as exc:
         receipt.update(status='stopped', error_type=type(exc).__name__)
         receipt.update(rnc.stop_explanation(exc, ledger.path, 'native-offline', getattr(proxy, 'failure', None)))
         receipt.update(rnc.transcript_terminal_state(attempt / 'transcript.jsonl'))
         receipt.update(rnc.record_controller_stop(ledger, 'native-offline', receipt))
+    finally:
+        if clock is not None:
+            rnc.time = real_time
     assert counting.is_set() and calls == []
+    # The count's start ended the child, never the hang guard.
+    assert clock is None or clock.elapsed_on_the_event(), "the registered deadline, not the count, stopped the child"
     receipt['stops_at_close'] = at_close.get('stops')
     return receipt, json.loads(ledger.path.read_bytes()).get('stopped_attempts')
 

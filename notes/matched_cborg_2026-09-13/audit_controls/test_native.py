@@ -497,9 +497,17 @@ def test_stopped_proxy_receipt_records_actual_drained_handlers(native_case,monke
 
 
 def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_source(native_case,monkeypatch):
+    # The deadline elapses when the handler has entered, not after 0.6 real
+    # seconds that also paid for starting the child and its request (#2617).
+    # The registered deadline is a hang guard the clock asserts it never reached;
+    # every other wait returns as soon as its event happens.
+    import run_native_canary
+    from native_controls.test_native_launch import EventClock, HANG_SECONDS
     c=native_case;_,sdk,review=configure_receipt_runner(c,monkeypatch)
-    c.job['deadline_seconds']=0.6
+    c.job['deadline_seconds']=HANG_SECONDS
     entered,released,done=threading.Event(),threading.Event(),threading.Event()
+    clock=EventClock(entered,HANG_SECONDS)
+    monkeypatch.setattr(run_native_canary,'time',clock)
     observed=[]
     original=native.AuditProxy
     class ObservedProxy(original):
@@ -507,22 +515,22 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     monkeypatch.setattr(native,'AuditProxy',ObservedProxy)
     def wait_for_release(_):
         entered.set()
-        assert released.wait(10)
+        assert released.wait(HANG_SECONDS)
         done.set()
         return httpx.Response(200,content=response_events(),headers={'content-type':'text/event-stream'})
     upstream=httpx.Client(transport=httpx.MockTransport(wait_for_release))
     def adapter(context):return native.execute_job(context,client=sdk,upstream=upstream)
     try:
         with pytest.raises(BudgetStop,match='deadline'):native.run_job(c.registration,review,adapter=adapter)
-        assert entered.is_set()
+        assert entered.is_set() and clock.elapsed_on_the_event()
         receipt=json.loads((c.attempt/'result.json').read_text())
         assert receipt['stop_source']=='native_controller' and receipt['status']=='stopped'
         assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':1}
         assert receipt['runtime']['unfinished_handlers']==observed[0].unfinished_handlers
         assert len(receipt['unresolved_requests'])==1
         before=c.ledger.path.read_bytes()
-        released.set();assert done.wait(2)
-        with observed[0].state:assert observed[0].state.wait_for(lambda:observed[0].active_handlers==0,timeout=2)
+        released.set();assert done.wait(HANG_SECONDS)
+        with observed[0].state:assert observed[0].state.wait_for(lambda:observed[0].active_handlers==0,timeout=HANG_SECONDS)
         assert c.ledger.path.read_bytes()==before
         assert json.loads(before)['requests'][0]['status']=='pending'
     finally:
