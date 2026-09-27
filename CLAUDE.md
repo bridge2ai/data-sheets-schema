@@ -1179,7 +1179,11 @@ only the effort level would look comparable with the API path's and is not.
 **Its transcript does carry a measure** (#1000, 2026-09-04): usage per turn
 (`output_tokens`), signed thinking blocks (empty in the sampled generation
 transcripts, text in some others — the observer records
-`thinking_text_chars` either way), and — in transcripts written by recent
+`thinking_text_chars` either way; a native run registered with the thinking
+display, #2464, is expected to carry summarized text on its adaptive
+requests, as the #2463 probe did, though none has run yet, so compare
+`thinking_text_chars` only within one display condition), and — in
+transcripts written by recent
 Claude Code versions — `usage.output_tokens_details.thinking_tokens`. `scripts/agentic_observed.py`
 now emits `assistant_turns`, `output_tokens`, `thinking_blocks`,
 `thinking_text_chars`, `visible_text_chars`, `tool_input_chars`,
@@ -1246,14 +1250,33 @@ for all of them:
 no log has not spent zero reasoning; it has no measurement. Do not average the
 two, and do not read an absent figure for the agentic arm as a low one.
 
-⚠️ **Through CBORG the reasoning text is not available.** Verified 2026-07-29 on
-`google/claude-opus-5-high` and again 2026-09-04: the thinking block arrives
-with a valid `signature` and `thinking: ''`, both streaming and non-streaming.
-The proxy forwards the signed envelope and strips the plaintext. The logs
-therefore record `reasoning_present: true, reasoning_available: false` — a
-deliberately different claim from "no reasoning happened". Runs made directly
-against the Anthropic API (`ANTHROPIC_API_KEY`) capture the text with no code
-change.
+⚠️ **What a thinking block carries depends on the effective display — the one
+the request names, else the model's default — not on the endpoint** (#2542,
+#2608, #2623). On the Claude Opus 5 family every committed log uses, the
+default is omitted: a request that names no display receives the block with a
+valid `signature` and `thinking: ''`, streaming and non-streaming. That covers
+every API-arm request — no `thinking` parameter before #1047 (2026-09-08),
+`{"type":"adaptive"}` since, and none still from the judging paths such as
+`evidence_score` (#2624) — and every native run not registered with a display
+(verified through CBORG 2026-07-29 on `google/claude-opus-5-high` and again
+2026-09-04, both before #1047; Anthropic documents the same default for a
+direct `ANTHROPIC_API_KEY` run). The Opus 5 logs therefore record
+`reasoning_present: true, reasoning_available: false` — a deliberately
+different claim from "no reasoning happened". Opus 4.6 and Sonnet 4.6, which
+the runner also accepts, default to summarized on an adaptive request instead;
+with no `thinking` parameter they do not think at all (#2668, #2694). A
+request with `"display":"summarized"` receives **summarized** thinking text:
+the #2463 probe (2026-09-26) streamed 54,291 characters in 4,536 thinking
+deltas through CBORG's unprefixed `claude-opus-5` route (the counts are
+recorded on #2463), and Anthropic documents the same for a direct run. The
+`google/` routes that older logs used have not been sent a display (#2691). No display
+setting returns the raw chain of thought (#2668). Native audits registered with the thinking display
+(#2464) send it on their adaptive requests; `{"type":"disabled"}` side calls
+are forwarded unchanged and carry no thinking. Phase 4 and evaluation select
+it from #2541. `thinking_text_chars` is comparable within one display
+condition, whichever endpoint served it. The earlier reading that the proxy
+strips the plaintext is superseded: the blocks were empty because no display
+was requested.
 
 **The count is available since 2026-09-04** (#999): CBORG returns
 `usage.output_tokens_details.thinking_tokens` in the non-streaming body and

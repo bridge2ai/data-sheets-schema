@@ -172,8 +172,9 @@ offline, with no provider contacted; enabling experimental betas turns on four
 more beta headers. The maintainer chose, on 2026-09-26, to have the proxy add
 the display instead. A registration selects it with
 `native_thinking_display = {"kind": "thinking_display_v1", "display":
-"summarized", "delivery": "proxy_substitution"}`. The setting is audit-only
-and registered for Claude Code 2.1.272.
+"summarized", "delivery": "proxy_substitution"}`. The setting is registered
+for Claude Code 2.1.272. Audits, Phase 4 and evaluation each select it for
+themselves (#2464, #2541); generation refuses it.
 
 **What the proxy does with each child request:**
 - **`{"type":"adaptive"}`** gains the display, and only those bytes change.
@@ -199,9 +200,10 @@ In 2,304 retained native requests, 2,301 carried exactly
   per-event counts. It holds counts and times, never text, and its observer
   cannot change delivered bytes.
 
-`thinking_display_evidence` re-reads these bytes. A completed audit and every
-batch child closure require it to prove every admitted request; a stopped
-receipt reports it.
+`thinking_display_evidence` re-reads these bytes. A completed run of any
+stage that forwards a display (an audit and every batch child closure, Phase 4
+through the shared controller, and each native evaluation job) requires it to
+prove every admitted request; a stopped receipt reports it (#2541).
 
 **Replay.** The CLI replays a summarized thinking block, text and signature
 unchanged, in its next request (checked offline).

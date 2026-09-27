@@ -2,10 +2,11 @@
 reasoning measure (#1000).
 
 Probed 2026-09-04: CBORG returns `usage.output_tokens_details.thinking_tokens`
-(non-streaming body, and the stream's `message_delta` usage) while still
-withholding the text; the SDK's `get_final_message()` drops it. Subagent
-transcripts carry usage per turn, signed empty thinking blocks and, from
-recent runtimes, the same `output_tokens_details`.
+(non-streaming body, and the stream's `message_delta` usage) beside an empty
+block, the requests naming no thinking display (#2542); the SDK's
+`get_final_message()` drops it. Subagent transcripts carry usage per turn,
+signed thinking blocks (empty in the runs sampled then) and, from recent
+runtimes, the same `output_tokens_details`.
 """
 
 import importlib.util
