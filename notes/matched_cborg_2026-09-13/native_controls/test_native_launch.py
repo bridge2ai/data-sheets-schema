@@ -1,4 +1,6 @@
 """Exercise the launch identity and deadline using local synthetic processes."""
+import contextlib
+import errno
 import os
 import json
 from contextlib import contextmanager
@@ -55,17 +57,72 @@ def test_deadline_closes_admission_and_kills_child_before_proxy_cleanup(tmp_path
     with pytest.raises(ProcessLookupError):os.kill(int(pidfile.read_text()),0)
 
 
-def test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error():
-    """#2571: Darwin answers killpg on a group whose only member is an unreaped zombie with
-    EPERM. On Linux the signal succeeds, so there this is only a smoke test."""
+def process_state(pid):
+    """pid's state letters (Z for exited, unreaped), '' once it is reaped: from /proc where
+    there is one, else `ps`. Reading it never reaps; os.waitid(WNOWAIT) would do the same,
+    but macOS Python lacks it before 3.13 (#2600)."""
+    try:
+        return Path(f'/proc/{pid}/stat').read_text().rpartition(')')[2].split()[0]
+    except (FileNotFoundError, ProcessLookupError, IndexError):
+        if Path('/proc/self/stat').exists():
+            return ''
+    return subprocess.run(['ps', '-o', 'stat=', '-p', str(pid)], capture_output=True, text=True).stdout.strip()
+
+
+def parent_of(pid):
+    try:
+        return int(Path(f'/proc/{pid}/stat').read_text().rpartition(')')[2].split()[1])
+    except (FileNotFoundError, ProcessLookupError, IndexError, ValueError):
+        if Path('/proc/self/stat').exists():
+            return None
+    owner = subprocess.run(['ps', '-o', 'ppid=', '-p', str(pid)], capture_output=True, text=True).stdout.strip()
+    return int(owner) if owner.isdigit() else None
+
+
+def wait_until_exited_unreaped(pid, timeout=30):
+    """Bounded (#2602): an exited, unreaped child is a zombie, state Z."""
+    deadline = time.monotonic() + timeout
+    while not process_state(pid).startswith('Z'):
+        if time.monotonic() >= deadline:
+            raise AssertionError(f'process {pid} did not exit within {timeout} s')
+        time.sleep(0.01)
+
+
+#: Darwin answers killpg on a group whose only member is an unreaped zombie with
+#: EPERM; Linux delivers the signal. `simulated` gives any platform Darwin's answer,
+#: so CI (Linux) exercises the same path the kernel takes on the Mac (#2601).
+REFUSALS = [pytest.param('kernel', marks=pytest.mark.skipif(
+                sys.platform != 'darwin', reason="only Darwin's kernel refuses a zombie-led group")),
+            'simulated']
+
+
+@pytest.fixture
+def darwin_refusal(request, monkeypatch):
+    if request.param == 'simulated':
+        signal_group = os.killpg
+        def killpg(pgid, sig):
+            if process_state(pgid).startswith('Z'):
+                raise PermissionError(errno.EPERM, 'Operation not permitted')
+            return signal_group(pgid, sig)
+        monkeypatch.setattr(os, 'killpg', killpg)
+    return request.param
+
+
+@pytest.mark.parametrize('darwin_refusal', REFUSALS, indirect=True)
+def test_terminating_an_exited_unreaped_child_is_not_a_cleanup_error(darwin_refusal):
+    """#2571: the group whose only member is the exited, unreaped leader refuses the
+    signal with EPERM; terminate_group reaps the leader instead of raising."""
     process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
-    os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOWAIT)       # exited, not reaped
-    assert process.returncode is None
-    if sys.platform == 'darwin':
+    try:
+        wait_until_exited_unreaped(process.pid)
+        assert process.returncode is None
         with pytest.raises(PermissionError):
             os.killpg(process.pid, 0)                                 # the state the fix must handle
-    terminate_group(process)
-    assert process.returncode == 0
+        terminate_group(process)
+        assert process.returncode == 0
+    finally:
+        if process.returncode is None:
+            process.kill(); process.wait()
 
 
 def test_a_refusal_before_the_reported_exit_is_excused_by_the_exit(monkeypatch):
@@ -78,29 +135,39 @@ def test_a_refusal_before_the_reported_exit_is_excused_by_the_exit(monkeypatch):
         calls.append(sig)
         if len(calls) == 1:
             # Still blocked on stdin: not exited, so the refusal comes before the exit.
-            assert os.waitid(os.P_PID, pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None
+            assert not process_state(pid).startswith('Z')
             process.stdin.close()
-        raise PermissionError(1, 'Operation not permitted')
+        raise PermissionError(errno.EPERM, 'Operation not permitted')
     monkeypatch.setattr(os, 'killpg', refuse_while_exiting)
-    terminate_group(process)
+    try:
+        terminate_group(process)
+    finally:
+        monkeypatch.undo()
+        if process.returncode is None:
+            process.kill(); process.wait()
     assert calls and process.returncode == 0
 
 
 def test_a_refused_signal_to_a_running_leader_is_raised_and_keeps_the_stop(monkeypatch):
-    """A live leader's refusal is real; the exception being unwound stays in its chain."""
-    import errno
+    """A live leader's refusal is real; the exception being unwound stays in its chain.
+    Whatever the cleanup raises is caught here (#2603), so a regression that lets the
+    interrupt through fails this test instead of ending the pytest session."""
     process = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(30)'], start_new_session=True)
     def refuse(pid, sig):
         raise PermissionError(errno.EPERM, 'Operation not permitted')
     monkeypatch.setattr(os, 'killpg', refuse)
     try:
         for unwinding in (BudgetStop('recorded stop'), KeyboardInterrupt()):
-            with pytest.raises(PermissionError) as raised:
+            raised = None
+            try:
                 try:
                     raise unwinding
                 finally:
                     terminate_group(process)
-            chain, node = [], raised.value
+            except BaseException as error:   # noqa: B036 - the interrupt must not escape the test
+                raised = error
+            assert isinstance(raised, PermissionError), raised
+            chain, node = [], raised
             while node is not None:
                 chain.append(node); node = node.__context__
             assert unwinding in chain, chain
@@ -108,24 +175,45 @@ def test_a_refused_signal_to_a_running_leader_is_raised_and_keeps_the_stop(monke
         monkeypatch.undo(); process.kill(); process.wait()
 
 
-def test_a_stop_after_the_child_exited_is_not_replaced_by_group_cleanup(tmp_path):
+@pytest.mark.parametrize('darwin_refusal', REFUSALS, indirect=True)
+def test_a_stop_after_the_child_exited_is_not_replaced_by_group_cleanup(tmp_path, darwin_refusal):
     """#2571 end to end: the child exits before the controller's cleanup, as a fast child
-    does under load; the stop raised is the recorded one and the child is reaped."""
+    does under load, and its group refuses the signal (the Darwin kernel, or `simulated`
+    anywhere). The stop raised is the recorded one and the child is reaped: this is what
+    fails when execute_child's cleanup does not excuse the refusal by the exit."""
     instruction = tmp_path / 'input.txt'; instruction.write_text('offline')
     pidfile = tmp_path / 'pid'
     code = ('import os,pathlib,time\npathlib.Path("pid.tmp").write_text(str(os.getpid()))\n'
             'os.replace("pid.tmp","pid")\nwhile not pathlib.Path("go").exists():time.sleep(0.01)\n')
     def stop_once_the_child_has_exited():
-        while not pidfile.exists(): time.sleep(0.01)
+        deadline = time.monotonic() + 30                              # bounded (#2602)
+        while not pidfile.exists():
+            if time.monotonic() >= deadline:
+                raise AssertionError('the child never wrote its pid')
+            time.sleep(0.01)
         (tmp_path / 'go').touch()
-        os.waitid(os.P_PID, int(pidfile.read_text()), os.WEXITED | os.WNOWAIT)   # an unreaped zombie
+        wait_until_exited_unreaped(int(pidfile.read_text()))
         return True
     proxy = SimpleNamespace(failed=SimpleNamespace(is_set=stop_once_the_child_has_exited),
                             failure='synthetic stop raised after the child exited', close_admission=lambda: None)
-    with pytest.raises(BudgetStop, match='synthetic stop raised after the child exited'):
-        execute_child([sys.executable, '-c', code], proxy=proxy, instruction=instruction, attempt=tmp_path,
-                      cwd=tmp_path, env=dict(os.environ), deadline_seconds=60, verify_launch=lambda: None)
-    with pytest.raises(ProcessLookupError): os.kill(int(pidfile.read_text()), 0)
+    reaped = False
+    try:
+        with pytest.raises(BudgetStop, match='synthetic stop raised after the child exited'):
+            execute_child([sys.executable, '-c', code], proxy=proxy, instruction=instruction, attempt=tmp_path,
+                          cwd=tmp_path, env=dict(os.environ), deadline_seconds=60, verify_launch=lambda: None)
+        assert process_state(int(pidfile.read_text())) == ''
+        reaped = True
+    finally:
+        # Nothing orphaned when the test fails: a child of this process that was not
+        # reaped still holds its pid, so that pid names no one else's process.
+        (tmp_path / 'go').touch()
+        if not reaped and pidfile.exists():
+            pid = int(pidfile.read_text())
+            if process_state(pid) and parent_of(pid) == os.getpid():
+                with contextlib.suppress(OSError):
+                    os.kill(pid, signal.SIGKILL)
+                with contextlib.suppress(ChildProcessError):
+                    os.waitpid(pid, 0)
 
 
 def test_launch_verification_failure_never_starts_process(tmp_path):
