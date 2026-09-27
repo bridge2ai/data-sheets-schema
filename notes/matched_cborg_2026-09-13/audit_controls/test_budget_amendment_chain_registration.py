@@ -87,3 +87,33 @@ def test_real_chained_preparation_refuses_a_proof_that_does_not_bind_its_predece
     with pytest.raises(BudgetStop):
         prepare_second(c, tmp_path / 'refused', continuation_checkpoint=checkpoint, budget_amendment=proof)
     assert not (tmp_path / 'refused').exists()
+
+
+# --- a link anchored on a real reconciliation (#2502, #2577) ---------------------------------------
+
+from audit_controls.test_registration import accounting  # noqa: F401,E402  (fixture)
+from audit_controls.test_reconcile_stopped import reconcile, stopped, successor_of  # noqa: F401,E402
+
+
+def test_the_anchor_proof_accepts_the_bytes_reconcile_stopped_writes(stopped):
+    """The relations a reconciled anchor proves hold for the receipt and checkpoint the tool
+    writes, and the registration's own recomputation accepts the same files."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    bridge = {'source_ledger': reference(first['budget']['ledger_path']), 'receipt': reference(value['receipt'])}
+    proof = {'reconciliation': deepcopy(bridge), 'predecessor_registration': reference(reg),
+             'predecessor_ledger': reference(value['checkpoint'])}
+    anchored = registration.read_json(value['checkpoint'])
+    assert amendment._reconciled_anchor(proof, first, anchored, {'predecessor': {'reconciliation': bridge}}) == bridge
+    successor, _ = successor_of(m, reg, first, value)
+    assert registration.validate_audit_reconciliation(successor) == anchored
+    # A receipt from another stop does not settle this one.
+    other = registration.read_json(value['receipt'])
+    other['request_id'] = 'another-request'
+    forged = save(reg.parent.parent / 'forged_receipt.json', other)
+    proof['reconciliation']['receipt'] = reference(forged)
+    anchored['reconciled_from']['receipt_sha256'] = proof['reconciliation']['receipt']['sha256']
+    next(row for row in anchored['requests'] if row['id'] == request_id)['reconciliation_receipt_sha256'] = \
+        proof['reconciliation']['receipt']['sha256']
+    with pytest.raises(BudgetStop, match='receipt does not settle'):
+        amendment._reconciled_anchor(proof, first, anchored, {'predecessor': deepcopy(proof)})

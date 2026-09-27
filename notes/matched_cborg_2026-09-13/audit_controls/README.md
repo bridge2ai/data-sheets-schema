@@ -678,6 +678,28 @@ states in dollars. The receipt review must still catch:
 
 Only chained links are checked; v1 and v2 are taken as they were validated.
 
+A chained link may be anchored on the checkpoint that reconciled its
+predecessor's own ledger: a stop settled by a receipt, as `reconcile_stopped`
+or a probe's `settle` writes (#2502). The link then carries a
+`reconciliation` of two references, `source_ledger` (the predecessor's own
+ledger, at the path its registration names) and `receipt`. Its schema-3
+receipt carries the same two under `predecessor.reconciliation`. Both are
+evidence of the chain: they are pinned like the five, and no later link
+reuses them (#2576). The proof checks that:
+- the anchored checkpoint's `reconciled_from` names that ledger and receipt,
+  from a pending row;
+- it was made for the same registration and carries the same caps;
+- its rows are the ledger's rows in the same order, and only the one
+  reconciled row changed, from pending to settled, at no more than its
+  reservation;
+- the receipt names that registration, ledger, request, attempt and
+  reservation, and the settled row names that receipt.
+
+The registration that imports the checkpoint still recomputes it from the
+receipt (`validate_audit_reconciliation`, or `probe_predecessor` for a probe).
+A link on its predecessor's own ledger names no reconciliation, and a v1 or
+v2 proof is never anchored on one.
+
 v1 and v2 proofs validate exactly as before, and a v2 still takes only a v1.
 Each further increase, up to the bound, is data: a new link, with no code
 change.
@@ -831,8 +853,9 @@ checks the link one hop further, to the audit the probe followed:
 
 `required_paths` pins every file this reads. A budget increase may be
 anchored on a probe's own settled ledger as on an audit's
-(`budget_amendment.PREDECESSOR_KINDS`). As with an audit, an increase cannot
-be anchored on a reconciled checkpoint (#2502).
+(`budget_amendment.PREDECESSOR_KINDS`). A chained link may also be anchored
+on a reconciled checkpoint, an audit's or a probe's; see the chain section
+below (#2502).
 
 ## Fresh-context audit batches (protocol 7 / renderer 20)
 
