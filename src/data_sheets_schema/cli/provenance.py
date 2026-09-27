@@ -2176,9 +2176,11 @@ def reasoning_cmd(method, project, label, path):
                    "no measurement. Do not average the two (#400).\n")
 
     total: list[dict] = []
+    skipped = 0
     for p in sorted(logs):
         entries, unreadable = _reasoning.read_lenient(p)
         total.extend(entries)
+        skipped += len(unreadable)
         s = _reasoning.summarise(entries)
         click.echo(f"\n{p}")
         if unreadable:
@@ -2216,8 +2218,14 @@ def reasoning_cmd(method, project, label, path):
     if len(logs) > 1 and total:              # every selected log empty: nothing to aggregate (#2692)
         s = _reasoning.summarise(total)
         click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
-                   f"{s['with_reasoning_text']} with reasoning text")
+                   f"{s['with_reasoning_text']} with reasoning text"
+                   + (f", {skipped} unreadable line(s) skipped" if skipped else ""))
     if total and not any(e.get('reasoning_available') for e in total):
+        if skipped:
+            # A skipped line may have held the block or text the diagnosis below
+            # finds absent (#2721).
+            click.echo(f"\n{skipped} unreadable line(s) skipped: what follows describes "
+                       "the readable entries only.")
         kinds = {b.get('type') for e in total for b in (e.get('blocks') or []) if isinstance(b, dict)}
         if any(e.get('reasoning_present') for e in total) and kinds == {'redacted_thinking'}:
             # Encrypted by the provider's safety redaction whatever the display (#2666).

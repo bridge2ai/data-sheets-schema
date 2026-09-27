@@ -191,28 +191,59 @@ def append(path: Path, entry: dict[str, Any]) -> None:
         fh.write(json.dumps(entry, ensure_ascii=False, default=str) + "\n")
 
 
+class UnreadableLog(ValueError):
+    """A reasoning log line that does not decode as UTF-8 or parse as JSON (#2695)."""
+
+
+def _lines(path: Path):
+    """The log's physical lines, numbered from 1, blank ones included. Split on the
+    newline `append` writes and nothing else: `ensure_ascii=False` leaves U+2028,
+    U+2029 and U+0085 unescaped in a text field, and `str.splitlines` breaks on all
+    three (#2720). Each line is decoded on its own, so a bad byte names its line."""
+    return enumerate(Path(path).read_bytes().split(b"\n"), 1)
+
+
+def _parse(raw: bytes) -> Any:
+    # RecursionError: a deeply nested line is corruption like any other (#2722).
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except RecursionError as error:
+        raise ValueError("nesting too deep") from error
+
+
 def read(path: Path) -> list[dict[str, Any]]:
-    """Every entry of a reasoning log; a line that does not parse raises, since
-    usage accounting must not skip a record it cannot read."""
+    """Every entry of a reasoning log. A line that does not decode or parse raises
+    UnreadableLog naming the file and the line, since usage accounting must not
+    skip a record it cannot read."""
     if not Path(path).exists():
         return []
-    return [json.loads(line) for line in
-            Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+    entries = []
+    for number, raw in _lines(path):
+        if not raw.strip():
+            continue
+        try:
+            entries.append(_parse(raw))
+        except ValueError as error:
+            raise UnreadableLog(f"{path}: line {number} is not a readable entry "
+                                f"({type(error).__name__}: {error})") from error
+    return entries
 
 
 def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
     """The entries that parse as JSON objects, and the numbers of the lines that
-    do not, for a read-only report. A run killed or out of disk mid-write can leave a partial
-    last line (#2695); a report names it rather than failing on it."""
+    do not, for a read-only report. A run killed or out of disk mid-write can
+    leave a partial last line (#2695); a report names it rather than failing on
+    it. A line that parses to something other than an object is named too: not
+    what `append` writes, so corruption rather than a partial write."""
     if not Path(path).exists():
         return [], []
     entries: list[dict[str, Any]] = []
     unreadable: list[int] = []
-    for number, line in enumerate(Path(path).read_text(encoding="utf-8", errors="replace").splitlines(), 1):
-        if not line.strip():
+    for number, raw in _lines(path):
+        if not raw.strip():
             continue
         try:
-            value = json.loads(line)
+            value = _parse(raw)
         except ValueError:
             value = None
         if isinstance(value, dict):
