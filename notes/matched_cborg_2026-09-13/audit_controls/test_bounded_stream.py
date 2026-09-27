@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import signal
 import socket
 import ssl
 import struct
@@ -58,6 +59,27 @@ def processes(monkeypatch):
     monkeypatch.setattr(bounded.subprocess, "Popen", start)
     yield created
     assert all(process.poll() is not None for process, _, _ in created), "child survived its transport context"
+
+
+def killed_before_reaped(process):
+    """For each wait on `process`, whether it had been sent SIGKILL (or was
+    already reaped) when the wait began (#2540, #2569 reviews).
+
+    A close that waits on a live worker first, as a grace period of any
+    length, records False. A wall-clock bound on leaving the context would
+    catch only waits longer than itself, and it would charge the verdict with
+    the scheduler's delays under load."""
+    killed, waits = [], []
+    real_signal, real_wait = process.send_signal, process.wait
+    def send_signal(sig):
+        if sig == signal.SIGKILL:
+            killed.append(sig)
+        return real_signal(sig)
+    def wait(*args, **kwargs):
+        waits.append(bool(killed) or process.returncode is not None)
+        return real_wait(*args, **kwargs)
+    process.send_signal, process.wait = send_signal, wait
+    return waits
 
 
 def test_exact_bytes_status_headers_and_secret_only_in_pipe(processes, monkeypatch):
@@ -177,16 +199,40 @@ def test_close_kills_and_reaps_an_inflight_worker_before_return(processes, monke
             pass
 
 
-def test_a_5xx_can_be_classified_without_draining_its_body(processes):
+def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatch):
+    # The body is withheld until the context has exited; only a watchdog
+    # releases it. The verdict is that ordering, the parent's reads from the
+    # worker after the headers, and killing before reaping, not a wall-clock
+    # total that also counted the worker's interpreter start-up (#2569). A
+    # bare sleep before the kill, shorter than the watchdog, is not covered.
+    exited, body_released = threading.Event(), threading.Event()
+    reads_after_headers = []
+    real_take = bounded._Worker._take
+    def take(worker, size, deadline):
+        if worker.headers_received:
+            reads_after_headers.append(size)
+        return real_take(worker, size, deadline)
+    monkeypatch.setattr(bounded._Worker, "_take", take)
     def respond(handler, body):
         handler.send_response(524); handler.send_header("Content-Length", "500"); handler.end_headers()
-        handler.wfile.flush(); time.sleep(2)
-    client = bounded.BoundedStreamClient(read_timeout_seconds=.5, connect_timeout_seconds=1)
+        handler.wfile.flush()
+        if not exited.wait(timeout=10):
+            body_released.set(); handler.wfile.write(b"x" * 500); handler.wfile.flush()
+    # The read bound outlasts the watchdog, so a draining exit receives the
+    # body rather than timing out. read + connect is the pre-header deadline,
+    # which keeps a loaded interpreter start-up out of the verdict.
+    client = bounded.BoundedStreamClient(read_timeout_seconds=30, connect_timeout_seconds=10)
     with endpoint(respond) as url:
-        started = time.monotonic()
-        with client.stream("POST", url, content=b"synthetic", headers={}) as value:
-            assert value.status_code == 524
-        assert time.monotonic() - started < 1.5
+        try:
+            with client.stream("POST", url, content=b"synthetic", headers={}) as value:
+                assert value.status_code == 524
+                waits = killed_before_reaped(processes[0][0])
+            drained = body_released.is_set()
+        finally:
+            exited.set()
+    assert not drained, "the context waited for the withheld body"
+    assert reads_after_headers == [], "the context read from the worker after its headers"
+    assert waits and all(waits), "the context waited on a live worker before killing it"
     assert not client._workers
     client.close()
 
