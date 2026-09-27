@@ -89,6 +89,17 @@ def test_real_preparation_pins_the_selection_and_changes_nothing_the_model_reads
     assert KEY not in json.loads((legacy.parent / 'offline_plan.json').read_text())
 
 
+@pytest.mark.parametrize('value', [None, {**THINKING_DISPLAY, 'delivery': 'cli_flag'}], ids=['null', 'cli_flag'])
+def test_validate_registration_refuses_a_changed_selection(ancestry, tmp_path, monkeypatch, value):
+    """#2554: the registration check itself, not only preparation or launch."""
+    monkeypatch.setattr(registration, 'THINKING_DISPLAY_RUNTIMES', frozenset({'synthetic-native-version'}))
+    path = prepare.prepare(**ancestry[0], destination=tmp_path / 'selected', native_thinking_display=THINKING_DISPLAY)
+    changed = registration.read_json(path); changed[KEY] = value
+    save(path, changed)
+    with pytest.raises(BudgetStop, match='thinking'):
+        registration.validate_registration(path)
+
+
 def test_a_worker_checkpoint_cannot_drop_or_adopt_the_display(metadata_ancestry, tmp_path, monkeypatch):
     """The successor must restate its source's display exactly; it is refused before its destination exists."""
     from audit_controls.test_stall_allowance_checkpoint import build
@@ -301,7 +312,12 @@ def test_a_batch_child_closure_binds_the_display_evidence(batch):
         'frozen_evidence': runtime._tree(root)}
     (root / 'closed.json').write_text(json.dumps(receipt))
     assert runtime.verify_child_closure(batch.m, batch.identity, row['id'])
-    # A receipt that drops the evidence is refused.
+    # A receipt whose evidence says something else is refused, not only one that drops it (#2550).
+    changed = json.loads(json.dumps(receipt))
+    changed['thinking_display']['requests'][0]['disposition'] = 'disabled_forwarded'
+    (root / 'closed.json').write_text(json.dumps(changed))
+    with pytest.raises(BudgetStop, match='thinking display evidence differs'):
+        runtime.verify_child_closure(batch.m, batch.identity, row['id'])
     (root / 'closed.json').write_text(json.dumps({k: v for k, v in receipt.items() if k != 'thinking_display'}))
     with pytest.raises(BudgetStop, match='thinking display evidence differs'):
         runtime.verify_child_closure(batch.m, batch.identity, row['id'])
@@ -312,8 +328,15 @@ def test_a_batch_child_closure_binds_the_display_evidence(batch):
         runtime.verify_child_closure(batch.m, batch.identity, row['id'])
 
 
-def test_a_real_child_controller_closes_with_the_display_evidence(batch, monkeypatch):
-    """Only the external process and network are replaced; ledger, history and closure replay are real."""
+@pytest.mark.parametrize('stops', [False, True], ids=['closes', 'stops'])
+def test_a_real_child_controller_closes_with_the_display_evidence(batch, monkeypatch, stops):
+    """The batch controller's wiring and closure with the display (#2555).
+
+    Only the external process and network are replaced; ledger, history and
+    closure replay are real. The proxy is a stand-in, so the request folder is
+    written by the fixture: the proxy's own substitution is tested in
+    native_controls/test_native_thinking_display.py.
+    """
     import threading
     from contextlib import contextmanager
     from audit_controls import batch_native as runtime
@@ -354,6 +377,19 @@ def test_a_real_child_controller_closes_with_the_display_evidence(batch, monkeyp
     context = SimpleNamespace(manifest=batch.m, manifest_sha256=batch.identity, job=batch.m['job'],
                               registration_path=batch.reg, ledger=batch.ledger, verify=lambda: None)
     row = batch.m['audit_batches']['children'][0]
+    if stops:
+        # A child that fails after its paid request: stopped.json reports the display, never raises (#2551).
+        def failing(argv, **kwargs):
+            execute(argv, **kwargs)
+            raise BudgetStop('synthetic child failure after its request')
+        monkeypatch.setattr(native, 'execute_child', failing)
+        with pytest.raises(BudgetStop):
+            runtime._execute_child(context, row, 21600, clock=lambda: 0)
+        stopped = json.loads((Path(row['attempt_dir']) / 'stopped.json').read_text())
+        report = stopped['thinking_display']
+        assert report['kind'] == 'thinking_display_summary_v1' and report['problems'] == []
+        assert [r['disposition'] for r in report['requests']] == ['substituted']
+        return
     runtime._execute_child(context, row, 21600, clock=lambda: 0)
     assert proxies[0].kw['thinking_display'] == THINKING_DISPLAY
     closed = json.loads((Path(row['attempt_dir']) / 'closed.json').read_text())

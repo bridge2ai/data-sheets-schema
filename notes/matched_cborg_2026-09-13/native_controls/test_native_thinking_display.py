@@ -184,12 +184,15 @@ def test_anything_else_is_refused_before_it_is_counted_reserved_or_sent(tmp_path
     assert thinking_display_evidence(tmp_path / 'requests', THINKING_DISPLAY, strict=False)['refusals'] == 1
 
 
-def test_a_refusal_under_a_stall_policy_is_not_a_stall(tmp_path):
+def test_a_refusal_under_a_stall_policy_stops_without_a_debit(tmp_path):
+    """Pins the combined behaviour, whatever the mechanism: the refusal precedes any
+    ticket, so no stall policy can debit it and the attempt stops (#2556)."""
     proxy, ledger, calls, _ = proxy_for(tmp_path, [], stall_policy={'count_attempts': 3, 'max_stall_debits': 4},
                                         count_pause=lambda seconds: None)
     with proxy.running() as url:
         assert post(url, proxy, compact(REQUEST)).status_code == 402
-    assert calls == [] and proxy.stalls_survived == 0
+    assert calls == [] and proxy.stalls_survived == 0 and proxy.failed.is_set()
+    assert not ledger.path.exists() or json.loads(ledger.path.read_text())['requests'] == []
 
 
 def test_the_childs_own_count_passes_untouched(tmp_path):
@@ -222,6 +225,12 @@ def test_the_first_thinking_event_is_timed_without_changing_delivery(tmp_path):
             timing['last_chunk_seconds']) == (1.0, 2.0, 3.0, 6.0, 10.0)
     assert timing['thinking_text_chars'] == len(SUMMARY) and timing['thinking_display_observed'] == 'summarized_text'
     assert timing['outcome'] == 'completed' and timing['observer_errors'] == 0 and timing['upstream_status'] == 200
+    # Headers arrive before the first second's chunk; the child's headers are sent before the first byte (#2553).
+    assert timing['headers_seconds'] == 0.0 and timing['child_headers_seconds'] == 0.0
+    assert timing['largest_gap_between_chunks_seconds'] == 1.0 and timing['chunks'] == len(values)
+    assert timing['bytes'] == len(wire(values)) and timing['error_type'] is None
+    assert timing['events']['content_block_start:thinking'] == {'count': 1, 'first_seconds': 2.0, 'last_seconds': 2.0}
+    assert timing['events']['content_block_delta:thinking_delta']['count'] == 1
     summary = thinking_display_evidence(tmp_path / 'requests', THINKING_DISPLAY, strict=True)
     assert summary['requests'][0]['timing']['first_thinking_block_seconds'] == 2.0
 
@@ -316,3 +325,109 @@ def test_a_completed_run_cannot_carry_a_refusal(tmp_path):
     (tmp_path / 'thinking_refusals' / 'synthetic.json').write_text('{}')
     with pytest.raises(BudgetStop, match='refused thinking setting'):
         thinking_display_evidence(tmp_path / 'requests', THINKING_DISPLAY, strict=True)
+
+
+
+# --- review of #2543 --------------------------------------------------------------------------
+
+@pytest.mark.parametrize('raw', [
+    compact(ADAPTIVE)[:-1] + b',"max_tokens":5}',
+    compact({**REQUEST, 'thinking': {'type': 'disabled'}})[:-1] + b',"thinking":{"type":"adaptive"}}',
+    # Forwarded unchanged if read last-wins: only the strict admission parse refuses these.
+    compact(ADAPTIVE)[:-1] + b',"thinking":{"type":"disabled"}}',
+    compact({**REQUEST, 'thinking': {'type': 'disabled'}})[:-1] + b',"stream":true}',
+], ids=['duplicate_max_tokens', 'two_thinking_members', 'disabled_last', 'duplicate_on_side_call'])
+def test_a_duplicate_key_is_refused_before_it_is_paid(tmp_path, raw):
+    """#2544: admission parses as strictly as the evidence gate re-reads."""
+    proxy, ledger, calls, counts = proxy_for(tmp_path, [])
+    with proxy.running() as url:
+        assert post(url, proxy, raw).status_code == 402
+    assert calls == [] and counts == [] and len(list((tmp_path / 'thinking_refusals').iterdir())) == 1
+
+
+def test_an_already_displayed_nested_member_is_refused(tmp_path):
+    """#2549: the child cannot carry the displayed setting anywhere, even nested."""
+    raw = compact({**ADAPTIVE, 'metadata': {'thinking': DISPLAYED}})
+    with pytest.raises(BudgetStop, match='registered display exactly'):
+        substitute_thinking(raw, json.loads(raw), THINKING_DISPLAY)
+
+
+def _settled(tmp_path, body):
+    proxy, _, _, _ = proxy_for(tmp_path, [httpx.Response(200, content=wire(events()),
+                               headers={'content-type': 'text/event-stream'})])
+    with proxy.running() as url:
+        assert post(url, proxy, compact(body)).status_code == 200
+    return folder_of(tmp_path)
+
+
+def _rehash(folder, **changes):
+    record = json.loads((folder / 'thinking_request.json').read_text())
+    record.update(changes)
+    if (folder / 'forwarded_request.json').exists():
+        record['forwarded_request_sha256'] = sha((folder / 'forwarded_request.json').read_bytes())
+    (folder / 'thinking_request.json').write_text(json.dumps(record))
+
+
+@pytest.mark.parametrize('forwarded', [
+    lambda raw: raw.replace(b'"thinking":{"type":"adaptive"}', b'"thinking":{"type":"adaptive", "display":"summarized"}'),
+    lambda raw: raw,                                                   # the display was never added
+    lambda raw: raw.replace(b'"thinking":{"type":"adaptive"}', b'"thinking":{"type":"adaptive","display":"summarized"}').replace(b'1000', b'1001'),
+], ids=['respaced', 'undisplayed', 'other_field'])
+def test_the_forwarded_bytes_must_be_the_child_bytes_with_only_the_display(tmp_path, forwarded):
+    """#2547: the record's hash is made consistent, so only the proof itself can refuse."""
+    folder = _settled(tmp_path, ADAPTIVE)
+    (folder / 'forwarded_request.json').write_bytes(forwarded((folder / 'native_request.json').read_bytes()))
+    _rehash(folder)
+    with pytest.raises(BudgetStop, match='only the registered display'):
+        thinking_display_evidence(tmp_path / 'requests', THINKING_DISPLAY, strict=True)
+
+
+@pytest.mark.parametrize('damage, match', [
+    ('forwarded_file', 'forwarded unchanged'), ('adaptive_child', 'forwarded unchanged'),
+    ('unknown', 'unknown thinking disposition'), ('registered', 'does not name'), ('kind', 'does not name')])
+def test_each_refusal_of_the_evidence_proof_is_reachable(tmp_path, damage, match):
+    """#2548: the disabled branch, an unknown disposition and the record's own fields."""
+    folder = _settled(tmp_path, {**REQUEST, 'thinking': {'type': 'disabled'}})
+    if damage == 'forwarded_file':
+        (folder / 'forwarded_request.json').write_bytes((folder / 'native_request.json').read_bytes())
+    elif damage == 'adaptive_child':
+        child = compact(ADAPTIVE)
+        (folder / 'native_request.json').write_bytes(child)
+        (folder / 'request.json').write_text(json.dumps(ADAPTIVE, sort_keys=True) + '\n')
+        _rehash(folder, native_request_sha256=sha(child), forwarded_request_sha256=sha(child))
+    elif damage == 'unknown':
+        _rehash(folder, disposition='rewritten')
+    elif damage == 'registered':
+        _rehash(folder, registered={**THINKING_DISPLAY, 'display': 'omitted'})
+    else:
+        _rehash(folder, kind='thinking_display_request_v0')
+    with pytest.raises(BudgetStop, match=match):
+        thinking_display_evidence(tmp_path / 'requests', THINKING_DISPLAY, strict=True)
+
+
+def test_frames_split_anywhere_and_crlf_lines_are_observed_alike():
+    """#2552: every chunk boundary, LF and CRLF framing give the same timing."""
+    values = thinking_stream()
+    whole = wire(values)
+    def observe(raw, cuts):
+        clock = Clock(); timing = StreamTiming(clock, clock.now)
+        pieces = [raw[a:b] for a, b in zip([0, *cuts], [*cuts, len(raw)])]
+        for piece in pieces:
+            timing.chunk(piece)
+        return timing.result('completed', None)
+    expected = observe(whole, [])
+    for raw in (whole, whole.replace(b'\n', b'\r\n')):
+        for cut in range(1, len(raw)):
+            got = observe(raw, [cut])
+            assert (got['events'], got['thinking_text_chars'], got['observer_errors']) == (
+                expected['events'], expected['thinking_text_chars'], 0), cut
+
+
+def test_an_unterminated_frame_beyond_the_bound_is_dropped_not_buffered(monkeypatch):
+    """#2546: observation is bounded; delivery never depends on it."""
+    monkeypatch.setattr(StreamTiming, 'MAX_FRAME_BYTES', 64)
+    clock = Clock(); timing = StreamTiming(clock, clock.now)
+    timing.chunk(b'data: ' + b'x' * 100)
+    assert timing.result('completed', None)['observer_errors'] == 1 and len(timing.buffer) == 0
+    timing.chunk(wire(thinking_stream()))
+    assert timing.result('completed', None)['thinking_display_observed'] == 'summarized_text'

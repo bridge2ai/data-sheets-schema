@@ -206,18 +206,24 @@ def substitute_thinking(raw, request, value):
 
     `{"type":"adaptive"}` gains the registered display, changing only those
     bytes; a side call with thinking disabled is forwarded as it is. Anything
-    else is refused before it is counted, reserved or sent. In JSON the quotes
-    of text inside a string are escaped, so the unescaped byte pattern can
-    only be the setting itself; it must occur exactly once.
+    else is refused before it is counted, reserved or sent. The body is parsed
+    strictly, as the evidence gate re-reads it, so a duplicate key is refused
+    here rather than after it is paid for (#2544). Text inside a JSON string
+    has its quotes escaped, so the unescaped pattern can only be a JSON member
+    named `thinking` with exactly that value, at the top level or nested
+    (#2545). Requiring one occurrence, no already-displayed member, and a
+    parsed result equal to the child with only the top-level `thinking`
+    replaced refuses every body where the pattern is not the setting alone.
     """
-    thinking = request.get("thinking")
-    if "thinking" in request and thinking == {"type": "adaptive"}:
+    child = _strict_object(raw)
+    thinking = child.get("thinking")
+    if "thinking" in child and thinking == {"type": "adaptive"}:
         forwarded = raw.replace(ADAPTIVE_THINKING, DISPLAYED_THINKING)
         if (raw.count(ADAPTIVE_THINKING) != 1 or DISPLAYED_THINKING in raw
-                or json.loads(forwarded) != {**request, "thinking": expected_thinking(value)}):
+                or _strict_object(forwarded) != {**child, "thinking": expected_thinking(value)}):
             raise BudgetStop("native request thinking cannot be given the registered display exactly")
         return forwarded, "substituted"
-    if "thinking" in request and thinking == DISABLED_THINKING:
+    if "thinking" in child and thinking == DISABLED_THINKING:
         return raw, "disabled_forwarded"
     raise BudgetStop("native request thinking is neither the registered adaptive setting nor disabled")
 
@@ -226,8 +232,12 @@ class StreamTiming:
     """When one upstream exchange's bytes arrived (#2464). Counts and times only,
     never text; every method swallows its own failure, so observing can never
     change what is settled or delivered."""
+    #: An unterminated frame longer than this is dropped from observation, not buffered on (#2546).
+    MAX_FRAME_BYTES = 16 * 1024 * 1024
+
     def __init__(self, clock, begun):
-        self.clock, self.begun, self.last, self.buffer = clock, begun, None, b""
+        self.clock, self.begun, self.last = clock, begun, None
+        self.buffer, self.scanned, self.carry = bytearray(), 0, b""
         self.value = {"kind": "native_stream_timing_v1", "upstream_status": None, "headers_seconds": None,
                       "first_chunk_seconds": None, "first_thinking_block_seconds": None,
                       "first_thinking_text_seconds": None, "first_output_block_seconds": None,
@@ -267,12 +277,27 @@ class StreamTiming:
         if value["first_chunk_seconds"] is None:
             value["first_chunk_seconds"] = at
         value["last_chunk_seconds"] = at
-        self.buffer = (self.buffer + raw).replace(b"\r\n", b"\n")
-        while b"\n\n" in self.buffer:
-            frame, self.buffer = self.buffer.split(b"\n\n", 1)
+        # Only the new bytes are normalised and scanned, so a long frame costs
+        # linear time (#2546). A CR at a chunk's end waits for the next chunk.
+        data, self.carry = self.carry + raw, b""
+        if data.endswith(b"\r"):
+            data, self.carry = data[:-1], b"\r"
+        self.buffer.extend(data.replace(b"\r\n", b"\n"))
+        while True:
+            end = self.buffer.find(b"\n\n", max(0, self.scanned - 1))
+            if end < 0:
+                self.scanned = len(self.buffer)
+                break
+            frame = bytes(self.buffer[:end])
+            del self.buffer[:end + 2]
+            self.scanned = 0
             lines = [line[5:].lstrip(b" ") for line in frame.split(b"\n") if line.startswith(b"data:")]
             if lines:
                 self._event(b"\n".join(lines), at)
+        if len(self.buffer) > self.MAX_FRAME_BYTES:
+            self.buffer.clear()
+            self.scanned = 0
+            value["observer_errors"] += 1
 
     def _event(self, data, at):
         value = self.value
