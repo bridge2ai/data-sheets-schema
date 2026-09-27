@@ -17,6 +17,7 @@ this module does not import (that would pull the proxy into every audit).
 from copy import deepcopy
 from decimal import Decimal
 from pathlib import Path
+import traceback
 
 from budgeted_cborg import BudgetStop
 
@@ -59,13 +60,21 @@ def _files(root):
 _MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError)
 
 
+def _malformed(what, error):
+    """A refusal that still fails closed, naming the error and where it was raised, so a
+    defect in this validator is not read as bad input (#2514)."""
+    frames = traceback.extract_tb(error.__traceback__)
+    where = f' at {Path(frames[-1].filename).name}:{frames[-1].lineno}' if frames else ''
+    return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
+
+
 def paths(manifest):
     """What an audit following a probe pins: the probe's link and the audit before it."""
     try:
         return _paths(manifest)
     except _MALFORMED as error:
         # The predecessor may be an ordinary audit; say only what failed (#2513).
-        raise BudgetStop('audit predecessor evidence is malformed or unavailable') from error
+        raise _malformed('audit predecessor evidence is malformed or unavailable', error) from error
 
 
 def _paths(manifest):
@@ -166,7 +175,7 @@ def validate_predecessor(manifest, *, require_pins=True):
                      'audit predecessor registration is not the one its checkpoint names')
         probe = is_probe_predecessor(manifest)
     except _MALFORMED as error:
-        raise BudgetStop('audit predecessor registration is malformed or unavailable') from error
+        raise _malformed('audit predecessor registration is malformed or unavailable', error) from error
     return validate_link(manifest, require_pins=require_pins) if probe else None
 
 
@@ -174,7 +183,7 @@ def validate_link(manifest, *, require_pins=True):
     try:
         return _validate_link(manifest, require_pins=require_pins)
     except _MALFORMED as error:
-        raise BudgetStop('probe predecessor is malformed or unavailable') from error
+        raise _malformed('probe predecessor is malformed or unavailable', error) from error
 
 
 def _validate_link(manifest, *, require_pins=True):

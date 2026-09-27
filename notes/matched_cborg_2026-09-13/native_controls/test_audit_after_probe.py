@@ -253,13 +253,72 @@ def test_the_settlement_after_exit_is_pinned_and_checked(prepared, monkeypatch):
         probe_predecessor.validate_link(manifest)
 
 
-def test_prepare_bridges_to_the_probes_own_result(prepared):
-    from audit_controls.prepare import _bridge_result
-    refused(prepared)
-    registration = prepared.root / 'probe' / 'registration.json'
-    assert _bridge_result(registration, r.read_json(registration)) == str(prepared.root / 'probe' / 'result.json')
+@pytest.mark.parametrize('outcome', [refused])
+def test_an_amendment_candidate_bridges_to_the_probes_own_result(prepared, outcome, tmp_path):
+    """#2512: through the preparer's entry point, not the helper. A probe's result sits beside its
+    registration; an audit's sits in its job's attempt directory."""
+    from audit_controls.prepare import amendment_candidate
+    result = outcome(prepared)
+    origin = tmp_path / 'origin.json'
+    save(origin, {'repository': str(prepared.root), 'budget': {'per_attempt_usd': '5',
+                                                             'ledger_path': str(prepared.root / 'origin_billing.json')}})
+    out = prepared.root / 'probe'
+    candidate = amendment_candidate(origin, {'total_usd': '800'}, result['successor_continues_from'],
+                                    source_registration=out / 'registration.json',
+                                    reconciliation_receipt=out / 'debit_receipt.json')
+    assert candidate['budget']['continuation']['reconciliation'] == {
+        'source_registration': str(out / 'registration.json'), 'source_ledger': str(out / 'billing.json'),
+        'receipt': str(out / 'debit_receipt.json'), 'result': str(out / 'result.json')}
     first = r.read_json(prepared.source)
-    assert _bridge_result(prepared.source, first) == str(Path(first['job']['attempt_dir']) / 'result.json')
+    candidate = amendment_candidate(origin, {'total_usd': '800'}, result['successor_continues_from'],
+                                    source_registration=prepared.source, reconciliation_receipt=out / 'debit_receipt.json')
+    assert candidate['budget']['continuation']['reconciliation']['result'] == \
+        str(Path(first['job']['attempt_dir']) / 'result.json')
+
+
+# --- the probe link on a complete registration (#2509, #2512) ---------------------------------
+# The synthetic probe lineage above is not a complete audit registration, so these prove the
+# wiring on a real prepared audit: validate_registration and required_paths reach the probe
+# link's check and pins. What those return for a probe is tested above.
+
+from audit_controls.test_context_preparation import ancestry  # noqa: E402,F401  (fixture)
+
+
+def test_validate_registration_checks_the_probe_link(ancestry, tmp_path, monkeypatch):
+    """#2509: deleting the #2505 call in validate_registration fails this test."""
+    from audit_controls import prepare
+    path = prepare.prepare(**ancestry[0], destination=tmp_path / 'audit')
+    seen = []
+
+    def checked(manifest, *, require_pins=True):
+        seen.append((manifest['budget']['continuation']['checkpoint'], require_pins))
+        raise BudgetStop('probe link checked')
+    monkeypatch.setattr(probe_predecessor, 'validate_predecessor', checked)
+    with pytest.raises(BudgetStop, match='probe link checked'):
+        r.validate_registration(path)
+    assert seen == [(r.read_json(path)['budget']['continuation']['checkpoint'], True)]
+
+
+def test_required_paths_pin_the_probe_link(ancestry, tmp_path, monkeypatch):
+    """#2512: the registration's own pin set, not only continuation_paths, carries the link."""
+    from audit_controls import prepare
+    path = prepare.prepare(**ancestry[0], destination=tmp_path / 'audit')
+    link = tmp_path / 'probe_link_file.json'
+    link.write_text('{}')
+    monkeypatch.setattr(probe_predecessor, 'paths', lambda manifest: {link})
+    assert link in r.required_paths(r.read_json(path))
+
+
+def test_a_validator_defect_is_named_with_its_error_and_place(prepared, monkeypatch):
+    """#2514: still a BudgetStop, but it says which error was raised where."""
+    manifest, _ = successor(prepared, completed(prepared))
+
+    def defect(manifest, *, require_pins=True):
+        return {}['a key the validator forgot']
+    monkeypatch.setattr(probe_predecessor, '_validate_link', defect)
+    with pytest.raises(BudgetStop, match=r"malformed or unavailable \(KeyError at test_audit_after_probe\.py:\d+: ") as caught:
+        probe_predecessor.validate_link(manifest)
+    assert isinstance(caught.value.__cause__, KeyError)
 
 
 def test_the_amendment_candidate_names_the_sequence_state_the_registration_will(tmp_path):
