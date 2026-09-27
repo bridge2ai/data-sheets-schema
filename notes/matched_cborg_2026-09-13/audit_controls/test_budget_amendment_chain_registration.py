@@ -91,7 +91,7 @@ def test_real_chained_preparation_refuses_a_proof_that_does_not_bind_its_predece
 
 # --- a link anchored on a real reconciliation (#2502, #2577) ---------------------------------------
 
-from audit_controls.test_registration import accounting  # noqa: F401,E402  (fixture)
+from audit_controls.test_registration import accounting, stopped_audit  # noqa: F401,E402  (fixtures)
 from audit_controls.test_reconcile_stopped import reconcile, stopped, successor_of  # noqa: F401,E402
 
 
@@ -117,6 +117,25 @@ def test_the_anchor_proof_accepts_the_bytes_reconcile_stopped_writes(stopped):
         proof['reconciliation']['receipt']['sha256']
     with pytest.raises(BudgetStop, match='receipt does not settle'):
         amendment._reconciled_anchor(proof, first, anchored, {'predecessor': deepcopy(proof)})
+
+
+def test_the_anchor_proof_accepts_the_bytes_a_confirmed_charge_writes(stopped_audit):
+    """#2679: the registration's confirmed-charge branch settles a stopped audit's charge below
+    its reservation, with its own settlement basis and no debit fields. The registration
+    accepts those bytes, and so does the reconciled anchor a chained link rests on."""
+    successor, source, receipt, checkpoint, _ = stopped_audit
+    bridge_paths = successor['budget']['continuation']['reconciliation']
+    first = registration.read_json(bridge_paths['source_registration'])
+    anchored = registration.read_json(checkpoint)
+    assert registration.validate_audit_reconciliation(successor) == anchored
+    row = next(r for r in anchored['requests'] if r['id'] == anchored['reconciled_from']['request_id'])
+    assert row['settlement_basis'] == 'user_confirmed_provider_accounting'
+    assert Decimal(row['cost_usd']) < Decimal(row['reserved_usd'])
+    assert registration.read_json(receipt)['kind'] == 'user_confirmed_provider_charge_reconciliation'
+    bridge = {'source_ledger': reference(source), 'receipt': reference(receipt)}
+    proof = {'reconciliation': deepcopy(bridge), 'predecessor_registration': reference(bridge_paths['source_registration']),
+             'predecessor_ledger': reference(checkpoint)}
+    assert amendment._reconciled_anchor(proof, first, anchored, {'predecessor': {'reconciliation': bridge}}) == bridge
 
 
 # --- the operator path end to end (#2633) ----------------------------------------------------------

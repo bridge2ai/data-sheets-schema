@@ -680,7 +680,7 @@ Only chained links are checked; v1 and v2 are taken as they were validated.
 
 A chained link may be anchored on the checkpoint that reconciled its
 predecessor's own ledger: a stop settled by a receipt, as `reconcile_stopped`
-or a probe's `settle` writes (#2502). The link then carries a
+or a probe's settlement (`settle_pending`, in `run` or through `settle`) writes (#2502, #2681). The link then carries a
 `reconciliation` of two references, `source_ledger` (the predecessor's own
 ledger, at the path its registration names) and `receipt`. Its schema-3
 receipt carries the same two under `predecessor.reconciliation`. Both are

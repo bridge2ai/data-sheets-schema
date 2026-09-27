@@ -21,7 +21,8 @@ SECOND_KIND = 'additive_sequence_budget_v2'
 CHAIN_KIND = 'additive_sequence_budget_chain_v1'
 CHAIN_RECEIPT_VERSION = 3
 #: An increase is anchored on the immediate predecessor's own settled ledger:
-#: an audit, or a transport probe, which is a lineage link too (#2469).
+#: an audit, or a transport probe, which is a lineage link too (#2469). A chained
+#: link may instead rest on the checkpoint that reconciled that ledger (#2502).
 PREDECESSOR_KINDS = ('d4d_native_audit_continuation', 'd4d_native_transport_probe_v1')
 #: A bound on validation work; a real lineage adds one link per authorization.
 MAX_CHAIN_LINKS = 16

@@ -659,16 +659,52 @@ def test_a_reconciliation_ref_cannot_reuse_an_earlier_identity_at_a_new_path(tmp
 
 
 def test_a_confirmed_charge_below_its_reservation_is_accepted(tmp_path):
-    """#2635: the registration's confirmed-charge path settles below the reservation."""
+    """#2635, #2679: the registration's confirmed-charge path settles below the reservation,
+    in the document shape that branch writes: no debit fields, its own settlement basis,
+    and the confirmed charge in reconciled_from."""
     def confirmed(stage, document):
         if stage == 'receipt':
-            document.update(kind='user_confirmed_provider_charge_reconciliation', confirmed_complete_charge_usd='2.00')
+            document.pop('budget_debit_usd')
+            document.update(kind='user_confirmed_provider_charge_reconciliation', confirmed_complete_charge_usd='2.00',
+                            user_confirmation={'exact_response': 'approved', 'quoted_request': 'Confirm the charge'},
+                            provider_observation_sha256='observation', recorded_at='2026-09-18T01:00:00Z')
         if stage == 'reconciled':
-            stopped(document).update(cost_usd='2.00')
+            stopped(document).update(cost_usd='2.00', settlement_basis='user_confirmed_provider_accounting',
+                                     provider_observation_sha256='observation', provider_usage_is_final=False)
+            document['reconciled_from'].update(confirmed_charge_usd='2.00', source_attempt_completed=False)
     proof, origin, reconciled, manifest, _ = make_reconciled_chain_fixture(tmp_path, edit=confirmed)
     assert stopped(reconciled)['cost_usd'] == '2.00' and stopped(reconciled)['reserved_usd'] == '2.4535'
+    assert stopped(reconciled)['settlement_basis'] == 'user_confirmed_provider_accounting'
     assert amendment.effective_total(manifest, origin) == Decimal(800)
     amendment.ledger_bridge(manifest, reconciled, checkpoint_sha256=proof['predecessor_ledger']['sha256'])
+
+
+def test_a_later_link_cannot_reuse_an_earlier_links_reconciliation_at_a_new_path(tmp_path):
+    """#2680: the reverse of #2634. A later link naming a byte copy, at a new path, of the
+    reconciled link's receipt or source ledger reuses that evidence and is refused at
+    selection, before anything is read."""
+    first = make_reconciled_chain_fixture(tmp_path / 'reconciled')
+    proof, origin, reconciled, manifest, _ = first
+    later, _, _, _ = make_chain_fixture(tmp_path / 'later', prior=(proof, origin, reconciled, manifest),
+                                        increase='150', quote='increase the budget by $150')
+    for key in ('receipt', 'source_ledger'):
+        earlier = proof['reconciliation'][key]
+        copy = tmp_path / 'copies' / key / Path(earlier['path']).name
+        copy.parent.mkdir(parents=True)
+        copy.write_bytes(Path(earlier['path']).read_bytes())
+        changed = deepcopy(later)
+        changed['authorization'] = {'path': str(copy), 'sha256': earlier['sha256']}
+        with pytest.raises(BudgetStop, match='reuses earlier authority or predecessor identity'):
+            amendment.selection(changed)
+
+
+@pytest.mark.parametrize('digest', [123, None, ['a' * 64]], ids=['int', 'null', 'list'])
+def test_a_reconciliation_digest_that_is_not_a_string_is_a_budget_stop(tmp_path, digest):
+    """#2680: the inner digest type guard; refused as a BudgetStop, never a TypeError."""
+    proof, _, _, _, _ = make_reconciled_chain_fixture(tmp_path)
+    proof['reconciliation']['receipt']['sha256'] = digest
+    with pytest.raises(BudgetStop, match='invalid budget amendment reconciliation'):
+        amendment.selection(proof)
 
 
 @pytest.mark.parametrize('value', [['source_ledger', 'receipt'], None, 'reconciliation'], ids=['list', 'null', 'string'])
