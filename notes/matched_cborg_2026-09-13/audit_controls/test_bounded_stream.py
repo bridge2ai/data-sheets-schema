@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import select
 import signal
 import socket
 import ssl
@@ -11,6 +12,7 @@ import subprocess
 import sys
 import threading
 import time
+from types import SimpleNamespace
 
 import httpx
 import pytest
@@ -108,22 +110,99 @@ def test_exact_bytes_status_headers_and_secret_only_in_pipe(processes, monkeypat
     client.close()
 
 
-def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(processes):
+class ParentClock:
+    """The parent's monotonic time, moved only by the phases the test names (#2540).
+
+    The worker, its socket and the header drips stay real. Only the parent's
+    deadline accounting reads this clock, so a loaded scheduler can neither
+    spend the budget on a slow interpreter start nor move the instant of
+    refusal. Starting the worker and writing the request each spend a fixed
+    part of the budget, so both phases still count against the one deadline.
+    The clock reaches the deadline only from inside the parent's own wait,
+    once the server holds the request and the parent holds the sent witness.
+    Every move is on the parent's thread, so nothing moves the clock between
+    the parent reading it and waiting on it.
+
+    The exact-deadline check relies on the product reading
+    `bounded.time.monotonic` and waiting with `bounded.select.select` for
+    exactly the remaining time. A refactor to `selectors` or to sliced polls
+    fails this test rather than slipping past it."""
+    def __init__(self, *, startup, write, deadline, expire_when):
+        self.now, self.waits = 1000.0, []
+        self.startup, self.write, self.deadline = startup, write, deadline
+        self.expire_when, self._written = expire_when, False
+
+    def monotonic(self):
+        return self.now
+
+    def spawned(self):
+        self.now += self.startup
+
+    def select(self, readable, writable, errors, timeout):
+        end = self.now + timeout
+        self.waits.append(end)
+        if end != pytest.approx(self.deadline, abs=1e-9):
+            raise AssertionError(f"the parent waits until {end}, not its one deadline {self.deadline}")
+        if writable and not self._written:
+            self._written, self.now = True, self.now + self.write
+        hang = time.monotonic() + 60
+        while True:
+            if not writable and self.now < self.deadline and self.expire_when():
+                self.now = self.deadline
+            expired = self.now >= end
+            ready = select.select(readable, writable, errors, 0 if expired else .01)
+            if expired or any(ready):
+                return ready
+            if time.monotonic() > hang:
+                raise AssertionError("the sent witness never arrived")
+
+
+def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(processes, monkeypatch):
     # Each byte arrives comfortably inside the HTTPX read-inactivity timeout.
-    # The entire header remains incomplete beyond the parent total deadline.
-    sent = threading.Event()
+    # The header stays incomplete for as long as the worker is connected, so
+    # only the parent's total deadline can refuse it. The parent's budget is
+    # virtual (ParentClock); the real-time limits bound only the worker, so
+    # they can be generous at no cost to the verdict.
+    read, connect = 5, 2
+    sent, stop = threading.Event(), threading.Event()
+    client = bounded.BoundedStreamClient(read_timeout_seconds=read, connect_timeout_seconds=connect)
+    def witnessed():
+        with client._lock:
+            return sent.is_set() and any(worker.sent for worker in client._workers)
+    clock = ParentClock(startup=.5, write=1, deadline=1000.0 + read + connect, expire_when=witnessed)
+    monkeypatch.setattr(bounded, "time", SimpleNamespace(monotonic=clock.monotonic))
+    monkeypatch.setattr(bounded, "select", SimpleNamespace(select=clock.select))
+    spawn, reaped = bounded.subprocess.Popen, []
+    def charged(*args, **kwargs):
+        clock.spawned()
+        process = spawn(*args, **kwargs)
+        reaped.append(killed_before_reaped(process))
+        return process
+    monkeypatch.setattr(bounded.subprocess, "Popen", charged)
     def respond(handler, body):
         sent.set()
-        for byte in b"HTTP/1.1 200 OK\r\nX-Slow: never-finished":
-            handler.wfile.write(bytes([byte])); handler.wfile.flush(); time.sleep(.05)
-    client = bounded.BoundedStreamClient(read_timeout_seconds=.45, connect_timeout_seconds=.25)
+        handler.close_connection = True  # no keep-alive read on the killed worker's socket
+        header = b"HTTP/1.1 200 OK\r\nX-Slow: never-finished"
+        for index in range(400):
+            handler.wfile.write(header[index:index + 1] or b"."); handler.wfile.flush()
+            if stop.wait(.05):
+                return
     with endpoint(respond) as url:
-        started = time.monotonic()
-        with pytest.raises(httpx.ReadTimeout):
-            with client.stream("POST", url, content=b"synthetic", headers={}):
-                pytest.fail("incomplete headers were accepted")
-        elapsed = time.monotonic() - started
-    assert sent.is_set() and .6 <= elapsed < 2
+        try:
+            with pytest.raises(httpx.ReadTimeout, match="bounded transport deadline exceeded"):
+                with client.stream("POST", url, content=b"synthetic", headers={}):
+                    pytest.fail("incomplete headers were accepted")
+        finally:
+            stop.set()
+    # Start-up, the request write and the dripping header all waited on one
+    # deadline, read + connect after entry, and the clock reached it only
+    # there: no phase moved it. The refusal is the parent's own, and the
+    # worker was killed at that deadline, not waited out.
+    assert sent.is_set() and len(clock.waits) >= 3 and clock.now == clock.deadline
+    (process, _, _), = processes
+    assert process.returncode == -signal.SIGKILL
+    (waits,) = reaped
+    assert waits and all(waits), "the worker was waited on before it was killed"
     assert not client._workers
     client.close()
 
