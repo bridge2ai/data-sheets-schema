@@ -774,7 +774,9 @@ already has one. The successor's validator binds both (#2492):
   pinned in the successor and must name this receipt, this checkpoint, this
   request and this output directory. The receipt and checkpoint must sit in
   that directory, compared by file identity rather than spelling (#2584). A
-  missing marker is refused by name before anything is written (#2585).
+  missing marker is refused by name (#2585): by a transport probe before its
+  output directory exists, and by an audit successor at registration, after
+  preparation has populated its destination (#2629).
 
 The tool runs that validator on its staged files before the marker exists,
 so its own check skips only the marker requirement. A per-charge
@@ -782,7 +784,8 @@ authorization has no `standing` key and cites its own record, as audit27's
 hand-made one does; it keeps its own checks and needs no marker. A transport
 probe pins `reconcile_stopped.py`, `probe_predecessor.py` and
 `runtime_closure.py` with its own code, since its lineage check runs them
-(#2586). A transport probe's debit is also
+(#2586). For a batch tip that check also runs `batch_native.py` and the
+modules it imports; the probe does not yet pin those (#2628). A transport probe's debit is also
 marked `standing`, but it is proven by its link (#2469) rather than by a
 marker. The stopped audit's files are never modified. The tool
 neither claims the sequence nor contacts a provider. The printed paths and

@@ -663,3 +663,126 @@ def test_a_malformed_authorization_is_refused_with_a_budget_stop(stopped):
     r.continuation_paths(successor)
     with pytest.raises(BudgetStop, match='lacks explicit confirmation evidence'):
         r.validate_audit_reconciliation(successor)
+
+
+# --- review round 2 of #2568: #2630-#2632 -----------------------------------------------------
+
+@pytest.mark.parametrize('standing', [False, 1, 'true', None])
+def test_any_standing_key_invokes_the_standing_authorization_whatever_record_it_cites(stopped, standing):
+    """#2630: a `standing` key of any value makes a standing debit even when the record it cites
+    is not the standing one, so it needs the marker and is refused unless it is exactly right."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    value = reauthorize(value, request_id, lambda a: a.update(
+        standing=standing, source_record={'path': '/elsewhere/user_authorization.json', 'sha256': '6' * 64}))
+    assert tool.claims_standing(r.read_json(value['receipt']))
+    successor, _ = successor_of(m, reg, first, value)
+    assert Path(value['marker']) in r.continuation_paths(successor)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
+    Path(value['marker']).unlink()
+    with pytest.raises(BudgetStop, match='no reconciliation marker'):
+        r.continuation_paths(successor)
+
+
+def test_a_marker_naming_another_existing_directory_is_refused(stopped):
+    """#2631: the marker's `out` must be the receipt's own directory, not merely a directory."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    other = reg.parent.parent / 'another_directory'
+    other.mkdir()
+    marker = Path(value['marker'])
+    recorded = r.read_json(marker); recorded['out'] = str(other)
+    save(marker, recorded)
+    successor, _ = successor_of(m, reg, first, value)
+    with pytest.raises(BudgetStop, match='marker records'):
+        r.validate_audit_reconciliation(successor)
+
+
+def test_a_relocated_receipt_and_checkpoint_are_refused(stopped):
+    """#2631: byte-identical copies of both files beside each other elsewhere keep every hash,
+    but the marker records where the tool wrote them."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    moved = reg.parent.parent / 'moved'
+    moved.mkdir()
+    copies = {key: moved / Path(value[key]).name for key in ('receipt', 'checkpoint')}
+    for key, target in copies.items():
+        target.write_bytes(Path(value[key]).read_bytes())
+    successor, _ = successor_of(m, reg, first, {**value, **{k: str(v) for k, v in copies.items()}})
+    with pytest.raises(BudgetStop, match='marker records'):
+        r.validate_audit_reconciliation(successor)
+
+
+def test_the_marker_directory_is_compared_by_identity_on_any_filesystem(stopped):
+    """#2631: a marker naming the reconciliation directory through an alias is the same
+    directory. The case-variant test below needs a case-insensitive filesystem; a symlink
+    alias is another spelling of one directory that CI's filesystem also has."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    alias = reg.parent.parent / 'alias'
+    alias.symlink_to(Path(value['receipt']).parent, target_is_directory=True)
+    marker = Path(value['marker'])
+    recorded = r.read_json(marker); recorded['out'] = str(alias)
+    save(marker, recorded)
+    successor, _ = successor_of(m, reg, first, value)
+    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+
+
+def test_the_checkpoint_directory_is_compared_by_identity_on_any_filesystem(stopped, monkeypatch):
+    """#2631: the receipt and the checkpoint spelled differently name one directory. On a
+    case-insensitive filesystem canonical_path accepts both spellings; this models that on any
+    filesystem with a symlink alias the canonical check is told to accept."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    alias = reg.parent.parent / 'alias'
+    alias.symlink_to(Path(value['receipt']).parent, target_is_directory=True)
+    real = r.canonical_path
+
+    def insensitive(path_value, *, exists=False):
+        if isinstance(path_value, str) and Path(path_value).parent == alias:
+            if exists and not Path(path_value).exists():
+                raise BudgetStop('registered path is not absolute and canonical')
+            return Path(path_value)
+        return real(path_value, exists=exists)
+    monkeypatch.setattr(r, 'canonical_path', insensitive)
+    spelled = {**value, 'checkpoint': str(alias / Path(value['checkpoint']).name)}
+    successor, _ = successor_of(m, reg, first, spelled)
+    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+
+
+def test_mixed_case_spellings_of_the_receipt_and_checkpoint_are_one_directory(stopped):
+    """#2631: on a case-insensitive filesystem the checkpoint and the receipt may be named in
+    different case spellings of the tool's directory."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'Reconciliation')
+    variant = reg.parent.parent / 'reconciliation'
+    if not variant.exists():
+        pytest.skip('case-sensitive filesystem: covered by the alias test above')
+    spelled = {**value, 'receipt': str(variant / Path(value['receipt']).name)}
+    successor, _ = successor_of(m, reg, first, spelled)
+    assert r.validate_audit_reconciliation(successor) == r.read_json(value['checkpoint'])
+
+
+@pytest.mark.parametrize('out', [None, ['x'], 7], ids=['null', 'list', 'int'])
+def test_a_malformed_marker_directory_is_a_budget_stop(stopped, out):
+    """#2632: a marker whose `out` is not a path is refused by name, not with a TypeError."""
+    m, first, reg, _, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    marker = Path(value['marker'])
+    recorded = r.read_json(marker); recorded['out'] = out
+    save(marker, recorded)
+    successor, _ = successor_of(m, reg, first, value)
+    with pytest.raises(BudgetStop, match='marker records'):
+        r.validate_audit_reconciliation(successor)
+
+
+@pytest.mark.parametrize('path', [None, 7, ['x']], ids=['null', 'int', 'list'])
+def test_a_malformed_standing_record_path_is_a_budget_stop(stopped, path):
+    """#2632: a record reference whose path is not a string is refused by name."""
+    m, first, reg, request_id, _ = stopped
+    value = reconcile(reg, reg.parent.parent / 'reconciliation')
+    value = reauthorize(value, request_id, lambda a: a['source_record'].update(path=path))
+    successor, _ = successor_of(m, reg, first, value)
+    with pytest.raises(BudgetStop, match='pinned standing authorization exactly'):
+        r.validate_audit_reconciliation(successor)
