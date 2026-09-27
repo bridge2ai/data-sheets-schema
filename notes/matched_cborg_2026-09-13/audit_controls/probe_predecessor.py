@@ -60,11 +60,26 @@ def _files(root):
 _MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError)
 
 
+#: The controls' own code: a refusal is located in it, not in the library it called (#2641).
+_CONTROLS = Path(__file__).resolve().parents[1]
+
+
+def _frame(frame):
+    return f'{Path(frame.filename).name}:{frame.lineno}'
+
+
 def _malformed(what, error):
     """A refusal that still fails closed, naming the error and where it was raised, so a
-    defect in this validator is not read as bad input (#2514)."""
+    defect in this validator is not read as bad input (#2514). The place is the innermost
+    frame in the controls' own code; an error raised inside a library it called (a JSON
+    decoder, a path method) is also named after `via` (#2641)."""
     frames = traceback.extract_tb(error.__traceback__)
-    where = f' at {Path(frames[-1].filename).name}:{frames[-1].lineno}' if frames else ''
+    own = [frame for frame in frames if Path(frame.filename).resolve().is_relative_to(_CONTROLS)]
+    where = ''
+    if own:
+        where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
+    elif frames:
+        where = f' at {_frame(frames[-1])}'
     return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
 
 

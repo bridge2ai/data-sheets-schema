@@ -255,7 +255,8 @@ def test_the_settlement_after_exit_is_pinned_and_checked(prepared, monkeypatch):
 
 @pytest.mark.parametrize('outcome', [refused])
 def test_an_amendment_candidate_bridges_to_the_probes_own_result(prepared, outcome, tmp_path):
-    """#2512: through the preparer's entry point, not the helper. A probe's result sits beside its
+    """#2512: through the amendment candidate, which builds its bridge with the same
+    continuation_bridge prepare() registers (#2640). A probe's result sits beside its
     registration; an audit's sits in its job's attempt directory."""
     from audit_controls.prepare import amendment_candidate
     result = outcome(prepared)
@@ -310,15 +311,66 @@ def test_required_paths_pin_the_probe_link(ancestry, tmp_path, monkeypatch):
 
 
 def test_a_validator_defect_is_named_with_its_error_and_place(prepared, monkeypatch):
-    """#2514: still a BudgetStop, but it says which error was raised where."""
+    """#2514: still a BudgetStop, but it says which error was raised where, and its message."""
     manifest, _ = successor(prepared, completed(prepared))
 
     def defect(manifest, *, require_pins=True):
         return {}['a key the validator forgot']
     monkeypatch.setattr(probe_predecessor, '_validate_link', defect)
-    with pytest.raises(BudgetStop, match=r"malformed or unavailable \(KeyError at test_audit_after_probe\.py:\d+: ") as caught:
+    with pytest.raises(BudgetStop, match=r"^probe predecessor is malformed or unavailable "
+                       r"\(KeyError at test_audit_after_probe\.py:\d+: 'a key the validator forgot'\)$") as caught:
         probe_predecessor.validate_link(manifest)
     assert isinstance(caught.value.__cause__, KeyError)
+
+
+@pytest.mark.parametrize('wrapper, patched, refusal', [
+    ('paths', '_paths', 'audit predecessor evidence is malformed or unavailable'),
+    ('validate_predecessor', 'predecessor_path', 'audit predecessor registration is malformed or unavailable'),
+], ids=['paths', 'validate_predecessor'])
+def test_each_wrapper_names_the_error_it_caught(prepared, monkeypatch, wrapper, patched, refusal):
+    """#2642: the other two wrappers carry the error's class, place and message too."""
+    manifest, _ = successor(prepared, completed(prepared))
+
+    def defect(*args, **kwargs):
+        raise KeyError('a key the wrapper forgot')
+    monkeypatch.setattr(probe_predecessor, patched, defect)
+    with pytest.raises(BudgetStop, match=rf"^{refusal} \(KeyError at test_audit_after_probe\.py:\d+: "
+                       r"'a key the wrapper forgot'\)$"):
+        getattr(probe_predecessor, wrapper)(manifest)
+
+
+def test_an_error_raised_in_a_library_is_located_in_the_controls_code(prepared):
+    """#2641: a malformed probe file fails inside the JSON decoder; the refusal names the
+    controls' own frame that read it, and the decoder after `via`."""
+    manifest, _ = successor(prepared, completed(prepared))
+    (prepared.root / 'probe' / 'registration.json').write_bytes(b'not json')
+    with pytest.raises(BudgetStop, match=r"^probe predecessor is malformed or unavailable \(JSONDecodeError "
+                       r"at registration\.py:\d+ via decoder\.py:\d+: Expecting value"):
+        probe_predecessor.validate_link(manifest, require_pins=False)
+
+
+def test_prepare_registers_the_bridge_to_the_probes_own_result(ancestry, tmp_path, monkeypatch):
+    """#2640: prepare() builds the bridge it registers with continuation_bridge, the builder the
+    amendment candidate uses, so the probe case tested there is the one registered. The probe
+    link's own checks are stubbed here; they are tested above on a real probe lineage."""
+    from audit_controls import prepare as audit_prepare
+    args = ancestry[0]
+    probe = tmp_path / 'probe'
+    source = save(probe / 'registration.json', {'kind': probe_predecessor.KIND,
+                                                'budget': {'ledger_path': str(probe / 'billing.json')}})
+    save(probe / 'billing.json', {'synthetic': 'the probe ledger'})
+    save(probe / 'result.json', {'synthetic': 'the probe result'})
+    receipt = save(probe / 'debit_receipt.json', {'synthetic': 'the probe debit'})
+    monkeypatch.setattr(probe_predecessor, 'validate_predecessor', lambda manifest, **_: None)
+    monkeypatch.setattr(probe_predecessor, 'paths', lambda manifest: set())
+    built, real = [], audit_prepare.continuation_bridge
+    monkeypatch.setattr(audit_prepare, 'continuation_bridge', lambda *given: built.append(real(*given)) or built[-1])
+    path = audit_prepare.prepare(**args, destination=tmp_path / 'after_probe',
+                                 continuation_checkpoint=args['reconciled_checkpoint'],
+                                 continuation_source_registration=source, continuation_reconciliation_receipt=receipt)
+    registered = r.read_json(path)['budget']['continuation']['reconciliation']
+    assert built == [registered] == [{'source_registration': str(source), 'source_ledger': str(probe / 'billing.json'),
+                                      'receipt': str(receipt), 'result': str(probe / 'result.json')}]
 
 
 def test_the_amendment_candidate_names_the_sequence_state_the_registration_will(tmp_path):
