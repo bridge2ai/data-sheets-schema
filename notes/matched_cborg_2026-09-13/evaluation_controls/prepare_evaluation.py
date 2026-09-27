@@ -141,11 +141,19 @@ def _job(manifest, destination, variant, style, identity, *, rating=1, canary=Tr
     return row
 
 
+def _select_thinking_display(native_runtime, value):
+    """Every native job copies this runtime, so one display covers the registration (#2541).
+    Checked before any destination exists; never inherited from an earlier stage."""
+    if value is not None:
+        from audit_controls.registration import stage_thinking_display
+        native_runtime['thinking_display'] = stage_thinking_display(value, native_runtime.get('version'))
+
+
 def build_registration(destination, *, generation_registration, generation_acceptance,
                        generation_job_id, context_path, billing_checkpoint,
                        native_executable=None, project=None, method=None, profile=None,
                        provider_base_url=None, provider_ca_bundle=None,
-                       fitness_schema_guidance=_UNSELECTED):
+                       fitness_schema_guidance=_UNSELECTED, native_thinking_display=None):
     """Build an exclusive offline condition; caller must supply actual acceptance.
 
     The source generation ledger must already be settled and match the
@@ -196,6 +204,7 @@ def build_registration(destination, *, generation_registration, generation_accep
         raise BudgetStop('evaluation profile must match the accepted generation profile')
     profile_object = profile_named(selected_profile)
     native_runtime = runtime_snapshot(native_executable)
+    _select_thinking_display(native_runtime, native_thinking_display)
     bundle = _source_path(source_repository, source_job['bundle'])
     original_bundle = source_job.get('input_identity', {}).get('bundle', {})
     original_pins = [generation.get('pinned_files', {}).get(key) for key in
@@ -364,7 +373,7 @@ def _materialize(manifest, destination, bundle, native_runtime, spent, *, billin
 
 def build_composite_registration(destination, *, finalization_registration, finalization_acceptance,
                                  context_path, native_executable=None, durable_sequence_claim=False,
-                                 fitness_schema_guidance=_UNSELECTED):
+                                 fitness_schema_guidance=_UNSELECTED, native_thinking_display=None):
     """Prepare the accepted composite pair without claiming accounting ownership."""
     fitness_selection = _fitness_selection(fitness_schema_guidance)
     from source_pair import inspect_finalization
@@ -389,6 +398,7 @@ def build_composite_registration(destination, *, finalization_registration, fina
     if timeout is None or native_api_force_idle_timeout(phase) is not False:
         raise BudgetStop('composite native evaluation requires reviewed bounded API and explicit idle-timeout controls')
     native_runtime.update(api_timeout_ms=timeout, api_force_idle_timeout=False)
+    _select_thinking_display(native_runtime, native_thinking_display)
     ledger_path = Path(source['finalization']['ledger']['path'])
     ledger = read_json(ledger_path)
     total_cap = Decimal('400')
@@ -460,6 +470,8 @@ def main():
     parser.add_argument('--finalization-registration', type=Path)
     parser.add_argument('--finalization-acceptance', type=Path)
     parser.add_argument('--native-executable', type=Path)
+    parser.add_argument('--native-thinking-display', choices=('summarized',),
+        help='the proxy adds display: summarized to each native job\'s forwarded adaptive-thinking requests (#2541)')
     parser.add_argument('--durable-sequence-claim', action='store_true',
         help='require durable ownership evidence for new shared composite evaluations')
     parser.add_argument('--provider-base-url', choices=('https://api.cborg.lbl.gov', 'https://api-local.cborg.lbl.gov'))
@@ -469,9 +481,12 @@ def main():
     parser.add_argument('--fitness-schema-guidance', choices=('nested_semantics_v1',), default=argparse.SUPPRESS,
         help='Explicit new fitness/subtype instrument; requires accepted schema/import authority')
     args = vars(parser.parse_args())
+    if args['native_thinking_display'] is not None:
+        from native_proxy import THINKING_DISPLAY
+        args['native_thinking_display'] = dict(THINKING_DISPLAY)
     if args['finalization_registration'] is not None:
         allowed = {'destination','finalization_registration','finalization_acceptance','context_path','native_executable',
-                   'durable_sequence_claim','fitness_schema_guidance'}
+                   'durable_sequence_claim','fitness_schema_guidance','native_thinking_display'}
         if args['finalization_acceptance'] is None or any(v is not None for k,v in args.items() if k not in allowed):
             parser.error('composite preparation requires finalization acceptance and excludes legacy source/provider overrides')
         result = build_composite_registration(**{k:v for k,v in args.items() if k in allowed})

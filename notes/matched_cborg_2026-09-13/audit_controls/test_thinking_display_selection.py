@@ -117,9 +117,11 @@ from audit_controls.test_source_metadata_upgrade import metadata_ancestry  # noq
 
 # --- later stages and generation never carry it ------------------------------------------------
 
-@pytest.mark.parametrize('stage', ['phase4', 'evaluation'])
-@pytest.mark.parametrize('value', [THINKING_DISPLAY, None], ids=['selection', 'null'])
-def test_later_stages_refuse_it_even_null_before_ownership(stage, value, tmp_path, monkeypatch):
+@pytest.mark.parametrize('stage, value, match', [
+    ('evaluation', THINKING_DISPLAY, 'audit-only'), ('evaluation', None, 'audit-only'),
+    # Phase 4 selects its own display now (#2541), but never a null one.
+    ('phase4', None, 'thinking_display_v1')], ids=['evaluation-selection', 'evaluation-null', 'phase4-null'])
+def test_later_stages_refuse_the_audit_key_or_a_null_before_ownership(stage, value, match, tmp_path, monkeypatch):
     m = {'kind': 'd4d_native_finalization' if stage == 'phase4' else 'd4d_evaluation_registration', KEY: value}
     path, review = tmp_path / 'registration.json', tmp_path / 'review.json'
     save(path, m); save(review, {})
@@ -127,7 +129,7 @@ def test_later_stages_refuse_it_even_null_before_ownership(stage, value, tmp_pat
     if stage == 'phase4':
         monkeypatch.setattr(final_native, 'owned_sequence', forbidden)
         monkeypatch.setattr(final_native, 'build_policy', forbidden)
-        with pytest.raises(BudgetStop, match='audit-only'): final_native.run_job(path, review, adapter=forbidden)
+        with pytest.raises(BudgetStop, match=match): final_native.run_job(path, review, adapter=forbidden)
     else:
         spec = importlib.util.spec_from_file_location('thinking_display_evaluation_entry', BASE / 'evaluation_controls/run_evaluation.py')
         run_evaluation = importlib.util.module_from_spec(spec)
@@ -136,7 +138,7 @@ def test_later_stages_refuse_it_even_null_before_ownership(stage, value, tmp_pat
             spec.loader.exec_module(run_evaluation)
         monkeypatch.setattr(run_evaluation, 'accounting_owner', forbidden)
         monkeypatch.setattr(run_evaluation, 'verify_dependencies', forbidden)
-        with pytest.raises(BudgetStop, match='audit-only'): run_evaluation.run_job(path, review, 'synthetic', adapter=forbidden)
+        with pytest.raises(BudgetStop, match=match): run_evaluation.run_job(path, review, 'synthetic', adapter=forbidden)
     assert snapshot(tmp_path) == before
 
 

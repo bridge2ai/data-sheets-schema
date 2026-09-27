@@ -172,8 +172,9 @@ offline, with no provider contacted; enabling experimental betas turns on four
 more beta headers. The maintainer chose, on 2026-09-26, to have the proxy add
 the display instead. A registration selects it with
 `native_thinking_display = {"kind": "thinking_display_v1", "display":
-"summarized", "delivery": "proxy_substitution"}`. The setting is audit-only
-and registered for Claude Code 2.1.272.
+"summarized", "delivery": "proxy_substitution"}`. The setting is registered
+for Claude Code 2.1.272. Audits, Phase 4 and evaluation each select it for
+themselves (#2464, #2541); generation refuses it.
 
 **What the proxy does with each child request:**
 - **`{"type":"adaptive"}`** gains the display, and only those bytes change.
