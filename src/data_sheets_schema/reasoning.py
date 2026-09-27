@@ -13,14 +13,18 @@ plaintext depends on the endpoint, so this module records what it observed
 rather than assuming:
 
 - **Direct Anthropic** (`ANTHROPIC_API_KEY`) — `thinking` carries text.
-- **CBORG** (`google/claude-opus-5-high`, verified 2026-07-29) — the block
-  arrives with a valid `signature` and `thinking: ''`. Not a streaming
+- **CBORG** (`google/claude-opus-5-high`, verified 2026-07-29) — for a request
+  that names no thinking display, as every request this runner sends, the
+  block arrives with a valid `signature` and `thinking: ''`. Not a streaming
   artifact: a non-streaming `messages.create` returns the same empty block, and
   the stream emits *no* `thinking_delta` events at all, only a `signature`
-  event. The proxy strips the plaintext and forwards the signed envelope.
+  event. A request with `"display":"summarized"` does receive summarized
+  thinking text through CBORG (#2463 probe, 2026-09-26; #2542), so the empty
+  block follows from the request, not from the proxy stripping text.
 
-So on the endpoint this project currently generates with, **the reasoning text
-is not obtainable**. Capturing it anyway is still worth the few lines: the
+So for the requests this runner sends, **the reasoning text is not
+obtainable**; summarized text would be a different, shorter claim than the
+full reasoning a direct run returns. Capturing it anyway is still worth the few lines: the
 record then states that a reasoning block existed, was signed, and was withheld
 — which is a different and more useful claim than silence — and the same code
 captures the real text unchanged if a run is ever pointed at the direct API.
