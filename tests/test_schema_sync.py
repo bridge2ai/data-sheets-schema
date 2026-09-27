@@ -23,6 +23,7 @@ from data_sheets_schema.schema_sync import (
     IN_SYNC,
     MERGED_SCHEMAS,
     STALE,
+    UNCHECKED,
     blocking,
     check,
     check_one,
@@ -193,3 +194,85 @@ class GateTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RefusalWordingTest(unittest.TestCase):
+    """#2738: a check that could not run is refused as unchecked, not as a stale schema."""
+
+    def _refusal(self, rows):
+        import tempfile
+        from unittest import mock
+        from data_sheets_schema import api_runner as api, schema_sync
+        from tests.test_download.test_api_runner import FakeClient, spec
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(schema_sync, "check", lambda **_: rows):
+            client = FakeClient()
+            with self.assertRaises(RuntimeError) as caught:
+                api.execute(spec(out_dir=Path(tmp)), client=client)
+            self.assertEqual(client.messages.calls, [])
+        return str(caught.exception)
+
+    def test_an_unchecked_row_is_not_called_stale(self):
+        message = self._refusal([{"class": "CoreDataset", "status": UNCHECKED,
+                                  "reason": "digest could not be computed: timed out after 600 seconds"}])
+        self.assertTrue(message.startswith("the schema sync check could not run"), message)
+        self.assertIn("CoreDataset: digest could not be computed", message)
+        self.assertNotIn("not built from the current source", message)
+        self.assertNotIn("make regen-all", message)
+
+    def test_a_stale_row_is_still_called_stale(self):
+        message = self._refusal([{"class": "Dataset", "status": STALE, "reason": "rebuild differs"}])
+        self.assertTrue(message.startswith("the merged schema is not built from the current source"), message)
+        self.assertIn("make regen-all", message)
+        self.assertNotIn("could not run", message)
+
+    def test_both_causes_are_named_each_with_its_rows(self):
+        message = self._refusal([{"class": "Dataset", "status": STALE, "reason": "rebuild differs"},
+                                 {"class": "CoreDataset", "status": UNCHECKED, "reason": "timed out"}])
+        stale_part, unchecked_part = message.split("; the schema sync check could not run")
+        self.assertIn("Dataset: rebuild differs", stale_part)
+        self.assertNotIn("CoreDataset", stale_part)
+        self.assertIn("CoreDataset: timed out", unchecked_part)
+
+
+class DigestTimeoutTest(unittest.TestCase):
+
+    def test_the_digest_child_gets_the_hang_guard(self):
+        """#2738: the digest child's bound is the regeneration's hang guard, not 60 s."""
+        import subprocess
+        from unittest import mock
+        from data_sheets_schema import schema_sync
+        seen = {}
+
+        def run(*args, **kwargs):
+            seen.update(kwargs)
+            raise subprocess.TimeoutExpired(args[0], kwargs["timeout"])
+        schema_sync.forget_rebuilds()
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(schema_sync.subprocess, "run", run):
+            schema = Path(tmp) / "x.yaml"; schema.write_text("id: x\n")
+            with self.assertRaises(subprocess.TimeoutExpired):
+                schema_sync._rebuilt_fingerprint("Dataset", schema, schema, "x.yaml")
+        self.assertEqual(seen["timeout"], schema_sync.DIGEST_TIMEOUT_SECONDS)
+        self.assertGreaterEqual(schema_sync.DIGEST_TIMEOUT_SECONDS, 600)
+
+
+class CheckDigestSummaryTest(unittest.TestCase):
+
+    def test_the_summary_tells_stale_from_unchecked(self):
+        """#2738: `d4d schema check-digest` counts each cause under its own advice."""
+        from unittest import mock
+        from click.testing import CliRunner
+        from data_sheets_schema import schema_sync
+        from data_sheets_schema.cli.schema import schema as schema_cli
+        rows = [{"class": "Dataset", "status": STALE, "merged": "a.yaml", "reason": "rebuild differs"},
+                {"class": "CoreDataset", "status": UNCHECKED, "merged": "b.yaml", "reason": "timed out"},
+                {"class": "Other", "status": IN_SYNC, "merged": "c.yaml"}]
+        for given, says, never in (
+                (rows, ["1 of 3 merged schema(s) not current", "1 of 3 merged schema(s) could not be checked"], []),
+                ([rows[1], rows[2]], ["1 of 2 merged schema(s) could not be checked"], ["not current", "regen-all"]),
+                ([rows[0], rows[2]], ["1 of 2 merged schema(s) not current", "regen-all"], ["could not be checked"])):
+            with mock.patch.object(schema_sync, "check", lambda **_: given):
+                result = CliRunner().invoke(schema_cli, ["check-digest"])
+            for text in says:
+                self.assertIn(text, result.output)
+            for text in never:
+                self.assertNotIn(text, result.output)

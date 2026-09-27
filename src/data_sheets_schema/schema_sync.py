@@ -72,6 +72,11 @@ UNCHECKED = "unchecked"
 _REBUILT: dict[tuple, bytes] = {}
 _REBUILT_DIGESTS: dict[tuple, str] = {}
 
+#: The digest child starts an interpreter and loads the merged schema; under load
+#: that took over 60 s. A hang guard, as the regeneration's is: a slow check that
+#: would have passed must not refuse the run (#2738).
+DIGEST_TIMEOUT_SECONDS = 600
+
 
 def forget_rebuilds() -> None:
     """Drop every cached rebuild. `schema_cache.clear` calls this too."""
@@ -241,7 +246,7 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
     result = subprocess.run(
         [sys.executable, "-c", code, str(Path(__file__).resolve().parents[1]),
          class_name, str(path.resolve()), str(vocabulary.resolve()), source_name, prof.name],
-        capture_output=True, text=True, timeout=60)
+        capture_output=True, text=True, timeout=DIGEST_TIMEOUT_SECONDS)
     value = result.stdout.strip()
     if result.returncode or len(value) != 32 or any(c not in "0123456789abcdef" for c in value):
         raise ValueError(f"rebuilt digest process failed: {(result.stderr or result.stdout).strip()[-300:]}")
