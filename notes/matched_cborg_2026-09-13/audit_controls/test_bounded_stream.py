@@ -64,9 +64,19 @@ def processes(monkeypatch):
 
 
 #: The in-process gap from the parent deciding to close a worker to its SIGKILL. It
-#: holds no interpreter start-up: measured at most 5 ms at load 290, so this keeps a
-#: 100-fold margin and still refuses any grace origin/main's totals refused (#2618, #2643).
+#: holds no interpreter start-up. Over 52 concurrent runs at load ~165 it measured
+#: median 0.05 ms, max 11 ms, so this keeps a margin of about 45-fold on the worst
+#: case, and still refuses any grace origin/main's totals refused (#2618, #2643, #2678).
 KILL_GAP_SECONDS = .5
+
+#: Real-time gaps between events around a worker that is already running: the
+#: parent's spawn to its request write, the server's receipt of the request to the
+#: kill, the server's header flush to the yielded response. No interpreter start-up
+#: is in them, but a worker-to-parent pipe hop is (#2676, #2677). Over the same 52
+#: runs: spawn to write max 0.3 ms; receipt to kill median 11 ms, max 21 ms; header
+#: flush to the yielded response median 8 ms, p95 59 ms, max 135 ms. 1 s keeps a
+#: sevenfold margin on that worst case and refuses a delay of 1.2 s or more.
+PARENT_GAP_SECONDS = 1.0
 
 
 def killed_before_reaped(process, killed_at=None):
@@ -180,14 +190,21 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
     clock = ParentClock(startup=.5, write=1, deadline=1000.0 + read + connect, expire_when=witnessed)
     monkeypatch.setattr(bounded, "time", SimpleNamespace(monotonic=clock.monotonic))
     monkeypatch.setattr(bounded, "select", SimpleNamespace(select=clock.select))
-    spawn, reaped, killed_at = bounded.subprocess.Popen, [], []
+    spawn, reaped, killed_at, spawned_at, send_at, sent_at = bounded.subprocess.Popen, [], [], [], [], []
     def charged(*args, **kwargs):
         clock.spawned()
         process = spawn(*args, **kwargs)
+        spawned_at.append(time.monotonic())          # Popen returns before the interpreter starts
         reaped.append(killed_before_reaped(process, killed_at))
         return process
     monkeypatch.setattr(bounded.subprocess, "Popen", charged)
+    real_send = bounded._Worker.send
+    def timed_send(worker, payload):
+        send_at.append(time.monotonic())
+        return real_send(worker, payload)
+    monkeypatch.setattr(bounded._Worker, "send", timed_send)
     def respond(handler, body):
+        sent_at.append(time.monotonic())
         sent.set()
         handler.close_connection = True  # no keep-alive read on the killed worker's socket
         header = b"HTTP/1.1 200 OK\r\nX-Slow: never-finished"
@@ -214,6 +231,11 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
     assert waits and all(waits), "the worker was waited on before it was killed"
     assert len(killed_at) == 1, f"expected one SIGKILL, saw {len(killed_at)}"          # #2644
     assert killed_at[0] - clock.expired_at < KILL_GAP_SECONDS, "the worker was killed long after its deadline"
+    # The virtual clock is charged only inside the parent's own waits, so real time the
+    # parent spends elsewhere is bounded here (#2677): from its spawn to the request write,
+    # and from the server's receipt of the request to the kill.
+    assert send_at[0] - spawned_at[0] < PARENT_GAP_SECONDS, "the request was written long after the spawn"
+    assert killed_at[0] - sent_at[0] < PARENT_GAP_SECONDS, "the worker was killed long after the request arrived"
     assert not client._workers
     client.close()
 
@@ -303,9 +325,11 @@ def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatc
             reads_after_headers.append(size)
         return real_take(worker, size, deadline)
     monkeypatch.setattr(bounded._Worker, "_take", take)
+    flushed = []
     def respond(handler, body):
         handler.send_response(524); handler.send_header("Content-Length", "500"); handler.end_headers()
         handler.wfile.flush()
+        flushed.append(time.monotonic())
         if not exited.wait(timeout=10):
             body_released.set(); handler.wfile.write(b"x" * 500); handler.wfile.flush()
     # The read bound outlasts the watchdog, so a draining exit receives the
@@ -316,6 +340,7 @@ def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatc
         try:
             killed_at = []
             with client.stream("POST", url, content=b"synthetic", headers={}) as value:
+                entered = time.monotonic()
                 assert value.status_code == 524
                 waits = killed_before_reaped(processes[0][0], killed_at)
                 leaving = time.monotonic()
@@ -327,6 +352,8 @@ def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatc
     assert waits and all(waits), "the context waited on a live worker before killing it"
     assert len(killed_at) == 1, f"expected one SIGKILL, saw {len(killed_at)}"          # #2644
     assert killed_at[0] - leaving < KILL_GAP_SECONDS, "the kill came long after the close"
+    # And from the headers leaving the server to the response reaching the caller (#2676).
+    assert entered - flushed[0] < PARENT_GAP_SECONDS, "the response was yielded long after its headers"
     assert not client._workers
     client.close()
 
