@@ -313,8 +313,9 @@ classes:
         description: >-
           Sum of per-attempt estimates (output tokens minus a chars/4 estimate
           of visible text). Sound for comparison, not cost attribution. The
-          requests name no thinking display, so their thinking text is empty
-          and this estimate is the measure this report carries (#2542, #2622).
+          requests name no thinking display, so on the Opus 5 family, whose
+          default display is omitted, their thinking text is empty and this
+          estimate is the measure this report carries (#2542, #2622, #2669).
       approx_cost_usd:
         range: float
         description: >-

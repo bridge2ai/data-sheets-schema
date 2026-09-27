@@ -25,7 +25,7 @@ records what it observed rather than assuming:
   run of the same request would be empty too.
 - **`"display": "summarized"`** — the block carries a summary of the
   reasoning, through CBORG as directly (#2463 probe, 2026-09-26). No display
-  returns the raw reasoning.
+  setting returns the raw chain of thought (#2668).
 
 Opus 4.6 and Sonnet 4.6, which the runner also accepts, default to summarized
 instead, so a no-display request to them would carry a summary.
@@ -47,9 +47,9 @@ error where both exist. Records before this carry the estimate only.
 
 ## The token estimate
 
-`output_tokens` covers thinking *and* visible text, so when the plaintext is
-withheld the difference between them is the only surviving measure of how much
-reasoning happened. `reasoning_tokens_estimate` reports it, and is an estimate
+`output_tokens` covers thinking *and* visible text, so when the thinking text is
+empty the difference between them measures how much reasoning happened — the
+only measure before #999, and beside the endpoint's own count since (#2669). `reasoning_tokens_estimate` reports it, and is an estimate
 in the strict sense — visible text is counted with a 4-chars-per-token
 approximation, not by the tokenizer that billed it. It is sound for "this
 judgement reasoned 10x longer than that one" and unsound for cost attribution.
@@ -292,8 +292,8 @@ def log_status(runtime: str | None, label: str, log_exists: bool,
     - ``recovered_from_transcript`` — a Claude Code agentic run whose
       ``run_observed`` block carries the transcript-derived measure (#1000):
       the subagent cannot report its own accounting, but its transcript
-      records usage per turn, signed thinking blocks (empty unless the run
-      requested a display, #2542), and — from
+      records usage per turn, signed thinking blocks (empty on the Opus 5
+      family unless the run requested a display, #2542, #2669), and — from
       recent runtimes — ``thinking_tokens``. Cache-inclusive runner
       accounting, one number per run: never averaged with ``api_usage``.
     - ``transcript_observation_invalid`` — a Claude Code agentic run whose

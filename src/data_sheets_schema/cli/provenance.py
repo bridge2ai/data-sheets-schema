@@ -2181,6 +2181,10 @@ def reasoning_cmd(method, project, label, path):
         total.extend(entries)
         s = _reasoning.summarise(entries)
         click.echo(f"\n{p}")
+        if not entries:
+            # A log created but never written, e.g. by a run killed at once (#2667).
+            click.echo("  entries 0")
+            continue
         click.echo(f"  entries {s['entries']}, with a reasoning block "
                    f"{s['with_reasoning_block']}, with reasoning text "
                    f"{s['with_reasoning_text']}")
@@ -2210,7 +2214,12 @@ def reasoning_cmd(method, project, label, path):
         click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
                    f"{s['with_reasoning_text']} with reasoning text")
     if total and not any(e.get('reasoning_available') for e in total):
-        if any(e.get('reasoning_present') for e in total):
+        kinds = {b.get('type') for e in total for b in (e.get('blocks') or []) if isinstance(b, dict)}
+        if any(e.get('reasoning_present') for e in total) and kinds == {'redacted_thinking'}:
+            # Encrypted by the provider's safety redaction whatever the display (#2666).
+            click.echo("\nNo reasoning text was available in any entry. The thinking "
+                       "blocks were redacted by the provider, which no display recovers.")
+        elif any(e.get('reasoning_present') for e in total):
             click.echo("\nNo reasoning text was available in any entry. The blocks "
                        "are signed but empty because the requests named no thinking "
                        "display; a request naming display 'summarized' receives a "
