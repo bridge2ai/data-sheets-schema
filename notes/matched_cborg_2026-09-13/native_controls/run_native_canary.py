@@ -421,8 +421,8 @@ def _signal_group(process, sig):
     re-raises it. The leader's exit alone does not show the group is empty: a
     live member that refuses the signal also answers EPERM, on Darwin and on
     Linux (#2614). So once the leader has exited, the signal is sent again,
-    within a second bound, until the group is gone (ESRCH); a refusal still
-    standing at the bound is raised. The refusal is raised outside any
+    within a second bound, until the group is gone (ESRCH) or a member takes
+    it, which is delivery; a refusal still standing at the bound is raised. The refusal is raised outside any
     handler, so the exception being unwound (a recorded stop, an interrupt)
     stays in its chain.
     """
@@ -438,20 +438,19 @@ def _signal_group(process, sig):
         exited = True
     except subprocess.TimeoutExpired:
         exited = False
-    refused, deadline = True, time.monotonic() + 2
+    deadline = time.monotonic() + 2
     while exited:
         try:
             os.killpg(process.pid, sig)
-            refused = False                   # a live member took it: not a refusal
+            return                            # a live member took it: delivery, not a refusal
         except ProcessLookupError:
             return
         except PermissionError:
-            refused = True
+            pass
         if time.monotonic() >= deadline:
             break
         time.sleep(0.02)
-    if refused:
-        raise refusal
+    raise refusal
 
 
 def terminate_group(process):
