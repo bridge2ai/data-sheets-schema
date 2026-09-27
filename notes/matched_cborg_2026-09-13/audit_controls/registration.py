@@ -984,6 +984,11 @@ def validate_reconciliation(manifest):
     source = parent_path(parent, generation['budget']['ledger_path'])
     old = read_json(source)
     receipt = read_json(parent['reconciliation_receipt'])
+    from .reconcile_stopped import claims_standing
+    if claims_standing(receipt):
+        # The standing authorization covers only a stopped audit's full-reservation
+        # debit, never a generation's confirmed charge (#2717).
+        raise BudgetStop('the standing authorization permits only a full-reservation debit')
     checkpoint = read_json(parent['reconciled_checkpoint'])
     digest = sha(parent['reconciliation_receipt'])
     if (receipt.get('kind') != 'user_confirmed_provider_charge_reconciliation' or
