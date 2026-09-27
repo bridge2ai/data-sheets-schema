@@ -21,7 +21,9 @@ def entry(present, kind="thinking"):
     ([entry(True), entry(False)], "signed but empty because the requests named no thinking display",
      "No entry returned"),
     ([entry(True, "redacted_thinking")], "redacted by the provider", "named no thinking display"),   # #2666
-], ids=["signed_empty_blocks", "no_blocks", "mixed", "redacted"])
+    # Signed-empty and redacted blocks together: each cause for its own blocks (#2693).
+    ([entry(True), entry(True, "redacted_thinking")], "instead redacted by the provider", "No entry returned"),
+], ids=["signed_empty_blocks", "no_blocks", "mixed", "redacted", "signed_and_redacted"])
 def test_the_closing_message_matches_what_the_log_holds(tmp_path, entries, says, never):
     log = tmp_path / "CHORUS_reasoning.jsonl"
     log.write_text("".join(json.dumps(e) + "\n" for e in entries))
@@ -37,3 +39,21 @@ def test_a_log_with_no_entries_is_reported_not_a_crash(tmp_path):
     result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
     assert result.exit_code == 0, result.output
     assert "entries 0" in result.output
+
+
+def test_several_empty_logs_are_reported_not_a_crash(tmp_path, monkeypatch):
+    """#2692: every log a label selects is empty, so there is nothing to aggregate."""
+    from types import SimpleNamespace
+    import data_sheets_schema.runs as runs
+    from data_sheets_schema.cli import provenance as module
+    run = SimpleNamespace(method="claudecode_api", label="L", projects=["CHORUS", "VOICE"],
+                          is_core=False, deterministic=False)
+    monkeypatch.setattr(runs, "discover", lambda *a, **k: [run])
+    monkeypatch.setattr(module, "_corpus_path", lambda *_: tmp_path)
+    folder = tmp_path / "claudecode_api_core" / "L"
+    folder.mkdir(parents=True)
+    for project in run.projects:
+        (folder / f"{project}_reasoning.jsonl").write_text("")
+    result = CliRunner().invoke(provenance, ["reasoning", "--label", "L"])
+    assert result.exit_code == 0, result.output
+    assert result.output.count("entries 0") == 2

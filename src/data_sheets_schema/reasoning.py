@@ -24,11 +24,14 @@ records what it observed rather than assuming:
   defaulting to omitted on this model family, so a direct `ANTHROPIC_API_KEY`
   run of the same request would be empty too.
 - **`"display": "summarized"`** — the block carries a summary of the
-  reasoning, through CBORG as directly (#2463 probe, 2026-09-26). No display
+  reasoning: observed through CBORG's unprefixed `claude-opus-5` route (#2463
+  probe, 2026-09-26; the `google/` routes have not been sent a display, #2691)
+  and documented for a direct run. No display
   setting returns the raw chain of thought (#2668).
 
 Opus 4.6 and Sonnet 4.6, which the runner also accepts, default to summarized
-instead, so a no-display request to them would carry a summary.
+instead, so an adaptive request naming no display would carry a summary; a
+request with no `thinking` parameter runs without thinking on them (#2694).
 
 So for the requests this runner sends to the Opus 5 family, **the reasoning
 text is not obtainable** on either endpoint. Capturing it anyway is still worth the few

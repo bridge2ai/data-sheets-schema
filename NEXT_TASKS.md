@@ -663,9 +663,11 @@ small file, rather than a paragraph inside a 200-line prompt.
   interface and documents superseded releases (#177). Do not score against it.
 - **Fitness ranks records identically to counting slots** in all four projects.
   Replicates differ in coverage, not quality — do not rebuild selection-by-score.
-- **Reasoning text is unavailable through CBORG.** Thinking blocks arrive signed
-  but empty. Records say `reasoning_present` / `reasoning_available` rather than
-  implying no reasoning occurred.
+- **Reasoning text depends on the requested thinking display** (#2542). With no
+  display named, thinking blocks arrive signed but empty on the Opus 5 family;
+  `display: summarized` returns a summary (the #2463 probe). Records say
+  `reasoning_present` / `reasoning_available` rather than implying no reasoning
+  occurred.
 - **CM4AI propagation is not affordable on the fitness axis** (record-level bias
   0.080 against a 0.05 tolerance), though it is on grounding (0.016) and on
   fitness for the other three projects. The axis changes the verdict; do not

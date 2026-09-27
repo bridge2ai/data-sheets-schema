@@ -2209,7 +2209,7 @@ def reasoning_cmd(method, project, label, path):
                        + (f"; median |estimate_error| where the count is above 0: "
                           f"{s['estimate_error_median']:,}" if s.get('estimate_error_median') else ""))
 
-    if len(logs) > 1:
+    if len(logs) > 1 and total:              # every selected log empty: nothing to aggregate (#2692)
         s = _reasoning.summarise(total)
         click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
                    f"{s['with_reasoning_text']} with reasoning text")
@@ -2223,7 +2223,11 @@ def reasoning_cmd(method, project, label, path):
             click.echo("\nNo reasoning text was available in any entry. The blocks "
                        "are signed but empty because the requests named no thinking "
                        "display; a request naming display 'summarized' receives a "
-                       "summary, on any endpoint (#2542).")
+                       "summary, as observed on CBORG's claude-opus-5 route (#2542, #2691).")
+            if 'redacted_thinking' in kinds:
+                # Both kinds: say which cause applies to which (#2693).
+                click.echo("Some blocks were instead redacted by the provider, which no "
+                           "display recovers.")
         else:
             # No block at all: thinking was skipped or not requested, so the
             # display is not why there is no text (#2626).

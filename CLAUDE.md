@@ -1263,10 +1263,13 @@ every API-arm request — no `thinking` parameter before #1047 (2026-09-08),
 direct `ANTHROPIC_API_KEY` run). The Opus 5 logs therefore record
 `reasoning_present: true, reasoning_available: false` — a deliberately
 different claim from "no reasoning happened". Opus 4.6 and Sonnet 4.6, which
-the runner also accepts, default to summarized instead (#2668). A request with
-`"display":"summarized"` receives **summarized** thinking text on either
-endpoint: the #2463 probe (2026-09-26) streamed 54,291 characters in 4,536
-thinking deltas through CBORG (the counts are recorded on #2463). No display
+the runner also accepts, default to summarized on an adaptive request instead;
+with no `thinking` parameter they do not think at all (#2668, #2694). A
+request with `"display":"summarized"` receives **summarized** thinking text:
+the #2463 probe (2026-09-26) streamed 54,291 characters in 4,536 thinking
+deltas through CBORG's unprefixed `claude-opus-5` route (the counts are
+recorded on #2463), and Anthropic documents the same for a direct run. The
+`google/` routes that older logs used have not been sent a display (#2691). No display
 setting returns the raw chain of thought (#2668). Native audits registered with the thinking display
 (#2464) send it on their adaptive requests; `{"type":"disabled"}` side calls
 are forwarded unchanged and carry no thinking. Phase 4 and evaluation select
