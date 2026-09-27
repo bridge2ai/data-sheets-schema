@@ -9,35 +9,50 @@ re-run is a different sample.
 ## What is actually available, measured
 
 Reasoning arrives as a `thinking` content block. Whether that block carries
-plaintext depends on the endpoint, so this module records what it observed
-rather than assuming:
+text depends on the effective display — the one the request names, else the
+model's default — not on the endpoint (#2542, #2608, #2623), so this module
+records what it observed rather than assuming:
 
-- **Direct Anthropic** (`ANTHROPIC_API_KEY`) — `thinking` carries text.
-- **CBORG** (`google/claude-opus-5-high`, verified 2026-07-29) — the block
-  arrives with a valid `signature` and `thinking: ''`. Not a streaming
-  artifact: a non-streaming `messages.create` returns the same empty block, and
-  the stream emits *no* `thinking_delta` events at all, only a `signature`
-  event. The proxy strips the plaintext and forwards the signed envelope.
+- **No display named, on the Claude Opus 5 family** — every request this
+  runner sends: no `thinking` parameter before #1047 (2026-09-08),
+  `{"type": "adaptive"}` since, and still none from the judging paths
+  (#2624). Through CBORG (`google/claude-opus-5-high`, verified 2026-07-29)
+  the block arrives with a valid `signature` and
+  `thinking: ''`. Not a streaming artifact: a non-streaming `messages.create`
+  returns the same empty block, and the stream emits *no* `thinking_delta`
+  events at all, only a `signature` event. Anthropic documents the display as
+  defaulting to omitted on this model family, so a direct `ANTHROPIC_API_KEY`
+  run of the same request would be empty too.
+- **`"display": "summarized"`** — the block carries a summary of the
+  reasoning: observed through CBORG's unprefixed `claude-opus-5` route (#2463
+  probe, 2026-09-26; the `google/` routes have not been sent a display, #2691)
+  and documented for a direct run. No display
+  setting returns the raw chain of thought (#2668).
 
-So on the endpoint this project currently generates with, **the reasoning text
-is not obtainable**. Capturing it anyway is still worth the few lines: the
-record then states that a reasoning block existed, was signed, and was withheld
-— which is a different and more useful claim than silence — and the same code
-captures the real text unchanged if a run is ever pointed at the direct API.
+Opus 4.6 and Sonnet 4.6, which the runner also accepts, default to summarized
+instead, so an adaptive request naming no display would carry a summary; a
+request with no `thinking` parameter runs without thinking on them (#2694).
+
+So for the requests this runner sends to the Opus 5 family, **the reasoning
+text is not obtainable** on either endpoint. Capturing it anyway is still worth the few
+lines: the record then states that a reasoning block existed, was signed, and
+was empty — which is a different and more useful claim than silence — and the
+same code captures summarized text unchanged if a request ever names that
+display. Summarized text is comparable only with summarized text.
 
 **The count is obtainable** (verified 2026-09-04, #999): CBORG now returns
 `usage.output_tokens_details.thinking_tokens` — in the non-streaming body
-and on the stream's `message_delta` usage — while still withholding the
-text. The SDK's `get_final_message()` accumulates usage without that
+and on the stream's `message_delta` usage — beside a block whose text is
+empty because no display was requested. The SDK's `get_final_message()` accumulates usage without that
 field, so the runner reads it off the delta event and the capture records
 it as `reasoning_tokens_observed` beside the estimate, with the estimate's
 error where both exist. Records before this carry the estimate only.
 
 ## The token estimate
 
-`output_tokens` covers thinking *and* visible text, so when the plaintext is
-withheld the difference between them is the only surviving measure of how much
-reasoning happened. `reasoning_tokens_estimate` reports it, and is an estimate
+`output_tokens` covers thinking *and* visible text, so when the thinking text is
+empty the difference between them measures how much reasoning happened — the
+only measure before #999, and beside the endpoint's own count since (#2669). `reasoning_tokens_estimate` reports it, and is an estimate
 in the strict sense — visible text is counted with a 4-chars-per-token
 approximation, not by the tokenizer that billed it. It is sound for "this
 judgement reasoned 10x longer than that one" and unsound for cost attribution.
@@ -52,9 +67,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-# Visible-text tokens are estimated, not counted. The API bills a single
-# output_tokens figure for thinking plus text and never breaks it down, so
-# subtracting an estimate is the only available route to the thinking share.
+# Visible-text tokens are estimated, not counted. output_tokens covers thinking
+# plus text; since #999 CBORG also returns the thinking count itself, recorded as
+# reasoning_tokens_observed. The estimate (output minus estimated text) stays for
+# records before that and for comparison across them (#2704).
 CHARS_PER_TOKEN = 4
 
 
@@ -280,7 +296,8 @@ def log_status(runtime: str | None, label: str, log_exists: bool,
     - ``recovered_from_transcript`` — a Claude Code agentic run whose
       ``run_observed`` block carries the transcript-derived measure (#1000):
       the subagent cannot report its own accounting, but its transcript
-      records usage per turn, signed (empty) thinking blocks, and — from
+      records usage per turn, signed thinking blocks (empty on the Opus 5
+      family unless the run requested a display, #2542, #2669), and — from
       recent runtimes — ``thinking_tokens``. Cache-inclusive runner
       accounting, one number per run: never averaged with ``api_usage``.
     - ``transcript_observation_invalid`` — a Claude Code agentic run whose

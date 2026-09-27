@@ -2045,11 +2045,13 @@ def backfill(verified, dry_run):
 def reasoning_cmd(method, project, label, path):
     """Summarise captured model reasoning for generation runs.
 
-    Reports presence and availability separately on purpose. Through the CBORG
-    proxy every thinking block arrives signed but empty, so a summary that
-    conflated the two would read as "no reasoning happened" when what actually
-    happened is that the endpoint withheld it. The token estimate is the only
-    quantitative trace that survives in that case.
+    Reports presence and availability separately on purpose. A request that
+    names no thinking display, as every API-arm request, receives each thinking
+    block signed but empty on the Opus 5 family, so a summary that conflated
+    the two would read as "no reasoning happened" when what actually happened
+    is that no text was requested (#2542). The quantitative traces left are the
+    token estimate and, since #999, the endpoint's own thinking-token count
+    (#2625).
     """
     from pathlib import Path as _Path
 
@@ -2179,6 +2181,10 @@ def reasoning_cmd(method, project, label, path):
         total.extend(entries)
         s = _reasoning.summarise(entries)
         click.echo(f"\n{p}")
+        if not entries:
+            # A log created but never written, e.g. by a run killed at once (#2667).
+            click.echo("  entries 0")
+            continue
         click.echo(f"  entries {s['entries']}, with a reasoning block "
                    f"{s['with_reasoning_block']}, with reasoning text "
                    f"{s['with_reasoning_text']}")
@@ -2203,14 +2209,31 @@ def reasoning_cmd(method, project, label, path):
                        + (f"; median |estimate_error| where the count is above 0: "
                           f"{s['estimate_error_median']:,}" if s.get('estimate_error_median') else ""))
 
-    if len(logs) > 1:
+    if len(logs) > 1 and total:              # every selected log empty: nothing to aggregate (#2692)
         s = _reasoning.summarise(total)
         click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
                    f"{s['with_reasoning_text']} with reasoning text")
     if total and not any(e.get('reasoning_available') for e in total):
-        click.echo("\nNo reasoning text was available in any entry. The blocks "
-                   "are signed but empty — the endpoint strips the plaintext. "
-                   "Runs made directly against the Anthropic API capture it.")
+        kinds = {b.get('type') for e in total for b in (e.get('blocks') or []) if isinstance(b, dict)}
+        if any(e.get('reasoning_present') for e in total) and kinds == {'redacted_thinking'}:
+            # Encrypted by the provider's safety redaction whatever the display (#2666).
+            click.echo("\nNo reasoning text was available in any entry. The thinking "
+                       "blocks were redacted by the provider, which no display recovers.")
+        elif any(e.get('reasoning_present') for e in total):
+            click.echo("\nNo reasoning text was available in any entry. The blocks "
+                       "are signed but empty because the requests named no thinking "
+                       "display; a request naming display 'summarized' receives a "
+                       "summary, as observed on CBORG's unprefixed claude-opus-5 route; the "
+                       "google/ routes have not been sent a display (#2542, #2691, #2703).")
+            if 'redacted_thinking' in kinds:
+                # Both kinds: say which cause applies to which (#2693).
+                click.echo("Some blocks were instead redacted by the provider, which no "
+                           "display recovers.")
+        else:
+            # No block at all: thinking was skipped or not requested, so the
+            # display is not why there is no text (#2626).
+            click.echo("\nNo entry returned a thinking block, so there is no "
+                       "reasoning text to report.")
 
 
 @provenance.command("backfill-effort")
