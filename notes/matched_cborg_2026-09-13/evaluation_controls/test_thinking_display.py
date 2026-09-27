@@ -68,6 +68,28 @@ def test_registration_refuses_mixed_or_null_displays(accepted_fixture, change, m
         reg.verify_manifest(manifest, result['registration'], reg.sha(result['registration']))
 
 
+@pytest.mark.parametrize('change, match', [
+    ('malformed', 'must be thinking_display_v1, summarized, proxy_substitution'),
+    ('unregistered_runtime', 'registered only for Claude Code 2.1.272'),
+])
+def test_registration_refuses_one_bad_display_shared_by_every_native_job(accepted_fixture, change, match):
+    """#2648: verify_manifest validates the display itself, not only that the jobs agree:
+    every native job carrying the same malformed display, or a valid one on a runtime it is
+    not registered for, is refused before any attempt exists."""
+    accepted_fixture['native_thinking_display'] = dict(THINKING_DISPLAY)
+    result = prepare.build_registration(**accepted_fixture)
+    manifest = reg.read_json(result['registration'])
+    native_jobs = [job for job in manifest['evaluation_jobs'] if job['style'] in reg.NATIVE_STYLES]
+    assert native_jobs
+    for job in native_jobs:
+        if change == 'malformed':
+            job['native_runtime']['thinking_display'] = {**THINKING_DISPLAY, 'delivery': 'cli_flag'}
+        else:
+            job['native_runtime']['version'] = '2.1.273 (Claude Code)'
+    with pytest.raises(BudgetStop, match=match):
+        reg.verify_manifest(manifest, result['registration'], reg.sha(result['registration']))
+
+
 @pytest.mark.parametrize('selected, outcome', [(False, 'proven'), (True, 'proven'), (True, 'unproven'), (True, 'refused')])
 def test_the_evaluator_proxy_gets_the_display_and_the_gate_runs(accepted_fixture, tmp_path, monkeypatch, selected, outcome):
     """Past the launch checks, a stand-in proxy and child; the strict gate must run on completion,
@@ -86,9 +108,12 @@ def test_the_evaluator_proxy_gets_the_display_and_the_gate_runs(accepted_fixture
     import data_sheets_schema.agent_pin as agent_pin
     monkeypatch.setattr(agent_pin, 'spawn_preamble', lambda name: '')
     monkeypatch.setattr(native, 'provider_clients', lambda *a, **kw: (SimpleNamespace(close=lambda: None),) * 2)
+    import native_proxy
     proxies, gates = [], []
     class Proxy:
         def __init__(self, **kwargs):
+            # The construction-time check the real NativeProxy makes (#2650).
+            native_proxy.validated_thinking_display(kwargs.get('thinking_display'))
             proxies.append(kwargs); self.token = 'offline'; self.unfinished_handlers = 0
             import threading; self.failed = threading.Event()
         @contextmanager
@@ -104,7 +129,6 @@ def test_the_evaluator_proxy_gets_the_display_and_the_gate_runs(accepted_fixture
             (tmp_path / 'attempt' / 'thinking_refusals' / 'synthetic.json').write_text('{}\n')
         return 0
     monkeypatch.setattr(native, 'execute_child', child)
-    import native_proxy
     real = native_proxy.thinking_display_evidence
     def gate(root, value, *, strict):
         gates.append((Path(root), strict)); return real(root, value, strict=strict)
@@ -125,6 +149,7 @@ def test_the_evaluator_proxy_gets_the_display_and_the_gate_runs(accepted_fixture
         with pytest.raises(BudgetStop, match=match):
             native.execute_job(context)
     assert ('thinking_display' in proxies[0]) is selected
+    assert proxies[0].get('thinking_display') == (THINKING_DISPLAY if selected else None)       # #2650
     assert gates == ([(tmp_path / 'attempt' / 'requests', True)] if selected else [])
 
 

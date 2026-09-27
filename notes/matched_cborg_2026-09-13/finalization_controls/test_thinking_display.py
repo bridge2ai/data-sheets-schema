@@ -49,6 +49,30 @@ def test_phase4_selects_its_own_display_and_never_inherits_the_audits(ancestry, 
         assert m[KEY] == THINKING_DISPLAY and final_native.thinking_display(m) == THINKING_DISPLAY
 
 
+@pytest.mark.parametrize('change, match', [
+    ('malformed', 'must be thinking_display_v1, summarized, proxy_substitution'),
+    ('unregistered_runtime', 'registered only for Claude Code 2.1.272'),
+])
+def test_the_phase4_registration_check_itself_refuses_a_changed_display(ancestry, tmp_path, monkeypatch, change, match):
+    """#2647: a registration prepared with the display, then edited by hand or read on a runtime
+    the display is not registered for, is refused by validate_registration itself, before
+    run_job takes ownership and uses up Phase 4's one attempt."""
+    monkeypatch.setattr(audit_registration, 'THINKING_DISPLAY_RUNTIMES', frozenset({'synthetic-native-version'}))
+    accepted, acceptance = accepted_audit(ancestry, tmp_path / 'accepted')
+    path = final_prepare.prepare(accepted_audit_registration=accepted, acceptance=acceptance,
+        destination=tmp_path / 'phase4', job_id='synthetic_final', repository=ancestry[0]['repository'],
+        **{KEY: dict(THINKING_DISPLAY)})
+    assert final_registration.validate_registration(path)[KEY] == THINKING_DISPLAY
+    if change == 'malformed':
+        manifest = json.loads(Path(path).read_text())
+        manifest[KEY] = {**THINKING_DISPLAY, 'delivery': 'cli_flag'}
+        Path(path).write_text(json.dumps(manifest, indent=2) + '\n')
+    else:
+        monkeypatch.setattr(audit_registration, 'THINKING_DISPLAY_RUNTIMES', frozenset({'2.1.272 (Claude Code)'}))
+    with pytest.raises(BudgetStop, match=match):
+        final_registration.validate_registration(path)
+
+
 def test_phase4_preparation_refuses_before_its_destination_exists(ancestry, tmp_path):
     """The fixture's runtime is not 2.1.272, so the exact selection is refused there too."""
     accepted, acceptance = accepted_audit(ancestry, tmp_path / 'accepted')
@@ -143,16 +167,18 @@ def test_the_phase4_cli_refuses_any_other_display(tmp_path, monkeypatch, capsys)
     assert stop.value.code == 2 and 'invalid choice' in capsys.readouterr().err
 
 
+@pytest.mark.parametrize('registered', [True, False], ids=['registered', 'not_registered'])
 @pytest.mark.parametrize('admitted', [False, True], ids=['nothing_admitted', 'unproven_request'])
-def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch, admitted):
+def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch, admitted, registered):
     """Stubs stand in for registration, review and ownership; the receipt code is the real one.
 
     #2595: a stop after a request was admitted whose display is not proven still writes its
-    receipt, reports the problem and keeps the stop's own reason."""
+    receipt, reports the problem and keeps the stop's own reason. #2649: a run registered
+    without a display writes no report at all."""
     from finalization_controls import registration as final_reg
     attempt = tmp_path / 'attempts' / 'synthetic_final'
     manifest = {'job': {'id': 'synthetic_final', 'attempt_dir': str(attempt), 'output_dir': str(attempt / 'output')},
-                'repository_commit': 'a' * 40, KEY: dict(THINKING_DISPLAY)}
+                'repository_commit': 'a' * 40, **({KEY: dict(THINKING_DISPLAY)} if registered else {})}
     path, review = tmp_path / 'registration.json', tmp_path / 'review.json'
     save(path, manifest)
     save(review, {'verdict': 'approve', 'registration_sha256': final_reg.sha(path), 'repository_commit': 'a' * 40,
@@ -175,7 +201,10 @@ def test_the_phase4_receipt_reports_the_display(tmp_path, monkeypatch, admitted)
     with pytest.raises(BudgetStop, match='synthetic Phase 4 stop'):
         final_native.run_job(path, review, adapter=stops)
     receipt = json.loads((attempt / 'result.json').read_text())
+    assert receipt['status'] == 'stopped' and receipt['reason'] == 'synthetic Phase 4 stop'
+    if not registered:
+        assert 'thinking_display' not in receipt
+        return
     report = receipt['thinking_display']
     assert report['kind'] == 'thinking_display_summary_v1' and report['registered'] == THINKING_DISPLAY
-    assert receipt['status'] == 'stopped' and receipt['reason'] == 'synthetic Phase 4 stop'
     assert [problem['id'] for problem in report['problems']] == (['synthetic-request'] if admitted else [])
