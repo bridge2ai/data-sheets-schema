@@ -30,9 +30,14 @@ def endpoint(respond, *, tls=None):
         def log_message(self, *args):
             pass
         def do_POST(self):
-            body = self.rfile.read(int(self.headers["content-length"]))
+            # One exchange per connection. Keep-alive would have this daemon
+            # thread read a next request line from a socket whose worker was
+            # killed, and a reset there prints a traceback, possibly during
+            # interpreter finalisation (#2540, #2604). Every worker opens its
+            # own connection, so no test relies on keep-alive.
+            self.close_connection = True
             try:
-                respond(self, body)
+                respond(self, self.rfile.read(int(self.headers["content-length"])))
             except (BrokenPipeError, ConnectionResetError):
                 pass
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
@@ -84,12 +89,29 @@ KILL_GAP_SECONDS = .5
 #: them; a shorter one passes.
 PARENT_GAP_SECONDS = 2.5
 
+#: The read-inactivity bound given to a chunk the server has already flushed: from
+#: the parent's first read to the chunk's arrival, one worker-to-parent pipe hop
+#: (#2604). Measured median 0 ms, p99 99 ms, max 324 ms over 1,536 reads under
+#: 128-192 concurrent copies at load 82-272; the same hop for the headers
+#: (PARENT_GAP_SECONDS) reached 791 ms at load 336, and this keeps threefold on that.
+#: It rejects a first-chunk hop of 2.5 s or more, where origin/main's 0.3 s bound
+#: rejected one of 0.3 s; the read of the withheld chunk now ends after 2.5 s.
+READ_HOP_SECONDS = 2.5
+
 #: The whole call less the worker's start-up window (from just before Popen to the
 #: server receiving the request, or flushing its headers). That covers every
 #: in-process step, including a wait before the spawn and one after the kill (#2696).
 #: Measured median 207-278 ms, p99 870-911 ms, max 1129 ms (load 336). It rejects
 #: 3.5 s or more spent outside start-up; less passes.
 CALL_GAP_SECONDS = 3.5
+
+#: The bounds a test gives a worker where no deadline is its subject. A pre-header
+#: bound also pays for the worker's interpreter start-up, which took about 14 s at
+#: load 450 (#2697), so a short one ended exchanges these tests expected to finish
+#: (#2604). This is a hang guard, not a measurement: a passing run never reaches it,
+#: and a run that did would raise a timeout the test does not expect, so it is never
+#: what ends a passing exchange.
+HANG_SECONDS = 120
 
 
 def killed_before_reaped(process, killed_at=None):
@@ -126,7 +148,8 @@ def test_exact_bytes_status_headers_and_secret_only_in_pipe(processes, monkeypat
         handler.send_header("X-Synthetic", "caf\xe9")
         handler.send_header("Content-Length", str(len(response))); handler.end_headers()
         handler.wfile.write(response); handler.wfile.flush()
-    client = bounded.BoundedStreamClient(read_timeout_seconds=2, connect_timeout_seconds=.5)
+    # The verdict is the bytes and where the secret went; the bounds are hang guards (#2604).
+    client = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
     with endpoint(respond) as url:
         with client.stream("POST", url, content=request, headers={"x-api-key":"synthetic-pipe-secret"}) as value:
             assert value.status_code == 200
@@ -223,7 +246,6 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
     def respond(handler, body):
         sent_at.append(time.monotonic())
         sent.set()
-        handler.close_connection = True  # no keep-alive read on the killed worker's socket
         header = b"HTTP/1.1 200 OK\r\nX-Slow: never-finished"
         for index in range(400):
             handler.wfile.write(header[index:index + 1] or b"."); handler.wfile.flush()
@@ -265,19 +287,34 @@ def test_total_preheader_deadline_outwaits_neither_header_drips_nor_write_phase(
 
 
 def test_after_headers_read_deadline_and_exact_incremental_chunks(processes):
-    first_sent = threading.Event()
+    # The server flushes the first chunk with the headers and withholds the rest
+    # until the test has its verdict, so only a read deadline can end the second
+    # read. A watchdog would release it after HANG_SECONDS, when a transport that
+    # never timed out a read would then complete the body and fail the raise; the
+    # test asserts that the watchdog did not fire. The pre-header bound is a hang
+    # guard, so the worker's start-up is no longer charged to a 1.3 s budget
+    # (#2604), and a first read that timed out fails on `received`: a ReadTimeout
+    # from anywhere but the second read is not the one this test is about.
+    first_sent, done, released = threading.Event(), threading.Event(), []
     def respond(handler, body):
         handler.send_response(200); handler.send_header("Content-Length", "10"); handler.end_headers()
         handler.wfile.write(b"first"); handler.wfile.flush(); first_sent.set()
-        time.sleep(.8)
-        handler.wfile.write(b"later"); handler.wfile.flush()
-    client = bounded.BoundedStreamClient(read_timeout_seconds=.3, connect_timeout_seconds=1)
+        if not done.wait(HANG_SECONDS):
+            released.append(True); handler.wfile.write(b"later"); handler.wfile.flush()
+    client = bounded.BoundedStreamClient(read_timeout_seconds=READ_HOP_SECONDS, connect_timeout_seconds=HANG_SECONDS)
+    received = []
     with endpoint(respond) as url:
-        with pytest.raises(httpx.ReadTimeout):
-            with client.stream("POST", url, content=b"synthetic", headers={}) as value:
-                chunks = value.iter_bytes()
-                assert next(chunks) == b"first" and first_sent.is_set()
-                next(chunks)
+        try:
+            with pytest.raises(httpx.ReadTimeout):
+                with client.stream("POST", url, content=b"synthetic", headers={}) as value:
+                    chunks = value.iter_bytes()
+                    received.append(next(chunks))
+                    assert first_sent.is_set()
+                    received.append(next(chunks))
+        finally:
+            done.set()
+    # Exactly the flushed chunk, yielded before the rest existed: nothing was buffered.
+    assert received == [b"first"] and not released
     assert not client._workers
     client.close()
 
@@ -291,11 +328,31 @@ def test_expired_startup_or_sent_write_is_classified_and_reaped(processes, monke
         source += "sys.stdout.buffer.write(struct.pack('!I',5)+b'Psent');sys.stdout.buffer.flush()\n"
     source += "time.sleep(30)\n"
     monkeypatch.setattr(bounded, "_worker_command", lambda: [sys.executable, "-B", "-c", source])
-    client = bounded.BoundedStreamClient(read_timeout_seconds=.1, connect_timeout_seconds=.1)
+    if not send_started:
+        # Any start-up time leaves the witness absent, so a real 0.2 s bound is exact.
+        client = bounded.BoundedStreamClient(read_timeout_seconds=.1, connect_timeout_seconds=.1)
+        witnessed = None
+    else:
+        # The witness is written only once the interpreter runs, which under load
+        # took longer than a 0.2 s bound, so the deadline came first and the
+        # attempt was classified as never sent (#2604). The parent's clock
+        # passes the deadline only once the parent holds the witness; the real
+        # bound is a hang guard, and a stop by it would be a ConnectTimeout.
+        client = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS / 2,
+                                             connect_timeout_seconds=HANG_SECONDS / 2)
+        witnessed = []
+        def monotonic():
+            with client._lock:
+                sent = any(worker.sent for worker in client._workers)
+            if sent and not witnessed:
+                witnessed.append(True)
+            return time.monotonic() + (HANG_SECONDS if sent else 0)
+        monkeypatch.setattr(bounded, "time", SimpleNamespace(monotonic=monotonic))
     error = httpx.ReadTimeout if send_started else httpx.ConnectTimeout
     with pytest.raises(error):
         with client.stream("POST", "http://127.0.0.1/unused", content=b"small", headers={}):
             pytest.fail("sleeping worker returned headers")
+    assert witnessed is None or witnessed == [True]
     assert not client._workers
     client.close()
 
@@ -464,7 +521,8 @@ def test_redirect_is_returned_without_following(processes):
         hits.append(body)
         handler.send_response(307); handler.send_header("Location", "/must-not-follow")
         handler.send_header("Content-Length", "0"); handler.end_headers()
-    client = bounded.BoundedStreamClient(read_timeout_seconds=1, connect_timeout_seconds=1)
+    # The verdict is the one request the server saw; the bounds are hang guards (#2604).
+    client = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
     with endpoint(respond) as url:
         with client.stream("POST", url, content=b"once", headers={}) as value:
             assert value.status_code == 307 and b"".join(value.iter_bytes()) == b""
@@ -505,8 +563,8 @@ def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypat
 
 def test_genuine_worker_upstream_protocol_error_preserves_debit_and_retry(tmp_path, monkeypatch, processes):
     """The distinct local error does not weaken an actual upstream stall."""
-    from native_controls.test_native_stall_policy import proxy_with, post, rows, STALL_DEBIT_BASIS
-    from native_controls.test_native_proxy import events, wire
+    from native_controls.test_native_stall_policy import proxy_with, rows, STALL_DEBIT_BASIS
+    from native_controls.test_native_proxy import events, wire, REQUEST
     calls = []
     # Run the actual worker and HTTPX exchange; the first local upstream closes
     # after receiving the request without returning a valid status line.
@@ -531,7 +589,13 @@ def test_genuine_worker_upstream_protocol_error_preserves_debit_and_retry(tmp_pa
         monkeypatch.setattr(bounded, "_worker_command", lambda: [sys.executable, "-B", "-c", source])
         proxy, ledger, provider_calls = proxy_with(tmp_path, [])
         proxy.upstream.close()
-        proxy.upstream = bounded.BoundedStreamClient(read_timeout_seconds=2, connect_timeout_seconds=1)
+        # Each request starts a worker that imports HTTPX: its bounds and the
+        # caller's are hang guards, not a 3 s and a 5 s budget (#2604). A worker
+        # that never sent would be a ConnectTimeout, never the stall asserted below.
+        proxy.upstream = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
+        def post(url, proxy):
+            return httpx.post(url + '/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token},
+                              timeout=HANG_SECONDS)
         with proxy.running() as url:
             assert post(url, proxy).status_code == 503
             assert post(url, proxy).status_code == 200

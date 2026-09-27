@@ -21,6 +21,14 @@ from audit_controls import bounded_transport as bounded
 
 FIELDS = {'model': 'synthetic-count', 'messages': [{'role': 'user', 'content': 'synthetic only'}]}
 
+#: The count budget of a test whose subject is not the deadline. The budget also
+#: pays for starting the worker's interpreter and importing the SDK, which took
+#: about 14 s at load 450 (#2697), so a short one ended counts these tests expected
+#: to complete (#2604). This one is a hang guard, not a measurement: a passing run
+#: never reaches it, and a run that did would get an APITimeoutError the test does
+#: not expect, so it can never be what ends a passing count.
+HANG_SECONDS = 120
+
 
 @contextmanager
 def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
@@ -35,7 +43,7 @@ def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
                                          'bypass': self.headers.get('x-headroom-bypass')})
             observed['arrived'].set()
             if hold is not None:
-                hold.wait(timeout=10)
+                hold.wait(timeout=HANG_SECONDS)   # released at the latest when the server stops
             try:
                 self.send_response(status)
                 self.send_header('Content-Type', 'application/json')
@@ -77,7 +85,7 @@ def children(monkeypatch):
 def test_real_worker_returns_typed_count_and_registered_headers(children):
     with server() as (url, seen):
         client = bounded.BoundedCountClient(api_key='fake-key', base_url=url,
-            default_headers={'x-headroom-bypass': 'true'}, timeout_seconds=5)
+            default_headers={'x-headroom-bypass': 'true'}, timeout_seconds=HANG_SECONDS)
         # SDK-facing inspection must describe the actual wire policy without
         # allowing a caller to mutate the worker's registered configuration.
         headers = client.default_headers
@@ -171,9 +179,14 @@ def test_progressing_response_cannot_outlive_total_count_deadline(children, monk
 
 
 def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
+    # The server holds its response until the test ends, so a close that waited
+    # for the count instead of killing its worker would return only after the
+    # server let the response go. The verdict is that order (#2604): close
+    # returned while no response byte had left the server. The waits are hang
+    # guards; each returns as soon as its event happens.
     hold = threading.Event()
     with server(hold=hold) as (url, seen):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=30)
+        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=HANG_SECONDS)
         errors = []
         def count():
             try:
@@ -183,12 +196,13 @@ def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
         thread = threading.Thread(target=count)
         thread.start()
         try:
-            assert seen['arrived'].wait(timeout=5)
+            assert seen['arrived'].wait(timeout=HANG_SECONDS)   # the worker's start-up is in this wait
             started = time.monotonic()
             client.close()
-            assert time.monotonic() - started < 2
+            assert not hold.is_set() and seen['sent'] == [], "close waited for the held response"
+            assert time.monotonic() - started < REAP_SECONDS
             assert all(child.poll() is not None for child in children)
-            thread.join(timeout=2)
+            thread.join(timeout=HANG_SECONDS)
             assert not thread.is_alive() and len(errors) == 1
             assert isinstance(errors[0], bounded.CountClientClosed)
             assert not client._active
@@ -206,7 +220,7 @@ def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
 def test_error_categories_preserve_retry_decisions_without_provider_text(children, status, exception):
     secret = 'SYNTHETIC_PROVIDER_PROSE_MUST_NOT_ESCAPE'
     with server(status=status, body=json.dumps({'error': {'message': secret}}).encode()) as (url, seen):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=5)
+        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=HANG_SECONDS)
         try:
             with pytest.raises(exception) as caught:
                 client.messages.count_tokens(**FIELDS)
@@ -220,7 +234,7 @@ def test_error_categories_preserve_retry_decisions_without_provider_text(childre
 @pytest.mark.parametrize('value', [True, -1, '100', None])
 def test_invalid_provider_count_is_not_a_retryable_transport_failure(value):
     with server(body=json.dumps({'input_tokens': value}).encode()) as (url, _):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=5)
+        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=HANG_SECONDS)
         try:
             with pytest.raises(bounded.CountWorkerError):
                 client.messages.count_tokens(**FIELDS)
