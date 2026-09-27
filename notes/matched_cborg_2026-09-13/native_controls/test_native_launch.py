@@ -206,15 +206,34 @@ def test_a_live_leader_refusing_the_kill_step_is_raised(monkeypatch):
         monkeypatch.undo(); process.kill(); process.wait()
 
 
+def run_bounded(cleanup, timeout=20):
+    """Run `cleanup` in a thread joined with a timeout, so a missing second bound fails the
+    test rather than hanging the session (#2653, #2675). Returns (error, elapsed)."""
+    outcome = {}
+    def body():
+        start = time.monotonic()
+        try:
+            cleanup()
+        except BaseException as error:    # noqa: B036 - reported to the test thread
+            outcome['error'] = error
+        outcome['elapsed'] = time.monotonic() - start
+    worker = threading.Thread(target=body, daemon=True)
+    worker.start()
+    worker.join(timeout=timeout)
+    assert not worker.is_alive(), "terminate_group's second bound did not end the re-sends"
+    return outcome.get('error'), outcome['elapsed']
+
+
 @pytest.mark.parametrize('after_reap', ['refuses', 'empties', 'accepts'],
                          ids=['member_lives_on', 'group_empties', 'member_takes_the_signal'])
 def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_is_not(monkeypatch, after_reap):
     """#2614: the leader's exit does not show the group is empty. A member that still
     refuses once the leader is reaped (one that changed its credentials, say) is raised
-    within the second bound, with the stop being unwound still in its chain (#2652). A
-    group that empties (ESRCH) is done, and so is one whose remaining member takes the
-    signal: that is delivery, not a refusal. Either way the refusal was re-sent after
-    the reap, at the SIGTERM step itself (#2653)."""
+    once the second bound has passed, not before it (#2675), with the stop being unwound
+    still in its chain (#2652). A group that empties (ESRCH) is done, and so is one whose
+    remaining member takes the signal: that is delivery, not a refusal, and nothing is
+    re-sent after it (#2675). Either way the refusal was re-sent after the reap, at the
+    SIGTERM step itself (#2653)."""
     process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
     wait_until_exited_unreaped(process.pid)            # exited before cleanup, bounded (#2653)
     calls = []
@@ -226,32 +245,70 @@ def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_i
             return None
         raise PermissionError(errno.EPERM, 'Operation not permitted')
     monkeypatch.setattr(os, 'killpg', member_refuses)
-    outcome = {}
     def cleanup():
-        start = time.monotonic()
         try:
-            try:
-                raise BudgetStop('recorded stop')
-            finally:
-                terminate_group(process)
-        except BaseException as error:    # noqa: B036 - reported to the test thread
-            outcome['error'] = error
-        outcome['elapsed'] = time.monotonic() - start
-    worker = threading.Thread(target=cleanup, daemon=True)
+            raise BudgetStop('recorded stop')
+        finally:
+            terminate_group(process)
     try:
-        worker.start()
-        worker.join(timeout=20)
-        assert not worker.is_alive(), "terminate_group's second bound did not end the re-sends"
+        error, elapsed = run_bounded(cleanup)
         assert process.returncode == 0 and (signal.SIGTERM, 0) in calls        # re-sent after the reap
         if after_reap == 'refuses':
-            error = outcome['error']
             assert isinstance(error, PermissionError), error
             assert isinstance(error.__context__, BudgetStop), error.__context__   # the stop stays in the chain
-            assert outcome['elapsed'] < 4.5, outcome['elapsed']                   # the second bound is 2 s
+            assert 2 <= elapsed < 4.5, elapsed                                    # the second bound is 2 s
         else:
-            assert isinstance(outcome['error'], BudgetStop)                       # only the stop being unwound
+            assert isinstance(error, BudgetStop)                                  # only the stop being unwound
+        if after_reap == 'accepts':
+            # Delivered once at each step, then done: no re-sends to the deadline.
+            assert calls.count((signal.SIGTERM, 0)) == 1 and elapsed < 1.5, (calls, elapsed)
     finally:
         monkeypatch.undo()
+        if process.returncode is None:
+            process.kill(); process.wait()
+
+
+@pytest.mark.parametrize('standing', [False, True], ids=['clears', 'stands'])
+@pytest.mark.parametrize('shape', ['completed_run', 'kill_step'])
+def test_a_refusal_after_the_leader_was_reaped_is_excused_only_once_the_group_is_gone(monkeypatch, shape,
+                                                                                    standing):
+    """#2674: production usually reaches cleanup with the leader already reaped, by the
+    run loop's poll() on normal completion (`completed_run`) or by terminate_group's own
+    wait when the leader exits on SIGTERM (`kill_step`). Darwin can still refuse while
+    other members are exiting; that is excused once the group is gone, and a refusal that
+    stands is raised. The kernel's window here is a few milliseconds and cannot be timed
+    by a test, so the refusal is simulated on every platform."""
+    if shape == 'completed_run':
+        process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
+        process.wait()                                  # the run loop's poll() reaped it
+        refused_signal = signal.SIGTERM
+    else:
+        process = subprocess.Popen([sys.executable, '-c', 'import sys,time;print("ready",flush=True);'
+                                    'time.sleep(30)'], stdout=subprocess.PIPE, text=True, start_new_session=True)
+        assert process.stdout.readline().strip() == 'ready'
+        refused_signal = signal.SIGKILL
+    signal_group, refusals = os.killpg, []
+    def killpg(pgid, sig):
+        if sig != refused_signal:
+            return signal_group(pgid, sig)             # SIGTERM ends the leader; terminate_group reaps it
+        refusals.append(process.returncode)
+        if standing or len(refusals) < 3:
+            raise PermissionError(errno.EPERM, 'Operation not permitted')   # a member still exiting / refusing
+        raise ProcessLookupError(errno.ESRCH, 'No such process')             # the group is gone
+    monkeypatch.setattr(os, 'killpg', killpg)
+    try:
+        error, elapsed = run_bounded(lambda: terminate_group(process))
+        assert refusals and refusals[0] is not None, refusals                 # refused after the reap
+        if standing:
+            assert isinstance(error, PermissionError), error
+            assert elapsed >= 2, elapsed
+        else:
+            assert error is None, error
+            assert len(refusals) == 3
+    finally:
+        monkeypatch.undo()
+        if process.stdout:
+            process.stdout.close()
         if process.returncode is None:
             process.kill(); process.wait()
 
@@ -261,7 +318,8 @@ def test_after_the_leader_exits_a_standing_refusal_is_raised_and_a_cleared_one_i
 def test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone(darwin_refusal, monkeypatch, standing):
     """#2651: the leader outlives SIGTERM and exits a moment before the SIGKILL killpg,
     which the kernel (or `simulated`) then refuses. The kill step, like the SIGTERM step,
-    excuses it once the group is gone; a refusal still standing after the reap is raised."""
+    excuses it once the group is gone; a refusal still standing after the reap is raised,
+    within the bound (a thread joined with a timeout, so a missing bound fails, #2675)."""
     process = subprocess.Popen([sys.executable, '-c', 'import signal,time;signal.signal(signal.SIGTERM,'
                                 'signal.SIG_IGN);print("ready",flush=True);time.sleep(30)'],
                                stdout=subprocess.PIPE, text=True, start_new_session=True)
@@ -271,22 +329,26 @@ def test_the_kill_step_excuses_a_refusal_only_once_the_group_is_gone(darwin_refu
         if sig == signal.SIGKILL and not refused:
             os.kill(pgid, signal.SIGKILL)               # the leader exits just before the killpg
             wait_until_exited_unreaped(pgid)
-            with pytest.raises(PermissionError):
+            try:
                 signal_group(pgid, 0)                   # the refusal the fix must handle
-            refused.append(sig)
+            except PermissionError:
+                refused.append(sig)
+            else:
+                refused.append('delivered')
         if standing and refused and process.returncode is not None:
             raise PermissionError(errno.EPERM, 'Operation not permitted')
         return signal_group(pgid, sig)
     monkeypatch.setattr(os, 'killpg', killpg)
     try:
+        error, _ = run_bounded(lambda: terminate_group(process))
         if standing:
-            with pytest.raises(PermissionError):
-                terminate_group(process)
+            assert isinstance(error, PermissionError), error
         else:
-            terminate_group(process)
+            assert error is None, error
         assert refused == [signal.SIGKILL] and process.returncode == -signal.SIGKILL
     finally:
         monkeypatch.undo()
+        process.stdout.close()
         if process.returncode is None:
             process.kill(); process.wait()
 
