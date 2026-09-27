@@ -2223,7 +2223,8 @@ def reasoning_cmd(method, project, label, path):
             click.echo("\nNo reasoning text was available in any entry. The blocks "
                        "are signed but empty because the requests named no thinking "
                        "display; a request naming display 'summarized' receives a "
-                       "summary, as observed on CBORG's claude-opus-5 route (#2542, #2691).")
+                       "summary, as observed on CBORG's unprefixed claude-opus-5 route; the "
+                       "google/ routes have not been sent a display (#2542, #2691, #2703).")
             if 'redacted_thinking' in kinds:
                 # Both kinds: say which cause applies to which (#2693).
                 click.echo("Some blocks were instead redacted by the provider, which no "

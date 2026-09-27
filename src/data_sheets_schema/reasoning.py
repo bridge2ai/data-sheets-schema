@@ -67,9 +67,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-# Visible-text tokens are estimated, not counted. The API bills a single
-# output_tokens figure for thinking plus text and never breaks it down, so
-# subtracting an estimate is the only available route to the thinking share.
+# Visible-text tokens are estimated, not counted. output_tokens covers thinking
+# plus text; since #999 CBORG also returns the thinking count itself, recorded as
+# reasoning_tokens_observed. The estimate (output minus estimated text) stays for
+# records before that and for comparison across them (#2704).
 CHARS_PER_TOKEN = 4
 
 

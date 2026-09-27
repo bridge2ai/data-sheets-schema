@@ -665,7 +665,9 @@ small file, rather than a paragraph inside a 200-line prompt.
   Replicates differ in coverage, not quality — do not rebuild selection-by-score.
 - **Reasoning text depends on the requested thinking display** (#2542). With no
   display named, thinking blocks arrive signed but empty on the Opus 5 family;
-  `display: summarized` returns a summary (the #2463 probe). Records say
+  `display: summarized` returns a summary (the #2463 probe, on CBORG's
+  unprefixed `claude-opus-5` route; the `google/` routes have not been sent a
+  display). Records say
   `reasoning_present` / `reasoning_available` rather than implying no reasoning
   occurred.
 - **CM4AI propagation is not affordable on the fitness axis** (record-level bias
