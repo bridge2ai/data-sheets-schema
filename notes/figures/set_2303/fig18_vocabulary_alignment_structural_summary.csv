@@ -1,0 +1,4 @@
+structural_class,predicate_id,rows,left
+"direct, type_compatible True",skos:exactMatch,145,0
+composition path (True by construction),skos:closeMatch,16,145
+type_compatible False (flagged),skos:closeMatch,4,161

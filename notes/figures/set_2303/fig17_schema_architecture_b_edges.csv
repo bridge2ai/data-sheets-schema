@@ -1,0 +1,29 @@
+kind,source,slots,target,declared_on,n_slots,line_label
+class-valued slot,Dataset,file_collections,FileCollection,Dataset,1,file_collections
+class-valued slot,Dataset,creators,Creator,Dataset,1,creators
+class-valued slot,Dataset,funders,FundingMechanism,Dataset,1,funders
+class-valued slot,Dataset,subsets,DataSubset,Dataset,1,subsets
+class-valued slot,Dataset,instances,Instance,Dataset,1,instances
+class-valued slot,Dataset,sampling_strategies,SamplingStrategy,Dataset,1,sampling_strategies
+class-valued slot,Dataset,ethical_reviews,EthicalReview,Dataset,1,ethical_reviews
+class-valued slot,Dataset,license_and_use_terms,LicenseAndUseTerms,Dataset,1,license_and_use_terms
+class-valued slot,Dataset,regulatory_restrictions,ExportControlRegulatoryRestrictions,Dataset,1,regulatory_restrictions
+class-valued slot,Dataset,data_governance,DataGovernance,Dataset,1,data_governance
+class-valued slot,Dataset,external_resources,ExternalResource,Dataset,1,external_resources
+class-valued slot,Dataset,"parent_datasets, resources",Dataset,Dataset,2,"parent_datasets, resources (range: Dataset itself)"
+class-valued slot,DatasetProperty,used_software,Software,DatasetProperty,1,used_software (declared here; inherited by 65 classes)
+class-valued slot,Person,affiliation,Organization,Person,1,affiliation
+class-valued slot,Creator,principal_investigator,Person,Creator,1,principal_investigator
+class-valued slot,Creator,affiliations,Organization,Creator,1,affiliations
+class-valued slot,FundingMechanism,grants,Grant,FundingMechanism,1,grants
+class-valued slot,Instance,sampling_strategies,SamplingStrategy,Instance,1,sampling_strategies
+class-valued slot,Instance,missing_information,MissingInfo,Instance,1,missing_information
+class-valued slot,EthicalReview,contact_person,Person,EthicalReview,1,contact_person
+class-valued slot,LicenseAndUseTerms,contact_person,Person,LicenseAndUseTerms,1,contact_person
+class-valued slot,ExportControlRegulatoryRestrictions,governance_committee_contact,Person,ExportControlRegulatoryRestrictions,1,governance_committee_contact
+class-valued slot,DataGovernance,"committee_members, committee_contact",Person,DataGovernance,2,"committee_members, committee_contact"
+class-valued slot,DataGovernance,accountable_organization,Organization,DataGovernance,1,accountable_organization
+class-valued slot,FileCollection,external_resources,ExternalResource,FileCollection,1,external_resources
+class-valued slot,FileCollection,resources,File,FileCollection,1,resources
+is_a,Dataset,,Information,Dataset,0,
+is_a,Information,,NamedThing,Information,0,

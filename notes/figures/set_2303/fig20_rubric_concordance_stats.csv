@@ -1,0 +1,6 @@
+statistic,value,n,note
+spearman_rho_all_records,0.9227,24,"Pearson correlation of average ranks (tie-corrected); no p-value, records clustered"
+spearman_rho_within_AI_READI,,6,rubric10 gives all 6 records the same score
+spearman_rho_within_CHORUS,0.8061,6,descriptive only
+spearman_rho_within_CM4AI,0.6912,6,descriptive only
+spearman_rho_within_VOICE,0.0,6,descriptive only

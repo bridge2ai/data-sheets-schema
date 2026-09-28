@@ -1,0 +1,15 @@
+module_file,classes,depth0,depth1,depth2,not_reachable,dataset_slots_into_file,isa_datasetproperty_in_file,induced_attributes_total,overview_position,overview_label
+data_sheets_schema.yaml,3,1,1,0,1,3,0,225,left,data_sheets_schema
+D4D_Base_import.yaml,7,0,0,3,4,0,0,63,right,D4D_Base_import
+D4D_Motivation.yaml,7,0,5,1,1,5,5,49,middle,Motivation (7)
+D4D_Composition.yaml,15,0,14,1,0,14,15,137,middle,Composition (15)
+D4D_Collection.yaml,7,0,7,0,0,7,7,62,middle,Collection (7)
+D4D_Preprocessing.yaml,7,0,7,0,0,7,7,64,middle,Preprocessing (7)
+D4D_Uses.yaml,7,0,7,0,0,7,7,52,middle,Uses (7)
+D4D_Distribution.yaml,3,0,3,0,0,3,3,25,middle,Distribution (3)
+D4D_Maintenance.yaml,6,0,6,0,0,6,6,49,middle,Maintenance (6)
+D4D_Ethics.yaml,5,0,5,0,0,5,5,37,middle,Ethics (5)
+D4D_Human.yaml,5,0,5,0,0,5,5,54,middle,Human (5)
+D4D_Data_Governance.yaml,4,0,4,0,0,4,4,41,middle,Data_Governance (4)
+D4D_Variables.yaml,1,0,1,0,0,1,1,20,middle,Variables (1)
+D4D_FileCollection.yaml,2,0,1,1,0,1,0,68,middle,FileCollection (2)

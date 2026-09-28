@@ -1,0 +1,133 @@
+record_referent,n_records,identifier,identifier_dataset,identifier_status,role,records_with_identifier_in_role,share,flagged_for_review,flag_rule
+VOICE,44,adult_all,VOICE,all versions,root,12,0.2727,False,
+VOICE,44,adult_all,VOICE,all versions,version,34,0.7727,False,
+VOICE,44,adult_all,VOICE,all versions,dist,18,0.4091,False,
+VOICE,44,adult_all,VOICE,all versions,other,4,0.0909,False,
+VOICE,44,adult_all,VOICE,all versions,related,11,0.25,False,
+VOICE,44,adult_all,VOICE,all versions,text,30,0.6818,False,
+VOICE,44,adult_3.1.0,VOICE,latest captured,root,42,0.9545,False,
+VOICE,44,adult_3.1.0,VOICE,latest captured,version,27,0.6136,False,
+VOICE,44,adult_3.1.0,VOICE,latest captured,dist,40,0.9091,False,
+VOICE,44,adult_3.1.0,VOICE,latest captured,other,16,0.3636,False,
+VOICE,44,adult_3.1.0,VOICE,latest captured,related,2,0.0455,False,
+VOICE,44,adult_3.1.0,VOICE,latest captured,text,15,0.3409,False,
+VOICE,44,adult_3.0.0,VOICE,superseded,root,0,0.0,False,earlier release of the record's own dataset in a root role
+VOICE,44,adult_3.0.0,VOICE,superseded,version,25,0.5682,False,
+VOICE,44,adult_3.0.0,VOICE,superseded,dist,5,0.1136,True,earlier release of the record's own dataset in a dist role
+VOICE,44,adult_3.0.0,VOICE,superseded,other,0,0.0,False,earlier release of the record's own dataset in a other role
+VOICE,44,adult_3.0.0,VOICE,superseded,related,18,0.4091,False,
+VOICE,44,adult_3.0.0,VOICE,superseded,text,12,0.2727,False,
+VOICE,44,adult_2.0.x,VOICE,earlier release,root,0,0.0,False,earlier release of the record's own dataset in a root role
+VOICE,44,adult_2.0.x,VOICE,earlier release,version,0,0.0,False,
+VOICE,44,adult_2.0.x,VOICE,earlier release,dist,1,0.0227,True,earlier release of the record's own dataset in a dist role
+VOICE,44,adult_2.0.x,VOICE,earlier release,other,0,0.0,False,earlier release of the record's own dataset in a other role
+VOICE,44,adult_2.0.x,VOICE,earlier release,related,0,0.0,False,
+VOICE,44,adult_2.0.x,VOICE,earlier release,text,0,0.0,False,
+VOICE,44,adult_1.1,VOICE,earlier release,root,0,0.0,False,earlier release of the record's own dataset in a root role
+VOICE,44,adult_1.1,VOICE,earlier release,version,25,0.5682,False,
+VOICE,44,adult_1.1,VOICE,earlier release,dist,5,0.1136,True,earlier release of the record's own dataset in a dist role
+VOICE,44,adult_1.1,VOICE,earlier release,other,0,0.0,False,earlier release of the record's own dataset in a other role
+VOICE,44,adult_1.1,VOICE,earlier release,related,4,0.0909,False,
+VOICE,44,adult_1.1,VOICE,earlier release,text,11,0.25,False,
+VOICE,44,adult_1.0_hdn,VOICE,earlier release,root,0,0.0,False,earlier release of the record's own dataset in a root role
+VOICE,44,adult_1.0_hdn,VOICE,earlier release,version,19,0.4318,False,
+VOICE,44,adult_1.0_hdn,VOICE,earlier release,dist,3,0.0682,True,earlier release of the record's own dataset in a dist role
+VOICE,44,adult_1.0_hdn,VOICE,earlier release,other,0,0.0,False,earlier release of the record's own dataset in a other role
+VOICE,44,adult_1.0_hdn,VOICE,earlier release,related,32,0.7273,False,
+VOICE,44,adult_1.0_hdn,VOICE,earlier release,text,17,0.3864,False,
+VOICE,44,adult_raw_synapse,VOICE,raw audio,root,0,0.0,False,
+VOICE,44,adult_raw_synapse,VOICE,raw audio,version,0,0.0,False,
+VOICE,44,adult_raw_synapse,VOICE,raw audio,dist,35,0.7955,False,
+VOICE,44,adult_raw_synapse,VOICE,raw audio,other,0,0.0,False,
+VOICE,44,adult_raw_synapse,VOICE,raw audio,related,13,0.2955,False,
+VOICE,44,adult_raw_synapse,VOICE,raw audio,text,36,0.8182,False,
+VOICE,44,ped_all,VOICE_PEDIATRIC,all versions,root,0,0.0,False,pediatric dataset identifier in a root role of a adult record
+VOICE,44,ped_all,VOICE_PEDIATRIC,all versions,version,6,0.1364,True,pediatric dataset identifier in a version role of a adult record
+VOICE,44,ped_all,VOICE_PEDIATRIC,all versions,dist,9,0.2045,True,pediatric dataset identifier in a dist role of a adult record
+VOICE,44,ped_all,VOICE_PEDIATRIC,all versions,other,0,0.0,False,pediatric dataset identifier in a other role of a adult record
+VOICE,44,ped_all,VOICE_PEDIATRIC,all versions,related,17,0.3864,False,
+VOICE,44,ped_all,VOICE_PEDIATRIC,all versions,text,18,0.4091,False,
+VOICE,44,ped_1.1.0,VOICE_PEDIATRIC,latest captured,root,6,0.1364,True,pediatric dataset identifier in a root role of a adult record
+VOICE,44,ped_1.1.0,VOICE_PEDIATRIC,latest captured,version,8,0.1818,True,pediatric dataset identifier in a version role of a adult record
+VOICE,44,ped_1.1.0,VOICE_PEDIATRIC,latest captured,dist,9,0.2045,True,pediatric dataset identifier in a dist role of a adult record
+VOICE,44,ped_1.1.0,VOICE_PEDIATRIC,latest captured,other,0,0.0,False,pediatric dataset identifier in a other role of a adult record
+VOICE,44,ped_1.1.0,VOICE_PEDIATRIC,latest captured,related,23,0.5227,False,
+VOICE,44,ped_1.1.0,VOICE_PEDIATRIC,latest captured,text,13,0.2955,False,
+VOICE,44,ped_1.0.0,VOICE_PEDIATRIC,superseded,root,0,0.0,False,pediatric dataset identifier in a root role of a adult record
+VOICE,44,ped_1.0.0,VOICE_PEDIATRIC,superseded,version,0,0.0,False,pediatric dataset identifier in a version role of a adult record
+VOICE,44,ped_1.0.0,VOICE_PEDIATRIC,superseded,dist,0,0.0,False,pediatric dataset identifier in a dist role of a adult record
+VOICE,44,ped_1.0.0,VOICE_PEDIATRIC,superseded,other,0,0.0,False,pediatric dataset identifier in a other role of a adult record
+VOICE,44,ped_1.0.0,VOICE_PEDIATRIC,superseded,related,2,0.0455,False,
+VOICE,44,ped_1.0.0,VOICE_PEDIATRIC,superseded,text,0,0.0,False,
+VOICE,44,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,root,0,0.0,False,pediatric dataset identifier in a root role of a adult record
+VOICE,44,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,version,0,0.0,False,pediatric dataset identifier in a version role of a adult record
+VOICE,44,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,dist,8,0.1818,True,pediatric dataset identifier in a dist role of a adult record
+VOICE,44,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,other,0,0.0,False,pediatric dataset identifier in a other role of a adult record
+VOICE,44,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,related,4,0.0909,False,
+VOICE,44,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,text,26,0.5909,False,
+VOICE_PEDIATRIC,6,adult_all,VOICE,all versions,root,0,0.0,False,adult dataset identifier in a root role of a pediatric record
+VOICE_PEDIATRIC,6,adult_all,VOICE,all versions,version,0,0.0,False,adult dataset identifier in a version role of a pediatric record
+VOICE_PEDIATRIC,6,adult_all,VOICE,all versions,dist,0,0.0,False,adult dataset identifier in a dist role of a pediatric record
+VOICE_PEDIATRIC,6,adult_all,VOICE,all versions,other,0,0.0,False,adult dataset identifier in a other role of a pediatric record
+VOICE_PEDIATRIC,6,adult_all,VOICE,all versions,related,6,1.0,False,
+VOICE_PEDIATRIC,6,adult_all,VOICE,all versions,text,2,0.3333,False,
+VOICE_PEDIATRIC,6,adult_3.1.0,VOICE,latest captured,root,0,0.0,False,adult dataset identifier in a root role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.1.0,VOICE,latest captured,version,0,0.0,False,adult dataset identifier in a version role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.1.0,VOICE,latest captured,dist,0,0.0,False,adult dataset identifier in a dist role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.1.0,VOICE,latest captured,other,0,0.0,False,adult dataset identifier in a other role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.1.0,VOICE,latest captured,related,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_3.1.0,VOICE,latest captured,text,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_3.0.0,VOICE,superseded,root,0,0.0,False,adult dataset identifier in a root role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.0.0,VOICE,superseded,version,0,0.0,False,adult dataset identifier in a version role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.0.0,VOICE,superseded,dist,0,0.0,False,adult dataset identifier in a dist role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.0.0,VOICE,superseded,other,0,0.0,False,adult dataset identifier in a other role of a pediatric record
+VOICE_PEDIATRIC,6,adult_3.0.0,VOICE,superseded,related,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_3.0.0,VOICE,superseded,text,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_2.0.x,VOICE,earlier release,root,0,0.0,False,adult dataset identifier in a root role of a pediatric record
+VOICE_PEDIATRIC,6,adult_2.0.x,VOICE,earlier release,version,0,0.0,False,adult dataset identifier in a version role of a pediatric record
+VOICE_PEDIATRIC,6,adult_2.0.x,VOICE,earlier release,dist,0,0.0,False,adult dataset identifier in a dist role of a pediatric record
+VOICE_PEDIATRIC,6,adult_2.0.x,VOICE,earlier release,other,0,0.0,False,adult dataset identifier in a other role of a pediatric record
+VOICE_PEDIATRIC,6,adult_2.0.x,VOICE,earlier release,related,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_2.0.x,VOICE,earlier release,text,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_1.1,VOICE,earlier release,root,0,0.0,False,adult dataset identifier in a root role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.1,VOICE,earlier release,version,0,0.0,False,adult dataset identifier in a version role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.1,VOICE,earlier release,dist,0,0.0,False,adult dataset identifier in a dist role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.1,VOICE,earlier release,other,0,0.0,False,adult dataset identifier in a other role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.1,VOICE,earlier release,related,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_1.1,VOICE,earlier release,text,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_1.0_hdn,VOICE,earlier release,root,0,0.0,False,adult dataset identifier in a root role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.0_hdn,VOICE,earlier release,version,0,0.0,False,adult dataset identifier in a version role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.0_hdn,VOICE,earlier release,dist,0,0.0,False,adult dataset identifier in a dist role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.0_hdn,VOICE,earlier release,other,0,0.0,False,adult dataset identifier in a other role of a pediatric record
+VOICE_PEDIATRIC,6,adult_1.0_hdn,VOICE,earlier release,related,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_1.0_hdn,VOICE,earlier release,text,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_raw_synapse,VOICE,raw audio,root,0,0.0,False,adult dataset identifier in a root role of a pediatric record
+VOICE_PEDIATRIC,6,adult_raw_synapse,VOICE,raw audio,version,0,0.0,False,adult dataset identifier in a version role of a pediatric record
+VOICE_PEDIATRIC,6,adult_raw_synapse,VOICE,raw audio,dist,0,0.0,False,adult dataset identifier in a dist role of a pediatric record
+VOICE_PEDIATRIC,6,adult_raw_synapse,VOICE,raw audio,other,0,0.0,False,adult dataset identifier in a other role of a pediatric record
+VOICE_PEDIATRIC,6,adult_raw_synapse,VOICE,raw audio,related,0,0.0,False,
+VOICE_PEDIATRIC,6,adult_raw_synapse,VOICE,raw audio,text,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_all,VOICE_PEDIATRIC,all versions,root,3,0.5,False,
+VOICE_PEDIATRIC,6,ped_all,VOICE_PEDIATRIC,all versions,version,6,1.0,False,
+VOICE_PEDIATRIC,6,ped_all,VOICE_PEDIATRIC,all versions,dist,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_all,VOICE_PEDIATRIC,all versions,other,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_all,VOICE_PEDIATRIC,all versions,related,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_all,VOICE_PEDIATRIC,all versions,text,4,0.6667,False,
+VOICE_PEDIATRIC,6,ped_1.1.0,VOICE_PEDIATRIC,latest captured,root,6,1.0,False,
+VOICE_PEDIATRIC,6,ped_1.1.0,VOICE_PEDIATRIC,latest captured,version,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_1.1.0,VOICE_PEDIATRIC,latest captured,dist,6,1.0,False,
+VOICE_PEDIATRIC,6,ped_1.1.0,VOICE_PEDIATRIC,latest captured,other,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_1.1.0,VOICE_PEDIATRIC,latest captured,related,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_1.1.0,VOICE_PEDIATRIC,latest captured,text,6,1.0,False,
+VOICE_PEDIATRIC,6,ped_1.0.0,VOICE_PEDIATRIC,superseded,root,0,0.0,False,earlier release of the record's own dataset in a root role
+VOICE_PEDIATRIC,6,ped_1.0.0,VOICE_PEDIATRIC,superseded,version,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_1.0.0,VOICE_PEDIATRIC,superseded,dist,0,0.0,False,earlier release of the record's own dataset in a dist role
+VOICE_PEDIATRIC,6,ped_1.0.0,VOICE_PEDIATRIC,superseded,other,0,0.0,False,earlier release of the record's own dataset in a other role
+VOICE_PEDIATRIC,6,ped_1.0.0,VOICE_PEDIATRIC,superseded,related,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_1.0.0,VOICE_PEDIATRIC,superseded,text,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,root,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,version,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,dist,6,1.0,False,
+VOICE_PEDIATRIC,6,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,other,0,0.0,False,
+VOICE_PEDIATRIC,6,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,related,6,1.0,False,
+VOICE_PEDIATRIC,6,ped_raw_synapse,VOICE_PEDIATRIC,raw audio,text,5,0.8333,False,

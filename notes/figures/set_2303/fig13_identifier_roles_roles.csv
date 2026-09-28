@@ -1,0 +1,7 @@
+role,rule,order
+text,"leaf key is descriptive: access_details, description, future_guarantees, notes, raw_data_details, recommended_mitigation, source_caveats, source_description, version_details",0
+related,"path passes through related_datasets, parent_datasets or external_resources",1
+root,"top-level id, doi, page or citation",2
+version,"path passes through version_access, updates, distribution_dates or errata",3
+dist,"path starts at distribution_formats, file_collections, resources, raw_sources, raw_data_sources, or top-level download_url",4
+other,any other structured leaf (mostly nested object ids that use a DOI as a namespace),5

@@ -1,0 +1,37 @@
+project,document_id,source_type,n_runs,median_sole_source_share,min,max,runs_cited,runs_flagged_redundancy_target
+AI_READI,ro_crate_metadata,RO-Crate,6,0.073948,0.039773,0.105882,6,0
+AI_READI,fairhub_dataset_v3_api,structured metadata,6,0.463133,0.403409,0.554622,6,2
+AI_READI,fairhub_dataset_v3,data resource,6,0.013323,0.005882,0.022727,6,3
+AI_READI,fairhub_dataset,data resource,6,0.0,0.0,0.008584,3,2
+AI_READI,dataset_documentation_v3,documentation,6,0.005311,0.0,0.011364,6,4
+AI_READI,dataset_documentation,documentation,6,0.0,0.0,0.005882,2,0
+AI_READI,dataset_license,license,6,0.056845,0.004202,0.064706,6,0
+AI_READI,irb_protocol,IRB,6,0.027842,0.021008,0.056818,6,0
+AI_READI,bmj_protocol_publication,publication,6,0.109109,0.094421,0.193182,6,0
+AI_READI,nature_metabolism_publication,publication,6,0.028924,0.025751,0.038462,6,0
+AI_READI,nih_reporter_project,NIH project page,6,0.005575,0.004202,0.017647,6,0
+CHORUS,project_documentation,documentation,6,0.160247,0.131148,0.184615,6,0
+CHORUS,nih_reporter_project,NIH project page,6,0.247719,0.20339,0.311475,6,0
+CHORUS,cohort_2_webinar,tutorial,6,0.309071,0.261538,0.368421,6,0
+CHORUS,github_organization_overview,historical documentation,6,0.2,0.169492,0.222222,6,0
+CM4AI,june_2026_dataverse_release,data resource,6,0.236568,0.15894,0.677215,6,2
+CM4AI,october_2025_dataverse_release,data resource,6,0.052266,0.025316,0.15894,6,0
+CM4AI,data_release_documentation,documentation,6,0.023383,0.013245,0.035088,6,0
+CM4AI,project_documentation,documentation,6,0.013156,0.006329,0.026316,6,0
+CM4AI,dataset_license,license,6,0.010715,0.0,0.041667,6,0
+CM4AI,nature_publication,publication,6,0.03519,0.0,0.157895,4,0
+CM4AI,biorxiv_preprint,preprint,6,0.186008,0.158228,0.270833,6,0
+CM4AI,nih_reporter_project,NIH project page,6,0.029712,0.012422,0.061404,6,0
+CM4AI,june_2025_dataverse_release,historical data release,6,0.07511,0.0,0.31677,5,2
+CM4AI,march_2025_dataverse_release,historical data release,6,0.069901,0.027778,0.198675,6,3
+VOICE,physionet_3_1_0,data resource,6,0.193881,0.068376,0.287293,6,1
+VOICE,physionet_3_0_0,data resource,6,0.030653,0.0,0.081081,6,0
+VOICE,physionet_1_1,data resource,6,0.011498,0.005525,0.051282,6,0
+VOICE,physionet_pediatric_1_1_0,data resource,6,0.010191,0.005525,0.042735,6,0
+VOICE,project_documentation,documentation,6,0.428665,0.384615,0.480663,6,0
+VOICE,documentation_repository,documentation,6,0.007179,0.0,0.018018,6,0
+VOICE,data_transfer_use_agreement,DUA,6,0.043607,0.020979,0.051282,6,0
+VOICE,irb_protocol,IRB,6,0.063172,0.016575,0.091667,6,0
+VOICE,feasibility_publication,publication,6,0.025703,0.005525,0.059829,6,0
+VOICE,audiomics_white_paper,white paper,6,0.020595,0.005525,0.027027,6,0
+VOICE,nih_reporter_project,NIH project page,6,0.016002,0.0,0.036145,6,0

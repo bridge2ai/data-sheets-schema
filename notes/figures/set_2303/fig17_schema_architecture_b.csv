@@ -1,0 +1,22 @@
+class,module_file,depth_from_dataset,column,role,induced_attributes,is_a,label_under_name,x_pt,y_pt
+Dataset,data_sheets_schema.yaml,0,0 (Dataset and its is_a lineage),start,98,Information,data_sheets_schema · is_a Information,144.4,184.6
+Information,D4D_Base_import.yaml,not reachable,0 (Dataset and its is_a lineage),is_a lineage of Dataset (not reachable),26,NamedThing,Base_import · is_a NamedThing,144.4,240.6
+NamedThing,D4D_Base_import.yaml,not reachable,0 (Dataset and its is_a lineage),is_a lineage of Dataset (not reachable),5,,Base_import,144.4,296.6
+DataSubset,data_sheets_schema.yaml,1,1,reachable,100,Dataset,data_sheets_schema · is_a Dataset,359.3,325.0
+FundingMechanism,D4D_Motivation.yaml,1,1,reachable,8,DatasetProperty,Motivation · is_a DatasetProperty,359.3,296.9
+Instance,D4D_Composition.yaml,1,1,reachable,14,DatasetProperty,Composition · is_a DatasetProperty,359.3,268.8
+SamplingStrategy,D4D_Composition.yaml,1,1,reachable,13,DatasetProperty,Composition · is_a DatasetProperty,359.3,240.7
+FileCollection,D4D_FileCollection.yaml,1,1,reachable,32,Information,FileCollection · is_a Information,359.3,212.6
+ExternalResource,D4D_Composition.yaml,1,1,reachable,10,DatasetProperty,Composition · is_a DatasetProperty,359.3,184.6
+Creator,D4D_Motivation.yaml,1,1,reachable,9,DatasetProperty,Motivation · is_a DatasetProperty,359.3,156.5
+DataGovernance,D4D_Data_Governance.yaml,1,1,reachable,14,DatasetProperty,Data_Governance · is_a DatasetProperty,359.3,128.4
+EthicalReview,D4D_Ethics.yaml,1,1,reachable,9,DatasetProperty,Ethics · is_a DatasetProperty,359.3,100.3
+LicenseAndUseTerms,D4D_Data_Governance.yaml,1,1,reachable,9,DatasetProperty,Data_Governance · is_a DatasetProperty,359.3,72.2
+ExportControlRegulatoryRestrictions,D4D_Data_Governance.yaml,1,1,reachable,11,DatasetProperty,Data_Governance · is_a DatasetProperty,359.3,44.1
+DatasetProperty,D4D_Base_import.yaml,not reachable,1,declaring parent of an inherited slot (not reachable),6,,Base_import,359.3,16.0
+Grant,D4D_Motivation.yaml,2,2,reachable,6,,Motivation,718.8,296.9
+MissingInfo,D4D_Composition.yaml,2,2,reachable,8,DatasetProperty,Composition · is_a DatasetProperty,718.8,266.9
+File,D4D_FileCollection.yaml,2,2,reachable,36,Information,FileCollection · is_a Information,718.8,212.6
+Organization,D4D_Base_import.yaml,2,2,reachable,5,,Base_import,718.8,142.4
+Person,D4D_Base_import.yaml,2,2,reachable,8,NamedThing,Base_import · is_a NamedThing,718.8,105.0
+Software,D4D_Base_import.yaml,2,2,reachable,8,NamedThing,Base_import · is_a NamedThing,718.8,16.0

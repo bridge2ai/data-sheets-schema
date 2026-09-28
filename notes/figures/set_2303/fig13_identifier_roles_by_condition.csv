@@ -1,0 +1,1585 @@
+record_referent,identifier,role,condition,arm,condition_label,n_records,records_with_identifier_in_role,applicable,flagged_for_review
+VOICE,adult_all,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_all,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,1,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,4,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,3,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_all,version,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_all,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,3,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,6,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,3,True,False
+VOICE,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,5,True,False
+VOICE,adult_all,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_all,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,3,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,3,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_all,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_all,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_all,related,mode:four-phase project agent,agentic,"project agent, no file†",3,2,True,False
+VOICE,adult_all,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,2,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,2,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,1,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,2,True,False
+VOICE,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_all,text,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_all,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,5,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,2,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,2,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,2,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,2,True,False
+VOICE,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_3.1.0,root,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_3.1.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,3,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,6,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,3,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,3,True,False
+VOICE,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,5,True,False
+VOICE,adult_3.1.0,version,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_3.1.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,5,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,2,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,5,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_3.1.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_3.1.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,1,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,3,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,6,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,3,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,2,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,2,True,False
+VOICE,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,5,True,False
+VOICE,adult_3.1.0,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_3.1.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,1,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,1,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,2,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,6,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,5,True,False
+VOICE,adult_3.1.0,related,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_3.1.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,1,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_3.1.0,text,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,adult_3.1.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,2,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,1,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,1,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_3.0.0,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_3.0.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_3.0.0,version,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_3.0.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,5,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,1,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,4,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_3.0.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,True
+VOICE,adult_3.0.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,3,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_3.0.0,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_3.0.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_3.0.0,related,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,adult_3.0.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,1,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,1,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,3,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,5,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,2,True,False
+VOICE,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,3,True,False
+VOICE,adult_3.0.0,text,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,adult_3.0.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,1,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,1,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_2.0.x,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_2.0.x,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_2.0.x,version,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_2.0.x,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_2.0.x,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_2.0.x,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,1,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_2.0.x,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_2.0.x,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_2.0.x,related,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_2.0.x,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_2.0.x,text,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_2.0.x,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_1.1,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_1.1,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_1.1,version,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_1.1,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,5,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,1,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,4,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_1.1,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,True
+VOICE,adult_1.1,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,3,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_1.1,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_1.1,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_1.1,related,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_1.1,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,1,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,1,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_1.1,text,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,adult_1.1,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,1,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,1,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_1.0_hdn,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_1.0_hdn,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_1.0_hdn,version,mode:four-phase project agent,agentic,"project agent, no file†",3,2,True,False
+VOICE,adult_1.0_hdn,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,4,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,1,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,4,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,1,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_1.0_hdn,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,True
+VOICE,adult_1.0_hdn,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,1,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_1.0_hdn,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,adult_1.0_hdn,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,adult_1.0_hdn,related,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_1.0_hdn,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,2,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,2,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,5,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,2,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,6,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,3,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,3,True,False
+VOICE,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,3,True,False
+VOICE,adult_1.0_hdn,text,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_1.0_hdn,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,2,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,1,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,1,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,adult_raw_synapse,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_raw_synapse,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_raw_synapse,version,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_raw_synapse,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_raw_synapse,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,False
+VOICE,adult_raw_synapse,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,2,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,3,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,5,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,3,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,2,True,False
+VOICE,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,2,True,False
+VOICE,adult_raw_synapse,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,adult_raw_synapse,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,adult_raw_synapse,related,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,adult_raw_synapse,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,1,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,1,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,1,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,1,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,3,True,False
+VOICE,adult_raw_synapse,text,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,adult_raw_synapse,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,5,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,3,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,5,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,3,True,False
+VOICE,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,4,True,False
+VOICE,ped_all,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_all,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_all,version,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,True
+VOICE,ped_all,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,2,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_all,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,True
+VOICE,ped_all,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_all,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_all,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_all,related,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,ped_all,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,2,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,1,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,3,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,2,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,1,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,3,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,3,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,1,True,False
+VOICE,ped_all,text,mode:four-phase project agent,agentic,"project agent, no file†",3,2,True,False
+VOICE,ped_all,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,2,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,2,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,1,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,2,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,ped_1.1.0,root,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,True
+VOICE,ped_1.1.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.1.0,version,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,True
+VOICE,ped_1.1.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.1.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,True
+VOICE,ped_1.1.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.1.0,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_1.1.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.1.0,related,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,ped_1.1.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,1,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,2,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,3,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,2,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,5,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,3,True,False
+VOICE,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,5,True,False
+VOICE,ped_1.1.0,text,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,ped_1.1.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,2,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,3,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,2,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,ped_1.0.0,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_1.0.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.0.0,version,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_1.0.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.0.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_1.0.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.0.0,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_1.0.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_1.0.0,related,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,ped_1.0.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,2,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,ped_1.0.0,text,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,False
+VOICE,ped_1.0.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,ped_raw_synapse,root,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_raw_synapse,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_raw_synapse,version,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_raw_synapse,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_raw_synapse,dist,mode:four-phase project agent,agentic,"project agent, no file†",3,3,True,True
+VOICE,ped_raw_synapse,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,2,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_raw_synapse,other,mode:four-phase project agent,agentic,"project agent, no file†",3,0,True,True
+VOICE,ped_raw_synapse,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,True
+VOICE,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,True
+VOICE,ped_raw_synapse,related,mode:four-phase project agent,agentic,"project agent, no file†",3,1,True,False
+VOICE,ped_raw_synapse,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,1,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,2,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,0,True,False
+VOICE,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,0,True,False
+VOICE,ped_raw_synapse,text,mode:four-phase project agent,agentic,"project agent, no file†",3,2,True,False
+VOICE,ped_raw_synapse,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,3,3,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,3,3,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,3,3,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,3,3,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,1,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,3,2,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,6,3,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,3,2,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,3,1,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,3,1,True,False
+VOICE,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,5,2,True,False
+VOICE_PEDIATRIC,adult_all,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_all,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_all,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_all,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_all,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_all,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_all,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_all,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_all,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_all,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_all,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_all,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,2,True,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_all,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.1.0,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_3.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_3.0.0,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_3.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_2.0.x,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_2.0.x,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.1,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_1.1,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_1.0_hdn,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_1.0_hdn,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,adult_raw_synapse,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,adult_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_all,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,3,True,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_all,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_all,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_all,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_all,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_all,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_all,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_all,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_all,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_all,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,4,True,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_all,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.1.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,True
+VOICE_PEDIATRIC,ped_1.0.0,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_1.0.0,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,root,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,version,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,dist,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,0,True,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,other,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,6,True,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,related,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,mode:four-phase project agent,agentic,"project agent, no file†",0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,"mode:four-phase project agent, de-primed",agentic,de-primed no file†,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@7e9a67f7,agentic,generic v1 rev 7e9a,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,api,generic v1 rev 0fbc,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v2.md@47806134,api,generic v2,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt.md@0fbc626b,agentic,generic v1 rev 0fbc,6,5,True,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v4.md@3845b66c,api,generic v4,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,api,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v5.md@c4bbcc41,agentic,generic v5,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v6.md@57ac2030,agentic,generic v6,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v7.md@08a26ae4,api,generic v7,0,,False,False
+VOICE_PEDIATRIC,ped_raw_synapse,text,src/download/prompts/d4d_generic_arm_prompt_v8.md@506af01b,api,generic v8,0,,False,False

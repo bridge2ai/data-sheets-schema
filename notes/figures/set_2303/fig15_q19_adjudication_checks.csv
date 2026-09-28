@@ -1,0 +1,16 @@
+check,value
+review manifest_sha256 equals manifest.json,True
+review definition_sha256 equals rubric20 definition_sha256,True
+cases,24
+cases with status requires_adjudication,9
+file-level ratings_requiring_adjudication,9
+evaluation and input SHA-256 match for every case,True
+Q19 score in evaluation JSON equals review copy for every case,True
+records with an API runtime header,24
+frozen text-or-graph rule quoted from definition_commit,verified against definition_sha256
+"ratings with >=1 filled representation mark, flagged",9 of 9
+"ratings with >=1 filled representation mark, not flagged",0 of 15
+not-flagged ratings with >=1 filled other-concern mark,"4 of 15: CHORUS_v7_rep2_r20_rating1 (version, missing, granularity); CHORUS_v7_rep3_r20_rating1 (version, missing, granularity); CHORUS_v8_rep3_r20_rating1 (version); CM4AI_v7_rep1_r20_rating1 (granularity)"
+not-flagged ratings scored below max that carry a filled other-concern mark,4 of 4
+"Q19 score distribution, flagged",9 at 4
+"Q19 score distribution, not flagged","11 at 5, 3 at 4, 1 at 3"

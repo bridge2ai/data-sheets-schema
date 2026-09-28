@@ -1,0 +1,5 @@
+panel,true_x,y,n_records,spacing,plotted_x_min,plotted_x_max,max_offset_from_true_x,records
+rank,5.0,2.5,2,0.62,4.69,5.31,0.31,AI-READI v7 r2; AI-READI v8 r3
+rank,5.0,5.5,3,0.62,4.38,5.62,0.62,AI-READI v7 r1; AI-READI v8 r1; AI-READI v8 r2
+percentage,98.0,93.1818,3,1.0,97.0,99.0,1.0,AI-READI v7 r1; AI-READI v8 r1; AI-READI v8 r2
+percentage,98.0,94.3182,2,1.0,97.5,98.5,0.5,AI-READI v7 r2; AI-READI v8 r3
