@@ -33,9 +33,11 @@ PREPARE_OPTIONS = {'native_api_timeout_ms': 3600000, 'native_api_force_idle_time
 
 
 def manifest(**changes):
+    # A documented endpoint, so a transport refusal can only come from the
+    # selection under test, never from a missing endpoint (#2938).
     return {'kind': 'd4d_native_audit_continuation', KEY: dict(BUFFER),
             'native_stall_policy': deepcopy(POLICY), 'native_runtime': dict(RUNTIME),
-            'native_upstream_read_timeout_seconds': 1200,
+            'native_upstream_read_timeout_seconds': 1200, 'provider_base_url': 'https://api.cborg.lbl.gov',
             'job': {'deadline_seconds': 10800}, **changes}
 
 
@@ -90,12 +92,26 @@ def test_inclusive_byte_and_time_bounds(max_bytes, seconds):
 
 
 @pytest.mark.parametrize('seconds', [1, 59])
-def test_a_deadline_below_the_floor_is_refused_by_name(seconds):
+def test_a_deadline_below_the_floor_is_refused_by_name(seconds, monkeypatch):
     """The worker's start-up counts against the deadline (#2159), so a few-second
-    deadline is a mistake that would debit every buffered request as a stall (#2605)."""
+    deadline is a mistake that would debit every buffered request as a stall (#2605).
+    The provider transport refuses it by the same name before any client exists (#2938)."""
     assert registration.MIN_RESPONSE_BUFFER_SECONDS == 60
-    with pytest.raises(BudgetStop, match='at least 60 seconds'):
-        registration.native_response_buffer(manifest(**{KEY: {**BUFFER, 'total_seconds': seconds}}))
+    m = manifest(**{KEY: {**BUFFER, 'total_seconds': seconds}})
+    monkeypatch.setattr(transport, 'Client', forbidden)
+    with pytest.raises(BudgetStop, match='deadline must be at least 60 seconds'):
+        registration.native_response_buffer(m)
+    with pytest.raises(BudgetStop, match='deadline must be at least 60 seconds'):
+        transport.provider_clients(m, 'synthetic-key')
+
+
+@pytest.mark.parametrize('seconds', [45, 59, 60])
+def test_a_read_bound_below_the_floor_names_the_read_bound(seconds):
+    """With a read bound under 60 s no deadline satisfies both bounds, so the refusal
+    names the read bound rather than pointing at the deadline both ways (#2940)."""
+    m = manifest(native_upstream_read_timeout_seconds=45, **{KEY: {**BUFFER, 'total_seconds': seconds}})
+    with pytest.raises(BudgetStop, match='needs an upstream read bound of at least 60 seconds'):
+        registration.native_response_buffer(m)
 
 
 @pytest.mark.parametrize('change', ['no_policy', 'null_policy', 'no_sdk', 'short_sdk',

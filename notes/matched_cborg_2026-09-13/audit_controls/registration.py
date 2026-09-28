@@ -859,6 +859,10 @@ def native_response_buffer(manifest):
     if policy is None:
         raise BudgetStop('native response buffering requires the registered stall policy')
     read_bound = native_upstream_read_timeout(manifest) or LEGACY_UPSTREAM_READ_SECONDS
+    if read_bound < MIN_RESPONSE_BUFFER_SECONDS:
+        # No deadline could satisfy both bounds; say which one to raise (#2940).
+        raise BudgetStop(f'native response buffering needs an upstream read bound of at least '
+                         f'{MIN_RESPONSE_BUFFER_SECONDS} seconds (#2605)')
     if value['total_seconds'] > read_bound:
         raise BudgetStop('complete-response deadline must not exceed the registered upstream read bound')
     if value['total_seconds'] < MIN_RESPONSE_BUFFER_SECONDS:

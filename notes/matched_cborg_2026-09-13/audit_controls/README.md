@@ -128,7 +128,9 @@ The strict JSON object is `{"kind":"complete_response_v1","max_bytes":16777216,
 requires the registered stall policy, an explicit SDK timeout with margin, and
 the native fetch idle timer disabled. The byte limit must be a positive integer
 at most 64 MiB; the absolute exchange limit must be a whole number of seconds,
-at least 60 and no greater than the registered upstream read bound. The floor
+at least 60 and no greater than the registered upstream read bound, so
+buffering also needs a read bound of at least 60 seconds and is refused by that
+name otherwise (#2940). The floor
 exists because the bounded worker's start-up counts against this limit by
 design (#2159): a limit of a few seconds, entered by mistake, would turn every
 buffered request into a stall debit after the send (#2605). The proxy's own
