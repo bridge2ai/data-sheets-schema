@@ -463,6 +463,9 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
     manifest = {
         'kind': KIND, 'schema_version': 1, 'issue': 2463, 'prepared_at': now(),
         'repository': repository, 'code_commit': commit, 'require_clean': require_clean,
+        # The closure as prepared: run must resolve exactly this set, not a subset, so a
+        # pinned module shadowed from outside the root is refused too (#2824).
+        'implementation': sorted(implementation),
         'attempt': ATTEMPT, 'scope': SCOPE,
         'parent': {'registration': str(origin_path)},
         'sequence_state': str(state_path),
@@ -772,7 +775,9 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
     if any((out / name).exists() for name in RUN_ONCE):
         raise BudgetStop('probe already ran; a probe runs once')
     verify_pins(manifest)
-    if not set(implementation_paths()) <= set(manifest['pinned_files']):
+    implementation = implementation_paths()
+    if (implementation != manifest.get('implementation')
+            or not set(implementation) <= set(manifest['pinned_files'])):
         raise BudgetStop('probe implementation is not the registered one')
     if interpreter() != manifest['runtime']:
         raise BudgetStop('probe interpreter or libraries differ from the registered ones')

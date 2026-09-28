@@ -1108,3 +1108,57 @@ def test_prepare_passes_its_clean_rule_to_the_clean_check(lineage, monkeypatch):
     monkeypatch.setattr(probe, 'repository_state', recorded)
     prepare(lineage, require_clean=True)
     assert seen == [True]
+
+
+
+def test_run_refuses_a_closure_that_shrank_after_prepare(lineage, monkeypatch):
+    """#2824: a pinned module that resolves outside the root at run time (a namespace
+    portion earlier on PYTHONPATH) leaves the closure, which a subset check would accept;
+    run requires exactly the prepared closure."""
+    registration, identity = prepare(lineage)
+    manifest = json.loads(registration.read_text())
+    assert manifest['implementation'] == probe.implementation_paths()
+    real = probe.implementation_paths
+    monkeypatch.setattr(probe, 'implementation_paths',
+                        lambda: [path for path in real() if not path.endswith('/api_runner.py')])
+    with pytest.raises(BudgetStop, match='probe implementation is not the registered one'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+
+
+def test_the_whole_interpreter_environment_is_excluded(tmp_path, monkeypatch):
+    """#2825: the base and exec prefixes and the site directories are the environment
+    too; a base interpreter inside the root keeps its standard library out of the closure."""
+    import site
+    root = tmp_path / 'root'
+    for attribute in ('base_prefix', 'exec_prefix', 'base_exec_prefix'):
+        place = root / attribute
+        (place / 'lib').mkdir(parents=True)
+        monkeypatch.setattr(sys, attribute, str(place))
+        assert not probe.repository_file((place / 'lib' / 'x.py').resolve(), root.resolve(), probe._environment())
+    user_site = root / 'user-site'
+    user_site.mkdir()
+    monkeypatch.setattr(site, 'getusersitepackages', lambda: str(user_site))
+    assert not probe.repository_file((user_site / 'x.py').resolve(), root.resolve(), probe._environment())
+
+
+def test_a_package_whose_init_lies_outside_the_root_is_not_pinned(tmp_path, monkeypatch):
+    """#2826: a package directory inside the root whose __init__.py links outside it is
+    found (its search location is inside), but the file that would run is not the
+    repository's, so it is not pinned; the final check on the origin keeps it out."""
+    root = tmp_path / 'root'
+    outside = tmp_path / 'outside_init.py'
+    outside.write_text('')
+    package = root / 'closure_linkinit_2826'
+    package.mkdir(parents=True)
+    (package / '__init__.py').symlink_to(outside)
+    (package / 'mod.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_linkinit_2826.mod\n')
+    monkeypatch.syspath_prepend(str(root))
+    try:
+        files = probe.import_closure(seed, root.resolve())
+    finally:
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
+    names = {f.relative_to(root.resolve()).as_posix() for f in files if f.is_relative_to(root.resolve())}
+    assert outside.resolve() not in files and 'closure_linkinit_2826/mod.py' in names
