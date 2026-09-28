@@ -311,3 +311,64 @@ def test_the_gone_refusal_says_its_cause_once(tmp_path):
     with pytest.raises(ledger.UsageLedgerError) as raised:
         api._abandoned_rows(s)
     assert str(raised.value).count("cannot establish surviving abandoned attempts") == 1
+
+
+def test_a_ledger_first_written_by_a_call_records_its_boundary(tmp_path):
+    """#2888: a ledger opened by begin_call rather than prepare_usage starts after the
+    journal's existing bytes too."""
+    other = spec(out_dir=tmp_path)
+    ledger.prepare_usage(other, resume=True)
+    _drop(other, 1)
+    with api._abandoned_ledger(other).open("ab") as stream:
+        stream.write(b'{"phase": "full", "usage_id": "torn"')
+    s = replace(other, label="another_rep1")
+    ledger.begin_call(s, "full", 1, "2026-09-28T00:00:00Z")
+    assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes())
+    assert api._abandoned_rows(s)                              # the torn line is not this generation's
+
+
+@pytest.mark.parametrize("how", ["directory", "unreadable"])
+def test_a_journal_that_cannot_be_read_is_refused(tmp_path, how):
+    """#2889: a journal the gate cannot read, a directory at its path or a file it may not
+    open, is refused rather than read as empty."""
+    import os
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    journal = api._abandoned_ledger(s)
+    journal.parent.mkdir(parents=True, exist_ok=True)
+    if how == "directory":
+        journal.mkdir()
+    else:
+        _drop(s, 1)
+        os.chmod(journal, 0)
+    try:
+        with pytest.raises(ledger.UsageLedgerError, match="cannot establish surviving abandoned attempts"):
+            api._require_surviving_accounting(s, [])
+    finally:
+        if how == "unreadable":
+            os.chmod(journal, 0o600)
+
+
+def test_a_legacy_continuation_adopts_rows_without_a_generation_before_its_boundary(tmp_path):
+    """#2889, #2883: rows journaled before any ledger carry no generation; a legacy
+    continuation, opened by resume, adopts them as its own charges."""
+    s = spec(out_dir=tmp_path)
+    journal = api._abandoned_ledger(s)
+    journal.parent.mkdir(parents=True, exist_ok=True)
+    legacy = {"phase": "full", "attempt": 1, "snapshot": "legacy-snapshot.txt", "output_tokens": 7}
+    journal.write_text(json.dumps(legacy) + "\n")
+    ledger.prepare_usage(s, resume=True)
+    assert ledger.abandoned_journal_offset(s) == len(journal.read_bytes())
+    assert api.merge_abandoned_rows(s, []) == [legacy]
+
+
+def test_a_predecessor_line_that_is_not_an_object_is_skipped(tmp_path):
+    """#2889: before the boundary a line that parses to something other than an object is
+    a predecessor's corruption like a torn one, skipped, not a refusal."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    old = _drop(s, 1)
+    with api._abandoned_ledger(s).open("ab") as stream:
+        stream.write(b"[1, 2]\n")
+    ledger.prepare_usage(s, resume=False)
+    assert api._abandoned_rows(s) == [old]

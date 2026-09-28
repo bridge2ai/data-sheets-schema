@@ -113,10 +113,16 @@ def ledger_path(spec) -> Path:
 
 
 def _empty(spec, *, accept_legacy: bool) -> dict:
+    # Every new ledger opens a generation, whichever route writes it first (prepare_usage,
+    # begin_call, persist_usage). The abandoned-attempts journal is shared and kept across
+    # generations, so the bytes already in it were written before this one: its own rows
+    # start here, and only they are read strictly (#2859, #2869, #2888).
+    journal = abandoned_journal_path(spec)
     return {"version": 1, "identity": run_identity(spec),
             "generation_id": uuid.uuid4().hex, "prior_generation_ids": [],
             "accept_legacy": accept_legacy, "rows": [],
-            "input_identity": spec.input_identity()}
+            "input_identity": spec.input_identity(),
+            "abandoned_journal_offset": journal.stat().st_size if journal.exists() else 0}
 
 
 def _read(spec) -> dict:
@@ -377,12 +383,7 @@ def prepare_usage(spec, *, resume: bool) -> str:
     if resume and path.exists():
         require_resolved(spec)
         return _read(spec)["generation_id"]
-    data = _empty(spec, accept_legacy=resume)
-    # Every new ledger opens a generation. The abandoned-attempts journal is shared and
-    # kept across generations, so the bytes already in it were written before this one:
-    # its own rows start here, and only they are read strictly (#2859, #2869).
-    journal = abandoned_journal_path(spec)
-    data["abandoned_journal_offset"] = journal.stat().st_size if journal.exists() else 0
+    data = _empty(spec, accept_legacy=resume)          # records the journal boundary
     if not resume:
         data["prior_generation_ids"] = _record_generations(spec)
         from data_sheets_schema.snapshot_store import predecessor_generation
