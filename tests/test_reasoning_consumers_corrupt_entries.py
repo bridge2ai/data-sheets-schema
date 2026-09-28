@@ -85,18 +85,22 @@ def test_the_baseline_follows_the_rule_around_corrupt_log_entries(run, log, acce
 
 
 @pytest.mark.parametrize("refused_key, log_key, accepted", [
-    ((2, 900.5), (2, 900.5), 555),        # a fraction the runner wrote to both is matched as written
-    ((2, 900), ("2", 900), 900),          # a text attempt equals no integer one
-    (("2", 900), ("2", 900), 555),        # and matches itself
+    ((2, 900.5), (2, 900.5), (555, 1)),        # a fraction the runner wrote to both is matched as written
+    ((2, 900), (2, 900.5), (900, 2)),          # and is not the integer beside it (#2908)
+    ((2, 900.5), (2, 900), (900, 2)),
+    ((2, 900), ("2", 900), (900, "2")),        # a text attempt equals no integer one
+    (("2", 900), ("2", 900), (555, 1)),        # and matches itself
 ])
 def test_refused_rows_are_matched_on_the_raw_values(run, refused_key, log_key, accepted):
-    """#2906: the log entry a refused row names is dropped when their raw (attempt,
-    output_tokens) are equal, as main compared them: no value is coerced first."""
+    """#2906, #2908: the log entry a refused row names is dropped when their raw (attempt,
+    output_tokens) are equal, as main compared them: no value is coerced first, so a
+    truncated or parsed comparison fails one of these."""
     from data_sheets_schema.run_telemetry import accepted_full_output
     refused = [{"phase": "full", "attempt": refused_key[0], "output_tokens": refused_key[1],
                 "stop_reason": "end_turn", "unusable_reason": "no YAML document"}]
     log = [GOOD, entry(attempt=log_key[0], output_tokens=log_key[1])]
-    assert accepted_full_output(run(refused, log), "CHORUS")["output_tokens"] == accepted
+    result = accepted_full_output(run(refused, log), "CHORUS")
+    assert (result["output_tokens"], result["attempt"]) == accepted
 
 
 def _deep(depth):
