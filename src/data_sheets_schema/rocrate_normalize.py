@@ -28,6 +28,7 @@ from typing import Any
 
 import yaml
 from linkml_runtime import SchemaView
+from data_sheets_schema.rocrate_map import doi_for_slot, verdict_basis
 from data_sheets_schema.schema_view import shared_view
 
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
@@ -188,7 +189,7 @@ def _person_to_creator(ref_id: str, person: dict | None,
 
 
 # --------------------------------------------------------------------------
-# transform 1-4: the LinkML rendering
+# transform 1-5: the LinkML rendering
 # --------------------------------------------------------------------------
 
 def normalize_linkml(
@@ -286,11 +287,26 @@ def normalize_linkml(
                 f"{len(out['created_by'])} entries", joined)
         out["created_by"] = joined
 
+    # 5. doi is the bare DOI: the pattern is anchored (#646) and upstream
+    #    writes the resolver URL. The case upstream wrote is kept, by the
+    #    rule the our-mapping arm applies to the same crate value (#2916).
+    if "doi" in out:
+        value = out["doi"]
+        doi, why = doi_for_slot(value)
+        if doi is None:
+            res.log("doi", "drop", f"{why}; none is inferred", value)
+            del out["doi"]
+        elif doi != value:
+            res.log("doi", "rewrite",
+                    "the slot takes the bare DOI (#646); resolver or `doi:` "
+                    "prefix removed, case kept", value, doi)
+            out["doi"] = doi
+
     return out
 
 
 # --------------------------------------------------------------------------
-# transform 5: reduce the crate JSON-LD
+# transform 6: reduce the crate JSON-LD
 # --------------------------------------------------------------------------
 
 def _summarize_inventory(entries: list) -> dict:
@@ -412,7 +428,7 @@ def write_report(res: Result, path: Path, sources: dict[str, Path]) -> None:
     lines += ["", "## Validation", ""]
     for name, status in res.validation.items():
         head = status.splitlines()[0]
-        lines.append(f"- `{name}`: **{head}**")
+        lines.append(f"- `{name}`: **{head}** — {verdict_basis(FULL_SCHEMA)}")
         if head != "PASS":
             lines += ["", "```", *status.splitlines()[1:][:20], "```", ""]
     lines += ["", f"## Changes ({len(res.changes)})", ""]

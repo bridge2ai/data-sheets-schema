@@ -24,17 +24,24 @@ import json
 import re
 import subprocess
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import yaml
 from linkml_runtime import SchemaView
 from data_sheets_schema.schema_view import shared_view
+from data_sheets_schema.scope import bare_doi
 
 MAPPING_TSV = Path("data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv")
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 PACKAGES_DIR = Path("data/ro-crate_packages")
 TARGET_CLASS = "Dataset"
+
+#: The slot whose pattern is anchored to the bare DOI (#646). Crates carry the
+#: resolver URL, and copying it through failed the schema while the report
+#: still said PASS (#2916).
+DOI_SLOT = "doi"
 
 # Path grammar actually present in the table (verified against all 133 rows):
 #   @graph[?@type='T']['prop']
@@ -244,10 +251,42 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
     return value, ""
 
 
+def doi_for_slot(value: Any) -> tuple[str | None, str]:
+    """The value a `doi` slot takes for a crate value, and what was done (#2916).
+
+    The slot holds one bare DOI (#646), in the case the crate wrote it. A list
+    gives up its one DOI. No DOI, or two different ones, gives None and the
+    reason: an invalid value is never kept, and neither DOI is chosen over the
+    other. Both deterministic arms apply this, so a crate value reaches the
+    slot in one form whichever arm writes it.
+    """
+    candidates = value if isinstance(value, list) else [value]
+    dois = list(dict.fromkeys(d for d in map(bare_doi, candidates) if d))
+    if len(dois) != 1:
+        why = (f"{len(dois)} distinct DOIs; the slot holds one and none is chosen"
+               if dois else f"not a DOI: {_preview(value)}")
+        return None, f"{why}; the doi slot takes the bare DOI only (#646)"
+    notes = []
+    if isinstance(value, list):
+        notes.append(f"the one DOI among {len(candidates)} list item(s)")
+    if dois[0] not in candidates:
+        notes.append("written as the bare DOI (#646), case kept")
+    return dois[0], "; ".join(notes)
+
+
 def _coerce(value: Any, slot, sv: SchemaView, project: str,
             counter: dict[str, int]) -> tuple[Any, str]:
     """Shape a crate value to the slot's cardinality and range."""
     notes: list[str] = []
+
+    # Every class's `doi` slot carries the same anchored pattern, so a nested
+    # one is shaped the same way as the Dataset's own.
+    if slot.name == DOI_SLOT:
+        value, note = doi_for_slot(value)
+        if value is None:
+            return None, note
+        if note:
+            notes.append(note)
 
     # Enum ranges: keep only permitted values, never coerce into one.
     enum = sv.get_enum(slot.range) if slot.range else None
@@ -353,16 +392,21 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
 
     # The record's own required id: use the crate's identifier rather than
     # minting one, so the D4D record points back at the crate it came from.
+    # A DOI is written as the `doi:` CURIE, the form #974's write-time
+    # normaliser gives the generated arms, so the two compare as one value.
     if "id" not in res.record and root is not None:
         crate_id = root.get("identifier") or root.get("@id")
         if isinstance(crate_id, list):
             crate_id = crate_id[0] if crate_id else None
         if crate_id:
-            res.record["id"] = str(crate_id)
+            doi = bare_doi(crate_id)
+            res.record["id"] = f"doi:{doi}" if doi else str(crate_id)
+            detail = "required by the schema; taken from the crate itself"
+            if doi:
+                detail += "; a DOI is written as the doi: CURIE (#974)"
             res.fields.append(FieldResult(
                 "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
-                "filled", "required by the schema; taken from the crate itself",
-                _preview(crate_id)))
+                "filled", detail, _preview(res.record["id"])))
 
     # attach nested objects, respecting each host slot's cardinality
     for host_slot_name, obj in nested.items():
@@ -392,6 +436,21 @@ def validate(path: Path) -> str:
     return "PASS" if proc.returncode == 0 and "No issues found" in out else f"FAIL\n{out}"
 
 
+def verdict_basis(schema: Path = FULL_SCHEMA, on: str | None = None) -> str:
+    """What a validation verdict was reached against, to write beside it (#2916).
+
+    A bare PASS pins nothing: #646 anchored the doi pattern and every crate
+    report went on saying PASS over records the schema now rejects. The
+    declared version, the sha256 of the merged schema `validate` reads and the
+    date let a reader tell a verdict about today's schema from an older one.
+    """
+    from data_sheets_schema.provenance import declared_schema_version
+    from data_sheets_schema.schema_cache import sha256_of
+    version = declared_schema_version(schema) or "(no version declared)"
+    day = on or datetime.now(timezone.utc).date().isoformat()
+    return f"schema {version} / sha256 {sha256_of(schema)} / {day} (`{schema}`)"
+
+
 def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     c = res.counts()
     lines = [
@@ -404,7 +463,7 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         "",
         f"- Crate metadata: `{source_file}`",
         f"- Mapping table: `{MAPPING_TSV}` ({len(res.fields)} rows applied)",
-        f"- Validation: **{res.validation.splitlines()[0]}**",
+        f"- Validation: **{res.validation.splitlines()[0]}** — {verdict_basis()}",
         "",
         "## Outcome",
         "",

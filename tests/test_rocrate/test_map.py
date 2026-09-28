@@ -1,25 +1,35 @@
 """Tests for the our-mapping crate → D4D arm."""
 
+import copy
+import tempfile
 import unittest
+from pathlib import Path
 
+import yaml
 from linkml_runtime import SchemaView
 
 from data_sheets_schema.rocrate_map import (
     FULL_SCHEMA,
+    MapResult,
     _normalize_datetime,
     build_placement,
     crate_root,
+    doi_for_slot,
     load_mapping,
     map_crate,
     resolve_path,
+    validate,
+    verdict_basis,
+    write_provenance,
 )
+from data_sheets_schema.schema_cache import sha256_of
 
 GRAPH = [
     {"@id": "ro-crate-metadata.json", "@type": "CreativeWork"},
     {"@id": "ark:59853/thing", "@type": ["https://w3id.org/EVI#Dataset",
                                          "https://w3id.org/EVI#ROCrate"],
      "name": "Test Crate", "description": "A crate for tests",
-     "identifier": "https://doi.org/10.5555/test",
+     "identifier": "https://doi.org/10.5555/Test",
      "author": ["Ada Lovelace", "Alan Turing"],
      "rai:dataBiases": "Sampling bias: clinic-recruited cohort.",
      "additionalProperty": [{"name": "Completeness", "value": "Interim"}],
@@ -106,8 +116,10 @@ class TestMapping(unittest.TestCase):
                             for f in res.fields))
 
     def test_record_takes_its_id_from_the_crate(self):
+        """A DOI id is written as the `doi:` CURIE, the form #974's write-time
+        normaliser gives the generated arms (#2916)."""
         res = map_crate(GRAPH, self.rows, self.sv, "TEST")
-        self.assertEqual(res.record["id"], "https://doi.org/10.5555/test")
+        self.assertEqual(res.record["id"], "doi:10.5555/Test")
 
     def test_string_authors_become_creator_objects(self):
         res = map_crate(GRAPH, self.rows, self.sv, "TEST")
@@ -127,6 +139,99 @@ class TestMapping(unittest.TestCase):
         unplaceable = [f for f in res.fields if f.status == "unplaceable"]
         self.assertTrue(unplaceable)
         self.assertTrue(all(f.detail for f in unplaceable))
+
+
+def _with_identifier(identifier):
+    graph = copy.deepcopy(GRAPH)
+    graph[1]["identifier"] = identifier
+    return graph
+
+
+class TestDoi(unittest.TestCase):
+    """#2916. The `doi` pattern is anchored to the bare DOI (#646) and crates
+    carry the resolver URL; copying it through failed the schema while the
+    provenance report still said PASS."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def doi_field(self, res):
+        return next(f for f in res.fields if f.d4d_path == "Dataset.doi")
+
+    def test_a_resolver_url_is_written_as_the_bare_doi_in_its_case(self):
+        res = map_crate(GRAPH, self.rows, self.sv, "TEST")
+        self.assertEqual(res.record["doi"], "10.5555/Test")
+        self.assertEqual(self.doi_field(res).status, "filled")
+
+    def test_a_doi_curie_identifier_maps_to_the_same_record(self):
+        res = map_crate(_with_identifier("doi:10.5555/Test"),
+                        self.rows, self.sv, "TEST")
+        self.assertEqual(res.record["doi"], "10.5555/Test")
+        self.assertEqual(res.record["id"], "doi:10.5555/Test")
+
+    def test_a_non_doi_identifier_writes_no_doi_and_says_why(self):
+        res = map_crate(_with_identifier("ark:59853/other"),
+                        self.rows, self.sv, "TEST")
+        self.assertNotIn("doi", res.record)
+        field = self.doi_field(res)
+        self.assertEqual(field.status, "empty")
+        self.assertIn("not a DOI", field.detail)
+        # The id is not a DOI either, so it stays as the crate wrote it.
+        self.assertEqual(res.record["id"], "ark:59853/other")
+
+    def test_a_list_gives_up_its_one_doi(self):
+        value, note = doi_for_slot(["ark:59853/other",
+                                    "https://doi.org/10.5555/Test",
+                                    "doi:10.5555/Test"])
+        self.assertEqual(value, "10.5555/Test")
+        self.assertIn("one DOI among 3", note)
+
+    def test_two_different_dois_give_none_and_neither_is_chosen(self):
+        res = map_crate(_with_identifier(["https://doi.org/10.5555/Test",
+                                          "https://doi.org/10.5555/Other"]),
+                        self.rows, self.sv, "TEST")
+        self.assertNotIn("doi", res.record)
+        field = self.doi_field(res)
+        self.assertEqual(field.status, "empty")
+        self.assertIn("2 distinct DOIs", field.detail)
+
+    def test_a_bare_doi_passes_through_with_no_note(self):
+        self.assertEqual(doi_for_slot("10.5555/Test"), ("10.5555/Test", ""))
+
+    def test_the_mapped_record_validates_against_the_schema(self):
+        """The check test_map.py never made: the mapper's output is judged by
+        the schema it claims to target, not only by its shape."""
+        res = map_crate(GRAPH, self.rows, self.sv, "TEST")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapped_d4d.yaml"
+            path.write_text(yaml.safe_dump(res.record, sort_keys=False,
+                                           allow_unicode=True), encoding="utf-8")
+            self.assertEqual(validate(path), "PASS")
+
+
+class TestVerdictBasis(unittest.TestCase):
+    """#2916. A verdict names the schema it was reached against, so a later
+    schema change leaves a PASS that says which schema it was about."""
+
+    def test_the_basis_names_version_hash_and_date(self):
+        basis = verdict_basis(FULL_SCHEMA, on="2026-09-28")
+        self.assertRegex(basis, r"^schema \d+\.\d+\.\d+ / ")
+        self.assertIn(f"sha256 {sha256_of(FULL_SCHEMA)}", basis)
+        self.assertIn("/ 2026-09-28 ", basis)
+        self.assertIn(str(FULL_SCHEMA), basis)
+
+    def test_the_provenance_report_writes_it_beside_the_verdict(self):
+        res = MapResult(project="TEST", validation="PASS")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            line = next(l for l in path.read_text(encoding="utf-8").splitlines()
+                        if l.startswith("- Validation:"))
+        self.assertTrue(line.startswith("- Validation: **PASS** — schema "), line)
+        self.assertIn(f"sha256 {sha256_of(FULL_SCHEMA)}", line)
+        self.assertRegex(line, r" / \d{4}-\d{2}-\d{2} ")
 
 
 if __name__ == "__main__":
