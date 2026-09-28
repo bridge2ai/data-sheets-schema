@@ -836,12 +836,13 @@ def short_guard(monkeypatch):
 
 def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch, short_guard):
     """#2771: a failing assertion in the main thread still joins the first run before
-    the test returns, and the failure is the one raised. The boundary poll counts polls,
-    so a worker scheduled late still reaches it (#2834), and the healthy worker is
+    the test returns, and the failure is the one raised. The boundary deadline never
+    passes, so a worker scheduled late, however late, still reaches it; the watchdog is
+    the hang guard (#2834, #2840). The healthy worker is
     joined on a bound no scheduling delay reaches, since it must end, not end quickly
     (#2837)."""
     guard = short_guard(120)
-    _poll_clock(monkeypatch, guard / 40)
+    _poll_clock(monkeypatch, 0)
     marker = RuntimeError("invented contender failure")
     joins, finished = [], []
     thread_class = threading.Thread
@@ -914,7 +915,9 @@ def _finished_worker(monkeypatch):
 class _PollClock:
     """The concurrency test's clock, advanced a fixed step per read, so its deadline is
     a number of polls rather than a stretch of wall time a paused runner can stretch
-    (#2821). Only that test's module reads it; the joins and the watchdog stay real."""
+    (#2821). A step of 0 is a deadline that never passes, for a meta-test that does not
+    exercise it: a worker scheduled late cannot expire it, and the watchdog is the hang
+    guard (#2840). Only that test's module reads it; the joins and the watchdog stay real."""
 
     def __init__(self, step):
         self.now, self.step, self.reads = 1000.0, step, 0
@@ -969,9 +972,11 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
 
 def test_the_concurrency_test_reports_a_first_run_that_fails_after_polling_began(tmp_path, monkeypatch, short_guard):
     """#2822: the worker is checked at every poll, not once: a first run that raises after
-    the polling has begun is that error, long before the deadline."""
-    guard = short_guard(5)
-    clock = _poll_clock(monkeypatch, guard / 40)     # forty polls to the deadline
+    the polling has begun is that error. The deadline never passes (#2840), so only a
+    liveness check at a later poll ends the loop; one made once, before it, leaves the
+    watchdog to end the test."""
+    short_guard(5)
+    clock = _poll_clock(monkeypatch, 0)
     marker = RuntimeError("invented failure after the polling began")
 
     cancel = threading.Event()
@@ -987,7 +992,7 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_polling_began
             test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
     finally:
         cancel.set()                                 # never left polling after a watchdog (#2828)
-    assert raised.value is marker and clock.reads < 1 + 40, clock.reads
+    assert raised.value is marker and clock.reads >= 3, clock.reads
 
 
 @pytest.mark.parametrize("late", ["raises", "hangs"])
@@ -995,11 +1000,12 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
     """#2796: after the boundary and the release, a first run that raises is that error,
     and one that hangs is "did not finish", never a KeyError on a result it never gave.
     The release handshake waits on its own bound, never this shortened guard, and the
-    boundary poll counts polls, so a paused main thread races neither. Only the "hangs"
+    boundary deadline never passes, so neither a paused main thread nor a worker
+    scheduled late races them. Only the "hangs"
     case shortens the join, which it waits out; the raising worker is joined on a bound
     no teardown delay reaches, since it must end, not end quickly (#2828, #2833, #2834)."""
     guard = short_guard(5 if late == "hangs" else 120)
-    _poll_clock(monkeypatch, guard / 40)
+    _poll_clock(monkeypatch, 0)                      # the boundary deadline never passes (#2840)
     marker, unblock = RuntimeError("invented late failure"), threading.Event()
     waits, event_class = [], threading.Event
 
