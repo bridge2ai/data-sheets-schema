@@ -37,26 +37,28 @@ def run(tmp_path, monkeypatch):
 
 
 BAD_KEYS = [("attempt", [1]), ("attempt", {"n": 1}), ("attempt", "1"), ("attempt", 1.5), ("attempt", True),
-            ("output_tokens", "100"), ("output_tokens", 100.5), ("output_tokens", [100]), ("output_tokens", None),
-            ("output_tokens", 10 ** 15)]
+            ("output_tokens", "100"), ("output_tokens", 100.5), ("output_tokens", [100]), ("output_tokens", 10 ** 15)]
 
 
 @pytest.mark.parametrize("field, value", BAD_KEYS)
 def test_the_baseline_declines_a_log_it_cannot_match(run, field, value):
-    """#2873, #2893: the provenance holds no accepted full row, so the log is consulted. An
-    entry whose attempt or output count is not what the runner writes cannot be matched
-    (an unhashable attempt once crashed the command), and it may be the last end_turn
-    attempt the rule accepts, so the log yields no accepted output, saying why, rather
-    than an earlier attempt in its place, whichever side of a good entry it lies."""
+    """#2873, #2893, #2896: the provenance holds no accepted full row, so the log is
+    consulted. An entry whose attempt or output count is not what the runner writes cannot
+    be matched (an unhashable attempt once crashed the command). After the attempt the rule
+    would accept, it may be the last end_turn attempt, so the log yields no accepted
+    output, saying why, rather than an earlier attempt in its place; before it, it cannot
+    change which attempt is last, and the rule's answer stands."""
     from data_sheets_schema.run_telemetry import accepted_full_output
     core = [{"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}]
     bad = entry(**{"attempt": 2, field: value})
-    for log in ([bad], [entry(attempt=1, output_tokens=777), bad], [bad, entry(attempt=3, output_tokens=777)]):
+    for log in ([bad], [entry(attempt=1, output_tokens=777), bad]):
         result = accepted_full_output(run(core, log), "CHORUS")
         assert result["output_tokens"] is None
         assert result["reason"].endswith(f"{len(log)} in the reasoning log (1 of them with an attempt or output "
-                                         "count that is not an integer, so the accepted one cannot be "
+                                         "count the runner does not write, so the accepted one cannot be "
                                          "established)"), result["reason"]
+    result = accepted_full_output(run(core, [bad, entry(attempt=3, output_tokens=777)]), "CHORUS")
+    assert (result["output_tokens"], result["attempt"], result["source"]) == (777, 3, "reasoning_log")
 
 
 def test_the_baseline_command_survives_an_unhashable_attempt(run):
@@ -83,7 +85,7 @@ def test_a_refused_row_still_drops_its_log_entry(run):
     assert result["output_tokens"] is None
     assert result["reason"] == ("no accepted full attempt: 1 full row(s) in the provenance, 2 in the reasoning "
                                 "log (1 of them the provenance recorded as refused) (1 of them with an attempt "
-                                "or output count that is not an integer, so the accepted one cannot be "
+                                "or output count the runner does not write, so the accepted one cannot be "
                                 "established)")
 
 
@@ -167,3 +169,25 @@ def test_a_refused_row_validates(run, tmp_path):
     run(usage, [entry()])
     (attempt,) = [a for p in _telemetry(tmp_path, "--validate")["phases"] for a in p["attempts"]]
     assert attempt["unusable_reason"] == "no YAML document"
+
+
+def test_an_entry_the_runner_wrote_without_an_output_count_is_passed_over(run):
+    """#2896: to_dict writes null for an output count it did not get. Such an entry is
+    matchable and is not accepted, as a provenance row without a count is not, so the rule
+    takes the attempt before it."""
+    from data_sheets_schema.run_telemetry import accepted_full_output
+    core = [{"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}]
+    result = accepted_full_output(run(core, [entry(attempt=1, output_tokens=555),
+                                             entry(attempt=2, output_tokens=None)]), "CHORUS")
+    assert (result["output_tokens"], result["attempt"]) == (555, 1)
+
+
+def test_entries_without_an_attempt_stay_matchable(run):
+    """#2897: older runs wrote full entries with no attempt; six real replicates' baselines
+    come from such entries, so an absent attempt is matchable and the last one accepted."""
+    from data_sheets_schema.run_telemetry import accepted_full_output
+    core = [{"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}]
+    first, last = entry(output_tokens=100), entry(output_tokens=25491)
+    first.pop("attempt", None), last.pop("attempt", None)
+    result = accepted_full_output(run(core, [first, last]), "CHORUS")
+    assert (result["output_tokens"], result["source"]) == (25491, "reasoning_log")
