@@ -95,13 +95,17 @@ def _attempt(row: dict[str, Any],
         # accepted. Wall time and the reasoning join are unaffected.
         a["unusable_reason"] = str(row["unusable_reason"])
     if reasoning_entry:
-        for src, dst in (("reasoning_tokens_estimate",
-                          "reasoning_tokens_estimate"),
-                         ("visible_text_chars", "visible_text_chars"),
-                         ("reasoning_present", "reasoning_present"),
-                         ("reasoning_available", "reasoning_available")):
-            if reasoning_entry.get(src) is not None:
-                a[dst] = reasoning_entry[src]
+        # Only what the report's schema can hold: an integer count, a boolean flag. The
+        # reader takes any object (#2876), so a corrupt field is left out as if the entry
+        # did not carry it, rather than failing validation or, deeply nested, the YAML
+        # dump (#2874), as the reasoning report leaves such a counter out (#2722).
+        from data_sheets_schema.reasoning import _count
+        for key in ("reasoning_tokens_estimate", "visible_text_chars"):
+            if _count(reasoning_entry, key) is not None:
+                a[key] = reasoning_entry[key]
+        for key in ("reasoning_present", "reasoning_available"):
+            if isinstance(reasoning_entry.get(key), bool):
+                a[key] = reasoning_entry[key]
     return a
 
 
@@ -215,6 +219,18 @@ PREDICTION_9_RULE = (
     "skipped silently")
 
 
+def _log_key(entry: dict[str, Any]) -> tuple[int | None, int] | None:
+    """The (attempt, output_tokens) a reasoning-log entry is matched by, when both are what
+    the runner writes: an attempt that is an integer or absent, an output count that is an
+    integer count. None for any other entry, which can neither be matched to a row nor be
+    taken as the accepted output (#2873)."""
+    from data_sheets_schema.reasoning import _count
+    if entry.get("attempt") is not None and _count(entry, "attempt") is None:
+        return None
+    output = _count(entry, "output_tokens")
+    return None if output is None else (entry.get("attempt"), output)
+
+
 def _accepted(attempts: list[dict[str, Any]]) -> dict[str, Any] | None:
     """The accepted attempt of a phase under `PREDICTION_9_RULE`: the last
     `end_turn` attempt that is neither an abandoned transport attempt nor a
@@ -251,6 +267,7 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     acc = _accepted(rows)
     logged: list[dict[str, Any]] = []
     in_log: list[dict[str, Any]] = []
+    matchable: list[dict[str, Any]] = []
     if acc is None:
         # No *accepted* row — not merely no row (#1155 review, S3): a record
         # whose only `full` row is an abandoned attempt must still consult
@@ -268,7 +285,10 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
         # attempt writes no log entry, so `outcome` rows guard nothing here.
         refused = {(r.get("attempt"), r.get("output_tokens")) for r in rows if r.get("unusable_reason")}
         in_log = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
-        logged = [e for e in in_log if (e.get("attempt"), e.get("output_tokens")) not in refused]
+        # An entry whose attempt or output count is not what the runner writes cannot be
+        # matched; it is set aside and counted, not a crash on an unhashable key (#2873).
+        matchable = [e for e in in_log if _log_key(e) is not None]
+        logged = [e for e in matchable if _log_key(e) not in refused]
         acc = _accepted(logged)
         if acc is not None:
             rows, source = logged, "reasoning_log"
@@ -276,8 +296,11 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     if acc is None:
         seen = (f"{len(rows)} full row(s) in the provenance" if rows else "no full row in the provenance")
         seen += (f", {len(in_log)} in the reasoning log" if in_log else ", none in the reasoning log")
-        if in_log and len(logged) < len(in_log):
-            seen += f" ({len(in_log) - len(logged)} of them the provenance recorded as refused)"
+        if in_log and len(logged) < len(matchable):
+            seen += f" ({len(matchable) - len(logged)} of them the provenance recorded as refused)"
+        if len(matchable) < len(in_log):
+            seen += (f" ({len(in_log) - len(matchable)} of them with an attempt or output count "
+                     "that is not an integer, set aside)")
         out["reason"] = f"no accepted full attempt: {seen}"
         return out
     out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,
@@ -460,6 +483,8 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     by_usage_id: dict[tuple[str, str], dict[str, Any]] = {}
     by_phase_reasoning: dict[str, list[dict[str, Any]]] = {}
     for e in reasoning:
+        if not isinstance(e.get("phase", ""), str):
+            continue          # no text phase: it joins no row, and cannot key one (#2874)
         uid = e.get("usage_id")
         if isinstance(uid, str) and uid:
             by_usage_id[(e.get("phase", ""), uid)] = e
@@ -523,9 +548,11 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     # legacy total, including historical calls absent from old api_usage.
     legacy_relevant = (not (prov.get("run") or {}).get("generation_id")
                        or any("usage_id" not in r and not r.get("outcome") for r in rows))
-    reasoning_total = sum(e.get("reasoning_tokens_estimate") or 0
+    # Only integer counts are summed; a corrupt one is left out (#2874, #2722).
+    from data_sheets_schema.reasoning import _count
+    reasoning_total = sum(_count(e, "reasoning_tokens_estimate") or 0
                           for e in reasoning if legacy_relevant and "usage_id" not in e)
-    reasoning_total += sum(e.get("reasoning_tokens_estimate") or 0
+    reasoning_total += sum(_count(e, "reasoning_tokens_estimate") or 0
                            for e in matched_reasoning.values())
     cost = (total["input_tokens"] * RATE_INPUT
             + total["cache_write"] * RATE_CACHE_WRITE
