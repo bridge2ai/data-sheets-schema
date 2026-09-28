@@ -5840,10 +5840,12 @@ def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
     line of this generation's that does not decode, parse or parse to an object is
     refused, naming it (#2779). The journal is kept across generations: a line that
     starts before this generation's boundary was written before it, so one that cannot
-    be read is skipped as before; with no generation at all (no usage ledger) no line
-    is this generation's (#2859, #2869). The one exception is a legacy continuation
-    (`accept_legacy`), which adopts earlier rows that carry no generation: a torn one
-    among them is skipped, as on main, and the gate never covered those rows (#2883). A
+    be read is skipped; with no generation at all (no usage ledger) no line is this
+    generation's (#2859, #2869). Main skipped only lines that failed to parse and
+    refused the whole journal on an undecodable byte or deep nesting; those are skipped
+    too before the boundary (#2872, #2885, #2890). The one exception is a legacy
+    continuation (`accept_legacy`), which adopts earlier rows that carry no generation: a
+    torn one among them is skipped, and the gate never covered those rows (#2883). A
     journal gone or shorter than when this generation began is refused (#2871)."""
     from data_sheets_schema.usage_ledger import abandoned_journal_offset
     path = _abandoned_ledger(spec)

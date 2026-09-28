@@ -211,7 +211,7 @@ def test_a_journal_gone_after_its_boundary_is_refused(tmp_path):
         api._abandoned_rows(s)
 
 
-@pytest.mark.parametrize("offset", [-1, "5", True, 2.0])
+@pytest.mark.parametrize("offset", [-1, "5", True, False, 2.0, None])
 def test_an_invalid_boundary_is_refused(tmp_path, offset):
     """#2870: the ledger's boundary is a non-negative integer or the ledger is refused."""
     s = spec(out_dir=tmp_path)
@@ -371,4 +371,20 @@ def test_a_predecessor_line_that_is_not_an_object_is_skipped(tmp_path):
     with api._abandoned_ledger(s).open("ab") as stream:
         stream.write(b"[1, 2]\n")
     ledger.prepare_usage(s, resume=False)
+    assert api._abandoned_rows(s) == [old]
+
+
+@pytest.mark.parametrize("ledgered", [True, False])
+def test_a_one_byte_fragment_just_before_the_boundary_is_a_predecessors(tmp_path, ledgered):
+    """#2890: a predecessor's row torn after its first byte starts one byte before the
+    boundary (or, with no ledger, before the journal's end); it is skipped, not refused."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    old = _drop(s, 1)
+    with api._abandoned_ledger(s).open("ab") as stream:
+        stream.write(b"{")
+    if ledgered:
+        ledger.prepare_usage(s, resume=False)
+    else:
+        ledger.ledger_path(s).unlink()
     assert api._abandoned_rows(s) == [old]
