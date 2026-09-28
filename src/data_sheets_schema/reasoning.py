@@ -220,10 +220,45 @@ def _parse(raw: bytes) -> Any:
         raise ValueError("nesting too deep") from error
 
 
+#: The counters `ReasoningCapture.to_dict` writes, each an integer or null: the report
+#: sums three of them and the accounting gate compares `output_tokens` (#2722).
+_COUNTER_FIELDS = ("output_tokens", "visible_text_chars", "reasoning_tokens_estimate",
+                   "reasoning_tokens_observed", "estimate_error")
+#: Far above any response's token count, and far below where a total can no longer be
+#: printed (Python's 4300-digit limit on int-to-str conversion) (#2722).
+_COUNTER_BOUND = 10 ** 15
+
+
+def _entry_problem(value: Any) -> str | None:
+    """Why a parsed line is not an entry as the writers write one, where a reader relies
+    on it, or None if it is. Both readers apply it, so the report and usage accounting
+    agree on what an entry is (#2739, #2722, #2854-#2857): an object; each counter an integer or
+    null, of a size a response can have; blocks, if any, a list of objects whose type
+    is text; a phase, if any, text that encodes."""
+    if not isinstance(value, dict):
+        return "not a JSON object"
+    for key in _COUNTER_FIELDS:
+        counter = value.get(key)
+        if counter is not None and (not isinstance(counter, int) or isinstance(counter, bool)
+                                    or abs(counter) >= _COUNTER_BOUND):
+            return f"{key} is not an integer count"
+    blocks = value.get("blocks")
+    if blocks is not None and (not isinstance(blocks, list) or any(
+            not isinstance(block, dict) or not isinstance(block.get("type", ""), str) for block in blocks)):
+        return "blocks is not a list of blocks"
+    phase = value.get("phase")
+    if phase is not None:
+        try:
+            phase.encode("utf-8")
+        except (AttributeError, UnicodeEncodeError):
+            return "phase is not text"
+    return None
+
+
 def read(path: Path) -> list[dict[str, Any]]:
-    """Every entry of a reasoning log. A line that does not decode, parse, or
-    parse to an object raises UnreadableLog naming the file and the line, since
-    usage accounting must not skip a record it cannot read."""
+    """Every entry of a reasoning log. A line that does not decode, parse, or parse
+    to an entry (`_entry_problem`) raises UnreadableLog naming the file and the line,
+    since usage accounting must not skip a record it cannot read."""
     if not Path(path).exists():
         return []
     entries = []
@@ -235,31 +270,12 @@ def read(path: Path) -> list[dict[str, Any]]:
         except ValueError as error:
             raise UnreadableLog(f"{path}: line {number} is not a readable entry "
                                 f"({type(error).__name__}: {error})") from error
-        if not isinstance(value, dict):
-            # `append` writes objects only; read_lenient names this line too (#2739).
-            raise UnreadableLog(f"{path}: line {number} is not a readable entry (not a JSON object)")
+        problem = _entry_problem(value)
+        if problem is not None:
+            # No writer produces it; read_lenient names this line too (#2739, #2722).
+            raise UnreadableLog(f"{path}: line {number} is not a readable entry ({problem})")
         entries.append(value)
     return entries
-
-
-#: The counters `summarise` does arithmetic on, which `ReasoningCapture.to_dict` writes
-#: as an integer or null (#2722).
-_COUNTER_FIELDS = ("output_tokens", "visible_text_chars", "reasoning_tokens_estimate",
-                   "reasoning_tokens_observed", "estimate_error")
-
-
-def _entry_shape(value: Any) -> bool:
-    """Whether a parsed line has the shape `to_dict` writes where the report relies on
-    it: an object whose counters are integers or null, and whose blocks, if any, are
-    a list (#2722)."""
-    if not isinstance(value, dict):
-        return False
-    for key in _COUNTER_FIELDS:
-        counter = value.get(key)
-        if counter is not None and (not isinstance(counter, int) or isinstance(counter, bool)):
-            return False
-    blocks = value.get("blocks")
-    return blocks is None or isinstance(blocks, list)
 
 
 def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
@@ -267,9 +283,9 @@ def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
     do not, for a read-only report. A run killed or out of disk mid-write can
     leave a partial last line (#2695); a report names it rather than failing on
     it. A line that parses to something other than an object is named too: not
-    what `append` writes, so corruption rather than a partial write. So is an
-    object whose counters are not integers or whose blocks are not a list, which
-    no writer produces and which would otherwise crash `summarise` (#2722)."""
+    what `append` writes, so corruption rather than a partial write. So is any
+    object `read` refuses (`_entry_problem`): the two readers agree on what an entry
+    is (#2739, #2722)."""
     if not Path(path).exists():
         return [], []
     entries: list[dict[str, Any]] = []
@@ -281,7 +297,7 @@ def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
             value = _parse(raw)
         except ValueError:
             value = None
-        if _entry_shape(value):
+        if _entry_problem(value) is None:
             entries.append(value)
         else:
             unreadable.append(number)

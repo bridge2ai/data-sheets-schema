@@ -145,20 +145,54 @@ def test_a_deeply_nested_line_is_named_not_a_crash(tmp_path):
         reasoning.read(log)
 
 
-@pytest.mark.parametrize("field, value", [
-    ("reasoning_tokens_estimate", "90"), ("reasoning_tokens_estimate", 90.5), ("reasoning_tokens_estimate", True),
-    ("reasoning_tokens_observed", "7"), ("estimate_error", [1]), ("output_tokens", {"n": 1}),
-    ("visible_text_chars", "40"), ("blocks", 3)])
-def test_a_wrong_typed_counter_is_named_not_a_crash(tmp_path, field, value):
-    """#2722: an object whose counters are not integers, or whose blocks are not a list,
-    is no entry `to_dict` writes; it crashed `summarise`, and is now named and skipped."""
+@pytest.mark.parametrize("field, value, problem", [
+    ("reasoning_tokens_estimate", "90", "reasoning_tokens_estimate is not an integer count"),
+    ("reasoning_tokens_estimate", 90.5, "reasoning_tokens_estimate is not an integer count"),
+    ("reasoning_tokens_estimate", True, "reasoning_tokens_estimate is not an integer count"),
+    ("reasoning_tokens_estimate", 10 ** 15, "reasoning_tokens_estimate is not an integer count"),
+    ("reasoning_tokens_observed", "7", "reasoning_tokens_observed is not an integer count"),
+    ("estimate_error", [1], "estimate_error is not an integer count"),
+    ("output_tokens", 100.0, "output_tokens is not an integer count"),
+    ("visible_text_chars", "40", "visible_text_chars is not an integer count"),
+    ("blocks", 3, "blocks is not a list of blocks"),
+    ("blocks", [3], "blocks is not a list of blocks"),
+    ("blocks", [{"type": ["thinking"]}], "blocks is not a list of blocks"),
+    ("phase", 7, "phase is not text"),
+    ("phase", "\ud800", "phase is not text")])
+def test_a_line_no_writer_produces_is_named_by_both_readers(tmp_path, field, value, problem):
+    """#2722: an object whose counters are not integer counts, whose blocks are not a
+    list of blocks with text types, or whose phase is not text, is no entry any writer
+    produces. The report names and skips it, where some of these crashed it (a string
+    counter in `summarise`, a bad block in the block scan, a lone surrogate when the
+    phase is printed, a counter too long to print); the strict reader refuses it,
+    naming the line, so the two agree (#2739)."""
     from data_sheets_schema import reasoning
     log = tmp_path / "CHORUS_reasoning.jsonl"
     log.write_text(json.dumps(entry(True)) + "\n" + json.dumps({**entry(True), field: value}) + "\n")
     assert reasoning.read_lenient(log) == ([entry(True)], [2])
+    with pytest.raises(reasoning.UnreadableLog, match=f"line 2 is not a readable entry \\({re.escape(problem)}\\)"):
+        reasoning.read(log)
     result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
     assert result.exit_code == 0, result.output
     assert "1 line(s) that are not a readable entry, skipped: 2" in result.output
+
+
+def test_the_accounting_gate_refuses_a_line_no_writer_produces(tmp_path):
+    """#2722: a wrong-typed counter on a line whose ids match a recorded row is refused
+    by the gate, not counted as covered: the strict reader names it."""
+    from data_sheets_schema import api_runner as api, usage_ledger as ledger
+    from tests.test_download.test_api_runner import spec
+    s = spec(out_dir=tmp_path)
+    generation = ledger.prepare_usage(s, resume=True)
+    line = {**entry(True), "usage_id": "u1", "generation_id": generation, "run_identity": ledger.run_identity(s),
+            "stop_reason": "end_turn", "reasoning_tokens_estimate": "90"}
+    path = api._reasoning_path(s)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(line) + "\n")
+    recorded = {"run": {"generation_id": generation},
+                "api_usage": [{"usage_id": "u1", "phase": "full", "output_tokens": 100, "stop_reason": "end_turn"}]}
+    with pytest.raises(ledger.UsageLedgerError, match="line 1 is not a readable entry"):
+        api._unrecorded_reasoning(s, recorded)
 
 
 def test_null_counters_are_entries(tmp_path):
