@@ -177,7 +177,9 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
             if r["output_tokens"] is None:
                 click.echo(f"   {r['label']}: — ({r.get('reason')})")
             else:
-                click.echo(f"   {r['label']}: {r['output_tokens']} (attempt {r['attempt']}, {r['source']}"
+                # The attempt is printed as text that encodes, whatever a log held (#2904).
+                from data_sheets_schema.reasoning import _text
+                click.echo(f"   {r['label']}: {r['output_tokens']} (attempt {_text(r['attempt'])}, {r['source']}"
                            + (f", {r['retried']} retried attempt(s) excluded" if r["retried"] else "") + ")")
 
 

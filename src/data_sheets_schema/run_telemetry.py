@@ -90,18 +90,22 @@ def _attempt(row: dict[str, Any],
     if row.get("outcome"):
         a["outcome"] = str(row["outcome"])                 # an abandoned attempt (#1017)
     if row.get("unusable_reason"):
-        # Display only — no branch reads it (#1048): a billed attempt whose
-        # body the parser refused, otherwise indistinguishable from the one
-        # accepted. Wall time and the reasoning join are unaffected.
+        # A billed attempt whose body the parser refused (#1048), otherwise
+        # indistinguishable from the one accepted: the comparisons pass over
+        # it through `_accepted`; wall time and the reasoning join do not.
         a["unusable_reason"] = str(row["unusable_reason"])
     if reasoning_entry:
-        for src, dst in (("reasoning_tokens_estimate",
-                          "reasoning_tokens_estimate"),
-                         ("visible_text_chars", "visible_text_chars"),
-                         ("reasoning_present", "reasoning_present"),
-                         ("reasoning_available", "reasoning_available")):
-            if reasoning_entry.get(src) is not None:
-                a[dst] = reasoning_entry[src]
+        # Only an integer count, as the reasoning report takes one (#2722: an int, not a
+        # flag, below its bound), and a boolean flag. The reader takes any object (#2876),
+        # so anything else is left out as if the entry did not carry it, rather than
+        # failing validation or, deeply nested, the YAML dump (#2874, #2907).
+        from data_sheets_schema.reasoning import _count
+        for key in ("reasoning_tokens_estimate", "visible_text_chars"):
+            if _count(reasoning_entry, key) is not None:
+                a[key] = reasoning_entry[key]
+        for key in ("reasoning_present", "reasoning_available"):
+            if isinstance(reasoning_entry.get(key), bool):
+                a[key] = reasoning_entry[key]
     return a
 
 
@@ -215,6 +219,41 @@ PREDICTION_9_RULE = (
     "skipped silently")
 
 
+def _log_key(entry: dict[str, Any]) -> tuple[Any, Any] | None:
+    """The (attempt, output_tokens) a reasoning-log entry is matched against refused rows
+    by, as the runner wrote them, the same raw values the provenance rows carry; or None
+    when either is a list or object. Such a key cannot equal any refused row's, so the
+    entry is not refused, as raw matching would find; only hashing it crashed (#2873,
+    #2902)."""
+    key = (entry.get("attempt"), entry.get("output_tokens"))
+    try:
+        hash(key)
+    except TypeError:
+        return None
+    return key
+
+
+def _reported(value: Any) -> Any:
+    """An accepted entry's attempt as the result reports it: a scalar as written, a list or
+    object by its type alone, since a deeply nested one would break the JSON the command
+    prints (#2905)."""
+    return value if value is None or isinstance(value, (bool, int, float, str)) else f"<{type(value).__name__}>"
+
+
+def _log_candidate(entry: dict[str, Any]) -> bool:
+    """Whether a reasoning-log entry could be the accepted attempt under the rule: an
+    end_turn reply, not abandoned, not refused as unusable (#2900), that reports an output
+    count: a number as the runner writes it, fraction included, not a flag or text, and of
+    a size a response can have, so the mean can be taken (#2898, #2901)."""
+    from data_sheets_schema.reasoning import _COUNTER_BOUND
+    value = entry.get("output_tokens")
+    # The bound also excludes NaN and infinity: no comparison with NaN holds.
+    return (entry.get("stop_reason") == "end_turn" and not entry.get("outcome")
+            and not entry.get("unusable_reason")
+            and isinstance(value, (int, float)) and not isinstance(value, bool)
+            and abs(value) < _COUNTER_BOUND)
+
+
 def _accepted(attempts: list[dict[str, Any]]) -> dict[str, Any] | None:
     """The accepted attempt of a phase under `PREDICTION_9_RULE`: the last
     `end_turn` attempt that is neither an abandoned transport attempt nor a
@@ -268,8 +307,13 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
         # attempt writes no log entry, so `outcome` rows guard nothing here.
         refused = {(r.get("attempt"), r.get("output_tokens")) for r in rows if r.get("unusable_reason")}
         in_log = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
-        logged = [e for e in in_log if (e.get("attempt"), e.get("output_tokens")) not in refused]
-        acc = _accepted(logged)
+        # The rule's answer: the last candidate the provenance did not refuse, matched on the
+        # raw (attempt, output_tokens) as main matched it. A key holding a list or object
+        # equals no refused row's, so its entry is not refused and may be the answer; only
+        # hashing it crashed (#2873, #2902). Entries that could not be accepted, and
+        # everything before the answer, cannot change it (#2896, #2898).
+        logged = [e for e in in_log if _log_key(e) not in refused]
+        acc = next((e for e in reversed(logged) if _log_candidate(e)), None)
         if acc is not None:
             rows, source = logged, "reasoning_log"
     out["attempts_seen"] = len(rows)
@@ -280,7 +324,7 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
             seen += f" ({len(in_log) - len(logged)} of them the provenance recorded as refused)"
         out["reason"] = f"no accepted full attempt: {seen}"
         return out
-    out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,
+    out.update({"output_tokens": int(acc["output_tokens"]), "attempt": _reported(acc.get("attempt")), "source": source,
                 "retried": sum(1 for r in rows if r is not acc and r.get("stop_reason") == "end_turn"
                                and not r.get("outcome"))})
     return out
@@ -460,6 +504,8 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     by_usage_id: dict[tuple[str, str], dict[str, Any]] = {}
     by_phase_reasoning: dict[str, list[dict[str, Any]]] = {}
     for e in reasoning:
+        if not isinstance(e.get("phase", ""), str):
+            continue          # no text phase: it joins no row, and cannot key one (#2874)
         uid = e.get("usage_id")
         if isinstance(uid, str) and uid:
             by_usage_id[(e.get("phase", ""), uid)] = e
@@ -523,9 +569,11 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     # legacy total, including historical calls absent from old api_usage.
     legacy_relevant = (not (prov.get("run") or {}).get("generation_id")
                        or any("usage_id" not in r and not r.get("outcome") for r in rows))
-    reasoning_total = sum(e.get("reasoning_tokens_estimate") or 0
+    # Only integer counts are summed; a corrupt one is left out (#2874, #2722).
+    from data_sheets_schema.reasoning import _count
+    reasoning_total = sum(_count(e, "reasoning_tokens_estimate") or 0
                           for e in reasoning if legacy_relevant and "usage_id" not in e)
-    reasoning_total += sum(e.get("reasoning_tokens_estimate") or 0
+    reasoning_total += sum(_count(e, "reasoning_tokens_estimate") or 0
                            for e in matched_reasoning.values())
     cost = (total["input_tokens"] * RATE_INPUT
             + total["cache_write"] * RATE_CACHE_WRITE
