@@ -372,3 +372,14 @@ def test_the_strict_reader_names_the_physical_line(tmp_path):
     with pytest.raises(reasoning.UnreadableLog, match=r": line 4 is not a readable entry"):
         reasoning.read(log)
     assert reasoning.read_lenient(log)[1] == [4]
+
+
+
+def test_whitespace_only_lines_are_blank_to_both_readers(tmp_path):
+    """#2795: a CRLF blank line or a line of spaces is blank, not an unreadable entry, to
+    the strict reader and the lenient one alike."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_bytes((json.dumps(entry(True)) + "\r\n\r\n" + json.dumps(entry(False)) + "\r\n   \n\t\n").encode())
+    assert reasoning.read(log) == [entry(True), entry(False)]
+    assert reasoning.read_lenient(log) == ([entry(True), entry(False)], [])

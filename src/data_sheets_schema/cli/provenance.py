@@ -2184,7 +2184,8 @@ def reasoning_cmd(method, project, label, path):
         s = _reasoning.summarise(entries)
         click.echo(f"\n{p}")
         if unreadable:
-            # A partial line from a run killed mid-write: named, not fatal (#2695).
+            # A partial line from a run killed mid-write, or a corrupt one (a bad byte,
+            # deep nesting, a non-object): named, not fatal (#2695, #2795).
             click.echo(f"  ⚠️  {len(unreadable)} line(s) that are not a readable entry, skipped: "
                        f"{', '.join(map(str, unreadable))}")
         if not entries:
