@@ -252,6 +252,16 @@ def _regenerate(source: Path, target: Path,
     return True, None
 
 
+class RebuiltDigestFailed(ValueError):
+    """The digest child ran and failed. A positive exit status is the child's own
+    exception, so the schema it was given; a negative one is a signal, a process
+    failure that says nothing about the schema (#2814)."""
+
+    def __init__(self, returncode, message):
+        super().__init__(message)
+        self.returncode = returncode
+
+
 def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
                          source_name: str, profile=None) -> str:
     """Digest frozen rebuild bytes without retaining a LinkML view (#946).
@@ -288,7 +298,8 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
         capture_output=True, text=True, timeout=DIGEST_TIMEOUT_SECONDS)
     value = result.stdout.strip()
     if result.returncode or len(value) != 32 or any(c not in "0123456789abcdef" for c in value):
-        raise ValueError(f"rebuilt digest process failed: {(result.stderr or result.stdout).strip()[-300:]}")
+        raise RebuiltDigestFailed(result.returncode,
+                                  f"rebuilt digest process failed: {(result.stderr or result.stdout).strip()[-300:]}")
     if len(_REBUILT_DIGESTS) >= 32:
         del _REBUILT_DIGESTS[next(iter(_REBUILT_DIGESTS))]
     _REBUILT_DIGESTS[key] = value
@@ -319,7 +330,7 @@ def check_one(merged: Path, source: Path, class_name: str,
         # Same filename, because the digest names the schema it came from and
         # a differing name would be a spurious difference.
         rebuilt = Path(tmp) / merged.name
-        same = source_state = merged_bytes = live = None
+        same = source_state = merged_bytes = live = vocabulary_bytes = None
         try:
             source_snapshot = _source_snapshot(source)
         except Exception as exc:                               # noqa: BLE001
@@ -334,13 +345,17 @@ def check_one(merged: Path, source: Path, class_name: str,
             from data_sheets_schema.profiles import vocabulary_bytes as _vb
             vocabulary_bytes = _vb(profile)
             if vocabulary_bytes:
-                # A pin that does not parse fails the digest with no file named (#2804).
+                # A pin that does not parse, or is not a mapping, fails the digest with
+                # no file named (#2804, #2815).
                 import yaml
                 try:
-                    yaml.safe_load(vocabulary_bytes)
+                    pin = yaml.safe_load(vocabulary_bytes)
                 except Exception as exc:                   # noqa: BLE001
                     return {**out, "status": UNCHECKED,
                             "reason": f"the vocabulary pin {profile.pin_path} does not parse: {exc}"}
+                if not isinstance(pin, dict):
+                    return {**out, "status": UNCHECKED,
+                            "reason": f"the vocabulary pin {profile.pin_path} is not a mapping"}
             vocabulary = Path(tmp) / "vocabulary" / (profile.pin_path.name if profile.pin_path else "no-vocabulary.yaml")
             vocabulary.parent.mkdir()
             vocabulary.write_bytes(vocabulary_bytes)
@@ -370,6 +385,16 @@ def check_one(merged: Path, source: Path, class_name: str,
             # its digest; a merged file that does not parse (a conflict marker, a cut)
             # is the usual reason the digest failed, and rebuilding fixes it (#2773).
             # Stale only if nothing moved during the check, else a retry decides.
+            # A pin that changed while the check ran is a retry, not a stale file (#2816).
+            if vocabulary_bytes is not None:
+                try:
+                    pin_moved = _vb(profile) != vocabulary_bytes
+                except Exception:                              # noqa: BLE001
+                    pin_moved = True
+                if pin_moved:
+                    return {**out, "status": UNCHECKED,
+                            "reason": (f"the vocabulary pin {profile.pin_path} changed during the "
+                                       "sync check; retry with stable inputs")}
             try:
                 stable = (same is False and merged.read_bytes() == merged_bytes
                           and _source_state(source) == source_state)
@@ -379,7 +404,8 @@ def check_one(merged: Path, source: Path, class_name: str,
                     return {**out, "status": UNCHECKED,
                             "reason": f"the source schema could not be read (it changed during the check): {moved}"}
                 stable = False
-            if stable and live is not None and not isinstance(exc, subprocess.TimeoutExpired):
+            if (stable and live is not None and isinstance(exc, RebuiltDigestFailed)
+                    and exc.returncode and exc.returncode > 0):
                 # The merged file digested; the fresh build did not, and not for want of
                 # time: the source itself is broken, and rebuilding would not help (#2808).
                 return {**out, "digest": live, "status": UNCHECKED,

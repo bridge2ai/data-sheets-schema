@@ -597,7 +597,7 @@ class BrokenFreshBuildTest(unittest.TestCase):
             return True, None
 
         def broken(*args, **kwargs):
-            raise ValueError('rebuilt digest process failed: No such class: "CoreDataset"')
+            raise schema_sync.RebuiltDigestFailed(1, 'rebuilt digest process failed: No such class: "CoreDataset"')
 
         with tempfile.TemporaryDirectory() as tmp:
             copy = Path(tmp) / merged.name
@@ -630,6 +630,78 @@ class UnnamedWrapperTest(unittest.TestCase):
         self.assertEqual(row["status"], UNCHECKED, row)
         self.assertIn("D4D_Core.yaml does not parse", row["reason"])
         self.assertNotIn("is not a schema", row["reason"])
+
+
+class ClassificationEdgeTest(unittest.TestCase):
+    """#2814-#2816: a process failure is not a source defect; a pin that is no mapping,
+    or that changes during the check, is named, not advised a rebuild."""
+
+    def _row(self, *, rebuilt_error=None, profile_name=None, pin=None, pin_after=None):
+        from unittest import mock
+        from data_sheets_schema import profiles, schema_sync
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        calls = []
+
+        def regenerate(src, target, flag, **kwargs):
+            target.write_bytes(b"id: a differing rebuild\n")
+            return True, None
+
+        def vocabulary(*args, **kwargs):
+            calls.append(1)
+            return pin if (pin_after is None or len(calls) == 1) else pin_after
+
+        def failing(*args, **kwargs):
+            raise rebuilt_error
+
+        def digest_fails(*args, **kwargs):
+            raise RuntimeError("digest failed")
+
+        patches = [mock.patch.object(schema_sync, "_regenerate", regenerate)]
+        if rebuilt_error is not None:
+            patches.append(mock.patch.object(schema_sync, "_rebuilt_fingerprint", failing))
+        if pin is not None:
+            patches.append(mock.patch.object(profiles, "vocabulary_bytes", vocabulary))
+        if pin_after is not None:
+            patches.append(mock.patch.object(schema_digest, "digest_text", digest_fails))
+        profile = profiles.profile_named(profile_name) if profile_name else None
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            copy.write_bytes(merged.read_bytes())
+            for patch in patches:
+                patch.start()
+            try:
+                row = schema_sync.check_one(copy, source, cls, marker, profile=profile)
+            finally:
+                for patch in reversed(patches):
+                    patch.stop()
+        if row.get("rebuilt_at"):
+            shutil.rmtree(Path(row["rebuilt_at"]).parent, ignore_errors=True)
+        return row
+
+    def test_a_killed_digest_child_is_stale_not_a_source_defect(self):
+        from data_sheets_schema import schema_sync
+        row = self._row(rebuilt_error=schema_sync.RebuiltDigestFailed(-9, "rebuilt digest process failed: "))
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("source needs repair", row["reason"])
+
+    def test_an_unspawnable_digest_child_is_stale_not_a_source_defect(self):
+        row = self._row(rebuilt_error=BlockingIOError(11, "Resource temporarily unavailable"))
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("source needs repair", row["reason"])
+
+    def test_a_pin_that_is_not_a_mapping_is_named(self):
+        row = self._row(profile_name="bridge2ai", pin=b"- invalid\n")
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertTrue(row["reason"].startswith("the vocabulary pin "), row)
+        self.assertIn("is not a mapping", row["reason"])
+
+    def test_a_pin_that_changes_during_the_check_is_a_retry(self):
+        row = self._row(profile_name="bridge2ai", pin=b"vocabularies: {}\n",
+                        pin_after=b"<<<<<<< HEAD\nsource: x\n")
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("changed during the sync check", row["reason"])
 
 
 if __name__ == "__main__":
