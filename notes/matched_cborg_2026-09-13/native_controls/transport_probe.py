@@ -225,7 +225,13 @@ def _module_spec(name, inside):
     are imported to find it, which runs their `__init__`: a name whose package is not
     the repository's (the standard library, an installed package) is never looked
     below, so nothing of theirs is imported (#2749), and a name under a plain module
-    (`from module import attribute`) is not a module, which is never executed to find out."""
+    (`from module import attribute`) is not a module, which is never executed to find out.
+
+    A module or a regular package is the repository's when the file that runs, its
+    origin, is. A package directory inside the repository whose initializer is not
+    is refused before it runs: that initializer would execute unpinned, and what it
+    imports would never enter the closure (#2732 Codex review). A namespace package
+    runs nothing, so any portion inside the repository makes it the repository's."""
     spec = None
     parts = name.split('.')
     for depth in range(1, len(parts) + 1):
@@ -237,9 +243,13 @@ def _module_spec(name, inside):
         spec = importlib.util.find_spec('.'.join(parts[:depth]))
         if spec is None:
             return None
-        places = [spec.origin] if spec.has_location and spec.origin else []
-        places.extend(spec.submodule_search_locations or [])
-        if not any(inside(Path(place).resolve()) for place in places):
+        portions = any(inside(Path(place).resolve()) for place in spec.submodule_search_locations or [])
+        if spec.has_location and spec.origin:
+            if not inside(Path(spec.origin).resolve()):
+                if portions:
+                    raise BudgetStop(f'repository package {spec.name} runs an initializer outside the repository')
+                return None
+        elif not portions:
             return None
     return spec
 

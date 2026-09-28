@@ -1141,24 +1141,66 @@ def test_the_whole_interpreter_environment_is_excluded(tmp_path, monkeypatch):
     assert not probe.repository_file((user_site / 'x.py').resolve(), root.resolve(), probe._environment())
 
 
-def test_a_package_whose_init_lies_outside_the_root_is_not_pinned(tmp_path, monkeypatch):
-    """#2826: a package directory inside the root whose __init__.py links outside it is
-    found (its search location is inside), but the file that would run is not the
-    repository's, so it is not pinned; the final check on the origin keeps it out."""
+@pytest.mark.parametrize('imports', ['', 'import closure_helper_2826\n'])
+def test_a_package_whose_init_lies_outside_the_root_is_refused_before_it_runs(tmp_path, monkeypatch, imports):
+    """#2826, #2732 Codex review: a package directory inside the root whose __init__.py
+    links outside it would run that initializer unpinned, and a repository helper it
+    imports would never enter the closure, so a change to the helper would escape the
+    pins, the closure comparison and the clean check. It is refused, and never run."""
     root = tmp_path / 'root'
+    marker = tmp_path / 'executed'
     outside = tmp_path / 'outside_init.py'
-    outside.write_text('')
+    outside.write_text(f"open({str(marker)!r}, 'a').write('init\\n')\n" + imports)
     package = root / 'closure_linkinit_2826'
     package.mkdir(parents=True)
     (package / '__init__.py').symlink_to(outside)
     (package / 'mod.py').write_text('')
+    (root / 'closure_helper_2826.py').write_text('')
     seed = root / 'seed.py'
     seed.write_text('import closure_linkinit_2826.mod\n')
+    monkeypatch.syspath_prepend(str(root))
+    try:
+        with pytest.raises(BudgetStop, match='closure_linkinit_2826 runs an initializer outside the repository'):
+            probe.import_closure(seed, root.resolve())
+    finally:
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
+    assert not marker.exists()
+
+
+def test_a_namespace_package_with_a_portion_in_the_root_is_the_repositorys(tmp_path, monkeypatch):
+    """A namespace package runs nothing; its portion inside the root is walked and one
+    outside it adds nothing."""
+    root = tmp_path / 'root'
+    (root / 'closure_ns_2826').mkdir(parents=True)
+    (root / 'closure_ns_2826' / 'inner.py').write_text('')
+    (tmp_path / 'away' / 'closure_ns_2826').mkdir(parents=True)
+    (tmp_path / 'away' / 'closure_ns_2826' / 'other.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_ns_2826.inner\nimport closure_ns_2826.other\n')
+    monkeypatch.syspath_prepend(str(tmp_path / 'away'))
     monkeypatch.syspath_prepend(str(root))
     try:
         files = probe.import_closure(seed, root.resolve())
     finally:
         for name in [name for name in sys.modules if name.startswith('closure_')]:
             del sys.modules[name]
-    names = {f.relative_to(root.resolve()).as_posix() for f in files if f.is_relative_to(root.resolve())}
-    assert outside.resolve() not in files and 'closure_linkinit_2826/mod.py' in names
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {'seed.py', 'closure_ns_2826/inner.py'}
+
+
+def test_run_refuses_a_dirty_closure_under_the_clean_rule(lineage, monkeypatch):
+    """#2732 Codex review: run itself, not only repository_state, refuses a closure file
+    that differs from the committed tree. The status query is modelled: clean when the
+    clean-rule prepare asks, dirty when run asks."""
+    real, statuses = probe.subprocess.check_output, []
+
+    def check_output(command, **kwargs):
+        if 'status' in command:
+            statuses.append(command)
+            return '' if len(statuses) == 1 else ' M notes/matched_cborg_2026-09-13/audit_controls/batch_native.py\n'
+        return real(command, **kwargs)
+    monkeypatch.setattr(probe.subprocess, 'check_output', check_output)
+    registration, identity = prepare(lineage, require_clean=True)
+    with pytest.raises(BudgetStop, match='probe implementation differs from the committed tree'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=True)
+    assert len(statuses) == 2
