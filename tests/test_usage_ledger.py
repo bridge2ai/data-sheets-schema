@@ -6,13 +6,25 @@ from pathlib import Path
 import subprocess
 import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor
+import time
 
 import pytest
 import yaml
 
 from data_sheets_schema import api_runner as api, usage_ledger as ledger
 from tests.test_download.test_api_runner import FakeClient, spec
+
+# A hang guard, not a measurement: the ledger tests assert what a run left behind, not
+# how fast. Under parallel load (-n 4, load 135-190 on 10 cores) the 90 s subprocess bound
+# ended two interrupted-generation children and entered.wait(60) one concurrency run
+# before any ledger was checked; all three passed when rerun alone (#2726, #2782). The
+# subprocess bounds end a child that hangs; the concurrency test polls its worker, a
+# daemon thread, so it ends too (#2767, #2768). The meta-tests at the end shorten the
+# guard to keep their own failures quick (#2781).
+HANG_GUARD_SECONDS = 900
+#: The first run's wait for its release. The meta-tests leave it alone: on their shortened
+#: guard, a main thread paused past it failed a healthy handshake (#2746 Codex review).
+HANDSHAKE_SECONDS = 900
 
 
 def row():
@@ -238,31 +250,56 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
     def pause_before_intent(run, *args):
         if not entered.is_set():
             entered.set()
-            assert release.wait(60), "concurrency test did not release the first run"
+            assert release.wait(HANDSHAKE_SECONDS), "concurrency test did not release the first run"
         return original(run, *args)
 
     monkeypatch.setattr(api, "_begin_usage_call", pause_before_intent)
     active = FakeClient()
-    with ThreadPoolExecutor(max_workers=1) as pool:
-        future = pool.submit(api.execute, s, client=active)
+    outcome = {}
+
+    def first_run():
         try:
-            assert entered.wait(60), "first run never reached the request boundary"
-            before = ledger.ledger_path(s).read_bytes()
-            for contender, resume in ((s, True), (s, False),
-                                      (replace(s, label="another_rep1"), True)):
-                client = FakeClient()
-                with pytest.raises(ledger.UsageLedgerError, match="already active"):
-                    api.execute(contender, resume=resume, client=client)
-                assert client.messages.calls == []
-                assert ledger.ledger_path(s).read_bytes() == before
-            assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
-            # Different output files do not share the exclusion.
-            other = spec(out_dir=tmp_path / "independent")
-            with ledger.exclusive_run(other):
-                pass
-        finally:
-            release.set()
-        result = future.result(timeout=60)
+            outcome["result"] = api.execute(s, client=active)
+        except BaseException as error:              # raised again by the test below
+            outcome["error"] = error
+
+    # A daemon thread, not a pool whose exit joins it: a first run that hangs fails the
+    # test at two guards or more and under three (the poll, then the join) rather than
+    # hanging it; a hung worker is left running as a daemon (#2768, #2782, #2817).
+    worker = threading.Thread(target=first_run, daemon=True)
+    worker.start()
+    try:
+        # Poll the worker as well as the boundary: a first run that fails before the
+        # boundary fails the test at once, with its own exception (#2767).
+        deadline = time.monotonic() + HANG_GUARD_SECONDS
+        while not entered.wait(0.5):
+            if not worker.is_alive():
+                raise outcome.get("error") or AssertionError(
+                    "first run finished without reaching the request boundary")
+            assert time.monotonic() < deadline, "first run never reached the request boundary"
+        before = ledger.ledger_path(s).read_bytes()
+        for contender, resume in ((s, True), (s, False),
+                                  (replace(s, label="another_rep1"), True)):
+            client = FakeClient()
+            with pytest.raises(ledger.UsageLedgerError, match="already active"):
+                api.execute(contender, resume=resume, client=client)
+            assert client.messages.calls == []
+            assert ledger.ledger_path(s).read_bytes() == before
+        assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
+        # Different output files do not share the exclusion.
+        other = spec(out_dir=tmp_path / "independent")
+        with ledger.exclusive_run(other):
+            pass
+    finally:
+        release.set()
+        # Joined on every exit, a failed contender assertion included, so a first run that
+        # is only slow finishes before the test and its monkeypatches end (#2771). The
+        # join is bounded; a hung one is left behind as a daemon (#2782).
+        worker.join(HANG_GUARD_SECONDS)
+    assert not worker.is_alive(), "first run did not finish after its release"
+    if "error" in outcome:
+        raise outcome["error"]
+    result = outcome["result"]
     assert len(active.messages.calls) == len(result["usage"]) == 4
     assert api.execute(s, client=active)["already_complete"]
     assert len(active.messages.calls) == 4
@@ -278,7 +315,7 @@ with exclusive_run(spec(out_dir=Path(sys.argv[1]))):
     os._exit(23)
 """
     result = subprocess.run([sys.executable, "-c", child, str(tmp_path)],
-                            capture_output=True, text=True, timeout=30)
+                            capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert result.returncode == 23, result.stderr
     with ledger.exclusive_run(spec(out_dir=tmp_path)):
         pass
@@ -412,7 +449,7 @@ api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
 """
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
     killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
-                            cwd=root, env=environment, capture_output=True, text=True, timeout=90)
+                            cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
     assert not s.provenance_path.exists()
     assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
@@ -521,7 +558,7 @@ api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
 """
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
     killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
-                            cwd=root, env=environment, capture_output=True, text=True, timeout=90)
+                            cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
     assert s.provenance_path.read_bytes() == old_provenance
     generation = ledger.generation_id(s)
@@ -773,3 +810,277 @@ def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):
     audit = next(p for p in result["phases"] if p["phase"] == "audit")["attempts"]
     assert "reasoning_tokens_estimate" not in audit[0]
     assert result["total_reasoning_tokens_estimate"] == 33
+
+
+#: How long a meta-test's teardown waits for the workers it started, once the test has
+#: released them. A cleanup bound, not a measurement (#2844).
+WORKER_CLEANUP_SECONDS = 120
+#: The meta-tests' watchdog. Where a meta-test's deadline never passes it is the only bound
+#: on the body, so it allows a worker scheduled minutes late, not the shortened guard's
+#: seconds, and still ends a regression well inside CI's job timeout (#2846).
+META_WATCHDOG_SECONDS = 300
+
+
+@pytest.fixture
+def short_guard(monkeypatch):
+    """Shorten the guard so a regression the meta-tests pin fails in seconds (#2781),
+    and arm a watchdog of their own: a regression that removes both of the poll's exits
+    would otherwise block the pytest thread until CI's job timeout (#2817). Every worker
+    a meta-test starts is joined before its monkeypatches are undone: one still running
+    would call whatever `api.execute` is then, the real runner included (#2844)."""
+    import signal
+    started = []
+
+    class Recorded(threading.Thread):
+        def start(self):
+            started.append(self)
+            return super().start()
+
+    def arm(seconds):
+        monkeypatch.setattr(sys.modules[__name__], "HANG_GUARD_SECONDS", seconds)
+        monkeypatch.setattr(threading, "Thread", Recorded)
+        if threading.current_thread() is threading.main_thread():
+            def expired(signum, frame):
+                raise TimeoutError("meta-test watchdog: the concurrency test did not return")
+            previous = signal.signal(signal.SIGALRM, expired)
+            signal.alarm(META_WATCHDOG_SECONDS)
+            arm.disarm = lambda: (signal.alarm(0), signal.signal(signal.SIGALRM, previous))
+        return seconds
+
+    arm.disarm = lambda: None
+    yield arm
+    # The watchdog guards the test body; the cleanup joins are bounded on their own, and an
+    # alarm inside them would leave a worker running past teardown (#2846).
+    arm.disarm()
+    for worker in started:
+        worker.join(WORKER_CLEANUP_SECONDS)
+    assert not [worker for worker in started if worker.is_alive()], "a meta-test left its worker running"
+
+
+def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch, short_guard):
+    """#2771: a failing assertion in the main thread still joins the first run before
+    the test returns, and the failure is the one raised. The boundary deadline never
+    passes, so a worker scheduled late, however late, still reaches it; the watchdog is
+    the hang guard (#2834, #2840). The healthy worker is
+    joined on a bound no scheduling delay reaches, since it must end, not end quickly
+    (#2837)."""
+    guard = short_guard(120)
+    _poll_clock(monkeypatch, 0)
+    marker = RuntimeError("invented contender failure")
+    joins, finished = [], []
+    thread_class = threading.Thread
+
+    class Observed(thread_class):
+        def join(self, timeout=None):
+            joins.append(timeout)
+            return super().join(timeout)
+
+    def execute(run, **kwargs):
+        if threading.current_thread() is threading.main_thread():
+            raise marker                            # the first contender check fails
+        api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
+        finished.append(True)
+        return {"usage": []}
+
+    written = tmp_path / "invented-ledger.json"
+    written.write_bytes(b"{}")                      # read before the first contender check
+    monkeypatch.setattr(ledger, "ledger_path", lambda run: written)
+    # The test calls the boundary it finds after its own pause; a no-op here, so the
+    # fake first run ends normally rather than in the real boundary's TypeError (#2781).
+    monkeypatch.setattr(api, "_begin_usage_call", lambda *args: None)
+    monkeypatch.setattr(threading, "Thread", Observed)
+    monkeypatch.setattr(api, "execute", execute)
+    with pytest.raises(RuntimeError) as raised:
+        test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    assert raised.value is marker and joins == [guard] and finished == [True]
+
+
+def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, monkeypatch, short_guard):
+    """#2767: a first run that fails before the boundary is the error raised, at the first
+    poll after it has ended, well inside the guard. The worker has ended before polling
+    begins, so the count is exact: the deadline's read and no other (#2746 Codex review)."""
+    guard = short_guard(30)
+    clock = _poll_clock(monkeypatch, guard / 40)     # counted in polls, not wall time (#2821)
+    joins = _finished_worker(monkeypatch)
+    marker = RuntimeError("invented early failure")
+
+    def fail(*args, **kwargs):
+        raise marker
+
+    monkeypatch.setattr(api, "execute", fail)
+    with pytest.raises(RuntimeError) as raised:
+        test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    assert raised.value is marker and clock.reads == 1 and joins == [guard], (clock.reads, joins)
+
+
+class _Finished(threading.Thread):
+    """A worker whose start() runs its target to the end before returning, so it has
+    observably ended before the first poll, however the scheduler would have run a real
+    thread's teardown (#2746 Codex review). Its bounded join is recorded."""
+    joins = None
+
+    def start(self):
+        self.run()
+
+    def is_alive(self):
+        return False
+
+    def join(self, timeout=None):
+        self.joins.append(timeout)
+
+
+def _finished_worker(monkeypatch):
+    joins = []
+    monkeypatch.setattr(threading, "Thread", type("Finished", (_Finished,), {"joins": joins}))
+    return joins
+
+
+class _PollClock:
+    """The concurrency test's clock, advanced a fixed step per read, so its deadline is
+    a number of polls rather than a stretch of wall time a paused runner can stretch
+    (#2821). A step of 0 is a deadline that never passes, for a meta-test that does not
+    exercise it: a worker scheduled late cannot expire it, and the watchdog is the hang
+    guard (#2840). Only that test's module reads it; the joins and the watchdog stay real."""
+
+    def __init__(self, step):
+        self.now, self.step, self.reads = 1000.0, step, 0
+
+    def monotonic(self):
+        self.reads += 1
+        value, self.now = self.now, self.now + self.step
+        return value
+
+
+def _poll_clock(monkeypatch, step):
+    from types import SimpleNamespace
+    clock = _PollClock(step)
+    monkeypatch.setattr(sys.modules[__name__], "time", SimpleNamespace(monotonic=clock.monotonic, sleep=time.sleep))
+    return clock
+
+
+def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch, short_guard):
+    """#2768, #2781, #2796, #2821: a first run hung before the boundary fails the test at
+    the poll deadline, then the bounded join, on a daemon thread whose exit the
+    interpreter does not wait for. The deadline is counted in clock reads: one to set
+    it, then a poll per step until it passes, so a lengthened, shortened or lost
+    deadline changes the count, whatever the scheduler does."""
+    guard = short_guard(5)
+    clock = _poll_clock(monkeypatch, guard / 4)
+    unblock, daemons, joins = threading.Event(), [], []
+    thread_class = threading.Thread
+
+    class Observed(thread_class):
+        def start(self):
+            daemons.append(self.daemon)
+            return super().start()
+
+        def join(self, timeout=None):
+            joins.append(timeout)
+            return super().join(timeout)
+
+    def execute(run, **kwargs):
+        unblock.wait(600)                           # hung until the test's own cleanup (#2828)
+        return {"usage": []}
+
+    monkeypatch.setattr(threading, "Thread", Observed)
+    monkeypatch.setattr(api, "execute", execute)
+    try:
+        with pytest.raises(AssertionError, match="first run never reached the request boundary"):
+            test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+        # The polling-timeout path joins its worker too, bounded by the guard (#2828).
+        assert clock.reads == 1 + 4 and daemons == [True] and joins == [guard], (clock.reads, joins)
+    finally:
+        unblock.set()
+
+
+def test_the_concurrency_test_reports_a_first_run_that_fails_after_polling_began(tmp_path, monkeypatch, short_guard):
+    """#2822: the worker is checked at every poll, not once: a first run that raises after
+    the polling has begun is that error. The deadline never passes (#2840), so only a
+    liveness check at a later poll ends the loop; one made once, before it, leaves the
+    watchdog to end the test."""
+    short_guard(5)
+    clock = _poll_clock(monkeypatch, 0)
+    marker = RuntimeError("invented failure after the polling began")
+
+    cancel = threading.Event()
+
+    def execute(run, **kwargs):
+        while clock.reads < 3 and not cancel.is_set():   # the deadline and at least one poll read
+            time.sleep(0.01)
+        raise marker
+
+    monkeypatch.setattr(api, "execute", execute)
+    try:
+        with pytest.raises(RuntimeError) as raised:
+            test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    finally:
+        cancel.set()                                 # never left polling after a watchdog (#2828)
+    assert raised.value is marker and clock.reads >= 3, clock.reads
+
+
+@pytest.mark.parametrize("late", ["raises", "hangs"])
+def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_path, monkeypatch, short_guard, late):
+    """#2796: after the boundary and the release, a first run that raises is that error,
+    and one that hangs is "did not finish", never a KeyError on a result it never gave.
+    The release handshake waits on its own bound, never this shortened guard, and the
+    boundary deadline never passes, so neither a paused main thread nor a worker
+    scheduled late races them. Only the "hangs"
+    case shortens the join, which it waits out; the raising worker is joined on a bound
+    no teardown delay reaches, since it must end, not end quickly (#2828, #2833, #2834)."""
+    guard = short_guard(5 if late == "hangs" else 120)
+    _poll_clock(monkeypatch, 0)                      # the boundary deadline never passes (#2840)
+    marker, unblock = RuntimeError("invented late failure"), threading.Event()
+    waits, event_class = [], threading.Event
+
+    class Observed(event_class):
+        def wait(self, timeout=None):
+            if threading.current_thread() is not threading.main_thread():
+                waits.append(timeout)
+            return super().wait(timeout)
+
+    def execute(run, **kwargs):
+        if threading.current_thread() is threading.main_thread():
+            raise ledger.UsageLedgerError("already active")     # every contender is refused
+        api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
+        if late == "raises":
+            raise marker
+        unblock.wait(600)                           # released by the test's cleanup
+        return {"usage": []}
+
+    written = tmp_path / "invented-ledger.json"
+    written.write_bytes(b"{}")
+    # The other label must still have no ledger, as the test checks.
+    monkeypatch.setattr(ledger, "ledger_path",
+                        lambda run: tmp_path / "absent.json" if run.label == "another_rep1" else written)
+    monkeypatch.setattr(api, "_begin_usage_call", lambda *args: None)
+    monkeypatch.setattr(api, "execute", execute)
+    monkeypatch.setattr(threading, "Event", Observed)
+    try:
+        if late == "raises":
+            with pytest.raises(RuntimeError) as raised:
+                test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+            assert raised.value is marker
+        else:
+            with pytest.raises(AssertionError, match="first run did not finish after its release"):
+                test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+        assert waits[0] == HANDSHAKE_SECONDS and HANDSHAKE_SECONDS > guard, waits    # the release handshake
+    finally:
+        unblock.set()
+
+
+
+def test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary(tmp_path, monkeypatch, short_guard):
+    """#2803: a first run that finishes without ever reaching the boundary, as a refactor
+    that stopped routing through it would, fails the test at the first poll after it has
+    ended, saying so; it has ended before polling begins (#2746 Codex review)."""
+    guard = short_guard(30)
+    clock = _poll_clock(monkeypatch, guard / 40)     # counted in polls, not wall time (#2821)
+    joins = _finished_worker(monkeypatch)
+
+    def execute(run, **kwargs):
+        return {"usage": []}                        # never calls api._begin_usage_call
+
+    monkeypatch.setattr(api, "execute", execute)
+    with pytest.raises(AssertionError, match="first run finished without reaching the request boundary"):
+        test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    assert clock.reads == 1 and joins == [guard], (clock.reads, joins)
