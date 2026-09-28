@@ -812,15 +812,29 @@ def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):
     assert result["total_reasoning_tokens_estimate"] == 33
 
 
+#: How long a meta-test's teardown waits for the workers it started, once the test has
+#: released them. A cleanup bound, not a measurement (#2844).
+WORKER_CLEANUP_SECONDS = 120
+
+
 @pytest.fixture
 def short_guard(monkeypatch):
     """Shorten the guard so a regression the meta-tests pin fails in seconds (#2781),
     and arm a watchdog of their own: a regression that removes both of the poll's exits
-    would otherwise block the pytest thread until CI's job timeout (#2817)."""
+    would otherwise block the pytest thread until CI's job timeout (#2817). Every worker
+    a meta-test starts is joined before its monkeypatches are undone: one still running
+    would call whatever `api.execute` is then, the real runner included (#2844)."""
     import signal
+    started = []
+
+    class Recorded(threading.Thread):
+        def start(self):
+            started.append(self)
+            return super().start()
 
     def arm(seconds):
         monkeypatch.setattr(sys.modules[__name__], "HANG_GUARD_SECONDS", seconds)
+        monkeypatch.setattr(threading, "Thread", Recorded)
         if threading.current_thread() is threading.main_thread():
             def expired(signum, frame):
                 raise TimeoutError("meta-test watchdog: the concurrency test did not return")
@@ -831,7 +845,12 @@ def short_guard(monkeypatch):
 
     arm.disarm = lambda: None
     yield arm
-    arm.disarm()
+    try:
+        for worker in started:
+            worker.join(WORKER_CLEANUP_SECONDS)
+        assert not [worker for worker in started if worker.is_alive()], "a meta-test left its worker running"
+    finally:
+        arm.disarm()
 
 
 def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch, short_guard):
