@@ -211,6 +211,41 @@ def test_a_counter_that_is_not_a_count_is_left_out_of_every_sum(tmp_path, bad, l
     assert summary["estimate_error_total"] == (0 if observed else None)
 
 
+_COUNTERS = ("output_tokens", "visible_text_chars", "reasoning_tokens_estimate",
+             "reasoning_tokens_observed", "estimate_error")
+
+
+@pytest.mark.parametrize("base", [
+    {"reasoning_tokens_observed": 0, "reasoning_tokens_estimate": 90, "estimate_error": 90},
+    {"reasoning_tokens_observed": 5, "reasoning_tokens_estimate": 90, "estimate_error": 85}],
+    ids=["observed-zero", "observed-count"])
+@pytest.mark.parametrize("field", _COUNTERS)
+@pytest.mark.parametrize("bad", ["7", 5.5, True, False, 0.0, 10 ** 15, -(10 ** 15), [1], {"n": 1}])
+def test_a_counter_that_is_not_a_count_is_as_if_absent(field, bad, base):
+    """#2886: wherever summarise reads a counter (totals, maxima, the error sum and median,
+    the observed-zero filter), one that is not an integer count behaves exactly as if the
+    entry did not carry it, apart from being counted as unusable. The base entries reach
+    every such site: an observed count of 0 beside an estimate, and a positive one beside
+    an error."""
+    from data_sheets_schema import reasoning
+    good = {**entry(True), "reasoning_tokens_observed": 5, "estimate_error": 85}
+    flagged = {**entry(False), **base, field: bad}
+    absent = {k: v for k, v in {**entry(False), **base}.items() if k != field}
+    with_bad, without = reasoning.summarise([good, flagged]), reasoning.summarise([good, absent])
+    assert with_bad.pop("with_unusable_counter") == 1 and without.pop("with_unusable_counter") == 0
+    assert with_bad == without
+
+
+@pytest.mark.parametrize("count", [0, 1, 144_863, 10 ** 9, 10 ** 15 - 1, -(10 ** 15 - 1)])
+def test_counts_of_any_real_size_are_counts(count):
+    """#2886: the bound keeps totals printable; it does not flag a count a response can
+    have (the corpus's largest estimate is 144,863)."""
+    from data_sheets_schema import reasoning
+    summary = reasoning.summarise([{**entry(True), "reasoning_tokens_estimate": count}])
+    assert summary["with_unusable_counter"] == 0
+    assert summary["reasoning_tokens_estimate_max"] == count
+
+
 def test_a_phase_is_escaped_wherever_the_report_prints_one(tmp_path):
     """#2882: the phase of an entry whose estimate sits over an observed 0 is printed on
     its own line; a lone surrogate there is escaped too, where main crashed."""
