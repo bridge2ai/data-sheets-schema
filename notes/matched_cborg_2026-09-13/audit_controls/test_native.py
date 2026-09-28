@@ -515,7 +515,7 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     class ObservedProxy(original):
         def __init__(self,**kwargs):super().__init__(**kwargs);observed.append(self)
         def close_admission(self):
-            stopped_at.append(clock.last);super().close_admission()
+            stopped_at.append((clock.last,clock.now()));super().close_admission()
     monkeypatch.setattr(native,'AuditProxy',ObservedProxy)
     def wait_for_release(_):
         entered.set()
@@ -527,7 +527,7 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     try:
         with pytest.raises(BudgetStop,match='deadline'):native.run_job(c.registration,review,adapter=adapter)
         assert entered.is_set()
-        clock.assert_stopped_at_the_deadline(stopped_at[0])
+        clock.assert_stopped_at_the_deadline(*stopped_at[0])
         receipt=json.loads((c.attempt/'result.json').read_text())
         assert receipt['stop_source']=='native_controller' and receipt['status']=='stopped'
         assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':1}

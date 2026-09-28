@@ -735,19 +735,27 @@ class EventClock:
     def deadline(self):
         return self.first + self.offset
 
+    def now(self):
+        """The clock's value now, read by the test rather than the controller: it
+        neither sets `first` nor counts as a reading after the event (#2823)."""
+        return time.monotonic() + self._shift
+
     def assert_read_after_the_event(self):
         assert self.jumped is not None, \
             "the controller never read its clock after the event: its deadline was not checked"
         assert self.jumped - self.first < self.offset - self.UNDER_SECONDS, \
             "the real clock had nearly reached the registered deadline before the event: the hang guard could have ended the run"
 
-    def assert_stopped_at_the_deadline(self, last_at_stop):
-        """`last_at_stop`: the value the controller had last read when it stopped."""
+    def assert_stopped_at_the_deadline(self, last_at_stop, closed_at):
+        """`last_at_stop`: the value the controller had last read when it stopped, which
+        decides whether it stopped early. `closed_at`: the clock's value when admission
+        actually closed, read then by the test, which decides whether it stopped late:
+        a delay between the expiry check and the close is late too (#2823)."""
         self.assert_read_after_the_event()
         assert last_at_stop is not None and last_at_stop >= self.deadline, \
             f"the controller stopped {self.deadline - last_at_stop:.2f} s before its registered deadline"
-        assert last_at_stop - self.deadline < self.LATE_SECONDS, \
-            f"the controller stopped {last_at_stop - self.deadline:.2f} s after its registered deadline"
+        assert closed_at is not None and closed_at - self.deadline < self.LATE_SECONDS, \
+            f"admission closed {closed_at - self.deadline:.2f} s after the registered deadline"
 
 
 def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
@@ -791,6 +799,7 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
         if 'stops' not in at_close:
             at_close['stops'] = json.loads(ledger.path.read_bytes()).get('stopped_attempts') if ledger.path.exists() else None
             at_close['clock'] = clock.last
+            at_close['closed'] = clock.now()
         original_close()
     proxy.close_admission = close_and_snapshot
     attempt = tmp_path / 'attempt'; attempt.mkdir()
@@ -819,7 +828,7 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
         rnc.time = real_time
     assert counting.is_set() and calls == []
     if interrupt is None:
-        clock.assert_stopped_at_the_deadline(at_close.get('clock'))   # due, after the count began
+        clock.assert_stopped_at_the_deadline(at_close.get('clock'), at_close.get('closed'))   # due, after the count began
     else:
         clock.assert_read_after_the_event()
     receipt['stops_at_close'] = at_close.get('stops')
