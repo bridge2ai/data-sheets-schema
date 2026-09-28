@@ -1064,3 +1064,47 @@ def test_prepare_and_run_clean_check_the_whole_closure(lineage, monkeypatch):
     expected = probe.implementation_paths()
     assert seen == [expected, expected]
     assert any(path.endswith('audit_controls/batch_native.py') for path in expected)
+
+
+def test_run_refuses_a_closure_that_grew_after_prepare(lineage, monkeypatch):
+    """#2811: every pinned file can keep its bytes while the closure resolves to more
+    files at run time (another PYTHONPATH, a shadowing module); run refuses before any
+    claim or send, since nothing else compares the two closures."""
+    registration, identity = prepare(lineage)
+    real = probe.implementation_paths
+    monkeypatch.setattr(probe, 'implementation_paths', lambda: real() + [str(lineage.root / 'extra_module.py')])
+    with pytest.raises(BudgetStop, match='probe implementation is not the registered one'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+
+
+def test_a_dirty_closure_file_is_refused(monkeypatch):
+    """#2811: a closure module that differs from the committed tree is refused; the
+    status query is modelled so the real worktree is never dirtied."""
+    import subprocess
+    calls = []
+    real = subprocess.check_output
+
+    def check_output(command, **kwargs):
+        calls.append(command)
+        if 'status' in command:
+            return ' M notes/matched_cborg_2026-09-13/audit_controls/batch_native.py\n'
+        return real(command, **kwargs)
+    monkeypatch.setattr(probe.subprocess, 'check_output', check_output)
+    paths = probe.implementation_paths()
+    with pytest.raises(BudgetStop, match='probe implementation differs from the committed tree'):
+        probe.repository_state(paths, require_clean=True)
+    status = next(command for command in calls if 'status' in command)
+    assert status[status.index('--') + 1:] == paths            # the whole closure is queried
+    probe.repository_state(paths, require_clean=False)          # the flag, not the tree, decides
+
+
+def test_prepare_passes_its_clean_rule_to_the_clean_check(lineage, monkeypatch):
+    """#2811: prepare hands require_clean through, so a clean-rule prepare clean-checks."""
+    seen = []
+
+    def recorded(paths, *, require_clean):
+        seen.append(require_clean)
+        return str(probe.Path(probe.__file__).resolve().parents[3]), 'c' * 40
+    monkeypatch.setattr(probe, 'repository_state', recorded)
+    prepare(lineage, require_clean=True)
+    assert seen == [True]
