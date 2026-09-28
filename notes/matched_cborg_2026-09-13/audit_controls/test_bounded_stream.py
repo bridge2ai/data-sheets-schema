@@ -74,7 +74,9 @@ def processes(monkeypatch):
 # test_bounded_transport.py) under 64-256 concurrent copies on 10 cores, at load
 # 114-336 (2026-09-27); each later constant states its own samples and load. Most
 # time steps inside one process. PARENT_GAP and READ_HOP_SECONDS also include a hop
-# between the worker and another process, and say so. Each bound gives up power
+# between the worker and another process, and say so; CALL_GAP's sum includes the
+# header flush-to-yield hop PARENT_GAP bounds, and READ_EARLY exists because of the
+# first chunk's worker-to-parent lead (#2793). Each bound gives up power
 # against shorter delays: origin/main's wall-clock totals caught delays of about
 # 1.2-1.5 s, but flaked under load (#2618, #2643, #2678, #2698).
 
@@ -360,7 +362,9 @@ def test_after_headers_read_deadline_and_exact_incremental_chunks(processes):
                 with client.stream("POST", url, content=b"synthetic", headers={}) as value:
                     chunks = value.iter_bytes()
                     received.append(next(chunks))
-                    assert first_sent.is_set()
+                    # The server thread sets this after its flush; the chunk can reach the
+                    # caller first, so wait for it rather than read it at once (#2792).
+                    assert first_sent.wait(HANG_SECONDS)
                     began = time.monotonic()
                     try:
                         received.append(next(chunks))
