@@ -286,7 +286,9 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
             pass
     finally:
         release.set()
-    worker.join(HANG_GUARD_SECONDS)
+        # Joined on every exit, a failed contender assertion included, so the first run
+        # never outlives the test and its monkeypatches (#2771).
+        worker.join(HANG_GUARD_SECONDS)
     assert not worker.is_alive(), "first run did not finish after its release"
     if "error" in outcome:
         raise outcome["error"]
@@ -801,3 +803,45 @@ def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):
     audit = next(p for p in result["phases"] if p["phase"] == "audit")["attempts"]
     assert "reasoning_tokens_estimate" not in audit[0]
     assert result["total_reasoning_tokens_estimate"] == 33
+
+
+def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch):
+    """#2771: a failing assertion in the main thread still joins the first run before
+    the test returns, and the failure is the one raised."""
+    marker = RuntimeError("invented contender failure")
+    joins = []
+    thread_class = threading.Thread
+
+    class Observed(thread_class):
+        def join(self, timeout=None):
+            joins.append(timeout)
+            return super().join(timeout)
+
+    def execute(run, **kwargs):
+        if threading.current_thread() is threading.main_thread():
+            raise marker                            # the first contender check fails
+        api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
+        return {"usage": []}
+
+    written = tmp_path / "invented-ledger.json"
+    written.write_bytes(b"{}")                      # read before the first contender check
+    monkeypatch.setattr(ledger, "ledger_path", lambda run: written)
+    monkeypatch.setattr(threading, "Thread", Observed)
+    monkeypatch.setattr(api, "execute", execute)
+    with pytest.raises(RuntimeError) as raised:
+        test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    assert raised.value is marker and joins == [HANG_GUARD_SECONDS]
+
+
+def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, monkeypatch):
+    """#2767: a first run that fails before the boundary is the error raised, at once."""
+    marker = RuntimeError("invented early failure")
+
+    def fail(*args, **kwargs):
+        raise marker
+
+    monkeypatch.setattr(api, "execute", fail)
+    started = time.monotonic()
+    with pytest.raises(RuntimeError) as raised:
+        test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    assert raised.value is marker and time.monotonic() - started < HANG_GUARD_SECONDS / 10
