@@ -21,6 +21,14 @@ from audit_controls import bounded_transport as bounded
 
 FIELDS = {'model': 'synthetic-count', 'messages': [{'role': 'user', 'content': 'synthetic only'}]}
 
+#: The count budget of a test whose subject is not the deadline. The budget also
+#: pays for starting the worker's interpreter and importing the SDK, which took
+#: about 14 s at load 450 (#2697), so a short one ended counts these tests expected
+#: to complete (#2604). This one is a hang guard, not a measurement: a passing run
+#: never reaches it, and a run that did would get an APITimeoutError the test does
+#: not expect, so it can never be what ends a passing count.
+HANG_SECONDS = 120
+
 
 @contextmanager
 def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
@@ -35,7 +43,9 @@ def server(*, status=200, body=b'{"input_tokens":100}', delay=0, hold=None):
                                          'bypass': self.headers.get('x-headroom-bypass')})
             observed['arrived'].set()
             if hold is not None:
-                hold.wait(timeout=10)
+                # Half the count's budget, so a count still waiting would see the
+                # response before its own deadline (#2733).
+                hold.wait(timeout=HANG_SECONDS / 2)
             try:
                 self.send_response(status)
                 self.send_header('Content-Type', 'application/json')
@@ -77,7 +87,7 @@ def children(monkeypatch):
 def test_real_worker_returns_typed_count_and_registered_headers(children):
     with server() as (url, seen):
         client = bounded.BoundedCountClient(api_key='fake-key', base_url=url,
-            default_headers={'x-headroom-bypass': 'true'}, timeout_seconds=5)
+            default_headers={'x-headroom-bypass': 'true'}, timeout_seconds=HANG_SECONDS)
         # SDK-facing inspection must describe the actual wire policy without
         # allowing a caller to mutate the worker's registered configuration.
         headers = client.default_headers
@@ -109,6 +119,21 @@ DEADLINE_KILL_SECONDS = 3.5
 #: hang guard (#2697). Measured median 89 ms, p99 633 ms, max 796 ms (load 356);
 #: the review measured max 1.56 s.
 REAP_SECONDS = 10
+
+#: From close() being called to the SIGKILL of the worker it cancels: taking the
+#: client's lock and the kill, in-process (#2733). Measured median 0.2 ms, p99
+#: 60 ms, max 98 ms over 768 closes under 256 concurrent copies at load 448-518.
+#: It rejects a grace of 0.5 s or more before the kill; a shorter one passes.
+CLOSE_KILL_SECONDS = .5
+
+#: From the worker's reap to close() returning, and to the cancelled count raising
+#: in its own thread: a return, a thread wake-up and a raise, in-process (#2733,
+#: #2761). Measured over 960 closes under 320 concurrent copies at load 306-548:
+#: reap to close's return max 1 ms, reap to the count's release median 5 ms, p99
+#: 57 ms, max 74 ms (and max 88 ms from close's return over 1,536 more). The timed
+#: wait's wake-up in the progressing test above reached 1.17 s at load ~450. It
+#: rejects either 1.5 s or more after the reap; a shorter one passes.
+RELEASE_SECONDS = 1.5
 
 
 def test_progressing_response_cannot_outlive_total_count_deadline(children, monkeypatch):
@@ -170,26 +195,59 @@ def test_progressing_response_cannot_outlive_total_count_deadline(children, monk
     assert progressed >= 2 and len(seen['requests']) == 1, attempts
 
 
-def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
+def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children, monkeypatch):
+    # close() must kill the active worker at once, return once it is reaped, and
+    # release the count it cancels. Each is timed from in-process instants, so none
+    # pays for the worker's start-up (#2604, #2733, #2761): the close call to the
+    # worker's SIGKILL, and the reap to close's return and to the cancelled count
+    # raising. The reap is a process-level cost and has only the REAP_SECONDS hang
+    # guard. The server holds its response for half the count's budget, so a close
+    # that waited instead of killing would return only after the response had left
+    # the server. The waits for events are hang guards.
+    killed_at, reaped_at, released_at = [], [], []
+    launch = bounded.subprocess.Popen
+    def watched(*args, **kwargs):
+        child = launch(*args, **kwargs)
+        real_signal, real_wait = child.send_signal, child.wait
+        def send_signal(sig):
+            if sig == signal.SIGKILL:
+                killed_at.append(time.monotonic())
+            return real_signal(sig)
+        def wait(*args, **kwargs):
+            try:
+                return real_wait(*args, **kwargs)
+            finally:
+                if child.returncode is not None:
+                    reaped_at.append(time.monotonic())   # whichever thread's wait reaped it
+        child.send_signal, child.wait = send_signal, wait
+        return child
+    monkeypatch.setattr(bounded.subprocess, 'Popen', watched)
     hold = threading.Event()
     with server(hold=hold) as (url, seen):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=30)
+        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=HANG_SECONDS)
         errors = []
         def count():
             try:
                 client.messages.count_tokens(**FIELDS)
             except Exception as exc:
+                released_at.append(time.monotonic())
                 errors.append(exc)
         thread = threading.Thread(target=count)
         thread.start()
         try:
-            assert seen['arrived'].wait(timeout=5)
-            started = time.monotonic()
+            assert seen['arrived'].wait(timeout=HANG_SECONDS)   # the worker's start-up is in this wait
+            closing = time.monotonic()
             client.close()
-            assert time.monotonic() - started < 2
+            closed = time.monotonic()
+            assert seen['sent'] == [], "close waited for the held response"
+            assert killed_at and killed_at[0] >= closing, "close did not kill its worker"
+            assert killed_at[0] - closing < CLOSE_KILL_SECONDS, "close killed its worker long after it was called"
+            assert reaped_at and min(reaped_at) - killed_at[0] < REAP_SECONDS
+            assert closed - min(reaped_at) < RELEASE_SECONDS, "close returned long after its worker was reaped"
             assert all(child.poll() is not None for child in children)
-            thread.join(timeout=2)
+            thread.join(timeout=HANG_SECONDS)
             assert not thread.is_alive() and len(errors) == 1
+            assert released_at[0] - min(reaped_at) < RELEASE_SECONDS, "the cancelled count returned long after the reap"
             assert isinstance(errors[0], bounded.CountClientClosed)
             assert not client._active
             with pytest.raises(bounded.CountClientClosed):
@@ -206,7 +264,7 @@ def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children):
 def test_error_categories_preserve_retry_decisions_without_provider_text(children, status, exception):
     secret = 'SYNTHETIC_PROVIDER_PROSE_MUST_NOT_ESCAPE'
     with server(status=status, body=json.dumps({'error': {'message': secret}}).encode()) as (url, seen):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=5)
+        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=HANG_SECONDS)
         try:
             with pytest.raises(exception) as caught:
                 client.messages.count_tokens(**FIELDS)
@@ -220,7 +278,7 @@ def test_error_categories_preserve_retry_decisions_without_provider_text(childre
 @pytest.mark.parametrize('value', [True, -1, '100', None])
 def test_invalid_provider_count_is_not_a_retryable_transport_failure(value):
     with server(body=json.dumps({'input_tokens': value}).encode()) as (url, _):
-        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=5)
+        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=HANG_SECONDS)
         try:
             with pytest.raises(bounded.CountWorkerError):
                 client.messages.count_tokens(**FIELDS)
