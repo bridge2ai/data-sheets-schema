@@ -758,5 +758,75 @@ class NestedPinTest(unittest.TestCase):
         self.assertNotIn("source needs repair", row["reason"])
 
 
+class HealthyPinTest(unittest.TestCase):
+    """#2827: a healthy pin is never blamed for a process failure, a failure that does
+    not recur, or a source that broke after both digests succeeded."""
+
+    GOOD_PIN = b"vocabularies: {}\n"
+
+    def _run(self, rebuilt, *, source_state=None):
+        from unittest import mock
+        from data_sheets_schema import profiles, schema_sync
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+
+        def regenerate(src, target, flag, **kwargs):
+            target.write_bytes(merged.read_bytes())
+            return True, None
+
+        patches = [mock.patch.object(schema_sync, "_regenerate", regenerate),
+                   mock.patch.object(profiles, "vocabulary_bytes", lambda p: self.GOOD_PIN if p.name == "bridge2ai" else b""),
+                   mock.patch.object(schema_digest, "digest_text", lambda *a, **k: "live digest text"),
+                   mock.patch.object(schema_sync, "_rebuilt_fingerprint", rebuilt)]
+        if source_state is not None:
+            patches.append(mock.patch.object(schema_sync, "_source_state", source_state))
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            copy.write_bytes(merged.read_bytes() + b"\n# a comment\n")
+            for patch in patches:
+                patch.start()
+            try:
+                row = schema_sync.check_one(copy, source, cls, marker, profile=profiles.profile_named("bridge2ai"))
+            finally:
+                for patch in reversed(patches):
+                    patch.stop()
+        if row.get("rebuilt_at"):
+            shutil.rmtree(Path(row["rebuilt_at"]).parent, ignore_errors=True)
+        return row
+
+    def test_a_killed_child_does_not_blame_the_pin(self):
+        from data_sheets_schema import schema_sync
+
+        def rebuilt(class_name, path, vocabulary, name, profile=None):
+            if profile is not None and profile.name == "bridge2ai":
+                raise schema_sync.RebuiltDigestFailed(-9, "rebuilt digest process failed: ")
+            return "0" * 32
+        row = self._run(rebuilt)
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("vocabulary pin", row["reason"])
+
+    def test_a_failure_that_does_not_recur_is_neither_the_pin_nor_the_source(self):
+        from data_sheets_schema import schema_sync
+        calls = []
+
+        def rebuilt(class_name, path, vocabulary, name, profile=None):
+            calls.append(profile.name if profile else None)
+            if len(calls) == 1:
+                raise schema_sync.RebuiltDigestFailed(1, "rebuilt digest process failed: a passing fault")
+            return "0" * 32
+        row = self._run(rebuilt)
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("vocabulary pin", row["reason"])
+        self.assertNotIn("source needs repair", row["reason"])
+
+    def test_a_source_that_broke_after_both_digests_is_named_not_the_pin(self):
+        def source_state(src):            # read only after both digests: the source broke meanwhile
+            raise ValueError("source module D4D_Core.yaml does not parse: conflict marker")
+        row = self._run(lambda *a, **k: "0" * 32, source_state=source_state)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertTrue(row["reason"].startswith("the source schema could not be read (it changed during the check)"), row)
+
+
 if __name__ == "__main__":
     unittest.main()

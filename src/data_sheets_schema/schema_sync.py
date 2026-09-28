@@ -306,21 +306,26 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
     return value
 
 
-def _succeeds_without_vocabulary(class_name, merged, rebuilt, vocabulary, live) -> bool:
-    """Whether the digest that failed succeeds under the neutral profile, which renders
-    no vocabulary: then the pin, not the schema, is what failed (#2820). The live digest
-    if it failed, else the fresh build's."""
+def _digest_again(class_name, merged, rebuilt, vocabulary, live, profile) -> bool:
+    """Re-run the digest that failed (the live one if it failed, else the fresh
+    build's) under `profile`: True if it now succeeds."""
     from data_sheets_schema import schema_digest
-    from data_sheets_schema.profiles import NEUTRAL
     try:
         if live is None:
-            schema_digest.digest_text(class_name, merged, profile=NEUTRAL)
+            schema_digest.digest_text(class_name, merged, profile=profile)
         else:
             _rebuilt_fingerprint(class_name, rebuilt, vocabulary,
-                                 schema_digest._schema_name(class_name, merged), profile=NEUTRAL)
+                                 schema_digest._schema_name(class_name, merged), profile=profile)
         return True
     except Exception:                                          # noqa: BLE001
         return False
+
+
+def _process_failure(exc) -> bool:
+    """A failure of the process, not of the schema or the pin: a timeout, a child that
+    could not start, or one killed by a signal (#2814, #2827)."""
+    return (isinstance(exc, (subprocess.TimeoutExpired, OSError))
+            or (isinstance(exc, RebuiltDigestFailed) and exc.returncode is not None and exc.returncode < 0))
 
 
 def check_one(merged: Path, source: Path, class_name: str,
@@ -412,22 +417,29 @@ def check_one(merged: Path, source: Path, class_name: str,
                     return {**out, "status": UNCHECKED,
                             "reason": (f"the vocabulary pin {profile.pin_path} changed during the "
                                        "sync check; retry with stable inputs")}
-            # A pin malformed below its top level fails only when rendered; name it rather
-            # than advise a rebuild or a source repair that cannot help (#2820).
-            if (vocabulary_bytes and same is not None
-                    and _succeeds_without_vocabulary(class_name, merged, rebuilt, vocabulary, live)):
-                return {**out, "status": UNCHECKED,
-                        "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {exc}"}
             try:
-                stable = (same is False and merged.read_bytes() == merged_bytes
-                          and _source_state(source) == source_state)
+                unchanged = (merged_bytes is not None and merged.read_bytes() == merged_bytes
+                             and source_state is not None and _source_state(source) == source_state)
             except Exception as moved:                         # noqa: BLE001
                 if str(moved).startswith("source module "):
                     # The source broke while the check ran; say so, not a digest (#2804).
                     return {**out, "status": UNCHECKED,
                             "reason": f"the source schema could not be read (it changed during the check): {moved}"}
-                stable = False
-            if (stable and live is not None and isinstance(exc, RebuiltDigestFailed)
+                unchanged = False
+            stable = same is False and unchanged
+            # Diagnose only a failure of the inputs, on inputs that did not move: a process
+            # failure, or one that does not recur under the same profile, is transient (#2827).
+            recurs = (unchanged and same is not None and not _process_failure(exc)
+                      and not _digest_again(class_name, merged, rebuilt, vocabulary, live, profile))
+            # A pin malformed below its top level fails only when rendered: the digest that
+            # recurs under the profile succeeds without the vocabulary. Name it rather than
+            # advise a rebuild or a source repair that cannot help (#2820).
+            if recurs and vocabulary_bytes:
+                from data_sheets_schema.profiles import NEUTRAL
+                if _digest_again(class_name, merged, rebuilt, vocabulary, live, NEUTRAL):
+                    return {**out, "status": UNCHECKED,
+                            "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {exc}"}
+            if (stable and recurs and live is not None and isinstance(exc, RebuiltDigestFailed)
                     and exc.returncode and exc.returncode > 0):
                 # The merged file digested; the fresh build did not, and not for want of
                 # time: the source itself is broken, and rebuilding would not help (#2808).
