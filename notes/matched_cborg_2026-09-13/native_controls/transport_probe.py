@@ -222,10 +222,12 @@ def repository_file(path, root, environment):
 
 
 def _module_spec(name, inside):
-    """The spec of a repository module name, or None, found without executing anything:
-    below the top level, each name is looked up in its parent's search locations rather
-    than by importing the parent, so no `__init__` runs, the repository's or another's,
-    before the walk has read its imports (#2749, #2836). A name whose package is not the
+    """The spec of a repository module name, or None, found without executing anything.
+    Every name is looked up on the filesystem by the path finder, never through the
+    other meta-path finders, which may import what they like (#2839); below the top
+    level, in its parent's search locations rather than by importing the parent, so no
+    `__init__` runs, the repository's or another's, before the walk has read its
+    imports (#2749, #2836). A name whose package is not the
     repository's is never looked below, and a name under a plain module (`from module
     import attribute`) is not a module.
 
@@ -243,7 +245,7 @@ def _module_spec(name, inside):
         if full in sys.modules and getattr(sys.modules[full], '__spec__', None) is not None:
             spec = sys.modules[full].__spec__                  # already run; nothing new executes
         elif spec is None:
-            spec = importlib.util.find_spec(full)              # a top-level name imports nothing
+            spec = importlib.machinery.PathFinder.find_spec(full)
         else:
             parent = sys.modules.get('.'.join(parts[:depth - 1]))
             locations = getattr(parent, '__path__', None) or spec.submodule_search_locations
@@ -336,6 +338,50 @@ def client_timeout(source):
     read = source.get('native_upstream_read_timeout_seconds') or LEGACY_UPSTREAM_READ_SECONDS
     counting = STALL_POLICY['count_attempts'] * (POLICY_COUNT_TRY_SECONDS + POLICY_COUNT_PAUSE_SECONDS)
     return read + counting + UPSTREAM_CONNECT_SECONDS + CLIENT_MARGIN_SECONDS
+
+
+def cached_code_matches(path):
+    """Whether the bytecode this interpreter would run for the source at `path` is that
+    source compiled, when it would run a cache at all (#2839). A pin covers the source,
+    and a timestamp or unchecked cache that still validates can hold other code. A
+    cache the interpreter would ignore (another magic number, unknown flags, a stale
+    timestamp, size or source hash) is not consulted, nor a missing one."""
+    import _imp
+    import marshal
+    source = Path(path)
+    try:
+        data = Path(importlib.util.cache_from_source(str(source))).read_bytes()
+    except (NotImplementedError, FileNotFoundError):
+        return True
+    if len(data) < 16 or data[:4] != importlib.util.MAGIC_NUMBER:
+        return True
+    raw = source.read_bytes()
+    flags = int.from_bytes(data[4:8], 'little')
+    if flags & ~0b11:
+        return True
+    if flags & 0b1:
+        checked = flags & 0b10 or _imp.check_hash_based_pycs == 'always'
+        if _imp.check_hash_based_pycs != 'never' and checked and data[8:16] != importlib.util.source_hash(raw):
+            return True
+    else:
+        stat = source.stat()
+        if (int.from_bytes(data[8:12], 'little') != int(stat.st_mtime) & 0xFFFFFFFF
+                or int.from_bytes(data[12:16], 'little') != stat.st_size & 0xFFFFFFFF):
+            return True
+    try:
+        cached = marshal.loads(data[16:])
+    except Exception:                                          # noqa: BLE001
+        return False
+    return cached == compile(raw, str(source), 'exec', dont_inherit=True)
+
+
+def verify_bytecode(paths):
+    """Refuse a pinned module whose cached bytecode, which this interpreter would run in
+    its place, is not its source compiled (#2839). A module already loaded was loaded
+    from the cache checked here, unless the cache changed after it loaded."""
+    for path in paths:
+        if not cached_code_matches(path):
+            raise BudgetStop(f'cached bytecode for {path} is not its pinned source')
 
 
 def verify_pins(manifest):
@@ -482,6 +528,7 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
                                  'only the reconcile tool applies one')
             pinned.append(marker)
     implementation = implementation_paths()
+    verify_bytecode(implementation)
     repository, commit = repository_state(implementation, require_clean=require_clean)
     manifest = {
         'kind': KIND, 'schema_version': 1, 'issue': 2463, 'prepared_at': now(),
@@ -804,6 +851,7 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
         raise BudgetStop('probe implementation is not the registered one')
     if interpreter() != manifest['runtime']:
         raise BudgetStop('probe interpreter or libraries differ from the registered ones')
+    verify_bytecode(implementation)
     _, commit = repository_state(implementation_paths(), require_clean=require_clean)
     source, state = check_lineage(manifest)
     raw = (Path(manifest['source']['request_dir']) / 'native_request.json').read_bytes()

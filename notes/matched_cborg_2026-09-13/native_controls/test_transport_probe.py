@@ -1,5 +1,6 @@
 """The one-request transport probe (#2463); synthetic lineages and upstreams only."""
 import copy
+import importlib.util
 from decimal import Decimal
 import hashlib
 import json
@@ -1247,6 +1248,98 @@ def test_a_bytecode_only_repository_package_is_refused(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(root))
     with pytest.raises(BudgetStop, match='closure_pyc_2836 is not Python source'):
         probe.import_closure(seed, root.resolve())
+
+
+def test_discovery_consults_no_other_meta_path_finder_and_imports_nothing(tmp_path, monkeypatch):
+    """#2839: a meta-path finder may import what it likes (setuptools' distutils finder
+    imports setuptools); discovery looks names up with the path finder alone, so no
+    other finder is asked and no module is added to sys.modules."""
+    root = tmp_path / 'root'
+    (root / 'closure_meta_2839').mkdir(parents=True)
+    (root / 'closure_meta_2839' / '__init__.py').write_text('from . import leaf\n')
+    (root / 'closure_meta_2839' / 'leaf.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_meta_2839\nimport json\ndef later():\n    import distutils\n'
+                    '    import closure_meta_only_2839\n')
+    asked = []
+
+    class Recording:
+        @staticmethod
+        def find_spec(name, path=None, target=None):
+            asked.append(name)
+            return None
+    monkeypatch.syspath_prepend(str(root))
+    monkeypatch.setattr(sys, 'meta_path', [Recording, *sys.meta_path])
+    before = set(sys.modules)
+    files = probe.import_closure(seed, root.resolve())
+    assert asked == [] and set(sys.modules) == before
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_meta_2839/__init__.py', 'closure_meta_2839/leaf.py'}
+
+
+def _pyc(source, code, *, kind, stamp_from=None):
+    """Write the cache this interpreter would look for beside `source`: a timestamp pyc
+    whose header validates against `stamp_from`'s stat (default `source`), or a
+    hash-based one, checked or not, for `code`."""
+    from importlib import _bootstrap_external as external
+    cache = Path(importlib.util.cache_from_source(str(source)))
+    cache.parent.mkdir(exist_ok=True)
+    if kind == 'timestamp':
+        stat = (stamp_from or source).stat()
+        data = external._code_to_timestamp_pyc(code, int(stat.st_mtime), stat.st_size)
+    else:
+        data = external._code_to_hash_pyc(code, importlib.util.source_hash(source.read_bytes()), kind == 'checked')
+    cache.write_bytes(bytes(data))
+    return cache
+
+
+def test_cached_bytecode_is_checked_against_its_pinned_source(tmp_path):
+    """#2839: a cache the interpreter would run in place of the source must be that source
+    compiled; a cache it would ignore is not consulted."""
+    import os
+    import py_compile
+    source = tmp_path / 'closure_cached_2839.py'
+    source.write_text('value = 1\n')
+    other = compile('value = 2\n', str(source), 'exec', dont_inherit=True)       # same size, other code
+    assert probe.cached_code_matches(source)                                          # no cache
+    py_compile.compile(str(source), doraise=True)
+    assert probe.cached_code_matches(source)                                          # the source compiled
+    _pyc(source, other, kind='timestamp')
+    assert not probe.cached_code_matches(source)                                      # validates, other code
+    stat = source.stat()
+    os.utime(source, (stat.st_atime, stat.st_mtime + 10))
+    assert probe.cached_code_matches(source)                                          # stale: recompiled
+    _pyc(source, other, kind='unchecked')
+    assert not probe.cached_code_matches(source)                                      # run unchecked
+    _pyc(source, other, kind='checked')
+    assert not probe.cached_code_matches(source)                                      # hash matches the source
+    cache = _pyc(source, other, kind='checked')
+    source.write_text('value = 3\n')
+    assert probe.cached_code_matches(source) and cache.exists()                       # hash stale: recompiled
+
+
+def test_prepare_and_run_refuse_a_pinned_module_whose_cache_is_not_its_source(lineage, monkeypatch):
+    """#2839: both check every closure module's cache before admission."""
+    implementation = probe.implementation_paths()
+    forged = next(path for path in implementation if path.endswith('audit_controls/batch_native.py'))
+    checked = []
+
+    def matches(path):
+        checked.append(path)
+        return path != forged
+    monkeypatch.setattr(probe, 'cached_code_matches', matches)
+    with pytest.raises(BudgetStop, match='cached bytecode for .*batch_native.py is not its pinned source'):
+        prepare(lineage)
+    assert checked[-1] == forged
+    checked.clear()
+    monkeypatch.setattr(probe, 'cached_code_matches', lambda path: checked.append(path) or True)
+    registration, identity = prepare(lineage)
+    assert checked == implementation                         # the whole closure at prepare
+    checked.clear()
+    monkeypatch.setattr(probe, 'cached_code_matches', matches)
+    with pytest.raises(BudgetStop, match='cached bytecode for .*batch_native.py is not its pinned source'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+    assert checked[-1] == forged and set(checked) <= set(implementation)
 
 
 def test_a_namespace_package_with_a_portion_in_the_root_is_the_repositorys(tmp_path, monkeypatch):
