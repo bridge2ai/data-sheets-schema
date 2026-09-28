@@ -242,12 +242,34 @@ def read(path: Path) -> list[dict[str, Any]]:
     return entries
 
 
+#: The counters `summarise` does arithmetic on, which `ReasoningCapture.to_dict` writes
+#: as an integer or null (#2722).
+_COUNTER_FIELDS = ("output_tokens", "visible_text_chars", "reasoning_tokens_estimate",
+                   "reasoning_tokens_observed", "estimate_error")
+
+
+def _entry_shape(value: Any) -> bool:
+    """Whether a parsed line has the shape `to_dict` writes where the report relies on
+    it: an object whose counters are integers or null, and whose blocks, if any, are
+    a list (#2722)."""
+    if not isinstance(value, dict):
+        return False
+    for key in _COUNTER_FIELDS:
+        counter = value.get(key)
+        if counter is not None and (not isinstance(counter, int) or isinstance(counter, bool)):
+            return False
+    blocks = value.get("blocks")
+    return blocks is None or isinstance(blocks, list)
+
+
 def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
     """The entries that parse as JSON objects, and the numbers of the lines that
     do not, for a read-only report. A run killed or out of disk mid-write can
     leave a partial last line (#2695); a report names it rather than failing on
     it. A line that parses to something other than an object is named too: not
-    what `append` writes, so corruption rather than a partial write."""
+    what `append` writes, so corruption rather than a partial write. So is an
+    object whose counters are not integers or whose blocks are not a list, which
+    no writer produces and which would otherwise crash `summarise` (#2722)."""
     if not Path(path).exists():
         return [], []
     entries: list[dict[str, Any]] = []
@@ -259,7 +281,7 @@ def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
             value = _parse(raw)
         except ValueError:
             value = None
-        if isinstance(value, dict):
+        if _entry_shape(value):
             entries.append(value)
         else:
             unreadable.append(number)

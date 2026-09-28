@@ -145,6 +145,31 @@ def test_a_deeply_nested_line_is_named_not_a_crash(tmp_path):
         reasoning.read(log)
 
 
+@pytest.mark.parametrize("field, value", [
+    ("reasoning_tokens_estimate", "90"), ("reasoning_tokens_estimate", 90.5), ("reasoning_tokens_estimate", True),
+    ("reasoning_tokens_observed", "7"), ("estimate_error", [1]), ("output_tokens", {"n": 1}),
+    ("visible_text_chars", "40"), ("blocks", 3)])
+def test_a_wrong_typed_counter_is_named_not_a_crash(tmp_path, field, value):
+    """#2722: an object whose counters are not integers, or whose blocks are not a list,
+    is no entry `to_dict` writes; it crashed `summarise`, and is now named and skipped."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps({**entry(True), field: value}) + "\n")
+    assert reasoning.read_lenient(log) == ([entry(True)], [2])
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "1 line(s) that are not a readable entry, skipped: 2" in result.output
+
+
+def test_null_counters_are_entries(tmp_path):
+    """#2722: `to_dict` writes null where a count is unknown; that is an entry."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    nulls = {**entry(False), "reasoning_tokens_observed": None, "estimate_error": None, "output_tokens": None}
+    log.write_text(json.dumps(nulls) + "\n")
+    assert reasoning.read_lenient(log) == ([nulls], [])
+
+
 def test_a_log_whose_only_line_is_partial_names_it(tmp_path):
     """#2724: a run killed during its first write; told apart from an empty log (#2667)."""
     log = tmp_path / "CHORUS_reasoning.jsonl"
