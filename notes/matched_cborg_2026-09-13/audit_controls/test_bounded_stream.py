@@ -524,9 +524,13 @@ def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatc
 @pytest.mark.parametrize("frame", [b"\xff\xff\xff\xff", struct.pack("!I", 3) + b"Pxx",
     struct.pack("!I", 3) + b"H{}", struct.pack("!I", 3) + b"E{}"])
 def test_bad_worker_frames_fail_closed_and_reap(processes, monkeypatch, frame):
-    source = f"import sys,time;sys.stdout.buffer.write({frame!r});sys.stdout.buffer.flush();time.sleep(30)"
+    # The bounds are hang guards, not a 2 s budget that also paid for the worker's
+    # start-up, and the worker outlives them, so only rejecting its frame can end the
+    # exchange: a frame ignored runs to the deadline instead (#2862).
+    source = (f"import sys,time;sys.stdout.buffer.write({frame!r});sys.stdout.buffer.flush();"
+              f"time.sleep({3 * HANG_SECONDS})")
     monkeypatch.setattr(bounded, "_worker_command", lambda: [sys.executable, "-B", "-c", source])
-    client = bounded.BoundedStreamClient(read_timeout_seconds=1, connect_timeout_seconds=1)
+    client = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
     with pytest.raises(bounded.BoundWorkerProtocolError):
         with client.stream("POST", "http://127.0.0.1/unused", content=b"small", headers={}):
             pass
@@ -605,7 +609,10 @@ def _local_worker_failure(tmp_path, monkeypatch, sent, defect, start_delay=0):
     """#2160: IPC faults remain pending even after a sent progress witness. The worker is
     a bare interpreter, so its bounds, the caller's and the proxy's handler cleanup are
     hang guards, not a 3 s, 5 s or 2 s budget that also paid for its start-up or a
-    descheduled handler (#2772, #2853): each defect ends the exchange at once."""
+    descheduled handler (#2772, #2853). The worker keeps its pipe open after its defect,
+    so the defect, not the worker's exit, ends the exchange: a defect the transport
+    ignored would run to the caller's timeout instead. Only the eof case exits, since
+    its exit is the defect (#2861)."""
     from native_controls.test_native_stall_policy import proxy_with, rows
     from native_controls.test_native_proxy import REQUEST
     frames = bounded._frame(b"P", b"sent") if sent else b""
@@ -619,8 +626,9 @@ def _local_worker_failure(tmp_path, monkeypatch, sent, defect, start_delay=0):
         "missing-headers": bounded._frame(b"D", b"unexpected data"),
         "false-sent-error": bounded._frame(b"E", json.dumps({"error":"RemoteProtocolError", "sent":not sent}).encode()),
     }[defect]
+    hold = "" if defect == "eof" else f";time.sleep({3 * HANG_SECONDS})"
     source = (f"import sys,time;time.sleep({start_delay});sys.stdin.buffer.read();"
-              f"sys.stdout.buffer.write({frames!r});sys.stdout.buffer.flush()")
+              f"sys.stdout.buffer.write({frames!r});sys.stdout.buffer.flush(){hold}")
     monkeypatch.setattr(bounded, "_worker_command", lambda: [sys.executable, "-B", "-c", source])
     proxy, ledger, provider_calls = proxy_with(tmp_path, [])
     proxy.upstream.close()
