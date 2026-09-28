@@ -169,9 +169,10 @@ def killed_before_reaped(process, killed_at=None, reaped_at=None):
     wait) is not seen here (#2619): each test bounds it by the real time from
     its close decision to the SIGKILL, appended to `killed_at` (#2618). The
     instant each wait returns with the worker reaped is appended to `reaped_at`
-    (#2760)."""
+    (#2760), and so is the first poll that finds it reaped, since poll() reaps too:
+    a stall after a poll-reap is then charged to the release, not the reap (#2813)."""
     killed, waits = [], []
-    real_signal, real_wait = process.send_signal, process.wait
+    real_signal, real_wait, real_poll = process.send_signal, process.wait, process.poll
     def send_signal(sig):
         if sig == signal.SIGKILL:
             killed.append(sig)
@@ -185,7 +186,12 @@ def killed_before_reaped(process, killed_at=None, reaped_at=None):
         finally:
             if reaped_at is not None and process.returncode is not None:
                 reaped_at.append(time.monotonic())
-    process.send_signal, process.wait = send_signal, wait
+    def poll(*args, **kwargs):
+        result = real_poll(*args, **kwargs)
+        if reaped_at is not None and result is not None and not reaped_at:
+            reaped_at.append(time.monotonic())
+        return result
+    process.send_signal, process.wait, process.poll = send_signal, wait, poll
     return waits
 
 
