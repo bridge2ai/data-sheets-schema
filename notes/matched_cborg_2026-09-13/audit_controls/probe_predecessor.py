@@ -19,6 +19,7 @@ from decimal import Decimal
 import os
 from pathlib import Path
 import traceback
+import types
 
 from budgeted_cborg import BudgetStop
 
@@ -58,7 +59,13 @@ def _files(root):
                                            'settlement_after_exit.json')}
 
 
-_MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError)
+# RuntimeError: the JSON scanner's RecursionError on deeply nested input (#2728), and
+# pathlib's answer to a symlink loop before 3.13 (#2752). BudgetStop is a RuntimeError
+# too, so every wrapper passes a refusal through before it catches these.
+_MALFORMED = (KeyError, TypeError, AttributeError, ValueError, OSError, ArithmeticError, RuntimeError)
+# The errors a file itself causes: it cannot be reached, opened or read, or does not
+# decode or parse.
+_ABOUT_A_FILE = (OSError, ValueError, RuntimeError)
 
 
 #: The controls' own code: a refusal is located in it, not in the library it called (#2641).
@@ -81,23 +88,66 @@ def _own(frame):
         return False
 
 
+def _path_of(value):
+    """The file a helper was given; nothing for a value that is not a path, which a
+    validator defect could pass (#2730)."""
+    try:
+        return os.fspath(value) if isinstance(value, (str, os.PathLike)) else None
+    except Exception:              # a path-like object whose __fspath__ raises
+        return None
+
+
+def _spelling(path):
+    """A path as the OS resolves its spelling: normalized, with POSIX's double root,
+    which normpath keeps and the OS does not, taken as one (#2797)."""
+    normal = os.path.normpath(path)
+    return '/' + normal.lstrip('/') if normal.startswith('//') else normal
+
+
 def _malformed(what, error):
     """A refusal that still fails closed, naming the error and where it was raised, so a
-    defect in this validator is not read as bad input (#2514). The place is the innermost
-    frame in the controls' own code; an error raised inside a library it called (a JSON
-    decoder, a path method) is also named after `via` (#2641)."""
+    defect in this validator is not read as bad input (#2514).
+
+    The place is the innermost frame in the controls' own code, and the innermost frame
+    of all follows `via` when it is elsewhere (#2641). An error inside a shared file
+    helper (reading, hashing, pinning or resolving a file) is instead located at the call
+    that handed the helper its file, since the helper's own line says nothing about which
+    of a dozen callers failed and one line can hand it two files (#2641, #2727). The
+    innermost frame, which may then be the helper's own, still follows `via`.
+
+    The file is named, quoted as an OSError quotes one, when the error is one a file
+    causes (it cannot be reached, opened, read, decoded or parsed; a KeyError on the audit
+    manifest inside `pinned` is not, #2743), the helper's argument is a path (#2730), and
+    the error does not already carry that same file as its filename attribute. An OSError
+    from the open carries it; one from the read itself carries nothing, and one from
+    resolving carries the component it could not reach, a missing directory or a
+    dangling link's target (#2753). Before 3.13 pathlib reports a symlink loop as a
+    RuntimeError whose text, not a filename attribute, names the file, so a self-loop
+    names it twice (#2797)."""
     # Read straight off the traceback, never through linecache: before 3.12 it raises
     # ValueError/UnicodeEncodeError for a filename os.stat refuses, which would make
     # the refusal raise here (#2689).
+    walked = list(traceback.walk_tb(error.__traceback__))
     frames = [traceback.FrameSummary(frame.f_code.co_filename, lineno, frame.f_code.co_name,
                                      lookup_line=False)
-              for frame, lineno in traceback.walk_tb(error.__traceback__)]
-    own = [frame for frame in frames if _own(frame)]
+              for frame, lineno in walked]
+    helper = next((i for i, (frame, _) in enumerate(walked) if frame.f_code in _HELPERS), None)
+    own = [frame for frame in (frames if helper is None else frames[:helper]) if _own(frame)]
     where = ''
     if own:
         where = f' at {_frame(own[-1])}' + (f' via {_frame(frames[-1])}' if frames[-1] is not own[-1] else '')
     elif frames:
         where = f' at {_frame(frames[-1])}'
+    if helper is not None and isinstance(error, _ABOUT_A_FILE):
+        frame = walked[helper][0]
+        path = _path_of(frame.f_locals.get(_HELPERS[frame.f_code]))
+        # Compared as normalized spellings: an OSError names the path as the OS resolved
+        # it, while the helper may have been handed '/d//x.json' or '//d/x.json' for the
+        # same file (#2786, #2797).
+        filename = getattr(error, 'filename', None)
+        if path and not (isinstance(filename, str) and isinstance(path, str)
+                         and _spelling(filename) == _spelling(path)):
+            where += f' reading {path!r}'
     return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
 
 
@@ -105,6 +155,8 @@ def paths(manifest):
     """What an audit following a probe pins: the probe's link and the audit before it."""
     try:
         return _paths(manifest)
+    except BudgetStop:
+        raise
     except _MALFORMED as error:
         # The predecessor may be an ordinary audit; say only what failed (#2513).
         raise _malformed('audit predecessor evidence is malformed or unavailable', error) from error
@@ -207,6 +259,8 @@ def validate_predecessor(manifest, *, require_pins=True):
             _require(sha(path) == read_json(checkpoint).get('manifest_sha256'),
                      'audit predecessor registration is not the one its checkpoint names')
         probe = is_probe_predecessor(manifest)
+    except BudgetStop:
+        raise
     except _MALFORMED as error:
         raise _malformed('audit predecessor registration is malformed or unavailable', error) from error
     return validate_link(manifest, require_pins=require_pins) if probe else None
@@ -215,6 +269,8 @@ def validate_predecessor(manifest, *, require_pins=True):
 def validate_link(manifest, *, require_pins=True):
     try:
         return _validate_link(manifest, require_pins=require_pins)
+    except BudgetStop:
+        raise
     except _MALFORMED as error:
         raise _malformed('probe predecessor is malformed or unavailable', error) from error
 
@@ -297,3 +353,14 @@ def _validate_link(manifest, *, require_pins=True):
         raise BudgetStop('probe predecessor has no settled checkpoint; its settlement needs a person')
     _require(sha(checkpoint) == continuation['sha256'], 'probe checkpoint differs from the registered continuation')
     return deepcopy(state)
+
+
+#: The shared file helpers, each with the argument that names its file. An error inside
+#: one is located at the call that handed it the file (#2641, #2727); the file is named
+#: when the error is about it and does not already carry it as its filename, and the
+#: argument is a path.
+#: `_validate_link`'s local `pinned` closure is one too: every call shares its code.
+_HELPERS = {read_json.__code__: 'path', sha.__code__: 'path', canonical_path.__code__: 'value',
+            _pinned.__code__: 'value',
+            **{code: 'value' for code in _validate_link.__code__.co_consts
+               if isinstance(code, types.CodeType) and code.co_name == 'pinned'}}
