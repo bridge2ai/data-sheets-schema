@@ -154,9 +154,12 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
         import yaml
         for path in dict.fromkeys(used):
             try:
-                yaml.safe_load(files[path])
+                document = yaml.safe_load(files[path])
             except Exception:                          # a YAMLError, or a constructor's ValueError (#2800)
                 raise ValueError(f"source module {path} does not parse: {error}") from error
+            if not isinstance(document, dict) or not document.get("name"):
+                # Parses, but is no schema: emptied, a list, its name removed (#2804).
+                raise ValueError(f"source module {path} is not a schema: {error}") from error
         raise
     state = (str(source), _generator_versions(),
              tuple((str(p), str(p.resolve()), hashlib.sha256(data).hexdigest()) for p, data in sorted(files.items())),
@@ -329,6 +332,14 @@ def check_one(merged: Path, source: Path, class_name: str,
             # whose render consumes no pin (#1520).
             from data_sheets_schema.profiles import vocabulary_bytes as _vb
             vocabulary_bytes = _vb(profile)
+            if vocabulary_bytes:
+                # A pin that does not parse fails the digest with no file named (#2804).
+                import yaml
+                try:
+                    yaml.safe_load(vocabulary_bytes)
+                except Exception as exc:                   # noqa: BLE001
+                    return {**out, "status": UNCHECKED,
+                            "reason": f"the vocabulary pin {profile.pin_path} does not parse: {exc}"}
             vocabulary = Path(tmp) / "vocabulary" / (profile.pin_path.name if profile.pin_path else "no-vocabulary.yaml")
             vocabulary.parent.mkdir()
             vocabulary.write_bytes(vocabulary_bytes)
@@ -361,7 +372,11 @@ def check_one(merged: Path, source: Path, class_name: str,
             try:
                 stable = (same is False and merged.read_bytes() == merged_bytes
                           and _source_state(source) == source_state)
-            except Exception:                                  # noqa: BLE001
+            except Exception as moved:                         # noqa: BLE001
+                if str(moved).startswith("source module "):
+                    # The source broke while the check ran; say so, not a digest (#2804).
+                    return {**out, "status": UNCHECKED,
+                            "reason": f"the source schema could not be read (it changed during the check): {moved}"}
                 stable = False
             if stable:
                 kept = Path(tempfile.mkdtemp(prefix="d4d-schema-rebuild-")) / merged.name

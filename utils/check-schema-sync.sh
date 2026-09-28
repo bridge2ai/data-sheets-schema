@@ -131,6 +131,7 @@ else
     echo ""
     echo "Or run both with:"
     echo "  make regen-all      # Force regenerate the merged schema and project artifacts"
-    echo "  (the core merged schema is separate: rm -f its file && make gen-core-schema)"
+    echo "  rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema"
+    echo "                       # the core merged schema, which regen-all does not rebuild"
     exit 1
 fi

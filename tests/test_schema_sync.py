@@ -485,6 +485,11 @@ class RebuildDigestTimeoutTest(unittest.TestCase):
             self.assertEqual(row["status"], STALE, row)
             self.assertTrue(row.get("digest"), row)                        # the merged file's own
             self.assertIn("timed out", row["reason"])
+            # Not blamed on the merged file's digest, which was computed (#2805).
+            self.assertTrue(row["reason"].startswith(
+                "the merged schema differs from a fresh build of its source; a digest could not be computed"), row)
+            # The kept file is the rebuild, the one to diff against the merged file (#2805).
+            self.assertEqual(Path(row["rebuilt_at"]).read_bytes(), b"id: a differing rebuild\n")
         finally:
             if row.get("rebuilt_at"):
                 shutil.rmtree(Path(row["rebuilt_at"]).parent, ignore_errors=True)
@@ -518,6 +523,60 @@ class SourceNamingNegativeTest(unittest.TestCase):
             broken.write_text(broken.read_text() + "\ncreated_on: 2023-02-30\n")
             row = check_one(schema_dir / merged.name, schema_dir / source.name, cls, marker)
         self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("D4D_Core.yaml does not parse", row["reason"])
+
+
+class NamedFailureTest(unittest.TestCase):
+    """#2804: a broken vocabulary pin, an emptied source module and a module that breaks
+    while the check runs are each named, not reported as a digest failure."""
+
+    def _core_copy(self, tmp):
+        merged, source, cls, marker = MERGED_SCHEMAS[1]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        schema_dir = Path(tmp) / "schema"
+        shutil.copytree(source.parent, schema_dir)
+        return schema_dir / merged.name, schema_dir / source.name, cls, marker
+
+    def test_an_emptied_source_module_is_named(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            merged, source, cls, marker = self._core_copy(tmp)
+            (source.parent / "D4D_Core.yaml").write_text("")
+            row = check_one(merged, source, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("D4D_Core.yaml is not a schema", row["reason"])
+
+    def test_a_vocabulary_pin_that_does_not_parse_is_named(self):
+        from unittest import mock
+        from data_sheets_schema import profiles
+        with tempfile.TemporaryDirectory() as tmp:
+            merged, source, cls, marker = self._core_copy(tmp)
+            with mock.patch.object(profiles, "vocabulary_bytes", lambda *a, **k: b"<<<<<<< HEAD\nsource: x\n"):
+                row = check_one(merged, source, cls, marker, profile=profiles.profile_named("bridge2ai"))
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertTrue(row["reason"].startswith("the vocabulary pin "), row)
+        self.assertIn("does not parse", row["reason"])
+
+    def test_a_source_module_that_breaks_during_the_check_is_named(self):
+        from unittest import mock
+        from data_sheets_schema import schema_sync
+        with tempfile.TemporaryDirectory() as tmp:
+            merged, source, cls, marker = self._core_copy(tmp)
+            broken = source.parent / "D4D_Core.yaml"
+
+            def regenerate(src, target, flag, **kwargs):
+                target.write_bytes(b"id: a differing rebuild\n")
+                return True, None
+
+            def digest(*args, **kwargs):
+                broken.write_text("<<<<<<< HEAD\n" + broken.read_text())    # a merge lands mid-check
+                raise RuntimeError("digest failed")
+
+            with mock.patch.object(schema_sync, "_regenerate", regenerate), \
+                 mock.patch.object(schema_digest, "digest_text", digest):
+                row = schema_sync.check_one(merged, source, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertTrue(row["reason"].startswith("the source schema could not be read (it changed during the check)"), row)
         self.assertIn("D4D_Core.yaml does not parse", row["reason"])
 
 

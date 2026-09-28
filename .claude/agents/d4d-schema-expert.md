@@ -112,8 +112,11 @@ classes:
 3. Lint the module: `make lint-modules`
 4. Validate the module: `make test-modules`
 5. Regenerate merged schema: `make full-schema`
-6. Regenerate Python model: `make gen-project`
-7. Run all tests: `make test`
+6. Regenerate the core merged schema, which imports most modules:
+   `rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema`
+7. Regenerate Python model: `make gen-project`
+8. Check both merged schemas: `make check-digest`
+9. Run all tests: `make test`
 
 ### Schema Synchronization
 The project maintains three synchronized representations:

@@ -312,18 +312,24 @@ class TestVerification(unittest.TestCase):
         self.assertIn("stop rather than proceeding", text)
 
 
+class PreimageRegistryTest(unittest.TestCase):
+
+    def test_the_preimage_registry_is_current_for_every_definition(self):
+        """#2798, #2805: an edited agent definition must be re-registered
+        (scripts/update_agent_preimages.py) or an installed wheel cannot issue its
+        check-echo challenge. Every field an install checks is checked here."""
+        import hashlib, json
+        root = Path(__file__).resolve().parents[1] / ".claude" / "agents"
+        registry = json.loads((root / "_preimages.json").read_text())["agents"]
+        definitions = {path.stem: hashlib.sha256(path.read_bytes()).hexdigest() for path in root.glob("*.md")}
+        self.assertEqual(set(registry), set(definitions))
+        stale = sorted(name for name, digest in definitions.items() if registry[name]["current_sha256"] != digest)
+        self.assertEqual(stale, [], f"re-run scripts/update_agent_preimages.py after committing: {stale}")
+        for name, row in registry.items():
+            previous = row["previous_text"]
+            self.assertTrue(previous, name)
+            self.assertEqual(row["previous_sha256"], hashlib.sha256(previous.encode()).hexdigest(), name)
+
+
 if __name__ == "__main__":
     unittest.main()
-
-
-
-def test_the_preimage_registry_is_current_for_every_definition():
-    """#2798: an edited agent definition must be re-registered (scripts/update_agent_preimages.py)
-    or an installed wheel cannot issue its check-echo challenge."""
-    import hashlib, json
-    root = Path(__file__).resolve().parents[1] / ".claude" / "agents"
-    registry = json.loads((root / "_preimages.json").read_text())["agents"]
-    definitions = {path.stem: hashlib.sha256(path.read_bytes()).hexdigest() for path in root.glob("*.md")}
-    assert set(registry) == set(definitions)
-    stale = sorted(name for name, digest in definitions.items() if registry[name]["current_sha256"] != digest)
-    assert stale == [], f"re-run scripts/update_agent_preimages.py after committing: {stale}"
