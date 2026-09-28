@@ -1,4 +1,11 @@
-"""The closing message of `d4d provenance reasoning` names a cause only where one applies (#2626)."""
+"""The reasoning log's readers, its append, and what reads it (#2626, #2695).
+
+The closing message of `d4d provenance reasoning` names a cause only where one applies
+(#2626). A line the log cannot hold as an entry is named and skipped by the report and
+refused, by file and line, by the strict reader that telemetry, the runs commands and
+usage accounting use (#2695, #2720-#2724, #2739-#2742, #2764-#2766, #2780); append ends a
+line an interrupted write left without its newline (#2740).
+"""
 import json
 import re
 
@@ -342,3 +349,26 @@ def test_an_append_after_a_tail_cut_inside_a_character(tmp_path):
     log.write_bytes(log.read_bytes() + raw[:raw.index("\u00e9".encode("utf-8")) + 1])
     reasoning.append(log, entry(False))
     assert reasoning.read_lenient(log) == ([entry(True), entry(False)], [2])
+
+
+def test_a_skipped_line_in_any_log_is_counted_not_only_the_last(tmp_path, monkeypatch):
+    """#2780: the guards read the total over every log; a partial line in the first-sorted
+    log is counted and caveated though the last log is clean."""
+    result = _two_logs(tmp_path, monkeypatch,
+                       json.dumps(entry(False)) + "\n" + json.dumps(entry(True))[:40],
+                       json.dumps(entry(False)) + "\n")
+    assert result.exit_code == 0, result.output
+    assert "2 log(s), 2 entries, 0 with reasoning text, 1 unreadable line(s) skipped" in result.output
+    assert result.output.index("1 unreadable line(s) skipped: what follows describes") \
+        < result.output.index("No entry returned a thinking block")
+
+
+def test_the_strict_reader_names_the_physical_line(tmp_path):
+    """#2780: the strict reader counts blank lines too, so its error names the line an
+    editor shows, as the lenient reader does."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text("\n" + json.dumps(entry(True)) + "\n\n" + json.dumps(entry(True))[:40])
+    with pytest.raises(reasoning.UnreadableLog, match=r": line 4 is not a readable entry"):
+        reasoning.read(log)
+    assert reasoning.read_lenient(log)[1] == [4]
