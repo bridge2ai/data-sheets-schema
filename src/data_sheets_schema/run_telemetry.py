@@ -219,16 +219,26 @@ PREDICTION_9_RULE = (
     "skipped silently")
 
 
-def _log_key(entry: dict[str, Any]) -> tuple[int | None, int | None] | None:
-    """The (attempt, output_tokens) a reasoning-log entry is matched by, when both are what
-    the runner writes: each an integer count or absent. An entry that reports no output
-    count is matchable and simply not accepted, as a provenance row without one is not
-    (#2896). None for any other entry, which can be neither matched nor accepted (#2873)."""
-    from data_sheets_schema.reasoning import _count
-    for key in ("attempt", "output_tokens"):
-        if entry.get(key) is not None and _count(entry, key) is None:
-            return None
-    return entry.get("attempt"), entry.get("output_tokens")
+def _log_key(entry: dict[str, Any]) -> tuple[Any, Any] | None:
+    """The (attempt, output_tokens) a reasoning-log entry is matched against refused rows
+    by, as the runner wrote them, the same raw values the provenance rows carry; or None
+    when either is a list or object, which cannot be compared (once a crash, #2873)."""
+    key = (entry.get("attempt"), entry.get("output_tokens"))
+    try:
+        hash(key)
+    except TypeError:
+        return None
+    return key
+
+
+def _log_candidate(entry: dict[str, Any]) -> bool:
+    """Whether a reasoning-log entry could be the accepted attempt under the rule: an
+    end_turn reply, not abandoned, that reports a finite output count (a number, as the
+    runner writes it, fraction included; not a flag or text) (#2898)."""
+    import math
+    value = entry.get("output_tokens")
+    return (entry.get("stop_reason") == "end_turn" and not entry.get("outcome")
+            and isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value))
 
 
 def _accepted(attempts: list[dict[str, Any]]) -> dict[str, Any] | None:
@@ -267,7 +277,7 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     acc = _accepted(rows)
     logged: list[dict[str, Any]] = []
     in_log: list[dict[str, Any]] = []
-    matchable: list[dict[str, Any]] = []
+    unchecked = 0
     if acc is None:
         # No *accepted* row — not merely no row (#1155 review, S3): a record
         # whose only `full` row is an abandoned attempt must still consult
@@ -285,29 +295,33 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
         # attempt writes no log entry, so `outcome` rows guard nothing here.
         refused = {(r.get("attempt"), r.get("output_tokens")) for r in rows if r.get("unusable_reason")}
         in_log = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
-        # An entry whose attempt or output count is not what the runner writes cannot be
-        # matched; it is not a crash on an unhashable key (#2873). Nor is it passed over
-        # when it comes after the attempt the rule would accept: it may be the last end_turn
-        # attempt, so the log then yields no accepted output rather than an earlier attempt
-        # in its place (#2893). One before it cannot change which attempt is last (#2896).
-        matchable = [e for e in in_log if _log_key(e) is not None]
-        logged = [e for e in matchable if _log_key(e) not in refused]
-        acc = _accepted(logged)
-        if acc is not None:
-            after = next(i for i, e in enumerate(in_log) if e is acc) + 1
-            if any(_log_key(e) is None for e in in_log[after:]):
-                acc = None
+        # The rule's answer is the last candidate the provenance did not refuse. Walking back
+        # from the end, the first candidate whose key can be compared is that answer; one
+        # whose key is a list or object cannot be checked against the refused rows, so if
+        # it comes first the answer cannot be established, where taking an earlier attempt
+        # would be silently wrong (#2873, #2893). Entries that could not be accepted, and
+        # everything before the answer, cannot change it (#2896, #2898).
+        logged = [e for e in in_log if _log_key(e) not in refused]
+        unchecked = 0
+        for e in reversed(logged):
+            if not _log_candidate(e):
+                continue
+            if _log_key(e) is None:
+                unchecked = 1
+            else:
+                acc = e
+            break
         if acc is not None:
             rows, source = logged, "reasoning_log"
     out["attempts_seen"] = len(rows)
     if acc is None:
         seen = (f"{len(rows)} full row(s) in the provenance" if rows else "no full row in the provenance")
         seen += (f", {len(in_log)} in the reasoning log" if in_log else ", none in the reasoning log")
-        if in_log and len(logged) < len(matchable):
-            seen += f" ({len(matchable) - len(logged)} of them the provenance recorded as refused)"
-        if len(matchable) < len(in_log):
-            seen += (f" ({len(in_log) - len(matchable)} of them with an attempt or output count "
-                     "the runner does not write, so the accepted one cannot be established)")
+        if in_log and len(logged) < len(in_log):
+            seen += f" ({len(in_log) - len(logged)} of them the provenance recorded as refused)"
+        if unchecked:
+            seen += (" (the last end_turn reply carries a list or object as its attempt or output "
+                     "count, so whether it was refused, and the accepted attempt, cannot be established)")
         out["reason"] = f"no accepted full attempt: {seen}"
         return out
     out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,

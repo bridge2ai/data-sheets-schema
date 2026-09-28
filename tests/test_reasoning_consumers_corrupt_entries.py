@@ -36,29 +36,62 @@ def run(tmp_path, monkeypatch):
     return write
 
 
-BAD_KEYS = [("attempt", [1]), ("attempt", {"n": 1}), ("attempt", "1"), ("attempt", 1.5), ("attempt", True),
-            ("output_tokens", "100"), ("output_tokens", 100.5), ("output_tokens", [100]), ("output_tokens", 10 ** 15)]
+CORE = [{"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}]
+GOOD = entry(attempt=1, output_tokens=555)
+LATER = entry(attempt=3, output_tokens=777)
 
 
-@pytest.mark.parametrize("field, value", BAD_KEYS)
-def test_the_baseline_declines_a_log_it_cannot_match(run, field, value):
-    """#2873, #2893, #2896: the provenance holds no accepted full row, so the log is
-    consulted. An entry whose attempt or output count is not what the runner writes cannot
-    be matched (an unhashable attempt once crashed the command). After the attempt the rule
-    would accept, it may be the last end_turn attempt, so the log yields no accepted
-    output, saying why, rather than an earlier attempt in its place; before it, it cannot
-    change which attempt is last, and the rule's answer stands."""
+@pytest.mark.parametrize("log, accepted, seen", [
+    # A later end_turn reply whose key cannot be compared might be the accepted one (#2893).
+    ([GOOD, entry(attempt=[2], output_tokens=900)], None, 2),
+    ([GOOD, entry(attempt={"n": 2}, output_tokens=900)], None, 2),
+    ([entry(attempt=[2], output_tokens=900)], None, 1),
+    # A later entry that could never be accepted leaves the rule's answer standing (#2898).
+    ([GOOD, entry(attempt=[2], output_tokens=900, stop_reason="max_tokens")], 555, 2),
+    ([GOOD, entry(attempt=[2], output_tokens=None)], 555, 2),
+    ([GOOD, entry(attempt=2, output_tokens=[900])], 555, 2),
+    ([GOOD, entry(attempt=2, output_tokens="900")], 555, 2),
+    ([GOOD, entry(attempt=2, output_tokens=float("nan"))], 555, 2),
+    ([GOOD, entry(attempt=2, output_tokens=True)], 555, 2),
+    # Comparable values are compared as the runner wrote them, as main compared them; a
+    # fraction is a count the runner writes (#2898).
+    ([GOOD, entry(attempt="2", output_tokens=900)], 900, 2),
+    ([GOOD, entry(attempt=2, output_tokens=900.5)], 900, 2),
+    # Nothing before the answer changes it, however many entries (#2896, #2899).
+    ([entry(attempt=[1], output_tokens=900), LATER], 777, 2),
+    ([entry(attempt=[1], output_tokens=900), entry(attempt=[2], output_tokens=901), LATER], 777, 3),
+], ids=["list-attempt", "object-attempt", "only-unchecked", "unchecked-max-tokens", "unchecked-null-output",
+        "list-output", "text-output", "nan-output", "flag-output", "text-attempt", "fraction-output",
+        "unchecked-before", "two-unchecked-before"])
+def test_the_baseline_follows_the_rule_around_corrupt_log_entries(run, log, accepted, seen):
+    """#2873, #2893, #2896, #2898, #2899: the provenance holds no accepted full row, so the
+    log is consulted. The answer is the last end_turn reply, not abandoned, reporting a
+    finite output count, that the provenance did not refuse. A reply whose attempt or
+    output count is a list or object cannot be checked against the refused rows (an
+    unhashable key once crashed the command); if it would be that answer, the log yields
+    none, saying why. Every entry the refused rows do not rule out is counted as seen."""
     from data_sheets_schema.run_telemetry import accepted_full_output
-    core = [{"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}]
-    bad = entry(**{"attempt": 2, field: value})
-    for log in ([bad], [entry(attempt=1, output_tokens=777), bad]):
-        result = accepted_full_output(run(core, log), "CHORUS")
-        assert result["output_tokens"] is None
-        assert result["reason"].endswith(f"{len(log)} in the reasoning log (1 of them with an attempt or output "
-                                         "count the runner does not write, so the accepted one cannot be "
-                                         "established)"), result["reason"]
-    result = accepted_full_output(run(core, [bad, entry(attempt=3, output_tokens=777)]), "CHORUS")
-    assert (result["output_tokens"], result["attempt"], result["source"]) == (777, 3, "reasoning_log")
+    result = accepted_full_output(run(CORE, log), "CHORUS")
+    assert result["output_tokens"] == accepted, result
+    if accepted is None:
+        assert result["reason"].endswith("(the last end_turn reply carries a list or object as its attempt or "
+                                         "output count, so whether it was refused, and the accepted attempt, "
+                                         "cannot be established)"), result["reason"]
+    else:
+        # Every other end_turn reply counts as retried, the unchecked ones among them.
+        others = sum(1 for e in log if e.get("stop_reason") == "end_turn") - 1
+        assert result["attempts_seen"] == seen and result["retried"] == others, result
+
+
+def test_an_unchecked_reply_after_a_refused_one_is_undetermined(run):
+    """#2893: with a refused row present, a later reply that cannot be compared might be
+    that refused attempt or a new one, so neither it nor the one before is taken."""
+    from data_sheets_schema.run_telemetry import accepted_full_output
+    refused = [{"phase": "full", "attempt": 1, "output_tokens": 500, "stop_reason": "end_turn",
+                "unusable_reason": "no YAML document"}]
+    result = accepted_full_output(run(refused, [GOOD, entry(attempt=1, output_tokens=500),
+                                                entry(attempt=[2], output_tokens=900)]), "CHORUS")
+    assert result["output_tokens"] is None and "cannot be established" in result["reason"]
 
 
 def test_the_baseline_command_survives_an_unhashable_attempt(run):
@@ -84,9 +117,9 @@ def test_a_refused_row_still_drops_its_log_entry(run):
     result = accepted_full_output(directory, "CHORUS")
     assert result["output_tokens"] is None
     assert result["reason"] == ("no accepted full attempt: 1 full row(s) in the provenance, 2 in the reasoning "
-                                "log (1 of them the provenance recorded as refused) (1 of them with an attempt "
-                                "or output count the runner does not write, so the accepted one cannot be "
-                                "established)")
+                                "log (1 of them the provenance recorded as refused) (the last end_turn reply "
+                                "carries a list or object as its attempt or output count, so whether it was "
+                                "refused, and the accepted attempt, cannot be established)")
 
 
 def _nested(depth):
