@@ -433,9 +433,9 @@ classes:
       unusable_reason:
         range: string
         description: >-
-          Why the runner refused a billed reply whose body it kept (#1048):
-          display only, the attempt is otherwise indistinguishable from the
-          one accepted (#2892).
+          Why the runner refused a billed reply whose body it kept (#1048);
+          the attempt is otherwise indistinguishable from the one accepted,
+          and the report's comparisons pass over it (#2892, #2903).
 
   RecordStats:
     description: >-
