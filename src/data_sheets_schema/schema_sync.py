@@ -252,10 +252,18 @@ def _regenerate(source: Path, target: Path,
     return True, None
 
 
+#: The digest child's exit when rendering the digest raised on its inputs (EX_DATAERR),
+#: and when it raised an OSError or MemoryError, an I/O or resource failure that says
+#: nothing about them (EX_IOERR). Any other exit, a start-up failure's 1 included, is
+#: unclassified (#2838).
+DIGEST_INPUT_EXIT = 65
+DIGEST_IO_EXIT = 74
+
+
 class RebuiltDigestFailed(ValueError):
-    """The digest child ran and failed. A positive exit status is the child's own
-    exception, so the schema it was given; a negative one is a signal, a process
-    failure that says nothing about the schema (#2814)."""
+    """The digest child ran and failed. Only DIGEST_INPUT_EXIT is the child's own
+    exception on the schema and pin it was given; a signal, an I/O or resource failure,
+    a silent exit 0 and any unclassified exit are process failures (#2814, #2838)."""
 
     def __init__(self, returncode, message):
         super().__init__(message)
@@ -282,16 +290,24 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
            _generator_versions(), prof.name)
     if key in _REBUILT_DIGESTS:
         return _REBUILT_DIGESTS[key]
+    # The child says which kind of failure it met: one on its inputs, or an I/O or
+    # resource failure. Anything before the render (start-up, imports, the profile's
+    # name) is left to the interpreter's own exit, which stays unclassified (#2838).
     code = (
-        "import sys\nfrom pathlib import Path\n"
+        "import sys, traceback\nfrom pathlib import Path\n"
         "sys.path.insert(0, sys.argv[1])\n"
         "from data_sheets_schema import schema_digest as d\n"
-        "d.VOCABULARY_PIN = Path(sys.argv[4])\n"
-        "inventory = d.build(sys.argv[2], Path(sys.argv[3]))\n"
-        "inventory.schema_path = sys.argv[5]\n"
         "from data_sheets_schema.profiles import profile_named\n"
         "prof = profile_named(sys.argv[6])\n"
-        "print(d.fingerprint(d.render(inventory, vocabulary=d.vocabularies(profile=prof))))\n")
+        "try:\n"
+        "    d.VOCABULARY_PIN = Path(sys.argv[4])\n"
+        "    inventory = d.build(sys.argv[2], Path(sys.argv[3]))\n"
+        "    inventory.schema_path = sys.argv[5]\n"
+        "    print(d.fingerprint(d.render(inventory, vocabulary=d.vocabularies(profile=prof))))\n"
+        "except (OSError, MemoryError):\n"
+        f"    traceback.print_exc(); sys.exit({DIGEST_IO_EXIT})\n"
+        "except Exception:\n"
+        f"    traceback.print_exc(); sys.exit({DIGEST_INPUT_EXIT})\n")
     result = subprocess.run(
         [sys.executable, "-c", code, str(Path(__file__).resolve().parents[1]),
          class_name, str(path.resolve()), str(vocabulary.resolve()), source_name, prof.name],
@@ -321,16 +337,18 @@ def _probe(class_name, schema, vocabulary, name, profile):
 
 def _process_failure(exc) -> bool:
     """A failure of the process, not of the schema or the pin: a timeout, a child that
-    could not start, one killed by a signal, or one that exited 0 without a digest
-    (#2814, #2827, #2835). Only a child's own nonzero exit speaks for its inputs."""
+    could not start, one killed by a signal, one that met an I/O or resource failure,
+    one that exited 0 without a digest or with an unclassified status (#2814, #2827,
+    #2835, #2838). Only a child that raised on its inputs speaks for them."""
     return (isinstance(exc, (subprocess.TimeoutExpired, OSError))
             or (isinstance(exc, RebuiltDigestFailed) and not _input_failure(exc)))
 
 
 def _input_failure(exc) -> bool:
-    """A digest child's own nonzero exit: its exception, so the inputs it was given. A
-    probe's other failures say nothing about them (#2835)."""
-    return isinstance(exc, RebuiltDigestFailed) and bool(exc.returncode) and exc.returncode > 0
+    """A digest child that raised on the inputs it was given, as it reports with
+    DIGEST_INPUT_EXIT. A probe's other failures, an unclassified exit among them, say
+    nothing about them (#2835, #2838)."""
+    return isinstance(exc, RebuiltDigestFailed) and exc.returncode == DIGEST_INPUT_EXIT
 
 
 def check_one(merged: Path, source: Path, class_name: str,

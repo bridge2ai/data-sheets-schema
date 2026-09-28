@@ -597,7 +597,7 @@ class BrokenFreshBuildTest(unittest.TestCase):
             return True, None
 
         def broken(*args, **kwargs):
-            raise schema_sync.RebuiltDigestFailed(1, 'rebuilt digest process failed: No such class: "CoreDataset"')
+            raise schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, 'rebuilt digest process failed: No such class: "CoreDataset"')
 
         with tempfile.TemporaryDirectory() as tmp:
             copy = Path(tmp) / merged.name
@@ -729,7 +729,7 @@ class NestedPinTest(unittest.TestCase):
 
         def rebuilt(class_name, path, vocabulary, name, profile=None):
             if profile is not None and profile.name == "bridge2ai":
-                raise schema_sync.RebuiltDigestFailed(1, "rebuilt digest process failed: 'list' object has no attribute 'items'")
+                raise schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "rebuilt digest process failed: 'list' object has no attribute 'items'")
             return "0" * 32
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -819,7 +819,7 @@ class HealthyPinTest(_PinHarness, unittest.TestCase):
         def rebuilt(class_name, path, vocabulary, name, profile=None):
             calls.append(profile.name if profile else None)
             if len(calls) == 1:
-                raise schema_sync.RebuiltDigestFailed(1, "rebuilt digest process failed: a passing fault")
+                raise schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "rebuilt digest process failed: a passing fault")
             return "0" * 32
         row = self._run(rebuilt)
         self.assertEqual(row["status"], STALE, row)
@@ -862,7 +862,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
     def test_a_retry_killed_by_a_signal_does_not_blame_the_pin(self):
         from data_sheets_schema import schema_sync
         failed = lambda code: schema_sync.RebuiltDigestFailed(code, "rebuilt digest process failed")
-        row = self._run(self.sequenced(failed(1), failed(-9), None))
+        row = self._run(self.sequenced(failed(schema_sync.DIGEST_INPUT_EXIT), failed(-9), None))
         self.assertEqual(row["status"], STALE, row)
         self.assertNotIn("vocabulary pin", row["reason"])
         self.assertEqual([c[0] for c in self.calls], ["bridge2ai", "bridge2ai"])    # no neutral probe
@@ -871,7 +871,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         import subprocess
         from data_sheets_schema import schema_sync
         timeout = subprocess.TimeoutExpired(["digest"], 600)
-        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "failed"), timeout, timeout))
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed"), timeout, timeout))
         self.assertEqual(row["status"], STALE, row)
         self.assertNotIn("source needs repair", row["reason"])
         self.assertNotIn("vocabulary pin", row["reason"])
@@ -879,7 +879,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
     def test_a_neutral_probe_that_fails_as_a_process_blames_neither(self):
         from data_sheets_schema import schema_sync
         failed = lambda code: schema_sync.RebuiltDigestFailed(code, "rebuilt digest process failed")
-        row = self._run(self.sequenced(failed(1), failed(1), failed(-9)))
+        row = self._run(self.sequenced(failed(schema_sync.DIGEST_INPUT_EXIT), failed(schema_sync.DIGEST_INPUT_EXIT), failed(-9)))
         self.assertEqual(row["status"], STALE, row)
         self.assertNotIn("source needs repair", row["reason"])
         self.assertNotIn("vocabulary pin", row["reason"])
@@ -887,7 +887,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
     def test_a_recurring_failure_on_both_profiles_needs_source_repair(self):
         from data_sheets_schema import schema_sync
         failed = lambda code: schema_sync.RebuiltDigestFailed(code, "rebuilt digest process failed")
-        row = self._run(self.sequenced(failed(1), failed(1), failed(1)))
+        row = self._run(self.sequenced(failed(schema_sync.DIGEST_INPUT_EXIT), failed(schema_sync.DIGEST_INPUT_EXIT), failed(schema_sync.DIGEST_INPUT_EXIT)))
         self.assertEqual(row["status"], UNCHECKED, row)
         self.assertIn("source needs repair", row["reason"])
 
@@ -895,7 +895,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         """#2835: a child that exited 0 without a digest is a process failure, first, as
         the retry or as the neutral probe: neither the pin nor the source is blamed."""
         from data_sheets_schema import schema_sync
-        failed = lambda: schema_sync.RebuiltDigestFailed(1, "failed")
+        failed = lambda: schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed")
         silent = lambda: schema_sync.RebuiltDigestFailed(0, "rebuilt digest process failed: ")
         for outcomes, probes in (((silent(),), []),                        # the first digest
                                  ((failed(), silent(), None), ["bridge2ai"]),  # the retry, then neutral success
@@ -911,7 +911,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         """#2835: only a probe child's own exit speaks for the inputs; a retry that failed
         before or around its child, followed by a neutral success, blames nothing."""
         from data_sheets_schema import schema_sync
-        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "failed"),
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed"),
                                        RuntimeError("the probe harness failed"), None))
         self.assertEqual(row["status"], STALE, row)
         self.assertNotIn("vocabulary pin", row["reason"])
@@ -921,7 +921,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         """#2835: the repair advice quotes the first failure, so it needs that failure to be
         the fresh build's own exit; a harness error first, then two child exits, is stale."""
         from data_sheets_schema import schema_sync
-        failed = lambda: schema_sync.RebuiltDigestFailed(1, "failed")
+        failed = lambda: schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed")
         row = self._run(self.sequenced(RuntimeError("the digest harness failed"), failed(), failed()))
         self.assertEqual(row["status"], STALE, row)
         self.assertNotIn("source needs repair", row["reason"])
@@ -935,12 +935,12 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
 
         def edit_then_fail():
             self.pin = b"vocabularies: {B2AI_TOPIC: {}}\n"
-            return schema_sync.RebuiltDigestFailed(1, "failed")
+            return schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed")
 
         def restore():
             self.pin = self.GOOD_PIN
             return None
-        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "failed"), edit_then_fail, restore))
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed"), edit_then_fail, restore))
         self.assertEqual(row["status"], UNCHECKED, row)
         self.assertIn("cannot be rendered", row["reason"])
         for profile, _schema, _path, vocabulary, pin in self.calls:
@@ -965,10 +965,12 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
                     raise answer
                 return subprocess.CompletedProcess(command, answer[0], answer[1], answer[2])
             return run
-        cases = {"signal": (child((1, "", "boom"), (-9, "", ""), (0, "0" * 32, "")), STALE),
-                 "silent": (child((1, "", "boom"), (0, "", ""), (0, "0" * 32, "")), STALE),
-                 "timeout": (child((1, "", "boom"), subprocess.TimeoutExpired(["digest"], 600)), STALE),
-                 "pin": (child((1, "", "boom"), (1, "", "boom"), (0, "0" * 32, "")), UNCHECKED)}
+        cases = {"signal": (child((schema_sync.DIGEST_INPUT_EXIT, "", "boom"), (-9, "", ""), (0, "0" * 32, "")), STALE),
+                 "silent": (child((schema_sync.DIGEST_INPUT_EXIT, "", "boom"), (0, "", ""), (0, "0" * 32, "")), STALE),
+                 "timeout": (child((schema_sync.DIGEST_INPUT_EXIT, "", "boom"), subprocess.TimeoutExpired(["digest"], 600)), STALE),
+                 "unclassified": (child((schema_sync.DIGEST_INPUT_EXIT, "", "boom"), (1, "", "boom"), (0, "0" * 32, "")), STALE),
+                 "io": (child((schema_sync.DIGEST_INPUT_EXIT, "", "boom"), (schema_sync.DIGEST_IO_EXIT, "", "OSError: [Errno 24] Too many open files"), (0, "0" * 32, "")), STALE),
+                 "pin": (child((schema_sync.DIGEST_INPUT_EXIT, "", "boom"), (schema_sync.DIGEST_INPUT_EXIT, "", "boom"), (0, "0" * 32, "")), UNCHECKED)}
         for label, (run, status) in cases.items():
             with self.subTest(label), mock.patch.object(schema_sync.subprocess, "run", run):
                 schema_sync._REBUILT_DIGESTS.clear()
@@ -976,6 +978,41 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
                 self.assertEqual(row["status"], status, row)
                 self.assertEqual("cannot be rendered" in row["reason"], label == "pin", row)
                 self.assertNotIn("source needs repair", row["reason"])
+
+    def test_the_real_child_tells_an_input_failure_from_an_io_failure(self):
+        """#2838: the real digest child exits DIGEST_INPUT_EXIT when rendering raises on its
+        inputs, and DIGEST_IO_EXIT when an OSError is raised inside it (here a pin that is
+        a directory; the parent's own read of it, for the cache key, is stubbed so the
+        child is the one that meets it), which is inconclusive."""
+        from unittest import mock
+        from data_sheets_schema import profiles, schema_sync, schema_view
+        merged, _source, cls, _marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        bridge2ai = profiles.profile_named("bridge2ai")
+        with tempfile.TemporaryDirectory() as tmp:
+            pin = Path(tmp) / "pin.yaml"
+            pin.write_bytes(b"vocabularies: {}\n")
+            broken = Path(tmp) / "broken" / merged.name
+            broken.parent.mkdir()
+            broken.write_bytes(b"id: https://example.org/x\nname: x\nclasses: {}\n")      # no such class
+            directory = Path(tmp) / "a_directory"
+            directory.mkdir()
+            real_key = schema_view.content_key
+
+            def content_key(path, *args, **kwargs):
+                return ("directory", str(path)) if Path(path) == directory else real_key(path, *args, **kwargs)
+            outcomes = {}
+            with mock.patch.object(schema_view, "content_key", content_key):
+                for label, schema, vocabulary in (("input", broken, pin), ("io", merged, directory)):
+                    with self.assertRaises(schema_sync.RebuiltDigestFailed) as raised:
+                        schema_sync._rebuilt_fingerprint(cls, schema, vocabulary, "x", profile=bridge2ai)
+                    outcomes[label] = (raised.exception.returncode, str(raised.exception))
+        self.assertEqual({k: v[0] for k, v in outcomes.items()},
+                         {"input": schema_sync.DIGEST_INPUT_EXIT, "io": schema_sync.DIGEST_IO_EXIT}, outcomes)
+        self.assertIn("IsADirectoryError", outcomes["io"][1])
+        self.assertTrue(schema_sync._process_failure(schema_sync.RebuiltDigestFailed(outcomes["io"][0], "")))
+        self.assertFalse(schema_sync._process_failure(schema_sync.RebuiltDigestFailed(outcomes["input"][0], "")))
 
     def test_a_merged_file_repaired_during_the_probes_is_a_retry_not_the_pin(self):
         """The merged file fails to digest twice, then is repaired before the neutral
@@ -989,7 +1026,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         def repair():
             self.copy.write_bytes(self.copy.read_bytes() + b"# repaired\n")
             return None                                    # the neutral probe then succeeds
-        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "No such class: Dataset"), repair),
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "No such class: Dataset"), repair),
                         digest=live_fails)
         self.assertEqual(row["status"], UNCHECKED, row)
         self.assertIn("changed during the sync check", row["reason"])
@@ -1005,8 +1042,8 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         def edit_pin():
             self.pin = b"vocabularies: {B2AI_TOPIC: {}}\n"
             return None
-        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "failed"),
-                                       schema_sync.RebuiltDigestFailed(1, "failed"), edit_pin))
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed"),
+                                       schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed"), edit_pin))
         self.assertEqual(row["status"], UNCHECKED, row)
         self.assertIn("changed during the sync check", row["reason"])
 
@@ -1017,7 +1054,7 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         def source_state(src):            # as read before the probes, then edited during them
             reads.append(src)
             return real(src) if len(reads) == 1 else ("edited during the probes",)
-        failed = lambda: schema_sync.RebuiltDigestFailed(1, "failed")
+        failed = lambda: schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "failed")
         row = self._run(self.sequenced(failed(), failed(), failed()), source_state=source_state)
         self.assertEqual(len(reads), 2)
         self.assertEqual(row["status"], UNCHECKED, row)
