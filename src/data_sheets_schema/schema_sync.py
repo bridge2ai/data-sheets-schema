@@ -458,6 +458,7 @@ def check_one(merged: Path, source: Path, class_name: str,
             # (#2827, #2832, #2835).
             recurs = pin_blamed = rebuild_broken = False
             rebuild_failure = None
+            pin_failure = exc
             if unchanged and same is not None and not _process_failure(exc):
                 from data_sheets_schema.profiles import NEUTRAL
                 name = schema_digest._schema_name(class_name, merged)
@@ -488,7 +489,9 @@ def check_one(merged: Path, source: Path, class_name: str,
                     # repaired, not regenerated (#2841).
                     again, blamed, rebuild_failure = diagnose(rebuilt)
                     if blamed:
+                        # The rebuild's failure is the one that names the pin (#2845).
                         recurs = pin_blamed = True
+                        pin_failure = rebuild_failure
                     rebuild_broken = again and not blamed
                 # A diagnosis names the live inputs, so they must still be the ones probed.
                 try:
@@ -504,7 +507,7 @@ def check_one(merged: Path, source: Path, class_name: str,
                             "reason": "schema inputs changed during the sync check; retry with stable inputs"}
             if recurs and pin_blamed:
                 return {**out, "status": UNCHECKED,
-                        "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {exc}"}
+                        "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {pin_failure}"}
             if stable and ((recurs and live is not None and _input_failure(exc)) or rebuild_broken):
                 # The fresh build does not digest, on its own inputs, twice where the merged
                 # file digested, or under both profiles where the merged file failed too:

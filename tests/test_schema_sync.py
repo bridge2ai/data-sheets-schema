@@ -1040,6 +1040,20 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
                 schemas = [c[2] for c in self.calls]
                 self.assertEqual(len({schemas[0], schemas[-1]}), 2 if len(schemas) > 2 else 1)   # merged copy, then the rebuild
 
+    def test_a_pin_implicated_by_the_rebuild_is_reported_with_the_rebuilds_failure(self):
+        """#2845: the merged file fails on its own schema; the rebuild fails only with the
+        vocabulary. The pin is named with the rebuild's failure, not the merged file's."""
+        from data_sheets_schema import schema_sync
+
+        def live_fails(*args, **kwargs):
+            raise KeyError('No such class: "Dataset"')
+        merged_failure = lambda: schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, 'No such class: "Dataset"')
+        pin_failure = schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "'list' object has no attribute 'items'")
+        row = self._run(self.sequenced(merged_failure(), merged_failure(), pin_failure, None), digest=live_fails)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("cannot be rendered: 'list' object has no attribute 'items'", row["reason"])
+        self.assertNotIn("Dataset", row["reason"])
+
     def test_a_merged_file_repaired_during_the_probes_is_a_retry_not_the_pin(self):
         """The merged file fails to digest twice, then is repaired before the neutral
         probe: the probe still reads the bytes the check read, and the diagnosis is
