@@ -145,54 +145,72 @@ def test_a_deeply_nested_line_is_named_not_a_crash(tmp_path):
         reasoning.read(log)
 
 
-@pytest.mark.parametrize("field, value, problem", [
-    ("reasoning_tokens_estimate", "90", "reasoning_tokens_estimate is not an integer count"),
-    ("reasoning_tokens_estimate", 90.5, "reasoning_tokens_estimate is not an integer count"),
-    ("reasoning_tokens_estimate", True, "reasoning_tokens_estimate is not an integer count"),
-    ("reasoning_tokens_estimate", 10 ** 15, "reasoning_tokens_estimate is not an integer count"),
-    ("reasoning_tokens_observed", "7", "reasoning_tokens_observed is not an integer count"),
-    ("estimate_error", [1], "estimate_error is not an integer count"),
-    ("output_tokens", 100.0, "output_tokens is not an integer count"),
-    ("visible_text_chars", "40", "visible_text_chars is not an integer count"),
-    ("blocks", 3, "blocks is not a list of blocks"),
-    ("blocks", [3], "blocks is not a list of blocks"),
-    ("blocks", [{"type": ["thinking"]}], "blocks is not a list of blocks"),
-    ("phase", 7, "phase is not text"),
-    ("phase", "\ud800", "phase is not text")])
-def test_a_line_no_writer_produces_is_named_by_both_readers(tmp_path, field, value, problem):
-    """#2722: an object whose counters are not integer counts, whose blocks are not a
-    list of blocks with text types, or whose phase is not text, is no entry any writer
-    produces. The report names and skips it, where some of these crashed it (a string
-    counter in `summarise`, a bad block in the block scan, a lone surrogate when the
-    phase is printed, a counter too long to print); the strict reader refuses it,
-    naming the line, so the two agree (#2739)."""
+@pytest.mark.parametrize("field, value, unusable", [
+    ("reasoning_tokens_estimate", "90", True), ("reasoning_tokens_estimate", 90.5, True),
+    ("reasoning_tokens_estimate", True, True), ("reasoning_tokens_estimate", 10 ** 15, True),
+    ("reasoning_tokens_observed", "7", True), ("estimate_error", [1], True),
+    ("output_tokens", 100.0, True), ("visible_text_chars", "40", True),
+    ("blocks", 3, False), ("blocks", [3], False), ("blocks", [{"type": ["thinking"]}], False),
+    ("blocks", {"type": "thinking"}, False), ("phase", 7, False), ("phase", "\ud800", False)])
+def test_a_corrupt_entry_is_read_and_reported_not_a_crash(tmp_path, field, value, unusable):
+    """#2722: no writer produces these, and each once crashed the report: a string counter
+    in `summarise`, a bad block in the block scan, a lone surrogate when the phase is
+    printed, a counter too long to print. Both readers still take the line as an entry,
+    as they take any object, so the accounting gate reads whatever the runner wrote
+    (#2739, #2876); the report sums only integer counts, names an entry whose counter is
+    anything else, scans only blocks with a text type and escapes what it prints."""
     from data_sheets_schema import reasoning
     log = tmp_path / "CHORUS_reasoning.jsonl"
-    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps({**entry(True), field: value}) + "\n")
-    assert reasoning.read_lenient(log) == ([entry(True)], [2])
-    with pytest.raises(reasoning.UnreadableLog, match=f"line 2 is not a readable entry \\({re.escape(problem)}\\)"):
-        reasoning.read(log)
+    bad = {**entry(False), field: value}
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps(bad) + "\n")
+    assert reasoning.read_lenient(log) == ([entry(True), json.loads(json.dumps(bad))], [])
+    assert len(reasoning.read(log)) == 2
     result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
     assert result.exit_code == 0, result.output
-    assert "1 line(s) that are not a readable entry, skipped: 2" in result.output
+    assert "entries 2" in result.output
+    assert ("1 entr(y/ies) with a counter that is not an integer count" in result.output) is unusable
 
 
-def test_the_accounting_gate_refuses_a_line_no_writer_produces(tmp_path):
-    """#2722: a wrong-typed counter on a line whose ids match a recorded row is refused
-    by the gate, not counted as covered: the strict reader names it."""
-    from data_sheets_schema import api_runner as api, usage_ledger as ledger
-    from tests.test_download.test_api_runner import spec
-    s = spec(out_dir=tmp_path)
-    generation = ledger.prepare_usage(s, resume=True)
-    line = {**entry(True), "usage_id": "u1", "generation_id": generation, "run_identity": ledger.run_identity(s),
-            "stop_reason": "end_turn", "reasoning_tokens_estimate": "90"}
-    path = api._reasoning_path(s)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(line) + "\n")
-    recorded = {"run": {"generation_id": generation},
-                "api_usage": [{"usage_id": "u1", "phase": "full", "output_tokens": 100, "stop_reason": "end_turn"}]}
-    with pytest.raises(ledger.UsageLedgerError, match="line 1 is not a readable entry"):
-        api._unrecorded_reasoning(s, recorded)
+def test_the_report_sums_only_integer_counts(tmp_path):
+    """#2722: two counters near the 4300-digit print limit are left out of the total, and
+    the good entry's count is what the report prints."""
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    huge = int("9" * 4300)
+    log.write_text("".join(json.dumps(e) + "\n" for e in
+                           (entry(True), {**entry(True), "reasoning_tokens_estimate": huge},
+                            {**entry(True), "reasoning_tokens_estimate": huge})))
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "reasoning tokens (estimated) 90 total, 90 max" in result.output
+    assert "2 entr(y/ies) with a counter that is not an integer count" in result.output
+
+
+def test_what_the_runner_writes_is_an_entry_for_both_readers(tmp_path):
+    """#2875, #2876: entries as `capture` builds them today, a thinking-token count with a
+    negative estimate error, a phase-less evidence-scoring entry, and a provider count the
+    SDK left as a float, are all read by both readers. The strict reader behind the
+    accounting gate refuses nothing `append` writes, so no billed run is stopped by its
+    own log; the report names only the float count as unusable."""
+    from types import SimpleNamespace as NS
+    from data_sheets_schema import reasoning
+
+    def response(output_tokens, thinking_tokens, text):
+        usage = NS(output_tokens=output_tokens, output_tokens_details={"thinking_tokens": thinking_tokens})
+        return NS(content=[NS(type="thinking", thinking="", signature="s"), NS(type="text", text=text)],
+                  usage=usage, stop_reason="end_turn")
+    current = {"phase": "full", "attempt": 1, **reasoning.capture(response(10, 5, "x" * 100)).to_dict()}
+    assert current["estimate_error"] == -5
+    judgement = reasoning.capture(response(300, None, "y" * 40)).to_dict()           # no phase
+    provider_float = {"phase": "core", **reasoning.capture(response(50.5, None, "z")).to_dict()}
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    for line in (current, judgement, provider_float):
+        reasoning.append(log, line)
+    expected = [json.loads(json.dumps(e)) for e in (current, judgement, provider_float)]
+    assert reasoning.read(log) == expected
+    assert reasoning.read_lenient(log) == (expected, [])
+    summary = reasoning.summarise(expected)
+    assert summary["with_observed_count"] == 1 and summary["estimate_error_total"] == -5
+    assert summary["with_unusable_counter"] == 1
 
 
 def test_null_counters_are_entries(tmp_path):

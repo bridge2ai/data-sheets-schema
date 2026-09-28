@@ -2203,6 +2203,9 @@ def reasoning_cmd(method, project, label, path):
         if s['truncated']:
             click.echo(f"  ⚠️  {s['truncated']} response(s) stopped at "
                        f"max_tokens")
+        if s.get('with_unusable_counter'):
+            click.echo(f"  ⚠️  {s['with_unusable_counter']} entr(y/ies) with a counter that is not "
+                       "an integer count; those counters are left out of the sums (#2722)")
         if s.get('phases_without_reasoning'):
             click.echo(f"  no thinking block on: {', '.join(s['phases_without_reasoning'])}")
         if s.get('full_phase_without_reasoning'):
@@ -2230,7 +2233,11 @@ def reasoning_cmd(method, project, label, path):
             # finds absent (#2721).
             click.echo(f"\n{skipped} unreadable line(s) skipped: what follows describes "
                        "the readable entries only.")
-        kinds = {b.get('type') for e in total for b in (e.get('blocks') or []) if isinstance(b, dict)}
+        # Only a list of blocks with a text type is scanned; anything else a corrupt line
+        # holds is not a block (#2722).
+        kinds = {b.get('type') for e in total
+                 for b in (e.get('blocks') if isinstance(e.get('blocks'), list) else [])
+                 if isinstance(b, dict) and isinstance(b.get('type'), str)}
         if any(e.get('reasoning_present') for e in total) and kinds == {'redacted_thinking'}:
             # Encrypted by the provider's safety redaction whatever the display (#2666).
             click.echo("\nNo reasoning text was available in any entry. The thinking "
