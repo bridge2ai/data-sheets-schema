@@ -603,8 +603,9 @@ def test_redirect_is_returned_without_following(processes):
 
 def _local_worker_failure(tmp_path, monkeypatch, sent, defect, start_delay=0):
     """#2160: IPC faults remain pending even after a sent progress witness. The worker is
-    a bare interpreter, so its bounds and the caller's are hang guards, not a 3 s budget
-    that also paid for its start-up (#2772): each defect ends the exchange at once."""
+    a bare interpreter, so its bounds, the caller's and the proxy's handler cleanup are
+    hang guards, not a 3 s, 5 s or 2 s budget that also paid for its start-up or a
+    descheduled handler (#2772, #2853): each defect ends the exchange at once."""
     from native_controls.test_native_stall_policy import proxy_with, rows
     from native_controls.test_native_proxy import REQUEST
     frames = bounded._frame(b"P", b"sent") if sent else b""
@@ -627,7 +628,7 @@ def _local_worker_failure(tmp_path, monkeypatch, sent, defect, start_delay=0):
     def post(url, proxy):
         return httpx.post(url + '/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token},
                           timeout=HANG_SECONDS)
-    with proxy.running() as url:
+    with proxy.running(cleanup_timeout=HANG_SECONDS) as url:
         assert post(url, proxy).status_code == 402
         assert post(url, proxy).status_code == 402
     row, = rows(ledger)
@@ -644,9 +645,10 @@ def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypat
 
 
 def test_a_slow_worker_start_does_not_turn_a_local_failure_into_a_timeout(tmp_path, monkeypatch, processes):
-    """#2772: a worker that takes 4 s to start, past the 3 s the test once allowed the
-    whole exchange, still fails as the worker protocol error it is, and debits nothing."""
-    _local_worker_failure(tmp_path, monkeypatch, False, "eof", start_delay=4)
+    """#2772, #2852: a worker that takes 6 s to start, past both the 3 s the test once
+    allowed the exchange and the caller's former 5 s, still fails as the worker protocol
+    error it is, and debits nothing."""
+    _local_worker_failure(tmp_path, monkeypatch, False, "eof", start_delay=6)
 
 
 def test_genuine_worker_upstream_protocol_error_preserves_debit_and_retry(tmp_path, monkeypatch, processes):
