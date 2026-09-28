@@ -95,10 +95,10 @@ def _attempt(row: dict[str, Any],
         # it through `_accepted`; wall time and the reasoning join do not.
         a["unusable_reason"] = str(row["unusable_reason"])
     if reasoning_entry:
-        # Only what the report's schema can hold: an integer count, a boolean flag. The
-        # reader takes any object (#2876), so a corrupt field is left out as if the entry
-        # did not carry it, rather than failing validation or, deeply nested, the YAML
-        # dump (#2874), as the reasoning report leaves such a counter out (#2722).
+        # Only an integer count, as the reasoning report takes one (#2722: an int, not a
+        # flag, below its bound), and a boolean flag. The reader takes any object (#2876),
+        # so anything else is left out as if the entry did not carry it, rather than
+        # failing validation or, deeply nested, the YAML dump (#2874, #2907).
         from data_sheets_schema.reasoning import _count
         for key in ("reasoning_tokens_estimate", "visible_text_chars"):
             if _count(reasoning_entry, key) is not None:
@@ -233,6 +233,13 @@ def _log_key(entry: dict[str, Any]) -> tuple[Any, Any] | None:
     return key
 
 
+def _reported(value: Any) -> Any:
+    """An accepted entry's attempt as the result reports it: a scalar as written, a list or
+    object by its type alone, since a deeply nested one would break the JSON the command
+    prints (#2905)."""
+    return value if value is None or isinstance(value, (bool, int, float, str)) else f"<{type(value).__name__}>"
+
+
 def _log_candidate(entry: dict[str, Any]) -> bool:
     """Whether a reasoning-log entry could be the accepted attempt under the rule: an
     end_turn reply, not abandoned, not refused as unusable (#2900), that reports an output
@@ -317,7 +324,7 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
             seen += f" ({len(in_log) - len(logged)} of them the provenance recorded as refused)"
         out["reason"] = f"no accepted full attempt: {seen}"
         return out
-    out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,
+    out.update({"output_tokens": int(acc["output_tokens"]), "attempt": _reported(acc.get("attempt")), "source": source,
                 "retried": sum(1 for r in rows if r is not acc and r.get("stop_reason") == "end_turn"
                                and not r.get("outcome"))})
     return out

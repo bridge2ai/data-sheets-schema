@@ -84,6 +84,40 @@ def test_the_baseline_follows_the_rule_around_corrupt_log_entries(run, log, acce
     assert result["attempts_seen"] == seen and result["retried"] == others, result
 
 
+@pytest.mark.parametrize("refused_key, log_key, accepted", [
+    ((2, 900.5), (2, 900.5), 555),        # a fraction the runner wrote to both is matched as written
+    ((2, 900), ("2", 900), 900),          # a text attempt equals no integer one
+    (("2", 900), ("2", 900), 555),        # and matches itself
+])
+def test_refused_rows_are_matched_on_the_raw_values(run, refused_key, log_key, accepted):
+    """#2906: the log entry a refused row names is dropped when their raw (attempt,
+    output_tokens) are equal, as main compared them: no value is coerced first."""
+    from data_sheets_schema.run_telemetry import accepted_full_output
+    refused = [{"phase": "full", "attempt": refused_key[0], "output_tokens": refused_key[1],
+                "stop_reason": "end_turn", "unusable_reason": "no YAML document"}]
+    log = [GOOD, entry(attempt=log_key[0], output_tokens=log_key[1])]
+    assert accepted_full_output(run(refused, log), "CHORUS")["output_tokens"] == accepted
+
+
+def _deep(depth):
+    value = 1
+    for _ in range(depth):
+        value = [value]
+    return value
+
+
+def test_a_deeply_nested_attempt_is_reported_by_its_type(run):
+    """#2905: an accepted entry's list or object attempt is reported by its type, so the
+    indented JSON dump, recursive before Python 3.13, cannot meet its nesting."""
+    from data_sheets_schema.cli.runs import runs as runs_cli
+    run(CORE, [GOOD, entry(attempt=_deep(2000), output_tokens=900)])
+    result = CliRunner().invoke(runs_cli, ["full-output-baseline", "--method", "claudecode_api",
+                                           "--label", "L1", "--project", "CHORUS", "--json"])
+    assert result.exit_code == 0, result.output
+    (replicate,) = json.loads(result.output)["CHORUS"]["replicates"]
+    assert (replicate["output_tokens"], replicate["attempt"]) == (900, "<list>")
+
+
 def test_a_list_attempt_after_a_refused_reply_is_not_that_reply(run):
     """#2902: a refused row's key is comparable, so a later reply whose attempt is a list
     cannot be it; the rule takes that later reply."""
@@ -92,7 +126,7 @@ def test_a_list_attempt_after_a_refused_reply_is_not_that_reply(run):
                 "unusable_reason": "no YAML document"}]
     result = accepted_full_output(run(refused, [GOOD, entry(attempt=1, output_tokens=500),
                                                 entry(attempt=[2], output_tokens=900)]), "CHORUS")
-    assert (result["output_tokens"], result["attempt"]) == (900, [2])
+    assert (result["output_tokens"], result["attempt"]) == (900, "<list>")
 
 
 def test_the_baseline_command_survives_an_unhashable_attempt(run):
@@ -141,11 +175,12 @@ def _nested(depth):
     ("reasoning_present", _nested(400)), ("reasoning_present", "yes"), ("reasoning_available", 1),
     ("reasoning_tokens_estimate", "90"), ("reasoning_tokens_estimate", 90.5), ("reasoning_tokens_estimate", True),
     ("visible_text_chars", [40]), ("visible_text_chars", 10 ** 15)])
-def test_telemetry_leaves_out_a_field_its_schema_cannot_hold(run, tmp_path, field, value):
-    """#2874: the report takes a reasoning entry's count only when it is an integer count
-    and its flags only when they are booleans, so a corrupt one is left out, as if the
-    entry did not carry it, rather than failing the schema or, nested deep enough, the
-    YAML dump that writes the report."""
+def test_telemetry_leaves_out_a_field_that_is_not_a_count_or_flag(run, tmp_path, field, value):
+    """#2874, #2907: the report takes a reasoning entry's count only when it is an integer
+    count as the reasoning report takes one (an int, not a flag, below its bound) and its
+    flags only when they are booleans, so anything else is left out, as if the entry did
+    not carry it, rather than failing the schema or, nested deep enough, the YAML dump that
+    writes the report."""
     from data_sheets_schema.cli.runs import runs as runs_cli
     usage = [{"phase": "core", "attempt": 1, "output_tokens": 10, "input_tokens": 5, "stop_reason": "end_turn"}]
     run(usage, [entry(phase="core", **{field: value})])
