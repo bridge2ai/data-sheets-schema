@@ -758,31 +758,32 @@ class NestedPinTest(unittest.TestCase):
         self.assertNotIn("source needs repair", row["reason"])
 
 
-class HealthyPinTest(unittest.TestCase):
-    """#2827: a healthy pin is never blamed for a process failure, a failure that does
-    not recur, or a source that broke after both digests succeeded."""
+class _PinHarness:
+    """check_one on a merged copy that differs from its rebuild, under the bridge2ai
+    profile with a healthy pin, the child digest `rebuilt` and the live `digest`."""
 
     GOOD_PIN = b"vocabularies: {}\n"
 
-    def _run(self, rebuilt, *, source_state=None):
+    def _run(self, rebuilt, *, source_state=None, digest=None):
         from unittest import mock
         from data_sheets_schema import profiles, schema_sync
         merged, source, cls, marker = MERGED_SCHEMAS[0]
         if not merged.exists():
             self.skipTest("merged schema not present in this checkout")
+        self.pin = self.GOOD_PIN
 
         def regenerate(src, target, flag, **kwargs):
             target.write_bytes(merged.read_bytes())
             return True, None
 
         patches = [mock.patch.object(schema_sync, "_regenerate", regenerate),
-                   mock.patch.object(profiles, "vocabulary_bytes", lambda p: self.GOOD_PIN if p.name == "bridge2ai" else b""),
-                   mock.patch.object(schema_digest, "digest_text", lambda *a, **k: "live digest text"),
+                   mock.patch.object(profiles, "vocabulary_bytes", lambda p: self.pin if p.name == "bridge2ai" else b""),
+                   mock.patch.object(schema_digest, "digest_text", digest or (lambda *a, **k: "live digest text")),
                    mock.patch.object(schema_sync, "_rebuilt_fingerprint", rebuilt)]
         if source_state is not None:
             patches.append(mock.patch.object(schema_sync, "_source_state", source_state))
         with tempfile.TemporaryDirectory() as tmp:
-            copy = Path(tmp) / merged.name
+            self.copy = copy = Path(tmp) / merged.name
             copy.write_bytes(merged.read_bytes() + b"\n# a comment\n")
             for patch in patches:
                 patch.start()
@@ -794,6 +795,11 @@ class HealthyPinTest(unittest.TestCase):
         if row.get("rebuilt_at"):
             shutil.rmtree(Path(row["rebuilt_at"]).parent, ignore_errors=True)
         return row
+
+
+class HealthyPinTest(_PinHarness, unittest.TestCase):
+    """#2827: a healthy pin is never blamed for a process failure, a failure that does
+    not recur, or a source that broke after both digests succeeded."""
 
     def test_a_killed_child_does_not_blame_the_pin(self):
         from data_sheets_schema import schema_sync
@@ -826,6 +832,119 @@ class HealthyPinTest(unittest.TestCase):
         row = self._run(lambda *a, **k: "0" * 32, source_state=source_state)
         self.assertEqual(row["status"], UNCHECKED, row)
         self.assertTrue(row["reason"].startswith("the source schema could not be read (it changed during the check)"), row)
+
+
+
+class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
+    """#2747 Codex review: the digest that failed is probed again, then without the
+    vocabulary, on the bytes the check read. A probe that fails as a process is
+    inconclusive, not evidence against the pin or the source, and a diagnosis is given
+    only while the live inputs are still the ones probed."""
+
+    def sequenced(self, *outcomes):
+        """A child digest that answers each call with the next outcome: an exception to
+        raise, or None for a digest. Records each call's profile and schema bytes."""
+        from data_sheets_schema import schema_sync
+        self.calls = []
+
+        def rebuilt(class_name, path, vocabulary, name, profile=None):
+            self.calls.append((profile.name if profile else None, Path(path).read_bytes(), Path(path)))
+            outcome = outcomes[len(self.calls) - 1]
+            if callable(outcome):
+                outcome = outcome()
+            if outcome is not None:
+                raise outcome
+            return "0" * 32
+        return rebuilt
+
+    def test_a_retry_killed_by_a_signal_does_not_blame_the_pin(self):
+        from data_sheets_schema import schema_sync
+        failed = lambda code: schema_sync.RebuiltDigestFailed(code, "rebuilt digest process failed")
+        row = self._run(self.sequenced(failed(1), failed(-9), None))
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("vocabulary pin", row["reason"])
+        self.assertEqual([c[0] for c in self.calls], ["bridge2ai", "bridge2ai"])    # no neutral probe
+
+    def test_retries_that_time_out_are_not_a_source_defect(self):
+        import subprocess
+        from data_sheets_schema import schema_sync
+        timeout = subprocess.TimeoutExpired(["digest"], 600)
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "failed"), timeout, timeout))
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("source needs repair", row["reason"])
+        self.assertNotIn("vocabulary pin", row["reason"])
+
+    def test_a_neutral_probe_that_fails_as_a_process_blames_neither(self):
+        from data_sheets_schema import schema_sync
+        failed = lambda code: schema_sync.RebuiltDigestFailed(code, "rebuilt digest process failed")
+        row = self._run(self.sequenced(failed(1), failed(1), failed(-9)))
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("source needs repair", row["reason"])
+        self.assertNotIn("vocabulary pin", row["reason"])
+
+    def test_a_recurring_failure_on_both_profiles_needs_source_repair(self):
+        from data_sheets_schema import schema_sync
+        failed = lambda code: schema_sync.RebuiltDigestFailed(code, "rebuilt digest process failed")
+        row = self._run(self.sequenced(failed(1), failed(1), failed(1)))
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("source needs repair", row["reason"])
+
+    def test_a_retry_that_printed_no_digest_is_not_a_source_defect(self):
+        """Source repair needs the fresh build's own failure twice: a child that exited 0
+        without a digest is not the source failing to digest."""
+        from data_sheets_schema import schema_sync
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "failed"),
+                                       schema_sync.RebuiltDigestFailed(0, "rebuilt digest process failed: "),
+                                       schema_sync.RebuiltDigestFailed(1, "failed")))
+        self.assertEqual(row["status"], STALE, row)
+        self.assertNotIn("source needs repair", row["reason"])
+
+    def test_a_merged_file_repaired_during_the_probes_is_a_retry_not_the_pin(self):
+        """The merged file fails to digest twice, then is repaired before the neutral
+        probe: the probe still reads the bytes the check read, and the diagnosis is
+        withheld because the live file moved."""
+        from data_sheets_schema import schema_sync
+
+        def live_fails(*args, **kwargs):
+            raise KeyError("No such class: Dataset")
+
+        def repair():
+            self.copy.write_bytes(self.copy.read_bytes() + b"# repaired\n")
+            return None                                    # the neutral probe then succeeds
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "No such class: Dataset"), repair),
+                        digest=live_fails)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("changed during the sync check", row["reason"])
+        self.assertEqual([c[0] for c in self.calls], ["bridge2ai", "neutral"])
+        probed = {c[1] for c in self.calls}
+        self.assertEqual(len(probed), 1)                    # both probes read one set of bytes...
+        self.assertNotIn(b"# repaired", probed.pop())       # ...the ones the check read
+        self.assertTrue(all(c[2] != self.copy for c in self.calls))   # never the live file
+
+    def test_a_pin_edited_during_the_probes_is_a_retry(self):
+        from data_sheets_schema import schema_sync
+
+        def edit_pin():
+            self.pin = b"vocabularies: {B2AI_TOPIC: {}}\n"
+            return None
+        row = self._run(self.sequenced(schema_sync.RebuiltDigestFailed(1, "failed"),
+                                       schema_sync.RebuiltDigestFailed(1, "failed"), edit_pin))
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("changed during the sync check", row["reason"])
+
+    def test_a_source_edited_during_the_probes_is_a_retry_not_a_repair(self):
+        from data_sheets_schema import schema_sync
+        real, reads = schema_sync._source_state, []
+
+        def source_state(src):            # as read before the probes, then edited during them
+            reads.append(src)
+            return real(src) if len(reads) == 1 else ("edited during the probes",)
+        failed = lambda: schema_sync.RebuiltDigestFailed(1, "failed")
+        row = self._run(self.sequenced(failed(), failed(), failed()), source_state=source_state)
+        self.assertEqual(len(reads), 2)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("changed during the sync check", row["reason"])
+        self.assertNotIn("source needs repair", row["reason"])
 
 
 if __name__ == "__main__":
