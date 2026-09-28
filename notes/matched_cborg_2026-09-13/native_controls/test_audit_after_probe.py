@@ -884,3 +884,36 @@ def test_the_named_file_is_quoted_as_repr_quotes_it(tmp_path, monkeypatch):
     except OSError as error:
         refusal = probe_predecessor._malformed('probe', error)
     assert f' reading {str(path)!r}: ' in str(refusal) and repr(str(path)).startswith('"'), str(refusal)
+
+
+
+def test_a_leading_double_slash_spelling_is_named_once(tmp_path):
+    """#2797: POSIX normpath keeps a leading '//' that the OS resolves to '/'."""
+    spelled = '/' + str(tmp_path) + '/missing.json'
+    assert spelled.startswith('//')
+    with pytest.raises(BudgetStop) as caught:
+        probe_predecessor.validate_predecessor({'budget': {'continuation': {'checkpoint': spelled}}})
+    message = str(caught.value)
+    assert 'FileNotFoundError' in message and ' reading ' not in message, message
+
+
+@pytest.mark.parametrize('case', ['dangling_link_existing_directory', 'missing_ancestor_directory'])
+def test_a_resolve_error_names_the_handed_file_beside_what_it_could_not_reach(prepared, tmp_path, case):
+    """#2797: the handed file is named beside the component the resolve error carries,
+    whether that is a dangling link's target in an existing directory or a missing
+    directory above the file."""
+    manifest, _ = successor(prepared, completed(prepared))
+    target = prepared.root / 'probe' / 'result.json'
+    if case == 'dangling_link_existing_directory':
+        gone = tmp_path / 'gone.json'                     # its directory exists
+        target.unlink(); target.symlink_to(gone)
+        reached = gone
+    else:
+        missing = tmp_path / 'missing_directory'
+        (prepared.root / 'probe' / 'result.json').unlink()
+        (prepared.root / 'probe' / 'result.json').symlink_to(missing / 'result.json')
+        reached = missing
+    with pytest.raises(BudgetStop) as caught:
+        probe_predecessor.validate_link(manifest, require_pins=False)
+    message = str(caught.value)
+    assert f'reading {str(target)!r}' in message and str(reached) in message, message

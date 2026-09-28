@@ -97,6 +97,13 @@ def _path_of(value):
         return None
 
 
+def _spelling(path):
+    """A path as the OS resolves its spelling: normalized, with POSIX's double root,
+    which normpath keeps and the OS does not, taken as one (#2797)."""
+    normal = os.path.normpath(path)
+    return '/' + normal.lstrip('/') if normal.startswith('//') else normal
+
+
 def _malformed(what, error):
     """A refusal that still fails closed, naming the error and where it was raised, so a
     defect in this validator is not read as bad input (#2514).
@@ -111,9 +118,12 @@ def _malformed(what, error):
     The file is named, quoted as an OSError quotes one, when the error is one a file
     causes (it cannot be reached, opened, read, decoded or parsed; a KeyError on the audit
     manifest inside `pinned` is not, #2743), the helper's argument is a path (#2730), and
-    the error does not already name that same file. An OSError from the open names it;
-    one from the read itself names nothing, and one from resolving names the component
-    it could not reach, a missing directory or a dangling link's target (#2753)."""
+    the error does not already carry that same file as its filename attribute. An OSError
+    from the open carries it; one from the read itself carries nothing, and one from
+    resolving carries the component it could not reach, a missing directory or a
+    dangling link's target (#2753). Before 3.13 pathlib reports a symlink loop as a
+    RuntimeError whose text, not a filename attribute, names the file, so a self-loop
+    names it twice (#2797)."""
     # Read straight off the traceback, never through linecache: before 3.12 it raises
     # ValueError/UnicodeEncodeError for a filename os.stat refuses, which would make
     # the refusal raise here (#2689).
@@ -132,10 +142,11 @@ def _malformed(what, error):
         frame = walked[helper][0]
         path = _path_of(frame.f_locals.get(_HELPERS[frame.f_code]))
         # Compared as normalized spellings: an OSError names the path as the OS resolved
-        # it, while the helper may have been handed '/d//x.json' for the same file (#2786).
+        # it, while the helper may have been handed '/d//x.json' or '//d/x.json' for the
+        # same file (#2786, #2797).
         filename = getattr(error, 'filename', None)
         if path and not (isinstance(filename, str) and isinstance(path, str)
-                         and os.path.normpath(filename) == os.path.normpath(path)):
+                         and _spelling(filename) == _spelling(path)):
             where += f' reading {path!r}'
     return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
 
@@ -346,7 +357,8 @@ def _validate_link(manifest, *, require_pins=True):
 
 #: The shared file helpers, each with the argument that names its file. An error inside
 #: one is located at the call that handed it the file (#2641, #2727); the file is named
-#: when the error is about it and does not already name it, and the argument is a path.
+#: when the error is about it and does not already carry it as its filename, and the
+#: argument is a path.
 #: `_validate_link`'s local `pinned` closure is one too: every call shares its code.
 _HELPERS = {read_json.__code__: 'path', sha.__code__: 'path', canonical_path.__code__: 'value',
             _pinned.__code__: 'value',
