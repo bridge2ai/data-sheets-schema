@@ -63,7 +63,7 @@ version: '1.0'
 license: https://creativecommons.org/licenses/by-nc-sa/4.0/
 download_url: ftp://massive-ftp.ucsd.edu/v10/MSV000098237/
 issued: '2026-06-30T00:00:00Z'
-doi: https://doi.org/10.18130/V3/HIGT4C
+doi: 10.18130/V3/HIGT4C
 resources:
 - id: https://orcid.org/0000-0003-4060-7360
 - id: https://orcid.org/0000-0003-4535-3486
@@ -384,4 +384,4 @@ citation: Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chin
   2026 Data Release (Beta)", https://doi.org/10.18130/V3/HIGT4C , https://dataverse.lib.virginia.edu/,
   V1
 total_size_bytes: 21051331945400
-id: https://doi.org/10.18130/V3/HIGT4C
+id: doi:10.18130/V3/HIGT4C

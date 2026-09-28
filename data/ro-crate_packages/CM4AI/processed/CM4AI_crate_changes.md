@@ -17,9 +17,9 @@ re-running over unchanged inputs reproduces these outputs exactly.
 
 ## Validation
 
-- `CM4AI_crate_d4d.yaml`: **PASS**
+- `CM4AI_crate_d4d.yaml`: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-28 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
 
-## Changes (25)
+## Changes (26)
 
 | Step | Action | Detail | Before | After |
 |------|--------|--------|--------|-------|
@@ -30,6 +30,7 @@ re-running over unchanged inputs reproduces these outputs exactly.
 | creators | mint-surrogate-id | 12 organization(s) named without an identifier; Organization.id is required, so a local `urn:d4d:org:` surrogate was minted. Carries no external authority; not a ROR/GRID claim. | affiliation name only | urn:d4d:org:kth-royal-institute-of-technology, urn:d4d:org:simon-fraser-university, urn:d4d:org:stanford-university |
 | creators | resolve | 38 reference(s) resolved to name + affiliation from in-crate Person entities; 0 unresolved. `@id` renamed to `id`, ORCID retained. | 47 entries, 38 ref-only | [{"id": "https://orcid.org/0000-0003-4060-7360", "name": "Clark, T", "affiliations": [{"id": "urn:d4d:org:university-of-virginia", "name": "University of Virgi… |
 | created_by | flatten | slot range is string but a 47-item list was supplied; resolved and joined into one string (47 names) | 47 entries | Clark, T, Parker, J, Al Manir, S, Axelsson, U, Ballllosero Navarro, F, Chinn, B, Churas, CP, Dailamy, A, Doctor, Y, Fall, J, Forget, A, Gao, J, Hansen, JN, Hu,… |
+| doi | rewrite | the slot takes the bare DOI (#646); resolver or `doi:` prefix removed, case kept | https://doi.org/10.18130/V3/HIGT4C | 10.18130/V3/HIGT4C |
 | reduce-metadata | collapse | `hasPart` on Cell Maps for Artificial Intelligence - June 2026 Data Rele… | 60 entries | summary of 60 |
 | reduce-metadata | collapse | `hasPart` on EndoTag AP-MS Profiling of Chromatin Modifier Interactome R… | 560 entries | summary of 560 |
 | reduce-metadata | collapse | `https://w3id.org/EVI#outputs` on EndoTag AP-MS Profiling of Chromatin Modifier Interactome R… | 555 entries | summary of 555 |
