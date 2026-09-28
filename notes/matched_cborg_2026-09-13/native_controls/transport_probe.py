@@ -307,7 +307,7 @@ def import_closure(source, root):
     environment = _environment()
     def inside(path):
         return repository_file(path, root, environment)
-    files, seen = {source.resolve()}, set()
+    files, seen, walked = {source.resolve()}, set(), set()
     pending = _imported_names(source, '')
     while pending:
         name = pending.pop()
@@ -322,15 +322,19 @@ def import_closure(source, root):
         origin = Path(spec.origin).resolve()
         if not inside(origin):
             continue
-        # Checked for every module, before a file already pinned is skipped: a link to it
+        # Checked for every module, before a file already walked is skipped: a link to it
         # is another module, run from the link's own package (#2843).
         if not isinstance(spec.loader, importlib.machinery.SourceFileLoader):
             raise BudgetStop(f'repository module {spec.name} is not Python source, so its imports cannot be read')
         if Path(spec.origin).is_symlink():
             raise BudgetStop(f'repository module {spec.name} is a symbolic link; the probe pins only regular files')
-        if origin in files:
-            continue
         files.add(origin)
+        # One file can be two modules, as a package directory linked to another is, and a
+        # relative import names a different module in each package: its imports are walked
+        # once per package it runs in, not once per file (#2848).
+        if (origin, spec.parent) in walked:
+            continue
+        walked.add((origin, spec.parent))
         pending.extend(_imported_names(origin, spec.parent))
     return files
 

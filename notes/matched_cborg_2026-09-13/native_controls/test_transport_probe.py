@@ -1257,6 +1257,29 @@ def test_a_link_to_an_already_pinned_initializer_is_refused(tmp_path, monkeypatc
     assert not set(names) & set(sys.modules)                 # neither package ran
 
 
+@pytest.mark.parametrize('order', ['left first', 'right first'])
+def test_a_linked_package_directory_is_walked_in_each_package(tmp_path, monkeypatch, order):
+    """#2848: right/shared is a link to the directory left/shared, so both packages' shared
+    initializer is one regular file, whose `from .. import helper` names left.helper in
+    one and right.helper in the other. Both helpers are pinned, in either walk order."""
+    root = tmp_path / 'root'
+    for side in ('left', 'right'):
+        (root / f'closure_{side}_2848').mkdir(parents=True)
+        (root / f'closure_{side}_2848' / '__init__.py').write_text('')
+        (root / f'closure_{side}_2848' / 'helper.py').write_text('')
+    (root / 'closure_left_2848' / 'shared').mkdir()
+    (root / 'closure_left_2848' / 'shared' / '__init__.py').write_text('from .. import helper\n')
+    (root / 'closure_right_2848' / 'shared').symlink_to(root / 'closure_left_2848' / 'shared')
+    names = ['closure_right_2848.shared', 'closure_left_2848.shared']
+    seed = root / 'seed.py'
+    seed.write_text(''.join(f'import {name}\n' for name in (names if order == 'left first' else names[::-1])))
+    monkeypatch.syspath_prepend(str(root))
+    files = probe.import_closure(seed, root.resolve())
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_left_2848/__init__.py', 'closure_left_2848/helper.py', 'closure_left_2848/shared/__init__.py',
+        'closure_right_2848/__init__.py', 'closure_right_2848/helper.py'}
+
+
 def test_a_bytecode_only_repository_package_is_refused(tmp_path, monkeypatch):
     """#2836: a package with only an __init__.pyc runs code whose imports cannot be read."""
     import py_compile
