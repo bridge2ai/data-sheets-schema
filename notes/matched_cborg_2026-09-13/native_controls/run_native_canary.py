@@ -503,10 +503,17 @@ def await_leader_exit(process, timeout):
 def terminate_group(process):
     """Signal the child's group while its unreaped leader holds the id, then reap (#2714).
 
-    A leader reaped before any signal (only by someone else) is left alone: its
-    group id may already name another group, so nothing is sent to it. The exit
-    check records such a reap first, which a Popen that did not do the reaping
-    cannot know of (#2943).
+    A leader reaped by someone else is sent nothing from then on: its group id
+    may already name another group. The exit check records such a reap, which a
+    Popen that did not do the reaping cannot know of, before the SIGTERM (#2943)
+    and again after the grace wait, before the SIGKILL (#2953). Nothing in the
+    controller reaps outside this function, so no reap can fall between a
+    check and its send.
+
+    On Linux a zombie leader accepts the signal, so killpg succeeds while the
+    leader is unreaped even when a live member refuses it, and that member's
+    refusal is not reported there (#2954). Darwin, where native runs execute,
+    does not deliver to a zombie, so a refusing member still surfaces.
     """
     if process is None:
         return
@@ -516,6 +523,7 @@ def terminate_group(process):
     _signal_group(process, signal.SIGTERM)
     if process.returncode is None:            # `_signal_group`'s refusal path reaps
         await_leader_exit(process, 2)
+    if process.returncode is None:            # nor did anyone else during the wait (#2953)
         # Also remove descendants if the parent exited before them. The leader
         # is still unreaped here, so the id names this group only (#2714).
         _signal_group(process, signal.SIGKILL)

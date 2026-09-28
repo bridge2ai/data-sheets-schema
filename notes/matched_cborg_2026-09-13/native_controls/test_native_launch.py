@@ -18,6 +18,11 @@ from budgeted_cborg import BudgetStop
 import run_native_canary as runner
 from run_native_canary import execute_child, sha, terminate_group, verified_executable
 
+#: The controller refuses to launch without os.waitid (macOS Python before 3.13), and
+#: most tests here launch or clean up a child through it (#2714, #2956).
+pytestmark = pytest.mark.skipif(not hasattr(os, 'waitid'),
+                                reason='native control requires os.waitid (macOS Python 3.13+)')
+
 
 def executable(path, marker):
     path.write_text(f'#!/bin/sh\nif [ "$1" = "--version" ]; then echo same-version; else echo {marker}; fi\n')
@@ -60,8 +65,8 @@ def test_deadline_closes_admission_and_kills_child_before_proxy_cleanup(tmp_path
 
 def process_state(pid):
     """pid's state letters (Z for exited, unreaped), '' once it is reaped: from /proc where
-    there is one, else `ps`. Reading it never reaps; os.waitid(WNOWAIT) would do the same,
-    but macOS Python lacks it before 3.13 (#2600)."""
+    there is one, else `ps`. Reading it never reaps, and it stays independent of the
+    os.waitid(WNOWAIT) check the controller under test uses (#2600, #2714)."""
     try:
         return Path(f'/proc/{pid}/stat').read_text().rpartition(')')[2].split()[0]
     except (FileNotFoundError, ProcessLookupError, IndexError):
@@ -304,8 +309,9 @@ def test_a_refusal_to_the_unreaped_leader_is_excused_only_once_the_group_is_gone
                                     'time.sleep(30)'], stdout=subprocess.PIPE, text=True, start_new_session=True)
         assert process.stdout.readline().strip() == 'ready'
         refused_signal = signal.SIGKILL
-    signal_group, refusals = os.killpg, []
+    signal_group, refusals, calls = os.killpg, [], []
     def killpg(pgid, sig):
+        calls.append((sig, process.returncode))        # every call, forwarded ones included (#2955)
         if sig not in (refused_signal, 0):
             return signal_group(pgid, sig)             # SIGTERM ends the leader, which stays unreaped
         refusals.append((sig, process.returncode))
@@ -319,6 +325,7 @@ def test_a_refusal_to_the_unreaped_leader_is_excused_only_once_the_group_is_gone
         # later call is a probe after the refusal path's reap (#2708, #2714).
         assert refusals[0] == (refused_signal, None), refusals
         assert all(sig == 0 and code is not None for sig, code in refusals[1:]), refusals
+        assert all(sig == 0 for sig, code in calls if code is not None), calls    # none forwarded after the reap
         if standing:
             assert isinstance(error, PermissionError), error
             assert elapsed >= 2, elapsed
@@ -342,6 +349,33 @@ def test_a_leader_reaped_before_cleanup_is_sent_nothing(monkeypatch):
     monkeypatch.setattr(os, 'killpg', lambda pgid, sig: sends.append(sig))
     terminate_group(process)
     assert sends == [] and process.returncode == 0
+
+
+def test_a_reap_by_someone_else_during_the_grace_wait_stops_the_sigkill(monkeypatch):
+    """#2953: a leader reaped behind its Popen after the SIGTERM (here by a thread blocked in
+    a raw waitpid) has released its group id; the exit check in the grace wait records it,
+    and the group SIGKILL is not sent."""
+    process = subprocess.Popen([sys.executable, '-c', 'import time;print("ready",flush=True);time.sleep(30)'],
+                               stdout=subprocess.PIPE, text=True, start_new_session=True)
+    assert process.stdout.readline().strip() == 'ready'
+    reaper = threading.Thread(target=os.waitpid, args=(process.pid, 0), daemon=True)
+    reaper.start()                                         # reaps the moment SIGTERM ends the leader
+    signal_group, calls = os.killpg, []
+    def killpg(pgid, sig):
+        calls.append((sig, process.returncode))
+        return signal_group(pgid, sig)
+    monkeypatch.setattr(os, 'killpg', killpg)
+    try:
+        error, _ = run_bounded(lambda: terminate_group(process))
+        reaper.join(5)
+        assert error is None, error
+        assert calls == [(signal.SIGTERM, None)], calls
+        assert process.returncode is not None and not reaper.is_alive()
+    finally:
+        monkeypatch.undo()
+        process.stdout.close()
+        if process.returncode is None and process_state(process.pid):
+            process.kill(); process.wait()
 
 
 @pytest.mark.parametrize('entry', ['exit_check', 'terminate_group'])
