@@ -261,8 +261,8 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
             outcome["error"] = error
 
     # A daemon thread, not a pool whose exit joins it: a first run that hangs fails the
-    # test, within two guards (the poll, then the join), rather than hanging it; a hung
-    # worker is left running as a daemon (#2768, #2782).
+    # test at two guards or more and under three (the poll, then the join) rather than
+    # hanging it; a hung worker is left running as a daemon (#2768, #2782, #2817).
     worker = threading.Thread(target=first_run, daemon=True)
     worker.start()
     try:
@@ -809,16 +809,32 @@ def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):
     assert result["total_reasoning_tokens_estimate"] == 33
 
 
-def _short_guard(monkeypatch, seconds):
-    """The meta-tests shorten the guard so a regression they pin fails in seconds (#2781)."""
-    monkeypatch.setattr(sys.modules[__name__], "HANG_GUARD_SECONDS", seconds)
-    return seconds
+@pytest.fixture
+def short_guard(monkeypatch):
+    """Shorten the guard so a regression the meta-tests pin fails in seconds (#2781),
+    and arm a watchdog of their own: a regression that removes both of the poll's exits
+    would otherwise block the pytest thread until CI's job timeout (#2817)."""
+    import signal
+
+    def arm(seconds):
+        monkeypatch.setattr(sys.modules[__name__], "HANG_GUARD_SECONDS", seconds)
+        if threading.current_thread() is threading.main_thread():
+            def expired(signum, frame):
+                raise TimeoutError("meta-test watchdog: the concurrency test did not return")
+            previous = signal.signal(signal.SIGALRM, expired)
+            signal.alarm(int(5 * seconds + 30))
+            arm.disarm = lambda: (signal.alarm(0), signal.signal(signal.SIGALRM, previous))
+        return seconds
+
+    arm.disarm = lambda: None
+    yield arm
+    arm.disarm()
 
 
-def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch):
+def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch, short_guard):
     """#2771: a failing assertion in the main thread still joins the first run before
     the test returns, and the failure is the one raised."""
-    guard = _short_guard(monkeypatch, 5)
+    guard = short_guard(5)
     marker = RuntimeError("invented contender failure")
     joins, finished = [], []
     thread_class = threading.Thread
@@ -848,10 +864,10 @@ def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_
     assert raised.value is marker and joins == [guard] and finished == [True]
 
 
-def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, monkeypatch):
+def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, monkeypatch, short_guard):
     """#2767: a first run that fails before the boundary is the error raised, within a
     poll or two, well inside the guard."""
-    guard = _short_guard(monkeypatch, 30)
+    guard = short_guard(30)
     marker = RuntimeError("invented early failure")
 
     def fail(*args, **kwargs):
@@ -864,12 +880,12 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, mon
     assert raised.value is marker and time.monotonic() - started < guard / 3
 
 
-def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch):
+def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch, short_guard):
     """#2768, #2781, #2796: a first run hung before the boundary fails the test at the
     poll deadline plus the bounded join, two guards and under three, on a daemon thread
     whose exit the interpreter does not wait for. The fake hangs for four guards, so a
     lost poll deadline fails here too, within seconds."""
-    guard = _short_guard(monkeypatch, 5)
+    guard = short_guard(5)
     unblock, daemons = threading.Event(), []
     thread_class = threading.Thread
 
@@ -897,10 +913,10 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
 
 
 @pytest.mark.parametrize("late", ["raises", "hangs"])
-def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_path, monkeypatch, late):
+def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_path, monkeypatch, short_guard, late):
     """#2796: after the boundary and the release, a first run that raises is that error,
     and one that hangs is "did not finish", never a KeyError on a result it never gave."""
-    guard = _short_guard(monkeypatch, 3)
+    guard = short_guard(3)
     marker, unblock = RuntimeError("invented late failure"), threading.Event()
 
     def execute(run, **kwargs):
@@ -932,10 +948,10 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
 
 
 
-def test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary(tmp_path, monkeypatch):
+def test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary(tmp_path, monkeypatch, short_guard):
     """#2803: a first run that finishes without ever reaching the boundary, as a refactor
     that stopped routing through it would, fails the test within a poll or two, saying so."""
-    guard = _short_guard(monkeypatch, 30)
+    guard = short_guard(30)
 
     def execute(run, **kwargs):
         return {"usage": []}                        # never calls api._begin_usage_call
