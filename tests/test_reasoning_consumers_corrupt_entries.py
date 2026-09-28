@@ -37,36 +37,39 @@ def run(tmp_path, monkeypatch):
 
 
 BAD_KEYS = [("attempt", [1]), ("attempt", {"n": 1}), ("attempt", "1"), ("attempt", 1.5), ("attempt", True),
-            ("output_tokens", "100"), ("output_tokens", 100.5), ("output_tokens", [100]), ("output_tokens", None)]
+            ("output_tokens", "100"), ("output_tokens", 100.5), ("output_tokens", [100]), ("output_tokens", None),
+            ("output_tokens", 10 ** 15)]
 
 
 @pytest.mark.parametrize("field, value", BAD_KEYS)
-def test_the_baseline_sets_aside_a_log_entry_it_cannot_match(run, field, value):
-    """#2873: the provenance holds no accepted full row, so the log is consulted. An entry
-    whose attempt or output count is not what the runner writes can neither be matched
-    to a refused row nor be the accepted output; it is set aside and counted, and a good
-    entry beside it is still found. An unhashable attempt once crashed the command."""
+def test_the_baseline_declines_a_log_it_cannot_match(run, field, value):
+    """#2873, #2893: the provenance holds no accepted full row, so the log is consulted. An
+    entry whose attempt or output count is not what the runner writes cannot be matched
+    (an unhashable attempt once crashed the command), and it may be the last end_turn
+    attempt the rule accepts, so the log yields no accepted output, saying why, rather
+    than an earlier attempt in its place, whichever side of a good entry it lies."""
     from data_sheets_schema.run_telemetry import accepted_full_output
     core = [{"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}]
-    directory = run(core, [entry(attempt=1, output_tokens=777), entry(**{"attempt": 2, field: value})])
-    result = accepted_full_output(directory, "CHORUS")
-    assert (result["output_tokens"], result["source"]) == (777, "reasoning_log")
-    directory = run(core, [entry(**{"attempt": 2, field: value})])
-    result = accepted_full_output(directory, "CHORUS")
-    assert result["output_tokens"] is None
-    assert result["reason"].endswith("1 in the reasoning log (1 of them with an attempt or output count "
-                                     "that is not an integer, set aside)"), result["reason"]
+    bad = entry(**{"attempt": 2, field: value})
+    for log in ([bad], [entry(attempt=1, output_tokens=777), bad], [bad, entry(attempt=3, output_tokens=777)]):
+        result = accepted_full_output(run(core, log), "CHORUS")
+        assert result["output_tokens"] is None
+        assert result["reason"].endswith(f"{len(log)} in the reasoning log (1 of them with an attempt or output "
+                                         "count that is not an integer, so the accepted one cannot be "
+                                         "established)"), result["reason"]
 
 
 def test_the_baseline_command_survives_an_unhashable_attempt(run):
-    """#2873: the whole command, as the review reproduced it."""
+    """#2873, #2893: the whole command, as the review reproduced it: no crash, and the
+    replicate is listed as having no row rather than given an earlier attempt's count."""
     from data_sheets_schema.cli.runs import runs as runs_cli
     core = [{"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}]
-    run(core, [entry(attempt=[1]), entry(attempt=2, output_tokens=555)])
+    run(core, [entry(attempt=1, output_tokens=555), entry(attempt=[2])])
     result = CliRunner().invoke(runs_cli, ["full-output-baseline", "--method", "claudecode_api",
                                            "--label", "L1", "--project", "CHORUS", "--json"])
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output)["CHORUS"]["mean"] == 555
+    baseline = json.loads(result.output)["CHORUS"]
+    assert baseline["n"] == 0 and baseline["without_a_row"] == ["L1"], baseline
 
 
 def test_a_refused_row_still_drops_its_log_entry(run):
@@ -80,7 +83,8 @@ def test_a_refused_row_still_drops_its_log_entry(run):
     assert result["output_tokens"] is None
     assert result["reason"] == ("no accepted full attempt: 1 full row(s) in the provenance, 2 in the reasoning "
                                 "log (1 of them the provenance recorded as refused) (1 of them with an attempt "
-                                "or output count that is not an integer, set aside)")
+                                "or output count that is not an integer, so the accepted one cannot be "
+                                "established)")
 
 
 def _nested(depth):
@@ -130,3 +134,36 @@ def test_telemetry_joins_no_row_to_an_entry_whose_phase_is_not_text(run, tmp_pat
     (attempt,) = [a for p in report["phases"] for a in p["attempts"]]
     assert attempt["reasoning_tokens_estimate"] == 33
     assert report["total_reasoning_tokens_estimate"] == 90 + 33
+
+
+def _telemetry(tmp_path, *extra):
+    from data_sheets_schema.cli.runs import runs as runs_cli
+    out = tmp_path / "report.yaml"
+    result = CliRunner().invoke(runs_cli, ["telemetry", "--label-prefix", "L1", "--method", "claudecode_api",
+                                           "--output", str(out), *extra])
+    assert result.exit_code == 0, result.output
+    return yaml.safe_load(out.read_text())["runs"][0]
+
+
+@pytest.mark.parametrize("value", ["90", 90.5, True, 10 ** 15])
+def test_the_reasoning_total_sums_only_integer_counts(run, tmp_path, value):
+    """#2894: both sums in the total, the legacy one over unidentified entries and the one
+    over entries matched by usage_id, leave out an estimate that is not an integer count;
+    a string there once crashed the matched sum."""
+    usage = [{"phase": "core", "attempt": 1, "output_tokens": 10, "input_tokens": 5, "stop_reason": "end_turn"},
+             {"phase": "full", "attempt": 1, "output_tokens": 20, "input_tokens": 5, "stop_reason": "end_turn",
+              "usage_id": "u1"}]
+    run(usage, [entry(phase="core", reasoning_tokens_estimate=value),
+                entry(phase="full", usage_id="u1", reasoning_tokens_estimate=value),
+                entry(phase="audit", reasoning_tokens_estimate=7)])
+    assert _telemetry(tmp_path)["total_reasoning_tokens_estimate"] == 7
+
+
+def test_a_refused_row_validates(run, tmp_path):
+    """#2892: an attempt the runner refused carries unusable_reason, which the schema now
+    declares, so the report validates."""
+    usage = [{"phase": "full", "attempt": 1, "output_tokens": 10, "input_tokens": 5, "stop_reason": "end_turn",
+              "unusable_reason": "no YAML document"}]
+    run(usage, [entry()])
+    (attempt,) = [a for p in _telemetry(tmp_path, "--validate")["phases"] for a in p["attempts"]]
+    assert attempt["unusable_reason"] == "no YAML document"

@@ -286,10 +286,12 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
         refused = {(r.get("attempt"), r.get("output_tokens")) for r in rows if r.get("unusable_reason")}
         in_log = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
         # An entry whose attempt or output count is not what the runner writes cannot be
-        # matched; it is set aside and counted, not a crash on an unhashable key (#2873).
+        # matched; it is not a crash on an unhashable key (#2873). Nor is it passed over:
+        # it may be the last end_turn attempt, which the rule accepts, so a log holding one
+        # yields no accepted output rather than an earlier attempt in its place (#2893).
         matchable = [e for e in in_log if _log_key(e) is not None]
         logged = [e for e in matchable if _log_key(e) not in refused]
-        acc = _accepted(logged)
+        acc = _accepted(logged) if len(matchable) == len(in_log) else None
         if acc is not None:
             rows, source = logged, "reasoning_log"
     out["attempts_seen"] = len(rows)
@@ -300,7 +302,7 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
             seen += f" ({len(matchable) - len(logged)} of them the provenance recorded as refused)"
         if len(matchable) < len(in_log):
             seen += (f" ({len(in_log) - len(matchable)} of them with an attempt or output count "
-                     "that is not an integer, set aside)")
+                     "that is not an integer, so the accepted one cannot be established)")
         out["reason"] = f"no accepted full attempt: {seen}"
         return out
     out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,

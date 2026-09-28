@@ -430,6 +430,12 @@ classes:
           message_stop, a transport error) — present only on rows that made
           no completed call (#1017); a sweep's dropped-stream count is the
           number of attempts carrying one.
+      unusable_reason:
+        range: string
+        description: >-
+          Why the runner refused a billed reply whose body it kept (#1048):
+          display only, the attempt is otherwise indistinguishable from the
+          one accepted (#2892).
 
   RecordStats:
     description: >-
