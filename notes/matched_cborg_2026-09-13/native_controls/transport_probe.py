@@ -50,8 +50,11 @@ import copy
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 import argparse
+import ast
 import hashlib
 import importlib.metadata
+import importlib.machinery
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -179,20 +182,176 @@ def derive_request(raw):
     return probe
 
 
+def _imported_names(source, package):
+    """Every module name a file's import statements can load, function-level ones
+    included, with relative names resolved against its package."""
+    names = []
+    for node in ast.walk(ast.parse(source.read_bytes(), str(source))):
+        if isinstance(node, ast.Import):
+            names.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            base = (importlib.util.resolve_name('.' * node.level + (node.module or ''), package)
+                    if node.level else node.module)
+            names.append(base)
+            # `from package import name` may load the submodule package.name.
+            names.extend(f'{base}.{alias.name}' for alias in node.names if alias.name != '*')
+    return names
+
+
+def _environment():
+    """Where the interpreter and its installed packages live. A virtual environment
+    may sit inside the repository, as CI's and the primary checkout's `.venv` does,
+    so lying under the root does not make a file repository code (#2748)."""
+    import site
+    places = [sys.prefix, sys.base_prefix, sys.exec_prefix, sys.base_exec_prefix]
+    for listing in (getattr(site, 'getsitepackages', None), getattr(site, 'getusersitepackages', None)):
+        if listing is not None:
+            found = listing()
+            places.extend([found] if isinstance(found, str) else found)
+    return {Path(place).resolve() for place in places if place}
+
+
+def repository_file(path, root, environment):
+    """Whether a resolved file is the repository's own code: under `root`, and neither
+    in the interpreter's environment (unless that contains the root) nor in any
+    site-packages or dist-packages directory."""
+    return (path.is_relative_to(root)
+            and not any(path.is_relative_to(place) for place in environment
+                        if place != root and not root.is_relative_to(place))
+            and not {'site-packages', 'dist-packages'} & set(path.relative_to(root).parts))
+
+
+_FILE_LOADERS = ((importlib.machinery.ExtensionFileLoader, importlib.machinery.EXTENSION_SUFFIXES),
+                 (importlib.machinery.SourceFileLoader, importlib.machinery.SOURCE_SUFFIXES),
+                 (importlib.machinery.SourcelessFileLoader, importlib.machinery.BYTECODE_SUFFIXES))
+
+
+def _find_on_disk(name, locations):
+    """The path finder's search over `locations`, with the standard file finders alone:
+    no path hook and no cached path-entry finder, either of which may run what it likes
+    (#2842). An entry that is not a directory, such as a zip archive, is not searched.
+    The first module or regular package wins; otherwise the namespace portions found."""
+    portions = []
+    for entry in locations:
+        if not isinstance(entry, str):
+            continue
+        entry = entry or os.getcwd()
+        if not os.path.isdir(entry):
+            continue
+        spec = importlib.machinery.FileFinder(entry, *_FILE_LOADERS).find_spec(name)
+        if spec is None:
+            continue
+        if spec.loader is not None:
+            return spec
+        portions.extend(spec.submodule_search_locations or [])
+    if not portions:
+        return None
+    spec = importlib.machinery.ModuleSpec(name, None, is_package=True)
+    spec.submodule_search_locations = portions
+    return spec
+
+
+def _module_spec(name, inside):
+    """The spec of a repository module name, or None, found without executing anything.
+    Every name is looked up on the filesystem by the standard file finders, never
+    through a meta-path finder or a path hook, which may import what they like (#2839,
+    #2842); below the top level, in its parent's search locations rather than by importing the parent, so no
+    `__init__` runs, the repository's or another's, before the walk has read its
+    imports (#2749, #2836). A name whose package is not the
+    repository's is never looked below, and a name under a plain module (`from module
+    import attribute`) is not a module.
+
+    A module or a regular package is the repository's when the file that runs, its
+    origin, is. A package directory inside the repository whose initializer is not is
+    refused: that initializer would execute unpinned, and what it imports would never
+    enter the closure (#2831). A namespace package runs nothing, so any portion inside
+    the repository makes it the repository's."""
+    spec = None
+    parts = name.split('.')
+    for depth in range(1, len(parts) + 1):
+        if spec is not None and spec.submodule_search_locations is None:
+            return None
+        full = '.'.join(parts[:depth])
+        if full in sys.modules and getattr(sys.modules[full], '__spec__', None) is not None:
+            spec = sys.modules[full].__spec__                  # already run; nothing new executes
+        elif spec is None:
+            spec = _find_on_disk(full, sys.path)
+        else:
+            parent = sys.modules.get('.'.join(parts[:depth - 1]))
+            locations = getattr(parent, '__path__', None) or spec.submodule_search_locations
+            spec = _find_on_disk(full, list(locations))
+        if spec is None:
+            return None
+        portions = any(inside(Path(place).resolve()) for place in spec.submodule_search_locations or [])
+        if spec.has_location and spec.origin:
+            if not inside(Path(spec.origin).resolve()):
+                if portions:
+                    raise BudgetStop(f'repository package {spec.name} runs an initializer outside the repository')
+                return None
+        elif not portions:
+            return None
+    return spec
+
+
+def import_closure(source, root):
+    """`source` and every repository file it imports, transitively, read from the
+    source rather than from what happens to be imported: an import inside a function
+    counts, since the lineage check reaches batch_native only through one (#2628).
+    Resolved as this interpreter would resolve it, without executing anything; a name
+    that is not a module, or a module that is not the repository's own
+    (`repository_file`), adds nothing. A repository module that is not Python source (a
+    bytecode-only file, an extension) is refused, since its imports cannot be read
+    (#2836). So is one whose file is a symbolic link: the interpreter takes its cache
+    and its package from the link's path, not the target's, so the pinned target would
+    not attest what runs (#2842)."""
+    environment = _environment()
+    def inside(path):
+        return repository_file(path, root, environment)
+    files, seen, walked = {source.resolve()}, set(), set()
+    pending = _imported_names(source, '')
+    while pending:
+        name = pending.pop()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        parts = name.split('.')
+        pending.extend('.'.join(parts[:i]) for i in range(1, len(parts)))     # the packages it runs
+        spec = _module_spec(name, inside)
+        if spec is None or not spec.has_location or not spec.origin:
+            continue
+        origin = Path(spec.origin).resolve()
+        if not inside(origin):
+            continue
+        # Checked for every module, before a file already walked is skipped: a link to it
+        # is another module, run from the link's own package (#2843).
+        if not isinstance(spec.loader, importlib.machinery.SourceFileLoader):
+            raise BudgetStop(f'repository module {spec.name} is not Python source, so its imports cannot be read')
+        if Path(spec.origin).is_symlink():
+            raise BudgetStop(f'repository module {spec.name} is a symbolic link; the probe pins only regular files')
+        files.add(origin)
+        # One file can be two modules, as a package directory linked to another is, and a
+        # relative import names a different module in each package: its imports are walked
+        # once per package it runs in, not once per file (#2848).
+        if (origin, spec.parent) in walked:
+            continue
+        walked.add((origin, spec.parent))
+        pending.extend(_imported_names(origin, spec.parent))
+    return files
+
+
 def implementation_paths():
-    """The modules the probe pins and clean-checks: what it sends, counts and
-    records, and the lineage checks of a probe or reconciled tip. For a batch
-    tip, check_lineage also runs batch_native.py and its imports, which are not
-    yet pinned here (#2628)."""
-    modules = [Path(__file__), Path(native_proxy.__file__), Path(sys.modules[Ledger.__module__].__file__),
+    """The modules the probe pins and clean-checks: this file and every repository
+    module it imports, transitively, so what it sends, counts and records and every
+    lineage check it runs are attested (#2586). For a batch tip that includes
+    batch_native.py and the modules it imports, which runtime_closure imports
+    only inside a function (#2628)."""
+    root = Path(__file__).resolve().parents[3]
+    modules = [Path(native_proxy.__file__), Path(sys.modules[Ledger.__module__].__file__),
                Path(budget_amendment.__file__), Path(sequence_claim.__file__), Path(audit_controls.__file__),
                Path(audit_registration.__file__), Path(audit_transport.__file__), Path(bounded_stream.__file__),
-               Path(bounded_transport.__file__), Path(sys.modules['data_sheets_schema.stream_evidence'].__file__),
-               # check_lineage decides with these for a probe or reconciled tip (#2586);
-               # a batch tip's batch_native closure is not yet among them (#2628)
-               *(Path(audit_controls.__file__).with_name(name) for name in
-                 ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py'))]
-    return sorted({str(p.resolve()) for p in modules} | {str(p) for p in sequence_claim.IMPLEMENTATIONS})
+               Path(bounded_transport.__file__), Path(sys.modules['data_sheets_schema.stream_evidence'].__file__)]
+    return sorted({str(p.resolve()) for p in modules} | {str(p) for p in import_closure(Path(__file__), root)}
+                  | {str(p) for p in sequence_claim.IMPLEMENTATIONS})
 
 
 def interpreter():
@@ -220,6 +379,54 @@ def client_timeout(source):
     read = source.get('native_upstream_read_timeout_seconds') or LEGACY_UPSTREAM_READ_SECONDS
     counting = STALL_POLICY['count_attempts'] * (POLICY_COUNT_TRY_SECONDS + POLICY_COUNT_PAUSE_SECONDS)
     return read + counting + UPSTREAM_CONNECT_SECONDS + CLIENT_MARGIN_SECONDS
+
+
+def cached_code_matches(path):
+    """Whether the bytecode this interpreter would run for the source at `path` is that
+    source compiled, when it would run a cache at all (#2839). A pin covers the source,
+    and a timestamp or unchecked cache that still validates can hold other code. A
+    cache the interpreter would ignore (another magic number, unknown flags, a stale
+    timestamp, size or source hash) is not consulted, nor a missing one."""
+    import _imp
+    import marshal
+    source = Path(path)
+    try:
+        data = Path(importlib.util.cache_from_source(str(source))).read_bytes()
+    except (NotImplementedError, FileNotFoundError):
+        return True
+    if len(data) < 16 or data[:4] != importlib.util.MAGIC_NUMBER:
+        return True
+    raw = source.read_bytes()
+    flags = int.from_bytes(data[4:8], 'little')
+    if flags & ~0b11:
+        return True
+    if flags & 0b1:
+        checked = flags & 0b10 or _imp.check_hash_based_pycs == 'always'
+        if _imp.check_hash_based_pycs != 'never' and checked and data[8:16] != importlib.util.source_hash(raw):
+            return True
+    else:
+        stat = source.stat()
+        if (int.from_bytes(data[8:12], 'little') != int(stat.st_mtime) & 0xFFFFFFFF
+                or int.from_bytes(data[12:16], 'little') != stat.st_size & 0xFFFFFFFF):
+            return True
+    try:
+        cached = marshal.loads(data[16:])
+    except Exception:                                          # noqa: BLE001
+        return False
+    return cached == compile(raw, str(source), 'exec', dont_inherit=True)
+
+
+def verify_bytecode(paths):
+    """Refuse a pinned module whose cached bytecode, which this interpreter would run in
+    its place, is not its source compiled (#2839). A module already loaded was loaded
+    from the cache checked here, unless the cache changed after it loaded."""
+    if sys.pycache_prefix is not None:
+        # The cache then lies under a path built from the import path's spelling, which a
+        # resolved pin does not carry (#2842).
+        raise BudgetStop('the probe does not run under a bytecode cache prefix (PYTHONPYCACHEPREFIX)')
+    for path in paths:
+        if not cached_code_matches(path):
+            raise BudgetStop(f'cached bytecode for {path} is not its pinned source')
 
 
 def verify_pins(manifest):
@@ -366,10 +573,14 @@ def prepare(out, *, source_registration, source_request, tip_checkpoint, sequenc
                                  'only the reconcile tool applies one')
             pinned.append(marker)
     implementation = implementation_paths()
+    verify_bytecode(implementation)
     repository, commit = repository_state(implementation, require_clean=require_clean)
     manifest = {
         'kind': KIND, 'schema_version': 1, 'issue': 2463, 'prepared_at': now(),
         'repository': repository, 'code_commit': commit, 'require_clean': require_clean,
+        # The closure as prepared: run must resolve exactly this set, not a subset, so a
+        # pinned module shadowed from outside the root is refused too (#2824).
+        'implementation': sorted(implementation),
         'attempt': ATTEMPT, 'scope': SCOPE,
         'parent': {'registration': str(origin_path)},
         'sequence_state': str(state_path),
@@ -679,10 +890,13 @@ def run(registration, expected_sha256, *, clients=None, key=None, require_clean=
     if any((out / name).exists() for name in RUN_ONCE):
         raise BudgetStop('probe already ran; a probe runs once')
     verify_pins(manifest)
-    if not set(implementation_paths()) <= set(manifest['pinned_files']):
+    implementation = implementation_paths()
+    if (implementation != manifest.get('implementation')
+            or not set(implementation) <= set(manifest['pinned_files'])):
         raise BudgetStop('probe implementation is not the registered one')
     if interpreter() != manifest['runtime']:
         raise BudgetStop('probe interpreter or libraries differ from the registered ones')
+    verify_bytecode(implementation)
     _, commit = repository_state(implementation_paths(), require_clean=require_clean)
     source, state = check_lineage(manifest)
     raw = (Path(manifest['source']['request_dir']) / 'native_request.json').read_bytes()

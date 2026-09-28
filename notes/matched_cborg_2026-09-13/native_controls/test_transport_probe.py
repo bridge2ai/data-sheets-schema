@@ -1,5 +1,6 @@
 """The one-request transport probe (#2463); synthetic lineages and upstreams only."""
 import copy
+import importlib.util
 from decimal import Decimal
 import hashlib
 import json
@@ -813,8 +814,10 @@ def test_a_probe_of_a_tool_reconciled_tip_pins_the_tools_marker(lineage):
     manifest = json.loads(registration.read_text())
     assert manifest['pinned_files'][value['marker']] == sha(value['marker'])
     probe.check_lineage(manifest)
-    # #2586: the modules that decided the lineage are pinned with the probe's own code.
-    for name in ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py'):
+    # #2586, #2628: the modules that decided the lineage are pinned with the probe's own
+    # code, and for a batch tip batch_native and the modules it imports.
+    for name in ('reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py', 'batch_native.py',
+                 'batch_output.py', 'batch_history.py', 'native.py', 'output_parts.py'):
         assert str(Path(r.__file__).with_name(name).resolve()) in manifest['pinned_files']
 
 
@@ -912,3 +915,555 @@ def test_a_probe_refuses_standing_authority_relabelled_as_a_confirmed_charge(lin
     with pytest.raises(BudgetStop, match='permits only a full-reservation debit'):
         prepare(lineage, tip_checkpoint=checkpoint, tip_reconciliation_receipt=receipt)
     assert not (lineage.root / 'probe').exists()
+
+
+def test_the_probe_pins_every_repository_module_its_lineage_modules_load():
+    """#2628, #2751, #2802: importing the probe and the modules its lineage checks run
+    (reconcile_stopped, probe_predecessor and runtime_closure; for a batch tip,
+    batch_native and worker_checkpoint) loads, in a fresh interpreter, only repository
+    files the probe pins. This checks what those imports load; the function-level
+    imports inside batch_native and the rest are the synthetic test's to show."""
+    import subprocess
+    root = Path(probe.__file__).resolve().parents[3]
+    code = ("import json, sys\n"
+            "import transport_probe\n"
+            "import audit_controls.reconcile_stopped, audit_controls.probe_predecessor\n"
+            "import audit_controls.runtime_closure, audit_controls.batch_native, audit_controls.worker_checkpoint\n"
+            "print(json.dumps(sorted({m.__file__ for m in list(sys.modules.values())\n"
+            "                         if getattr(m, '__file__', None)})))\n")
+    result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, timeout=600,
+                            cwd=root, env={**__import__('os').environ, 'PYTHONPATH': ':'.join(sys.path)})
+    assert result.returncode == 0, result.stderr
+    environment = probe._environment()
+    loaded = {str(Path(f).resolve()) for f in json.loads(result.stdout)
+              if f.endswith('.py') and probe.repository_file(Path(f).resolve(), root, environment)}
+    names = {Path(f).name for f in loaded}
+    assert {'reconcile_stopped.py', 'probe_predecessor.py', 'runtime_closure.py', 'batch_native.py',
+            'worker_checkpoint.py'} <= names
+    assert loaded <= set(probe.implementation_paths()), sorted(loaded - set(probe.implementation_paths()))
+
+
+def test_the_import_closure_reads_source_and_imports_only_repository_packages(tmp_path, monkeypatch):
+    """#2628, #2748-#2750, #2801, #2836: a function-level import counts; a relative one
+    resolves against its package, a package's own `__init__` included; `from module
+    import attribute` never executes the module; packages in site-packages and
+    dist-packages inside the root, a package and a module outside the root, a
+    standard-library package and a name that is no module add nothing. Nothing is
+    executed to find any of it, the repository's own package initializers included."""
+    root = tmp_path / 'root'
+    marker = tmp_path / 'executed'
+    ran = f"open({str(marker)!r}, 'a').write(__name__ + '\\n')\n"
+    package = root / 'closure_pkg_2628'
+    package.mkdir(parents=True)
+    (package / '__init__.py').write_text(ran)
+    (package / 'nested').mkdir()
+    (package / 'nested' / '__init__.py').write_text(ran + 'from . import leaf\n')      # relative in an __init__
+    (package / 'nested' / 'leaf.py').write_text('')
+    (package / 'inner.py').write_text('def later():\n    from . import deferred\n')
+    (package / 'deferred.py').write_text('import json\nfrom closure_top_2628 import attribute\n'
+                                         'import closure_venv_2628.sub\n')
+    (root / 'closure_top_2628.py').write_text(ran + 'attribute = 1\n')
+    installed = root / '.venv' / 'lib' / 'python3.12' / 'site-packages'
+    (installed / 'closure_venv_2628').mkdir(parents=True)
+    (installed / 'closure_venv_2628' / '__init__.py').write_text(ran)
+    (installed / 'closure_venv_2628' / 'sub.py').write_text(ran)
+    debian = root / 'env' / 'lib' / 'python3' / 'dist-packages'
+    (debian / 'closure_dist_2628').mkdir(parents=True)
+    (debian / 'closure_dist_2628' / '__init__.py').write_text(ran)
+    (debian / 'closure_dist_2628' / 'sub.py').write_text(ran)
+    (tmp_path / 'closure_outside_2628.py').write_text(ran)
+    (tmp_path / 'closure_outpkg_2628').mkdir()
+    (tmp_path / 'closure_outpkg_2628' / '__init__.py').write_text(ran)
+    (tmp_path / 'closure_outpkg_2628' / 'sub.py').write_text(ran)
+    stdlib = 'xmlrpc' not in sys.modules                 # a standard-library package not yet loaded
+    seed = root / 'seed.py'
+    seed.write_text('import closure_pkg_2628.inner\nimport closure_pkg_2628.nested\nimport closure_outside_2628\n'
+                    'import closure_missing_2628\nimport closure_outpkg_2628.sub\nimport closure_dist_2628.sub\n'
+                    'import xmlrpc.client\n')
+    for place in (tmp_path, installed, debian, root):
+        monkeypatch.syspath_prepend(str(place))
+    try:
+        files = probe.import_closure(seed, root.resolve())
+    finally:
+        # The package imported to look below it would otherwise answer a rerun from
+        # this tmp_path, outside the next root (#2784).
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_pkg_2628/__init__.py', 'closure_pkg_2628/inner.py', 'closure_pkg_2628/deferred.py',
+        'closure_pkg_2628/nested/__init__.py', 'closure_pkg_2628/nested/leaf.py', 'closure_top_2628.py'}
+    assert not marker.exists(), marker.read_text()          # no module above ran, in or out of the root
+    if stdlib:
+        assert 'xmlrpc' not in sys.modules                   # not imported to look below it
+
+
+def test_the_interpreter_environment_is_not_repository_code(tmp_path, monkeypatch):
+    """#2748: an environment inside the root is excluded by its prefix even when its
+    directories are not named site-packages."""
+    root = tmp_path / 'root'
+    prefix = root / 'env'
+    (prefix / 'lib').mkdir(parents=True)
+    monkeypatch.setattr(sys, 'prefix', str(prefix))
+    environment = probe._environment()
+    assert not probe.repository_file((prefix / 'lib' / 'x.py').resolve(), root.resolve(), environment)
+    assert probe.repository_file((root / 'pkg' / 'x.py').resolve(), root.resolve(), environment)
+    # An environment that contains the root does not exclude the repository.
+    monkeypatch.setattr(sys, 'prefix', str(tmp_path))
+    assert probe.repository_file((root / 'pkg' / 'x.py').resolve(), root.resolve(), probe._environment())
+
+
+@pytest.mark.parametrize('failure', [RuntimeError, ImportError, ValueError, ModuleNotFoundError])
+def test_a_repository_package_that_would_fail_to_import_is_pinned_not_skipped(tmp_path, monkeypatch, failure):
+    """A repository package whose __init__ would raise is pinned with what it imports, not
+    skipped: skipping would leave its imports unpinned (#2628, #2770). Nothing is
+    imported to find it, so whatever it raises is the run's business, not the
+    closure's (#2836). A name per case keeps the cases independent (#2802)."""
+    name = f'closure_broken_2628_{failure.__name__.lower()}'
+    root = tmp_path / 'root'
+    (root / name).mkdir(parents=True)
+    # A ModuleNotFoundError comes, as it does in practice, from a dependency that is not
+    # installed; the others are raised as themselves (#2783).
+    (root / name / '__init__.py').write_text(
+        "import closure_dependency_not_installed_2783  # broken package\nfrom . import helper\n"
+        if failure is ModuleNotFoundError
+        else f"from . import helper\nraise {failure.__name__}('broken package')\n")
+    (root / name / 'helper.py').write_text('')
+    (root / name / 'mod.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text(f'import {name}.mod\n')
+    monkeypatch.syspath_prepend(str(root))
+    files = probe.import_closure(seed, root.resolve())
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', f'{name}/__init__.py', f'{name}/helper.py', f'{name}/mod.py'}
+    assert name not in sys.modules
+
+
+def test_a_repository_package_that_does_not_parse_fails_the_closure(tmp_path, monkeypatch):
+    """Its imports cannot be read, so the probe refuses rather than pin less."""
+    root = tmp_path / 'root'
+    (root / 'closure_unparsed_2836').mkdir(parents=True)
+    (root / 'closure_unparsed_2836' / '__init__.py').write_text('def broken(:\n')
+    (root / 'closure_unparsed_2836' / 'mod.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_unparsed_2836.mod\n')
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(SyntaxError):
+        probe.import_closure(seed, root.resolve())
+
+
+def test_a_missing_name_adds_nothing_and_raises_nothing(tmp_path, monkeypatch):
+    """#2770: without the suppression, a name that is no module is still just absent."""
+    root = tmp_path / 'root'
+    root.mkdir()
+    seed = root / 'seed.py'
+    seed.write_text('import closure_absent_2770\nimport closure_absent_2770.child\n'
+                    'from closure_absent_2770 import thing\n')
+    monkeypatch.syspath_prepend(str(root))
+    assert probe.import_closure(seed, root.resolve()) == {seed.resolve()}
+
+
+def test_prepare_and_run_clean_check_the_whole_closure(lineage, monkeypatch):
+    """#2783: the clean check covers what is pinned, the closure included, at prepare and
+    again at run; a clean check of fewer files would leave a dirty closure module unseen."""
+    seen, real = [], probe.repository_state
+
+    class Stop(Exception):
+        pass
+
+    def recorded(paths, *, require_clean):
+        seen.append(list(paths))
+        if len(seen) == 2:
+            raise Stop                              # run's check is recorded; nothing is sent
+        return real(paths, require_clean=require_clean)
+
+    monkeypatch.setattr(probe, 'repository_state', recorded)
+    registration, identity = prepare(lineage)
+    with pytest.raises(Stop):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+    expected = probe.implementation_paths()
+    assert seen == [expected, expected]
+    assert any(path.endswith('audit_controls/batch_native.py') for path in expected)
+
+
+def test_run_refuses_a_closure_that_grew_after_prepare(lineage, monkeypatch):
+    """#2811: every pinned file can keep its bytes while the closure resolves to more
+    files at run time (another PYTHONPATH, a shadowing module); run refuses before any
+    claim or send, since nothing else compares the two closures."""
+    registration, identity = prepare(lineage)
+    real = probe.implementation_paths
+    monkeypatch.setattr(probe, 'implementation_paths', lambda: real() + [str(lineage.root / 'extra_module.py')])
+    with pytest.raises(BudgetStop, match='probe implementation is not the registered one'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+
+
+def test_a_dirty_closure_file_is_refused(monkeypatch):
+    """#2811: a closure module that differs from the committed tree is refused; the
+    status query is modelled so the real worktree is never dirtied."""
+    import subprocess
+    calls = []
+    real = subprocess.check_output
+
+    def check_output(command, **kwargs):
+        calls.append(command)
+        if 'status' in command:
+            return ' M notes/matched_cborg_2026-09-13/audit_controls/batch_native.py\n'
+        return real(command, **kwargs)
+    monkeypatch.setattr(probe.subprocess, 'check_output', check_output)
+    paths = probe.implementation_paths()
+    with pytest.raises(BudgetStop, match='probe implementation differs from the committed tree'):
+        probe.repository_state(paths, require_clean=True)
+    status = next(command for command in calls if 'status' in command)
+    assert status[status.index('--') + 1:] == paths            # the whole closure is queried
+    probe.repository_state(paths, require_clean=False)          # the flag, not the tree, decides
+
+
+def test_prepare_passes_its_clean_rule_to_the_clean_check(lineage, monkeypatch):
+    """#2811: prepare hands require_clean through, so a clean-rule prepare clean-checks."""
+    seen = []
+
+    def recorded(paths, *, require_clean):
+        seen.append(require_clean)
+        return str(probe.Path(probe.__file__).resolve().parents[3]), 'c' * 40
+    monkeypatch.setattr(probe, 'repository_state', recorded)
+    prepare(lineage, require_clean=True)
+    assert seen == [True]
+
+
+
+def test_run_refuses_a_closure_that_shrank_after_prepare(lineage, monkeypatch):
+    """#2824: a pinned module that resolves outside the root at run time (a namespace
+    portion earlier on PYTHONPATH) leaves the closure, which a subset check would accept;
+    run requires exactly the prepared closure."""
+    registration, identity = prepare(lineage)
+    manifest = json.loads(registration.read_text())
+    assert manifest['implementation'] == probe.implementation_paths()
+    real = probe.implementation_paths
+    monkeypatch.setattr(probe, 'implementation_paths',
+                        lambda: [path for path in real() if not path.endswith('/api_runner.py')])
+    with pytest.raises(BudgetStop, match='probe implementation is not the registered one'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+
+
+def test_the_whole_interpreter_environment_is_excluded(tmp_path, monkeypatch):
+    """#2825: the base and exec prefixes and the site directories are the environment
+    too; a base interpreter inside the root keeps its standard library out of the closure."""
+    import site
+    root = tmp_path / 'root'
+    for attribute in ('base_prefix', 'exec_prefix', 'base_exec_prefix'):
+        place = root / attribute
+        (place / 'lib').mkdir(parents=True)
+        monkeypatch.setattr(sys, attribute, str(place))
+        assert not probe.repository_file((place / 'lib' / 'x.py').resolve(), root.resolve(), probe._environment())
+    user_site = root / 'user-site'
+    user_site.mkdir()
+    monkeypatch.setattr(site, 'getusersitepackages', lambda: str(user_site))
+    assert not probe.repository_file((user_site / 'x.py').resolve(), root.resolve(), probe._environment())
+
+
+@pytest.mark.parametrize('imports', ['', 'import closure_helper_2826\n'])
+def test_a_package_whose_init_lies_outside_the_root_is_refused_before_it_runs(tmp_path, monkeypatch, imports):
+    """#2826, #2732 Codex review: a package directory inside the root whose __init__.py
+    links outside it would run that initializer unpinned, and a repository helper it
+    imports would never enter the closure, so a change to the helper would escape the
+    pins, the closure comparison and the clean check. It is refused, and never run."""
+    root = tmp_path / 'root'
+    marker = tmp_path / 'executed'
+    outside = tmp_path / 'outside_init.py'
+    outside.write_text(f"open({str(marker)!r}, 'a').write('init\\n')\n" + imports)
+    package = root / 'closure_linkinit_2826'
+    package.mkdir(parents=True)
+    (package / '__init__.py').symlink_to(outside)
+    (package / 'mod.py').write_text('')
+    (root / 'closure_helper_2826.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_linkinit_2826.mod\n')
+    monkeypatch.syspath_prepend(str(root))
+    try:
+        with pytest.raises(BudgetStop, match='closure_linkinit_2826 runs an initializer outside the repository'):
+            probe.import_closure(seed, root.resolve())
+    finally:
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
+    assert not marker.exists()
+
+
+def test_an_outside_initializer_below_a_repository_package_never_runs(tmp_path, monkeypatch):
+    """#2836: a repository package's __init__ imports a subpackage whose __init__ links
+    outside the root. Resolving the parent's children never imports the parent, so the
+    outside initializer is refused before anything executes it."""
+    root = tmp_path / 'root'
+    marker = tmp_path / 'executed'
+    ran = f"open({str(marker)!r}, 'a').write(__name__ + '\\n')\n"
+    outside = tmp_path / 'outside_init.py'
+    outside.write_text(ran + 'import closure_helper_2836\n')
+    parent = root / 'closure_parent_2836'
+    (parent / 'linked').mkdir(parents=True)
+    (parent / '__init__.py').write_text(ran + 'from .linked import child\n')
+    (parent / 'linked' / '__init__.py').symlink_to(outside)
+    (parent / 'linked' / 'child.py').write_text(ran)
+    (parent / 'other.py').write_text('')
+    (root / 'closure_helper_2836.py').write_text(ran)
+    seed = root / 'seed.py'
+    seed.write_text('import closure_parent_2836.other\n')
+    monkeypatch.syspath_prepend(str(root))
+    try:
+        with pytest.raises(BudgetStop, match='closure_parent_2836.linked runs an initializer outside the repository'):
+            probe.import_closure(seed, root.resolve())
+    finally:
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
+    assert not marker.exists(), marker.read_text()
+
+
+@pytest.mark.parametrize('shape', ['extensionless target', 'shared by two packages'])
+def test_a_symlinked_repository_module_is_refused(tmp_path, monkeypatch, shape):
+    """#2836, #2842: the interpreter takes a linked module's cache and package from the
+    link's path, so pinning the target would not attest what runs: an __init__.py linked
+    to an extensionless file, or two packages' initializers linked to one file whose
+    relative import names a different helper in each, is refused."""
+    root = tmp_path / 'root'
+    root.mkdir()
+    (root / 'initializer_source').write_text('from . import helper\n')
+    packages = ['closure_link_a_2842'] if shape == 'extensionless target' else ['closure_link_a_2842', 'closure_link_b_2842']
+    for name in packages:
+        (root / name).mkdir()
+        (root / name / '__init__.py').symlink_to(root / 'initializer_source')
+        (root / name / 'helper.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text(''.join(f'import {name}\n' for name in packages))
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(BudgetStop, match='closure_link_.*_2842 is a symbolic link'):
+        probe.import_closure(seed, root.resolve())
+
+
+@pytest.mark.parametrize('order', ['regular first', 'link first'])
+def test_a_link_to_an_already_pinned_initializer_is_refused(tmp_path, monkeypatch, order):
+    """#2843: one package's __init__.py links to another's, which is pinned already when the
+    walk reaches the link, in either order. The link is still another module, run from
+    its own package, so it is refused rather than skipped as a duplicate."""
+    root = tmp_path / 'root'
+    for name in ('closure_regular_2843', 'closure_linked_2843'):
+        (root / name).mkdir(parents=True)
+        (root / name / 'helper.py').write_text('')
+    (root / 'closure_regular_2843' / '__init__.py').write_text('from . import helper\n')
+    (root / 'closure_linked_2843' / '__init__.py').symlink_to(root / 'closure_regular_2843' / '__init__.py')
+    names = ['closure_linked_2843', 'closure_regular_2843']
+    seed = root / 'seed.py'
+    # The walk pops the last import first.
+    seed.write_text(''.join(f'import {name}\n' for name in (names if order == 'regular first' else names[::-1])))
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(BudgetStop, match='closure_linked_2843 is a symbolic link'):
+        probe.import_closure(seed, root.resolve())
+    assert not set(names) & set(sys.modules)                 # neither package ran
+
+
+@pytest.mark.parametrize('order', ['left first', 'right first'])
+def test_a_linked_package_directory_is_walked_in_each_package(tmp_path, monkeypatch, order):
+    """#2848: right/shared is a link to the directory left/shared, so both packages' shared
+    initializer is one regular file, whose `from .. import helper` names left.helper in
+    one and right.helper in the other. Both helpers are pinned, in either walk order."""
+    root = tmp_path / 'root'
+    for side in ('left', 'right'):
+        (root / f'closure_{side}_2848').mkdir(parents=True)
+        (root / f'closure_{side}_2848' / '__init__.py').write_text('')
+        (root / f'closure_{side}_2848' / 'helper.py').write_text('')
+    (root / 'closure_left_2848' / 'shared').mkdir()
+    (root / 'closure_left_2848' / 'shared' / '__init__.py').write_text('from .. import helper\n')
+    (root / 'closure_right_2848' / 'shared').symlink_to(root / 'closure_left_2848' / 'shared')
+    names = ['closure_right_2848.shared', 'closure_left_2848.shared']
+    seed = root / 'seed.py'
+    seed.write_text(''.join(f'import {name}\n' for name in (names if order == 'left first' else names[::-1])))
+    monkeypatch.syspath_prepend(str(root))
+    files = probe.import_closure(seed, root.resolve())
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_left_2848/__init__.py', 'closure_left_2848/helper.py', 'closure_left_2848/shared/__init__.py',
+        'closure_right_2848/__init__.py', 'closure_right_2848/helper.py'}
+
+
+def test_a_bytecode_only_repository_package_is_refused(tmp_path, monkeypatch):
+    """#2836: a package with only an __init__.pyc runs code whose imports cannot be read."""
+    import py_compile
+    root = tmp_path / 'root'
+    package = root / 'closure_pyc_2836'
+    package.mkdir(parents=True)
+    (package / 'source.py').write_text('import closure_helper_pyc_2836\n')
+    py_compile.compile(str(package / 'source.py'), cfile=str(package / '__init__.pyc'), doraise=True)
+    (package / 'source.py').unlink()
+    (package / 'child.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_pyc_2836.child\n')
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(BudgetStop, match='closure_pyc_2836 is not Python source'):
+        probe.import_closure(seed, root.resolve())
+
+
+def test_discovery_consults_no_other_meta_path_finder_and_imports_nothing(tmp_path, monkeypatch):
+    """#2839: a meta-path finder may import what it likes (setuptools' distutils finder
+    imports setuptools); discovery looks names up with the path finder alone, so no
+    other finder is asked and no module is added to sys.modules."""
+    root = tmp_path / 'root'
+    (root / 'closure_meta_2839').mkdir(parents=True)
+    (root / 'closure_meta_2839' / '__init__.py').write_text('from . import leaf\n')
+    (root / 'closure_meta_2839' / 'leaf.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_meta_2839\nimport json\ndef later():\n    import distutils\n'
+                    '    import closure_meta_only_2839\n')
+    asked = []
+
+    class Recording:
+        @staticmethod
+        def find_spec(name, path=None, target=None):
+            asked.append(name)
+            return None
+    monkeypatch.syspath_prepend(str(root))
+    monkeypatch.setattr(sys, 'meta_path', [Recording, *sys.meta_path])
+    before = set(sys.modules)
+    files = probe.import_closure(seed, root.resolve())
+    assert asked == [] and set(sys.modules) == before
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_meta_2839/__init__.py', 'closure_meta_2839/leaf.py'}
+
+
+def test_discovery_runs_no_path_hook_and_no_cached_path_entry_finder(tmp_path, monkeypatch):
+    """#2842: a path hook, or a finder cached for a path entry, may import what it likes;
+    discovery reads directories with the standard file finders and consults neither."""
+    root = tmp_path / 'root'
+    (root / 'closure_hook_2842').mkdir(parents=True)
+    (root / 'closure_hook_2842' / '__init__.py').write_text('')
+    (root / 'closure_hook_2842' / 'leaf.py').write_text('')
+    elsewhere = tmp_path / 'elsewhere'
+    elsewhere.mkdir()
+    seed = root / 'seed.py'
+    seed.write_text('import closure_hook_2842.leaf\n')
+    asked = []
+
+    def hook(entry):
+        asked.append(('hook', entry))
+        raise ImportError('not this hook')
+
+    class Cached:
+        @staticmethod
+        def find_spec(name, target=None):
+            asked.append(('cached', name))
+            return None
+    monkeypatch.syspath_prepend(str(root))
+    monkeypatch.syspath_prepend(str(elsewhere))
+    monkeypatch.setattr(sys, 'path_hooks', [hook, *sys.path_hooks])
+    monkeypatch.setattr(sys, 'path_importer_cache', {**sys.path_importer_cache, str(elsewhere): Cached})
+    sys.path_importer_cache.pop(str(root), None)
+    before = set(sys.modules)
+    files = probe.import_closure(seed, root.resolve())
+    assert asked == [] and set(sys.modules) == before
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_hook_2842/__init__.py', 'closure_hook_2842/leaf.py'}
+
+
+def test_a_bytecode_cache_prefix_is_refused(tmp_path, monkeypatch):
+    """#2842: under a cache prefix the cache path is built from the import path's spelling,
+    which a resolved pin does not carry."""
+    monkeypatch.setattr(sys, 'pycache_prefix', str(tmp_path))
+    with pytest.raises(BudgetStop, match='bytecode cache prefix'):
+        probe.verify_bytecode([])
+
+
+def _pyc(source, code, *, kind, stamp_from=None):
+    """Write the cache this interpreter would look for beside `source`: a timestamp pyc
+    whose header validates against `stamp_from`'s stat (default `source`), or a
+    hash-based one, checked or not, for `code`."""
+    from importlib import _bootstrap_external as external
+    cache = Path(importlib.util.cache_from_source(str(source)))
+    cache.parent.mkdir(exist_ok=True)
+    if kind == 'timestamp':
+        stat = (stamp_from or source).stat()
+        data = external._code_to_timestamp_pyc(code, int(stat.st_mtime), stat.st_size)
+    else:
+        data = external._code_to_hash_pyc(code, importlib.util.source_hash(source.read_bytes()), kind == 'checked')
+    cache.write_bytes(bytes(data))
+    return cache
+
+
+def test_cached_bytecode_is_checked_against_its_pinned_source(tmp_path):
+    """#2839: a cache the interpreter would run in place of the source must be that source
+    compiled; a cache it would ignore is not consulted."""
+    import os
+    import py_compile
+    source = tmp_path / 'closure_cached_2839.py'
+    source.write_text('value = 1\n')
+    other = compile('value = 2\n', str(source), 'exec', dont_inherit=True)       # same size, other code
+    assert probe.cached_code_matches(source)                                          # no cache
+    py_compile.compile(str(source), doraise=True)
+    assert probe.cached_code_matches(source)                                          # the source compiled
+    _pyc(source, other, kind='timestamp')
+    assert not probe.cached_code_matches(source)                                      # validates, other code
+    stat = source.stat()
+    os.utime(source, (stat.st_atime, stat.st_mtime + 10))
+    assert probe.cached_code_matches(source)                                          # stale: recompiled
+    _pyc(source, other, kind='unchecked')
+    assert not probe.cached_code_matches(source)                                      # run unchecked
+    _pyc(source, other, kind='checked')
+    assert not probe.cached_code_matches(source)                                      # hash matches the source
+    cache = _pyc(source, other, kind='checked')
+    source.write_text('value = 3\n')
+    assert probe.cached_code_matches(source) and cache.exists()                       # hash stale: recompiled
+
+
+def test_prepare_and_run_refuse_a_pinned_module_whose_cache_is_not_its_source(lineage, monkeypatch):
+    """#2839: both check every closure module's cache before admission."""
+    implementation = probe.implementation_paths()
+    forged = next(path for path in implementation if path.endswith('audit_controls/batch_native.py'))
+    checked = []
+
+    def matches(path):
+        checked.append(path)
+        return path != forged
+    monkeypatch.setattr(probe, 'cached_code_matches', matches)
+    with pytest.raises(BudgetStop, match='cached bytecode for .*batch_native.py is not its pinned source'):
+        prepare(lineage)
+    assert checked[-1] == forged
+    checked.clear()
+    monkeypatch.setattr(probe, 'cached_code_matches', lambda path: checked.append(path) or True)
+    registration, identity = prepare(lineage)
+    assert checked == implementation                         # the whole closure at prepare
+    checked.clear()
+    monkeypatch.setattr(probe, 'cached_code_matches', matches)
+    with pytest.raises(BudgetStop, match='cached bytecode for .*batch_native.py is not its pinned source'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+    assert checked[-1] == forged and set(checked) <= set(implementation)
+
+
+def test_a_namespace_package_with_a_portion_in_the_root_is_the_repositorys(tmp_path, monkeypatch):
+    """A namespace package runs nothing; its portion inside the root is walked and one
+    outside it adds nothing."""
+    root = tmp_path / 'root'
+    (root / 'closure_ns_2826').mkdir(parents=True)
+    (root / 'closure_ns_2826' / 'inner.py').write_text('')
+    (tmp_path / 'away' / 'closure_ns_2826').mkdir(parents=True)
+    (tmp_path / 'away' / 'closure_ns_2826' / 'other.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_ns_2826.inner\nimport closure_ns_2826.other\n')
+    monkeypatch.syspath_prepend(str(tmp_path / 'away'))
+    monkeypatch.syspath_prepend(str(root))
+    try:
+        files = probe.import_closure(seed, root.resolve())
+    finally:
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {'seed.py', 'closure_ns_2826/inner.py'}
+
+
+def test_run_refuses_a_dirty_closure_under_the_clean_rule(lineage, monkeypatch):
+    """#2732 Codex review: run itself, not only repository_state, refuses a closure file
+    that differs from the committed tree. The status query is modelled: clean when the
+    clean-rule prepare asks, dirty when run asks."""
+    real, statuses = probe.subprocess.check_output, []
+
+    def check_output(command, **kwargs):
+        if 'status' in command:
+            statuses.append(command)
+            return '' if len(statuses) == 1 else ' M notes/matched_cborg_2026-09-13/audit_controls/batch_native.py\n'
+        return real(command, **kwargs)
+    monkeypatch.setattr(probe.subprocess, 'check_output', check_output)
+    registration, identity = prepare(lineage, require_clean=True)
+    with pytest.raises(BudgetStop, match='probe implementation differs from the committed tree'):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=True)
+    assert len(statuses) == 2
