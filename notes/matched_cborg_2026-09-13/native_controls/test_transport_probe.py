@@ -917,11 +917,11 @@ def test_a_probe_refuses_standing_authority_relabelled_as_a_confirmed_charge(lin
 
 
 def test_the_probe_pins_every_repository_module_its_lineage_modules_load():
-    """#2628, #2751: importing the probe and the modules its lineage checks run (those
-    of a probe or reconciled tip, and for a batch tip batch_native and what it imports
-    inside a function) loads, in a fresh interpreter, only repository files the probe
-    pins. Import time only: that function-level imports are followed is the synthetic
-    test's to show."""
+    """#2628, #2751, #2802: importing the probe and the modules its lineage checks run
+    (reconcile_stopped, probe_predecessor and runtime_closure; for a batch tip,
+    batch_native and worker_checkpoint) loads, in a fresh interpreter, only repository
+    files the probe pins. This checks what those imports load; the function-level
+    imports inside batch_native and the rest are the synthetic test's to show."""
     import subprocess
     root = Path(probe.__file__).resolve().parents[3]
     code = ("import json, sys\n"
@@ -943,15 +943,19 @@ def test_the_probe_pins_every_repository_module_its_lineage_modules_load():
 
 
 def test_the_import_closure_reads_source_and_imports_only_repository_packages(tmp_path, monkeypatch):
-    """#2628, #2748-#2750: a function-level import counts; a relative one resolves against
-    its package; `from module import attribute` never executes the module; a package in
-    a virtual environment inside the root, one outside the root, the standard library
+    """#2628, #2748-#2750, #2801: a function-level import counts; a relative one resolves
+    against its package, a package's own `__init__` included; `from module import
+    attribute` never executes the module; packages in site-packages and dist-packages
+    inside the root, a package and a module outside the root, a standard-library package
     and a name that is no module add nothing, and none of them is imported."""
     root = tmp_path / 'root'
     marker = tmp_path / 'executed'
     package = root / 'closure_pkg_2628'
     package.mkdir(parents=True)
     (package / '__init__.py').write_text('')
+    (package / 'nested').mkdir()
+    (package / 'nested' / '__init__.py').write_text('from . import leaf\n')      # relative in an __init__
+    (package / 'nested' / 'leaf.py').write_text('')
     (package / 'inner.py').write_text('def later():\n    from . import deferred\n')
     (package / 'deferred.py').write_text('import json\nfrom closure_top_2628 import attribute\n'
                                          'import closure_venv_2628.sub\n')
@@ -961,10 +965,20 @@ def test_the_import_closure_reads_source_and_imports_only_repository_packages(tm
     (installed / 'closure_venv_2628').mkdir(parents=True)
     (installed / 'closure_venv_2628' / '__init__.py').write_text(ran)
     (installed / 'closure_venv_2628' / 'sub.py').write_text(ran)
+    debian = root / 'env' / 'lib' / 'python3' / 'dist-packages'
+    (debian / 'closure_dist_2628').mkdir(parents=True)
+    (debian / 'closure_dist_2628' / '__init__.py').write_text(ran)
+    (debian / 'closure_dist_2628' / 'sub.py').write_text(ran)
     (tmp_path / 'closure_outside_2628.py').write_text(ran)
+    (tmp_path / 'closure_outpkg_2628').mkdir()
+    (tmp_path / 'closure_outpkg_2628' / '__init__.py').write_text(ran)
+    (tmp_path / 'closure_outpkg_2628' / 'sub.py').write_text(ran)
+    stdlib = 'xmlrpc' not in sys.modules                 # a standard-library package not yet loaded
     seed = root / 'seed.py'
-    seed.write_text('import closure_pkg_2628.inner\nimport closure_outside_2628\nimport closure_missing_2628\n')
-    for place in (tmp_path, installed, root):
+    seed.write_text('import closure_pkg_2628.inner\nimport closure_pkg_2628.nested\nimport closure_outside_2628\n'
+                    'import closure_missing_2628\nimport closure_outpkg_2628.sub\nimport closure_dist_2628.sub\n'
+                    'import xmlrpc.client\n')
+    for place in (tmp_path, installed, debian, root):
         monkeypatch.syspath_prepend(str(place))
     try:
         files = probe.import_closure(seed, root.resolve())
@@ -975,8 +989,10 @@ def test_the_import_closure_reads_source_and_imports_only_repository_packages(tm
             del sys.modules[name]
     assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
         'seed.py', 'closure_pkg_2628/__init__.py', 'closure_pkg_2628/inner.py', 'closure_pkg_2628/deferred.py',
-        'closure_top_2628.py'}
+        'closure_pkg_2628/nested/__init__.py', 'closure_pkg_2628/nested/leaf.py', 'closure_top_2628.py'}
     assert not marker.exists(), marker.read_text()          # no module above ran, in or out of the root
+    if stdlib:
+        assert 'xmlrpc' not in sys.modules                   # not imported to look below it
 
 
 def test_the_interpreter_environment_is_not_repository_code(tmp_path, monkeypatch):
@@ -998,8 +1014,7 @@ def test_the_interpreter_environment_is_not_repository_code(tmp_path, monkeypatc
 def test_a_repository_package_that_fails_to_import_fails_the_closure(tmp_path, monkeypatch, failure):
     """A repository package whose __init__ raises is not skipped, whatever it raises:
     skipping would leave what it imports unpinned, so the probe refuses rather than pin
-    less (#2628, #2770). The package name differs per case, since a failed import is
-    retried from source."""
+    less (#2628, #2770). A name per case keeps the cases independent (#2802)."""
     name = f'closure_broken_2628_{failure.__name__.lower()}'
     root = tmp_path / 'root'
     (root / name).mkdir(parents=True)
