@@ -120,7 +120,8 @@ def check_digest(strict):
     """
     import sys
 
-    from data_sheets_schema.schema_sync import IN_SYNC, blocking, check
+    from data_sheets_schema.schema_sync import (
+        IN_SYNC, STALE, UNCHECKED_ADVICE, blocking, check, rebuild_advice)
 
     rows = check()
     for r in rows:
@@ -137,9 +138,17 @@ def check_digest(strict):
     if not bad:
         click.echo(f"\n{len(rows)} merged schema(s) built from current source.")
     else:
-        click.echo(f"\n{len(bad)} of {len(rows)} merged schema(s) not current. "
-                   "Run `make regen-all`, review the diff, and commit it before "
-                   "generating: a run started now would record a digest for a "
-                   "schema this repository no longer holds.")
+        # A check that could not run is not a stale schema; regenerating would not
+        # help it (#2738).
+        stale = [r for r in bad if r["status"] == STALE]
+        if stale:
+            click.echo(f"\n{len(stale)} of {len(rows)} merged schema(s) not current. "
+                       f"Rebuild with {rebuild_advice(stale)}, review the diff, and commit "
+                       "it before generating: a run started now would record a digest for "
+                       "a schema this repository no longer holds.")
+        if len(bad) - len(stale):
+            click.echo(f"\n{len(bad) - len(stale)} of {len(rows)} merged schema(s) could not be "
+                       f"checked; see the reason above. A run started now is refused: "
+                       f"{UNCHECKED_ADVICE}.")
     if strict and bad:
         sys.exit(1)

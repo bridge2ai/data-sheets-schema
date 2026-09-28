@@ -112,8 +112,15 @@ classes:
 3. Lint the module: `make lint-modules`
 4. Validate the module: `make test-modules`
 5. Regenerate merged schema: `make full-schema`
-6. Regenerate Python model: `make gen-project`
-7. Run all tests: `make test`
+6. Regenerate the core merged schema, which imports most modules:
+   `rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema`
+7. Regenerate Python model: `make gen-project`
+8. Check both merged schemas: `make check-digest`
+9. Run all tests: `make test`
+
+Step 6 is easy to miss but is not optional: the core merged schema imports most
+modules, `make regen-all` never rebuilds it, and a stale core schema makes the next
+generation run refuse to start.
 
 ### Schema Synchronization
 The project maintains three synchronized representations:
@@ -126,10 +133,17 @@ Check sync status:
 make check-sync
 ```
 
-Force regenerate everything:
+Force regenerate the full merged schema and project artifacts:
 ```bash
 make regen-all
 ```
+
+The core merged schema (`data_sheets_schema_core_all.yaml`) is not rebuilt by `regen-all`;
+remove it and rebuild it (`make gen-core-schema` alone skips a stale file newer than its sources):
+```bash
+rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema
+```
+`make check-digest` names the command for each stale merged schema.
 
 ## Validation Commands
 

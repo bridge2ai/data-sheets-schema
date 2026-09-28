@@ -6200,16 +6200,29 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # nothing to preserve by continuing.
     _rewrites: list[dict[str, Any]] = []
     _rewrite_token = _REWRITE_LOG.set(_rewrites)
-    from data_sheets_schema.schema_sync import blocking, check as _schema_check
+    from data_sheets_schema.schema_sync import (
+        STALE, UNCHECKED_ADVICE, blocking, check as _schema_check, rebuild_advice)
     stale = blocking(_schema_check(profile=spec.profile_obj))     # this run's instrument (#1463)
     if stale:
-        detail = "; ".join(f"{r['class']}: {r.get('reason', r['status'])}"
-                           for r in stale)
-        raise RuntimeError(
-            "the merged schema is not built from the current source, so this "
-            f"run would record a digest for a schema that does not exist — "
-            f"{detail}. Run `make regen-all`, review the diff and commit it, "
-            "or check with `d4d schema check-digest`.")
+        def detail(rows):
+            return "; ".join(f"{r['class']}: {r.get('reason', r['status'])}" for r in rows)
+        # A check that could not run blocks as a stale schema does, but is not one:
+        # regenerating would change nothing (#2738).
+        not_built = [r for r in stale if r["status"] == STALE]
+        unchecked = [r for r in stale if r["status"] != STALE]
+        causes = []
+        if not_built:
+            causes.append(
+                "the merged schema is not built from the current source, so this "
+                f"run would record a digest for a schema that does not exist — "
+                f"{detail(not_built)}. Rebuild with {rebuild_advice(not_built)}, review the "
+                "diff and commit it")
+        if unchecked:
+            causes.append(
+                "the schema sync check could not run, so this run cannot establish "
+                "that the digest it would record describes the current source — "
+                f"{detail(unchecked)}. To continue, {UNCHECKED_ADVICE}")
+        raise RuntimeError("; ".join(causes) + ", or check with `d4d schema check-digest`.")
 
     from data_sheets_schema.provenance import build_record, record_path_for
 

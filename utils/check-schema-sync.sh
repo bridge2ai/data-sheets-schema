@@ -130,6 +130,8 @@ else
     echo "  make gen-project    # Regenerate Python model and artifacts"
     echo ""
     echo "Or run both with:"
-    echo "  make regen-all      # Force regenerate everything"
+    echo "  make regen-all      # Force regenerate the merged schema and project artifacts"
+    echo "  rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema"
+    echo "                       # the core merged schema, which regen-all does not rebuild"
     exit 1
 fi

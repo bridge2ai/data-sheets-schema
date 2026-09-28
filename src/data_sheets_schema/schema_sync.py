@@ -72,6 +72,32 @@ UNCHECKED = "unchecked"
 _REBUILT: dict[tuple, bytes] = {}
 _REBUILT_DIGESTS: dict[tuple, str] = {}
 
+#: How each merged schema is rebuilt. `make regen-all` never rebuilds the core merged
+#: schema, and `make gen-core-schema` rebuilds it only when older than its sources, so
+#: the core's advice removes it first (#2756).
+REBUILD = {
+    "Dataset": "make regen-all",
+    "CoreDataset": "rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema",
+}
+
+
+def rebuild_advice(rows: list[dict[str, Any]]) -> str:
+    """The commands that rebuild the merged schemas `rows` name, each once."""
+    commands = sorted({REBUILD.get(r["class"], "make regen-all") for r in rows})
+    return "; ".join(f"`{c}`" for c in commands)
+
+
+#: Advice for a check that could not run: some causes pass on a retry, others recur
+#: until someone fixes them (#2757).
+UNCHECKED_ADVICE = ("fix the cause named above, or retry if it was transient "
+                    "(a timeout, or inputs that changed during the check)")
+
+
+#: The digest child starts an interpreter and loads the merged schema; under load
+#: that took over 60 s. A hang guard, as the regeneration's is: a slow check that
+#: would have passed must not refuse the run (#2738).
+DIGEST_TIMEOUT_SECONDS = 600
+
 
 def forget_rebuilds() -> None:
     """Drop every cached rebuild. `schema_cache.clear` calls this too."""
@@ -109,15 +135,33 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
              if p.name not in merged_names or physical(p) == source}
     if source not in files:
         files[source] = source.read_bytes()
+    used = [source]
+
     def read(path):
         if path not in files:
             files[path] = path.read_bytes()
+        used.append(path)
         return files[path]
     # gen-linkml creates a fresh view and traverses imports before callers can
     # initialize namespaces. Use that same resolver and the same captured
     # bytes, including namespace aliases for local packages (#1276).
-    capture_schema(source, content=files[source], read_bytes=read,
-                   namespace_orders=(False,), strict=True)
+    try:
+        capture_schema(source, content=files[source], read_bytes=read,
+                       namespace_orders=(False,), strict=True)
+    except Exception as error:
+        # A YAML error names no file ("<byte string>"); name the module the capture
+        # read that does not parse, when one does (#2789).
+        import yaml
+        for path in dict.fromkeys(used):
+            try:
+                document = yaml.safe_load(files[path])
+            except Exception:                          # a YAMLError, or a constructor's ValueError (#2800)
+                raise ValueError(f"source module {path} does not parse: {error}") from error
+            if not isinstance(document, dict) or not (document.get("name") or document.get("id")):
+                # Parses, but is no schema: emptied, a list, neither name nor id; the
+                # loader derives a missing name from the id (#2804, #2809).
+                raise ValueError(f"source module {path} is not a schema: {error}") from error
+        raise
     state = (str(source), _generator_versions(),
              tuple((str(p), str(p.resolve()), hashlib.sha256(data).hexdigest()) for p, data in sorted(files.items())),
              source_name)
@@ -208,6 +252,24 @@ def _regenerate(source: Path, target: Path,
     return True, None
 
 
+#: The digest child's exit when rendering the digest raised on its inputs (EX_DATAERR),
+#: and when it raised an OSError or MemoryError, an I/O or resource failure that says
+#: nothing about them (EX_IOERR). Any other exit, a start-up failure's 1 included, is
+#: unclassified (#2838).
+DIGEST_INPUT_EXIT = 65
+DIGEST_IO_EXIT = 74
+
+
+class RebuiltDigestFailed(ValueError):
+    """The digest child ran and failed. Only DIGEST_INPUT_EXIT is the child's own
+    exception on the schema and pin it was given; a signal, an I/O or resource failure,
+    a silent exit 0 and any unclassified exit are process failures (#2814, #2838)."""
+
+    def __init__(self, returncode, message):
+        super().__init__(message)
+        self.returncode = returncode
+
+
 def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
                          source_name: str, profile=None) -> str:
     """Digest frozen rebuild bytes without retaining a LinkML view (#946).
@@ -228,27 +290,65 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
            _generator_versions(), prof.name)
     if key in _REBUILT_DIGESTS:
         return _REBUILT_DIGESTS[key]
+    # The child says which kind of failure it met: one on its inputs, or an I/O or
+    # resource failure. Anything before the render (start-up, imports, the profile's
+    # name) is left to the interpreter's own exit, which stays unclassified (#2838).
     code = (
-        "import sys\nfrom pathlib import Path\n"
+        "import sys, traceback\nfrom pathlib import Path\n"
         "sys.path.insert(0, sys.argv[1])\n"
         "from data_sheets_schema import schema_digest as d\n"
-        "d.VOCABULARY_PIN = Path(sys.argv[4])\n"
-        "inventory = d.build(sys.argv[2], Path(sys.argv[3]))\n"
-        "inventory.schema_path = sys.argv[5]\n"
         "from data_sheets_schema.profiles import profile_named\n"
         "prof = profile_named(sys.argv[6])\n"
-        "print(d.fingerprint(d.render(inventory, vocabulary=d.vocabularies(profile=prof))))\n")
+        "try:\n"
+        "    d.VOCABULARY_PIN = Path(sys.argv[4])\n"
+        "    inventory = d.build(sys.argv[2], Path(sys.argv[3]))\n"
+        "    inventory.schema_path = sys.argv[5]\n"
+        "    print(d.fingerprint(d.render(inventory, vocabulary=d.vocabularies(profile=prof))))\n"
+        "except (OSError, MemoryError):\n"
+        f"    traceback.print_exc(); sys.exit({DIGEST_IO_EXIT})\n"
+        "except Exception:\n"
+        f"    traceback.print_exc(); sys.exit({DIGEST_INPUT_EXIT})\n")
     result = subprocess.run(
         [sys.executable, "-c", code, str(Path(__file__).resolve().parents[1]),
          class_name, str(path.resolve()), str(vocabulary.resolve()), source_name, prof.name],
-        capture_output=True, text=True, timeout=60)
+        capture_output=True, text=True, timeout=DIGEST_TIMEOUT_SECONDS)
     value = result.stdout.strip()
     if result.returncode or len(value) != 32 or any(c not in "0123456789abcdef" for c in value):
-        raise ValueError(f"rebuilt digest process failed: {(result.stderr or result.stdout).strip()[-300:]}")
+        raise RebuiltDigestFailed(result.returncode,
+                                  f"rebuilt digest process failed: {(result.stderr or result.stdout).strip()[-300:]}")
     if len(_REBUILT_DIGESTS) >= 32:
         del _REBUILT_DIGESTS[next(iter(_REBUILT_DIGESTS))]
     _REBUILT_DIGESTS[key] = value
     return value
+
+
+def _probe(class_name, schema, vocabulary, name, profile):
+    """Digest captured bytes again under `profile`, in a child: `schema` a temporary
+    copy, `vocabulary` the pin as the check read it. None if it succeeds, else what it
+    raised, so a probe that failed as a process is told from one that failed on its
+    inputs. Every probe reads the same bytes, whatever the live files do meanwhile
+    (#2747 Codex review)."""
+    try:
+        _rebuilt_fingerprint(class_name, schema, vocabulary, name, profile=profile)
+        return None
+    except Exception as exc:                                   # noqa: BLE001
+        return exc
+
+
+def _process_failure(exc) -> bool:
+    """A failure of the process, not of the schema or the pin: a timeout, a child that
+    could not start, one killed by a signal, one that met an I/O or resource failure,
+    one that exited 0 without a digest or with an unclassified status (#2814, #2827,
+    #2835, #2838). Only a child that raised on its inputs speaks for them."""
+    return (isinstance(exc, (subprocess.TimeoutExpired, OSError))
+            or (isinstance(exc, RebuiltDigestFailed) and not _input_failure(exc)))
+
+
+def _input_failure(exc) -> bool:
+    """A digest child that raised on the inputs it was given, as it reports with
+    DIGEST_INPUT_EXIT. A probe's other failures, an unclassified exit among them, say
+    nothing about them (#2835, #2838)."""
+    return isinstance(exc, RebuiltDigestFailed) and exc.returncode == DIGEST_INPUT_EXIT
 
 
 def check_one(merged: Path, source: Path, class_name: str,
@@ -275,14 +375,32 @@ def check_one(merged: Path, source: Path, class_name: str,
         # Same filename, because the digest names the schema it came from and
         # a differing name would be a spurious difference.
         rebuilt = Path(tmp) / merged.name
+        same = source_state = merged_bytes = live = vocabulary_bytes = vocabulary = None
         try:
             source_snapshot = _source_snapshot(source)
+        except Exception as exc:                               # noqa: BLE001
+            # The source failed, not a digest (#2789).
+            return {**out, "status": UNCHECKED,
+                    "reason": f"the source schema could not be read: {exc}"}
+        try:
             source_state = source_snapshot[0]
             merged_bytes = merged.read_bytes()
             # The selected profile's vocabulary inputs — none for neutral,
             # whose render consumes no pin (#1520).
             from data_sheets_schema.profiles import vocabulary_bytes as _vb
             vocabulary_bytes = _vb(profile)
+            if vocabulary_bytes:
+                # A pin that does not parse, or is not a mapping, fails the digest with
+                # no file named (#2804, #2815).
+                import yaml
+                try:
+                    pin = yaml.safe_load(vocabulary_bytes)
+                except Exception as exc:                   # noqa: BLE001
+                    return {**out, "status": UNCHECKED,
+                            "reason": f"the vocabulary pin {profile.pin_path} does not parse: {exc}"}
+                if not isinstance(pin, dict):
+                    return {**out, "status": UNCHECKED,
+                            "reason": f"the vocabulary pin {profile.pin_path} is not a mapping"}
             vocabulary = Path(tmp) / "vocabulary" / (profile.pin_path.name if profile.pin_path else "no-vocabulary.yaml")
             vocabulary.parent.mkdir()
             vocabulary.write_bytes(vocabulary_bytes)
@@ -308,6 +426,105 @@ def check_one(merged: Path, source: Path, class_name: str,
                 return {**out, "status": UNCHECKED,
                         "reason": "schema inputs changed during the sync check; retry with stable inputs"}
         except Exception as exc:                               # noqa: BLE001
+            # The rebuild already differs from the merged file, so it is stale whatever
+            # its digest; a merged file that does not parse (a conflict marker, a cut)
+            # is the usual reason the digest failed, and rebuilding fixes it (#2773).
+            # Stale only if nothing moved during the check, else a retry decides.
+            # A pin that changed while the check ran is a retry, not a stale file (#2816).
+            if vocabulary_bytes is not None:
+                try:
+                    pin_moved = _vb(profile) != vocabulary_bytes
+                except Exception:                              # noqa: BLE001
+                    pin_moved = True
+                if pin_moved:
+                    return {**out, "status": UNCHECKED,
+                            "reason": (f"the vocabulary pin {profile.pin_path} changed during the "
+                                       "sync check; retry with stable inputs")}
+            try:
+                unchanged = (merged_bytes is not None and merged.read_bytes() == merged_bytes
+                             and source_state is not None and _source_state(source) == source_state)
+            except Exception as moved:                         # noqa: BLE001
+                if str(moved).startswith("source module "):
+                    # The source broke while the check ran; say so, not a digest (#2804).
+                    return {**out, "status": UNCHECKED,
+                            "reason": f"the source schema could not be read (it changed during the check): {moved}"}
+                unchanged = False
+            stable = same is False and unchanged
+            # Diagnose only a failure of the inputs, on inputs that did not move. The digest
+            # that failed (the live one if it failed, else the fresh build's) is probed again
+            # on the captured bytes, then without the vocabulary. Only a probe child's own
+            # nonzero exit is a recurrence; a process failure, first or in either probe, is
+            # inconclusive, and so is a failure that does not recur under the same profile
+            # (#2827, #2832, #2835).
+            recurs = pin_blamed = rebuild_broken = False
+            rebuild_failure = pin_failure = None
+            if unchanged and same is not None and not _process_failure(exc):
+                from data_sheets_schema.profiles import NEUTRAL
+                name = schema_digest._schema_name(class_name, merged)
+
+                def diagnose(schema):
+                    """Whether `schema`'s digest fails on its inputs again, and whether only
+                    the vocabulary makes it fail: a pin malformed below its top level fails
+                    only when rendered, so the digest that recurs under the profile
+                    succeeds without it (#2820). Returns (recurs, pin_blamed, failure)."""
+                    failure = _probe(class_name, schema, vocabulary, name, profile)
+                    again, blamed = _input_failure(failure), False
+                    if again and vocabulary_bytes:
+                        neutral = _probe(class_name, schema, vocabulary, name, NEUTRAL)
+                        blamed = neutral is None
+                        again = neutral is None or _input_failure(neutral)
+                    return again, blamed, failure
+
+                if live is None:
+                    probed = Path(tmp) / "captured" / merged.name
+                    probed.parent.mkdir()
+                    probed.write_bytes(merged_bytes)
+                else:
+                    probed = rebuilt
+                # The pin is named with the failure of the probe that implicated it (#2845,
+                # #2847), not the first failure, which may describe other bytes.
+                recurs, pin_blamed, pin_failure = diagnose(probed)
+                if live is None and same is False and not pin_blamed:
+                    # The merged file failed and its rebuild differs, so the advice would be
+                    # to rebuild: judge the rebuild too, since a broken one needs its source
+                    # repaired, not regenerated (#2841).
+                    again, blamed, rebuild_failure = diagnose(rebuilt)
+                    if blamed:
+                        # The rebuild's failure is the one that names the pin (#2845).
+                        recurs = pin_blamed = True
+                        pin_failure = rebuild_failure
+                    rebuild_broken = again and not blamed
+                # A diagnosis names the live inputs, so they must still be the ones probed.
+                try:
+                    moved = (merged.read_bytes() != merged_bytes or _source_state(source) != source_state
+                             or _vb(profile) != vocabulary_bytes)
+                except Exception as broke:                     # noqa: BLE001
+                    if str(broke).startswith("source module "):
+                        return {**out, "status": UNCHECKED,
+                                "reason": f"the source schema could not be read (it changed during the check): {broke}"}
+                    moved = True
+                if moved:
+                    return {**out, "status": UNCHECKED,
+                            "reason": "schema inputs changed during the sync check; retry with stable inputs"}
+            if recurs and pin_blamed:
+                return {**out, "status": UNCHECKED,
+                        "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {pin_failure}"}
+            if stable and ((recurs and live is not None and _input_failure(exc)) or rebuild_broken):
+                # The fresh build does not digest, on its own inputs, twice where the merged
+                # file digested, or under both profiles where the merged file failed too:
+                # the source itself is broken, and rebuilding would not help (#2808, #2841).
+                return {**out, **({"digest": live} if live is not None else {}), "status": UNCHECKED,
+                        "reason": ("a fresh build of the source could not be digested, so the "
+                                   f"source needs repair, not a rebuild: {exc if live is not None else rebuild_failure}")}
+            if stable:
+                kept = Path(tempfile.mkdtemp(prefix="d4d-schema-rebuild-")) / merged.name
+                shutil.copy2(rebuilt, kept)
+                # Either digest may be the one that failed: the merged file's (it does not
+                # parse) or the rebuild's (its child timed out, #2738) (#2789).
+                return {**out, **({"digest": live} if live is not None else {}),
+                        "status": STALE, "rebuilt_at": str(kept),
+                        "reason": ("the merged schema differs from a fresh build of its "
+                                   f"source; a digest could not be computed: {exc}")}
             return {**out, "status": UNCHECKED,
                     "reason": f"digest could not be computed: {exc}"}
         out["digest"] = live
