@@ -8,7 +8,7 @@ from tests.test_download.test_api_runner import FakeClient
 from tests.test_generation_manifest_identity import external, offline  # noqa: F401
 
 
-@pytest.mark.parametrize('evidence', ['abandoned', 'reasoning', 'journal_counters'])
+@pytest.mark.parametrize('evidence', ['abandoned', 'torn_abandoned', 'reasoning', 'journal_counters'])
 def test_completed_return_checks_all_surviving_accounting(external, evidence):
     api.execute(external, client=FakeClient())
     prior = external.provenance_path.read_bytes()
@@ -16,6 +16,12 @@ def test_completed_return_checks_all_surviving_accounting(external, evidence):
     if evidence == 'abandoned':
         api._record_incomplete_stream(external, 'full', 1, '2026-09-12T00:00:00Z',
                                      {'usage': {'input_tokens': 99, 'output_tokens': 7}}, [])
+    elif evidence == 'torn_abandoned':
+        # A row torn mid-write is refused, not skipped (#2779).
+        journal = api._abandoned_ledger(external)
+        journal.parent.mkdir(parents=True, exist_ok=True)
+        with journal.open('ab') as stream:
+            stream.write(b'{"phase": "full", "usage_id": "torn", "input_tok')
     elif evidence == 'reasoning':
         extra = {'usage_id': 'later-reasoning', 'generation_id': ledger.generation_id(external),
                  'run_identity': ledger.run_identity(external), 'phase': 'full',

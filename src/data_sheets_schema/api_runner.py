@@ -5820,31 +5820,66 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
     usage.append(row)
     # Persisted at once (#1038 second pass): a run whose every retry fails
     # never reaches the record write, and the row would be lost with it.
+    # Appended as the reasoning log is, ending a line an interrupted write left
+    # open, so a resumed run's row never joins it (#2779, #2740).
     try:
-        ledger = _abandoned_ledger(spec)
-        ledger.parent.mkdir(parents=True, exist_ok=True)
-        with ledger.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+        reasoning.append(_abandoned_ledger(spec), row)
     except OSError as exc:
         print(f"   could not persist the abandoned attempt: {exc}")
 
 
 def _abandoned_ledger(spec: RunSpec) -> Path:
-    return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
+    from data_sheets_schema.usage_ledger import abandoned_journal_path
+    return abandoned_journal_path(spec)
 
 
 def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
-    ledger = _abandoned_ledger(spec)
-    if not ledger.exists():
-        return []
-    rows = []
-    for line in ledger.read_text(encoding="utf-8").splitlines():
-        try:
-            row = json.loads(line)
-        except json.JSONDecodeError:
+    """Every row of the abandoned-attempts journal, split on the newline the writer
+    ends each row with and nothing else (#2720). The accounting gate reads it before
+    every call and before publication and must not skip a charge it cannot read, so a
+    line of this generation's that does not decode, parse or parse to an object is
+    refused, naming it (#2779). The journal is kept across generations: a line that
+    starts before this generation's boundary was written before it, so one that cannot
+    be read is skipped; with no generation at all (no usage ledger) no line is this
+    generation's (#2859, #2869). Main skipped only lines that failed to parse and
+    refused the whole journal on an undecodable byte or deep nesting; those are skipped
+    too before the boundary (#2872, #2885, #2890). The one exception is a legacy
+    continuation (`accept_legacy`), which adopts earlier rows that carry no generation: a
+    torn one among them is skipped, and the gate never covered those rows (#2883). A
+    journal gone or shorter than when this generation began is refused (#2871)."""
+    from data_sheets_schema.usage_ledger import abandoned_journal_offset
+    path = _abandoned_ledger(spec)
+    try:
+        boundary = abandoned_journal_offset(spec)
+        if not path.exists():
+            if boundary:
+                raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {path} is gone, "
+                                       f"though this generation began after {boundary} bytes of it")
+            return []
+        raw = path.read_bytes()
+    except UsageLedgerError:
+        raise                                        # already says what it could not establish (#2884)
+    except OSError as exc:
+        raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {exc}") from exc
+    if boundary is None:
+        boundary = len(raw)
+    if boundary > len(raw):
+        raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {path} is shorter "
+                               "than when this generation began")
+    rows, start = [], 0
+    for number, line in enumerate(raw.split(b"\n"), 1):
+        own, start = start >= boundary, start + len(line) + 1
+        if not line.strip():
             continue
+        try:
+            row = json.loads(line.decode("utf-8"))
+        except (ValueError, RecursionError):
+            row = None
         if isinstance(row, dict):
             rows.append(row)
+        elif own:
+            raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {path}: line {number} "
+                                   "is not a readable entry")
     return rows
 
 

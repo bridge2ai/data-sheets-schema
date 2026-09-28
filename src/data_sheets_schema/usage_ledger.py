@@ -113,10 +113,16 @@ def ledger_path(spec) -> Path:
 
 
 def _empty(spec, *, accept_legacy: bool) -> dict:
+    # Every new ledger opens a generation, whichever route writes it first (prepare_usage,
+    # begin_call, persist_usage). The abandoned-attempts journal is shared and kept across
+    # generations, so the bytes already in it were written before this one: its own rows
+    # start here, and only they are read strictly (#2859, #2869, #2888).
+    journal = abandoned_journal_path(spec)
     return {"version": 1, "identity": run_identity(spec),
             "generation_id": uuid.uuid4().hex, "prior_generation_ids": [],
             "accept_legacy": accept_legacy, "rows": [],
-            "input_identity": spec.input_identity()}
+            "input_identity": spec.input_identity(),
+            "abandoned_journal_offset": journal.stat().st_size if journal.exists() else 0}
 
 
 def _read(spec) -> dict:
@@ -146,12 +152,26 @@ def _read(spec) -> dict:
         ids.append(row["usage_id"])
     if len(set(ids)) != len(ids):
         raise UsageLedgerError(f"duplicate API usage identities in {path}")
+    offset = data.get("abandoned_journal_offset", 0)
+    if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
+        raise UsageLedgerError(f"invalid abandoned-attempts journal boundary: {path}")
     pending = data.get("pending_call")
     if pending is not None and (
             not isinstance(pending, dict) or not isinstance(pending.get("usage_id"), str)
             or not pending["usage_id"] or pending["usage_id"] in ids):
         raise UsageLedgerError(f"invalid pending API call identity: {path}")
     return data
+
+
+def abandoned_journal_path(spec) -> Path:
+    return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
+
+
+def abandoned_journal_offset(spec) -> int | None:
+    """Where this generation's rows start in the abandoned-attempts journal: None when
+    there is no generation (no ledger), and 0 for a ledger that predates the boundary,
+    whose rows are then read strictly throughout (#2859, #2869)."""
+    return _read(spec).get("abandoned_journal_offset", 0) if ledger_path(spec).exists() else None
 
 
 def recorded_inputs(spec) -> dict | None:
@@ -363,7 +383,7 @@ def prepare_usage(spec, *, resume: bool) -> str:
     if resume and path.exists():
         require_resolved(spec)
         return _read(spec)["generation_id"]
-    data = _empty(spec, accept_legacy=resume)
+    data = _empty(spec, accept_legacy=resume)          # records the journal boundary
     if not resume:
         data["prior_generation_ids"] = _record_generations(spec)
         from data_sheets_schema.snapshot_store import predecessor_generation
