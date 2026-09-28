@@ -1054,6 +1054,19 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         self.assertIn("cannot be rendered: 'list' object has no attribute 'items'", row["reason"])
         self.assertNotIn("Dataset", row["reason"])
 
+    def test_a_pin_implicated_by_the_merged_files_probe_is_reported_with_that_failure(self):
+        """#2847: the first failure described other bytes; the probe of the captured merged
+        file fails only with the vocabulary. The pin is named with the probe's failure."""
+        from data_sheets_schema import schema_sync
+
+        def live_fails(*args, **kwargs):
+            raise KeyError('No such class: "Dataset"')
+        pin_failure = schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "'list' object has no attribute 'items'")
+        row = self._run(self.sequenced(pin_failure, None), digest=live_fails)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("cannot be rendered: 'list' object has no attribute 'items'", row["reason"])
+        self.assertNotIn("Dataset", row["reason"])
+
     def test_a_merged_file_repaired_during_the_probes_is_a_retry_not_the_pin(self):
         """The merged file fails to digest twice, then is repaired before the neutral
         probe: the probe still reads the bytes the check read, and the diagnosis is

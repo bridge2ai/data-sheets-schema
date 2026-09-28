@@ -457,8 +457,7 @@ def check_one(merged: Path, source: Path, class_name: str,
             # inconclusive, and so is a failure that does not recur under the same profile
             # (#2827, #2832, #2835).
             recurs = pin_blamed = rebuild_broken = False
-            rebuild_failure = None
-            pin_failure = exc
+            rebuild_failure = pin_failure = None
             if unchanged and same is not None and not _process_failure(exc):
                 from data_sheets_schema.profiles import NEUTRAL
                 name = schema_digest._schema_name(class_name, merged)
@@ -482,7 +481,9 @@ def check_one(merged: Path, source: Path, class_name: str,
                     probed.write_bytes(merged_bytes)
                 else:
                     probed = rebuilt
-                recurs, pin_blamed, _ = diagnose(probed)
+                # The pin is named with the failure of the probe that implicated it (#2845,
+                # #2847), not the first failure, which may describe other bytes.
+                recurs, pin_blamed, pin_failure = diagnose(probed)
                 if live is None and same is False and not pin_blamed:
                     # The merged file failed and its rebuild differs, so the advice would be
                     # to rebuild: judge the rebuild too, since a broken one needs its source
