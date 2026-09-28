@@ -836,8 +836,10 @@ def short_guard(monkeypatch):
 
 def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch, short_guard):
     """#2771: a failing assertion in the main thread still joins the first run before
-    the test returns, and the failure is the one raised."""
+    the test returns, and the failure is the one raised. The boundary poll counts polls,
+    so a worker scheduled late still reaches it (#2834)."""
     guard = short_guard(5)
+    _poll_clock(monkeypatch, guard / 40)
     marker = RuntimeError("invented contender failure")
     joins, finished = [], []
     thread_class = threading.Thread
@@ -991,9 +993,10 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
     """#2796: after the boundary and the release, a first run that raises is that error,
     and one that hangs is "did not finish", never a KeyError on a result it never gave.
     The release handshake waits on its own bound, never this shortened guard, and the
-    boundary poll counts polls, so a paused main thread races neither; only the "hangs"
-    case waits out the guard, through the join (#2828, #2746 Codex review)."""
-    guard = short_guard(5)
+    boundary poll counts polls, so a paused main thread races neither. Only the "hangs"
+    case shortens the join, which it waits out; the raising worker is joined on a bound
+    no teardown delay reaches, since it must end, not end quickly (#2828, #2833, #2834)."""
+    guard = short_guard(5 if late == "hangs" else 120)
     _poll_clock(monkeypatch, guard / 40)
     marker, unblock = RuntimeError("invented late failure"), threading.Event()
     waits, event_class = [], threading.Event
