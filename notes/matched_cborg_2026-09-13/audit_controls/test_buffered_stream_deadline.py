@@ -76,6 +76,9 @@ def test_progress_after_headers_does_not_extend_absolute_exchange_bound(processe
         assert len(killed_at) == 1 and killed_at[0] - refused_at[0] < UNWIND_GAP_SECONDS, \
             ("the worker was killed long after the refusal", killed_at, refused_at, attempts)
         assert reaped_at and reaped_at[0] - killed_at[0] < REAP_SECONDS, attempts
+        # Reaped before the caller hears of it: kill and reap precede any debit, evidence or
+        # retry the refusal leads to (bounded_stream.stream's finally, #2777).
+        assert reaped_at[0] <= released, ("the caller was released before its worker was reaped", attempts)
         assert released - reaped_at[0] < UNWIND_GAP_SECONDS, ("the caller was released long after the reap", attempts)
         assert not client._workers and all(p.poll() is not None for p, _, _ in processes), attempts
         client.close()

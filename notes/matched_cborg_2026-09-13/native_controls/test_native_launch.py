@@ -751,8 +751,9 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
     not after one real second that also paid for the child's interpreter
     start-up and its request (#2617), and never before it is due (#2763). An
     interrupt arm raises its interrupt at the controller's first sleep after it
-    has checked its deadline since the count began, so a deadline enforced early
-    would be recorded instead of the interrupt."""
+    has checked its deadline since the count began, so a deadline enforced more
+    than UNDER_SECONDS early would be recorded instead of the interrupt; one less
+    early is caught by the deadline tests' own check (#2778)."""
     import threading, time
     from types import SimpleNamespace
     from test_native_proxy import fixture_proxy, REQUEST
