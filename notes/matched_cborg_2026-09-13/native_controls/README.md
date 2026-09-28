@@ -370,7 +370,12 @@ Twenty-three offline transport and launch tests pass, including concurrent
 admission (#1766), shutdown during an active stream or token count, no late
 evidence writes after bounded cleanup (#1768), and exact executable identity
 despite a same-version alias retarget (#1769). The controller closes admission
-and terminates the child process group before proxy cleanup. The installed CLI
+and terminates the child process group before proxy cleanup. It watches the
+child's exit without reaping it (`os.waitid` with `WNOWAIT`, or a kqueue
+`NOTE_EXIT` on a macOS Python before 3.13) and reaps only after its last signal
+to the group. An unreaped leader keeps its pid, and so the group id, reserved,
+so no signal can reach an unrelated group that reused the id (#2714). A Python
+with neither check is refused before launch. The installed CLI
 2.1.270 completed a
 scripted read, write and Python-helper probe with no tool permission denials;
 all four responses came from an in-memory fake, and no real provider was

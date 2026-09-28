@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import shlex
+import select
 import signal
 import subprocess
 import sys
@@ -458,16 +459,64 @@ def _signal_group(process, sig):
     raise refusal
 
 
+def exit_check_available():
+    """Whether the leader's exit can be observed without reaping it (#2714)."""
+    return hasattr(os, 'waitid') or hasattr(select, 'kqueue')
+
+
+def leader_exited(process):
+    """True once the child's leader has exited, without reaping it (#2714).
+
+    An exited but unreaped leader is a zombie that keeps its pid, and with it
+    the group id, reserved: no new process or group can take the id, so a
+    signal to the group reaches this group and no other. Reaping releases the
+    id, after which a signal could reach an unrelated group that took it. So
+    the run loop watches the exit with waitid(WNOWAIT), or a kqueue NOTE_EXIT
+    on a macOS Python before 3.13, and only terminate_group reaps, after its
+    last signal. A leader already reaped, by `_signal_group`'s refusal path or
+    by anyone else (ECHILD), has exited; poll() then records its status.
+    """
+    if process.returncode is not None:
+        return True
+    try:
+        if hasattr(os, 'waitid'):
+            return os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
+        queue = select.kqueue()
+        try:
+            watch = select.kevent(process.pid, select.KQ_FILTER_PROC,
+                                  select.KQ_EV_ADD | select.KQ_EV_ONESHOT, select.KQ_NOTE_EXIT)
+            return bool(queue.control([watch], 1, 0))
+        finally:
+            queue.close()
+    except (ChildProcessError, ProcessLookupError):
+        process.poll()                        # reaped elsewhere: the id is no longer held
+        return True
+
+
+def await_leader_exit(process, timeout):
+    """Wait up to `timeout` seconds for the leader to exit, without reaping it."""
+    deadline = time.monotonic() + timeout
+    while not leader_exited(process):
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(0.02)
+    return True
+
+
 def terminate_group(process):
-    if process is None:
+    """Signal the child's group while its unreaped leader holds the id, then reap (#2714).
+
+    A leader reaped before any signal (only by someone else) is left alone: its
+    group id may already name another group, so nothing is sent to it.
+    """
+    if process is None or process.returncode is not None:
         return
     _signal_group(process, signal.SIGTERM)
-    try:
-        process.wait(timeout=2)
-    except subprocess.TimeoutExpired:
-        pass
-    # Also remove descendants if the parent exited before them.
-    _signal_group(process, signal.SIGKILL)
+    if process.returncode is None:            # `_signal_group`'s refusal path reaps
+        await_leader_exit(process, 2)
+        # Also remove descendants if the parent exited before them. The leader
+        # is still unreaped here, so the id names this group only (#2714).
+        _signal_group(process, signal.SIGKILL)
     process.wait(timeout=2)
 
 
@@ -527,12 +576,16 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                     proxy.control_shutdown = {'control_initialized': True,
                         'control_shutdown_complete': False, 'unfinished_control_workers': None}
                 evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
+            if not exit_check_available():
+                raise BudgetStop('native control needs a non-reaping exit check (os.waitid or kqueue)')
             verify_launch()  # Bind the executable immediately before Popen.
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
                 env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)
             if control:
                 control.start(process, out, evidence, incoming.read())
-            while process.poll() is None or (control and not control.stdout_closed):
+            # Watch for the exit without reaping: cleanup signals the group
+            # before the reap releases its id (#2714).
+            while not leader_exited(process) or (control and not control.stdout_closed):
                 if proxy.failed.is_set():
                     raise BudgetStop(proxy.failure)
                 if time.monotonic() >= deadline:
@@ -545,7 +598,6 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 control.finish()
         if proxy.failed.is_set():
             raise BudgetStop(proxy.failure)
-        return process.returncode
     except BaseException as exc:
         primary_error = exc
         # Record every controller-originated failure before shutdown (#2042). An
@@ -570,6 +622,8 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                     control.close()
         else:
             _close_responsive_control(proxy, process, control, attempt, primary_error)
+    # Read after the cleanup above, which is what reaps the leader (#2714).
+    return process.returncode
 
 
 def _close_responsive_control(proxy, process, control, attempt, primary_error):
