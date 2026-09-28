@@ -376,7 +376,8 @@ class StaleBranchGuardTest(unittest.TestCase):
             copy.write_bytes(merged.read_bytes())
 
             def regenerate(src, target, flag, **kwargs):
-                target.write_bytes(b"id: a differing rebuild\n")      # same is False
+                # same is False, and the rebuild itself digests, so a rebuild would help (#2841)
+                target.write_bytes(merged.read_bytes() + b"# a differing rebuild\n")
                 return True, None
 
             def digest(*args, **kwargs):
@@ -1013,6 +1014,31 @@ class DiagnosticProbeTest(_PinHarness, unittest.TestCase):
         self.assertIn("IsADirectoryError", outcomes["io"][1])
         self.assertTrue(schema_sync._process_failure(schema_sync.RebuiltDigestFailed(outcomes["io"][0], "")))
         self.assertFalse(schema_sync._process_failure(schema_sync.RebuiltDigestFailed(outcomes["input"][0], "")))
+
+    def test_when_the_merged_digest_fails_the_rebuild_is_judged_too(self):
+        """#2841: the merged file fails to digest and differs from its rebuild. The advice
+        would be to rebuild, so the rebuild is probed as well: one that fails on its own
+        inputs under both profiles needs its source repaired; one that digests, or whose
+        probe fails as a process, is stale; one that fails only with the vocabulary names
+        the pin."""
+        from data_sheets_schema import schema_sync
+
+        def live_fails(*args, **kwargs):
+            raise KeyError("No such class: Dataset")
+        failed = lambda: schema_sync.RebuiltDigestFailed(schema_sync.DIGEST_INPUT_EXIT, "No such class: Dataset")
+        killed = schema_sync.RebuiltDigestFailed(-9, "")
+        cases = {"broken rebuild": ((failed(), failed(), failed(), failed()), UNCHECKED, "source needs repair"),
+                 "healthy rebuild": ((failed(), failed(), None), STALE, "differs from a fresh build"),
+                 "killed probe": ((failed(), failed(), killed), STALE, "differs from a fresh build"),
+                 "pin in the rebuild": ((failed(), failed(), failed(), None), UNCHECKED, "cannot be rendered")}
+        for label, (outcomes, status, words) in cases.items():
+            with self.subTest(label):
+                row = self._run(self.sequenced(*outcomes), digest=live_fails)
+                self.assertEqual(row["status"], status, row)
+                self.assertIn(words, row["reason"])
+                self.assertNotIn("digest", row)
+                schemas = [c[2] for c in self.calls]
+                self.assertEqual(len({schemas[0], schemas[-1]}), 2 if len(schemas) > 2 else 1)   # merged copy, then the rebuild
 
     def test_a_merged_file_repaired_during_the_probes_is_a_retry_not_the_pin(self):
         """The merged file fails to digest twice, then is repaired before the neutral

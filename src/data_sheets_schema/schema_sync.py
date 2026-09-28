@@ -456,26 +456,40 @@ def check_one(merged: Path, source: Path, class_name: str,
             # nonzero exit is a recurrence; a process failure, first or in either probe, is
             # inconclusive, and so is a failure that does not recur under the same profile
             # (#2827, #2832, #2835).
-            recurs = pin_blamed = False
+            recurs = pin_blamed = rebuild_broken = False
+            rebuild_failure = None
             if unchanged and same is not None and not _process_failure(exc):
+                from data_sheets_schema.profiles import NEUTRAL
+                name = schema_digest._schema_name(class_name, merged)
+
+                def diagnose(schema):
+                    """Whether `schema`'s digest fails on its inputs again, and whether only
+                    the vocabulary makes it fail: a pin malformed below its top level fails
+                    only when rendered, so the digest that recurs under the profile
+                    succeeds without it (#2820). Returns (recurs, pin_blamed, failure)."""
+                    failure = _probe(class_name, schema, vocabulary, name, profile)
+                    again, blamed = _input_failure(failure), False
+                    if again and vocabulary_bytes:
+                        neutral = _probe(class_name, schema, vocabulary, name, NEUTRAL)
+                        blamed = neutral is None
+                        again = neutral is None or _input_failure(neutral)
+                    return again, blamed, failure
+
                 if live is None:
                     probed = Path(tmp) / "captured" / merged.name
                     probed.parent.mkdir()
                     probed.write_bytes(merged_bytes)
                 else:
                     probed = rebuilt
-                name = schema_digest._schema_name(class_name, merged)
-                retry = _probe(class_name, probed, vocabulary, name, profile)
-                recurs = _input_failure(retry)
-                if recurs and vocabulary_bytes:
-                    from data_sheets_schema.profiles import NEUTRAL
-                    neutral = _probe(class_name, probed, vocabulary, name, NEUTRAL)
-                    # A pin malformed below its top level fails only when rendered: the
-                    # digest that recurs under the profile succeeds without the vocabulary.
-                    # Name it rather than advise a rebuild or a source repair that cannot
-                    # help (#2820).
-                    pin_blamed = neutral is None
-                    recurs = neutral is None or _input_failure(neutral)
+                recurs, pin_blamed, _ = diagnose(probed)
+                if live is None and same is False and not pin_blamed:
+                    # The merged file failed and its rebuild differs, so the advice would be
+                    # to rebuild: judge the rebuild too, since a broken one needs its source
+                    # repaired, not regenerated (#2841).
+                    again, blamed, rebuild_failure = diagnose(rebuilt)
+                    if blamed:
+                        recurs = pin_blamed = True
+                    rebuild_broken = again and not blamed
                 # A diagnosis names the live inputs, so they must still be the ones probed.
                 try:
                     moved = (merged.read_bytes() != merged_bytes or _source_state(source) != source_state
@@ -491,12 +505,13 @@ def check_one(merged: Path, source: Path, class_name: str,
             if recurs and pin_blamed:
                 return {**out, "status": UNCHECKED,
                         "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {exc}"}
-            if stable and recurs and live is not None and _input_failure(exc):
-                # The merged file digested; the fresh build did not, twice, and not for want
-                # of time: the source itself is broken, and rebuilding would not help (#2808).
-                return {**out, "digest": live, "status": UNCHECKED,
+            if stable and ((recurs and live is not None and _input_failure(exc)) or rebuild_broken):
+                # The fresh build does not digest, on its own inputs, twice where the merged
+                # file digested, or under both profiles where the merged file failed too:
+                # the source itself is broken, and rebuilding would not help (#2808, #2841).
+                return {**out, **({"digest": live} if live is not None else {}), "status": UNCHECKED,
                         "reason": ("a fresh build of the source could not be digested, so the "
-                                   f"source needs repair, not a rebuild: {exc}")}
+                                   f"source needs repair, not a rebuild: {exc if live is not None else rebuild_failure}")}
             if stable:
                 kept = Path(tempfile.mkdtemp(prefix="d4d-schema-rebuild-")) / merged.name
                 shutil.copy2(rebuilt, kept)
