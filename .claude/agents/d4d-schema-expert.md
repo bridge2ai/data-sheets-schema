@@ -118,6 +118,10 @@ classes:
 8. Check both merged schemas: `make check-digest`
 9. Run all tests: `make test`
 
+Step 6 is easy to miss but is not optional: the core merged schema imports most
+modules, `make regen-all` never rebuilds it, and a stale core schema makes the next
+generation run refuse to start.
+
 ### Schema Synchronization
 The project maintains three synchronized representations:
 1. Source schema (modular YAML files)

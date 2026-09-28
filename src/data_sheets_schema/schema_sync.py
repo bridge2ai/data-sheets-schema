@@ -157,8 +157,9 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
                 document = yaml.safe_load(files[path])
             except Exception:                          # a YAMLError, or a constructor's ValueError (#2800)
                 raise ValueError(f"source module {path} does not parse: {error}") from error
-            if not isinstance(document, dict) or not document.get("name"):
-                # Parses, but is no schema: emptied, a list, its name removed (#2804).
+            if not isinstance(document, dict) or not (document.get("name") or document.get("id")):
+                # Parses, but is no schema: emptied, a list, neither name nor id; the
+                # loader derives a missing name from the id (#2804, #2809).
                 raise ValueError(f"source module {path} is not a schema: {error}") from error
         raise
     state = (str(source), _generator_versions(),
@@ -378,6 +379,12 @@ def check_one(merged: Path, source: Path, class_name: str,
                     return {**out, "status": UNCHECKED,
                             "reason": f"the source schema could not be read (it changed during the check): {moved}"}
                 stable = False
+            if stable and live is not None and not isinstance(exc, subprocess.TimeoutExpired):
+                # The merged file digested; the fresh build did not, and not for want of
+                # time: the source itself is broken, and rebuilding would not help (#2808).
+                return {**out, "digest": live, "status": UNCHECKED,
+                        "reason": ("a fresh build of the source could not be digested, so the "
+                                   f"source needs repair, not a rebuild: {exc}")}
             if stable:
                 kept = Path(tempfile.mkdtemp(prefix="d4d-schema-rebuild-")) / merged.name
                 shutil.copy2(rebuilt, kept)

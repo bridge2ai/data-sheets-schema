@@ -333,6 +333,16 @@ class PreimageRegistryTest(unittest.TestCase):
             self.assertTrue(previous, name)
             self.assertEqual(row["previous_sha256"], hashlib.sha256(previous.encode()).hexdigest(), name)
 
+    def test_the_schema_expert_definition_can_be_challenged(self):
+        """#2810: an edit that adds no prose leaves no challenge, and preamble and
+        check-echo refuse; the definition's current text must answer its own challenge."""
+        from data_sheets_schema import agent_pin
+        ask = agent_pin.challenge("d4d-schema-expert")
+        self.assertIsNotNone(ask)
+        agent_pin.verify_echo("d4d-schema-expert", "Quoted: " + ask["expected"])
+        with self.assertRaises(Exception):
+            agent_pin.verify_echo("d4d-schema-expert", "Quoted: nothing from the definition")
+
 
 if __name__ == "__main__":
     unittest.main()

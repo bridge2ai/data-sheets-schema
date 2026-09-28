@@ -580,5 +580,57 @@ class NamedFailureTest(unittest.TestCase):
         self.assertIn("D4D_Core.yaml does not parse", row["reason"])
 
 
+class BrokenFreshBuildTest(unittest.TestCase):
+
+    def test_a_fresh_build_that_does_not_digest_needs_source_repair_not_a_rebuild(self):
+        """#2808: the merged file digests and the rebuild differs, but the rebuild's digest
+        fails for a reason other than time (a renamed root class): rebuilding cannot help,
+        so the row is unchecked and says the source needs repair."""
+        from unittest import mock
+        from data_sheets_schema import schema_sync
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+
+        def regenerate(src, target, flag, **kwargs):
+            target.write_bytes(b"id: a differing rebuild\n")
+            return True, None
+
+        def broken(*args, **kwargs):
+            raise ValueError('rebuilt digest process failed: No such class: "CoreDataset"')
+
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            copy.write_bytes(merged.read_bytes())
+            with mock.patch.object(schema_sync, "_regenerate", regenerate), \
+                 mock.patch.object(schema_sync, "_rebuilt_fingerprint", broken):
+                row = schema_sync.check_one(copy, source, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertTrue(row["reason"].startswith("a fresh build of the source could not be digested"), row)
+        self.assertNotIn("rebuilt_at", row)
+
+
+class UnnamedWrapperTest(unittest.TestCase):
+
+    def test_a_wrapper_with_an_id_but_no_name_is_not_blamed(self):
+        """#2809: the loader derives a missing name from the id, so the broken import is
+        the one named."""
+        merged, source, cls, marker = MERGED_SCHEMAS[1]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        with tempfile.TemporaryDirectory() as tmp:
+            schema_dir = Path(tmp) / "schema"
+            shutil.copytree(source.parent, schema_dir)
+            wrapper = schema_dir / source.name
+            wrapper.write_text("\n".join(line for line in wrapper.read_text().splitlines()
+                                          if not line.startswith("name:")) + "\n")
+            broken = schema_dir / "D4D_Core.yaml"
+            broken.write_text("<<<<<<< HEAD\n" + broken.read_text())
+            row = check_one(schema_dir / merged.name, wrapper, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("D4D_Core.yaml does not parse", row["reason"])
+        self.assertNotIn("is not a schema", row["reason"])
+
+
 if __name__ == "__main__":
     unittest.main()
