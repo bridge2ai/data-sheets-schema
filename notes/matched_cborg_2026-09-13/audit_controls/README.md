@@ -131,9 +131,12 @@ at most 64 MiB; the absolute exchange limit must be a whole number of seconds,
 at least 60 and no greater than the registered upstream read bound, so
 buffering also needs a read bound of at least 60 seconds and is refused by that
 name otherwise (#2940). The floor
-exists because the bounded worker's start-up counts against this limit by
-design (#2159): a limit of a few seconds, entered by mistake, would turn every
-buffered request into a stall debit after the send (#2605). The proxy's own
+exists because a limit of a few seconds, entered by mistake, is shorter than a
+complete provider response, so buffered requests would be debited as stalls
+after the send (#2605). The bounded worker's start-up is charged to the same
+limit by design (#2159) and shortens it further; a start-up that uses it all up
+stops the attempt before the send, as a ConnectTimeout, which is never debited
+(#2952). The proxy's own
 check stays at "positive", because the transport modules are pinned and the
 registration is where a selection is admitted. Both limits are pinned in the registration
 and offline plan. Generation, Phase 4 and evaluation reject this selector.

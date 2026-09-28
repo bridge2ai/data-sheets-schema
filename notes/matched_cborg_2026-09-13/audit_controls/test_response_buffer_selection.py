@@ -93,8 +93,8 @@ def test_inclusive_byte_and_time_bounds(max_bytes, seconds):
 
 @pytest.mark.parametrize('seconds', [1, 59])
 def test_a_deadline_below_the_floor_is_refused_by_name(seconds, monkeypatch):
-    """The worker's start-up counts against the deadline (#2159), so a few-second
-    deadline is a mistake that would debit every buffered request as a stall (#2605).
+    """A few-second deadline is a mistake: shorter than a complete provider response, so
+    buffered requests would be debited as stalls after the send (#2605, #2952).
     The provider transport refuses it by the same name before any client exists (#2938)."""
     assert registration.MIN_RESPONSE_BUFFER_SECONDS == 60
     m = manifest(**{KEY: {**BUFFER, 'total_seconds': seconds}})

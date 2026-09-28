@@ -837,9 +837,12 @@ def native_history_control(manifest):
     return dict(value)
 
 
-#: The smallest registrable complete-response deadline. The bounded worker's
-#: start-up counts against it by design (#2159), and a deadline of a few seconds
-#: would turn every buffered request into a stall debit after the send (#2605).
+#: The smallest registrable complete-response deadline (#2605). A deadline of a
+#: few seconds, entered by mistake, is shorter than a complete provider response,
+#: so buffered requests would be debited as stalls after the send. The bounded
+#: worker's start-up is charged to the same deadline (#2159) and shortens it
+#: further; a start-up that uses it all up stops the attempt before the send
+#: (ConnectTimeout, never debited) (#2952).
 MIN_RESPONSE_BUFFER_SECONDS = 60
 
 
