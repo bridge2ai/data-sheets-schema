@@ -321,9 +321,16 @@ def _probe(class_name, schema, vocabulary, name, profile):
 
 def _process_failure(exc) -> bool:
     """A failure of the process, not of the schema or the pin: a timeout, a child that
-    could not start, or one killed by a signal (#2814, #2827)."""
+    could not start, one killed by a signal, or one that exited 0 without a digest
+    (#2814, #2827, #2835). Only a child's own nonzero exit speaks for its inputs."""
     return (isinstance(exc, (subprocess.TimeoutExpired, OSError))
-            or (isinstance(exc, RebuiltDigestFailed) and exc.returncode is not None and exc.returncode < 0))
+            or (isinstance(exc, RebuiltDigestFailed) and not _input_failure(exc)))
+
+
+def _input_failure(exc) -> bool:
+    """A digest child's own nonzero exit: its exception, so the inputs it was given. A
+    probe's other failures say nothing about them (#2835)."""
+    return isinstance(exc, RebuiltDigestFailed) and bool(exc.returncode) and exc.returncode > 0
 
 
 def check_one(merged: Path, source: Path, class_name: str,
@@ -427,11 +434,11 @@ def check_one(merged: Path, source: Path, class_name: str,
             stable = same is False and unchanged
             # Diagnose only a failure of the inputs, on inputs that did not move. The digest
             # that failed (the live one if it failed, else the fresh build's) is probed again
-            # on the captured bytes, then without the vocabulary. A process failure, first
-            # or in either probe, is inconclusive, and so is a failure that does not recur
-            # under the same profile (#2827, #2747 Codex review).
+            # on the captured bytes, then without the vocabulary. Only a probe child's own
+            # nonzero exit is a recurrence; a process failure, first or in either probe, is
+            # inconclusive, and so is a failure that does not recur under the same profile
+            # (#2827, #2832, #2835).
             recurs = pin_blamed = False
-            retry = None
             if unchanged and same is not None and not _process_failure(exc):
                 if live is None:
                     probed = Path(tmp) / "captured" / merged.name
@@ -441,7 +448,7 @@ def check_one(merged: Path, source: Path, class_name: str,
                     probed = rebuilt
                 name = schema_digest._schema_name(class_name, merged)
                 retry = _probe(class_name, probed, vocabulary, name, profile)
-                recurs = retry is not None and not _process_failure(retry)
+                recurs = _input_failure(retry)
                 if recurs and vocabulary_bytes:
                     from data_sheets_schema.profiles import NEUTRAL
                     neutral = _probe(class_name, probed, vocabulary, name, NEUTRAL)
@@ -450,7 +457,7 @@ def check_one(merged: Path, source: Path, class_name: str,
                     # Name it rather than advise a rebuild or a source repair that cannot
                     # help (#2820).
                     pin_blamed = neutral is None
-                    recurs = recurs and (neutral is None or not _process_failure(neutral))
+                    recurs = neutral is None or _input_failure(neutral)
                 # A diagnosis names the live inputs, so they must still be the ones probed.
                 try:
                     moved = (merged.read_bytes() != merged_bytes or _source_state(source) != source_state
@@ -466,9 +473,7 @@ def check_one(merged: Path, source: Path, class_name: str,
             if recurs and pin_blamed:
                 return {**out, "status": UNCHECKED,
                         "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {exc}"}
-            if (stable and recurs and live is not None
-                    and all(isinstance(e, RebuiltDigestFailed) and e.returncode and e.returncode > 0
-                            for e in (exc, retry))):
+            if stable and recurs and live is not None and _input_failure(exc):
                 # The merged file digested; the fresh build did not, twice, and not for want
                 # of time: the source itself is broken, and rebuilding would not help (#2808).
                 return {**out, "digest": live, "status": UNCHECKED,
