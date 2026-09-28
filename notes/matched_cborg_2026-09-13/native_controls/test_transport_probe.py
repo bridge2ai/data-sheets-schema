@@ -943,23 +943,24 @@ def test_the_probe_pins_every_repository_module_its_lineage_modules_load():
 
 
 def test_the_import_closure_reads_source_and_imports_only_repository_packages(tmp_path, monkeypatch):
-    """#2628, #2748-#2750, #2801: a function-level import counts; a relative one resolves
-    against its package, a package's own `__init__` included; `from module import
-    attribute` never executes the module; packages in site-packages and dist-packages
-    inside the root, a package and a module outside the root, a standard-library package
-    and a name that is no module add nothing, and none of them is imported."""
+    """#2628, #2748-#2750, #2801, #2836: a function-level import counts; a relative one
+    resolves against its package, a package's own `__init__` included; `from module
+    import attribute` never executes the module; packages in site-packages and
+    dist-packages inside the root, a package and a module outside the root, a
+    standard-library package and a name that is no module add nothing. Nothing is
+    executed to find any of it, the repository's own package initializers included."""
     root = tmp_path / 'root'
     marker = tmp_path / 'executed'
+    ran = f"open({str(marker)!r}, 'a').write(__name__ + '\\n')\n"
     package = root / 'closure_pkg_2628'
     package.mkdir(parents=True)
-    (package / '__init__.py').write_text('')
+    (package / '__init__.py').write_text(ran)
     (package / 'nested').mkdir()
-    (package / 'nested' / '__init__.py').write_text('from . import leaf\n')      # relative in an __init__
+    (package / 'nested' / '__init__.py').write_text(ran + 'from . import leaf\n')      # relative in an __init__
     (package / 'nested' / 'leaf.py').write_text('')
     (package / 'inner.py').write_text('def later():\n    from . import deferred\n')
     (package / 'deferred.py').write_text('import json\nfrom closure_top_2628 import attribute\n'
                                          'import closure_venv_2628.sub\n')
-    ran = f"open({str(marker)!r}, 'a').write(__name__ + '\\n')\n"
     (root / 'closure_top_2628.py').write_text(ran + 'attribute = 1\n')
     installed = root / '.venv' / 'lib' / 'python3.12' / 'site-packages'
     (installed / 'closure_venv_2628').mkdir(parents=True)
@@ -1011,24 +1012,41 @@ def test_the_interpreter_environment_is_not_repository_code(tmp_path, monkeypatc
 
 
 @pytest.mark.parametrize('failure', [RuntimeError, ImportError, ValueError, ModuleNotFoundError])
-def test_a_repository_package_that_fails_to_import_fails_the_closure(tmp_path, monkeypatch, failure):
-    """A repository package whose __init__ raises is not skipped, whatever it raises:
-    skipping would leave what it imports unpinned, so the probe refuses rather than pin
-    less (#2628, #2770). A name per case keeps the cases independent (#2802)."""
+def test_a_repository_package_that_would_fail_to_import_is_pinned_not_skipped(tmp_path, monkeypatch, failure):
+    """A repository package whose __init__ would raise is pinned with what it imports, not
+    skipped: skipping would leave its imports unpinned (#2628, #2770). Nothing is
+    imported to find it, so whatever it raises is the run's business, not the
+    closure's (#2836). A name per case keeps the cases independent (#2802)."""
     name = f'closure_broken_2628_{failure.__name__.lower()}'
     root = tmp_path / 'root'
     (root / name).mkdir(parents=True)
     # A ModuleNotFoundError comes, as it does in practice, from a dependency that is not
     # installed; the others are raised as themselves (#2783).
     (root / name / '__init__.py').write_text(
-        "import closure_dependency_not_installed_2783  # broken package\n" if failure is ModuleNotFoundError
-        else f"raise {failure.__name__}('broken package')\n")
+        "import closure_dependency_not_installed_2783  # broken package\nfrom . import helper\n"
+        if failure is ModuleNotFoundError
+        else f"from . import helper\nraise {failure.__name__}('broken package')\n")
+    (root / name / 'helper.py').write_text('')
     (root / name / 'mod.py').write_text('')
     seed = root / 'seed.py'
     seed.write_text(f'import {name}.mod\n')
     monkeypatch.syspath_prepend(str(root))
-    with pytest.raises(failure, match='closure_dependency_not_installed_2783' if failure is ModuleNotFoundError
-                       else 'broken package'):
+    files = probe.import_closure(seed, root.resolve())
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', f'{name}/__init__.py', f'{name}/helper.py', f'{name}/mod.py'}
+    assert name not in sys.modules
+
+
+def test_a_repository_package_that_does_not_parse_fails_the_closure(tmp_path, monkeypatch):
+    """Its imports cannot be read, so the probe refuses rather than pin less."""
+    root = tmp_path / 'root'
+    (root / 'closure_unparsed_2836').mkdir(parents=True)
+    (root / 'closure_unparsed_2836' / '__init__.py').write_text('def broken(:\n')
+    (root / 'closure_unparsed_2836' / 'mod.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_unparsed_2836.mod\n')
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(SyntaxError):
         probe.import_closure(seed, root.resolve())
 
 
@@ -1166,6 +1184,69 @@ def test_a_package_whose_init_lies_outside_the_root_is_refused_before_it_runs(tm
         for name in [name for name in sys.modules if name.startswith('closure_')]:
             del sys.modules[name]
     assert not marker.exists()
+
+
+def test_an_outside_initializer_below_a_repository_package_never_runs(tmp_path, monkeypatch):
+    """#2836: a repository package's __init__ imports a subpackage whose __init__ links
+    outside the root. Resolving the parent's children never imports the parent, so the
+    outside initializer is refused before anything executes it."""
+    root = tmp_path / 'root'
+    marker = tmp_path / 'executed'
+    ran = f"open({str(marker)!r}, 'a').write(__name__ + '\\n')\n"
+    outside = tmp_path / 'outside_init.py'
+    outside.write_text(ran + 'import closure_helper_2836\n')
+    parent = root / 'closure_parent_2836'
+    (parent / 'linked').mkdir(parents=True)
+    (parent / '__init__.py').write_text(ran + 'from .linked import child\n')
+    (parent / 'linked' / '__init__.py').symlink_to(outside)
+    (parent / 'linked' / 'child.py').write_text(ran)
+    (parent / 'other.py').write_text('')
+    (root / 'closure_helper_2836.py').write_text(ran)
+    seed = root / 'seed.py'
+    seed.write_text('import closure_parent_2836.other\n')
+    monkeypatch.syspath_prepend(str(root))
+    try:
+        with pytest.raises(BudgetStop, match='closure_parent_2836.linked runs an initializer outside the repository'):
+            probe.import_closure(seed, root.resolve())
+    finally:
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
+    assert not marker.exists(), marker.read_text()
+
+
+def test_an_initializer_linked_to_a_file_without_a_py_suffix_is_read(tmp_path, monkeypatch):
+    """#2836: Python runs an __init__.py that links to an extensionless file inside the
+    root; the closure pins that file and follows its imports."""
+    root = tmp_path / 'root'
+    package = root / 'closure_extless_2836'
+    package.mkdir(parents=True)
+    (root / 'initializer_source').write_text('import closure_helper_extless_2836\n')
+    (package / '__init__.py').symlink_to(root / 'initializer_source')
+    (package / 'child.py').write_text('')
+    (root / 'closure_helper_extless_2836.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_extless_2836.child\n')
+    monkeypatch.syspath_prepend(str(root))
+    files = probe.import_closure(seed, root.resolve())
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'initializer_source', 'closure_extless_2836/child.py', 'closure_helper_extless_2836.py'}
+
+
+def test_a_bytecode_only_repository_package_is_refused(tmp_path, monkeypatch):
+    """#2836: a package with only an __init__.pyc runs code whose imports cannot be read."""
+    import py_compile
+    root = tmp_path / 'root'
+    package = root / 'closure_pyc_2836'
+    package.mkdir(parents=True)
+    (package / 'source.py').write_text('import closure_helper_pyc_2836\n')
+    py_compile.compile(str(package / 'source.py'), cfile=str(package / '__init__.pyc'), doraise=True)
+    (package / 'source.py').unlink()
+    (package / 'child.py').write_text('')
+    seed = root / 'seed.py'
+    seed.write_text('import closure_pyc_2836.child\n')
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(BudgetStop, match='closure_pyc_2836 is not Python source'):
+        probe.import_closure(seed, root.resolve())
 
 
 def test_a_namespace_package_with_a_portion_in_the_root_is_the_repositorys(tmp_path, monkeypatch):

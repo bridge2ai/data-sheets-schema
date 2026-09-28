@@ -53,6 +53,7 @@ import argparse
 import ast
 import hashlib
 import importlib.metadata
+import importlib.machinery
 import importlib.util
 import json
 import os
@@ -221,26 +222,32 @@ def repository_file(path, root, environment):
 
 
 def _module_spec(name, inside):
-    """The spec of a repository module name, or None. Only repository packages above it
-    are imported to find it, which runs their `__init__`: a name whose package is not
-    the repository's (the standard library, an installed package) is never looked
-    below, so nothing of theirs is imported (#2749), and a name under a plain module
-    (`from module import attribute`) is not a module, which is never executed to find out.
+    """The spec of a repository module name, or None, found without executing anything:
+    below the top level, each name is looked up in its parent's search locations rather
+    than by importing the parent, so no `__init__` runs, the repository's or another's,
+    before the walk has read its imports (#2749, #2836). A name whose package is not the
+    repository's is never looked below, and a name under a plain module (`from module
+    import attribute`) is not a module.
 
     A module or a regular package is the repository's when the file that runs, its
-    origin, is. A package directory inside the repository whose initializer is not
-    is refused before it runs: that initializer would execute unpinned, and what it
-    imports would never enter the closure (#2732 Codex review). A namespace package
-    runs nothing, so any portion inside the repository makes it the repository's."""
+    origin, is. A package directory inside the repository whose initializer is not is
+    refused: that initializer would execute unpinned, and what it imports would never
+    enter the closure (#2831). A namespace package runs nothing, so any portion inside
+    the repository makes it the repository's."""
     spec = None
     parts = name.split('.')
     for depth in range(1, len(parts) + 1):
         if spec is not None and spec.submodule_search_locations is None:
             return None
-        # Nothing is suppressed: a repository package above the name has already been
-        # found, so an error importing it is a broken package, which must fail the
-        # closure rather than shrink it (#2770). A missing top-level name is None.
-        spec = importlib.util.find_spec('.'.join(parts[:depth]))
+        full = '.'.join(parts[:depth])
+        if full in sys.modules and getattr(sys.modules[full], '__spec__', None) is not None:
+            spec = sys.modules[full].__spec__                  # already run; nothing new executes
+        elif spec is None:
+            spec = importlib.util.find_spec(full)              # a top-level name imports nothing
+        else:
+            parent = sys.modules.get('.'.join(parts[:depth - 1]))
+            locations = getattr(parent, '__path__', None) or spec.submodule_search_locations
+            spec = importlib.machinery.PathFinder.find_spec(full, list(locations))
         if spec is None:
             return None
         portions = any(inside(Path(place).resolve()) for place in spec.submodule_search_locations or [])
@@ -258,8 +265,12 @@ def import_closure(source, root):
     """`source` and every repository file it imports, transitively, read from the
     source rather than from what happens to be imported: an import inside a function
     counts, since the lineage check reaches batch_native only through one (#2628).
-    Resolved as this interpreter would resolve it; a name that is not a module, or a
-    module that is not the repository's own (`repository_file`), adds nothing."""
+    Resolved as this interpreter would resolve it, without executing anything; a name
+    that is not a module, or a module that is not the repository's own
+    (`repository_file`), adds nothing. A repository module that is not Python source (a
+    bytecode-only file, an extension) is refused, since its imports cannot be read; one
+    whose source file has no `.py` suffix, such as an initializer linked to one, is read
+    all the same (#2836)."""
     environment = _environment()
     def inside(path):
         return repository_file(path, root, environment)
@@ -276,8 +287,10 @@ def import_closure(source, root):
         if spec is None or not spec.has_location or not spec.origin:
             continue
         origin = Path(spec.origin).resolve()
-        if origin.suffix != '.py' or not inside(origin) or origin in files:
+        if not inside(origin) or origin in files:
             continue
+        if not isinstance(spec.loader, importlib.machinery.SourceFileLoader):
+            raise BudgetStop(f'repository module {spec.name} is not Python source, so its imports cannot be read')
         files.add(origin)
         pending.extend(_imported_names(origin, spec.parent))
     return files
