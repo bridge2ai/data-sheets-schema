@@ -5820,11 +5820,10 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
     usage.append(row)
     # Persisted at once (#1038 second pass): a run whose every retry fails
     # never reaches the record write, and the row would be lost with it.
+    # Appended as the reasoning log is, ending a line an interrupted write left
+    # open, so a resumed run's row never joins it (#2779, #2740).
     try:
-        ledger = _abandoned_ledger(spec)
-        ledger.parent.mkdir(parents=True, exist_ok=True)
-        with ledger.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+        reasoning.append(_abandoned_ledger(spec), row)
     except OSError as exc:
         print(f"   could not persist the abandoned attempt: {exc}")
 
@@ -5834,18 +5833,15 @@ def _abandoned_ledger(spec: RunSpec) -> Path:
 
 
 def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
-    ledger = _abandoned_ledger(spec)
-    if not ledger.exists():
-        return []
-    rows = []
-    for line in ledger.read_text(encoding="utf-8").splitlines():
-        try:
-            row = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(row, dict):
-            rows.append(row)
-    return rows
+    """Every row of the abandoned-attempts journal, read as the reasoning log is:
+    split on the newline the writer ends each row with and nothing else, and a line
+    that does not decode, parse or parse to an object refused, naming it. The
+    accounting gate reads this journal before every call and before publication, and
+    must not skip a charge it cannot read (#2779, #2695, #2720)."""
+    try:
+        return reasoning.read(_abandoned_ledger(spec))
+    except (OSError, ValueError) as exc:
+        raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {exc}") from exc
 
 
 def _unrecorded_abandoned(spec: RunSpec, prior: dict[str, Any]) -> bool:
