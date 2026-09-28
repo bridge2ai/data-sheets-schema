@@ -68,13 +68,15 @@ def processes(monkeypatch):
     assert all(process.poll() is not None for process, _, _ in created), "child survived its transport context"
 
 
-# Real-time bounds on in-process gaps. None holds interpreter start-up, and each
-# keeps at least a threefold margin over its measured maximum. The measurements were
-# 768 runs of the two stream tests (the count test's in test_bounded_transport.py)
-# under 64-256 concurrent copies on 10 cores, at load 114-336 for these samples
-# (2026-09-27). Each bound gives up power against shorter delays: origin/main's
-# wall-clock totals caught delays of about 1.2-1.5 s, but flaked under load
-# (#2618, #2643, #2678, #2698).
+# Real-time bounds. None holds interpreter start-up, and each keeps at least a
+# threefold margin over the maximum measured for it. KILL_GAP, PARENT_GAP and
+# CALL_GAP were measured over 768 runs of the two stream tests (the count test's in
+# test_bounded_transport.py) under 64-256 concurrent copies on 10 cores, at load
+# 114-336 (2026-09-27); each later constant states its own samples and load. Most
+# time steps inside one process. PARENT_GAP and READ_HOP_SECONDS also include a hop
+# between the worker and another process, and say so. Each bound gives up power
+# against shorter delays: origin/main's wall-clock totals caught delays of about
+# 1.2-1.5 s, but flaked under load (#2618, #2643, #2678, #2698).
 
 #: The parent's close decision (the deadline expiring, or leaving the context) to
 #: the worker's SIGKILL. Measured median 0.1 ms, p99 69 ms, max 141 ms (load 336).
@@ -105,6 +107,13 @@ PARENT_GAP_SECONDS = 2.5
 #: where origin/main's 0.3 s bound failed one of 0.3 s.
 READ_HOP_SECONDS = 2.5
 
+#: How much sooner than READ_HOP_SECONDS after the parent begins its second read
+#: the withheld read may end. The worker's read timer starts when it has written
+#: the first chunk, before the parent begins that read (#2762). Measured at most
+#: 43 ms early over 1,536 reads at load 176-477, and 20 ms over 960 at load
+#: 435-548. It rejects a read deadline that fires 0.5 s or more early.
+READ_EARLY_SECONDS = .5
+
 #: The whole call less the worker's start-up window (from just before Popen to the
 #: server receiving the request, or flushing its headers). That covers every
 #: in-process step, including a wait before the spawn and one after the kill (#2696).
@@ -121,6 +130,24 @@ CALL_GAP_SECONDS = 3.5
 #: buffered test's ladder; a later one than origin/main's 1.5 s total still passes.
 REFUSAL_GAP_SECONDS = 1.5
 
+#: After a refusal: from the refusal to the worker's SIGKILL, and from the worker's
+#: reap to the caller receiving the refusal. Both are the exception unwinding
+#: through the stream context, in-process (#2760). Measured: refusal to kill median
+#: 0.1 ms, p99 92 ms, max 759 ms; reap to release max 129 ms; over 3,427 refusals
+#: under 320 concurrent copies at load 108-510. It rejects a delay of 2.5 s or more
+#: on either side of the reap. KILL_GAP_SECONDS (0.5 s) was measured at load up to
+#: 336 only, on other paths.
+UNWIND_GAP_SECONDS = 2.5
+
+#: The reap of a killed worker. It is a process-level cost, so this is a hang guard,
+#: as REAP_SECONDS is in test_bounded_transport.py. Measured median 201 ms, p99
+#: 864 ms, max 1.60 s over the same 3,427 reaps (#2760).
+REAP_SECONDS = 10
+
+
+# A hang guard, not a real-time bound: nothing measured it and a passing run never
+# reaches it.
+
 #: The bounds a test gives a worker where no deadline is its subject. A pre-header
 #: bound also pays for the worker's interpreter start-up, which took about 14 s at
 #: load 450 (#2697), so a short one ended exchanges these tests expected to finish
@@ -130,14 +157,16 @@ REFUSAL_GAP_SECONDS = 1.5
 HANG_SECONDS = 120
 
 
-def killed_before_reaped(process, killed_at=None):
+def killed_before_reaped(process, killed_at=None, reaped_at=None):
     """For each wait on `process`, whether it had been sent SIGKILL (or was
     already reaped) when the wait began (#2540, #2569 reviews).
 
     A close that waits on a live worker first through `Popen.wait`, for any
     length, records False. A grace spent some other way (a sleep, an event
     wait) is not seen here (#2619): each test bounds it by the real time from
-    its close decision to the SIGKILL, appended to `killed_at` (#2618)."""
+    its close decision to the SIGKILL, appended to `killed_at` (#2618). The
+    instant each wait returns with the worker reaped is appended to `reaped_at`
+    (#2760)."""
     killed, waits = [], []
     real_signal, real_wait = process.send_signal, process.wait
     def send_signal(sig):
@@ -148,7 +177,11 @@ def killed_before_reaped(process, killed_at=None):
         return real_signal(sig)
     def wait(*args, **kwargs):
         waits.append(bool(killed) or process.returncode is not None)
-        return real_wait(*args, **kwargs)
+        try:
+            return real_wait(*args, **kwargs)
+        finally:
+            if reaped_at is not None and process.returncode is not None:
+                reaped_at.append(time.monotonic())
     process.send_signal, process.wait = send_signal, wait
     return waits
 
@@ -337,9 +370,11 @@ def test_after_headers_read_deadline_and_exact_incremental_chunks(processes):
             done.set()
     # Exactly the flushed chunk, yielded before the rest existed: nothing was buffered.
     assert received == [b"first"] and not released
-    # The read deadline ended the withheld read on time. Measured: at most 68 ms after
-    # READ_HOP_SECONDS over 1,536 reads at load up to 477 (#2734).
-    assert waited[0] < READ_HOP_SECONDS + REFUSAL_GAP_SECONDS, f"the read deadline fired {waited[0]:.2f} s after the read began"
+    # The read deadline ended the withheld read when it was due: not late (measured at
+    # most 68 ms after READ_HOP_SECONDS over 1,536 reads at load up to 477, #2734) and
+    # not early (#2762).
+    assert READ_HOP_SECONDS - READ_EARLY_SECONDS <= waited[0] < READ_HOP_SECONDS + REFUSAL_GAP_SECONDS, \
+        f"the read deadline fired {waited[0]:.2f} s after the read began; {READ_HOP_SECONDS} s is registered"
     assert not client._workers
     client.close()
 

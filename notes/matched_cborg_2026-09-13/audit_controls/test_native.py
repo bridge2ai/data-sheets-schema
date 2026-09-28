@@ -497,10 +497,11 @@ def test_stopped_proxy_receipt_records_actual_drained_handlers(native_case,monke
 
 
 def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_source(native_case,monkeypatch):
-    # The deadline elapses when the handler has entered, not after 0.6 real
-    # seconds that also paid for starting the child and its request (#2617).
-    # The registered deadline is a hang guard the clock asserts it never reached;
-    # every other wait returns as soon as its event happens.
+    # The deadline elapses UNDER_SECONDS after the handler has entered, not after
+    # 0.6 real seconds that also paid for starting the child and its request
+    # (#2617), and the clock asserts it was due when the controller stopped
+    # (#2763). The registered deadline is a hang guard; every other wait returns
+    # as soon as its event happens.
     import run_native_canary
     from native_controls.test_native_launch import EventClock, HANG_SECONDS
     c=native_case;_,sdk,review=configure_receipt_runner(c,monkeypatch)
@@ -510,8 +511,11 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     monkeypatch.setattr(run_native_canary,'time',clock)
     observed=[]
     original=native.AuditProxy
+    stopped_at=[]
     class ObservedProxy(original):
         def __init__(self,**kwargs):super().__init__(**kwargs);observed.append(self)
+        def close_admission(self):
+            stopped_at.append(clock.last);super().close_admission()
     monkeypatch.setattr(native,'AuditProxy',ObservedProxy)
     def wait_for_release(_):
         entered.set()
@@ -523,7 +527,7 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     try:
         with pytest.raises(BudgetStop,match='deadline'):native.run_job(c.registration,review,adapter=adapter)
         assert entered.is_set()
-        clock.assert_the_event_elapsed_it()
+        clock.assert_stopped_at_the_deadline(stopped_at[0])
         receipt=json.loads((c.attempt/'result.json').read_text())
         assert receipt['stop_source']=='native_controller' and receipt['status']=='stopped'
         assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':1}
