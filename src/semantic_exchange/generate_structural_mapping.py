@@ -129,7 +129,9 @@ class StructuralMapping:
             "confidence": str(self.confidence),
             "subject_source": "d4d:data_sheets_schema",
             "object_source": "rocrate:fairscape",
-            "d4d_subject_range": self.d4d_range or "string",
+            # An unknown range is left empty, never written as "string": that
+            # placeholder read as schema data on every composition row (#2936).
+            "d4d_subject_range": self.d4d_range or "",
             "subject_multivalued": str(self.d4d_multivalued),
             "rocrate_value_type": self.rocrate_type,
             "type_compatible": str(self.type_compatible),
@@ -223,6 +225,36 @@ class D4DSchemaParser:
             if attr.is_composition(self.classes):
                 paths[attr_name] = attr.get_composition_path(self.classes)
         return paths
+
+    def resolve_path(self, class_name: str, path: str) -> SchemaSlot:
+        """The slot a dotted composition path reaches from `class_name`, as one slot.
+
+        Range and slot_uri are the last segment's, so the bare root path
+        `anomalies` is `DataAnomaly` and `anomalies.id` is `uriorcurie`.
+        Multivalued is True when *any* segment is: `anomalies.name` is a
+        single string per anomaly, but there is one per entry of a list, so
+        the value the path reaches from a `Dataset` is a list (#2936).
+        """
+        segments = []
+        owner = class_name
+        for name in path.split("."):
+            cls = self.classes.get(owner)
+            if cls is None or name not in cls.attributes:
+                raise ValueError(
+                    f"{class_name}.{path}: {name!r} is not an attribute of "
+                    f"{owner!r} in {self.schema_path}")
+            segments.append(cls.attributes[name])
+            owner = segments[-1].range
+        leaf = segments[-1]
+        return SchemaSlot(
+            name=path,
+            description=leaf.description,
+            range=leaf.range,
+            slot_uri=leaf.slot_uri,
+            multivalued=any(s.multivalued for s in segments),
+            required=all(s.required for s in segments),
+            parent_class=class_name,
+        )
 
 
 class ROCrateSchemaParser:
@@ -384,12 +416,22 @@ class StructuralMappingGenerator:
             for attr_name, paths in comp_paths.items():
                 # Find matching RO-Crate nested structures
                 for path in paths:
+                    # What the schema says the path reaches. These rows were
+                    # written with range None (emitted as "string"),
+                    # multivalued False and type_compatible True, whatever
+                    # the path was (#2936).
+                    slot = self.d4d.resolve_path(class_name, path)
                     rocrate_candidates = [
                         p for p in self.rocrate.properties.values()
                         if attr_name.lower() in p.path.lower()
                     ]
 
                     for rocrate_prop in rocrate_candidates:
+                        type_compat, warnings = self._validate_type_compatibility(slot, rocrate_prop)
+                        # Kept and flagged when incompatible, as `_map_slot_uris`
+                        # does, rather than skipped as the hierarchy and module
+                        # strategies do: skipping would silently delete rows the
+                        # committed file carries.
                         mapping = StructuralMapping(
                             d4d_class=class_name,
                             # The whole path, not its last segment (#410).
@@ -401,9 +443,9 @@ class StructuralMappingGenerator:
                             # only in the free-text `structural_notes` column,
                             # which nothing reads.
                             d4d_slot=path,
-                            d4d_slot_uri=None,
-                            d4d_range=None,
-                            d4d_multivalued=False,
+                            d4d_slot_uri=slot.slot_uri,
+                            d4d_range=slot.range,
+                            d4d_multivalued=slot.multivalued,
                             rocrate_property=rocrate_prop.name,
                             rocrate_path=rocrate_prop.path,
                             rocrate_type=rocrate_prop.value_type,
@@ -412,7 +454,8 @@ class StructuralMappingGenerator:
                             confidence=0.7,
                             composition_path=path,
                             structural_notes=f"Composition path: {path}",
-                            type_compatible=True,
+                            type_compatible=type_compat,
+                            warnings=warnings,
                         )
                         self.mappings.append(mapping)
 
@@ -629,18 +672,21 @@ class StructuralMappingGenerator:
         print(f"Exported summary to {output_path}")
 
 
-def read_sssom_rows(path: Path) -> set:
-    """(subject_id, predicate_id, object_id) for every data row.
+TRIPLE = ("subject_id", "predicate_id", "object_id")
 
-    Identity is the triple, not the whole line: confidence and structural notes
-    move for reasons that are not a change of meaning, and a drift check that
-    fires on those is one nobody keeps running.
-    """
+#: Columns that state what the schema says about a subject, or whether the
+#: mapping was checked. Unlike confidence or notes, a wrong value here is a
+#: wrong claim: composition rows carried the generator's placeholders in all
+#: three and a triple-only check could not see it (#2936).
+STRUCTURAL_COLUMNS = ("d4d_subject_range", "subject_multivalued",
+                      "type_compatible")
+
+
+def _read_sssom(path: Path, required: tuple) -> list:
     import csv
     with path.open(encoding="utf-8") as fh:
         lines = [l for l in fh if not l.startswith("#")]
     reader = csv.DictReader(lines, delimiter="\t")
-    required = ("subject_id", "predicate_id", "object_id")
     missing = [c for c in required if c not in (reader.fieldnames or [])]
     if missing:
         # Naming the file and the column, because the alternative is a bare
@@ -650,13 +696,41 @@ def read_sssom_rows(path: Path) -> set:
             f"{path} is not a readable SSSOM mapping: no "
             f"{', '.join(missing)} column"
             + (" (no header row at all?)" if not reader.fieldnames else ""))
-    return {tuple(r[c] for c in required) for r in reader}
+    return list(reader)
+
+
+def read_sssom_rows(path: Path) -> set:
+    """(subject_id, predicate_id, object_id) for every data row.
+
+    Identity is the triple, not the whole line: confidence and structural notes
+    move for reasons that are not a change of meaning, and a drift check that
+    fires on those is one nobody keeps running.
+    """
+    return {tuple(r[c] for c in TRIPLE) for r in _read_sssom(path, TRIPLE)}
 
 
 def check_drift(committed: Path, regenerated: Path) -> tuple:
     """Rows the committed file has that regeneration does not, and vice versa."""
     have, made = read_sssom_rows(committed), read_sssom_rows(regenerated)
     return sorted(have - made), sorted(made - have)
+
+
+def check_column_drift(committed: Path, regenerated: Path,
+                       columns: tuple = STRUCTURAL_COLUMNS) -> tuple:
+    """How many rows both files carry, and where their `columns` disagree.
+
+    Compared per triple, so a row only one file has is `check_drift`'s to
+    report, not this. Each difference is (triple, column, committed value,
+    regenerated value).
+    """
+    def by_triple(path):
+        return {tuple(r[c] for c in TRIPLE): r
+                for r in _read_sssom(path, TRIPLE + tuple(columns))}
+    have, made = by_triple(committed), by_triple(regenerated)
+    shared = sorted(have.keys() & made.keys())
+    differ = [(t, c, have[t][c], made[t][c])
+              for t in shared for c in columns if have[t][c] != made[t][c]]
+    return len(shared), differ
 
 
 def main(argv=None):
@@ -707,6 +781,7 @@ def main(argv=None):
                 print(f"\n✗ No committed mapping at {committed}")
                 return 1
             lost, gained = check_drift(committed, scratch)
+            compared, column_drift = check_column_drift(committed, scratch)
 
             # The target writes two artifacts from the same mappings list, so
             # check both. Today the summary is fresh and the mapping is stale
@@ -719,7 +794,7 @@ def main(argv=None):
                 not summary.exists()
                 or summary.read_text(encoding="utf-8")
                 != scratch_summary.read_text(encoding="utf-8"))
-        if not lost and not gained and not summary_drifted:
+        if not lost and not gained and not column_drift and not summary_drifted:
             print("\n✓ The committed mapping and summary regenerate exactly.")
             return 0
         print(f"\n✗ The committed mapping does not regenerate from its inputs.")
@@ -733,9 +808,20 @@ def main(argv=None):
                   "committed file lacks:")
             for s, p_, o in gained:
                 print(f"      {s}  --{p_}->  {o}")
+        if column_drift:
+            print(f"\n  {len(column_drift)} value(s) differ on the {compared} "
+                  "row(s) both files carry:")
+            for (s, p_, o), col, was, now in column_drift:
+                print(f"      {s}  --{p_}->  {o}  {col}: "
+                      f"committed {was!r}, regenerated {now!r}")
+        else:
+            # Said affirmatively, so a reader can tell a column check that
+            # found nothing from one that did not run.
+            print(f"\n  The {compared} row(s) both files carry agree on "
+                  f"{', '.join(STRUCTURAL_COLUMNS)}.")
         if summary_drifted:
             print("\n  The summary does not regenerate either.")
-        elif lost or gained:
+        elif lost or gained or column_drift:
             print("\n  The summary regenerates exactly, so it describes the "
                   "generator's output rather than the mapping beside it (#295).")
         print("\n  A mapping nobody can rebuild is a mapping nobody can safely "
