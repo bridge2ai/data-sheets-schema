@@ -126,10 +126,17 @@ Check sync status:
 make check-sync
 ```
 
-Force regenerate everything:
+Force regenerate the full merged schema and project artifacts:
 ```bash
 make regen-all
 ```
+
+The core merged schema (`data_sheets_schema_core_all.yaml`) is not rebuilt by `regen-all`;
+remove it and rebuild it (`make gen-core-schema` alone skips a stale file newer than its sources):
+```bash
+rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema
+```
+`make check-digest` names the command for each stale merged schema.
 
 ## Validation Commands
 

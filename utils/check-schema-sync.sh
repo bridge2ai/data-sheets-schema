@@ -130,6 +130,7 @@ else
     echo "  make gen-project    # Regenerate Python model and artifacts"
     echo ""
     echo "Or run both with:"
-    echo "  make regen-all      # Force regenerate everything"
+    echo "  make regen-all      # Force regenerate the merged schema and project artifacts"
+    echo "  (the core merged schema is separate: rm -f its file && make gen-core-schema)"
     exit 1
 fi

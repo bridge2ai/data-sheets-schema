@@ -140,8 +140,9 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
 class SyncCheckTest(unittest.TestCase):
 
     def test_the_repository_is_in_sync(self):
-        """If this fails, do not generate: rebuild a stale schema with the command its
-        row names, or fix the cause an unchecked row names, then commit (#2775)."""
+        """If this fails, do not generate: rebuild a stale schema with the command
+        `d4d schema check-digest` names for it, or fix the cause an unchecked row's reason
+        names, then commit (#2775, #2790)."""
         rows = check()
         self.assertEqual(blocking(rows), [],
                          "a merged schema is stale or could not be checked (see the rows)")
@@ -250,6 +251,9 @@ class RefusalWordingTest(unittest.TestCase):
         self.assertIn("Dataset: rebuild differs", stale_part)
         self.assertNotIn("CoreDataset", stale_part)
         self.assertIn("CoreDataset: timed out", unchecked_part)
+        # Only the stale row's rebuild: the unchecked core gets no rm -f (#2788).
+        for text in ("rm -f", "gen-core-schema"):
+            self.assertNotIn(text, message)
 
 
 class DigestTimeoutTest(unittest.TestCase):
@@ -285,7 +289,8 @@ class CheckDigestSummaryTest(unittest.TestCase):
                 {"class": "CoreDataset", "status": UNCHECKED, "merged": "b.yaml", "reason": "timed out"},
                 {"class": "Other", "status": IN_SYNC, "merged": "c.yaml"}]
         for given, says, never in (
-                (rows, ["1 of 3 merged schema(s) not current", "1 of 3 merged schema(s) could not be checked"], []),
+                (rows, ["1 of 3 merged schema(s) not current", "1 of 3 merged schema(s) could not be checked"],
+                 ["rm -f", "gen-core-schema"]),                  # the unchecked core gets no rebuild (#2788)
                 ([rows[1], rows[2]], ["1 of 2 merged schema(s) could not be checked"], ["not current", "regen-all"]),
                 ([rows[0], rows[2]], ["1 of 2 merged schema(s) not current", "regen-all"], ["could not be checked"])):
             with mock.patch.object(schema_sync, "check", lambda **_: given):
@@ -332,9 +337,14 @@ class UnparseableMergedSchemaTest(unittest.TestCase):
             copy = Path(tmp) / merged.name
             copy.write_bytes(b"<<<<<<< HEAD\n" + merged.read_bytes())
             row = check_one(copy, source, cls, marker)
-        self.assertEqual(row["status"], STALE, row)
-        self.assertIn("could not be computed", row["reason"])
-        self.assertTrue(Path(row["rebuilt_at"]).is_file())
+        kept = Path(row.get("rebuilt_at", ""))
+        try:
+            self.assertEqual(row["status"], STALE, row)
+            self.assertIn("could not be computed", row["reason"])
+            self.assertTrue(kept.is_file())
+        finally:
+            if kept.name:
+                shutil.rmtree(kept.parent, ignore_errors=True)     # 1.4 MB a run (#2791)
 
     def test_a_digest_failure_on_a_matching_file_stays_unchecked(self):
         """#2773: only a file the rebuild shows differs is called stale."""
@@ -348,6 +358,101 @@ class UnparseableMergedSchemaTest(unittest.TestCase):
         with mock.patch.object(schema_digest, "digest_text", boom):
             row = check_one(merged, source, cls, marker)
         self.assertEqual(row["status"], UNCHECKED, row)
+
+
+class StaleBranchGuardTest(unittest.TestCase):
+    """#2788: a digest failure is stale only when the rebuild already differs and nothing
+    moved during the check; otherwise it is unchecked, and never a crash."""
+
+    def _row(self, *, move=None, before_compare=False):
+        from unittest import mock
+        from data_sheets_schema import profiles, schema_sync
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            copy.write_bytes(merged.read_bytes())
+
+            def regenerate(src, target, flag, **kwargs):
+                target.write_bytes(b"id: a differing rebuild\n")      # same is False
+                return True, None
+
+            def digest(*args, **kwargs):
+                if move == "merged":
+                    copy.write_bytes(copy.read_bytes() + b"# moved during the check\n")
+                raise RuntimeError("digest failed")
+
+            patches = [mock.patch.object(schema_sync, "_regenerate", regenerate),
+                       mock.patch.object(schema_digest, "digest_text", digest)]
+            if move == "source":
+                patches.append(mock.patch.object(schema_sync, "_source_state", lambda _s: ("moved",)))
+            if before_compare:
+                def vocabulary(*a, **k):
+                    raise RuntimeError("vocabulary pin missing")
+                patches.append(mock.patch.object(profiles, "vocabulary_bytes", vocabulary))
+            for patch in patches:
+                patch.start()
+            try:
+                row = schema_sync.check_one(copy, source, cls, marker)
+            finally:
+                for patch in reversed(patches):
+                    patch.stop()
+        if row.get("rebuilt_at"):
+            shutil.rmtree(Path(row["rebuilt_at"]).parent, ignore_errors=True)
+        return row
+
+    def test_a_differing_rebuild_with_a_failed_digest_is_stale(self):
+        self.assertEqual(self._row()["status"], STALE)
+
+    def test_a_merged_file_that_moved_during_the_check_is_unchecked(self):
+        self.assertEqual(self._row(move="merged")["status"], UNCHECKED)
+
+    def test_a_source_that_moved_during_the_check_is_unchecked(self):
+        self.assertEqual(self._row(move="source")["status"], UNCHECKED)
+
+    def test_a_failure_before_the_comparison_is_unchecked_not_a_crash(self):
+        row = self._row(before_compare=True)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("vocabulary pin missing", row["reason"])
+
+
+class RebuildOperandTest(unittest.TestCase):
+    """#2788: the rebuild commands are checked against the schemas and the Makefile, not
+    against themselves: the core's rm -f removes the core merged file and nothing else,
+    and every make target it names exists."""
+
+    def test_each_rebuild_command_names_its_own_merged_file_and_real_targets(self):
+        import re as _re
+        from data_sheets_schema.schema_sync import REBUILD
+        makefile = (Path(__file__).resolve().parents[1] / "Makefile").read_text()
+        targets = set(_re.findall(r"^([A-Za-z0-9_.-]+):", makefile, flags=_re.M))
+        merged_by_class = {cls: str(merged) for merged, _source, cls, _marker in MERGED_SCHEMAS}
+        self.assertEqual(set(REBUILD), set(merged_by_class))
+        for cls, command in REBUILD.items():
+            removed = _re.findall(r"rm -f (\S+)", command)
+            self.assertLessEqual(set(removed), {merged_by_class[cls]}, command)
+            for target in _re.findall(r"make (\S+)", command):
+                self.assertIn(target, targets, command)
+        self.assertEqual(_re.findall(r"rm -f (\S+)", REBUILD["CoreDataset"]), [merged_by_class["CoreDataset"]])
+
+
+class SourceParseFailureTest(unittest.TestCase):
+
+    def test_a_source_module_that_does_not_parse_is_named(self):
+        """#2789: the row says the source failed, and which module, not a digest."""
+        merged, source, cls, marker = MERGED_SCHEMAS[1]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        with tempfile.TemporaryDirectory() as tmp:
+            schema_dir = Path(tmp) / "schema"
+            shutil.copytree(source.parent, schema_dir)
+            broken = schema_dir / "D4D_Core.yaml"
+            broken.write_text("<<<<<<< HEAD\n" + broken.read_text())
+            row = check_one(schema_dir / merged.name, schema_dir / source.name, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertTrue(row["reason"].startswith("the source schema could not be read: source module "), row)
+        self.assertIn("D4D_Core.yaml does not parse", row["reason"])
 
 
 if __name__ == "__main__":

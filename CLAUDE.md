@@ -1765,8 +1765,9 @@ poetry run python -m unittest tests.test_d4d_full_schema[.TestClass[.test_method
 - `aurelian/` is git submodule: `git submodule update --init --recursive`
 - Legacy data in `data/ATTIC/` (see ATTIC/README.md)
 - Always run `make regen-all` after editing schemas to stay in sync, and rebuild the core
-  merged schema (`make gen-core-schema`, after removing it) when a core module changed;
-  `make check-digest` names the command for each stale schema (#2775)
+  merged schema too (`rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  && make gen-core-schema`): it imports most modules, and regen-all does not rebuild it;
+  `make check-digest` names the command for each stale schema (#2775, #2790)
 
 ## LinkML-Specific Commands
 

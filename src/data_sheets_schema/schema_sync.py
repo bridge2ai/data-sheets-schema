@@ -135,15 +135,29 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
              if p.name not in merged_names or physical(p) == source}
     if source not in files:
         files[source] = source.read_bytes()
+    used = [source]
+
     def read(path):
         if path not in files:
             files[path] = path.read_bytes()
+        used.append(path)
         return files[path]
     # gen-linkml creates a fresh view and traverses imports before callers can
     # initialize namespaces. Use that same resolver and the same captured
     # bytes, including namespace aliases for local packages (#1276).
-    capture_schema(source, content=files[source], read_bytes=read,
-                   namespace_orders=(False,), strict=True)
+    try:
+        capture_schema(source, content=files[source], read_bytes=read,
+                       namespace_orders=(False,), strict=True)
+    except Exception as error:
+        # A YAML error names no file ("<byte string>"); name the module the capture
+        # read that does not parse, when one does (#2789).
+        import yaml
+        for path in dict.fromkeys(used):
+            try:
+                yaml.safe_load(files[path])
+            except yaml.YAMLError:
+                raise ValueError(f"source module {path} does not parse: {error}") from error
+        raise
     state = (str(source), _generator_versions(),
              tuple((str(p), str(p.resolve()), hashlib.sha256(data).hexdigest()) for p, data in sorted(files.items())),
              source_name)
@@ -301,9 +315,14 @@ def check_one(merged: Path, source: Path, class_name: str,
         # Same filename, because the digest names the schema it came from and
         # a differing name would be a spurious difference.
         rebuilt = Path(tmp) / merged.name
-        same = source_state = merged_bytes = None
+        same = source_state = merged_bytes = live = None
         try:
             source_snapshot = _source_snapshot(source)
+        except Exception as exc:                               # noqa: BLE001
+            # The source failed, not a digest (#2789).
+            return {**out, "status": UNCHECKED,
+                    "reason": f"the source schema could not be read: {exc}"}
+        try:
             source_state = source_snapshot[0]
             merged_bytes = merged.read_bytes()
             # The selected profile's vocabulary inputs — none for neutral,
@@ -347,9 +366,12 @@ def check_one(merged: Path, source: Path, class_name: str,
             if stable:
                 kept = Path(tempfile.mkdtemp(prefix="d4d-schema-rebuild-")) / merged.name
                 shutil.copy2(rebuilt, kept)
-                return {**out, "status": STALE, "rebuilt_at": str(kept),
+                # Either digest may be the one that failed: the merged file's (it does not
+                # parse) or the rebuild's (its child timed out, #2738) (#2789).
+                return {**out, **({"digest": live} if live is not None else {}),
+                        "status": STALE, "rebuilt_at": str(kept),
                         "reason": ("the merged schema differs from a fresh build of its "
-                                   f"source, and its digest could not be computed: {exc}")}
+                                   f"source; a digest could not be computed: {exc}")}
             return {**out, "status": UNCHECKED,
                     "reason": f"digest could not be computed: {exc}"}
         out["digest"] = live
