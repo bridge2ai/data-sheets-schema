@@ -6,7 +6,6 @@ import json
 import os
 from pathlib import Path
 import shlex
-import select
 import signal
 import subprocess
 import sys
@@ -460,8 +459,14 @@ def _signal_group(process, sig):
 
 
 def exit_check_available():
-    """Whether the leader's exit can be observed without reaping it (#2714)."""
-    return hasattr(os, 'waitid') or hasattr(select, 'kqueue')
+    """Whether the leader's exit can be observed without reaping it (#2714).
+
+    Only waitid(WNOWAIT) does this reliably: Linux, and macOS from Python 3.13.
+    A kqueue NOTE_EXIT watch cannot stand in for it on older macOS Pythons,
+    because XNU answers the same ESRCH for a zombie and for a pid someone else
+    already reaped, and only the zombie still holds the group id (#2942).
+    """
+    return hasattr(os, 'waitid')
 
 
 def leader_exited(process):
@@ -471,24 +476,16 @@ def leader_exited(process):
     the group id, reserved: no new process or group can take the id, so a
     signal to the group reaches this group and no other. Reaping releases the
     id, after which a signal could reach an unrelated group that took it. So
-    the run loop watches the exit with waitid(WNOWAIT), or a kqueue NOTE_EXIT
-    on a macOS Python before 3.13, and only terminate_group reaps, after its
-    last signal. A leader already reaped, by `_signal_group`'s refusal path or
-    by anyone else (ECHILD), has exited; poll() then records its status.
+    the run loop watches the exit with waitid(WNOWAIT), and only
+    terminate_group reaps, after its last signal. A leader already reaped, by
+    `_signal_group`'s refusal path or by anyone else (ECHILD), has exited;
+    poll() then records a status, so terminate_group sends it nothing.
     """
     if process.returncode is not None:
         return True
     try:
-        if hasattr(os, 'waitid'):
-            return os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
-        queue = select.kqueue()
-        try:
-            watch = select.kevent(process.pid, select.KQ_FILTER_PROC,
-                                  select.KQ_EV_ADD | select.KQ_EV_ONESHOT, select.KQ_NOTE_EXIT)
-            return bool(queue.control([watch], 1, 0))
-        finally:
-            queue.close()
-    except (ChildProcessError, ProcessLookupError):
+        return os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
+    except ChildProcessError:
         process.poll()                        # reaped elsewhere: the id is no longer held
         return True
 
@@ -507,9 +504,14 @@ def terminate_group(process):
     """Signal the child's group while its unreaped leader holds the id, then reap (#2714).
 
     A leader reaped before any signal (only by someone else) is left alone: its
-    group id may already name another group, so nothing is sent to it.
+    group id may already name another group, so nothing is sent to it. The exit
+    check records such a reap first, which a Popen that did not do the reaping
+    cannot know of (#2943).
     """
-    if process is None or process.returncode is not None:
+    if process is None:
+        return
+    leader_exited(process)
+    if process.returncode is not None:
         return
     _signal_group(process, signal.SIGTERM)
     if process.returncode is None:            # `_signal_group`'s refusal path reaps
@@ -577,7 +579,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                         'control_shutdown_complete': False, 'unfinished_control_workers': None}
                 evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
             if not exit_check_available():
-                raise BudgetStop('native control needs a non-reaping exit check (os.waitid or kqueue)')
+                raise BudgetStop('native control needs a non-reaping exit check (os.waitid; macOS Python 3.13+)')
             verify_launch()  # Bind the executable immediately before Popen.
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
                 env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)

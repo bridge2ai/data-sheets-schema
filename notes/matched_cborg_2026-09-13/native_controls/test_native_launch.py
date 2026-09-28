@@ -3,7 +3,6 @@ import contextlib
 import errno
 import os
 import json
-import select
 from contextlib import contextmanager
 from pathlib import Path
 import signal
@@ -345,23 +344,24 @@ def test_a_leader_reaped_before_cleanup_is_sent_nothing(monkeypatch):
     assert sends == [] and process.returncode == 0
 
 
-#: Which non-reaping exit check the controller uses: waitid(WNOWAIT) wherever Python has
-#: it, and a kqueue NOTE_EXIT on a macOS Python before 3.13 (exercised here by hiding waitid).
-WATCHERS = ['waitid', pytest.param('kqueue', marks=pytest.mark.skipif(
-    not hasattr(select, 'kqueue'), reason='kqueue is BSD and macOS only'))]
+@pytest.mark.parametrize('entry', ['exit_check', 'terminate_group'])
+def test_a_leader_reaped_behind_popen_is_recorded_and_sent_nothing(monkeypatch, entry):
+    """#2943: a leader reaped by a raw waitpid, not by its Popen, leaves returncode unset. The
+    exit check's ECHILD branch must record a status so terminate_group sends nothing: the id
+    is no longer held and may name another group."""
+    process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
+    os.waitpid(process.pid, 0)                             # reaped behind Popen's back
+    assert process.returncode is None
+    sends = []
+    monkeypatch.setattr(os, 'killpg', lambda pgid, sig: sends.append(sig))
+    if entry == 'exit_check':
+        assert runner.leader_exited(process)
+    else:
+        terminate_group(process)
+    assert sends == [] and process.returncode is not None
 
 
-@pytest.fixture
-def watcher(request, monkeypatch):
-    if request.param == 'kqueue':
-        monkeypatch.delattr(os, 'waitid', raising=False)
-    elif not hasattr(os, 'waitid'):
-        pytest.skip('this Python has no os.waitid')
-    return request.param
-
-
-@pytest.mark.parametrize('watcher', WATCHERS, indirect=True)
-def test_the_exit_check_sees_an_exited_leader_without_reaping_it(watcher):
+def test_the_exit_check_sees_an_exited_leader_without_reaping_it():
     """#2714: the check the run loop uses reports a running leader as running and an exited
     one as exited, and leaves the exited one a zombie that still holds its pid and group id."""
     process = subprocess.Popen([sys.executable, '-c', 'import sys;sys.stdin.read()'], stdin=subprocess.PIPE,
@@ -379,14 +379,22 @@ def test_the_exit_check_sees_an_exited_leader_without_reaping_it(watcher):
     assert process.returncode == 0
 
 
-#: A leader that leaves a SIGTERM-ignoring member in its group and exits: the member must
-#: be removed by the group SIGKILL, which only reaches it while the leader holds the id.
-DESCENDANT = ('import os,pathlib,subprocess,sys\n'
-              'child = subprocess.Popen([sys.executable, "-c", "import os,pathlib,signal,time;'
-              'signal.signal(signal.SIGTERM, signal.SIG_IGN);'
-              'pathlib.Path(\'member.tmp\').write_text(str(os.getpid()));'
-              'os.replace(\'member.tmp\', \'member\');time.sleep(60)"])\n'
-              'while not pathlib.Path("member").exists(): pass\n')
+def test_the_leader_gets_its_sigterm_grace_before_the_group_sigkill(monkeypatch):
+    """#2945: terminate_group waits (without reaping) for the leader to act on SIGTERM before
+    the group SIGKILL, so a leader that takes a moment to exit cleanly ends by its own exit,
+    not by the kill that follows."""
+    process = subprocess.Popen([sys.executable, '-c', 'import signal,sys,time\n'
+                                'def stop(*_):\n    time.sleep(0.3); sys.exit(0)\n'
+                                'signal.signal(signal.SIGTERM, stop)\nprint("ready", flush=True)\ntime.sleep(30)\n'],
+                               stdout=subprocess.PIPE, text=True, start_new_session=True)
+    try:
+        assert process.stdout.readline().strip() == 'ready'
+        terminate_group(process)
+        assert process.returncode == 0, process.returncode
+    finally:
+        process.stdout.close()
+        if process.returncode is None:
+            process.kill(); process.wait()
 
 
 def run_recorded(tmp_path, monkeypatch, code, deadline):
@@ -422,14 +430,19 @@ def run_recorded(tmp_path, monkeypatch, code, deadline):
     return outcome, leader, sent
 
 
+#: The kernel's own answer on every platform (Linux delivers to a zombie-led group, Darwin
+#: refuses it), and Darwin's answer simulated anywhere, so Linux CI runs both (#2946).
+KERNEL_OR_SIMULATED = ['kernel', 'simulated']
+
+
 @pytest.mark.parametrize('shape', ['completed', 'stopped'])
-@pytest.mark.parametrize('darwin_refusal', REFUSALS, indirect=True)
-@pytest.mark.parametrize('watcher', WATCHERS, indirect=True)
-def test_no_signal_reaches_the_group_after_the_leader_is_reaped(tmp_path, monkeypatch, darwin_refusal, watcher, shape):
+@pytest.mark.parametrize('darwin_refusal', KERNEL_OR_SIMULATED, indirect=True)
+def test_no_signal_reaches_the_group_after_the_leader_is_reaped(tmp_path, monkeypatch, darwin_refusal, shape):
     """#2714 end to end through execute_child: every non-zero signal to the child's group is
     sent while the leader is unreaped, whether the run completes or is stopped at its
-    deadline, and whether the kernel (or `simulated`) refuses a zombie-led group. A completed
-    run still returns the child's own exit status, read after the cleanup that reaps it."""
+    deadline, on the platform's own kernel and with Darwin's refusal of a zombie-led group
+    simulated. A completed run still returns the child's own exit status, read after the
+    cleanup that reaps it."""
     if shape == 'completed':
         outcome, leader, _ = run_recorded(tmp_path, monkeypatch, 'raise SystemExit(3)', 60)
         assert outcome == 3 and leader.returncode == 3
@@ -448,11 +461,12 @@ DESCENDANT = ('import os,pathlib,subprocess,sys\n'
               'while not pathlib.Path("member").exists(): pass\n')
 
 
-@pytest.mark.parametrize('watcher', WATCHERS, indirect=True)
-def test_a_member_left_behind_is_killed_while_the_leader_holds_the_group_id(tmp_path, monkeypatch, watcher):
+def test_a_member_left_behind_is_removed_by_the_group_sigkill(tmp_path, monkeypatch):
     """#2714: a SIGTERM-ignoring member the leader leaves behind is removed by the group
-    SIGKILL, sent while the exited leader is still unreaped. The real kernel on each platform:
-    with a live member Darwin delivers rather than refuses, which `simulated` does not model."""
+    SIGKILL, which run_recorded shows was sent while the exited leader was unreaped. The
+    real kernel on each platform: with a live member Darwin delivers rather than refuses,
+    which `simulated` does not model."""
+    gone = False
     try:
         outcome, leader, sent = run_recorded(tmp_path, monkeypatch, DESCENDANT, 60)
         assert outcome == 0 and signal.SIGKILL in [sig for sig, _, _ in sent], sent
@@ -460,19 +474,26 @@ def test_a_member_left_behind_is_killed_while_the_leader_holds_the_group_id(tmp_
         pid, end = int((tmp_path / 'member').read_text()), time.monotonic() + 10
         while time.monotonic() < end and process_state(pid) and not process_state(pid).startswith('Z'):
             time.sleep(0.02)
-        assert process_state(pid) == '' or process_state(pid).startswith('Z'), process_state(pid)
+        gone = process_state(pid) == '' or process_state(pid).startswith('Z')
+        assert gone, process_state(pid)
     finally:
+        # Only a member still seen alive is killed: once it is gone its pid is released and
+        # may name another process (#2944).
         member = tmp_path / 'member'
-        if member.exists():
-            with contextlib.suppress(OSError):
-                os.kill(int(member.read_text()), signal.SIGKILL)
+        if not gone and member.exists():
+            pid = int(member.read_text())
+            state = process_state(pid)
+            if state and not state.startswith('Z'):
+                with contextlib.suppress(OSError):
+                    os.kill(pid, signal.SIGKILL)
 
 
 def test_without_a_non_reaping_exit_check_nothing_is_launched(tmp_path, monkeypatch):
-    """#2714: a Python with neither waitid nor kqueue cannot keep the leader unreaped while
-    it signals the group, so the controller refuses before launching anything."""
+    """#2714, #2942: a Python without os.waitid (macOS before 3.13) cannot keep the leader
+    unreaped while it signals the group, so the controller refuses before launching anything."""
     instruction = tmp_path / 'input.txt'; instruction.write_text('offline')
-    monkeypatch.setattr(runner, 'exit_check_available', lambda: False)
+    monkeypatch.delattr(os, 'waitid', raising=False)
+    assert not runner.exit_check_available()
     launched = []
     proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: None)
     with pytest.raises(BudgetStop, match='non-reaping exit check'):
