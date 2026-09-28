@@ -187,15 +187,83 @@ def append(path: Path, entry: dict[str, Any]) -> None:
     single JSON document rewritten each time would risk truncation mid-write.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(entry, ensure_ascii=False, default=str) + "\n")
+    line = (json.dumps(entry, ensure_ascii=False, default=str) + "\n").encode("utf-8")
+    with path.open("a+b") as fh:
+        # An interrupted write can leave a line without its newline; this entry
+        # would then join that line and neither would parse. End it first (#2740).
+        end = fh.seek(0, 2)
+        if end:
+            fh.seek(end - 1)
+            if fh.read(1) != b"\n":
+                line = b"\n" + line
+        fh.write(line)
+
+
+class UnreadableLog(ValueError):
+    """A reasoning log line that does not decode as UTF-8, parse as JSON, or parse to
+    an object (#2695, #2739)."""
+
+
+def _lines(path: Path):
+    """The log's physical lines, numbered from 1, blank ones included. Split on the
+    newline `append` writes and nothing else: `ensure_ascii=False` leaves U+2028,
+    U+2029 and U+0085 unescaped in a text field, and `str.splitlines` breaks on all
+    three (#2720). Each line is decoded on its own, so a bad byte names its line."""
+    return enumerate(Path(path).read_bytes().split(b"\n"), 1)
+
+
+def _parse(raw: bytes) -> Any:
+    # RecursionError: a deeply nested line is corruption like any other (#2722).
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except RecursionError as error:
+        raise ValueError("nesting too deep") from error
 
 
 def read(path: Path) -> list[dict[str, Any]]:
+    """Every entry of a reasoning log. A line that does not decode, parse, or
+    parse to an object raises UnreadableLog naming the file and the line, since
+    usage accounting must not skip a record it cannot read."""
     if not Path(path).exists():
         return []
-    return [json.loads(line) for line in
-            Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+    entries = []
+    for number, raw in _lines(path):
+        if not raw.strip():
+            continue
+        try:
+            value = _parse(raw)
+        except ValueError as error:
+            raise UnreadableLog(f"{path}: line {number} is not a readable entry "
+                                f"({type(error).__name__}: {error})") from error
+        if not isinstance(value, dict):
+            # `append` writes objects only; read_lenient names this line too (#2739).
+            raise UnreadableLog(f"{path}: line {number} is not a readable entry (not a JSON object)")
+        entries.append(value)
+    return entries
+
+
+def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
+    """The entries that parse as JSON objects, and the numbers of the lines that
+    do not, for a read-only report. A run killed or out of disk mid-write can
+    leave a partial last line (#2695); a report names it rather than failing on
+    it. A line that parses to something other than an object is named too: not
+    what `append` writes, so corruption rather than a partial write."""
+    if not Path(path).exists():
+        return [], []
+    entries: list[dict[str, Any]] = []
+    unreadable: list[int] = []
+    for number, raw in _lines(path):
+        if not raw.strip():
+            continue
+        try:
+            value = _parse(raw)
+        except ValueError:
+            value = None
+        if isinstance(value, dict):
+            entries.append(value)
+        else:
+            unreadable.append(number)
+    return entries, unreadable
 
 
 def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
