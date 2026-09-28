@@ -1236,6 +1236,27 @@ def test_a_symlinked_repository_module_is_refused(tmp_path, monkeypatch, shape):
         probe.import_closure(seed, root.resolve())
 
 
+@pytest.mark.parametrize('order', ['regular first', 'link first'])
+def test_a_link_to_an_already_pinned_initializer_is_refused(tmp_path, monkeypatch, order):
+    """#2843: one package's __init__.py links to another's, which is pinned already when the
+    walk reaches the link, in either order. The link is still another module, run from
+    its own package, so it is refused rather than skipped as a duplicate."""
+    root = tmp_path / 'root'
+    for name in ('closure_regular_2843', 'closure_linked_2843'):
+        (root / name).mkdir(parents=True)
+        (root / name / 'helper.py').write_text('')
+    (root / 'closure_regular_2843' / '__init__.py').write_text('from . import helper\n')
+    (root / 'closure_linked_2843' / '__init__.py').symlink_to(root / 'closure_regular_2843' / '__init__.py')
+    names = ['closure_linked_2843', 'closure_regular_2843']
+    seed = root / 'seed.py'
+    # The walk pops the last import first.
+    seed.write_text(''.join(f'import {name}\n' for name in (names if order == 'regular first' else names[::-1])))
+    monkeypatch.syspath_prepend(str(root))
+    with pytest.raises(BudgetStop, match='closure_linked_2843 is a symbolic link'):
+        probe.import_closure(seed, root.resolve())
+    assert not set(names) & set(sys.modules)                 # neither package ran
+
+
 def test_a_bytecode_only_repository_package_is_refused(tmp_path, monkeypatch):
     """#2836: a package with only an __init__.pyc runs code whose imports cannot be read."""
     import py_compile

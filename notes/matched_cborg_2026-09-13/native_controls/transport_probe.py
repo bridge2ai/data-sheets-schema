@@ -320,12 +320,16 @@ def import_closure(source, root):
         if spec is None or not spec.has_location or not spec.origin:
             continue
         origin = Path(spec.origin).resolve()
-        if not inside(origin) or origin in files:
+        if not inside(origin):
             continue
+        # Checked for every module, before a file already pinned is skipped: a link to it
+        # is another module, run from the link's own package (#2843).
         if not isinstance(spec.loader, importlib.machinery.SourceFileLoader):
             raise BudgetStop(f'repository module {spec.name} is not Python source, so its imports cannot be read')
         if Path(spec.origin).is_symlink():
             raise BudgetStop(f'repository module {spec.name} is a symbolic link; the probe pins only regular files')
+        if origin in files:
+            continue
         files.add(origin)
         pending.extend(_imported_names(origin, spec.parent))
     return files
