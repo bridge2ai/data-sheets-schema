@@ -601,11 +601,12 @@ def test_redirect_is_returned_without_following(processes):
     client.close()
 
 
-@pytest.mark.parametrize("sent", [False, True], ids=["before-send", "after-send"])
-@pytest.mark.parametrize("defect", ["length", "headers", "eof", "progress", "unknown-error", "local-error", "missing-headers", "false-sent-error"])
-def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypatch, processes, sent, defect):
-    """#2160: IPC faults remain pending even after a sent progress witness."""
-    from native_controls.test_native_stall_policy import proxy_with, post, rows
+def _local_worker_failure(tmp_path, monkeypatch, sent, defect, start_delay=0):
+    """#2160: IPC faults remain pending even after a sent progress witness. The worker is
+    a bare interpreter, so its bounds and the caller's are hang guards, not a 3 s budget
+    that also paid for its start-up (#2772): each defect ends the exchange at once."""
+    from native_controls.test_native_stall_policy import proxy_with, rows
+    from native_controls.test_native_proxy import REQUEST
     frames = bounded._frame(b"P", b"sent") if sent else b""
     frames += {
         "length": b"\xff\xff\xff\xff",
@@ -617,11 +618,15 @@ def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypat
         "missing-headers": bounded._frame(b"D", b"unexpected data"),
         "false-sent-error": bounded._frame(b"E", json.dumps({"error":"RemoteProtocolError", "sent":not sent}).encode()),
     }[defect]
-    source = f"import sys;sys.stdin.buffer.read();sys.stdout.buffer.write({frames!r});sys.stdout.buffer.flush()"
+    source = (f"import sys,time;time.sleep({start_delay});sys.stdin.buffer.read();"
+              f"sys.stdout.buffer.write({frames!r});sys.stdout.buffer.flush()")
     monkeypatch.setattr(bounded, "_worker_command", lambda: [sys.executable, "-B", "-c", source])
     proxy, ledger, provider_calls = proxy_with(tmp_path, [])
     proxy.upstream.close()
-    proxy.upstream = bounded.BoundedStreamClient(read_timeout_seconds=2, connect_timeout_seconds=1)
+    proxy.upstream = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
+    def post(url, proxy):
+        return httpx.post(url + '/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token},
+                          timeout=HANG_SECONDS)
     with proxy.running() as url:
         assert post(url, proxy).status_code == 402
         assert post(url, proxy).status_code == 402
@@ -630,6 +635,18 @@ def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypat
     assert proxy.stalls_survived == 0 and proxy.failure == "BoundWorkerProtocolError"
     assert proxy.unfinished_handlers == 0 and not proxy.upstream._workers
     assert provider_calls == [] and not list(tmp_path.rglob("stall.json"))
+
+
+@pytest.mark.parametrize("sent", [False, True], ids=["before-send", "after-send"])
+@pytest.mark.parametrize("defect", ["length", "headers", "eof", "progress", "unknown-error", "local-error", "missing-headers", "false-sent-error"])
+def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypatch, processes, sent, defect):
+    _local_worker_failure(tmp_path, monkeypatch, sent, defect)
+
+
+def test_a_slow_worker_start_does_not_turn_a_local_failure_into_a_timeout(tmp_path, monkeypatch, processes):
+    """#2772: a worker that takes 4 s to start, past the 3 s the test once allowed the
+    whole exchange, still fails as the worker protocol error it is, and debits nothing."""
+    _local_worker_failure(tmp_path, monkeypatch, False, "eof", start_delay=4)
 
 
 def test_genuine_worker_upstream_protocol_error_preserves_debit_and_retry(tmp_path, monkeypatch, processes):
