@@ -14,11 +14,13 @@ import yaml
 from data_sheets_schema import api_runner as api, usage_ledger as ledger
 from tests.test_download.test_api_runner import FakeClient, spec
 
-# A hang guard, not a measurement: these tests assert what a run left behind, never how
-# fast. Under parallel load (-n 4, load 135-190 on 10 cores) the 90 s subprocess bound
-# ended two interrupted-generation children and entered.wait(60) one concurrency run,
-# with the ledgers correct (#2726). The subprocess bounds end a child that hangs; the
-# concurrency test polls its worker, a daemon thread, so it ends too (#2767, #2768).
+# A hang guard, not a measurement: the ledger tests assert what a run left behind, not
+# how fast. Under parallel load (-n 4, load 135-190 on 10 cores) the 90 s subprocess bound
+# ended two interrupted-generation children and entered.wait(60) one concurrency run
+# before any ledger was checked; all three passed when rerun alone (#2726, #2782). The
+# subprocess bounds end a child that hangs; the concurrency test polls its worker, a
+# daemon thread, so it ends too (#2767, #2768). The meta-tests at the end shorten the
+# guard to keep their own failures quick (#2781).
 HANG_GUARD_SECONDS = 900
 
 
@@ -259,7 +261,8 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
             outcome["error"] = error
 
     # A daemon thread, not a pool whose exit joins it: a first run that hangs fails the
-    # test at the guard rather than hanging it (#2768).
+    # test, within two guards (the poll, then the join), rather than hanging it; a hung
+    # worker is left running as a daemon (#2768, #2782).
     worker = threading.Thread(target=first_run, daemon=True)
     worker.start()
     try:
@@ -286,8 +289,9 @@ def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_pat
             pass
     finally:
         release.set()
-        # Joined on every exit, a failed contender assertion included, so the first run
-        # never outlives the test and its monkeypatches (#2771).
+        # Joined on every exit, a failed contender assertion included, so a first run that
+        # is only slow finishes before the test and its monkeypatches end (#2771). The
+        # join is bounded; a hung one is left behind as a daemon (#2782).
         worker.join(HANG_GUARD_SECONDS)
     assert not worker.is_alive(), "first run did not finish after its release"
     if "error" in outcome:
@@ -805,11 +809,18 @@ def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):
     assert result["total_reasoning_tokens_estimate"] == 33
 
 
+def _short_guard(monkeypatch, seconds):
+    """The meta-tests shorten the guard so a regression they pin fails in seconds (#2781)."""
+    monkeypatch.setattr(sys.modules[__name__], "HANG_GUARD_SECONDS", seconds)
+    return seconds
+
+
 def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch):
     """#2771: a failing assertion in the main thread still joins the first run before
     the test returns, and the failure is the one raised."""
+    guard = _short_guard(monkeypatch, 5)
     marker = RuntimeError("invented contender failure")
-    joins = []
+    joins, finished = [], []
     thread_class = threading.Thread
 
     class Observed(thread_class):
@@ -821,20 +832,26 @@ def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_
         if threading.current_thread() is threading.main_thread():
             raise marker                            # the first contender check fails
         api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
+        finished.append(True)
         return {"usage": []}
 
     written = tmp_path / "invented-ledger.json"
     written.write_bytes(b"{}")                      # read before the first contender check
     monkeypatch.setattr(ledger, "ledger_path", lambda run: written)
+    # The test calls the boundary it finds after its own pause; a no-op here, so the
+    # fake first run ends normally rather than in the real boundary's TypeError (#2781).
+    monkeypatch.setattr(api, "_begin_usage_call", lambda *args: None)
     monkeypatch.setattr(threading, "Thread", Observed)
     monkeypatch.setattr(api, "execute", execute)
     with pytest.raises(RuntimeError) as raised:
         test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
-    assert raised.value is marker and joins == [HANG_GUARD_SECONDS]
+    assert raised.value is marker and joins == [guard] and finished == [True]
 
 
 def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, monkeypatch):
-    """#2767: a first run that fails before the boundary is the error raised, at once."""
+    """#2767: a first run that fails before the boundary is the error raised, within a
+    poll or two, well inside the guard."""
+    guard = _short_guard(monkeypatch, 30)
     marker = RuntimeError("invented early failure")
 
     def fail(*args, **kwargs):
@@ -844,4 +861,31 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, mon
     started = time.monotonic()
     with pytest.raises(RuntimeError) as raised:
         test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
-    assert raised.value is marker and time.monotonic() - started < HANG_GUARD_SECONDS / 10
+    assert raised.value is marker and time.monotonic() - started < guard / 3
+
+
+def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch):
+    """#2768, #2781: a first run hung before the boundary fails the test within two
+    guards, on a daemon thread, so neither the test nor the interpreter's exit waits on it."""
+    guard = _short_guard(monkeypatch, 2)
+    unblock, daemons = threading.Event(), []
+    thread_class = threading.Thread
+
+    class Observed(thread_class):
+        def start(self):
+            daemons.append(self.daemon)
+            return super().start()
+
+    def execute(run, **kwargs):
+        unblock.wait(60)                            # hung until the test's own cleanup
+        return {"usage": []}
+
+    monkeypatch.setattr(threading, "Thread", Observed)
+    monkeypatch.setattr(api, "execute", execute)
+    started = time.monotonic()
+    try:
+        with pytest.raises(AssertionError, match="first run never reached the request boundary"):
+            test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+        assert time.monotonic() - started < 2 * guard + 10 and daemons == [True]
+    finally:
+        unblock.set()
