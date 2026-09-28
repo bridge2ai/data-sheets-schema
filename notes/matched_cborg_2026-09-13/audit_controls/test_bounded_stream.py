@@ -113,7 +113,8 @@ READ_HOP_SECONDS = 2.5
 #: the withheld read may end. The worker's read timer starts when it has written
 #: the first chunk, before the parent begins that read (#2762). Measured at most
 #: 43 ms early over 1,536 reads at load 176-477, and 20 ms over 960 at load
-#: 435-548. It rejects a read deadline that fires 0.5 s or more early.
+#: 435-548. It rejects a read deadline that fires more than about 0.5 s early; one
+#: exactly 0.5 s early can still pass, as the bound is inclusive (#2807).
 READ_EARLY_SECONDS = .5
 
 #: The whole call less the worker's start-up window (from just before Popen to the
@@ -655,7 +656,8 @@ def test_genuine_worker_upstream_protocol_error_preserves_debit_and_retry(tmp_pa
         proxy.upstream.close()
         # Each request starts a worker that imports HTTPX: its bounds and the
         # caller's are hang guards, not a 3 s and a 5 s budget (#2604). A worker
-        # that never sent would be a ConnectTimeout, never the stall asserted below.
+        # that never sent would end the caller's own 120 s timeout first, a
+        # ReadTimeout here, never the stall asserted below (#2807).
         proxy.upstream = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
         def post(url, proxy):
             return httpx.post(url + '/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token},

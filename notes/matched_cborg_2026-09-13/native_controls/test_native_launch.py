@@ -753,9 +753,10 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
     interrupt arm raises its interrupt at the controller's first sleep after it
     has checked its deadline since the count began, so a deadline enforced more
     than UNDER_SECONDS early would be recorded instead of the interrupt; one less
-    early is caught by the deadline tests' own check, down to about one controller
-    poll (0.05 s): a shortfall smaller than that stops at a reading already past the
-    registered deadline (#2778, #2793)."""
+    early is caught by the deadline tests' own check. A shortfall under one
+    controller poll (0.05 s) is caught only when a deadline check happens to fall
+    inside it, which depends on the poll's overhead: 30 ms was caught in most runs,
+    10 ms in few (#2778, #2793, #2807)."""
     import threading, time
     from types import SimpleNamespace
     from test_native_proxy import fixture_proxy, REQUEST
