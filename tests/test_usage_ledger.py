@@ -837,8 +837,10 @@ def short_guard(monkeypatch):
 def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch, short_guard):
     """#2771: a failing assertion in the main thread still joins the first run before
     the test returns, and the failure is the one raised. The boundary poll counts polls,
-    so a worker scheduled late still reaches it (#2834)."""
-    guard = short_guard(5)
+    so a worker scheduled late still reaches it (#2834), and the healthy worker is
+    joined on a bound no scheduling delay reaches, since it must end, not end quickly
+    (#2837)."""
+    guard = short_guard(120)
     _poll_clock(monkeypatch, guard / 40)
     marker = RuntimeError("invented contender failure")
     joins, finished = [], []
