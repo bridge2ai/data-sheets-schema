@@ -1,23 +1,60 @@
 #!/usr/bin/env python3
 """
-Generate comprehensive SSSOM mapping including ALL D4D attributes.
+Generate the comprehensive SSSOM table: one row for every slot name in the
+D4D schema.
 
-Extends the existing SKOS-based SSSOM with:
-1. Attributes from SKOS alignment (95 mapped)
-2. Attributes with recommended URIs (97 could have URIs)
-3. Novel D4D concepts (47 need D4D namespace)
-4. Free text fields (17 marked as unmapped)
-5. Remaining attributes (needs research)
+Each slot's mapping is resolved in order of precedence, falling through only
+when a higher source is silent (#2935):
+
+1. The SKOS alignment TTL: a slot-level subject (``d4d:<slot>``), else a
+   class-scoped one (``d4d:<Class>_<slot>``) for a class that carries the slot.
+2. The schema's ``slot_uri`` (as ``skos:exactMatch``) and its
+   ``exact_``/``close_``/``narrow_``/``broad_``/``related_mappings``, emitted
+   with the matching SKOS predicate. Only targets outside the D4D namespace
+   count: a ``d4d:`` slot_uri names the slot itself, which is the alignment's
+   subject, not a target.
+3. ``notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv``, where it suggests a URI. An
+   entry with no suggested URI is silent and falls through.
+4. The keyword heuristics (``free_text`` / ``novel_d4d``), else ``unmapped``.
+
+Before #2935 the heuristics ran first. They matched words in the slot name
+*and description* and returned before the TTL was consulted, so 29 TTL-aligned
+slots were labelled free text or novel. The schema's own declarations were
+never read, and a top-level slot that no class attribute repeats had no row.
+The heuristic verdict is now recorded in ``heuristic_hint`` on every row and
+decides ``mapping_status`` only when no curated source speaks.
+
+One row per slot holds one primary mapping. Every other curated pair for the
+slot is listed in ``other_curated_mappings`` with where it was declared, so no
+curated alignment is dropped: a second TTL triple, the schema's declarations
+where the TTL won, a slot_uri one class declares differently.
+
+``d4d_schema_path`` names a class that carries the slot: ``Dataset`` when it
+does, else the first class (by name) that owns it. It is empty for a
+top-level slot no class uses. ``d4d_owning_classes`` lists every class that
+owns the slot: it declares the slot, and no ancestor that also declares it
+does.
+
+Where the TTL and the schema disagree, the TTL wins the row. "Disagree" means
+the schema declares external targets for the slot and a TTL pair is not among
+them. Each such slot must be listed in ACCEPTED_DISAGREEMENTS or
+OPEN_DISAGREEMENTS with a reason. A run warns about every unlisted
+disagreement, every listed slot that no longer disagrees, and every open one;
+the tests fail on the first two.
+
+The output is a function of the schema, the TTL, the recommendations and the
+date. ``--date`` sets the date. ``--check`` regenerates in memory under the
+date the committed file records, fails on any difference, and writes nothing.
 """
 
 import csv
-import json
+import io
 import re
 import sys
-import yaml
+from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
-from typing import Dict, List, Optional, Set
-from datetime import datetime
+from typing import Dict, List, Optional, Tuple
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
@@ -31,8 +68,241 @@ except ImportError:
     FAIRSCAPE_AVAILABLE = False
 
 
+D4D_NAMESPACE = 'https://w3id.org/bridge2ai/data-sheets-schema/'
+
+#: SKOS predicates from strongest to weakest. When a slot has several TTL
+#: pairs, the primary is the strongest, then the first in the file.
+SKOS_ORDER = ('exactMatch', 'closeMatch', 'narrowMatch', 'broadMatch',
+              'relatedMatch')
+
+#: Schema metaslots read as alignments, in the order a primary is chosen, and
+#: the SKOS predicate each is emitted with.
+SCHEMA_MAPPING_KINDS = (
+    ('slot_uri', 'skos:exactMatch'),
+    ('exact_mappings', 'skos:exactMatch'),
+    ('close_mappings', 'skos:closeMatch'),
+    ('narrow_mappings', 'skos:narrowMatch'),
+    ('broad_mappings', 'skos:broadMatch'),
+    ('related_mappings', 'skos:relatedMatch'),
+)
+
+FREE_TEXT_KEYWORDS = ('description', 'documentation', 'comment', 'notes',
+                      'details', 'narrative', 'paragraph')
+NOVEL_D4D_KEYWORDS = ('strategies', 'protocol', 'analyses', 'compensation',
+                      'governance', 'warnings', 'gaps', 'impacts', 'biases',
+                      'imputation', 'deidentif', 'confidential', 'vulnerable',
+                      'ethical', 'prohibited', 'retention', 'errata')
+
+_CROSS_VOCABULARY = (
+    "cross-vocabulary: the TTL aligns the slot to an RO-Crate (schema.org / "
+    "EVI) property and the schema serialises it as the DCAT / Dublin Core / "
+    "PROV property for the same notion ({schema}); both are curated and the "
+    "row carries the TTL's")
+_STRENGTH_ONLY = (
+    "same target, different strength: the schema's {schema} serialises the "
+    "slot as the TTL's target, which the TTL qualifies as {ttl}; the row keeps "
+    "the TTL predicate")
+_BROADER_ONLY = (
+    "compatible: the schema adds only a broader term ({schema}) beside the "
+    "TTL's more specific alignment")
+
+#: TTL/schema disagreements that are understood. The TTL target is the row's;
+#: the schema's declaration stays in ``other_curated_mappings``. No warning.
+ACCEPTED_DISAGREEMENTS: Dict[str, str] = {
+    'title': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:title'),
+    'keywords': _CROSS_VOCABULARY.format(schema='slot_uri dcat:keyword'),
+    'publisher': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:publisher'),
+    'page': _CROSS_VOCABULARY.format(schema='slot_uri dcat:landingPage'),
+    'bytes': _CROSS_VOCABULARY.format(schema='slot_uri dcat:byteSize'),
+    'created_on': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:created'),
+    'issued': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:issued'),
+    'last_updated_on': _CROSS_VOCABULARY.format(
+        schema='slot_uri dcterms:modified'),
+    'conforms_to': _CROSS_VOCABULARY.format(
+        schema='slot_uri dcterms:conformsTo'),
+    'format': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:format'),
+    'created_by': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:creator'),
+    'modified_by': _CROSS_VOCABULARY.format(
+        schema='slot_uri dcterms:contributor'),
+    'compression': (
+        "compatible: the TTL hedges with closeMatch evi:formats, the general "
+        "format term it also uses for distribution_formats and encoding; the "
+        "schema's slot_uri dcat:compressFormat is the specific DCAT term for "
+        "a compression format"),
+    'themes': _CROSS_VOCABULARY.format(schema='slot_uri dcat:theme'),
+    'external_resources': _CROSS_VOCABULARY.format(
+        schema='slot_uri dcterms:references'),
+    'was_derived_from': _CROSS_VOCABULARY.format(
+        schema='slot_uri prov:wasDerivedFrom, exact_mappings dcterms:source'),
+    'regulatory_restrictions': _CROSS_VOCABULARY.format(
+        schema='slot_uri dcterms:accessRights; the DUO broad_mappings name '
+               'consent codes a restriction may carry'),
+    'md5': _BROADER_ONLY.format(schema='broad_mappings dcterms:identifier'),
+    'conforms_to_class': _BROADER_ONLY.format(
+        schema='broad_mappings dcterms:conformsTo'),
+    'conforms_to_schema': _BROADER_ONLY.format(
+        schema='broad_mappings dcterms:conformsTo'),
+    'license_and_use_terms': _STRENGTH_ONLY.format(
+        schema='slot_uri schema:license', ttl='closeMatch'),
+    'dialect': _STRENGTH_ONLY.format(
+        schema='slot_uri schema:encodingFormat', ttl='closeMatch'),
+    'media_type': _STRENGTH_ONLY.format(
+        schema='exact_mappings schema:encodingFormat', ttl='closeMatch'),
+    'resources': _STRENGTH_ONLY.format(
+        schema='slot_uri schema:hasPart', ttl='relatedMatch'),
+    'path': _STRENGTH_ONLY.format(
+        schema='slot_uri schema:contentUrl', ttl='narrowMatch'),
+}
+
+#: Disagreements where one side is probably wrong. The TTL still wins the row
+#: (precedence), but every run warns until a curator settles them.
+OPEN_DISAGREEMENTS: Dict[str, str] = {
+    'creators': (
+        "same vocabulary, different term: the TTL says closeMatch "
+        "schema:author, the schema's slot_uri is schema:creator"),
+    'download_url': (
+        "same vocabulary, different term: the TTL says exactMatch "
+        "schema:contentUrl, the schema's exact_mappings says schema:url "
+        "(beside slot_uri dcat:downloadURL); both cannot be exact"),
+    'id': (
+        "the TTL says exactMatch rdf:ID, an RDF/XML syntax attribute rather "
+        "than a property; the schema's slot_uri is schema:identifier"),
+    'hash': (
+        "the TTL says exactMatch evi:md5 for a slot that does not fix the "
+        "hash algorithm (md5 and sha256 are separate slots); the schema "
+        "declares only broad_mappings dcterms:identifier"),
+    'sha256': (
+        "two vocabularies' checksum terms: the TTL says exactMatch "
+        "evi:sha256, the schema's slot_uri is schema:sha256; one should be "
+        "the slot's serialisation, or the TTL should carry both"),
+}
+
+
+@dataclass(frozen=True)
+class CuratedPair:
+    """One curated alignment of a slot, and where it was declared."""
+    predicate: str          # e.g. skos:exactMatch
+    object: str             # CURIE
+    source: str             # 'ttl' or 'schema'
+    where: str = ''         # '' (slot-level / top-level), a class, or a TTL subject
+
+
+@dataclass
+class Resolution:
+    """How one slot resolves. Both comprehensive tables are built from this."""
+    slot: str
+    path_class: str
+    owners: List[str]
+    description: str
+    hint: str
+    status: str
+    source: str
+    predicate: str
+    object: str
+    confidence: float
+    justification: str
+    comment: str
+    origin: str = ''        # the TTL subject or schema metaslot of the primary
+    others: List[str] = field(default_factory=list)
+    disagreement: str = ''  # '', 'accepted', 'open' or 'unlisted'
+    notes: List[str] = field(default_factory=list)  # appended to the comment
+
+
+def heuristic_hint(slot: str, description: str) -> str:
+    """The keyword verdict: 'free_text', 'novel_d4d' or ''.
+
+    Advisory. It decides ``mapping_status`` only when no curated source speaks
+    for the slot, and is recorded either way.
+    """
+    desc = (description or '').lower()
+    name = slot.lower()
+    if any(kw in name or kw in desc for kw in FREE_TEXT_KEYWORDS):
+        return 'free_text'
+    if any(kw in name or kw in desc for kw in NOVEL_D4D_KEYWORDS):
+        return 'novel_d4d'
+    return ''
+
+
+def parse_ttl_prefixes(content: str) -> Dict[str, str]:
+    """``@prefix p: <uri> .`` declarations of a Turtle file."""
+    return dict(re.findall(r'@prefix\s+(\w*):\s*<([^>]*)>\s*\.', content))
+
+
+def committed_date(path: Path) -> str:
+    """The ``# Date:`` a committed table records, as YYYY-MM-DD."""
+    for line in path.read_text(encoding='utf-8').splitlines():
+        if not line.startswith('#'):
+            break
+        m = re.match(r'#\s*Date:\s*(\S+)', line)
+        if m:
+            return date.fromisoformat(m.group(1)[:10]).isoformat()
+    raise ValueError(f"{path} records no '# Date:' header line, so it cannot "
+                     "be regenerated under the date it was made")
+
+
+def table_rows(text: str, key: str) -> Dict[str, Dict[str, str]]:
+    """Data rows of a rendered table, keyed by the ``key`` column."""
+    body = ''.join(line for line in text.splitlines(keepends=True)
+                   if not line.startswith('#'))
+    return {r[key]: r for r in csv.DictReader(io.StringIO(body), delimiter='\t')}
+
+
+def report_drift(committed: Path, regenerated: str, key: str) -> int:
+    """Compare a committed table with its regeneration; 0 when identical."""
+    current = committed.read_text(encoding='utf-8') if committed.exists() else None
+    if current == regenerated:
+        print(f"✓ {committed} regenerates exactly.")
+        return 0
+    print(f"✗ {committed} does not regenerate from its inputs.")
+    if current is None:
+        print("  The file does not exist.")
+        return 1
+    have, made = table_rows(current, key), table_rows(regenerated, key)
+    lost = sorted(set(have) - set(made))
+    gained = sorted(set(made) - set(have))
+    changed = sorted(k for k in set(have) & set(made) if have[k] != made[k])
+    for label, keys in (('rows only in the committed file', lost),
+                        ('rows only in the regeneration', gained),
+                        ('rows that differ', changed)):
+        if keys:
+            print(f"  {len(keys)} {label}: {', '.join(keys[:20])}"
+                  + (' ...' if len(keys) > 20 else ''))
+    old_head = [line for line in current.splitlines() if line.startswith('#')]
+    new_head = [line for line in regenerated.splitlines() if line.startswith('#')]
+    if old_head != new_head:
+        print("  The '#' header differs.")
+    print("  Regenerate with: make gen-sssom-comprehensive "
+          "gen-sssom-uri-comprehensive")
+    return 1
+
+
 class ComprehensiveSSSOMGenerator:
-    """Generate comprehensive SSSOM including all D4D attributes."""
+    """Generate comprehensive SSSOM including all D4D slots."""
+
+    FIELDNAMES = [
+        'd4d_schema_path',
+        'subject_id',
+        'subject_label',
+        'predicate_id',
+        'rocrate_json_path',
+        'object_id',
+        'object_label',
+        'mapping_justification',
+        'confidence',
+        'comment',
+        'author_id',
+        'mapping_date',
+        'subject_source',
+        'object_source',
+        'mapping_set_id',
+        'mapping_set_version',
+        'mapping_status',
+        'mapping_source',
+        'other_curated_mappings',
+        'heuristic_hint',
+        'd4d_owning_classes',
+        'd4d_description',
+    ]
 
     def __init__(
         self,
@@ -44,50 +314,100 @@ class ComprehensiveSSSOMGenerator:
         self.skos_file = skos_file
         self.recommendations_file = recommendations_file
 
-        # Load data
+        from data_sheets_schema.schema_view import shared_view
+        self.sv = shared_view(d4d_schema)
+
+        ttl = Path(skos_file).read_text(encoding='utf-8')
+        self.skos_triples = self._parse_skos(ttl)
+        self.namespaces = self._namespace_map(ttl)
+        self.recommendations = (self._load_recommendations()
+                                if recommendations_file else {})
         self.d4d_attributes = self._load_d4d_attributes()
-        self.skos_mappings = self._parse_skos()
-        self.recommendations = self._load_recommendations() if recommendations_file else {}
+        self.resolutions = {slot: self._resolve(slot)
+                            for slot in sorted(self.d4d_attributes)}
 
+    # ------------------------------------------------------------ inputs
     def _load_d4d_attributes(self) -> Dict[str, Dict]:
-        """Load all D4D attributes from schema."""
-        with open(self.d4d_schema) as f:
-            schema = yaml.safe_load(f)
+        """Every slot name in the schema, with the classes that own it.
 
+        ``SchemaView.all_slots`` covers top-level ``slots:`` and every class
+        attribute, so a top-level slot no attribute repeats still gets a row.
+
+        The merged schema repeats inherited attributes on every subclass
+        (``description`` is declared on 78 classes), so a class *owns* a slot
+        when it declares it and no ancestor that also declares it does:
+        ``description`` is owned by DatasetProperty, Grant, NamedThing and
+        Organization.
+        """
+        sv = self.sv
+        classes = sorted(sv.all_classes())
+        carriers: Dict[str, List[str]] = {}
+        declarers: Dict[str, List[str]] = {}
+        for cls in classes:
+            for slot in sv.class_slots(cls):
+                carriers.setdefault(slot, []).append(cls)
+            for slot in sv.class_slots(cls, direct=True):
+                declarers.setdefault(slot, []).append(cls)
+
+        top_level = sv.all_slots(attributes=False)
         attributes = {}
-        for class_name, class_def in schema.get('classes', {}).items():
-            attrs = class_def.get('attributes', {})
-            for attr_name, attr_def in attrs.items():
-                if attr_name not in attributes:
-                    attributes[attr_name] = {
-                        'description': attr_def.get('description', ''),
-                        'range': attr_def.get('range', 'string'),
-                        'slot_uri': attr_def.get('slot_uri', ''),
-                        'classes': [class_name]
-                    }
-                else:
-                    attributes[attr_name]['classes'].append(class_name)
-
+        for slot in sv.all_slots():
+            carried = carriers.get(slot, [])
+            declared = set(declarers.get(slot, []))
+            owned = [c for c in sorted(declared)
+                     if not declared & set(sv.class_ancestors(c)[1:])]
+            if 'Dataset' in carried:
+                path_class = 'Dataset'
+            else:
+                path_class = (owned or carried or [''])[0]
+            definitions = self._definitions(slot, path_class, classes, top_level)
+            description = next((d.description for _, d in definitions
+                                if d.description), '')
+            attributes[slot] = {
+                'description': description,
+                'path_class': path_class,
+                'owners': owned,
+                'definitions': definitions,
+            }
         return attributes
 
-    def _parse_skos(self) -> Dict[str, Dict]:
-        """Parse SKOS alignment."""
-        with open(self.skos_file) as f:
-            content = f.read()
+    def _definitions(self, slot, path_class, classes, top_level):
+        """Every declaration of ``slot``, most specific to ``path_class`` first.
 
-        mappings = {}
+        The path class, then its ancestors, then the top-level slot, then every
+        other class by name; within a class, ``slot_usage`` before
+        ``attributes``. The first external target in this order is the schema's
+        primary mapping, so a row's mapping is the one its path class sees.
+        """
+        sv = self.sv
+        near = list(sv.class_ancestors(path_class)) if path_class else []
+        order = near + [None] + [c for c in classes if c not in near]
+        found = []
+        for cls in order:
+            if cls is None:
+                if slot in top_level:
+                    found.append(('', top_level[slot]))
+                continue
+            cdef = sv.get_class(cls)
+            for group in (cdef.slot_usage, cdef.attributes):
+                if group and slot in group:
+                    found.append((cls, group[slot]))
+        return found
+
+    def _parse_skos(self, content: str) -> List[Tuple[str, str, str]]:
+        """(subject, predicate, object) for every SKOS match triple, in order.
+
+        The pattern fits the file's one-triple-per-line layout; an rdflib parse
+        finds the same triples.
+        """
         pattern = r'd4d:(\w+)\s+skos:(\w+Match)\s+(\S+)\s+\.'
+        return [m.groups() for m in re.finditer(pattern, content)]
 
-        for match in re.finditer(pattern, content):
-            d4d_property = match.group(1)
-            predicate = match.group(2)
-            rocrate_uri = match.group(3)
-            mappings[d4d_property] = {
-                'predicate': predicate,
-                'rocrate_uri': rocrate_uri
-            }
-
-        return mappings
+    def _namespace_map(self, ttl: str) -> Dict[str, str]:
+        """Prefix -> namespace IRI: the TTL's declarations, then the schema's."""
+        mapping = {p: str(uri) for p, uri in self.sv.namespaces().items()}
+        mapping.update(parse_ttl_prefixes(ttl))
+        return mapping
 
     def _load_recommendations(self) -> Dict[str, Dict]:
         """Load URI recommendations from TSV."""
@@ -107,168 +427,262 @@ class ComprehensiveSSSOMGenerator:
 
         return recommendations
 
-    def _categorize_attribute(self, attr_name: str, attr_info: Dict) -> str:
-        """Categorize attribute type."""
-        description = attr_info['description'].lower()
-        attr_lower = attr_name.lower()
+    # ------------------------------------------------------------ curated sources
+    def _is_internal(self, curie: str) -> bool:
+        prefix = curie.split(':', 1)[0] if ':' in curie else ''
+        return (curie.startswith(D4D_NAMESPACE)
+                or self.namespaces.get(prefix, '').startswith(D4D_NAMESPACE))
 
-        # Free text
-        if any(kw in attr_lower or kw in description
-               for kw in ['description', 'documentation', 'comment', 'notes',
-                         'details', 'narrative', 'paragraph']):
-            return 'free_text'
+    def ttl_pairs(self, slot: str) -> Tuple[List[CuratedPair], List[CuratedPair]]:
+        """(slot-level, class-scoped) TTL alignments of ``slot``, strongest first.
 
-        # Novel D4D
-        if any(kw in attr_lower or kw in description
-               for kw in ['strategies', 'protocol', 'analyses', 'compensation',
-                         'governance', 'warnings', 'gaps', 'impacts', 'biases',
-                         'imputation', 'deidentif', 'confidential', 'vulnerable',
-                         'ethical', 'prohibited', 'retention', 'errata']):
-            return 'novel_d4d'
+        A class-scoped subject is ``<Class>_<slot>`` for a class that carries
+        the slot (``d4d:FileCollection_total_bytes``).
+        """
+        classes = set(self.sv.all_classes())
+        slot_level, scoped = [], []
+        for subject, predicate, obj in self.skos_triples:
+            if subject == slot:
+                slot_level.append(CuratedPair(f'skos:{predicate}', obj, 'ttl'))
+            elif subject.endswith('_' + slot):
+                cls = subject[:-len(slot) - 1]
+                if cls in classes and slot in self.sv.class_slots(cls):
+                    scoped.append(CuratedPair(f'skos:{predicate}', obj, 'ttl',
+                                              f'd4d:{subject}'))
+        rank = {f'skos:{p}': i for i, p in enumerate(SKOS_ORDER)}
+        slot_level.sort(key=lambda p: rank.get(p.predicate, len(rank)))
+        scoped.sort(key=lambda p: rank.get(p.predicate, len(rank)))
+        return slot_level, scoped
 
-        # Has SKOS mapping
-        if attr_name in self.skos_mappings:
-            return 'mapped'
+    def schema_pairs(self, slot: str) -> List[Tuple[CuratedPair, str]]:
+        """External targets the schema declares for ``slot``, with the metaslot."""
+        pairs = []
+        for cls, definition in self.d4d_attributes[slot]['definitions']:
+            for metaslot, predicate in SCHEMA_MAPPING_KINDS:
+                value = getattr(definition, metaslot, None)
+                values = [value] if isinstance(value, str) else list(value or [])
+                for v in map(str, values):
+                    if not self._is_internal(v):
+                        pairs.append((CuratedPair(predicate, v, 'schema', cls),
+                                      metaslot))
+        return pairs
 
-        # Has recommendation
-        if attr_name in self.recommendations:
-            return 'recommended'
+    def declared_slot_uri(self, slot: str) -> str:
+        """The slot_uri the row's path class sees, D4D namespace included."""
+        for _, definition in self.d4d_attributes[slot]['definitions']:
+            if definition.slot_uri:
+                return str(definition.slot_uri)
+        return ''
 
-        return 'unmapped'
+    # ------------------------------------------------------------ resolution
+    def _resolve(self, slot: str) -> Resolution:
+        res = self._resolve_mapping(slot)
+        if not res.path_class:
+            res.notes.append('no class uses this slot')
+        return res
 
-    def generate_comprehensive_sssom(self) -> List[Dict]:
-        """Generate comprehensive SSSOM rows for all D4D attributes."""
+    def _resolve_mapping(self, slot: str) -> Resolution:
+        info = self.d4d_attributes[slot]
+        base = dict(slot=slot, path_class=info['path_class'],
+                    owners=info['owners'], description=info['description'],
+                    hint=heuristic_hint(slot, info['description']))
+
+        slot_level, scoped = self.ttl_pairs(slot)
+        schema = self.schema_pairs(slot)
+        ttl_used = slot_level or scoped
+        curated = slot_level + scoped + [p for p, _ in schema]
+
+        if ttl_used:                                       # 1. TTL
+            primary = ttl_used[0]
+            origin = primary.where or f'd4d:{slot}'
+            comment = 'Mapped via SKOS alignment' + (
+                f' ({primary.where})' if primary.where else '')
+            source = 'ttl'
+        elif schema:                                       # 2. schema
+            primary, origin = schema[0]
+            comment = f'Mapped via schema {origin}'
+            source = 'schema'
+        else:
+            primary = None
+
+        if primary is not None:
+            disagreement = self._disagreement(slot, ttl_used,
+                                              [p for p, _ in schema])
+            return Resolution(
+                **base, status='mapped', source=source,
+                predicate=primary.predicate, object=primary.object,
+                confidence=self._get_confidence(primary.predicate.split(':')[1]),
+                justification='semapv:ManualMappingCuration',
+                comment=comment, origin=origin,
+                others=self._others(primary, curated),
+                disagreement=disagreement,
+                notes=([f'TTL and schema disagree ({disagreement})']
+                       if disagreement else []))
+
+        rec = self.recommendations.get(slot)                # 3. recommendation
+        if rec and rec['suggested_uri']:
+            return Resolution(
+                **base, status='recommended', source='recommendations',
+                predicate='skos:closeMatch', object=rec['suggested_uri'],
+                confidence=0.7 if rec['confidence'] == 'high' else 0.5,
+                justification='semapv:SuggestedMapping',
+                comment=f"Recommended mapping (confidence: {rec['confidence']})")
+
+        if base['hint'] == 'novel_d4d':                     # 4. heuristics
+            return Resolution(
+                **base, status='novel_d4d', source='heuristic',
+                predicate='skos:exactMatch', object=f'd4d:{slot}',
+                confidence=1.0, justification='semapv:ManualMappingCuration',
+                comment='Novel D4D concept - uses D4D namespace')
+        if base['hint'] == 'free_text':
+            return Resolution(
+                **base, status='free_text', source='heuristic',
+                predicate='semapv:UnmappableProperty', object='',
+                confidence=0.0, justification='semapv:FreeTextProperty',
+                comment='Free text/narrative field - no URI needed')
+        return Resolution(
+            **base, status='unmapped', source='none',
+            predicate='semapv:UnmappedProperty', object='', confidence=0.0,
+            justification='semapv:RequiresResearch',
+            comment='Unmapped - needs vocabulary research')
+
+    def _disagreement(self, slot: str, ttl: List[CuratedPair],
+                      schema: List[CuratedPair]) -> str:
+        """'' when the TTL and the schema agree, else how the slot is listed."""
+        if not self.disagrees(ttl, schema):
+            return ''
+        if slot in ACCEPTED_DISAGREEMENTS:
+            return 'accepted'
+        if slot in OPEN_DISAGREEMENTS:
+            return 'open'
+        return 'unlisted'
+
+    @staticmethod
+    def disagrees(ttl: List[CuratedPair], schema: List[CuratedPair]) -> bool:
+        """The schema declares external targets and a TTL pair is not one."""
+        if not ttl or not schema:
+            return False
+        declared = {(p.predicate, p.object) for p in schema}
+        return any((p.predicate, p.object) not in declared for p in ttl)
+
+    def _others(self, primary: CuratedPair, curated: List[CuratedPair]) -> List[str]:
+        """Every curated pair but the primary, with where it was declared.
+
+        A schema pair names the classes that declare it, less any whose
+        ancestor declares the same pair: the merged schema repeats an
+        inherited attribute on every subclass, and ``id``'s slot_uri would
+        otherwise name 78 classes.
+        """
+        where: Dict[Tuple[str, str], Dict[str, List[str]]] = {}
+        for p in curated:
+            key = (p.predicate, p.object)
+            if key == (primary.predicate, primary.object):
+                continue
+            places = where.setdefault(key, {}).setdefault(p.source, [])
+            if p.where not in places:
+                places.append(p.where)
+        out = []
+        for (predicate, obj), sources in where.items():
+            labels = []
+            for source in ('ttl', 'schema'):
+                places = sources.get(source)
+                if places is None:
+                    continue
+                if '' in places:
+                    labels.append(source)
+                    continue
+                if source == 'schema':
+                    places = [c for c in places if not set(places)
+                              & set(self.sv.class_ancestors(c)[1:])]
+                labels.append(f"{source} {', '.join(sorted(places))}")
+            out.append(f"{predicate} {obj} ({'; '.join(labels)})")
+        return out
+
+    def disagreement_report(self) -> Dict[str, List[str]]:
+        """Slots by how their TTL/schema disagreement is listed, plus stale ones."""
+        report = {'accepted': [], 'open': [], 'unlisted': [], 'stale': []}
+        for slot, res in self.resolutions.items():
+            if res.disagreement:
+                report[res.disagreement].append(slot)
+        listed = set(ACCEPTED_DISAGREEMENTS) | set(OPEN_DISAGREEMENTS)
+        live = set(report['accepted']) | set(report['open'])
+        report['stale'] = sorted(listed - live)
+        return report
+
+    def warnings(self) -> List[str]:
+        """What a run says about TTL/schema disagreements."""
+        report = self.disagreement_report()
+        out = []
+        for slot in report['unlisted']:
+            res = self.resolutions[slot]
+            out.append(f"TTL and schema disagree on {slot} and it is in neither "
+                       f"disagreement list: TTL {res.predicate} {res.object}; "
+                       f"others: {' | '.join(res.others)}")
+        for slot in report['stale']:
+            out.append(f"{slot} is listed as a TTL/schema disagreement but no "
+                       "longer disagrees; remove it from the list")
+        for slot in report['open']:
+            out.append(f"unsettled TTL/schema disagreement on {slot}: "
+                       f"{OPEN_DISAGREEMENTS[slot]}")
+        return out
+
+    # ------------------------------------------------------------ rows
+    def generate_comprehensive_sssom(self, mapping_date: Optional[str] = None
+                                     ) -> List[Dict]:
+        """Generate comprehensive SSSOM rows for all D4D slots."""
+        mapping_date = mapping_date or date.today().isoformat()
         rows = []
-
-        for attr_name, attr_info in sorted(self.d4d_attributes.items()):
-            category = self._categorize_attribute(attr_name, attr_info)
-
-            # Build SSSOM row
-            row = {
-                'd4d_schema_path': f"Dataset.{attr_name}",
-                'subject_id': f"d4d:{attr_name}",
-                'subject_label': attr_name.replace('_', ' ').title(),
-                'subject_source': 'https://w3id.org/bridge2ai/data-sheets-schema/',
-            }
-
-            # Determine predicate and object based on category
-            if category == 'mapped':
-                # Has SKOS mapping
-                mapping = self.skos_mappings[attr_name]
-                row.update({
-                    'predicate_id': f"skos:{mapping['predicate']}",
-                    'rocrate_json_path': self._get_rocrate_path(mapping['rocrate_uri']),
-                    'object_id': mapping['rocrate_uri'],
-                    'object_label': mapping['rocrate_uri'].split(':')[1] if ':' in mapping['rocrate_uri'] else mapping['rocrate_uri'],
-                    'object_source': self._get_vocab_source(mapping['rocrate_uri']),
-                    'confidence': self._get_confidence(mapping['predicate']),
-                    'mapping_justification': 'semapv:ManualMappingCuration',
-                    'comment': f"Mapped via SKOS alignment",
-                    'mapping_status': 'mapped'
-                })
-
-            elif category == 'recommended':
-                # Has URI recommendation
-                rec = self.recommendations[attr_name]
-                suggested_uri = rec['suggested_uri']
-
-                row.update({
-                    'predicate_id': 'skos:closeMatch' if suggested_uri else 'semapv:UnmappedProperty',
-                    'rocrate_json_path': self._get_rocrate_path(suggested_uri) if suggested_uri else '',
-                    'object_id': suggested_uri if suggested_uri else '',
-                    'object_label': suggested_uri.split(':')[1] if ':' in suggested_uri else suggested_uri,
-                    'object_source': self._get_vocab_source(suggested_uri) if suggested_uri else '',
-                    'confidence': 0.7 if rec['confidence'] == 'high' else 0.5,
-                    'mapping_justification': 'semapv:SuggestedMapping',
-                    'comment': f"Recommended mapping (confidence: {rec['confidence']})",
-                    'mapping_status': 'recommended'
-                })
-
-            elif category == 'novel_d4d':
-                # Novel D4D concept - needs D4D namespace
-                d4d_uri = f"d4d:{attr_name}"
-                row.update({
-                    'predicate_id': 'skos:exactMatch',
-                    'rocrate_json_path': f"@graph[?@type='Dataset']['{d4d_uri}']",
-                    'object_id': d4d_uri,
-                    'object_label': attr_name,
-                    'object_source': 'https://w3id.org/bridge2ai/data-sheets-schema/',
-                    'confidence': 1.0,
-                    'mapping_justification': 'semapv:ManualMappingCuration',
-                    'comment': 'Novel D4D concept - uses D4D namespace',
-                    'mapping_status': 'novel_d4d'
-                })
-
-            elif category == 'free_text':
-                # Free text field - no mapping needed
-                row.update({
-                    'predicate_id': 'semapv:UnmappableProperty',
-                    'rocrate_json_path': '',
-                    'object_id': '',
-                    'object_label': '',
-                    'object_source': '',
-                    'confidence': 0.0,
-                    'mapping_justification': 'semapv:FreeTextProperty',
-                    'comment': 'Free text/narrative field - no URI needed',
-                    'mapping_status': 'free_text'
-                })
-
-            else:
-                # Unmapped - needs research
-                row.update({
-                    'predicate_id': 'semapv:UnmappedProperty',
-                    'rocrate_json_path': '',
-                    'object_id': '',
-                    'object_label': '',
-                    'object_source': '',
-                    'confidence': 0.0,
-                    'mapping_justification': 'semapv:RequiresResearch',
-                    'comment': 'Unmapped - needs vocabulary research',
-                    'mapping_status': 'unmapped'
-                })
-
-            # Add common fields
-            row.update({
+        for slot, res in self.resolutions.items():
+            # One physical line per row: a description's line breaks would
+            # otherwise be written as a quoted multi-line cell.
+            desc = ' '.join(res.description.split())
+            rows.append({
+                'd4d_schema_path': f"{res.path_class}.{slot}" if res.path_class else '',
+                'subject_id': f"d4d:{slot}",
+                'subject_label': slot.replace('_', ' ').title(),
+                'predicate_id': res.predicate,
+                'rocrate_json_path': self._get_rocrate_path(res.object),
+                'object_id': res.object,
+                'object_label': self._object_label(res.object),
+                'mapping_justification': res.justification,
+                'confidence': res.confidence,
+                'comment': '; '.join([res.comment] + res.notes),
                 'author_id': 'https://orcid.org/0000-0000-0000-0000',
-                'mapping_date': datetime.now().strftime('%Y-%m-%d'),
+                'mapping_date': mapping_date,
+                'subject_source': D4D_NAMESPACE,
+                'object_source': self._get_vocab_source(res.object),
                 'mapping_set_id': 'd4d-rocrate-comprehensive-v1',
-                'mapping_set_version': '1.0',
-                'd4d_description': attr_info['description'][:100] + '...' if len(attr_info['description']) > 100 else attr_info['description']
+                'mapping_set_version': '2.0',
+                'mapping_status': res.status,
+                'mapping_source': res.source,
+                'other_curated_mappings': ' | '.join(res.others),
+                'heuristic_hint': res.hint,
+                'd4d_owning_classes': '|'.join(res.owners),
+                'd4d_description': desc[:100] + '...' if len(desc) > 100 else desc,
             })
-
-            rows.append(row)
-
         return rows
 
+    @staticmethod
+    def _object_label(uri: str) -> str:
+        return uri.split(':', 1)[1] if ':' in uri else uri
+
     def _get_rocrate_path(self, uri: str) -> str:
-        """Get RO-Crate JSON path for a URI."""
+        """Get RO-Crate JSON path for a URI.
+
+        RO-Crate's JSON-LD context carries schema.org terms as bare keys; a
+        term from any other vocabulary appears under its prefixed name.
+        """
         if not uri:
             return ''
-
-        if ':' in uri:
-            ns, prop = uri.split(':', 1)
-            if ns in ['evi', 'rai', 'd4d']:
-                return f"@graph[?@type='Dataset']['{uri}']"
-            else:
-                return f"@graph[?@type='Dataset']['{prop}']"
+        if uri.startswith('schema:'):
+            return f"@graph[?@type='Dataset']['{uri.split(':', 1)[1]}']"
         return f"@graph[?@type='Dataset']['{uri}']"
 
     def _get_vocab_source(self, uri: str) -> str:
-        """Get vocabulary source URL."""
+        """Namespace IRI of a CURIE, from the TTL's or the schema's prefixes."""
         if not uri or ':' not in uri:
             return ''
-
-        namespace = uri.split(':')[0]
-        sources = {
-            'schema': 'https://schema.org/',
-            'dcterms': 'http://purl.org/dc/terms/',
-            'dcat': 'https://www.w3.org/ns/dcat#',
-            'prov': 'http://www.w3.org/ns/prov#',
-            'evi': 'https://w3id.org/EVI#',
-            'rai': 'http://mlcommons.org/croissant/RAI/',
-            'd4d': 'https://w3id.org/bridge2ai/data-sheets-schema/',
-        }
-        return sources.get(namespace, 'unknown')
+        return self.namespaces.get(uri.split(':', 1)[0], 'unknown')
 
     def _get_confidence(self, predicate: str) -> float:
         """Get confidence based on SKOS predicate."""
@@ -281,72 +695,55 @@ class ComprehensiveSSSOMGenerator:
         }
         return confidence_map.get(predicate, 0.5)
 
-    def write_sssom(self, output_file: Path):
+    @staticmethod
+    def status_counts(rows: List[Dict]) -> Dict[str, int]:
+        counts: Dict[str, int] = {}
+        for row in rows:
+            counts[row['mapping_status']] = counts.get(row['mapping_status'], 0) + 1
+        return dict(sorted(counts.items()))
+
+    def render_sssom(self, mapping_date: Optional[str] = None) -> str:
+        """The comprehensive SSSOM TSV, as the file holds it."""
+        mapping_date = mapping_date or date.today().isoformat()
+        rows = self.generate_comprehensive_sssom(mapping_date)
+        out = io.StringIO()
+        out.write('# Comprehensive SSSOM Mapping - ALL D4D Slots\n')
+        out.write('# One row per schema slot name. Precedence: SKOS alignment TTL, '
+                  'schema slot_uri/*_mappings, URI recommendations, keyword '
+                  'heuristics\n')
+        out.write(f'# Date: {mapping_date}\n')
+        out.write(f'# Total attributes: {len(rows)}\n')
+        out.write('#\n')
+        out.write('# Status breakdown:\n')
+        for status, count in self.status_counts(rows).items():
+            out.write(f'#   {status}: {count}\n')
+        out.write('#\n')
+        writer = csv.DictWriter(out, fieldnames=self.FIELDNAMES,
+                                delimiter='\t', lineterminator='\n')
+        writer.writeheader()
+        writer.writerows(rows)
+        return out.getvalue()
+
+    def write_sssom(self, output_file: Path, mapping_date: Optional[str] = None):
         """Write comprehensive SSSOM TSV."""
-        rows = self.generate_comprehensive_sssom()
+        mapping_date = mapping_date or date.today().isoformat()
+        with open(output_file, 'w', encoding='utf-8', newline='') as f:
+            f.write(self.render_sssom(mapping_date))
 
-        if not rows:
-            print("No mappings to write")
-            return
-
-        # SSSOM header
-        fieldnames = [
-            'd4d_schema_path',
-            'subject_id',
-            'subject_label',
-            'predicate_id',
-            'rocrate_json_path',
-            'object_id',
-            'object_label',
-            'mapping_justification',
-            'confidence',
-            'comment',
-            'author_id',
-            'mapping_date',
-            'subject_source',
-            'object_source',
-            'mapping_set_id',
-            'mapping_set_version',
-            'mapping_status',
-            'd4d_description'
-        ]
-
-        with open(output_file, 'w', newline='') as f:
-            # Write SSSOM metadata
-            f.write('# Comprehensive SSSOM Mapping - ALL D4D Attributes\n')
-            f.write('# Includes mapped, recommended, novel, free text, and unmapped attributes\n')
-            f.write(f'# Date: {datetime.now().isoformat()}\n')
-            f.write(f'# Total attributes: {len(rows)}\n')
-
-            # Count by status
-            status_counts = {}
-            for row in rows:
-                status = row['mapping_status']
-                status_counts[status] = status_counts.get(status, 0) + 1
-
-            f.write(f'#\n')
-            f.write('# Status breakdown:\n')
-            for status, count in sorted(status_counts.items()):
-                f.write(f'#   {status}: {count}\n')
-            f.write('#\n')
-
-            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
-            writer.writeheader()
-            writer.writerows(rows)
-
+        rows = self.generate_comprehensive_sssom(mapping_date)
         print(f"✓ Wrote {len(rows)} comprehensive mappings to {output_file}")
-        print(f"\nStatus breakdown:")
-        for status, count in sorted(status_counts.items()):
+        print("\nStatus breakdown:")
+        for status, count in self.status_counts(rows).items():
             print(f"  {status}: {count}")
 
 
-def main():
-    """Main entry point."""
-    import argparse
+def iso_date(value: str) -> str:
+    """argparse type for ``--date``: a YYYY-MM-DD date."""
+    return date.fromisoformat(value).isoformat()
 
-    parser = argparse.ArgumentParser(
-        description='Generate comprehensive SSSOM for ALL D4D attributes'
-    )
+
+def add_common_arguments(parser, output_default: str) -> None:
+    """Arguments both comprehensive generators take."""
     parser.add_argument(
         '--schema',
         default='src/data_sheets_schema/schema/data_sheets_schema_all.yaml',
@@ -362,28 +759,49 @@ def main():
         default='notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv',
         help='URI recommendations file'
     )
+    parser.add_argument('--output', default=output_default,
+                        help='Output TSV (the committed file --check compares)')
     parser.add_argument(
-        '--output',
-        default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv',
-        help='Output comprehensive SSSOM file'
+        '--date', type=iso_date, default=None,
+        help='Mapping date, YYYY-MM-DD (default: today). Everything else in '
+             'the output is a function of the inputs.')
+    parser.add_argument(
+        '--check', action='store_true',
+        help="Regenerate in memory under the date the committed --output "
+             "records and report any difference. Writes nothing; exits "
+             "non-zero on drift.")
+
+
+def main(argv=None):
+    """Main entry point."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description='Generate comprehensive SSSOM for ALL D4D slots'
     )
+    add_common_arguments(
+        parser,
+        'src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv')
+    args = parser.parse_args(argv)
 
-    args = parser.parse_args()
-
-    # Generate comprehensive SSSOM
+    recommendations = Path(args.recommendations)
     generator = ComprehensiveSSSOMGenerator(
         Path(args.schema),
         Path(args.skos),
-        Path(args.recommendations) if Path(args.recommendations).exists() else None
+        recommendations if recommendations.exists() else None
     )
+    for warning in generator.warnings():
+        print(f"WARNING: {warning}", file=sys.stderr)
 
-    # Create output directory
     output_file = Path(args.output)
-    output_file.parent.mkdir(parents=True, exist_ok=True)
+    if args.check:
+        pinned = committed_date(output_file) if output_file.exists() else args.date
+        return report_drift(output_file, generator.render_sssom(pinned),
+                            'subject_id')
 
-    # Write SSSOM
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     print("\nGenerating comprehensive SSSOM mapping...")
-    generator.write_sssom(output_file)
+    generator.write_sssom(output_file, args.date)
 
     print("\n✓ Comprehensive SSSOM generation complete")
     return 0

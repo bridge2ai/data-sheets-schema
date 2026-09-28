@@ -139,23 +139,10 @@ class TestSSSOMValidation(unittest.TestCase):
         self.assertGreater(len(rows), 10,
                           "URI SSSOM should have at least 10 mappings")
 
-    def test_sssom_comprehensive_mapping_count(self):
-        """Test that comprehensive SSSOM has all D4D attributes."""
-        path = self.sssom_files['comprehensive']
-        if not path.exists():
-            self.skipTest(f"SSSOM file not found: {path}")
-
-        with open(path, 'r', encoding='utf-8') as f:
-            # Skip comment lines
-            lines = [line for line in f if not line.startswith('#')]
-            f_filtered = '\n'.join(lines)
-            import io
-            reader = csv.DictReader(io.StringIO(f_filtered), delimiter='\t')
-            rows = list(reader)
-
-        # Comprehensive SSSOM should have many mappings (all D4D attributes)
-        self.assertGreater(len(rows), 200,
-                        "Comprehensive SSSOM should have at least 200 mappings")
+    # The comprehensive table's row count is no longer checked here: "more
+    # than 200 rows" passed while 17 schema slots had none. Its completeness,
+    # curated alignments and drift are tested in test_comprehensive_sssom.py
+    # (#2935).
 
     def test_sssom_no_duplicate_subjects(self):
         """Test that SSSOM files don't have duplicate subject_id entries."""
