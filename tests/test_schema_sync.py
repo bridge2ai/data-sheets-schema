@@ -704,5 +704,59 @@ class ClassificationEdgeTest(unittest.TestCase):
         self.assertIn("changed during the sync check", row["reason"])
 
 
+class NestedPinTest(unittest.TestCase):
+    """#2820: a pin malformed below its top level fails only when rendered; the digest
+    that fails succeeds without it, so the pin is named, not a rebuild or a repair."""
+
+    BAD_PIN = b"vocabularies: {B2AI_TOPIC: [B2AI_TOPIC:1]}\n"
+
+    def _run(self, *, fail_live):
+        from unittest import mock
+        from data_sheets_schema import profiles, schema_sync
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        bridge2ai = profiles.profile_named("bridge2ai")
+
+        def regenerate(src, target, flag, **kwargs):
+            target.write_bytes(merged.read_bytes())            # the fresh build, without the comment
+            return True, None
+
+        def digest(class_name, path, *, profile=None):
+            if fail_live and profile is not None and profile.name == "bridge2ai":
+                raise AttributeError("'list' object has no attribute 'items'")
+            return "live digest text"
+
+        def rebuilt(class_name, path, vocabulary, name, profile=None):
+            if profile is not None and profile.name == "bridge2ai":
+                raise schema_sync.RebuiltDigestFailed(1, "rebuilt digest process failed: 'list' object has no attribute 'items'")
+            return "0" * 32
+
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            copy.write_bytes(merged.read_bytes() + b"\n# a comment\n")
+            with mock.patch.object(schema_sync, "_regenerate", regenerate), \
+                 mock.patch.object(profiles, "vocabulary_bytes",
+                                   lambda p: self.BAD_PIN if p.name == "bridge2ai" else b""), \
+                 mock.patch.object(schema_digest, "digest_text", digest), \
+                 mock.patch.object(schema_sync, "_rebuilt_fingerprint", rebuilt):
+                row = schema_sync.check_one(copy, source, cls, marker, profile=bridge2ai)
+        if row.get("rebuilt_at"):
+            shutil.rmtree(Path(row["rebuilt_at"]).parent, ignore_errors=True)
+        return row
+
+    def test_the_live_digest_failing_on_the_pin_names_it(self):
+        row = self._run(fail_live=True)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertTrue(row["reason"].startswith("the vocabulary pin "), row)
+        self.assertIn("cannot be rendered", row["reason"])
+
+    def test_the_fresh_builds_digest_failing_on_the_pin_names_it(self):
+        row = self._run(fail_live=False)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertIn("cannot be rendered", row["reason"])
+        self.assertNotIn("source needs repair", row["reason"])
+
+
 if __name__ == "__main__":
     unittest.main()

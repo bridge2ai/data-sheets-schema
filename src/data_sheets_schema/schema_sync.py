@@ -306,6 +306,23 @@ def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
     return value
 
 
+def _succeeds_without_vocabulary(class_name, merged, rebuilt, vocabulary, live) -> bool:
+    """Whether the digest that failed succeeds under the neutral profile, which renders
+    no vocabulary: then the pin, not the schema, is what failed (#2820). The live digest
+    if it failed, else the fresh build's."""
+    from data_sheets_schema import schema_digest
+    from data_sheets_schema.profiles import NEUTRAL
+    try:
+        if live is None:
+            schema_digest.digest_text(class_name, merged, profile=NEUTRAL)
+        else:
+            _rebuilt_fingerprint(class_name, rebuilt, vocabulary,
+                                 schema_digest._schema_name(class_name, merged), profile=NEUTRAL)
+        return True
+    except Exception:                                          # noqa: BLE001
+        return False
+
+
 def check_one(merged: Path, source: Path, class_name: str,
               marker: bool = False, *, profile=None) -> dict[str, Any]:
     """Rebuild `merged` from `source` and compare — under `profile`, else
@@ -395,6 +412,12 @@ def check_one(merged: Path, source: Path, class_name: str,
                     return {**out, "status": UNCHECKED,
                             "reason": (f"the vocabulary pin {profile.pin_path} changed during the "
                                        "sync check; retry with stable inputs")}
+            # A pin malformed below its top level fails only when rendered; name it rather
+            # than advise a rebuild or a source repair that cannot help (#2820).
+            if (vocabulary_bytes and same is not None
+                    and _succeeds_without_vocabulary(class_name, merged, rebuilt, vocabulary, live)):
+                return {**out, "status": UNCHECKED,
+                        "reason": f"the vocabulary pin {profile.pin_path} cannot be rendered: {exc}"}
             try:
                 stable = (same is False and merged.read_bytes() == merged_bytes
                           and _source_state(source) == source_state)
