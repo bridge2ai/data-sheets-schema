@@ -503,12 +503,14 @@ def await_leader_exit(process, timeout):
 def terminate_group(process):
     """Signal the child's group while its unreaped leader holds the id, then reap (#2714).
 
-    A leader reaped by someone else is sent nothing from then on: its group id
-    may already name another group. The exit check records such a reap, which a
+    A leader already reaped by someone else is sent nothing: its group id may
+    already name another group. The exit check records such a reap, which a
     Popen that did not do the reaping cannot know of, before the SIGTERM (#2943)
-    and again after the grace wait, before the SIGKILL (#2953). Nothing in the
-    controller reaps outside this function, so no reap can fall between a
-    check and its send.
+    and again after the grace wait, before the SIGKILL (#2953). A check covers
+    only reaps that precede it: nothing in the controller reaps outside this
+    function, but a reaper outside the controller could still act between a
+    check and its send, and no check can exclude that (#2958). None exists in
+    this process today.
 
     On Linux a zombie leader accepts the signal, so killpg succeeds while the
     leader is unreaped even when a live member refuses it, and that member's
@@ -525,7 +527,7 @@ def terminate_group(process):
         await_leader_exit(process, 2)
     if process.returncode is None:            # nor did anyone else during the wait (#2953)
         # Also remove descendants if the parent exited before them. The leader
-        # is still unreaped here, so the id names this group only (#2714).
+        # was unreaped at the last check, so the id named this group (#2714).
         _signal_group(process, signal.SIGKILL)
     process.wait(timeout=2)
 
