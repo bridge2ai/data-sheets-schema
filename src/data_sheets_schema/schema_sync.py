@@ -155,7 +155,7 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
         for path in dict.fromkeys(used):
             try:
                 yaml.safe_load(files[path])
-            except yaml.YAMLError:
+            except Exception:                          # a YAMLError, or a constructor's ValueError (#2800)
                 raise ValueError(f"source module {path} does not parse: {error}") from error
         raise
     state = (str(source), _generator_versions(),

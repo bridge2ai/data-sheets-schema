@@ -251,6 +251,7 @@ class RefusalWordingTest(unittest.TestCase):
         self.assertIn("Dataset: rebuild differs", stale_part)
         self.assertNotIn("CoreDataset", stale_part)
         self.assertIn("CoreDataset: timed out", unchecked_part)
+        self.assertNotIn("Dataset: rebuild differs", unchecked_part)        # each row under one cause (#2799)
         # Only the stale row's rebuild: the unchecked core gets no rm -f (#2788).
         for text in ("rm -f", "gen-core-schema"):
             self.assertNotIn(text, message)
@@ -452,6 +453,71 @@ class SourceParseFailureTest(unittest.TestCase):
             row = check_one(schema_dir / merged.name, schema_dir / source.name, cls, marker)
         self.assertEqual(row["status"], UNCHECKED, row)
         self.assertTrue(row["reason"].startswith("the source schema could not be read: source module "), row)
+        self.assertIn("D4D_Core.yaml does not parse", row["reason"])
+
+
+class RebuildDigestTimeoutTest(unittest.TestCase):
+
+    def test_the_rebuilds_digest_timing_out_on_a_stale_file_is_stale_with_its_digest(self):
+        """#2799: the #2738 failure itself, the rebuild's digest child timing out after the
+        merged file's own digest was computed, on a file whose rebuild differs."""
+        import subprocess
+        from unittest import mock
+        from data_sheets_schema import schema_sync
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+
+        def regenerate(src, target, flag, **kwargs):
+            target.write_bytes(b"id: a differing rebuild\n")
+            return True, None
+
+        def timed_out(*args, **kwargs):
+            raise subprocess.TimeoutExpired("digest child", schema_sync.DIGEST_TIMEOUT_SECONDS)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            copy.write_bytes(merged.read_bytes())
+            with mock.patch.object(schema_sync, "_regenerate", regenerate), \
+                 mock.patch.object(schema_sync, "_rebuilt_fingerprint", timed_out):
+                row = schema_sync.check_one(copy, source, cls, marker)
+        try:
+            self.assertEqual(row["status"], STALE, row)
+            self.assertTrue(row.get("digest"), row)                        # the merged file's own
+            self.assertIn("timed out", row["reason"])
+        finally:
+            if row.get("rebuilt_at"):
+                shutil.rmtree(Path(row["rebuilt_at"]).parent, ignore_errors=True)
+
+
+class SourceNamingNegativeTest(unittest.TestCase):
+
+    def test_a_missing_import_is_not_called_a_parse_failure(self):
+        """#2799: a module is named only when one really does not parse; a missing import
+        keeps its own error."""
+        merged, source, cls, marker = MERGED_SCHEMAS[1]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        with tempfile.TemporaryDirectory() as tmp:
+            schema_dir = Path(tmp) / "schema"
+            shutil.copytree(source.parent, schema_dir)
+            (schema_dir / "D4D_Variables.yaml").unlink()
+            row = check_one(schema_dir / merged.name, schema_dir / source.name, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
+        self.assertNotIn("does not parse", row["reason"])
+
+    def test_a_yaml_constructor_error_names_the_module(self):
+        """#2800: PyYAML raises a plain ValueError for an impossible date; the module is named."""
+        merged, source, cls, marker = MERGED_SCHEMAS[1]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        with tempfile.TemporaryDirectory() as tmp:
+            schema_dir = Path(tmp) / "schema"
+            shutil.copytree(source.parent, schema_dir)
+            broken = schema_dir / "D4D_Core.yaml"
+            broken.write_text(broken.read_text() + "\ncreated_on: 2023-02-30\n")
+            row = check_one(schema_dir / merged.name, schema_dir / source.name, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
         self.assertIn("D4D_Core.yaml does not parse", row["reason"])
 
 
