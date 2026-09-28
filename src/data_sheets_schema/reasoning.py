@@ -266,7 +266,9 @@ def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
     return entries, unreadable
 
 
-#: The counters `ReasoningCapture.to_dict` writes, each an integer or null (#2722).
+#: The counters `ReasoningCapture.to_dict` writes: integers or null as the SDK reports
+#: them, though a provider count it cannot coerce (a fraction) is written as it came,
+#: and `estimate_error` is absent rather than null (#2722, #2876).
 _COUNTER_FIELDS = ("output_tokens", "visible_text_chars", "reasoning_tokens_estimate",
                    "reasoning_tokens_observed", "estimate_error")
 #: Far above any response's token count, and far below where a total can no longer be

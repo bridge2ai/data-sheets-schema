@@ -153,9 +153,9 @@ def test_a_deeply_nested_line_is_named_not_a_crash(tmp_path):
     ("blocks", 3, False), ("blocks", [3], False), ("blocks", [{"type": ["thinking"]}], False),
     ("blocks", {"type": "thinking"}, False), ("phase", 7, False), ("phase", "\ud800", False)])
 def test_a_corrupt_entry_is_read_and_reported_not_a_crash(tmp_path, field, value, unusable):
-    """#2722: no writer produces these, and each once crashed the report: a string counter
-    in `summarise`, a bad block in the block scan, a lone surrogate when the phase is
-    printed, a counter too long to print. Both readers still take the line as an entry,
+    """#2722: shapes the report must survive. Five crashed it on main: a string estimate or
+    observed count in `summarise`, a `blocks` that is no list or a block whose type is no
+    text in the block scan, and a lone surrogate when the phase is printed. Both readers still take the line as an entry,
     as they take any object, so the accounting gate reads whatever the runner wrote
     (#2739, #2876); the report sums only integer counts, counts the entries whose counter
     is anything else, scans only blocks with a text type and escapes what it prints."""
@@ -239,7 +239,8 @@ def test_a_counter_that_is_not_a_count_is_as_if_absent(field, bad, base):
 @pytest.mark.parametrize("count", [0, 1, 144_863, 10 ** 9, 10 ** 15 - 1, -(10 ** 15 - 1)])
 def test_counts_of_any_real_size_are_counts(count):
     """#2886: the bound keeps totals printable; it does not flag a count a response can
-    have (the corpus's largest estimate is 144,863)."""
+    have (the corpus's largest estimate is 86,402, its largest counter of any kind the
+    visible_text_chars 144,863)."""
     from data_sheets_schema import reasoning
     summary = reasoning.summarise([{**entry(True), "reasoning_tokens_estimate": count}])
     assert summary["with_unusable_counter"] == 0
@@ -262,7 +263,7 @@ def test_what_the_runner_writes_is_an_entry_for_both_readers(tmp_path):
     negative estimate error, a phase-less evidence-scoring entry, and a provider count the
     SDK left as a float, are all read by both readers. The strict reader behind the
     accounting gate refuses nothing `append` writes, so no billed run is stopped by its
-    own log; the report names only the float count as unusable."""
+    own log; the report counts only the float count's entry as unusable."""
     from types import SimpleNamespace as NS
     from data_sheets_schema import reasoning
 
