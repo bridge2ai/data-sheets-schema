@@ -65,8 +65,29 @@ def processes(monkeypatch):
         return process
     monkeypatch.setattr(bounded.subprocess, "Popen", start)
     yield created
-    assert all(process.poll() is not None for process, _, _ in created), "child survived its transport context"
+    survivors = [process for process, _, _ in created if process.poll() is None]
+    for process in survivors:            # a reaping regression leaves no child running (#2865)
+        process.kill()
+        process.wait()
+    assert not survivors, "child survived its transport context"
 
+
+def assert_killed(processes):
+    """Every worker a case started was killed. A transport that rejects a defect kills
+    the worker holding its pipe open; one that ignored the defect and kept waiting, or
+    closed without killing, lets it exit by itself when its hold ends (#2861, #2864,
+    #2867). A regression that instead turns the defect into a response is killed on the
+    way out too, and is caught by the case's verdict on the failure, not by this (#2878)."""
+    assert processes and all(process.returncode == -signal.SIGKILL for process, _, _ in processes), \
+        [process.returncode for process, _, _ in processes]
+
+
+#: How long a fake worker keeps its pipe open after its defect. A healthy transport kills
+#: it as soon as it reads the defect, so only a parent descheduled this long could see it
+#: exit first. It is also what a transport that ignored the defect, or closed without
+#: killing, costs a case before `assert_killed` fails it: short, so a whole regressed
+#: suite still ends inside CI's job timeout (#2864).
+HOLD_SECONDS = 60
 
 # Real-time bounds. None holds interpreter start-up, and each keeps at least a
 # threefold margin over the maximum measured for it. KILL_GAP, PARENT_GAP and
@@ -524,14 +545,20 @@ def test_a_5xx_can_be_classified_without_draining_its_body(processes, monkeypatc
 @pytest.mark.parametrize("frame", [b"\xff\xff\xff\xff", struct.pack("!I", 3) + b"Pxx",
     struct.pack("!I", 3) + b"H{}", struct.pack("!I", 3) + b"E{}"])
 def test_bad_worker_frames_fail_closed_and_reap(processes, monkeypatch, frame):
-    source = f"import sys,time;sys.stdout.buffer.write({frame!r});sys.stdout.buffer.flush();time.sleep(30)"
+    # The bounds are hang guards, not a 2 s budget that also paid for the worker's
+    # start-up (#2862). The worker holds its pipe open after the frame, and the case
+    # requires that it was killed: a frame ignored, or a close that only waits, lets it
+    # exit by itself (#2867).
+    source = (f"import sys,time;sys.stdout.buffer.write({frame!r});sys.stdout.buffer.flush();"
+              f"time.sleep({HOLD_SECONDS})")
     monkeypatch.setattr(bounded, "_worker_command", lambda: [sys.executable, "-B", "-c", source])
-    client = bounded.BoundedStreamClient(read_timeout_seconds=1, connect_timeout_seconds=1)
+    client = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
     with pytest.raises(bounded.BoundWorkerProtocolError):
         with client.stream("POST", "http://127.0.0.1/unused", content=b"small", headers={}):
             pass
     assert not client._workers
     client.close()
+    assert_killed(processes)
 
 
 def test_get_delegates_only_to_explicit_metadata_client_and_overrides_are_checked():
@@ -601,11 +628,15 @@ def test_redirect_is_returned_without_following(processes):
     client.close()
 
 
-@pytest.mark.parametrize("sent", [False, True], ids=["before-send", "after-send"])
-@pytest.mark.parametrize("defect", ["length", "headers", "eof", "progress", "unknown-error", "local-error", "missing-headers", "false-sent-error"])
-def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypatch, processes, sent, defect):
-    """#2160: IPC faults remain pending even after a sent progress witness."""
-    from native_controls.test_native_stall_policy import proxy_with, post, rows
+def _local_worker_failure(tmp_path, monkeypatch, processes, sent, defect, start_delay=0):
+    """#2160: IPC faults remain pending even after a sent progress witness. The worker is
+    a bare interpreter, so its bounds, the caller's and the proxy's handler cleanup are
+    hang guards, not a 3 s, 5 s or 2 s budget that also paid for its start-up or a
+    descheduled handler (#2772, #2853). The worker keeps its pipe open for HOLD_SECONDS
+    after its defect and must be killed, so the defect, not the worker's exit, ends the
+    exchange (#2861, #2864). Only the eof case exits, since its exit is the defect."""
+    from native_controls.test_native_stall_policy import proxy_with, rows
+    from native_controls.test_native_proxy import REQUEST
     frames = bounded._frame(b"P", b"sent") if sent else b""
     frames += {
         "length": b"\xff\xff\xff\xff",
@@ -616,13 +647,22 @@ def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypat
         "local-error": bounded._frame(b"E", json.dumps({"error":bounded.LOCAL_ERROR_NAME, "sent":sent}).encode()),
         "missing-headers": bounded._frame(b"D", b"unexpected data"),
         "false-sent-error": bounded._frame(b"E", json.dumps({"error":"RemoteProtocolError", "sent":not sent}).encode()),
+        # Valid headers with no sent witness, and a second witness: each is refused on its
+        # own, not by a malformed body beside it (#2866).
+        "unsent-headers": bounded._frame(b"H", json.dumps({"status": 200, "headers": []}).encode()),
+        "duplicate-witness": bounded._frame(b"P", b"sent"),
     }[defect]
-    source = f"import sys;sys.stdin.buffer.read();sys.stdout.buffer.write({frames!r});sys.stdout.buffer.flush()"
+    hold = "" if defect == "eof" else f";time.sleep({HOLD_SECONDS})"
+    source = (f"import sys,time;time.sleep({start_delay});sys.stdin.buffer.read();"
+              f"sys.stdout.buffer.write({frames!r});sys.stdout.buffer.flush(){hold}")
     monkeypatch.setattr(bounded, "_worker_command", lambda: [sys.executable, "-B", "-c", source])
     proxy, ledger, provider_calls = proxy_with(tmp_path, [])
     proxy.upstream.close()
-    proxy.upstream = bounded.BoundedStreamClient(read_timeout_seconds=2, connect_timeout_seconds=1)
-    with proxy.running() as url:
+    proxy.upstream = bounded.BoundedStreamClient(read_timeout_seconds=HANG_SECONDS, connect_timeout_seconds=HANG_SECONDS)
+    def post(url, proxy):
+        return httpx.post(url + '/v1/messages?beta=true', json=REQUEST, headers={'x-api-key': proxy.token},
+                          timeout=HANG_SECONDS)
+    with proxy.running(cleanup_timeout=HANG_SECONDS) as url:
         assert post(url, proxy).status_code == 402
         assert post(url, proxy).status_code == 402
     row, = rows(ledger)
@@ -630,6 +670,27 @@ def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypat
     assert proxy.stalls_survived == 0 and proxy.failure == "BoundWorkerProtocolError"
     assert proxy.unfinished_handlers == 0 and not proxy.upstream._workers
     assert provider_calls == [] and not list(tmp_path.rglob("stall.json"))
+    if defect != "eof":
+        assert_killed(processes)
+
+
+@pytest.mark.parametrize("sent", [False, True], ids=["before-send", "after-send"])
+@pytest.mark.parametrize("defect", ["length", "headers", "eof", "progress", "unknown-error", "local-error", "missing-headers", "false-sent-error"])
+def test_local_worker_failure_never_debits_real_proxy_ledger(tmp_path, monkeypatch, processes, sent, defect):
+    _local_worker_failure(tmp_path, monkeypatch, processes, sent, defect)
+
+
+@pytest.mark.parametrize("sent, defect", [(False, "unsent-headers"), (True, "duplicate-witness")])
+def test_a_witness_out_of_order_is_a_local_failure(tmp_path, monkeypatch, processes, sent, defect):
+    """#2866: headers before the sent witness, and a second witness after it."""
+    _local_worker_failure(tmp_path, monkeypatch, processes, sent, defect)
+
+
+def test_a_slow_worker_start_does_not_turn_a_local_failure_into_a_timeout(tmp_path, monkeypatch, processes):
+    """#2772, #2852: a worker that takes 6 s to start, past both the 3 s the test once
+    allowed the exchange and the caller's former 5 s, still fails as the worker protocol
+    error it is, and debits nothing."""
+    _local_worker_failure(tmp_path, monkeypatch, processes, False, "eof", start_delay=6)
 
 
 def test_genuine_worker_upstream_protocol_error_preserves_debit_and_retry(tmp_path, monkeypatch, processes):
