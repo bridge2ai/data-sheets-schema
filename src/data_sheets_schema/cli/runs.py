@@ -45,8 +45,13 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
     from data_sheets_schema.run_telemetry import (
         SCHEMA_PATH, collect_report, load_findings)
 
+    from data_sheets_schema.reasoning import UnreadableLog
+
     findings = load_findings(Path(findings_path)) if findings_path else None
-    report = collect_report(label_prefix, method=method, findings=findings)
+    try:
+        report = collect_report(label_prefix, method=method, findings=findings)
+    except UnreadableLog as error:
+        raise click.ClickException(str(error)) from error
     if not report["runs"]:
         raise click.ClickException(
             f"no runs with provenance found for prefix {label_prefix!r} "
@@ -155,7 +160,11 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
             raise click.ClickException("none of the labels lives under a claudecode_agent_core, claudecode_api_core "
                                        "or claudecode_direct_core directory; pass --method")   # #2229
         method = families.pop()
-    base = full_output_baseline(method, list(labels), list(projects) or projects_for(click.get_current_context()))
+    from data_sheets_schema.reasoning import UnreadableLog
+    try:
+        base = full_output_baseline(method, list(labels), list(projects) or projects_for(click.get_current_context()))
+    except UnreadableLog as error:           # a log line it cannot read, named (#2723)
+        raise click.ClickException(str(error)) from error
     if as_json:
         click.echo(_json.dumps(base, indent=2))
         return

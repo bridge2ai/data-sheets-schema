@@ -67,13 +67,10 @@ def _mtime_iso(path: Path) -> str | None:
 
 
 def _reasoning_entries(path: Path) -> list[dict[str, Any]]:
-    if not path.exists():
-        return []
-    out = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            out.append(json.loads(line))
-    return out
+    # The shared strict reader: telemetry joins entries to usage rows, so a line
+    # it cannot read is refused, naming the file and line (#2723).
+    from data_sheets_schema import reasoning
+    return reasoning.read(path)
 
 
 def _attempt(row: dict[str, Any],
