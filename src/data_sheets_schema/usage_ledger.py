@@ -161,10 +161,11 @@ def abandoned_journal_path(spec) -> Path:
     return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
 
 
-def abandoned_journal_offset(spec) -> int:
-    """Where this generation's rows start in the abandoned-attempts journal: 0 for a
-    generation that recorded no boundary, which is read strictly throughout (#2859)."""
-    return _read(spec).get("abandoned_journal_offset", 0) if ledger_path(spec).exists() else 0
+def abandoned_journal_offset(spec) -> int | None:
+    """Where this generation's rows start in the abandoned-attempts journal: None when
+    there is no generation (no ledger), and 0 for a ledger that predates the boundary,
+    whose rows are then read strictly throughout (#2859, #2869)."""
+    return _read(spec).get("abandoned_journal_offset", 0) if ledger_path(spec).exists() else None
 
 
 def recorded_inputs(spec) -> dict | None:
@@ -377,6 +378,11 @@ def prepare_usage(spec, *, resume: bool) -> str:
         require_resolved(spec)
         return _read(spec)["generation_id"]
     data = _empty(spec, accept_legacy=resume)
+    # Every new ledger opens a generation. The abandoned-attempts journal is shared and
+    # kept across generations, so the bytes already in it were written before this one:
+    # its own rows start here, and only they are read strictly (#2859, #2869).
+    journal = abandoned_journal_path(spec)
+    data["abandoned_journal_offset"] = journal.stat().st_size if journal.exists() else 0
     if not resume:
         data["prior_generation_ids"] = _record_generations(spec)
         from data_sheets_schema.snapshot_store import predecessor_generation
@@ -385,11 +391,6 @@ def prepare_usage(spec, *, resume: bool) -> str:
             data["prior_generation_ids"].append(predecessor)
         from data_sheets_schema.snapshot_store import activation_intent
         data["pending_snapshot_activation"] = activation_intent(spec)
-        # The abandoned-attempts journal is shared and kept across generations, so the
-        # bytes already in it are a predecessor's: this generation's rows start here, and
-        # only they are read strictly (#2859).
-        journal = abandoned_journal_path(spec)
-        data["abandoned_journal_offset"] = journal.stat().st_size if journal.exists() else 0
     if path.exists():
         try:
             previous = _read(spec)

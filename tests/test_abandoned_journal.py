@@ -5,6 +5,7 @@ line an interrupted write left open, the reader splits on the newline alone, and
 a line it cannot read is refused rather than skipped, since the gate must not
 pass over a charge it cannot see.
 """
+from dataclasses import replace
 import json
 
 import pytest
@@ -137,3 +138,85 @@ def test_a_journal_shorter_than_its_boundary_is_refused(tmp_path):
     api._abandoned_ledger(s).write_bytes(b"")
     with pytest.raises(ledger.UsageLedgerError, match="shorter than when this generation began"):
         api._abandoned_rows(s)
+
+
+def test_each_new_generation_records_its_own_boundary(tmp_path):
+    """#2870: a fresh generation measures the journal as it finds it, not the boundary
+    the previous ledger recorded."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    assert ledger.abandoned_journal_offset(s) == 0
+    _drop(s, 1)
+    ledger.prepare_usage(s, resume=False)
+    first = len(api._abandoned_ledger(s).read_bytes())
+    assert ledger.abandoned_journal_offset(s) == first > 0
+    _drop(s, 1)
+    ledger.prepare_usage(s, resume=False)
+    assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes()) > first
+
+
+def test_a_first_ledger_opened_over_an_existing_journal_starts_after_it(tmp_path):
+    """#2869: a generation opened by resume with no ledger yet, as the CLI opens one, does
+    not own the lines already in the journal: another run's torn line there is skipped."""
+    other = spec(out_dir=tmp_path)
+    ledger.prepare_usage(other, resume=True)
+    _drop(other, 1)
+    with api._abandoned_ledger(other).open("ab") as stream:
+        stream.write(b'{"phase": "full", "usage_id": "torn"')
+    s = replace(other, label="another_rep1")                  # another run's identity, sharing the journal
+    assert ledger.abandoned_journal_offset(s) is None
+    assert len(api._abandoned_rows(s)) == 1                   # no generation: read as before, torn line skipped
+    ledger.prepare_usage(s, resume=True)
+    assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes())
+    api._require_surviving_accounting(s, [])
+
+
+def test_the_boundary_is_in_bytes_and_lines_are_placed_by_their_start(tmp_path):
+    """#2870, #2872: predecessor rows carrying multi-byte text, and a predecessor line torn
+    in the middle of a character, are placed before the boundary by their byte offsets and
+    skipped when unreadable; this generation's line that does not decode is refused."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    old = [_drop(s, 1, outcome="transport error: café 漢字 — dropped"), _drop(s, 2, outcome="ünïcödé")]
+    journal = api._abandoned_ledger(s)
+    torn = json.dumps({"phase": "full", "outcome": "漢字"}, ensure_ascii=False).encode("utf-8")
+    with journal.open("ab") as stream:
+        stream.write(torn[:torn.index("漢".encode("utf-8")) + 1])          # cut inside a character
+    ledger.prepare_usage(s, resume=False)
+    assert ledger.abandoned_journal_offset(s) == len(journal.read_bytes())
+    assert api._abandoned_rows(s) == old
+    new = _drop(s, 1, outcome="ascii")
+    assert api._abandoned_rows(s) == [*old, new]
+    # This generation's first line, undecodable: placed by its start in bytes, it lies at
+    # the boundary; placed by characters it would fall before it and be skipped.
+    raw = journal.read_bytes()
+    boundary = ledger.abandoned_journal_offset(s)
+    journal.write_bytes(raw[:boundary] + b'\n{"phase": "full", "outcome": "\xe6\xbc"}\n' + raw[boundary:].lstrip(b"\n"))
+    with pytest.raises(ledger.UsageLedgerError, match="line 4 is not a readable entry"):
+        api._abandoned_rows(s)
+
+
+def test_a_journal_gone_after_its_boundary_is_refused(tmp_path):
+    """#2871: bytes this generation began after are gone; removing the journal is refused as
+    emptying it is. A generation whose journal was empty at its start may have none."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    assert api._abandoned_rows(s) == []
+    _drop(s, 1)
+    ledger.prepare_usage(s, resume=False)
+    api._abandoned_ledger(s).unlink()
+    with pytest.raises(ledger.UsageLedgerError, match="is gone, though this generation began after"):
+        api._abandoned_rows(s)
+
+
+@pytest.mark.parametrize("offset", [-1, "5", True, 2.0])
+def test_an_invalid_boundary_is_refused(tmp_path, offset):
+    """#2870: the ledger's boundary is a non-negative integer or the ledger is refused."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    path = ledger.ledger_path(s)
+    data = json.loads(path.read_text())
+    data["abandoned_journal_offset"] = offset
+    path.write_text(json.dumps(data))
+    with pytest.raises(ledger.UsageLedgerError, match="invalid abandoned-attempts journal boundary"):
+        ledger.abandoned_journal_offset(s)
