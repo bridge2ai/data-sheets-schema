@@ -865,9 +865,11 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, mon
 
 
 def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch):
-    """#2768, #2781: a first run hung before the boundary fails the test within two
-    guards, on a daemon thread, so neither the test nor the interpreter's exit waits on it."""
-    guard = _short_guard(monkeypatch, 2)
+    """#2768, #2781, #2796: a first run hung before the boundary fails the test at the
+    poll deadline plus the bounded join, two guards and under three, on a daemon thread
+    whose exit the interpreter does not wait for. The fake hangs for four guards, so a
+    lost poll deadline fails here too, within seconds."""
+    guard = _short_guard(monkeypatch, 5)
     unblock, daemons = threading.Event(), []
     thread_class = threading.Thread
 
@@ -877,7 +879,7 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
             return super().start()
 
     def execute(run, **kwargs):
-        unblock.wait(60)                            # hung until the test's own cleanup
+        unblock.wait(4 * guard)                     # hung past the test's own two guards
         return {"usage": []}
 
     monkeypatch.setattr(threading, "Thread", Observed)
@@ -886,6 +888,42 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
     try:
         with pytest.raises(AssertionError, match="first run never reached the request boundary"):
             test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
-        assert time.monotonic() - started < 2 * guard + 10 and daemons == [True]
+        assert time.monotonic() - started < 3 * guard and daemons == [True]
+    finally:
+        unblock.set()
+
+
+
+@pytest.mark.parametrize("late", ["raises", "hangs"])
+def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_path, monkeypatch, late):
+    """#2796: after the boundary and the release, a first run that raises is that error,
+    and one that hangs is "did not finish", never a KeyError on a result it never gave."""
+    guard = _short_guard(monkeypatch, 3)
+    marker, unblock = RuntimeError("invented late failure"), threading.Event()
+
+    def execute(run, **kwargs):
+        if threading.current_thread() is threading.main_thread():
+            raise ledger.UsageLedgerError("already active")     # every contender is refused
+        api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
+        if late == "raises":
+            raise marker
+        unblock.wait(4 * guard)
+        return {"usage": []}
+
+    written = tmp_path / "invented-ledger.json"
+    written.write_bytes(b"{}")
+    # The other label must still have no ledger, as the test checks.
+    monkeypatch.setattr(ledger, "ledger_path",
+                        lambda run: tmp_path / "absent.json" if run.label == "another_rep1" else written)
+    monkeypatch.setattr(api, "_begin_usage_call", lambda *args: None)
+    monkeypatch.setattr(api, "execute", execute)
+    try:
+        if late == "raises":
+            with pytest.raises(RuntimeError) as raised:
+                test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+            assert raised.value is marker
+        else:
+            with pytest.raises(AssertionError, match="first run did not finish after its release"):
+                test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
     finally:
         unblock.set()
