@@ -73,9 +73,11 @@ def processes(monkeypatch):
 
 
 def assert_killed(processes):
-    """Every worker a case started was killed: a transport that rejects a defect kills
-    the worker holding its pipe open, where one that ignored the defect, or closed
-    without killing, lets it exit by itself when its hold ends (#2861, #2864, #2867)."""
+    """Every worker a case started was killed. A transport that rejects a defect kills
+    the worker holding its pipe open; one that ignored the defect and kept waiting, or
+    closed without killing, lets it exit by itself when its hold ends (#2861, #2864,
+    #2867). A regression that instead turns the defect into a response is killed on the
+    way out too, and is caught by the case's verdict on the failure, not by this (#2878)."""
     assert processes and all(process.returncode == -signal.SIGKILL for process, _, _ in processes), \
         [process.returncode for process, _, _ in processes]
 
