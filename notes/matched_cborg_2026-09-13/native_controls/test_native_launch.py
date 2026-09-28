@@ -707,8 +707,14 @@ class EventClock:
     The assertions name how a run failed (#2736): the clock was never read after
     the event, so no deadline check could have ended the run; the real clock had
     nearly reached the deadline before the event, so the hang guard could have;
-    or the controller stopped before its registered deadline."""
+    or the controller stopped before its registered deadline, or LATE_SECONDS or
+    more after it."""
     UNDER_SECONDS = 1.0
+    #: How long past its registered deadline the controller may stop. It checks its
+    #: deadline once per 0.05 s poll, and the clock runs at the real rate after the
+    #: jump, so this is scheduling inside the test process, never start-up. A
+    #: deadline enforced LATE_SECONDS or more late fails (#2818).
+    LATE_SECONDS = 2.0
 
     def __init__(self, event, offset, sleep=time.sleep):
         self.event, self.offset, self.sleep = event, offset, sleep
@@ -740,6 +746,8 @@ class EventClock:
         self.assert_read_after_the_event()
         assert last_at_stop is not None and last_at_stop >= self.deadline, \
             f"the controller stopped {self.deadline - last_at_stop:.2f} s before its registered deadline"
+        assert last_at_stop - self.deadline < self.LATE_SECONDS, \
+            f"the controller stopped {last_at_stop - self.deadline:.2f} s after its registered deadline"
 
 
 def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
