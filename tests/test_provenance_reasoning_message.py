@@ -157,8 +157,8 @@ def test_a_corrupt_entry_is_read_and_reported_not_a_crash(tmp_path, field, value
     in `summarise`, a bad block in the block scan, a lone surrogate when the phase is
     printed, a counter too long to print. Both readers still take the line as an entry,
     as they take any object, so the accounting gate reads whatever the runner wrote
-    (#2739, #2876); the report sums only integer counts, names an entry whose counter is
-    anything else, scans only blocks with a text type and escapes what it prints."""
+    (#2739, #2876); the report sums only integer counts, counts the entries whose counter
+    is anything else, scans only blocks with a text type and escapes what it prints."""
     from data_sheets_schema import reasoning
     log = tmp_path / "CHORUS_reasoning.jsonl"
     bad = {**entry(False), field: value}
@@ -183,6 +183,43 @@ def test_the_report_sums_only_integer_counts(tmp_path):
     assert result.exit_code == 0, result.output
     assert "reasoning tokens (estimated) 90 total, 90 max" in result.output
     assert "2 entr(y/ies) with a counter that is not an integer count" in result.output
+
+
+@pytest.mark.parametrize("bad, left_out", [
+    ({"reasoning_tokens_estimate": 90.5}, "reasoning tokens (estimated) 90 total, 90 max"),
+    ({"reasoning_tokens_estimate": -int("9" * 4300)}, "reasoning tokens (estimated) 90 total, 90 max"),
+    ({"reasoning_tokens_observed": 5, "estimate_error": "3"}, "entries 2"),
+    ({"reasoning_tokens_observed": 5.5, "estimate_error": 3}, "entries 2")])
+def test_a_counter_that_is_not_a_count_is_left_out_of_every_sum(tmp_path, bad, left_out):
+    """#2882: the counter an entry is flagged for is left out of the totals, maxima and the
+    estimate-error sum and median, not merely flagged: a float estimate does not reach the
+    printed total, a huge negative one does not reach the print, and a string error beside
+    an observed count does not reach the error sum, where main crashed."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps({**entry(True), **bad}) + "\n")
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert left_out in result.output
+    assert "1 entr(y/ies) with a counter that is not an integer count" in result.output
+    summary = reasoning.summarise(reasoning.read(log))
+    assert summary["reasoning_tokens_estimate_total"] == (180 if "reasoning_tokens_estimate" not in bad else 90)
+    observed = bad.get("reasoning_tokens_observed") == 5
+    assert summary["with_observed_count"] == (1 if observed else 0)
+    # Beside an observed count the error total sums the usable errors, here none; with no
+    # observed count there is no error total at all.
+    assert summary["estimate_error_total"] == (0 if observed else None)
+
+
+def test_a_phase_is_escaped_wherever_the_report_prints_one(tmp_path):
+    """#2882: the phase of an entry whose estimate sits over an observed 0 is printed on
+    its own line; a lone surrogate there is escaped too, where main crashed."""
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    odd = {**entry(True), "phase": "\ud800", "reasoning_tokens_observed": 0, "estimate_error": 90}
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps(odd) + "\n")
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "estimate over an observed 0 on: \\ud800" in result.output
 
 
 def test_what_the_runner_writes_is_an_entry_for_both_readers(tmp_path):

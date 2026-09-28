@@ -292,8 +292,9 @@ def _text(value: Any) -> str:
 
 def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregate a reasoning log, keeping presence and availability distinct. Only
-    integer counts enter a sum; an entry whose counter is anything else is counted under
-    `with_unusable_counter`, not summed (#2722)."""
+    integer counts enter a sum, a maximum or the median; an entry whose counter is
+    anything else is counted under `with_unusable_counter` and that counter left out
+    (#2722, #2881)."""
     if not entries:
         return {"entries": 0}
     est = [x for x in (_count(e, "reasoning_tokens_estimate") for e in entries) if x is not None]
