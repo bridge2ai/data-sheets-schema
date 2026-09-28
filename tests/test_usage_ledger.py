@@ -888,7 +888,9 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
     try:
         with pytest.raises(AssertionError, match="first run never reached the request boundary"):
             test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
-        assert time.monotonic() - started < 3 * guard and daemons == [True]
+        elapsed = time.monotonic() - started
+        # The poll cannot leave before its deadline, nor the join before its guard (#2803).
+        assert 2 * guard <= elapsed < 3 * guard and daemons == [True], elapsed
     finally:
         unblock.set()
 
@@ -927,3 +929,19 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
                 test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
     finally:
         unblock.set()
+
+
+
+def test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary(tmp_path, monkeypatch):
+    """#2803: a first run that finishes without ever reaching the boundary, as a refactor
+    that stopped routing through it would, fails the test within a poll or two, saying so."""
+    guard = _short_guard(monkeypatch, 30)
+
+    def execute(run, **kwargs):
+        return {"usage": []}                        # never calls api._begin_usage_call
+
+    monkeypatch.setattr(api, "execute", execute)
+    started = time.monotonic()
+    with pytest.raises(AssertionError, match="first run finished without reaching the request boundary"):
+        test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    assert time.monotonic() - started < guard / 3
