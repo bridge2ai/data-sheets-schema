@@ -966,7 +966,13 @@ def test_the_import_closure_reads_source_and_imports_only_repository_packages(tm
     seed.write_text('import closure_pkg_2628.inner\nimport closure_outside_2628\nimport closure_missing_2628\n')
     for place in (tmp_path, installed, root):
         monkeypatch.syspath_prepend(str(place))
-    files = probe.import_closure(seed, root.resolve())
+    try:
+        files = probe.import_closure(seed, root.resolve())
+    finally:
+        # The package imported to look below it would otherwise answer a rerun from
+        # this tmp_path, outside the next root (#2784).
+        for name in [name for name in sys.modules if name.startswith('closure_')]:
+            del sys.modules[name]
     assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
         'seed.py', 'closure_pkg_2628/__init__.py', 'closure_pkg_2628/inner.py', 'closure_pkg_2628/deferred.py',
         'closure_top_2628.py'}
@@ -988,7 +994,7 @@ def test_the_interpreter_environment_is_not_repository_code(tmp_path, monkeypatc
     assert probe.repository_file((root / 'pkg' / 'x.py').resolve(), root.resolve(), probe._environment())
 
 
-@pytest.mark.parametrize('failure', [RuntimeError, ImportError, ValueError])
+@pytest.mark.parametrize('failure', [RuntimeError, ImportError, ValueError, ModuleNotFoundError])
 def test_a_repository_package_that_fails_to_import_fails_the_closure(tmp_path, monkeypatch, failure):
     """A repository package whose __init__ raises is not skipped, whatever it raises:
     skipping would leave what it imports unpinned, so the probe refuses rather than pin
@@ -997,12 +1003,17 @@ def test_a_repository_package_that_fails_to_import_fails_the_closure(tmp_path, m
     name = f'closure_broken_2628_{failure.__name__.lower()}'
     root = tmp_path / 'root'
     (root / name).mkdir(parents=True)
-    (root / name / '__init__.py').write_text(f"raise {failure.__name__}('broken package')\n")
+    # A ModuleNotFoundError comes, as it does in practice, from a dependency that is not
+    # installed; the others are raised as themselves (#2783).
+    (root / name / '__init__.py').write_text(
+        "import closure_dependency_not_installed_2783  # broken package\n" if failure is ModuleNotFoundError
+        else f"raise {failure.__name__}('broken package')\n")
     (root / name / 'mod.py').write_text('')
     seed = root / 'seed.py'
     seed.write_text(f'import {name}.mod\n')
     monkeypatch.syspath_prepend(str(root))
-    with pytest.raises(failure, match='broken package'):
+    with pytest.raises(failure, match='closure_dependency_not_installed_2783' if failure is ModuleNotFoundError
+                       else 'broken package'):
         probe.import_closure(seed, root.resolve())
 
 
@@ -1015,3 +1026,26 @@ def test_a_missing_name_adds_nothing_and_raises_nothing(tmp_path, monkeypatch):
                     'from closure_absent_2770 import thing\n')
     monkeypatch.syspath_prepend(str(root))
     assert probe.import_closure(seed, root.resolve()) == {seed.resolve()}
+
+
+def test_prepare_and_run_clean_check_the_whole_closure(lineage, monkeypatch):
+    """#2783: the clean check covers what is pinned, the closure included, at prepare and
+    again at run; a clean check of fewer files would leave a dirty closure module unseen."""
+    seen, real = [], probe.repository_state
+
+    class Stop(Exception):
+        pass
+
+    def recorded(paths, *, require_clean):
+        seen.append(list(paths))
+        if len(seen) == 2:
+            raise Stop                              # run's check is recorded; nothing is sent
+        return real(paths, require_clean=require_clean)
+
+    monkeypatch.setattr(probe, 'repository_state', recorded)
+    registration, identity = prepare(lineage)
+    with pytest.raises(Stop):
+        probe.run(registration, identity, clients=None, key='offline-provider-key', require_clean=False)
+    expected = probe.implementation_paths()
+    assert seen == [expected, expected]
+    assert any(path.endswith('audit_controls/batch_native.py') for path in expected)
