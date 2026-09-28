@@ -131,7 +131,11 @@ def _malformed(what, error):
     if helper is not None and isinstance(error, _ABOUT_A_FILE):
         frame = walked[helper][0]
         path = _path_of(frame.f_locals.get(_HELPERS[frame.f_code]))
-        if path and getattr(error, 'filename', None) != path:
+        # Compared as normalized spellings: an OSError names the path as the OS resolved
+        # it, while the helper may have been handed '/d//x.json' for the same file (#2786).
+        filename = getattr(error, 'filename', None)
+        if path and not (isinstance(filename, str) and isinstance(path, str)
+                         and os.path.normpath(filename) == os.path.normpath(path)):
             where += f' reading {path!r}'
     return BudgetStop(f'{what} ({type(error).__name__}{where}: {error})')
 

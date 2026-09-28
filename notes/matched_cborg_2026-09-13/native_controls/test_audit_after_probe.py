@@ -838,3 +838,49 @@ def test_a_path_like_whose_fspath_raises_names_nothing_and_never_raises():
     assert probe_predecessor._path_of(Unrenderable()) is None
     assert probe_predecessor._path_of({'a': 'contents'}) is None and probe_predecessor._path_of(b'/x') is None
     assert probe_predecessor._path_of(Path('/x/y.json')) == '/x/y.json'
+
+
+
+@pytest.mark.parametrize('wrapper, refusal', [
+    ('paths', 'audit predecessor evidence is malformed or unavailable'),
+    ('validate_predecessor', 'audit predecessor registration is malformed or unavailable'),
+    ('validate_link', 'probe predecessor is malformed or unavailable'),
+], ids=['paths', 'validate_predecessor', 'validate_link'])
+def test_every_wrapper_passes_a_refusal_through_unchanged(wrapper, refusal):
+    """#2785: a BudgetStop raised inside any of the three wrappers (here canonical_path's
+    refusal of a relative path) reaches the caller as itself, not rewrapped as malformed
+    evidence, though BudgetStop is a RuntimeError and RuntimeError is caught."""
+    manifest = {'budget': {'continuation': {'checkpoint': 'relative.json', 'sha256': '0' * 64}},
+                'parent': {'registration': 'relative.json'}}
+    with pytest.raises(BudgetStop) as caught:
+        getattr(probe_predecessor, wrapper)(manifest)
+    assert str(caught.value) == 'registered path is not absolute and canonical', str(caught.value)
+    assert refusal not in str(caught.value)
+
+
+def test_a_non_normalized_spelling_of_the_file_is_named_once(tmp_path):
+    """#2786: the OS names the file normalized; the helper was handed '//' in it."""
+    spelled = str(tmp_path) + '//missing.json'
+    manifest = {'budget': {'continuation': {'checkpoint': spelled}}}
+    with pytest.raises(BudgetStop) as caught:
+        probe_predecessor.validate_predecessor(manifest)
+    message = str(caught.value)
+    assert 'FileNotFoundError' in message and ' reading ' not in message, message
+
+
+def test_the_named_file_is_quoted_as_repr_quotes_it(tmp_path, monkeypatch):
+    """#2786: a path with a single quote is quoted unambiguously, as an OSError quotes one."""
+    from audit_controls import registration
+    path = tmp_path / "o'brien" / 'result.json'
+    path.parent.mkdir(); path.write_text('{}')
+    real = Path.read_bytes
+    def read_bytes(self):
+        if self == path:
+            raise OSError(5, 'Input/output error')
+        return real(self)
+    monkeypatch.setattr(Path, 'read_bytes', read_bytes)
+    try:
+        registration.read_json(path)
+    except OSError as error:
+        refusal = probe_predecessor._malformed('probe', error)
+    assert f' reading {str(path)!r}: ' in str(refusal) and repr(str(path)).startswith('"'), str(refusal)
