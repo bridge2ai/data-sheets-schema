@@ -815,6 +815,10 @@ def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):
 #: How long a meta-test's teardown waits for the workers it started, once the test has
 #: released them. A cleanup bound, not a measurement (#2844).
 WORKER_CLEANUP_SECONDS = 120
+#: The meta-tests' watchdog. Where a meta-test's deadline never passes it is the only bound
+#: on the body, so it allows a worker scheduled minutes late, not the shortened guard's
+#: seconds, and still ends a regression well inside CI's job timeout (#2846).
+META_WATCHDOG_SECONDS = 300
 
 
 @pytest.fixture
@@ -839,18 +843,18 @@ def short_guard(monkeypatch):
             def expired(signum, frame):
                 raise TimeoutError("meta-test watchdog: the concurrency test did not return")
             previous = signal.signal(signal.SIGALRM, expired)
-            signal.alarm(int(5 * seconds + 30))
+            signal.alarm(META_WATCHDOG_SECONDS)
             arm.disarm = lambda: (signal.alarm(0), signal.signal(signal.SIGALRM, previous))
         return seconds
 
     arm.disarm = lambda: None
     yield arm
-    try:
-        for worker in started:
-            worker.join(WORKER_CLEANUP_SECONDS)
-        assert not [worker for worker in started if worker.is_alive()], "a meta-test left its worker running"
-    finally:
-        arm.disarm()
+    # The watchdog guards the test body; the cleanup joins are bounded on their own, and an
+    # alarm inside them would leave a worker running past teardown (#2846).
+    arm.disarm()
+    for worker in started:
+        worker.join(WORKER_CLEANUP_SECONDS)
+    assert not [worker for worker in started if worker.is_alive()], "a meta-test left its worker running"
 
 
 def test_the_concurrency_test_joins_its_worker_when_a_contender_check_fails(tmp_path, monkeypatch, short_guard):
