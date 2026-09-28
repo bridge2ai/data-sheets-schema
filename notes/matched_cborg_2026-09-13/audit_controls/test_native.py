@@ -503,7 +503,7 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     # (#2763). The registered deadline is a hang guard; every other wait returns
     # as soon as its event happens.
     import run_native_canary
-    from native_controls.test_native_launch import EventClock, HANG_SECONDS
+    from native_controls.test_native_launch import EventClock, HANG_SECONDS, closing_observed
     c=native_case;_,sdk,review=configure_receipt_runner(c,monkeypatch)
     c.job['deadline_seconds']=HANG_SECONDS
     entered,released,done=threading.Event(),threading.Event(),threading.Event()
@@ -513,9 +513,9 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     original=native.AuditProxy
     stopped_at=[]
     class ObservedProxy(original):
-        def __init__(self,**kwargs):super().__init__(**kwargs);observed.append(self)
-        def close_admission(self):
-            stopped_at.append((clock.last,clock.now()));super().close_admission()
+        def __init__(self,**kwargs):
+            super().__init__(**kwargs);observed.append(self)
+            self.close_admission,seen=closing_observed(clock,self.close_admission);stopped_at.append(seen)
     monkeypatch.setattr(native,'AuditProxy',ObservedProxy)
     def wait_for_release(_):
         entered.set()
@@ -527,7 +527,7 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     try:
         with pytest.raises(BudgetStop,match='deadline'):native.run_job(c.registration,review,adapter=adapter)
         assert entered.is_set()
-        clock.assert_stopped_at_the_deadline(*stopped_at[0])
+        clock.assert_stopped_at_the_deadline(stopped_at[0].get('clock'),stopped_at[0].get('closed'))
         receipt=json.loads((c.attempt/'result.json').read_text())
         assert receipt['stop_source']=='native_controller' and receipt['status']=='stopped'
         assert receipt['runtime']=={'proxy_initialized':True,'proxy_shutdown_complete':True,'unfinished_handlers':1}

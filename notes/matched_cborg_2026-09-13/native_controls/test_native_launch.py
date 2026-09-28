@@ -758,7 +758,24 @@ class EventClock:
             f"admission closed {closed_at - self.deadline:.2f} s after the registered deadline"
 
 
-def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
+def closing_observed(clock, close, before=lambda: None):
+    """Wrap `close`, a proxy's close_admission. At its first call it records the
+    controller's last clock reading and what `before` returns, both as they stood
+    when the controller began to close, and, once `close` has returned, the
+    clock's value then: the instant admission is closed. Timing the entry instead
+    accepts a close delayed inside it by any amount (#2725 Codex review)."""
+    seen = {}
+    def closing():
+        first = not seen
+        if first:
+            seen.update(clock=clock.last, before=before())
+        close()
+        if first:
+            seen['closed'] = clock.now()
+    return closing, seen
+
+
+def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, close_delay=None):
     """The real NativeProxy.running() and execute_child: the deadline fires
     while a /v1/messages handler is still counting tokens, so the handler
     meets the admission the controller has just closed (#2023/#2024).
@@ -772,7 +789,8 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
     early is caught by the deadline tests' own check. A shortfall under one
     controller poll (0.05 s) is caught only when a deadline check happens to fall
     inside it, which depends on the poll's overhead: 30 ms was caught in most runs,
-    10 ms in few (#2778, #2793, #2807)."""
+    10 ms in few (#2778, #2793, #2807). `close_delay` holds admission open that
+    long inside close_admission, the lateness a negative control injects."""
     import threading, time
     from types import SimpleNamespace
     from test_native_proxy import fixture_proxy, REQUEST
@@ -791,17 +809,17 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
             raise interrupt('private exception detail')
         time.sleep(seconds)
     clock = EventClock(counting, HANG_SECONDS, sleep=time.sleep if interrupt is None else interrupted_sleep)
-    at_close = {}
-    original_close = proxy.close_admission
-    def close_and_snapshot():
-        # What the ledger holds at the moment admission first closes (#2029),
-        # and the controller's last clock reading then.
-        if 'stops' not in at_close:
-            at_close['stops'] = json.loads(ledger.path.read_bytes()).get('stopped_attempts') if ledger.path.exists() else None
-            at_close['clock'] = clock.last
-            at_close['closed'] = clock.now()
-        original_close()
-    proxy.close_admission = close_and_snapshot
+    if close_delay is not None:
+        prompt_close = proxy.close_admission
+        def late_close():
+            time.sleep(close_delay)
+            prompt_close()
+        proxy.close_admission = late_close
+    # What the ledger holds as admission first closes (#2029), the controller's
+    # last clock reading then, and when admission was closed.
+    proxy.close_admission, at_close = closing_observed(
+        clock, proxy.close_admission,
+        before=lambda: json.loads(ledger.path.read_bytes()).get('stopped_attempts') if ledger.path.exists() else None)
     attempt = tmp_path / 'attempt'; attempt.mkdir()
     instruction = tmp_path / 'instruction.txt'; instruction.write_text('offline')
     child = ("import json,os,time,urllib.request\n"
@@ -831,7 +849,7 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None):
         clock.assert_stopped_at_the_deadline(at_close.get('clock'), at_close.get('closed'))   # due, after the count began
     else:
         clock.assert_read_after_the_event()
-    receipt['stops_at_close'] = at_close.get('stops')
+    receipt['stops_at_close'] = at_close.get('before')
     return receipt, json.loads(ledger.path.read_bytes()).get('stopped_attempts')
 
 
@@ -867,6 +885,14 @@ def test_a_deadline_during_an_in_flight_request_is_recorded_as_the_deadline(tmp_
     assert receipt['ledger_stop_recorded'] == stops['native-offline']['reason']
     # the deadline was already in the ledger when admission closed (#2029)
     assert receipt['stops_at_close']['native-offline']['reason'].startswith('controller: native attempt deadline elapsed')
+
+
+def test_admission_closed_late_inside_its_close_fails_the_deadline_check(tmp_path):
+    """Negative control (#2725 Codex review): the controller checks its deadline on
+    time but admission closes LATE_SECONDS later, inside close_admission. That is a
+    late stop, and the check must say so."""
+    with pytest.raises(AssertionError, match=r'admission closed \d+\.\d+ s after the registered deadline'):
+        _deadline_while_counting(tmp_path, record_first=True, close_delay=EventClock.LATE_SECONDS + 0.5)
 
 
 def test_the_admission_closed_consequence_never_masks_a_controller_stop(tmp_path):
