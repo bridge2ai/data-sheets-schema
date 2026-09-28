@@ -327,6 +327,9 @@ class PreimageRegistryTest(unittest.TestCase):
         self.assertEqual(stale, [], f"re-run scripts/update_agent_preimages.py after committing: {stale}")
         for name, row in registry.items():
             previous = row["previous_text"]
+            if previous is None:                    # a definition with no earlier version
+                self.assertIsNone(row["previous_sha256"], name)
+                continue
             self.assertTrue(previous, name)
             self.assertEqual(row["previous_sha256"], hashlib.sha256(previous.encode()).hexdigest(), name)
 
