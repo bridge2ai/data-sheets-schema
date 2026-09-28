@@ -812,8 +812,10 @@ function counts: that covers `reconcile_stopped.py`, `probe_predecessor.py`
 and `runtime_closure.py`, which its lineage check runs (#2586), and, for a
 batch tip, `batch_native.py` and the modules it imports, which
 `runtime_closure.py` reaches only inside a function (#2628). Finding them
-executes nothing (#2836), and a cached bytecode file the interpreter would
-run in place of a pinned source must be that source compiled (#2839). A transport probe's debit is also
+executes nothing and consults no import hook (#2836, #2839, #2842); a
+repository module that is a symbolic link is refused, and a cached bytecode
+file the interpreter would run in place of a pinned source must be that
+source compiled (#2839, #2842). A transport probe's debit is also
 marked `standing`, but it is proven by its link (#2469) rather than by a
 marker. The stopped audit's files are never modified. The tool
 neither claims the sequence nor contacts a provider. The printed paths and

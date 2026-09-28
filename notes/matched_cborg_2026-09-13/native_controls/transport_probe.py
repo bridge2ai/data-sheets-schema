@@ -221,11 +221,41 @@ def repository_file(path, root, environment):
             and not {'site-packages', 'dist-packages'} & set(path.relative_to(root).parts))
 
 
+_FILE_LOADERS = ((importlib.machinery.ExtensionFileLoader, importlib.machinery.EXTENSION_SUFFIXES),
+                 (importlib.machinery.SourceFileLoader, importlib.machinery.SOURCE_SUFFIXES),
+                 (importlib.machinery.SourcelessFileLoader, importlib.machinery.BYTECODE_SUFFIXES))
+
+
+def _find_on_disk(name, locations):
+    """The path finder's search over `locations`, with the standard file finders alone:
+    no path hook and no cached path-entry finder, either of which may run what it likes
+    (#2842). An entry that is not a directory, such as a zip archive, is not searched.
+    The first module or regular package wins; otherwise the namespace portions found."""
+    portions = []
+    for entry in locations:
+        if not isinstance(entry, str):
+            continue
+        entry = entry or os.getcwd()
+        if not os.path.isdir(entry):
+            continue
+        spec = importlib.machinery.FileFinder(entry, *_FILE_LOADERS).find_spec(name)
+        if spec is None:
+            continue
+        if spec.loader is not None:
+            return spec
+        portions.extend(spec.submodule_search_locations or [])
+    if not portions:
+        return None
+    spec = importlib.machinery.ModuleSpec(name, None, is_package=True)
+    spec.submodule_search_locations = portions
+    return spec
+
+
 def _module_spec(name, inside):
     """The spec of a repository module name, or None, found without executing anything.
-    Every name is looked up on the filesystem by the path finder, never through the
-    other meta-path finders, which may import what they like (#2839); below the top
-    level, in its parent's search locations rather than by importing the parent, so no
+    Every name is looked up on the filesystem by the standard file finders, never
+    through a meta-path finder or a path hook, which may import what they like (#2839,
+    #2842); below the top level, in its parent's search locations rather than by importing the parent, so no
     `__init__` runs, the repository's or another's, before the walk has read its
     imports (#2749, #2836). A name whose package is not the
     repository's is never looked below, and a name under a plain module (`from module
@@ -245,11 +275,11 @@ def _module_spec(name, inside):
         if full in sys.modules and getattr(sys.modules[full], '__spec__', None) is not None:
             spec = sys.modules[full].__spec__                  # already run; nothing new executes
         elif spec is None:
-            spec = importlib.machinery.PathFinder.find_spec(full)
+            spec = _find_on_disk(full, sys.path)
         else:
             parent = sys.modules.get('.'.join(parts[:depth - 1]))
             locations = getattr(parent, '__path__', None) or spec.submodule_search_locations
-            spec = importlib.machinery.PathFinder.find_spec(full, list(locations))
+            spec = _find_on_disk(full, list(locations))
         if spec is None:
             return None
         portions = any(inside(Path(place).resolve()) for place in spec.submodule_search_locations or [])
@@ -270,9 +300,10 @@ def import_closure(source, root):
     Resolved as this interpreter would resolve it, without executing anything; a name
     that is not a module, or a module that is not the repository's own
     (`repository_file`), adds nothing. A repository module that is not Python source (a
-    bytecode-only file, an extension) is refused, since its imports cannot be read; one
-    whose source file has no `.py` suffix, such as an initializer linked to one, is read
-    all the same (#2836)."""
+    bytecode-only file, an extension) is refused, since its imports cannot be read
+    (#2836). So is one whose file is a symbolic link: the interpreter takes its cache
+    and its package from the link's path, not the target's, so the pinned target would
+    not attest what runs (#2842)."""
     environment = _environment()
     def inside(path):
         return repository_file(path, root, environment)
@@ -293,6 +324,8 @@ def import_closure(source, root):
             continue
         if not isinstance(spec.loader, importlib.machinery.SourceFileLoader):
             raise BudgetStop(f'repository module {spec.name} is not Python source, so its imports cannot be read')
+        if Path(spec.origin).is_symlink():
+            raise BudgetStop(f'repository module {spec.name} is a symbolic link; the probe pins only regular files')
         files.add(origin)
         pending.extend(_imported_names(origin, spec.parent))
     return files
@@ -379,6 +412,10 @@ def verify_bytecode(paths):
     """Refuse a pinned module whose cached bytecode, which this interpreter would run in
     its place, is not its source compiled (#2839). A module already loaded was loaded
     from the cache checked here, unless the cache changed after it loaded."""
+    if sys.pycache_prefix is not None:
+        # The cache then lies under a path built from the import path's spelling, which a
+        # resolved pin does not carry (#2842).
+        raise BudgetStop('the probe does not run under a bytecode cache prefix (PYTHONPYCACHEPREFIX)')
     for path in paths:
         if not cached_code_matches(path):
             raise BudgetStop(f'cached bytecode for {path} is not its pinned source')

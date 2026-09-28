@@ -1215,22 +1215,25 @@ def test_an_outside_initializer_below_a_repository_package_never_runs(tmp_path, 
     assert not marker.exists(), marker.read_text()
 
 
-def test_an_initializer_linked_to_a_file_without_a_py_suffix_is_read(tmp_path, monkeypatch):
-    """#2836: Python runs an __init__.py that links to an extensionless file inside the
-    root; the closure pins that file and follows its imports."""
+@pytest.mark.parametrize('shape', ['extensionless target', 'shared by two packages'])
+def test_a_symlinked_repository_module_is_refused(tmp_path, monkeypatch, shape):
+    """#2836, #2842: the interpreter takes a linked module's cache and package from the
+    link's path, so pinning the target would not attest what runs: an __init__.py linked
+    to an extensionless file, or two packages' initializers linked to one file whose
+    relative import names a different helper in each, is refused."""
     root = tmp_path / 'root'
-    package = root / 'closure_extless_2836'
-    package.mkdir(parents=True)
-    (root / 'initializer_source').write_text('import closure_helper_extless_2836\n')
-    (package / '__init__.py').symlink_to(root / 'initializer_source')
-    (package / 'child.py').write_text('')
-    (root / 'closure_helper_extless_2836.py').write_text('')
+    root.mkdir()
+    (root / 'initializer_source').write_text('from . import helper\n')
+    packages = ['closure_link_a_2842'] if shape == 'extensionless target' else ['closure_link_a_2842', 'closure_link_b_2842']
+    for name in packages:
+        (root / name).mkdir()
+        (root / name / '__init__.py').symlink_to(root / 'initializer_source')
+        (root / name / 'helper.py').write_text('')
     seed = root / 'seed.py'
-    seed.write_text('import closure_extless_2836.child\n')
+    seed.write_text(''.join(f'import {name}\n' for name in packages))
     monkeypatch.syspath_prepend(str(root))
-    files = probe.import_closure(seed, root.resolve())
-    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
-        'seed.py', 'initializer_source', 'closure_extless_2836/child.py', 'closure_helper_extless_2836.py'}
+    with pytest.raises(BudgetStop, match='closure_link_.*_2842 is a symbolic link'):
+        probe.import_closure(seed, root.resolve())
 
 
 def test_a_bytecode_only_repository_package_is_refused(tmp_path, monkeypatch):
@@ -1275,6 +1278,48 @@ def test_discovery_consults_no_other_meta_path_finder_and_imports_nothing(tmp_pa
     assert asked == [] and set(sys.modules) == before
     assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
         'seed.py', 'closure_meta_2839/__init__.py', 'closure_meta_2839/leaf.py'}
+
+
+def test_discovery_runs_no_path_hook_and_no_cached_path_entry_finder(tmp_path, monkeypatch):
+    """#2842: a path hook, or a finder cached for a path entry, may import what it likes;
+    discovery reads directories with the standard file finders and consults neither."""
+    root = tmp_path / 'root'
+    (root / 'closure_hook_2842').mkdir(parents=True)
+    (root / 'closure_hook_2842' / '__init__.py').write_text('')
+    (root / 'closure_hook_2842' / 'leaf.py').write_text('')
+    elsewhere = tmp_path / 'elsewhere'
+    elsewhere.mkdir()
+    seed = root / 'seed.py'
+    seed.write_text('import closure_hook_2842.leaf\n')
+    asked = []
+
+    def hook(entry):
+        asked.append(('hook', entry))
+        raise ImportError('not this hook')
+
+    class Cached:
+        @staticmethod
+        def find_spec(name, target=None):
+            asked.append(('cached', name))
+            return None
+    monkeypatch.syspath_prepend(str(root))
+    monkeypatch.syspath_prepend(str(elsewhere))
+    monkeypatch.setattr(sys, 'path_hooks', [hook, *sys.path_hooks])
+    monkeypatch.setattr(sys, 'path_importer_cache', {**sys.path_importer_cache, str(elsewhere): Cached})
+    sys.path_importer_cache.pop(str(root), None)
+    before = set(sys.modules)
+    files = probe.import_closure(seed, root.resolve())
+    assert asked == [] and set(sys.modules) == before
+    assert {f.relative_to(root.resolve()).as_posix() for f in files} == {
+        'seed.py', 'closure_hook_2842/__init__.py', 'closure_hook_2842/leaf.py'}
+
+
+def test_a_bytecode_cache_prefix_is_refused(tmp_path, monkeypatch):
+    """#2842: under a cache prefix the cache path is built from the import path's spelling,
+    which a resolved pin does not carry."""
+    monkeypatch.setattr(sys, 'pycache_prefix', str(tmp_path))
+    with pytest.raises(BudgetStop, match='bytecode cache prefix'):
+        probe.verify_bytecode([])
 
 
 def _pyc(source, code, *, kind, stamp_from=None):
