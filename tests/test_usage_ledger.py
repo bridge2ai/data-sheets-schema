@@ -871,13 +871,17 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_early(tmp_path, mon
     clock = _poll_clock(monkeypatch, guard / 40)     # counted in polls, not wall time (#2821)
     marker = RuntimeError("invented early failure")
 
+    finished = []
+
     def fail(*args, **kwargs):
+        finished.append(clock.reads)                 # counted from here, not from its start
         raise marker
 
     monkeypatch.setattr(api, "execute", fail)
     with pytest.raises(RuntimeError) as raised:
         test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
-    assert raised.value is marker and clock.reads <= 1 + 2
+    # Detected within two polls of the worker failing, however late it was scheduled (#2828).
+    assert raised.value is marker and clock.reads <= max(finished[0], 1) + 2, (finished, clock.reads)
 
 
 class _PollClock:
@@ -909,7 +913,7 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
     deadline changes the count, whatever the scheduler does."""
     guard = short_guard(5)
     clock = _poll_clock(monkeypatch, guard / 4)
-    unblock, daemons = threading.Event(), []
+    unblock, daemons, joins = threading.Event(), [], []
     thread_class = threading.Thread
 
     class Observed(thread_class):
@@ -917,8 +921,12 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
             daemons.append(self.daemon)
             return super().start()
 
+        def join(self, timeout=None):
+            joins.append(timeout)
+            return super().join(timeout)
+
     def execute(run, **kwargs):
-        unblock.wait(8 * guard)                     # hung past every poll and the join
+        unblock.wait(600)                           # hung until the test's own cleanup (#2828)
         return {"usage": []}
 
     monkeypatch.setattr(threading, "Thread", Observed)
@@ -926,7 +934,8 @@ def test_the_concurrency_test_fails_a_first_run_that_hangs(tmp_path, monkeypatch
     try:
         with pytest.raises(AssertionError, match="first run never reached the request boundary"):
             test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
-        assert clock.reads == 1 + 4 and daemons == [True], clock.reads
+        # The polling-timeout path joins its worker too, bounded by the guard (#2828).
+        assert clock.reads == 1 + 4 and daemons == [True] and joins == [guard], (clock.reads, joins)
     finally:
         unblock.set()
 
@@ -938,14 +947,19 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_polling_began
     clock = _poll_clock(monkeypatch, guard / 40)     # forty polls to the deadline
     marker = RuntimeError("invented failure after the polling began")
 
+    cancel = threading.Event()
+
     def execute(run, **kwargs):
-        while clock.reads < 3:                       # the deadline and at least one poll read
+        while clock.reads < 3 and not cancel.is_set():   # the deadline and at least one poll read
             time.sleep(0.01)
         raise marker
 
     monkeypatch.setattr(api, "execute", execute)
-    with pytest.raises(RuntimeError) as raised:
-        test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    try:
+        with pytest.raises(RuntimeError) as raised:
+            test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
+    finally:
+        cancel.set()                                 # never left polling after a watchdog (#2828)
     assert raised.value is marker and clock.reads < 1 + 40, clock.reads
 
 
@@ -953,7 +967,9 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_polling_began
 def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_path, monkeypatch, short_guard, late):
     """#2796: after the boundary and the release, a first run that raises is that error,
     and one that hangs is "did not finish", never a KeyError on a result it never gave."""
-    guard = short_guard(3)
+    # Long enough that the release handshake never races a paused main thread; only the
+    # "hangs" case waits on it, through the join (#2828).
+    guard = short_guard(10)
     marker, unblock = RuntimeError("invented late failure"), threading.Event()
 
     def execute(run, **kwargs):
@@ -962,7 +978,7 @@ def test_the_concurrency_test_reports_a_first_run_that_fails_after_release(tmp_p
         api._begin_usage_call(run)                  # the patched boundary: sets entered, waits
         if late == "raises":
             raise marker
-        unblock.wait(4 * guard)
+        unblock.wait(600)                           # released by the test's cleanup
         return {"usage": []}
 
     written = tmp_path / "invented-ledger.json"
@@ -991,10 +1007,13 @@ def test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary
     guard = short_guard(30)
     clock = _poll_clock(monkeypatch, guard / 40)     # counted in polls, not wall time (#2821)
 
+    finished = []
+
     def execute(run, **kwargs):
+        finished.append(clock.reads)
         return {"usage": []}                        # never calls api._begin_usage_call
 
     monkeypatch.setattr(api, "execute", execute)
     with pytest.raises(AssertionError, match="first run finished without reaching the request boundary"):
         test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
-    assert clock.reads <= 1 + 2
+    assert clock.reads <= max(finished[0], 1) + 2, (finished, clock.reads)      # (#2828)
