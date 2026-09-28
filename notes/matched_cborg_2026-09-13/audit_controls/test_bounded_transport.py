@@ -242,8 +242,9 @@ def test_a_worker_that_starts_late_ends_as_a_count_timeout_before_any_request(ch
     # than hiding inside the reap's hang guard (#2941).
     assert budget - .5 <= elapsed < budget + DEADLINE_KILL_SECONDS + REAP_SECONDS, elapsed
     assert len(killed_at) == 1 and killed_at[0] - (started + budget) < DEADLINE_KILL_SECONDS, (killed_at, started)
-    # The client reaped it: returncode is set only by a wait, and reading it does
-    # not reap, unlike poll() (#2941).
+    # The client reaped it: returncode is set by the client's own poll() or wait()
+    # after the kill, and reading the attribute here reaps nothing, unlike a
+    # poll() from the test would (#2941, #2950).
     assert len(children) == 1 and children[0].returncode is not None and not client._active
 
 

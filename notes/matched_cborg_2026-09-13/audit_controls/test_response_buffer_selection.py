@@ -105,6 +105,15 @@ def test_a_deadline_below_the_floor_is_refused_by_name(seconds, monkeypatch):
         transport.provider_clients(m, 'synthetic-key')
 
 
+@pytest.mark.parametrize('read_bound, seconds', [(60, 60), (61, 60), (61, 61), (600, 60), (600, 600)])
+def test_a_read_bound_at_or_above_the_floor_admits_a_deadline_within_both_bounds(read_bound, seconds):
+    """The accepting side of the read-bound floor, inclusive at 60 s: any read bound from 60
+    admits every deadline from 60 up to it (#2949)."""
+    value = {**BUFFER, 'total_seconds': seconds}
+    m = manifest(native_upstream_read_timeout_seconds=read_bound, **{KEY: value})
+    assert registration.native_response_buffer(m) == value
+
+
 @pytest.mark.parametrize('seconds', [45, 59, 60])
 def test_a_read_bound_below_the_floor_names_the_read_bound(seconds):
     """With a read bound under 60 s no deadline satisfies both bounds, so the refusal
