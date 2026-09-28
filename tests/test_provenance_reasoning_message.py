@@ -145,6 +145,156 @@ def test_a_deeply_nested_line_is_named_not_a_crash(tmp_path):
         reasoning.read(log)
 
 
+@pytest.mark.parametrize("field, value, unusable", [
+    ("reasoning_tokens_estimate", "90", True), ("reasoning_tokens_estimate", 90.5, True),
+    ("reasoning_tokens_estimate", True, True), ("reasoning_tokens_estimate", 10 ** 15, True),
+    ("reasoning_tokens_observed", "7", True), ("estimate_error", [1], True),
+    ("output_tokens", 100.0, True), ("visible_text_chars", "40", True),
+    ("blocks", 3, False), ("blocks", [3], False), ("blocks", [{"type": ["thinking"]}], False),
+    ("blocks", {"type": "thinking"}, False), ("phase", 7, False), ("phase", "\ud800", False)])
+def test_a_corrupt_entry_is_read_and_reported_not_a_crash(tmp_path, field, value, unusable):
+    """#2722: shapes the report must survive. Five crashed it on main: a string estimate or
+    observed count in `summarise`, a `blocks` that is no list or a block whose type is no
+    text in the block scan, and a lone surrogate when the phase is printed. Both readers still take the line as an entry,
+    as they take any object, so the accounting gate reads whatever the runner wrote
+    (#2739, #2876); the report sums only integer counts, counts the entries whose counter
+    is anything else, scans only blocks with a text type and escapes what it prints."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    bad = {**entry(False), field: value}
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps(bad) + "\n")
+    assert reasoning.read_lenient(log) == ([entry(True), json.loads(json.dumps(bad))], [])
+    assert len(reasoning.read(log)) == 2
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "entries 2" in result.output
+    assert ("1 entr(y/ies) with a counter that is not an integer count" in result.output) is unusable
+
+
+def test_the_report_sums_only_integer_counts(tmp_path):
+    """#2722: two counters near the 4300-digit print limit are left out of the total, and
+    the good entry's count is what the report prints."""
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    huge = int("9" * 4300)
+    log.write_text("".join(json.dumps(e) + "\n" for e in
+                           (entry(True), {**entry(True), "reasoning_tokens_estimate": huge},
+                            {**entry(True), "reasoning_tokens_estimate": huge})))
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "reasoning tokens (estimated) 90 total, 90 max" in result.output
+    assert "2 entr(y/ies) with a counter that is not an integer count" in result.output
+
+
+@pytest.mark.parametrize("bad, left_out", [
+    ({"reasoning_tokens_estimate": 90.5}, "reasoning tokens (estimated) 90 total, 90 max"),
+    ({"reasoning_tokens_estimate": -int("9" * 4300)}, "reasoning tokens (estimated) 90 total, 90 max"),
+    ({"reasoning_tokens_observed": 5, "estimate_error": "3"}, "entries 2"),
+    ({"reasoning_tokens_observed": 5.5, "estimate_error": 3}, "entries 2")])
+def test_a_counter_that_is_not_a_count_is_left_out_of_every_sum(tmp_path, bad, left_out):
+    """#2882: the counter an entry is flagged for is left out of the totals, maxima and the
+    estimate-error sum and median, not merely flagged: a float estimate does not reach the
+    printed total, a huge negative one does not reach the print, and a string error beside
+    an observed count does not reach the error sum, where main crashed."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps({**entry(True), **bad}) + "\n")
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert left_out in result.output
+    assert "1 entr(y/ies) with a counter that is not an integer count" in result.output
+    summary = reasoning.summarise(reasoning.read(log))
+    assert summary["reasoning_tokens_estimate_total"] == (180 if "reasoning_tokens_estimate" not in bad else 90)
+    observed = bad.get("reasoning_tokens_observed") == 5
+    assert summary["with_observed_count"] == (1 if observed else 0)
+    # Beside an observed count the error total sums the usable errors, here none; with no
+    # observed count there is no error total at all.
+    assert summary["estimate_error_total"] == (0 if observed else None)
+
+
+_COUNTERS = ("output_tokens", "visible_text_chars", "reasoning_tokens_estimate",
+             "reasoning_tokens_observed", "estimate_error")
+
+
+@pytest.mark.parametrize("base", [
+    {"reasoning_tokens_observed": 0, "reasoning_tokens_estimate": 90, "estimate_error": 90},
+    {"reasoning_tokens_observed": 5, "reasoning_tokens_estimate": 90, "estimate_error": 85}],
+    ids=["observed-zero", "observed-count"])
+@pytest.mark.parametrize("field", _COUNTERS)
+@pytest.mark.parametrize("bad", ["7", 5.5, True, False, 0.0, 10 ** 15, -(10 ** 15), [1], {"n": 1}])
+def test_a_counter_that_is_not_a_count_is_as_if_absent(field, bad, base):
+    """#2886: wherever summarise reads a counter (totals, maxima, the error sum and median,
+    the observed-zero filter), one that is not an integer count behaves exactly as if the
+    entry did not carry it, apart from being counted as unusable. The base entries reach
+    every such site: an observed count of 0 beside an estimate, and a positive one beside
+    an error."""
+    from data_sheets_schema import reasoning
+    good = {**entry(True), "reasoning_tokens_observed": 5, "estimate_error": 85}
+    flagged = {**entry(False), **base, field: bad}
+    absent = {k: v for k, v in {**entry(False), **base}.items() if k != field}
+    with_bad, without = reasoning.summarise([good, flagged]), reasoning.summarise([good, absent])
+    assert with_bad.pop("with_unusable_counter") == 1 and without.pop("with_unusable_counter") == 0
+    assert with_bad == without
+
+
+@pytest.mark.parametrize("count", [0, 1, 144_863, 10 ** 9, 10 ** 15 - 1, -(10 ** 15 - 1)])
+def test_counts_of_any_real_size_are_counts(count):
+    """#2886: the bound keeps totals printable; it does not flag a count a response can
+    have (the corpus's largest estimate is 86,402, its largest counter of any kind the
+    visible_text_chars 144,863)."""
+    from data_sheets_schema import reasoning
+    summary = reasoning.summarise([{**entry(True), "reasoning_tokens_estimate": count}])
+    assert summary["with_unusable_counter"] == 0
+    assert summary["reasoning_tokens_estimate_max"] == count
+
+
+def test_a_phase_is_escaped_wherever_the_report_prints_one(tmp_path):
+    """#2882: the phase of an entry whose estimate sits over an observed 0 is printed on
+    its own line; a lone surrogate there is escaped too, where main crashed."""
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    odd = {**entry(True), "phase": "\ud800", "reasoning_tokens_observed": 0, "estimate_error": 90}
+    log.write_text(json.dumps(entry(True)) + "\n" + json.dumps(odd) + "\n")
+    result = CliRunner().invoke(provenance, ["reasoning", "--path", str(log)])
+    assert result.exit_code == 0, result.output
+    assert "estimate over an observed 0 on: \\ud800" in result.output
+
+
+def test_what_the_runner_writes_is_an_entry_for_both_readers(tmp_path):
+    """#2875, #2876: entries as `capture` builds them today, a thinking-token count with a
+    negative estimate error, a phase-less evidence-scoring entry, and a provider count the
+    SDK left as a float, are all read by both readers. The strict reader behind the
+    accounting gate refuses nothing `append` writes, so no billed run is stopped by its
+    own log; the report counts only the float count's entry as unusable."""
+    from types import SimpleNamespace as NS
+    from data_sheets_schema import reasoning
+
+    def response(output_tokens, thinking_tokens, text):
+        usage = NS(output_tokens=output_tokens, output_tokens_details={"thinking_tokens": thinking_tokens})
+        return NS(content=[NS(type="thinking", thinking="", signature="s"), NS(type="text", text=text)],
+                  usage=usage, stop_reason="end_turn")
+    current = {"phase": "full", "attempt": 1, **reasoning.capture(response(10, 5, "x" * 100)).to_dict()}
+    assert current["estimate_error"] == -5
+    judgement = reasoning.capture(response(300, None, "y" * 40)).to_dict()           # no phase
+    provider_float = {"phase": "core", **reasoning.capture(response(50.5, None, "z")).to_dict()}
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    for line in (current, judgement, provider_float):
+        reasoning.append(log, line)
+    expected = [json.loads(json.dumps(e)) for e in (current, judgement, provider_float)]
+    assert reasoning.read(log) == expected
+    assert reasoning.read_lenient(log) == (expected, [])
+    summary = reasoning.summarise(expected)
+    assert summary["with_observed_count"] == 1 and summary["estimate_error_total"] == -5
+    assert summary["with_unusable_counter"] == 1
+
+
+def test_null_counters_are_entries(tmp_path):
+    """#2722: `to_dict` writes null where a count is unknown; that is an entry."""
+    from data_sheets_schema import reasoning
+    log = tmp_path / "CHORUS_reasoning.jsonl"
+    nulls = {**entry(False), "reasoning_tokens_observed": None, "estimate_error": None, "output_tokens": None}
+    log.write_text(json.dumps(nulls) + "\n")
+    assert reasoning.read_lenient(log) == ([nulls], [])
+
+
 def test_a_log_whose_only_line_is_partial_names_it(tmp_path):
     """#2724: a run killed during its first write; told apart from an empty log (#2667)."""
     log = tmp_path / "CHORUS_reasoning.jsonl"

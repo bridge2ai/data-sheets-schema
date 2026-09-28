@@ -266,14 +266,45 @@ def read_lenient(path: Path) -> tuple[list[dict[str, Any]], list[int]]:
     return entries, unreadable
 
 
+#: The counters `ReasoningCapture.to_dict` writes: integers or null as the SDK reports
+#: them, though a provider count it cannot coerce (a fraction) is written as it came,
+#: and `estimate_error` is absent rather than null (#2722, #2876).
+_COUNTER_FIELDS = ("output_tokens", "visible_text_chars", "reasoning_tokens_estimate",
+                   "reasoning_tokens_observed", "estimate_error")
+#: Far above any response's token count, and far below where a total can no longer be
+#: printed (Python's 4300-digit limit on int-to-str conversion) (#2722).
+_COUNTER_BOUND = 10 ** 15
+
+
+def _count(entry: dict[str, Any], key: str) -> int | None:
+    """An entry's counter when it is an integer count, else None. The readers accept any
+    object, as the accounting gate must read whatever the runner wrote; the report sums
+    and prints only integer counts, so a corrupt counter cannot break it (#2722, #2876)."""
+    value = entry.get(key)
+    if isinstance(value, int) and not isinstance(value, bool) and abs(value) < _COUNTER_BOUND:
+        return value
+    return None
+
+
+def _text(value: Any) -> str:
+    """A value as printable text: a lone surrogate is escaped, not left to fail the
+    terminal's encoder (#2722)."""
+    return str(value).encode("utf-8", "backslashreplace").decode("utf-8")
+
+
 def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
-    """Aggregate a reasoning log, keeping presence and availability distinct."""
+    """Aggregate a reasoning log, keeping presence and availability distinct. Only
+    integer counts enter a sum, a maximum or the median; an entry whose counter is
+    anything else is counted under `with_unusable_counter` and that counter left out
+    (#2722, #2881)."""
     if not entries:
         return {"entries": 0}
-    est = [e.get("reasoning_tokens_estimate") for e in entries]
-    est = [x for x in est if x is not None]
-    obs = [e.get("reasoning_tokens_observed") for e in entries]
-    obs = [x for x in obs if x is not None]
+    est = [x for x in (_count(e, "reasoning_tokens_estimate") for e in entries) if x is not None]
+    obs = [x for x in (_count(e, "reasoning_tokens_observed") for e in entries) if x is not None]
+    errors = [x for x in (_count(e, "estimate_error") for e in entries) if x is not None]
+    observed_errors = sorted(abs(_count(e, "estimate_error")) for e in entries
+                             if _count(e, "estimate_error") is not None
+                             and (_count(e, "reasoning_tokens_observed") or 0) > 0)
     return {
         "entries": len(entries),
         "with_reasoning_block": sum(1 for e in entries
@@ -288,10 +319,10 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
         # estimate minus observed.
         "with_observed_count": len(obs),
         "reasoning_tokens_observed_total": sum(obs) if obs else None,
-        "with_estimate_error": sum(1 for e in entries if e.get("estimate_error") is not None),
-        "estimate_error_total": (sum(e["estimate_error"] for e in entries
-                                     if e.get("estimate_error") is not None)
-                                 if obs else None),
+        "with_estimate_error": len(errors),
+        "estimate_error_total": sum(errors) if obs else None,
+        "with_unusable_counter": sum(1 for e in entries if any(
+            e.get(key) is not None and _count(e, key) is None for key in _COUNTER_FIELDS)),
         "truncated": sum(1 for e in entries
                          if e.get("stop_reason") == "max_tokens"),
         # Which phases returned no thinking block — a per-phase fact, never a
@@ -302,7 +333,7 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
         # `full` phase without one: 14 entries in 11 logs (8 of the logs and 9
         # of the entries CM4AI's).
         "phases_without_reasoning": sorted({
-            str(e.get("phase")) for e in entries
+            _text(e.get("phase")) for e in entries
             if e.get("reasoning_present") is False}),
         "full_phase_without_reasoning": any(
             e.get("phase") == "full" and e.get("reasoning_present") is False
@@ -315,15 +346,10 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
         # named. That does not certify the rest: the median error is reported
         # beside them so no reader sums the estimate as a count.
         "estimate_over_observed_zero": sorted({
-            str(e.get("phase")) for e in entries
-            if e.get("reasoning_tokens_observed") == 0
-            and (e.get("reasoning_tokens_estimate") or 0) > 0}),
-        "estimate_error_median": (sorted(abs(e["estimate_error"]) for e in entries
-                                         if e.get("estimate_error") is not None
-                                         and (e.get("reasoning_tokens_observed") or 0) > 0)
-                                  or [None])[len([e for e in entries
-                                                  if e.get("estimate_error") is not None
-                                                  and (e.get("reasoning_tokens_observed") or 0) > 0]) // 2],
+            _text(e.get("phase")) for e in entries
+            if _count(e, "reasoning_tokens_observed") == 0
+            and (_count(e, "reasoning_tokens_estimate") or 0) > 0}),
+        "estimate_error_median": (observed_errors or [None])[len(observed_errors) // 2],
     }
 
 
