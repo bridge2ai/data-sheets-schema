@@ -48,7 +48,9 @@ def test_a_torn_row_is_refused_not_skipped(tmp_path):
     journal = api._abandoned_ledger(s)
     raw = journal.read_bytes()
     journal.write_bytes(raw[:len(raw) // 2])
-    _drop(s, 2)
+    second = _drop(s, 2)
+    # The resumed row starts a line of its own, whole, whatever the torn tail ended in (#2860).
+    assert json.loads(journal.read_bytes().split(b"\n")[1]) == second
     with pytest.raises(ledger.UsageLedgerError, match=r"abandoned attempts: .*line 1 is not a readable entry"):
         api._abandoned_rows(s)
     with pytest.raises(ledger.UsageLedgerError, match="abandoned attempts"):
@@ -87,3 +89,51 @@ def test_blank_lines_and_a_missing_journal_are_nothing(tmp_path):
     second = _drop(s, 2)
     assert api._abandoned_rows(s) == [first, second]
     assert json.loads(api._abandoned_ledger(s).read_bytes().split(b"\n")[0]) == first
+
+
+def test_a_fresh_generation_is_not_blocked_by_a_predecessors_torn_line(tmp_path):
+    """#2859: the journal is kept across generations. A torn line a predecessor left is
+    skipped, as the predecessor's rows are superseded anyway; this generation's own rows
+    are read strictly from the boundary it recorded."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    old = _drop(s, 1)
+    journal = api._abandoned_ledger(s)
+    with journal.open("ab") as stream:
+        stream.write(b'{"phase": "full", "usage_id": "torn", "input_tok')
+    ledger.prepare_usage(s, resume=False)
+    assert ledger.abandoned_journal_offset(s) == len(journal.read_bytes())
+    assert api._abandoned_rows(s) == [old]
+    assert api.merge_abandoned_rows(s, []) == []                  # the predecessor's row is superseded
+    api._require_surviving_accounting(s, [])
+    new = _drop(s, 1)
+    assert api._abandoned_rows(s) == [old, new]
+    assert api.merge_abandoned_rows(s, []) == [new]
+    raw = journal.read_bytes()
+    journal.write_bytes(raw[:len(raw) - 40])                      # this generation's own row, torn
+    with pytest.raises(ledger.UsageLedgerError, match="line 3 is not a readable entry"):
+        api._require_surviving_accounting(s, [])
+
+
+def test_an_explicit_fresh_execution_runs_over_a_predecessors_torn_line(tmp_path):
+    """#2859: the `--no-resume` route the resume refusals recommend is not refused."""
+    from tests.test_download.test_api_runner import FakeClient
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    _drop(s, 1)
+    with api._abandoned_ledger(s).open("ab") as stream:
+        stream.write(b'{"phase": "full", "usage_id": "torn"')
+    client = FakeClient()
+    api.execute(s, resume=False, client=client)
+    assert client.messages.calls
+
+
+def test_a_journal_shorter_than_its_boundary_is_refused(tmp_path):
+    """Bytes this generation counted on are gone: the journal was cut or replaced."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    _drop(s, 1)
+    ledger.prepare_usage(s, resume=False)
+    api._abandoned_ledger(s).write_bytes(b"")
+    with pytest.raises(ledger.UsageLedgerError, match="shorter than when this generation began"):
+        api._abandoned_rows(s)

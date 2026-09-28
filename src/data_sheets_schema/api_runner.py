@@ -5829,19 +5829,45 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
 
 
 def _abandoned_ledger(spec: RunSpec) -> Path:
-    return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
+    from data_sheets_schema.usage_ledger import abandoned_journal_path
+    return abandoned_journal_path(spec)
 
 
 def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
-    """Every row of the abandoned-attempts journal, read as the reasoning log is:
-    split on the newline the writer ends each row with and nothing else, and a line
-    that does not decode, parse or parse to an object refused, naming it. The
-    accounting gate reads this journal before every call and before publication, and
-    must not skip a charge it cannot read (#2779, #2695, #2720)."""
+    """Every row of the abandoned-attempts journal, split on the newline the writer
+    ends each row with and nothing else (#2720). The accounting gate reads it before
+    every call and before publication and must not skip a charge it cannot read, so a
+    line of this generation's that does not decode, parse or parse to an object is
+    refused, naming it (#2779). The journal is kept across generations: a line that
+    starts before this generation's boundary is a predecessor's, whose rows the gate
+    sets aside as superseded, so one it cannot read is skipped as before (#2859)."""
+    from data_sheets_schema.usage_ledger import abandoned_journal_offset
+    path = _abandoned_ledger(spec)
     try:
-        return reasoning.read(_abandoned_ledger(spec))
-    except (OSError, ValueError) as exc:
+        if not path.exists():
+            return []
+        raw = path.read_bytes()
+        boundary = abandoned_journal_offset(spec)
+    except OSError as exc:
         raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {exc}") from exc
+    if boundary > len(raw):
+        raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {path} is shorter "
+                               "than when this generation began")
+    rows, start = [], 0
+    for number, line in enumerate(raw.split(b"\n"), 1):
+        own, start = start >= boundary, start + len(line) + 1
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line.decode("utf-8"))
+        except (ValueError, RecursionError):
+            row = None
+        if isinstance(row, dict):
+            rows.append(row)
+        elif own:
+            raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {path}: line {number} "
+                                   "is not a readable entry")
+    return rows
 
 
 def _unrecorded_abandoned(spec: RunSpec, prior: dict[str, Any]) -> bool:
