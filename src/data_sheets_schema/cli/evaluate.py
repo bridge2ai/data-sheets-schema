@@ -385,6 +385,35 @@ def spelling_cmd(method, label, project, show_quoted):
             click.echo(f"   {proj:16} {o.context}")
 
 
+@evaluate.command("q19-lint")
+@click.argument("paths", nargs=-1, type=click.Path(exists=True, path_type=Path))
+@click.option("--inspection", "inspections", multiple=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="A recorded Q19 inspection (semantic_errata.md or semantic_review.md): "
+                   "lint the evaluations it names and report agreement with it.")
+@click.option("--show", is_flag=True, help="Print the sentence each reason was read from.")
+@click.option("--strict", is_flag=True, help="Exit 1 if any rating is flagged.")
+def q19_lint_cmd(paths, inspections, show, strict):
+    """Flag rubric20 Q19 scores held below 5 for how provenance is represented (#2911).
+
+    PATHS are rubric20 semantic evaluation files, or directories searched for
+    *_evaluation.json. A rating is flagged when the sentences that say why
+    Q19 is below 5 give a representation or empty-slot reason (an empty
+    was_derived_from, no PROV graph, not machine-traversable, scattered
+    across fields). Substantive reasons given beside it are listed, never
+    reported as a pass. Evaluation files are read, never written.
+    """
+    from data_sheets_schema.q19_rationale_lint import lint_report
+    try:
+        lines, flagged = lint_report(paths, inspections, show=show)
+    except ValueError as exc:
+        raise click.ClickException(str(exc))
+    for line in lines:
+        click.echo(line)
+    if strict and flagged:
+        raise SystemExit(1)
+
+
 @evaluate.command("validate")
 @click.argument("files", nargs=-1, required=True,
                 type=click.Path(exists=True, dir_okay=False, path_type=Path))
