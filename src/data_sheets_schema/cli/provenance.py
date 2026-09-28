@@ -2176,13 +2176,21 @@ def reasoning_cmd(method, project, label, path):
                    "no measurement. Do not average the two (#400).\n")
 
     total: list[dict] = []
+    skipped = 0
     for p in sorted(logs):
-        entries = _reasoning.read(p)
+        entries, unreadable = _reasoning.read_lenient(p)
         total.extend(entries)
+        skipped += len(unreadable)
         s = _reasoning.summarise(entries)
         click.echo(f"\n{p}")
+        if unreadable:
+            # A partial line from a run killed mid-write, or a corrupt one (a bad byte,
+            # deep nesting, a non-object): named, not fatal (#2695, #2795).
+            click.echo(f"  ⚠️  {len(unreadable)} line(s) that are not a readable entry, skipped: "
+                       f"{', '.join(map(str, unreadable))}")
         if not entries:
-            # A log created but never written, e.g. by a run killed at once (#2667).
+            # A log created but never written, e.g. by a run killed at once (#2667),
+            # or one whose only lines are unreadable, named above (#2766).
             click.echo("  entries 0")
             continue
         click.echo(f"  entries {s['entries']}, with a reasoning block "
@@ -2209,11 +2217,19 @@ def reasoning_cmd(method, project, label, path):
                        + (f"; median |estimate_error| where the count is above 0: "
                           f"{s['estimate_error_median']:,}" if s.get('estimate_error_median') else ""))
 
-    if len(logs) > 1 and total:              # every selected log empty: nothing to aggregate (#2692)
+    # Every selected log empty: nothing to aggregate (#2692). Logs that hold only
+    # unreadable lines are not empty, and the count says so (#2742).
+    if len(logs) > 1 and (total or skipped):
         s = _reasoning.summarise(total)
         click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
-                   f"{s['with_reasoning_text']} with reasoning text")
+                   f"{s.get('with_reasoning_text', 0)} with reasoning text"
+                   + (f", {skipped} unreadable line(s) skipped" if skipped else ""))
     if total and not any(e.get('reasoning_available') for e in total):
+        if skipped:
+            # A skipped line may have held the block or text the diagnosis below
+            # finds absent (#2721).
+            click.echo(f"\n{skipped} unreadable line(s) skipped: what follows describes "
+                       "the readable entries only.")
         kinds = {b.get('type') for e in total for b in (e.get('blocks') or []) if isinstance(b, dict)}
         if any(e.get('reasoning_present') for e in total) and kinds == {'redacted_thinking'}:
             # Encrypted by the provider's safety redaction whatever the display (#2666).
