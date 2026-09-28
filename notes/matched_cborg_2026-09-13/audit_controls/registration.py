@@ -837,6 +837,12 @@ def native_history_control(manifest):
     return dict(value)
 
 
+#: The smallest registrable complete-response deadline. The bounded worker's
+#: start-up counts against it by design (#2159), and a deadline of a few seconds
+#: would turn every buffered request into a stall debit after the send (#2605).
+MIN_RESPONSE_BUFFER_SECONDS = 60
+
+
 def native_response_buffer(manifest):
     """Opt-in complete-response delivery; never expose an incomplete turn (#2304)."""
     key = 'native_response_buffer'
@@ -855,6 +861,8 @@ def native_response_buffer(manifest):
     read_bound = native_upstream_read_timeout(manifest) or LEGACY_UPSTREAM_READ_SECONDS
     if value['total_seconds'] > read_bound:
         raise BudgetStop('complete-response deadline must not exceed the registered upstream read bound')
+    if value['total_seconds'] < MIN_RESPONSE_BUFFER_SECONDS:
+        raise BudgetStop(f'complete-response deadline must be at least {MIN_RESPONSE_BUFFER_SECONDS} seconds (#2605)')
     outer = native_api_timeout(manifest)
     if (outer is None or outer < stall_policy_minimum_api_timeout_ms(manifest, policy['count_attempts']) or
             native_api_force_idle_timeout(manifest) is not False):

@@ -66,7 +66,7 @@ def test_absence_keeps_legacy_and_selection_returns_an_independent_value():
 BAD_SELECTIONS = [None, True, False, [], 'on', {}, {**BUFFER, 'extra': 1},
     {**BUFFER, 'kind': 'other'}, {k: v for k, v in BUFFER.items() if k != 'total_seconds'},
     *[{**BUFFER, 'max_bytes': v} for v in (None, True, False, 0, -1, 1.5, '16', 67108865)],
-    *[{**BUFFER, 'total_seconds': v} for v in (None, True, False, 0, -1, 1.5, '1200', 1201)]]
+    *[{**BUFFER, 'total_seconds': v} for v in (None, True, False, 0, -1, 1.5, '1200', 1201, 1, 59)]]
 
 
 @pytest.mark.parametrize('value', BAD_SELECTIONS)
@@ -83,10 +83,19 @@ def test_malformed_selection_stops_before_runtime_or_client(value, tmp_path, mon
 
 
 @pytest.mark.parametrize('max_bytes', [1, 67108864])
-@pytest.mark.parametrize('seconds', [1, 1200])
+@pytest.mark.parametrize('seconds', [registration.MIN_RESPONSE_BUFFER_SECONDS, 1200])
 def test_inclusive_byte_and_time_bounds(max_bytes, seconds):
     value = {**BUFFER, 'max_bytes': max_bytes, 'total_seconds': seconds}
     assert registration.native_response_buffer(manifest(**{KEY: value})) == value
+
+
+@pytest.mark.parametrize('seconds', [1, 59])
+def test_a_deadline_below_the_floor_is_refused_by_name(seconds):
+    """The worker's start-up counts against the deadline (#2159), so a few-second
+    deadline is a mistake that would debit every buffered request as a stall (#2605)."""
+    assert registration.MIN_RESPONSE_BUFFER_SECONDS == 60
+    with pytest.raises(BudgetStop, match='at least 60 seconds'):
+        registration.native_response_buffer(manifest(**{KEY: {**BUFFER, 'total_seconds': seconds}}))
 
 
 @pytest.mark.parametrize('change', ['no_policy', 'null_policy', 'no_sdk', 'short_sdk',
