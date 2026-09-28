@@ -301,6 +301,7 @@ def check_one(merged: Path, source: Path, class_name: str,
         # Same filename, because the digest names the schema it came from and
         # a differing name would be a spurious difference.
         rebuilt = Path(tmp) / merged.name
+        same = source_state = merged_bytes = None
         try:
             source_snapshot = _source_snapshot(source)
             source_state = source_snapshot[0]
@@ -334,6 +335,21 @@ def check_one(merged: Path, source: Path, class_name: str,
                 return {**out, "status": UNCHECKED,
                         "reason": "schema inputs changed during the sync check; retry with stable inputs"}
         except Exception as exc:                               # noqa: BLE001
+            # The rebuild already differs from the merged file, so it is stale whatever
+            # its digest; a merged file that does not parse (a conflict marker, a cut)
+            # is the usual reason the digest failed, and rebuilding fixes it (#2773).
+            # Stale only if nothing moved during the check, else a retry decides.
+            try:
+                stable = (same is False and merged.read_bytes() == merged_bytes
+                          and _source_state(source) == source_state)
+            except Exception:                                  # noqa: BLE001
+                stable = False
+            if stable:
+                kept = Path(tempfile.mkdtemp(prefix="d4d-schema-rebuild-")) / merged.name
+                shutil.copy2(rebuilt, kept)
+                return {**out, "status": STALE, "rebuilt_at": str(kept),
+                        "reason": ("the merged schema differs from a fresh build of its "
+                                   f"source, and its digest could not be computed: {exc}")}
             return {**out, "status": UNCHECKED,
                     "reason": f"digest could not be computed: {exc}"}
         out["digest"] = live

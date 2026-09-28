@@ -160,7 +160,9 @@ Three representations must stay synchronized:
 
 ```bash
 make check-sync    # Check synchronization
-make regen-all     # Force regenerate everything
+make regen-all     # Force regenerate the full merged schema and project artifacts
+rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml && make gen-core-schema
+                   # the core merged schema, which regen-all does not rebuild (#2775)
 ```
 
 ## Working with Modules
@@ -1762,7 +1764,9 @@ poetry run python -m unittest tests.test_d4d_full_schema[.TestClass[.test_method
 - Prefer inheriting from base classes in `D4D_Base_import.yaml`
 - `aurelian/` is git submodule: `git submodule update --init --recursive`
 - Legacy data in `data/ATTIC/` (see ATTIC/README.md)
-- Always run `make regen-all` after editing schemas to stay in sync
+- Always run `make regen-all` after editing schemas to stay in sync, and rebuild the core
+  merged schema (`make gen-core-schema`, after removing it) when a core module changed;
+  `make check-digest` names the command for each stale schema (#2775)
 
 ## LinkML-Specific Commands
 

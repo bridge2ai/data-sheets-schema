@@ -140,7 +140,8 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
 class SyncCheckTest(unittest.TestCase):
 
     def test_the_repository_is_in_sync(self):
-        """If this fails, do not generate — regenerate and commit first."""
+        """If this fails, do not generate: rebuild a stale schema with the command its
+        row names, or fix the cause an unchecked row names, then commit (#2775)."""
         rows = check()
         self.assertEqual(blocking(rows), [],
                          "a merged schema is stale or could not be checked (see the rows)")
@@ -217,7 +218,10 @@ class RefusalWordingTest(unittest.TestCase):
         self.assertIn("fix the cause named above, or retry if it was transient", message)
         self.assertTrue(message.endswith("or check with `d4d schema check-digest`."), message)
         self.assertNotIn("not built from the current source", message)
+        # No rebuild advice of any kind for an unchecked row, the core's included (#2774).
         self.assertNotIn("make regen-all", message)
+        self.assertNotIn("gen-core-schema", message)
+        self.assertNotIn("rm -f", message)
 
     def test_a_stale_row_is_still_called_stale(self):
         message = self._refusal([{"class": "Dataset", "status": STALE, "reason": "rebuild differs"}])
@@ -228,8 +232,11 @@ class RefusalWordingTest(unittest.TestCase):
 
     def test_a_stale_core_schema_is_told_how_to_rebuild_the_core(self):
         """#2756: regen-all never rebuilds the core merged schema."""
+        from data_sheets_schema.schema_sync import REBUILD
         message = self._refusal([{"class": "CoreDataset", "status": STALE, "reason": "rebuild differs"}])
-        self.assertIn("make gen-core-schema", message)
+        # The whole command: gen-core-schema alone is a no-op on a newer stale file (#2774).
+        self.assertIn(f"`{REBUILD['CoreDataset']}`", message)
+        self.assertTrue(REBUILD["CoreDataset"].startswith("rm -f "))
         self.assertNotIn("make regen-all", message)
         both = self._refusal([{"class": "CoreDataset", "status": STALE, "reason": "x"},
                               {"class": "Dataset", "status": STALE, "reason": "y"}])
@@ -292,6 +299,55 @@ class CheckDigestSummaryTest(unittest.TestCase):
             self.assertEqual((result.exit_code, strict.exit_code), (0, 1), strict.output)
         with mock.patch.object(schema_sync, "check", lambda **_: [rows[2]]):
             self.assertEqual(CliRunner().invoke(schema_cli, ["check-digest", "--strict"]).exit_code, 0)
+
+    def test_the_summary_gives_each_cause_its_advice(self):
+        """#2774: the CLI names the core's own rebuild and the unchecked advice, and never
+        rebuild advice for an unchecked row."""
+        from unittest import mock
+        from click.testing import CliRunner
+        from data_sheets_schema import schema_sync
+        from data_sheets_schema.cli.schema import schema as schema_cli
+        stale_core = {"class": "CoreDataset", "status": STALE, "merged": "core.yaml", "reason": "differs"}
+        unchecked_core = {"class": "CoreDataset", "status": UNCHECKED, "merged": "core.yaml", "reason": "timed out"}
+        with mock.patch.object(schema_sync, "check", lambda **_: [stale_core]):
+            stale = CliRunner().invoke(schema_cli, ["check-digest"]).output
+        with mock.patch.object(schema_sync, "check", lambda **_: [unchecked_core]):
+            unchecked = CliRunner().invoke(schema_cli, ["check-digest"]).output
+        self.assertIn(f"`{schema_sync.REBUILD['CoreDataset']}`", stale)
+        self.assertNotIn("make regen-all", stale)
+        self.assertIn(schema_sync.UNCHECKED_ADVICE, unchecked)
+        for text in ("gen-core-schema", "rm -f", "regen-all"):
+            self.assertNotIn(text, unchecked)
+
+
+class UnparseableMergedSchemaTest(unittest.TestCase):
+
+    def test_a_merged_schema_that_differs_and_does_not_parse_is_stale(self):
+        """#2773: the rebuild already shows it is stale, so the digest failing on a conflict
+        marker does not make it unchecked, and its rebuild advice applies."""
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            copy.write_bytes(b"<<<<<<< HEAD\n" + merged.read_bytes())
+            row = check_one(copy, source, cls, marker)
+        self.assertEqual(row["status"], STALE, row)
+        self.assertIn("could not be computed", row["reason"])
+        self.assertTrue(Path(row["rebuilt_at"]).is_file())
+
+    def test_a_digest_failure_on_a_matching_file_stays_unchecked(self):
+        """#2773: only a file the rebuild shows differs is called stale."""
+        from unittest import mock
+        from data_sheets_schema import schema_sync
+        merged, source, cls, marker = MERGED_SCHEMAS[0]
+        if not merged.exists():
+            self.skipTest("merged schema not present in this checkout")
+        def boom(*a, **k):
+            raise RuntimeError("digest child failed")
+        with mock.patch.object(schema_digest, "digest_text", boom):
+            row = check_one(merged, source, cls, marker)
+        self.assertEqual(row["status"], UNCHECKED, row)
 
 
 if __name__ == "__main__":
