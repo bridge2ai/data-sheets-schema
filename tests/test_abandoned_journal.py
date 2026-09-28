@@ -157,7 +157,9 @@ def test_each_new_generation_records_its_own_boundary(tmp_path):
 
 def test_a_first_ledger_opened_over_an_existing_journal_starts_after_it(tmp_path):
     """#2869: a generation opened by resume with no ledger yet, as the CLI opens one, does
-    not own the lines already in the journal: another run's torn line there is skipped."""
+    not own the lines already in the journal: another run's torn line there is skipped.
+    (A legacy continuation does adopt earlier generation-less rows of its own; a torn one
+    among them is skipped as on main, #2883.)"""
     other = spec(out_dir=tmp_path)
     ledger.prepare_usage(other, resume=True)
     _drop(other, 1)
@@ -220,3 +222,92 @@ def test_an_invalid_boundary_is_refused(tmp_path, offset):
     path.write_text(json.dumps(data))
     with pytest.raises(ledger.UsageLedgerError, match="invalid abandoned-attempts journal boundary"):
         ledger.abandoned_journal_offset(s)
+
+
+def test_a_ledger_that_predates_the_boundary_reads_strictly(tmp_path):
+    """#2885: a ledger written before abandoned_journal_offset existed has no boundary, so
+    every line may be its own and a torn one is refused, as #2779 requires."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    path = ledger.ledger_path(s)
+    data = json.loads(path.read_text())
+    del data["abandoned_journal_offset"]
+    path.write_text(json.dumps(data))
+    assert ledger.abandoned_journal_offset(s) == 0
+    _drop(s, 1)
+    journal = api._abandoned_ledger(s)
+    raw = journal.read_bytes()
+    journal.write_bytes(raw[:len(raw) // 2])
+    _drop(s, 2)
+    with pytest.raises(ledger.UsageLedgerError, match="line 1 is not a readable entry"):
+        api._require_surviving_accounting(s, [])
+
+
+def test_a_first_ledger_opened_fresh_starts_after_the_journal(tmp_path):
+    """#2885: the route the CLI takes on foreign progress, and --no-resume with no ledger:
+    resume=False with no ledger of its own records the boundary too."""
+    other = spec(out_dir=tmp_path)
+    ledger.prepare_usage(other, resume=True)
+    _drop(other, 1)
+    with api._abandoned_ledger(other).open("ab") as stream:
+        stream.write(b'{"phase": "full", "usage_id": "torn"')
+    s = replace(other, label="another_rep1")
+    assert not ledger.ledger_path(s).exists()
+    ledger.prepare_usage(s, resume=False)
+    assert ledger.abandoned_journal_offset(s) == len(api._abandoned_ledger(s).read_bytes())
+    api._require_surviving_accounting(s, [])
+
+
+def test_blank_lines_before_the_boundary_do_not_move_it(tmp_path):
+    """#2885: a blank line still takes its byte, so this generation's first line, torn,
+    stays after the boundary and is refused."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    _drop(s, 1)
+    journal = api._abandoned_ledger(s)
+    with journal.open("ab") as stream:
+        stream.write(b"\n\n")
+    ledger.prepare_usage(s, resume=False)
+    with journal.open("ab") as stream:
+        stream.write(b'{"phase": "full", "usage_id": "torn"\n')
+    with pytest.raises(ledger.UsageLedgerError, match="line 4 is not a readable entry"):
+        api._require_surviving_accounting(s, [])
+
+
+def test_a_deeply_nested_line_is_skipped_before_the_boundary_and_refused_after(tmp_path):
+    """#2885: json.loads raises RecursionError on deep nesting, which is an unreadable line
+    like any other: skipped as a predecessor's, refused, by name, as this generation's."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    journal = api._abandoned_ledger(s)
+    journal.write_bytes(b"[" * 200000 + b"\n")
+    ledger.prepare_usage(s, resume=False)
+    assert api._abandoned_rows(s) == []
+    with journal.open("ab") as stream:
+        stream.write(b"[" * 200000 + b"\n")
+    with pytest.raises(ledger.UsageLedgerError, match="line 2 is not a readable entry"):
+        api._abandoned_rows(s)
+
+
+def test_one_byte_lost_below_the_boundary_is_refused(tmp_path):
+    """#2885: any shortfall is refused, the last byte included."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    _drop(s, 1)
+    ledger.prepare_usage(s, resume=False)
+    journal = api._abandoned_ledger(s)
+    journal.write_bytes(journal.read_bytes()[:-1])
+    with pytest.raises(ledger.UsageLedgerError, match="shorter than when this generation began"):
+        api._abandoned_rows(s)
+
+
+def test_the_gone_refusal_says_its_cause_once(tmp_path):
+    """#2884: the refusal is not wrapped a second time."""
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    _drop(s, 1)
+    ledger.prepare_usage(s, resume=False)
+    api._abandoned_ledger(s).unlink()
+    with pytest.raises(ledger.UsageLedgerError) as raised:
+        api._abandoned_rows(s)
+    assert str(raised.value).count("cannot establish surviving abandoned attempts") == 1

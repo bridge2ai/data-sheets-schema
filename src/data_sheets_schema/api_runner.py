@@ -5841,8 +5841,10 @@ def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
     refused, naming it (#2779). The journal is kept across generations: a line that
     starts before this generation's boundary was written before it, so one that cannot
     be read is skipped as before; with no generation at all (no usage ledger) no line
-    is this generation's (#2859, #2869). A journal gone or shorter than when this
-    generation began is refused (#2871)."""
+    is this generation's (#2859, #2869). The one exception is a legacy continuation
+    (`accept_legacy`), which adopts earlier rows that carry no generation: a torn one
+    among them is skipped, as on main, and the gate never covered those rows (#2883). A
+    journal gone or shorter than when this generation began is refused (#2871)."""
     from data_sheets_schema.usage_ledger import abandoned_journal_offset
     path = _abandoned_ledger(spec)
     try:
@@ -5853,6 +5855,8 @@ def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
                                        f"though this generation began after {boundary} bytes of it")
             return []
         raw = path.read_bytes()
+    except UsageLedgerError:
+        raise                                        # already says what it could not establish (#2884)
     except OSError as exc:
         raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {exc}") from exc
     if boundary is None:
