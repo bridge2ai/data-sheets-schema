@@ -231,10 +231,10 @@ def _module_spec(name, inside):
     for depth in range(1, len(parts) + 1):
         if spec is not None and spec.submodule_search_locations is None:
             return None
-        try:
-            spec = importlib.util.find_spec('.'.join(parts[:depth]))
-        except (ImportError, ValueError):
-            return None
+        # Nothing is suppressed: a repository package above the name has already been
+        # found, so an error importing it is a broken package, which must fail the
+        # closure rather than shrink it (#2770). A missing top-level name is None.
+        spec = importlib.util.find_spec('.'.join(parts[:depth]))
         if spec is None:
             return None
         places = [spec.origin] if spec.has_location and spec.origin else []

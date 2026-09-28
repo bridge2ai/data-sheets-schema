@@ -988,15 +988,30 @@ def test_the_interpreter_environment_is_not_repository_code(tmp_path, monkeypatc
     assert probe.repository_file((root / 'pkg' / 'x.py').resolve(), root.resolve(), probe._environment())
 
 
-def test_a_repository_package_that_fails_to_import_fails_the_closure(tmp_path, monkeypatch):
-    """A repository package whose __init__ raises is not skipped: skipping would leave
-    what it imports unpinned, so the probe refuses rather than pin less (#2628)."""
+@pytest.mark.parametrize('failure', [RuntimeError, ImportError, ValueError])
+def test_a_repository_package_that_fails_to_import_fails_the_closure(tmp_path, monkeypatch, failure):
+    """A repository package whose __init__ raises is not skipped, whatever it raises:
+    skipping would leave what it imports unpinned, so the probe refuses rather than pin
+    less (#2628, #2770). The package name differs per case, since a failed import is
+    retried from source."""
+    name = f'closure_broken_2628_{failure.__name__.lower()}'
     root = tmp_path / 'root'
-    (root / 'closure_broken_2628').mkdir(parents=True)
-    (root / 'closure_broken_2628' / '__init__.py').write_text("raise RuntimeError('broken package')\n")
-    (root / 'closure_broken_2628' / 'mod.py').write_text('')
+    (root / name).mkdir(parents=True)
+    (root / name / '__init__.py').write_text(f"raise {failure.__name__}('broken package')\n")
+    (root / name / 'mod.py').write_text('')
     seed = root / 'seed.py'
-    seed.write_text('import closure_broken_2628.mod\n')
+    seed.write_text(f'import {name}.mod\n')
     monkeypatch.syspath_prepend(str(root))
-    with pytest.raises(RuntimeError, match='broken package'):
+    with pytest.raises(failure, match='broken package'):
         probe.import_closure(seed, root.resolve())
+
+
+def test_a_missing_name_adds_nothing_and_raises_nothing(tmp_path, monkeypatch):
+    """#2770: without the suppression, a name that is no module is still just absent."""
+    root = tmp_path / 'root'
+    root.mkdir()
+    seed = root / 'seed.py'
+    seed.write_text('import closure_absent_2770\nimport closure_absent_2770.child\n'
+                    'from closure_absent_2770 import thing\n')
+    monkeypatch.syspath_prepend(str(root))
+    assert probe.import_closure(seed, root.resolve()) == {seed.resolve()}
