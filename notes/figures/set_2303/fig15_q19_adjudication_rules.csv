@@ -1,0 +1,17 @@
+kind,key,label,group,regex
+concern,empty_field,empty derivation field,rep,was_derived_from|parent_datasets|was_generated_by|derivation fields?|dedicated[- ]fields?|designated (?:graph )?fields|provenance fields|structured derivation
+concern,graph,graph or PROV expression,rep,(?<!or-)\bgraph\b|PROV-O|\bPROV\b|serializ|addressable|\bRDF\b
+concern,machine,machine-readable or traversable,rep,machine[- ]?(?:readab|actionab|travers)|mechanical|machine cannot|human-readable
+concern,scattered,links spread across fields,rep,scattered|spans sections|across (?:four |unrelated )?(?:fields|sections)|matching prose|for their placement
+concern,version,version access or errata,other,version access|errata|unversioned|versioning|non-monotonic
+concern,missing,missingness or QC,other,missingness|missing[- ]data|QC gaps|coverage
+concern,granularity,artifact-level granularity,other,granularit|artifact-level|source-to-artifact|source-to-output|specific released|particular released|released archive|released file|file-by-file|per-artifact|released-artifact|feature-file|variable-level
+concern,overlooked,input evidence overlooked,review,overlook
+concern,disclaimer,certification disclaimed,review,certif|not adjudicat|unadjudicated
+cue,limit,limit cue,,withh[oe]ld|withholds|withholding|blocked|reserves|stated reason|limiting|\brequires?\b|\brequired\b|\brequiring\b|penaliz|short of|falls short|\bdeduction\b|\badds? (?:a|the)\b|\bremaining concerns?\b|\basks for\b
+cue,negation,negation/acceptance cue (overrides the limit cue),,\bdoes not\b|\bdo not\b|\bnot a deduction\b|\bwithout\b|\bdespite\b|\binformational\b|\baccepts?\b|\baccepted\b|\bneither\b|\bno requirement\b|\bnot clearly\b|rather than (?:imposing|an explicit)|\bcould apply\b|\bmay be\b|\bmay still\b|\bremains? (?:unadjudicated|independent|matters)\b|\bnot adjudicated\b
+exclusion,input_sentence,sentence describes the input record (concern columns only),,^(?:The|Its own|The own|Its) input\b
+exclusion,input_continuation,also excluded when it directly follows an input sentence,,^It\b
+splitter,sentence_split,sentence boundary,,(?<=[.;])\s+(?=[A-Z])
+example_choice,withhold,flagged example must carry this cue,,withh[oe]ld|withholds|withholding|blocked|reserves|stated reason
+example_choice,no_deduction,unflagged example must carry this cue,,informational|not a deduction|does not deduct|without reducing|do not reduce|without penalizing

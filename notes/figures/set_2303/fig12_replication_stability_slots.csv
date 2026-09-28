@@ -1,0 +1,98 @@
+module,block,slot,kind,median_observed_string_chars,n_groups,groups_identical,groups_two_agree,groups_all_differ,groups_intermittent,groups_absent
+Motivation,Motivation,purposes,nested,,8,0,0,8,0,0
+Motivation,Motivation,tasks,nested,,8,0,0,8,0,0
+Motivation,Motivation,addressing_gaps,nested,,8,0,0,8,0,0
+Motivation,Motivation,creators,nested,,8,0,0,8,0,0
+Motivation,Motivation,funders,nested,,8,0,0,8,0,0
+Composition,Composition,external_resources,nested,,8,0,0,8,0,0
+Composition,Composition,instances,nested,,8,0,0,8,0,0
+Composition,Composition,anomalies,nested,,8,0,0,4,1,3
+Composition,Composition,known_biases,nested,,8,0,1,5,2,0
+Composition,Composition,known_limitations,nested,,8,0,0,8,0,0
+Composition,Composition,confidential_elements,nested,,8,0,0,6,2,0
+Composition,Composition,content_warnings,nested,,8,0,0,2,3,3
+Composition,Composition,subpopulations,nested,,8,0,0,6,2,0
+Composition,Composition,sensitive_elements,nested,,8,0,0,8,0,0
+Composition,Composition,relationships,nested,,8,0,0,4,0,4
+Composition,Composition,splits,nested,,8,0,0,6,0,2
+Composition,Composition,sampling_strategies,nested,,8,0,0,7,1,0
+Composition,Composition,is_deidentified,nested,,8,0,0,8,0,0
+Composition,Composition,related_datasets,nested,,8,0,0,6,0,2
+Collection,Collection,acquisition_methods,nested,,8,0,0,8,0,0
+Collection,Collection,collection_mechanisms,nested,,8,0,0,8,0,0
+Collection,Collection,data_collectors,nested,,8,0,0,8,0,0
+Collection,Collection,collection_timeframes,nested,,8,0,0,6,2,0
+Collection,Collection,direct_collection,nested,,8,0,0,8,0,0
+Collection,Collection,missing_data_documentation,nested,,8,0,0,4,2,2
+Collection,Collection,raw_data_sources,nested,,8,0,0,6,2,0
+Preprocessing,Preprocessing,preprocessing_strategies,nested,,8,0,0,7,1,0
+Preprocessing,Preprocessing,cleaning_strategies,nested,,8,0,0,6,1,1
+Preprocessing,Preprocessing,labeling_strategies,nested,,8,0,0,4,1,3
+Preprocessing,Preprocessing,raw_sources,nested,,8,0,0,1,4,3
+Preprocessing,Preprocessing,imputation_protocols,nested,,8,0,0,0,0,8
+Preprocessing,Preprocessing,annotation_analyses,nested,,8,0,0,0,1,7
+Preprocessing,Preprocessing,machine_annotation_tools,nested,,8,0,0,2,3,3
+Uses,Uses,existing_uses,nested,,8,0,1,3,2,2
+Uses,Uses,use_repository,nested,,8,0,0,0,2,6
+Uses,Uses,other_tasks,nested,,8,0,0,1,5,2
+Uses,Uses,future_use_impacts,nested,,8,0,0,4,3,1
+Uses,Uses,discouraged_uses,nested,,8,0,0,3,2,3
+Uses,Uses,intended_uses,nested,,8,0,0,8,0,0
+Uses,Uses,prohibited_uses,nested,,8,0,0,6,0,2
+Distribution,Distribution,distribution_formats,nested,,8,0,0,8,0,0
+Distribution,Distribution,distribution_dates,nested,,8,0,0,6,1,1
+Distribution,Distribution,third_party_sharing,nested,,8,0,0,7,1,0
+Maintenance,Maintenance,maintainers,nested,,8,0,0,8,0,0
+Maintenance,Maintenance,errata,nested,,8,0,0,2,1,5
+Maintenance,Maintenance,updates,nested,,8,0,1,7,0,0
+Maintenance,Maintenance,retention_limit,nested,,8,1,1,4,0,2
+Maintenance,Maintenance,version_access,nested,,8,0,0,6,0,2
+Maintenance,Maintenance,extension_mechanism,nested,,8,0,0,4,3,1
+Ethics,Ethics,collection_notifications,nested,,8,0,0,4,0,4
+Ethics,Ethics,collection_consents,nested,,8,0,0,4,0,4
+Ethics,Ethics,consent_revocations,nested,,8,0,1,3,0,4
+Ethics,Ethics,ethical_reviews,nested,,8,0,0,8,0,0
+Ethics,Ethics,data_protection_impacts,nested,,8,0,0,0,4,4
+Human,Human,human_subject_research,nested,,8,0,0,7,1,0
+Human,Human,informed_consent,nested,,8,0,0,4,0,4
+Human,Human,at_risk_populations,nested,,8,0,0,4,2,2
+Human,Human,participant_privacy,nested,,8,0,0,5,1,2
+Human,Human,participant_compensation,nested,,8,0,0,4,0,4
+Data Governance,Data Governance,license_and_use_terms,nested,,8,0,0,8,0,0
+Data Governance,Data Governance,ip_restrictions,nested,,8,0,0,6,1,1
+Data Governance,Data Governance,regulatory_restrictions,nested,,8,0,0,5,3,0
+Data Governance,Data Governance,data_governance,nested,,8,0,0,7,1,0
+Variables,Variables,variables,nested,,8,0,0,3,1,4
+FileCollection,FileCollection,file_collections,nested,,8,0,0,5,2,1
+Base / root,Base / root: scalar,total_file_count,scalar,,8,4,0,0,0,4
+Base / root,Base / root: scalar,total_size_bytes,scalar,,8,2,0,0,1,5
+Base / root,Base / root: scalar,is_tabular,scalar,,8,2,0,0,3,3
+Base / root,Base / root: scalar,compression,scalar,3.0,8,0,0,0,2,6
+Base / root,Base / root: scalar,conforms_to_class,scalar,7.0,8,8,0,0,0,0
+Base / root,Base / root: scalar,conforms_to_schema,scalar,45.0,8,8,0,0,0,0
+Base / root,Base / root: scalar,created_by,scalar,19,8,4,1,1,1,1
+Base / root,Base / root: scalar,created_on,scalar,20.0,8,2,0,0,0,6
+Base / root,Base / root: scalar,doi,scalar,18.0,8,6,0,0,0,2
+Base / root,Base / root: scalar,download_url,scalar,,8,0,0,0,0,8
+Base / root,Base / root: scalar,issued,scalar,20.0,8,6,0,0,0,2
+Base / root,Base / root: scalar,language,scalar,2,8,2,2,0,2,2
+Base / root,Base / root: scalar,last_updated_on,scalar,20,8,0,0,0,3,5
+Base / root,Base / root: scalar,license,scalar,28.0,8,5,1,0,0,2
+Base / root,Base / root: scalar,modified_by,scalar,,8,0,0,0,0,8
+Base / root,Base / root: scalar,page,scalar,29.0,8,5,3,0,0,0
+Base / root,Base / root: scalar,publisher,scalar,19,8,3,0,0,3,2
+Base / root,Base / root: scalar,status,scalar,9.0,8,6,0,2,0,0
+Base / root,Base / root: scalar,title,scalar,69.0,8,6,2,0,0,0
+Base / root,Base / root: scalar,version,scalar,5.0,8,6,0,0,0,2
+Base / root,Base / root: scalar,id,scalar,22.0,8,6,1,1,0,0
+Base / root,Base / root: scalar,name,scalar,16.0,8,1,5,2,0,0
+Base / root,Base / root: long text,citation,long text,439.0,8,3,3,0,0,2
+Base / root,Base / root: long text,conforms_to,long text,372.5,8,0,0,6,1,1
+Base / root,Base / root: long text,was_derived_from,long text,198.5,8,0,0,1,4,3
+Base / root,Base / root: long text,description,long text,1616.5,8,0,0,8,0,0
+Base / root,Base / root: long text,notes,long text,542,8,0,0,3,5,0
+Base / root,Base / root: list of values,conforms_to_standard,list,,8,4,0,2,1,1
+Base / root,Base / root: list of values,keywords,list,,8,3,2,3,0,0
+Base / root,Base / root: nested,resources,nested,,8,0,0,0,0,8
+Base / root,Base / root: nested,subsets,nested,,8,0,0,0,7,1
+Base / root,Base / root: nested,parent_datasets,nested,,8,0,0,0,0,8

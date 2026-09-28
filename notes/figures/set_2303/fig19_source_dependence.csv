@@ -1,0 +1,217 @@
+label,method,project,cohort,rep,document_id,source_type,processed_file,field_paths_citing,field_paths_sole_source,receipted_field_paths,sole_source_share,median_share_of_project_runs,cited_in_run,redundant_chunk_of_other_document_points_here,y_row,y_lane_offset
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,ro_crate_metadata,RO-Crate,aireadi_ro_crate_metadata_2026-08-12.txt,16,7,176,0.039773,0.073948,True,False,0,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,ro_crate_metadata,RO-Crate,aireadi_ro_crate_metadata_2026-08-12.txt,24,18,170,0.105882,0.073948,True,False,0,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,ro_crate_metadata,RO-Crate,aireadi_ro_crate_metadata_2026-08-12.txt,22,14,156,0.089744,0.073948,True,False,0,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,ro_crate_metadata,RO-Crate,aireadi_ro_crate_metadata_2026-08-12.txt,28,12,238,0.05042,0.073948,True,False,0,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,ro_crate_metadata,RO-Crate,aireadi_ro_crate_metadata_2026-08-12.txt,30,14,211,0.066351,0.073948,True,False,0,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,ro_crate_metadata,RO-Crate,aireadi_ro_crate_metadata_2026-08-12.txt,36,19,233,0.081545,0.073948,True,False,0,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,fairhub_dataset_v3_api,structured metadata,fairhub_api_dataset_3_2026-07-27.txt,89,71,176,0.403409,0.463133,True,True,1,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,fairhub_dataset_v3_api,structured metadata,fairhub_api_dataset_3_2026-07-27.txt,92,74,170,0.435294,0.463133,True,True,1,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,fairhub_dataset_v3_api,structured metadata,fairhub_api_dataset_3_2026-07-27.txt,96,75,156,0.480769,0.463133,True,False,1,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,fairhub_dataset_v3_api,structured metadata,fairhub_api_dataset_3_2026-07-27.txt,175,132,238,0.554622,0.463133,True,False,1,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,fairhub_dataset_v3_api,structured metadata,fairhub_api_dataset_3_2026-07-27.txt,139,94,211,0.445498,0.463133,True,False,1,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,fairhub_dataset_v3_api,structured metadata,fairhub_api_dataset_3_2026-07-27.txt,153,115,233,0.493562,0.463133,True,False,1,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,fairhub_dataset_v3,data resource,fairhub_dataset_3_2026-07-24.txt,8,4,176,0.022727,0.013323,True,True,2,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,fairhub_dataset_v3,data resource,fairhub_dataset_3_2026-07-24.txt,4,1,170,0.005882,0.013323,True,True,2,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,fairhub_dataset_v3,data resource,fairhub_dataset_3_2026-07-24.txt,3,1,156,0.00641,0.013323,True,False,2,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,fairhub_dataset_v3,data resource,fairhub_dataset_3_2026-07-24.txt,9,5,238,0.021008,0.013323,True,True,2,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,fairhub_dataset_v3,data resource,fairhub_dataset_3_2026-07-24.txt,4,2,211,0.009479,0.013323,True,False,2,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,fairhub_dataset_v3,data resource,fairhub_dataset_3_2026-07-24.txt,8,4,233,0.017167,0.013323,True,False,2,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,fairhub_dataset,data resource,fairhub_dataset_2_row12.txt,0,0,176,0.0,0.0,False,False,3,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,fairhub_dataset,data resource,fairhub_dataset_2_row12.txt,0,0,170,0.0,0.0,False,False,3,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,fairhub_dataset,data resource,fairhub_dataset_2_row12.txt,4,1,156,0.00641,0.0,True,True,3,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,fairhub_dataset,data resource,fairhub_dataset_2_row12.txt,0,0,238,0.0,0.0,False,False,3,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,fairhub_dataset,data resource,fairhub_dataset_2_row12.txt,3,0,211,0.0,0.0,True,True,3,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,fairhub_dataset,data resource,fairhub_dataset_2_row12.txt,5,2,233,0.008584,0.0,True,False,3,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,dataset_documentation_v3,documentation,docs_aireadi_org_docs-3_2026-07-24.txt,5,2,176,0.011364,0.005311,True,True,4,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,dataset_documentation_v3,documentation,docs_aireadi_org_docs-3_2026-07-24.txt,3,1,170,0.005882,0.005311,True,False,4,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,dataset_documentation_v3,documentation,docs_aireadi_org_docs-3_2026-07-24.txt,4,1,156,0.00641,0.005311,True,True,4,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,dataset_documentation_v3,documentation,docs_aireadi_org_docs-3_2026-07-24.txt,4,0,238,0.0,0.005311,True,True,4,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,dataset_documentation_v3,documentation,docs_aireadi_org_docs-3_2026-07-24.txt,5,1,211,0.004739,0.005311,True,True,4,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,dataset_documentation_v3,documentation,docs_aireadi_org_docs-3_2026-07-24.txt,5,1,233,0.004292,0.005311,True,False,4,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,dataset_documentation,documentation,docs_aireadi_org_docs-2_row10.txt,0,0,176,0.0,0.0,False,False,5,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,dataset_documentation,documentation,docs_aireadi_org_docs-2_row10.txt,1,1,170,0.005882,0.0,True,False,5,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,dataset_documentation,documentation,docs_aireadi_org_docs-2_row10.txt,0,0,156,0.0,0.0,False,False,5,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,dataset_documentation,documentation,docs_aireadi_org_docs-2_row10.txt,0,0,238,0.0,0.0,False,False,5,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,dataset_documentation,documentation,docs_aireadi_org_docs-2_row10.txt,0,0,211,0.0,0.0,False,False,5,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,dataset_documentation,documentation,docs_aireadi_org_docs-2_row10.txt,1,0,233,0.0,0.0,True,False,5,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,dataset_license,license,AI-READI-LICENSE-v2.0_2026-08-12.txt,11,10,176,0.056818,0.056845,True,False,6,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,dataset_license,license,AI-READI-LICENSE-v2.0_2026-08-12.txt,12,11,170,0.064706,0.056845,True,False,6,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,dataset_license,license,AI-READI-LICENSE-v2.0_2026-08-12.txt,11,9,156,0.057692,0.056845,True,False,6,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,dataset_license,license,AI-READI-LICENSE-v2.0_2026-08-12.txt,4,1,238,0.004202,0.056845,True,False,6,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,dataset_license,license,AI-READI-LICENSE-v2.0_2026-08-12.txt,13,12,211,0.056872,0.056845,True,False,6,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,dataset_license,license,AI-READI-LICENSE-v2.0_2026-08-12.txt,12,8,233,0.034335,0.056845,True,False,6,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,irb_protocol,IRB,gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt,14,10,176,0.056818,0.027842,True,False,7,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,irb_protocol,IRB,gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt,11,4,170,0.023529,0.027842,True,False,7,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,irb_protocol,IRB,gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt,9,4,156,0.025641,0.027842,True,False,7,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,irb_protocol,IRB,gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt,13,5,238,0.021008,0.027842,True,False,7,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,irb_protocol,IRB,gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt,23,8,211,0.037915,0.027842,True,False,7,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,irb_protocol,IRB,gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt,16,7,233,0.030043,0.027842,True,False,7,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,bmj_protocol_publication,publication,bmjopen-2024-097449_row2.txt,50,34,176,0.193182,0.109109,True,False,8,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,bmj_protocol_publication,publication,bmjopen-2024-097449_row2.txt,39,27,170,0.158824,0.109109,True,False,8,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,bmj_protocol_publication,publication,bmjopen-2024-097449_row2.txt,29,17,156,0.108974,0.109109,True,False,8,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,bmj_protocol_publication,publication,bmjopen-2024-097449_row2.txt,47,26,238,0.109244,0.109109,True,False,8,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,bmj_protocol_publication,publication,bmjopen-2024-097449_row2.txt,43,21,211,0.099526,0.109109,True,False,8,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,bmj_protocol_publication,publication,bmjopen-2024-097449_row2.txt,41,22,233,0.094421,0.109109,True,False,8,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,nature_metabolism_publication,publication,s42255-024-01165-x_row3.txt,13,5,176,0.028409,0.028924,True,False,9,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,nature_metabolism_publication,publication,s42255-024-01165-x_row3.txt,9,6,170,0.035294,0.028924,True,False,9,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,nature_metabolism_publication,publication,s42255-024-01165-x_row3.txt,9,6,156,0.038462,0.028924,True,False,9,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,nature_metabolism_publication,publication,s42255-024-01165-x_row3.txt,13,7,238,0.029412,0.028924,True,False,9,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,nature_metabolism_publication,publication,s42255-024-01165-x_row3.txt,12,6,211,0.028436,0.028924,True,False,9,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,nature_metabolism_publication,publication,s42255-024-01165-x_row3.txt,9,6,233,0.025751,0.028924,True,False,9,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,AI_READI,v7,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10471118_row7.txt,6,3,176,0.017045,0.005575,True,False,10,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,AI_READI,v7,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10471118_row7.txt,3,3,170,0.017647,0.005575,True,False,10,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,AI_READI,v7,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10471118_row7.txt,3,1,156,0.00641,0.005575,True,False,10,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,AI_READI,v8,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10471118_row7.txt,4,1,238,0.004202,0.005575,True,False,10,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,AI_READI,v8,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10471118_row7.txt,5,1,211,0.004739,0.005575,True,False,10,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,AI_READI,v8,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10471118_row7.txt,4,1,233,0.004292,0.005575,True,False,10,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CHORUS,v7,1,project_documentation,documentation,chorus4ai_org_row11.txt,14,12,65,0.184615,0.160247,True,False,0,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CHORUS,v7,2,project_documentation,documentation,chorus4ai_org_row11.txt,12,8,61,0.131148,0.160247,True,False,0,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CHORUS,v7,3,project_documentation,documentation,chorus4ai_org_row11.txt,16,13,81,0.160494,0.160247,True,False,0,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,CHORUS,v8,1,project_documentation,documentation,chorus4ai_org_row11.txt,13,10,59,0.169492,0.160247,True,False,0,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,CHORUS,v8,2,project_documentation,documentation,chorus4ai_org_row11.txt,16,12,75,0.16,0.160247,True,False,0,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,CHORUS,v8,3,project_documentation,documentation,chorus4ai_org_row11.txt,17,13,95,0.136842,0.160247,True,False,0,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CHORUS,v7,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10472824_row7.txt,21,18,65,0.276923,0.247719,True,False,1,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CHORUS,v7,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10472824_row7.txt,20,19,61,0.311475,0.247719,True,False,1,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CHORUS,v7,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10472824_row7.txt,24,17,81,0.209877,0.247719,True,False,1,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,CHORUS,v8,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10472824_row7.txt,16,12,59,0.20339,0.247719,True,False,1,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,CHORUS,v8,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10472824_row7.txt,22,19,75,0.253333,0.247719,True,False,1,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,CHORUS,v8,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-10472824_row7.txt,27,23,95,0.242105,0.247719,True,False,1,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CHORUS,v7,1,cohort_2_webinar,tutorial,bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt,20,17,65,0.261538,0.309071,True,False,2,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CHORUS,v7,2,cohort_2_webinar,tutorial,bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt,19,19,61,0.311475,0.309071,True,False,2,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CHORUS,v7,3,cohort_2_webinar,tutorial,bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt,26,24,81,0.296296,0.309071,True,False,2,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,CHORUS,v8,1,cohort_2_webinar,tutorial,bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt,22,20,59,0.338983,0.309071,True,False,2,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,CHORUS,v8,2,cohort_2_webinar,tutorial,bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt,24,23,75,0.306667,0.309071,True,False,2,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,CHORUS,v8,3,cohort_2_webinar,tutorial,bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt,37,35,95,0.368421,0.309071,True,False,2,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CHORUS,v7,1,github_organization_overview,historical documentation,github_chorus_ai_overview_2025-11-14.txt,16,13,65,0.2,0.2,True,False,3,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CHORUS,v7,2,github_organization_overview,historical documentation,github_chorus_ai_overview_2025-11-14.txt,14,11,61,0.180328,0.2,True,False,3,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CHORUS,v7,3,github_organization_overview,historical documentation,github_chorus_ai_overview_2025-11-14.txt,24,18,81,0.222222,0.2,True,False,3,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,CHORUS,v8,1,github_organization_overview,historical documentation,github_chorus_ai_overview_2025-11-14.txt,15,10,59,0.169492,0.2,True,False,3,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,CHORUS,v8,2,github_organization_overview,historical documentation,github_chorus_ai_overview_2025-11-14.txt,19,15,75,0.2,0.2,True,False,3,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,CHORUS,v8,3,github_organization_overview,historical documentation,github_chorus_ai_overview_2025-11-14.txt,20,19,95,0.2,0.2,True,False,3,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,june_2026_dataverse_release,data resource,dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,22,21,96,0.21875,0.236568,True,False,0,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,june_2026_dataverse_release,data resource,dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,31,29,114,0.254386,0.236568,True,False,0,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,june_2026_dataverse_release,data resource,dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,36,35,72,0.486111,0.236568,True,True,0,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,june_2026_dataverse_release,data resource,dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,112,107,158,0.677215,0.236568,True,True,0,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,june_2026_dataverse_release,data resource,dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,36,33,161,0.204969,0.236568,True,False,0,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,june_2026_dataverse_release,data resource,dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,26,24,151,0.15894,0.236568,True,False,0,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,october_2025_dataverse_release,data resource,dataverse_10.18130_V3_K7TGEM_row16.txt,11,11,96,0.114583,0.052266,True,False,1,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,october_2025_dataverse_release,data resource,dataverse_10.18130_V3_K7TGEM_row16.txt,5,4,114,0.035088,0.052266,True,False,1,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,october_2025_dataverse_release,data resource,dataverse_10.18130_V3_K7TGEM_row16.txt,5,5,72,0.069444,0.052266,True,False,1,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,october_2025_dataverse_release,data resource,dataverse_10.18130_V3_K7TGEM_row16.txt,4,4,158,0.025316,0.052266,True,False,1,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,october_2025_dataverse_release,data resource,dataverse_10.18130_V3_K7TGEM_row16.txt,7,5,161,0.031056,0.052266,True,False,1,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,october_2025_dataverse_release,data resource,dataverse_10.18130_V3_K7TGEM_row16.txt,25,24,151,0.15894,0.052266,True,False,1,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,data_release_documentation,documentation,cm4ai_org_data-releases_row11.txt,4,3,96,0.03125,0.023383,True,False,2,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,data_release_documentation,documentation,cm4ai_org_data-releases_row11.txt,5,4,114,0.035088,0.023383,True,False,2,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,data_release_documentation,documentation,cm4ai_org_data-releases_row11.txt,3,2,72,0.027778,0.023383,True,False,2,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,data_release_documentation,documentation,cm4ai_org_data-releases_row11.txt,5,3,158,0.018987,0.023383,True,False,2,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,data_release_documentation,documentation,cm4ai_org_data-releases_row11.txt,4,3,161,0.018634,0.023383,True,False,2,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,data_release_documentation,documentation,cm4ai_org_data-releases_row11.txt,2,2,151,0.013245,0.023383,True,False,2,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,project_documentation,documentation,cm4ai_org_row10.txt,3,2,96,0.020833,0.013156,True,False,3,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,project_documentation,documentation,cm4ai_org_row10.txt,4,3,114,0.026316,0.013156,True,False,3,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,project_documentation,documentation,cm4ai_org_row10.txt,1,1,72,0.013889,0.013156,True,False,3,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,project_documentation,documentation,cm4ai_org_row10.txt,3,1,158,0.006329,0.013156,True,False,3,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,project_documentation,documentation,cm4ai_org_row10.txt,3,2,161,0.012422,0.013156,True,False,3,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,project_documentation,documentation,cm4ai_org_row10.txt,2,1,151,0.006623,0.013156,True,False,3,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,dataset_license,license,creativecommons_org_licenses-by-nc-sa_row15.txt,3,2,96,0.020833,0.010715,True,False,4,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,dataset_license,license,creativecommons_org_licenses-by-nc-sa_row15.txt,1,1,114,0.008772,0.010715,True,False,4,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,dataset_license,license,creativecommons_org_licenses-by-nc-sa_row15.txt,3,3,72,0.041667,0.010715,True,False,4,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,dataset_license,license,creativecommons_org_licenses-by-nc-sa_row15.txt,2,2,158,0.012658,0.010715,True,False,4,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,dataset_license,license,creativecommons_org_licenses-by-nc-sa_row15.txt,2,0,161,0.0,0.010715,True,False,4,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,dataset_license,license,creativecommons_org_licenses-by-nc-sa_row15.txt,1,0,151,0.0,0.010715,True,False,4,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,nature_publication,publication,www_nature_com_articles-s41586-025-08878-3_row2.txt,14,11,96,0.114583,0.03519,True,False,5,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,nature_publication,publication,www_nature_com_articles-s41586-025-08878-3_row2.txt,19,18,114,0.157895,0.03519,True,False,5,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,nature_publication,publication,www_nature_com_articles-s41586-025-08878-3_row2.txt,0,0,72,0.0,0.03519,False,False,5,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,nature_publication,publication,www_nature_com_articles-s41586-025-08878-3_row2.txt,0,0,158,0.0,0.03519,False,False,5,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,nature_publication,publication,www_nature_com_articles-s41586-025-08878-3_row2.txt,7,6,161,0.037267,0.03519,True,False,5,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,nature_publication,publication,www_nature_com_articles-s41586-025-08878-3_row2.txt,6,5,151,0.033113,0.03519,True,False,5,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,biorxiv_preprint,preprint,biorxiv_2024.05.21.589311v1_row4.txt,30,26,96,0.270833,0.186008,True,False,6,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,biorxiv_preprint,preprint,biorxiv_2024.05.21.589311v1_row4.txt,25,24,114,0.210526,0.186008,True,False,6,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,biorxiv_preprint,preprint,biorxiv_2024.05.21.589311v1_row4.txt,19,18,72,0.25,0.186008,True,False,6,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,biorxiv_preprint,preprint,biorxiv_2024.05.21.589311v1_row4.txt,28,25,158,0.158228,0.186008,True,False,6,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,biorxiv_preprint,preprint,biorxiv_2024.05.21.589311v1_row4.txt,29,26,161,0.161491,0.186008,True,False,6,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,biorxiv_preprint,preprint,biorxiv_2024.05.21.589311v1_row4.txt,27,24,151,0.15894,0.186008,True,False,6,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11211616_row7.txt,4,4,96,0.041667,0.029712,True,False,7,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11211616_row7.txt,7,7,114,0.061404,0.029712,True,False,7,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11211616_row7.txt,2,2,72,0.027778,0.029712,True,False,7,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11211616_row7.txt,6,5,158,0.031646,0.029712,True,False,7,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11211616_row7.txt,3,2,161,0.012422,0.029712,True,False,7,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11211616_row7.txt,5,3,151,0.019868,0.029712,True,False,7,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,june_2025_dataverse_release,historical data release,dataverse_10.18130_V3_F3TD5R_row19.txt,6,6,96,0.0625,0.07511,True,False,8,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,june_2025_dataverse_release,historical data release,dataverse_10.18130_V3_F3TD5R_row19.txt,11,10,114,0.087719,0.07511,True,True,8,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,june_2025_dataverse_release,historical data release,dataverse_10.18130_V3_F3TD5R_row19.txt,2,2,72,0.027778,0.07511,True,False,8,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,june_2025_dataverse_release,historical data release,dataverse_10.18130_V3_F3TD5R_row19.txt,0,0,158,0.0,0.07511,False,False,8,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,june_2025_dataverse_release,historical data release,dataverse_10.18130_V3_F3TD5R_row19.txt,53,51,161,0.31677,0.07511,True,True,8,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,june_2025_dataverse_release,historical data release,dataverse_10.18130_V3_F3TD5R_row19.txt,33,32,151,0.211921,0.07511,True,False,8,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,CM4AI,v7,1,march_2025_dataverse_release,historical data release,dataverse_10.18130_V3_B35XWX_row16.txt,6,5,96,0.052083,0.069901,True,True,9,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,CM4AI,v7,2,march_2025_dataverse_release,historical data release,dataverse_10.18130_V3_B35XWX_row16.txt,11,10,114,0.087719,0.069901,True,True,9,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,CM4AI,v7,3,march_2025_dataverse_release,historical data release,dataverse_10.18130_V3_B35XWX_row16.txt,3,2,72,0.027778,0.069901,True,False,9,-0.37
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,claudecode_api,CM4AI,v8,1,march_2025_dataverse_release,historical data release,dataverse_10.18130_V3_B35XWX_row16.txt,5,5,158,0.031646,0.069901,True,True,9,0.09
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,claudecode_api,CM4AI,v8,2,march_2025_dataverse_release,historical data release,dataverse_10.18130_V3_B35XWX_row16.txt,27,24,161,0.149068,0.069901,True,False,9,0.23
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,claudecode_api,CM4AI,v8,3,march_2025_dataverse_release,historical data release,dataverse_10.18130_V3_B35XWX_row16.txt,30,30,151,0.198675,0.069901,True,False,9,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,physionet_3_1_0,data resource,physionet_b2ai-voice_3.1.0_2026-07-24.txt,12,8,117,0.068376,0.193881,True,False,0,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,physionet_3_1_0,data resource,physionet_b2ai-voice_3.1.0_2026-07-24.txt,19,15,111,0.135135,0.193881,True,False,0,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,physionet_3_1_0,data resource,physionet_b2ai-voice_3.1.0_2026-07-24.txt,26,18,120,0.15,0.193881,True,False,0,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,physionet_3_1_0,data resource,physionet_b2ai-voice_3.1.0_2026-07-24.txt,64,52,181,0.287293,0.193881,True,True,0,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,physionet_3_1_0,data resource,physionet_b2ai-voice_3.1.0_2026-07-24.txt,51,34,143,0.237762,0.193881,True,False,0,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,physionet_3_1_0,data resource,physionet_b2ai-voice_3.1.0_2026-07-24.txt,47,41,166,0.246988,0.193881,True,False,0,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,physionet_3_0_0,data resource,physionet_b2ai-voice_3.0.0_row18.txt,13,8,117,0.068376,0.030653,True,False,1,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,physionet_3_0_0,data resource,physionet_b2ai-voice_3.0.0_row18.txt,11,9,111,0.081081,0.030653,True,False,1,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,physionet_3_0_0,data resource,physionet_b2ai-voice_3.0.0_row18.txt,7,4,120,0.033333,0.030653,True,False,1,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,physionet_3_0_0,data resource,physionet_b2ai-voice_3.0.0_row18.txt,2,1,181,0.005525,0.030653,True,False,1,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,physionet_3_0_0,data resource,physionet_b2ai-voice_3.0.0_row18.txt,5,4,143,0.027972,0.030653,True,False,1,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,physionet_3_0_0,data resource,physionet_b2ai-voice_3.0.0_row18.txt,2,0,166,0.0,0.030653,True,False,1,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,physionet_1_1,data resource,physionet_b2ai-voice_1.1_row17.txt,12,6,117,0.051282,0.011498,True,False,2,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,physionet_1_1,data resource,physionet_b2ai-voice_1.1_row17.txt,3,1,111,0.009009,0.011498,True,False,2,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,physionet_1_1,data resource,physionet_b2ai-voice_1.1_row17.txt,6,5,120,0.041667,0.011498,True,False,2,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,physionet_1_1,data resource,physionet_b2ai-voice_1.1_row17.txt,5,1,181,0.005525,0.011498,True,False,2,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,physionet_1_1,data resource,physionet_b2ai-voice_1.1_row17.txt,6,2,143,0.013986,0.011498,True,False,2,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,physionet_1_1,data resource,physionet_b2ai-voice_1.1_row17.txt,3,1,166,0.006024,0.011498,True,False,2,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,physionet_pediatric_1_1_0,data resource,physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt,7,5,117,0.042735,0.010191,True,False,3,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,physionet_pediatric_1_1_0,data resource,physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt,3,2,111,0.018018,0.010191,True,False,3,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,physionet_pediatric_1_1_0,data resource,physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt,2,1,120,0.008333,0.010191,True,False,3,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,physionet_pediatric_1_1_0,data resource,physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt,2,1,181,0.005525,0.010191,True,False,3,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,physionet_pediatric_1_1_0,data resource,physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt,2,1,143,0.006993,0.010191,True,False,3,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,physionet_pediatric_1_1_0,data resource,physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt,2,2,166,0.012048,0.010191,True,False,3,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,project_documentation,documentation,docs_b2ai-voice_org_row10.txt,57,45,117,0.384615,0.428665,True,False,4,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,project_documentation,documentation,docs_b2ai-voice_org_row10.txt,60,50,111,0.45045,0.428665,True,False,4,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,project_documentation,documentation,docs_b2ai-voice_org_row10.txt,62,53,120,0.441667,0.428665,True,False,4,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,project_documentation,documentation,docs_b2ai-voice_org_row10.txt,112,87,181,0.480663,0.428665,True,False,4,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,project_documentation,documentation,docs_b2ai-voice_org_row10.txt,82,56,143,0.391608,0.428665,True,False,4,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,project_documentation,documentation,docs_b2ai-voice_org_row10.txt,87,69,166,0.415663,0.428665,True,False,4,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,documentation_repository,documentation,github_eipm_bridge2ai-docs_README_row22.txt,2,2,117,0.017094,0.007179,True,False,5,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,documentation_repository,documentation,github_eipm_bridge2ai-docs_README_row22.txt,2,2,111,0.018018,0.007179,True,False,5,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,documentation_repository,documentation,github_eipm_bridge2ai-docs_README_row22.txt,1,1,120,0.008333,0.007179,True,False,5,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,documentation_repository,documentation,github_eipm_bridge2ai-docs_README_row22.txt,2,1,181,0.005525,0.007179,True,False,5,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,documentation_repository,documentation,github_eipm_bridge2ai-docs_README_row22.txt,1,0,143,0.0,0.007179,True,False,5,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,documentation_repository,documentation,github_eipm_bridge2ai-docs_README_row22.txt,1,1,166,0.006024,0.007179,True,False,5,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,data_transfer_use_agreement,DUA,gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt,8,6,117,0.051282,0.043607,True,False,6,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,data_transfer_use_agreement,DUA,gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt,7,5,111,0.045045,0.043607,True,False,6,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,data_transfer_use_agreement,DUA,gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt,8,6,120,0.05,0.043607,True,False,6,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,data_transfer_use_agreement,DUA,gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt,11,5,181,0.027624,0.043607,True,False,6,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,data_transfer_use_agreement,DUA,gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt,6,3,143,0.020979,0.043607,True,False,6,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,data_transfer_use_agreement,DUA,gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt,10,7,166,0.042169,0.043607,True,False,6,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,irb_protocol,IRB,gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt,10,9,117,0.076923,0.063172,True,False,7,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,irb_protocol,IRB,gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt,10,6,111,0.054054,0.063172,True,False,7,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,irb_protocol,IRB,gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt,15,11,120,0.091667,0.063172,True,False,7,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,irb_protocol,IRB,gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt,9,3,181,0.016575,0.063172,True,False,7,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,irb_protocol,IRB,gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt,13,7,143,0.048951,0.063172,True,False,7,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,irb_protocol,IRB,gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt,20,12,166,0.072289,0.063172,True,False,7,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,feasibility_publication,publication,pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt,8,7,117,0.059829,0.025703,True,False,8,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,feasibility_publication,publication,pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt,4,4,111,0.036036,0.025703,True,False,8,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,feasibility_publication,publication,pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt,5,4,120,0.033333,0.025703,True,False,8,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,feasibility_publication,publication,pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt,1,1,181,0.005525,0.025703,True,False,8,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,feasibility_publication,publication,pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt,7,1,143,0.006993,0.025703,True,False,8,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,feasibility_publication,publication,pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt,7,3,166,0.018072,0.025703,True,False,8,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,audiomics_white_paper,white paper,gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt,5,2,117,0.017094,0.020595,True,False,9,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,audiomics_white_paper,white paper,gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt,4,3,111,0.027027,0.020595,True,False,9,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,audiomics_white_paper,white paper,gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt,4,3,120,0.025,0.020595,True,False,9,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,audiomics_white_paper,white paper,gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt,1,1,181,0.005525,0.020595,True,False,9,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,audiomics_white_paper,white paper,gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt,4,2,143,0.013986,0.020595,True,False,9,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,audiomics_white_paper,white paper,gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt,5,4,166,0.024096,0.020595,True,False,9,0.37
+2026-09-01_claude-opus-5-api-generic-v7_rep1,claudecode_agent,VOICE,v7,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11376382_row7.txt,4,3,117,0.025641,0.016002,True,False,10,-0.09
+2026-09-01_claude-opus-5-api-generic-v7_rep2,claudecode_agent,VOICE,v7,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11376382_row7.txt,3,2,111,0.018018,0.016002,True,False,10,-0.23
+2026-09-01_claude-opus-5-api-generic-v7_rep3,claudecode_agent,VOICE,v7,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11376382_row7.txt,1,0,120,0.0,0.016002,True,False,10,-0.37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,claudecode_api,VOICE,v8,1,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11376382_row7.txt,3,2,181,0.01105,0.016002,True,False,10,0.09
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,claudecode_api,VOICE,v8,2,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11376382_row7.txt,3,2,143,0.013986,0.016002,True,False,10,0.23
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,claudecode_api,VOICE,v8,3,nih_reporter_project,NIH project page,reporter_nih_gov_project-details-11376382_row7.txt,6,6,166,0.036145,0.016002,True,False,10,0.37

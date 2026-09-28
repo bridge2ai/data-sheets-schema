@@ -1,0 +1,12 @@
+identifier,dataset,status,label,pattern,recognized_from
+adult_all,VOICE,all versions,all versions (project DOI),10\.13026/37yb\-1t42|physionet\.org/content/b2ai-voice/(?![0-9]),source_manifest scope.VOICE.referent_id; unversioned PhysioNet URL (bundle)
+adult_3.1.0,VOICE,latest captured,"v3.1.0, latest captured",10\.13026/8xbn\-nq66|physionet\.org/content/b2ai-voice/3\.1\.0(?![0-9.]),scope.VOICE.referent_note DOI; projects.VOICE physionet_3_1_0 url
+adult_3.0.0,VOICE,superseded,"v3.0.0, superseded",10\.13026/k81f\-qr68|physionet\.org/content/b2ai-voice/3\.0\.0(?![0-9.]),scope.VOICE.referent_note DOI; projects.VOICE physionet_3_0_0 url; superseded_by physionet_3_1_0
+adult_2.0.x,VOICE,earlier release,"v2.0.x, earlier release",physionet\.org/content/b2ai-voice/2\.\d,records only: PhysioNet URL with a 2.x version; not in manifest or bundle
+adult_1.1,VOICE,earlier release,"v1.1, earlier release",10\.13026/249v\-w155|physionet\.org/content/b2ai-voice/1\.1(?![0-9.]),scope.VOICE.referent_note DOI; projects.VOICE physionet_1_1 url
+adult_1.0_hdn,VOICE,earlier release,"v1.0 (Health Data Nexus), earlier release",10\.57764/qb6h\-em84,VOICE bundle: citation '(version 1.0). Health Data Nexus.' DOI
+adult_raw_synapse,VOICE,raw audio,raw audio on Synapse,syn72370534,VOICE bundle: 'Raw Audio Data Access for Bridge2AI Voice Adult Cohort' Synapse ID
+ped_all,VOICE_PEDIATRIC,all versions,all versions (project DOI),10\.13026/mf9s\-5r03|physionet\.org/content/b2ai-voice-pediatric/(?![0-9]),scope.VOICE.related_but_distinct id (= scope.VOICE_PEDIATRIC.referent_id); verification_url
+ped_1.1.0,VOICE_PEDIATRIC,latest captured,"v1.1.0, latest captured",10\.13026/h995\-bt35|physionet\.org/content/b2ai-voice-pediatric/1\.1\.0,scope.VOICE.related_but_distinct also_known_as; scope.VOICE_PEDIATRIC.referent_note
+ped_1.0.0,VOICE_PEDIATRIC,superseded,"v1.0.0, superseded, not captured",physionet\.org/content/b2ai-voice-pediatric/1\.0\.0,projects.VOICE physionet_pediatric_1_1_0 curation_note: 'v1.0.0 exists upstream but is superseded'
+ped_raw_synapse,VOICE_PEDIATRIC,raw audio,raw audio on Synapse,syn73617068,projects.VOICE physionet_pediatric_1_1_0 curation_note Synapse ID

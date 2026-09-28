@@ -1,0 +1,217 @@
+job_id,status,concern,concern_label,group,state,sentences_matched,sentences_stated_limit,input_description_sentences_excluded
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,2,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,not named,0,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+AI_READI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,named,1,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,not named,0,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+AI_READI_v7_rep2_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,not named,0,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,named,1,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,not named,0,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+AI_READI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,stated limit,1,1,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,stated limit,2,2,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,not named,0,0,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,stated limit,1,1,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,version,version access or errata,other,stated limit,1,1,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,missing,missingness or QC,other,not named,0,0,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,not named,0,0,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,not named,0,0,0
+AI_READI_v8_rep1_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,1,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,named,1,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,not named,0,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+AI_READI_v8_rep2_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,stated limit,1,1,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,stated limit,2,1,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,not named,0,0,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,not named,0,0,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,version,version access or errata,other,not named,0,0,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,missing,missingness or QC,other,not named,0,0,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,not named,0,0,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,stated,1,0,0
+AI_READI_v8_rep3_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,1,0,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,stated limit,1,1,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,not named,0,0,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,stated limit,1,1,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,not named,0,0,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,version,version access or errata,other,named,1,0,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,missing,missingness or QC,other,named,1,0,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,not named,0,0,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,not named,0,0,0
+CHORUS_v7_rep1_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,1,0,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,2,0,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,named,1,0,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,stated limit,1,1,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,stated limit,1,1,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,stated limit,4,1,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+CHORUS_v7_rep2_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,named,1,0,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,stated limit,1,1,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,stated limit,1,1,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,stated limit,3,1,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+CHORUS_v7_rep3_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,not named,0,0,1
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,not named,0,0,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,stated limit,1,1,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,not named,0,0,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,version,version access or errata,other,named,1,0,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,missing,missingness or QC,other,not named,0,0,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,named,1,0,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,not named,0,0,0
+CHORUS_v8_rep1_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,2,0,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,not named,0,0,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,stated limit,1,1,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,stated limit,1,1,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,not named,0,0,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,version,version access or errata,other,named,1,0,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,missing,missingness or QC,other,not named,0,0,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,named,1,0,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,not named,0,0,0
+CHORUS_v8_rep2_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,1,0,0
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,named,1,0,0
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,stated limit,1,1,1
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,1
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,named,1,0,0
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+CHORUS_v8_rep3_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,2,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,named,1,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,named,1,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,named,1,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,stated limit,2,1,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+CM4AI_v7_rep1_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,stated limit,1,1,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,stated limit,1,1,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,not named,0,0,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,not named,0,0,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,version,version access or errata,other,named,1,0,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,missing,missingness or QC,other,not named,0,0,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,not named,0,0,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,stated,2,0,0
+CM4AI_v7_rep2_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,1,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,2,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,1
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,named,1,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+CM4AI_v7_rep3_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,stated limit,2,2,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,stated limit,1,1,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,stated limit,1,1,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,not named,0,0,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,version,version access or errata,other,not named,0,0,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,missing,missingness or QC,other,named,1,0,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,not named,0,0,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,not named,0,0,0
+CM4AI_v8_rep1_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,1,0,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,stated limit,1,1,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,not named,0,0,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,not named,0,0,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,stated limit,2,2,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,version,version access or errata,other,not named,0,0,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,missing,missingness or QC,other,named,1,0,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,not named,0,0,1
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,not named,0,0,0
+CM4AI_v8_rep2_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,1,0,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,empty_field,empty derivation field,rep,not named,0,0,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,graph,graph or PROV expression,rep,stated limit,2,1,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,machine,machine-readable or traversable,rep,not named,0,0,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,scattered,links spread across fields,rep,stated limit,1,1,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,version,version access or errata,other,not named,0,0,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,missing,missingness or QC,other,named,1,0,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,granularity,artifact-level granularity,other,not named,0,0,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,overlooked,input evidence overlooked,review,not named,0,0,0
+CM4AI_v8_rep3_r20_rating1,requires_adjudication,disclaimer,certification disclaimed,review,stated,2,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,not named,0,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,1
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,not named,0,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+VOICE_v7_rep1_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,1
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,named,1,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+VOICE_v7_rep2_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,named,1,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+VOICE_v7_rep3_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,1
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,named,1,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+VOICE_v8_rep1_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,1,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,named,1,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+VOICE_v8_rep2_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,empty_field,empty derivation field,rep,named,1,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,graph,graph or PROV expression,rep,named,2,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,machine,machine-readable or traversable,rep,not named,0,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,scattered,links spread across fields,rep,not named,0,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,version,version access or errata,other,not named,0,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,missing,missingness or QC,other,not named,0,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,granularity,artifact-level granularity,other,named,1,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,overlooked,input evidence overlooked,review,not named,0,0,0
+VOICE_v8_rep3_r20_rating1,not_flagged_by_this_inspection,disclaimer,certification disclaimed,review,stated,1,0,0
