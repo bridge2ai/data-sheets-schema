@@ -1,0 +1,15 @@
+# Registered lexicons (#2919): each file's bytes pinned by sha256.
+#
+# A registered file is never edited. A change is a new version: a new file
+# named {name}_v{N}.yaml beside the old one and a new entry below, so a count
+# made under an earlier version can be reproduced from its bytes. load()
+# refuses a file whose bytes are not its pin, and tests/test_lexicons.py
+# fails on one. Unlike the files it pins, this registry is edited — once per
+# new version.
+lexicons:
+  absence_self_narration:
+    - version: 1
+      file: absence_self_narration_v1.yaml
+      sha256: 7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e
+      registered: "2026-09-28"
+      issue: 2919

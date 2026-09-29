@@ -421,3 +421,35 @@ def agree_cmd(method, label, project, write):
         ProvenanceRecord(data=rec).write(prov)
         click.echo(f"   ✓ reliability written into {prov}")
 
+
+@review.command("absence-lint")
+@click.option("--record", "records", multiple=True, required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="a full or core record YAML; repeatable")
+@click.option("--json", "as_json", is_flag=True, help="print one JSON result per record, as a list")
+def absence_lint_cmd(records, as_json):
+    """Bundle-wide absence claims and record self-narration in a record's
+    free text (#2919): each phrase the registered lexicon matches in a
+    `description`, `notes`, `source_caveats` or `*_details` leaf, by class, at
+    its JSON pointer. Read-only and never gating: a record with matches still
+    exits 0. A match is a regex hit, not a reviewed finding."""
+    import json
+
+    from data_sheets_schema import absence_lint
+    from data_sheets_schema.lexicon import LexiconError, load
+    try:
+        lexicon = load(absence_lint.LEXICON)
+        results = [absence_lint.lint_path(p, lexicon) for p in records]
+    except (LexiconError, ValueError, OSError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(json.dumps(results, indent=2, ensure_ascii=False))
+        return
+    click.echo(f"   {lexicon.instrument} · sha256 {lexicon.sha256[:12]}… · not gating")
+    for r in results:
+        click.echo(f"{r['record']}")
+        click.echo(f"   {r['leaves']} free-text leaves · " + " · ".join(
+            f"{cls} {c['phrases']} phrase(s) in {c['leaves']} leaf/leaves" for cls, c in r["by_class"].items()))
+        for h in r["hits"]:
+            text = h["text"] if len(h["text"]) <= 100 else h["text"][:97] + "…"
+            click.echo(f"   {h['pointer']}  {h['class']}  {','.join(h['patterns'])}  \"{text}\"")
