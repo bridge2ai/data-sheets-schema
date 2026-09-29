@@ -49,14 +49,17 @@ every observation committed here in:
 - the rendered audit-batch contexts and output contracts;
 - the registered native inputs (schemas, playbooks, source manifest, chunk
   manifests, bundles);
+- every registration record under `notes/` (`*registration*.json`),
+  so a registered input list that names this directory fails;
 - every file under `src/` other than `audit_recall.py`, whose docstring
   names the schema file here.
 
 It reads those files and never edits them. It fails on a match. It also
 fails when a file here, at any depth, does not load, or is neither a `.yaml`,
 `.yml` or `.json` ground-truth file nor this README or the schema. It does not
-see a launch message typed at run time or a registration written outside the
-repository; keeping those clean is the operator's job.
+see a launch message typed at run time, or a registration or rendered
+instruction written outside the repository; keeping those clean is the
+operator's job.
 
 A report from the command carries entry ids, kinds and pointers. It never
 carries observation text or any of the audit's prose.

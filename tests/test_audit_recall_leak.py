@@ -14,6 +14,8 @@ directory or quotes an observation. These scans cover:
   batch framing, the finalization and evaluation instructions, context recovery;
 - the rendered audit-batch contexts and output contracts;
 - the registered native inputs;
+- every registration record under notes/, whose inputs may not
+  name the directory;
 - every file under src/ other than the instrument itself.
 
 The files under notes/ are pinned: they are read here and never edited. A
@@ -21,8 +23,9 @@ committed ground-truth file that does not load, at any depth of the directory,
 fails here too, and so does a file there that is neither a ground-truth file
 nor the README or schema.
 
-Not scanned: a launch message typed at run time and a registration written
-outside the repository. Those are the operator's to keep clean.
+Not scanned: a launch message typed at run time, and a registration or a
+rendered instruction written outside the repository. Those are the
+operator's to keep clean.
 """
 from pathlib import Path
 
@@ -121,6 +124,11 @@ def instruction_surfaces():
     return files_under(*INSTRUCTION_TREES, *INSTRUCTION_FILES) + control_code(*CONTROL_CODE_TREES)
 
 
+def registration_records():
+    """Every registration record under notes/ (``*registration*.json``)."""
+    return sorted(p for p in (ROOT / "notes").rglob("*registration*.json") if p.is_file())
+
+
 def leaks(paths, needles, root=ROOT):
     return {str(p.relative_to(root)): found for p in paths
             if (found := matches(p.read_bytes().decode("utf-8", errors="replace"), needles))}
@@ -144,6 +152,7 @@ def test_the_scanned_surfaces_exist():
         assert files_under(relative), relative
     for relative in CONTROL_CODE_TREES:
         assert control_code(relative), relative
+    assert ROOT / MATCHED / "registration.json" in registration_records()
     assert (GROUND_TRUTH / SCHEMA_NAME).is_file()
 
 
@@ -163,6 +172,11 @@ def test_no_registered_native_input_does(needles):
     assert all(p.is_file() for p in registered)
     assert [p for p in registered if GROUND_TRUTH in p.resolve().parents] == []
     assert leaks(registered, needles) == {}
+
+
+def test_no_registration_record_under_notes_does(needles):
+    """A registration's inputs, pins and closures may not name the directory."""
+    assert leaks(registration_records(), needles) == {}
 
 
 def test_only_the_instrument_under_src_names_the_directory(needles):
