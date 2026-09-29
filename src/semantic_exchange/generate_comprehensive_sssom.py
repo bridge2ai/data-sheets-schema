@@ -38,13 +38,21 @@ does.
 Where the TTL and the schema disagree, the TTL wins the row. "Disagree" means
 the schema declares external targets for the slot and a TTL pair is not among
 them. Each such slot must be listed in ACCEPTED_DISAGREEMENTS or
-OPEN_DISAGREEMENTS with a reason. A run warns about every unlisted
-disagreement, every listed slot that no longer disagrees, and every open one;
-the tests fail on the first two.
+OPEN_DISAGREEMENTS with the TTL and schema pairs it was reviewed for and a
+reason. A listing matches only while both sides declare exactly those pairs
+(#2991): a listed slot whose pairs change is ``changed``. A run warns about
+every unlisted disagreement, every changed one, every listed slot that no
+longer disagrees, and every open one; the tests fail on the first three.
 
 The output is a function of the schema, the TTL, the recommendations and the
 date. ``--date`` sets the date. ``--check`` regenerates in memory under the
 date the committed file records, fails on any difference, and writes nothing.
+
+So a change to any of those inputs regenerates both comprehensive tables in
+the same commit (``make gen-sssom-comprehensive gen-sssom-uri-comprehensive``):
+an edit to the schema, to the SKOS alignment TTL (a slot-level or
+``<Class>_<slot>`` triple, such as the /d4d-add-mapping playbook adds), or to
+the recommendations file. The drift tests fail until it does, and say so.
 """
 
 import csv
@@ -105,76 +113,166 @@ _STRENGTH_ONLY = (
 _BROADER_ONLY = (
     "compatible: the schema adds only a broader term ({schema}) beside the "
     "TTL's more specific alignment")
+_NOT_SCHEMA_ORG = (
+    "schema:conformsTo is not a schema.org term (https://schema.org/conformsTo "
+    "does not resolve; checked 2026-09-28), and RO-Crate 1.1's JSON-LD context "
+    "maps its conformsTo key to dcterms:conformsTo")
+
+
+@dataclass(frozen=True)
+class Listed:
+    """A TTL/schema disagreement as it was reviewed (#2991).
+
+    ``ttl`` and ``schema`` are the pairs each side declared for the slot when
+    the reason was written, as ``'<predicate> <object>'``. A listing holds
+    only while both sides still declare exactly these pairs: any change on
+    either side makes the slot ``changed``, which warns and fails the tests,
+    because the reason was written for the pairs listed and may no longer be
+    true.
+    """
+    ttl: Tuple[str, ...]
+    schema: Tuple[str, ...]
+    reason: str
+
+    def signature(self) -> Tuple[Tuple[str, ...], Tuple[str, ...]]:
+        return tuple(sorted(set(self.ttl))), tuple(sorted(set(self.schema)))
+
+
+def _cross(ttl: str, slot_uri: str) -> Listed:
+    """A cross-vocabulary listing: the TTL's one pair against the schema's
+    ``slot_uri`` (emitted as exactMatch)."""
+    return Listed((ttl,), (f'skos:exactMatch {slot_uri}',),
+                  _CROSS_VOCABULARY.format(schema=f'slot_uri {slot_uri}'))
+
 
 #: TTL/schema disagreements that are understood. The TTL target is the row's;
 #: the schema's declaration stays in ``other_curated_mappings``. No warning.
-ACCEPTED_DISAGREEMENTS: Dict[str, str] = {
-    'title': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:title'),
-    'keywords': _CROSS_VOCABULARY.format(schema='slot_uri dcat:keyword'),
-    'publisher': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:publisher'),
-    'page': _CROSS_VOCABULARY.format(schema='slot_uri dcat:landingPage'),
-    'bytes': _CROSS_VOCABULARY.format(schema='slot_uri dcat:byteSize'),
-    'created_on': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:created'),
-    'issued': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:issued'),
-    'last_updated_on': _CROSS_VOCABULARY.format(
-        schema='slot_uri dcterms:modified'),
-    'conforms_to': _CROSS_VOCABULARY.format(
-        schema='slot_uri dcterms:conformsTo'),
-    'format': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:format'),
-    'created_by': _CROSS_VOCABULARY.format(schema='slot_uri dcterms:creator'),
-    'modified_by': _CROSS_VOCABULARY.format(
-        schema='slot_uri dcterms:contributor'),
-    'compression': (
+ACCEPTED_DISAGREEMENTS: Dict[str, Listed] = {
+    'title': _cross('skos:exactMatch schema:name', 'dcterms:title'),
+    'keywords': _cross('skos:exactMatch schema:keywords', 'dcat:keyword'),
+    'publisher': _cross('skos:exactMatch schema:publisher',
+                        'dcterms:publisher'),
+    'page': _cross('skos:exactMatch schema:url', 'dcat:landingPage'),
+    'bytes': _cross('skos:exactMatch schema:contentSize', 'dcat:byteSize'),
+    'created_on': _cross('skos:exactMatch schema:dateCreated',
+                         'dcterms:created'),
+    'issued': _cross('skos:exactMatch schema:datePublished', 'dcterms:issued'),
+    'last_updated_on': _cross('skos:exactMatch schema:dateModified',
+                              'dcterms:modified'),
+    'format': _cross('skos:exactMatch schema:encodingFormat', 'dcterms:format'),
+    'created_by': _cross('skos:closeMatch schema:creator', 'dcterms:creator'),
+    'modified_by': _cross('skos:closeMatch schema:contributor',
+                          'dcterms:contributor'),
+    'compression': Listed(
+        ('skos:closeMatch evi:formats',),
+        ('skos:exactMatch dcat:compressFormat',),
         "compatible: the TTL hedges with closeMatch evi:formats, the general "
         "format term it also uses for distribution_formats and encoding; the "
         "schema's slot_uri dcat:compressFormat is the specific DCAT term for "
         "a compression format"),
-    'themes': _CROSS_VOCABULARY.format(schema='slot_uri dcat:theme'),
-    'external_resources': _CROSS_VOCABULARY.format(
-        schema='slot_uri dcterms:references'),
-    'was_derived_from': _CROSS_VOCABULARY.format(
-        schema='slot_uri prov:wasDerivedFrom, exact_mappings dcterms:source'),
-    'regulatory_restrictions': _CROSS_VOCABULARY.format(
-        schema='slot_uri dcterms:accessRights; the DUO broad_mappings name '
-               'consent codes a restriction may carry'),
-    'md5': _BROADER_ONLY.format(schema='broad_mappings dcterms:identifier'),
-    'conforms_to_class': _BROADER_ONLY.format(
-        schema='broad_mappings dcterms:conformsTo'),
-    'conforms_to_schema': _BROADER_ONLY.format(
-        schema='broad_mappings dcterms:conformsTo'),
-    'license_and_use_terms': _STRENGTH_ONLY.format(
-        schema='slot_uri schema:license', ttl='closeMatch'),
-    'dialect': _STRENGTH_ONLY.format(
-        schema='slot_uri schema:encodingFormat', ttl='closeMatch'),
-    'media_type': _STRENGTH_ONLY.format(
-        schema='exact_mappings schema:encodingFormat', ttl='closeMatch'),
-    'resources': _STRENGTH_ONLY.format(
-        schema='slot_uri schema:hasPart', ttl='relatedMatch'),
-    'path': _STRENGTH_ONLY.format(
-        schema='slot_uri schema:contentUrl', ttl='narrowMatch'),
+    'themes': _cross('skos:closeMatch schema:about', 'dcat:theme'),
+    'external_resources': _cross('skos:closeMatch schema:relatedLink',
+                                 'dcterms:references'),
+    'was_derived_from': Listed(
+        ('skos:exactMatch schema:isBasedOn',),
+        ('skos:exactMatch dcterms:source', 'skos:exactMatch prov:wasDerivedFrom'),
+        _CROSS_VOCABULARY.format(
+            schema='slot_uri prov:wasDerivedFrom, exact_mappings '
+                   'dcterms:source')),
+    'regulatory_restrictions': Listed(
+        ('skos:closeMatch schema:conditionsOfAccess',),
+        ('skos:broadMatch DUO:0000021', 'skos:broadMatch DUO:0000022',
+         'skos:broadMatch DUO:0000028', 'skos:exactMatch dcterms:accessRights'),
+        _CROSS_VOCABULARY.format(
+            schema='slot_uri dcterms:accessRights; the DUO broad_mappings name '
+                   'consent codes a restriction may carry')),
+    'md5': Listed(
+        ('skos:exactMatch evi:md5',),
+        ('skos:broadMatch dcterms:identifier',),
+        _BROADER_ONLY.format(schema='broad_mappings dcterms:identifier')),
+    'license_and_use_terms': Listed(
+        ('skos:closeMatch schema:license',),
+        ('skos:exactMatch schema:license',),
+        _STRENGTH_ONLY.format(schema='slot_uri schema:license',
+                              ttl='closeMatch')),
+    'dialect': Listed(
+        ('skos:closeMatch schema:encodingFormat',),
+        ('skos:exactMatch schema:encodingFormat',),
+        _STRENGTH_ONLY.format(schema='slot_uri schema:encodingFormat',
+                              ttl='closeMatch')),
+    'media_type': Listed(
+        ('skos:closeMatch schema:encodingFormat',),
+        ('skos:exactMatch dcat:mediaType',
+         'skos:exactMatch schema:encodingFormat'),
+        _STRENGTH_ONLY.format(schema='exact_mappings schema:encodingFormat',
+                              ttl='closeMatch')),
+    'resources': Listed(
+        ('skos:relatedMatch schema:hasPart',),
+        ('skos:exactMatch schema:hasPart',),
+        _STRENGTH_ONLY.format(schema='slot_uri schema:hasPart',
+                              ttl='relatedMatch')),
+    'path': Listed(
+        ('skos:narrowMatch schema:contentUrl',),
+        ('skos:exactMatch schema:contentUrl',),
+        _STRENGTH_ONLY.format(schema='slot_uri schema:contentUrl',
+                              ttl='narrowMatch')),
 }
 
 #: Disagreements where one side is probably wrong. The TTL still wins the row
 #: (precedence), but every run warns until a curator settles them.
-OPEN_DISAGREEMENTS: Dict[str, str] = {
-    'creators': (
+OPEN_DISAGREEMENTS: Dict[str, Listed] = {
+    'creators': Listed(
+        ('skos:closeMatch schema:author',),
+        ('skos:exactMatch schema:creator',),
         "same vocabulary, different term: the TTL says closeMatch "
         "schema:author, the schema's slot_uri is schema:creator"),
-    'download_url': (
+    'download_url': Listed(
+        ('skos:exactMatch schema:contentUrl',),
+        ('skos:exactMatch dcat:downloadURL', 'skos:exactMatch schema:url'),
         "same vocabulary, different term: the TTL says exactMatch "
         "schema:contentUrl, the schema's exact_mappings says schema:url "
         "(beside slot_uri dcat:downloadURL); both cannot be exact"),
-    'id': (
+    'id': Listed(
+        ('skos:exactMatch rdf:ID',),
+        ('skos:exactMatch schema:identifier',),
         "the TTL says exactMatch rdf:ID, an RDF/XML syntax attribute rather "
         "than a property; the schema's slot_uri is schema:identifier"),
-    'hash': (
+    'hash': Listed(
+        ('skos:exactMatch evi:md5',),
+        ('skos:broadMatch dcterms:identifier',),
         "the TTL says exactMatch evi:md5 for a slot that does not fix the "
         "hash algorithm (md5 and sha256 are separate slots); the schema "
         "declares only broad_mappings dcterms:identifier"),
-    'sha256': (
+    'sha256': Listed(
+        ('skos:exactMatch evi:sha256',),
+        ('skos:exactMatch schema:sha256',),
         "two vocabularies' checksum terms: the TTL says exactMatch "
         "evi:sha256, the schema's slot_uri is schema:sha256; one should be "
         "the slot's serialisation, or the TTL should carry both"),
+    # #2990: these three were listed as accepted until review round 1 of
+    # #2963. The TTL side names an IRI that does not exist.
+    'conforms_to': Listed(
+        ('skos:exactMatch schema:conformsTo',),
+        ('skos:exactMatch dcterms:conformsTo',),
+        "the TTL says exactMatch schema:conformsTo, but " + _NOT_SCHEMA_ORG
+        + ", the schema's slot_uri; the TTL's target is probably the wrong "
+        "IRI for the same property"),
+    'conforms_to_class': Listed(
+        ('skos:narrowMatch schema:conformsTo',),
+        ('skos:broadMatch dcterms:conformsTo',),
+        "the TTL says narrowMatch schema:conformsTo, but " + _NOT_SCHEMA_ORG
+        + "; and narrowMatch says the target is narrower than the slot, while "
+        "the TTL's own comment calls the D4D slot the narrower one and the "
+        "schema's broad_mappings dcterms:conformsTo says the target is "
+        "broader, so the two declarations point in opposite directions"),
+    'conforms_to_schema': Listed(
+        ('skos:narrowMatch schema:conformsTo',),
+        ('skos:broadMatch dcterms:conformsTo',),
+        "the TTL says narrowMatch schema:conformsTo, but " + _NOT_SCHEMA_ORG
+        + "; and narrowMatch says the target is narrower than the slot, while "
+        "the TTL's own comment calls the D4D slot the narrower one and the "
+        "schema's broad_mappings dcterms:conformsTo says the target is "
+        "broader, so the two declarations point in opposite directions"),
 }
 
 
@@ -204,8 +302,28 @@ class Resolution:
     comment: str
     origin: str = ''        # the TTL subject or schema metaslot of the primary
     others: List[str] = field(default_factory=list)
-    disagreement: str = ''  # '', 'accepted', 'open' or 'unlisted'
+    # '', 'accepted', 'open', 'changed' (listed for other pairs) or 'unlisted'
+    disagreement: str = ''
+    # The (TTL, schema) pairs, as text, where the two disagree
+    disagreement_pairs: Tuple[Tuple[str, ...], Tuple[str, ...]] = ((), ())
     notes: List[str] = field(default_factory=list)  # appended to the comment
+
+
+#: How a row's comment names each kind of TTL/schema disagreement.
+DISAGREEMENT_NOTES = {
+    'accepted': 'accepted',
+    'open': 'open',
+    'changed': 'not the listed pairs',
+    'unlisted': 'unlisted',
+}
+
+#: What a drift failure tells the reader to do (#2993).
+REGENERATE_HINT = (
+    "Regenerate both tables with `make gen-sssom-comprehensive "
+    "gen-sssom-uri-comprehensive` and commit them with the change that moved "
+    "them: an edit to the schema, to the SKOS alignment TTL (a slot-level or "
+    "<Class>_<slot> triple, as /d4d-add-mapping adds) or to "
+    "notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv moves them")
 
 
 def heuristic_hint(slot: str, description: str) -> str:
@@ -256,6 +374,7 @@ def report_drift(committed: Path, regenerated: str, key: str) -> int:
     print(f"✗ {committed} does not regenerate from its inputs.")
     if current is None:
         print("  The file does not exist.")
+        print(f"  {REGENERATE_HINT}.")
         return 1
     have, made = table_rows(current, key), table_rows(regenerated, key)
     lost = sorted(set(have) - set(made))
@@ -271,8 +390,7 @@ def report_drift(committed: Path, regenerated: str, key: str) -> int:
     new_head = [line for line in regenerated.splitlines() if line.startswith('#')]
     if old_head != new_head:
         print("  The '#' header differs.")
-    print("  Regenerate with: make gen-sssom-comprehensive "
-          "gen-sssom-uri-comprehensive")
+    print(f"  {REGENERATE_HINT}.")
     return 1
 
 
@@ -506,8 +624,8 @@ class ComprehensiveSSSOMGenerator:
             primary = None
 
         if primary is not None:
-            disagreement = self._disagreement(slot, ttl_used,
-                                              [p for p, _ in schema])
+            schema_curated = [p for p, _ in schema]
+            disagreement = self._disagreement(slot, ttl_used, schema_curated)
             return Resolution(
                 **base, status='mapped', source=source,
                 predicate=primary.predicate, object=primary.object,
@@ -516,7 +634,10 @@ class ComprehensiveSSSOMGenerator:
                 comment=comment, origin=origin,
                 others=self._others(primary, curated),
                 disagreement=disagreement,
-                notes=([f'TTL and schema disagree ({disagreement})']
+                disagreement_pairs=(self.signature(ttl_used, schema_curated)
+                                    if disagreement else ((), ())),
+                notes=([f'TTL and schema disagree '
+                        f'({DISAGREEMENT_NOTES[disagreement]})']
                        if disagreement else []))
 
         rec = self.recommendations.get(slot)                # 3. recommendation
@@ -548,14 +669,31 @@ class ComprehensiveSSSOMGenerator:
 
     def _disagreement(self, slot: str, ttl: List[CuratedPair],
                       schema: List[CuratedPair]) -> str:
-        """'' when the TTL and the schema agree, else how the slot is listed."""
+        """'' when the TTL and the schema agree, else how the slot is listed.
+
+        A listing is matched on the slot *and* the pairs both sides declare
+        (#2991): a listed slot whose TTL or schema pairs are no longer the
+        listed ones is ``changed``, not accepted or open, because its reason
+        was written for other pairs.
+        """
         if not self.disagrees(ttl, schema):
             return ''
-        if slot in ACCEPTED_DISAGREEMENTS:
-            return 'accepted'
-        if slot in OPEN_DISAGREEMENTS:
-            return 'open'
+        seen = self.signature(ttl, schema)
+        for status, listing in (('accepted', ACCEPTED_DISAGREEMENTS),
+                                ('open', OPEN_DISAGREEMENTS)):
+            entry = listing.get(slot)
+            if entry is not None:
+                return status if entry.signature() == seen else 'changed'
         return 'unlisted'
+
+    @staticmethod
+    def signature(ttl: List[CuratedPair], schema: List[CuratedPair]
+                  ) -> Tuple[Tuple[str, ...], Tuple[str, ...]]:
+        """The distinct (TTL, schema) pairs, each as sorted
+        ``'<predicate> <object>'`` text: what a listing is matched on."""
+        def text(pairs):
+            return tuple(sorted({f'{p.predicate} {p.object}' for p in pairs}))
+        return text(ttl), text(schema)
 
     @staticmethod
     def disagrees(ttl: List[CuratedPair], schema: List[CuratedPair]) -> bool:
@@ -599,13 +737,19 @@ class ComprehensiveSSSOMGenerator:
         return out
 
     def disagreement_report(self) -> Dict[str, List[str]]:
-        """Slots by how their TTL/schema disagreement is listed, plus stale ones."""
-        report = {'accepted': [], 'open': [], 'unlisted': [], 'stale': []}
+        """Slots by how their TTL/schema disagreement is listed, plus stale ones.
+
+        ``changed``: listed, but the pairs that now disagree are not the
+        listed ones. ``stale``: listed, and the slot no longer disagrees.
+        """
+        report = {'accepted': [], 'open': [], 'changed': [], 'unlisted': [],
+                  'stale': []}
         for slot, res in self.resolutions.items():
             if res.disagreement:
                 report[res.disagreement].append(slot)
         listed = set(ACCEPTED_DISAGREEMENTS) | set(OPEN_DISAGREEMENTS)
-        live = set(report['accepted']) | set(report['open'])
+        live = (set(report['accepted']) | set(report['open'])
+                | set(report['changed']))
         report['stale'] = sorted(listed - live)
         return report
 
@@ -618,12 +762,23 @@ class ComprehensiveSSSOMGenerator:
             out.append(f"TTL and schema disagree on {slot} and it is in neither "
                        f"disagreement list: TTL {res.predicate} {res.object}; "
                        f"others: {' | '.join(res.others)}")
+        for slot in report['changed']:
+            entry = ACCEPTED_DISAGREEMENTS.get(slot) or OPEN_DISAGREEMENTS[slot]
+            (l_ttl, l_schema) = entry.signature()
+            (ttl, schema) = self.resolutions[slot].disagreement_pairs
+            out.append(
+                f"the TTL/schema disagreement on {slot} is not the listed one, "
+                f"so its reason may no longer hold: listed TTL "
+                f"{' | '.join(l_ttl)} against schema {' | '.join(l_schema)}; "
+                f"now TTL {' | '.join(ttl)} against schema "
+                f"{' | '.join(schema)}. Re-review the reason and update the "
+                "listing")
         for slot in report['stale']:
             out.append(f"{slot} is listed as a TTL/schema disagreement but no "
                        "longer disagrees; remove it from the list")
         for slot in report['open']:
             out.append(f"unsettled TTL/schema disagreement on {slot}: "
-                       f"{OPEN_DISAGREEMENTS[slot]}")
+                       f"{OPEN_DISAGREEMENTS[slot].reason}")
         return out
 
     # ------------------------------------------------------------ rows

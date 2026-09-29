@@ -18,6 +18,9 @@ recommendations file.
 import csv
 import functools
 import io
+import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import textwrap
@@ -121,8 +124,10 @@ def raw_external_declarations(schema):
     return found
 
 
-def ttl_slot_alignments(slot_names):
-    """{slot: [(predicate, object)]} for slot-level SKOS triples, by rdflib."""
+@functools.lru_cache(maxsize=None)
+def ttl_match_triples():
+    """(D4D local name, predicate, object CURIE) for every SKOS match triple
+    on a D4D subject, by rdflib rather than the generator's regex."""
     import rdflib
     g = rdflib.Graph()
     g.parse(TTL, format="turtle")
@@ -136,16 +141,99 @@ def ttl_slot_alignments(slot_names):
                 return f"{prefix}:{iri[len(ns):]}"
         return iri
 
-    found = {}
+    found = []
     for s, p, o in g:
         s, p, o = str(s), str(p), str(o)
-        if not (p.startswith(skos) and p.endswith("Match") and s.startswith(D4D)):
-            continue
-        slot = s[len(D4D):]
-        if slot in slot_names:
-            found.setdefault(slot, []).append(
-                ("skos:" + p[len(skos):], curie(o)))
+        if p.startswith(skos) and p.endswith("Match") and s.startswith(D4D):
+            found.append((s[len(D4D):], "skos:" + p[len(skos):], curie(o)))
+    return tuple(found)
+
+
+def ttl_slot_alignments(slot_names):
+    """{slot: [(predicate, object)]} for slot-level SKOS triples, by rdflib."""
+    found = {}
+    for subject, predicate, obj in ttl_match_triples():
+        if subject in slot_names:
+            found.setdefault(subject, []).append((predicate, obj))
     return found
+
+
+def raw_ancestors(schema, cls):
+    """Every proper is_a / mixin ancestor of ``cls``, from the raw YAML."""
+    classes = schema.get("classes") or {}
+    seen, todo = set(), [cls]
+    while todo:
+        cdef = classes.get(todo.pop()) or {}
+        for parent in [cdef.get("is_a")] + list(cdef.get("mixins") or []):
+            if parent and parent not in seen:
+                seen.add(parent)
+                todo.append(parent)
+    return seen
+
+
+def raw_declarers(schema):
+    """{slot: {class}} for classes that declare the slot themselves: in their
+    ``attributes`` or their ``slots:`` list, from the raw YAML."""
+    found = {}
+    for cls, cdef in (schema.get("classes") or {}).items():
+        cdef = cdef or {}
+        for slot in set(cdef.get("attributes") or {}) | set(cdef.get("slots") or []):
+            found.setdefault(slot, set()).add(cls)
+    return found
+
+
+def raw_carried(schema, cls):
+    """Slots ``cls`` carries: its own declarations and its ancestors'."""
+    classes = schema.get("classes") or {}
+    carried = set()
+    for c in {cls} | raw_ancestors(schema, cls):
+        cdef = classes.get(c) or {}
+        carried |= set(cdef.get("attributes") or {}) | set(cdef.get("slots") or [])
+    return carried
+
+
+def raw_slot_uris(schema):
+    """{slot: {slot_uri}} from every declaration: top-level ``slots:``, class
+    ``attributes`` and ``slot_usage``, from the raw YAML."""
+    found = {}
+
+    def add(slot, sdef):
+        uri = (sdef or {}).get("slot_uri")
+        if uri:
+            found.setdefault(slot, set()).add(uri)
+
+    for slot, sdef in (schema.get("slots") or {}).items():
+        add(slot, sdef)
+    for cdef in (schema.get("classes") or {}).values():
+        for group in ("attributes", "slot_usage"):
+            for slot, sdef in ((cdef or {}).get(group) or {}).items():
+                add(slot, sdef)
+    return found
+
+
+def curated_sources(schema, names):
+    """{slot: 'ttl' | 'schema'}: the curated source that speaks first for each
+    slot, computed from the inputs and never from the table.
+
+    The TTL speaks for a slot through a slot-level subject, or a
+    ``<Class>_<slot>`` subject for a class that carries the slot (rdflib, and
+    the raw YAML for what a class carries); else the schema speaks when it
+    declares an external target (raw YAML).
+    """
+    classes = set(schema.get("classes") or {})
+    ttl = set()
+    for subject, _, _ in ttl_match_triples():
+        if subject in names:
+            ttl.add(subject)
+            continue
+        for i, ch in enumerate(subject):
+            cls, slot = subject[:i], subject[i + 1:]
+            if (ch == "_" and cls in classes and slot in names
+                    and slot in raw_carried(schema, cls)):
+                ttl.add(slot)
+    out = {slot: "schema" for slot in raw_external_declarations(schema)}
+    out.update({slot: "ttl" for slot in ttl})
+    return out
 
 
 class _Committed(unittest.TestCase):
@@ -208,8 +296,10 @@ class TestTTLAlignmentsAreMapped(_Committed):
         for slot, pairs in sorted(self.ttl.items()):
             with self.subTest(slot=slot):
                 row = self.comp[slot]
-                self.assertEqual(row["mapping_status"], "mapped")
-                self.assertEqual(row["mapping_source"], "ttl")
+                self.assertEqual(
+                    (row["mapping_status"], row["mapping_source"]),
+                    ("mapped", "ttl"),
+                    f"the TTL aligns {slot}; {gcs.REGENERATE_HINT}")
                 self.assertEqual(row["mapping_justification"],
                                  "semapv:ManualMappingCuration")
                 primary = (row["predicate_id"], row["object_id"])
@@ -300,22 +390,43 @@ class TestSchemaDeclaredMappingsAreKept(_Committed):
 
 
 class TestHeuristicsNeverOverrideCuration(_Committed):
+    """Which slots a curated source speaks for is computed from the inputs
+    (``curated_sources``), never read from the table's ``mapping_source``
+    (#2996). The resolution writes that column together with the status, so
+    a heuristic that overrides a curated slot relabels it ``heuristic``, and a
+    test that picked curated rows by that column would never see it."""
 
-    def test_a_curated_row_is_mapped_whatever_the_hint(self):
-        hinted = [r for r in self.comp.values()
-                  if r["mapping_source"] in ("ttl", "schema") and r["heuristic_hint"]]
-        self.assertTrue(hinted, "no curated slot trips a keyword; test is vacuous")
-        for row in hinted:
-            with self.subTest(slot=row["subject_id"]):
-                self.assertEqual(row["mapping_status"], "mapped")
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.curated = curated_sources(cls.schema, cls.names)
+
+    def test_curated_slots_include_ones_the_keywords_match(self):
+        """Not vacuous: slots whose *names* alone trip a keyword are curated."""
+        keywords = gcs.FREE_TEXT_KEYWORDS + gcs.NOVEL_D4D_KEYWORDS
+        by_name = [s for s in self.curated if any(k in s for k in keywords)]
+        self.assertGreaterEqual(len(by_name), 40)
+        self.assertLessEqual(FORMERLY_UNMAPPED_TTL_SLOTS, set(self.curated))
+
+    def test_every_curated_slot_is_mapped_from_its_source_whatever_the_hint(self):
+        for slot, source in sorted(self.curated.items()):
+            with self.subTest(slot=slot):
+                row = self.comp[slot]
+                self.assertEqual(
+                    (row["mapping_status"], row["mapping_source"]),
+                    ("mapped", source),
+                    f"{slot} has a curated {source} source in the inputs; "
+                    f"{gcs.REGENERATE_HINT}")
 
     def test_the_hint_decides_status_only_without_a_curated_source(self):
-        for row in self.comp.values():
-            with self.subTest(slot=row["subject_id"]):
+        for slot, row in sorted(self.comp.items()):
+            with self.subTest(slot=slot):
                 if row["mapping_status"] in ("free_text", "novel_d4d"):
+                    self.assertNotIn(slot, self.curated)
                     self.assertEqual(row["mapping_source"], "heuristic")
                     self.assertEqual(row["mapping_status"], row["heuristic_hint"])
                 if row["mapping_source"] == "heuristic":
+                    self.assertNotIn(slot, self.curated)
                     self.assertIn(row["mapping_status"], ("free_text", "novel_d4d"))
 
 
@@ -348,6 +459,41 @@ class TestSchemaPathNamesACarrier(_Committed):
                 with self.subTest(slot=slot, cls=cls):
                     self.assertIn(slot, self.sv.class_slots(cls))
 
+    def test_owners_are_the_declarers_no_declaring_ancestor_precedes(self):
+        """The rule, recomputed from the raw YAML (#2998): a class owns a slot
+        when it declares it and no is_a/mixin ancestor that also declares it
+        does. The merged schema repeats inherited attributes on subclasses,
+        so every declarer carries the slot and the carrier test above cannot
+        tell an owner from a subclass that repeats it."""
+        declarers = raw_declarers(self.schema)
+        for slot, row in sorted(self.comp.items()):
+            with self.subTest(slot=slot):
+                declared = declarers.get(slot, set())
+                expected = sorted(c for c in declared
+                                  if not declared & raw_ancestors(self.schema, c))
+                self.assertEqual(
+                    list(filter(None, row["d4d_owning_classes"].split("|"))),
+                    expected)
+
+    def test_named_owners(self):
+        self.assertEqual(self.comp["description"]["d4d_owning_classes"],
+                         "DatasetProperty|Grant|NamedThing|Organization")
+        self.assertEqual(self.comp["used_software"]["d4d_schema_path"],
+                         "DatasetProperty.used_software")
+
+    def test_the_path_is_dataset_else_the_first_owner(self):
+        """``Dataset`` when it carries the slot (raw YAML), else the first
+        owning class by name; a subclass that repeats the slot is never the
+        path when an ancestor owns it."""
+        dataset = raw_carried(self.schema, "Dataset")
+        for slot, row in sorted(self.comp.items()):
+            with self.subTest(slot=slot):
+                owners = list(filter(None, row["d4d_owning_classes"].split("|")))
+                if slot in dataset:
+                    self.assertEqual(row["d4d_schema_path"], f"Dataset.{slot}")
+                elif owners:
+                    self.assertEqual(row["d4d_schema_path"], f"{owners[0]}.{slot}")
+
     def test_a_schema_declaration_names_its_classes_not_their_subclasses(self):
         """The merged schema repeats ``id``'s slot_uri on 78 classes; the row
         names the four that declare it without inheriting it."""
@@ -374,25 +520,85 @@ class TestSchemaPathNamesACarrier(_Committed):
         self.assertFalse(row["d4d_schema_path"].startswith("Dataset."))
 
 
+class TestURITableReadsEveryDeclaredSlotUri(_Committed):
+    """``d4d_slot_uri_current`` against the raw YAML (#2997). Before #2935
+    the URI table read slot_uri from top-level ``slots:`` only (31/284); a
+    slot_uri set on a class attribute or in ``slot_usage`` counts too."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.declared = raw_slot_uris(cls.schema)
+        cls.top_level = {slot for slot, sdef in (cls.schema.get("slots") or {}).items()
+                         if (sdef or {}).get("slot_uri")}
+
+    def test_the_current_slot_uri_is_one_the_schema_declares(self):
+        for slot, row in sorted(self.uri.items()):
+            with self.subTest(slot=slot):
+                current = row["d4d_slot_uri_current"]
+                if slot in self.declared:
+                    self.assertIn(current, self.declared[slot])
+                else:
+                    self.assertEqual(current, "")
+
+    def test_a_slot_uri_declared_only_below_the_top_level_counts(self):
+        below = set(self.declared) - self.top_level
+        self.assertGreater(len(below), 200)
+        for slot in sorted(below):
+            with self.subTest(slot=slot):
+                self.assertTrue(self.uri[slot]["d4d_slot_uri_current"])
+
+    def test_the_coverage_header_counts_every_declared_slot_uri(self):
+        text = URI.read_text(encoding="utf-8")
+        n = len(self.names)
+        self.assertIn(f"# Current slot_uri coverage: {len(self.declared)}/{n} ",
+                      text)
+
+    def test_needs_slot_uri_only_where_none_is_declared(self):
+        for slot, row in sorted(self.uri.items()):
+            with self.subTest(slot=slot):
+                expected = ("yes" if slot not in self.declared
+                            and row["mapping_status"] in ("recommended", "novel_d4d")
+                            else "no")
+                self.assertEqual(row["needs_slot_uri"], expected)
+
+
 class TestDisagreementsAreListed(unittest.TestCase):
     """A TTL/schema disagreement the lists do not name is new and must be
-    looked at; a listed one that no longer occurs is stale."""
+    looked at; a listed one whose pairs changed must be looked at again; a
+    listed one that no longer occurs is stale."""
 
     @classmethod
     def setUpClass(cls):
         cls.gen = gcs.ComprehensiveSSSOMGenerator(SCHEMA, TTL, RECS)
+        cls.listed = {**gcs.ACCEPTED_DISAGREEMENTS, **gcs.OPEN_DISAGREEMENTS}
 
-    def test_no_unlisted_and_no_stale_disagreement(self):
+    def test_no_unlisted_changed_or_stale_disagreement(self):
         report = self.gen.disagreement_report()
         self.assertEqual(report["unlisted"], [])
+        self.assertEqual(report["changed"], [])
         self.assertEqual(report["stale"], [])
 
     def test_the_lists_are_disjoint_and_give_reasons(self):
         self.assertFalse(set(gcs.ACCEPTED_DISAGREEMENTS) & set(gcs.OPEN_DISAGREEMENTS))
-        for slot, reason in {**gcs.ACCEPTED_DISAGREEMENTS,
-                             **gcs.OPEN_DISAGREEMENTS}.items():
+        for slot, entry in self.listed.items():
             with self.subTest(slot=slot):
-                self.assertGreater(len(reason.strip()), 20)
+                self.assertGreater(len(entry.reason.strip()), 20)
+
+    def test_each_listing_names_the_pairs_the_inputs_declare(self):
+        """Read independently of the generator (#2991): the TTL's slot-level
+        triples by rdflib and the schema's external declarations from the raw
+        YAML must be exactly the pairs the listing was written for."""
+        schema = raw_schema()
+        names = raw_slot_names(schema)
+        ttl = ttl_slot_alignments(names)
+        declared = raw_external_declarations(schema)
+        for slot, entry in sorted(self.listed.items()):
+            with self.subTest(slot=slot):
+                self.assertEqual(set(entry.ttl),
+                                 {f"{p} {o}" for p, o in ttl.get(slot, [])})
+                self.assertEqual(set(entry.schema),
+                                 {f"{p} {o}" for p, o in declared.get(slot, set())})
 
     def test_open_disagreements_warn_on_every_run(self):
         warnings = "\n".join(self.gen.warnings())
@@ -400,16 +606,72 @@ class TestDisagreementsAreListed(unittest.TestCase):
             self.assertIn(f"disagreement on {slot}:", warnings)
 
     def test_a_stale_listing_warns(self):
-        with mock.patch.dict(gcs.ACCEPTED_DISAGREEMENTS, {"doi": "not a disagreement"}):
+        stale = gcs.Listed(("skos:exactMatch schema:x",), ("skos:exactMatch dcterms:x",),
+                           "not a disagreement")
+        with mock.patch.dict(gcs.ACCEPTED_DISAGREEMENTS, {"doi": stale}):
             report = self.gen.disagreement_report()
             self.assertIn("doi", report["stale"])
             self.assertTrue(any("doi is listed" in w for w in self.gen.warnings()))
 
+    def test_no_accepted_listing_names_a_schema_org_term_that_does_not_exist(self):
+        """#2990: the TTL aligned the conforms_to slots to schema:conformsTo,
+        which schema.org does not define (RO-Crate 1.1's context maps its
+        conformsTo key to dcterms:conformsTo). A side that names no term is
+        probably wrong, so the listing is open, not accepted. Checked against
+        rdflib's schema.org term list."""
+        from rdflib.namespace import SDO
+        for slot, entry in sorted(gcs.ACCEPTED_DISAGREEMENTS.items()):
+            for pair in entry.ttl + entry.schema:
+                obj = pair.split(" ", 1)[1]
+                if obj.startswith("schema:"):
+                    with self.subTest(slot=slot, object=obj):
+                        self.assertIn(f"https://schema.org/{obj[len('schema:'):]}", SDO)
+        self.assertNotIn("https://schema.org/conformsTo", SDO)
+
+    def test_the_conforms_to_slots_are_open(self):
+        for slot in ("conforms_to", "conforms_to_class", "conforms_to_schema"):
+            with self.subTest(slot=slot):
+                self.assertIn(slot, gcs.OPEN_DISAGREEMENTS)
+                self.assertNotIn(slot, gcs.ACCEPTED_DISAGREEMENTS)
+                self.assertEqual(self.gen.resolutions[slot].disagreement, "open")
+                row = next(r for r in read_table(COMP)
+                           if r["subject_id"] == f"d4d:{slot}")
+                self.assertIn("TTL and schema disagree (open)", row["comment"])
+
+    def test_a_changed_ttl_pair_on_an_accepted_slot_is_not_accepted(self):
+        """#2991's reproduction: the TTL's license_and_use_terms triple moves
+        to another predicate and target. Matched by slot name alone it stayed
+        'accepted' under a reason that no longer held."""
+        old = "d4d:license_and_use_terms skos:closeMatch schema:license ."
+        new = "d4d:license_and_use_terms skos:relatedMatch schema:usageInfo ."
+        text = TTL.read_text(encoding="utf-8")
+        self.assertEqual(text.count(old), 1)
+        with tempfile.TemporaryDirectory() as d:
+            changed = Path(d) / TTL.name
+            changed.write_text(text.replace(old, new), encoding="utf-8")
+            gen = gcs.ComprehensiveSSSOMGenerator(SCHEMA, changed, RECS)
+        res = gen.resolutions["license_and_use_terms"]
+        self.assertEqual((res.predicate, res.object, res.disagreement),
+                         ("skos:relatedMatch", "schema:usageInfo", "changed"))
+        report = gen.disagreement_report()
+        self.assertEqual(report["changed"], ["license_and_use_terms"])
+        self.assertEqual((report["unlisted"], report["stale"]), ([], []))
+        self.assertTrue(any(
+            "disagreement on license_and_use_terms is not the listed one" in w
+            and "skos:relatedMatch schema:usageInfo" in w
+            and "skos:closeMatch schema:license" in w
+            for w in gen.warnings()))
+        row = next(r for r in gen.generate_comprehensive_sssom("2001-01-01")
+                   if r["subject_id"] == "d4d:license_and_use_terms")
+        self.assertIn("TTL and schema disagree (not the listed pairs)", row["comment"])
+
 
 class TestCommittedTablesRegenerate(unittest.TestCase):
     """Drift: regenerated in memory under the date the file records, the
-    table must be byte-for-byte the committed one. A schema-release PR that
-    moves a slot must regenerate both tables."""
+    table must be byte-for-byte the committed one. A change that moves a
+    slot's mapping regenerates both tables in the same commit: a schema
+    release, and equally an edit to the SKOS alignment TTL or the URI
+    recommendations file (#2993)."""
 
     @classmethod
     def setUpClass(cls):
@@ -423,9 +685,28 @@ class TestCommittedTablesRegenerate(unittest.TestCase):
             made = {r[key]: r for r in read_table(text)}
             differ = sorted(k for k in set(have) | set(made)
                             if have.get(k) != made.get(k))
-            self.fail(f"{committed.name} does not regenerate "
-                      f"({len(differ)} rows differ: {differ[:10]}); run "
-                      "make gen-sssom-comprehensive gen-sssom-uri-comprehensive")
+            self.fail(f"{committed.name} does not regenerate from the schema, "
+                      "the SKOS alignment TTL and the recommendations file "
+                      f"({len(differ)} rows differ: {differ[:10]}). "
+                      f"{gcs.REGENERATE_HINT}.")
+
+    def test_a_drift_failure_says_how_to_regenerate_and_what_moves_the_tables(self):
+        """#2993: the /d4d-add-mapping playbook (pinned, not edited here)
+        still says to skip regeneration after adding a TTL triple, so the
+        failure itself has to say what to run and that the TTL moves it."""
+        with tempfile.TemporaryDirectory() as d:
+            stale = Path(d) / COMP.name
+            stale.write_text(self._without_first_row(COMP.read_text(encoding="utf-8")),
+                             encoding="utf-8")
+            with self.assertRaises(AssertionError) as caught:
+                self._assert_regenerates(
+                    stale, self.comp_gen.render_sssom(gcs.committed_date(COMP)),
+                    "subject_id")
+        message = str(caught.exception)
+        for needle in ("make gen-sssom-comprehensive gen-sssom-uri-comprehensive",
+                       "commit them with the change", "SKOS alignment TTL",
+                       "/d4d-add-mapping", "D4D_MISSING_URI_RECOMMENDATIONS.tsv"):
+            self.assertIn(needle, message)
 
     def test_comprehensive_table(self):
         self._assert_regenerates(
@@ -486,7 +767,53 @@ class TestCommittedTablesRegenerate(unittest.TestCase):
                 code, out = self._main(module, ["--check", "--output", str(stale)])
                 self.assertEqual(code, 1)
                 self.assertIn("rows only in the regeneration", out)
+                self.assertIn(gcs.REGENERATE_HINT, out)
                 self.assertEqual(stale.read_bytes(), before)
+
+    def test_make_check_reports_both_tables_when_both_drift(self):
+        """#2995: the make target ran the two checks as separate recipe
+        lines, so a drift in the first stopped make before the second ran.
+        Run through make itself, with the interpreter under test as
+        ``python``, the fixture schema, TTL and recommendations as inputs,
+        and both tables pointed at stale copies of the fixture's tables."""
+        if shutil.which("make") is None:
+            self.skipTest("make is not installed")
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            inputs = {"D4D_SCHEMA_ALL": d / "schema.yaml",
+                      "SKOS_ALIGNMENT": d / "align.ttl",
+                      "URI_RECOMMENDATIONS": d / "recs.tsv"}
+            inputs["D4D_SCHEMA_ALL"].write_text(textwrap.dedent(FIXTURE_SCHEMA))
+            inputs["SKOS_ALIGNMENT"].write_text(FIXTURE_TTL)
+            inputs["URI_RECOMMENDATIONS"].write_text(FIXTURE_RECS)
+            uri_gen = gcsu.ComprehensiveURISSSOMGenerator(
+                inputs["D4D_SCHEMA_ALL"], inputs["SKOS_ALIGNMENT"],
+                inputs["URI_RECOMMENDATIONS"])
+            stale = {"SSSOM_COMPREHENSIVE": (d / "comp.tsv",
+                                             uri_gen.comp_gen.render_sssom("2001-01-01")),
+                     "SSSOM_URI_COMPREHENSIVE": (d / "uri.tsv",
+                                                 uri_gen.render_sssom("2001-01-01"))}
+            for path, text in stale.values():
+                path.write_text(self._without_first_row(text), encoding="utf-8")
+            env = dict(os.environ)
+            env["PATH"] = os.pathsep.join([str(Path(sys.executable).parent),
+                                           env.get("PATH", "")])
+            env["PYTHONPATH"] = os.pathsep.join(
+                [str(REPO), str(REPO / "src"), env.get("PYTHONPATH", "")])
+            result = subprocess.run(
+                ["make", "--no-print-directory", "check-sssom-comprehensive",
+                 "RUN=", "PROJECTS=unused"]
+                + [f"{var}={path}" for var, path in inputs.items()]
+                + [f"{var}={path}" for var, (path, _) in stale.items()],
+                cwd=REPO, env=env, capture_output=True, text=True, timeout=600)
+            output = result.stdout + result.stderr
+            self.assertNotEqual(result.returncode, 0, output)
+            for var, (path, text) in stale.items():
+                with self.subTest(table=var):
+                    self.assertIn(f"✗ {path} does not regenerate", output)
+                    self.assertIn("1 rows only in the regeneration", output)
+                    self.assertEqual(path.read_text(encoding="utf-8"),
+                                     self._without_first_row(text))
 
     def test_date_flag_pins_the_written_table(self):
         with tempfile.TemporaryDirectory() as d:
@@ -608,6 +935,46 @@ class TestPrecedenceOnAFixture(unittest.TestCase):
         self.assertIn("skos:exactMatch dcterms:title (schema Dataset)", r.others)
         self.assertTrue(any("disagree on both_named" in w
                             for w in self.gen.warnings()))
+
+    def _generator(self):
+        """A fresh generator, so it resolves under whatever lists are patched."""
+        d = Path(self._tmp.name)
+        return gcs.ComprehensiveSSSOMGenerator(
+            d / "schema.yaml", d / "align.ttl", d / "recs.tsv")
+
+    def test_a_listing_holds_only_for_the_pairs_it_names(self):
+        """#2991: a listing is matched on the slot and both sides' pairs.
+        Here the TTL says exactMatch schema:name and the schema's slot_uri
+        dcterms:title."""
+        as_reviewed = gcs.Listed(("skos:exactMatch schema:name",),
+                                 ("skos:exactMatch dcterms:title",),
+                                 "fixture: reviewed for exactly these pairs")
+        with mock.patch.dict(gcs.ACCEPTED_DISAGREEMENTS, {"both_named": as_reviewed}):
+            gen = self._generator()
+            self.assertEqual(gen.resolutions["both_named"].disagreement, "accepted")
+            # The study's other listings are stale on the fixture; only
+            # both_named is asked about.
+            self.assertFalse([w for w in gen.warnings() if "both_named" in w])
+        for side, listing in (
+                ("schema", gcs.Listed(as_reviewed.ttl,
+                                      ("skos:exactMatch dcterms:creator",),
+                                      as_reviewed.reason)),
+                ("ttl", gcs.Listed(("skos:closeMatch schema:name",),
+                                   as_reviewed.schema, as_reviewed.reason))):
+            for listing_name in ("ACCEPTED_DISAGREEMENTS", "OPEN_DISAGREEMENTS"):
+                with self.subTest(changed_side=side, listed_in=listing_name), \
+                        mock.patch.dict(getattr(gcs, listing_name),
+                                        {"both_named": listing}):
+                    gen = self._generator()
+                    self.assertEqual(gen.resolutions["both_named"].disagreement,
+                                     "changed")
+                    report = gen.disagreement_report()
+                    self.assertEqual(report["changed"], ["both_named"])
+                    self.assertNotIn("both_named", report["stale"])
+                    warnings = gen.warnings()
+                    self.assertTrue(any("on both_named is not the listed one" in w
+                                        for w in warnings))
+                    self.assertFalse(any("unsettled" in w for w in warnings))
 
 
 if __name__ == "__main__":
