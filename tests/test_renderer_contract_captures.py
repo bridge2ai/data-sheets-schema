@@ -426,9 +426,21 @@ def test_probe_each_api_phase_suffix_carries_one_more_copy():
 def test_probe_measures_the_duplicated_bytes_at_renderer_17(tmp_path, stable):
     text = instructions(tmp_path)['specification/native'][17]
     section = contracts_section(text)
-    redundant = sum(len(p.encode('utf-8')) * (n - 1) for p, n in repeated_paragraphs(section).items())
-    # The issue's 21,873-byte section. Its 8,854 redundant bytes compared
-    # unstripped paragraphs, which misses the final v17 paragraph's last copy
-    # (696 B); stripped, the two redundant copies are 2 x 4,775 B.
-    assert len(section.encode('utf-8')) == 21873
+    size = lambda chunk: len(chunk.encode('utf-8'))
+    # The 21,873-byte section #2924 measures.
+    assert size(section) == 21873
+    # Whole blocks, as #2924 counts them: each copy runs from the v15 heading
+    # to the end of the v17 text, 5,105 B (the three constants, 5,102 B, and
+    # their separators), so the two redundant copies are 10,210 B. The issue's
+    # 10,212 B is 2 x 5,106 B, one byte more per copy.
+    v15, v17 = heading('ANONYMOUS_REMOVAL_CONTRACT_V15'), api.CLAIM_CLARIFICATION_CONTRACT_V17.rstrip()
+    starts = [i for i in range(len(section)) if section.startswith(v15, i)]
+    blocks = [section[i:section.index(v17, i) + len(v17)] for i in starts]
+    assert sum(size(getattr(api, name)) for name in SHARED) == 5102
+    assert [size(block) for block in blocks] == [5105] * 3
+    assert len(set(blocks)) == 1
+    # A narrower measure: only repeated paragraphs of 200 B or more, compared
+    # stripped (2 x 4,775 B). It omits the headings and short paragraphs the
+    # whole-block count includes, so it is below the issue's figure by design.
+    redundant = sum(size(p) * (n - 1) for p, n in repeated_paragraphs(section).items())
     assert redundant == 9550
