@@ -37,6 +37,7 @@ the tree, or was partly written by hand. Either way the ten rows are assertions
 no declared input supports.
 """
 
+import os
 import subprocess
 import sys
 import unittest
@@ -144,7 +145,11 @@ class TestStructuralMappingDrift(unittest.TestCase):
         committed summary regenerates byte for byte, so a `--check` that wrote
         it back would leave its content as it was (#3056).
         `TestTheCheckActsOnColumnDrift` makes the same check on a summary
-        that differs from regeneration, where the content would move too."""
+        that differs from regeneration, where the content would move too.
+
+        This run fails on the KNOWN_UNDERIVABLE rows, so it never reaches the
+        pass branch. `TestTheCheckActsOnColumnDrift` covers that branch on
+        the generator's own output (#3142)."""
         present = [p for p in (COMMITTED, SUMMARY) if p.exists()]
         before = _snapshot(*present)
         subprocess.run([sys.executable, str(SCRIPT), "--check"],
@@ -254,7 +259,21 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
     It is what lets "writes nothing where it reads" fail for the summary: in
     the other two the summary is already what regeneration makes, so writing
     it back would leave its bytes unchanged.
+
+    All three are snapshotted, the check is run on exactly the directories
+    snapshotted, and the generator's own output is among them (#3142). It is
+    the only run here that takes the pass branch, and the committed data
+    cannot take it while the KNOWN_UNDERIVABLE rows stand. A pass means both
+    artifacts already equal what regeneration makes, so a write there leaves
+    their content as it was and only the modification time can see it. Every
+    file is therefore set to a fixed past time before the snapshot, so that
+    the time moves on any write however coarse the file system's clock,
+    rather than resting on the check running in a later tick than the
+    generator that wrote the file.
     """
+
+    #: What each file read is set to before the snapshot: 2000-01-01 UTC.
+    PAST_NS = 946_684_800 * 10**9
 
     @classmethod
     def setUpClass(cls):
@@ -302,15 +321,23 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         with (stale / SUMMARY.name).open("a", encoding="utf-8") as fh:
             fh.write("A line regeneration does not write.\n")
 
-        read_from = {"drifted": drifted, "stale summary": stale}
+        # The check runs on these and on nothing else that exists, so no
+        # directory it reads can be left out of the snapshot (#3142).
+        read_from = {"exact": exact, "drifted": drifted,
+                     "stale summary": stale}
+        for path in read_from.values():
+            for file in path.iterdir():
+                os.utime(file, ns=(cls.PAST_NS, cls.PAST_NS))
 
         def directory(name):
             return _snapshot(*sorted(read_from[name].iterdir()))
         cls.before = {name: directory(name) for name in read_from}
 
-        cls.exact_result = run("--check", "--output-dir", str(exact))
-        cls.drifted_result = run("--check", "--output-dir", str(drifted))
-        cls.stale_result = run("--check", "--output-dir", str(stale))
+        cls.results = {name: run("--check", "--output-dir", str(path))
+                       for name, path in read_from.items()}
+        cls.exact_result = cls.results["exact"]
+        cls.drifted_result = cls.results["drifted"]
+        cls.stale_result = cls.results["stale summary"]
         cls.after = {name: directory(name) for name in read_from}
         cls.absent = base / "absent"
         cls.absent_result = run("--check", "--output-dir", str(cls.absent))
@@ -375,9 +402,21 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         """Every file in each directory the check read, by content and by
         modification time, and no file added. The stale-summary copy is the
         one where writing the summary back would change its content (#3056),
-        so the catch does not rest on the file system's clock alone."""
+        so for the failure branch the catch does not rest on the file
+        system's clock alone. The generator's own output is the one that
+        takes the pass branch (#3142); there both files already equal what
+        regeneration makes, so the catch is the modification time, which was
+        set to a fixed past time before the snapshot."""
+        self.assertIn(0, [code for code, _ in self.results.values()],
+                      "no directory the check read took the pass branch, so "
+                      "a write on a pass would go unseen")
         for name, before in self.before.items():
             with self.subTest(directory=name):
+                self.assertEqual({mtime for _, mtime in before.values()},
+                                 {self.PAST_NS},
+                                 "the files were not set to the past time, "
+                                 "so an unchanged time may be the clock's "
+                                 "granularity rather than no write")
                 self.assertEqual(sorted(self.after[name]), sorted(before))
                 for file, (content, mtime) in before.items():
                     self.assertEqual(self.after[name][file][0], content,
