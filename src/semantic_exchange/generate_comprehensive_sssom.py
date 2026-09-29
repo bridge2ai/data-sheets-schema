@@ -10,16 +10,23 @@ when a higher source is silent (#2935):
    class-scoped one (``d4d:<Class>_<slot>``) for a class that carries the slot.
 2. The schema's ``slot_uri`` (as ``skos:exactMatch``) and its
    ``exact_``/``close_``/``narrow_``/``broad_``/``related_mappings``, emitted
-   with the matching SKOS predicate. Only targets outside the D4D namespace
-   count: a ``d4d:`` slot_uri names the slot itself, which is the alignment's
-   subject, not a target.
+   with the matching SKOS predicate.
 3. ``notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv``, where it suggests a URI. An
    entry with no suggested URI is silent and falls through.
 4. The keyword heuristics (``free_text`` / ``novel_d4d``), else ``unmapped``.
 
+In both curated rungs only targets outside the D4D namespace count (#3054). A
+``d4d:`` target is the slot itself or another D4D term, not an external
+vocabulary: a ``d4d:`` slot_uri names the alignment's subject, and a TTL
+triple such as ``d4d:File_file_type skos:exactMatch d4d:fileType`` restates
+the slot's own slot_uri. So a slot whose only curated targets are D4D terms
+falls through to rung 3 whichever input names them. The TTL's D4D targets
+stay listed in ``other_curated_mappings``.
+
 Before #2935 the heuristics ran first. They matched words in the slot name
 *and description* and returned before the TTL was consulted, so 29 TTL-aligned
-slots were labelled free text or novel. The schema's own declarations were
+slots were labelled free text or novel: 25 whose TTL target is an external
+term and 4 whose TTL target is a D4D term. The schema's own declarations were
 never read, and a top-level slot that no class attribute repeats had no row.
 The heuristic verdict is now recorded in ``heuristic_hint`` on every row and
 decides ``mapping_status`` only when no curated source speaks.
@@ -27,7 +34,8 @@ decides ``mapping_status`` only when no curated source speaks.
 One row per slot holds one primary mapping. Every other curated pair for the
 slot is listed in ``other_curated_mappings`` with where it was declared, so no
 curated alignment is dropped: a second TTL triple, the schema's declarations
-where the TTL won, a slot_uri one class declares differently.
+where the TTL won, a slot_uri one class declares differently, a TTL triple
+whose target is a D4D term.
 
 ``d4d_schema_path`` names a class that carries the slot: ``Dataset`` when it
 does, else the first class (by name) that owns it. It is empty for a
@@ -36,8 +44,11 @@ owns the slot: it declares the slot, and no ancestor that also declares it
 does.
 
 Where the TTL and the schema disagree, the TTL wins the row. "Disagree" means
-the schema declares external targets for the slot and a TTL pair is not among
-them. Each such slot must be listed in ACCEPTED_DISAGREEMENTS or
+the schema declares external targets for the slot and an external TTL pair is
+not among them. Every such TTL pair is checked, slot-level and class-scoped
+alike (#3053): the primary comes from a slot-level triple when there is one,
+but a ``<Class>_<slot>`` triple is the TTL's word on the slot as well. Each
+such slot must be listed in ACCEPTED_DISAGREEMENTS or
 OPEN_DISAGREEMENTS with the TTL and schema pairs it was reviewed for and a
 reason. A listing matches only while both sides declare exactly those pairs
 (#2991): a listed slot whose pairs change is ``changed``. A run warns about
@@ -94,6 +105,53 @@ SCHEMA_MAPPING_KINDS = (
     ('related_mappings', 'skos:relatedMatch'),
 )
 
+#: What ``rocrate_json_path`` is read against: the RO-Crate 1.1 JSON-LD
+#: context (https://w3id.org/ro/crate/1.1/context, version 1.1.3). Every
+#: schema.org term it defines is keyed by its local name. These are the
+#: property terms it keys bare for another vocabulary's IRI (#3052); its
+#: class terms are left out, since an object here is a property.
+ROCRATE_CONTEXT_TERMS: Dict[str, str] = {
+    'http://purl.org/dc/terms/conformsTo': 'conformsTo',
+    'http://www.w3.org/ns/prov#wasDerivedFrom': 'wasDerivedFrom',
+    'http://purl.org/pav/importedBy': 'importedBy',
+    'http://purl.org/pav/importedFrom': 'importedFrom',
+    'http://purl.org/pav/importedOn': 'importedOn',
+    'http://purl.org/pav/retrievedBy': 'retrievedBy',
+    'http://purl.org/pav/retrievedFrom': 'retrievedFrom',
+    'http://purl.org/pav/retrievedOn': 'retrievedOn',
+    'http://pcdm.org/models#hasFile': 'hasFile',
+    'http://pcdm.org/models#hasMember': 'hasMember',
+    'https://bioschemas.org/ComputationalWorkflow#input': 'input',
+    'https://bioschemas.org/ComputationalWorkflow#output': 'output',
+    'https://www.w3.org/ns/iana/link-relations/relation#cite-as': 'cite-as',
+}
+
+#: The prefixes that context declares, by namespace. It declares ``dct``,
+#: not ``dcterms``, and no prefix for DCAT, EVI, RAI, DUO, QUDT, SPDX or D4D.
+ROCRATE_CONTEXT_PREFIXES: Dict[str, str] = {
+    'http://schema.org/': 'schema',
+    'http://purl.org/dc/terms/': 'dct',
+    'http://www.w3.org/ns/prov#': 'prov',
+    'http://www.w3.org/1999/02/22-rdf-syntax-ns#': 'rdf',
+    'http://www.w3.org/2000/01/rdf-schema#': 'rdfs',
+    'http://purl.org/pav/': 'pav',
+    'http://pcdm.org/models#': 'pcdm',
+    'http://xmlns.com/foaf/0.1/': 'foaf',
+    'http://purl.org/ontology/bibo/': 'bibo',
+    'http://creativecommons.org/ns#': 'cc',
+    'http://purl.org/cerif/frapo/': 'frapo',
+    'http://www.w3.org/ns/rdfa#': 'rdfa',
+    'https://www.w3.org/ns/iana/link-relations/relation#': 'rel',
+    'http://purl.org/ro/roterms#': 'roterms',
+    'http://purl.org/ro/wf4ever#': 'wf4ever',
+    'http://purl.org/ro/wfdesc#': 'wfdesc',
+    'http://purl.org/ro/wfprov#': 'wfprov',
+}
+
+#: schema.org's namespace in either scheme: the context writes http, the TTL
+#: https.
+SCHEMA_ORG = ('http://schema.org/', 'https://schema.org/')
+
 FREE_TEXT_KEYWORDS = ('description', 'documentation', 'comment', 'notes',
                       'details', 'narrative', 'paragraph')
 NOVEL_D4D_KEYWORDS = ('strategies', 'protocol', 'analyses', 'compensation',
@@ -124,7 +182,9 @@ class Listed:
     """A TTL/schema disagreement as it was reviewed (#2991).
 
     ``ttl`` and ``schema`` are the pairs each side declared for the slot when
-    the reason was written, as ``'<predicate> <object>'``. A listing holds
+    the reason was written, as ``'<predicate> <object>'``: every external TTL
+    pair, from slot-level and ``<Class>_<slot>`` subjects (#3053), and every
+    external schema declaration. A listing holds
     only while both sides still declare exactly these pairs: any change on
     either side makes the slot ``changed``, which warns and fails the tests,
     because the reason was written for the pairs listed and may no longer be
@@ -206,11 +266,17 @@ ACCEPTED_DISAGREEMENTS: Dict[str, Listed] = {
          'skos:exactMatch schema:encodingFormat'),
         _STRENGTH_ONLY.format(schema='exact_mappings schema:encodingFormat',
                               ttl='closeMatch')),
+    # #3053: the TTL's two class-scoped triples (DatasetCollection_resources,
+    # FileCollection_resources) say exactMatch schema:hasPart and agree with
+    # the schema; its slot-level triple is the one that qualifies it.
     'resources': Listed(
-        ('skos:relatedMatch schema:hasPart',),
+        ('skos:exactMatch schema:hasPart', 'skos:relatedMatch schema:hasPart'),
         ('skos:exactMatch schema:hasPart',),
         _STRENGTH_ONLY.format(schema='slot_uri schema:hasPart',
-                              ttl='relatedMatch')),
+                              ttl='relatedMatch at slot level (its '
+                                  'DatasetCollection_resources and '
+                                  'FileCollection_resources triples say '
+                                  'exactMatch, as the schema does)')),
     'path': Listed(
         ('skos:narrowMatch schema:contentUrl',),
         ('skos:exactMatch schema:contentUrl',),
@@ -552,10 +618,11 @@ class ComprehensiveSSSOMGenerator:
                 or self.namespaces.get(prefix, '').startswith(D4D_NAMESPACE))
 
     def ttl_pairs(self, slot: str) -> Tuple[List[CuratedPair], List[CuratedPair]]:
-        """(slot-level, class-scoped) TTL alignments of ``slot``, strongest first.
+        """(slot-level, class-scoped) TTL triples on ``slot``, strongest first.
 
         A class-scoped subject is ``<Class>_<slot>`` for a class that carries
-        the slot (``d4d:FileCollection_total_bytes``).
+        the slot (``d4d:FileCollection_total_bytes``). D4D targets are
+        included; the resolution sets them aside (#3054).
         """
         classes = set(self.sv.all_classes())
         slot_level, scoped = [], []
@@ -606,9 +673,17 @@ class ComprehensiveSSSOMGenerator:
                     hint=heuristic_hint(slot, info['description']))
 
         slot_level, scoped = self.ttl_pairs(slot)
+        # A D4D target is not an alignment, in the TTL as in the schema
+        # (#3054): it is listed, never the row.
+        internal = [p for p in slot_level + scoped if self._is_internal(p.object)]
+        slot_level = [p for p in slot_level if not self._is_internal(p.object)]
+        scoped = [p for p in scoped if not self._is_internal(p.object)]
         schema = self.schema_pairs(slot)
-        ttl_used = slot_level or scoped
-        curated = slot_level + scoped + [p for p, _ in schema]
+        ttl_used = slot_level or scoped        # where the primary comes from
+        ttl_all = slot_level + scoped          # what the schema is checked against (#3053)
+        curated = ttl_all + [p for p, _ in schema] + internal
+        silent = ([] if ttl_used or not internal else
+                  ['TTL names only D4D terms, which are not alignments'])
 
         if ttl_used:                                       # 1. TTL
             primary = ttl_used[0]
@@ -625,7 +700,7 @@ class ComprehensiveSSSOMGenerator:
 
         if primary is not None:
             schema_curated = [p for p, _ in schema]
-            disagreement = self._disagreement(slot, ttl_used, schema_curated)
+            disagreement = self._disagreement(slot, ttl_all, schema_curated)
             return Resolution(
                 **base, status='mapped', source=source,
                 predicate=primary.predicate, object=primary.object,
@@ -634,11 +709,14 @@ class ComprehensiveSSSOMGenerator:
                 comment=comment, origin=origin,
                 others=self._others(primary, curated),
                 disagreement=disagreement,
-                disagreement_pairs=(self.signature(ttl_used, schema_curated)
+                disagreement_pairs=(self.signature(ttl_all, schema_curated)
                                     if disagreement else ((), ())),
                 notes=([f'TTL and schema disagree '
                         f'({DISAGREEMENT_NOTES[disagreement]})']
                        if disagreement else []))
+
+        # No curated external target: only a TTL D4D term can be left over.
+        base.update(others=self._others(None, internal), notes=silent)
 
         rec = self.recommendations.get(slot)                # 3. recommendation
         if rec and rec['suggested_uri']:
@@ -697,14 +775,20 @@ class ComprehensiveSSSOMGenerator:
 
     @staticmethod
     def disagrees(ttl: List[CuratedPair], schema: List[CuratedPair]) -> bool:
-        """The schema declares external targets and a TTL pair is not one."""
+        """The schema declares external targets and a TTL pair is not one.
+
+        ``ttl`` is every external TTL pair on the slot, slot-level and
+        class-scoped (#3053), not only the ones the primary was chosen from.
+        """
         if not ttl or not schema:
             return False
         declared = {(p.predicate, p.object) for p in schema}
         return any((p.predicate, p.object) not in declared for p in ttl)
 
-    def _others(self, primary: CuratedPair, curated: List[CuratedPair]) -> List[str]:
-        """Every curated pair but the primary, with where it was declared.
+    def _others(self, primary: Optional[CuratedPair],
+                curated: List[CuratedPair]) -> List[str]:
+        """Every curated pair but the primary (if any), with where it was
+        declared.
 
         A schema pair names the classes that declare it, less any whose
         ancestor declares the same pair: the merged schema repeats an
@@ -714,7 +798,7 @@ class ComprehensiveSSSOMGenerator:
         where: Dict[Tuple[str, str], Dict[str, List[str]]] = {}
         for p in curated:
             key = (p.predicate, p.object)
-            if key == (primary.predicate, primary.object):
+            if primary is not None and key == (primary.predicate, primary.object):
                 continue
             places = where.setdefault(key, {}).setdefault(p.source, [])
             if p.where not in places:
@@ -821,17 +905,58 @@ class ComprehensiveSSSOMGenerator:
     def _object_label(uri: str) -> str:
         return uri.split(':', 1)[1] if ':' in uri else uri
 
-    def _get_rocrate_path(self, uri: str) -> str:
-        """Get RO-Crate JSON path for a URI.
+    def rocrate_key(self, uri: str) -> str:
+        """The key a crate written with the RO-Crate 1.1 context carries
+        ``uri``'s IRI under (#3052), in this order:
 
-        RO-Crate's JSON-LD context carries schema.org terms as bare keys; a
-        term from any other vocabulary appears under its prefixed name.
+        1. The context's bare term for another vocabulary's IRI:
+           ``conformsTo`` for ``dcterms:conformsTo``, ``wasDerivedFrom`` for
+           ``prov:wasDerivedFrom``.
+        2. Else, for a schema.org IRI, its local name: the context keys
+           schema.org's terms bare. Not where the context binds that name to
+           another IRI: the bare ``conformsTo`` is Dublin Core's, so
+           ``schema:conformsTo`` goes on to rule 3. The name is not checked
+           against the schema.org release the context was built from, so a
+           ``schema:`` IRI that release lacks (``schema:measurementMethod``,
+           or one schema.org does not define, such as ``schema:example``)
+           still gets a bare key the context does not define.
+        3. Else a compact IRI on a prefix the context declares:
+           ``dct:accessRights``, never ``dcterms:``, which the context does
+           not declare.
+        4. Else the table's own CURIE (``dcat:byteSize``, ``evi:md5``,
+           ``rai:ethicalReview``). The context defines no such key; a crate
+           carries it only where its own context declares the prefix, as
+           the FAIRSCAPE profile example
+           (``data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json``)
+           declares ``evi``, ``rai`` and ``d4d``.
+
+        A crate written with another context can use another key for the
+        same property: the VOICE FAIRSCAPE crate writes
+        ``prov:wasDerivedFrom``. The key named here is the RO-Crate 1.1
+        context's.
         """
+        prefix, local = uri.split(':', 1) if ':' in uri else ('', uri)
+        namespace = self.namespaces.get(prefix)
+        if namespace is None:
+            return uri
+        if namespace in SCHEMA_ORG:
+            namespace = SCHEMA_ORG[0]
+        iri = namespace + local
+        if iri in ROCRATE_CONTEXT_TERMS:
+            return ROCRATE_CONTEXT_TERMS[iri]
+        if (namespace == SCHEMA_ORG[0]
+                and local not in ROCRATE_CONTEXT_TERMS.values()):
+            return local
+        if namespace in ROCRATE_CONTEXT_PREFIXES:
+            return f'{ROCRATE_CONTEXT_PREFIXES[namespace]}:{local}'
+        return uri
+
+    def _get_rocrate_path(self, uri: str) -> str:
+        """RO-Crate JSON path of the row's object: the Dataset entity's key
+        for it, as ``rocrate_key`` names it."""
         if not uri:
             return ''
-        if uri.startswith('schema:'):
-            return f"@graph[?@type='Dataset']['{uri.split(':', 1)[1]}']"
-        return f"@graph[?@type='Dataset']['{uri}']"
+        return f"@graph[?@type='Dataset']['{self.rocrate_key(uri)}']"
 
     def _get_vocab_source(self, uri: str) -> str:
         """Namespace IRI of a CURIE, from the TTL's or the schema's prefixes."""

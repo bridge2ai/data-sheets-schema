@@ -45,7 +45,9 @@ import generate_comprehensive_sssom as gcs  # noqa: E402
 import generate_comprehensive_sssom_uri as gcsu  # noqa: E402
 
 #: The 29 TTL-aligned slots the committed table did not label ``mapped``
-#: before #2935 (25 novel_d4d, 4 free_text).
+#: before #2935 (25 novel_d4d, 4 free_text). Four of them have a TTL target
+#: in the D4D namespace only (FORMERLY_UNMAPPED_D4D_TARGET_SLOTS), which is
+#: not an alignment (#3054); the other 25 are now mapped.
 FORMERLY_UNMAPPED_TTL_SLOTS = {
     'addressing_gaps', 'annotation_analyses', 'cleaning_strategies',
     'collection_timeframes', 'confidential_elements', 'content_warnings',
@@ -57,6 +59,10 @@ FORMERLY_UNMAPPED_TTL_SLOTS = {
     'missing_data_documentation', 'participant_compensation',
     'preprocessing_strategies', 'prohibited_uses', 'regulatory_restrictions',
     'retention_limit', 'sampling_strategies',
+}
+FORMERLY_UNMAPPED_D4D_TARGET_SLOTS = {
+    'addressing_gaps', 'content_warnings', 'informed_consent',
+    'participant_compensation',
 }
 
 SCHEMA_KINDS = (('slot_uri', 'skos:exactMatch'),
@@ -125,12 +131,13 @@ def raw_external_declarations(schema):
 
 
 @functools.lru_cache(maxsize=None)
-def ttl_match_triples():
-    """(D4D local name, predicate, object CURIE) for every SKOS match triple
-    on a D4D subject, by rdflib rather than the generator's regex."""
+def ttl_match_triples(ttl=TTL):
+    """(D4D local name, predicate, object CURIE, whether the object is in the
+    D4D namespace) for every SKOS match triple on a D4D subject, by rdflib
+    rather than the generator's regex."""
     import rdflib
     g = rdflib.Graph()
-    g.parse(TTL, format="turtle")
+    g.parse(ttl, format="turtle")
     namespaces = sorted(((p, str(ns)) for p, ns in g.namespaces()),
                         key=lambda x: -len(x[1]))
     skos = "http://www.w3.org/2004/02/skos/core#"
@@ -145,16 +152,46 @@ def ttl_match_triples():
     for s, p, o in g:
         s, p, o = str(s), str(p), str(o)
         if p.startswith(skos) and p.endswith("Match") and s.startswith(D4D):
-            found.append((s[len(D4D):], "skos:" + p[len(skos):], curie(o)))
+            found.append((s[len(D4D):], "skos:" + p[len(skos):], curie(o),
+                          o.startswith(D4D)))
     return tuple(found)
 
 
-def ttl_slot_alignments(slot_names):
-    """{slot: [(predicate, object)]} for slot-level SKOS triples, by rdflib."""
+def ttl_slot_alignments(slot_names, internal=False):
+    """{slot: [(predicate, object)]} for slot-level SKOS triples, by rdflib:
+    those whose target is outside the D4D namespace, or with ``internal``
+    those whose target is in it."""
     found = {}
-    for subject, predicate, obj in ttl_match_triples():
-        if subject in slot_names:
+    for subject, predicate, obj, in_d4d in ttl_match_triples():
+        if subject in slot_names and in_d4d == internal:
             found.setdefault(subject, []).append((predicate, obj))
+    return found
+
+
+def ttl_subject_slot(schema, names, subject):
+    """The slot a TTL subject speaks for: itself when it is a slot name, else
+    ``<slot>`` of a ``<Class>_<slot>`` subject whose class carries the slot
+    (the raw YAML). None when it is neither."""
+    if subject in names:
+        return subject
+    classes = set(schema.get("classes") or {})
+    for i, ch in enumerate(subject):
+        cls, slot = subject[:i], subject[i + 1:]
+        if (ch == "_" and cls in classes and slot in names
+                and slot in raw_carried(schema, cls)):
+            return slot
+    return None
+
+
+def ttl_all_alignments(schema, names, ttl=TTL, internal=False):
+    """{slot: {(predicate, object)}} for every TTL triple on the slot,
+    slot-level and ``<Class>_<slot>`` alike (#3053): targets outside the D4D
+    namespace, or with ``internal`` those inside it (#3054)."""
+    found = {}
+    for subject, predicate, obj, in_d4d in ttl_match_triples(ttl):
+        slot = ttl_subject_slot(schema, names, subject)
+        if slot is not None and in_d4d == internal:
+            found.setdefault(slot, set()).add((predicate, obj))
     return found
 
 
@@ -217,22 +254,12 @@ def curated_sources(schema, names):
 
     The TTL speaks for a slot through a slot-level subject, or a
     ``<Class>_<slot>`` subject for a class that carries the slot (rdflib, and
-    the raw YAML for what a class carries); else the schema speaks when it
-    declares an external target (raw YAML).
+    the raw YAML for what a class carries), with a target outside the D4D
+    namespace (#3054); else the schema speaks when it declares an external
+    target (raw YAML).
     """
-    classes = set(schema.get("classes") or {})
-    ttl = set()
-    for subject, _, _ in ttl_match_triples():
-        if subject in names:
-            ttl.add(subject)
-            continue
-        for i, ch in enumerate(subject):
-            cls, slot = subject[:i], subject[i + 1:]
-            if (ch == "_" and cls in classes and slot in names
-                    and slot in raw_carried(schema, cls)):
-                ttl.add(slot)
     out = {slot: "schema" for slot in raw_external_declarations(schema)}
-    out.update({slot: "ttl" for slot in ttl})
+    out.update({slot: "ttl" for slot in ttl_all_alignments(schema, names)})
     return out
 
 
@@ -261,8 +288,9 @@ class TestEverySlotHasOneRow(_Committed):
         self.assertEqual(set(self.uri), self.names)
 
     def test_every_row_is_one_physical_line(self):
-        """A description's line breaks once made 32 continuation lines, which
-        a line-oriented reader (grep, awk, a '#' filter) splits mid-row."""
+        """The table committed before #2935 had 34 continuation lines, from
+        34 rows whose description held a line break; a line-oriented reader
+        (grep, awk, a '#' filter) splits such a row mid-row."""
         for path in (COMP, URI):
             with self.subTest(table=path.name):
                 text = path.read_text(encoding="utf-8")
@@ -290,9 +318,15 @@ class TestTTLAlignmentsAreMapped(_Committed):
         cls.ttl = ttl_slot_alignments(cls.names)
 
     def test_the_ttl_has_slot_level_alignments(self):
-        self.assertGreater(len(self.ttl), 90)
+        """94 slot-level subjects: 87 with an external target, 7 with only a
+        D4D one."""
+        internal = ttl_slot_alignments(self.names, internal=True)
+        self.assertGreater(len(self.ttl), 80)
+        self.assertGreater(len(set(self.ttl) | set(internal)), 90)
 
     def test_every_slot_level_alignment_is_the_mapped_row(self):
+        """Every slot-level triple whose target is outside the D4D
+        namespace; a D4D target is not an alignment (#3054, below)."""
         for slot, pairs in sorted(self.ttl.items()):
             with self.subTest(slot=slot):
                 row = self.comp[slot]
@@ -309,10 +343,55 @@ class TestTTLAlignmentsAreMapped(_Committed):
                 self.assertLessEqual(set(pairs), pairs_in(row))
 
     def test_the_29_the_heuristics_used_to_hide(self):
-        self.assertLessEqual(FORMERLY_UNMAPPED_TTL_SLOTS, set(self.ttl))
-        for slot in sorted(FORMERLY_UNMAPPED_TTL_SLOTS):
+        """25 are aligned to an external term and are mapped; the other 4
+        name only a D4D term, which is listed and not mapped (#3054)."""
+        external = FORMERLY_UNMAPPED_TTL_SLOTS - FORMERLY_UNMAPPED_D4D_TARGET_SLOTS
+        self.assertEqual(len(external), 25)
+        self.assertLessEqual(external, set(self.ttl))
+        internal = ttl_slot_alignments(self.names, internal=True)
+        self.assertLessEqual(FORMERLY_UNMAPPED_D4D_TARGET_SLOTS, set(internal))
+        self.assertFalse(FORMERLY_UNMAPPED_D4D_TARGET_SLOTS & set(self.ttl))
+        for slot in sorted(external):
             with self.subTest(slot=slot):
                 self.assertEqual(self.comp[slot]["mapping_status"], "mapped")
+        for slot in sorted(FORMERLY_UNMAPPED_D4D_TARGET_SLOTS):
+            with self.subTest(slot=slot):
+                self.assertNotEqual(self.comp[slot]["mapping_status"], "mapped")
+                self.assertLessEqual(set(internal[slot]), pairs_in(self.comp[slot]))
+
+    def test_a_d4d_target_is_listed_and_never_the_mapped_row(self):
+        """#3054: the schema rung drops a D4D target because it names the
+        slot itself or another D4D term, not an external vocabulary; the TTL
+        rung does the same. Every TTL triple with a D4D target (slot-level
+        or class-scoped, by rdflib) stays in the row, and a slot with no
+        external curated target is not ``mapped`` whichever input names the
+        D4D term. Before #3054, 10 rows were ``mapped`` to a D4D term, 7 of
+        them to the slot's own slot_uri."""
+        internal = ttl_all_alignments(self.schema, self.names, internal=True)
+        self.assertGreaterEqual(len(internal), 10)
+        curated = curated_sources(self.schema, self.names)
+        slot_uris = raw_slot_uris(self.schema)
+        self_alignments = [s for s, pairs in internal.items()
+                           if {o for _, o in pairs} & slot_uris.get(s, set())]
+        self.assertGreaterEqual(len(self_alignments), 7)
+        generated = {r["subject_id"][len("d4d:"):]: r for r in
+                     study_generator().generate_comprehensive_sssom("2001-01-01")}
+        tables = (("comprehensive", self.comp), ("generated", generated),
+                  ("uri", self.uri))
+        for table, rows in tables:
+            for slot, pairs in sorted(internal.items()):
+                with self.subTest(table=table, slot=slot):
+                    row = rows[slot]
+                    self.assertLessEqual(pairs, pairs_in(row))
+                    self.assertNotIn((row["predicate_id"], row["object_id"]), pairs)
+                    if slot not in curated:
+                        self.assertNotEqual(row["mapping_status"], "mapped")
+                        self.assertNotIn(row["mapping_source"], ("ttl", "schema"))
+                        self.assertIn("TTL names only D4D terms", row["comment"])
+            for slot, row in sorted(rows.items()):
+                if row["mapping_status"] == "mapped":
+                    with self.subTest(table=table, slot=slot):
+                        self.assertFalse(row["object_id"].startswith("d4d:"))
 
     def test_named_examples(self):
         for slot, pair in {
@@ -406,7 +485,10 @@ class TestHeuristicsNeverOverrideCuration(_Committed):
         keywords = gcs.FREE_TEXT_KEYWORDS + gcs.NOVEL_D4D_KEYWORDS
         by_name = [s for s in self.curated if any(k in s for k in keywords)]
         self.assertGreaterEqual(len(by_name), 40)
-        self.assertLessEqual(FORMERLY_UNMAPPED_TTL_SLOTS, set(self.curated))
+        self.assertLessEqual(
+            FORMERLY_UNMAPPED_TTL_SLOTS - FORMERLY_UNMAPPED_D4D_TARGET_SLOTS,
+            set(self.curated))
+        self.assertFalse(FORMERLY_UNMAPPED_D4D_TARGET_SLOTS & set(self.curated))
 
     def test_every_curated_slot_is_mapped_from_its_source_whatever_the_hint(self):
         for slot, source in sorted(self.curated.items()):
@@ -563,6 +645,136 @@ class TestURITableReadsEveryDeclaredSlotUri(_Committed):
                 self.assertEqual(row["needs_slot_uri"], expected)
 
 
+#: An excerpt of the RO-Crate 1.1 JSON-LD context
+#: (https://w3id.org/ro/crate/1.1/context, version 1.1.3), written here from
+#: the published file rather than taken from the generator: every property
+#: term it keys bare for an IRI outside schema.org, and every prefix it
+#: declares. It keys schema.org's terms by their local names.
+ROCRATE_11_BARE = {
+    "cite-as": "https://www.w3.org/ns/iana/link-relations/relation#cite-as",
+    "conformsTo": "http://purl.org/dc/terms/conformsTo",
+    "hasFile": "http://pcdm.org/models#hasFile",
+    "hasMember": "http://pcdm.org/models#hasMember",
+    "importedBy": "http://purl.org/pav/importedBy",
+    "importedFrom": "http://purl.org/pav/importedFrom",
+    "importedOn": "http://purl.org/pav/importedOn",
+    "input": "https://bioschemas.org/ComputationalWorkflow#input",
+    "output": "https://bioschemas.org/ComputationalWorkflow#output",
+    "retrievedBy": "http://purl.org/pav/retrievedBy",
+    "retrievedFrom": "http://purl.org/pav/retrievedFrom",
+    "retrievedOn": "http://purl.org/pav/retrievedOn",
+    "wasDerivedFrom": "http://www.w3.org/ns/prov#wasDerivedFrom",
+}
+ROCRATE_11_PREFIXES = {
+    "bibo": "http://purl.org/ontology/bibo/",
+    "cc": "http://creativecommons.org/ns#",
+    "dct": "http://purl.org/dc/terms/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "frapo": "http://purl.org/cerif/frapo/",
+    "pav": "http://purl.org/pav/",
+    "pcdm": "http://pcdm.org/models#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfa": "http://www.w3.org/ns/rdfa#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "rel": "https://www.w3.org/ns/iana/link-relations/relation#",
+    "roterms": "http://purl.org/ro/roterms#",
+    "schema": "http://schema.org/",
+    "wf4ever": "http://purl.org/ro/wf4ever#",
+    "wfdesc": "http://purl.org/ro/wfdesc#",
+    "wfprov": "http://purl.org/ro/wfprov#",
+}
+
+
+@functools.lru_cache(maxsize=None)
+def study_generator():
+    """The generator on the study's schema, TTL and recommendations."""
+    return gcs.ComprehensiveSSSOMGenerator(SCHEMA, TTL, RECS)
+
+
+class TestRoCratePathFollowsTheContext(unittest.TestCase):
+    """``rocrate_json_path`` names the key a crate written with the RO-Crate
+    1.1 context carries the object under (#3052). The rule this replaced
+    keyed only ``schema:`` objects bare, so ``dcterms:conformsTo`` got a
+    ``dcterms:conformsTo`` key (the context declares ``dct``, not
+    ``dcterms``, and binds the bare ``conformsTo`` to that IRI) and
+    ``prov:wasDerivedFrom`` lost its bare term. The rule before #2935 keyed
+    ``schema:conformsTo`` as ``conformsTo``, which expands to Dublin Core's
+    IRI.
+
+    Checked on the generator's rows and on the committed table. Not
+    checked: whether a ``schema:`` object is a term of the schema.org release
+    the context was built from (the excerpt above cannot say; see the
+    generator's ``rocrate_key``)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.gen = study_generator()
+        cls.tables = {
+            "generated": cls.gen.generate_comprehensive_sssom("2001-01-01"),
+            "committed": read_table(COMP),
+        }
+
+    @staticmethod
+    def key(path):
+        return path.split("['", 1)[1][:-2]
+
+    def test_named_keys(self):
+        for curie, key in {
+            "dcterms:conformsTo": "conformsTo",
+            "prov:wasDerivedFrom": "wasDerivedFrom",
+            "schema:conformsTo": "schema:conformsTo",
+            "schema:name": "name",
+            "dcterms:accessRights": "dct:accessRights",
+            "rdf:ID": "rdf:ID",
+            "dcat:byteSize": "dcat:byteSize",
+            "evi:md5": "evi:md5",
+        }.items():
+            with self.subTest(curie=curie):
+                self.assertEqual(self.gen.rocrate_key(curie), key)
+        for table, rows in self.tables.items():
+            by_slot = {r["subject_id"]: r for r in rows}
+            for slot, key in {"d4d:conforms_to_standard": "conformsTo",
+                              "d4d:was_inferred_derived": "wasDerivedFrom",
+                              "d4d:conforms_to": "schema:conformsTo"}.items():
+                with self.subTest(table=table, slot=slot):
+                    self.assertEqual(by_slot[slot]["rocrate_json_path"],
+                                     f"@graph[?@type='Dataset']['{key}']")
+
+    def test_every_key_expands_to_the_object_under_the_context(self):
+        """A bare key or a key on a declared prefix expands, under the
+        excerpt, to the object's IRI, and is the shortest such key; a key on
+        any other prefix is the object's own CURIE, for a vocabulary the
+        context declares no prefix for."""
+        schema_org = ("http://schema.org/", "https://schema.org/")
+        for table, rows in self.tables.items():
+            for row in rows:
+                obj, path = row["object_id"], row["rocrate_json_path"]
+                with self.subTest(table=table, slot=row["subject_id"], object=obj):
+                    if not obj:
+                        self.assertEqual(path, "")
+                        continue
+                    namespace = row["object_source"]
+                    self.assertNotEqual(namespace, "unknown")
+                    if namespace in schema_org:
+                        namespace = schema_org[0]
+                    local = obj.split(":", 1)[1]
+                    iri = namespace + local
+                    key = self.key(path)
+                    bare = ({k for k, v in ROCRATE_11_BARE.items() if v == iri}
+                            | ({local} if namespace == schema_org[0]
+                               and local not in ROCRATE_11_BARE else set()))
+                    if bare:
+                        self.assertEqual({key}, bare)
+                    elif ":" in key and key.split(":", 1)[0] in ROCRATE_11_PREFIXES:
+                        prefix, rest = key.split(":", 1)
+                        self.assertEqual(ROCRATE_11_PREFIXES[prefix] + rest, iri)
+                    else:
+                        self.assertNotIn(namespace, ROCRATE_11_PREFIXES.values())
+                        self.assertEqual(key, obj)
+                    self.assertFalse(key.startswith("dcterms:"))
+
+
 class TestDisagreementsAreListed(unittest.TestCase):
     """A TTL/schema disagreement the lists do not name is new and must be
     looked at; a listed one whose pairs changed must be looked at again; a
@@ -586,19 +798,76 @@ class TestDisagreementsAreListed(unittest.TestCase):
                 self.assertGreater(len(entry.reason.strip()), 20)
 
     def test_each_listing_names_the_pairs_the_inputs_declare(self):
-        """Read independently of the generator (#2991): the TTL's slot-level
-        triples by rdflib and the schema's external declarations from the raw
-        YAML must be exactly the pairs the listing was written for."""
+        """Read independently of the generator (#2991): the TTL's triples by
+        rdflib and the schema's external declarations from the raw YAML must
+        be exactly the pairs the listing was written for. The TTL side is
+        every external triple on the slot, slot-level and ``<Class>_<slot>``
+        alike (#3053): ``resources`` is listed with both its slot-level
+        relatedMatch and its class-scoped exactMatch."""
         schema = raw_schema()
         names = raw_slot_names(schema)
-        ttl = ttl_slot_alignments(names)
+        ttl = ttl_all_alignments(schema, names)
         declared = raw_external_declarations(schema)
+        self.assertEqual(ttl["resources"],
+                         {("skos:relatedMatch", "schema:hasPart"),
+                          ("skos:exactMatch", "schema:hasPart")})
         for slot, entry in sorted(self.listed.items()):
             with self.subTest(slot=slot):
                 self.assertEqual(set(entry.ttl),
-                                 {f"{p} {o}" for p, o in ttl.get(slot, [])})
+                                 {f"{p} {o}" for p, o in ttl.get(slot, set())})
                 self.assertEqual(set(entry.schema),
                                  {f"{p} {o}" for p, o in declared.get(slot, set())})
+
+    def test_every_slot_where_the_inputs_disagree_is_listed(self):
+        """The disagreement rule recomputed from the inputs (#3053): a slot
+        disagrees when the schema declares external targets and some
+        external TTL pair on it, from any subject, is not among them."""
+        schema = raw_schema()
+        names = raw_slot_names(schema)
+        ttl = ttl_all_alignments(schema, names)
+        declared = raw_external_declarations(schema)
+        disagree = {slot for slot, pairs in ttl.items()
+                    if declared.get(slot) and pairs - declared[slot]}
+        self.assertIn("resources", disagree)
+        self.assertEqual(sorted(disagree), sorted(self.listed))
+
+    def _generator_with_ttl(self, edit):
+        """A generator on the real schema and an edited copy of the TTL."""
+        text = TTL.read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as d:
+            changed = Path(d) / TTL.name
+            changed.write_text(edit(text), encoding="utf-8")
+            return gcs.ComprehensiveSSSOMGenerator(SCHEMA, changed, RECS)
+
+    def test_a_changed_class_scoped_triple_on_a_listed_slot_is_changed(self):
+        """#3053's first reproduction: ``resources`` also has a slot-level
+        triple, so its class-scoped ones were never checked, and the listing
+        held while one of them changed target."""
+        old = "d4d:FileCollection_resources skos:exactMatch schema:hasPart ."
+        new = "d4d:FileCollection_resources skos:exactMatch schema:isPartOf ."
+        self.assertEqual(TTL.read_text(encoding="utf-8").count(old), 1)
+        gen = self._generator_with_ttl(lambda text: text.replace(old, new))
+        res = gen.resolutions["resources"]
+        self.assertEqual((res.predicate, res.object, res.disagreement),
+                         ("skos:relatedMatch", "schema:hasPart", "changed"))
+        report = gen.disagreement_report()
+        self.assertEqual((report["changed"], report["unlisted"], report["stale"]),
+                         (["resources"], [], []))
+        self.assertTrue(any("disagreement on resources is not the listed one" in w
+                            and "skos:exactMatch schema:isPartOf" in w
+                            for w in gen.warnings()))
+
+    def test_a_disagreeing_class_scoped_triple_on_an_unlisted_slot_warns(self):
+        """#3053's second reproduction, in the form /d4d-add-mapping writes:
+        a ``<Class>_<slot>`` triple beside a slot-level one that agrees."""
+        self.assertIn("description", raw_carried(raw_schema(), "FileCollection"))
+        added = "d4d:FileCollection_description skos:exactMatch schema:abstract .\n"
+        gen = self._generator_with_ttl(lambda text: text + added)
+        res = gen.resolutions["description"]
+        self.assertEqual((res.predicate, res.object, res.disagreement),
+                         ("skos:exactMatch", "schema:description", "unlisted"))
+        self.assertEqual(gen.disagreement_report()["unlisted"], ["description"])
+        self.assertTrue(any("disagree on description" in w for w in gen.warnings()))
 
     def test_open_disagreements_warn_on_every_run(self):
         warnings = "\n".join(self.gen.warnings())
@@ -861,6 +1130,12 @@ classes:
       own_uri:
         description: Declares only a D4D slot_uri.
         slot_uri: d4d:ownUri
+      own_uri_ttl:
+        description: Declares a D4D slot_uri the TTL restates.
+        slot_uri: d4d:ownUriTtl
+      own_uri_scoped:
+        description: Declares a D4D slot_uri a class-scoped triple restates.
+        slot_uri: d4d:ownUriScoped
 """
 
 FIXTURE_TTL = """\
@@ -871,6 +1146,8 @@ FIXTURE_TTL = """\
 
 d4d:ethical_notes skos:exactMatch rai:ethicalReview .
 d4d:both_named skos:exactMatch schema:name .
+d4d:own_uri_ttl skos:exactMatch d4d:ownUriTtl .
+d4d:Dataset_own_uri_scoped skos:exactMatch d4d:ownUriScoped .
 """
 
 FIXTURE_RECS = (
@@ -928,6 +1205,31 @@ class TestPrecedenceOnAFixture(unittest.TestCase):
         r = self.res["own_uri"]
         self.assertEqual(r.status, "unmapped")
         self.assertEqual(self.gen.declared_slot_uri("own_uri"), "d4d:ownUri")
+
+    def test_a_d4d_target_is_not_an_alignment_whichever_input_names_it(self):
+        """#3054: the same fact, a slot's only curated target being its own
+        D4D slot_uri, resolves the same way whether the schema states it or
+        the TTL restates it, slot-level or class-scoped. The TTL's triple
+        stays listed."""
+        for slot in ("own_uri", "own_uri_ttl", "own_uri_scoped"):
+            with self.subTest(slot=slot):
+                r = self.res[slot]
+                self.assertEqual(
+                    (r.status, r.source, r.predicate, r.object, r.confidence,
+                     r.justification),
+                    ("unmapped", "none", "semapv:UnmappedProperty", "", 0.0,
+                     "semapv:RequiresResearch"))
+        self.assertEqual(self.res["own_uri"].others, [])
+        self.assertEqual(self.res["own_uri_ttl"].others,
+                         ["skos:exactMatch d4d:ownUriTtl (ttl)"])
+        self.assertEqual(self.res["own_uri_scoped"].others,
+                         ["skos:exactMatch d4d:ownUriScoped "
+                          "(ttl d4d:Dataset_own_uri_scoped)"])
+        for slot in ("own_uri_ttl", "own_uri_scoped"):
+            with self.subTest(slot=slot):
+                self.assertIn("TTL names only D4D terms, which are not alignments",
+                              self.res[slot].notes)
+        self.assertEqual(self.res["own_uri"].notes, [])
 
     def test_an_unlisted_disagreement_warns_and_the_ttl_still_wins(self):
         r = self.res["both_named"]
