@@ -404,18 +404,20 @@ def test_a_reap_by_a_concurrent_popen_waiter_is_latched_before_any_signal(monkey
 
 
 def test_an_exit_status_never_published_is_not_a_success(monkeypatch, tmp_path):
-    """#2984: a waiter that reaped the leader elsewhere and holds the Popen's lock past the
-    cleanup bound leaves the exit status unknown. Cleanup sends nothing and fails loudly,
-    and execute_child never returns None, which its callers read as success."""
+    """#2984, #2985: a waiter that reaped the leader elsewhere and holds the Popen's lock
+    past the cleanup bound leaves the exit status unknown. Cleanup sends nothing and does
+    not wait for it (a wait would only invent 0), exit_status reports it unknown, and
+    execute_child never returns an unknown status, which its callers read as success."""
     process = subprocess.Popen([sys.executable, '-c', 'raise SystemExit(3)'], stdout=subprocess.PIPE, text=True,
                                start_new_session=True)
     sends = []
     thread, done = _paused_popen_waiter(process, reap_when_exited=True, hold=4)
     monkeypatch.setattr(os, 'killpg', lambda pgid, sig: sends.append(sig))
     try:
-        with pytest.raises(subprocess.TimeoutExpired):
-            terminate_group(process)
-        assert sends == [] and runner.leader_released(process)
+        start = time.monotonic()
+        terminate_group(process)
+        assert time.monotonic() - start < 2 and sends == [] and runner.leader_released(process)
+        assert runner.exit_status(process) is None
     finally:
         monkeypatch.undo()
         thread.join(10)
@@ -430,6 +432,42 @@ def test_an_exit_status_never_published_is_not_a_success(monkeypatch, tmp_path):
         execute_child([sys.executable, '-c', 'pass'], proxy=proxy, instruction=instruction,
                       attempt=tmp_path, cwd=tmp_path, env=dict(os.environ), deadline_seconds=30,
                       verify_launch=lambda: None)
+
+
+@pytest.mark.parametrize('reaper', ['raw_waitpid', 'ignored_sigchld'])
+def test_a_failed_child_reaped_elsewhere_is_never_returned_as_success(tmp_path, reaper):
+    """#2985: when someone else reaps the leader, Popen's poll() and wait() invent status 0
+    on ECHILD. execute_child returns only a status the kernel reported before the reap, else
+    stops: a child that exited 3 is never returned as 0, whether a raw waitpid in another
+    thread or an ignored SIGCHLD (the kernel reaping) took the status."""
+    instruction = tmp_path / 'input.txt'; instruction.write_text('offline')
+    proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: None)
+    real_popen, previous = subprocess.Popen, signal.getsignal(signal.SIGCHLD)
+    def reaped_elsewhere(*args, **kwargs):
+        child = real_popen(*args, **kwargs)
+        if reaper == 'raw_waitpid' and kwargs.get('start_new_session'):
+            threading.Thread(target=os.waitpid, args=(child.pid, 0), daemon=True).start()
+        return child
+    outcomes = []
+    try:
+        if reaper == 'ignored_sigchld':
+            signal.signal(signal.SIGCHLD, signal.SIG_IGN)
+        runner.subprocess.Popen = reaped_elsewhere
+        for n in range(3):
+            attempt = tmp_path / f'attempt{n}'; attempt.mkdir()
+            try:
+                outcomes.append(execute_child([sys.executable, '-c', 'raise SystemExit(3)'], proxy=proxy,
+                                              instruction=instruction, attempt=attempt,
+                                              cwd=tmp_path, env=dict(os.environ), deadline_seconds=30,
+                                              verify_launch=lambda: None))
+            except BudgetStop as stop:
+                assert 'exit status is unavailable' in str(stop), stop
+                outcomes.append('unknown')
+    finally:
+        runner.subprocess.Popen = real_popen
+        signal.signal(signal.SIGCHLD, previous)
+    # Each run either observed the exit (3) before the reap or reports it unknown; never 0.
+    assert outcomes and all(o in (3, 'unknown') for o in outcomes), outcomes
 
 
 def test_a_reap_by_someone_else_during_the_grace_wait_stops_the_sigkill(monkeypatch):
@@ -451,20 +489,21 @@ def test_a_reap_by_someone_else_during_the_grace_wait_stops_the_sigkill(monkeypa
         reaper.join(5)
         assert error is None, error
         assert calls == [(signal.SIGTERM, None)], calls
-        assert process.returncode is not None and not reaper.is_alive()
+        assert runner.leader_released(process) and not reaper.is_alive()
     finally:
         monkeypatch.undo()
         process.stdout.close()
-        if process.returncode is None and process_state(process.pid):
+        if not runner.leader_released(process) and process_state(process.pid):
             process.kill(); process.wait()
 
 
 @pytest.mark.parametrize('entry', ['exit_check', 'terminate_group'])
 def test_a_leader_reaped_behind_popen_is_recorded_and_sent_nothing(monkeypatch, entry):
-    """#2943: a leader reaped by a raw waitpid, not by its Popen, leaves returncode unset. The
-    exit check's ECHILD branch must record a status so terminate_group sends nothing: the id
-    is no longer held and may name another group."""
-    process = subprocess.Popen([sys.executable, '-c', 'pass'], start_new_session=True)
+    """#2943, #2985: a leader reaped by a raw waitpid, not by its Popen, leaves returncode
+    unset. The exit check's ECHILD branch latches the reap so terminate_group sends nothing
+    (the id is no longer held and may name another group), and it records no status: the
+    exit was never observed, and Popen would invent 0."""
+    process = subprocess.Popen([sys.executable, '-c', 'raise SystemExit(3)'], start_new_session=True)
     os.waitpid(process.pid, 0)                             # reaped behind Popen's back
     assert process.returncode is None
     sends = []
@@ -473,7 +512,8 @@ def test_a_leader_reaped_behind_popen_is_recorded_and_sent_nothing(monkeypatch, 
         assert runner.leader_exited(process)
     else:
         terminate_group(process)
-    assert sends == [] and process.returncode is not None
+    assert sends == [] and runner.leader_released(process)
+    assert runner.exit_status(process) is None and process.returncode is None
 
 
 def test_the_exit_check_sees_an_exited_leader_without_reaping_it():
