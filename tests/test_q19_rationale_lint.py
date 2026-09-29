@@ -791,6 +791,99 @@ def test_strict_passes_a_disclaimed_list(tmp_path):
     assert "substantive_only" in result.output and "0 flagged of 1" in result.output
 
 
+#: #3264: a label reason is a range of the label, its clauses judged in the
+#: whole label, so a gap named in a concession's aside or list is conceded.
+_CONCEDED_LABELS = [
+    # The Codex scenario.
+    "Good despite empty provenance fields (no was_derived_from)",
+    "Good despite empty provenance fields, no was_derived_from",
+    "Good despite empty provenance fields no was_derived_from",
+    "Good although the fields are empty (no was_derived_from, no parent_datasets)",
+    "Good; nothing deducted for the empty fields (was_derived_from)",
+]
+
+
+@pytest.mark.parametrize("label", _CONCEDED_LABELS)
+def test_a_label_reason_keeps_the_scope_of_the_clause_it_follows(label):
+    """#3264: the label reason "no was_derived_from)" was cut from the label
+    and read on its own, apart from the "despite" that governs it, so a
+    conceded gap was a reason and --strict failed; the form with no
+    punctuation was already substantive_only."""
+    result = lint_q19(item(score=3, label=label, note="Held at 3 because no errata are recorded."))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, SUBSTANTIVE_ONLY, []), label
+
+
+@pytest.mark.parametrize("label, reason", [
+    ("Good versioning (no PROV graph)", "no PROV graph)"),
+    ("Good versioning, no PROV graph", "no PROV graph"),
+    ("Good versioning but no PROV graph", "but no PROV graph"),
+])
+def test_a_label_reason_after_credit_is_still_read(label, reason):
+    """#3264: judging a label reason in the whole label removes only what a
+    concession, acceptance or disclaimer governs; after credit it is read
+    and shown as the same words as before."""
+    rating = item(score=3, label=label, note="Held at 3 because no errata are recorded.")
+    result = lint_q19(rating)
+    assert result.concerns(REPRESENTATION) == ["graph_form"], label
+    assert ("score_label", reason) in withholding_sentences(rating)
+
+
+#: #3264: a withholding cue in the aside of an acceptance: the parenthesised
+#: form must read as the same words with no parentheses do.
+_ACCEPTED_ASIDE = ("The PROV graph documents all source data. The rubric accepts prose (even if "
+                   "it falls short of a full graph). No errata are recorded.")
+
+
+def test_a_cue_in_an_acceptance_aside_does_not_say_why():
+    """#3264: the aside was marked unread, but its cue still set the stated
+    basis, and because its sentence named no reason the neighbouring credit
+    ("The PROV graph documents all source data.") was read as a graph_form
+    reason. It now reads as the unparenthesised sentence does: nothing says
+    why, and the cue is reported as unread."""
+    plain = lint_q19(item(score=3, note=_ACCEPTED_ASIDE.replace("(", "").replace(")", "")))
+    result = lint_q19(item(score=3, note=_ACCEPTED_ASIDE))
+    assert (result.basis, result.verdict, result.cue_unread) == (
+        UNSTATED, SUBSTANTIVE_ONLY, True)
+    assert (plain.basis, plain.verdict, plain.cue_unread) == (
+        result.basis, result.verdict, result.cue_unread)
+    assert withholding_sentences(item(score=3, note=_ACCEPTED_ASIDE)) == []
+
+
+def test_a_cue_in_a_disclaimer_aside_is_disclaimed():
+    """#3264: a cue in the scope of a disclaimer does not say why and is not
+    reported as unread: the disclaimer covers it."""
+    result = lint_q19(item(score=3, note=(
+        "The PROV graph documents all source data. Nothing is deducted for the prose form "
+        "(which falls short of a full graph). No errata are recorded.")))
+    assert (result.basis, result.verdict, result.cue_unread) == (
+        UNSTATED, SUBSTANTIVE_ONLY, False)
+
+
+def test_a_cue_before_a_disclaimer_in_its_own_clause_still_says_why():
+    """#3264 keeps the documented exception: a disclaimer after the cue in
+    the cue's own clause removes that clause, not the cue."""
+    result = lint_q19(item(score=3, note=(
+        "The PROV graph documents all source data. It falls short of 5 not because of form "
+        "but because no errata are recorded.")))
+    assert (result.basis, result.verdict) == (STATED, SUBSTANTIVE_ONLY)
+    assert all("documents all source data" not in r.sentence for r in result.reasons)
+
+
+@pytest.mark.parametrize("rating", [
+    item(score=3, label=_CONCEDED_LABELS[0], note="Held at 3 because no errata are recorded."),
+    item(score=3, note=_ACCEPTED_ASIDE),
+])
+def test_strict_passes_a_conceded_label_and_an_accepted_aside(tmp_path, rating):
+    """#3264: both Codex scenarios exit 0 under --strict."""
+    from data_sheets_schema.cli import cli
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [rating]}]}))
+    result = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--strict", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    assert "substantive_only" in result.output and "0 flagged of 1" in result.output
+
+
 def test_a_score_below_maximum_with_no_reason_is_reported_as_such():
     result = lint_q19(item(note="Good provenance overall."))
     assert (result.verdict, result.flagged) == (REASON_NOT_DETERMINED, False)

@@ -142,7 +142,16 @@ machine-readable form and lineage across fields. So:
   may be an item of an outer list instead, and the lint does not guess,
   so it is not read: the committed 09-11 CHORUS v7 rep1 rating loses "and
   no structured was_derived_from or parent_datasets linkage" after a
-  concession, its verdict unchanged.
+  concession, its verdict unchanged. A withholding cue in such a scope
+  does not say why either (#3264): in the scope of an acceptance or
+  concession it is reported as `cue_unread`, and in a disclaimer's it is
+  disclaimed, so it neither states the basis nor sends the lint to its
+  sentence's neighbours ("The rubric accepts prose (even if it falls
+  short of a full graph)" reads as the same words with no parentheses).
+  A label's reason clauses are ranges of the label, judged in the whole
+  label, so they keep this scope too: "Good despite empty provenance
+  fields (no was_derived_from)" names no reason, as the same label with
+  no punctuation names none.
 
 Where nothing the lint reads names a concern, the verdict is
 `REASON_NOT_DETERMINED`. The rationale may give no reason, give one outside
@@ -575,27 +584,38 @@ def _clauses(text: str) -> list[tuple[int, int, bool]]:
     fields (was_derived_from, parent_datasets) being empty". Where the
     words do not say whether a fragment continues the clause or starts one
     of its own, it is not read."""
+    return [(a, b, read) for a, b, read, _ in _scoped_clauses(text)]
+
+
+def _scoped_clauses(text: str) -> list[tuple[int, int, bool, int]]:
+    """(start, end, read, origin) of each clause of `text`, as `_clauses`
+    reads them. `origin` is the index of the clause whose words decide that
+    a clause is not read: the clause itself where it concedes, accepts or
+    disclaims (`_unread`), else the clause whose scope it is in, a
+    disclaimer opening with "but", "whereas" or "however" after it, or the
+    clause a comma or parenthesis continues (`_in_scope`). It is the
+    clause's own index where the clause is read (#3264)."""
     clauses, seps, pos, sep = [], [], 0, ""
     for m in _CLAUSE.finditer(text):
-        clauses.append([pos, m.start(), True])
+        clauses.append([pos, m.start(), True, len(clauses)])
         seps.append(sep)
         pos, sep = m.end(), m.group(0).strip()
-    clauses.append([pos, len(text), True])
+    clauses.append([pos, len(text), True, len(clauses)])
     seps.append(sep)
     for k, clause in enumerate(clauses):
-        a, b, _ = clause
+        a, b = clause[0], clause[1]
         clause[2] = not _unread(text[a:b])
         if (k and _CONTRAST_OPENS.match(text, a) and _disclaims(text[a:b])
                 and not _names_concern(text[a:b])):
             # The disclaimed clause, and the list or aside it closes.
             j = k - 1
-            clauses[j][2] = False
+            clauses[j][2:] = [False, k]
             while j and seps[j] in _SCOPE_SEPARATORS and not _FINITE.search(
                     text[clauses[j - 1][0]:clauses[j - 1][1]]):
                 j -= 1
-                clauses[j][2] = False
+                clauses[j][2:] = [False, k]
     _in_scope(text, clauses, seps)
-    return [(a, b, read) for a, b, read in clauses]
+    return [tuple(clause) for clause in clauses]
 
 
 #: What splits a clause's own list or aside from it: a comma or a
@@ -636,7 +656,7 @@ def _in_scope(text: str, clauses: list[list], seps: list[str]) -> None:
     complete in prose, was_derived_from is empty")."""
     depth, pending = 0, False
     for k, clause in enumerate(clauses):
-        a, b, read = clause
+        a, b, read = clause[:3]
         fragment = text[a:b]
         if not (k and not clauses[k - 1][2] and seps[k] in _SCOPE_SEPARATORS
                 and not _OWN_CLAUSE.match(fragment)):
@@ -650,6 +670,9 @@ def _in_scope(text: str, clauses: list[list], seps: list[str]) -> None:
             clause[2], pending = False, False
         if not clause[2] and _disclaims(fragment) and not _FINITE.search(fragment):
             pending = True
+        if read and not clause[2]:
+            # Not read for its predecessor's words, not its own.
+            clause[3] = clauses[k - 1][3]
 
 
 #: A fragment opening with one of these was split at a conjunction and
@@ -666,24 +689,49 @@ def _says_why(text: str) -> bool:
     phrase (`_DISCLAIMER`) before it in its clause. A disclaimer after the
     cue removes its own clause from what is read, not the cue: "It falls
     short of 5 not because of form but because no errata are recorded"
-    says why."""
+    says why.
+
+    A cue in a clause that is not read for another clause's words (the
+    aside or list of an acceptance, a concession or a disclaimer, #3248)
+    does not say why either, so it neither states the basis nor sends the
+    lint to the neighbouring sentences (#3264): "The rubric accepts prose
+    (even if it falls short of a full graph)" gives no reason, as the same
+    words without the parentheses give none."""
     return any(not accepts for accepts in _cue_clauses(text))
 
 
-def _cue_clauses(text: str):
-    """For each withholding cue in `text` that is neither negated within
+def _cue_clauses(text: str, lo: int = 0, hi: int | None = None):
+    """For each withholding cue in `text` (within `lo`..`hi`, its clauses
+    judged in the whole of `text`) that is neither negated within
     `_DISCLAIM_WINDOW` words nor preceded by a disclaiming phrase in its
-    clause: whether its clause accepts or concedes (`_accepts`)."""
-    for a, b, _ in _clauses(text):
+    clause: whether its clause accepts or concedes (`_accepts`). A cue in a
+    clause that is not read for another clause's words is yielded as
+    accepting where that clause accepts or concedes, and not at all where
+    it disclaims: a disclaimer's scope is disclaimed (#3264)."""
+    hi = len(text) if hi is None else hi
+    scoped = _scoped_clauses(text)
+    for k, (a, b, read, origin) in enumerate(scoped):
+        a, b = max(a, lo), min(b, hi)
+        if a >= b:
+            continue
         clause = text[a:b]
+        governing = text[scoped[origin][0]:scoped[origin][1]]
         for cue in _WITHHOLDING.finditer(clause):
-            if not (_negated(clause, cue.start()) or _DISCLAIMER.search(clause[:cue.start()])):
+            if _negated(clause, cue.start()) or _DISCLAIMER.search(clause[:cue.start()]):
+                continue
+            if origin == k:
                 yield _accepts(clause)
+            elif _accepts(governing):
+                yield True
 
 
-def _label_reasons(label: str) -> list[str]:
-    """The parts of one score-label sentence that give a reason; the rest is
-    credit.
+def _label_reasons(label: str) -> list[tuple[int, int]]:
+    """The (start, end) of each part of one score-label sentence that gives
+    a reason; the rest is credit. Each part is a range of the label, read
+    with its clauses judged in the whole label (`_reasons`), so a part keeps
+    the scope of the clause before it: in "Good despite empty provenance
+    fields (no was_derived_from)" the parenthesis is the concession's
+    aside and names no reason, as it does with no parenthesis (#3264).
 
     Clauses end at `_CLAUSE_BREAK` and before a contrasting conjunction
     (`_LABEL_CONJUNCTION`). The reason runs from the first clause carrying a
@@ -711,15 +759,18 @@ def _label_reasons(label: str) -> list[str]:
         cuts = [a] + [m.end() for m in _LABEL_CONJUNCTION.finditer(label, a, b)]
         for i, start in enumerate(cuts):
             part = label[start:cuts[i + 1] if i + 1 < len(cuts) else b].strip()
-            if (_LABEL_OPENS.search(part) or _says_why(part)
+            end = cuts[i + 1] if i + 1 < len(cuts) else b
+            if (_LABEL_OPENS.search(part)
+                    or any(not accepts for accepts in _cue_clauses(label, start, end))
                     or (_LABEL_NOT.search(part) and len(_kinds(part)) < 2)):
-                if i and not _reasons([("score_label", label[start:b])]):
+                if i and not _reasons([("score_label", label, (start, b))]):
                     start = cuts[i - 1]
-                return [text for text in out + [label[start:].strip()] if text]
+                return [(lo, hi) for lo, hi in out + [(start, len(label))]
+                        if label[lo:hi].strip()]
         clause = label[a:b].strip()
         absent = _ABSENCE.search(clause)
         if absent and (absent.start() == 0 or len(_kinds(clause)) < 2):
-            out.append(clause)
+            out.append((a, b))
     return out
 
 
@@ -760,20 +811,28 @@ def withholding_sentences(item: dict) -> list[tuple[str, str]]:
     sentence that names no concern of its own ("Short of 5.", "One point is
     deducted for that gap.") gives its reason in a neighbour, so the
     sentences either side of it in the same field are read with it."""
+    return [(name, text[lo:hi].strip()) for name, text, (lo, hi) in _withholding(item)]
+
+
+def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int]]]:
+    """`withholding_sentences` as (field, sentence, (start, end)) triples,
+    which `_reasons` reads with the sentence's clauses judged whole: a
+    label's reason is a range of the label, not a string cut from it
+    (#3264)."""
     sentences = _sentences(item)
     keep = []
     for i, (name, sentence) in enumerate(sentences):
         if name == "score_label":
-            keep.extend((i, reason) for reason in _label_reasons(sentence))
+            keep.extend((i, span) for span in _label_reasons(sentence))
         elif _says_why(sentence):
-            keep.append((i, sentence))
+            keep.append((i, (0, len(sentence))))
             if not _reasons([(name, sentence)]):
-                keep.extend((j, sentences[j][1]) for j in (i - 1, i + 1)
+                keep.extend((j, (0, len(sentences[j][1]))) for j in (i - 1, i + 1)
                             if 0 <= j < len(sentences) and sentences[j][0] == name)
     seen, out = set(), []
-    for i, text in sorted(keep, key=lambda k: k[0]):
-        if (i, text) not in seen:
-            seen.add((i, text)); out.append((sentences[i][0], text))
+    for i, span in sorted(keep, key=lambda k: k[0]):
+        if (i, span) not in seen:
+            seen.add((i, span)); out.append((sentences[i][0], sentences[i][1], span))
     return out
 
 
@@ -809,15 +868,16 @@ def lint_q19(item: dict) -> Q19Lint:
     mentions = _reasons(sentences, accepting=False)
     if score is None or maximum is None or score >= maximum:
         return Q19Lint(score, maximum, NOT_LINTED, (), mentions)
-    stated = withholding_sentences(item)
-    label = [(name, s) for name, s in stated if name == "score_label"]
+    stated = _withholding(item)
+    label = [(name, s, span) for name, s, span in stated if name == "score_label"]
     # A label says why the score is held when it carries a withholding cue
     # and names a reason ("Held at 4 because was_derived_from is empty").
     # A contrast or absence clause ("…, no formal provenance graph") names a
     # gap the record has without saying that is what held the score, and a
     # bare "Short of 5" names none, so both leave the body to say it.
-    label_says_why = any(_says_why(s) for _, s in label) and bool(_reasons(label))
-    if label_says_why or any(name != "score_label" for name, _ in stated):
+    label_says_why = any(not accepts for _, s, span in label
+                         for accepts in _cue_clauses(s, *span)) and bool(_reasons(label))
+    if label_says_why or any(name != "score_label" for name, *_ in stated):
         return Q19Lint(score, maximum, STATED, _reasons(stated), mentions)
     # Nothing says why: the label's reason clauses and the body's parts that
     # name a gap are read (`_gap_parts`); a part naming no gap is not.
