@@ -24,7 +24,7 @@ LEXICON = sd.load_lexicon()
 #:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites either of them (#3161).
-LEXICON_PINS = {1: "14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35"}
+LEXICON_PINS = {1: "56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4"}
 
 
 def record(**containers):

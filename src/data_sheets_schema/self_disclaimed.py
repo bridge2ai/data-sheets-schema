@@ -31,10 +31,11 @@ declares where that lies: after an active cue up to the phrase's end,
 before a passive one together with an `as` complement, or inside a cue that
 ends on the role noun. So the source a sentence cites ("The website does
 not name her as a creator", "The 2024 slide ...") and the cue's own verb
-("do not credit her") are not read as the thing unstated (#3157, #3158).
-A role cue is read that narrowly only where its object names the role
-itself; where the role that licenses it lies elsewhere in the clause, the
-object is not located and the guards read the whole clause. A sub-role
+("do not credit her as an author") are not read as the thing unstated
+(#3157, #3158). A role cue is read that narrowly only where its object
+names the role itself; where the role that licenses it lies elsewhere in
+the clause, the object is not located and the guards read the whole
+clause, the cue's verb included. A sub-role
 counts only as a complement ("as the corresponding author", "is the PI")
 or as the modifier of a role noun or of a principal investigator ("a
 principal investigator role", "the contact PI"), so "identify the contact

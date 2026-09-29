@@ -117,10 +117,11 @@ other_subject:
 # source a sentence cites is an active cue's subject, so "The website does
 # not name her as a creator" and "The 2024 slide ..." are not read as an
 # attribute or a date, and neither is the cue's own verb ("do not credit
-# her"). A role cue is read this narrowly only where its object names the
-# role itself. Where the role that licenses it lies elsewhere in the clause
-# ("the author affiliations ... do not name the Hastings Center"), what it
-# says is unstated is not located and `object` reads the whole clause.
+# her as an author"). A role cue is read this narrowly only where its
+# object names the role itself. Where the role that licenses it lies
+# elsewhere in the clause ("the author affiliations ... do not name the
+# Hastings Center"), what it says is unstated is not located and `object`
+# reads the whole clause, the cue's verb included.
 #
 # A sub-role counts only in one of two shapes: as a complement ("as the
 # corresponding author", "is the PI") or as the modifier of a role noun or
