@@ -53,8 +53,14 @@ the call was denied as above, and then never ran. A `timeout`, `env` or
 variable (`$PY -m data_sheets_schema.cli`), are read through; any other
 part that carries the words `derive core` and is neither a d4d call of
 another subcommand nor a program known to read (a nested `bash -c`,
-`xargs`, a substitution, a wrapper option or CLI option it does not read)
-is a derive that cannot be placed (#3137). A call the runtime
+`xargs`, a wrapper option or CLI option it does not read) is a derive that
+cannot be placed (#3137). So is a reader part that carries them where a
+pipe later in the command feeds a program not known to read (`echo '...
+derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
+substitutes anywhere (`$(...)`, backticks, `<(...)`), every part that
+carries them, readers and the recorder's `--phase` included: the parts
+inside a substitution are split out of it, so none can be shown not to be
+in one (#3385). A call the runtime
 backgrounded is ambiguous too: its result is the launch, not the end. A
 shell command is read as bash reads it: `#` starts a comment only at the
 start of a word, outside quotes (#3184), and a `cd`, `pushd` or `popd`
@@ -166,8 +172,9 @@ NON_CHECKS = (
     "there: `rg` is read-only only when neither its arguments nor its own assignments set "
     "either (#3256, #3268)",
     "a `derive core` run without the words `derive core` on the command line (a script, an "
-    "alias or function, a variable holding the subcommand, or `python -c` building the argument "
-    "list): such a derive is not seen, and the Phase 1 / Phase 3 boundary is missed (#3137)",
+    "alias or function, a variable holding the subcommand, `python -c` building the argument "
+    "list, or a file that an earlier part wrote the words into and a later part runs): such a "
+    "derive is not seen, and the Phase 1 / Phase 3 boundary is missed (#3137, #3384)",
 )
 
 _ABSENT = object()
@@ -378,9 +385,13 @@ def _runtime_denials(events: list[tuple[int, int, dict]], calls: list[dict],
     call's own transcript ends in exactly one terminal `result` event, a
     `success` with `is_error: false`, after the call's result; that event's
     `permission_denials` lists the call once, with `tool_name` Bash and
-    `tool_input` equal to the call's input; and the call's result is an
-    error opening with the runtime's refusal. The refusal text without the
-    terminal listing is not evidence: a command can print it."""
+    `tool_input` equal to the call's input, a mapping whose `command` is a
+    string; and the call's result is an error whose content is a string
+    opening with the runtime's refusal. The refusal text without the
+    terminal listing is not evidence: a command can print it. The one
+    tool_use and one tool_result per id that `reference_rescore` requires
+    are required here by `_pair`: a duplicated id or a second result is a
+    reason, so the whole block is `unknown` (#2077) whatever the denials say."""
     terminals: dict[int, list[tuple[int, dict]]] = defaultdict(list)
     for t, n, event in events:
         if event.get("type") == "result":
@@ -405,11 +416,13 @@ def _runtime_denials(events: list[tuple[int, int, dict]], calls: list[dict],
                     or call["transcript"] != t or result["transcript"] != t
                     or not call["line"] < result["line"] < line
                     or call["name"] != "Bash" or denial.get("tool_name") != "Bash"
-                    or not isinstance(call["input"], dict) or denial.get("tool_input") != call["input"]
-                    or result["is_error"] is not True):
+                    or not isinstance(call["input"], dict) or not isinstance(call["input"].get("command"), str)
+                    or denial.get("tool_input") != call["input"] or result["is_error"] is not True):
                 continue
-            text = _result_text(result["content"])
-            if isinstance(text, str) and text.startswith(DONT_ASK_DENIAL_PREFIX):
+            # The content itself, a string, as `reference_rescore` reads it:
+            # a list of text blocks is not joined here (#3387).
+            content = result["content"]
+            if isinstance(content, str) and content.startswith(DONT_ASK_DENIAL_PREFIX):
                 proven.add(identity)
     return proven
 
@@ -973,6 +986,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # multi-line command a here-document's lines read as parts too
     # (`_newlines_as_joins`), so a change in one leaves none either.
     unsettled = False                               # a change was made; only `&&` keeps it
+    # Per part: whether it runs a program not read here (`runs_unknown`),
+    # and the reader parts that carry the words `derive core` without a row.
+    runs_unknown = [False] * len(segments)
+    mentioning_readers: list[int] = []
     for index, segment in enumerate(segments):
         before = leading if index == 0 else joins[index - 1]
         if unsettled and before != ["&&"]:
@@ -1007,9 +1024,12 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         # A part that carries the words `derive core` but is not read here as
         # a d4d call of that subcommand, nor as a program known to read, may
         # run the derive through a spelling this parser does not follow (a
-        # nested shell, `xargs`, a substitution, a wrapper or a CLI option it
-        # does not know): a derive that cannot be placed, never none (#3137).
-        opaque = substitutes
+        # nested shell, `xargs`, a wrapper or a CLI option it does not know):
+        # a derive that cannot be placed, never none (#3137). A substitution
+        # anywhere in the command makes every such part opaque, readers and
+        # other d4d subcommands included (#3385): the segmenter splits the
+        # parts inside `$(...)` out of it, so no part can say it was not in one.
+        opaque = False
         if args is not None:
             sub, sub_args = _subcommand(args)
             outs = _option(sub_args, "--out", "-o")
@@ -1030,16 +1050,30 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             # A d4d call runs only its own subcommand: `derive core` in an
             # option value (the recorder's `--phase`) runs nothing, unless
             # the subcommand itself was not read (`d4d -v derive core`).
-            opaque = opaque or len(sub) < 2 or any(word.startswith("-") for word in sub)
+            opaque = len(sub) < 2 or any(word.startswith("-") for word in sub)
         else:
             reads = program in READ_ONLY_PROGRAMS and not (
                 (program == "sed" and not _sed_reads_only(rest[1:]))
                 or (program == "rg" and not _rg_reads_only(segment)))
             if not reads:
                 read_only = False
-            opaque = opaque or not reads
-        if opaque and full is not None and _mentions_derive(segment):
+            opaque = not reads
+        runs_unknown[index] = opaque
+        if full is not None and _mentions_derive(segment):
+            if opaque or substitutes:
+                out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
+            else:
+                mentioning_readers.append(index)
+    # A reader's words run where a pipe carries its output into a program
+    # not read here (`echo '... derive core ...' | bash`, `| xargs d4d`,
+    # #3384). Any such pipe later in the command counts, since a group
+    # (`(echo ...; echo ...) | bash`) feeds every part inside it.
+    piped_into_unknown = [j for j in range(1, len(segments))
+                          if runs_unknown[j] and {"|", "|&"} & set(joins[j - 1])]
+    for index in mentioning_readers:
+        if any(j > index for j in piped_into_unknown):
             out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
+    out["derives"].sort(key=lambda row: row["segment"])
     out["read_only"] = read_only
     return out
 

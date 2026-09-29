@@ -301,9 +301,13 @@ def origin(transcripts, receipt_file, full_file, as_json):
     by `;`, or a failed `&&` chain cannot be placed, unless the native
     control denied the call, or the runtime did in `dontAsk` mode and its
     terminal `result` lists the call, which then never ran. `timeout`,
-    `env` and `nice` wrappers are read through; any other spelling that
-    carries the words `derive core` (`bash -c`, `xargs`, a substitution)
-    cannot be placed. A relative `--full`
+    `env` and `nice` wrappers are read through. A part carrying the words
+    `derive core` that is neither a d4d call it reads nor a program known
+    only to read (`bash -c`, `xargs`), a reader part carrying them in a
+    command where a later pipe feeds such a program (`echo '... derive core
+    ...' | bash`), and, in a command with a substitution anywhere, every
+    part carrying them cannot be placed. A derive whose words are not on the command line (a
+    script, an alias) is not seen. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,

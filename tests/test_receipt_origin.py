@@ -1458,7 +1458,19 @@ class DeriveSpellings(Base):
                          f"python -X utf8 -m data_sheets_schema.cli {derive}",
                          f"$PY -c 'x' -m data_sheets_schema.cli {derive}",
                          f"sed -n 'e d4d {derive}' {self.FULL}",
-                         f"d4d receipts check --label \"$(d4d {derive})\""):
+                         f"d4d receipts check --label \"$(d4d {derive})\"",
+                         # #3384: the words in a reader, run by a program a pipe feeds
+                         f"echo '{derive}' | xargs poetry run d4d",
+                         f"echo 'poetry run d4d {derive}' | bash",
+                         f"printf '%s\\n' 'd4d {derive}' | cat | sh",
+                         f"echo 'd4d {derive}' |& bash",
+                         f"(echo 'd4d {derive}'; echo true) | bash",
+                         # command-wide, as documented: a pipe later in the command, not only
+                         # the reader's own pipeline, is enough (a false unknown at worst)
+                         "grep -n 'derive core' x.md && ls | python scripts/tally.py",
+                         # #3385: a substitution anywhere makes a reader's words opaque
+                         f"grep -c 'derive core' .claude/commands/d4d-full-core.md; echo $((1+1))",
+                         "poetry run d4d provenance record --phase 'derive core' --recorded-at \"$(date -u)\""):
             for ok in (True, False):
                 with self.subTest(spelling=spelling, ok=ok):
                     identity, block = self._derived(spelling, ok=ok)
@@ -1488,7 +1500,14 @@ class DeriveSpellings(Base):
                          "poetry run d4d provenance record --project CHORUS --label L "
                          "--phase '{\"name\": \"derive core\"}'",
                          "poetry run d4d receipts check --label L --project CHORUS --note 'after derive core'",
-                         "cat derive-core.log", "ls data/rederive core"):
+                         "cat derive-core.log", "ls data/rederive core",
+                         # #3384: a reader's words piped only into readers run nothing
+                         "grep -n 'derive core' x.md | head -3 | wc -l",
+                         "ls | python scripts/tally.py && grep -n 'derive core' x.md",
+                         # #3386: whole words only, in a program that is not a reader
+                         "python scripts/rederive core_x.py", "python scripts/derive core-x.py",
+                         "python scripts/derive core.py", "python scripts/derive_core x.py",
+                         "python scripts/re.derive core"):
             with self.subTest(spelling=spelling):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -1528,6 +1547,11 @@ class DeriveSpellings(Base):
         doc = " ".join(ro.__doc__.split())
         self.assertIn("carries the words `derive core` and is neither a d4d call of another subcommand "
                       "nor a program known to read", doc)
+        self.assertIn("a reader part that carries them where a pipe later in the command feeds a program "
+                      "not known to read", doc)                                    # #3384
+        self.assertIn("in a command that substitutes anywhere (`$(...)`, backticks, `<(...)`), every part "
+                      "that carries them, readers and the recorder's `--phase` included", doc)   # #3385
+        self.assertIn("a file that an earlier part wrote the words into and a later part runs", text)
 
 
 class RuntimeDenial(Base):
@@ -1598,6 +1622,29 @@ class RuntimeDenial(Base):
                 block = r.report()
                 self.assertUnknown(block, "may change the receipt other than by a Write")
                 self.assertEqual(block["rejected_writes"], [])
+
+    def test_the_rule_is_reference_rescores_own(self):
+        # #3387: content that is a list of text blocks, or a command that is
+        # not a string, is not corroborated here any more than there.
+        blocks = [{"type": "text", "text": self.REFUSAL}]
+        _, r = self._refused(content=blocks)
+        self.assertUnknown(r.report(), "may change the receipt other than by a Write")
+        identity, r = self._refused()
+        call = next(b for e in r.events if e.get("type") == "assistant"
+                    for b in e["message"]["content"] if b.get("id") == identity)
+        call["input"]["command"] = [self.WRITE]
+        r.events[-1]["permission_denials"][0]["tool_input"] = call["input"]
+        self.assertNotIn(identity, ro._runtime_denials(*self._paired(r)))
+        call["input"]["command"] = self.WRITE
+        r.events[-1]["permission_denials"][0]["tool_input"] = call["input"]
+        self.assertIn(identity, ro._runtime_denials(*self._paired(r)))
+
+    @staticmethod
+    def _paired(r):
+        reasons: list = []
+        _, events = ro._load([r.transcript()], reasons)
+        calls, results = ro._pair(events, reasons)
+        return events, calls, results
 
     def test_two_terminal_events_corroborate_nothing(self):
         identity, r = self._refused()
@@ -1733,7 +1780,11 @@ class Cli(unittest.TestCase):
         self.assertIn("a failed `&&` chain cannot be placed", text)
         # #3137, #3201: the wrappers read through and the runtime's own refusal
         self.assertIn("`timeout`, `env` and `nice` wrappers are read through", text)
-        self.assertIn("any other spelling that carries the words `derive core`", text)
+        self.assertNotIn("any other spelling that carries the words `derive core`", text)   # #3384
+        self.assertIn("a reader part carrying them in a command where a later pipe feeds such a program", text)
+        self.assertIn("in a command with a substitution anywhere, every part carrying them cannot be placed",
+                      text)                                                                     # #3385
+        self.assertIn("A derive whose words are not on the command line (a script, an alias) is not seen", text)
         self.assertIn("the runtime did in `dontAsk` mode and its terminal `result` lists the call", text)
 
     def test_unknown_prints_its_reasons_and_exits_zero(self):
