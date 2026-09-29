@@ -195,7 +195,8 @@ def _person_to_creator(ref_id: str, person: dict | None,
 def normalize_linkml(
     doc: dict, persons: dict[str, dict], sv: SchemaView, res: Result
 ) -> dict:
-    allowed = {s.name for s in sv.class_induced_slots(TARGET_CLASS)}
+    slots = {s.name: s for s in sv.class_induced_slots(TARGET_CLASS)}
+    allowed = set(slots)
     out = dict(doc)
 
     # 1. reconcile top-level keys against the schema
@@ -287,19 +288,23 @@ def normalize_linkml(
                 f"{len(out['created_by'])} entries", joined)
         out["created_by"] = joined
 
-    # 5. doi is the bare DOI: the pattern is anchored (#646) and upstream
-    #    writes the resolver URL. The case upstream wrote is kept, by the
-    #    rule the our-mapping arm applies to the same crate value (#2916).
+    # 5. the Dataset's own doi is the bare DOI: the pattern is anchored
+    #    (#646) and upstream writes the resolver URL. The rule is the one the
+    #    our-mapping arm applies to the same crate value (#2916): a value the
+    #    slot's pattern already accepts is left as written (#2989), and the
+    #    case upstream wrote is kept. It repairs the Dataset's own `doi`
+    #    only: a `doi` inside a nested object passes through as upstream
+    #    wrote it, for validation to judge (#2988). Step 1 has dropped every
+    #    key the class does not declare, so the slot is there to read.
     if "doi" in out:
         value = out["doi"]
-        doi, why = doi_for_slot(value)
+        doi, why = doi_for_slot(value, slots["doi"].pattern)
         if doi is None:
             res.log("doi", "drop", f"{why}; none is inferred", value)
             del out["doi"]
         elif doi != value:
-            res.log("doi", "rewrite",
-                    "the slot takes the bare DOI (#646); resolver or `doi:` "
-                    "prefix removed, case kept", value, doi)
+            res.log("doi", "rewrite", f"the slot takes the bare DOI (#646); {why}",
+                    value, doi)
             out["doi"] = doi
 
     return out

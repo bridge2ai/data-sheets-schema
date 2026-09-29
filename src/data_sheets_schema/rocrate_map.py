@@ -31,7 +31,7 @@ from typing import Any
 import yaml
 from linkml_runtime import SchemaView
 from data_sheets_schema.schema_view import shared_view
-from data_sheets_schema.scope import bare_doi
+from data_sheets_schema.scope import _norm, bare_doi
 
 MAPPING_TSV = Path("data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv")
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
@@ -251,27 +251,81 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
     return value, ""
 
 
-def doi_for_slot(value: Any) -> tuple[str | None, str]:
+def doi_for_slot(value: Any, pattern: str | None) -> tuple[str | None, str]:
     """The value a `doi` slot takes for a crate value, and what was done (#2916).
 
-    The slot holds one bare DOI (#646), in the case the crate wrote it. A list
-    gives up its one DOI. No DOI, or two different ones, gives None and the
-    reason: an invalid value is never kept, and neither DOI is chosen over the
-    other. Both deterministic arms apply this, so a crate value reaches the
-    slot in one form whichever arm writes it.
+    `pattern` is the slot's own declared pattern, which the caller reads from
+    the schema (the anchored bare-DOI pattern on every `doi` slot since #646).
+    A value it already accepts is kept exactly as written: there is nothing
+    to repair (#2989). Any other value is repaired only by `scope.bare_doi`:
+    its resolver or `doi:` prefix, a trailing `/` and surrounding whitespace
+    come off, and its case stays. `bare_doi` recognises a narrower shape than
+    the pattern accepts (a registrant of four to nine digits, as in
+    Crossref's recommended DOI pattern, and no whitespace in the suffix), so
+    a prefixed value outside that shape is not repaired but dropped with the
+    reason: what the rule does not recognise it does not guess at. A slot
+    that declares no pattern accepts nothing as written here, and takes only
+    what `bare_doi` finds.
+
+    A list gives up its one DOI. Two spellings name one DOI when
+    `scope._norm`, the comparison the scope checks use, makes them equal —
+    DOIs are case-insensitive, so `10.5555/Test` and `10.5555/TEST` are one
+    (#2987) — and the first spelling is kept. No DOI, or two different ones,
+    gives None and the reason: an invalid value is never kept, and neither
+    DOI is chosen over the other.
+
+    Where each arm applies it (#2988): `rocrate_map._coerce` to every `doi`
+    slot a mapping row fills — the table's only such row today is
+    `Dataset.doi` — and `rocrate_normalize.normalize_linkml` to the Dataset's
+    own `doi` only, so a `doi` nested inside another object passes through
+    normalize as upstream wrote it, for validation to judge. `Dataset.doi` is
+    the slot both arms write, and a crate value reaches it in one form
+    whichever arm writes it.
     """
     candidates = value if isinstance(value, list) else [value]
-    dois = list(dict.fromkeys(d for d in map(bare_doi, candidates) if d))
-    if len(dois) != 1:
-        why = (f"{len(dois)} distinct DOIs; the slot holds one and none is chosen"
-               if dois else f"not a DOI: {_preview(value)}")
+    found: dict[str, list[tuple[str, str]]] = {}   # identity -> [(written, slot form)]
+    for written in candidates:
+        if isinstance(written, str) and pattern and re.search(pattern, written):
+            form = written
+        else:
+            form = bare_doi(written)
+        if form is not None:
+            found.setdefault(_norm(form), []).append((written, form))
+    if len(found) != 1:
+        why = (f"{len(found)} distinct DOIs; the slot holds one and none is chosen"
+               if found else "not a DOI the slot accepts as written or the "
+               f"repair recognises: {_preview(value)}")
         return None, f"{why}; the doi slot takes the bare DOI only (#646)"
+    spellings = next(iter(found.values()))
+    written, doi = spellings[0]
     notes = []
     if isinstance(value, list):
         notes.append(f"the one DOI among {len(candidates)} list item(s)")
-    if dois[0] not in candidates:
-        notes.append("written as the bare DOI (#646), case kept")
-    return dois[0], "; ".join(notes)
+    forms = list(dict.fromkeys(form for _, form in spellings))
+    if len(forms) > 1:
+        notes.append(f"{len(forms)} spellings that differ only in case, a "
+                     "trailing `/` or surrounding whitespace, so one DOI "
+                     "(#2987); the first is kept")
+    if doi != written:
+        notes.append(_repair_note(written, doi))
+    return doi, "; ".join(notes)
+
+
+def _repair_note(written: str, doi: str) -> str:
+    """What `bare_doi` took off `written` to leave `doi`, named part by part so
+    a log never says a prefix came off when only a `/` or whitespace did."""
+    stripped = written.strip()
+    trimmed = stripped.rstrip("/")
+    removed = []
+    if trimmed != doi:
+        removed.append("resolver or `doi:` prefix")
+    if trimmed != stripped:
+        removed.append("trailing `/`")
+    if stripped != written:
+        removed.append("surrounding whitespace")
+    said = removed[0] if len(removed) == 1 else (
+        ", ".join(removed[:-1]) + " and " + removed[-1])
+    return f"{said} removed, case kept"
 
 
 def _coerce(value: Any, slot, sv: SchemaView, project: str,
@@ -279,10 +333,11 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     """Shape a crate value to the slot's cardinality and range."""
     notes: list[str] = []
 
-    # Every class's `doi` slot carries the same anchored pattern, so a nested
-    # one is shaped the same way as the Dataset's own.
+    # Every class's `doi` slot carries the same anchored pattern, so a row
+    # that fills a nested class's `doi` is shaped the same way as the
+    # Dataset's own, against that slot's pattern.
     if slot.name == DOI_SLOT:
-        value, note = doi_for_slot(value)
+        value, note = doi_for_slot(value, slot.pattern)
         if value is None:
             return None, note
         if note:

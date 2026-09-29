@@ -1,6 +1,7 @@
 """Tests for the our-mapping crate → D4D arm."""
 
 import copy
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -156,6 +157,8 @@ class TestDoi(unittest.TestCase):
     def setUpClass(cls):
         cls.sv = SchemaView(str(FULL_SCHEMA))
         cls.rows = load_mapping()
+        # The slot's own declared pattern, as `_coerce` passes it.
+        cls.pattern = cls.sv.induced_slot("doi", "Dataset").pattern
 
     def doi_field(self, res):
         return next(f for f in res.fields if f.d4d_path == "Dataset.doi")
@@ -184,7 +187,7 @@ class TestDoi(unittest.TestCase):
     def test_a_list_gives_up_its_one_doi(self):
         value, note = doi_for_slot(["ark:59853/other",
                                     "https://doi.org/10.5555/Test",
-                                    "doi:10.5555/Test"])
+                                    "doi:10.5555/Test"], self.pattern)
         self.assertEqual(value, "10.5555/Test")
         self.assertIn("one DOI among 3", note)
 
@@ -198,7 +201,69 @@ class TestDoi(unittest.TestCase):
         self.assertIn("2 distinct DOIs", field.detail)
 
     def test_a_bare_doi_passes_through_with_no_note(self):
-        self.assertEqual(doi_for_slot("10.5555/Test"), ("10.5555/Test", ""))
+        self.assertEqual(doi_for_slot("10.5555/Test", self.pattern),
+                         ("10.5555/Test", ""))
+
+    def test_case_variants_of_one_doi_are_one_doi_and_the_first_is_kept(self):
+        """#2987. DOIs are case-insensitive, so two spellings that differ only
+        in case name one DOI: the slot is filled, not emptied as '2 distinct
+        DOIs'. The first spelling is written, in its own case."""
+        for identifier, expected in (
+                (["https://doi.org/10.18130/V3/HIGT4C", "doi:10.18130/v3/higt4c"],
+                 "10.18130/V3/HIGT4C"),
+                (["doi:10.18130/v3/higt4c", "https://doi.org/10.18130/V3/HIGT4C"],
+                 "10.18130/v3/higt4c")):
+            with self.subTest(identifier=identifier):
+                res = map_crate(_with_identifier(identifier),
+                                self.rows, self.sv, "TEST")
+                self.assertEqual(res.record.get("doi"), expected)
+                field = self.doi_field(res)
+                self.assertEqual(field.status, "filled")
+                self.assertNotIn("distinct", field.detail)
+                self.assertIn("2 spellings", field.detail)
+
+    def test_a_value_the_slot_pattern_accepts_is_kept_as_written(self):
+        """#2989. `bare_doi` recognises a narrower shape than the slot's
+        pattern; a value the pattern already accepts is valid, so it is
+        neither dropped nor trimmed."""
+        for value in ("10.5555/a b", "10.1234567890/x", "10.5555/x\ty",
+                      "10.5555/x/", "10.5555/x "):
+            with self.subTest(value=value):
+                self.assertRegex(value, self.pattern)   # the schema accepts it
+                self.assertEqual(doi_for_slot(value, self.pattern), (value, ""))
+        # and the arm hands the slot's own pattern to the rule
+        res = map_crate(_with_identifier("10.1234567890/x"), self.rows, self.sv, "TEST")
+        self.assertEqual(res.record.get("doi"), "10.1234567890/x")
+
+    def test_a_prefixed_doi_outside_the_repaired_shape_is_dropped_not_guessed(self):
+        """#2989, the narrowness that remains: a `doi:` form with a ten-digit
+        registrant is not one the repair recognises, and the reason says so
+        rather than that it is not a DOI at all."""
+        value, why = doi_for_slot("doi:10.1234567890/x", self.pattern)
+        self.assertIsNone(value)
+        self.assertIn("the slot accepts as written or the repair recognises", why)
+
+    def test_the_repair_note_names_only_what_came_off(self):
+        """#2989. The note no longer says a prefix came off when only
+        whitespace or a trailing `/` did."""
+        cases = {
+            "https://doi.org/10.5555/Test":
+                "resolver or `doi:` prefix removed, case kept",
+            " 10.5555/Test":
+                "surrounding whitespace removed, case kept",
+            " doi:10.5555/Test/ ":
+                "resolver or `doi:` prefix, trailing `/` and surrounding "
+                "whitespace removed, case kept",
+        }
+        for written, note in cases.items():
+            with self.subTest(written=written):
+                self.assertEqual(doi_for_slot(written, self.pattern),
+                                 ("10.5555/Test", note))
+
+    def test_a_slot_that_declares_no_pattern_takes_only_the_bare_doi(self):
+        self.assertEqual(doi_for_slot("https://doi.org/10.5555/x", None)[0],
+                         "10.5555/x")
+        self.assertIsNone(doi_for_slot("10.5555/a b", None)[0])
 
     def test_the_mapped_record_validates_against_the_schema(self):
         """The check test_map.py never made: the mapper's output is judged by

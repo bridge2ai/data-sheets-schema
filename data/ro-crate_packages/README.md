@@ -51,7 +51,10 @@ cd data/ro-crate_packages/CM4AI && unzip -q -o raw/cm4ai_release_metadata.zip \
 The table predates #646, which anchored the `doi` pattern to the bare DOI.
 Every crate here writes its DOI as a resolver URL, so each one now needs one
 more repair: both mappers write the bare DOI in the crate's own case, and
-`d4d rocrate normalize` logs the rewrite as its `doi` step (#2916). The
+`d4d rocrate normalize` logs the rewrite as its `doi` step (#2916). A value
+the slot's pattern already accepts is left as written (#2989), spellings
+that differ only in case count as one DOI (#2987), and normalize repairs
+the Dataset's own `doi` only, not one nested in another object (#2988). The
 record `id` of `d4d rocrate map` takes the `doi:` CURIE form. Each verdict in
 `processed/` names the schema version, merged-schema sha256 and date it was
 reached against, and `tests/test_rocrate/test_committed_outputs.py` (corpus

@@ -202,6 +202,14 @@ def bare_doi(identifier: Any) -> str | None:
     spelling is the one to keep. None when the value is not a DOI in one of
     those forms: an ARK is not, and neither is a landing page that merely
     contains one (`…?persistentId=doi:…`).
+
+    The shape it recognises — `10.`, four to nine digits (the registrant
+    length of Crossref's recommended DOI pattern), `/`, a suffix with no
+    whitespace — is narrower than the `doi` slot's own pattern
+    (`^10\\.\\d{4,}\\/.+$`). So it decides which values can be *repaired*,
+    never which are valid: `rocrate_map.doi_for_slot` keeps a value the slot
+    already accepts exactly as written, and asks this only of the rest
+    (#2989).
     """
     if not isinstance(identifier, str):
         return None
