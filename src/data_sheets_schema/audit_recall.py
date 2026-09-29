@@ -40,9 +40,9 @@ from data_sheets_schema import audit_grammar
 
 INSTRUMENT = "audit_recall v1 (#2921)"
 FORMAT = "audit_ground_truth_v1"
-#: The closed list the issue proposes plus ``omission`` (#2930). Provisional:
-#: owner decision 2 of #2921, and it must equal the audit grammar's finding
-#: ``kind`` enum once that lands under a new protocol version.
+#: The closed list the issue proposes plus ``omission`` (#2930). Provisional
+#: until the owner signs the list off on #2921, and it must equal the audit
+#: grammar's finding ``kind`` enum once that lands under a new protocol version.
 KINDS = ("role_placement", "status_scope", "date_scope", "absence_or_self_narration",
          "quotation_fidelity", "identifier_count", "attribution", "omission", "other")
 HIT_RULE = {
@@ -59,8 +59,14 @@ MISS_CATEGORIES = ("judged_supported", "flagged_below", "metadata_only", "not_re
 MAX_GROUND_TRUTH_BYTES = 4_194_304
 MAX_ORIGINAL_BYTES = 8_388_608
 MAX_PROBLEMS = 50
-_HEX = "^[0-9a-f]{64}$"
-_POINTER = "^(/([^/~]|~[01])*)+$"
+#: End of input in both dialects a ``pattern`` here meets: Python's ``re``, which
+#: jsonschema runs with ``re.search``, and ECMA-262, which JSON Schema names. A
+#: bare "$" also matches before a final newline in Python, so a hash or id
+#: ending in "\n" loaded here, then joined nothing, while any other validator of
+#: the committed schema refused it (#3097).
+_END = r"(?![\s\S])"
+_HEX = "^[0-9a-f]{64}" + _END
+_POINTER = "^(/([^/~]|~[01])*)+" + _END
 _TEXT = {"type": "string", "pattern": r"\S"}
 
 
@@ -81,14 +87,15 @@ def ground_truth_schema() -> dict:
 
     ``data/audit_ground_truth/ground_truth.schema.json`` is this, rendered by
     ``schema_text``; a test holds the two equal. Uniqueness of ids, line order,
-    calendar dates and relative note paths are checked in code as well.
+    line numbers written as integers, calendar dates and relative note paths are
+    checked in code as well.
     """
     entry = {
         "type": "object", "additionalProperties": False,
         "required": ["id", "target_original_full_sha256", "paths", "kind", "governing_source",
                      "observation", "reviewer_role", "reviewed_on", "provenance_note", "held_out"],
         "properties": {
-            "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$", "maxLength": 128},
+            "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*" + _END, "maxLength": 128},
             "target_original_full_sha256": {"type": "string", "pattern": _HEX,
                 "description": "sha256 of the exact original_full bytes the observation describes."},
             "paths": {"type": "array", "minItems": 1, "uniqueItems": True,
@@ -109,7 +116,7 @@ def ground_truth_schema() -> dict:
                               "description": "First and last bundle line, 1-based and inclusive."}}},
             "observation": {**_TEXT, "maxLength": 2000},
             "reviewer_role": {**_TEXT, "maxLength": 200},
-            "reviewed_on": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+            "reviewed_on": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}" + _END},
             "provenance_note": {**_TEXT, "description": "Repository-relative path of the note recording the review."},
             "held_out": {"const": True},
         }}
@@ -195,9 +202,16 @@ def load_ground_truth(raw: bytes) -> dict:
                 problems.append({"at": where + "/reviewed_on", "problem": "not a calendar date"})
         source = entry.get("governing_source")
         lines = source.get("lines") if isinstance(source, dict) else None
-        if (isinstance(lines, list) and len(lines) == 2 and all(type(n) is int for n in lines)
-                and lines[0] > lines[1]):
-            problems.append({"at": where + "/governing_source/lines", "problem": "first line is after the last"})
+        if isinstance(lines, list):
+            # The schema's "integer" admits 9.0; an integral float is still an
+            # authoring slip here, and must not skip the order check (#3098).
+            for number, line in enumerate(lines):
+                if type(line) is float and line.is_integer():
+                    problems.append({"at": f"{where}/governing_source/lines/{number}",
+                                     "problem": "a line number is written as an integer, not a float"})
+            if (len(lines) == 2 and all(type(n) in (int, float) for n in lines)
+                    and lines[0] > lines[1]):
+                problems.append({"at": where + "/governing_source/lines", "problem": "first line is after the last"})
         note = entry.get("provenance_note")
         if isinstance(note, str) and note.strip():
             # Segments as written: PurePosixPath would fold "a/./b" and "a//b".

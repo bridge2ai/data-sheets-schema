@@ -180,6 +180,33 @@ def test_an_entry_missing_a_required_field_is_refused(field):
     assert any(p["at"] == "/entries/0" and repr(field) in p["problem"] for p in caught.value.problems)
 
 
+def test_every_problem_in_an_entry_and_across_entries_is_named():
+    """Not the first problem: each one, at its own location (#3102)."""
+    o = original()
+    first = entry("gt-a", o, "/title")
+    del first["kind"], first["reviewer_role"]
+    first["held_out"] = False
+    second = entry("gt-b", o, "/notes")
+    second["reviewed_on"] = "2026-02-30"
+    with pytest.raises(recall.GroundTruthError) as caught:
+        load(truth(first, second))
+    problems = caught.value.problems
+    assert len(problems) == 4, problems
+    assert sorted(p["at"] for p in problems) == ["/entries/0", "/entries/0", "/entries/0/held_out",
+                                                 "/entries/1/reviewed_on"]
+    missing = " ".join(p["problem"] for p in problems if p["at"] == "/entries/0")
+    assert "'kind'" in missing and "'reviewer_role'" in missing
+
+
+def test_problems_are_named_up_to_the_bound():
+    o = original()
+    many = [{**entry(f"gt-{n}", o, "/title"), "kind": "misc"} for n in range(recall.MAX_PROBLEMS + 5)]
+    with pytest.raises(recall.GroundTruthError) as caught:
+        load(truth(*many))
+    assert len(caught.value.problems) == recall.MAX_PROBLEMS
+    assert len({p["at"] for p in caught.value.problems}) == recall.MAX_PROBLEMS
+
+
 @pytest.mark.parametrize("change, where", [
     ({"paths": []}, "/entries/0/paths"),
     ({"paths": ["title"]}, "/entries/0/paths/0"),
@@ -197,6 +224,8 @@ def test_an_entry_missing_a_required_field_is_refused(field):
     ({"governing_source": {"bundle_sha256": "b" * 64, "chunk": "c001", "lines": [9, 5]}},
      "/entries/0/governing_source/lines"),
     ({"governing_source": {"chunk": "c001", "lines": [3, 5]}}, "/entries/0/governing_source"),
+    ({"governing_source": {"bundle_sha256": "b" * 64, "chunk": "c001", "lines": [3.0, 5]}},
+     "/entries/0/governing_source/lines/0"),
     ({"expected_fix": "anything"}, "/entries/0"),
 ])
 def test_malformed_entries_are_refused_at_their_location(change, where):
@@ -205,6 +234,67 @@ def test_malformed_entries_are_refused_at_their_location(change, where):
     with pytest.raises(recall.GroundTruthError) as caught:
         load(truth(bad))
     assert where in {p["at"] for p in caught.value.problems}, caught.value.problems
+
+
+def test_out_of_order_lines_written_as_floats_are_refused():
+    """The schema's "integer" admits 9.0; the order check must not skip it (#3098)."""
+    bad = entry("gt-6", original(), "/title")
+    bad["governing_source"]["lines"] = [9.0, 5.0]
+    with pytest.raises(recall.GroundTruthError) as caught:
+        load(truth(bad))
+    assert sorted(p["at"] for p in caught.value.problems) == [
+        "/entries/0/governing_source/lines", "/entries/0/governing_source/lines/0",
+        "/entries/0/governing_source/lines/1"]
+    assert "first line is after the last" in str(caught.value)
+
+
+@pytest.mark.parametrize("field, where", [
+    (("target_original_full_sha256",), "/entries/0/target_original_full_sha256"),
+    (("governing_source", "bundle_sha256"), "/entries/0/governing_source/bundle_sha256"),
+    (("id",), "/entries/0/id"),
+    (("reviewed_on",), "/entries/0/reviewed_on"),
+])
+def test_a_value_ending_in_a_newline_is_refused_not_left_to_join_nothing(field, where):
+    """Python's "$" also matches before a final newline; the patterns anchor at end of input (#3097)."""
+    bad = entry("gt", original(), "/title")
+    *parents, leaf = field
+    holder = bad
+    for key in parents:
+        holder = holder[key]
+    holder[leaf] += "\n"
+    with pytest.raises(recall.GroundTruthError) as caught:
+        load(truth(bad))
+    assert where in {p["at"] for p in caught.value.problems}, caught.value.problems
+
+
+def test_a_hash_written_as_a_block_scalar_is_refused():
+    o = original()
+    raw = yaml.safe_dump(truth(entry("gt", o, "/title")), sort_keys=False).replace(
+        f"target_original_full_sha256: {sha(o)}\n", f"target_original_full_sha256: |\n      {sha(o)}\n")
+    assert f"|\n      {sha(o)}\n".encode() in raw.encode()
+    with pytest.raises(recall.GroundTruthError) as caught:
+        recall.load_ground_truth(raw.encode())
+    assert [p["at"] for p in caught.value.problems] == ["/entries/0/target_original_full_sha256"]
+
+
+def test_every_anchored_pattern_ends_at_end_of_input_in_both_dialects():
+    """A bare "$" means end of input in ECMA-262 but not in Python's re (#3097)."""
+    patterns = []
+
+    def walk(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "pattern":
+                    patterns.append(value)
+                else:
+                    walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+    walk(recall.ground_truth_schema())
+    anchored = [p for p in patterns if p.startswith("^")]
+    assert len(anchored) == 5
+    assert [p for p in anchored if p.endswith("$") or not p.endswith(r"(?![\s\S])")] == []
 
 
 def test_file_level_problems_are_refused():
@@ -267,6 +357,37 @@ def test_misses_not_judged_supported_are_classified():
     assert result["misses_judged_supported"] == []
 
 
+_META = {"path": "/maintainers/0", "metadata_reason": "A synthetic metadata value."}
+
+
+@pytest.mark.parametrize("rows, flagged, expected", [
+    # A supported row at the path outranks a flag below it.
+    ([row("/maintainers/0")], True,
+     {"miss": "judged_supported", "rows": [{"pointer": "/maintainers/0", "relation": "exact"}]}),
+    # So does one above it.
+    ([row("/maintainers")], True,
+     {"miss": "judged_supported", "rows": [{"pointer": "/maintainers", "relation": "ancestor"}]}),
+    # A flag below outranks a supported row below.
+    ([row("/maintainers/0/name")], True, {"miss": "flagged_below", "flags": ["/maintainers/0/email"]}),
+    # A flag below outranks a metadata row at the path.
+    ([_META], True, {"miss": "flagged_below", "flags": ["/maintainers/0/email"]}),
+    # With no flag below, a supported row below outranks a metadata row at the path.
+    ([_META, row("/maintainers/0/name")], False,
+     {"miss": "judged_supported", "rows": [{"pointer": "/maintainers/0/name", "relation": "below"}]}),
+])
+def test_misses_are_classified_in_the_documented_order(rows, flagged, expected):
+    """judged_supported (at or above; below only with no flag below), flagged_below,
+    metadata_only, not_reviewed — the README's order, pair by pair (#3105)."""
+    o = original()
+    revise = [row("/maintainers/0/email", "revise")] if flagged else []
+    a = audit(o, [*deepcopy(rows), *revise], [finding("/maintainers/0/email")] if flagged else [])
+    result = scored(a, o, truth(entry("gt", o, "/maintainers/0")))
+    (path,) = result["paths"]
+    assert {key: path.get(key) for key in expected} == expected
+    listed = [m["path"] for m in result["misses_judged_supported"]]
+    assert listed == (["/maintainers/0"] if expected["miss"] == "judged_supported" else [])
+
+
 def test_supported_rows_below_a_container_entry_are_judged_supported():
     o = original()
     a = audit(o, [row("/maintainers/0/name"), row("/maintainers/0/email")])
@@ -283,15 +404,16 @@ def test_an_audit_of_another_original_is_refused():
         scored(a, o, truth(entry("gt", o, "/title")))
 
 
-def test_an_audit_failing_the_grammar_is_refused_and_left_unchanged():
-    o = original()
-    value = json.loads(audit(o, [row("/title", "revise")], [finding("/title")]))
+def grammar_failing_audit(raw_original):
+    value = json.loads(audit(raw_original, [row("/title", "revise")], [finding("/title")]))
     value["findings"] = []                       # revise row with no linked finding
-    raw = json.dumps(value).encode()
-    before = bytes(raw)
+    return json.dumps(value).encode()
+
+
+def test_an_audit_failing_the_grammar_is_refused():
+    o = original()
     with pytest.raises(recall.AuditRecallError, match="revise_without_finding"):
-        scored(raw, o, truth(entry("gt", o, "/title")))
-    assert raw == before
+        scored(grammar_failing_audit(o), o, truth(entry("gt", o, "/title")))
 
 
 def test_the_report_carries_pins_and_no_observation_or_audit_prose():
@@ -320,11 +442,21 @@ def test_the_committed_schema_file_is_the_loaders_schema():
     assert SCHEMA_FILE.read_text(encoding="utf-8") == recall.schema_text()
 
 
-def test_every_proposed_kind_is_accepted_and_nothing_else():
+#: The issue's proposed list plus ``omission`` (#2930), written out so that a
+#: change to KINDS is a change here too.
+PROPOSED_KINDS = ("role_placement", "status_scope", "date_scope", "absence_or_self_narration",
+                  "quotation_fidelity", "identifier_count", "attribution", "omission", "other")
+
+
+def test_the_proposed_kinds_are_accepted_and_nothing_else_is():
     o = original()
-    for kind in recall.KINDS:
+    assert recall.KINDS == PROPOSED_KINDS
+    for kind in PROPOSED_KINDS:
         load(truth(entry("k", o, "/title", kind=kind)))
-    assert "omission" in recall.KINDS and len(set(recall.KINDS)) == 9
+    for kind in ("misc", "Role_placement", "role placement", "omission ", "", None, 3):
+        with pytest.raises(recall.GroundTruthError) as caught:
+            load(truth(entry("k", o, "/title", kind=kind)))
+        assert [p["at"] for p in caught.value.problems] == ["/entries/0/kind"], kind
 
 
 class TestCommand:
@@ -356,10 +488,11 @@ class TestCommand:
         assert json.loads(as_json.output)["replicates"][0]["totals"]["paths"] == 1
 
     def test_refusals_exit_nonzero_with_the_reason(self, tmp_path):
-        p = self.files(tmp_path, lambda o: truth({k: v for k, v in entry("gt", o, "/title").items()
-                                                  if k != "reviewer_role"}))
+        p = self.files(tmp_path, lambda o: truth({**{k: v for k, v in entry("gt", o, "/title").items()
+                                                     if k != "reviewer_role"}, "kind": "misc"}))
         out = self.invoke("--audit", p["audit"], "--original", p["original"], "--ground-truth", p["truth"])
         assert out.exit_code == 1 and "'reviewer_role' is a required property" in out.output
+        assert "/entries/0/kind: 'misc' is not one of" in out.output
         p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))
         out = self.invoke("--audit", p["audit"], "--original", p["truth"], "--ground-truth", p["truth"])
         assert out.exit_code == 1 and "not scored" in out.output
@@ -370,4 +503,15 @@ class TestCommand:
         out = self.invoke("--audit", p["audit"], "--original", p["original"], "--ground-truth", p["truth"],
                           "--output", p["audit"])
         assert out.exit_code == 2 and "names an input" in out.output
+        assert p["audit"].read_bytes() == before
+
+    def test_an_audit_failing_the_grammar_writes_no_report_and_is_left_unchanged(self, tmp_path):
+        p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))
+        p["audit"].write_bytes(grammar_failing_audit(p["original"].read_bytes()))
+        before = p["audit"].read_bytes()
+        report = tmp_path / "report.json"
+        out = self.invoke("--audit", p["audit"], "--original", p["original"], "--ground-truth", p["truth"],
+                          "--output", report)
+        assert out.exit_code == 1 and "not scored" in out.output and "revise_without_finding" in out.output
+        assert not report.exists()
         assert p["audit"].read_bytes() == before
