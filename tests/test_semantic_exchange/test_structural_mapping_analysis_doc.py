@@ -79,6 +79,28 @@ class TestTheAnalysisDocDoesNotDrift(unittest.TestCase):
                          {"False"},
                          "the doc says every composition row is flagged")
 
+    def test_the_composition_depth_it_states_holds(self):
+        """The doc once said the strategy follows "every dotted path"; the
+        generator goes one level below the slot and stops (#3381)."""
+        prose = " ".join(self.doc.split())
+        self.assertIn("a path never has more than one dot", prose)
+        composition = [r["composition_path"] for r in self.rows
+                       if r["composition_path"]]
+        self.assertTrue(composition)
+        self.assertEqual([p for p in composition if p.count(".") > 1], [],
+                         "the doc says no composition path has two dots")
+
+    def test_it_does_not_claim_the_class_level_rows_are_checked(self):
+        """TestRowsStateTheSchema checks only rows whose subject names a slot;
+        the doc once said every hand-written row's range and cardinality were
+        checked, class-level rows included (#3380)."""
+        prose = " ".join(self.doc.split())
+        self.assertIn("The class-level rows are not checked", prose)
+        self.assertNotIn("Their range and cardinality columns are still "
+                         "checked", prose)
+        self.assertTrue([r for r in self.rows if "/" not in r["subject_id"]],
+                        "the doc describes class-level rows the file lacks")
+
 
 if __name__ == "__main__":
     unittest.main()

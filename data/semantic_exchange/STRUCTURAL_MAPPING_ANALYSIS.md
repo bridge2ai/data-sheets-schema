@@ -68,8 +68,12 @@ the filter, not evidence about the schema.
 
 ### 3. Composition paths
 
-Every dotted path through a slot whose range is a class, matched to RO-Crate
-properties whose path contains the slot name. The subject carries the whole
+Every slot whose range is a class, and one level below it: each direct
+attribute of that class as `slot.attribute`. The generator does not recurse,
+so a path never has more than one dot, even where the attribute's own range is
+a class (`anomalies.used_software` is the deepest path; nothing under it is
+traced). Each path is matched to RO-Crate properties whose path contains the
+slot name. The subject carries the whole
 path, so `anomalies.id` is `d4d:Dataset/anomalies.id` and no longer shares a
 subject with `Dataset`'s own `id` slot (#410). The range and cardinality are
 those the schema gives the end of the path (#2936). Before
@@ -113,8 +117,11 @@ generator reads `class_uri` and never emits a row from it), `schema:hasPart`,
 `dcat:byteSize`, and `d4d:` targets that are absent from the RO-Crate input.
 They are listed, each with its reason, in `KNOWN_UNDERIVABLE` in
 `tests/test_semantic_exchange/test_structural_mapping_drift.py` (#234), and
-that test fails if the set changes. Their range and cardinality columns are
-still checked against the schema (`TestRowsStateTheSchema`).
+that test fails if the set changes. Those that name a slot still have their
+range and cardinality columns checked against the schema
+(`TestRowsStateTheSchema`). The class-level rows are not checked: they name a
+class, not a slot, so the values in their range and cardinality columns are
+stated by hand and nothing compares them with the schema.
 
 ## Usage
 
