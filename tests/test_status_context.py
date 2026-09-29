@@ -323,6 +323,44 @@ def test_what_ends_the_walk_back_from_an_item_to_its_lead_in(gap, governed):
     assert [(f["marker"], f["via"]) for f in out["flags"]] == ([("will", "enumeration")] if governed else [])
 
 
+LIST_AFTER = "\n- Records were acquired from each site\n- Data were standardized to a common model"
+
+
+@pytest.mark.parametrize("before,governed", [
+    # #3167: the walk back from an item reaches the unit before the list;
+    # a finished sentence there is the end of the previous paragraph, not
+    # the list's governing clause ...
+    ("The consortium will publish a paper next year.", False),
+    ("The consortium will publish a paper next year.\n", False),       # a blank line between
+    ("Is the archive expected to grow?", False),
+    # ... unless it announces the list,
+    ("The study will collect the following data.", True),
+    ("The data will be prepared as follows.", True),
+    # and an open clause governs: a colon, no terminator, or a full stop
+    # that is an abbreviation and so does not end the sentence.
+    ("The consortium will:", True),
+    ("Over the next two years the consortium will", True),
+    ("The consortium will enrol approx.", True),
+])
+def test_a_finished_sentence_before_a_list_governs_it_only_when_it_announces_it(before, governed):
+    out = _run(before + LIST_AFTER, [("x", "Data were standardized to a common model")],
+               {"x": "Data are standardized to a common model."})
+    assert out["counts"]["located"] == 1
+    assert [f["via"] for f in out["flags"]] == (["enumeration"] if governed else [])
+
+
+def test_a_numbered_section_heading_is_not_governed_by_the_previous_sections_last_sentence():
+    # #3167's committed shape: "11. ECONOMIC BURDEN ..." after section 10's
+    # last sentence, which carries "will" and "future".
+    doc = ("The data set will be publicly available to researchers in the future.\n"
+           "11. ECONOMIC BURDEN TO PARTICIPANTS\nParticipants bear no costs for the study visits.")
+    out = _run(doc, [("x", "ECONOMIC BURDEN TO PARTICIPANTS")], {"x": "Economic burden to participants"})
+    assert out["counts"]["located"] == 1 and out["flags"] == []
+    # An inline enumeration after a finished sentence is read the same way.
+    inline = "The team will expand. A) collect records; B) standardize data to a common model."
+    assert _run(inline, [("x", "standardize data to a common model")], {"x": "Data are standardized."})["flags"] == []
+
+
 def test_a_single_parenthesised_number_is_not_an_enumeration():
     # An inline enumeration needs two consecutive labels: "(see table 2)"
     # is a reference, so the sentence, not an item, is the context.

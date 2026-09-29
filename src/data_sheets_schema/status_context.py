@@ -23,9 +23,14 @@ offsets, and two contexts are read:
     `A) ... E)` / `(a)` / `1)` items or bulleted and numbered lines — back
     to the governing clause. Only the governing clause and the snippet's
     own item are read; a sibling item's marker governs that item, not this
-    one. Without item markers a sentence is narrowed to the `;`-clauses the
-    snippet spans (and any lead-in up to a `:`), since `;` then separates
-    independent clauses or the terms of a list.
+    one. The governing clause is the open clause before the first item
+    (ending in `:` or in no sentence terminator), or a finished sentence
+    that announces the list ("the following", "as follows"); any other
+    finished sentence — the end of the paragraph above a bulleted list or a
+    numbered section heading — governs nothing after it, and only the
+    item is read. Without item markers a sentence is narrowed to the
+    `;`-clauses the snippet spans (and any lead-in up to a `:`), since `;`
+    then separates independent clauses or the terms of a list.
 (b) the nearest preceding heading-like line, or lead-in clause ending in
     `:`, in the same block that carries a status marker. Count labels in a
     flattened panel are heading-like and carry none, so they are passed
@@ -340,6 +345,30 @@ def _is_terminator(line: str, m: re.Match) -> bool:
     return not (word.isdigit() and len(word) <= 2 and not before[:w.start()].strip())
 
 
+#: A finished sentence that announces the list after it ("... the
+#: following data.", "... as follows.").
+_ANNOUNCES_LIST = re.compile(r"\b(?:the following|as follows)\b")
+
+
+def _governs_enumeration(lead: str) -> bool:
+    """Whether the text before an enumeration's first item is its governing
+    clause. An open clause is: one ending in ':' or in no sentence
+    terminator ("this project will A) ..."). A finished sentence is only
+    when it announces the list ("The study will collect the following
+    data."); otherwise it is the last sentence of whatever came before — a
+    previous paragraph above a bulleted list or a numbered section heading
+    — and governs nothing after it (#3167). Terminators are read as a
+    sentence end is (`_is_terminator`), so "approx." does not finish one."""
+    s = lead.rstrip()
+    if not s:
+        return False
+    last = s.rsplit("\n", 1)[-1]
+    m = next((m for m in _TERMINATOR.finditer(last) if m.end() == len(last)), None)
+    if m is None or not _is_terminator(last, m):
+        return True
+    return bool(_ANNOUNCES_LIST.search(rc.normalise(s)))
+
+
 class BundleView:
     """A bundle's text with its chunk manifest: chunk texts, bundle line
     numbers, and the contexts rule 1 reads. The chunk texts are the bundle
@@ -476,7 +505,9 @@ class BundleView:
         """The sentence before the one starting at `start`: before its
         terminator on the same line, else the last sentence of the previous
         non-blank line (one blank line is passed over; a separator or a
-        second blank line ends the walk)."""
+        second blank line ends the walk). Whether the unit reached governs
+        the items after it is `_governs_enumeration`'s question, not this
+        one's."""
         if term is not None:
             return self._sentence_start(term)
         k, blanks = self.line_of(start) - 1, 0
@@ -613,7 +644,9 @@ class BundleView:
         """The status classes in one located part's context: {class: {term,
         via, source_line}} for its sentence or enumeration (governing clause
         and own item) and, for classes not found there, the heading or
-        lead-in clause above it."""
+        lead-in clause above it. The walk back from an item stops at the
+        first unit that is not an item; that unit is read as the governing
+        clause only when `_governs_enumeration` says it is one."""
         a, b = span
         s_start, term = self._sentence_start(a)
         s_end = max(self._sentence_end(b), b)
@@ -634,7 +667,7 @@ class BundleView:
             item, run = max(candidates, key=lambda c: c[0])
             after = [m[0] for m in run if m[0] >= b]
             pieces = [(item, min(after) if after else s_end)]
-            if self.text[start:run[0][0]].strip():
+            if _governs_enumeration(self.text[start:run[0][0]]):
                 pieces.insert(0, (start, run[0][0]))
             via, own = "enumeration", item
         else:
