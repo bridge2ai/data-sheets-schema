@@ -81,9 +81,14 @@ machine-readable form and lineage across fields. So:
   negation within three words (`_says_why`); a disclaimer after the cue
   removes its clause from what is read, not the cue ("It falls short of 5
   not because of form but because no errata are recorded" says why):
-  - it accepts where it says "accept", "permit" or "allow" ("which the
-    rubric accepts in place of a PROV-O serialization"). A permission
-    negated or restricted where it stands states a limit and is read ("does
+  - it accepts where it says "accept", "permit" or "allow" in one of the
+    forms `_PERMISSION` lists (accept, accepts, accepted, accepting,
+    acceptable; permit, permits, permitted, permitting, permissible; allow,
+    allows, allowed, allowing, allowable; #3227): "which the rubric accepts
+    in place of a PROV-O serialization", "text is allowed in place of a
+    PROV-O graph". Other derived words ("acceptance", "allowance") accept
+    nothing, and "unacceptable" or "impermissible" is not a permission. A
+    permission negated or restricted where it stands states a limit and is read ("does
     not allow a machine to traverse the lineage", "is not permitted",
     "allows only a human-readable reconstruction"; #3147). "In place of",
     like "instead of" and "rather than", says what a form is given as, not
@@ -313,21 +318,24 @@ _DISCLAIMER = re.compile(
     r"|\brather than (?:a deduction|from being a 5)\b"
     r"|\bwithout (?:moving|reducing|lowering|penali[sz]ing)"
     r"|\b(?:is|are) not required\b|\b(?:does|do|need) not (?:require|need|count|matter)", _I)
-#: A clause that accepts a form says "accept", "permit" or "allow" ...
+#: A clause that accepts a form says "accept", "permit" or "allow", in any
+#: of the inflections and "-able"/"-ible" adjectives listed here (#3227;
+#: "allowed" was missing beside "accepted" and "permitted") ...
 #: "In place of" and "on equal footing" name no acceptance on their own:
 #: "the lineage is given as prose in place of a PROV-O graph" is a reason,
 #: as it is with "instead of" (#3205). Every committed rationale that says
 #: either also says "accepts".
 _PERMISSION = re.compile(
-    r"\baccepts?\b|\baccepted\b|\bpermits?\b|\bpermitted\b|\ballows?\b", _I)
+    r"\baccept(?:s|ed|ing|able)?\b|\bpermit(?:s|ted|ting)?\b|\bpermissible\b"
+    r"|\ballow(?:s|ed|ing|able)?\b", _I)
 #: ... unless the permission is negated or restricted where it stands, which
 #: states a limit rather than accepting one (#3147): "does not allow a
 #: machine to traverse", "is not permitted", "cannot be accepted", "allows
 #: no machine traversal", "allows only a human-readable reconstruction",
-#: "does not accept prose in place of a PROV-O graph".
+#: "does not accept prose in place of a PROV-O graph", "is not permissible".
 _PERMISSION_DENIED = re.compile(
-    r"(?:\b(?:not|never|cannot)|n't)\s+(?:(?:be|been|being|itself)\s+)?(?:accept|permit|allow)\w*"
-    r"|\b(?:accept|permit|allow)\w*\s+(?:no|only|nothing)\b", _I)
+    r"(?:\b(?:not|never|cannot)|n't)\s+(?:(?:be|been|being|itself)\s+)?(?:accept|permi[ts]|allow)\w*"
+    r"|\b(?:accept|permi[ts]|allow)\w*\s+(?:no|only|nothing)\b", _I)
 #: A negation, and the words for deducting that it can negate besides the
 #: withholding cues. A negation within `_DISCLAIM_WINDOW` words before a
 #: cue or one of those words disclaims a deduction (#3145): "nothing is deducted for …", "no
@@ -841,7 +849,8 @@ def inspection_statuses(path: Path | str) -> dict[str, InspectionStatus]:
     Where the inspection has a JSON companion (`semantic_errata.json`,
     `semantic_review.json`), it must name the same records with the same
     statuses, outputs, Q19 scores and, where the Markdown records one, the
-    same hash; the hash each status carries is the companion's. The 09-11
+    same hash; a companion case that records no Q19 score disagrees, as one
+    with no status or output does (#3228); the hash each status carries is the companion's. The 09-11
     errata's Markdown hashes only the 15 records it flagged, its companion
     all 24, so without the companion 9 of the evaluations it read could not
     be tied to their bytes.
@@ -892,7 +901,7 @@ def inspection_statuses(path: Path | str) -> dict[str, InspectionStatus]:
         disagree = [what for what, differs in (
             ("status", recorded != status.flagged),
             ("output", not _names(status.path, case.get("output"))),
-            ("Q19 score", score is not None and (isinstance(score, bool) or score != status.q19_score)),
+            ("Q19 score", score is None or isinstance(score, bool) or score != status.q19_score),
             ("sha256", status.sha256 not in (None, case["evaluation_sha256"])),
         ) if differs]
         if disagree:

@@ -592,6 +592,29 @@ def test_a_permission_denied_where_it_stands_states_a_limit(note, concern):
         STATED, REPRESENTATION_ONLY, [concern])
 
 
+@pytest.mark.parametrize("word", ["accepted", "permitted", "allowed", "accepting", "permitting",
+                                  "allowing", "acceptable", "allowable", "permissible"])
+def test_every_listed_form_of_a_permission_accepts(word):
+    """#3227: "allowed", "acceptable", "allowable" and "permissible" accept,
+    as "accepted" and "permitted" already did, so the form they accept is
+    not read as a reason."""
+    result = lint_q19(item(score=3, note=f"Held at 3 because version history is absent; text is "
+                                         f"{word} in place of a PROV-O graph."))
+    assert (result.verdict, result.concerns(REPRESENTATION), result.concerns(SUBSTANTIVE)) == (
+        SUBSTANTIVE_ONLY, [], ["version_history"])
+
+
+@pytest.mark.parametrize("words", ["not permissible", "not allowed", "not acceptable",
+                                   "permissible only"])
+def test_a_new_permission_form_denied_where_it_stands_states_a_limit(words):
+    """The denial side covers the new forms: "is not permissible" states a
+    limit, and its reason is read."""
+    result = lint_q19(item(note=f"Held at 4 because a PROV-O graph outside the record is {words} "
+                                f"here."))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, REPRESENTATION_ONLY, ["graph_form"])
+
+
 def test_a_denied_permission_that_disclaims_a_deduction_still_disclaims():
     """The disclaimer rule, not the permission rule, decides "does not
     permit withholding 5 for …": a plain negation guard would flag it."""
@@ -767,8 +790,14 @@ def test_a_table_header_and_separator_are_not_records(tmp_path):
     assert list(inspection_statuses(doc)) == ["A"]
 
 
-def _companion_case(job="A", status="requires_adjudication", output="a.json", sha="0" * 64, **extra):
-    return {"job_id": job, "status": status, "output": output, "evaluation_sha256": sha, **extra}
+def _companion_case(job="A", status="requires_adjudication", output="a.json", sha="0" * 64,
+                    score=4, **extra):
+    """A companion case agreeing with `_section`/`_TABLE` unless told not to.
+    `score=None` records no `q19_score`; a `q19` mapping stands in for it."""
+    case = {"job_id": job, "status": status, "output": output, "evaluation_sha256": sha}
+    if score is not None and "q19" not in extra:
+        case["q19_score"] = score
+    return case | extra
 
 
 @pytest.mark.parametrize("cases, message", [
@@ -777,6 +806,9 @@ def _companion_case(job="A", status="requires_adjudication", output="a.json", sh
     ([_companion_case(output="elsewhere/a.json")], "A: output disagree"),
     ([_companion_case(q19_score=3)], "A: Q19 score disagree"),
     ([_companion_case(q19={"score": 5})], "A: Q19 score disagree"),
+    # #3228: a case that records no score does not agree with one that does.
+    ([_companion_case(score=None)], "A: Q19 score disagree"),
+    ([_companion_case(q19={"rationale": "no score"})], "A: Q19 score disagree"),
     ([_companion_case(sha="1" * 64)], "A: sha256 disagree"),
     ([_companion_case(sha=None)], "A: no evaluation_sha256"),
     ([_companion_case(), _companion_case()], "A is listed twice"),
@@ -790,12 +822,31 @@ def test_a_companion_that_disagrees_with_its_markdown_is_refused(tmp_path, cases
         inspection_statuses(doc)
 
 
+def test_a_boolean_companion_score_is_not_a_score(tmp_path):
+    """`True == 1` in Python; a companion recording `true` names no score."""
+    doc = tmp_path / "review.md"
+    doc.write_text(_section("A", "requires_adjudication", "a.json", score=1))
+    doc.with_suffix(".json").write_text(json.dumps({"cases": [_companion_case(score=True)]}))
+    with pytest.raises(ValueError, match="A: Q19 score disagree"):
+        inspection_statuses(doc)
+
+
+@pytest.mark.parametrize("case", [_companion_case(), _companion_case(q19={"score": 4})])
+def test_a_companion_that_agrees_with_its_markdown_is_read(tmp_path, case):
+    """The refusals above are disagreements, not a companion refused
+    whatever it says: either score field agreeing with the Markdown reads."""
+    doc = tmp_path / "review.md"
+    doc.write_text(_section("A", "requires_adjudication", "a.json"))
+    doc.with_suffix(".json").write_text(json.dumps({"cases": [case]}))
+    assert inspection_statuses(doc)["A"].q19_score == 4
+
+
 def test_a_companion_supplies_the_hash_the_markdown_does_not(tmp_path):
     doc = tmp_path / "review.md"
     doc.write_text(_TABLE)
     assert inspection_statuses(doc)["A"].sha256 is None
     doc.with_suffix(".json").write_text(json.dumps({"cases": [
-        _companion_case(sha="2" * 64, q19_score=4)]}))
+        _companion_case(sha="2" * 64)]}))
     assert inspection_statuses(doc)["A"].sha256 == "2" * 64
 
 
