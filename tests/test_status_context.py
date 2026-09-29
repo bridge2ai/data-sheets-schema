@@ -803,6 +803,55 @@ def test_the_receipts_cli_reads_named_files_writes_nothing_and_exits_zero(tmp_pa
     assert broken.exit_code == 1 and "Error:" in broken.output and broken.exception.__class__ is SystemExit
 
 
+def test_the_text_report_prints_each_flag_on_one_line_whatever_its_text_spans():
+    # #3169: a snippet, a governor, a slot or a reason can carry bundle or
+    # model line breaks; each is written as the two characters \n, so a
+    # line-oriented reader sees one line per flag. JSON keeps the text.
+    doc = ("Anticipated Final Dataset\n14\nData contributing hospitals\n\n"
+           "The consortium\nwill:\n\nWorkshops on the common data model")
+    out = _run(doc, [("x", "14\nData contributing hospitals"), ("y", "Workshops on the common data model")],
+               {"x": "Fourteen hospitals contribute data.", "y": "Workshops on the common data model."})
+    assert [(f["slot"], f["snippet"], f["governor"]) for f in out["flags"]] == [
+        ("x", "14\nData contributing hospitals", "Anticipated Final Dataset"),
+        ("y", "Workshops on the common data model", "The consortium\nwill:")]
+    lines = sc.report_lines(out)
+    assert len(lines) == 5 and all(len(line.splitlines()) == 1 for line in lines)
+    assert "snippet=14\\nData contributing hospitals" in lines[2] and "governor=The consortium\\nwill:" in lines[3]
+    flag = out["flags"][0]
+    breaks = "a\nb\r\nc\rd\x0be\x0cf\x1cg\x85h i j"
+    synthetic = {**out, "summary": "claims " + breaks,
+                 "flags": [{**flag, "snippet": breaks, "governor": breaks}],
+                 "label_slot": [{**flag, "slot": "creators[0].name\nx"}],
+                 "unlocated": [{"chunk": "c\n002", "slot": "s\nlot", "snippet": breaks}]}
+    lines = sc.report_lines(synthetic)
+    assert len(lines) == 7 and all(len(line.splitlines()) == 1 for line in lines)
+    assert "snippet=a\\nb\\nc\\nd\\ne\\nf\\ng\\nh\\ni\\nj" in lines[2] and "governor=a\\nb" in lines[2]
+    assert lines[4].startswith("   flag governor_outside_snippet creators[0].name\\nx:")
+    assert lines[5] == "   · unlocated: chunk=c\\n002 slot=s\\nlot"
+    unchecked = sc.report_lines({**sc._unchecked(sc.RULE_RECEIPT, "no manifest at\n/x"), "rule": "r\nule"})
+    assert unchecked == ["   status_context v1 (#2917) · r\\nule · non-gating", "   · unchecked: no manifest at\\n/x"]
+
+
+def test_the_receipts_cli_prints_a_multiline_snippet_on_one_line(tmp_path):
+    text, _m = _bundle(PANEL)
+    bundle = tmp_path / "study.txt"
+    bundle.write_text(text, encoding="utf-8")
+    (tmp_path / "study_chunks.yaml").write_text(chunking.dump_manifest(chunking.build_manifest(bundle)),
+                                                encoding="utf-8")
+    (tmp_path / "receipt.yaml").write_text(yaml.safe_dump(_receipt(text, PANEL_PAIRS[:1])), encoding="utf-8")
+    (tmp_path / "record.yaml").write_text(yaml.safe_dump(
+        {"data_collectors": [{"collector_details": "Fourteen hospitals contribute data."}]}), encoding="utf-8")
+    args = ["receipts", "status-context", "--receipt", str(tmp_path / "receipt.yaml"),
+            "--bundle", str(bundle), "--record", str(tmp_path / "record.yaml")]
+    result = CliRunner().invoke(cli, args)
+    assert result.exit_code == 0, result.output
+    lines = result.output.splitlines()
+    assert len(lines) == 4 and all(line.startswith("   ") for line in lines)
+    assert "snippet=14\\nData contributing hospitals" in lines[2]
+    as_json = json.loads(CliRunner().invoke(cli, args + ["--json"]).output)
+    assert as_json["flags"][0]["snippet"] == "14\nData contributing hospitals"
+
+
 def test_the_review_cli_reads_an_audit_and_writes_nothing(tmp_path):
     audit = {"findings": [], "summary": "0 findings", "source_review": _review(
         ("/notes", [_claim("Curation continues.", "in_progress")]))}
@@ -862,6 +911,13 @@ def test_replay_flags_the_planned_preprocessing_the_v8_rep1_chorus_receipt_quote
     for i in (0, 1):
         assert (f"preprocessing_strategies[{i}].preprocessing_details", 45, "will", "enumeration", False) in flagged
     assert {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in files} == before
+    # #3169 on committed data: three of this run's flagged snippets span
+    # bundle lines, and the text report still prints one line per flag.
+    assert sum("\n" in f["snippet"] for f in out["flags"] + out["label_slot"]) >= 1
+    lines = sc.report_lines(out)
+    assert all(len(line.splitlines()) == 1 and line.startswith("   ") for line in lines)
+    assert len(lines) == (3 + len(out["flags"]) + len(out["unlocated"])
+                          + (1 + len(out["label_slot"]) if out["label_slot"] else 0))
 
 
 V8_REP3 = "2026-09-04f_claude-opus-5-api-generic-v8_rep3"

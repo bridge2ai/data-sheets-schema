@@ -1119,8 +1119,26 @@ def file_status_expression(audit: Path, *, record: Path | None = None, bundle: P
     return review_status_expression(parsed, record_raw=record_raw, view=view)
 
 
+#: Every line boundary `str.splitlines` recognises.
+_LINE_BREAK = re.compile(r"\r\n|[\n\r\v\f\x1c\x1d\x1e\x85  ]")
+
+
+def _one_line(text: str) -> str:
+    """`text` with each line break written as the two characters `\\n`, so
+    a snippet, governor, slot or reason that spans bundle lines stays on
+    its own output line."""
+    return _LINE_BREAK.sub(lambda _m: "\\n", text)
+
+
 def report_lines(out: dict[str, Any]) -> list[str]:
-    """The human-readable form the CLI prints beside the existing summaries."""
+    """The human-readable form the CLI prints beside the existing summaries:
+    a header, the summary, one line per flag and the assurance, each one
+    line whatever the model-written or bundle text in it holds (#3169);
+    `--json` carries the text as it is."""
+    return [_one_line(line) for line in _report_lines(out)]
+
+
+def _report_lines(out: dict[str, Any]) -> list[str]:
     lines = [f"   {out['instrument']} · {out['rule']} · non-gating"]
     if not out.get("checked"):
         return lines + [f"   · unchecked: {out['reason']}"]
