@@ -421,3 +421,37 @@ def agree_cmd(method, label, project, write):
         ProvenanceRecord(data=rec).write(prov)
         click.echo(f"   ✓ reliability written into {prov}")
 
+
+
+@review.command("status-expression")
+@click.option("--audit", "audit_file", required=True, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="an audit JSON carrying source_review, or a bare source_review object")
+@click.option("--record", "record_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the artifact the source_review is bound to; a marker elsewhere in a value then counts")
+@click.option("--bundle", "bundle_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the bundle the evidence quotes, to read each quote's context")
+@click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the bundle's chunk manifest; default the one beside it or the study's")
+@click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
+def status_expression(audit_file, record_file, bundle_file, chunk_manifest, as_json):
+    """Declared status the claim text does not carry (#2917):
+    `status_unexpressed` for a supported claim declared planned or
+    in_progress, `planned_evidence_declared_fact` for one declared fact on
+    planned evidence; label slots apart.
+
+    Read-only and non-gating: `source_review.check` is unchanged and nothing
+    is written. A flag is lexical — see the assurance line it prints.
+    """
+    import json
+
+    from data_sheets_schema import status_context as sc
+    try:
+        out = sc.file_status_expression(audit_file, record=record_file, bundle=bundle_file,
+                                        chunk_manifest=chunk_manifest)
+    except (OSError, UnicodeDecodeError, ValueError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(json.dumps(out, indent=2, ensure_ascii=False, default=str))
+    else:
+        for line in sc.report_lines(out):
+            click.echo(line)

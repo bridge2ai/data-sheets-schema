@@ -151,3 +151,57 @@ def invert(receipt_file, full_file, out_file):
         click.echo(f"✓ {out_file}")
     else:
         click.echo(text, nl=False)
+
+
+@receipts.command("status-context")
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (#934)")
+@click.option("--label", default=None, help="a run label; with --project, read the run's receipt, record and bundle")
+@click.option("--project", default=None, help="dataset identifier carried by the run's files")
+@click.option("--receipt", "receipt_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="instead of a run: the coverage receipt (with --bundle and --record)")
+@click.option("--bundle", "bundle_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the bundle the receipt names by md5")
+@click.option("--record", "record_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the record the receipt addresses (the phase-1 snapshot where the run wrote one)")
+@click.option("--final", "final_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the final record, to say whether each flagged value there expresses the status")
+@click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the bundle's chunk manifest; default the one beside it or the study's")
+@click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
+def status_context(method, label, project, receipt_file, bundle_file, record_file, final_file,
+                   chunk_manifest, as_json):
+    """Where a receipted snippet lost a status marker its context carries
+    (#2917): `governor_outside_snippet` and `modal_dropped`, label slots apart.
+
+    Read-only and non-gating: it writes nothing, exits 0 whatever it finds,
+    and leaves `receipts check` and every provenance block as they are. A
+    flag is lexical — see the assurance line it prints.
+    """
+    import json
+
+    import yaml
+
+    from data_sheets_schema import receipts as rc
+    from data_sheets_schema import status_context as sc
+    if receipt_file is not None:
+        if bundle_file is None or record_file is None or label or project:
+            raise click.UsageError("--receipt takes --bundle and --record, and no --label/--project")
+    elif not label or not project:
+        raise click.UsageError("name a run (--label and --project) or files (--receipt, --bundle, --record)")
+    elif not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
+        raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")
+    try:
+        if receipt_file is not None:
+            out = sc.file_status_context(receipt_file, bundle_file, record_file,
+                                         chunk_manifest=chunk_manifest, final=final_file)
+        else:
+            from data_sheets_schema.cli.method import resolve_method
+            p = _run_paths(method or resolve_method(label, project), label, project)
+            out = sc.run_status_context(p["provenance"], rc.receipt_path(p["core_dir"], project), p["full"])
+    except (OSError, UnicodeDecodeError, ValueError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(json.dumps(out, indent=2, ensure_ascii=False, default=str))
+    else:
+        for line in sc.report_lines(out):
+            click.echo(line)
