@@ -712,7 +712,8 @@ class NonChecks(unittest.TestCase):
         # A write that never names the receipt is not seen at all; the stated
         # exception must cover it, not only a glob or variable (#3221).
         text = " ".join(ro.NON_CHECKS)
-        for route in ("glob or variable", "python fix.py", "git checkout -- DIR", "rm -r DIR"):
+        for route in ("glob or variable", "a program or script that writes it", "python fix.py",
+                      "a command on a directory that holds it", "git checkout -- DIR", "rm -r DIR"):
             self.assertIn(route, text)
         self.assertIn("does not name it literally", ro.__doc__)
 
