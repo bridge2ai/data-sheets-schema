@@ -38,7 +38,12 @@ every observation committed here in:
 
 - the condition prompts, `.claude/` and `.github/workflows/`;
 - the matched arms' launch prompts and rubric system prompts
-  (`notes/matched_cborg_2026-09-13/prompts/`);
+  (`notes/matched_cborg_2026-09-13/prompts/`), and every other directory
+  under `notes/` named `prompts` or `initial_requests`: the rendered API
+  request bodies a registration writes, and the launch prompts and request
+  bodies of the registered but unexecuted run under
+  `notes/matched_cborg_2026-09-13/drafts/`. A new registration that writes
+  those two directories is found by name wherever under `notes/` it lands;
 - the direct and native arms' system prompts
   (`notes/claudecode_direct/system.md`,
   `notes/matched_cborg_2026-09-13/native_controls/system.md`);
@@ -66,9 +71,12 @@ the top level. A README or schema one level down is loaded or refused like
 any other file. Finder's `.DS_Store`, recognised by its binary header, is the
 one file skipped at any depth; a `.DS_Store` holding anything else is refused.
 
-It does not see a launch message typed at run time, or a registration or
-rendered instruction written outside the repository; keeping those clean is
-the operator's job. No text scan finds an observation that is paraphrased, or
+It does not see a launch message typed at run time; a registration or
+rendered instruction written outside the repository; or one written under
+`notes/` with a file name other than `*registration*.json` in a directory
+named neither `prompts` nor `initial_requests` (the per-attempt `prompt.txt`
+files of the 2026-09-11/12 reference rescores, which predate this directory,
+for example). Keeping those clean is the operator's job. No text scan finds an observation that is paraphrased, or
 assembled at run time from pieces that are not string literals in the scanned
 source.
 

@@ -7,7 +7,12 @@ that nothing a generation or audit model is given names the ground-truth
 directory or quotes an observation. These scans cover:
 
 - the condition prompts, playbooks, agent definitions and assistant instructions;
-- the matched arms' launch prompts and rubric system prompts;
+- the matched arms' launch prompts and rubric system prompts, and every other
+  directory under notes/ named ``prompts`` or ``initial_requests``: the rendered
+  request bodies a registration writes (``prepare_registration.py``), and the
+  launch prompts and request bodies of a registered run not yet executed
+  (#3254). A future registration written the same way is found by its
+  directory names, wherever under notes/ it lands;
 - the direct and native arms' system prompts;
 - the Python source under notes/ that builds model-facing text: the command
   guidance appended to both arms' system prompts, the audit system prompts and
@@ -29,9 +34,12 @@ fails here too, and so does a file there that is neither a ground-truth file
 nor the top-level README or schema (#3176). Finder's ``.DS_Store``, recognised
 by its binary header, is the one other file skipped, at any depth.
 
-Not scanned: a launch message typed at run time, and a registration or a
-rendered instruction written outside the repository. Those are the
-operator's to keep clean. Not found: an observation paraphrased, or assembled
+Not scanned: a launch message typed at run time; a registration or a
+rendered instruction written outside the repository; and one written inside
+notes/ under a file name other than ``*registration*.json`` in a directory
+named neither ``prompts`` nor ``initial_requests`` (the per-attempt
+``prompt.txt`` files of the 2026-09-11/12 reference rescores, for example,
+which predate the ground truth). Those are the operator's to keep clean. Not found: an observation paraphrased, or assembled
 at run time from pieces that are not string literals in the scanned source.
 """
 import ast
@@ -64,6 +72,16 @@ INSTRUCTION_FILES = ("notes/claudecode_direct/system.md",         # the direct a
 #: audit_controls; the finalization and evaluation instructions; context
 #: recovery. Every non-test .py file under these is scanned as source text (#3096).
 CONTROL_CODE_TREES = ("notes/claudecode_direct", MATCHED)
+#: Directory names under notes/ that hold rendered model-facing text: launch
+#: prompts, and the literal API request bodies prepare_registration.py writes
+#: (#3254). Found by name, so a new registration's output directory is too.
+RENDERED_INSTRUCTION_DIRS = ("prompts", "initial_requests")
+#: The rendered instructions #3254 found unscanned; each must stay in the scanned set.
+RENDERED_UNDER_NOTES = (
+    f"{MATCHED}/initial_requests",
+    f"{MATCHED}/drafts/five_study_sources_pending_unexecuted/initial_requests",
+    f"{MATCHED}/drafts/five_study_sources_pending_unexecuted/prompts",
+)
 #: The model-facing files #3096 found unscanned; each must stay in the scanned set.
 MODEL_FACING_UNDER_NOTES = (
     f"{MATCHED}/native_controls/system.md",
@@ -143,8 +161,16 @@ def control_code(*relatives):
             if p.suffix == ".py" and not p.name.startswith("test_") and "test_fixtures" not in p.parts]
 
 
+def rendered_instruction_trees(notes=ROOT / "notes"):
+    """Every directory under ``notes`` named ``prompts`` or ``initial_requests`` (#3254)."""
+    return sorted(p for p in notes.rglob("*")
+                  if p.is_dir() and p.name in RENDERED_INSTRUCTION_DIRS and "__pycache__" not in p.parts)
+
+
 def instruction_surfaces():
-    return files_under(*INSTRUCTION_TREES, *INSTRUCTION_FILES) + control_code(*CONTROL_CODE_TREES)
+    rendered = [str(p.relative_to(ROOT)) for p in rendered_instruction_trees()]
+    return list(dict.fromkeys(files_under(*INSTRUCTION_TREES, *INSTRUCTION_FILES, *rendered)
+                              + control_code(*CONTROL_CODE_TREES)))
 
 
 def registration_records():
@@ -252,6 +278,25 @@ def test_the_model_facing_files_under_notes_are_scanned():
     """The native arm's system prompt, its command guidance and the audit framing (#3096)."""
     scanned = {p.resolve() for p in instruction_surfaces()}
     assert [f for f in MODEL_FACING_UNDER_NOTES if (ROOT / f).resolve() not in scanned] == []
+
+
+def test_the_rendered_instructions_under_notes_are_scanned():
+    """The rendered request bodies and the pending run's launch prompts (#3254)."""
+    scanned = {p.resolve() for p in instruction_surfaces()}
+    for relative in RENDERED_UNDER_NOTES:
+        files = files_under(relative)
+        assert files, relative
+        assert [str(f.relative_to(ROOT)) for f in files if f.resolve() not in scanned] == []
+
+
+def test_a_new_registrations_prompts_and_requests_are_found_by_name(tmp_path):
+    """A registration written into a new output directory is scanned without an edit here."""
+    run = tmp_path / "some_new_run_2026-10-01" / "drafts" / "pending"
+    for name in (*RENDERED_INSTRUCTION_DIRS, "reviews"):
+        (run / name).mkdir(parents=True)
+    (tmp_path / "__pycache__" / "prompts").mkdir(parents=True)
+    assert [p.relative_to(tmp_path) for p in rendered_instruction_trees(tmp_path)] == [
+        run.relative_to(tmp_path) / "initial_requests", run.relative_to(tmp_path) / "prompts"]
 
 
 def test_no_instruction_file_names_the_directory_or_quotes_an_observation(needles):
