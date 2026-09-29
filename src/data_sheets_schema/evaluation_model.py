@@ -4,9 +4,12 @@ Five LLM instruments that score a D4D record — the support and fitness
 scorers in `evidence_score`, the referent judge in `merge`, the equivalence
 judge in `agreement`, the form-subtype classifier in `form_defects` — used to
 fall back, when no model was passed, to `api_runner._model_settings()["name"]`:
-the *generation* model. Nothing separated "which model wrote the records" from
-"which model judged them", so every rubric, fitness and support score in the
-corpus was produced by the generator's own family, and no report said so.
+the *generation* model. For those paths nothing separated "which model wrote
+the records" from "which model judged them", so their support, fitness,
+referent, equivalence and form-subtype judgements share the generator's
+family. Rubric scores come by other routes: on the Claude-generated arms that
+`arm_comparison` reports, every evaluation is same-family as well, while the
+legacy gpt5-method rubric scores were judged cross-family.
 
 This module is the seam. `evaluation_model_settings()` is what those five
 paths ask when they were given no model, and it answers with a `basis` naming
