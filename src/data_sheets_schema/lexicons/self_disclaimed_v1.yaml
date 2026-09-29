@@ -118,6 +118,19 @@ other_subject:
   - '^(?:they|none of these|none of those)\b'
   - '\bthey (?:are|were)\b'
 
+# The subject of the cue's clause names other items of a presence
+# container's own kind: "Two other variables are not part of the public
+# release", "The remaining partitions are not one of the released files"
+# (#3231). Read only in the subject (a passive cue's `subject`, the stretch
+# before the cue after its last comma, self-references blanked), never in
+# the whole clause: "Unlike the other splits, this split is not released"
+# and "it is not one of the listed data types" are about the member. An
+# item named with no such determiner ("The external test set is described
+# as planned") is not read as another's: without the member's identity it
+# may be the member.
+other_item_subject:
+  - '\b(?:another|these|those|other|such|the other|the remaining|the rest of the) (?!than\b)(?:[\w-]+ ){0,2}?(?:variables?|data elements?|elements|fields?|columns?|measures?|instances?|data types?|modalit(?:y|ies)|record types?|splits?|partitions?|(?:holdout |test |validation |training )?(?:data )?sets?)\b'
+
 # A hit whose guard matches is a caveat about a date, amount or attribute
 # of the member, or about a study's design, not about its role or presence.
 # Guarded hits are reported in their own list, never as flags. A guard
@@ -196,9 +209,16 @@ guards:
 # names the container's own role, while `presence.prospective_predicate`
 # counts whatever the clause's subject is ("both statements are
 # prospective", but also "the consent process is prospective"), with only
-# the design guard. Every scope rejects an other-subject anywhere in the
-# clause holding the cue, read with the member's own self-references
-# blanked.
+# the design guard. A presence term licenses a `presence` cue only outside
+# the words the cue itself spells, and not inside one of the member's own
+# self-references: `presence.planned_element` ends on the planned noun, so
+# "Unlike the planned splits for the next release, this split is complete"
+# names no presence term of its own (#3230). A pattern that declares its
+# object inside the cue (`object: [cue]`) is read with the cue, whose free
+# span names the item it reports ("No source reports the holdout set as
+# available"). Every scope rejects an other-subject anywhere in the clause
+# holding the cue and an other-item subject in the cue's subject, each read
+# with the member's own self-references blanked.
 patterns:
   - id: role.assignment_negated
     class: role_disclaimer

@@ -19,14 +19,24 @@ A self-reference that a comma separates from the cue counts only when the
 stretch after the last such comma has no subject of its own either: "Given
 the consent terms, the raw recordings are not released" is about the
 recordings (#3159). A `presence` cue counts where a `self` cue would or
-where its clause names the container's own presence term. A `none` cue has
+where its clause names the container's own presence term outside the
+cue's own words and outside the member's self-references: "Unlike the
+planned splits for the next release, this split is complete" names no
+presence term but the one `presence.planned_element` spells (#3230). A
+presence term with no other-marker ("The external test set is described
+as planned") is taken as possibly the member's, since the lint does not
+know which item the member is. A `none` cue has
 no further condition: `role.not_necessarily` names the container's role in
 its cue, but `presence.prospective_predicate` counts whatever its clause's
 subject is, so "the consent process is prospective" in an instance's prose
 is flagged like "both statements are prospective". A clause whose words
-name other people or things ("those individuals") never counts; the
-member's own self-reference ("this member among the creators") is blanked
-before that check, so it is never read as someone else (#3156).
+name other people or organisations ("those individuals") never counts, and
+nor does one whose subject names other items of a presence container's
+kind ("Two other variables are not part of the public release", "The
+remaining partitions ..."); that second check reads the subject alone, so
+"Unlike the other splits, this split is not released" still counts (#3231).
+The member's own self-reference ("this member among the creators") is
+blanked before both checks, so it is never read as someone else (#3156).
 
 A cue does not count where a guard shows that what it says is unstated is a
 date, an amount, an attribute, a narrower sub-role or a study's design. The
@@ -181,6 +191,7 @@ class Lexicon:
         placement = frozenset(data["placement"]["fields"])
         self._self = [re.compile(p, re.I) for p in data["self_reference"]]
         self._other = [re.compile(p, re.I) for p in data["other_subject"]]
+        self._other_item = [re.compile(p, re.I) for p in data["other_item_subject"]]
         self._guards = {}
         for name, guard in data["guards"].items():
             if guard.get("reads") not in GUARD_READS:
@@ -478,10 +489,25 @@ def _object_texts(pattern, container, raw: dict[str, str], masked: dict[str, str
     return [masked[p] for p in pattern.object]
 
 
+def _presence_text(pattern, masked: str, c0: int, c1: int, m) -> str:
+    """Where a `presence` cue's clause is searched for the container's
+    presence term: the masked clause, so a term inside one of the member's
+    own self-references ("this split") is not a second licence for a cue the
+    self-reference rule rejected, with the cue's own span blanked. A term the
+    cue itself spells cannot fail to be there: `presence.planned_element`
+    ends on the planned noun, so "Unlike the planned splits for the next
+    release, this split is complete" names no presence term of its own
+    (#3230). A pattern that declares its object inside the cue (`object:
+    [cue]`) keeps the cue, whose free span names the item it reports ("No
+    source reports the holdout set as available")."""
+    if "cue" in pattern.object:
+        return masked[c0:c1]
+    return masked[c0:m.start()] + " " * (m.end() - m.start()) + masked[m.end():c1]
+
+
 def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     """One cue match: a flag hit, a guarded hit, or out of scope, with why."""
     c0, c1 = _clause(sentence, m.start())
-    clause = sentence[c0:c1]
     out = {"rule": pattern.id, "class": pattern.cls, "cue": m.group(0)}
     selves = lexicon._self + _own_names(member)
     masked = _masked(sentence, selves)
@@ -490,6 +516,14 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     # Read with the member's own self-references blanked: "this member among
     # the creators" is the member, not a group of other people (#3156).
     other = _search(lexicon._other, masked[c0:m.start()], masked[c0:c1])
+    if other:
+        return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
+    # The cue's subject names other items of a presence container's kind
+    # ("Two other variables are not part of the public release"), read in
+    # the subject alone: "Unlike the other splits, this split is not
+    # released" is about the member (#3231).
+    parts = _parts(masked, c0, c1, m, sentence)
+    other = _search(lexicon._other_item, parts["subject"])
     if other:
         return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
     if pattern.scope == "role":
@@ -501,7 +535,7 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     elif pattern.scope == "presence":
         term = _self_reference(selves, sentence, c0, m.start())
         if term is None:
-            found = container.presence_scope.search(clause)
+            found = container.presence_scope.search(_presence_text(pattern, masked, c0, c1, m))
             term = found.group(0) if found else None
         if term is None:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_or_presence_term"}
@@ -511,7 +545,6 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         if term is None:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_reference"}
         out["scope"] = term
-    parts = _parts(masked, c0, c1, m, sentence)
     read = {k: [parts[k]] for k in ("clause", "before_cue", "cue", "after_phrase")}
     read["object"] = _object_texts(pattern, container, _parts(sentence, c0, c1, m), parts)
     for name in pattern.guards:

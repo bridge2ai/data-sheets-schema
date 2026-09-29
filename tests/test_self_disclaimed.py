@@ -19,14 +19,15 @@ LEXICON = sd.load_lexicon()
 #: Pins on the lexicon's exact bytes, one per version. Changing the file
 #: without a version bump fails here; so does bumping without a pin. v1 was
 #: revised in review before it first merged (#3029), so this PR's commits
-#: carry four earlier byte versions under `version: 1`:
+#: carry five earlier byte versions under `version: 1`:
 #:   9b1f536ba02afc9971bbe9e28da316ea1c3c90e356bdbcc2c200400259521b04 (e00711d21, first commit)
 #:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
 #:   14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35 (cf3d16cb3, review round 2)
 #:   56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4 (df35537aa, review round 2)
+#:   3b2949e29c7aebef79c6e77894d735c6fa2ce1a0ae8800463374d63fe45a5f3a (7e327b512, review round 3)
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161).
-LEXICON_PINS = {1: "3b2949e29c7aebef79c6e77894d735c6fa2ce1a0ae8800463374d63fe45a5f3a"}
+LEXICON_PINS = {1: "626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6"}
 
 
 def record(**containers):
@@ -425,6 +426,67 @@ def test_a_presence_cue_is_licensed_by_a_self_reference_alone(container, text, e
     out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
     assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == expected
     assert not LEXICON.containers[container].presence_scope.search(text)
+
+
+@pytest.mark.parametrize("container,text,rule", [
+    ("splits", "Unlike the planned splits for the next release, this split is complete.",
+     "presence.planned_element"),
+    ("splits", "The training set is fixed; a planned holdout set is described in the protocol.",
+     "presence.planned_element"),
+    ("variables", "Complete for all participants; planned measures from wave 2 are listed elsewhere.",
+     "presence.planned_element"),
+    ("instances", "Some planned data elements were dropped; this instance type is released.",
+     "presence.planned_element"),
+    # a presence term only inside a self-reference the comma rule rejects
+    ("splits", "For this split, the data are recorded as planned.", "presence.recorded_as_planned"),
+])
+def test_a_presence_term_the_cue_spells_does_not_license_it(container, text, rule):
+    """#3230: `presence.planned_element` ends on the planned noun, so the
+    presence term it spells cannot be what puts its clause in scope; nor can
+    a term inside the member's own self-reference."""
+    assert outcomes(container, text) == [(rule, "out_of_scope", "no_self_or_presence_term")]
+
+
+@pytest.mark.parametrize("container,text,rule,scope", [
+    ("splits", "The holdout set is a planned provision.", "presence.planned_element", "holdout set"),
+    ("splits", "The project abstract describes the holdout set as a planned provision.",
+     "presence.planned_element", "holdout set"),
+    ("splits", "This split is a planned split.", "presence.planned_element", "This split"),
+    ("splits", "No source reports the holdout set as available.", "presence.none_reports_available",
+     "holdout set"),
+])
+def test_a_presence_term_outside_the_cue_or_in_a_cue_object_still_licenses_it(container, text, rule, scope):
+    """#3230: the corpus shape (the term outside the cue), a self-reference,
+    and a cue that declares its object inside itself (`object: [cue]`)."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [(rule, scope)], text
+
+
+@pytest.mark.parametrize("container,text,term", [
+    ("variables", "Two other variables are not part of the public release.", "other variables"),
+    ("splits", "The remaining partitions are not one of the released files.", "The remaining partitions"),
+    ("instances", "Those data types are not yet released.", "Those data types"),
+    ("splits", "Another holdout set is not yet available.", "Another holdout set"),
+])
+def test_a_subject_naming_other_items_is_another_subject(container, text, term):
+    """#3231: the other-subject rule covers other items of a presence
+    container's kind, not only other people."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert out["flags"] == []
+    assert {(r["reason"], r["term"]) for r in out["out_of_scope"]} == {("other_subject", term)}, text
+
+
+@pytest.mark.parametrize("container,text,rule", [
+    ("splits", "Unlike the other splits, this split is not yet released.", "presence.not_yet_released"),
+    ("instances", "It is not one of the listed data types.", "presence.not_member_of"),
+    ("variables", "This variable is not part of the release, unlike the other variables.",
+     "presence.not_member_of"),
+])
+def test_other_items_outside_the_subject_do_not_reject_the_member(container, text, rule):
+    """#3231: the other-item check reads the cue's subject alone, so other
+    items named as a contrast or as the reference set leave the member's
+    own disclaimer counted."""
+    assert outcomes(container, text) == [(rule, "flag", None)]
 
 
 def test_scope_is_read_in_the_clause_holding_the_cue():
