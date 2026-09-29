@@ -28,7 +28,8 @@ in, a report out, no file read. Per slot it gives
   agree;
 - **alignment** of list entries across each pair of replicates, one to one:
   on the identity `receipts._entry_key` reads (the first `id`, `name`,
-  `title`, … string an entry carries, or a scalar entry's own value), and a
+  `title`, … string an entry carries, or a string entry's own value — a
+  number or boolean entry is keyless), and a
   keyless entry against the keyless entry at its own index —
   `joined_by_position`, the same caveat as #908: position is no evidence of
   identity, so it is counted and never folded into the keyed count.

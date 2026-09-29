@@ -190,3 +190,10 @@ def test_the_v7_and_v8_production_arms_reproduce_the_issue_figures():
     for name, n in {"purposes": 8, "external_resources": 8, "preprocessing_strategies": 7,
                     "subpopulations": 6, "related_datasets": 6}.items():
         assert (differ[name], held[name]) == (n, n), name
+
+
+def test_keyed_alignment_is_one_to_one():
+    """Two entries sharing a key cannot both join the one entry that carries it."""
+    out = align([{"name": "A"}, {"name": "A"}], [{"name": "A"}])
+    assert out["joined_by_key"] == {"name": 1}
+    assert out["unaligned"] == 1

@@ -606,8 +606,8 @@ def receipt_section(data) -> list[str]:
 
 
 # Arms whose records are not replicates of one configuration: the v7 API
-# canaries are four labels, each one run under its own settings (#777).
-NOT_REPLICATES = {"v7api": "four canary labels, one run each under its own settings (#777)"}
+# canaries are five runs under four labels, each label its own settings (#777).
+NOT_REPLICATES = {"v7api": "five canary runs under four labels, each label its own settings (#777)"}
 
 
 def replicate_structure_section(data) -> list[str]:
