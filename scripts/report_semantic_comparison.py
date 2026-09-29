@@ -21,7 +21,8 @@ from data_sheets_schema.semantic_comparison import (
 def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     """`cohort` names the evaluations the discrimination block measures — one
     rating per record, e.g. the primaries of a set that also holds repeats.
-    By default it is every named evaluation; a record rated more than once is
+    The table still lists every named evaluation, and the block names those
+    its cohort leaves out (#3303). By default it is every named evaluation; a record rated more than once is
     then named and left out of the block rather than having a rating chosen."""
     if not paths:
         raise ValueError("name at least one evaluation")
@@ -60,15 +61,19 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
         text.append("| " + " | ".join(str(cell).replace("|", "\\|").replace("\n", " ")
                                        for cell in row) + " |")
     if cohort is None:
-        measured = [doc for _path, doc in documents]
+        measured, left_out = [doc for _path, doc in documents], []
     else:
         named = {path.resolve(): doc for path, doc in documents}
         outside = [str(path) for path in cohort if path.resolve() not in named]
         if outside:
             raise ValueError(f"cohort names evaluations the report does not: {outside}")
         measured = [named[path.resolve()] for path in cohort]
+        # The table lists every evaluation; name the ones the block does not
+        # measure rather than say it measured "the evaluations above" (#3303).
+        in_cohort = {path.resolve() for path in cohort}
+        left_out = [str(path) for path, _doc in documents if path.resolve() not in in_cohort]
     text.append("")
-    text.extend(render_discrimination(discrimination(measured)))
+    text.extend(render_discrimination(discrimination(measured), left_out=left_out))
     return "\n".join(text).rstrip("\n") + "\n"
 
 

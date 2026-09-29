@@ -250,6 +250,13 @@ def test_the_comparison_report_carries_the_block_over_the_named_cohort(tmp_path)
     primaries = report(paths, [paths[0], paths[2], paths[3]])
     assert "Rated more than once" not in primaries
     assert "| P | 3 | 1 / 1 |" in primaries
+    # #3303: the table above lists all four; the block names the one it leaves out.
+    assert f"| {paths[1]} |" in primaries
+    assert ("Measured on the evaluations above except the 1 left out of this block's cohort, "
+            f"one rating per record. Left out, and in no count below: `{paths[1]}`.") in primaries
+    assert "Measured on the evaluations above, one rating per record." in whole
+    assert "Left out" not in whole
+    assert "Left out" not in report(paths, paths)
     assert "**withheld on both bases**: 1 distinct total" in primaries
     with pytest.raises(ValueError, match="cohort names evaluations the report does not"):
         report(paths[:2], [paths[3]])
@@ -269,7 +276,8 @@ def test_arm_comparison_partitions_by_evaluator_and_flags_the_project_cell():
         return {"label": label, "total": total, "max": 50, "adjusted_max": 50, "pct": 2.0 * total,
                 "evaluator": evaluator, "file": f"VOICE_{label}_evaluation.json", "doc": doc}
 
-    # Pooled, the two evaluators give three distinct totals; each alone gives two.
+    # Pooled, the two evaluators give three distinct totals (3, 2, 1); alone,
+    # evaluator one gives two (3, 2) and evaluator two gives one (1, 1).
     scores["rubric10"][arms[-2]]["VOICE"] = [entry("x_rep1", 3, "one"), entry("x_rep2", 2, "one")]
     scores["rubric10"][arms[-1]]["VOICE"] = [entry("y_rep1", 1, "two"), entry("y_rep2", 1, "two")]
     cohorts = m.rubric_discrimination(scores)

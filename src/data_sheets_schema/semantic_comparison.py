@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 import json
 from math import isfinite
-from typing import Any, Iterable
+from typing import Any, Iterable, Sequence
 
 
 @dataclass(frozen=True)
@@ -389,11 +389,19 @@ def instruments_of(block: dict[str, Any], rubric: str) -> list[str]:
     return [name for name, entry in block["rubrics"].items() if entry["family"] == rubric]
 
 
-def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str = "") -> list[str]:
+def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str = "",
+                          left_out: Sequence[str] = ()) -> list[str]:
     """Markdown lines for a discrimination block; the basis is named on every
-    figure that depends on one. `scope` qualifies the heading."""
+    figure that depends on one. `scope` qualifies the heading. `left_out` names
+    the evaluations listed above the block that it does not measure (a report
+    whose cohort is narrower than its table, #3303); they are named, so the
+    block never claims to measure every evaluation above it."""
+    measured = ("Measured on the evaluations above, one rating per record." if not left_out else
+                f"Measured on the evaluations above except the {len(left_out)} left out of this "
+                "block's cohort, one rating per record. Left out, and in no count below: "
+                + ", ".join(f"`{name}`" for name in left_out) + ".")
     lines = [f"{heading} Item discrimination and within-project orderings{scope} (#2927)", "",
-             "Measured on the evaluations above, one rating per record. An item at ceiling "
+             measured + " An item at ceiling "
              "(or floor) scored its maximum (or 0) on every record where it was scored, so it "
              "separates none of them. A project with at most "
              f"{block['withheld_at_most']} distinct totals on a basis gets no within-project "
