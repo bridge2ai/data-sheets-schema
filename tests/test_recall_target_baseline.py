@@ -251,6 +251,15 @@ class Baseline(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(self.m.main(["--check"]), 0)
         self.assertEqual(self.m.OUT_MD.read_bytes(), written)
+        # An existing note whose bytes differ is stale, and --check leaves it
+        # as it found it rather than rewriting it (#3308).
+        stale = written + b"x"
+        self.m.OUT_MD.write_bytes(stale)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(self.m.main(["--check"]), 1)
+        self.assertIn("stale", err.getvalue())
+        self.assertEqual(self.m.OUT_MD.read_bytes(), stale)
 
 
 def test_the_arms_are_arm_comparison_s_where_both_name_one():
