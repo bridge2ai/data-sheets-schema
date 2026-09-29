@@ -801,8 +801,15 @@ def main(argv=None):
                 not summary.exists()
                 or summary.read_text(encoding="utf-8")
                 != scratch_summary.read_text(encoding="utf-8"))
+        # Said on a pass as well as a failure. Before #2936 a pass printed
+        # only the line below, from a check that compared triples alone, so
+        # without this a column check that found nothing reads exactly like
+        # one that never ran (#3057).
+        agree = (f"\n  The {compared} row(s) both files carry agree on "
+                 f"{', '.join(STRUCTURAL_COLUMNS)}.")
         if not lost and not gained and not column_drift and not summary_drifted:
             print("\n✓ The committed mapping and summary regenerate exactly.")
+            print(agree)
             return 0
         print(f"\n✗ The committed mapping does not regenerate from its inputs.")
         if lost:
@@ -822,10 +829,7 @@ def main(argv=None):
                 print(f"      {s}  --{p_}->  {o}  {col}: "
                       f"committed {was!r}, regenerated {now!r}")
         else:
-            # Said affirmatively, so a reader can tell a column check that
-            # found nothing from one that did not run.
-            print(f"\n  The {compared} row(s) both files carry agree on "
-                  f"{', '.join(STRUCTURAL_COLUMNS)}.")
+            print(agree)
         if summary_drifted:
             print("\n  The summary does not regenerate either.")
         elif lost or gained or column_drift:

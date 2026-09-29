@@ -198,7 +198,10 @@ class TestTheCheckCoversBothArtifacts(unittest.TestCase):
 
     def test_the_check_says_which_columns_it_compared(self):
         """#2936. Said when nothing differs too, so a column check that found
-        nothing cannot be mistaken for one that never ran."""
+        nothing cannot be mistaken for one that never ran. This run fails on
+        the KNOWN_UNDERIVABLE rows; the same line on a pass is
+        `TestTheCheckActsOnColumnDrift.test_a_pass_says_which_columns_it_compared`
+        (#3057)."""
         import re
         said = re.search(r"The (\d+) row\(s\) both files carry agree on "
                          r"d4d_subject_range, subject_multivalued, "
@@ -286,6 +289,16 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         code, out = self.exact_result
         self.assertEqual(code, 0, out)
         self.assertIn("regenerate exactly", out)
+
+    def test_a_pass_says_which_columns_it_compared(self):
+        """#3057. Before #2936 a pass printed only "regenerate exactly", from
+        a check that compared triples alone. Without this line a pass from the
+        column check reads exactly like one from that check, so the columns
+        compared, and how many rows, are said on a pass too."""
+        _, out = self.exact_result
+        self.assertIn(f"The {self.rows} row(s) both files carry agree on "
+                      "d4d_subject_range, subject_multivalued, "
+                      "type_compatible.", out)
 
     def test_one_differing_value_fails_the_check(self):
         """No triple is lost or gained and the summary is fresh, so this
