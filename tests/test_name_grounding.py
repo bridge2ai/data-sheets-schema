@@ -269,9 +269,31 @@ class InitialExpandedIsAnExpansionTest(unittest.TestCase):
         self.assertEqual(BundleIndex("Levinson M A and Marquez C").initials_beside("Levinson"), {"m"})
 
     def test_capitals_ending_the_line_before_do_not_take_the_initial_after(self):
-        """`La Jolla, CA\\nClark T`: whatever `CA` is, it is on another line,
-        so Clark's own `T` still counts."""
-        self.assertEqual(cls("Tim Clark", "Tim", "La Jolla, CA\nClark T"), "initial_expanded")
+        """`La Jolla, CA\\nClark T`: whatever the capitals are, they are on
+        another line, so Clark's own `T` still counts. `U.S.A.` is single
+        capitals, which on Clark's line would open his entry (#3143), so
+        only the line break keeps the `T` there."""
+        for bundle in ("La Jolla, CA\nClark T", "Stanford, CA 94305, U.S.A.\nClark T"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(cls("Tim Clark", "Tim", bundle), "initial_expanded")
+
+    def test_a_run_of_capitals_before_the_surname_does_not_open_its_entry(self):
+        """#3143: only single capitals before a surname show that its entry
+        started there, so that the initial after it opens the next one. A
+        run of two or three may be an acronym, and the capitalised words
+        after it no compound surname. Review round 2 read `NIH Common Fund
+        Metallo` as a compound whose initials are `NIH` and gave Metallo no
+        `C`; the same-line `CA Clark T` had lost its `T` in round 1."""
+        for bundle, name in (("Funded by the NIH Common Fund Metallo C", "Christian Metallo"),
+                             ("UCI Team Metallo C", "Christian Metallo"),
+                             ("Stanford, CA Palo Alto Clark T", "Tim Clark"),
+                             ("La Jolla, CA Clark T", "Tim Clark")):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(cls(name, name.split()[0], bundle), "initial_expanded")
+        # Single capitals joined as one person's still open the entry.
+        self.assertEqual(BundleIndex("M.A. Levinson, T. Clark").initials_beside("Levinson"),
+                         {"m", "a"})
+        self.assertEqual(cls("Tim Levinson", "Tim", "M.A. Levinson, T. Clark"), "absent")
 
     def test_a_line_break_ends_initials_before_the_surname_too(self):
         """`Clark T.\\nA. Metallo`: the A is Metallo's. Read across the line
@@ -293,10 +315,16 @@ class DocumentedCostTest(unittest.TestCase):
     def test_a_suffix_in_mixed_case(self):
         self.assertEqual(cls("Tim Clark Jr", "Jr", "Clark J"), "initial_expanded")
 
-    def test_capitals_ending_the_line_before_or_after_a_surname(self):
-        self.assertLessEqual({"c", "a"}, BundleIndex("La Jolla, CA\nClark T").initials_beside("Clark"))
+    def test_capitals_before_or_after_a_surname(self):
+        """Before it on its line or ending the line before, and after it
+        with no word following on its line."""
+        for bundle in ("La Jolla, CA Clark T", "La Jolla, CA\nClark T"):
+            with self.subTest(bundle=bundle):
+                self.assertLessEqual({"c", "a"}, BundleIndex(bundle).initials_beside("Clark"))
         self.assertEqual(BundleIndex("Zhandos Sembay, UAB\nand the").initials_beside("Sembay"),
                          {"u", "a", "b"})
+        self.assertLessEqual({"p", "h", "i"},
+                             BundleIndex("any UW Medicine PHI.").initials_beside("Medicine"))
 
     def test_a_surname_after_a_given_name_spelled_out(self):
         """No initials before it, so nothing shows where its entry starts:
@@ -304,6 +332,20 @@ class DocumentedCostTest(unittest.TestCase):
         self.assertEqual(cls("Tim Metallo", "Tim", "Christian Metallo, T. Clark"), "initial_expanded")
         self.assertEqual(cls("Frida Ballllosero Navarro", "Frida", "Ballllosero Navarro, F."),
                          "initial_expanded")
+
+    def test_initials_first_written_as_a_run_of_capitals(self):
+        """A run of two or three capitals before the surname does not show
+        where its entry starts either (#3143)."""
+        self.assertEqual(BundleIndex("MA Levinson, T. Clark").initials_beside("Levinson"),
+                         {"m", "a", "t"})
+        self.assertEqual(BundleIndex("JC Bélisle-Pipon, T. Clark").initials_beside("Pipon"), {"t"})
+        self.assertEqual(cls("Tim Levinson", "Tim", "MA Levinson, T. Clark"), "initial_expanded")
+
+    def test_a_single_capital_before_capitalised_words(self):
+        """`A` is read as initials, `Common Fund Metallo` as their compound
+        surname, and the `C` after it as the next entry's."""
+        self.assertEqual(BundleIndex("A Common Fund Metallo C").initials_beside("Metallo"), set())
+        self.assertEqual(cls("Christian Metallo", "Christian", "A Common Fund Metallo C"), "absent")
 
     def test_a_lower_case_particle_ends_the_compound(self):
         self.assertEqual(BundleIndex("J. van der Berg, T. Clark").initials_beside("Berg"), {"t"})

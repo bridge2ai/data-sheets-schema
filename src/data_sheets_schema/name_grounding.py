@@ -76,8 +76,12 @@ the word sets alone.
   whitespace, periods and hyphens. It is not the surname's when it is the
   trailing initial of the previous word (`Marquez C Metallo` gives Metallo
   no `C`). Where the surname has its initials before it on its line,
-  whatever follows it opens the next entry (`C. Metallo, T. Clark` gives
-  Metallo no `T`).
+  written as single capitals, whatever follows it opens the next entry
+  (`C. Metallo, T. Clark` gives Metallo no `T`). A run of two or three
+  capitals there is credited as its initials but does not show where its
+  entry starts: it may be an acronym, and the capitalised words after it
+  no surname, so `La Jolla, CA Clark T` and `the NIH Common Fund Metallo
+  C` keep the initial after the surname (#3143).
 - A **compound surname** is capitalised words, none of them initials,
   joined by hyphens or spaces on one line (`Bélisle-Pipon`, `Ballllosero
   Navarro`). Its initials sit before its first word, and are credited to
@@ -101,18 +105,24 @@ Layout is not meaning, so the rules can still be wrong in both
 directions: `Levinson MA and` gives Levinson no initials there; a two- or
 three-letter given name in capitals (`TIM CLARK`) reads as initials kept;
 a suffix in mixed case (`Jr`) is judged like a given name; a run of
-capitals ending the line before a surname (`La Jolla, CA\\nClark T`) is
-read as that surname's initials, and so is one ending the line after it
-(the CM4AI bundle's `Zhandos Sembay, UAB` gives Sembay `UAB`); a surname
-after a given name spelled out takes the next entry's initial
-(`Christian Metallo, T. Clark` gives Metallo `T`: only initials before
-it show where its entry starts, and `Ballllosero Navarro, F.` is laid out
-the same way); a surname with a lower-case particle (`J. van der Berg,
-T. Clark`) is not read as one compound, so `Berg` takes the `T`; a list
-of initials-first entries one per line (`C. Metallo\\nT. Clark`) reads
-the `T` as Metallo's trailing initial, which Metallo does not take
-either, so Clark gets none; and a capitalised word that is not a surname
-(`The` opening an organisation's name) can still stand in for one.
+capitals before a surname, on its line or ending the line before
+(`La Jolla, CA Clark T`, `La Jolla, CA\\nClark T`), is read as that
+surname's initials, and so is one after it that no word follows on its
+line (the CM4AI bundle's `Zhandos Sembay, UAB` gives Sembay `UAB`, and
+`UW Medicine PHI.` gives Medicine `PHI`); a surname after a given name
+spelled out takes the next entry's initial (`Christian Metallo, T.
+Clark` gives Metallo `T`: only single capitals before it show where its
+entry starts, and `Ballllosero Navarro, F.` is laid out the same way), and
+so does one after initials written as a run of capitals (`MA Levinson, T.
+Clark`, `JC Bélisle-Pipon, T. Clark`); a single capital before
+capitalised words on one line reads as a compound surname's initials
+whatever the words are (`A Common Fund Metallo C` gives Metallo no `C`); a
+surname with a lower-case particle (`J. van der Berg, T. Clark`) is not
+read as one compound, so `Berg` takes the `T`; a list of initials-first
+entries one per line (`C. Metallo\\nT. Clark`) reads the `T` as Metallo's
+trailing initial, which Metallo does not take either, so Clark gets none;
+and a capitalised word that is not a surname (`The` opening an
+organisation's name) can still stand in for one.
 
 Every token that is not `grounded` is a finding
 (`{kind: name_token_not_in_bundle, path, name, token, class}`). Occurrences
@@ -355,10 +365,14 @@ class BundleIndex:
                     # Written `C. Metallo` on one line, so what follows it
                     # opens the next entry: in `C. Metallo, T. Clark` the T
                     # is Clark's, and in `J.-C. Bélisle-Pipon, T. Clark` it
-                    # is not Pipon's either. Not across a line break, where
-                    # the "initials" may end the line before (`La Jolla,
-                    # CA\nClark T`).
-                    if not any(ch in "\r\n" for ch in self._gap(run[0], start)):
+                    # is not Pipon's either. Only single capitals show
+                    # that. A run of two or three before a word may be an
+                    # acronym, with no surname after it (`La Jolla, CA Clark
+                    # T`, `the NIH Common Fund Metallo C`). Nor across a
+                    # line break, where the "initials" may end the line
+                    # before (`La Jolla, CA\nClark T`).
+                    if (_letters(self.tokens[run[0]].text) == 1
+                            and not any(ch in "\r\n" for ch in self._gap(run[0], start))):
                         continue
             # After it: `Metallo C`, `Metallo, C.`, `Levinson MA`, `Pipon J-C`.
             j = k + 1
