@@ -2831,11 +2831,13 @@ def name_grounding_cmd(record_file, bundle, label, project, method, which, as_js
         elif basis.get("source") == "bundle on disk":
             where = f"bundle on disk, matched on {', '.join(basis.get('matched_on') or [])}"
         elif basis.get("source"):
-            where = f"{basis['source']}, md5 {basis.get('md5')}"
+            where = basis["source"]
         else:
             where = None
         if where:
-            click.echo(f"  bundle: {basis.get('path')} — {where}")
+            # The md5 of the bytes checked, whichever source supplied them.
+            md5 = f"; md5 {basis['md5']}" if basis.get("md5") else ""
+            click.echo(f"  bundle: {basis.get('path')} — {where}{md5}")
         click.echo(f"  record scope: {', '.join(res.get('record_scope') or [])} (each reported separately)")
         if not res.get("checked"):
             click.echo(f"  not checked: {res.get('reason')}")

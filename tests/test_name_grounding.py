@@ -122,6 +122,122 @@ class ClassTest(unittest.TestCase):
         self.assertEqual(cls("Christian Metallo", "Christian", "metallo C"), "absent")
 
 
+class InitialExpandedIsAnExpansionTest(unittest.TestCase):
+    """`initial_expanded` is a given name written where the bundle has only
+    its initial (#3001). The `absent` cases here are tokens and capitals
+    that are not that and were classed `initial_expanded` before review
+    round 1; beside each, the real expansion the rule must keep. Whether a
+    token is a finding is untouched: only its class moves."""
+
+    def test_a_token_that_is_itself_initials_expands_nothing(self):
+        """A degree (the corpus's `Jorge Contreras, JD`, AI_READI 2026-08-05
+        v3 rep2) and initials the record kept as a pair."""
+        name = "Jorge Contreras, JD"
+        bundle = "Authors: Contreras J; Metallo C"
+        self.assertEqual(cls(name, "Jorge", bundle), "initial_expanded")
+        self.assertEqual(cls(name, "JD", bundle), "absent")
+        self.assertEqual(cls("JC Bélisle-Pipon", "JC", "Bélisle-Pipon J-C"), "absent")
+
+    def test_the_surname_is_a_word_the_record_writes_as_one(self):
+        """The corpus's `… in the FAIRhub DataCite metadata` (AI_READI
+        2026-08-11 rep1): `the` stood in for a surname because the bundle
+        writes `The` before a capital. A run of capitals is no surname either."""
+        bundle = "The D, and Levinson MA D; Hansen JN"
+        self.assertEqual(cls("creator of record in the FAIRhub DataCite metadata", "DataCite",
+                             bundle), "absent")
+        self.assertEqual(cls("Dora MA", "Dora", bundle), "absent")
+        self.assertEqual(cls("Jakob Hansen", "Jakob", bundle), "initial_expanded")
+
+    def test_a_capital_glued_to_a_digit_is_not_an_initial(self):
+        """The ORCID check digit before the next line's surname, as the CM4AI
+        bundle writes `…-420X\\nMetallo C`, and a model name (`Dexcom G6`)."""
+        bundle = "ORCID\n0000-0003-3960-420X\nMetallo C\nDexcom G6"
+        self.assertEqual(cls("Xanthe Metallo", "Xanthe", bundle), "absent")
+        self.assertEqual(cls("Christian Metallo", "Christian", bundle), "initial_expanded")
+        self.assertEqual(BundleIndex(bundle).initials_beside("Dexcom"), set())
+
+    def test_a_run_of_capitals_followed_by_a_word_is_an_acronym(self):
+        """`Hansen JN, Gao J` gives Hansen `JN`; `Hansen JN reports` and
+        `Clark RO-Crate` are prose. The cost: `Levinson MA and` is read the
+        same way (see the module docstring)."""
+        self.assertEqual(BundleIndex("Hansen JN, Gao J").initials_beside("Hansen"), {"j", "n"})
+        self.assertEqual(cls("Jakob Hansen", "Jakob", "Hansen JN reports"), "absent")
+        self.assertEqual(cls("Rosa Clark", "Rosa", "Clark RO-Crate"), "absent")
+
+    def test_initials_do_not_run_on_into_other_capitals(self):
+        """The CM4AI bundle's `Axelsson U\\nKTH Royal Institute`, `Clark T.
+        EVI:` and `Bélisle-Pipon JC. A Scoping Review`: only a single capital
+        continues a single capital, and a line break ends them."""
+        for bundle, surname, not_an_initial, initial in (
+                ("Axelsson U\nKTH Royal Institute", "Axelsson", "Kerstin", "Ulrika"),
+                ("Axelsson U\nH. Smith", "Axelsson", "Hedda", "Ulrika"),
+                ("Clark T. EVI: a platform", "Clark", "Viggo", "Tim"),
+                ("Bélisle-Pipon JC. A Scoping Review", "Bélisle-Pipon", "Agathe", "Jean")):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(cls(f"{not_an_initial} {surname}", not_an_initial, bundle),
+                                 "absent")
+                self.assertEqual(cls(f"{initial} {surname}", initial, bundle), "initial_expanded")
+
+    def test_a_sentence_after_an_initial_is_not_a_second_initial(self):
+        """`Clark T. A study` gives Clark no `A`; `Wilkinson, M. D. The FAIR`
+        still gives Wilkinson both, because the `D` ends at its period."""
+        self.assertEqual(cls("Amy Clark", "Amy", "Clark T. A study of"), "absent")
+        for token in ("Mark", "David"):
+            with self.subTest(token=token):
+                self.assertEqual(cls("Mark David Wilkinson", token,
+                                     "Wilkinson, M. D. The FAIR principles"), "initial_expanded")
+
+    def test_the_next_entrys_leading_initial_is_not_this_surnames(self):
+        """In `C. Metallo, T. Clark` the T opens Clark's entry. The mirror of
+        `test_another_persons_initial_is_not_this_persons`."""
+        bundle = "C. Metallo, T. Clark"
+        self.assertEqual(cls("Tim Metallo", "Tim", bundle), "absent")
+        self.assertEqual(cls("Christian Metallo", "Christian", bundle), "initial_expanded")
+        self.assertEqual(cls("Tim Clark", "Tim", bundle), "initial_expanded")
+
+    def test_capitals_ending_the_line_before_do_not_take_the_initial_after(self):
+        """`La Jolla, CA\\nClark T`: whatever `CA` is, it is on another line,
+        so Clark's own `T` still counts."""
+        self.assertEqual(cls("Tim Clark", "Tim", "La Jolla, CA\nClark T"), "initial_expanded")
+
+    def test_a_line_break_ends_initials_before_the_surname_too(self):
+        """`Clark T.\\nA. Metallo`: the A is Metallo's. Read across the line
+        break, `T. A.` would be one run that is Clark's trailing initials."""
+        self.assertEqual(cls("Amy Metallo", "Amy", "Clark T.\nA. Metallo"), "initial_expanded")
+
+
+class AfterTheSurnameSeparatorTest(unittest.TestCase):
+    """The separators the docstring allows after a surname (#3003): at most
+    one comma before the initial, and joiners or spaces, on one line,
+    between the initials written together."""
+
+    def test_one_comma_before_the_initial(self):
+        self.assertEqual(cls("Christian Metallo", "Christian", "Metallo, C."), "initial_expanded")
+
+    def test_two_commas_or_a_semicolon_end_the_entry(self):
+        for bundle in ("Metallo,, C.", "Metallo; C."):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(cls("Christian Metallo", "Christian", bundle), "absent")
+
+    def test_initials_joined_after_the_surname(self):
+        name = "Jean-Christophe Bélisle-Pipon"
+        for bundle in ("Bélisle-Pipon J-C", "Bélisle-Pipon J.-C.", "Bélisle-Pipon J C",
+                       "Bélisle-Pipon J-C and Metallo C"):
+            for token in ("Jean", "Christophe"):
+                with self.subTest(bundle=bundle, token=token):
+                    self.assertEqual(cls(name, token, bundle), "initial_expanded")
+
+    def test_spaces_on_one_line_join_initials_and_a_line_break_does_not(self):
+        """Text extracted from a PDF spaces initials unevenly (`J  C`); a
+        line break ends them (`J\\nC`)."""
+        name = "Jean-Christophe Bélisle-Pipon"
+        for token in ("Jean", "Christophe"):
+            with self.subTest(token=token):
+                self.assertEqual(cls(name, token, "Bélisle-Pipon J  C"), "initial_expanded")
+        self.assertEqual(cls(name, "Jean", "Bélisle-Pipon J\nC"), "initial_expanded")
+        self.assertEqual(cls(name, "Christophe", "Bélisle-Pipon J\nC"), "absent")
+
+
 class LowerBoundTest(unittest.TestCase):
     """What a whole-bundle token match can and cannot see."""
 
@@ -285,6 +401,9 @@ class RunTest(unittest.TestCase):
         self.assertTrue(out["checked"])
         self.assertEqual(out["bundle"]["source"], "git blob")
         self.assertEqual(out["bundle"]["commit"], "c" * 40)
+        # The md5 of the bytes checked: the version read, not today's file.
+        self.assertEqual(out["bundle"]["md5"], _md5(self.READ))
+        self.assertNotEqual(out["bundle"]["md5"], _md5(TODAY))
         full = out["records"]["full"]
         self.assertEqual([(f["token"], f["class"]) for f in full["findings"]],
                          [("Christian", "initial_expanded")])
@@ -295,7 +414,7 @@ class RunTest(unittest.TestCase):
                         side_effect=AssertionError("git was asked")):
             out = self._run()
         self.assertEqual(out["bundle"], {"source": "bundle on disk", "path": self.BUNDLE_PATH,
-                                         "matched_on": ["md5"]})
+                                         "matched_on": ["md5"], "md5": _md5(self.READ)})
 
     def test_every_recorded_hash_must_match_the_file_on_disk(self):
         """The md5 matches and the sha256 does not: not the bytes read."""
@@ -443,7 +562,7 @@ class CliTest(unittest.TestCase):
                                   "--record", "full")
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertIn("P L [claudecode_api]", result.output)
-        self.assertIn("bundle on disk, matched on md5", result.output)
+        self.assertIn(f"bundle on disk, matched on md5; md5 {_md5(READ)}", result.output)
         self.assertIn("record scope: full", result.output)
         self.assertIn("2 name leaves;", result.output)
         self.assertIn("Christian (initial_expanded)", result.output)
@@ -508,12 +627,17 @@ class CorpusTest(unittest.TestCase):
         return {f["token"] for f in rec["findings"]}
 
     def test_every_run_read_the_measured_bundle_and_names_its_scope(self):
+        """The bytes checked are the measured bundle's (#3002): a run whose
+        record pinned, or resolved to, any other bundle fails here, not only
+        in the table tests downstream."""
         for key, out in self.results.items():
             with self.subTest(run=key[1]):
                 self.assertTrue(out["checked"], out.get("reason"))
-                self.assertEqual(out["record_scope"], ["phase1", "full", "core"])
+                self.assertEqual(out["bundle"]["md5"], CM4AI_BUNDLE_MD5)
                 self.assertIn(out["bundle"]["source"], ("bundle on disk", "git blob"))
                 self.assertIn("md5", out["bundle"]["matched_on"])
+                self.assertEqual(out["record_scope"], ["phase1", "full", "core"])
+                self.assertEqual(list(out["records"]), out["record_scope"])
 
     def test_the_intermediate_full_records_report_the_issues_table(self):
         for key, expected in CM4AI_RUNS.items():
@@ -561,6 +685,39 @@ class CorpusTest(unittest.TestCase):
                          {"Christian", "Tim"})
         self.assertEqual([f["path"] for f in out["records"]["full"]["findings"]],
                          ["creators[17].name"])
+
+
+#: The corpus's three `initial_expanded` occurrences that expanded nothing
+#: (#3001), each read on the bytes its run hashed: a degree kept beside the
+#: name, and an organisation word with `the` standing in for a surname.
+NOT_EXPANSIONS = {
+    ("claudecode_agent", "2026-08-05_claude-opus-5-1m-generic-v3_rep2", "AI_READI"):
+        {("full", "creators[5].principal_investigator", "JD"),
+         ("core", "creators[5].principal_investigator", "JD")},
+    ("claudecode_agent", "2026-08-11_claude-opus-5-api-generic_rep1", "AI_READI"):
+        {("phase1", "creators[20].principal_investigator", "DataCite")},
+}
+
+
+@pytest.mark.corpus   # reads committed records under data/d4d_concatenated (#1203)
+class NotAnExpansionCorpusTest(unittest.TestCase):
+    """Record scope: the records named in `NOT_EXPANSIONS`. Each token is
+    still a finding; only its class is `absent`, not `initial_expanded`."""
+
+    def test_a_degree_and_an_organisation_word_are_absent(self):
+        from data_sheets_schema.provenance import record_path_for
+        for (method, label, project), expected in NOT_EXPANSIONS.items():
+            path = record_path_for(project, method, label)
+            if not path.exists():
+                self.skipTest(f"{path} is not in this checkout")
+            out = ng.check_run(path)
+            _skip_if_shallow(out)
+            for which, where, token in expected:
+                with self.subTest(run=label, record=which, token=token):
+                    rec = out["records"][which]
+                    self.assertTrue(rec.get("checked"), rec)
+                    self.assertIn((where, token, "absent"),
+                                  {(f["path"], f["token"], f["class"]) for f in rec["findings"]})
 
 
 #: A run whose bundle drifted after it. The AI_READI bytes it hashed (the

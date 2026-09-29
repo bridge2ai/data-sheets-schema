@@ -53,16 +53,46 @@ name leaf is exactly one of:
     it does not occur even folded, but it is capitalised and another token
     of the same name — the surname — sits in the bundle, capitalised, next
     to an initial that is this token's first letter: `Metallo C` or
-    `C. Metallo` for `Christian Metallo`. An initial is a single capital, or
-    two or three capitals written together (`Levinson MA`). One that
-    follows the surname may be separated from it by whitespace and at most
-    one comma; one that precedes it only by whitespace, periods and
-    hyphens, and not when it is itself the trailing initial of the previous
-    word (`Marquez C Metallo` gives Metallo no `C`). This decides only the
-    class of a token that is already a finding: whether a token is a
-    finding depends on the word sets alone.
+    `C. Metallo` for `Christian Metallo`. The token is not itself a run of
+    two or three capitals: initials the record kept (`JC Bélisle-Pipon`)
+    or a degree (`Jorge Contreras, JD`) expand nothing and are `absent`.
+    The surname is a token the record writes capitalised and not as
+    initials, so `the` in an organisation's name stands in for none.
 ``absent``
     none of these.
+
+Every rule below reads the bundle's layout, and decides only the class of
+a token that is already a finding: whether a token is a finding depends on
+the word sets alone.
+
+- An **initial** is a single capital, or two or three capitals written
+  together (`Levinson MA`), standing alone: one glued to a digit (the
+  ORCID check digit of `…-420X`, the `G` of `G6`) is not an initial.
+- **Before the surname**, an initial may be separated from it by
+  whitespace, periods and hyphens. It is not the surname's when it is the
+  trailing initial of the previous word (`Marquez C Metallo` gives Metallo
+  no `C`). Where the surname has its initials before it on its line,
+  whatever follows it opens the next entry (`C. Metallo, T. Clark` gives
+  Metallo no `T`).
+- **After the surname**, an initial may be separated from it by whitespace
+  and at most one comma (`Metallo C`, `Metallo, C.`, `Metallo\\nC`). A run
+  of two or three capitals followed on its line by a word is an acronym in
+  prose, not initials (`The IRB will`, `RO-Crate`).
+- **Initials written together** are single capitals with only joiners
+  (`.`, `-`) and spaces between them, on one line (`J-C`, `J.-C.`,
+  `M. A.`), in either direction. After the surname, one joined
+  across a space must not be followed on its line by a word (`Clark T. A
+  study` gives Clark no `A`). A line break, or a run of two or three
+  capitals, ends them (`Axelsson U\\nKTH`, `Clark T. EVI`).
+
+Layout is not meaning, so the rules can still be wrong in both
+directions: `Levinson MA and` gives Levinson no initials there; a two- or
+three-letter given name in capitals (`TIM CLARK`) reads as initials kept;
+a suffix in mixed case (`Jr`) is judged like a given name; a run of
+capitals ending the line before a surname (`La Jolla, CA\\nClark T`) is
+read as that surname's initials; and a capitalised word that is not a
+surname (`The` opening an organisation's name) can still stand in for
+one.
 
 Every token that is not `grounded` is a finding
 (`{kind: name_token_not_in_bundle, path, name, token, class}`). Occurrences
@@ -98,9 +128,10 @@ resolves the bytes a run's provenance record says it read
 hashes to every hash the record recorded, otherwise the committed version
 that does, through `provenance.bundle_bytes_for` (#1140). Today's bytes of
 a drifted bundle are never used, and a record that pins no hash is not
-checked. Bytes that are not UTF-8 are refused rather than decoded with
-replacement characters, which would split a name and report the pieces
-(the receipts check refuses them the same way). The result states its
+checked. The result's `bundle.md5` is the md5 of the bytes checked.
+Bytes that are not UTF-8 are refused rather than decoded with replacement
+characters, which would split a name and report the pieces (the receipts
+check refuses them the same way). The result states its
 record scope: the phase-1 snapshot (`intermediate/{P}_full.yaml`, when the
 run kept one), the final full record and the derived core, each reported
 separately, never pooled.
@@ -204,6 +235,15 @@ def _gap_ok(gap: str, allowed: str, commas: int = 0) -> bool:
             and gap.count(",") <= commas)
 
 
+#: A word of two or more letters after an initial on the same line, across
+#: spaces or a hyphen: `The IRB will`, `RO-Crate`, `T. A study`. Not across
+#: a line break, which ends an author entry (`Axelsson U\nKTH`).
+_WORD_AFTER = re.compile(r"[ \t\-\u2010\u2011]+[^\W\d_]{2}")
+
+#: Spaces on one line: what may sit between two initials besides joiners.
+_SPACES = " \t"
+
+
 class BundleIndex:
     """One bundle tokenised once: the word sets and the token stream."""
 
@@ -221,30 +261,43 @@ class BundleIndex:
     def _gap(self, i: int, j: int) -> str:
         return self.text[self.tokens[i].end:self.tokens[j].start]
 
+    def _initial_at(self, j: int) -> bool:
+        """Token `j` is an initial standing alone: not glued to a digit, as
+        the ORCID check digit of `…-420X` and the `G` of `G6` are."""
+        if not (0 <= j < len(self.tokens) and _is_initial(self.tokens[j].text)):
+            return False
+        t = self.tokens[j]
+        return not (self.text[t.start - 1:t.start].isdigit()
+                    or self.text[t.end:t.end + 1].isdigit())
+
+    def _word_after(self, j: int) -> bool:
+        return bool(_WORD_AFTER.match(self.text, self.tokens[j].end))
+
+    def _joined(self, i: int, j: int) -> bool:
+        """Initials `i` < `j` written together as one person's: single
+        capitals with only joiners and spaces between them, on one line
+        (`J-C`, `J.-C.`, `M.A.`, `M. A.`). A run of two or three capitals
+        (`MA`, `JC`) is already all of that person's initials."""
+        return (_letters(self.tokens[i].text) == 1 and _letters(self.tokens[j].text) == 1
+                and all(ch in _JOINERS or ch in _SPACES for ch in self._gap(i, j)))
+
     def initials_beside(self, surname: str) -> set[str]:
         """Folded initial letters written next to `surname` in the bundle,
-        where the bundle writes it capitalised: `access R` is not a name."""
+        where the bundle writes it capitalised: `access R` is not a name.
+        The rule is the one the module docstring gives under
+        `initial_expanded`."""
         out: set[str] = set()
-        n = len(self.tokens)
         for k in self.positions.get(folded_key(surname), ()):
             if not self.tokens[k].text[:1].isupper():
                 continue
-            # After it: `Metallo C`, `Metallo, C.`, `Levinson MA`, `Pipon J-C`.
-            j = k + 1
-            if j < n and _is_initial(self.tokens[j].text) and _gap_ok(self._gap(k, j), "", commas=1):
-                while True:
-                    out.update(folded_key(self.tokens[j].text))
-                    if not (j + 1 < n and _is_initial(self.tokens[j + 1].text)
-                            and _gap_ok(self._gap(j, j + 1), _JOINERS)):
-                        break
-                    j += 1
             # Before it: `C. Metallo`, `J.-C. Bélisle-Pipon`.
-            j = k - 1
             run: list[int] = []
-            while (j >= 0 and _is_initial(self.tokens[j].text)
-                   and _gap_ok(self._gap(j, run[-1] if run else k), _JOINERS)):
+            j = k - 1
+            if self._initial_at(j) and _gap_ok(self._gap(j, k), _JOINERS):
                 run.append(j)
-                j -= 1
+                while self._initial_at(j - 1) and self._joined(j - 1, j):
+                    j -= 1
+                    run.append(j)
             if run:
                 first = run[-1]
                 prev = first - 1
@@ -256,6 +309,24 @@ class BundleIndex:
                 if not belongs_to_previous:
                     for i in run:
                         out.update(folded_key(self.tokens[i].text))
+                    # Written `C. Metallo` on one line, so what follows it
+                    # opens the next entry: in `C. Metallo, T. Clark` the T
+                    # is Clark's. Not across a line break, where the "initials"
+                    # may end the line before (`La Jolla, CA\nClark T`).
+                    if not any(ch in "\r\n" for ch in self._gap(run[0], k)):
+                        continue
+            # After it: `Metallo C`, `Metallo, C.`, `Levinson MA`, `Pipon J-C`.
+            j = k + 1
+            if not (self._initial_at(j) and _gap_ok(self._gap(k, j), "", commas=1)):
+                continue
+            if _letters(self.tokens[j].text) > 1 and self._word_after(j):
+                continue                     # an acronym in prose: `The IRB will`, `RO-Crate`
+            out.update(folded_key(self.tokens[j].text))
+            while (self._initial_at(j + 1) and self._joined(j, j + 1)
+                   and not (any(ch in _SPACES for ch in self._gap(j, j + 1))
+                            and self._word_after(j + 1))):     # not `Clark T. A study`
+                j += 1
+                out.update(folded_key(self.tokens[j].text))
         return out
 
 
@@ -267,10 +338,14 @@ def classify(token: str, name: list[str], index: BundleIndex) -> str:
         return "diacritic_dropped"
     if not token[:1].isupper():
         return "absent"                  # an initial expands into a capitalised name
+    if _is_initial(token):
+        return "absent"                  # initials kept (`JC`) or a degree (`JD`): nothing expanded
     initial = folded_key(token)[:1]
     for other in name:
         if folded_key(other) == folded_key(token) or folded_key(other) not in index.folded:
             continue
+        if not other[:1].isupper() or _is_initial(other):
+            continue                     # not written as a surname here (`the`, `MA`)
         if initial in index.initials_beside(other):
             return "initial_expanded"
     return "absent"
@@ -456,7 +531,8 @@ def check_run(provenance: Path, records: tuple[str, ...] = RECORDS) -> dict[str,
     `records` is the record scope, named in the result: any of `phase1`
     (the `full` phase's snapshot under `intermediate/`), `full` (the final
     full record) and `core` (the derived core). Each is reported on its
-    own; nothing is pooled across them.
+    own; nothing is pooled across them. Where bytes were resolved,
+    `bundle.md5` is the md5 of the bytes the records were checked against.
     """
     from data_sheets_schema.schema_cache import load_yaml
     out: dict[str, Any] = {"instrument": INSTRUMENT,
@@ -474,6 +550,10 @@ def check_run(provenance: Path, records: tuple[str, ...] = RECORDS) -> dict[str,
     out["bundle"] = basis
     if raw is None:
         return {**out, "checked": False, "reason": basis["reason"]}
+    # The md5 of the bytes actually indexed, so a reader (and the corpus
+    # test) can compare it with the bundle it expects, not only trust the
+    # basis's `matched_on`.
+    out["bundle"] = {**basis, "md5": hashlib.md5(raw).hexdigest()}
     text, why = bundle_text(raw)
     if text is None:
         return {**out, "checked": False, "reason": why}
