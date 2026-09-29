@@ -93,6 +93,26 @@ class TestUncoveredReceiptableLeaves:
         assert block["snippets"]["unattesting"] == 1
         assert "title" in paths and _agrees(paths, block)
 
+    @pytest.mark.parametrize("where", ["chunk not in the manifest", "chunk without text"])
+    def test_a_below_floor_snippet_check_cannot_read_still_earns_what_check_credits(self, where):
+        # check() judges a below-floor snippet unattesting only in a chunk the
+        # manifest lists and whose text it has; elsewhere the path is credited.
+        # The helper must list exactly what check() leaves without a receipt (#3320).
+        manifest, texts = _manifest_and_texts()
+        receipt = _receipt(manifest["bundle_md5"], [{"slot": "description", "snippet": "a longitudinal, multimodal study"}])
+        if where == "chunk not in the manifest":
+            receipt["chunks"].append({"id": "c099", "status": "extracted",
+                                      "extracted": [{"slot": "title", "snippet": "AI"}]})
+            texts = {**texts, "c099": "AI-READI"}                  # text alone does not make it listed
+        else:
+            receipt["chunks"][1]["extracted"].append({"slot": "title", "snippet": "AI"})
+            texts = {k: v for k, v in texts.items() if k != "c002"}
+        paths, block = _both(receipt, manifest, texts, FULL)
+        assert block["snippets"]["unattesting"] == 0
+        assert "title" not in block["slots"]["without_receipt"]
+        assert paths == block["slots"]["without_receipt"]
+        assert "title" not in paths and _agrees(paths, block)
+
     def test_the_list_is_not_truncated(self):
         manifest, texts = _manifest_and_texts()
         full = {**FULL, "creators": [{"name": f"Person {i}"} for i in range(70)]}
@@ -206,6 +226,34 @@ class TestApplyRereceipt:
             texts, listed=listed)
         assert out["rejected"] == 1 and "duplicate_of" in out["rejections"][0]["reason"]
 
+    @pytest.mark.parametrize("entries", [0, 2])
+    def test_a_chunk_without_exactly_one_entry_takes_no_pair(self, entries):
+        _manifest, texts, receipt, listed = _setup()
+        receipt["chunks"] = [c for c in receipt["chunks"] if c["id"] != "c002"]
+        receipt["chunks"] += [{"id": "c002", "status": "extracted",
+                               "extracted": [{"slot": "title", "snippet": "AI-READI dataset"}]}
+                              for _ in range(entries)]
+        out = rc.apply_rereceipt(receipt, FULL, [
+            {"path": "funders[0].grant_id", "receipt": {"chunk": "c002", "snippet": "Grant OT2OD032644"}}],
+            texts, listed=listed)
+        assert (out["added"], out["rejected"]) == (0, 1)
+        assert out["rejections"][0]["reason"] == f"chunk c002 has {entries} entries in the receipt, not one"
+        assert out["receipt"] == receipt
+
+    @pytest.mark.parametrize("extracted", ["title: AI-READI dataset", ["AI-READI dataset"],
+                                           {"slot": "title", "snippet": "AI-READI dataset"}])
+    def test_a_malformed_extracted_is_rejected_not_raised(self, extracted):
+        _manifest, texts, receipt, listed = _setup()
+        receipt["chunks"][1]["extracted"] = extracted
+        out = rc.apply_rereceipt(receipt, FULL, [
+            {"path": "funders[0].grant_id", "receipt": {"chunk": "c002", "snippet": "Grant OT2OD032644"}}],
+            texts, listed=listed)
+        assert (out["added"], out["already_present"], out["rejected"]) == (0, 0, 1)
+        assert out["rejections"][0] == {
+            "index": 0, "path": "funders[0].grant_id",
+            "reason": "chunk c002's extracted is not a list of {slot, snippet} mappings"}
+        assert out["receipt"] == receipt
+
     def test_unsupported_paths_are_recorded_with_their_reasons(self):
         _manifest, texts, receipt, listed = _setup()
         out = rc.apply_rereceipt(receipt, FULL, [
@@ -226,6 +274,22 @@ class TestApplyRereceipt:
                          "rereceipt_prior": {"status": "nothing_relevant", "reason": "references only"},
                          "extracted": [{"slot": "keywords", "snippet": "Something else entirely"}]}
         assert out["status_changed"] == ["c003"]
+        block = rc.check(out["receipt"], manifest, texts, FULL, manifest["bundle_md5"])
+        assert block["findings_gated"] == 0
+
+    def test_a_redundant_with_chunk_becomes_extracted_and_keeps_its_chunks(self):
+        manifest, texts, receipt, listed = _setup()
+        receipt["chunks"][2] = {"id": "c003", "status": "redundant_with", "chunks": ["c002"]}
+        out = rc.apply_rereceipt(receipt, FULL, [
+            {"path": "keywords", "receipt": {"chunk": "c003", "snippet": "Something else entirely"}}],
+            texts, listed=listed)
+        assert (out["added"], out["rejected"]) == (1, 0)
+        assert out["receipt"]["chunks"][2] == {
+            "id": "c003", "status": "extracted",
+            "rereceipt_prior": {"status": "redundant_with", "chunks": ["c002"]},
+            "extracted": [{"slot": "keywords", "snippet": "Something else entirely"}]}
+        assert out["status_changed"] == ["c003"]
+        assert receipt["chunks"][2] == {"id": "c003", "status": "redundant_with", "chunks": ["c002"]}
         block = rc.check(out["receipt"], manifest, texts, FULL, manifest["bundle_md5"])
         assert block["findings_gated"] == 0
 
