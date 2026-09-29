@@ -15,7 +15,10 @@ than restoring the value. Read value by value, this module finds a receipted
 value that no finding's path covers removed in eight v8 records, not three
 (#3078): six of the twelve-record 04f/g fill — those three, VOICE 04f rep1,
 CHORUS 04f rep3 and AI_READI 04g rep2 — the AI_READI 04f rep1 record its own
-validation block declares invalid, and the 04b CM4AI canary.
+validation block declares invalid, and the 04b CM4AI canary. Those are values
+whose text does not survive by the rule below, not values proven gone: of the
+five such values in VOICE 04f rep1, CHORUS 04f rep3 and AI_READI 04g rep2,
+four reappear reworded elsewhere in the final record (#3207, see below).
 
 This module diffs the phase-1 snapshot (the API runner's
 `intermediate/{P}_full.yaml`) against the final full record, value by value,
@@ -47,6 +50,22 @@ minted key reconciliation stripped is located at its own index
 a stripped key is not a removal. A value emptied to null or "" is removed.
 A member of a list of scalars is identified by its text, so a rewritten
 member reads as removed unless its old text survives in the list (flattened).
+
+A reworded or moved value reads as deleted (#3207). The text test is
+containment of the value's own normalised text under the nearest surviving
+ancestor, so content that reconcile_full rephrased, moved to another key of
+its entry or to another slot, or split across several members is counted
+deleted — and unfounded when no finding covers it — although its content
+survives. Among the v8 rows the review checked: AI_READI 04g rep2
+`sampling_strategies[0].notes` restated in that entry's new `source_caveats`
+(a move out of the claim slots into the run's commentary — a change of
+standing, not of content); VOICE 04f rep1
+`at_risk_populations.special_protections[0]` split and reworded into members
+1 and 3 of a three-member list, and its `ethical_reviews[1].review_details`
+reworded into `data_governance.notes`; CHORUS 04f rep3
+`acquisition_methods[0].notes` reworded into
+`labeling_strategies[0].data_annotation_protocol`. The deleted, unfounded and
+receipted-deleted counts are therefore upper bounds on content actually lost.
 Class declarations, `source_caveats` and minted ids are outside the
 classification (`exempt_value`).
 
@@ -102,6 +121,11 @@ NON_CHECKS = (
     "to the entry — it is flattened where the sibling recognised as the entry's continuation "
     "carries it, though that copy may be the sibling's own, and otherwise only where more "
     "final entries carry it than the entry's other phase-1 siblings did (#3151)",
+    "that a deleted value's content is gone — the text test is exact normalised containment of "
+    "the value's own text, so a value reworded, moved to another key (source_caveats included) or "
+    "slot, or split across several list members reads as deleted, and as unfounded when no "
+    "finding covers it: deleted, unfounded and receipted-deleted are upper bounds on content "
+    "lost (#3207)",
     "a finding that narrows its slot in prose ('maintainers (the Emory contact)') is read at "
     "the path it names, so founded is an upper bound where findings narrow by prose",
     "that a finding's index means the entry it gives — one past the end of its list is read "

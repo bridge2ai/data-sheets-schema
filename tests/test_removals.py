@@ -2,8 +2,10 @@
 
 `reconcile_full` is told to remove what a finding identifies as unsupported.
 Three v8 reviews found a receipted top-level slot removed with nothing in the
-report; read value by value, eight v8 records lost a receipted value that no
-finding's path covers (#3078, pinned by the corpus test below). These pin
+report; read value by value, eight v8 records carry a receipted value whose
+text does not survive and that no finding's path covers (#3078, pinned by the
+corpus test below) — some of them reworded or moved rather than lost (#3207,
+also pinned below). These pin
 the three classes on synthetic records — flattened (the text survives),
 founded (a finding's path covers the value), unfounded — the identity join
 that keeps a reorder or a stripped key from reading as a removal, and the
@@ -81,6 +83,21 @@ class Classes(unittest.TestCase):
         after = _record(description="Requests go to the Data Access Committee.")
         b = rm.classify(_record(data_governance={"committee_name": "Data Access Committee"}), after, _audit())
         self.assertEqual((b["flattened"], b["unfounded"]), (0, 1))
+
+    def test_a_value_reworded_into_its_entrys_source_caveats_reads_as_deleted_and_the_limit_is_published(self):
+        """#3207, the AI_READI 04g rep2 shape: `notes` dropped and its content
+        restated, reworded, in the entry's new `source_caveats`. The text test
+        is the value's own text, so this is a deletion — unfounded with no
+        finding — and the emitted non-checks say the counts are upper bounds."""
+        before = _record(sampling_strategies=[{"is_sample": True, "notes": "The healthsheet answers N/A on sampling."}])
+        after = _record(sampling_strategies=[{"is_sample": True, "source_caveats":
+                                              "The healthsheet answers \"N/A\" to the sampling question."}])
+        b = rm.classify(before, after, _audit(), receipt=_receipt("sampling_strategies[0].notes"))
+        self.assertEqual([r["path"] for r in b["unfounded_paths"]], ["sampling_strategies[0].notes"])
+        self.assertEqual(b["receipted"]["deleted"], 1)
+        text = next(n for n in b["non_checks"] if n.startswith("that a deleted value's content is gone"))
+        for phrase in ("reworded", "source_caveats", "split across several list members", "upper bounds"):
+            self.assertIn(phrase, text)
 
     def test_a_single_scalar_and_a_one_item_list_of_it_are_the_same_value(self):
         b = rm.classify(_record(keywords=["speech"], license="CC-BY"), _record(keywords="speech", license=["CC-BY"]),
@@ -735,8 +752,10 @@ def test_a_v8_finding_one_past_the_end_founds_the_last_entry(label, project, pat
     assert path not in {r["path"] for r in b["unfounded_paths"]}
 
 
-#: Every v8 API record with a receipted value removed that no finding's path
-#: covers (#3078): the three whole-slot cases the reviews found and five more.
+#: Every v8 API record with a receipted value whose text does not survive and
+#: that no finding's path covers (#3078): the three whole-slot cases the reviews
+#: found and five more. Not all are losses: AI_READI 04g rep2's only such value
+#: is reworded into a caveat (#3207, pinned below).
 RECEIPTED_UNFOUNDED_V8 = {
     ("2026-09-04b_claude-opus-5-api-generic-v8_rep1", "CM4AI"),       # canary
     ("2026-09-04f_claude-opus-5-api-generic-v8_rep1", "AI_READI"),    # declared invalid by its own block
@@ -750,7 +769,7 @@ RECEIPTED_UNFOUNDED_V8 = {
 
 
 @pytest.mark.corpus
-def test_the_v8_records_that_lost_a_receipted_value_no_finding_covers(monkeypatch):
+def test_the_v8_records_with_a_receipted_value_deleted_that_no_finding_covers(monkeypatch):
     """The module docstring's count: eight v8 records, not the three whole
     slots the reviews found — six of the twelve-record fill."""
     monkeypatch.chdir(CONCAT.parents[1])
@@ -760,3 +779,39 @@ def test_the_v8_records_that_lost_a_receipted_value_no_finding_covers(monkeypatc
     found = {(p.parent.name, p.name.split("_provenance")[0]) for p in provs
              if ((rm.for_record(p)["receipted"] or {}).get("unfounded") or 0) > 0}
     assert found == RECEIPTED_UNFOUNDED_V8
+
+
+#: #3207: receipted values counted deleted and unfounded whose content the final
+#: record carries reworded elsewhere — (label, project, removed path, final
+#: path, a phrase of the old text the final path restates).
+REWORDED_NOT_LOST = [
+    ("2026-09-04g_claude-opus-5-api-generic-v8_rep2", "AI_READI", "sampling_strategies[0].notes",
+     "sampling_strategies[0].source_caveats", "to the question of the sampling strategy"),
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep1", "VOICE", "at_risk_populations.special_protections[0]",
+     "at_risk_populations.special_protections[2]", "such as mood disorders, depression and anxiety"),
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep1", "VOICE", "ethical_reviews[1].review_details",
+     "data_governance.notes", "memorandum setting out the ethical justification"),
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep3", "CHORUS", "acquisition_methods[0].notes",
+     "labeling_strategies[0].data_annotation_protocol", "clinical validation SOP"),
+]
+
+
+@pytest.mark.corpus
+@pytest.mark.parametrize("label, project, removed, final_path, phrase", REWORDED_NOT_LOST)
+def test_a_reworded_or_moved_value_is_counted_deleted_though_its_content_survives(
+        label, project, removed, final_path, phrase, monkeypatch):
+    """#3207: the module docstring's named cases. Each reads as a receipted
+    unfounded deletion at reconcile_full, and the final record restates it
+    at another path — so the counts are upper bounds on content lost."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    b = _replay(label, project)
+    row = next((r for r in b["unfounded_paths"] if r["path"] == removed), None)
+    assert row and row.get("receipted") and row["phase"] == "reconcile_full", b["summary"]
+    inter = CONCAT / "claudecode_api_core" / label / "intermediate" / f"{project}_full.yaml"
+    final = CONCAT / "claudecode_api" / label / f"{project}_d4d.yaml"
+    squash = lambda v: " ".join(str(v).split())
+    ok, old = rm._resolve_value(yaml.safe_load(inter.read_text()), removed)
+    assert ok and phrase in squash(old)
+    ok, new = rm._resolve_value(yaml.safe_load(final.read_text()), final_path)
+    assert ok and phrase in squash(new)
+    assert squash(old) not in squash(new)          # reworded: the old text does not survive verbatim

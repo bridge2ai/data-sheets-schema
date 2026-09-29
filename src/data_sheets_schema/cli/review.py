@@ -201,7 +201,9 @@ def removals_cmd(method, label, project, show_flattened, as_json):
     """Classify every value the phase-1 snapshot carried and the final full
     record does not (#2923): flattened (its text survives), founded (the
     path of an audit finding not scoped to the core record alone covers it)
-    or unfounded, with the phase that removed it. Read-only: nothing is
+    or unfounded, with the phase that removed it. The text test is the
+    value's own text surviving, so a value reworded, moved or split lists
+    as deleted (#3207). Read-only: nothing is
     written, and a run with no phase-1 snapshot prints that it was not
     checked rather than zero. Where the audit is missing, or present but
     unreadable, the deletions are listed unsorted and the summary says
