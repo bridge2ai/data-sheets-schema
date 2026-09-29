@@ -19,16 +19,17 @@ LEXICON = sd.load_lexicon()
 #: Pins on the lexicon's exact bytes, one per version. Changing the file
 #: without a version bump fails here; so does bumping without a pin. v1 was
 #: revised in review before it first merged (#3029), so this PR's commits
-#: carry six earlier byte versions under `version: 1`:
+#: carry seven earlier byte versions under `version: 1`:
 #:   9b1f536ba02afc9971bbe9e28da316ea1c3c90e356bdbcc2c200400259521b04 (e00711d21, first commit)
 #:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
 #:   14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35 (cf3d16cb3, review round 2)
 #:   56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4 (df35537aa, review round 2)
 #:   3b2949e29c7aebef79c6e77894d735c6fa2ce1a0ae8800463374d63fe45a5f3a (7e327b512, review round 3)
 #:   626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6 (5705a4f3f, review round 4)
+#:   d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c (9607a6416, review round 5)
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161).
-LEXICON_PINS = {1: "d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c"}
+LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a"}
 
 
 def record(**containers):
@@ -335,9 +336,15 @@ def test_the_study_design_is_not_the_members_presence():
 
 
 def test_only_the_members_own_narrative_leaves_are_read():
-    rec = record(creators=[{"name": "The slide does not assign this member a project title",
-                            "affiliations": [{"name": "Org", "description":
-                                              "The slide does not assign this member a project title."}]}])
+    """A non-narrative leaf and a nested object's prose are not read. The
+    non-narrative value is one that flags when it is read (#3265): `name`
+    would not do, since the member's own name is masked as a
+    self-reference and its cue then names no role."""
+    text = "The source does not name her as a creator."
+    assert flagged(record(creators=[{"name": "Person A", "description": text}])) == {
+        "/creators/0": ["role.assignment_negated"]}
+    rec = record(creators=[{"name": "Person A", "title": text,
+                            "affiliations": [{"name": "Org", "description": text}]}])
     assert flagged(rec) == {}
 
 
@@ -530,6 +537,35 @@ def test_the_cited_source_of_a_cue_that_holds_its_object_is_not_the_item():
         ("presence.none_reports_available", "flag", None)]
 
 
+@pytest.mark.parametrize("text", [
+    "No source from 2024 reports the holdout set as available.",
+    "No source in the 2023 bundle reports the holdout set as available.",
+    "No document dated 2025 lists the test set as released.",
+])
+def test_a_date_on_the_cited_source_does_not_guard_the_reported_item(text):
+    """#3265: `presence.none_reports_available` declares its object as its
+    `item` group, so the date/amount guard reads the reported item, not the
+    source the cue cites."""
+    assert outcomes("splits", text) == [("presence.none_reports_available", "flag", None)]
+
+
+@pytest.mark.parametrize("text,term", [
+    ("No source reports the 2025 holdout set as available.", "2025"),
+    ("No source reports the holdout set release date as available.", "date"),
+    ("No source reports the number of test sets as released.", "number"),
+])
+def test_a_date_or_amount_in_the_reported_item_is_still_guarded(text, term):
+    """#3265: what the cue reports as unstated is a date or an amount."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("date_amount", term)]
+
+
+def test_an_item_object_needs_the_cue_to_name_an_item_group():
+    raw = sd.LEXICON_PATH.read_bytes().replace(b"(?P<item>", b"(?:")
+    with pytest.raises(ValueError, match="item"):
+        sd.Lexicon(raw)
+
+
 @pytest.mark.parametrize("text,rule", [
     ("The sources do not give this author's institution.", "role.assignment_negated"),
     ("The sources do not give this author's employer.", "role.assignment_negated"),
@@ -612,6 +648,33 @@ def test_a_self_reference_across_a_comma_counts_where_the_cue_has_no_subject_of_
     keeps the self-reference, as for an earlier clause (#3082)."""
     out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
     assert (rule, scope) in [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]], text
+
+
+@pytest.mark.parametrize("container,text,rule,scope", [
+    ("splits", "This is not yet released.", "presence.not_yet_released", "This"),
+    ("splits", "This was not yet released.", "presence.not_yet_released", "This"),
+    ("instances", "After review, it is not yet released.", "presence.not_yet_released", "it"),
+    ("splits", "It is derived from the pilot, but it is not yet released.", "presence.not_yet_released", "it"),
+    ("creators", "This is not a creator of the dataset.", "role.not_the_role", "This"),
+    ("creators", "According to the slide, she is not a creator.", "role.not_the_role", "she"),
+])
+def test_a_subject_pronoun_before_an_auxiliary_led_cue_is_a_self_reference(container, text, rule, scope):
+    """#3265: a cue that opens on its auxiliary ("is not yet released")
+    leaves "This is" without its verb, so the pronoun alone right before
+    the cue is the self-reference."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [(rule, scope)], text
+
+
+@pytest.mark.parametrize("container,text", [
+    ("splits", "A version of it is not released."),
+    ("splits", "This is balanced, but the raw images are not released."),
+    ("instances", "Given the consent terms for it, the raw audio is not released."),
+])
+def test_a_pronoun_that_is_not_the_cues_subject_is_not_a_self_reference(container, text):
+    """#3265: the pronoun counts only as the cue's own subject, not as the
+    object of `of`/`for` or in a clause with a subject of its own."""
+    assert outcomes(container, text) == [("presence.not_yet_released", "out_of_scope", "no_self_reference")]
 
 
 def test_a_none_scope_cue_counts_whatever_its_subject():
@@ -804,6 +867,50 @@ def test_identity_is_followed_across_reordering_and_removal():
     assert out["final_only"] == []
     # read at the entry's final path, not its original one (#3085)
     assert [r["still_flagged_in_final"] for r in out["lexicon_diff"]["rows"]] == [True, False]
+
+
+def test_a_shared_caveat_does_not_join_two_different_people():
+    """#3265: remap_path joins an entry with no key match by scalar overlap,
+    and a caveat two maintainers share is such a scalar. Alice is not
+    retained as Betty: deleted, she is unresolved (her entry may also have
+    been renamed), and replaced, Betty is a final-only flag."""
+    alice = {"name": "Alice Adams", "source_caveats": DISCLAIMER}
+    betty = {"name": "Betty Baker", "source_caveats": DISCLAIMER}
+    deleted = sd.diff(record(maintainers=[alice, betty]), record(maintainers=[betty]), lexicon=LEXICON)
+    assert [(r["path"], r["classification"], r["final_path"], r["identity_basis"])
+            for r in deleted["lexicon_diff"]["rows"]] == [
+        ("/maintainers/0", "identity_unresolved", None, "identity_conflict"),
+        ("/maintainers/1", "self_disclaimed_retained", "/maintainers/0", "by_name")]
+    assert deleted["lexicon_diff"]["counts"]["self_disclaimed_retained"] == 1
+    replaced = sd.diff(record(maintainers=[alice]), record(maintainers=[betty]), lexicon=LEXICON)
+    assert classes(replaced) == {"/maintainers/0": "identity_unresolved"}
+    assert replaced["final_only"] == ["/maintainers/0"]
+
+
+def test_a_resolver_url_and_its_curie_are_one_identity():
+    """The identity check compares keys as remap_path does: #974's
+    normaliser rewrites a resolver URL to its CURIE, the same entry."""
+    member = {"id": "https://doi.org/10.1/x", "source_caveats": DISCLAIMER}
+    final = {"id": "doi:10.1/x", "source_caveats": DISCLAIMER}
+    assert sd._identity(member, final) == "agrees"
+    assert sd._identity({"name": "A B"}, {"name": "C D"}) == "conflicts"
+    assert sd._identity({"name": "A B"}, {"id": "x"}) == "unknown"
+
+
+def test_two_originals_followed_to_one_final_entry_are_not_both_retained():
+    """#3265: keyless entries both joined by overlap to the one survivor.
+    Neither identity is confirmed by a key, so neither is retained."""
+    one = {"split_details": "This split is recorded as a planned provision.", "size": "10"}
+    two = {"split_details": one["split_details"], "size": "20"}
+    out = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=LEXICON)
+    assert [(r["path"], r["classification"], r["identity_basis"]) for r in out["lexicon_diff"]["rows"]] == [
+        ("/splits/0", "identity_unresolved", "shared_final_entry"),
+        ("/splits/1", "identity_unresolved", "shared_final_entry")]
+    # the one whose key agrees keeps the survivor; the other does not
+    a = {"name": "Split A", "split_details": one["split_details"]}
+    b = {"name": "Split B", "split_details": one["split_details"]}
+    kept = sd._resolve_all(record(splits=[a, b]), record(splits=[{**a, "size": "1"}]), LEXICON)
+    assert kept == {("splits", 0): ((("splits", 0)), "same"), ("splits", 1): (None, "identity_conflict")}
 
 
 def test_a_container_emptied_or_nulled_in_the_final_is_removed():

@@ -108,6 +108,12 @@ self_reference:
   - '^(?:it|he|she)\b'
   - '\b(?:it|this) (?:is|was|has|appears)\b'
   - '^(?:named|listed|recorded|credited|identified|described|mentioned|included|given|shown|cited|stated|reported|treated|kept)\b'
+  # A subject pronoun right before the cue, which a cue opening on its
+  # auxiliary leaves without one: "This is not yet released", "After review,
+  # it is not yet released", "This is not a creator" (the cue starts at "is").
+  # Not the object of `of`/`for`: "A version of it is not released" is about
+  # the version.
+  - '(?<!\bof )(?<!\bfor )\b(?:it|this|he|she)(?=\s*$)'
 
 # The clause is about other people or things, so its role or presence
 # wording does not disclaim the member. Read with the member's own
@@ -123,7 +129,8 @@ other_subject:
 # release", "The remaining partitions are not one of the released files",
 # "No source reports the other splits as available" (#3231, #3250). Read
 # only in that item, self-references blanked: the cue's `item` group where
-# the pattern declares its object inside the cue, else the cue's subject
+# the pattern declares it as its object (`object: [item]`), else the cue's
+# subject
 # (the stretch before the cue after its last comma). Never in the whole
 # clause: "Unlike the other splits, this split is not released" and "it is
 # not one of the listed data types" are about the member. Never for a
@@ -150,7 +157,10 @@ other_item_subject:
 # active cue ("does not name <her as an author>"), `subject` and
 # `as_phrase` for a passive one ("<the start date of her role> is not
 # stated", "are not recorded <as creator affiliations>"), `cue` for a cue
-# that ends on the role noun ("does not state <a credit role>"). A passive
+# that ends on the role noun ("does not state <a credit role>"), `item`
+# for a cue whose named `item` group holds the item it reports ("No source
+# reports <the holdout set> as available"; the cited source is not read,
+# #3265). A passive
 # cue's `subject` is the clause before it with an appositive closing on the
 # cue's own comma left out, and with anything before its last remaining
 # comma left out: in "This split, planned for 2025, is not yet released"
@@ -221,9 +231,9 @@ guards:
 # self-references: `presence.planned_element` ends on the planned noun, so
 # "Unlike the planned splits for the next release, this split is complete"
 # names no presence term of its own (#3230). A pattern that declares its
-# object inside the cue (`object: [cue]`) is read with the cue, whose free
-# span names the item it reports ("No source reports the holdout set as
-# available"). Every cue is rejected by an other-subject anywhere in the
+# object inside the cue (`object: [cue]` or `[item]`) is read with the cue,
+# whose free span names the item it reports ("No source reports the
+# holdout set as available"). Every cue is rejected by an other-subject anywhere in the
 # clause holding it, and a presence container's cue also by an other item
 # in the item it reports (`other_item_subject`), each read with the
 # member's own self-references blanked.
@@ -316,11 +326,13 @@ patterns:
   - id: presence.none_reports_available
     class: presence_disclaimer
     kinds: [presence]
-    # `item` is the item the cue reports, the span the other-item check reads.
+    # `item` is the item the cue reports: the span the other-item check and
+    # the date/amount guard read, so the source it cites ("No source from
+    # 2024 reports ...") is not what is unstated (#3265).
     cue: '\b(?:none|no (?:source|document|passage|page)s?(?: in the bundle)?)\b[^.;:]{0,20}?\b(?:reports?|states?|lists?|describes?|shows?|presents?)\b(?P<item>[^.;:]{0,80}?) as (?:available|released|present|collected|complete|delivered|distributed)\b'
     scope: presence
     guards: [date_amount]
-    object: [cue]
+    object: [item]
   - id: presence.not_yet_released
     class: presence_disclaimer
     kinds: [presence]

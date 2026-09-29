@@ -18,7 +18,9 @@ its own ("It is derived, but is not yet released"), earlier in the sentence.
 A self-reference that a comma separates from the cue counts only when the
 stretch after the last such comma has no subject of its own either: "Given
 the consent terms, the raw recordings are not released" is about the
-recordings (#3159). A `presence` cue counts where a `self` cue would or
+recordings (#3159). A subject pronoun right before a cue that opens on its
+auxiliary is such a self-reference: "This is not yet released", "After
+review, it is not yet released" (#3265). A `presence` cue counts where a `self` cue would or
 where its clause names the container's own presence term outside the
 cue's own words and outside the member's self-references: "Unlike the
 planned splits for the next release, this split is complete" names no
@@ -35,8 +37,8 @@ a presence container, nor does a cue whose reported item names other items
 of the container's kind ("Two other variables are not part of the public
 release", "The remaining partitions ...", "No source reports the other
 splits as available"); that second check reads the item alone, the cue's
-subject or, where the pattern declares its object inside the cue, the
-cue's `item` group, so "Unlike the other splits, this split is not
+subject or, where the pattern declares its object as the cue's `item`
+group, that group, so "Unlike the other splits, this split is not
 released" still counts (#3231, #3250). It is not applied to a person-role
 container, where an active cue's subject is the source it cites: "These
 data sets do not name her as a creator" is the member's disclaimer (#3249).
@@ -52,8 +54,10 @@ A cue does not count where a guard shows that what it says is unstated is a
 date, an amount, an attribute, a narrower sub-role or a study's design. The
 date, amount and attribute guards read the cue's object. Each pattern
 declares where that lies: after an active cue up to the phrase's end, in a
-passive one's subject together with an `as` complement, or inside a cue
-that ends on the role noun. A passive cue's subject leaves out an
+passive one's subject together with an `as` complement, inside a cue
+that ends on the role noun, or in the `item` group of a cue that cites its
+source ("No source from 2024 reports <the holdout set> as available": the
+year dates the source, not the split, #3265). A passive cue's subject leaves out an
 appositive and anything before a comma: in "This split, planned for 2025,
 is not yet released" what is unstated is the split, not the year (#3210),
 while in "This split's 2025 release date is not yet available" it is the
@@ -85,7 +89,12 @@ classifies it:
   `original_full` evidence paths name the member itself or one of its
   placement leaves (`id`, `name`, a maintainer's `role`, ...; the lexicon
   lists them per container).
-- `identity_unresolved`: the entry cannot be followed to the final record.
+- `identity_unresolved`: the entry cannot be followed to the final record:
+  remap_path cannot place it, the entry it was followed to carries
+  conflicting identity keys (`identity_conflict`: an overlap join on a
+  caveat two people share is not the same person), or another original
+  member was followed to the same final entry and it is not the one whose
+  keys agree with it (`shared_final_entry`, #3265).
 - `self_disclaimed_retained`: none of the above.
 
 A finding that names only the member's prose, a count or an affiliation is
@@ -118,7 +127,7 @@ SCOPES = ("role", "presence", "self", "none")
 # What a guard reads, and where a pattern's object lies (the lexicon's
 # `reads` and `object` keys; see its guards comment).
 GUARD_READS = ("clause", "before_cue", "cue", "after_phrase", "object")
-OBJECT_PARTS = ("before_cue", "subject", "cue", "after_phrase", "as_phrase")
+OBJECT_PARTS = ("before_cue", "subject", "cue", "item", "after_phrase", "as_phrase")
 CLASSIFICATIONS = ("removal_declared", "removed", "named_by_finding", "identity_unresolved")
 NON_CHECKS = (
     "whether the source supports the placement: a flag reads the member's own words, never the bundle",
@@ -230,6 +239,8 @@ class Lexicon:
                 raise ValueError(f"pattern {row['id']} declares an object outside {', '.join(OBJECT_PARTS)}")
             if not parts and any(self._guards[g][0] == "object" for g in row["guards"]):
                 raise ValueError(f"pattern {row['id']} has a guard that reads its object but declares none")
+            if "item" in parts and "(?P<item>" not in row["cue"]:
+                raise ValueError(f"pattern {row['id']} declares its object in an `item` group its cue lacks")
             patterns.append(Pattern(row["id"], row["class"], kinds, row["cue"],
                                     row["scope"], tuple(row["guards"]), parts))
         if len({p.id for p in patterns}) != len(patterns):
@@ -393,15 +404,15 @@ def _possessors_blanked(sentence: str, selves) -> str:
     return "".join(chars)
 
 
-def _item_text(pattern, parts: dict[str, str], masked: str, m) -> str:
+def _item_text(pattern, parts: dict[str, str]) -> str:
     """Where a presence cue names the item it says is unstated, for the
-    other-item check: the cue's `item` group when the pattern declares its
-    object inside the cue ("No source reports <the other splits> as
-    available", #3250), the whole cue when that pattern has no such group,
-    and otherwise the cue's subject."""
+    other-item check: the cue's `item` group when the pattern declares it as
+    its object ("No source reports <the other splits> as available", #3250,
+    #3265), the whole cue when the pattern declares the cue, and otherwise
+    the cue's subject."""
+    if "item" in pattern.object:
+        return parts["item"]
     if "cue" in pattern.object:
-        if "item" in m.re.groupindex and m.start("item") >= 0:
-            return masked[m.start("item"):m.end("item")]
         return parts["cue"]
     return parts["subject"]
 
@@ -455,7 +466,9 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None) -> dict[str
     """The pieces of the cue's clause a guard or an object can name, read
     from the masked sentence: `clause`, `before_cue`, `subject` (a passive
     cue's subject, `_subject`, located on `raw`, the unmasked sentence),
-    `cue`, `after_phrase` (after the cue up to the phrase's end,
+    `cue`, `item` (the cue's named `item` group: the item a cue that cites
+    its source reports, empty when the cue has none), `after_phrase` (after
+    the cue up to the phrase's end,
     `_PHRASE_END`) and `as_phrase` (`after_phrase` when it opens on `as`,
     else empty)."""
     after = masked[m.end():c1]
@@ -463,8 +476,10 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None) -> dict[str
     phrase = after[:end.start()] if end else after
     before = masked[c0:m.start()]
     s0, s1 = _subject((raw if raw is not None else masked)[c0:m.start()])
+    item = (masked[m.start("item"):m.end("item")]
+            if "item" in m.re.groupindex and m.start("item") >= 0 else "")
     return {"clause": masked[c0:c1], "before_cue": before, "subject": before[s0:s1],
-            "cue": masked[m.start():m.end()], "after_phrase": phrase,
+            "cue": masked[m.start():m.end()], "item": item, "after_phrase": phrase,
             "as_phrase": phrase if re.match(r"\s*as\b", phrase, re.I) else ""}
 
 
@@ -552,9 +567,9 @@ def _presence_text(pattern, masked: str, c0: int, c1: int, m) -> str:
     ends on the planned noun, so "Unlike the planned splits for the next
     release, this split is complete" names no presence term of its own
     (#3230). A pattern that declares its object inside the cue (`object:
-    [cue]`) keeps the cue, whose free span names the item it reports ("No
-    source reports the holdout set as available")."""
-    if "cue" in pattern.object:
+    [cue]` or `[item]`) keeps the cue, whose free span names the item it
+    reports ("No source reports the holdout set as available")."""
+    if "cue" in pattern.object or "item" in pattern.object:
         return masked[c0:c1]
     return masked[c0:m.start()] + " " * (m.end() - m.start()) + masked[m.end():c1]
 
@@ -580,7 +595,7 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     # subject is the source it cites, not another item (#3249, #3250).
     parts = _parts(masked, c0, c1, m, sentence)
     if container.kind == "presence":
-        other = _search(lexicon._other_item, _item_text(pattern, parts, masked, m))
+        other = _search(lexicon._other_item, _item_text(pattern, parts))
         if other:
             return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
     # The object read with only the member's possessor self-references
@@ -736,6 +751,38 @@ def _names_member(member: tuple, named: tuple, container: Container) -> bool:
             and named[len(member)] in container.placement_fields)
 
 
+def _identity(original_entry: Any, final_entry: Any) -> str:
+    """How the identity keys (`receipts.ENTRY_KEYS`) of two list entries
+    compare: `agrees` when a key both carry holds the same value on each
+    (resolver URL and CURIE forms are one value), `conflicts` when they
+    share keys and every one differs ("Alice Adams" and "Betty Baker" under
+    `name`), `unknown` when they share none."""
+    from data_sheets_schema.receipts import ENTRY_KEYS, _canonical_identifier
+    if not isinstance(original_entry, dict) or not isinstance(final_entry, dict):
+        return "unknown"
+    shared = [k for k in ENTRY_KEYS
+              if all(isinstance(e.get(k), str) and e[k].strip() for e in (original_entry, final_entry))]
+    if not shared:
+        return "unknown"
+    same = any(_canonical_identifier(" ".join(original_entry[k].split()))
+               == _canonical_identifier(" ".join(final_entry[k].split())) for k in shared)
+    return "agrees" if same else "conflicts"
+
+
+def _identity_steps(tokens: tuple, where: tuple, original: Any, final: Any) -> list[str]:
+    """`_identity` at every list step of the member's path, original entry
+    against the final entry it was followed to."""
+    steps, o, f = [], original, final
+    for a, b in zip(tokens, where):
+        try:
+            o, f = o[a], f[b]
+        except (KeyError, IndexError, TypeError):
+            return steps
+        if isinstance(a, int):
+            steps.append(_identity(o, f))
+    return steps
+
+
 def _follow(tokens: tuple, original: Any, final: Any) -> tuple[tuple | None, str]:
     """Where the member sits in the final record, joined by identity.
 
@@ -743,11 +790,21 @@ def _follow(tokens: tuple, original: Any, final: Any) -> tuple[tuple | None, str
     final record or holds null or an empty list there: its own container,
     or a list further up (a nested member under `resources: null`, #3088).
     The nearest ancestor that resolves decides; when it is present and not
-    empty, the member is `identity_unresolved` with remap_path's basis."""
+    empty, the member is `identity_unresolved` with remap_path's basis.
+
+    remap_path joins an entry with no key match by the overlap of its
+    scalar leaves, and a caveat two entries share is such a leaf. A join
+    whose entries carry conflicting identity keys at any list step ("Alice
+    Adams" followed to "Betty Baker" because both carry the same caveat) is
+    rejected as `identity_conflict` (#3265): the final entry is someone
+    else, and whether the member was deleted or renamed is not known."""
     from data_sheets_schema.receipts import remap_path
     moved = remap_path(_dotted(tokens), original, final)
     if moved["path"] is not None:
-        return _undotted(moved["path"]), moved["basis"]
+        where = _undotted(moved["path"])
+        if "conflicts" in _identity_steps(tokens, where, original, final):
+            return None, "identity_conflict"
+        return where, moved["basis"]
     if moved["basis"] in ("entry_dropped", "leaf_dropped"):
         return None, "removed"
     for depth in range(len(tokens) - 1, 0, -1):
@@ -765,6 +822,29 @@ def _follow(tokens: tuple, original: Any, final: Any) -> tuple[tuple | None, str
     return None, moved["basis"]
 
 
+def _resolve_all(original: Any, final: Any, lexicon: Lexicon) -> dict[tuple, tuple[tuple | None, str]]:
+    """`_follow` for every member of the original, then one survivor per
+    final entry. Where two original members are followed to the same final
+    entry, the one whose identity keys agree with it at every list step
+    keeps it; every other, and all of them when not exactly one agrees, is
+    `identity_unresolved` with basis `shared_final_entry` (#3265): two
+    distinct entries cannot both be retained as one."""
+    out = {tokens: _follow(tokens, original, final) for tokens, _c, _m in members(original, lexicon)}
+    landed: dict[tuple, list[tuple]] = {}
+    for tokens, (where, _basis) in out.items():
+        if where is not None:
+            landed.setdefault(tuple(where), []).append(tokens)
+    for where, group in landed.items():
+        if len(group) < 2:
+            continue
+        agreed = [t for t in group
+                  if set(_identity_steps(t, where, original, final)) == {"agrees"}]
+        for tokens in group:
+            if len(agreed) != 1 or tokens != agreed[0]:
+                out[tokens] = (None, "shared_final_entry")
+    return out
+
+
 def classify(flags: list, original: Any, final: Any, *, audit: Any = None,
              final_flags: list | None = None, retained: str = "self_disclaimed_retained",
              lexicon: Lexicon | None = None) -> dict:
@@ -773,11 +853,12 @@ def classify(flags: list, original: Any, final: Any, *, audit: Any = None,
     removals, naming, unreadable = _finding_pointers(audit) if audit is not None else ([], [], 0)
     still = {f["path"] for f in final_flags or []}
     rows, counts = [], {k: 0 for k in (*CLASSIFICATIONS, retained)}
+    resolved = _resolve_all(original, final, lexicon) if flags else {}
     for flag in flags:
         tokens = parse_pointer(flag["path"])
         member = tuple(int(t) if re.fullmatch(r"0|[1-9][0-9]*", t) else t for t in tokens)
         container = lexicon.containers[flag["container"]]
-        where, basis = _follow(member, original, final)
+        where, basis = resolved.get(member) or _follow(member, original, final)
         declared = sorted({i for i, p in removals if len(p) <= len(tokens) and tokens[:len(p)] == p})
         named = sorted({i for i, p in naming if _names_member(tokens, p, container)})
         if declared:
