@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from data_sheets_schema.evaluation_context import context_digest, load_document
+from data_sheets_schema.evaluation_context import FIELD_ALIASES, context_digest, load_document
 from data_sheets_schema.judge_contract import evaluation_contract
 from data_sheets_schema.semantic_evidence import check_evidence
 from data_sheets_schema.semantic_scope import validate_scope
@@ -339,6 +339,50 @@ def test_a_path_outside_the_grammar_is_an_error_in_every_other_list(source, name
     assert _codes(_check(result, source).findings) == [("malformed_path", "Q19", path) for path in OFF_GRAMMAR]
 
 
+# Each is a well-formed pointer that applies to a list of the pinned input a
+# token that is not an index without leading zeros. RFC 6901 gives it no
+# element to name; read as reaching nothing, each would pass as a true
+# absence of a value the input populates (#3149).
+LIST_KEY_TOKENS = ("/creators/name", "/distribution_formats/format", "/creators/01/name", "/creators/00",
+                   "/creators/-", "/creators/0/affiliations/name")
+
+
+@pytest.mark.parametrize("name", ["absent", "cited", "counts", "considered"])
+def test_a_pointer_that_applies_a_key_token_to_a_list_is_an_error_in_every_list(source, name):
+    assert all(creator["name"] for creator in source[0]["creators"])
+    assert all(entry["format"] for entry in source[0]["distribution_formats"])
+    result = _rating("rubric20", source)
+    entries = {"absent": [{"path": path} for path in LIST_KEY_TOKENS],
+               "cited": [{"path": path} for path in LIST_KEY_TOKENS],
+               "counts": [{"path": path, "claimed": 1} for path in LIST_KEY_TOKENS],
+               "considered": list(LIST_KEY_TOKENS)}[name]
+    _row(result, "Q19", **{name: entries})
+    assert _accepted_by_scope(result, source)
+    findings = _check(result, source).findings
+    assert _codes(findings) == [("malformed_path", "Q19", path) for path in LIST_KEY_TOKENS]
+    assert {finding.severity for finding in findings} == {"error"}
+    messages = dict(zip(LIST_KEY_TOKENS, (finding.message for finding in findings)))
+    assert "applies the token 'name' to the list at /creators;" in messages["/creators/name"]
+    assert "applies the token '01' to the list at /creators;" in messages["/creators/01/name"]
+    assert "to the list at /creators/0/affiliations;" in messages["/creators/0/affiliations/name"]
+
+
+def test_a_pointer_that_reaches_nothing_otherwise_is_still_an_absence(source):
+    # Past the end of a list, a key a mapping lacks and a step into a scalar
+    # reach nothing, as their dotted spellings do. The last is the #3027
+    # residual: one key, `version_access.version_details`, that no mapping holds.
+    result = _rating("rubric20", source)
+    _row(result, "Q19", absent=[{"path": path} for path in (
+        "/creators/39", "/creators/39/name", "/creators/0/orcid", "/creators/0/name/given",
+        "/version_access.version_details")])
+    assert _accepted_by_scope(result, source)
+    assert _check(result, source).findings == ()
+    _row(result, "Q19", absent=[{"path": "/creators/38/name"}, {"path": "/distribution_formats/1/format"}])
+    assert _codes(_check(result, source).errors) == [
+        ("absent_path_populated", "Q19", "/creators/38/name"),
+        ("absent_path_populated", "Q19", "/distribution_formats/1/format")]
+
+
 def test_a_key_that_is_not_a_snake_case_name_is_written_in_pointer_form(source):
     # A few model-written records carry keys such as DOI or "Point of Contact".
     document = copy.deepcopy(source[0])
@@ -453,6 +497,85 @@ def test_a_container_an_alias_passes_through_accounts_only_for_values_it_holds(s
                  "/distribution_formats/0/format"):
         _row(result, "E3.2", cited=[], considered=[path])
         assert _check(result, source).findings == (), path
+
+
+def test_a_declared_name_that_is_not_a_root_slot_names_its_locations_in_every_list(source):
+    # This input holds format and media_type only at /distribution_formats/{0,1}.
+    # Coverage read them there while cited, absent and counts read them as
+    # root keys, so a false absence passed and a true citation failed (#3148).
+    assert "format" not in source[0] and "media_type" not in source[0]
+    result = _rating("rubric10", source)
+    _issue(result, ["E2.4"])
+    _row(result, "E2.4", score=0, absent=[{"path": "format"}, {"path": "media_type"}],
+         considered=["format", "media_type", "distribution_formats"])
+    assert _accepted_by_scope(result, source)
+    errors = _check(result, source).errors
+    assert _codes(errors) == [("absent_path_populated", "E2.4", "format"),
+                              ("absent_path_populated", "E2.4", "media_type")]
+    assert "populates /distribution_formats/0/format" in errors[0].message
+    assert "populates /distribution_formats/0/media_type" in errors[1].message
+    # Cited, the names resolve to those values, and a quote is looked for there.
+    result = _rating("rubric10", source)
+    _row(result, "E2.4", cited=[{"path": "format", "quote": "RO-Crate metadata package"},
+                                {"path": "media_type", "quote": "application/zip"}])
+    assert _check(result, source).findings == ()
+    _row(result, "E2.4", cited=[{"path": "format", "quote": "application/zip"}])
+    assert _codes(_check(result, source).errors) == [("quote_not_found", "E2.4", "format")]
+    # For coverage, format reaches the distribution_formats entries it sits
+    # in, not the media types beside it.
+    _issue(result, ["E2.4"])
+    _row(result, "E2.4", score=0, cited=[{"path": "format"}])
+    assert _codes(_check(result, source).findings) == [("uncovered_populated_field", "E2.4", "media_type")]
+    # A count needs one list: distribution_formats is one, format two values.
+    result = _rating("rubric10", source)
+    _row(result, "E2.4", counts=[{"path": "distribution_formats", "claimed": 2}, {"path": "format", "claimed": 2}])
+    errors = _check(result, source).errors
+    assert _codes(errors) == [("count_path_not_list", "E2.4", "format")]
+    assert "names 2 locations in the input, not one list; the first is /distribution_formats/0/format" \
+        in errors[0].message
+
+
+def test_every_aliased_name_is_read_where_a_core_record_holds_it(source):
+    # A core record holds distribution properties under `distributions`, so no
+    # key of FIELD_ALIASES is a key of the copy below, and read as a root key
+    # each would pass as absent (#3148).
+    document = copy.deepcopy(source[0])
+    for key in ("distribution_formats", "compression", "file_collections"):
+        del document[key]
+    document["distributions"] = [
+        {"format": "ZIP archive", "media_type": "application/zip", "encoding": "UTF-8", "compression": "zip",
+         "bytes": 1024, "conforms_to": ["Fixture standard"]},
+        {"format": "RO-Crate metadata package", "media_type": "application/ld+json"}]
+    names = sorted(FIELD_ALIASES)
+    assert not {name.split(".")[0] for name in names} & set(document)
+    # A pointer is read as written: no key of the table is spelled as one.
+    assert not any(name.startswith("/") for name in names)
+    result = _rating("rubric20", source)
+    _row(result, "Q19", absent=[{"path": name} for name in names])
+    errors = check_evidence(result, document, "rubric20").errors
+    assert _codes(errors) == [("absent_path_populated", "Q19", name) for name in names]
+    assert all("populates /distributions/0" in error.message for error in errors)
+    _row(result, "Q19", absent=[], cited=[{"path": name} for name in names])
+    assert check_evidence(result, document, "rubric20").findings == ()
+    # A count reads the same locations: here distribution_formats is two
+    # distributions, not one list, and the list is counted by pointer.
+    _row(result, "Q19", cited=[], counts=[{"path": "distribution_formats", "claimed": 2},
+                                          {"path": "/distributions", "claimed": 2}])
+    assert _codes(check_evidence(result, document, "rubric20").errors) == [
+        ("count_path_not_list", "Q19", "distribution_formats")]
+    # Where the name's own spelling holds every populated location, that list
+    # is counted. An alias location that holds no value, or a distribution
+    # that names no format, takes nothing from it.
+    document["distribution_formats"] = copy.deepcopy(source[0]["distribution_formats"])
+    document["conforms_to"] = ["Fixture standard", "Second fixture standard"]
+    for entry in document["distributions"]:
+        entry.update(format=None, media_type="", conforms_to=None)
+    _row(result, "Q19", counts=[{"path": "distribution_formats", "claimed": 2}, {"path": "conforms_to", "claimed": 2}])
+    assert check_evidence(result, document, "rubric20").findings == ()
+    # One populated alias location outside it and the name is not one list.
+    document["distributions"][1]["media_type"] = "application/ld+json"
+    assert _codes(check_evidence(result, document, "rubric20").errors) == [
+        ("count_path_not_list", "Q19", "distribution_formats")]
 
 
 def test_an_issue_must_name_rubric_items_that_apply(source):

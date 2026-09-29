@@ -14,7 +14,7 @@ Per `unit_scores` row, with paths relative to the resource the row scores:
                                    a quote lies inside one scalar under it
                                    once whitespace is normalised
     absent      [{path}]           the path is missing, null or empty
-    counts      [{path, claimed}]  the path resolves to one list of that length
+    counts      [{path, claimed}]  the path names one list, of that length
     considered  [path, ...]        declared fields examined and not cited
 
 Per item, `no_issue_reason` says why no lowered issue accounts for a score
@@ -22,13 +22,14 @@ below the maximum. Per `semantic_analysis.issues_detected` entry, `item_ids`
 names the rubric items the issue concerns and `score_effect` is `lowered` or
 `noted_only`.
 
-Errors mark false or unreadable evidence: a path outside the grammar below, a
-cited path that does not resolve or is empty, a quote the value does not
-contain, an "absent" path that is populated, a miscount, an issue naming an
-unknown or non-applicable item, and a lowered issue that names no item scored
-below its maximum. Warnings mark accounting gaps: a populated declared field
-that a below-maximum row neither cites nor considers, and a below-maximum item
-that no lowered issue and no reason explains. The checker reads the rating and
+Errors mark false or unreadable evidence: a path outside the grammar below
+or a pointer that applies a key to a list, a cited path that does not
+resolve or is empty, a quote the value does not contain, an "absent" path
+that is populated, a miscount, an issue naming an unknown or non-applicable
+item, and a lowered issue that names no item scored below its maximum.
+Warnings mark accounting gaps: a populated declared field that a
+below-maximum row neither cites nor considers, and a below-maximum item that
+no lowered issue and no reason explains. The checker reads the rating and
 never changes a score.
 
 Paths. A path that begins with `/` is a JSON pointer (RFC 6901) and names one
@@ -43,10 +44,18 @@ snake_case name, such as the few model-written `DOI` keys. Any other spelling
 is a `malformed_path` error in every list, never a path that reaches nothing:
 `#/creators` (a pointer begins with `/` and is relative to the row's
 resource), `creators/0`, `creators.0.name`, `creators[0].name`, `Creators`,
-and a path with a stray space. This matters most for `absent`, where a path
-that reaches nothing is a true absence. A value is populated when it is a
-scalar other than null or a blank string, or a list or mapping that holds one.
-A stated `false` or `0` is populated.
+and a path with a stray space. So is a pointer that meets a list and applies
+to it a token that is not an index without leading zeros: `/creators/name`,
+`/creators/01/name`, `/creators/-`. RFC 6901 gives such a token no element to
+name, and the dotted `creators.name` is the spelling that reads across the
+list (#3149). This is the one malformation the input decides, so it is found
+by walking the pointer. Otherwise a pointer reaches nothing where a mapping
+lacks its key, a canonical index is past the end of its list, or a token
+would descend into a scalar, as a dotted path reaches nothing where a
+mapping lacks its segment or the walk meets a scalar. This matters most for
+`absent`, where a path that reaches nothing is a true absence. A value is
+populated when it is a scalar other than null or a blank string, or a list
+or mapping that holds one. A stated `false` or `0` is populated.
 
 Quotes. A quote is matched, with whitespace normalised, against each scalar
 under the path. It may be a substring of a string as written, of `true` or
@@ -68,25 +77,39 @@ resource root, such as rubric10's bare `confidentiality_level`,
 `reidentification_risk` or `is_data_split`, is never populated and never
 warns. A cited or considered path accounts for a declared field when it
 reaches a location where the input populates that field, a value inside one,
-or a container of one. The declared name, as the rubric writes it, names all
-of those locations. An alias spelling accounts for nothing where it holds no
-value: citing `file_collections` does not account for `format`, whose aliases
-include `file_collections.resources.format`, when no file collection holds a
-format.
+or a container of one.
+
+Aliased names. A dotted path that is a key of `FIELD_ALIASES` is read the
+same way in every list, not only for coverage: it names what its own
+spelling reaches and every other location `field_values` reads for it that
+holds a value. So the declared name, as the rubric writes it, names all of
+the field's locations. `absent: format` on a record whose formats sit under
+`distribution_formats` is `absent_path_populated`, and `cited: format`
+resolves there (#3148). A pointer names one value and is never read through
+an alias, and an alias spelled out, such as `distribution_formats.format`,
+is an ordinary dotted path. A container an alias passes through accounts
+for nothing where it holds no value: citing `file_collections` does not
+account for `format`, whose aliases include
+`file_collections.resources.format`, when no file collection holds a format.
 
 Limits. These checks are mechanical. They catch fabricated quotes, false
 absences, miscounts and unmentioned declared fields. They do not establish
 that a cited value supports the judgement, so an inference drawn against the
 record, or a misreading of a field the row cites, passes them. #1355's Q13
-deduction cited the `version_access` fields it misread. An absence claim is
-checked only as far as its path is well formed. A misspelled key in a
-well-formed path (`version_acess.version_details`) reads as missing, because
-no schema or rubric declares every name an absence may be claimed for: #2920
-requires `was_generated_by`, which neither declares, to pass as absent. A
-count is the `len()` of one list. A filtered claim such as "38 with an ORCID"
-cannot be checked here and must not be written as a count. Call this after
-`validate_scope`, which pins the rubric bytes and the applicability context
-this module reads.
+deduction cited the `version_access` fields it misread. An absence claim
+cannot tell a missing value from a key spelled wrong. A misspelled key in a
+well-formed path (`version_acess.version_details`), or a pointer token
+naming a key no mapping holds (`/version_access.version_details`, one key
+with a dot in it), reads as missing, because no schema or rubric declares
+every name an absence may be claimed for: #2920 requires `was_generated_by`,
+which neither declares, to pass as absent (#3027). A count is the `len()` of
+one list: the path, read as above, must name exactly one location, and it
+must be a list. So an aliased name is counted only where its own spelling
+holds every populated location, as `distribution_formats` does on a full
+record; where an alias holds one too, the list is counted by pointer. A
+filtered claim such as "38 with an ORCID" cannot be checked here and must
+not be written as a count. Call this after `validate_scope`, which pins the
+rubric bytes and the applicability context this module reads.
 """
 from __future__ import annotations
 
@@ -97,7 +120,7 @@ from typing import Any, Iterator
 
 import yaml
 
-from data_sheets_schema.evaluation_context import dataset_units, field_values
+from data_sheets_schema.evaluation_context import FIELD_ALIASES, dataset_units, field_values
 from data_sheets_schema.judge_contract import evaluation_contract
 from data_sheets_schema.resources import resource_path
 
@@ -232,19 +255,38 @@ def _escape(key: str) -> str:
     return key.replace("~", "~0").replace("/", "~1")
 
 
+def _follow(unit: dict, path: str) -> tuple[list[tuple[str, Any]], str | None]:
+    """The (pointer, value) a JSON pointer names, and why it can name none.
+
+    A pointer names nothing where a mapping lacks its key, a canonical index
+    is past the end of its list, or a token would descend into a scalar; that
+    is a true absence. A token met on a list that is not an index without
+    leading zeros names no element at all under RFC 6901, so the second value
+    says why, and every list reports it rather than `absent` reading it as
+    missing (#3149).
+    """
+    node, walked = unit, ""
+    for raw in path[1:].split("/"):
+        token = raw.replace("~1", "/").replace("~0", "~")
+        if isinstance(node, list):
+            if not _INDEX.fullmatch(token):
+                return [], (f"applies the token {token!r} to the list at {walked}; a pointer token on a "
+                            "list is an index without leading zeros, and dotted notation reads across a list")
+            if int(token) >= len(node):
+                return [], None
+            node = node[int(token)]
+        elif isinstance(node, dict) and token in node:
+            node = node[token]
+        else:
+            return [], None
+        walked += f"/{raw}"
+    return [(path, node)], None
+
+
 def _resolve(unit: dict, path: str) -> list[tuple[str, Any]]:
-    """Every (pointer, value) a path reaches in the unit; empty when it reaches none."""
+    """Every (pointer, value) a path's own spelling reaches in the unit; empty when it reaches none."""
     if path.startswith("/"):
-        node = unit
-        for raw in path[1:].split("/"):
-            token = raw.replace("~1", "/").replace("~0", "~")
-            if isinstance(node, dict) and token in node:
-                node = node[token]
-            elif isinstance(node, list) and _INDEX.fullmatch(token) and int(token) < len(node):
-                node = node[int(token)]
-            else:
-                return []
-        return [(path, node)]
+        return _follow(unit, path)[0]
 
     def walk(node, parts, pointer):
         if not parts:
@@ -256,6 +298,32 @@ def _resolve(unit: dict, path: str) -> list[tuple[str, Any]]:
         return []
 
     return walk(unit, path.split("."), "")
+
+
+def _parts(pointer: str) -> list[str]:
+    return pointer.split("/")[1:]
+
+
+def _within(pointer: str, base: str) -> bool:
+    """Whether a pointer is the base or a location inside it."""
+    return _parts(pointer)[:len(_parts(base))] == _parts(base)
+
+
+def _locations(unit: dict, path: str) -> list[tuple[str, Any]]:
+    """Every (pointer, value) a path names, read as the coverage check reads a declared name.
+
+    A dotted key of `FIELD_ALIASES` names what its own spelling reaches and
+    every other populated location `field_values` reads for it. Reading it
+    literally here while coverage read it through the aliases let `absent:
+    format` pass on a record whose formats sit under `distribution_formats`,
+    and made `cited: format` an unresolved path (#3148). What the spelling
+    reaches is kept whole, so a list stays one list for `counts`.
+    """
+    hits = _resolve(unit, path)
+    if path not in FIELD_ALIASES:  # no key begins with "/", so a pointer is read as written
+        return hits
+    return hits + [(pointer, value) for pointer, value in field_values(unit, path)
+                   if _populated(value) and not any(_within(pointer, base) for base, _ in hits)]
 
 
 def _path_problem(path: str) -> str | None:
@@ -370,8 +438,10 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
 
     def malformed(name, index, path):
         # A path outside the grammar reaches nothing, and under `absent`
-        # reaching nothing would pass as a true absence (#3017).
-        problem = _path_problem(path)
+        # reaching nothing would pass as a true absence (#3017). So does a
+        # pointer that applies a key token to a list, which only the input
+        # can show (#3149).
+        problem = _path_problem(path) or (_follow(unit, path)[1] if path.startswith("/") else None)
         return None if problem is None else error("malformed_path", path, f"{name}[{index}] path {path!r} {problem}")
 
     lists = {}
@@ -391,7 +461,7 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
         if (finding := malformed("cited", index, path)) is not None:
             yield finding
             continue
-        hits = _resolve(unit, path)
+        hits = _locations(unit, path)
         if not hits:
             yield error("cited_path_unresolved", path, f"cites {path}, which the input does not contain")
             continue
@@ -414,7 +484,7 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
         if (finding := malformed("absent", index, path)) is not None:
             yield finding
             continue
-        populated = [pointer for pointer, value in _resolve(unit, path) if _populated(value)]
+        populated = [pointer for pointer, value in _locations(unit, path) if _populated(value)]
         if populated:
             yield error("absent_path_populated", path,
                         f"claims {path} is absent, but the input populates {populated[0]}")
@@ -428,10 +498,14 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
         if (finding := malformed("counts", index, path)) is not None:
             yield finding
             continue
-        hits = _resolve(unit, path)
+        hits = _locations(unit, path)
         if not hits:
             yield error("count_path_unresolved", path, f"counts {path}, which the input does not contain")
-        elif len(hits) != 1 or not isinstance(hits[0][1], list):
+        elif len(hits) != 1:
+            yield error("count_path_not_list", path,
+                        f"counts {path}, which names {len(hits)} locations in the input, not one list; "
+                        f"the first is {hits[0][0]}")
+        elif not isinstance(hits[0][1], list):
             yield error("count_path_not_list", path, f"counts {path}, which is not one list in the input")
         elif len(hits[0][1]) != claimed:
             yield error("count_mismatch", path,
@@ -458,10 +532,6 @@ def _named_paths(row: dict) -> list[str]:
     return [path for path in paths if path and path.strip() and _path_problem(path) is None]
 
 
-def _parts(pointer: str) -> list[str]:
-    return pointer.split("/")[1:]
-
-
 def _coverage(key: str, unit_path: str, unit: dict, row: dict,
               declared: tuple[str, ...]) -> Iterator[EvidenceFinding]:
     """Warn on each populated declared field a deduction does not account for.
@@ -470,12 +540,14 @@ def _coverage(key: str, unit_path: str, unit: dict, row: dict,
     input populates for that field, or a container or value of one. Comparing
     spellings instead let a container an alias passes through, such as
     `file_collections` for `format`, stand for values it does not hold (#3018).
+    A named path is read by `_locations`, as every other list reads it, so the
+    declared name reaches all of the field's locations and needs no rule of
+    its own (#3148).
     """
-    named = _named_paths(row)
-    reached = [_parts(pointer) for path in named for pointer, _ in _resolve(unit, path)]
+    reached = [_parts(pointer) for path in _named_paths(row) for pointer, _ in _locations(unit, path)]
     for name in declared:
         populated = [_parts(pointer) for pointer, value in field_values(unit, name) if _populated(value)]
-        if not populated or name in named:
+        if not populated:
             continue
         if not any(a[:len(b)] == b[:len(a)] for a in reached for b in populated):
             yield EvidenceFinding(
