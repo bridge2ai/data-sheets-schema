@@ -6,14 +6,16 @@ D4D-shaped rendering. No value is inferred: a field is filled only when
 its declared path resolves in the crate.
 
 - Crate metadata: `data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json`
-- Mapping table: `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (137 rows applied)
-- Validation: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-28 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
+- Mapping table: `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (136 table rows applied, plus the record's `id`, taken from the crate root)
+- Validation: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-29 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
+- Distinct top-level `Dataset` slots filled: 44 (from 44 filled rows, the `id` among them)
 
 ## Outcome
 
 | Status | Rows | Meaning |
 |--------|------|---------|
-| filled | 48 | path resolved; value placed |
+| filled | 44 | path resolved; value placed (includes the record's `id`, which no table row supplies) |
+| subsumed | 4 | path resolved, but a `Dataset` row already placed the same crate value in the host slot |
 | empty | 31 | path valid but the crate has no value there |
 | unresolvable | 4 | the table declares no crate path |
 | unplaceable | 54 | no route into a `Dataset` record |
@@ -22,7 +24,7 @@ its declared path resolves in the crate.
 
 | Mapping type | Filled fields |
 |---|---|
-| closeMatch | 15 |
+| closeMatch | 11 |
 | exactMatch | 31 |
 | narrowMatch | 1 |
 | relatedMatch | 1 |
@@ -30,7 +32,7 @@ its declared path resolves in the crate.
 | Information loss | Filled fields |
 |---|---|
 | minimal | 11 |
-| moderate | 6 |
+| moderate | 2 |
 | none | 31 |
 
 Fields marked `moderate` or `high` loss carry a value that the mapping
@@ -41,8 +43,6 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 
 | D4D path | Status | Mapping | Loss | Source path | Value / note |
 |---|---|---|---|---|---|
-| AnnotationAnalysis.description | filled | closeMatch | moderate | rai:dataAnnotationAnalysis | Questionnaire-based labels are generated using the standard scoring rules for each valida… |
-| CleaningStrategy.description | filled | closeMatch | moderate | rai:dataManipulationProtocol | Prior to release, data are transformed to reduce re-identification risk and align with re… |
 | Dataset.acquisition_methods | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Prospective observational study conducted at multiple specialty clinics… |
 | Dataset.annotation_analyses | filled | closeMatch | minimal | @graph[?@type='Dataset']['rai:dataAnnotationAnalysis'] | [{"description": "Questionnaire-based labels are generated using the standard scoring rul… |
 | Dataset.citation | filled | exactMatch | none | @graph[?@type='Dataset']['citation'] | Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., R… |
@@ -87,8 +87,8 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.updates | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataReleaseMaintenancePlan'] | {"description": "Dataset releases follow a static versioning scheme managed through Physi… |
 | Dataset.version | filled | exactMatch | none | @graph[?@type='Dataset']['version'] | 3.0.0 |
 | Dataset.version_access | filled | relatedMatch | minimal | @graph[?@type='Dataset']['version'] | {"name": "3.0.0"} |
-| LabelingStrategy.description | filled | closeMatch | moderate | rai:dataAnnotationProtocol | Annotations for this dataset consist primarily of clinical labels and questionnaire-deriv… |
-| PreprocessingStrategy.description | filled | closeMatch | moderate | rai:dataPreprocessingProtocol | Raw audio waveforms are converted to mono and resampled to 16 kHz using anti-aliasing fil… |
+| AnnotationAnalysis.description | subsumed | closeMatch | moderate | rai:dataAnnotationAnalysis | Dataset.annotation_analyses already carries this crate value (rai:dataAnnotationAnalysis); not placed a second time (#2915) |
+| CleaningStrategy.description | subsumed | closeMatch | moderate | rai:dataManipulationProtocol | Dataset.cleaning_strategies already carries this crate value (rai:dataManipulationProtocol); not placed a second time (#2915) |
 | CleaningStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'pipeline_step' is not a slot on CleaningStrategy |
 | CleaningStrategy.step_type | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'step_type' is not a slot on CleaningStrategy |
 | Dataset.addressing_gaps | empty | exactMatch | none | @graph[?@type='Dataset']['d4d:addressingGaps'] | @type=Dataset present but 'd4d:addressingGaps' empty or absent |
@@ -162,10 +162,12 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Instance.data_topic | unresolvable | unmapped | high | N/A | not a crate path |
 | Instance.instance_type | unresolvable | unmapped | high | N/A | not a crate path |
 | LabelingStrategy.annotator_type | unplaceable | closeMatch | high | rai:dataAnnotationProtocol | 'annotator_type' is not a slot on LabelingStrategy |
+| LabelingStrategy.description | subsumed | closeMatch | moderate | rai:dataAnnotationProtocol | Dataset.labeling_strategies already carries this crate value (rai:dataAnnotationProtocol); not placed a second time (#2915) |
 | LabelingStrategy.evidence_type | unplaceable | closeMatch | high | rai:dataAnnotationProtocol | 'evidence_type' is not a slot on LabelingStrategy |
 | MachineAnnotation.tool_name | unplaceable | closeMatch | moderate | rai:machineAnnotationTools | no Dataset slot ranges over MachineAnnotation |
 | Maintenance.frequency | unplaceable | closeMatch | moderate | rai:dataReleaseMaintenancePlan | no Dataset slot ranges over Maintenance |
 | Maintenance.versioning_strategy | unplaceable | closeMatch | moderate | rai:dataReleaseMaintenancePlan | no Dataset slot ranges over Maintenance |
+| PreprocessingStrategy.description | subsumed | closeMatch | moderate | rai:dataPreprocessingProtocol | Dataset.preprocessing_strategies already carries this crate value (rai:dataPreprocessingProtocol); not placed a second time (#2915) |
 | PreprocessingStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataPreprocessingProtocol | 'pipeline_step' is not a slot on PreprocessingStrategy |
 | PreprocessingStrategy.step_type | unplaceable | closeMatch | high | rai:dataPreprocessingProtocol | 'step_type' is not a slot on PreprocessingStrategy |
 | QualityControl.accuracy | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Accuracy']['value'] | no Dataset slot ranges over QualityControl |

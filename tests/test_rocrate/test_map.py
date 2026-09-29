@@ -1,6 +1,7 @@
 """Tests for the our-mapping crate → D4D arm."""
 
 import copy
+import json
 import re
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ from data_sheets_schema.rocrate_map import (
     MapResult,
     _normalize_datetime,
     build_placement,
+    crate_property,
     crate_root,
     doi_for_slot,
     load_mapping,
@@ -113,8 +115,15 @@ class TestMapping(unittest.TestCase):
         # id is appended separately, so field count is rows + at most one
         self.assertGreaterEqual(len(res.fields), len(self.rows))
         self.assertTrue(all(f.status in
-                            ("filled", "empty", "unresolvable", "unplaceable")
+                            ("filled", "subsumed", "empty", "unresolvable",
+                             "unplaceable")
                             for f in res.fields))
+        # One report row per table row, in table order, and the id apart.
+        table = [f for f in res.fields if f.from_table]
+        self.assertEqual([f.d4d_path for f in table],
+                         [r["D4D_Full_Path"].strip() for r in self.rows])
+        self.assertEqual([f.d4d_path for f in res.fields if not f.from_table],
+                         ["Dataset.id"])
 
     def test_record_takes_its_id_from_the_crate(self):
         """A DOI id is written as the `doi:` CURIE, the form #974's write-time
@@ -140,6 +149,142 @@ class TestMapping(unittest.TestCase):
         unplaceable = [f for f in res.fields if f.status == "unplaceable"]
         self.assertTrue(unplaceable)
         self.assertTrue(all(f.detail for f in unplaceable))
+
+
+PROTOCOL = "rai:dataPreprocessingProtocol"
+STEPS = ["Resampled to 16 kHz.", "Segmented by task."]
+
+
+def _row(path, source, mtype="closeMatch", loss="minimal"):
+    return {"D4D_Full_Path": path, "RO_Crate_JSON_Path": source,
+            "Mapping_Type": mtype, "Information_Loss": loss}
+
+
+DATASET_ROW = _row("Dataset.preprocessing_strategies",
+                   f"@graph[?@type='Dataset']['{PROTOCOL}']")
+NESTED_ROW = _row("PreprocessingStrategy.description", PROTOCOL, loss="moderate")
+
+
+def _with_protocol(steps=STEPS, **extra):
+    graph = copy.deepcopy(GRAPH)
+    graph[1][PROTOCOL] = steps
+    graph[1].update(extra)
+    return graph
+
+
+class TestNestedRowsNeverOverwrite(unittest.TestCase):
+    """#2915. A nested `*.description` row replaced the objects a Dataset row
+    had placed in the same host slot with one object of '; '-joined items,
+    and the report counted both rows filled."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def status(self, res, path):
+        return next(f for f in res.fields if f.d4d_path == path)
+
+    def assert_one_object_per_item(self, res):
+        # A short single-line item lands in `name`, a long one in
+        # `description` (`_to_object`); either way, one object per item.
+        self.assertEqual([list(o.values()) for o in res.record["preprocessing_strategies"]],
+                         [[step] for step in STEPS])
+        self.assertNotIn("; ".join(STEPS), json.dumps(res.record))
+
+    def test_a_list_keeps_one_object_per_item_whatever_the_row_order(self):
+        for rows in ([DATASET_ROW, NESTED_ROW], [NESTED_ROW, DATASET_ROW]):
+            with self.subTest(first=rows[0]["D4D_Full_Path"]):
+                res = map_crate(_with_protocol(), rows, self.sv, "TEST")
+                self.assert_one_object_per_item(res)
+                self.assertEqual(self.status(res, DATASET_ROW["D4D_Full_Path"]).status,
+                                 "filled")
+                nested = self.status(res, NESTED_ROW["D4D_Full_Path"])
+                self.assertEqual(nested.status, "subsumed")
+                self.assertIn("Dataset.preprocessing_strategies", nested.detail)
+                self.assertEqual(nested.value_preview, "")
+                # the report keeps table order
+                self.assertEqual([f.d4d_path for f in res.fields if f.from_table],
+                                 [r["D4D_Full_Path"] for r in rows])
+
+    def test_the_shipped_table_keeps_the_list(self):
+        res = map_crate(_with_protocol(), self.rows, self.sv, "TEST")
+        self.assert_one_object_per_item(res)
+        self.assertEqual(self.status(res, NESTED_ROW["D4D_Full_Path"]).status,
+                         "subsumed")
+
+    def test_filled_rows_count_distinct_top_level_slots(self):
+        graph = _with_protocol(**{
+            "rai:dataManipulationProtocol": "Deduplicated.",
+            "rai:dataAnnotationProtocol": "Clinician labels.",
+            "rai:dataAnnotationAnalysis": ["Kappa 0.8.", "Audited."],
+        })
+        res = map_crate(graph, self.rows, self.sv, "TEST")
+        self.assertEqual(res.counts()["subsumed"], 4)
+        self.assertEqual(res.counts()["filled"], len(res.record))
+
+    def test_a_nested_row_alone_still_fills_its_host(self):
+        res = map_crate(_with_protocol(["Resampled."]), [NESTED_ROW], self.sv, "TEST")
+        self.assertEqual(res.record["preprocessing_strategies"],
+                         [{"description": "Resampled."}])
+        self.assertEqual(self.status(res, NESTED_ROW["D4D_Full_Path"]).status,
+                         "filled")
+
+    def test_a_nested_row_reading_another_property_is_not_merged(self):
+        """Different crate property into a filled host: not placed, and the
+        reason says merging is undecided; the host keeps the Dataset row's
+        objects."""
+        other = _row("PreprocessingStrategy.description", "rai:dataBiases")
+        for rows in ([DATASET_ROW, other], [other, DATASET_ROW]):
+            with self.subTest(first=rows[0]["RO_Crate_JSON_Path"]):
+                res = map_crate(_with_protocol(), rows, self.sv, "TEST")
+                self.assert_one_object_per_item(res)
+                row = self.status(res, "PreprocessingStrategy.description")
+                self.assertEqual(row.status, "unplaceable")
+                self.assertIn("rai:dataBiases", row.detail)
+                self.assertIn("not decided", row.detail)
+        # Another property holding the same value is still another property:
+        # the table did not declare it the same source, so it is not subsumed.
+        res = map_crate(_with_protocol(**{"rai:dataBiases": STEPS}),
+                        [DATASET_ROW, other], self.sv, "TEST")
+        self.assertEqual(self.status(res, "PreprocessingStrategy.description").status,
+                         "unplaceable")
+
+    def test_the_same_property_on_another_entity_is_not_subsumed(self):
+        """Same property name, different value: the Dataset row read a
+        Dataset entity that is not the crate root, so the values differ and
+        the nested row is not reported as already carried."""
+        graph = _with_protocol(["Root step."])
+        graph.insert(1, {"@id": "other", "@type": "Dataset", PROTOCOL: STEPS})
+        res = map_crate(graph, [DATASET_ROW, NESTED_ROW], self.sv, "TEST")
+        self.assert_one_object_per_item(res)
+        self.assertEqual(self.status(res, NESTED_ROW["D4D_Full_Path"]).status,
+                         "unplaceable")
+
+    def test_crate_property_reads_both_spellings_as_one(self):
+        self.assertEqual(crate_property(DATASET_ROW["RO_Crate_JSON_Path"]), PROTOCOL)
+        self.assertEqual(crate_property(PROTOCOL), PROTOCOL)
+        self.assertIsNone(crate_property("N/A"))
+        self.assertNotEqual(
+            crate_property("@graph[?@type='Dataset']['additionalProperty'][?name='A']['value']"),
+            crate_property("@graph[?@type='Dataset']['additionalProperty'][?name='B']['value']"))
+
+    def test_the_report_counts_rows_slots_and_the_id_apart(self):
+        res = map_crate(_with_protocol(), self.rows, self.sv, "TEST")
+        res.validation = "PASS"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            text = path.read_text(encoding="utf-8")
+        filled = res.counts()["filled"]
+        self.assertIn(f"({len(self.rows)} table rows applied, plus the record's "
+                      "`id`, taken from the crate root)", text)
+        self.assertIn(f"- Distinct top-level `Dataset` slots filled: {len(res.record)} "
+                      f"(from {filled} filled rows, the `id` among them)", text)
+        self.assertIn(f"| filled | {filled} | ", text)
+        self.assertIn("| subsumed | 1 | ", text)
+        self.assertRegex(text, r"\| PreprocessingStrategy\.description \| subsumed \|")
+        self.assertNotIn("rows applied)", text.replace("taken from the crate root)", ""))
 
 
 def _with_identifier(identifier):
