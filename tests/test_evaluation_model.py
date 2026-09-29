@@ -269,10 +269,12 @@ def test_rendering_the_comparison_rewrites_no_evaluation_or_judge_cache():
     cache or record is written to carry it (#2928)."""
     m = _arm_comparison()
     evals = ROOT / "data" / "evaluation_llm"
-    before = _tree_digest(evals)
+    records = ROOT / "data" / "d4d_concatenated"
+    note = ROOT / "notes" / "arm_comparison.md"
+    before = (_tree_digest(evals), _tree_digest(records), note.read_bytes())
     data = m.collect()
     scores = {r: {k: {p: m.rubric_scores(pfx, p, r) for p in m.PROJECTS}
                   for k, _d, pfx, *_ in m.ARMS} for r in m.EVAL_DIRS}
     text = m.render_markdown(data, scores)
     assert evaluation_model.SAME_FAMILY_DISCLAIMER in text
-    assert _tree_digest(evals) == before
+    assert (_tree_digest(evals), _tree_digest(records), note.read_bytes()) == before
