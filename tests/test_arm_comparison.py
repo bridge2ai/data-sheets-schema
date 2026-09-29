@@ -206,3 +206,104 @@ def test_committed_comparison_matches_current_records():
                       for key, _display, prefix, *_ in m.ARMS} for rubric in m.EVAL_DIRS}
     assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(data, scores), (
         "Run scripts/arm_comparison.py to refresh the committed table and figures")
+
+
+class RemovalRows(unittest.TestCase):
+    """The removal rows (#2923): a record the classifier could not measure —
+    no phase-1 snapshot, the agentic path's case — is `–`, never 0 (#899)."""
+
+    def setUp(self):
+        self.m = _module()
+
+    def _rows(self, block, report_claims):
+        from unittest import mock
+        with mock.patch("data_sheets_schema.removals.for_record", return_value=block):
+            return self.m.removal_metrics(Path("P_provenance.yaml"), {"report_claims": report_claims})
+
+    def test_a_record_with_no_snapshot_is_unmeasured_on_every_removal_row(self):
+        from data_sheets_schema.removals import classify
+        rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": None})
+        self.assertEqual(rows, {"unfoundedremovals": None, "unfoundedreconcile": None, "receipteddeleted": None,
+                                "unrecordedremovals": None})
+        self.assertEqual({self.m.fmt(rows, k) for k in rows}, {"–"})
+        self.assertEqual(self.m.cell([rows] * 3, "unfoundedremovals", "reps"), "– [–,–,–]")
+
+    def test_a_measured_record_carries_its_counts_and_a_measured_zero_stays_zero(self):
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "data_governance": {"committee_name": "DAC"}, "license": "CC-BY"}
+        receipt = {"chunks": [{"id": "c001", "status": "extracted",
+                               "extracted": [{"slot": "data_governance.committee_name", "snippet": "the DAC"}]}]}
+        block = classify(before, {"id": "doi:10.1/x", "license": "CC-BY"}, {"findings": []}, receipt=receipt)
+        rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual(rows, {"unfoundedremovals": 1, "unfoundedreconcile": None, "receipteddeleted": 1,
+                                "unrecordedremovals": 0})
+
+    def test_an_unrecorded_count_the_block_did_not_measure_is_not_read(self):
+        """`removals_unrecorded_count` is only a measurement where the report
+        block read a snapshot."""
+        from data_sheets_schema.removals import classify
+        rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": 0})
+        self.assertIsNone(rows["unrecordedremovals"])
+
+    def test_the_deletion_rows_say_a_reworded_or_moved_value_counts_as_deleted(self):
+        """#3207: the text test is the value's own text surviving, so the
+        published definitions must not read as true deletions; and #3229:
+        coincidental flattening and in-place rewrites deflate them, so the
+        definitions must not call them upper bounds."""
+        for key in ("unfoundedremovals", "receipteddeleted"):
+            text = self.m.METRICS[key][3]
+            self.assertIn("reworded", text)
+            self.assertNotIn("upper bound", text)        # #3229: the counts err both ways
+            self.assertIn("#3207", text)
+            self.assertIn("#3229", text)
+
+    def test_the_rows_are_in_the_table(self):
+        for key in ("unfoundedremovals", "unfoundedreconcile", "receipteddeleted", "unrecordedremovals"):
+            self.assertIn(key, self.m.METRICS)
+        keys = list(self.m.METRICS)
+        self.assertEqual(keys.index("unfoundedreconcile"), keys.index("unfoundedremovals") + 1)
+
+    def test_the_reconcile_row_counts_only_what_reconcile_full_removed(self):
+        """#3150: the all-phase row counts a repair round's removals too; the
+        row below it counts reconcile_full's alone, a measured 0 where every
+        unfounded value went at repair, and – where no phase is attributed."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "a": "1", "b": "2", "c": "3"}
+        stages = [("reconcile_full", {"id": "doi:10.1/x", "b": "2", "c": "3"}),
+                  ("repair_full_r1", {"id": "doi:10.1/x"})]
+        claims = {"snapshot_checked": True, "removals_unrecorded_count": 0}
+        rows = self._rows(classify(before, {"id": "doi:10.1/x"}, {"findings": []}, intermediates=stages), claims)
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedreconcile"]), (3, 1))
+        at_repair = [("reconcile_full", before), ("repair_full_r1", {"id": "doi:10.1/x"})]
+        rows = self._rows(classify(before, {"id": "doi:10.1/x"}, {"findings": []}, intermediates=at_repair), claims)
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedreconcile"]), (3, 0))
+        gap = [("reconcile_full", None), ("repair_full_r1", {"id": "doi:10.1/x"})]
+        rows = self._rows(classify(before, {"id": "doi:10.1/x"}, {"findings": []}, intermediates=gap), claims)
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedreconcile"]), (3, None))
+
+    def test_the_all_phase_row_says_it_counts_every_phase(self):
+        """#3150: the published definition names the repair rounds it
+        counts and why they are split out."""
+        definition = self.m.METRICS["unfoundedremovals"][3]
+        for phrase in ("Every phase after phase 1 is counted", "repair_full_rN",
+                       "acts on validation errors, not on the audit", "the row below isolates reconcile_full"):
+            self.assertIn(phrase, definition)
+        self.assertIn("reconcile_full removed", self.m.METRICS["unfoundedreconcile"][3])
+
+    def test_the_row_definition_states_the_exclusions_the_classifier_applies(self):
+        """#3079: a value only a core-only finding's path covers is counted
+        in the row, and the published definition says so rather than 'no
+        audit finding's path covers'; the past-end reading (#3077) and the
+        dropped-entry rule (#3076) are stated with it."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "data_governance": {"committee_name": "DAC"}}
+        block = classify(before, {"id": "doi:10.1/x"},
+                         {"findings": [{"record": "core", "slot": "data_governance", "issue": "x"}]})
+        rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 1})
+        self.assertEqual((rows["unfoundedremovals"], block["unfounded_named_by_core_finding"]), (1, 1))
+        definition = self.m.METRICS["unfoundedremovals"][3]
+        for phrase in ("not scoped to the core record alone", "a value only a core-only finding's path covers "
+                       "is counted here", "one past the end of its list read as the last entry",
+                       "for an entry dropped from a list"):
+            self.assertIn(phrase, definition)
+        self.assertNotIn("no finding named the value", definition)

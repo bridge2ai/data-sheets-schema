@@ -24,17 +24,24 @@ import json
 import re
 import subprocess
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import yaml
 from linkml_runtime import SchemaView
 from data_sheets_schema.schema_view import shared_view
+from data_sheets_schema.scope import _norm, bare_doi
 
 MAPPING_TSV = Path("data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv")
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 PACKAGES_DIR = Path("data/ro-crate_packages")
 TARGET_CLASS = "Dataset"
+
+#: The slot whose pattern is anchored to the bare DOI (#646). Crates carry the
+#: resolver URL, and copying it through failed the schema while the report
+#: still said PASS (#2916).
+DOI_SLOT = "doi"
 
 # Path grammar actually present in the table (verified against all 133 rows):
 #   @graph[?@type='T']['prop']
@@ -58,6 +65,16 @@ class FieldResult:
     status: str           # filled | empty | unresolvable | unplaceable
     detail: str = ""
     value_preview: str = ""
+    #: The crate's value, previewed, on the two identifier rows where the
+    #: value written is not the crate's: a `doi` slot the DOI rule repaired
+    #: (#2916), and the record `id` written as a `doi:` CURIE or taken from
+    #: one item of a list. `write_provenance` shows it and `detail` beside
+    #: the value, so the report never presents a rewritten value as the one
+    #: the crate holds at the source path (#3139). Empty when the value is
+    #: the crate's own. The other coercions (dates, joins, object shaping) do
+    #: not set it; their note stays in `detail`, which the report does not
+    #: show on a filled row.
+    rewritten_from: str = ""
 
 
 @dataclass
@@ -244,10 +261,97 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
     return value, ""
 
 
+def doi_for_slot(value: Any, pattern: str | None) -> tuple[str | None, str]:
+    """The value a `doi` slot takes for a crate value, and what was done (#2916).
+
+    `pattern` is the slot's own declared pattern, which the caller reads from
+    the schema (the anchored bare-DOI pattern on every `doi` slot since #646).
+    A value it already accepts is kept exactly as written: there is nothing
+    to repair (#2989). Any other value is repaired only by `scope.bare_doi`:
+    its resolver or `doi:` prefix, a trailing `/` and surrounding whitespace
+    come off, and its case stays. `bare_doi` recognises a narrower shape than
+    the pattern accepts (a registrant of four to nine digits, as in
+    Crossref's recommended DOI pattern, and no whitespace in the suffix), so
+    a prefixed value outside that shape is not repaired but dropped with the
+    reason: what the rule does not recognise it does not guess at. A slot
+    that declares no pattern accepts nothing as written here, and takes only
+    what `bare_doi` finds.
+
+    A list gives up its one DOI. Two spellings name one DOI when
+    `scope._norm`, the comparison the scope checks use, makes them equal —
+    DOIs are case-insensitive, so `10.5555/Test` and `10.5555/TEST` are one
+    (#2987) — and the first spelling is kept. No DOI, or two different ones,
+    gives None and the reason: an invalid value is never kept, and neither
+    DOI is chosen over the other.
+
+    Where each arm applies it (#2988): `rocrate_map._coerce` to every `doi`
+    slot a mapping row fills — the table's only such row today is
+    `Dataset.doi` — and `rocrate_normalize.normalize_linkml` to the Dataset's
+    own `doi` only, so a `doi` nested inside another object passes through
+    normalize as upstream wrote it, for validation to judge. `Dataset.doi` is
+    the slot both arms write, and a crate value reaches it in one form
+    whichever arm writes it.
+    """
+    candidates = value if isinstance(value, list) else [value]
+    found: dict[str, list[tuple[str, str]]] = {}   # identity -> [(written, slot form)]
+    for written in candidates:
+        if isinstance(written, str) and pattern and re.search(pattern, written):
+            form = written
+        else:
+            form = bare_doi(written)
+        if form is not None:
+            found.setdefault(_norm(form), []).append((written, form))
+    if len(found) != 1:
+        why = (f"{len(found)} distinct DOIs; the slot holds one and none is chosen"
+               if found else "not a DOI the slot accepts as written or the "
+               f"repair recognises: {_preview(value)}")
+        return None, f"{why}; the doi slot takes the bare DOI only (#646)"
+    spellings = next(iter(found.values()))
+    written, doi = spellings[0]
+    notes = []
+    if isinstance(value, list):
+        notes.append(f"the one DOI among {len(candidates)} list item(s)")
+    forms = list(dict.fromkeys(form for _, form in spellings))
+    if len(forms) > 1:
+        notes.append(f"{len(forms)} spellings that differ only in case, a "
+                     "trailing `/` or surrounding whitespace, so one DOI "
+                     "(#2987); the first is kept")
+    if doi != written:
+        notes.append(_repair_note(written, doi))
+    return doi, "; ".join(notes)
+
+
+def _repair_note(written: str, doi: str) -> str:
+    """What `bare_doi` took off `written` to leave `doi`, named part by part so
+    a log never says a prefix came off when only a `/` or whitespace did."""
+    stripped = written.strip()
+    trimmed = stripped.rstrip("/")
+    removed = []
+    if trimmed != doi:
+        removed.append("resolver or `doi:` prefix")
+    if trimmed != stripped:
+        removed.append("trailing `/`")
+    if stripped != written:
+        removed.append("surrounding whitespace")
+    said = removed[0] if len(removed) == 1 else (
+        ", ".join(removed[:-1]) + " and " + removed[-1])
+    return f"{said} removed, case kept"
+
+
 def _coerce(value: Any, slot, sv: SchemaView, project: str,
             counter: dict[str, int]) -> tuple[Any, str]:
     """Shape a crate value to the slot's cardinality and range."""
     notes: list[str] = []
+
+    # Every class's `doi` slot carries the same anchored pattern, so a row
+    # that fills a nested class's `doi` is shaped the same way as the
+    # Dataset's own, against that slot's pattern.
+    if slot.name == DOI_SLOT:
+        value, note = doi_for_slot(value, slot.pattern)
+        if value is None:
+            return None, note
+        if note:
+            notes.append(note)
 
     # Enum ranges: keep only permitted values, never coerce into one.
     enum = sv.get_enum(slot.range) if slot.range else None
@@ -311,9 +415,10 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
         loss = (row.get("Information_Loss") or "").strip()
         cls, _, slot_name = d4d_path.partition(".")
 
-        def record(status, detail="", preview=""):
+        def record(status, detail="", preview="", rewritten_from=""):
             res.fields.append(FieldResult(d4d_path, source, mtype, loss,
-                                          status, detail, preview))
+                                          status, detail, preview,
+                                          rewritten_from))
 
         # Can this row be placed in a Dataset record at all?
         if cls == TARGET_CLASS:
@@ -340,29 +445,48 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
             record("unresolvable" if note == "not a crate path" else "empty", note)
             continue
 
+        crate_value = value
         value, coercion = _coerce(value, slot, sv, project or 'd4d', counter)
         if value is None:
             record("empty", coercion)
             continue
+        # Where the DOI rule in `_coerce` wrote something other than the
+        # crate's value, the report names the crate's value (#3139). A value
+        # the slot's pattern kept verbatim (#2989) is the crate's own.
+        rewritten_from = (_preview(crate_value)
+                          if slot.name == DOI_SLOT and value != crate_value else "")
         where, slot = target
         if where == "root":
             res.record[slot_name] = value
         else:
             nested.setdefault(where, {})[slot_name] = value
-        record("filled", coercion, _preview(value))
+        record("filled", coercion, _preview(value), rewritten_from)
 
     # The record's own required id: use the crate's identifier rather than
     # minting one, so the D4D record points back at the crate it came from.
+    # A DOI is written as the `doi:` CURIE, the form #974's write-time
+    # normaliser gives the generated arms, so the two compare as one value.
     if "id" not in res.record and root is not None:
-        crate_id = root.get("identifier") or root.get("@id")
+        crate_value = root.get("identifier") or root.get("@id")
+        crate_id = crate_value
         if isinstance(crate_id, list):
             crate_id = crate_id[0] if crate_id else None
         if crate_id:
-            res.record["id"] = str(crate_id)
+            doi = bare_doi(crate_id)
+            res.record["id"] = f"doi:{doi}" if doi else str(crate_id)
+            detail = "required by the schema; taken from the crate itself"
+            if isinstance(crate_value, list):
+                detail += f"; the first of {len(crate_value)} list item(s)"
+            if doi:
+                detail += "; a DOI is written as the doi: CURIE (#974)"
+            # Wherever the id written is not what the crate holds there — the
+            # CURIE of a DOI, or one item of a list — the report names the
+            # crate's value, as a `doi` row does (#3139).
+            rewritten_from = (_preview(crate_value)
+                              if res.record["id"] != crate_value else "")
             res.fields.append(FieldResult(
                 "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
-                "filled", "required by the schema; taken from the crate itself",
-                _preview(crate_id)))
+                "filled", detail, _preview(res.record["id"]), rewritten_from))
 
     # attach nested objects, respecting each host slot's cardinality
     for host_slot_name, obj in nested.items():
@@ -392,6 +516,21 @@ def validate(path: Path) -> str:
     return "PASS" if proc.returncode == 0 and "No issues found" in out else f"FAIL\n{out}"
 
 
+def verdict_basis(schema: Path = FULL_SCHEMA, on: str | None = None) -> str:
+    """What a validation verdict was reached against, to write beside it (#2916).
+
+    A bare PASS pins nothing: #646 anchored the doi pattern and every crate
+    report went on saying PASS over records the schema now rejects. The
+    declared version, the sha256 of the merged schema `validate` reads and the
+    date let a reader tell a verdict about today's schema from an older one.
+    """
+    from data_sheets_schema.provenance import declared_schema_version
+    from data_sheets_schema.schema_cache import sha256_of
+    version = declared_schema_version(schema) or "(no version declared)"
+    day = on or datetime.now(timezone.utc).date().isoformat()
+    return f"schema {version} / sha256 {sha256_of(schema)} / {day} (`{schema}`)"
+
+
 def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     c = res.counts()
     lines = [
@@ -404,7 +543,7 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         "",
         f"- Crate metadata: `{source_file}`",
         f"- Mapping table: `{MAPPING_TSV}` ({len(res.fields)} rows applied)",
-        f"- Validation: **{res.validation.splitlines()[0]}**",
+        f"- Validation: **{res.validation.splitlines()[0]}** — {verdict_basis()}",
         "",
         "## Outcome",
         "",
@@ -441,6 +580,11 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     ]
     for f in sorted(res.fields, key=lambda x: (x.status != "filled", x.d4d_path)):
         cell = f.value_preview or f.detail
+        if f.rewritten_from:
+            # The value written is not the crate's: say what the crate holds
+            # at the source path and what was done to it (#3139).
+            cell = (f"{f.value_preview} — rewritten from the crate's "
+                    f"{f.rewritten_from}" + (f": {f.detail}" if f.detail else ""))
         row = [f.d4d_path, f.status, f.mapping_type or "—",
                f.information_loss or "—", f.source_path or "—", cell or ""]
         lines.append("| " + " | ".join(
