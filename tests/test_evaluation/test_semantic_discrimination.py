@@ -263,6 +263,41 @@ def test_the_comparison_report_carries_the_block_over_the_named_cohort(tmp_path)
     assert [p.read_bytes() for p in paths] == before
 
 
+def test_the_comparison_report_measures_each_evaluator_apart(tmp_path):
+    """#3309: evaluator A totals 3, 3, 2 and B totals 1, 1 on VOICE. Pooled
+    that is 3 distinct totals and no gate; alone each has at most 2, so each
+    evaluator's block withholds the order and none claims the other's ratings."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from report_semantic_comparison import report
+
+    def rated(label, total, evaluator):
+        doc = r10("VOICE", label, [1] * total + [0] * (3 - total))
+        doc["model"] = {"name": evaluator, "evaluator_model": evaluator}
+        return doc
+
+    docs = [rated("a", 3, "A"), rated("b", 3, "A"), rated("c", 2, "A"),
+            rated("d", 1, "B"), rated("e", 1, "B")]
+    paths = _write(tmp_path, docs)
+    text = report(paths)
+    assert "not withheld on either basis" not in text
+    assert "| VOICE | 3 | 2 / 2 |" in text and "| VOICE | 2 | 1 / 1 |" in text
+    assert text.count("**withheld on both bases**") == 2
+    assert "## Item discrimination and within-project orderings, A evaluations (#2927)" in text
+    assert "## Item discrimination and within-project orderings, B evaluations (#2927)" in text
+    assert "Measured on the A evaluations above, one rating per record." in text
+    assert "Measured on the evaluations above," not in text
+    assert "Evaluations by any other evaluator are in no count below" in text
+    # A cohort narrower than the table names only that evaluator's left-outs.
+    narrowed = report(paths, [paths[0], paths[1], paths[3], paths[4]])
+    assert (f"Measured on the A evaluations above except the 1 left out of this block's cohort, "
+            f"one rating per record. Left out, and in no count below: `{paths[2]}`.") in narrowed
+    assert "Measured on the B evaluations above, one rating per record." in narrowed
+    # One evaluator keeps the unscoped block.
+    single = report(paths[:3])
+    assert "Measured on the evaluations above, one rating per record." in single
+    assert "A evaluations (#2927)" not in single
+
+
 def test_arm_comparison_partitions_by_evaluator_and_flags_the_project_cell():
     spec = importlib.util.spec_from_file_location("arm_comparison_2927", ROOT / "scripts" / "arm_comparison.py")
     m = importlib.util.module_from_spec(spec)
@@ -286,6 +321,10 @@ def test_arm_comparison_partitions_by_evaluator_and_flags_the_project_cell():
     text = m.render_markdown(data, scores)
     assert "| VOICE (no within-project order — one: 2 distinct totals; two: 1 distinct total) |" in text
     assert "## Item discrimination and within-project orderings, one evaluations (#2927)" in text
+    # #3310: the tables above hold both evaluators' ratings; each block says whose it measured.
+    assert "Measured on the one evaluations above, one rating per record." in text
+    assert "Measured on the two evaluations above, one rating per record." in text
+    assert "Measured on the evaluations above," not in text
     assert "| AI_READI | – |" in text                 # no evaluations, no flag
     assert m._withheld_cell("CM4AI", [("e", {"fixed": withholding_reason(2)})]) == (
         "CM4AI (no within-project order — e, fixed basis: 2 distinct totals)")

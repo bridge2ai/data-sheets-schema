@@ -390,16 +390,24 @@ def instruments_of(block: dict[str, Any], rubric: str) -> list[str]:
 
 
 def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str = "",
-                          left_out: Sequence[str] = ()) -> list[str]:
+                          left_out: Sequence[str] = (), evaluator: str | None = None) -> list[str]:
     """Markdown lines for a discrimination block; the basis is named on every
     figure that depends on one. `scope` qualifies the heading. `left_out` names
     the evaluations listed above the block that it does not measure (a report
     whose cohort is narrower than its table, #3303); they are named, so the
-    block never claims to measure every evaluation above it."""
-    measured = ("Measured on the evaluations above, one rating per record." if not left_out else
-                f"Measured on the evaluations above except the {len(left_out)} left out of this "
+    block never claims to measure every evaluation above it. `evaluator`
+    scopes the block to one evaluator's evaluations where the tables above
+    hold more than one evaluator's (#3309, #3310): the block then says it
+    measured that evaluator's evaluations only."""
+    whose = "the evaluations above" if evaluator is None else f"the {evaluator} evaluations above"
+    measured = (f"Measured on {whose}, one rating per record." if not left_out else
+                f"Measured on {whose} except the {len(left_out)} left out of this "
                 "block's cohort, one rating per record. Left out, and in no count below: "
                 + ", ".join(f"`{name}`" for name in left_out) + ".")
+    if evaluator is not None:
+        measured += (" Evaluations by any other evaluator are in no count below: an evaluator "
+                     "is an instrument (#1058), and pooling two would count their offset as "
+                     "distinct totals.")
     lines = [f"{heading} Item discrimination and within-project orderings{scope} (#2927)", "",
              measured + " An item at ceiling "
              "(or floor) scored its maximum (or 0) on every record where it was scored, so it "

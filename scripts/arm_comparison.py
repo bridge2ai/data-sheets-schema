@@ -662,7 +662,7 @@ def render_markdown(data, scores) -> str:
               "No gold standard exists (#177); the rubrics are "
               "not domain-neutral (#627); rubric20's N/A convention is #155's.", ""]
     for evaluator, arms, versions, cohort in cohorts:
-        lines += render_discrimination(cohort, scope=f", {evaluator} evaluations")
+        lines += render_discrimination(cohort, scope=f", {evaluator} evaluations", evaluator=evaluator)
         lines += [f"This cohort is every {evaluator} evaluation in the rubric tables above "
                   f"(arms {', '.join(arms)}; {versions}); evaluations by different evaluators "
                   "are not pooled, since an evaluator is an instrument (#1058), and a rubric held "

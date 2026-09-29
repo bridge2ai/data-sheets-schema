@@ -3,7 +3,7 @@
 
 This reads only the named evaluations, keeps every measurement, and does not
 choose winners. Existing evaluation and generation files are never rewritten.
-It ends with the item-discrimination block (#2927), which withholds a
+It ends with the item-discrimination block (#2927), one per evaluator (#3309), which withholds a
 within-project order wherever a project has too few distinct totals.
 """
 from __future__ import annotations
@@ -18,12 +18,21 @@ from data_sheets_schema.semantic_comparison import (
 )
 
 
+def evaluator_of(doc: dict) -> str:
+    """The evaluator an evaluation names: the table's Evaluator column
+    (`model.name`), else `model.evaluator_model`, else "unreported"."""
+    model = doc.get("model") or {}
+    return model.get("name") or model.get("evaluator_model") or "unreported"
+
+
 def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     """`cohort` names the evaluations the discrimination block measures — one
     rating per record, e.g. the primaries of a set that also holds repeats.
     The table still lists every named evaluation, and the block names those
     its cohort leaves out (#3303). By default it is every named evaluation; a record rated more than once is
-    then named and left out of the block rather than having a rating chosen."""
+    then named and left out of the block rather than having a rating chosen.
+    Evaluations by different evaluators are measured in separate blocks, one
+    per evaluator, never pooled (#3309)."""
     if not paths:
         raise ValueError("name at least one evaluation")
     documents, rows = [], []
@@ -41,7 +50,7 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
             str(path), doc.get("project", "unknown"), doc["rubric"],
             fixed, adjusted,
             ", ".join(exclusions) if exclusions else ("unreported" if exclusions is None else "none"),
-            (doc.get("model") or {}).get("name", "unreported"),
+            evaluator_of(doc),
             metadata.get("instrument_sha256", "unreported"),
             hashlib.sha256(raw).hexdigest(),
         ])
@@ -73,7 +82,22 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
         in_cohort = {path.resolve() for path in cohort}
         left_out = [str(path) for path, _doc in documents if path.resolve() not in in_cohort]
     text.append("")
-    text.extend(render_discrimination(discrimination(measured), left_out=left_out))
+    # An evaluator is an instrument (#1058): pooling two counts their offset
+    # as distinct totals and can lift a project past the gate that each
+    # evaluator alone would withhold. Measure each evaluator apart, as
+    # arm_comparison does (#3309); one evaluator keeps the unscoped block.
+    by_evaluator: dict[str, list[dict]] = {}
+    for doc in measured:
+        by_evaluator.setdefault(evaluator_of(doc), []).append(doc)
+    if len(by_evaluator) <= 1:
+        text.extend(render_discrimination(discrimination(measured), left_out=left_out))
+    else:
+        evaluator_by_path = {str(path): evaluator_of(doc) for path, doc in documents}
+        for evaluator in sorted(by_evaluator):
+            text.extend(render_discrimination(
+                discrimination(by_evaluator[evaluator]), scope=f", {evaluator} evaluations",
+                left_out=[name for name in left_out if evaluator_by_path[name] == evaluator],
+                evaluator=evaluator))
     return "\n".join(text).rstrip("\n") + "\n"
 
 

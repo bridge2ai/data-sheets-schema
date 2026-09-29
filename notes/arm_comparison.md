@@ -165,7 +165,7 @@ Evaluator model(s) recorded: claude-fable-5, claude-opus-5[1m]. Scores are shown
 
 ## Item discrimination and within-project orderings, claude-fable-5 evaluations (#2927)
 
-Measured on the evaluations above, one rating per record. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.
+Measured on the claude-fable-5 evaluations above, one rating per record. Evaluations by any other evaluator are in no count below: an evaluator is an instrument (#1058), and pooling two would count their offset as distinct totals. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.
 
 **rubric10-semantic** — 25 records, 50 items. At ceiling: 23/50 (E1.2, E1.4, E2.1, E2.4, E3.2, E3.3, E3.5, E5.2, E5.4, E6.5, E7.1, E7.2, E7.3, E7.4, E7.5, E8.1, E8.2, E8.3, E8.5, E9.1, E10.2 (not scored on 7), E10.3, E10.4). At floor: 0/50 (none).
 
@@ -198,7 +198,7 @@ This cohort is every claude-fable-5 evaluation in the rubric tables above (arms 
 
 ## Item discrimination and within-project orderings, claude-opus-5[1m] evaluations (#2927)
 
-Measured on the evaluations above, one rating per record. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.
+Measured on the claude-opus-5[1m] evaluations above, one rating per record. Evaluations by any other evaluator are in no count below: an evaluator is an instrument (#1058), and pooling two would count their offset as distinct totals. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.
 
 **rubric10-semantic v1.0** — 15 records, 50 items. At ceiling: 24/50 (E1.2, E1.4, E2.1, E2.4, E2.5, E3.2, E3.5, E4.2, E5.2, E5.4, E6.5, E7.1, E7.2, E7.3, E7.4, E7.5, E8.1, E8.2, E8.3, E8.5, E9.1, E9.4, E10.2 (not scored on 5), E10.4). At floor: 0/50 (none).
 
