@@ -35,16 +35,36 @@ machine-readable form and lineage across fields. So:
   are read (`withholding_sentences`): a sentence with a score-directed cue
   ("held at 4 because", "falls short of the 5-band", "what keeps it from
   5"), its neighbours when it names no reason itself ("Short of 5."), and
-  the reason clauses of the score label (`_label_reasons`): from its first
-  contrast or withholding cue onward ("…, short of a full provenance
-  graph", "…; no typed derivation links", "Held at 4 because …"), and any
+  the reason clauses of the score label (`_label_reasons`). A label's
+  clauses end at punctuation, a spaced dash, a parenthesis and before
+  "but", "without", "rather than" and "short of", so its reason is the
+  same with or without a comma: from its first contrast or withholding cue
+  onward ("…, short of a full provenance graph", "… - no typed derivation
+  links", "… but no version history", "Held at 4 because …"), and any
   earlier clause saying something is absent ("…, structural derivation
-  slots empty"). The label's other clauses are credit and are not read;
-- a rationale in which nothing says why the score is below the maximum
-  (no quality-note or semantic-analysis sentence with a cue, and no label
-  cue naming a reason) has its quality note and semantic analysis read
-  whole (`basis == UNSTATED`): every gap they name is a candidate reason,
-  beside the label's reason clauses (its credit is still not read);
+  slots empty"). The label's other clauses are credit and are not read,
+  with one exception: a contrast that names nothing of its own ("graph
+  claimed but not evidenced", "full provenance graph asserted rather than
+  exhibited") is about the words before it in its clause, and those are
+  read with it;
+- the basis is `STATED` when a quality-note or semantic-analysis sentence
+  carries a cue, or the label carries a withholding cue and names a reason
+  ("Held at 4 because was_derived_from is empty"). A label's contrast or
+  absence clause ("…, no formal provenance graph") names a gap the record
+  has without saying that gap is what held the score, so it does not
+  state the basis on its own;
+- otherwise nothing says why the score is below the maximum
+  (`basis == UNSTATED`), and every gap the quality note and semantic
+  analysis name is a candidate reason beside the label's reason clauses: a
+  sentence is read only where it says something is absent, negated or
+  incomplete (`_gap_part`), less any text before its first "but",
+  "whereas" or "however" that names no gap itself (as in a label, a
+  contrast naming nothing of its own keeps the words before it in its
+  clause: "changelog mentioned but not detailed"). A sentence that names
+  no gap ("RO-Crate packages include provenance graphs", "per-archive MD5
+  checksums give real integrity evidence") is credit and is not read, as
+  the label's credit is not. A sentence pairing credit with a gap and no
+  contrast word between them is read whole;
 - inside those sentences a clause that accepts or disclaims ("which the
   rubric accepts in place of a PROV-O serialization", "despite the
   dedicated field being empty", "not a reason to withhold 5") names no
@@ -103,11 +123,20 @@ rubric20 semantic outputs, which no inspection labels (plural "graphs", a
 label's ", no …", a bare "Short of 5.", a passive "one point withheld" came
 from those). Its precision and recall on unseen ratings are unmeasured.
 An empty-slot match is the slot's name, not a check that the slot is
-empty. On the committed ratings the two coincide (each of the 89 empty-slot
-reasons read from the 133 comes from a sentence carrying an emptiness or
-negation word), but a rationale that never says why its score is below 5
-and names a populated `was_derived_from` as credit is read as giving that
-reason.
+empty (#2982). Where nothing says why, a sentence that names no gap is not
+read, so credit naming a populated slot is not read there: before that rule
+the committed CHORUS 2026-09-04f API rep1 rating (UNSTATED) gave an
+empty-slot reason, and a missing-data one, from "was_derived_from is
+explicit rather than implied, and missing data is documented with reasons
+at instance level", which says the slot is populated. A sentence that says
+why the score is below 5 is still read whole, less its concessions, so one
+naming a populated slot as credit beside its reason would be read as giving
+that reason. Of the 88 empty-slot reasons read from the 133 committed
+ratings, 78 name the slot in a clause saying something is empty, absent or
+negated; the other 10 name it in a list or parenthesis whose emptiness a
+neighbouring clause of the same sentence states ("the dedicated derivation
+fields (was_derived_from, parent_datasets) are empty", "No version history,
+errata or structured derivation"). None is credit.
 """
 from __future__ import annotations
 
@@ -137,7 +166,7 @@ FLAGGED = frozenset({REPRESENTATION_ONLY, REPRESENTATION_AND_SUBSTANTIVE})
 
 #: Where the withholding reasons were read from.
 STATED = "stated"          # sentences that say why the score is below maximum
-UNSTATED = "unstated"      # none do, so the whole rationale was read
+UNSTATED = "unstated"      # none do: label reason clauses and body gaps were read
 NOT_LINTED = "not_linted"  # at the maximum, or no numeric score
 
 _I = re.IGNORECASE
@@ -200,7 +229,7 @@ SUBSTANTIVE_CONCERNS = {
 #: withheld", "the fifth mark is withheld", "the top band is withheld").
 _WITHHOLDING = re.compile(
     r"\b(?:held|holds?|kept|stays?|remains?) (?:it |this )?(?:at|to|below) (?:[0-4]|5|a [0-4])\b"
-    r"|\bfalls? short\b|\bshort of (?:5|the|a|full)\b|\bnot (?:a )?5\b|\bnot reach"
+    r"|\bfalls? short\b|\bshort of (?:5|the|an?|full)\b|\bnot (?:a )?5\b|\bnot reach"
     r"|\bkeeps? (?:it|this|the score) from (?:5|five|the top|a 5|full)"
     r"|\bblocks? (?:a )?5\b|\bprevents? (?:a )?(?:higher|5|full)"
     r"|\bbelow the (?:top|5)|\bdeducted\b"
@@ -222,16 +251,45 @@ _ACCEPTANCE = re.compile(
     r"|\bwithout (?:moving|reducing|lowering|penali[sz]ing)"
     r"|\b(?:is|are) not required\b|\b(?:does|do|need) not (?:require|need|count|matter)", _I)
 
-#: A score label is a one-line summary; it gives a reason when it contrasts.
-_LABEL_CONTRAST = re.compile(
-    r"\bbut\b|\bshort of\b|[,;:—]\s*no\b|\bnot\b|\bwithout\b|\brather than\b", _I)
+#: Where a clause ends inside a sentence or a score label: , ; : ( ) an em
+#: dash, or a spaced hyphen, en dash or double hyphen ("Very Good - no
+#: formal provenance graph"). Sentence ends are split before this is used.
+_CLAUSE_BREAK = r"[,;:()]|\s[—–-]{1,2}\s|—"
+_BREAK = re.compile(_CLAUSE_BREAK)
+
+#: A score label is a one-line summary; it gives a reason where it contrasts.
+#: A contrasting conjunction opens a label clause of its own even with no
+#: punctuation before it, so "Good versioning but no PROV graph" gives its
+#: reason after "but", as "Good versioning, but no PROV graph" does.
+_LABEL_CONJUNCTION = re.compile(r"\s+(?=(?:but|without|rather than|short of)\b)", _I)
+#: A label clause gives a reason when it opens with a contrasting
+#: conjunction or with "no", or says "not".
+_LABEL_CONTRAST = re.compile(r"^(?:but|without|rather than|short of|no)\b|\bnot\b", _I)
 #: A label clause that says something is absent gives a reason with no
 #: contrast word ("…, structural derivation slots empty", "…; version history
 #: and missingness absent"). "missing-data documentation" names content.
 _ABSENCE = re.compile(
     r"\b(?:empty|absent|unpopulated|unfilled|blank|lacking|lacks)\b|\bmissing\b(?![-_ ]data)", _I)
-#: The clauses of a label, for finding the ones that say something is absent.
-_LABEL_CLAUSE = re.compile(r"[,;:—]|\s[–-]{1,2}\s")
+
+#: A quality-note or semantic-analysis sentence names a gap when it says
+#: something is absent, negated or incomplete. Where nothing says why a score
+#: is below its maximum, only such sentences are read: "RO-Crate packages
+#: include provenance graphs", "was_derived_from is explicit rather than
+#: implied, and missing data is documented" and "per-archive MD5 checksums
+#: give real integrity evidence" are credit. A hyphenated "-only" is a name
+#: ("the version-history-only anchor"), and a bare "rather than" contrasts
+#: as often as it withholds ("explicit rather than implied").
+_GAP = re.compile(
+    r"\b(?:no|not|none|nor|neither|never|nothing|without|cannot|lacks?|lacking|lacked"
+    r"|absent|empty|unpopulated|unfilled|blank|partial(?:ly)?|incomplete|insufficient|limited)\b"
+    r"|(?<!-)\bonly\b|\bmissing\b(?![-_ ]data)|n't\b"
+    r"|\bun(?:typed|versioned|identified|documented|structured|linked)\b"
+    r"|\b(?:rather than|instead of) (?:being )?(?:represented|expressed|encoded|instantiated)"
+    r"|\bscattered\b|\breader must (?:re)?assemble|\b(?:re)?assembled by (?:a|the) reader"
+    r"|\b(?:could|would) benefit\b", _I)
+#: What divides a sentence's credit from its gap: "… is recoverable from
+#: prose, which exceeds the version-history-only anchor, but no PROV-O graph".
+_BODY_CONTRAST = re.compile(r"\b(?:but|whereas|however)\b", _I)
 
 #: Sentences end at . ! ? — not at a semicolon, which in these rationales
 #: joins a withholding cue to the reason it gives ("…lack accessions; that
@@ -245,7 +303,7 @@ _SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[\w\"'(])|\n+")
 #: clause it heads, where `_ACCEPTANCE` sees a concessive one; "but" and
 #: "whereas" head either side of a contrast and accept nothing.
 _CLAUSE = re.compile(
-    r"\s*(?:[,;:()]|\s[—–-]{1,2}\s|—)\s*"
+    rf"\s*(?:{_CLAUSE_BREAK})\s*"
     r"|\s+(?=(?:but|whereas|although|even though|despite|in spite of)\b)"
     r"|(?<!\beven)\s+(?=though\b)", _I)
 
@@ -256,7 +314,10 @@ class Reason:
     kind: str      # REPRESENTATION or SUBSTANTIVE
     field: str     # the rationale field the sentence came from
     match: str     # the matched text
+    #: The text read: a sentence, a label's reason clauses, or, where
+    #: nothing says why, the part of a sentence that names a gap.
     sentence: str
+    clause: str    # the clause of `sentence` the match is in
 
 
 @dataclass(frozen=True)
@@ -315,24 +376,65 @@ def _sentences(item: dict) -> list[tuple[str, str]]:
     return out
 
 
-def _label_reasons(label: str) -> list[str]:
-    """The parts of a score label that give a reason; the rest is credit.
+def _spans(text: str) -> list[tuple[int, int]]:
+    """(start, end) of each clause of `text`, split at `_CLAUSE_BREAK`."""
+    out, pos = [], 0
+    for m in _BREAK.finditer(text):
+        out.append((pos, m.start()))
+        pos = m.end()
+    return out + [(pos, len(text))]
 
-    From the clause holding its first contrast or withholding cue onward:
-    "Well beyond version history, with a declared provenance graph, short of
-    an explicit graph in the record" gives its reason in the last clause, the
-    first two are credit, and "Held at 4 because was_derived_from is empty"
-    is a reason whole. Before that clause, each clause saying something is
-    absent is a reason of its own: "Prose lineage; was_derived_from empty".
+
+def _label_reasons(label: str) -> list[str]:
+    """The parts of one score-label sentence that give a reason; the rest is
+    credit.
+
+    Clauses end at `_CLAUSE_BREAK` and before a contrasting conjunction
+    (`_LABEL_CONJUNCTION`). The reason runs from the first clause carrying a
+    contrast or withholding cue to the end of the sentence: "Well beyond
+    version history, with a declared provenance graph, short of an explicit
+    graph in the record" gives its reason in the last clause, the first two
+    are credit; "Typed derivation links in was_derived_from but no version
+    history" gives it after "but", whatever punctuation precedes it; "Held
+    at 4 because was_derived_from is empty" is a reason whole. A contrast
+    that names nothing of its own is about the words before it in its
+    clause, which are read with it: "graph claimed but not evidenced",
+    "full provenance graph asserted rather than exhibited". Before the
+    reason, each clause saying something is absent is a reason of its own:
+    "Prose lineage; was_derived_from empty".
     """
-    cues = [m.start() for m in (_LABEL_CONTRAST.search(label), _WITHHOLDING.search(label)) if m]
-    start = len(label)
-    if cues:
-        start = max(label.rfind(sep, 0, min(cues) + 1) for sep in ",;:—") + 1
-    out = [clause.strip() for clause in _LABEL_CLAUSE.split(label[:start])
-           if _ABSENCE.search(clause)]
-    tail = label[start:].strip()
-    return [text for text in out + [tail] if text]
+    out = []
+    for a, b in _spans(label):
+        cuts = [a] + [m.end() for m in _LABEL_CONJUNCTION.finditer(label, a, b)]
+        for i, start in enumerate(cuts):
+            part = label[start:cuts[i + 1] if i + 1 < len(cuts) else b].strip()
+            if _LABEL_CONTRAST.search(part) or _WITHHOLDING.search(part):
+                if i and not _reasons([("score_label", label[start:b])]):
+                    start = cuts[i - 1]
+                return [text for text in out + [label[start:].strip()] if text]
+        if _ABSENCE.search(label[a:b]):
+            out.append(label[a:b].strip())
+    return out
+
+
+def _gap_part(sentence: str) -> str:
+    """The part of a quality-note or semantic-analysis sentence that names a
+    gap (`_GAP`), or "" where it names none: the whole sentence, less any
+    credit before its first contrast ("…recoverable from prose, which
+    exceeds the version-history-only anchor, but no PROV-O graph") when
+    that credit names no gap itself. As in a label, a contrast that names
+    nothing of its own ("changelog mentioned but not detailed") is about the
+    words before it in its clause, which are kept."""
+    if not _GAP.search(sentence):
+        return ""
+    contrast = _BODY_CONTRAST.search(sentence)
+    if contrast is None or _GAP.search(sentence[:contrast.start()]):
+        return sentence
+    start = contrast.start()
+    a, b = next((a, b) for a, b in _spans(sentence) if a <= start <= b)
+    if not _reasons([("", sentence[start:b])]):
+        start = a
+    return sentence[start:].strip()
 
 
 def withholding_sentences(item: dict) -> list[tuple[str, str]]:
@@ -371,7 +473,7 @@ def _reasons(pairs, *, accepting: bool = True) -> tuple[Reason, ...]:
                     m = pattern.search(clause)
                     if m:
                         found.setdefault((concern, name, sentence),
-                                         Reason(concern, kind, name, m.group(0), sentence))
+                                         Reason(concern, kind, name, m.group(0), sentence, clause))
     return tuple(found.values())
 
 
@@ -384,15 +486,18 @@ def lint_q19(item: dict) -> Q19Lint:
         return Q19Lint(score, maximum, NOT_LINTED, (), mentions)
     stated = withholding_sentences(item)
     label = [(name, s) for name, s in stated if name == "score_label"]
-    # A label says why when it carries a withholding cue and names a reason
-    # ("Held at 4 because was_derived_from is empty"); a bare "Short of 5"
-    # leaves the body to say it.
+    # A label says why the score is held when it carries a withholding cue
+    # and names a reason ("Held at 4 because was_derived_from is empty").
+    # A contrast or absence clause ("…, no formal provenance graph") names a
+    # gap the record has without saying that is what held the score, and a
+    # bare "Short of 5" names none, so both leave the body to say it.
     label_says_why = any(_WITHHOLDING.search(s) for _, s in label) and bool(_reasons(label))
     if label_says_why or any(name != "score_label" for name, _ in stated):
         return Q19Lint(score, maximum, STATED, _reasons(stated), mentions)
-    # Nothing says why: every gap the body names is a candidate reason, and
-    # the label contributes its reason clauses only, as above, not its credit.
-    body = [(name, s) for name, s in sentences if name != "score_label"]
+    # Nothing says why: every gap the body names is a candidate reason beside
+    # the label's reason clauses; the body's credit, like the label's, is not.
+    body = [(name, part) for name, s in sentences if name != "score_label"
+            for part in (_gap_part(s),) if part]
     return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions)
 
 
@@ -657,7 +762,8 @@ def lint_report(paths=(), inspections=(), *, show: bool = False) -> tuple[list[s
             sub = ",".join(r.concerns(SUBSTANTIVE)) or "-"
             line = f"{r.verdict:32}{score:>6}  rep={rep}  sub={sub}"
         if r.basis == UNSTATED:
-            line += "  (no withholding sentence: whole rationale read)"
+            # The label's credit and the body's credit were not read (#3070).
+            line += "  (nothing says why: label reason clauses and body gaps read)"
         doc, status = recorded.get(f.resolve(), (None, None))
         if status is not None:
             key = ("both" if status.flagged and r.flagged else "lint_only" if r.flagged

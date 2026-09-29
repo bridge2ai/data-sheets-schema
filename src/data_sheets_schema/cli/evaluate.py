@@ -394,16 +394,20 @@ def spelling_cmd(method, label, project, show_quoted):
                    "it names and report agreement with it. Refused where an evaluation is "
                    "missing, has no recorded hash, or is not the bytes or the Q19 score the "
                    "inspection recorded.")
-@click.option("--show", is_flag=True, help="Print the sentence each reason was read from.")
+@click.option("--show", is_flag=True,
+              help="Print the text each reason was read from (a sentence, a label's reason "
+                   "clauses, or the part of a sentence that names a gap).")
 @click.option("--strict", is_flag=True, help="Exit 1 if any rating is flagged.")
 def q19_lint_cmd(paths, inspections, show, strict):
     """Flag rubric20 Q19 scores held below 5 for how provenance is represented (#2911).
 
     PATHS are rubric20 semantic evaluation files, or directories searched for
-    *_evaluation.json. A rating is flagged when the sentences that say why
-    Q19 is below 5 give a representation or empty-slot reason (an empty
+    *_evaluation.json. A rating is flagged when what says why Q19 is below
+    5 gives a representation or empty-slot reason (an empty
     was_derived_from, no PROV graph, not machine-traversable, scattered
-    across fields). Substantive reasons given beside it are listed, never
+    across fields). Where nothing says why, the score label's reason
+    clauses and every gap the rationale names are read instead; credit is
+    not read. Substantive reasons given beside it are listed, never
     reported as a pass. Evaluation files are read, never written.
     """
     from data_sheets_schema.q19_rationale_lint import lint_report

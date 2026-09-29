@@ -230,10 +230,42 @@ def test_a_bare_verdict_takes_its_reason_from_the_next_sentence():
     assert result.concerns(REPRESENTATION) == ["empty_slot", "graph_form"]
 
 
-def test_a_rationale_that_never_says_why_is_read_whole():
+def test_a_rationale_that_never_says_why_is_read_for_every_gap_it_names():
     result = lint_q19(item(note="Lineage is documented in prose.",
                            analysis="was_derived_from is empty."))
     assert (result.basis, result.verdict) == (UNSTATED, REPRESENTATION_ONLY)
+
+
+@pytest.mark.parametrize("note", [
+    # #3068: credit sentences of committed ratings, read as reasons before.
+    "RO-Crate packages include provenance graphs linking datasets, software, and processing steps.",
+    "EVI Evidence Graph Ontology is appropriate for representing computational workflows.",
+    "The version chain is DOI-typed, and per-archive MD5 checksums give real integrity evidence.",
+    "Lineage is fully recoverable from prose, which exceeds bare version history.",
+    # #3069: says was_derived_from is populated; "missing data" names content.
+    "was_derived_from is explicit rather than implied, and missing data is documented with "
+    "reasons at instance level.",
+])
+def test_where_nothing_says_why_a_sentence_naming_no_gap_is_credit(note):
+    result = lint_q19(item(label="Updates tracking and provenance, missing formal version_access",
+                           note=note))
+    assert (result.basis, result.verdict, result.flagged) == (UNSTATED, SUBSTANTIVE_ONLY, False)
+    assert [(r.concern, r.field) for r in result.reasons] == [("version_history", "score_label")]
+
+
+def test_where_nothing_says_why_the_credit_before_a_contrast_is_not_read():
+    """The gap after "but" is read; the checksums and graph credited before it
+    are not. A contrast naming nothing of its own keeps its subject."""
+    mixed = lint_q19(item(note="Integrity is well supported (checksums on every archive) and a "
+                               "PROV graph ships in the crates, but the record gives no "
+                               "structured derivation links."))
+    assert (mixed.basis, mixed.verdict, mixed.concerns(REPRESENTATION)) == (
+        UNSTATED, REPRESENTATION_ONLY, ["empty_slot"])
+    assert [r.sentence for r in mixed.reasons] == ["but the record gives no structured derivation links."]
+    subject = lint_q19(item(note="Version control is well structured; changelog mentioned but not "
+                                 "detailed in this file."))
+    assert (subject.verdict, subject.concerns(SUBSTANTIVE)) == (SUBSTANTIVE_ONLY, ["version_history"])
+    assert [r.clause for r in subject.reasons] == ["changelog mentioned"]
 
 
 def test_a_label_gives_its_reason_after_the_contrast_not_its_credit():
@@ -274,6 +306,78 @@ def test_a_label_that_says_why_leaves_the_body_unread_as_reasons():
     assert (said.basis, said.verdict, said.concerns(SUBSTANTIVE)) == (STATED, REPRESENTATION_ONLY, [])
     bare = lint_q19(item(label="Short of 5", note="was_derived_from is empty."))
     assert (bare.basis, bare.verdict) == (UNSTATED, REPRESENTATION_ONLY)
+    # "short of an" is a withholding cue as "short of a" is (#3068).
+    for label in ("Well beyond version history, with a declared provenance graph, short of an "
+                  "explicit graph in the record",
+                  "Well beyond version history, with a declared provenance graph, short of a "
+                  "full provenance graph"):
+        result = lint_q19(item(label=label, note="Version history and errata are documented, "
+                                                 "with checksums for every file."))
+        assert (result.basis, result.verdict, result.concerns(SUBSTANTIVE)) == (
+            STATED, REPRESENTATION_ONLY, []), label
+
+
+def test_a_label_contrast_names_a_gap_and_leaves_the_body_to_say_why():
+    """#3068: a contrast or absence clause names a gap without saying it held
+    the score, so it does not state the basis; the body's gaps are read
+    beside it, and its credit is not."""
+    contrast = lint_q19(item(label="Full provenance graph, but no version history",
+                             note="was_derived_from links every release to its parent dataset "
+                                  "as a PROV graph. There are no errata."))
+    assert (contrast.basis, contrast.verdict, contrast.concerns(REPRESENTATION)) == (
+        UNSTATED, SUBSTANTIVE_ONLY, [])
+    assert {r.sentence for r in contrast.reasons} == {"but no version history",
+                                                      "There are no errata."}
+    body_gap = lint_q19(item(label="Rich prose lineage; no errata",
+                             note="Version history is documented. parent_datasets is empty."))
+    assert (body_gap.basis, body_gap.verdict) == (UNSTATED, REPRESENTATION_AND_SUBSTANTIVE)
+    assert (body_gap.concerns(REPRESENTATION), body_gap.concerns(SUBSTANTIVE)) == (
+        ["empty_slot"], ["version_history"])
+
+
+@pytest.mark.parametrize("bare, punctuated, rep, sub", [
+    # #3068: the reason follows the cue whether or not a comma precedes it.
+    ("Typed derivation links in was_derived_from but no version history",
+     "Typed derivation links in was_derived_from, but no version history", [], ["version_history"]),
+    ("Machine-readable PROV graph without errata", "Machine-readable PROV graph, without errata",
+     [], ["version_history"]),
+    ("Good versioning but no PROV graph", "Good versioning, but no PROV graph", ["graph_form"], []),
+    ("Well beyond version history short of an explicit graph",
+     "Well beyond version history, short of an explicit graph", ["graph_form"], []),
+    ("Complete versioning rather than a PROV graph", "Complete versioning, rather than a PROV graph",
+     ["graph_form"], []),
+    # A spaced hyphen, an en dash, a parenthesis or a sentence end ends a
+    # clause as a comma does: the reason after it is read, the credit before
+    # it is not.
+    ("Very Good - no formal provenance graph", "Very Good, no formal provenance graph",
+     ["graph_form"], []),
+    ("Very Good – no formal provenance graph", "Very Good, no formal provenance graph",
+     ["graph_form"], []),
+    ("Strong textual lineage (no PROV graph)", "Strong textual lineage, no PROV graph",
+     ["graph_form"], []),
+    ("Strong textual lineage. No PROV graph.", "Strong textual lineage, no PROV graph",
+     ["graph_form"], []),
+    ("Very Good - no errata recorded", "Very Good, no errata recorded", [], ["version_history"]),
+    ("Full version history and errata - but no PROV graph",
+     "Full version history and errata, but no PROV graph", ["graph_form"], []),
+    ("Declared PROV graph with typed links – short of version history",
+     "Declared PROV graph with typed links, short of version history", [], ["version_history"]),
+])
+def test_a_label_reason_does_not_depend_on_the_punctuation_before_its_cue(bare, punctuated, rep, sub):
+    for body in (_NEUTRAL, "Held at 4 because no checksums are recorded."):
+        results = [lint_q19(item(label=label, note=body)) for label in (bare, punctuated)]
+        extra = [] if body == _NEUTRAL else ["integrity"]
+        assert [(r.concerns(REPRESENTATION), r.concerns(SUBSTANTIVE)) for r in results] == [
+            (rep, sorted(sub + extra))] * 2, (bare, body)
+
+
+@pytest.mark.parametrize("label", [
+    "graph claimed but not evidenced",
+    "Rich narrative provenance; full provenance graph asserted rather than exhibited",
+])
+def test_a_label_contrast_naming_nothing_is_about_the_words_before_it(label):
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.verdict, result.concerns(REPRESENTATION)) == (REPRESENTATION_ONLY, ["graph_form"])
 
 
 def test_a_label_clause_saying_something_is_absent_is_read_and_its_credit_is_not():
@@ -473,6 +577,12 @@ def test_the_command_reports_agreement_and_changes_no_evaluation_file():
     assert "inspection agreement: 42/48 (flagged by both 24, by neither 18)" in result.output
     assert "flagged by the inspection, not the lint" not in result.output
     assert "reference_rescore_2026-09-11/CM4AI_v8_rep1_r20_rating1" in result.output
+    # #3070: 09-11 CHORUS v8 rep1 says nothing about why its score is 4; its
+    # label's credit ("Substantial textual lineage …") was not read.
+    unstated = [line for line in result.output.splitlines() if "(nothing says why" in line]
+    assert [line.rsplit("/", 1)[-1] for line in unstated] == [
+        "CHORUS_v8_rep1_r20_rating1_evaluation.json"]
+    assert "whole rationale" not in result.output
     strict = CliRunner().invoke(cli, args + ["--strict"])
     assert strict.exit_code == 1
     assert _hashes() == before
@@ -486,6 +596,19 @@ def test_strict_passes_a_directory_with_nothing_flagged(tmp_path):
     result = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--strict", str(tmp_path)])
     assert result.exit_code == 0, result.output
     assert "substantive_only" in result.output and "0 flagged of 1" in result.output
+
+
+def test_the_report_says_what_an_unstated_rating_was_read_for(tmp_path):
+    """#3070: where nothing says why, the label's reason clauses and the
+    body's gaps are read, not the whole rationale, and the line says so."""
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(
+            label="Substantial textual lineage, but no versioning or typed derivation links",
+            note="Version history is documented. parent_datasets is empty.")]}]}))
+    lines, flagged = lint_report([tmp_path], show=True)
+    assert flagged == 1 and "whole rationale" not in "\n".join(lines)
+    assert "(nothing says why: label reason clauses and body gaps read)" in lines[0]
+    assert "Version history is documented" not in "\n".join(lines)
 
 
 def test_the_report_refuses_an_inspection_whose_evaluation_is_gone(tmp_path):
@@ -557,19 +680,64 @@ def test_an_evaluation_whose_q19_is_not_the_recorded_score_is_refused(tmp_path):
 
 # -- the committed corpus -----------------------------------------------------
 
+#: Empty-slot reasons on the committed ratings whose clause names the slot in
+#: a list or parenthesis, with the emptiness stated in a neighbouring clause
+#: of the same sentence. Each was read by hand; the value is the words that
+#: say the slot is empty.
+_EMPTY_IN_A_NEIGHBOURING_CLAUSE = {
+    ("label_aware/AI_READI_2026-09-04gapi_rep1_evaluation.json",
+     "and the dedicated derivation slots"): "(was_derived_from, parent_datasets) and errata are empty",
+    ("label_aware/CHORUS_2026-08-22c_rep3_evaluation.json",
+     "errata or structured derivation graph."): "there is no version history, errata or structured",
+    ("label_aware/CHORUS_2026-08-28bapi_rep1_evaluation.json",
+     "errata or structured derivation"): "No version history, errata or structured derivation",
+    ("label_aware/CM4AI_2026-09-01api_rep3_evaluation.json",
+     "and the typed derivation slots that would express lineage in the datasheet"):
+        "was_derived_from and parent_datasets, are both empty",
+    ("label_aware/superseded_fable5/CHORUS_2026-09-01api_rep3_evaluation.json",
+     "structured derivation path or missingness documentation."):
+        "No version history, errata, structured derivation path",
+    ("reference_2026-09-11/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+     "derivation lives in prose across raw_data_sources and preprocessing_strategies rather than "
+     "in was_derived_from or parent_datasets edges"): "What is missing is the typed representation",
+    ("reference_2026-09-11/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+     "the two schema slots built for derivation"): "(`was_derived_from`, `parent_datasets`) are empty",
+    ("reference_2026-09-11/CHORUS_v7_rep2_r20_rating1_evaluation.json",
+     "Scored 4 rather than 5 because the dedicated derivation fields"):
+        "(was_derived_from, parent_datasets) are empty",
+    ("reference_2026-09-11/CM4AI_v7_rep3_r20_rating1_evaluation.json",
+     "and the schema's own derivation slots"): "was_derived_from and parent_datasets - are empty",
+    ("reference_2026-09-12_cborg_runtime/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+     "was_derived_from"): "(was_derived_from, parent_datasets, errata) are all empty",
+}
+
+
 @pytest.mark.corpus
 def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
-    """The module docstring's count: the empty-slot concern matches a slot's
-    name, and on the 133 committed ratings every such reason comes from a
-    sentence carrying an emptiness or negation word."""
+    """The module docstring's count (#3069). The empty-slot concern matches a
+    slot's name; on the 133 committed ratings each such reason names the slot
+    in a clause saying something is empty or negated, or in one of the ten
+    hand-read lists above whose emptiness a neighbouring clause states. A
+    credit clause naming a populated slot is neither, so it fails here, as
+    CHORUS 2026-09-04f API rep1's did before a sentence naming no gap went
+    unread where nothing says why."""
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
     ratings = [ROOT / f for f in listed if f.endswith("_evaluation.json")
                and json.loads((ROOT / f).read_text(encoding="utf-8")).get("rubric")
                == "rubric20-semantic"]
     assert len(ratings) == 133
-    empty = re.compile(r"\b(?:empty|absent|unpopulated|no|not|none|nor|neither|lacks?|lacking"
-                       r"|missing|without|null)\b", re.I)
-    reasons = [r for path in ratings for r in lint_file(path).reasons if r.concern == "empty_slot"]
-    assert len(reasons) == 89
-    assert [r.sentence for r in reasons if not empty.search(r.sentence)] == []
+    empty = re.compile(r"\b(?:empty|absent|unpopulated|unused|no|not|none|nor|neither|lacks?"
+                       r"|lacking|missing|without|null)\b", re.I)
+    base = ROOT / "data/evaluation_llm/rubric20_semantic"
+    reasons = [(path.relative_to(base).as_posix(), r) for path in ratings
+               for r in lint_file(path).reasons if r.concern == "empty_slot"]
+    assert len(reasons) == 88
+    elsewhere = {(path, r.clause): r.sentence for path, r in reasons if not empty.search(r.clause)}
+    assert set(elsewhere) == set(_EMPTY_IN_A_NEIGHBOURING_CLAUSE)
+    for key, said in _EMPTY_IN_A_NEIGHBOURING_CLAUSE.items():
+        assert said in elsewhere[key], key
+    # The credit sentence that was read as an empty-slot reason (#3069).
+    chorus = lint_file(base / "label_aware/CHORUS_2026-09-04fapi_rep1_evaluation.json")
+    assert chorus.basis == UNSTATED
+    assert [r for r in chorus.reasons if "explicit rather than implied" in r.sentence] == []
