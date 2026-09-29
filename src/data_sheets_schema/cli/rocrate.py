@@ -164,6 +164,7 @@ def normalize(project, packages_dir):
     require_repo_context("d4d rocrate normalize")     # the mapping table and packages are the corpus (#1551); below the docstring (#1590)
     from linkml_runtime import SchemaView
 
+    from data_sheets_schema.rocrate_map import CrateEncodingError
     from data_sheets_schema.rocrate_normalize import (
         FULL_SCHEMA, normalize_project,
     )
@@ -184,7 +185,7 @@ def normalize(project, packages_dir):
         click.echo(f"\n📦 {name}")
         try:
             res = normalize_project(name, root, sv=sv)
-        except FileNotFoundError as e:
+        except (FileNotFoundError, CrateEncodingError) as e:   # report, go on (#2969)
             click.echo(f"  ⚠️  {e}", err=True)
             failures += 1
             continue
@@ -304,7 +305,7 @@ def map_cmd(project, packages_dir):
     from linkml_runtime import SchemaView
 
     from data_sheets_schema.rocrate_map import (
-        FULL_SCHEMA, load_mapping, map_project,
+        FULL_SCHEMA, CrateEncodingError, load_mapping, map_project,
     )
 
     root = Path(packages_dir)
@@ -326,7 +327,7 @@ def map_cmd(project, packages_dir):
         click.echo(f"\n📦 {name}")
         try:
             res = map_project(name, root, sv=sv, rows=rows)
-        except FileNotFoundError as e:
+        except (FileNotFoundError, CrateEncodingError) as e:   # report, go on (#2969)
             click.echo(f"  ❌ {e}", err=True)
             failures += 1
             continue

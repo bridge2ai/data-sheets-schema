@@ -28,7 +28,9 @@ from typing import Any
 
 import yaml
 from linkml_runtime import SchemaView
-from data_sheets_schema.rocrate_map import doi_for_slot, verdict_basis
+from data_sheets_schema.rocrate_map import (
+    doi_for_slot, read_crate_json, verdict_basis,
+)
 from data_sheets_schema.schema_view import shared_view
 
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
@@ -548,15 +550,17 @@ def normalize_project(project: str, packages_dir: Path = PACKAGES_DIR,
         )
 
     sv = sv or shared_view(FULL_SCHEMA)
+    # Every input is parsed before processed/ is created, so a crate that
+    # cannot be read leaves no empty processed/ behind (#2969).
+    metadata = read_crate_json(sources["metadata"]) if "metadata" in sources else {}
+    persons = build_person_index(metadata)
+    doc = (yaml.safe_load(sources["linkml"].read_text(encoding="utf-8"))
+           if "linkml" in sources else None)
+
     out_dir = project_dir / "processed"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    metadata = json.loads(sources["metadata"].read_text(encoding="utf-8")) \
-        if "metadata" in sources else {}
-    persons = build_person_index(metadata)
-
     if "linkml" in sources:
-        doc = yaml.safe_load(sources["linkml"].read_text(encoding="utf-8"))
         normalized = normalize_linkml(doc, persons, sv, res)
         target = out_dir / f"{project}_crate_d4d.yaml"
         target.write_text(

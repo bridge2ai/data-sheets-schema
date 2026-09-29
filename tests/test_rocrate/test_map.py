@@ -12,6 +12,7 @@ from linkml_runtime import SchemaView
 
 from data_sheets_schema.rocrate_map import (
     FULL_SCHEMA,
+    CrateEncodingError,
     MapResult,
     _normalize_datetime,
     build_placement,
@@ -20,6 +21,8 @@ from data_sheets_schema.rocrate_map import (
     doi_for_slot,
     load_mapping,
     map_crate,
+    map_project,
+    read_crate_json,
     resolve_path,
     validate,
     verdict_basis,
@@ -339,6 +342,111 @@ def _with_identifier(identifier):
     graph = copy.deepcopy(GRAPH)
     graph[1]["identifier"] = identifier
     return graph
+
+
+def _write_cp1252_crate(project_dir: Path) -> Path:
+    """A crate whose JSON is windows-1252, as the AI_READI crate's is: the
+    copyright sign is byte 0xa9, which is not UTF-8 (#2969)."""
+    graph = copy.deepcopy(GRAPH)
+    graph[1]["copyrightNotice"] = "\u00a9 2025 Test"
+    path = project_dir / "raw" / "ro-crate-metadata.json"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(json.dumps({"@graph": graph}, ensure_ascii=False)
+                     .encode("cp1252"))
+    return path
+
+
+class TestCrateEncoding(unittest.TestCase):
+    """#2969. A crate that is not UTF-8 raised a bare UnicodeDecodeError that
+    ended the run at the first such project."""
+
+    def test_a_non_utf8_crate_is_refused_by_name_and_not_guessed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write_cp1252_crate(Path(tmp) / "TEST")
+            offset = path.read_bytes().index(b"\xa9")
+            with self.assertRaises(CrateEncodingError) as cm:
+                read_crate_json(path)
+        message = str(cm.exception)
+        self.assertIn(f"{path} is not UTF-8", message)
+        self.assertIn(f"byte 0xa9 at offset {offset}, 1 undecodable byte(s)", message)
+        self.assertIsInstance(cm.exception.__cause__, UnicodeDecodeError)
+
+    def test_a_utf8_crate_parses_as_before(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ro-crate-metadata.json"
+            path.write_text(json.dumps({"@graph": GRAPH}, ensure_ascii=False),
+                            encoding="utf-8")
+            self.assertEqual(read_crate_json(path), {"@graph": GRAPH})
+
+    def test_map_project_refuses_before_writing_anything(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _write_cp1252_crate(Path(tmp) / "TEST")
+            with self.assertRaises(CrateEncodingError):
+                map_project("TEST", Path(tmp), sv=SchemaView(str(FULL_SCHEMA)),
+                            rows=[])
+            self.assertFalse((Path(tmp) / "TEST" / "processed").exists())
+
+    def test_the_map_command_reports_the_crate_and_maps_the_next(self):
+        """The loop caught only FileNotFoundError, so no project after the
+        undecodable one was mapped."""
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.rocrate import rocrate
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_cp1252_crate(root / "AI_READI")
+            good = root / "CHORUS" / "raw" / "ro-crate-metadata.json"
+            good.parent.mkdir(parents=True)
+            good.write_text(json.dumps({"@graph": GRAPH}), encoding="utf-8")
+            r = CliRunner().invoke(rocrate, [
+                "map", "--project", "AI_READI", "--project", "CHORUS",
+                "--packages-dir", str(root)])
+            self.assertIsInstance(r.exception, SystemExit, r.output)   # not a crash
+            self.assertEqual(r.exit_code, 1, r.output)      # the refusal is a failure
+            self.assertIn("AI_READI/raw/ro-crate-metadata.json is not UTF-8", r.output)
+            self.assertTrue((root / "CHORUS" / "processed"
+                             / "CHORUS_crate_mapped_d4d.yaml").exists(), r.output)
+            self.assertFalse((root / "AI_READI" / "processed").exists())
+
+
+class TestFilledRowNotes(unittest.TestCase):
+    """#3191. The report showed a filled row's value alone, hiding the note
+    saying what was done to the crate's value, and the join note counted the
+    joined string's characters as its items."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def test_a_join_counts_the_items_not_the_characters(self):
+        res = map_crate(GRAPH, self.rows, self.sv, "TEST")
+        field = next(f for f in res.fields if f.d4d_path == "Dataset.created_by")
+        self.assertEqual(field.value_preview, "Ada Lovelace; Alan Turing")
+        self.assertEqual(field.detail, "joined 2 list items")
+
+    def cells(self, graph):
+        res = map_crate(graph, self.rows, self.sv, "TEST")
+        res.validation = "PASS"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            text = path.read_text(encoding="utf-8")
+        return {line.split(" | ", 1)[0][2:]: line.rstrip(" |").rsplit(" | ", 1)[1]
+                for line in text.splitlines() if " | filled | " in line}
+
+    def test_a_filled_row_shows_its_note_beside_the_value(self):
+        graph = copy.deepcopy(GRAPH)
+        graph[1]["datePublished"] = "2026-04-03"
+        cells = self.cells(graph)
+        self.assertEqual(cells["Dataset.created_by"],
+                         "Ada Lovelace; Alan Turing — joined 2 list items")
+        self.assertEqual(cells["Dataset.issued"],
+                         "2026-04-03T00:00:00Z — date -> date-time")
+        self.assertEqual(cells["Dataset.known_biases"],
+                         '[{"name": "Sampling bias: clinic-recruited cohort."}] — '
+                         "string -> DatasetBias.name; wrapped scalar into a list")
+        # A value placed as the crate holds it carries no note.
+        self.assertEqual(cells["Dataset.title"], "Test Crate")
 
 
 class TestDoi(unittest.TestCase):

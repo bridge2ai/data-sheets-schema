@@ -72,8 +72,8 @@ class FieldResult:
     #: the value, so the report never presents a rewritten value as the one
     #: the crate holds at the source path (#3139). Empty when the value is
     #: the crate's own. The other coercions (dates, joins, object shaping) do
-    #: not set it; their note stays in `detail`, which the report does not
-    #: show on a filled row.
+    #: not set it; their note stays in `detail`, which the report shows
+    #: beside the value on a filled table row (#3191).
     rewritten_from: str = ""
     #: False only on the record's `id` row, which `map_crate` takes from the
     #: crate root and no table row supplies; the report counts table rows
@@ -425,8 +425,12 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
             value = value[0]
             notes.append("unwrapped single-item list")
         else:
+            # Counted before the join: after it, `len` is the joined string's
+            # character count, which the report printed as the item count
+            # (#3191).
+            items = len(value)
             value = "; ".join(str(v) for v in value)
-            notes.append(f"joined {len(value)} list items")
+            notes.append(f"joined {items} list items")
     return value, "; ".join(notes)
 
 
@@ -610,6 +614,38 @@ def verdict_basis(schema: Path = FULL_SCHEMA, on: str | None = None) -> str:
     return f"schema {version} / sha256 {sha256_of(schema)} / {day} (`{schema}`)"
 
 
+class CrateEncodingError(ValueError):
+    """A crate's JSON is not UTF-8, so it is not JSON under RFC 8259 (#2969)."""
+
+
+def read_crate_json(path: Path) -> Any:
+    """Parse a crate's ``ro-crate-metadata.json``, refusing one that is not UTF-8.
+
+    The AI_READI crate is windows-1252 (crate_manifest.yaml `encoding_note`),
+    and reading it as UTF-8 raised a bare UnicodeDecodeError that ended the
+    whole `d4d rocrate map`/`normalize` run at the first such project (#2969).
+    No other encoding is tried: bytes that are not UTF-8 decode as *something*
+    under most single-byte encodings, so a fallback would be a silent guess,
+    and ``raw/`` is the provenance anchor that is never repaired in place. A
+    transcode is a curation decision, to be declared, not inferred here.
+    """
+    data = path.read_bytes()
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as e:
+        # surrogateescape maps each undecodable byte to one lone surrogate,
+        # so this counts bytes, not decoding errors.
+        bad = sum(1 for ch in data.decode("utf-8", errors="surrogateescape")
+                  if "\udc80" <= ch <= "\udcff")
+        raise CrateEncodingError(
+            f"{path} is not UTF-8, as RFC 8259 requires of JSON: byte "
+            f"0x{data[e.start]:02x} at offset {e.start}, {bad} undecodable "
+            "byte(s) in all. Not decoded under a guessed encoding; declare or "
+            "transcode it deliberately (see the project's `encoding_note` in "
+            "crate_manifest.yaml)") from e
+    return json.loads(text)
+
+
 def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     c = res.counts()
     table_rows = sum(1 for f in res.fields if f.from_table)
@@ -680,6 +716,12 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     ]
     for f in sorted(res.fields, key=lambda x: (x.status != "filled", x.d4d_path)):
         cell = f.value_preview or f.detail
+        if f.status == "filled" and f.from_table and f.value_preview and f.detail:
+            # A filled row's note says what was done to the crate's value on
+            # the way in (a date widened, a list joined, values dropped by an
+            # enum); showing the value alone presented it as the crate's own
+            # (#3191).
+            cell = f"{f.value_preview} — {f.detail}"
         if f.rewritten_from:
             # The value written is not the crate's: say what the crate holds
             # at the source path and what was done to it (#3139).
@@ -709,7 +751,7 @@ def map_project(project: str, packages_dir: Path = PACKAGES_DIR,
 
     sv = sv or shared_view(FULL_SCHEMA)
     rows = rows if rows is not None else load_mapping()
-    graph = json.loads(source.read_text(encoding="utf-8")).get("@graph", [])
+    graph = read_crate_json(source).get("@graph", [])
 
     res = map_crate(graph, rows, sv, project)
 
