@@ -277,7 +277,9 @@ def receipt_candidates(receipt: dict[str, Any], texts: dict[str, str] | None) ->
         found = chunk_cues(text)
         if found:
             cands.append({"chunk": str(c.get("id")), "status": c["status"], "cues": found})
-    out["candidates"] = cands
+    # A marked chunk whose text is unknown was not inspected, so the count is
+    # unmeasured, not a floor: a stale id must not read as zero candidates.
+    out["candidates"] = None if out["missing_chunks"] else cands
     return out
 
 
@@ -464,13 +466,14 @@ def render_markdown(collected: dict[str, Any], arms=None) -> str:
         lines.append(f"### `{r['path']}`")
         lines.append("")
         if rc["candidates"] is None:
-            lines += [f"Chunk text not recovered: {r['text_basis']}. Candidates –.", ""]
+            if rc["missing_chunks"]:
+                lines += [f"Chunk text: {r['text_basis']}. Receipt chunk ids absent from the record's chunks: "
+                          + ", ".join(f"`{c}`" for c in rc["missing_chunks"]) + ". Candidates –.", ""]
+            else:
+                lines += [f"Chunk text not recovered: {r['text_basis']}. Candidates –.", ""]
             continue
         lines.append(f"Chunk text: {r['text_basis']}. {rc['marked']} chunk(s) marked "
                      f"nothing_relevant/redundant_with; {len(rc['candidates'])} with a cue.")
-        if rc["missing_chunks"]:
-            lines.append("Receipt chunk ids absent from the record's chunks: "
-                         + ", ".join(f"`{c}`" for c in rc["missing_chunks"]) + ".")
         lines.append("")
         if rc["candidates"]:
             lines += ["| chunk | status | cues |", "|---|---|---|"]

@@ -131,7 +131,12 @@ class Cues(unittest.TestCase):
 
     def test_a_receipt_chunk_the_record_s_chunks_lack_is_reported(self):
         out = self.m.receipt_candidates({"chunks": [{"id": "c009", "status": "nothing_relevant"}]}, {"c001": ""})
-        self.assertEqual((out["candidates"], out["missing_chunks"]), ([], ["c009"]))
+        # Unmeasured, not zero: the marked chunk was never read (Codex review of #3278).
+        self.assertEqual((out["candidates"], out["missing_chunks"]), (None, ["c009"]))
+        out = self.m.receipt_candidates({"chunks": [{"id": "c009", "status": "nothing_relevant"},
+                                                    {"id": "c001", "status": "nothing_relevant"}]},
+                                        {"c001": "derived from the parent dataset"})
+        self.assertIsNone(out["candidates"])
 
 
 class Baseline(unittest.TestCase):
