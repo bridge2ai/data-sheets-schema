@@ -1,8 +1,10 @@
 """The committed structural mapping does not regenerate, and that is pinned.
 
-`make gen-sssom-structural` emits 150 rows against the committed 160 (#234). A
+`make gen-sssom-structural` emits 155 rows against the committed 165 (#234). A
 mapping nobody can rebuild is a mapping nobody can safely change, so the ten
-missing rows are enumerated here with what is actually wrong with each.
+missing rows are enumerated here with what is actually wrong with each. Both
+counts, and the `d4d:` counts in the table below, are compared with the files
+by `test_the_module_docstring_states_the_current_counts` (#3000).
 
 The point is not to bless the gap. It is that **new** drift should fail while the
 known gap does not, because a check that has been red since the day it was
@@ -17,7 +19,7 @@ declared input. That is wrong, and the accounting says so cleanly:
 |---|---|---|
 | 4 class-level rows | `schema:` | the generator emits **no** class-level rows at all |
 | 2 `…/resources` | `schema:hasPart` | it produces no `schema:` targets |
-| 3 file/collection attrs | `d4d:` | 21 `d4d:` rows committed, 18 regenerated |
+| 3 file/collection attrs | `d4d:` | 25 `d4d:` rows committed, 22 regenerated |
 | 1 `total_bytes` | `dcat:byteSize` | it produces no `dcat:` targets |
 
 `class_uri` is parsed into `SchemaClass` and never used to emit a mapping —
@@ -400,6 +402,27 @@ class TestRowsStateTheSchema(unittest.TestCase):
         deliberate change to the table."""
         flagged = [r for r in self.committed if r["type_compatible"] == "False"]
         self.assertEqual((len(flagged), len(self.committed)), (20, 165))
+
+    def test_the_module_docstring_states_the_current_counts(self):
+        """#3000. The docstring said 150 rows against 160, and 21 `d4d:` rows
+        committed against 18 regenerated, while the file had 165 rows (#407
+        and #503 added rows after it was written) and the assertion above said
+        so. Nothing compared the prose with the files; this does."""
+        import re
+        doc = sys.modules[__name__].__doc__
+        rows = re.search(r"emits (\d+) rows against the committed (\d+)", doc)
+        d4d = re.search(r"(\d+) `d4d:` rows committed, (\d+) regenerated", doc)
+        self.assertIsNotNone(rows, "the docstring no longer states row counts")
+        self.assertIsNotNone(d4d, "the docstring no longer states d4d: counts")
+
+        def d4d_targets(rows_):
+            return sum(r["object_id"].startswith("d4d:") for r in rows_)
+        self.assertEqual(
+            (int(rows.group(1)), int(rows.group(2))),
+            (len(self.regenerated), len(self.committed)))
+        self.assertEqual(
+            (int(d4d.group(1)), int(d4d.group(2))),
+            (d4d_targets(self.committed), d4d_targets(self.regenerated)))
 
     def test_a_path_the_schema_does_not_have_is_named(self):
         with self.assertRaises(ValueError) as ctx:
