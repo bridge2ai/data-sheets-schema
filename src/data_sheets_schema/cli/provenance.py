@@ -2745,3 +2745,110 @@ def validate_records(strict, label):
         click.echo("Every matched generation record conforms to its schema.")
     if strict and failed:
         sys.exit(1)
+
+
+@provenance.command("name-grounding")
+@click.option('--full', 'record_file', type=click.Path(exists=True, dir_okay=False, path_type=Path), default=None,
+              help='a D4D record to check (a full or core record, or a phase-1 snapshot); with --bundle')
+@click.option('--bundle', type=click.Path(exists=True, dir_okay=False, path_type=Path), default=None,
+              help='with --full: the bundle to check it against, read as given (no record hash is consulted)')
+@click.option('--label', default=None,
+              help="a run label: check the run's records against the bytes each provenance record hashed")
+@click.option('--project', default=None,
+              help='with --label: one project; default every project with a provenance record under the label')
+@click.option('--method', default=None,
+              help='with --label: run directory family; defaults to the one the label lives in (#934)')
+@click.option('--record', 'which', type=click.Choice(['phase1', 'full', 'core', 'all']), default=None,
+              help="with --label: which of the run's records to check [default: all]")
+@click.option('--json', 'as_json', is_flag=True, help='emit the result as JSON')
+def name_grounding_cmd(record_file, bundle, label, project, method, which, as_json):
+    """Classify person-name tokens against the bundle a record read (#2918).
+
+    Every token of two or more letters in a Person- or Creator-ranged name
+    (and `principal_investigator`) is `grounded`, `diacritic_dropped`,
+    `initial_expanded` or `absent`; every token that is not grounded is
+    listed with its path. A whole-bundle token match is a lower bound: a
+    given name found anywhere in the bundle, even in another person's
+    entry, grounds the token (see `data_sheets_schema.name_grounding`).
+
+    With --label, the bytes are the ones each provenance record hashed: the
+    bundle on disk only where it matches every recorded hash, otherwise the
+    committed version that does (`provenance.bundle_bytes_for`). The record
+    scope — phase-1 snapshot, final full record, derived core — is printed
+    with each result and each record is reported separately. Read-only:
+    nothing is written, and findings never change the exit status.
+    """
+    import hashlib
+    import json
+
+    from data_sheets_schema import name_grounding as ng
+    if record_file or bundle:
+        if not (record_file and bundle):
+            raise click.UsageError("--full and --bundle go together")
+        if label or project or method or which:
+            raise click.UsageError("--full/--bundle check one file against one bundle; "
+                                   "--label, --project, --method and --record select a run instead")
+        raw = bundle.read_bytes()
+        text, why = ng.bundle_text(raw)
+        if text is None:
+            raise click.ClickException(f"{bundle}: {why}")
+        doc, why = ng.parse_record(record_file.read_bytes())
+        if why:
+            raise click.ClickException(f"{record_file} {why}")
+        results = [{"instrument": ng.INSTRUMENT, "record_scope": ["given"], "checked": True,
+                    "bundle": {"source": "given on the command line", "path": str(bundle),
+                               "md5": hashlib.md5(raw).hexdigest()},
+                    "records": {"given": {"path": str(record_file), **ng.check_record(doc, text)}}}]
+    elif label:
+        from data_sheets_schema.cli.method import resolve_method
+        from data_sheets_schema.provenance import record_path_for
+        method = method or resolve_method(label, project)
+        if project:
+            paths = [record_path_for(project, method, label)]
+            if not paths[0].exists():
+                raise click.ClickException(f"no provenance record for {project} under {method} {label}: {paths[0]}")
+        else:
+            paths = sorted(record_path_for("_", method, label).parent.glob("*_provenance.yaml"))
+            if not paths:
+                raise click.ClickException(f"no provenance record under {method} {label}")
+        records = ng.RECORDS if which in (None, "all") else (which,)
+        results = [{**ng.check_run(p, records), "method": method} for p in paths]
+    else:
+        raise click.UsageError("name a run (--label) or a record and a bundle (--full, --bundle)")
+
+    if as_json:
+        click.echo(json.dumps(results, indent=2, default=str))
+        return
+    click.echo(f"{ng.INSTRUMENT}: whole-bundle token match, a lower bound — a given name found "
+               "anywhere in the bundle grounds the token")
+    for res in results:
+        head = f"{res['project']} {res['label']} [{res['method']}]" if "label" in res else "given record"
+        click.echo(f"\n{head}")
+        basis = res.get("bundle") or {}
+        if basis.get("source") == "git blob":
+            where = (f"git blob of {basis['commit'][:12]} ({basis.get('committed_on')}), "
+                     f"matched on {', '.join(basis.get('matched_on') or [])}")
+        elif basis.get("source") == "bundle on disk":
+            where = f"bundle on disk, matched on {', '.join(basis.get('matched_on') or [])}"
+        elif basis.get("source"):
+            where = f"{basis['source']}, md5 {basis.get('md5')}"
+        else:
+            where = None
+        if where:
+            click.echo(f"  bundle: {basis.get('path')} — {where}")
+        click.echo(f"  record scope: {', '.join(res.get('record_scope') or [])} (each reported separately)")
+        if not res.get("checked"):
+            click.echo(f"  not checked: {res.get('reason')}")
+            continue
+        for name, rec in res["records"].items():
+            if not rec.get("checked"):
+                click.echo(f"  {name:6} {rec.get('path') or '—'}: not checked — {rec.get('reason')}")
+                continue
+            counts, distinct = rec["counts"], rec["distinct"]
+            # Occurrences, and distinct tokens beside any class that has some (#556).
+            tally = " · ".join(f"{c} {counts[c]}" + (f" ({distinct[c]} distinct)" if counts[c] else "")
+                               for c in ng.CLASSES)
+            leaves = f"{rec['name_leaves']} name " + ("leaf" if rec['name_leaves'] == 1 else "leaves")
+            click.echo(f"  {name:6} {rec['path']}: {leaves}; {tally}")
+            for f in rec["findings"]:
+                click.echo(f"      {f['path']} {f['name']!r}: {f['token']} ({f['class']})")
