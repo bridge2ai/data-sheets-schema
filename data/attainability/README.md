@@ -15,12 +15,17 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
   so a statement a line break splits still matches: the break is read as a
   space and, after a hyphen, as a split word (`con-` `sent`) or a hyphenated
   compound (`human-` `subjects`), the continuation line's indentation read as
-  part of the break. A word split with no hyphen is not read
-  that way; every entry's note says so.
+  part of the break. Each break after a hyphen is read on its own within any
+  six consecutive lines, so one statement can carry both kinds (`a data-`
+  `protec-` `tion impact`). A word split with no hyphen is not read that way,
+  nor a statement over more than six lines whose hyphens need different
+  readings; every entry's note says so.
 - **A valid file's deterministic entries are the generator's output**, type
   for type: `hit_count: false` or snippet lines `[45.0, 45]` are refused,
   although Python compares them equal to `0` and `[45, 45]`. Every entry
-  names its `route`, `null` included.
+  names its `route`, `null` included. The format is closed: a key it does not
+  name, at any level (top, `bundle`, a `rubrics` identity, an entry, a
+  snippet), makes the file invalid.
 - **Curator and judge entries** (`method: curator` / `judge:<id>`) may assert
   support; their snippets are checked against the bundle bytes, their reading
   is not.

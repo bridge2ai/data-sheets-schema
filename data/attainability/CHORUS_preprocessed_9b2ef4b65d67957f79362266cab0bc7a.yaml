@@ -36,8 +36,9 @@ entries:
     accession, so zero matching lines mean the bundle states no DOI and no RRID. E1.1 also accepts another
     persistent URI, which no pattern settles: this entry speaks for the DOI/RRID route only. A matching
     line is one a match touches, the text read line by line and whole: a line break read as a space and,
-    after a hyphen, as nothing (a split word) or as the hyphen alone (a hyphenated compound). Not seen:
-    a word a break splits with no hyphen. Result: no matching line.'
+    after a hyphen, as nothing (a split word) or as the hyphen alone (a hyphenated compound), each such
+    break read on its own within any 6 consecutive lines. Not seen: a word a break splits with no hyphen,
+    or a statement over more than 6 lines whose hyphens need different readings. Result: no matching line.'
 - rubric: rubric10
   item_id: E4.1
   route: null
@@ -69,24 +70,27 @@ entries:
     or oversight, a compound hyphenated or spaced alike (''human-subjects''), so zero matching lines mean
     the bundle states none. A matching line is one a match touches, the text read line by line and whole:
     a line break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen alone
-    (a hyphenated compound). Not seen: a word a break splits with no hyphen. Result: 17 matching line(s).
-    A match is not evidence the item is supported (the words recur in other senses), so the status stays
-    unknown until a curator or judge reads the lines listed.'
+    (a hyphenated compound), each such break read on its own within any 6 consecutive lines. Not seen:
+    a word a break splits with no hyphen, or a statement over more than 6 lines whose hyphens need different
+    readings. Result: 17 matching line(s). A match is not evidence the item is supported (the words recur
+    in other senses), so the status stays unknown until a curator or judge reads the lines listed.'
 - rubric: rubric10
   item_id: E4.4
   route: null
   status: not_stated_in_source
   method: deterministic:consent_text
   evidence:
-    pattern: (?i)consent|(?<![a-z])assent|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|permission|authori[sz]ation|(?<![a-z])opt(?:ed|s|ing)?[-\s]?(?:in|out)s?(?![a-z])
+    pattern: (?i)consent|(?<![a-z])assent|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|permission|authori[sz]ation|(?<![a-z])opt(?:ed|s|ing)?[-\s]*(?:in|out)s?(?![a-z])
     hit_count: 0
     snippets: []
   note: 'Any statement of informed consent names consent, assent, a waiver, parental permission, a HIPAA
-    authorization or an opt-in/opt-out model, so zero matching lines mean the bundle states no consent
-    procedure. Not seen: consent described without any of these words (''participants agreed to ...'').
-    A matching line is one a match touches, the text read line by line and whole: a line break read as
-    a space and, after a hyphen, as nothing (a split word) or as the hyphen alone (a hyphenated compound).
-    Not seen: a word a break splits with no hyphen. Result: no matching line.'
+    authorization or an opt-in/opt-out model (written joined, hyphenated or spaced, ''opt  out'' and ''opt-
+    out'' included), so zero matching lines mean the bundle states no consent procedure. Not seen: consent
+    described without any of these words (''participants agreed to ...''). A matching line is one a match
+    touches, the text read line by line and whole: a line break read as a space and, after a hyphen, as
+    nothing (a split word) or as the hyphen alone (a hyphenated compound), each such break read on its
+    own within any 6 consecutive lines. Not seen: a word a break splits with no hyphen, or a statement
+    over more than 6 lines whose hyphens need different readings. Result: no matching line.'
 - rubric: rubric10
   item_id: E6.1
   route: null
@@ -106,10 +110,11 @@ entries:
     of three or more parts (also at the end of a sentence), so zero matching lines mean the bundle states
     no version. Not seen: a bare two-part number with no such word (''X 2.0''). A matching line is one
     a match touches, the text read line by line and whole: a line break read as a space and, after a hyphen,
-    as nothing (a split word) or as the hyphen alone (a hyphenated compound). Not seen: a word a break
-    splits with no hyphen. Result: 6 matching line(s). A match is not evidence the item is supported (the
-    words recur in other senses), so the status stays unknown until a curator or judge reads the lines
-    listed.'
+    as nothing (a split word) or as the hyphen alone (a hyphenated compound), each such break read on
+    its own within any 6 consecutive lines. Not seen: a word a break splits with no hyphen, or a statement
+    over more than 6 lines whose hyphens need different readings. Result: 6 matching line(s). A match
+    is not evidence the item is supported (the words recur in other senses), so the status stays unknown
+    until a curator or judge reads the lines listed.'
 - rubric: rubric10
   item_id: E10.2
   route: null
@@ -125,4 +130,6 @@ entries:
     so zero matching lines mean the bundle states neither. Not seen: a bare formatted reference carrying
     none of those words. A matching line is one a match touches, the text read line by line and whole:
     a line break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen alone
-    (a hyphenated compound). Not seen: a word a break splits with no hyphen. Result: no matching line.'
+    (a hyphenated compound), each such break read on its own within any 6 consecutive lines. Not seen:
+    a word a break splits with no hyphen, or a statement over more than 6 lines whose hyphens need different
+    readings. Result: no matching line.'

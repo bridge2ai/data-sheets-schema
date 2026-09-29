@@ -175,6 +175,25 @@ def test_tampered_entries_and_snippets_are_refused():
     assert problems and "duplicate mapping key" in problems[0]
 
 
+@pytest.mark.parametrize("where, extra", [
+    # The reviewer's reproduction (#3239): each was accepted as valid.
+    ((), {"overrides": {"E4.4": "supported"}}),
+    (("bundle",), {"note": "a note nobody reads"}),
+    (("rubrics", "rubric10"), {"extra": 1}),
+])
+def test_a_key_the_format_does_not_name_is_refused_at_every_level(where, extra):
+    doc = yaml.safe_load(CHORUS_FILE.read_text(encoding="utf-8"))
+    target = doc
+    for key in where:
+        target = target[key]
+    target.update(extra)
+    problems, loaded = _git_or_skip(lambda: at.validate_text(at.dump(doc), CHORUS_FILE.name))
+    assert loaded is None
+    [key] = extra
+    label = {(): "", ("bundle",): "bundle: ", ("rubrics", "rubric10"): "rubric rubric10: "}[where]
+    assert problems == [f"{label}unknown keys {key}"]
+
+
 def test_a_value_equal_but_not_identical_to_the_generators_is_refused():
     """#3182: `False == 0`, `0.0 == 0`, `True == 1` and `45.0 == 45` hold in
     Python, so these hand edits, none of which `derive` writes, validated as
@@ -381,7 +400,10 @@ _CLAIMED_FORMS = {
     "consent_text": ["consent", "consented", "informed consents", "assent", "assented", "waiver",
                      "waivers", "parental permission", "permissions", "HIPAA authorization",
                      "authorisations", "opt-in", "opt-out", "opt out", "opted out", "opts in",
-                     "participants opting out were removed", "opting-in", "opt-outs", "optout"],
+                     "participants opting out were removed", "opting-in", "opt-outs", "optout",
+                     # a run of separators, as PDF extraction leaves (#3237)
+                     "Participants may opt  out at any time.", "Participants may opt- out at any time.",
+                     "opt - out", "opted \t in"],
     "version_string": ["version", "versions", "versioned", "Release", "released", "releases",
                        "releasing", "edition", "revisions", "v2", "V1.0.3", "Dataset 2.0.1 is out",
                        "The dataset is 2.0.1.", "at 1.2.3.", "1.0.0.2", "(2.0.1)"],
@@ -453,6 +475,56 @@ def test_every_claimed_form_split_by_a_line_break_still_matches():
     assert misses == []
 
 
+@pytest.mark.parametrize("check, text", [
+    # The reviewer's reproductions (#3238): a compound hyphen at one break and
+    # a split-word hyphen at the next, which no reading of all breaks alike joins.
+    ("ethics_review", "a data-\nprotec-\ntion impact assessment"),
+    ("ethics_review", "human-\nsub-\njects research"),
+    ("ethics_review", "insti-\ntutional-\nreview board"),                     # the split word first
+    ("ethics_review", "a data-\nprotection\nim-\npact assessment"),            # a plain break between
+    ("consent_text", "an opt-\nout-\ns list"),                                # opt-outs, both kinds
+])
+def test_a_statement_whose_hyphenated_breaks_need_different_readings_matches(check, text):
+    entry = _entry_over(check, text)
+    assert entry["status"] == "unknown", entry
+    assert entry["evidence"]["hit_count"] == len(text.split("\n"))
+
+
+def test_every_claimed_compound_split_at_its_hyphen_and_inside_a_word_still_matches():
+    """Each claimed form written with a compound hyphen, broken after that
+    hyphen and again, with a hyphen, between two letters of another word:
+    one statement needing both readings of a hyphenated line end (#3238)."""
+    misses, tried = [], 0
+    for check, forms in _CLAIMED_FORMS.items():
+        for form in forms:
+            for h in [i for i, ch in enumerate(form) if ch == "-" and 0 < i < len(form) - 1
+                      and form[i - 1].isalpha() and form[i + 1].isalpha()]:
+                for i in range(1, len(form)):
+                    if abs(i - h) > 1 and form[i - 1].isalpha() and form[i].isalpha():
+                        cut = sorted([(h + 1, "\n"), (i, "-\n")], reverse=True)
+                        text = form
+                        for at_, ins in cut:
+                            text = text[:at_] + ins + text[at_:]
+                        tried += 1
+                        if _entry_over(check, text)["status"] != "unknown":
+                            misses.append((check, text))
+    assert tried > 50 and misses == []
+
+
+def test_the_mixed_readings_reach_as_far_as_the_note_says_and_no_further():
+    """Within `MIXED_WINDOW_LINES` lines the breaks are read each on its own;
+    beyond that the note's "Not seen" says a statement is missed, and it is."""
+    n = at.MIXED_WINDOW_LINES
+    inside = ["data-"] + ["-"] * (n - 3) + ["protec-", "tion impact"]
+    beyond = ["data-"] + ["-"] * (n - 2) + ["protec-", "tion impact"]
+    pattern = at.CHECKS_BY_NAME["ethics_review"].pattern
+    lines = lambda xs: {k: ("c001", x) for k, x in enumerate(xs, 1)}
+    assert len(inside) == n and at.matching_lines(pattern, lines(inside)) == list(range(1, n + 1))
+    assert at.matching_lines(pattern, lines(beyond)) == []
+    assert f"a statement over more than {n} lines whose hyphens need different readings" in \
+        _entry_over("ethics_review", "x")["note"]
+
+
 def test_a_line_break_does_not_join_what_no_reading_joins():
     """The readings add a line only where a match crosses its break, and a
     break with no hyphen before it is a space: 'over' 'sight' is two words,
@@ -460,7 +532,7 @@ def test_a_line_break_does_not_join_what_no_reading_joins():
     assert _entry_over("dataset_citation", "we should\nnot reference")["status"] == "not_stated_in_source"
     assert _entry_over("consent_text", "opt\nfor the smaller cohort")["status"] == "not_stated_in_source"
     assert _entry_over("ethics_review", "we looked it over\nsight unseen")["status"] == "not_stated_in_source"
-    assert "Not seen: a word a break splits with no hyphen." in _entry_over("ethics_review", "x")["note"]
+    assert "Not seen: a word a break splits with no hyphen," in _entry_over("ethics_review", "x")["note"]
     # Lines matching alone are listed alone; a neighbour is not pulled in.
     entry = _entry_over("ethics_review", "the IRB approved it\nand then\nwe left")
     assert [s["lines"] for s in entry["evidence"]["snippets"]] == [[1, 1]]

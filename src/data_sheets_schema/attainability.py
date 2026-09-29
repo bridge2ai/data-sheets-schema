@@ -40,8 +40,12 @@ the item's content would match; zero matching lines establish
 when a match touches it with the text read line by line *and* whole, each
 line break read as a space and, after a hyphen, as a split word or a
 hyphenated compound (`matching_lines`, #3179): a statement a break splits
-is not an absence. A word a break splits with no hyphen is not read that
-way, and every entry's note says so. A match establishes nothing — the four CHORUS
+is not an absence. The breaks after a hyphen are read each on its own,
+not all alike, within any `MIXED_WINDOW_LINES` (six) consecutive lines, so
+a compound hyphen and a split-word hyphen in one statement ('a data-'
+'protec-' 'tion impact') still match (#3238). A word a break splits with no
+hyphen is not read that way, nor a statement over more than six lines
+whose hyphens need different readings, and every entry's note says so. A match establishes nothing — the four CHORUS
 "IRB" lines are a training curriculum, its "license" lines the MIT
 software license and a course agreement, its "version" lines Python
 version control — so a check
@@ -70,6 +74,9 @@ identical to what its check writes over those bytes under that rule —
 type for type, since Python's `False == 0` and `45.0 == 45` would let a
 file the generator never wrote pass (#3182) — and every entry names its
 `route`, `null` included; every snippet must hash to the lines it names.
+The format is closed: a key it does not name — at the top, in `bundle`, in
+a `rubrics` identity, in an entry or a snippet — is refused, so a file
+cannot carry an `overrides:` block nothing reads and still be valid (#3239).
 The pinned rubric is resolved the same way. Curator and judge entries are
 hand-written, so a valid file is not always the generator's output; its
 deterministic entries are. A file that cannot be read, is not UTF-8 or
@@ -91,6 +98,7 @@ from __future__ import annotations
 import argparse
 import bisect
 import hashlib
+import itertools
 import json
 import re
 import sys
@@ -110,6 +118,12 @@ FINDING_KINDS = ("credited", "unjoined")
 #: Statuses that assert support: never written by a deterministic check.
 SUPPORT_STATUSES = ("supported", "partly_supported")
 RUBRIC_PATHS = {"rubric10": "data/rubric/rubric10.txt", "rubric20": "data/rubric/rubric20.txt"}
+#: The document is closed at every level (#3239): a key nothing reads — an
+#: `overrides:` block, a `bundle.note` — would sit in a file the validator
+#: attests as valid and read as part of it.
+_DOCUMENT_KEYS = {"format", "format_version", "bundle", "chunk_rule", "rubrics", "entries"}
+_BUNDLE_KEYS = {"path", "md5", "sha256", "bytes"}
+_RUBRIC_KEYS = {"path", "sha256"}
 _ENTRY_KEYS = {"rubric", "item_id", "route", "status", "method", "evidence", "note"}
 _SNIPPET_KEYS = {"chunk", "lines", "sha256"}
 _HEX = {"md5": re.compile(r"[0-9a-f]{32}"), "sha256": re.compile(r"[0-9a-f]{64}")}
@@ -145,7 +159,9 @@ class AbsenceCheck:
 # claim names must match too — `exemptions`, `opting out`, `HRECs`, a
 # version number that ends a sentence (#3109); `test_every_form_a_claim_names_matches`
 # lists them. So must a compound written hyphenated or spaced alike
-# (`human-subjects`, #3183): the words of one are joined by `[-\s]+`. A
+# (`human-subjects`, #3183): the words of one are joined by `[-\s]+`, or
+# by `[-\s]*` where the claim also names the joined form (`optout`), so a
+# run of separators — two spaces, 'opt- out' — never breaks one (#3237). A
 # statement a line break splits is matched by reading the text whole
 # (`matching_lines`, #3179), not by the patterns. A pattern carries no
 # literal space (`\s` instead), so the YAML writer never folds one across
@@ -176,9 +192,10 @@ CHECKS: tuple[AbsenceCheck, ...] = (
     AbsenceCheck(
         "consent_text", "rubric10", "E4.4", None,
         f"(?i)consent|(?<![a-z])assent|{_WAIVER}|permission"
-        r"|authori[sz]ation|(?<![a-z])opt(?:ed|s|ing)?[-\s]?(?:in|out)s?(?![a-z])",
+        r"|authori[sz]ation|(?<![a-z])opt(?:ed|s|ing)?[-\s]*(?:in|out)s?(?![a-z])",
         "Any statement of informed consent names consent, assent, a waiver, parental permission, "
-        "a HIPAA authorization or an opt-in/opt-out model, so zero matching lines mean the bundle "
+        "a HIPAA authorization or an opt-in/opt-out model (written joined, hyphenated or spaced, "
+        "'opt  out' and 'opt- out' included), so zero matching lines mean the bundle "
         "states no consent procedure. Not seen: consent described without any of these words "
         "('participants agreed to ...')."),
     AbsenceCheck(
@@ -203,13 +220,28 @@ CHECKS: tuple[AbsenceCheck, ...] = (
 )
 CHECKS_BY_NAME = {c.name: c for c in CHECKS}
 
+#: How a line break after a hyphen is read: as a space, as nothing with the
+#: hyphen dropped (a split word, 'con-' 'sent') or with the hyphen kept (a
+#: hyphenated compound, 'human-' 'subjects').
+HYPHEN_READINGS = ("space", "drop", "keep")
+#: The most consecutive lines over which the breaks after a hyphen are read
+#: each on its own (#3238): one statement can carry a compound hyphen at one
+#: break and a split-word hyphen at the next ('a data-' 'protec-' 'tion
+#: impact'), which no reading of every break alike joins. Every way of
+#: reading every such break in every run of this many lines is searched.
+MIXED_WINDOW_LINES = 6
+
+
 #: What every claim's "matching line" means (#3179). The bundles are
 #: hard-wrapped PDF and HTML text, so a statement a line break splits
 #: ('should\nreference', 'con-\nsent') is a statement too, and a check that
 #: read one line at a time would certify its absence.
 LINE_READING = ("A matching line is one a match touches, the text read line by line and whole: a line "
                 "break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen "
-                "alone (a hyphenated compound). Not seen: a word a break splits with no hyphen.")
+                "alone (a hyphenated compound), each such break read on its own within any "
+                f"{MIXED_WINDOW_LINES} consecutive lines. Not seen: a word a break splits with no hyphen, "
+                f"or a statement over more than {MIXED_WINDOW_LINES} lines whose hyphens need different "
+                "readings.")
 
 
 # --------------------------------------------------------------------------
@@ -291,31 +323,52 @@ def snippet_sha256(lines: dict[int, tuple[str, str]], first: int, last: int) -> 
 # Deterministic entries
 
 
+def _read(lines: dict[int, tuple[str, str]], numbers: list[int],
+          reading: dict[int, str]) -> tuple[str, list[tuple[int, int, int]]]:
+    """Lines `numbers` joined into one text, each break a space except after
+    a line `reading` maps to `drop` or `keep`, with every line's
+    `(number, start, end)` span in that text. After a dropped or kept hyphen
+    the continuation line's indentation is part of the break ('con-' '  sent'
+    is 'consent', #3218): layout-preserving PDF and HTML text indents it."""
+    parts, spans, at, joined = [], [], 0, False
+    for n in numbers:
+        body, sep = lines[n][1], " "
+        if joined:
+            body = body.lstrip()
+        hyphen = reading.get(n, "space")
+        joined = hyphen != "space"
+        if joined:
+            stripped = body.rstrip()
+            body, sep = (stripped[:-1] if hyphen == "drop" else stripped), ""
+        parts += [body, sep]
+        spans.append((n, at, at + len(body)))
+        at += len(body) + len(sep)
+    return "".join(parts), spans
+
+
+def _hyphenated(lines: dict[int, tuple[str, str]]) -> set[int]:
+    return {n for n, (_, text) in lines.items() if text.rstrip().endswith("-")}
+
+
 def _readings(lines: dict[int, tuple[str, str]]) -> Iterable[tuple[str, list[tuple[int, int, int]]]]:
-    """The bundle's text read whole, once per reading of its line breaks —
-    every break a space; then, where a line ends in a hyphen, the break read
-    as nothing with the hyphen dropped (a split word, 'con-' 'sent') and
-    with it kept (a hyphenated compound, 'human-' 'subjects') — each with
-    every line's `(number, start, end)` span in that text. In those two
-    readings the continuation line's indentation is part of the break
-    ('con-' '  sent' is 'consent', #3218): layout-preserving PDF and HTML
-    text indents it."""
+    """The bundle's text read whole, once per way of reading its line breaks
+    after a hyphen (`HYPHEN_READINGS`): every break read alike over the whole
+    text, then — in every run of `MIXED_WINDOW_LINES` lines holding two or
+    more such breaks — each of those breaks read on its own, every
+    combination that is not all alike (#3238). Each reading comes with every
+    line's `(number, start, end)` span in its text."""
     numbers = sorted(lines)
-    hyphenated = {n for n in numbers if lines[n][1].rstrip().endswith("-")}
-    for hyphen in ("space",) + (("drop", "keep") if hyphenated else ()):
-        parts, spans, at, joined = [], [], 0, False
-        for n in numbers:
-            body, sep = lines[n][1], " "
-            if joined:
-                body = body.lstrip()
-            joined = n in hyphenated and hyphen != "space"
-            if joined:
-                stripped = body.rstrip()
-                body, sep = (stripped[:-1] if hyphen == "drop" else stripped), ""
-            parts += [body, sep]
-            spans.append((n, at, at + len(body)))
-            at += len(body) + len(sep)
-        yield "".join(parts), spans
+    hyphenated = _hyphenated(lines)
+    for hyphen in HYPHEN_READINGS[:1] + (HYPHEN_READINGS[1:] if hyphenated else ()):
+        yield _read(lines, numbers, {n: hyphen for n in hyphenated})
+    for start in range(len(numbers)):
+        window = numbers[start:start + MIXED_WINDOW_LINES]
+        breaks = [n for n in window[:-1] if n in hyphenated]
+        if len(breaks) < 2:
+            continue
+        for combo in itertools.product(HYPHEN_READINGS, repeat=len(breaks)):
+            if len(set(combo)) > 1:
+                yield _read(lines, window, dict(zip(breaks, combo)))
 
 
 def matching_lines(pattern: str, lines: dict[int, tuple[str, str]]) -> list[int]:
@@ -326,7 +379,8 @@ def matching_lines(pattern: str, lines: dict[int, tuple[str, str]]) -> list[int]
     not at its end, so that one match does not hide another it overlaps.
     Zero lines means no line, and no run of lines under any of the
     readings, carries a match (#3179); a break inside a word with no hyphen
-    is not one of them."""
+    is not one of them, nor a statement over more than `MIXED_WINDOW_LINES`
+    lines whose hyphenated breaks must be read differently (#3238)."""
     rx = re.compile(pattern)
     hits = {n for n, (_, text) in lines.items() if rx.search(text)}
     for text, spans in _readings(lines):
@@ -525,7 +579,8 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
         return [f"not YAML: {exc!r}" if isinstance(exc, RecursionError) else f"not YAML: {exc}"], None
     if not isinstance(doc, dict):
         return ["not a mapping"], None
-    problems: list[str] = []
+    problems = _key_problems(doc, _DOCUMENT_KEYS) + \
+        [f"bundle: {p}" for p in _key_problems(doc.get("bundle"), _BUNDLE_KEYS)]
     if not (identical(doc.get("format"), FORMAT) and identical(doc.get("format_version"), FORMAT_VERSION)):
         problems.append(f"format must be {FORMAT} version {FORMAT_VERSION} (the integer)")
     bundle = doc.get("bundle")
@@ -563,6 +618,7 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
         problems.append("rubrics must map each rubric to its path and sha256")
         rubrics = {}
     for rubric, identity in rubrics.items():
+        problems.extend(f"rubric {rubric}: {p}" for p in _key_problems(identity, _RUBRIC_KEYS))
         if rubric not in RUBRIC_PATHS or not isinstance(identity, dict) or \
                 identity.get("path") != RUBRIC_PATHS[rubric] or \
                 not (isinstance(identity.get("sha256"), str) and _HEX["sha256"].fullmatch(identity["sha256"])):
@@ -582,6 +638,13 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
     if problems:
         return problems, None
     return [], Attainability(None, doc, basis, items)
+
+
+def _key_problems(value: Any, keys: set[str]) -> list[str]:
+    """An unknown key in a mapping whose keys the format closes (#3239); a
+    missing one is reported by the check that needs it."""
+    extra = sorted(map(str, set(value) - keys)) if isinstance(value, dict) else []
+    return [f"unknown keys {', '.join(extra)}"] if extra else []
 
 
 def _entry_problems(entry: Any, items: dict[str, dict[str, str]], lines: dict[int, tuple[str, str]],
