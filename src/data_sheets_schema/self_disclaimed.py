@@ -4,7 +4,7 @@ A read-only lint that never gates. Each list member of a registered container
 is read: `creators`, `maintainers` and `data_collectors` record a role, and
 `variables`, `instances` and `splits` record that something is present in the
 released data. The lint reads the member's own narrative leaves against a
-versioned lexicon (`lexicons/self_disclaimed_v1.yaml`). It flags the member
+versioned lexicon (`container_lexicons/self_disclaimed_v1.yaml`). It flags the member
 when one of those leaves says the source does not establish that role or
 presence: check (a). The lexicon is scoped, per pattern. A `role` cue counts
 only where its clause names the container's own role, a role verb or a
@@ -120,8 +120,11 @@ from typing import Any, Iterator
 import yaml
 
 INSTRUMENT = "self_disclaimed v1 (#2913)"
-LEXICON_PATH = Path(__file__).parent / "lexicons" / "self_disclaimed_v1.yaml"
-LEXICON_RESOURCE = "src/data_sheets_schema/lexicons/self_disclaimed_v1.yaml"
+# Not under lexicons/: that directory is the pattern-lexicon registry (#2919),
+# whose check refuses any file it does not register, and this file is a
+# container registry with its own shape and its own pins.
+LEXICON_PATH = Path(__file__).parent / "container_lexicons" / "self_disclaimed_v1.yaml"
+LEXICON_RESOURCE = "src/data_sheets_schema/container_lexicons/self_disclaimed_v1.yaml"
 KINDS = ("person_role", "presence")
 SCOPES = ("role", "presence", "self", "none")
 # What a guard reads, and where a pattern's object lies (the lexicon's
