@@ -29,8 +29,10 @@ offsets, and two contexts are read:
     finished sentence — the end of the paragraph above a bulleted list or a
     numbered section heading — governs nothing after it, and only the
     item is read. Without item markers a sentence is narrowed to the
-    `;`-clauses the snippet spans (and any lead-in up to a `:`), since `;`
-    then separates independent clauses or the terms of a list.
+    `;`-clauses the snippet spans (and a lead-in up to a `:` that is
+    followed by whitespace and lies in the first `;`-clause — not the `:` of
+    a URL, a clock time or a ratio), since `;` then separates independent
+    clauses or the terms of a list.
 (b) the nearest preceding heading-like line, or lead-in clause ending in
     `:`, in the same block that carries a status marker. Count labels in a
     flattened panel are heading-like and carry none, so they are passed
@@ -683,7 +685,11 @@ class BundleView:
             # and narrowed to the ';'-clauses the part spans — in a sentence
             # with no item markers ';' separates independent clauses or the
             # terms of a list ("Critical Care;...;Goals;..."). A lead-in the
-            # sentence carries up to a ':' still governs its clauses.
+            # sentence carries up to a ':' still governs its clauses: a ':'
+            # that ends a lead-in is followed by whitespace or the segment's
+            # end and lies in the first ';'-clause, before every term it
+            # introduces. A ':' inside a token (a URL scheme, "10:30", "3:1")
+            # or in a later clause is not a lead-in (#3211).
             later = [r[0][0] for r in runs if r[0][0] >= b]
             lo, hi = s_start, (min(later) if later else s_end)
             seg = self.text[lo:hi]
@@ -691,8 +697,8 @@ class BundleView:
             k = seg.find(";", max(0, b - lo))
             c_hi = lo + k if k >= 0 else hi
             pieces = [(c_lo, c_hi)]
-            colon = seg.rfind(":", 0, c_lo - lo)
-            if c_lo > lo and colon >= 0:
+            colon = _lead_in_colon(seg[:c_lo - lo])
+            if c_lo > lo and colon is not None:
                 pieces.insert(0, (lo, lo + colon + 1))
             via, own = "sentence", s_start
         found: dict[str, dict[str, Any]] = {}
@@ -1109,12 +1115,27 @@ def _record_bytes(bundle: Path | None, inputs: dict[str, Any]) -> tuple[bytes | 
     return raw, {"source": "git blob", "path": rel, "commit": entry["commit"]}, None
 
 
+def _lead_in_colon(before: str) -> int | None:
+    """Offset of the ':' ending the lead-in of `before` — the text of a
+    sentence before the part's ';'-clause — or None. The lead-in is in the
+    first ';'-clause, and its ':' is followed by whitespace or ends that
+    clause; a ':' inside a token (a URL scheme, a clock time, a ratio) or in
+    a later clause is not one (#3211)."""
+    first = before.split(";", 1)[0]
+    found = None
+    for m in re.finditer(r":(?=\s|$)", first):
+        found = m.start()
+    return found
+
+
 def file_status_expression(audit: Path, *, record: Path | None = None, bundle: Path | None = None,
                            chunk_manifest: Path | None = None) -> dict[str, Any]:
     """Rule 2 over named files: an audit JSON carrying `source_review` (or a
     bare source_review), and optionally the artifact it is bound to and the
     bundle with its chunk manifest."""
     from data_sheets_schema.evidence_assertions import load_json
+    if chunk_manifest is not None and bundle is None:
+        raise ValueError("a chunk manifest is read only with the bundle it chunks: give --bundle too")
     parsed = load_json(audit.read_bytes())
     view = None
     if bundle is not None:

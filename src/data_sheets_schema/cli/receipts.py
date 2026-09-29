@@ -160,11 +160,11 @@ def invert(receipt_file, full_file, out_file):
 @click.option("--receipt", "receipt_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="instead of a run: the coverage receipt (with --bundle and --record)")
 @click.option("--bundle", "bundle_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="the bundle the receipt names by md5")
+              help="with --receipt: the bundle the receipt names by md5")
 @click.option("--record", "record_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="the record the receipt addresses (the phase-1 snapshot where the run wrote one)")
+              help="with --receipt: the record the receipt addresses (the phase-1 snapshot where the run wrote one)")
 @click.option("--final", "final_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="the final record, to say whether each flagged value there expresses the status")
+              help="with --receipt: the final record, to say whether each flagged value there expresses the status")
 @click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="the bundle's chunk manifest; default the one beside it or the study's")
 @click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
@@ -190,6 +190,13 @@ def status_context(method, label, project, receipt_file, bundle_file, record_fil
         raise click.UsageError("name a run (--label and --project) or files (--receipt, --bundle, --record)")
     elif not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
         raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")
+    else:
+        given = [flag for flag, v in (("--bundle", bundle_file), ("--record", record_file),
+                                      ("--final", final_file), ("--chunk-manifest", chunk_manifest)) if v is not None]
+        if given:
+            # A run is read from its own files; a file option here would be
+            # ignored and the result would be over other bytes (#3212).
+            raise click.UsageError(f"{', '.join(given)} apply to --receipt, not to a run (--label/--project)")
     try:
         if receipt_file is not None:
             out = sc.file_status_context(receipt_file, bundle_file, record_file,

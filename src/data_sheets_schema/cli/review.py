@@ -445,6 +445,9 @@ def status_expression(audit_file, record_file, bundle_file, chunk_manifest, as_j
     import json
 
     from data_sheets_schema import status_context as sc
+    if chunk_manifest is not None and bundle_file is None:
+        # The manifest chunks a bundle; without one it would be ignored (#3212).
+        raise click.UsageError("--chunk-manifest is read only with --bundle")
     try:
         out = sc.file_status_expression(audit_file, record=record_file, bundle=bundle_file,
                                         chunk_manifest=chunk_manifest)

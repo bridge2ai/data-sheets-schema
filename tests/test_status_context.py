@@ -600,6 +600,33 @@ def test_a_semicolon_clause_before_the_part_does_not_govern_it(doc, snippet, val
     assert out["counts"]["located"] == 1 and out["flags"] == []
 
 
+@pytest.mark.parametrize("earlier", [
+    # #3211: a ':' inside a token of an earlier independent clause is not a
+    # lead-in, so it does not bring that clause's marker back.
+    "The team will host files at https://example.org",
+    "The team will meet at 10:30 daily",
+    "The team will balance sites (see ratio 3:1)",
+    # A ':' in a later clause than the first is not the sentence's lead-in.
+    "Records are kept; the team will add notes: more sites",
+])
+def test_a_colon_that_ends_no_lead_in_does_not_bring_back_an_earlier_clause(earlier):
+    doc = earlier + "; records are standardized to a common model."
+    out = _run(doc, [("x", "records are standardized to a common model")],
+               {"x": "Records are standardized to a common model."})
+    assert out["counts"]["located"] == 1 and out["flags"] == []
+
+
+def test_a_lead_in_colon_in_the_first_clause_governs_but_only_up_to_the_colon():
+    # The lead-in is read up to its ':'; the rest of the first clause is an
+    # independent term and its marker does not govern the part.
+    [flag] = _run("Planned: sites; records are standardized to a common model.",
+                  [("x", "records are standardized to a common model")], {"x": "Records are standardized."})["flags"]
+    assert (flag["marker"], flag["via"]) == ("planned", "sentence")
+    out = _run("Scope: the team will expand the network; records are standardized to a common model.",
+               [("x", "records are standardized to a common model")], {"x": "Records are standardized."})
+    assert out["counts"]["located"] == 1 and out["flags"] == []
+
+
 def test_a_parenthesised_letter_enumeration_is_followed_back_to_its_lead_in():
     # The "(a)" form the module docstring names, beside "A)" and "1)".
     doc = "The project will (a) collect records; (b) standardize data to a common model; (c) release data."
@@ -923,6 +950,12 @@ def test_the_receipts_cli_reads_named_files_writes_nothing_and_exits_zero(tmp_pa
     assert usage.exit_code == 2
     escape = CliRunner().invoke(cli, ["receipts", "status-context", "--label", "L", "--project", "../x"])
     assert escape.exit_code == 2 and "basename" in escape.output
+    # #3212: a run is read from its own files, so a file option beside
+    # --label/--project is refused rather than silently ignored.
+    for extra in (["--bundle", str(bundle)], ["--record", str(tmp_path / "record.yaml")],
+                  ["--final", str(tmp_path / "record.yaml")], ["--chunk-manifest", str(tmp_path / "study_chunks.yaml")]):
+        ignored = CliRunner().invoke(cli, ["receipts", "status-context", "--label", "L", "--project", "P", *extra])
+        assert ignored.exit_code == 2 and f"{extra[0]} apply to --receipt" in ignored.output, (extra, ignored.output)
     (tmp_path / "receipt.yaml").write_text("chunks: [unclosed", encoding="utf-8")
     broken = CliRunner().invoke(cli, args)
     assert broken.exit_code == 1 and "Error:" in broken.output and broken.exception.__class__ is SystemExit
@@ -986,6 +1019,13 @@ def test_the_review_cli_reads_an_audit_and_writes_nothing(tmp_path):
     assert result.exit_code == 0, result.output
     assert [(f["rule"], f["path"]) for f in json.loads(result.output)["flags"]] == [("status_unexpressed", "/notes")]
     assert _tree_hashes(tmp_path) == before
+    # #3212: a chunk manifest without the bundle it chunks is refused, not ignored.
+    (tmp_path / "chunks.yaml").write_text("chunks: []", encoding="utf-8")
+    lone = CliRunner().invoke(cli, ["review", "status-expression", "--audit", str(tmp_path / "audit.json"),
+                                    "--chunk-manifest", str(tmp_path / "chunks.yaml")])
+    assert lone.exit_code == 2 and "--chunk-manifest is read only with --bundle" in lone.output
+    with pytest.raises(ValueError, match="give --bundle too"):
+        sc.file_status_expression(tmp_path / "audit.json", chunk_manifest=tmp_path / "chunks.yaml")
     (tmp_path / "bad.json").write_text("[]", encoding="utf-8")
     bad = CliRunner().invoke(cli, ["review", "status-expression", "--audit", str(tmp_path / "bad.json")])
     assert bad.exit_code == 1 and "no source_review" in bad.output
