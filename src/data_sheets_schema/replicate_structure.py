@@ -132,8 +132,9 @@ def align(a: list[Any], b: list[Any]) -> dict[str, Any]:
             used.add(j)
             by_key[key[0]] += 1
     for i in keyless_a:
-        # After every keyed join, so a keyed entry of `b` that some entry of
-        # `a` claims is never taken by position first.
+        # Only a keyless entry of `b` can join by position (`keys_b[i] is None`),
+        # and a keyed join only takes keyed entries, so the two passes never
+        # compete for an entry of `b`; their order does not matter.
         if i < len(b) and i not in used and keys_b[i] is None:
             used.add(i)
             by_position += 1
@@ -244,7 +245,6 @@ def summarize(result: Mapping[str, Any]) -> dict[str, Any]:
         "nested_in_all": len(all_nested), "nested_counted": len(counted),
         "counts_differ": [s for s in counted if rows[s]["counts_differ"]],
         "ratio_ge_2": [s for s in counted if rows[s]["max_over_min"] >= 2],
-        "zero_count": [s for s in counted if 0 in rows[s]["counts"].values()],
         "joined_by_key": sum(by_key.values()), "joined_by_position": by_position,
         "unaligned": unaligned, "outside_universe": list(result["outside_universe"]),
     }

@@ -79,7 +79,7 @@ def test_key_sets_report_union_intersection_and_agreement():
     assert _slot(["x"], ["y"], ["z"])["keys"] is None
 
 
-def test_alignment_joins_by_identity_key_before_position():
+def test_alignment_joins_keyed_entries_by_key_and_keyless_by_position():
     """Keyed entries join on their key wherever they sit; keyless entries only
     by index, and that count is reported apart (#908)."""
     a = [{"name": "Ada"}, {"description": "p"}, {"name": "Bo"}]
@@ -175,7 +175,7 @@ def test_the_v7_and_v8_production_arms_reproduce_the_issue_figures():
             s = summarize(res)
             per_group[(p, arm)] = s["some"]
             tot.update(some=s["some"], nested=s["nested_in_all"], counted=s["nested_counted"],
-                       differ=len(s["counts_differ"]), ge2=len(s["ratio_ge_2"]), zero=len(s["zero_count"]))
+                       differ=len(s["counts_differ"]), ge2=len(s["ratio_ge_2"]))
             for name in s["counts_differ"]:
                 differ[name] += 1
             for name, r in res["slots"].items():
@@ -186,7 +186,7 @@ def test_the_v7_and_v8_production_arms_reproduce_the_issue_figures():
                          ("CM4AI", "v7prod"): 24, ("CM4AI", "v8prod"): 17,
                          ("VOICE", "v7prod"): 8, ("VOICE", "v8prod"): 9}
     assert tot["some"] == 97
-    assert (tot["nested"], tot["counted"], tot["differ"], tot["ge2"], tot["zero"]) == (354, 285, 165, 75, 0)
+    assert (tot["nested"], tot["counted"], tot["differ"], tot["ge2"]) == (354, 285, 165, 75)
     for name, n in {"purposes": 8, "external_resources": 8, "preprocessing_strategies": 7,
                     "subpopulations": 6, "related_datasets": 6}.items():
         assert (differ[name], held[name]) == (n, n), name
