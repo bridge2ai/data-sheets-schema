@@ -15,11 +15,11 @@
     },
     "project": {
       "type": "string",
-      "pattern": "\\S"
+      "pattern": "[^\\s\\x1c-\\x1f\\x85\\ufeff]"
     },
     "description": {
       "type": "string",
-      "pattern": "\\S"
+      "pattern": "[^\\s\\x1c-\\x1f\\x85\\ufeff]"
     },
     "entries": {
       "type": "array",
@@ -100,12 +100,12 @@
               },
               "source": {
                 "type": "string",
-                "pattern": "\\S",
+                "pattern": "[^\\s\\x1c-\\x1f\\x85\\ufeff]",
                 "description": "Document name, as the bundle's FILE: header gives it."
               },
               "chunk": {
                 "type": "string",
-                "pattern": "\\S",
+                "pattern": "[^\\s\\x1c-\\x1f\\x85\\ufeff]",
                 "description": "Chunk id from that bundle's chunk manifest."
               },
               "lines": {
@@ -122,12 +122,12 @@
           },
           "observation": {
             "type": "string",
-            "pattern": "\\S",
+            "pattern": "[^\\s\\x1c-\\x1f\\x85\\ufeff]",
             "maxLength": 2000
           },
           "reviewer_role": {
             "type": "string",
-            "pattern": "\\S",
+            "pattern": "[^\\s\\x1c-\\x1f\\x85\\ufeff]",
             "maxLength": 200
           },
           "reviewed_on": {
@@ -136,7 +136,7 @@
           },
           "provenance_note": {
             "type": "string",
-            "pattern": "\\S",
+            "pattern": "[^\\s\\x1c-\\x1f\\x85\\ufeff]",
             "description": "Repository-relative path of the note recording the review."
           },
           "held_out": {

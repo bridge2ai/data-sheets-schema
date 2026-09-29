@@ -8,6 +8,7 @@ from copy import deepcopy
 import hashlib
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -278,6 +279,40 @@ def test_a_hash_written_as_a_block_scalar_is_refused():
     assert [p["at"] for p in caught.value.problems] == ["/entries/0/target_original_full_sha256"]
 
 
+#: ECMA-262's \s: WhiteSpace (TAB, VT, FF, SP, NBSP, ZWNBSP and category Zs)
+#: and LineTerminator (LF, CR, LS, PS), as the specification lists them.
+ECMA_WHITESPACE = ({"\t", "\v", "\f", " ", "\xa0", "\ufeff", "\n", "\r", "\u2028", "\u2029"}
+                   | {chr(c) for c in range(0x110000) if unicodedata.category(chr(c)) == "Zs"})
+
+
+def test_text_fields_refuse_the_same_characters_in_both_dialects():
+    """``\S`` classifies U+FEFF, U+001C-U+001F and U+0085 differently in Python's
+    re and ECMA-262 (#3215). The text pattern refuses the union, so a lone such
+    character is refused by the loader and by an ECMA-262 validator alike."""
+    pattern = recall._TEXT["pattern"]
+    # The pattern as an ECMA-262 engine reads it: its \s spelled out. The rest
+    # of the class (\xhh, \uhhhh, ranges) means the same in both dialects.
+    assert pattern.count("\\s") == 1 and "\\S" not in pattern
+    ecma_class = "".join(f"\\U{ord(c):08x}" for c in sorted(ECMA_WHITESPACE))
+    as_ecma = re.compile(pattern.replace("\\s", ecma_class))
+    as_python = re.compile(pattern)
+    refused = set()
+    for c in map(chr, range(0x110000)):
+        python, ecma = bool(as_python.search(c)), bool(as_ecma.search(c))
+        assert python is ecma, hex(ord(c))
+        if not python:
+            refused.add(c)
+    # It still refuses exactly whitespace, by either dialect's definition.
+    python_ws = {chr(c) for c in range(0x110000) if re.fullmatch(r"\s", chr(c))}
+    assert refused == python_ws | ECMA_WHITESPACE
+    o = original()
+    for lone in ("\ufeff", "\x1f", "\x85", "\u3000"):
+        with pytest.raises(recall.GroundTruthError) as caught:
+            load(truth({**entry("gt", o, "/title"), "observation": lone}))
+        assert [p["at"] for p in caught.value.problems] == ["/entries/0/observation"], hex(ord(lone))
+    load(truth({**entry("gt", o, "/title"), "observation": "\ufeffA visible observation."}))
+
+
 def test_every_anchored_pattern_ends_at_end_of_input_in_both_dialects():
     """A bare "$" means end of input in ECMA-262 but not in Python's re (#3097)."""
     patterns = []
@@ -339,6 +374,29 @@ def test_json_refuses_duplicate_keys_and_text_neither_grammar_reads_is_named_wit
     assert problem["problem"] == ("neither JSON (Expecting value at line 1 column 1) "
                                   "nor YAML (ScannerError)")
     assert "planted" not in str(caught.value)
+
+
+#: Well under MAX_GROUND_TRUTH_BYTES, and deeper than either parser recurses.
+DEEP_TEXTS = {
+    "json array": b"[" * 100_000 + b"]" * 100_000,
+    "json under entries": b'{"entries": ' + b"[" * 100_000 + b"]" * 100_000 + b"}",
+    "yaml block sequence": b"- " * 5_000 + b"x",
+}
+
+
+@pytest.mark.parametrize("raw", DEEP_TEXTS.values(), ids=DEEP_TEXTS)
+def test_nesting_too_deep_to_parse_is_refused_not_raised(raw):
+    """A RecursionError from either parser is a refusal with a named problem (#3214)."""
+    assert len(raw) < recall.MAX_GROUND_TRUTH_BYTES
+    with pytest.raises(recall.GroundTruthError) as caught:
+        recall.load_ground_truth(raw)
+    assert caught.value.problems == [{"at": "", "problem": "nested too deeply to read"}]
+
+
+def test_an_original_nested_too_deeply_is_not_scored_rather_than_raised():
+    deep = b"- " * 5_000 + b"x"
+    with pytest.raises(recall.AuditRecallError, match="not a readable YAML record: RecursionError"):
+        scored(audit(deep, []), deep, truth(entry("gt", original(), "/title")))
 
 
 def test_a_complete_entry_loads_with_its_date_as_written():
@@ -542,6 +600,14 @@ class TestCommand:
                           "--output", p["audit"])
         assert out.exit_code == 2 and "names an input" in out.output
         assert p["audit"].read_bytes() == before
+
+    def test_ground_truth_nested_too_deeply_is_refused_with_the_message(self, tmp_path):
+        p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))
+        p["truth"].write_bytes(DEEP_TEXTS["json array"])
+        out = self.invoke("--audit", p["audit"], "--original", p["original"], "--ground-truth", p["truth"])
+        assert out.exit_code == 1, out.output
+        assert out.exception is None or isinstance(out.exception, SystemExit), repr(out.exception)
+        assert "ground truth refused:\n  /: nested too deeply to read" in out.output
 
     def test_an_audit_failing_the_grammar_writes_no_report_and_is_left_unchanged(self, tmp_path):
         p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))

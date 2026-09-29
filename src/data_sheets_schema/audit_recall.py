@@ -67,7 +67,12 @@ MAX_PROBLEMS = 50
 _END = r"(?![\s\S])"
 _HEX = "^[0-9a-f]{64}" + _END
 _POINTER = "^(/([^/~]|~[01])*)+" + _END
-_TEXT = {"type": "string", "pattern": r"\S"}
+#: One character that is not whitespace in either dialect. ``\S`` alone differs:
+#: Python's ``\s`` has U+001C-U+001F and U+0085, which ECMA-262's lacks, and
+#: ECMA-262's has U+FEFF, which Python's lacks. Refusing the union makes the
+#: loader and any other validator of the committed schema agree on every
+#: code point, so a text field of U+FEFF alone is refused in both (#3215).
+_TEXT = {"type": "string", "pattern": r"[^\s\x1c-\x1f\x85\ufeff]"}
 
 
 class GroundTruthError(ValueError):
@@ -173,12 +178,22 @@ def _parse(text: str):
     well-formed JSON indented with tabs (``json.dump(indent="\\t")``, ``jq
     --tab``) was refused as "not YAML" (#3177). Only text the JSON grammar
     rejects goes to the YAML loader. Both refuse duplicate keys.
+
+    Nesting deeper than either parser's recursion reaches is refused as such,
+    not raised as ``RecursionError``: both parsers recurse per level, and a few
+    kilobytes of brackets or ``- `` stay well under the byte bound (#3214;
+    ``audit_grammar._load`` refuses the same case).
     """
+    too_deep = GroundTruthError([{"at": "", "problem": "nested too deeply to read"}])
     try:
         return json.loads(text, object_pairs_hook=_json_object)
+    except RecursionError:
+        raise too_deep from None
     except json.JSONDecodeError as not_json:
         try:
             return yaml.load(text, Loader=_Loader)
+        except RecursionError:
+            raise too_deep from None
         except yaml.YAMLError as not_yaml:
             # Positions and class names only: a YAML message quotes the file.
             raise GroundTruthError([{"at": "", "problem": (
@@ -317,7 +332,7 @@ def _populated(original_raw: bytes):
     try:
         text = original_raw.decode("utf-8", errors="strict")
         return [row["path"] for row in inventory(text, "original_full")["values"]]
-    except (UnicodeError, ValueError, yaml.YAMLError) as exc:
+    except (UnicodeError, ValueError, RecursionError, yaml.YAMLError) as exc:
         raise AuditRecallError(f"original is not a readable YAML record: {exc.__class__.__name__}") from None
 
 
