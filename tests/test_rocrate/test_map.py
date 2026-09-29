@@ -371,6 +371,27 @@ class TestCrateEncoding(unittest.TestCase):
         self.assertIn(f"byte 0xa9 at offset {offset}, 1 undecodable byte(s)", message)
         self.assertIsInstance(cm.exception.__cause__, UnicodeDecodeError)
 
+    def test_the_count_is_of_bytes_across_the_whole_file(self):
+        """#3375. With one bad byte a constant 1, or the first error's length,
+        reads right. Here the first error is one byte (0xa9), a later one is a
+        truncated two-byte sequence (0xe2 0x82: one decoding error, two bytes)
+        and a third is a lone 0x97: 4 bytes in 3 errors, so a constant, the
+        first error's length and a count of decoding errors all read wrong."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ro-crate-metadata.json"
+            graph = copy.deepcopy(GRAPH)
+            graph[1]["copyrightNotice"] = "@A@ 2025 @B@ Test @C@"
+            data = (json.dumps({"@graph": graph}).encode("ascii")
+                    .replace(b"@A@", b"\xa9")
+                    .replace(b"@B@", b"\xe2\x82")
+                    .replace(b"@C@", b"\x97"))
+            path.write_bytes(data)
+            offset = data.index(b"\xa9")
+            with self.assertRaises(CrateEncodingError) as cm:
+                read_crate_json(path)
+        self.assertIn(f"byte 0xa9 at offset {offset}, 4 undecodable byte(s)",
+                      str(cm.exception))
+
     def test_a_utf8_crate_parses_as_before(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "ro-crate-metadata.json"
