@@ -40,10 +40,11 @@ machine-readable form and lineage across fields. So:
   graph", "…; no typed derivation links", "Held at 4 because …"), and any
   earlier clause saying something is absent ("…, structural derivation
   slots empty"). The label's other clauses are credit and are not read;
-- a rationale whose quality note and semantic analysis never say why the
-  score is below the maximum has those two read whole (`basis ==
-  UNSTATED`): every gap they name is a candidate reason, beside the label's
-  reason clauses (its credit is still not read);
+- a rationale in which nothing says why the score is below the maximum
+  (no quality-note or semantic-analysis sentence with a cue, and no label
+  cue naming a reason) has its quality note and semantic analysis read
+  whole (`basis == UNSTATED`): every gap they name is a candidate reason,
+  beside the label's reason clauses (its credit is still not read);
 - inside those sentences a clause that accepts or disclaims ("which the
   rubric accepts in place of a PROV-O serialization", "despite the
   dedicated field being empty", "not a reason to withhold 5") names no
@@ -382,11 +383,15 @@ def lint_q19(item: dict) -> Q19Lint:
     if score is None or maximum is None or score >= maximum:
         return Q19Lint(score, maximum, NOT_LINTED, (), mentions)
     stated = withholding_sentences(item)
-    if any(name != "score_label" for name, _ in stated):
+    label = [(name, s) for name, s in stated if name == "score_label"]
+    # A label says why when it carries a withholding cue and names a reason
+    # ("Held at 4 because was_derived_from is empty"); a bare "Short of 5"
+    # leaves the body to say it.
+    label_says_why = any(_WITHHOLDING.search(s) for _, s in label) and bool(_reasons(label))
+    if label_says_why or any(name != "score_label" for name, _ in stated):
         return Q19Lint(score, maximum, STATED, _reasons(stated), mentions)
     # Nothing says why: every gap the body names is a candidate reason, and
-    # the label contributes its reason clause only, as above, not its credit.
-    label = [(name, s) for name, s in stated if name == "score_label"]
+    # the label contributes its reason clauses only, as above, not its credit.
     body = [(name, s) for name, s in sentences if name != "score_label"]
     return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions)
 

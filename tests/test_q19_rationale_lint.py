@@ -266,6 +266,16 @@ def test_a_label_that_gives_its_reason_without_a_contrast_is_read(label, concern
     assert all(r.field == "score_label" for r in result.reasons)
 
 
+def test_a_label_that_says_why_leaves_the_body_unread_as_reasons():
+    """A label with a withholding cue and a reason states why, so the body's
+    credit is not read as co-reasons; a bare label cue leaves the body to."""
+    said = lint_q19(item(label="Held at 4 because was_derived_from is empty",
+                         note="Version history and errata are documented."))
+    assert (said.basis, said.verdict, said.concerns(SUBSTANTIVE)) == (STATED, REPRESENTATION_ONLY, [])
+    bare = lint_q19(item(label="Short of 5", note="was_derived_from is empty."))
+    assert (bare.basis, bare.verdict) == (UNSTATED, REPRESENTATION_ONLY)
+
+
 def test_a_label_clause_saying_something_is_absent_is_read_and_its_credit_is_not():
     result = lint_q19(item(label="Derivation fields unpopulated, strong version history",
                            note="Held at 4 because no checksums are recorded."))
