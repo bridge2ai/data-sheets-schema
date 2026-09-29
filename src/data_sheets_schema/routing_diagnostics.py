@@ -116,15 +116,21 @@ exponential, or merge keys nest the same way, each walk — the scan and the
 duplicate check — stops after `MAX_TRAVERSAL_STEPS` steps and raises
 `TraversalBudgetExceeded`; `check_text` reports that record as not checked,
 and the command goes on to the next. A string is matched once however many
-aliases reach it, and each visit to it is a step (#3263). Two more shapes
-are not checked rather than approximated: a merge key that reaches the
-mapping it is written in (`MergeCycle`), whose kept pairs follow PyYAML's
-stateful flattening rather than the override rule reproduced here, and a
-merge chain deeper than the duplicate walk can recurse, whose
-`RecursionError` is the record's reason, never an empty list (#3263). The
-loader itself is not bounded here:
-PyYAML flattens nested merge lists by copying their pairs, so a text of
-doubling merges can stall `safe_load` before the scan starts.
+aliases reach it, and each visit to it is a step (#3263). A merge key that
+reaches the mapping it is written in (`MergeCycle`) is not checked rather
+than approximated: its kept pairs follow PyYAML's stateful flattening rather
+than the override rule reproduced here (#3263). A merge chain is followed
+with an explicit stack, so one longer than the interpreter's recursion limit
+is checked like a short one (#3272).
+
+The loader is bounded too. PyYAML flattens a merge by copying the merged
+pairs, so a text whose anchors each merge the one before twice grows
+exponentially inside `safe_load`, before either walk starts: twenty such
+levels, about 1 KB, took seconds, and each level more about doubles it. The record
+is loaded as `safe_load` loads it, by a loader that charges every merged pair
+it copies and raises `TraversalBudgetExceeded` once the copies would pass
+`MAX_TRAVERSAL_STEPS` pairs; `check_text` reports that record as not checked
+(#3259).
 
 ## What this is not
 
@@ -241,6 +247,79 @@ class _Budget:
             raise TraversalBudgetExceeded(
                 f"the walk ran past its budget of {self.limit:,} steps (a shared YAML graph "
                 "whose paths grow faster than its text); not read in full")
+
+
+class _MergeBoundedLoader(yaml.SafeLoader):
+    """`yaml.SafeLoader` whose merge flattening counts the pairs it copies
+    and stops past a bound (#3259). PyYAML flattens a merge by copying the
+    merged mapping's pairs into the one that merges it, in place, so a text
+    whose anchors each merge the one before twice grows exponentially inside
+    the loader, before either walk here can spend a step. `flatten_mapping`
+    is PyYAML 6's own, pair for pair and error for error, with each copy
+    charged before it is made: what a record loads as is unchanged, and a
+    record that would copy more than the bound raises
+    TraversalBudgetExceeded having copied at most the bound."""
+
+    def __init__(self, stream: str, max_pairs: int):
+        super().__init__(stream)
+        self._pairs_limit = max_pairs
+        self._pairs_copied = 0
+
+    def _charge(self, pairs: int) -> None:
+        self._pairs_copied += pairs
+        if self._pairs_copied > self._pairs_limit:
+            raise TraversalBudgetExceeded(
+                f"the loader's merge keys would copy more than {self._pairs_limit:,} pairs (merges "
+                "that nest and repeat grow faster than their text); not read in full")
+
+    def flatten_mapping(self, node: yaml.MappingNode) -> None:
+        merge: list[tuple[Any, Any]] = []
+        index = 0
+        while index < len(node.value):
+            key_node, value_node = node.value[index]
+            if key_node.tag == "tag:yaml.org,2002:merge":
+                del node.value[index]
+                if isinstance(value_node, yaml.MappingNode):
+                    self.flatten_mapping(value_node)
+                    self._charge(len(value_node.value))
+                    merge.extend(value_node.value)
+                elif isinstance(value_node, yaml.SequenceNode):
+                    submerge = []
+                    for subnode in value_node.value:
+                        if not isinstance(subnode, yaml.MappingNode):
+                            raise yaml.constructor.ConstructorError(
+                                "while constructing a mapping", node.start_mark,
+                                "expected a mapping for merging, but found %s" % subnode.id,
+                                subnode.start_mark)
+                        self.flatten_mapping(subnode)
+                        submerge.append(subnode.value)
+                    submerge.reverse()
+                    for value in submerge:
+                        self._charge(len(value))
+                        merge.extend(value)
+                else:
+                    raise yaml.constructor.ConstructorError(
+                        "while constructing a mapping", node.start_mark,
+                        "expected a mapping or list of mappings for merging, but found %s"
+                        % value_node.id, value_node.start_mark)
+            elif key_node.tag == "tag:yaml.org,2002:value":
+                key_node.tag = "tag:yaml.org,2002:str"
+                index += 1
+            else:
+                index += 1
+        if merge:
+            node.value = merge + node.value
+
+
+def _load(text: str, *, max_pairs: int | None = None) -> Any:
+    """`yaml.safe_load(text)`, except that merge keys copying more than
+    `max_pairs` pairs (default `MAX_TRAVERSAL_STEPS`) raise
+    TraversalBudgetExceeded rather than stall the loader (#3259)."""
+    loader = _MergeBoundedLoader(text, MAX_TRAVERSAL_STEPS if max_pairs is None else max_pairs)
+    try:
+        return loader.get_single_data()
+    finally:
+        loader.dispose()
 
 
 @dataclass(frozen=True)
@@ -403,7 +482,7 @@ def _kept_pairs(loader: yaml.SafeLoader, node: yaml.MappingNode, path: str,
     dropped whole (#3203). Every pair of the kept source is listed, an
     explicit key written twice included: that is the duplicate being judged."""
     pairs = []
-    for source, label_path in _merge_sources(node, path, frozenset(), budget):
+    for source, label_path in _merge_sources(node, path, budget):
         for key_node, value_node in source.value:
             if _is_merge(key_node):
                 continue
@@ -461,7 +540,7 @@ def _is_merge(key_node: Any) -> bool:
             and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge")
 
 
-def _merge_sources(node: yaml.MappingNode, path: str, active: frozenset[int],
+def _merge_sources(node: yaml.MappingNode, path: str,
                    budget: _Budget) -> list[tuple[yaml.MappingNode, str]]:
     """The mappings whose pairs the loader reads as `node`'s, each with the
     path it is named at, in the order PyYAML's `flatten_mapping` lays their
@@ -475,24 +554,48 @@ def _merge_sources(node: yaml.MappingNode, path: str, active: frozenset[int],
     of a diamond — is listed once, at its last place: the loader lays its
     pairs out at each place, but they are the same key nodes with the same
     values, so the repeat drops nothing, and its last place is the one whose
-    pairs win against the mappings between (#3226)."""
-    if id(node) in active:
-        raise MergeCycle("a merge key reaches the mapping it is written in; which values the "
-                         "loader keeps there is not reproduced, so the record was not read in full")
-    budget.spend()
-    active = active | {id(node)}
+    pairs win against the mappings between (#3226).
+    Iterative, with an explicit stack of the merges still to follow at each
+    open mapping, so a merge chain of any length is read; each mapping
+    opened is a step (#3272)."""
+    def merges(current: yaml.MappingNode, current_path: str) -> Iterator[tuple[yaml.MappingNode, str]]:
+        base = f"{current_path}.<<" if current_path else "<<"
+        for key_node, value_node in current.value:
+            if not _is_merge(key_node):
+                continue
+            if isinstance(value_node, yaml.MappingNode):
+                yield value_node, base
+            elif isinstance(value_node, yaml.SequenceNode):
+                for index, item in reversed(list(enumerate(value_node.value))):
+                    if isinstance(item, yaml.MappingNode):
+                        yield item, f"{base}[{index}]"
+
     sources: list[tuple[yaml.MappingNode, str]] = []
-    base = f"{path}.<<" if path else "<<"
-    for key_node, value_node in node.value:
-        if not _is_merge(key_node):
+    # The mappings open between `node` and the one being read: a merge that
+    # reaches one of them is a cycle; a mapping reached again once closed is
+    # a diamond or a repeat, listed at its last place below.
+    active: set[int] = set()
+    stack: list[tuple[yaml.MappingNode, str, Iterator[tuple[yaml.MappingNode, str]]]] = []
+
+    def enter(current: yaml.MappingNode, current_path: str) -> None:
+        if id(current) in active:
+            raise MergeCycle("a merge key reaches the mapping it is written in; which values the "
+                             "loader keeps there is not reproduced, so the record was not read in full")
+        budget.spend()
+        active.add(id(current))
+        stack.append((current, current_path, merges(current, current_path)))
+
+    enter(node, path)
+    while stack:
+        current, current_path, pending = stack[-1]
+        merged = next(pending, None)
+        if merged is not None:
+            enter(*merged)
             continue
-        if isinstance(value_node, yaml.MappingNode):
-            sources.extend(_merge_sources(value_node, base, active, budget))
-        elif isinstance(value_node, yaml.SequenceNode):
-            for index, item in reversed(list(enumerate(value_node.value))):
-                if isinstance(item, yaml.MappingNode):
-                    sources.extend(_merge_sources(item, f"{base}[{index}]", active, budget))
-    sources.append((node, path))
+        # Every merge of `current` has been laid out: its own pairs follow.
+        stack.pop()
+        active.discard(id(current))
+        sources.append((current, current_path))
     last = {id(source): index for index, (source, _) in enumerate(sources)}
     return [entry for index, entry in enumerate(sources) if last[id(entry[0])] == index]
 
@@ -521,10 +624,10 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
     yields nothing: `safe_load` rejects it too, and the record is not
     checked on that. Raises TraversalBudgetExceeded when the walk takes
     more than `max_steps` (default `MAX_TRAVERSAL_STEPS`), as nested merge
-    lists that double at each level do (#3247), MergeCycle for a merge key
-    that reaches its own mapping, and RecursionError for a merge chain
-    deeper than the interpreter's limit: a walk that did not finish found
-    nothing, and saying so would read as clean (#3263)."""
+    lists that double at each level do (#3247), and MergeCycle for a merge
+    key that reaches its own mapping: a walk that did not finish found
+    nothing, and saying so would read as clean (#3263). A merge chain of
+    any length is followed, not cut at the recursion limit (#3272)."""
     budget = _Budget(max_steps)
     holds_memo: dict[int, bool] = {}
     try:
@@ -601,12 +704,15 @@ def check_text(text: str) -> tuple[list[Mismatch] | None, str | None]:
     duplicated key dropped values the scan would have read. Never raises for
     a record the loader rejects, so one bad record in a run cannot stop the
     others being reported (a record never looked at is not a clean one), nor
-    for one whose walk runs past `MAX_TRAVERSAL_STEPS`, holds a merge cycle,
-    or nests past the recursion limit, none of which is checked either
-    (#3247, #3263)."""
+    for one whose merge keys would copy more than `MAX_TRAVERSAL_STEPS` pairs
+    in the loader, whose walk runs past `MAX_TRAVERSAL_STEPS` steps, that
+    holds a merge cycle, or whose scan nests past the recursion limit, none
+    of which is checked either (#3247, #3259, #3263)."""
     try:
-        record = yaml.safe_load(text)
+        record = _load(text)
     except yaml.YAMLError as exc:
+        return None, _first_line(exc)
+    except TraversalBudgetExceeded as exc:
         return None, _first_line(exc)
     except Exception as exc:                                   # noqa: BLE001
         # PyYAML's constructors raise bare ValueError (an impossible unquoted
