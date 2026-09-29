@@ -19,12 +19,14 @@ LEXICON = sd.load_lexicon()
 #: Pins on the lexicon's exact bytes, one per version. Changing the file
 #: without a version bump fails here; so does bumping without a pin. v1 was
 #: revised in review before it first merged (#3029), so this PR's commits
-#: carry two earlier byte versions under `version: 1`:
+#: carry four earlier byte versions under `version: 1`:
 #:   9b1f536ba02afc9971bbe9e28da316ea1c3c90e356bdbcc2c200400259521b04 (e00711d21, first commit)
 #:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
+#:   14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35 (cf3d16cb3, review round 2)
+#:   56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4 (df35537aa, review round 2)
 #: Every output names the sha it ran under, and no committed output, record
-#: or note cites either of them (#3161).
-LEXICON_PINS = {1: "56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4"}
+#: or note cites any of them (#3161).
+LEXICON_PINS = {1: "3b2949e29c7aebef79c6e77894d735c6fa2ce1a0ae8800463374d63fe45a5f3a"}
 
 
 def record(**containers):
@@ -217,6 +219,47 @@ def test_the_cited_source_or_incidental_context_is_not_what_is_unstated(containe
     assert [f["path"] for f in out["flags"]] == [f"/{container}/0"] and out["guarded"] == [], text
 
 
+@pytest.mark.parametrize("container,text,rule", [
+    ("splits", "This split, planned for 2025, is not yet released.", "presence.not_yet_released"),
+    ("splits", "This split, the 2024 holdout, has not been released.", "presence.not_yet_released"),
+    ("splits", "Per the 2024 slide, this split is not yet released.", "presence.not_yet_released"),
+    ("variables", "This variable, added in the 2023 revision, is not one of the released fields.",
+     "presence.not_member_of"),
+    ("creators", "Her role, per the 2024 slide, is not stated.", "role.passive_not_stated"),
+])
+def test_a_date_modifying_a_passive_subject_is_not_what_is_unstated(container, text, rule):
+    """#3210: a passive cue's object is its subject, without an appositive
+    or what a comma sets before it, so a year that only modifies the member
+    does not guard the hit."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert out["guarded"] == [], text
+    assert [h["rule"] for f in out["flags"] for h in f["hits"]] == [rule], text
+
+
+@pytest.mark.parametrize("text", [
+    "This split's 2025 release date is not yet available.",
+    "Per the codebook, this split's 2025 release date, as listed, is not yet available.",
+])
+def test_a_date_heading_a_passive_subject_is_still_guarded(text):
+    """#3210: the subject keeps the date where the date is what is unstated."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert out["flags"] == [], text
+    assert [(g["rule"], g["guard"], g["term"]) for g in out["guarded"]] == [
+        ("presence.not_yet_released", "date_amount", "2025")], text
+
+
+@pytest.mark.parametrize("before,subject", [
+    ("This split, planned for 2025, ", "This split"),
+    ("Per the 2024 slide, this split ", " this split "),
+    ("Per the codebook, its date, as listed, ", " its date"),
+    ("Planned for 2025, ", "Planned for 2025"),
+    ("Its date ", "Its date "),
+])
+def test_the_passive_subject_span(before, subject):
+    s0, s1 = sd._subject(before)
+    assert before[s0:s1] == subject
+
+
 @pytest.mark.parametrize("text,guard,term", [
     # the object names the role, and the attribute is in it
     ("No source assigns CRediT contributor roles to the creator, so credit_roles is left unpopulated.",
@@ -316,6 +359,50 @@ def outcomes(container, text, name="Entry"):
 def test_a_role_cue_needs_a_role_term_in_its_clause(text, rule):
     """The role scope decides these alone: no guard term, no other subject (#3084)."""
     assert outcomes("maintainers", text) == [(rule, "out_of_scope", "no_role_term")]
+
+
+@pytest.mark.parametrize("container,text,expected", [
+    ("creators", "The abstract does not state the title of the award.",
+     [("role.no_role_stated", "title of the award")]),
+    ("creators", "The award notice states no title for the project.",
+     [("role.states_no_role", "title for the project")]),
+    ("maintainers", "The page does not give the position of the server.",
+     [("role.assignment_negated", "position of the server"),
+      ("role.no_role_stated", "position of the server")]),
+    ("data_collectors", "The protocol does not specify the category of device used.",
+     [("role.no_role_stated", "category of device used")]),
+    # a role verb elsewhere in the clause does not make another thing's title the member's
+    ("creators", "The abstract, authored by her, does not state the title of the award.",
+     [("role.no_role_stated", "title of the award")]),
+])
+def test_an_assignment_noun_another_thing_owns_is_not_the_members_role(container, text, expected):
+    """#3209: the cue of role.no_role_stated and role.states_no_role always
+    holds an assignment noun, so the role scope could not fail for them.
+    A title, position or category owned by another thing puts nothing in
+    scope, and a cue whose own noun is another thing's is out of scope."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert out["flags"] == [] and out["guarded"] == [], text
+    assert [(o["rule"], o["reason"], o["term"]) for o in out["out_of_scope"]] == [
+        (rule, "assignment_noun_of_other", term) for rule, term in expected], text
+
+
+@pytest.mark.parametrize("container,text,rule", [
+    ("creators", "The sources do not state an individual role for this person.", "role.no_role_stated"),
+    ("creators", "The sources state no contribution role for this person.", "role.states_no_role"),
+    ("creators", "The sources do not state a role for her in the dataset.", "role.no_role_stated"),
+    ("creators", "The sources do not state her role.", "role.no_role_stated"),
+    ("creators", "The sources do not state a role for the dataset.", "role.no_role_stated"),
+    ("creators", "The sources do not state the role of Jane Parker.", "role.no_role_stated"),
+    ("maintainers", "The sources do not state which category of maintainer this contact represents.",
+     "role.no_role_stated"),
+    ("maintainers", "The sources do not state which category of maintainer applies.", "role.no_role_stated"),
+])
+def test_an_assignment_noun_the_member_owns_still_counts(container, text, rule):
+    """#3209: the owner after `of`/`for` is the member's when it is one of
+    its self-references or its name, a pronoun, a role term, or (after
+    `for`) what a role is held in."""
+    rec = record(**{container: [{"name": "Jane Parker", "description": text}]})
+    assert flagged(rec) == {f"/{container}/0": [rule]}, text
 
 
 def test_a_presence_cue_needs_a_self_reference_or_a_presence_term():
@@ -639,6 +726,15 @@ def test_a_guard_reading_the_object_needs_the_pattern_to_declare_one():
         edited_lexicon(lambda d: pattern_row(d, "role.assignment_negated").update(object=["after_cue"]))
     with pytest.raises(ValueError, match="must read one of"):
         edited_lexicon(lambda d: d["guards"]["subrole_object"].update(reads="after_cue"))
+
+
+def test_the_assignment_owner_block_is_validated():
+    """#3209: the owner reader needs a positive word window and a pattern
+    that captures its preposition."""
+    with pytest.raises(ValueError, match="positive integer"):
+        edited_lexicon(lambda d: d["assignment_owner"].update(words=0))
+    with pytest.raises(ValueError, match="one group"):
+        edited_lexicon(lambda d: d["assignment_owner"].update(after=r"\s+(?:of|for)\s+"))
 
 
 def test_lexicon_is_generic():

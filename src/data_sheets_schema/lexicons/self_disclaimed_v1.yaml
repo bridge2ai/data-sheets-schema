@@ -77,6 +77,26 @@ containers:
 # Nouns that name a role assignment rather than a particular role.
 assignment_nouns: ['roles?', 'titles?', 'categor(?:y|ies)', 'designations?', 'positions?']
 
+# An assignment noun is the member's own unless another thing owns it: "the
+# title of the award", "the position of the server" and "a category for the
+# device" are about the award, the server and the device (#3209). The owner
+# is the phrase after `of` or `for`, up to the phrase's end and at most
+# `words` words. It is the member's when it holds one of the member's own
+# self-references, one of the container's role terms or role verbs, or one
+# of `member_words`, and after `for` also when it holds one of
+# `held_in_words`, the thing a role is held in ("credit roles for the
+# dataset itself" are the member's roles); any other owner is another
+# thing's. Such a noun never puts a clause in `role` scope, and a cue whose
+# own assignment noun is another thing's is out of scope whatever else its
+# clause names.
+assignment_owner:
+  after: '\s+(of|for)\s+'
+  words: 3
+  member_words: ['her', 'hers', 'him', 'his', 'them', 'their', 'herself', 'himself', 'themselves',
+                 'persons?', 'people', 'individuals?', 'members?', 'contributors?', 'investigators?',
+                 'researchers?', 'scientists?', 'staff', 'personnel', 'entry', 'contacts?']
+  held_in_words: ['datasets?', 'data', 'resources?', 'releases?', 'collections?', 'corpus', 'corpora']
+
 # The sentence's subject is the member itself: a deictic phrase or pronoun,
 # a sentence opening on a participle with the subject elided, or the
 # member's own `name`/`variable_name` (added by the code). One a comma
@@ -110,10 +130,17 @@ other_subject:
 # narrower sub-role.
 #
 # A pattern's `object` lists where that thing lies: `after_phrase` for an
-# active cue ("does not name <her as an author>"), `before_cue` and
+# active cue ("does not name <her as an author>"), `subject` and
 # `as_phrase` for a passive one ("<the start date of her role> is not
 # stated", "are not recorded <as creator affiliations>"), `cue` for a cue
-# that ends on the role noun ("does not state <a credit role>"). The
+# that ends on the role noun ("does not state <a credit role>"). A passive
+# cue's `subject` is the clause before it with an appositive closing on the
+# cue's own comma left out, and with anything before its last remaining
+# comma left out: in "This split, planned for 2025, is not yet released"
+# the subject is "This split", not the year that modifies it (#3210), and
+# in "Per the 2024 slide, this split is not yet released" it is "this
+# split". A date that heads the subject ("This split's 2025 release date is
+# not yet available") is still what is unstated. The
 # source a sentence cites is an active cue's subject, so "The website does
 # not name her as a creator" and "The 2024 slide ..." are not read as an
 # attribute or a date, and neither is the cue's own verb ("do not credit
@@ -159,7 +186,8 @@ guards:
     regex: '\b(?:study|studies|cohorts?|design|trials?|recruitment|enrol(?:l)?ment|collection|project|protocol)\s+(?:\w+\s+){0,2}$'
 
 # Scope: `role` needs one of the container's role terms or role verbs, or an
-# assignment noun, in the clause holding the cue; `self` needs a
+# assignment noun no other thing owns (`assignment_owner`), in the clause
+# holding the cue; `self` needs a
 # self-reference before the cue, in the cue's own clause or, when that
 # clause has no subject of its own ("It is derived, but is not yet
 # released"), earlier in the sentence; `presence` needs what `self` needs
@@ -199,7 +227,7 @@ patterns:
     cue: '\b(?:is|are|was|were) not (?:stated|given|reported|recorded|specified|established|assigned|named)\b'
     scope: role
     guards: [date_amount, attribute, subrole_in_clause]
-    object: [before_cue, as_phrase]
+    object: [subject, as_phrase]
   - id: role.not_stated_who
     class: role_disclaimer
     kinds: [person_role]
@@ -256,7 +284,7 @@ patterns:
     cue: '\b(?:is|are|was|were) not (?:one|part|among|any) of the\b'
     scope: presence
     guards: [date_amount]
-    object: [before_cue]
+    object: [subject]
   - id: presence.none_reports_available
     class: presence_disclaimer
     kinds: [presence]
@@ -270,7 +298,7 @@ patterns:
     cue: '\b(?:is|are|was|were|has|have) not (?:yet )?(?:been )?(?:released|available|collected|included|present|distributed|delivered|produced|generated|acquired)\b'
     scope: self
     guards: [date_amount, attribute]
-    object: [before_cue]
+    object: [subject]
   - id: presence.prospective_predicate
     class: presence_disclaimer
     kinds: [presence]

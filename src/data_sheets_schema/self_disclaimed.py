@@ -8,7 +8,11 @@ versioned lexicon (`lexicons/self_disclaimed_v1.yaml`). It flags the member
 when one of those leaves says the source does not establish that role or
 presence: check (a). The lexicon is scoped, per pattern. A `role` cue counts
 only where its clause names the container's own role, a role verb or a
-role-assignment noun. A `self` cue counts only where a self-reference to the
+role-assignment noun that no other thing owns: "the title of the award" and
+"the position of the server" name the award's title and the server's
+position, so they put nothing in scope, and a cue whose own assignment noun
+is another thing's ("does not state the title of the award") is out of
+scope whatever else its clause names (#3209). A `self` cue counts only where a self-reference to the
 member precedes it in its own clause or, when that clause has no subject of
 its own ("It is derived, but is not yet released"), earlier in the sentence.
 A self-reference that a comma separates from the cue counts only when the
@@ -27,12 +31,15 @@ before that check, so it is never read as someone else (#3156).
 A cue does not count where a guard shows that what it says is unstated is a
 date, an amount, an attribute, a narrower sub-role or a study's design. The
 date, amount and attribute guards read the cue's object. Each pattern
-declares where that lies: after an active cue up to the phrase's end,
-before a passive one together with an `as` complement, or inside a cue that
-ends on the role noun. So the source a sentence cites ("The website does
-not name her as a creator", "The 2024 slide ...") and the cue's own verb
-("do not credit her as an author") are not read as the thing unstated
-(#3157, #3158). A role cue is read that narrowly only where its object
+declares where that lies: after an active cue up to the phrase's end, in a
+passive one's subject together with an `as` complement, or inside a cue
+that ends on the role noun. A passive cue's subject leaves out an
+appositive and anything before a comma: in "This split, planned for 2025,
+is not yet released" what is unstated is the split, not the year (#3210),
+while in "This split's 2025 release date is not yet available" it is the
+date. So the source a sentence cites ("The website does not name her as a
+creator", "The 2024 slide ...") and the cue's own verb ("do not credit her
+as an author") are not read as the thing unstated (#3157, #3158). A role cue is read that narrowly only where its object
 names the role itself; where the role that licenses it lies elsewhere in
 the clause, the object is not located and the guards read the whole
 clause, the cue's verb included. A sub-role
@@ -91,7 +98,7 @@ SCOPES = ("role", "presence", "self", "none")
 # What a guard reads, and where a pattern's object lies (the lexicon's
 # `reads` and `object` keys; see its guards comment).
 GUARD_READS = ("clause", "before_cue", "cue", "after_phrase", "object")
-OBJECT_PARTS = ("before_cue", "cue", "after_phrase", "as_phrase")
+OBJECT_PARTS = ("before_cue", "subject", "cue", "after_phrase", "as_phrase")
 CLASSIFICATIONS = ("removal_declared", "removed", "named_by_finding", "identity_unresolved")
 NON_CHECKS = (
     "whether the source supports the placement: a flag reads the member's own words, never the bundle",
@@ -140,6 +147,7 @@ class Container:
     placement_fields: frozenset    # leaves through which a finding names the placement
     cues: tuple                    # (Pattern, compiled cue) for this container
     role_scope: re.Pattern | None  # role terms, role verbs or assignment nouns
+    role_words: re.Pattern | None  # role terms or role verbs: an owner that is the member's
     presence_scope: re.Pattern | None
     role_predicates: re.Pattern | None
 
@@ -179,6 +187,16 @@ class Lexicon:
                 raise ValueError(f"guard {name} must read one of {', '.join(GUARD_READS)}")
             self._guards[name] = (guard["reads"], re.compile(guard["regex"], re.I))
         assignment = data["assignment_nouns"]
+        self._assignment = _word(assignment)
+        owner = data["assignment_owner"]
+        if type(owner.get("words")) is not int or owner["words"] < 1:
+            raise ValueError("assignment_owner.words must be a positive integer")
+        self._owner_after = re.compile(owner["after"], re.I)
+        self._owner_words = owner["words"]
+        self._owner_member = _word(owner["member_words"])
+        self._owner_held_in = _word(owner["held_in_words"])
+        if self._owner_after.groups != 1:
+            raise ValueError("assignment_owner.after must capture its preposition as its one group")
         patterns = []
         for row in data["patterns"]:
             kinds = frozenset(row["kinds"])
@@ -201,11 +219,12 @@ class Lexicon:
             kind = spec["kind"]
             if kind not in KINDS:
                 raise ValueError(f"container {name} has unknown kind {kind!r}")
-            role = presence = predicates = None
+            role = words = presence = predicates = None
             fill = {}
             if kind == "person_role":
                 fill["role"] = _alternation(spec["role_terms"])
                 role = _word(spec["role_terms"] + spec["role_verbs"] + assignment)
+                words = _word(spec["role_terms"] + spec["role_verbs"])
                 predicates = _word(spec["role_predicates"])
             else:
                 fill["presence"] = _alternation(spec["presence_terms"])
@@ -218,7 +237,7 @@ class Lexicon:
             self.containers[name] = Container(
                 name, kind, self._fields | frozenset(spec.get("narrative_fields") or ()),
                 placement | frozenset(spec.get("placement_fields") or ()),
-                tuple(cues), role, presence, predicates)
+                tuple(cues), role, words, presence, predicates)
 
     def is_narrative(self, container: Container, key: Any) -> bool:
         return isinstance(key, str) and (key in container.narrative_fields
@@ -363,22 +382,88 @@ def _self_reference(selves, sentence: str, c0: int, at: int) -> str | None:
     return _search(selves, sentence[:at])
 
 
-def _parts(masked: str, c0: int, c1: int, m) -> dict[str, str]:
+def _subject(before: str) -> tuple[int, int]:
+    """Where a passive cue's subject lies in `before` (its clause up to the
+    cue, unmasked): an appositive that closes on a comma right before the
+    cue is left out, and so is anything before the last comma that remains.
+    "This split, planned for 2025, " -> "This split"; "Per the 2024 slide,
+    this split " -> "this split"; "This split's 2025 release date " is
+    itself (#3210). Read on the unmasked text, since a blanked
+    self-reference would look like an empty stretch."""
+    cuts = [0] + [i + 1 for i, ch in enumerate(before) if ch == ","] + [len(before) + 1]
+    spans = [(cuts[k], cuts[k + 1] - 1) for k in range(len(cuts) - 1)]
+    if len(spans) >= 2 and not before[spans[-1][0]:spans[-1][1]].strip():
+        return spans[-3] if len(spans) > 2 else spans[0]
+    return spans[-1]
+
+
+def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None) -> dict[str, str]:
     """The pieces of the cue's clause a guard or an object can name, read
-    from the masked sentence: `clause`, `before_cue`, `cue`, `after_phrase`
-    (after the cue up to the phrase's end, `_PHRASE_END`) and `as_phrase`
-    (`after_phrase` when it opens on `as`, else empty)."""
+    from the masked sentence: `clause`, `before_cue`, `subject` (a passive
+    cue's subject, `_subject`, located on `raw`, the unmasked sentence),
+    `cue`, `after_phrase` (after the cue up to the phrase's end,
+    `_PHRASE_END`) and `as_phrase` (`after_phrase` when it opens on `as`,
+    else empty)."""
     after = masked[m.end():c1]
     end = _PHRASE_END.search(after)
     phrase = after[:end.start()] if end else after
-    return {"clause": masked[c0:c1], "before_cue": masked[c0:m.start()], "cue": masked[m.start():m.end()],
-            "after_phrase": phrase, "as_phrase": phrase if re.match(r"\s*as\b", phrase, re.I) else ""}
+    before = masked[c0:m.start()]
+    s0, s1 = _subject((raw if raw is not None else masked)[c0:m.start()])
+    return {"clause": masked[c0:c1], "before_cue": before, "subject": before[s0:s1],
+            "cue": masked[m.start():m.end()], "after_phrase": phrase,
+            "as_phrase": phrase if re.match(r"\s*as\b", phrase, re.I) else ""}
+
+
+def _owned_by_other(lexicon, container, sentence: str, masked: str, noun) -> str | None:
+    """The preposition and owner phrase when another thing owns the
+    assignment noun `noun` (a match in `sentence`): "title of the award" ->
+    "of the award". None when the noun has no `of`/`for` owner, or its
+    owner is the member: one of its own self-references (blanked in
+    `masked`), a role term or verb, or a member word ("a role for her", "the
+    category of maintainer", "a role for this person"), or, after `for`,
+    what a role is held in ("credit roles for the dataset") (#3209)."""
+    after = lexicon._owner_after.match(sentence, noun.end())
+    if after is None:
+        return None
+    rest = sentence[after.end():]
+    end = _PHRASE_END.search(rest)
+    owner = " ".join((rest[:end.start()] if end else rest).split()[:lexicon._owner_words])
+    if not owner:
+        return None
+    if masked[after.end():after.end() + len(owner)] != sentence[after.end():after.end() + len(owner)]:
+        return None
+    if lexicon._owner_member.search(owner) or container.role_words.search(owner):
+        return None
+    preposition = after.group(1).lower()
+    if preposition == "for" and lexicon._owner_held_in.search(owner):
+        return None
+    return f"{preposition} {owner}"
+
+
+def _role_scope(lexicon, container, sentence: str, masked: str, c0: int, c1: int, m) -> tuple[str, str]:
+    """(`scope`, term) for a `role` cue: the first role term, role verb or
+    member-owned assignment noun in its clause, or (`out_of_scope` reason,
+    term) when there is none or the cue's own assignment noun is another
+    thing's (#3209)."""
+    for noun in lexicon._assignment.finditer(sentence, m.start(), m.end()):
+        owner = _owned_by_other(lexicon, container, sentence, masked, noun)
+        if owner is not None:
+            return "assignment_noun_of_other", f"{noun.group(0)} {owner}"
+    foreign = None
+    for found in container.role_scope.finditer(sentence, c0, c1):
+        if lexicon._assignment.fullmatch(found.group(0)):
+            owner = _owned_by_other(lexicon, container, sentence, masked, found)
+            if owner is not None:
+                foreign = foreign or f"{found.group(0)} {owner}"
+                continue
+        return "scope", found.group(0)
+    return ("assignment_noun_of_other", foreign) if foreign else ("no_role_term", None)
 
 
 def _object_texts(pattern, container, raw: dict[str, str], masked: dict[str, str]) -> list[str]:
     """The texts naming what the cue says is unstated, as the pattern
-    declares them, read masked: `before_cue` (a passive cue's subject),
-    `cue` (a cue that ends on the role noun: "does not state a credit
+    declares them, read masked: `subject` (a passive cue's subject;
+    `before_cue`, the whole clause before a cue, is also accepted), `cue` (a cue that ends on the role noun: "does not state a credit
     role"), `after_phrase` (an active cue's object) and `as_phrase` (the
     `as` complement after a passive cue: "are not recorded as creator
     affiliations"). The source a sentence cites is an active cue's subject
@@ -408,10 +493,11 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     if other:
         return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
     if pattern.scope == "role":
-        term = container.role_scope.search(clause)
-        if term is None:
-            return {**out, "outcome": "out_of_scope", "reason": "no_role_term"}
-        out["scope"] = term.group(0)
+        verdict, term = _role_scope(lexicon, container, sentence, masked, c0, c1, m)
+        if verdict != "scope":
+            return {**out, "outcome": "out_of_scope", "reason": verdict,
+                    **({"term": term} if term else {})}
+        out["scope"] = term
     elif pattern.scope == "presence":
         term = _self_reference(selves, sentence, c0, m.start())
         if term is None:
@@ -425,7 +511,7 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         if term is None:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_reference"}
         out["scope"] = term
-    parts = _parts(masked, c0, c1, m)
+    parts = _parts(masked, c0, c1, m, sentence)
     read = {k: [parts[k]] for k in ("clause", "before_cue", "cue", "after_phrase")}
     read["object"] = _object_texts(pattern, container, _parts(sentence, c0, c1, m), parts)
     for name in pattern.guards:
