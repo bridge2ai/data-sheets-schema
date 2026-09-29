@@ -1341,6 +1341,12 @@ class UnestablishedDirectory(Base):
                  "pushd /x; popd && d4d derive core --full data/F.yaml": None,
                  "pushd data && pushd /x ; popd && d4d derive core --full F.yaml": None,
                  "cd data\nd4d derive core --full F.yaml": None,
+                 # a here-document's lines read as parts: no change in a
+                 # multi-line command is trusted, even one `&&` guards
+                 "echo a\ncd data && d4d derive core --full F.yaml": None,
+                 # a skipped pushd pushed nothing; a skipped popd popped nothing
+                 "true || pushd /x && popd && d4d derive core --full data/F.yaml": None,
+                 "pushd data && true || popd && d4d derive core --full F.yaml": None,
                  "echo a\nd4d derive core --full /r/data/F.yaml": True}
         for command, expected in cases.items():
             with self.subTest(command=command):
@@ -1349,8 +1355,9 @@ class UnestablishedDirectory(Base):
 
     def test_newlines_are_joins_outside_quotes(self):
         self.assertEqual(ro._tokens("cd data\nd4d derive core"), ["cd", "data", ";", "d4d", "derive", "core"])
-        for command in ('python -c "a\nb"', "echo 'a\nb'", "echo $'a\nb'"):
+        for command, word in (('python -c "a\nb"', "a\nb"), ("echo 'a\nb'", "a\nb"), ("echo $'a\nb'", "$a\nb")):
             with self.subTest(command=command):
+                self.assertEqual(ro._tokens(command)[-1], word)
                 self.assertNotIn(";", ro._tokens(command))
 
 

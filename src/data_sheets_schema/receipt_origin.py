@@ -837,8 +837,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # by `;` or `&&` alone (never after `||`, a pipe, `&` or a group
     # bracket), and every join from it to the part is `&&`. `cd /missing;
     # derive` runs the derive where the call started, and `false && cd X;
-    # derive` skips the cd: neither leaves a known directory. A multi-line
-    # command hides its joins, so a change in one leaves none either.
+    # derive` skips the cd: neither leaves a known directory. In a
+    # multi-line command a here-document's lines read as parts too
+    # (`_newlines_as_joins`), so a change in one leaves none either.
     unsettled = False                               # a change was made; only `&&` keeps it
     for index, segment in enumerate(segments):
         before = leading if index == 0 else joins[index - 1]
