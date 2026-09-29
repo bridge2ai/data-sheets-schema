@@ -65,13 +65,28 @@ def test_registered_markers_carry_their_class(phrase, cls):
     assert cls in sc.classes(phrase)
 
 
-@pytest.mark.parametrize("phrase", [
-    "the target population", "intended uses of the data", "a prospective cohort",
-    "the licensee shall not redistribute", "the expected value", "a data management plan",
-    "the data are not to be used for commercial purposes", "described in the process documentation",
-])
+#: One example per EXCLUDED_TERMS entry: the excluded sense, in a phrase.
+EXCLUDED_EXAMPLES = {
+    "target": "the target population", "intended": "intended uses of the data",
+    "prospective": "a prospective cohort", "shall": "the licensee shall not redistribute",
+    "expected": "the expected value", "plan": "a data management plan",
+    "to be used": "the data are not to be used for commercial purposes",
+}
+
+
+@pytest.mark.parametrize("phrase", [*EXCLUDED_EXAMPLES.values(), "described in the process documentation"])
 def test_excluded_terms_carry_no_status(phrase):
     assert sc.classes(phrase) == {}
+
+
+def test_the_curator_list_names_every_exclusion_the_detector_makes():
+    # EXCLUDED_TERMS is what a curator signs off (#2917, owner decision 3),
+    # so an exclusion carved out of a registered pattern is listed there too
+    # (#3091): every tested exclusion is a listed term, and every listed
+    # term has a tested example.
+    assert set(EXCLUDED_EXAMPLES) == set(sc.EXCLUDED_TERMS)
+    for term, phrase in EXCLUDED_EXAMPLES.items():
+        assert term in phrase and sc.classes(phrase) == {}, term
 
 
 def test_registry_is_one_versioned_dataset_neutral_vocabulary():
@@ -213,6 +228,139 @@ def test_without_the_counter_heading_the_anticipated_scope_reaches_the_released_
     assert slots == {"data_collectors[0].collector_details", "instances[0].counts"}
 
 
+@pytest.mark.parametrize("snippet", [
+    "Current Released Dataset\n50,000",
+    "Current Released Dataset",
+    "Current Released Dataset\n50,000\nPatient admissions from intensive care",
+    "Current Released Dataset...50,000...Patient admissions from intensive care",
+    "Released Dataset\n50,000",
+])
+def test_a_snippet_that_quotes_the_counter_heading_is_under_it(snippet):
+    # #3089: the heading scan read only the lines above a part's own line,
+    # so a part starting on "Current Released Dataset" was governed by the
+    # "Anticipated" heading above it — and `status: released`, receipted by
+    # that heading alone, was flagged as having lost "anticipated".
+    record = {"instances": [{"counts": "50,000 admissions"}], "status": "released"}
+    out = _run(PANEL, [("instances[0].counts", snippet), ("status", snippet)], record)
+    assert out["counts"]["located"] == 2 and out["flags"] == []
+
+
+def test_a_part_that_starts_under_the_status_heading_stays_governed_past_a_counter_heading():
+    # The counter-heading closes the scope for the text below it, not for
+    # the quoted figures above it, which the status heading governs.
+    record = {"instances": [{"counts": "14 hospitals and 50,000 admissions"}]}
+    spanning = "14\nData contributing hospitals\nCurrent Released Dataset\n50,000"
+    [flag] = _run(PANEL, [("instances[0].counts", spanning)], record)["flags"]
+    assert (flag["rule"], flag["via"], flag["governor"]) == (
+        "governor_outside_snippet", "heading", "Anticipated Final Dataset")
+
+
+def test_evidence_quoting_the_counter_heading_is_not_planned_evidence():
+    text, manifest = _bundle(PANEL)
+    view = sc.BundleView(text, manifest)
+    released = _review(("/instances/0/counts", [
+        _claim("50,000 admissions", "fact", quote="Current Released Dataset\n50,000")]))
+    assert sc.review_status_expression(released, view=view)["flags"] == []
+
+
+@pytest.mark.parametrize("gap,governed", [
+    ("", True),
+    ("\n", True),                                                      # one blank line: the same block
+    ("9\nDifferent data modalities\n", True),                          # count labels are passed over
+    ("\n\n", False),                                                   # two blank lines end the block
+    ("-" * 20 + "\n", False),                                          # a document separator ends it
+    ("The consortium publishes a summary for every site.\n", False),   # a prose line ends it
+    ("Partner hospitals contribute waveform telemetry, clinical notes and imaging to the shared archive "
+     "under the data use agreement that every institution in the network signed in its first year\n",
+     False),                                                           # so does a paragraph-length line
+])
+def test_what_ends_a_status_headings_block(gap, governed):
+    # #3092: each end-of-block rule the docstrings document, against the
+    # same heading and figures with the gap between them varied.
+    doc = "Anticipated Final Dataset\n" + gap + "14\nData contributing hospitals"
+    out = _run(doc, [("x", "14\nData contributing hospitals")], {"x": "Fourteen hospitals contribute data."})
+    assert [(f["via"], f["governor"]) for f in out["flags"]] == (
+        [("heading", "Anticipated Final Dataset")] if governed else [])
+
+
+def test_a_counter_word_in_a_sentence_is_not_a_counter_heading():
+    # Only a heading or lead-in closes a scope: "the current plan" is still
+    # the anticipated one.
+    doc = "Anticipated Final Dataset\nThe current plan covers 14 hospitals across the network."
+    [flag] = _run(doc, [("x", "covers 14 hospitals across the network")], {"x": "Fourteen hospitals."})["flags"]
+    assert (flag["via"], flag["governor"]) == ("heading", "Anticipated Final Dataset")
+
+
+@pytest.mark.parametrize("doc,snippet,governed", [
+    # A listed abbreviation and a single-letter initial do not end a
+    # sentence, so the modal before them governs the words after them.
+    ("The study will enrol approx. 500 adults from partner sites.", "500 adults from partner sites", True),
+    ("Harmonisation will be overseen by J. Rivera and the imaging core.", "Rivera and the imaging core", True),
+    # A full stop after any other word does.
+    ("The study will expand. 500 adults joined from partner sites.", "500 adults joined from partner sites", False),
+])
+def test_an_abbreviation_or_an_initial_does_not_end_the_sentence(doc, snippet, governed):
+    out = _run(doc, [("x", snippet)], {"x": "Partner sites contribute adults."})
+    assert [(f["marker"], f["via"]) for f in out["flags"]] == ([("will", "sentence")] if governed else [])
+
+
+def test_a_numbered_item_is_read_as_an_item_not_cut_at_its_number():
+    # A one- or two-digit number at a line start is a list label, not a
+    # sentence end, so a numbered item is followed back to its lead-in.
+    doc = "The consortium will:\n1. acquire records from each site\n2. standardize data to a common model\n"
+    [flag] = _run(doc, [("x", "standardize data to a common model")], {"x": "Data are standardized."})["flags"]
+    assert (flag["marker"], flag["via"]) == ("will", "enumeration")
+
+
+@pytest.mark.parametrize("gap,governed", [
+    ("\n", True),                          # one blank line is passed over on the way back to the lead-in
+    ("\n\n", False),                       # a second blank line ends the walk
+    ("\nROLE: what will change\n", False),  # so does a document separator, marker and all
+])
+def test_what_ends_the_walk_back_from_an_item_to_its_lead_in(gap, governed):
+    doc = "The consortium will:" + gap + "\n- acquire records\n- standardize data to a common model"
+    out = _run(doc, [("x", "standardize data to a common model")], {"x": "Data are standardized."})
+    assert [(f["marker"], f["via"]) for f in out["flags"]] == ([("will", "enumeration")] if governed else [])
+
+
+def test_a_single_parenthesised_number_is_not_an_enumeration():
+    # An inline enumeration needs two consecutive labels: "(see table 2)"
+    # is a reference, so the sentence, not an item, is the context.
+    doc = "Enrolment will grow (see table 2) and records are standardized to a common model."
+    [flag] = _run(doc, [("x", "records are standardized to a common model")], {"x": "Records are standardized."})["flags"]
+    assert (flag["marker"], flag["via"]) == ("will", "sentence")
+
+
+@pytest.mark.parametrize("doc,snippet,marker", [
+    # A sentence wrapped onto a lower-case line is read whole, before the
+    # snippet and after it.
+    ("Imaging and waveform data will\nbe released to approved researchers.",
+     "be released to approved researchers", "will"),
+    ("Standardized imaging and waveform data are\nexpected to be available in 2027.",
+     "Standardized imaging and waveform data", "expected to"),
+])
+def test_a_sentence_wrapped_across_lines_is_read_whole(doc, snippet, marker):
+    [flag] = _run(doc, [("x", snippet)], {"x": "Standardized data are available to researchers."})["flags"]
+    assert (flag["marker"], flag["via"]) == (marker, "sentence")
+
+
+@pytest.mark.parametrize("labels,governed", [(29, True), (30, False)])
+def test_a_status_heading_governs_only_within_the_heading_window(labels, governed):
+    # HEADING_WINDOW (30) non-blank lines scanned above a part end the block.
+    doc = ("Anticipated Final Dataset\n" + "\n".join(f"Site {i}" for i in range(labels))
+           + "\n14\nData contributing hospitals")
+    out = _run(doc, [("x", "14\nData contributing hospitals")], {"x": "Fourteen hospitals contribute data."})
+    assert [f["via"] for f in out["flags"]] == (["heading"] if governed else [])
+
+
+def test_a_one_word_colon_lead_in_governs_where_a_one_word_line_does_not():
+    # The two-word minimum is for heading-like lines (a flattened table's
+    # "Planned" cell); a lead-in's colon says it governs what follows.
+    doc = "Planned:\n\nWorkshops on the common data model"
+    [flag] = _run(doc, [("x", "Workshops on the common data model")], {"x": "Workshops on the common data model."})["flags"]
+    assert (flag["marker"], flag["via"], flag["governor"]) == ("planned", "lead-in", "Planned:")
+
+
 def test_a_one_word_status_line_is_a_table_cell_not_a_heading():
     doc = "Data type\n\nControlled\n\nPlanned\n\nWaveform telemetry\n(bedside monitors)"
     record = {"x": "Waveform telemetry from bedside monitors."}
@@ -338,6 +486,58 @@ def test_malformed_model_output_is_counted_not_raised():
     manifest["chunks"].append({"id": "c999", "lines": [10**6, 10**6 + 1]})
     view = sc.BundleView(text, manifest)
     assert "c999" not in view.chunks and "c002" in view.chunks
+    manifest["chunks"].append({"id": ["c002"], "lines": [5, 6]})           # an unhashable id is not a chunk
+    assert set(sc.BundleView(text, manifest).chunks) == set(view.chunks)
+
+
+def _malformed_receipt(text):
+    pair = {"slot": D_SLOT, "snippet": D_SNIPPET}
+    return {"bundle_md5": _md5(text), "chunks": [
+        {"id": ["c002"], "status": "extracted", "extracted": [pair]},       # an unhashable chunk id
+        {"id": "c002", "status": "extracted", "extracted": 5},              # extracted not a list
+        {"id": "c002", "status": "extracted", "extracted": pair},           # one pair, not listed
+        "not an entry",
+        {"id": "c002", "status": "extracted", "extracted": ["not a pair", pair]},   # a pair not a mapping
+        {"id": 7, "status": "nothing_relevant", "reason": "boilerplate"},  # any status needs a string id
+        {"id": "c002", "status": "extracted", "extracted": [pair]}]}        # the one well-formed entry
+
+
+def test_a_malformed_receipt_entry_is_counted_not_raised():
+    # #3090: the receipt is model output. The entries `receipts.check`
+    # reports as `malformed_entry` (#724) are counted and not read, and the
+    # well-formed entry beside them still is.
+    text, manifest = _bundle(ENUMERATION)
+    record = {"preprocessing_strategies": [{"preprocessing_details": "Data are standardized."}]}
+    receipt = _malformed_receipt(text)
+    out = sc.receipt_context(receipt, manifest, text, record)
+    c = out["counts"]
+    assert (c["malformed_entries"], c["snippets"], c["verified"]) == (6, 1, 1)
+    texts = dict(zip((ch["id"] for ch in manifest["chunks"]), chunking.chunk_texts(text, manifest["chunks"])))
+    findings = rc.check(receipt, manifest, texts, record, manifest["bundle_md5"])["findings"]
+    assert c["malformed_entries"] == sum(1 for f in findings if f["kind"] == "malformed_entry")
+    assert _rules(out) == [("governor_outside_snippet", D_SLOT, "planned")]
+    assert "6 malformed receipt entries not read" in out["summary"]
+    assert "malformed" not in _run(ENUMERATION, [(D_SLOT, D_SNIPPET)], record)["summary"]
+
+
+@pytest.mark.parametrize("chunk", [["c002"], {"id": "c002"}, 2, "c999"])
+def test_evidence_naming_no_chunk_of_the_bundle_is_counted_not_raised(chunk):
+    text, manifest = _bundle(ENUMERATION)
+    view = sc.BundleView(text, manifest)
+    out = sc.review_status_expression(_review(("/x", [
+        _claim("Capabilities exist.", "fact", quote="develop capabilities", chunk=chunk)])), view=view)
+    assert out["flags"] == [] and out["counts"]["quotes_chunk_not_in_bundle"] == 1
+    assert "1 evidence quote(s) name no chunk of the bundle" in out["summary"]
+    # The same quote in its own chunk is read in its context.
+    [flag] = sc.review_status_expression(_review(("/x", [
+        _claim("Capabilities exist.", "fact", quote="develop capabilities")])), view=view)["flags"]
+    assert (flag["rule"], flag["via"], flag["marker"]) == ("planned_evidence_declared_fact", "enumeration", "will")
+
+
+def test_a_review_naming_no_artifact_cannot_be_bound_to_a_record():
+    review = {**_review(("/notes", [_claim("Curation continues.", "planned")])), "artifact": ["original_full"]}
+    with pytest.raises(ValueError, match="names no artifact"):
+        sc.review_status_expression(review, record_raw="notes: Curation continues.\n")
 
 
 def test_a_name_slot_is_routed_to_the_label_bucket():
@@ -465,6 +665,33 @@ def test_the_review_cli_reads_an_audit_and_writes_nothing(tmp_path):
     assert bad.exit_code == 1 and "no source_review" in bad.output
 
 
+def test_both_clis_count_malformed_model_output_and_exit_zero(tmp_path):
+    # #3090: a list chunk id in a receipt, or in an audit's evidence, raised
+    # an uncaught TypeError through both commands.
+    text, _m = _bundle(ENUMERATION)
+    bundle = tmp_path / "study.txt"
+    bundle.write_text(text, encoding="utf-8")
+    (tmp_path / "study_chunks.yaml").write_text(chunking.dump_manifest(chunking.build_manifest(bundle)),
+                                                encoding="utf-8")
+    (tmp_path / "receipt.yaml").write_text(yaml.safe_dump(_malformed_receipt(text)), encoding="utf-8")
+    (tmp_path / "record.yaml").write_text(yaml.safe_dump(
+        {"preprocessing_strategies": [{"preprocessing_details": "Data are standardized."}]}), encoding="utf-8")
+    before = _tree_hashes(tmp_path)
+    receipts = CliRunner().invoke(cli, ["receipts", "status-context", "--receipt", str(tmp_path / "receipt.yaml"),
+                                        "--bundle", str(bundle), "--record", str(tmp_path / "record.yaml")])
+    assert receipts.exit_code == 0 and receipts.exception is None, receipts.output
+    assert "6 malformed receipt entries not read" in receipts.output
+    audit = {"source_review": _review(("/x", [
+        _claim("Capabilities exist.", "fact", quote="develop capabilities", chunk=["c002"])]))}
+    (tmp_path / "audit.json").write_text(json.dumps(audit), encoding="utf-8")
+    review = CliRunner().invoke(cli, ["review", "status-expression", "--audit", str(tmp_path / "audit.json"),
+                                      "--bundle", str(bundle)])
+    assert review.exit_code == 0 and review.exception is None, review.output
+    assert "1 evidence quote(s) name no chunk of the bundle" in review.output
+    before[tmp_path / "audit.json"] = hashlib.sha256((tmp_path / "audit.json").read_bytes()).hexdigest()
+    assert _tree_hashes(tmp_path) == before
+
+
 # ------------------------------------------------ replay on a committed run
 V8_REP1 = "2026-09-04f_claude-opus-5-api-generic-v8_rep1"
 V8_CORE = ROOT / "data" / "d4d_concatenated" / "claudecode_api_core" / V8_REP1
@@ -482,4 +709,29 @@ def test_replay_flags_the_planned_preprocessing_the_v8_rep1_chorus_receipt_quote
                for f in out["flags"] if f["rule"] == "governor_outside_snippet"}
     for i in (0, 1):
         assert (f"preprocessing_strategies[{i}].preprocessing_details", 45, "will", "enumeration", False) in flagged
+    assert {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in files} == before
+
+
+V8_REP3 = "2026-09-04f_claude-opus-5-api-generic-v8_rep3"
+V8_REP3_CORE = ROOT / "data" / "d4d_concatenated" / "claudecode_api_core" / V8_REP3
+V8_REP3_FULL = ROOT / "data" / "d4d_concatenated" / "claudecode_api" / V8_REP3 / "CHORUS_d4d.yaml"
+
+
+@pytest.mark.skipif(not (V8_REP3_CORE / "CHORUS_coverage_receipt.yaml").exists(), reason="v8 rep3 run not on disk")
+def test_replay_the_v8_rep3_chorus_receipt_quoting_the_counter_heading_is_not_flagged():
+    # #3089 on committed data: this receipt quotes "Current Released
+    # Dataset ... Patient admissions" for `instances[0].counts`, and the
+    # "Anticipated Final Dataset" heading nine lines above it was reported
+    # as its governor. The consortium count under that heading still is.
+    receipt = V8_REP3_CORE / "CHORUS_coverage_receipt.yaml"
+    files = [V8_REP3_CORE / "CHORUS_provenance.yaml", receipt, V8_REP3_FULL,
+             V8_REP3_CORE / "intermediate" / "CHORUS_full.yaml"]
+    quoted = [p["snippet"] for e in rc.load_receipt(receipt)["chunks"] if isinstance(e, dict)
+              for p in e.get("extracted") or [] if p.get("slot") == "instances[0].counts"]
+    assert any(q.startswith("Current Released Dataset") for q in quoted)
+    before = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+    out = sc.run_status_context(files[0], files[1], V8_REP3_FULL)
+    assert out["checked"] and out["value_basis"].startswith("phase-1 snapshot")
+    governed = {f["slot"] for f in out["flags"] if f.get("governor") == "Anticipated Final Dataset"}
+    assert "instances[0].counts" not in governed and "creators[0].notes" in governed
     assert {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in files} == before

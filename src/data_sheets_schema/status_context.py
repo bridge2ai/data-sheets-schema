@@ -30,9 +30,11 @@ offsets, and two contexts are read:
     `:`, in the same block that carries a status marker. Count labels in a
     flattened panel are heading-like and carry none, so they are passed
     over; a heading with a counter marker ("Current Released Dataset")
-    closes the scope first; a one-word line is not a status heading (a
-    flattened table's "Planned" cell); a prose line, a document separator
-    or two blank lines end the block.
+    closes the scope first, including one on the line the snippet's own
+    sentence or item starts on (a snippet that quotes the counter-heading
+    is under it); a one-word line is not a status heading (a flattened
+    table's "Planned" cell); a prose line, a document separator or two
+    blank lines end the block.
 
 Each `...`-part of a snippet is read in its own context, so the text a
 snippet elides counts where it shares a part's sentence and not where it
@@ -95,7 +97,8 @@ STATUS_MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
         ("intend to", r"\bintend(?:s|ing)? to\b"),
         ("proposed", r"\bpropos(?:ed|es|e|ing)\b"),
         # "to be used" is an instruction, not a status (a licence's "is not
-        # to be used for"), so it is left out of the participle form.
+        # to be used for"), so it is left out of the participle form; it is
+        # listed in EXCLUDED_TERMS with the other exclusions.
         ("to be <participle>", r"\bto be (?!used\b)\w+(?:ed|en)\b"),
     ),
     "prospective": (
@@ -118,7 +121,9 @@ STATUS_MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
 }
 
 #: Terms deliberately not registered, with the reason — the list a curator
-#: signs off together with STATUS_MARKERS (#2917, owner decision 3).
+#: signs off together with STATUS_MARKERS (#2917, owner decision 3). An
+#: exclusion carved out of a registered pattern (a negative lookahead) is
+#: listed here too, so the list is complete without reading the patterns.
 EXCLUDED_TERMS: dict[str, str] = {
     "target": "the noun sense dominates (target population, target variable)",
     "intended": "purpose vocabulary (intended uses), not a status",
@@ -126,6 +131,8 @@ EXCLUDED_TERMS: dict[str, str] = {
     "shall": "an obligation in licences and agreements, not a plan",
     "expected": "the statistical sense (expected value); only 'expected to' is registered",
     "plan": "the noun (a data management plan); only 'planned' and 'plan(s) to' are registered",
+    "to be used": ("an instruction, not a status (a licence's 'is not to be used for'); excluded from the "
+                   "registered 'to be <participle>' pattern by a negative lookahead"),
 }
 
 #: Which marker classes express which status. A prospective marker
@@ -343,7 +350,7 @@ class BundleView:
         self.starts = [0] + [m.end() for m in re.finditer("\n", text)]
         self.chunks: dict[str, tuple[int, int, str | None]] = {}
         for c in manifest.get("chunks") or []:
-            if not isinstance(c, dict) or "id" not in c or "lines" not in c:
+            if not isinstance(c, dict) or not isinstance(c.get("id"), str) or "lines" not in c:
                 continue
             a, b = (c["lines"] + [None, None])[:2] if isinstance(c["lines"], list) else (None, None)
             if not (type(a) is int and type(b) is int and 1 <= a <= b <= len(self.starts)):
@@ -514,6 +521,31 @@ class BundleView:
                 open_runs[kind] = run
         return [r for r in runs if len(r) >= 2], line_items
 
+    def _read_as_heading(self, k: int) -> tuple[str, str] | None:
+        """(text, via) when line `k` reads as a lead-in clause ending in ':'
+        (via `lead-in`, the text from its sentence start) or as a heading-like
+        line that does not wrap onto a lower-case line (via `heading`); None
+        for any other line."""
+        line = self.line(k)
+        s = line.strip()
+        if s.endswith(":") and not _LINE_ITEM.match(line):
+            ls, _le = self.bounds(k)
+            start, _t = self._sentence_start(ls + len(line.rstrip()) - 1)
+            return self.text[start:ls + len(line.rstrip())].strip(), "lead-in"
+        wrapped = k < len(self.starts) and _continues(line, self.line(k + 1))
+        if _heading_like(line) and not wrapped:
+            return s, "heading"
+        return None
+
+    def _counter_heading(self, k: int) -> dict[str, Any]:
+        """{"closed_by": k, "text"} when line `k` reads as a heading or
+        lead-in carrying a counter marker and no status marker, else {}."""
+        read = self._read_as_heading(k) if 1 <= k <= len(self.starts) and self.line(k).strip() else None
+        if read is None:
+            return {}
+        norm = rc.normalise(read[0])
+        return {"closed_by": k, "text": read[0]} if _counter(norm) and not markers(norm) else {}
+
     def _heading(self, from_line: int) -> dict[str, Any]:
         """Scan up from `from_line` for what governs the lines below it.
 
@@ -541,13 +573,9 @@ class BundleView:
             blanks = 0
             if _SEPARATOR.match(s):
                 return {}
-            wrapped = k < len(self.starts) and _continues(line, self.line(k + 1))
-            if s.endswith(":") and not _LINE_ITEM.match(line):
-                ls, _le = self.bounds(k)
-                start, _t = self._sentence_start(ls + len(line.rstrip()) - 1)
-                text, via = self.text[start:ls + len(line.rstrip())].strip(), "lead-in"
-            elif _heading_like(line) and not wrapped:
-                text, via = s, "heading"
+            read = self._read_as_heading(k)
+            if read is not None:
+                text, via = read
             elif _prose_line(line):
                 return {}
             else:
@@ -625,7 +653,14 @@ class BundleView:
                     found[cls] = {"term": term_, "via": via, "source_line": self.line_of(at), "_dist": dist}
         for d in found.values():
             d.pop("_dist")
-        heading = self._heading(self.line_of(own) - 1)
+        # The line the part's own sentence or item starts on is read first: a
+        # part that begins on a counter-heading ("Current Released Dataset")
+        # is under that heading, so the status heading above it does not
+        # govern. A counter-heading the part quotes only after its first line
+        # closes nothing for the text before it, which the status heading
+        # does govern (#3089).
+        own_line = self.line_of(own)
+        heading = self._counter_heading(own_line) or self._heading(own_line - 1)
         for cls, term_ in (heading.get("classes") or {}).items():
             found.setdefault(cls, {"term": term_, "via": heading["via"], "source_line": heading["line"],
                                    "governor": heading["text"]})
@@ -662,19 +697,30 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     the receipt addresses (the API path's phase-1 snapshot, else the full
     record). With `final` as well, each flag says whether the final value,
     followed by entry identity (`receipts.remap_path`), expresses the
-    status. Pure and read-only: nothing passed in is modified."""
+    status. Pure and read-only: nothing passed in is modified.
+
+    The receipt is model output, so a malformed entry is counted, never
+    raised (#724): exactly the entries `receipts.check` reports as
+    `malformed_entry` — one that is not a mapping with a string id, or an
+    `extracted` entry whose `extracted` is not a list of mappings — are
+    counted under `malformed_entries` and none of their pairs is read, as
+    the validator reads none of them."""
     view = BundleView(bundle_text, manifest)
     counts = {"snippets": 0, "verified": 0, "not_verified": 0, "value_unresolved": 0,
-              "located": 0, "unlocated": 0}
+              "located": 0, "unlocated": 0, "malformed_entries": 0}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     unlocated: list[dict[str, Any]] = []
     for entry in receipt.get("chunks") or []:
-        if not isinstance(entry, dict) or entry.get("status") != "extracted":
+        pairs = entry.get("extracted") if isinstance(entry, dict) else None
+        if (not isinstance(entry, dict) or not isinstance(entry.get("id"), str)
+                or (entry.get("status") == "extracted" and pairs is not None
+                    and not (isinstance(pairs, list) and all(isinstance(p, dict) for p in pairs)))):
+            counts["malformed_entries"] += 1
             continue
-        cid = entry.get("id")
-        for pair in entry.get("extracted") or []:
-            if not isinstance(pair, dict):
-                continue
+        if entry.get("status") != "extracted":
+            continue
+        cid = entry["id"]
+        for pair in pairs or []:
             counts["snippets"] += 1
             slot, snippet = str(pair.get("slot") or ""), pair.get("snippet")
             if (not isinstance(snippet, str) or not snippet.strip() or cid not in view.chunks
@@ -714,6 +760,8 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     slots = {k: len({f["slot"] for f in flags[k]}) for k in ("value", "label")}
     summary = (f"snippets {counts['verified']}/{counts['snippets']} verified · {counts['located']} located"
                + (f" ({counts['unlocated']} unlocated)" if counts["unlocated"] else "")
+               + (f" · {counts['malformed_entries']} malformed receipt entr"
+                  f"{'y' if counts['malformed_entries'] == 1 else 'ies'} not read" if counts["malformed_entries"] else "")
                + f" · governor_outside_snippet {by_rule['governor_outside_snippet']['value']}"
                + f" (+{by_rule['governor_outside_snippet']['label']} label)"
                + f" · modal_dropped {by_rule['modal_dropped']['value']} (+{by_rule['modal_dropped']['label']} label)"
@@ -744,19 +792,27 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
     the review's): a claim whose own text carries no marker is then counted
     as expressed when the whole value at its path carries one. `view` (the
     bundle and its manifest) lets an evidence quote's context count, as in
-    rule 1. Pure and read-only."""
+    rule 1. Pure and read-only.
+
+    The review is model output: a malformed row, claim or evidence entry is
+    passed over or counted, never raised. An evidence entry whose `chunk`
+    names no chunk of the bundle (a list, a number, an unknown id) has its
+    context left unread and is counted under `quotes_chunk_not_in_bundle`."""
     review = audit.get("source_review") if isinstance(audit, dict) and "source_review" in audit else audit
     if not isinstance(review, dict) or not isinstance(review.get("values"), list):
         raise ValueError("no source_review with a values list")
     value_texts: dict[str, str] | None = None
     if record_raw is not None:
         from data_sheets_schema.source_review import inventory
+        if not isinstance(review.get("artifact"), str):
+            raise ValueError("the source_review names no artifact, so no record can be bound to it")
         inv = inventory(record_raw, review.get("artifact"))
         if inv["sha256"] != review.get("sha256"):
             raise ValueError("the record is not the artifact this source_review is bound to (sha256 differs)")
         value_texts = {row["path"]: row["text"] for row in inv["values"]}
     counts = {"claims": 0, "supported": 0, "declared": {}, "expressed": 0,
-              "expressed_elsewhere_in_value": 0, "fact_claims": 0, "unlocated_quotes": 0}
+              "expressed_elsewhere_in_value": 0, "fact_claims": 0, "unlocated_quotes": 0,
+              "quotes_chunk_not_in_bundle": 0}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     for row in review["values"]:
         if not isinstance(row, dict) or not isinstance(row.get("claims"), list):
@@ -799,7 +855,9 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
                + f" · planned_evidence_declared_fact {by_rule['planned_evidence_declared_fact']['value']}"
                + f" (+{by_rule['planned_evidence_declared_fact']['label']} label)"
                + ("" if value_texts is not None else " · value text not read (no record supplied)")
-               + ("" if view is not None else " · evidence context not read (no bundle supplied)"))
+               + ("" if view is not None else " · evidence context not read (no bundle supplied)")
+               + (f" · {counts['quotes_chunk_not_in_bundle']} evidence quote(s) name no chunk of the bundle"
+                  if counts["quotes_chunk_not_in_bundle"] else ""))
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_REVIEW, "checked": True,
             "gating": False, "artifact": review.get("artifact"), "sha256": review.get("sha256"),
             "value_text_read": value_texts is not None, "evidence_context_read": view is not None,
@@ -817,7 +875,10 @@ def _planned_evidence(evidence: Any, view: BundleView | None, counts: dict[str, 
         cls = next((c for c in PLANNED_EVIDENCE_CLASSES if c in own), None)
         if cls:
             return {"evidence": i, "chunk": e.get("chunk"), "class": cls, "marker": own[cls], "via": "quote"}
-        if view is None or e.get("chunk") not in view.chunks:
+        if view is None:
+            continue
+        if not isinstance(e.get("chunk"), str) or e["chunk"] not in view.chunks:
+            counts["quotes_chunk_not_in_bundle"] += 1
             continue
         lost, _n = view.lost_classes(e["chunk"], e["quote"])
         if lost is None:
