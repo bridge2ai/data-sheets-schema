@@ -20,8 +20,12 @@ import unittest
 from pathlib import Path
 
 import pytest
+import yaml
 
-from data_sheets_schema.rocrate_map import PACKAGES_DIR, validate
+from data_sheets_schema.rocrate_map import (
+    FULL_SCHEMA, PACKAGES_DIR, build_placement, validate,
+)
+from data_sheets_schema.schema_view import shared_view
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGES = ROOT / PACKAGES_DIR
@@ -89,6 +93,32 @@ class TestCommittedMapperOutputs(unittest.TestCase):
         self.assertGreaterEqual(len(lines), len(KNOWN))
         self.assertEqual([], [(name, line) for name, line in lines
                               if not BASIS.search(line)])
+
+    def test_every_filled_row_is_in_the_record_it_reports_on(self):
+        """#2915. A nested row replaced the value a `Dataset` row had placed
+        while the report still listed that row filled; a report's filled
+        `Dataset.<slot>` rows name slots its record carries, and its slot
+        count is the record's."""
+        placement = build_placement(shared_view(FULL_SCHEMA))
+        reports = sorted(PACKAGES.glob("*/processed/*_crate_mapping_provenance.md"))
+        self.assertTrue(reports)
+        for report in reports:
+            with self.subTest(report=report.name):
+                text = report.read_text(encoding="utf-8")
+                mapped = report.with_name(report.name.replace(
+                    "_crate_mapping_provenance.md", "_crate_mapped_d4d.yaml"))
+                record = yaml.safe_load(mapped.read_text(encoding="utf-8"))
+                filled = re.findall(r"^\| Dataset\.(\w+) \| filled \|", text, re.M)
+                self.assertEqual([], [s for s in filled if s not in record])
+                # and no nested row is also filled into a host a Dataset row
+                # filled: that pair is the overwrite
+                nested = re.findall(r"^\| (\w+)\.\w+ \| filled \|", text, re.M)
+                hosts = {placement.get(cls) for cls in nested if cls != "Dataset"}
+                self.assertEqual(set(), hosts & set(filled))
+                m = re.search(r"^- Distinct top-level `Dataset` slots filled: (\d+) ",
+                              text, re.M)
+                self.assertIsNotNone(m)
+                self.assertEqual(int(m.group(1)), len(record))
 
 
 if __name__ == "__main__":

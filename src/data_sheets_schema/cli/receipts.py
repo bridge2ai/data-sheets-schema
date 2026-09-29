@@ -212,3 +212,107 @@ def sources(method, label, project, examples, as_json):
         return
     for line in rs.render(report):
         click.echo(line)
+
+
+@receipts.command("status-context")
+@click.option("--method", default=None,
+              help="with --label/--project: the run directory family; defaults to the one the label lives in (#934)")
+@click.option("--label", default=None, help="a run label; with --project, read the run's receipt, record and bundle")
+@click.option("--project", default=None, help="dataset identifier carried by the run's files")
+@click.option("--receipt", "receipt_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="instead of a run: the coverage receipt (with --bundle and --record)")
+@click.option("--bundle", "bundle_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="with --receipt: the bundle the receipt names by md5")
+@click.option("--record", "record_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="with --receipt: the record the receipt addresses (the phase-1 snapshot where the run wrote one)")
+@click.option("--final", "final_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="with --receipt: the final record, to say whether each flagged value there expresses the status")
+@click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="with --receipt: the bundle's chunk manifest; default the one beside it or the study's")
+@click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
+def status_context(method, label, project, receipt_file, bundle_file, record_file, final_file,
+                   chunk_manifest, as_json):
+    """Where a receipted snippet lost a status marker its context carries
+    (#2917): `governor_outside_snippet` and `modal_dropped`, label slots apart.
+
+    Read-only and non-gating: it writes nothing, exits 0 whatever it finds,
+    and leaves `receipts check` and every provenance block as they are. A
+    flag is lexical — see the assurance line it prints.
+    """
+    import json
+
+    import yaml
+
+    from data_sheets_schema import receipts as rc
+    from data_sheets_schema import status_context as sc
+    if receipt_file is not None:
+        if bundle_file is None or record_file is None or label or project or method:
+            # --method names a run's directory family; the files named here
+            # are read as given, so it would be silently ignored (#3253).
+            raise click.UsageError("--receipt takes --bundle and --record, and no --label/--project/--method")
+    elif not label or not project:
+        raise click.UsageError("name a run (--label and --project) or files (--receipt, --bundle, --record)")
+    elif not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
+        raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")
+    else:
+        given = [flag for flag, v in (("--bundle", bundle_file), ("--record", record_file),
+                                      ("--final", final_file), ("--chunk-manifest", chunk_manifest)) if v is not None]
+        if given:
+            # A run is read from its own files; a file option here would be
+            # ignored and the result would be over other bytes (#3212).
+            raise click.UsageError(f"{', '.join(given)} apply to --receipt, not to a run (--label/--project)")
+    try:
+        if receipt_file is not None:
+            out = sc.file_status_context(receipt_file, bundle_file, record_file,
+                                         chunk_manifest=chunk_manifest, final=final_file)
+        else:
+            from data_sheets_schema.cli.method import resolve_method
+            p = _run_paths(method or resolve_method(label, project), label, project)
+            out = sc.run_status_context(p["provenance"], rc.receipt_path(p["core_dir"], project), p["full"])
+    except (OSError, UnicodeDecodeError, ValueError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(json.dumps(out, indent=2, ensure_ascii=False, default=str))
+    else:
+        for line in sc.report_lines(out):
+            click.echo(line)
+
+
+@receipts.command("origin")
+@click.option("--transcript", "transcripts", multiple=True, required=True, type=click.Path(dir_okay=False),
+              help="the run's stream-json transcript; repeat, first invocation first, for a killed-and-resumed run")
+@click.option("--receipt", "receipt_file", required=True, type=click.Path(dir_okay=False),
+              help="the coverage receipt, spelled or resolving as the transcript's Writes name it")
+@click.option("--full", "full_file", required=True, type=click.Path(dir_okay=False),
+              help="the full record, spelled or resolving as the transcript's Writes name it")
+@click.option("--json", "as_json", is_flag=True, help="print the whole block as JSON")
+def origin(transcripts, receipt_file, full_file, as_json):
+    """Report which receipt snippets were written before the full record
+    existed, and which after it (#2933). Report-only: it writes nothing.
+
+    Rebuilds the receipt from the transcript's successful Writes and
+    classifies each final (chunk, snippet, slot) element as
+    `contemporaneous`, `phase1_correction` (after the first full-record
+    Write, before the first successful `derive core`, or to the end when
+    none succeeded) or `phase3_backport`. A derive counts only where its
+    call's result carries its own status: it is the command's last part, or
+    every join after it is `&&` and the call succeeded. A piped,
+    backgrounded, grouped or multi-line derive, one after `||` or followed
+    by `;`, or a failed `&&` chain cannot be placed, unless the native
+    control denied the call, which then never ran. A relative `--full`
+    after a `cd`, `pushd` or `popd` resolves against the new directory only
+    where every join from the change to the derive is `&&`. Where the
+    history cannot be rebuilt the status is `unknown`, with the reasons,
+    and nothing is classified; that includes a receipt Write in flight
+    together with another receipt Write, the draft or the derive. Prints counts, chunk ids, slot paths and hashes, never
+    snippet text.
+    """
+    import json
+
+    from data_sheets_schema import receipt_origin as ro
+    block = ro.origin([Path(t) for t in transcripts], Path(receipt_file), Path(full_file))
+    if as_json:
+        click.echo(json.dumps(block, indent=2))
+    else:
+        for line in ro.summary(block):
+            click.echo(f"   {line}")
