@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Held-out audit ground truth",
+  "description": "Independent review observations of frozen originals, kept out of every generation and audit instruction, used only to score audit recall (#2921).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "project",
+    "entries"
+  ],
+  "properties": {
+    "format": {
+      "const": "audit_ground_truth_v1"
+    },
+    "project": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "description": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "target_original_full_sha256",
+          "paths",
+          "kind",
+          "governing_source",
+          "observation",
+          "reviewer_role",
+          "reviewed_on",
+          "provenance_note",
+          "held_out"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+            "maxLength": 128
+          },
+          "target_original_full_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "sha256 of the exact original_full bytes the observation describes."
+          },
+          "paths": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^(/([^/~]|~[01])*)+$"
+            },
+            "description": "JSON Pointers into that original where the defect sits."
+          },
+          "kind": {
+            "enum": [
+              "role_placement",
+              "status_scope",
+              "date_scope",
+              "absence_or_self_narration",
+              "quotation_fidelity",
+              "identifier_count",
+              "attribution",
+              "omission",
+              "other"
+            ]
+          },
+          "governing_source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bundle_sha256",
+              "lines"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "source"
+                ]
+              },
+              {
+                "required": [
+                  "chunk"
+                ]
+              }
+            ],
+            "properties": {
+              "bundle_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$",
+                "description": "sha256 of the bundle the lines are numbered in."
+              },
+              "source": {
+                "type": "string",
+                "pattern": "\\S",
+                "description": "Document name, as the bundle's FILE: header gives it."
+              },
+              "chunk": {
+                "type": "string",
+                "pattern": "\\S",
+                "description": "Chunk id from that bundle's chunk manifest."
+              },
+              "lines": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "First and last bundle line, 1-based and inclusive."
+              }
+            }
+          },
+          "observation": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 2000
+          },
+          "reviewer_role": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 200
+          },
+          "reviewed_on": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "provenance_note": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Repository-relative path of the note recording the review."
+          },
+          "held_out": {
+            "const": true
+          }
+        }
+      }
+    }
+  }
+}

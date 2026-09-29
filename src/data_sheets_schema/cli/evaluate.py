@@ -405,3 +405,57 @@ def validate_cmd(files, rubric, input_path, agent_definition, context_path):
     if validate_outputs(list(files), rubric, input_path=input_path,
                         definition_path=agent_definition, context_path=context_path):
         raise click.ClickException("Semantic output validation failed.")
+
+
+@evaluate.command("audit-recall")
+@click.option("--audit", "audits", multiple=True, required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="audit.json to score; repeat once per replicate")
+@click.option("--original", "originals", multiple=True, required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the frozen original_full each --audit reviewed, in the same order")
+@click.option("--ground-truth", "ground_truth", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="held-out ground-truth file to score against")
+@click.option("--arm", default=None, help="arm label to record; never inferred")
+@click.option("--replicate", "replicates", multiple=True,
+              help="replicate label for each --audit, in the same order")
+@click.option("--output", default=None, type=click.Path(dir_okay=False, path_type=Path),
+              help="also write the JSON report here")
+@click.option("--json", "as_json", is_flag=True, help="print the JSON report instead of the summary")
+def audit_recall_cmd(audits, originals, ground_truth, arm, replicates, output, as_json):
+    """Recall of Phase 3 audits against held-out review observations (#2921).
+
+    Offline and read-only: no model call, no source check. Each audit must
+    pass audit_grammar and name its original's sha256 in source_review; only
+    ground-truth entries pinned to that sha256 are scored, so another
+    original gives 0 applicable entries and recall n/a, not 0. The hit rule
+    is provisional until the owner signs it off. Unmatched audit flags are
+    review candidates, never false positives.
+    """
+    import json as _json
+
+    from data_sheets_schema import audit_recall
+    if len(audits) != len(originals):
+        raise click.UsageError("give one --original for each --audit, in the same order")
+    if replicates and len(replicates) != len(audits):
+        raise click.UsageError("give one --replicate for each --audit, or none")
+    if output is not None and output.resolve() in {p.resolve() for p in (*audits, *originals, ground_truth)}:
+        raise click.UsageError("--output names an input; a report never overwrites what it scored")
+    raw = ground_truth.read_bytes()
+    runs = [{"audit": a.read_bytes(), "original": o.read_bytes(), "audit_path": str(a),
+             "original_path": str(o), "replicate": replicates[i] if replicates else None}
+            for i, (a, o) in enumerate(zip(audits, originals))]
+    try:
+        truth = audit_recall.load_ground_truth(raw)
+        value = audit_recall.report(runs, truth, ground_truth_raw=raw,
+                                    ground_truth_label=str(ground_truth), arm=arm)
+    except audit_recall.GroundTruthError as exc:
+        raise click.ClickException("ground truth refused:\n" + "\n".join(
+            f"  {p['at'] or '/'}: {p['problem']}" for p in exc.problems))
+    except audit_recall.AuditRecallError as exc:
+        raise click.ClickException(f"not scored: {exc}")
+    text = _json.dumps(value, indent=2, ensure_ascii=False) + "\n"
+    if output is not None:
+        output.write_text(text, encoding="utf-8")
+    click.echo(text if as_json else audit_recall.render_text(value), nl=False)
