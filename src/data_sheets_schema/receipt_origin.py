@@ -56,7 +56,9 @@ unreadable or malformed; a tool id is duplicated or a result has no call
 successful Write, has no result or no success evidence; the receipt is
 changed by anything other than a Write (an edit tool, or a shell command
 that names it, is not known to be read-only and was not denied by the
-native control) where the change can reach
+native control; a command substitution -- backticks, `$(...)` unquoted or
+double-quoted, `<(...)` or `>(...)` -- is never known to be read-only,
+since the inner command is not parsed, #3240) where the change can reach
 the pre-draft or derive-time snapshot, or the full record is changed that
 way before its first Write; the first observed Write of either file updated
 an existing file, or carries no create/update metadata to say it did not; a
@@ -102,7 +104,8 @@ READ_TOOLS = frozenset({"Read", "Grep", "Glob", "LS", "NotebookRead"})
 #: only when `_sed_reads_only` admits its options and script: no in-place
 #: flag, no script file, and no `w`/`W`/`e` command or `s///w`/`s///e`
 #: flag, #3220). Anything else that names a tracked file is a possible
-#: mutation.
+#: mutation, and so is any command that substitutes one (`_substitutes`,
+#: #3240).
 READ_ONLY_PROGRAMS = frozenset({"cat", "head", "tail", "grep", "egrep", "fgrep", "rg", "wc", "ls",
                                 "stat", "file", "md5", "md5sum", "shasum", "sha256sum", "cmp",
                                 "diff", "nl", "sed", "echo", "printf", "pwd", "true", "test", "["})
@@ -402,6 +405,47 @@ def _strip_comments(command: str) -> str:
     return "".join(out)
 
 
+def _substitutes(command: str) -> bool:
+    """Whether the (comment-free) command runs a command inside a word:
+    a backtick or `$(` outside single and `$'...'` quotes -- inside double
+    quotes too -- or a process substitution `<(` / `>(` outside quotes.
+    The tokeniser reads `echo "$(sed -i d R)"`, `` echo `rm R` `` and
+    `cat <(rm R)` as arguments of a read-only `echo`/`cat` and never sees
+    the inner command, so a command that substitutes is never known to be
+    read-only (#3240). Conservative by design: the inner command is not
+    parsed, and `$((...))` arithmetic counts too."""
+    i, n = 0, len(command)
+    quote: str | None = None
+    while i < n:
+        ch = command[i]
+        if quote in ("'", "$'"):
+            if ch == "\\" and quote == "$'" and i + 1 < n:
+                i += 2
+                continue
+            if ch == "'":
+                quote = None
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            i += 2
+            continue
+        if ch == "`" or (ch == "$" and command[i + 1:i + 2] == "("):
+            return True
+        if quote == '"':
+            if ch == '"':
+                quote = None
+        elif ch in "<>" and command[i + 1:i + 2] == "(":
+            return True
+        elif ch == "$" and command[i + 1:i + 2] == "'":
+            quote = "$'"
+            i += 2
+            continue
+        elif ch in "'\"":
+            quote = ch
+        i += 1
+    return False
+
+
 def _tokens(command: str) -> list[str] | None:
     """The command's words and operators, or None when it does not tokenise.
     Comments are removed first, the way bash removes them, and the lexer's
@@ -694,7 +738,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 break
     # Read-only: no redirection except to /dev/null or a descriptor, no
     # unescaped newline (a second command), and every program known to read.
-    read_only = not newline
+    # A command substitution hides its command inside a word (#3240).
+    read_only = not newline and not _substitutes(_strip_comments(command))
     for i, token in enumerate(tokens):
         if set(token) <= _PUNCT and ">" in token:
             following = tokens[i + 1] if i + 1 < len(tokens) else ""

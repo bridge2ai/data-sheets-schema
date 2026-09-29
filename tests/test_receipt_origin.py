@@ -707,6 +707,55 @@ class SedWrites(Base):
                 self.assertEqual(block["non_write_mutations"], [])
 
 
+class CommandSubstitution(Base):
+    """A command inside backticks, a double-quoted `$(...)` or a process
+    substitution is a word of the outer command to the tokeniser, so the
+    outer `echo`/`cat` looked read-only while the inner one wrote the
+    receipt (#3240). Such a command is never known to be read-only."""
+
+    def _before_draft(self, command):
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.bash(command)
+        r.write(r.full, "id: x\n")
+        r.derive()
+        return r.report()
+
+    def test_a_substituted_write_of_the_receipt_is_unknown(self):
+        for command in (f"echo `sed -i '' -e /X/d {REL}`",
+                        f"echo \"$(sed -i '' -e /X/d {REL})\"",
+                        f"cat <(rm {REL})",
+                        f"cat {REL} >(tee {REL})",
+                        f"echo \"x `rm {REL}`\"",
+                        f"echo $(sed -i d {REL})"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertUnknown(block, "may change the receipt other than by a Write")
+                self.assertEqual(len(block["non_write_mutations"]), 1)
+
+    def test_a_quoted_or_escaped_substitution_is_text(self):
+        for command in (f"echo '$(rm x)' {REL}",
+                        f"echo '`rm x`' {REL}",
+                        f"echo \\$\\(rm x\\) {REL}",
+                        f"echo \"\\`rm x\\`\" {REL}",
+                        f"grep -c '<(' {REL}",
+                        f"echo \"<(x)\" {REL}"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["non_write_mutations"], [])
+
+    def test_substitutes_reads_quotes_as_bash_does(self):
+        cases = {"echo `x`": True, 'echo "$(x)"': True, "echo $(x)": True, "cat <(x)": True,
+                 "tee >(x)": True, "echo $((1+2))": True, 'echo "a `b` c"': True,
+                 "echo '$(x)'": False, "echo '`x`'": False, "echo \\$(x)": False,
+                 'echo "\\`x\\`"': False, 'echo "<(x)"': False, "echo $'\\'$(x)'": False,
+                 "echo $'a'$(x)": True, 'echo "a" <(x)': True, "cat a < (b)": False, "echo 'a' \"b\" c": False}
+        for command, expected in cases.items():
+            with self.subTest(command=command):
+                self.assertIs(ro._substitutes(command), expected)
+
+
 class NonChecks(unittest.TestCase):
     def test_the_unattributable_shell_write_names_every_unnamed_route(self):
         # A write that never names the receipt is not seen at all; the stated
