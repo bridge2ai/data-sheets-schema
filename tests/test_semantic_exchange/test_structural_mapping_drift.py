@@ -398,6 +398,25 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         self.assertNotIn("value(s) differ", out)
         self.assertIn(f"The {self.rows} row(s) both files carry agree on", out)
 
+    def test_a_stale_summary_alone_is_what_the_headline_names(self):
+        """#3125. The headline blamed the mapping whatever drifted, said the
+        summary failed "either" when nothing else had, and closed on the
+        mapping's #234 line. Here the mapping regenerates exactly."""
+        _, out = self.stale_result
+        self.assertIn("✗ The committed summary does not regenerate from the "
+                      "mapping's inputs.", out)
+        self.assertNotIn("committed mapping does not regenerate", out)
+        self.assertNotIn("either", out)
+        self.assertNotIn("(#234)", out)
+
+    def test_a_drifted_mapping_is_what_the_headline_names(self):
+        """The other side of #3125: with the summary fresh, the mapping."""
+        _, out = self.drifted_result
+        self.assertIn("✗ The committed mapping does not regenerate from its "
+                      "inputs.", out)
+        self.assertNotIn("committed summary does not regenerate", out)
+        self.assertIn("(#234)", out)
+
     def test_the_check_writes_nothing_where_it_reads(self):
         """Every file in each directory the check read, by content and by
         modification time, and no file added. The stale-summary copy is the

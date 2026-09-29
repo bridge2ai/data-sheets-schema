@@ -2,193 +2,137 @@
 
 ## Overview
 
-This document describes the schema-structure-aware mapping between D4D (Datasheets for Datasets) and RO-Crate FAIRSCAPE implementation.
+This document describes how the schema-structure-aware mapping between D4D
+(Datasheets for Datasets) and the RO-Crate FAIRSCAPE profile is produced and
+checked.
 
-**Generation Date**: 2026-03-20  
-**Method**: Automated structural analysis  
-**Script**: `src/semantic_exchange/generate_structural_mapping.py`  
-**Total Mappings**: 142
+**Script**: `src/semantic_exchange/generate_structural_mapping.py`
+**Mapping**: `data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv`
+**Summary**: `data/semantic_exchange/d4d_rocrate_structural_mapping_summary.md`
 
-## Mapping Quality Metrics
+## Where the numbers are
 
-| Metric | Count | Percentage |
-|--------|-------|------------|
-| **Total mappings** | 142 | 100% |
-| **Exact matches** (confidence = 1.0) | 130 | 91.5% |
-| **Close matches** (confidence < 1.0) | 12 | 8.5% |
-| **Type-compatible mappings** | 142 | 100% |
-| **Mappings with warnings** | 0 | 0% |
-
-## Structural Awareness Features
-
-### 1. Inheritance Hierarchy Analysis ✅
-
-The mapper identifies all classes that inherit from `DatasetProperty` and applies consistent mapping patterns:
-
-**Example**:
-```
-Purpose (is_a: DatasetProperty)
-  ├─ Purpose.name → name (exactMatch, confidence: 1.0)
-  ├─ Purpose.description → description (exactMatch, confidence: 1.0)
-  └─ Purpose.id → identifier (filtered out - low similarity)
-
-Task (is_a: DatasetProperty)
-  ├─ Task.name → name (exactMatch, confidence: 1.0)
-  ├─ Task.description → description (exactMatch, confidence: 1.0)
-  └─ Task.id → identifier (filtered out - low similarity)
-```
-
-**Total DatasetProperty subclasses mapped**: 50+
-
-### 2. Composition Path Tracing ✅
-
-The mapper follows composition relationships where slots have class ranges:
-
-**Example**:
-```
-Creator.principal_investigator (range: Person)
-  └─ → principalInvestigator (exactMatch, confidence: 1.0)
-
-FundingMechanism.grantor (range: Grantor)
-  └─ → funder (composition path traced)
-```
-
-### 3. Module Semantic Grouping ✅
-
-The mapper groups classes by LinkML module and maps to corresponding RO-Crate namespaces:
-
-| D4D Module | RO-Crate Namespace | Mappings |
-|------------|-------------------|----------|
-| Motivation | d4d:, schema: | ~20 |
-| Composition | d4d:, schema: | ~25 |
-| Collection | rai:, schema: | ~18 |
-| Preprocessing | rai: | ~15 |
-
-### 4. Type Compatibility Validation ✅
-
-The mapper validates that source and target types are compatible:
-
-**Validation Rules**:
-- ❌ `boolean` cannot map to relationship properties (e.g., `prov:wasDerivedFrom`)
-- ❌ `boolean` cannot map to date properties (e.g., `schema:date`)
-- ❌ Multivalued slots cannot map to single-value properties
-- ❌ Literal values cannot map to semantic relationships
-- ✅ All generated mappings passed validation
-
-## Example Mappings by Category
-
-### Exact Name Matches (confidence = 1.0)
-
-```sssom
-d4d:Purpose/name → name (skos:exactMatch)
-d4d:Purpose/description → description (skos:exactMatch)
-d4d:Creator/principal_investigator → principalInvestigator (skos:exactMatch)
-d4d:Dataset/identifier → identifier (skos:exactMatch)
-d4d:Dataset/version → version (skos:exactMatch)
-d4d:Dataset/license → license (skos:exactMatch)
-d4d:Dataset/keywords → keywords (skos:exactMatch)
-```
-
-### Semantic Matches (confidence < 1.0)
-
-```sssom
-d4d:DataSubset/bytes → contentSize (skos:closeMatch, confidence: 0.7)
-d4d:Dataset/issued → datePublished (skos:closeMatch, confidence: 0.7)
-```
-
-### Composition Paths
-
-```sssom
-d4d:Creator/principal_investigator → principalInvestigator
-  (Traces: Creator.principal_investigator (Person) → principalInvestigator)
-```
-
-### Module-Based Mappings
-
-**Motivation Module → d4d: namespace**:
-```sssom
-d4d:Purpose/response → d4d:purpose (via module semantic grouping)
-d4d:AddressingGap/response → d4d:addressingGaps (via module semantic grouping)
-```
-
-**Collection Module → rai: namespace**:
-```sssom
-d4d:CollectionProcess/* → rai:dataCollection* (via module semantic grouping)
-d4d:LabelingStrategy/* → rai:dataAnnotation* (via module semantic grouping)
-```
-
-## Comparison with Previous Approach
-
-| Aspect | Old Mapping (mappings/*.yaml) | New Structural Mapping |
-|--------|------------------------------|----------------------|
-| **Method** | Manual hardcoded field-level | Automated structural analysis |
-| **Class awareness** | Yes (hardcoded per class) | Yes (via inheritance) |
-| **Hierarchy awareness** | No | **Yes** (DatasetProperty lineage) |
-| **Composition awareness** | No | **Yes** (follows range: Person) |
-| **Module awareness** | Partial (manual sections) | **Yes** (automated grouping) |
-| **Type validation** | No | **Yes** (prevents semantic mismatches) |
-| **Deduplication** | Manual | **Automatic** |
-| **Maintainability** | Low (manual updates) | **High** (regenerates from schema) |
-| **Coverage** | ~47 mappings | **142 mappings** |
-
-## Prevented Errors
-
-The structural mapper prevented the following types of errors that occurred in PR #134:
-
-1. **Boolean → Relationship**:
-   ```
-   ❌ was_inferred_derived (boolean) → prov:wasDerivedFrom (relationship)
-   ✅ Prevented by type validation
-   ```
-
-2. **String → Date**:
-   ```
-   ❌ representative_verification (string) → schema:date
-   ✅ Prevented by semantic domain checking
-   ```
-
-3. **Multivalued → Single**:
-   ```
-   ❌ missing_value_code (string[]) → schema:variableMeasured (single)
-   ✅ Prevented by cardinality validation
-   ```
-
-## Usage
-
-### Generate Mappings
+This document states no counts. An earlier version stated a total and a
+type-compatibility rate that the committed file had long since stopped
+matching, and nothing compared them (#2976). Read the numbers from the files
+instead:
 
 ```bash
-poetry run python src/semantic_exchange/generate_structural_mapping.py
+make check-sssom-structural   # committed mapping and summary against regeneration
 ```
 
-**Outputs**:
-- `data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv` - SSSOM format
-- `data/semantic_exchange/d4d_rocrate_structural_mapping_summary.md` - Human-readable summary
+The check writes nothing. It lists every row the committed file carries that
+regeneration does not produce (and the reverse), every value that differs in
+`d4d_subject_range`, `subject_multivalued` or `type_compatible` on the rows
+both carry, and whether the summary regenerates. It exits non-zero on any
+difference. It currently fails on the hand-written rows described under
+[Rows the generator does not produce](#rows-the-generator-does-not-produce).
 
-### Read Mappings
+The summary is written from the generator's output, not from the committed
+TSV, so its per-justification counts describe what regeneration makes and not
+the file beside it (#295). For the committed file's own counts, read the TSV:
 
 ```python
 import pandas as pd
 
-df = pd.read_csv("data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv", sep="\t")
-
-# Filter exact matches
-exact = df[df["predicate_id"] == "skos:exactMatch"]
-
-# Filter by confidence
-high_conf = df[df["confidence"] >= 0.9]
-
-# Filter by namespace
-rai_mappings = df[df["object_id"].str.startswith("rai:")]
+df = pd.read_csv("data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv",
+                 sep="\t", comment="#")
+len(df)                                          # rows
+df["predicate_id"].value_counts()                # exactMatch / closeMatch
+(df["type_compatible"] == False).sum()           # rows flagged incompatible
+df["composition_path"].notna().sum()             # composition rows
 ```
 
-## Future Enhancements
+## Mapping strategies
 
-1. **Ontology Integration**: Fetch formal definitions from LOV for deeper semantic validation
-2. **Inverse Mappings**: Generate RO-Crate → D4D mappings
-3. **Transformation Templates**: Generate actual data transformation code
-4. **Mapping Refinement**: User feedback loop to adjust similarity thresholds
-5. **Cross-Schema Validation**: Compare against other D4D implementations
+`StructuralMappingGenerator.generate_mappings` runs four strategies, then keeps
+one row per (class, slot, RO-Crate property), the one with the highest
+confidence. Each row's `structural_notes` names the strategy that produced it.
+
+### 1. `slot_uri` annotations
+
+A slot whose `slot_uri` names a property the RO-Crate input carries in the same
+namespace, for example `d4d:Dataset/at_risk_populations` → `d4d:atRiskPopulations`.
+Justification `semapv:SemanticSimilarity`; confidence 0.9 when the types are
+compatible and 0.6 when not. **An incompatible row is kept and flagged**, not
+dropped.
+
+### 2. `DatasetProperty` hierarchy
+
+The attributes of every class that inherits from `DatasetProperty`, matched to
+RO-Crate properties by name similarity (at least 0.85), for example
+`d4d:Purpose/name` → `name` and `d4d:Creator/principal_investigator` →
+`principalInvestigator`. **An incompatible candidate is skipped**, so every row
+this strategy emits is type-compatible by construction; that is a property of
+the filter, not evidence about the schema.
+
+### 3. Composition paths
+
+Every dotted path through a slot whose range is a class, matched to RO-Crate
+properties whose path contains the slot name. The subject carries the whole
+path, so `anomalies.id` is `d4d:Dataset/anomalies.id` and no longer shares a
+subject with `Dataset`'s own `id` slot (#410). The range and cardinality are
+those the schema gives the end of the path (#2936). Before
+#2936 these rows were written with range `string`, multivalued `False` and
+`type_compatible` `True` whatever the path reached, and none was validated.
+Today the only composition rows go through `anomalies` on `Dataset` and
+`DataSubset`, a multivalued slot mapped to a single value, so every one of them
+is **kept and flagged** with a cardinality warning.
+
+### 4. Module semantic grouping
+
+Meant to match the attributes of classes in the Motivation, Composition,
+Collection, Preprocessing and Uses modules to properties in each module's
+RO-Crate namespaces. It emits nothing: the parser assigns a class to a module
+from the `id` of the schema file it reads, and the merged schema it is given
+has one `id`, so every class lands in a single `Core` module that the strategy
+does not map. No row in the committed file comes from it.
+
+## Type-compatibility validation
+
+`_validate_type_compatibility` applies these rules:
+
+- a `boolean` slot cannot map to an object (`dict`) property;
+- a `boolean` slot cannot map to a property whose name contains `date`;
+- a multivalued slot cannot map to a property whose value is not a list;
+- a literal slot (`string`, `boolean`, `integer`, `float`) cannot map to a
+  property whose name suggests a relationship (`derived`, `related`,
+  `references`, `requires`).
+
+What happens on a failure depends on the strategy (above): the `slot_uri` and
+composition strategies keep the row with `type_compatible` `False` and the
+failed rule in `warnings`; the hierarchy and module strategies drop the
+candidate. So the share of compatible rows is not a quality measure of the
+mapping. It is how many rows came from the strategies that keep failures, and
+how many of those failed.
+
+## Rows the generator does not produce
+
+The committed file carries rows no strategy emits: class-level rows (the
+generator reads `class_uri` and never emits a row from it), `schema:hasPart`,
+`dcat:byteSize`, and `d4d:` targets that are absent from the RO-Crate input.
+They are listed, each with its reason, in `KNOWN_UNDERIVABLE` in
+`tests/test_semantic_exchange/test_structural_mapping_drift.py` (#234), and
+that test fails if the set changes. Their range and cardinality columns are
+still checked against the schema (`TestRowsStateTheSchema`).
+
+## Usage
+
+### Check
+
+```bash
+make check-sssom-structural
+```
+
+### Generate
+
+```bash
+make gen-sssom-structural
+```
+
+This rewrites both the mapping and the summary from the generator. While the
+rows above stand, a rewrite also drops them from the committed mapping, so
+review the diff before committing.
 
 ## References
 

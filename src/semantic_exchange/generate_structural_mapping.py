@@ -811,7 +811,15 @@ def main(argv=None):
             print("\n✓ The committed mapping and summary regenerate exactly.")
             print(agree)
             return 0
-        print(f"\n✗ The committed mapping does not regenerate from its inputs.")
+        # The headline names what drifted. It used to blame the mapping
+        # whatever failed, so a stale summary beside a mapping that
+        # regenerates exactly read as a mapping failure (#3125).
+        mapping_drifted = bool(lost or gained or column_drift)
+        if mapping_drifted:
+            print("\n✗ The committed mapping does not regenerate from its inputs.")
+        else:
+            print("\n✗ The committed summary does not regenerate from the "
+                  "mapping's inputs.")
         if lost:
             print(f"\n  {len(lost)} row(s) in the committed file that "
                   "regeneration does not produce:")
@@ -830,13 +838,18 @@ def main(argv=None):
                       f"committed {was!r}, regenerated {now!r}")
         else:
             print(agree)
-        if summary_drifted:
+        if not mapping_drifted:
+            # Reached only with the summary stale: the pass returned above.
+            print("\n  The summary does not regenerate. The mapping beside it "
+                  "does, so only the summary is stale.")
+        elif summary_drifted:
             print("\n  The summary does not regenerate either.")
-        elif lost or gained or column_drift:
+        else:
             print("\n  The summary regenerates exactly, so it describes the "
                   "generator's output rather than the mapping beside it (#295).")
-        print("\n  A mapping nobody can rebuild is a mapping nobody can safely "
-              "change (#234).")
+        if mapping_drifted:
+            print("\n  A mapping nobody can rebuild is a mapping nobody can "
+                  "safely change (#234).")
         return 1
 
     # Export. The directory is made here rather than up front, so `--check`
