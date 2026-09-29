@@ -68,6 +68,25 @@ class Counting(unittest.TestCase):
         self.assertEqual((c["software"], c["software_versioned"]), (3, 1))
         self.assertEqual((c["tools"], c["tools_versioned"]), (4, 3))
 
+    def test_tools_version_reads_two_part_and_named_versions_but_not_model_names(self):
+        """#3301: `v.gpt-4-1106-preview` (a committed v6 CM4AI record) and a
+        bare two-part version are versions in a `tools` string; a hyphenated
+        model name, `node2vec` and a stated `unknown` are not."""
+        versioned = ["GPT-4 v.gpt-4-1106-preview", "samtools 1.9", "Python 3.11", "node2vec v0.4",
+                     "tool v2", "Praat version 6", "spaCy 3.5.0"]
+        plain = ["GPT-4", "GPT-4 unknown", "OHNLP toolkit unknown", "DenseNet-121", "node2vec",
+                 "OpenAI Whisper Large", "Speech Articulatory Coding (sparc)"]
+        c = self.m.target_counts({"machine_annotation_tools": [{"tools": versioned + plain}]})
+        self.assertEqual((c["tools"], c["tools_versioned"]), (len(versioned) + len(plain), len(versioned)))
+        for t in versioned:
+            self.assertTrue(self.m.TOOL_VERSION.search(t), t)
+        for t in plain:
+            self.assertFalse(self.m.TOOL_VERSION.search(t), t)
+
+    def test_the_chunk_version_cue_stays_narrow_for_prose_decimals(self):
+        """The chunk cue does not read a bare decimal as a version (#3301)."""
+        self.assertEqual(self.m.chunk_cues("Sessions lasted 4.5 hours (p < 0.05)."), {})
+
 
 class Cues(unittest.TestCase):
     def setUp(self):

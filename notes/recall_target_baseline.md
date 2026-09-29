@@ -13,7 +13,10 @@ Per full record, at any depth: **lineage** is populated `was_derived_from` value
 `parent_datasets` entries; **variables** is populated `variables` entries;
 **used_software with version** is `used_software` entries whose `version` is populated;
 **tools with version token** is `tools` strings carrying a version-like token (a regular
-expression over a free string). A count is of what the record carries, not of whether
+expression over a free string, `TOOL_VERSION`: any dotted number, `v` with a numeric or
+named body such as `v3.0.1` or `v.gpt-4-1106-preview`, or `version`/`release N`; a
+hyphenated model name such as `GPT-4` and a stated `unknown` are not versions). A
+count is of what the record carries, not of whether
 it is supported. A variables count says nothing about whether the entries are variables
 in data files or promoted data-type rows (#2079).
 
@@ -27,6 +30,11 @@ rule. `–` is not measured: no receipt, or chunk text that could not be recover
 never 0.
 
 - **Cue patterns:** sha256 `768a26a370bdc1bdddb0eb0fa56e37a12e2d1ed7d0dc85c0fc8c1c8ffc99bf62` over `CUES` in the script.
+- **Tools version pattern:** sha256 `4726c0058b019ab213018e7071d4b408f58faa441a8cc4d5278db15e86256990` over `_TOOL_VERSION` in the script.
+- **Version cue is narrower than the tools pattern:** in chunk text a bare two-part number
+  (`1.9`) or a named version (`v.gpt-4-1106-preview`) is not a cue, since prose is full
+  of decimals; the version-cue counts are a lower bound for chunks stating a version only
+  in those forms.
 - **Arms:** fixed in the script (`ARMS`): `scripts/arm_comparison.py`'s arms plus the v9
   canary. A record whose own validation block says `passed: false` is not counted (#1029).
 
@@ -45,7 +53,7 @@ Sums over the arm's records, with the per-record mean in parentheses.
 | v4 API (2026-08-13) | 12 | 6 (0.5) | 6 (0.5) | 0 (0.0) | 103 (8.6) | 0 (0.0) | 0 (0.0) | 0 (0.0) | 38 (3.2) | 0 | – | – | – | – | – |
 | v5 API (2026-08-22c) | 12 | 2 (0.2) | 2 (0.2) | 0 (0.0) | 135 (11.2) | 0 (0.0) | 0 (0.0) | 0 (0.0) | 37 (3.1) | 0 | – | – | – | – | – |
 | v5 agentic (2026-08-24) | 12 | 0 (0.0) | 0 (0.0) | 0 (0.0) | 29 (2.4) | 4 (0.3) | 13 (1.1) | 0 (0.0) | 17 (1.4) | 0 | – | – | – | – | – |
-| v6 agentic (2026-08-28) | 12 | 0 (0.0) | 0 (0.0) | 0 (0.0) | 40 (3.3) | 4 (0.3) | 29 (2.4) | 0 (0.0) | 9 (0.8) | 12 | 44 | 14 | 8 | 3 | 11 |
+| v6 agentic (2026-08-28) | 12 | 0 (0.0) | 0 (0.0) | 0 (0.0) | 40 (3.3) | 4 (0.3) | 29 (2.4) | 1 (0.1) | 9 (0.8) | 12 | 44 | 14 | 8 | 3 | 11 |
 | v7 API canaries (2026-08-28…d, exploratory) | 5 | 1 (0.2) | 1 (0.2) | 0 (0.0) | 76 (15.2) | 0 (0.0) | 0 (0.0) | 0 (0.0) | 3 (0.6) | 5 | 18 | 10 | 3 | 6 | 7 |
 | v7 API production (2026-09-01) | 12 | 2 (0.2) | 2 (0.2) | 0 (0.0) | 90 (7.5) | 0 (0.0) | 0 (0.0) | 0 (0.0) | 22 (1.8) | 12 | 62 | 28 | 13 | 9 | 23 |
 | v8 API production (2026-09-04f/g) | 12 | 6 (0.5) | 6 (0.5) | 0 (0.0) | 65 (5.4) | 0 (0.0) | 0 (0.0) | 0 (0.0) | 26 (2.2) | 12 | 57 | 26 | 14 | 13 | 20 |
@@ -101,7 +109,7 @@ Sums over the arm's records, with the per-record mean in parentheses.
 | v6agentic | `claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_d4d.yaml` | 0 | 0 | 0 | 0 | 1 | 2 | 0 | 1 | 1 | 1 | 0 | `32cf1c025fd73c20` | `aa72cbbc3bbaa293` |
 | v6agentic | `claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml` | 0 | 0 | 0 | 15 | 0 | 0 | 0 | 0 | 3 | 0 | 1 | `15ff936ecc4d6b3b` | `ece5d981773e19f1` |
 | v6agentic | `claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml` | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | `70000ac23c3505c0` | `cf6b3ffe3c8c1275` |
-| v6agentic | `claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_d4d.yaml` | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 1 | 7 | 2 | 4 | `329e7a7038fcc464` | `326d82ca17a1d5ce` |
+| v6agentic | `claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_d4d.yaml` | 0 | 0 | 0 | 0 | 0 | 3 | 1 | 1 | 7 | 2 | 4 | `329e7a7038fcc464` | `326d82ca17a1d5ce` |
 | v6agentic | `claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml` | 0 | 0 | 0 | 4 | 1 | 2 | 0 | 1 | 2 | 0 | 0 | `e4b5ce387976a884` | `24e599f4bacb3922` |
 | v7api | `claudecode_agent/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | `81770bd1b57ffabc` | `1670314dfd14bf1a` |
 | v7api | `claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml` | 0 | 0 | 0 | 17 | 0 | 0 | 0 | 0 | 4 | 1 | 3 | `f223439e02a3921b` | `ab0a7c665fe10f86` |

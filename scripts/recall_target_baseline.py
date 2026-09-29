@@ -18,7 +18,8 @@ Per full record, at any depth of the record:
   range) whose `version` is populated, beside all `used_software` entries;
   and `tools` strings (`MachineAnnotationTools.tools`, "ToolName version" by
   its description) that carry a version-like token, beside all `tools`
-  strings. The `tools` half is a regular expression over a free string.
+  strings. The `tools` half is a regular expression over a free string
+  (`TOOL_VERSION`), broader than the chunk-text version cue.
 
 Per coverage receipt, the chunks marked `nothing_relevant` or
 `redundant_with` whose text carries a lineage, variable or version cue
@@ -94,11 +95,25 @@ LINEAGE_KEYS = ("was_derived_from", "parent_datasets")
 VARIABLE_KEYS = ("variables",)
 REVIEWED_ELSEWHERE = ("nothing_relevant", "redundant_with")
 
-#: A version-like token: `v1.2`, `1.2.3`, `version 2`, `release 4.0`. Applied
-#: to a `tools` string to say whether it names a version, and (as the
-#: `version` cue class) to chunk text.
+#: The chunk-text `version` cue: `v1.2`, `1.2.3`, `version 2`, `release 4.0`.
+#: Deliberately narrow for prose: a bare two-part number (`1.9`, `3.11`) is
+#: not a cue, because chunk text is full of decimals ("4.5 hours", "p < 0.05"),
+#: and neither is a named version (`v.gpt-4-1106-preview`). The version-cue
+#: counts are therefore a lower bound for chunks that state a version only in
+#: those forms (#3301).
 _VERSION_TOKEN = r"(?:\bv\d+(?:\.\d+)+\b|\b\d+\.\d+(?:\.\d+)+\b|\b(?:version|release)\s*:?\s*v?\d+(?:\.\d+)*\b)"
 VERSION_TOKEN = re.compile(_VERSION_TOKEN, re.IGNORECASE)
+
+#: A version in a `tools` string (`MachineAnnotationTools.tools`, "ToolName
+#: version" by its description). Broader than the chunk cue, because the
+#: string names one tool and a number in it is not prose: any dotted number
+#: (`samtools 1.9`, `Python 3.11`, `spaCy 3.5.0`), a `v`-prefixed version
+#: with or without a dot and with a named or numeric body (`v2`, `v3.0.1`,
+#: `v.gpt-4-1106-preview`), or `version|release N`. A hyphenated model name
+#: (`GPT-4`, `DenseNet-121`) and a stated `unknown` are not versions (#3301).
+_TOOL_VERSION = (r"(?:\b\d+\.\d+(?:\.\d+)*\b|\bv\d+(?:\.\d+)*\b|\bv\.\s?[\w.-]*\d[\w.-]*"
+                 r"|\b(?:version|release)\s*:?\s*v?\d+(?:\.\d+)*\b)")
+TOOL_VERSION = re.compile(_TOOL_VERSION, re.IGNORECASE)
 
 #: The lexical cues, by class. Case-insensitive, over whitespace-collapsed
 #: chunk text. Recorded in the note by id; changing one changes the note.
@@ -131,6 +146,11 @@ def cues_sha256() -> str:
     """The cue patterns' identity, printed into the note."""
     body = "".join(f"{cls}\t{pid}\t{rx}\n" for cls, pats in CUES.items() for pid, rx in pats)
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
+def tool_version_sha256() -> str:
+    """The `tools` version pattern's identity, printed into the note."""
+    return hashlib.sha256(_TOOL_VERSION.encode("utf-8")).hexdigest()
 
 
 def _populated(value: Any) -> bool:
@@ -176,7 +196,7 @@ def target_counts(record: dict[str, Any]) -> dict[str, int]:
         elif key == "tools":
             for tool in entries(value):
                 out["tools"] += 1
-                out["tools_versioned"] += isinstance(tool, str) and bool(VERSION_TOKEN.search(tool))
+                out["tools_versioned"] += isinstance(tool, str) and bool(TOOL_VERSION.search(tool))
     out["lineage"] = out["was_derived_from"] + out["parent_datasets"]
     return out
 
@@ -370,7 +390,10 @@ def render_markdown(collected: dict[str, Any], arms=None) -> str:
         "`parent_datasets` entries; **variables** is populated `variables` entries;",
         "**used_software with version** is `used_software` entries whose `version` is populated;",
         "**tools with version token** is `tools` strings carrying a version-like token (a regular",
-        "expression over a free string). A count is of what the record carries, not of whether",
+        "expression over a free string, `TOOL_VERSION`: any dotted number, `v` with a numeric or",
+        "named body such as `v3.0.1` or `v.gpt-4-1106-preview`, or `version`/`release N`; a",
+        "hyphenated model name such as `GPT-4` and a stated `unknown` are not versions). A",
+        "count is of what the record carries, not of whether",
         "it is supported. A variables count says nothing about whether the entries are variables",
         "in data files or promoted data-type rows (#2079).",
         "",
@@ -384,6 +407,11 @@ def render_markdown(collected: dict[str, Any], arms=None) -> str:
         "never 0.",
         "",
         f"- **Cue patterns:** sha256 `{cues_sha256()}` over `CUES` in the script.",
+        f"- **Tools version pattern:** sha256 `{tool_version_sha256()}` over `_TOOL_VERSION` in the script.",
+        "- **Version cue is narrower than the tools pattern:** in chunk text a bare two-part number",
+        "  (`1.9`) or a named version (`v.gpt-4-1106-preview`) is not a cue, since prose is full",
+        "  of decimals; the version-cue counts are a lower bound for chunks stating a version only",
+        "  in those forms.",
         "- **Arms:** fixed in the script (`ARMS`): `scripts/arm_comparison.py`'s arms plus the v9",
         "  canary. A record whose own validation block says `passed: false` is not counted (#1029).",
         "",
