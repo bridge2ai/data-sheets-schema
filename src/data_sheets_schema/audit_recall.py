@@ -32,6 +32,7 @@ from __future__ import annotations
 from datetime import date
 import hashlib
 import json
+import re
 from pathlib import Path
 
 import yaml
@@ -205,6 +206,60 @@ def _at(parts):
     return "".join("/" + str(p).replace("~", "~0").replace("/", "~1") for p in parts)
 
 
+#: A key named in a refusal only when it looks like a field name (#3255).
+_FIELD_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]{0,63}")
+
+
+def _schema_problem(error) -> str:
+    """One schema violation, described from the schema's side only (#3255).
+
+    jsonschema's own messages ``repr`` the offending value, so an over-long
+    observation, an entry written as a bare string or prose in ``kind`` would
+    be echoed into the refusal and from there to the terminal. Only the rule,
+    the schema's own values and field-name-shaped keys are named here, for the
+    same reason ``_parse`` names positions and class names only.
+    """
+    rule, bound, instance = error.validator, error.validator_value, error.instance
+    if rule == "anyOf":   # the one anyOf; its default message repeats the whole mapping
+        return "must name a source or a chunk"
+    if rule == "type":
+        return "must be of type " + " or ".join(bound if isinstance(bound, list) else [bound])
+    if rule == "required":
+        # One error per missing property, and its message quotes only the
+        # schema's property name ("'kind' is a required property").
+        return error.message
+    if rule == "additionalProperties":
+        extra = sorted(k for k in instance if k not in error.schema.get("properties", {})) \
+            if isinstance(instance, dict) else []
+        named = [k for k in extra if isinstance(k, str) and _FIELD_NAME.fullmatch(k)]
+        unnamed = len(extra) - len(named)
+        return ("properties the schema does not declare: "
+                + ", ".join([repr(k) for k in named] + ([f"{unnamed} not shaped like a field name"]
+                                                        if unnamed else [])))
+    described = _describe_bound(bound)
+    return described.get(rule, f"fails the schema's {rule!r} rule")
+
+
+def _describe_bound(bound) -> dict:
+    return {
+        "maxLength": f"longer than {bound} characters",
+        "minLength": f"shorter than {bound} characters",
+        "pattern": f"does not match the pattern {bound!r}",
+        "enum": f"not one of {bound!r}",
+        "const": f"must be {bound!r}",
+        "format": f"not a valid {bound}",
+        "minimum": f"less than the minimum of {bound!r}",
+        "maximum": f"greater than the maximum of {bound!r}",
+        "minItems": f"fewer than {bound} items",
+        "maxItems": f"more than {bound} items",
+        "uniqueItems": "items are not unique",
+    }
+
+
+#: Every rule ``_schema_problem`` describes without falling back to its name.
+_DESCRIBED_RULES = frozenset({"anyOf", "type", "required", "additionalProperties", *_describe_bound(None)})
+
+
 def load_ground_truth(raw: bytes) -> dict:
     """Parse and validate one ground-truth file, refusing any incomplete entry.
 
@@ -220,12 +275,10 @@ def load_ground_truth(raw: bytes) -> dict:
     except UnicodeError:
         raise GroundTruthError([{"at": "", "problem": "file is not UTF-8"}]) from None
     value = _parse(text)
-    problems = [{"at": _at(error.absolute_path),
-                 # The one anyOf; its default message repeats the whole mapping.
-                 "problem": ("must name a source or a chunk" if error.validator == "anyOf"
-                             else error.message[:300])}
-                for error in sorted(Draft202012Validator(ground_truth_schema()).iter_errors(value),
-                                    key=lambda e: (_at(e.absolute_path), e.message))]
+    # Never error.message: it quotes the value, which may be observation text (#3255).
+    problems = sorted(({"at": _at(error.absolute_path), "problem": _schema_problem(error)}
+                       for error in Draft202012Validator(ground_truth_schema()).iter_errors(value)),
+                      key=lambda p: (p["at"], p["problem"]))
     entries = value.get("entries") if isinstance(value, dict) else None
     seen = {}
     for index, entry in enumerate(entries if isinstance(entries, list) else []):

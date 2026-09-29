@@ -376,6 +376,50 @@ def test_json_refuses_duplicate_keys_and_text_neither_grammar_reads_is_named_wit
     assert "planted" not in str(caught.value)
 
 
+SECRET = "Planted held-out prose"
+
+
+@pytest.mark.parametrize("change, where, named", [
+    # jsonschema's messages repr the value; each of these once quoted it (#3255).
+    (lambda e: {**e, "observation": SECRET + " " + "x" * 2000}, "/entries/0/observation",
+     "longer than 2000 characters"),
+    (lambda e: SECRET + " written as a bare entry", "/entries/0", "must be of type object"),
+    (lambda e: {**e, "kind": SECRET}, "/entries/0/kind", "not one of ["),
+    (lambda e: {**e, "id": SECRET}, "/entries/0/id", "does not match the pattern"),
+    (lambda e: {**e, "paths": [SECRET]}, "/entries/0/paths/0", "does not match the pattern"),
+    (lambda e: {**e, "paths": ["/title", "/title"]}, "/entries/0/paths", "items are not unique"),
+    (lambda e: {**e, "held_out": SECRET}, "/entries/0/held_out", "must be True"),
+    (lambda e: {**e, SECRET: 1, "extra_field": 2}, "/entries/0",
+     "properties the schema does not declare: 'extra_field', 1 not shaped like a field name"),
+])
+def test_a_schema_refusal_names_the_rule_and_never_quotes_the_value(change, where, named):
+    """The refusal reaches the terminal, and the text refused may be held-out prose (#3255)."""
+    bad = change(entry("gt-1", original(), "/title"))
+    with pytest.raises(recall.GroundTruthError) as caught:
+        load(truth(bad))
+    assert any(p["at"] == where and named in p["problem"] for p in caught.value.problems), caught.value.problems
+    assert "Planted" not in str(caught.value) and "Planted" not in repr(caught.value.problems)
+
+
+def test_every_rule_the_schema_uses_has_a_description_that_quotes_no_value():
+    """A rule missing from the describer would fall back to naming only the rule (#3255)."""
+    annotations = {"$schema", "$id", "title", "description", "properties", "items", "$defs"}
+
+    def rules(node):
+        # Keywords of a schema node; the names under "properties" are fields, not rules.
+        yield from (k for k in node if k not in annotations)
+        for child in node.get("properties", {}).values():
+            yield from rules(child)
+        for key in ("items", "additionalProperties"):
+            if isinstance(node.get(key), dict):
+                yield from rules(node[key])
+        for child in node.get("anyOf", []):
+            yield from rules(child)
+    used = set(rules(recall.ground_truth_schema()))
+    assert {"maxLength", "pattern", "enum", "type"} <= used
+    assert used - set(recall._DESCRIBED_RULES) == set()
+
+
 #: Well under MAX_GROUND_TRUTH_BYTES, and deeper than either parser recurses.
 DEEP_TEXTS = {
     "json array": b"[" * 100_000 + b"]" * 100_000,
@@ -596,7 +640,7 @@ class TestCommand:
                                                      if k != "reviewer_role"}, "kind": "misc"}))
         out = self.invoke("--audit", p["audit"], "--original", p["original"], "--ground-truth", p["truth"])
         assert out.exit_code == 1 and "'reviewer_role' is a required property" in out.output
-        assert "/entries/0/kind: 'misc' is not one of" in out.output
+        assert "/entries/0/kind: not one of" in out.output and "'misc'" not in out.output
         p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))
         out = self.invoke("--audit", p["audit"], "--original", p["truth"], "--ground-truth", p["truth"])
         assert out.exit_code == 1 and "not scored" in out.output
