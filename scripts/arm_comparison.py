@@ -31,6 +31,12 @@ Bases, stated once and printed into the output:
   would-be canonical) records. Applicability (N/A) is itself evaluator
   output, so adjusted maxima can differ between evaluations of comparable
   records; points and adjusted maximum are both shown.
+- **item discrimination** (#2927): per evaluator, never pooled across
+  evaluators, and per rubric version where an evaluator's evaluations span
+  more than one (#3290), the items at ceiling or floor, each project's
+  distinct totals and the rubrics' pair agreement on both bases. A project
+  with at most two distinct totals is flagged in the rubric tables: no
+  within-project order.
 - **removal rows** (#2923): values deleted without a finding, the share of
   them `reconcile_full` removed (#3150) and receipted values deleted are
   recomputed live and read-only (`removals.for_record`); the
@@ -62,6 +68,9 @@ ROOT = Path(__file__).resolve().parent.parent
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema.grounding import form_facts  # noqa: E402
+from data_sheets_schema.semantic_comparison import (  # noqa: E402
+    discrimination, evaluator_key, instruments_of, render_discrimination, withheld_projects,
+)
 CONCAT = ROOT / "data" / "d4d_concatenated"
 EVAL_DIRS = {
     "rubric10": ROOT / "data" / "evaluation_llm" / "rubric10_semantic" / "label_aware",
@@ -389,8 +398,8 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
                         "max": s.get("max_points"),
                         "adjusted_max": s.get("adjusted_max_points"),
                         "pct": s.get("normalized_percentage"),
-                        "evaluator": (d.get("model") or {}).get("evaluator_model"),
-                        "file": path.name})
+                        "evaluator": evaluator_key(d),
+                        "file": path.name, "doc": d})
     return out
 
 
@@ -622,10 +631,19 @@ def render_markdown(data, scores) -> str:
         lines.append(f"- **{disp}** — {basis}." + (f" {cav}." if cav else ""))
     lines.append("")
 
+    cohorts = rubric_discrimination(scores)
     for rubric, rscores in scores.items():
         lines += [f"## {rubric.capitalize()}-semantic scores (every evaluated replicate; earlier arms have their canonical only)", "",
                   "| project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
                   "|---|" + "|".join("---" for _ in ARMS) + "|"]
+        withheld: dict[str, list[tuple[str, dict[str, str]]]] = {}
+        for evaluator, _arms, _versions, cohort in cohorts:
+            for name in instruments_of(cohort, f"{rubric}-semantic"):
+                # A rubric the cohort holds under several versions is gated
+                # per version (#3290); the cell names the version then.
+                who = evaluator + name[len(f"{rubric}-semantic"):]
+                for project, reasons in withheld_projects(cohort, name).items():
+                    withheld.setdefault(project, []).append((who, reasons))
         for p in PROJECTS:
             cells = []
             for key, _d, pfx, _rt, _role in ARMS:
@@ -633,7 +651,7 @@ def render_markdown(data, scores) -> str:
                 cells.append("; ".join(
                     f"{s['total']}/{s['adjusted_max'] or s['max']} ({s['pct']}%, {_rep_tag(s['label'])})"
                     for s in ss) or "–")
-            lines.append(f"| {p} | " + " | ".join(cells) + " |")
+            lines.append(f"| {_withheld_cell(p, withheld.get(p))} | " + " | ".join(cells) + " |")
         lines.append("")
     evaluators = sorted({s["evaluator"] for rs in scores.values() for arm in rs.values() for ss in arm.values() for s in ss if s.get("evaluator")})
     lines += [f"Evaluator model(s) recorded: {', '.join(evaluators) or 'none'}. "
@@ -643,7 +661,55 @@ def render_markdown(data, scores) -> str:
               "scores are not results from the newly registered reference rescore. "
               "No gold standard exists (#177); the rubrics are "
               "not domain-neutral (#627); rubric20's N/A convention is #155's.", ""]
+    for evaluator, arms, versions, cohort in cohorts:
+        lines += render_discrimination(cohort, scope=f", {evaluator} evaluations", evaluator=evaluator)
+        lines += [f"This cohort is every {evaluator} evaluation in the rubric tables above "
+                  f"(arms {', '.join(arms)}; {versions}); evaluations by different evaluators "
+                  "are not pooled, since an evaluator is an instrument (#1058), and a rubric held "
+                  "under more than one version is measured per version (#3290). A project the "
+                  "rubric tables flag has too few distinct totals across these arms' records to "
+                  "rank them against each other on that rubric.", ""]
     return "\n".join(lines)
+
+
+def rubric_discrimination(scores) -> list[tuple[str, list[str], str, dict[str, Any]]]:
+    """The #2927 block per evaluator over every evaluation the rubric tables
+    show, each file once however many arms list it: (evaluator, arm keys,
+    rubric versions, block). Pooling evaluators would count their offsets as
+    distinct totals and hide a project one evaluator cannot separate; for the
+    same reason `discrimination` splits a rubric the cohort holds under more
+    than one version by version (#3290)."""
+    groups: dict[str, dict[str, tuple[str, dict]]] = {}
+    for rubric, rs in scores.items():
+        for arm, per_project in rs.items():
+            for ss in per_project.values():
+                for s in ss:
+                    if s.get("doc"):
+                        groups.setdefault(s.get("evaluator") or "unrecorded", {})[
+                            f"{rubric}/{s['file']}"] = (arm, s["doc"])
+    order = [key for key, *_ in ARMS]
+    out = []
+    for evaluator in sorted(groups):
+        members = groups[evaluator]
+        arms = sorted({arm for arm, _doc in members.values()}, key=order.index)
+        versions = "; ".join(
+            f"{rubric} v{', v'.join(sorted({str(d.get('version')) for _a, d in members.values() if d.get('rubric') == rubric}))}"
+            for rubric in sorted({d.get("rubric") for _a, d in members.values()}))
+        out.append((evaluator, arms, versions,
+                    discrimination(members[k][1] for k in sorted(members))))
+    return out
+
+
+def _withheld_cell(project: str, flags: list[tuple[str, dict[str, str]]] | None) -> str:
+    """The project cell of a rubric table, flagged where #2927 withholds its
+    within-project order: per evaluator, and per basis where only one is."""
+    parts = []
+    for evaluator, reasons in flags or []:
+        counts = sorted({r.split(" distinct", 1)[0] for r in reasons.values()})
+        where = "" if len(reasons) == 2 else f", {next(iter(reasons))} basis"
+        parts.append(f"{evaluator}{where}: {'/'.join(counts)} distinct "
+                     f"total{'' if counts == ['1'] else 's'}")
+    return f"{project} (no within-project order — {'; '.join(parts)})" if parts else project
 
 
 def write_markdown(data, scores) -> None:

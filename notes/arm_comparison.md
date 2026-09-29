@@ -147,8 +147,8 @@ The never/added split (#807) says which half of the gap the protocol could have 
 
 | project | v4 API (2026-08-13) | v5 API (2026-08-22c) | v5 agentic (2026-08-24) | v6 agentic (2026-08-28) | v7 API canaries (2026-08-28…d, exploratory) | v7 API production (2026-09-01) | v8 API production (2026-09-04f/g) |
 |---|---|---|---|---|---|---|---|
-| AI_READI | – | 49/50 (98.0%, 22c/rep2) | 48/50 (96.0%, rep2) | 50/50 (100.0%, rep1); 48/50 (96.0%, rep2); 49/50 (98.0%, rep3) | 49/50 (98.0%, 28b/rep1); 49/50 (98.0%, 28c/rep1); 49/50 (98.0%, 28d/rep1) | 49/50 (98.0%, rep1); 49/50 (98.0%, rep2); 49/50 (98.0%, rep3) | 49/50 (98.0%, 04g/rep1); 49/50 (98.0%, 04g/rep2); 49/50 (98.0%, 04g/rep3) |
-| CHORUS | – | 36/49 (73.5%, 22c/rep3) | 32/49 (65.3%, rep1) | 30/49 (61.2%, rep1); 26/49 (53.1%, rep2); 30/49 (61.2%, rep3) | 32/49 (65.3%, rep1); 31/49 (63.3%, 28b/rep1) | 32/49 (65.3%, rep1); 29/49 (59.2%, rep2); 31/49 (63.3%, rep3) | 36/50 (72.0%, 04f/rep1); 31/49 (63.3%, 04f/rep2); 31/49 (63.3%, 04f/rep3) |
+| AI_READI (no within-project order — claude-opus-5[1m] v1.0: 1 distinct total; claude-opus-5[1m] v1.1: 1 distinct total) | – | 49/50 (98.0%, 22c/rep2) | 48/50 (96.0%, rep2) | 50/50 (100.0%, rep1); 48/50 (96.0%, rep2); 49/50 (98.0%, rep3) | 49/50 (98.0%, 28b/rep1); 49/50 (98.0%, 28c/rep1); 49/50 (98.0%, 28d/rep1) | 49/50 (98.0%, rep1); 49/50 (98.0%, rep2); 49/50 (98.0%, rep3) | 49/50 (98.0%, 04g/rep1); 49/50 (98.0%, 04g/rep2); 49/50 (98.0%, 04g/rep3) |
+| CHORUS (no within-project order — claude-opus-5[1m] v1.1: 1 distinct total) | – | 36/49 (73.5%, 22c/rep3) | 32/49 (65.3%, rep1) | 30/49 (61.2%, rep1); 26/49 (53.1%, rep2); 30/49 (61.2%, rep3) | 32/49 (65.3%, rep1); 31/49 (63.3%, 28b/rep1) | 32/49 (65.3%, rep1); 29/49 (59.2%, rep2); 31/49 (63.3%, rep3) | 36/50 (72.0%, 04f/rep1); 31/49 (63.3%, 04f/rep2); 31/49 (63.3%, 04f/rep3) |
 | CM4AI | – | 47/50 (94.0%, 22c/rep1) | 47/50 (94.0%, rep2) | 39/45 (86.7%, rep1); 40/45 (88.9%, rep2); 42/45 (93.3%, rep3) | – | 43/47 (91.5%, rep1); 43/47 (91.5%, rep2); 42/47 (89.4%, rep3) | 40/47 (85.1%, 04g/rep1); 43/47 (91.5%, 04g/rep2); 41/47 (87.2%, 04g/rep3) |
 | VOICE | – | 50/50 (100.0%, 22c/rep2) | 49/50 (98.0%, rep1) | 49/50 (98.0%, rep1); 47/50 (94.0%, rep2); 49/50 (98.0%, rep3) | – | 48/50 (96.0%, rep1); 49/50 (98.0%, rep2); 47/50 (94.0%, rep3) | 47/50 (94.0%, 04f/rep1); 49/50 (98.0%, 04f/rep2); 49/50 (98.0%, 04f/rep3) |
 
@@ -162,3 +162,87 @@ The never/added split (#807) says which half of the gap the protocol could have 
 | VOICE | – | 81/88 (92.0%, 22c/rep2) | 78/88 (88.6%, rep1) | 80/88 (90.9%, rep1); 78/88 (88.6%, rep2); 80/88 (90.9%, rep3) | – | 80/88 (90.9%, rep1); 80/88 (90.9%, rep2); 83.5/88 (94.9%, rep3) | 79/88 (89.8%, 04f/rep1); 76/88 (86.4%, 04f/rep2); 80/88 (90.9%, 04f/rep3) |
 
 Evaluator model(s) recorded: claude-fable-5, claude-opus-5[1m]. Scores are shown as points / adjusted maximum after N/A exclusions; comparison requires the same evaluator, definition and applicability basis; raw points alone do not establish comparability. These historical scores are not results from the newly registered reference rescore. No gold standard exists (#177); the rubrics are not domain-neutral (#627); rubric20's N/A convention is #155's.
+
+## Item discrimination and within-project orderings, claude-fable-5 evaluations (#2927)
+
+Measured on the claude-fable-5 evaluations above, one rating per record. Evaluations by any other evaluator are in no count below: an evaluator is an instrument (#1058), and pooling two would count their offset as distinct totals. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.
+
+**rubric10-semantic** — 25 records, 50 items. At ceiling: 23/50 (E1.2, E1.4, E2.1, E2.4, E3.2, E3.3, E3.5, E5.2, E5.4, E6.5, E7.1, E7.2, E7.3, E7.4, E7.5, E8.1, E8.2, E8.3, E8.5, E9.1, E10.2 (not scored on 7), E10.3, E10.4). At floor: 0/50 (none).
+
+| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |
+|---|---|---|---|---|---|
+| AI_READI | 8 | 3 / 3 | 11/28 (39%) / 11/28 (39%) | 4: E3.4, E4.5, E5.3, E8.4 | not withheld on either basis |
+| CHORUS | 7 | 5 / 5 | 2/21 (10%) / 2/21 (10%) | 11: E2.2, E2.3, E2.5, E4.2, E4.3, E4.5, E5.1, E5.5, E6.4, E9.2, E9.5 | not withheld on either basis |
+| CM4AI | 5 | 4 / 4 | 1/10 (10%) / 1/10 (10%) | 9: E1.5, E4.1, E4.2, E4.3, E4.4, E4.5, E5.5, E9.4, E10.5 | not withheld on either basis |
+| VOICE | 5 | 3 / 3 | 3/10 (30%) / 3/10 (30%) | 3: E1.3, E3.4, E5.3 | not withheld on either basis |
+
+**rubric20-semantic** — 25 records, 20 items. At ceiling: 4/20 (Q2, Q5, Q6, Q16). At floor: 0/20 (none).
+
+| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |
+|---|---|---|---|---|---|
+| AI_READI | 8 | 5 / 5 | 4/28 (14%) / 4/28 (14%) | 9: Q1, Q3, Q7, Q8, Q9, Q11, Q18, Q19, Q20 | not withheld on either basis |
+| CHORUS | 7 | 5 / 5 | 2/21 (10%) / 2/21 (10%) | 10: Q1, Q4, Q7, Q8, Q9, Q11, Q14, Q18, Q19, Q20 | not withheld on either basis |
+| CM4AI | 5 | 4 / 4 | 1/10 (10%) / 1/10 (10%) | 11: Q1, Q4, Q8, Q9, Q11, Q12, Q13, Q15, Q17, Q18, Q20 | not withheld on either basis |
+| VOICE | 5 | 3 / 3 | 2/10 (20%) / 2/10 (20%) | 8: Q1, Q3, Q4, Q8, Q11, Q12, Q14, Q18 | not withheld on either basis |
+
+**Cross-rubric agreement** — record pairs ordered the same way by rubric10-semantic and rubric20-semantic, opposite ways, or tied on at least one rubric; 25 records joined by (project, label). Each basis is shown: adjusted-basis agreement is confounded by what each evaluation judged applicable (#2912).
+
+| basis | scope | pairs | same order | opposite | tied on at least one rubric |
+|---|---|---|---|---|---|
+| N/A-adjusted (points / applicable maximum) | within project | 69 | 34 | 11 | 24 |
+| N/A-adjusted (points / applicable maximum) | between projects | 231 | 204 | 6 | 21 |
+| fixed (points / full rubric maximum) | within project | 69 | 32 | 13 | 24 |
+| fixed (points / full rubric maximum) | between projects | 231 | 206 | 4 | 21 |
+
+This cohort is every claude-fable-5 evaluation in the rubric tables above (arms v5api, v5agentic, v6agentic, v7api; rubric10-semantic v1.0; rubric20-semantic v1.0); evaluations by different evaluators are not pooled, since an evaluator is an instrument (#1058), and a rubric held under more than one version is measured per version (#3290). A project the rubric tables flag has too few distinct totals across these arms' records to rank them against each other on that rubric.
+
+## Item discrimination and within-project orderings, claude-opus-5[1m] evaluations (#2927)
+
+Measured on the claude-opus-5[1m] evaluations above, one rating per record. Evaluations by any other evaluator are in no count below: an evaluator is an instrument (#1058), and pooling two would count their offset as distinct totals. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.
+
+**rubric10-semantic v1.0** — 15 records, 50 items. At ceiling: 24/50 (E1.2, E1.4, E2.1, E2.4, E2.5, E3.2, E3.5, E4.2, E5.2, E5.4, E6.5, E7.1, E7.2, E7.3, E7.4, E7.5, E8.1, E8.2, E8.3, E8.5, E9.1, E9.4, E10.2 (not scored on 5), E10.4). At floor: 0/50 (none).
+
+| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |
+|---|---|---|---|---|---|
+| AI_READI | 4 | 1 / 1 | 6/6 (100%) / 6/6 (100%) | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |
+| CHORUS | 5 | 3 / 3 | 3/10 (30%) / 3/10 (30%) | 9: E2.2, E2.3, E4.3, E4.5, E5.1, E5.5, E6.4, E9.2, E9.5 | not withheld on either basis |
+| VOICE | 6 | 3 / 3 | 4/15 (27%) / 4/15 (27%) | 4: E3.3, E3.4, E5.3, E10.3 | not withheld on either basis |
+
+**rubric10-semantic v1.1** — 9 records, 50 items. At ceiling: 31/50 (E1.2, E1.3, E1.4, E2.1, E2.2, E2.3, E2.4, E2.5, E3.3, E3.5, E4.1, E4.2, E4.3 (not scored on 6), E4.5 (not scored on 6), E5.1, E5.4, E5.5, E6.4, E6.5, E7.1, E7.2, E7.3, E7.4, E7.5, E8.1, E8.2, E8.5, E9.1, E9.4, E10.3, E10.4). At floor: 0/50 (none).
+
+| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |
+|---|---|---|---|---|---|
+| AI_READI | 2 | 1 / 1 | 1/1 (100%) / 1/1 (100%) | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |
+| CHORUS | 1 | 1 / 1 | 0/0 / 0/0 | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |
+| CM4AI | 6 | 4 / 4 | 3/15 (20%) / 3/15 (20%) | 7: E3.2, E5.2, E5.3, E6.3, E8.3, E9.3, E9.5 | not withheld on either basis |
+
+**rubric20-semantic** — 24 records, 20 items. At ceiling: 4/20 (Q2, Q5, Q6, Q16). At floor: 0/20 (none).
+
+| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |
+|---|---|---|---|---|---|
+| AI_READI | 6 | 5 / 5 | 1/15 (7%) / 1/15 (7%) | 7: Q3, Q7, Q8, Q13, Q18, Q19, Q20 | not withheld on either basis |
+| CHORUS | 6 | 5 / 5 | 1/15 (7%) / 1/15 (7%) | 9: Q4, Q7, Q9, Q10, Q12, Q14, Q18, Q19, Q20 | not withheld on either basis |
+| CM4AI | 6 | 5 / 5 | 1/15 (7%) / 1/15 (7%) | 13: Q1, Q4, Q7, Q9, Q10, Q11, Q12, Q13, Q15, Q17, Q18, Q19, Q20 | not withheld on either basis |
+| VOICE | 6 | 4 / 4 | 3/15 (20%) / 3/15 (20%) | 12: Q1, Q4, Q7, Q8, Q10, Q11, Q12, Q13, Q14, Q18, Q19, Q20 | not withheld on either basis |
+
+Split by instrument version: rubric10-semantic. Each version is measured on its own; totals under different versions are not counted as distinct totals of one another nor ordered against each other (#3290).
+
+**Cross-rubric agreement** — record pairs ordered the same way by rubric10-semantic v1.0 and rubric20-semantic, opposite ways, or tied on at least one rubric; 15 records joined by (project, label). Each basis is shown: adjusted-basis agreement is confounded by what each evaluation judged applicable (#2912).
+
+| basis | scope | pairs | same order | opposite | tied on at least one rubric |
+|---|---|---|---|---|---|
+| N/A-adjusted (points / applicable maximum) | within project | 31 | 10 | 6 | 15 |
+| N/A-adjusted (points / applicable maximum) | between projects | 74 | 62 | 0 | 12 |
+| fixed (points / full rubric maximum) | within project | 31 | 10 | 6 | 15 |
+| fixed (points / full rubric maximum) | between projects | 74 | 62 | 0 | 12 |
+
+**Cross-rubric agreement** — record pairs ordered the same way by rubric10-semantic v1.1 and rubric20-semantic, opposite ways, or tied on at least one rubric; 9 records joined by (project, label). Each basis is shown: adjusted-basis agreement is confounded by what each evaluation judged applicable (#2912).
+
+| basis | scope | pairs | same order | opposite | tied on at least one rubric |
+|---|---|---|---|---|---|
+| N/A-adjusted (points / applicable maximum) | within project | 16 | 9 | 2 | 5 |
+| N/A-adjusted (points / applicable maximum) | between projects | 20 | 20 | 0 | 0 |
+| fixed (points / full rubric maximum) | within project | 16 | 9 | 2 | 5 |
+| fixed (points / full rubric maximum) | between projects | 20 | 20 | 0 | 0 |
+
+This cohort is every claude-opus-5[1m] evaluation in the rubric tables above (arms v7prod, v8prod; rubric10-semantic v1.0, v1.1; rubric20-semantic v1.0); evaluations by different evaluators are not pooled, since an evaluator is an instrument (#1058), and a rubric held under more than one version is measured per version (#3290). A project the rubric tables flag has too few distinct totals across these arms' records to rank them against each other on that rubric.
