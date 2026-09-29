@@ -158,9 +158,12 @@ def invert(receipt_file, full_file, out_file):
 @click.option("--label", required=True)
 @click.option("--project", required=True, help="dataset identifier carried by the run's files")
 @click.option("--examples", type=click.IntRange(min=0), default=10, show_default=True,
-              help="paths to list from the higher-tier token screen")
+              help="paths to list from each of the higher-tier and supersession token screens")
+@click.option("--at-run-commit", is_flag=True,
+              help="read tiers from the source manifest bytes the run recorded (inputs.source_manifest), "
+                   "recovered from git by hash when the file has changed since, instead of the selected manifest (#3050)")
 @click.option("--json", "as_json", is_flag=True, help="emit the whole report, one row per path included, as JSON")
-def sources(method, label, project, examples, as_json):
+def sources(method, label, project, examples, at_run_commit, as_json):
     """Which source documents a run's coverage receipt cites, by tier (#2937).
 
     Read-only: writes nothing, and no receipt, record or `receipts` block
@@ -171,7 +174,10 @@ def sources(method, label, project, examples, as_json):
     the share cited by exactly one document overall and by tier, each
     document's sole-citation share, and the paths cited only to a lower tier
     while a higher-tier chunk holds every token of the value — a lexical
-    screen to spot-check, not a finding.
+    screen to spot-check, not a finding — and, as a separate count, the
+    paths cited only to superseded sources while a replacement's chunk
+    holds them (#3049). `--at-run-commit` takes the tiers from the manifest
+    bytes the run recorded instead (#3050).
     """
     from data_sheets_schema.cli.method import resolve_method
     if not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
@@ -191,12 +197,17 @@ def sources(method, label, project, examples, as_json):
     for need in (p["provenance"], receipt_file, p["full"]):
         if not need.exists():
             raise click.ClickException(f"no {need}")
-    selected = corpus.selected_manifest(allow_checkout_fallback=True)
-    if selected is None:
+    selected = None if at_run_commit else corpus.selected_manifest(allow_checkout_fallback=True)
+    if selected is None and not at_run_commit:     # --at-run-commit reads the run's own manifest instead
         raise click.ClickException("tiers come from a source manifest's source_priority, and none is selected")
     try:
-        raw = Path(selected).read_bytes()
         run = rs.run_chunks(p["provenance"])
+        if at_run_commit:
+            raw, manifest_basis = rs.run_source_manifest(run["record"], p["provenance"])
+            tiers_from = manifest_basis["path"] + f" ({manifest_basis['source']}" + (
+                f" {manifest_basis['commit'][:12]})" if manifest_basis.get("commit") else ")")
+        else:
+            raw, manifest_basis, tiers_from = Path(selected).read_bytes(), None, str(selected)
         full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
         if not isinstance(full, dict):
             raise ValueError(f"{p['full']} is not a mapping")
@@ -205,8 +216,11 @@ def sources(method, label, project, examples, as_json):
     except (OSError, ValueError, yaml.YAMLError, GitUnavailable) as exc:
         raise click.ClickException(str(exc)) from None
     report["run"] = {"method": method, "label": label, "bundle_basis": run["basis"],
-                     "source_manifest": str(selected),
+                     "source_manifest": tiers_from,
                      "source_manifest_basis": rs.source_manifest_basis(run["record"], raw)}
+    if at_run_commit:
+        report["run"]["source_manifest_bytes"] = manifest_basis
+        report["non_checks"] = rs.non_checks(at_run_commit=True)
     if as_json:
         click.echo(json.dumps(report, indent=1, ensure_ascii=False, default=str))
         return

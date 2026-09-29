@@ -330,6 +330,153 @@ def test_mismatched_bytes_and_an_undeclared_project_are_refused():
         rs.source_dependence(_acceptance_receipt(manifest["bundle_md5"]), manifest, SOURCE_MANIFEST, "Q", FULL, texts)
 
 
+#: Supersession (#3049): the October and June releases are both tier 1, so
+#: the tier screen cannot compare them; `v1 → v2 → v3` is a chain whose only
+#: text-bearing replacement is at its end; `retired`'s replacement has no chunk.
+SUPERSEDED_MANIFEST = b"""source_priority:
+  1: [data resource]
+  4: [tutorial]
+projects:
+  P:
+    - id: october
+      source_type: data resource
+      processed_file: october.txt
+      superseded_by: june
+    - id: june
+      source_type: data resource
+      processed_file: june.txt
+    - id: v1
+      source_type: tutorial
+      processed_file: v1.txt
+      superseded_by: v2
+    - id: v2
+      source_type: tutorial
+      processed_file: v2.txt
+      superseded_by: v3
+    - id: v3
+      source_type: tutorial
+      processed_file: v3.txt
+    - id: retired
+      source_type: tutorial
+      processed_file: retired.txt
+      superseded_by: absent
+    - id: absent
+      source_type: tutorial
+      processed_file: absent.txt
+"""
+
+OCTOBER = "The October release holds 1,200 recordings from five clinical sites. Contact the steward."
+JUNE = "The June release holds 1,200 recordings from five clinical sites and adds pediatric sessions."
+V1 = "Workshop one: annotation guidelines for vowel phonation."
+V2 = "Workshop two: nothing about annotation."
+V3 = "Workshop three: revised annotation guidelines for vowel phonation tasks."
+RETIRED = "An old page about retired calibration procedures here."
+
+SUPERSEDED_FULL = {"id": "https://x/ds",
+                   "sites": "recordings from five clinical sites",       # in June too
+                   "steward": "contact the data steward office",         # October only
+                   "both": "recordings from five clinical sites",        # cited to October and June
+                   "count": "1,200",                                     # no token
+                   "guidelines": "annotation guidelines vowel phonation",  # v1; v2 lacks it, v3 holds it
+                   "calibration": "retired calibration procedures",      # replacement has no chunk
+                   "workshop": "nothing about annotation"}               # cited to v1 and v2; only v2 holds it
+
+
+def _superseded():
+    bundle = "".join(_doc(n, t) for n, t in (("october.txt", OCTOBER), ("june.txt", JUNE), ("v1.txt", V1),
+                                             ("v2.txt", V2), ("v3.txt", V3), ("retired.txt", RETIRED)))
+    manifest, texts = _manifest(bundle)
+    assert [c["id"] for c in manifest["chunks"]] == ["c001", "c002", "c003", "c004", "c005", "c006"]
+    receipt = {"bundle_md5": manifest["bundle_md5"], "chunks": [
+        {"id": "c001", "status": "extracted", "extracted": [
+            {"slot": s, "snippet": "the october release"} for s in ("sites", "steward", "both", "count")]},
+        {"id": "c002", "status": "extracted", "extracted": [{"slot": "both", "snippet": "the june release"}]},
+        {"id": "c003", "status": "extracted", "extracted": [{"slot": "guidelines", "snippet": "workshop one"},
+                                                           {"slot": "workshop", "snippet": "workshop one"}]},
+        {"id": "c004", "status": "extracted", "extracted": [{"slot": "workshop", "snippet": "nothing about"}]},
+        {"id": "c006", "status": "extracted", "extracted": [{"slot": "calibration", "snippet": "an old page"}]}]}
+    return rs.source_dependence(receipt, manifest, SUPERSEDED_MANIFEST, "P", SUPERSEDED_FULL, texts)
+
+
+def test_a_path_cited_only_to_a_superseded_source_is_screened_against_its_replacement():
+    """A separate count (#3049): the tier screen leaves `sites` alone, since
+    June shares October's tier; the supersession screen flags it, and follows
+    the `superseded_by` chain past v2 to v3 for `guidelines`."""
+    out = _superseded()
+    rows = {r["path"]: r for r in out["by_path"]}
+    assert {p: r["supersession_screen"] for p, r in rows.items()} == {
+        "sites": "replacement_match", "guidelines": "replacement_match",
+        "steward": "no_replacement_match",
+        "both": "cites_a_current_source",           # June is cited beside October
+        "count": "below_floor",
+        "calibration": "no_replacement_chunk",      # `absent` is declared but not in the bundle
+        # v2 is cited too, so its own chunk is no replacement: only v3's is read
+        "workshop": "no_replacement_match"}
+    assert rows["sites"]["token_screen"] == "no_higher_tier_chunk"      # the tier screen cannot see it
+    assert rows["sites"]["replacement_chunks"] == ["c002"]
+    assert rows["guidelines"]["replacement_chunks"] == ["c005"]           # v2 (c004) lacks the tokens
+    s = out["superseded_with_replacement_token_match"]
+    assert s["count"] == 2 and s["screened"] == 4
+    assert s["outcomes"] == {"replacement_match": 2, "no_replacement_match": 2, "below_floor": 1,
+                             "no_replacement_chunk": 1, "cites_a_current_source": 1, "exempt": 0,
+                             "preamble_only": 0}
+    assert sum(s["outcomes"].values()) == out["paths"]
+    assert s["superseded_documents"] == [{"document": "october", "superseded_by": "june"},
+                                         {"document": "v1", "superseded_by": "v2"},
+                                         {"document": "v2", "superseded_by": "v3"},
+                                         {"document": "retired", "superseded_by": "absent"}]
+    # guidelines is cited to tier 4 and v3 is tier 4, so the tier screen has no chunk above it either
+    assert s["also_higher_tier_match"] == 0
+    ex = {e["path"]: e for e in s["examples"]}
+    assert ex["sites"]["verbatim"] is True and s["verbatim"] == 1
+    assert ex["sites"]["cited"] == [{"document": "october", "tier": 1, "superseded_by": "june", "chunks": ["c001"]}]
+    assert ex["sites"]["replacement_chunks"] == [{"chunk": "c002", "document": "june", "tier": 1}]
+    assert out["instrument"] == rs.INSTRUMENT and "#3049" in rs.INSTRUMENT
+    text = "\n".join(rs.render({**out, "run": {}}))
+    assert "superseded, replacement token match: 2 of 4 screened paths" in text
+    assert "cited october (tier 1, superseded by june, c001); verbatim in c002 june (tier 1)" in text
+
+
+def test_the_supersession_screen_changes_no_tier_outcome():
+    """The tier screen's outcomes, counts and examples are the same with the
+    supersession links removed from the manifest: the new count is beside
+    the old one, not inside it."""
+    out = _superseded()
+    plain = re.sub(rb"\n      superseded_by: \w+", b"", SUPERSEDED_MANIFEST)
+    assert b"superseded_by" not in plain
+    manifest, texts = _manifest("".join(_doc(n, t) for n, t in (
+        ("october.txt", OCTOBER), ("june.txt", JUNE), ("v1.txt", V1), ("v2.txt", V2), ("v3.txt", V3),
+        ("retired.txt", RETIRED))))
+    receipt = {"bundle_md5": manifest["bundle_md5"], "chunks": [
+        {"id": "c001", "status": "extracted", "extracted": [
+            {"slot": s, "snippet": "x"} for s in ("sites", "steward", "both", "count")]},
+        {"id": "c002", "status": "extracted", "extracted": [{"slot": "both", "snippet": "x"}]},
+        {"id": "c003", "status": "extracted", "extracted": [{"slot": "guidelines", "snippet": "x"},
+                                                           {"slot": "workshop", "snippet": "x"}]},
+        {"id": "c004", "status": "extracted", "extracted": [{"slot": "workshop", "snippet": "x"}]},
+        {"id": "c006", "status": "extracted", "extracted": [{"slot": "calibration", "snippet": "x"}]}]}
+    base = rs.source_dependence(receipt, manifest, plain, "P", SUPERSEDED_FULL, texts)
+    key = "lower_tier_with_higher_tier_token_match"
+    assert out[key] == base[key]
+    assert [r["token_screen"] for r in out["by_path"]] == [r["token_screen"] for r in base["by_path"]]
+    assert base["superseded_with_replacement_token_match"]["outcomes"]["cites_a_current_source"] == 7
+
+
+def test_the_higher_tier_and_supersession_screens_can_flag_one_path():
+    """Superseded at tier 4 by a tier-1 replacement: both screens flag it,
+    and `also_higher_tier_match` counts it once."""
+    sm = SOURCE_MANIFEST.replace(b"      processed_file: webinar.txt\n",
+                                 b"      processed_file: webinar.txt\n      superseded_by: release\n")
+    manifest, texts = _manifest(BUNDLE3)
+    out = rs.source_dependence(_acceptance_receipt(manifest["bundle_md5"]), manifest, sm, "P", FULL, texts)
+    rows = {r["path"]: r for r in out["by_path"]}
+    assert (rows["description"]["token_screen"], rows["description"]["supersession_screen"]) == (
+        "higher_tier_match", "replacement_match")
+    s = out["superseded_with_replacement_token_match"]
+    assert (s["count"], s["also_higher_tier_match"]) == (1, 1)
+    assert out["lower_tier_with_higher_tier_token_match"]["count"] == 1
+
+
 # ---------------------------------------------------------------- on disk
 def _record(tmp: Path, bundle_text: str, **inputs) -> tuple[Path, Path]:
     bundle = tmp / "P_preprocessed.txt"
@@ -392,6 +539,43 @@ def test_the_source_manifest_basis_compares_whichever_hash_the_run_kept():
     assert rs.source_manifest_basis(other, raw)["same_bytes"] is False
 
 
+def test_run_source_manifest_reads_the_bytes_the_run_recorded(tmp_path):
+    """`--at-run-commit` (#3050): the file on disk when it hashes to the
+    run's record, else the committed version that does, by hash."""
+    sm = tmp_path / "source_manifest.yaml"
+    sm.write_bytes(SOURCE_MANIFEST)
+    prov = tmp_path / "P_provenance.yaml"
+    record = {"inputs": {"source_manifest": {"path": str(sm), "md5": hashlib.md5(SOURCE_MANIFEST).hexdigest()}}}
+    with mock.patch.object(pv, "bundle_bytes_for") as git:
+        assert rs.run_source_manifest(record, prov) == (SOURCE_MANIFEST, {"source": "manifest on disk",
+                                                                          "path": str(sm)})
+    git.assert_not_called()
+    sm.write_bytes(SOURCE_MANIFEST + b"# edited since the run\n")
+    entry = {"commit": "b" * 40, "date": "2026-09-01", "md5": "x", "sha256": "y", "matched_on": ["md5"]}
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=(SOURCE_MANIFEST, entry)) as git:
+        raw, basis = rs.run_source_manifest(record, prov)
+    assert git.call_args.args == (str(sm),)
+    assert git.call_args.kwargs == {"md5": hashlib.md5(SOURCE_MANIFEST).hexdigest(), "sha256": None}
+    assert raw == SOURCE_MANIFEST and basis == {"source": "git blob", "path": str(sm), "commit": "b" * 40}
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=None):
+        with pytest.raises(ValueError, match="no committed version .* md5"):
+            rs.run_source_manifest(record, prov)
+    with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
+        with pytest.raises(pv.GitUnavailable, match="shallow"):
+            rs.run_source_manifest(record, prov)
+
+
+def test_run_source_manifest_refuses_a_run_that_recorded_no_path_or_no_hash(tmp_path):
+    prov = tmp_path / "P_provenance.yaml"
+    unselected = {"inputs": {"source_manifest": {"path": None, "basis": "the bundle is not the one it declares"}}}
+    with pytest.raises(ValueError, match="no source manifest path .*the bundle is not the one it declares"):
+        rs.run_source_manifest(unselected, prov)
+    with pytest.raises(ValueError, match="no source manifest path"):
+        rs.run_source_manifest({}, prov)
+    with pytest.raises(ValueError, match="no source manifest hash"):
+        rs.run_source_manifest({"inputs": {"source_manifest": {"path": "m.yaml"}}}, prov)
+
+
 def _tree(root: Path) -> dict[str, bytes]:
     return {str(p.relative_to(root)): p.read_bytes() for p in sorted(root.rglob("*")) if p.is_file()}
 
@@ -433,6 +617,53 @@ def test_the_command_reports_and_writes_nothing(tmp_path, monkeypatch):
     result = CliRunner().invoke(cli, ["--manifest", str(sm), "receipts", "sources", "--method", "m",
                                       "--label", "L", "--project", "Q"])
     assert result.exit_code != 0 and "no " in result.output
+
+
+def test_at_run_commit_reads_tiers_from_the_manifest_the_run_recorded(tmp_path, monkeypatch):
+    """The selected manifest ranks the webinar at tier 1, so by today's
+    ranking nothing sits above it; the run recorded the manifest that ranks
+    it tier 4, and `--at-run-commit` reads that one (#3050)."""
+    from click.testing import CliRunner
+
+    from data_sheets_schema.cli import cli
+    manifest, _texts = _manifest(BUNDLE3)
+    recorded = tmp_path / "recorded_manifest.yaml"
+    recorded.write_bytes(SOURCE_MANIFEST)
+    today = tmp_path / "source_manifest.yaml"
+    today.write_bytes(SOURCE_MANIFEST.replace(b"  1: [data resource]\n  2: [documentation]\n  4: [tutorial]\n",
+                                              b"  1: [data resource, tutorial]\n  2: [documentation]\n"))
+    assert today.read_bytes() != SOURCE_MANIFEST
+    assert rs.source_dependence(_acceptance_receipt(manifest["bundle_md5"]), manifest, today.read_bytes(), "P",
+                                FULL, _texts)["lower_tier_with_higher_tier_token_match"]["count"] == 0
+    concat = tmp_path / "concat"
+    core, full_dir = concat / "m_core" / "L", concat / "m" / "L"
+    core.mkdir(parents=True)
+    full_dir.mkdir(parents=True)
+    _record(core, BUNDLE3, source_manifest={"path": str(recorded), "md5": hashlib.md5(SOURCE_MANIFEST).hexdigest()})
+    (core / "P_coverage_receipt.yaml").write_text(yaml.safe_dump(_acceptance_receipt(manifest["bundle_md5"])))
+    (full_dir / "P_d4d.yaml").write_text("# D4D Datasheet for P Dataset\n" + yaml.safe_dump(FULL))
+    monkeypatch.setattr(pv, "CONCAT_DIR", concat)
+    before = _tree(tmp_path)
+    args = ["--manifest", str(today), "receipts", "sources", "--method", "m", "--label", "L", "--project", "P"]
+    default = json.loads(CliRunner().invoke(cli, args + ["--json"]).output)
+    assert default["lower_tier_with_higher_tier_token_match"]["count"] == 0
+    assert default["run"]["source_manifest_basis"]["same_bytes"] is False
+    result = CliRunner().invoke(cli, args + ["--at-run-commit", "--json"])
+    assert result.exit_code == 0, result.output
+    report = json.loads(result.output)
+    assert report["lower_tier_with_higher_tier_token_match"]["count"] == 1
+    assert report["source_manifest_sha256"] == hashlib.sha256(SOURCE_MANIFEST).hexdigest()
+    assert report["run"]["source_manifest_bytes"] == {"source": "manifest on disk", "path": str(recorded)}
+    assert report["run"]["source_manifest_basis"]["same_bytes"] is True
+    assert report["non_checks"][-1] == rs.NON_CHECK_AT_RUN_COMMIT and report["non_checks"] != default["non_checks"]
+    text = CliRunner().invoke(cli, args + ["--at-run-commit"]).output
+    assert f"tiers: {recorded} (manifest on disk) sha256" in text and "(the bytes the run recorded)" in text
+    with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
+        recorded.write_bytes(SOURCE_MANIFEST + b"# edited\n")
+        result = CliRunner().invoke(cli, args + ["--at-run-commit"])
+    assert result.exit_code != 0 and "shallow clone" in result.output
+    recorded.write_bytes(SOURCE_MANIFEST)
+    assert _tree(tmp_path) == before                   # read-only
 
 
 # ---------------------------------------------------------------- corpus
@@ -534,6 +765,48 @@ def test_the_screen_figures_the_module_states_on_the_24_fig19_records():
     loosest = screen(min_tokens=1, min_chars=0)
     assert sum(x["count"] for x in loosest) == 152
     assert sum(x["outcomes"]["below_floor"] for x in loosest) == 42        # every one a value with no token
+
+
+@pytest.mark.corpus
+def test_the_supersession_figures_the_module_states_on_the_24_fig19_records():
+    """The supersession screen's counts in the module docstring (#3049)."""
+    reports = _fig19_reports()
+    s = [o["superseded_with_replacement_token_match"] for _p, o in reports]
+    outcomes = Counter()
+    for x in s:
+        outcomes.update(x["outcomes"])
+    assert outcomes["replacement_match"] + outcomes["no_replacement_match"] + outcomes["below_floor"] == 74
+    assert outcomes["no_replacement_chunk"] == 0
+    assert sum(x["screened"] for x in s) == 62 and sum(x["count"] for x in s) == 12
+    assert sum(x["verbatim"] for x in s) == 1 and sum(x["also_higher_tier_match"] for x in s) == 0
+    replaced = Counter()
+    for (project, _o), x in zip(reports, s):
+        for ex in x["examples"]:
+            replaced[(project, *sorted({h["document"] for h in ex["replacement_chunks"]}))] += 1
+    assert replaced == {("CM4AI", "june_2026_dataverse_release"): 8, ("VOICE", "physionet_3_1_0"): 4}
+    assert all(x["examples_truncated"] is None for x in s)
+
+
+@pytest.mark.corpus
+def test_the_24_fig19_records_rank_the_same_at_their_run_commit():
+    """`--at-run-commit` (#3050) on the 24 fig19 records: every one reads its
+    manifest from a git blob (12 md5 41408d…, 12 6c71e8…), and those bytes
+    rank every cited document as today's manifest does, so fig19 and both
+    screens are unchanged by the choice."""
+    today = (ROOT / "data/preprocessed/source_manifest.yaml").read_bytes()
+    seen = Counter()
+    for project, core, receipt, run, full in _fig19_runs():
+        try:
+            raw, basis = rs.run_source_manifest(run["record"], core / f"{project}_provenance.yaml")
+        except pv.GitUnavailable as exc:
+            pytest.skip(f"the recorded manifests need git history: {exc}")
+        seen[(basis["source"], hashlib.md5(raw).hexdigest()[:6])] += 1
+        a = rs.source_dependence(receipt, run["manifest"], today, project, full, run["texts"])
+        b = rs.source_dependence(receipt, run["manifest"], raw, project, full, run["texts"])
+        for key in ("by_tier", "documents", "lower_tier_with_higher_tier_token_match",
+                    "superseded_with_replacement_token_match"):
+            assert a[key] == b[key], (project, core.name, key)
+    assert seen == {("git blob", "41408d"): 12, ("git blob", "6c71e8"): 12}
 
 
 @pytest.mark.corpus
