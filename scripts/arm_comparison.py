@@ -37,6 +37,10 @@ Bases, stated once and printed into the output:
   distinct totals and the rubrics' pair agreement on both bases. A project
   with at most two distinct totals is flagged in the rubric tables: no
   within-project order.
+- **evaluator vs generator** (#2928): each rubric evaluation's evaluator
+  beside the model its record's provenance says generated it, and whether
+  the two are one model family (`evaluation_model.same_family`), derived at
+  report time; nothing is written back to an evaluation.
 - **removal rows** (#2923): values deleted without a finding, the share of
   them `reconcile_full` removed (#3150) and receipted values deleted are
   recomputed live and read-only (`removals.for_record`); the
@@ -67,6 +71,9 @@ ROOT = Path(__file__).resolve().parent.parent
 # from anywhere else and every GC count silently becomes 0.
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / "src"))
+from data_sheets_schema.evaluation_model import (  # noqa: E402
+    SAME_FAMILY_DISCLAIMER, same_family_label,
+)
 from data_sheets_schema.grounding import form_facts  # noqa: E402
 from data_sheets_schema.semantic_comparison import (  # noqa: E402
     discrimination, evaluator_key, instruments_of, render_discrimination, withheld_projects,
@@ -399,8 +406,39 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
                         "adjusted_max": s.get("adjusted_max_points"),
                         "pct": s.get("normalized_percentage"),
                         "evaluator": evaluator_key(d),
+                        "generator": generator_model(label, project),
                         "file": path.name, "doc": d})
     return out
+
+
+def generator_model(label: str, project: str) -> str | None:
+    """The model the record's provenance says generated it (`model.model`,
+    else `model.name`); None when the record or its model block is absent."""
+    prov = CONCAT / f"{_method_for(label, project)}_core" / label / f"{project}_provenance.yaml"
+    if not prov.exists():
+        return None
+    m = load(prov).get("model") or {}
+    return m.get("model") or m.get("name") or None
+
+
+def same_family_section(scores) -> list[str]:
+    """Evaluator, generator and same-family status of every evaluation in the
+    rubric tables (#2928), counted per (rubric, evaluator, generator)."""
+    counts: dict[tuple[str, str, str], int] = {}
+    for rubric, rs in scores.items():
+        for arm in rs.values():
+            for ss in arm.values():
+                for s in ss:
+                    key = (rubric, s.get("evaluator") or "unrecorded",
+                           s.get("generator") or "unrecorded")
+                    counts[key] = counts.get(key, 0) + 1
+    lines = ["Evaluator and generator of the evaluations above, from each evaluation's "
+             "model block and its record's provenance `model` (#2928):", "",
+             "| rubric | evaluator | generator | same family | evaluations |",
+             "|---|---|---|---|---|"]
+    for (rubric, ev, gen), n in sorted(counts.items()):
+        lines.append(f"| {rubric} | `{ev}` | `{gen}` | {same_family_label(ev, gen)} | {n} |")
+    return lines + ["", SAME_FAMILY_DISCLAIMER, ""]
 
 
 def collect() -> dict[str, dict[str, list[dict[str, Any]]]]:
@@ -661,6 +699,7 @@ def render_markdown(data, scores) -> str:
               "scores are not results from the newly registered reference rescore. "
               "No gold standard exists (#177); the rubrics are "
               "not domain-neutral (#627); rubric20's N/A convention is #155's.", ""]
+    lines += same_family_section(scores)
     for evaluator, arms, versions, cohort in cohorts:
         lines += render_discrimination(cohort, scope=f", {evaluator} evaluations", evaluator=evaluator)
         lines += [f"This cohort is every {evaluator} evaluation in the rubric tables above "

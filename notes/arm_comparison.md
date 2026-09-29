@@ -163,6 +163,17 @@ The never/added split (#807) says which half of the gap the protocol could have 
 
 Evaluator model(s) recorded: claude-fable-5, claude-opus-5[1m]. Scores are shown as points / adjusted maximum after N/A exclusions; comparison requires the same evaluator, definition and applicability basis; raw points alone do not establish comparability. These historical scores are not results from the newly registered reference rescore. No gold standard exists (#177); the rubrics are not domain-neutral (#627); rubric20's N/A convention is #155's.
 
+Evaluator and generator of the evaluations above, from each evaluation's model block and its record's provenance `model` (#2928):
+
+| rubric | evaluator | generator | same family | evaluations |
+|---|---|---|---|---|
+| rubric10 | `claude-fable-5` | `claude-opus-5` | yes | 25 |
+| rubric10 | `claude-opus-5[1m]` | `claude-opus-5` | yes | 24 |
+| rubric20 | `claude-fable-5` | `claude-opus-5` | yes | 25 |
+| rubric20 | `claude-opus-5[1m]` | `claude-opus-5` | yes | 24 |
+
+Evaluator and generator are the same model family wherever the same-family column reads yes: self-preference is unmeasured, since no cross-family second rating of these scores exists yet (#2928).
+
 ## Item discrimination and within-project orderings, claude-fable-5 evaluations (#2927)
 
 Measured on the claude-fable-5 evaluations above, one rating per record. Evaluations by any other evaluator are in no count below: an evaluator is an instrument (#1058), and pooling two would count their offset as distinct totals. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.

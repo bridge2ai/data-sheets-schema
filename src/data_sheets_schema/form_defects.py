@@ -377,8 +377,8 @@ class FormSubtypeClassifier:
                 raise
             except (ValueError, OSError):
                 pass          # nothing recorded, or unreadable — fall through
-        from data_sheets_schema.api_runner import _model_settings
-        return _model_settings()["name"]
+        from data_sheets_schema.evaluation_model import evaluation_model_name
+        return evaluation_model_name()
 
     def _load(self) -> None:
         if not self.cache_path or not self.cache_path.exists():
