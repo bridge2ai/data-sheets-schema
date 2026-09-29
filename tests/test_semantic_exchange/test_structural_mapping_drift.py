@@ -46,6 +46,19 @@ REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "src" / "semantic_exchange" / "generate_structural_mapping.py"
 COMMITTED = (REPO / "data" / "semantic_exchange"
              / "d4d_rocrate_structural_mapping.sssom.tsv")
+SUMMARY = COMMITTED.with_name("d4d_rocrate_structural_mapping_summary.md")
+
+
+def _snapshot(*paths):
+    """Each file's content hash and modification time, keyed by name.
+
+    The content alone cannot see `--check` writing back what regeneration
+    makes where the file already holds exactly that (#3056); the time can.
+    """
+    import hashlib
+    return {p.name: (hashlib.sha256(p.read_bytes()).hexdigest(),
+                     p.stat().st_mtime_ns)
+            for p in paths}
 
 #: Rows the committed file asserts that regeneration does not produce.
 #: Shrinking this set is progress. Growing it without a reason is the drift
@@ -125,11 +138,18 @@ class TestStructuralMappingDrift(unittest.TestCase):
                          "cardinality or compatibility in each")
 
     def test_check_mode_writes_nothing(self):
-        """A check that regenerates in place becomes the thing it detects."""
-        before = COMMITTED.read_bytes()
+        """A check that regenerates in place becomes the thing it detects.
+
+        Both committed artifacts, by content and by modification time: the
+        committed summary regenerates byte for byte, so a `--check` that wrote
+        it back would leave its content as it was (#3056).
+        `TestTheCheckActsOnColumnDrift` makes the same check on a summary
+        that differs from regeneration, where the content would move too."""
+        present = [p for p in (COMMITTED, SUMMARY) if p.exists()]
+        before = _snapshot(*present)
         subprocess.run([sys.executable, str(SCRIPT), "--check"],
                        cwd=REPO, capture_output=True)
-        self.assertEqual(COMMITTED.read_bytes(), before)
+        self.assertEqual(_snapshot(*present), before)
 
     def test_check_mode_fails_while_the_gap_stands(self):
         result = subprocess.run([sys.executable, str(SCRIPT), "--check"],
@@ -229,6 +249,11 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
     which regenerates exactly, and at a copy of it with one value put back to
     the placeholder #2936 removed — a copy that differs from regeneration in
     that value and in nothing else.
+
+    A third copy differs in its summary alone, by one appended line (#3056).
+    It is what lets "writes nothing where it reads" fail for the summary: in
+    the other two the summary is already what regeneration makes, so writing
+    it back would leave its bytes unchanged.
     """
 
     @classmethod
@@ -271,10 +296,22 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
             raise AssertionError("the generator wrote no composition row")
         cls.mapping.write_text("".join(lines), encoding="utf-8")
         cls.rows = len(lines) - 1
-        cls.drifted_bytes = cls.mapping.read_bytes()
+
+        stale = base / "stale_summary"
+        shutil.copytree(exact, stale)
+        with (stale / SUMMARY.name).open("a", encoding="utf-8") as fh:
+            fh.write("A line regeneration does not write.\n")
+
+        read_from = {"drifted": drifted, "stale summary": stale}
+
+        def directory(name):
+            return _snapshot(*sorted(read_from[name].iterdir()))
+        cls.before = {name: directory(name) for name in read_from}
 
         cls.exact_result = run("--check", "--output-dir", str(exact))
         cls.drifted_result = run("--check", "--output-dir", str(drifted))
+        cls.stale_result = run("--check", "--output-dir", str(stale))
+        cls.after = {name: directory(name) for name in read_from}
         cls.absent = base / "absent"
         cls.absent_result = run("--check", "--output-dir", str(cls.absent))
 
@@ -322,8 +359,31 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         self.assertIn("The summary regenerates exactly, so it describes the "
                       "generator's output", self.drifted_result[1])
 
+    def test_a_summary_that_differs_fails_the_check_and_is_named(self):
+        """The control for the stale-summary copy: the check read that
+        summary and found it differs. Its mapping regenerates exactly, so the
+        exit status is the summary's alone."""
+        code, out = self.stale_result
+        self.assertEqual(code, 1, out)
+        self.assertIn("The summary does not regenerate", out)
+        self.assertNotIn("regeneration does not produce", out)
+        self.assertNotIn("committed file lacks", out)
+        self.assertNotIn("value(s) differ", out)
+        self.assertIn(f"The {self.rows} row(s) both files carry agree on", out)
+
     def test_the_check_writes_nothing_where_it_reads(self):
-        self.assertEqual(self.mapping.read_bytes(), self.drifted_bytes)
+        """Every file in each directory the check read, by content and by
+        modification time, and no file added. The stale-summary copy is the
+        one where writing the summary back would change its content (#3056),
+        so the catch does not rest on the file system's clock alone."""
+        for name, before in self.before.items():
+            with self.subTest(directory=name):
+                self.assertEqual(sorted(self.after[name]), sorted(before))
+                for file, (content, mtime) in before.items():
+                    self.assertEqual(self.after[name][file][0], content,
+                                     f"--check rewrote {file}")
+                    self.assertEqual(self.after[name][file][1], mtime,
+                                     f"--check wrote to {file}")
         code, out = self.absent_result
         self.assertEqual(code, 1, out)
         self.assertIn("No committed mapping", out)
