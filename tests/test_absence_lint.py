@@ -63,6 +63,20 @@ class Controls(unittest.TestCase):
         record["description"] = phrase                                          # the control
         self.assertEqual(_hits(record), [("/description", BWA, "No source in the bundle")])
 
+    def test_nothing_nested_under_name_or_id_is_read(self):
+        """A string under `name` or `id` goes unread because neither is a
+        free-text key, excluded or not; only a mapping or list under one
+        reaches the exclusion itself (#3095). The control puts the same nodes
+        under keys that are not excluded, where every one is read."""
+        phrase = POSITIVE[0][0]
+        nested = {"name": {"description": phrase}, "id": [{"notes": phrase}],
+                  "creators": [{"name": [{"source_caveats": phrase}], "id": {"x_details": phrase}}]}
+        self.assertEqual((_hits(nested), al.lint(nested)["leaves"]), ([], 0))
+        control = {"alias": {"description": phrase}, "ids": [{"notes": phrase}],
+                   "creators": [{"names": [{"source_caveats": phrase}], "ref": {"x_details": phrase}}]}
+        self.assertEqual([h[0] for h in _hits(control)], [
+            "/alias/description", "/ids/0/notes", "/creators/0/names/0/source_caveats", "/creators/0/ref/x_details"])
+
 
 class Pointers(unittest.TestCase):
     def test_a_nested_list_members_caveat_is_reported_at_its_pointer(self):
