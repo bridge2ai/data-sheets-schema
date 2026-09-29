@@ -741,14 +741,21 @@ def main(argv=None):
                     help="Regenerate to a temporary file and report drift "
                          "against the committed mapping. Writes nothing. "
                          "Exits non-zero if they differ.")
+    # The inputs stay fixed; only where the two artifacts live can move. That
+    # is what lets a test run the check on a copy of the mapping it has
+    # changed, which is the only way to see what `--check` does with a
+    # difference while the committed file carries none (#2999).
+    ap.add_argument("--output-dir", type=Path, default=None,
+                    help="Directory the mapping and its summary are written "
+                         "to, or read from with --check "
+                         "(default: data/semantic_exchange).")
     args = ap.parse_args(argv)
 
     # Paths
     base_dir = Path(__file__).parent.parent.parent
     d4d_schema = base_dir / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
     rocrate_example = base_dir / "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json"
-    output_dir = base_dir / "data/semantic_exchange"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = args.output_dir or base_dir / "data/semantic_exchange"
 
     # Parse schemas
     print("Parsing D4D schema structure...")
@@ -828,8 +835,10 @@ def main(argv=None):
               "change (#234).")
         return 1
 
-    # Export
+    # Export. The directory is made here rather than up front, so `--check`
+    # pointed at one that does not exist creates nothing either.
     print("\nExporting mappings...")
+    output_dir.mkdir(parents=True, exist_ok=True)
     generator.export_sssom(committed)
     generator.export_summary(output_dir / "d4d_rocrate_structural_mapping_summary.md")
 

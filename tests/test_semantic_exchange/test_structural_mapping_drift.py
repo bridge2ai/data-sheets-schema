@@ -212,6 +212,112 @@ class TestTheCheckCoversBothArtifacts(unittest.TestCase):
         self.assertIn("describes the generator's output", self.stdout)
 
 
+class TestTheCheckActsOnColumnDrift(unittest.TestCase):
+    """#2999. What `--check` does with `check_column_drift`'s answer.
+
+    Every other `--check` test reads the committed file, where no value
+    differs, so neither half of that use was exercised: printing the
+    differences rather than "agree", and failing on them. The second was
+    hidden besides by the ten KNOWN_UNDERIVABLE rows, which fail the check on
+    their own; once #234 is fixed, a verdict that ignored column drift would
+    pass a table that contradicts the schema.
+
+    So the check is pointed (`--output-dir`) at the generator's own output,
+    which regenerates exactly, and at a copy of it with one value put back to
+    the placeholder #2936 removed — a copy that differs from regeneration in
+    that value and in nothing else.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import io
+        import shutil
+        import tempfile
+        from contextlib import redirect_stdout
+        sys.path.insert(0, str(REPO / "src" / "semantic_exchange"))
+        from generate_structural_mapping import main  # noqa: E402
+
+        def run(*argv):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                code = main(list(argv))
+            return code, out.getvalue()
+
+        cls._tmp = tempfile.TemporaryDirectory()
+        base = Path(cls._tmp.name)
+        exact, drifted = base / "exact", base / "drifted"
+        cls.written = run("--output-dir", str(exact))
+        shutil.copytree(exact, drifted)
+
+        cls.mapping = drifted / COMMITTED.name
+        lines = cls.mapping.read_text(encoding="utf-8").splitlines(keepends=True)
+        header = lines[0].rstrip("\n").split("\t")
+        at = {c: header.index(c) for c in
+              ("subject_id", "predicate_id", "object_id", "composition_path",
+               "type_compatible")}
+        for i, line in enumerate(lines[1:], start=1):
+            fields = line.rstrip("\n").split("\t")
+            if fields[at["composition_path"]]:
+                assert fields[at["type_compatible"]] == "False", line
+                fields[at["type_compatible"]] = "True"
+                lines[i] = "\t".join(fields) + "\n"
+                cls.triple = tuple(fields[at[c]] for c in
+                                   ("subject_id", "predicate_id", "object_id"))
+                break
+        else:
+            raise AssertionError("the generator wrote no composition row")
+        cls.mapping.write_text("".join(lines), encoding="utf-8")
+        cls.rows = len(lines) - 1
+        cls.drifted_bytes = cls.mapping.read_bytes()
+
+        cls.exact_result = run("--check", "--output-dir", str(exact))
+        cls.drifted_result = run("--check", "--output-dir", str(drifted))
+        cls.absent = base / "absent"
+        cls.absent_result = run("--check", "--output-dir", str(cls.absent))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    def test_the_generators_own_output_passes(self):
+        """The control: without it, a drifted copy that fails says nothing
+        about the one value changed."""
+        self.assertEqual(self.written[0], 0, self.written[1])
+        code, out = self.exact_result
+        self.assertEqual(code, 0, out)
+        self.assertIn("regenerate exactly", out)
+
+    def test_one_differing_value_fails_the_check(self):
+        """No triple is lost or gained and the summary is fresh, so this
+        exit status is the column comparison's alone."""
+        code, out = self.drifted_result
+        self.assertEqual(code, 1, out)
+        self.assertNotIn("regeneration does not produce", out)
+        self.assertNotIn("committed file lacks", out)
+        self.assertNotIn("summary does not regenerate", out)
+
+    def test_the_differing_value_is_printed_and_agreement_is_not(self):
+        s, p, o = self.triple
+        _, out = self.drifted_result
+        self.assertIn(f"1 value(s) differ on the {self.rows} row(s) both "
+                      "files carry:", out)
+        self.assertIn(f"{s}  --{p}->  {o}  type_compatible: committed 'True', "
+                      "regenerated 'False'", out)
+        self.assertNotIn("agree on", out)
+
+    def test_the_summary_is_named_as_the_fresh_artifact(self):
+        self.assertIn("The summary regenerates exactly, so it describes the "
+                      "generator's output", self.drifted_result[1])
+
+    def test_the_check_writes_nothing_where_it_reads(self):
+        self.assertEqual(self.mapping.read_bytes(), self.drifted_bytes)
+        code, out = self.absent_result
+        self.assertEqual(code, 1, out)
+        self.assertIn("No committed mapping", out)
+        self.assertFalse(self.absent.exists(),
+                         "--check created the directory it was checking")
+
+
 class TestMalformedInputIsNamed(unittest.TestCase):
     """#296: a bare KeyError sends the reader to the code, not the file."""
 
