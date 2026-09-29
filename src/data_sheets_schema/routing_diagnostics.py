@@ -314,7 +314,12 @@ def _merge_sources(node: yaml.MappingNode, path: str,
     path it is named at, in the order PyYAML's `flatten_mapping` lays their
     pairs out: every `<<` in turn — a merged mapping's own merges before its
     pairs, and a list of merges last to first, so the first wins — then
-    `node` itself. A merge cycle, which the loader cannot construct, is cut."""
+    `node` itself. A merge cycle, which the loader cannot construct, is cut.
+    A mapping reached more than once — merged twice, or through two merges
+    of a diamond — is listed once, at its last place: the loader lays its
+    pairs out at each place, but they are the same key nodes with the same
+    values, so the repeat drops nothing, and its last place is the one whose
+    pairs win against the mappings between (#3226)."""
     if id(node) in active:
         return []
     active = active | {id(node)}
@@ -330,7 +335,8 @@ def _merge_sources(node: yaml.MappingNode, path: str,
                 if isinstance(item, yaml.MappingNode):
                     sources.extend(_merge_sources(item, f"{base}[{index}]", active))
     sources.append((node, path))
-    return sources
+    last = {id(source): index for index, (source, _) in enumerate(sources)}
+    return [entry for index, entry in enumerate(sources) if last[id(entry[0])] == index]
 
 
 def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:

@@ -355,6 +355,39 @@ class TestAMappingIsJudgedWhereverTheScanReadsIt(unittest.TestCase):
                 self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)], [where])
                 self.assertIsNone(rd.check_text(text)[0])
 
+    def test_a_mapping_merged_into_one_place_twice_is_not_a_duplicate(self):
+        """#3226: a mapping reached twice through merges — a diamond, a list
+        naming it twice, two merge keys — lays out the same key nodes twice,
+        and the loader reads every one of them. Nothing is dropped, so
+        nothing is named, and the record's findings are reported."""
+        a = "a: &a\n  confidentiality_details: " + EMBARGO_TEXT + "\n"
+        for text in (
+                a + "b: &b\n  <<: *a\n  id: x:b\nconfidential_elements:\n- <<: [*a, *b]\n",
+                a + "confidential_elements:\n- <<: [*a, *a]\n",
+                a + "confidential_elements:\n- <<: *a\n  <<: *a\n"):
+            with self.subTest(text=text):
+                loaded = yaml.safe_load(text)["confidential_elements"][0]
+                self.assertEqual(loaded["confidentiality_details"], EMBARGO_TEXT)
+                self.assertEqual(rd.unread_duplicate_keys(text), [])
+                found, reason = rd.check_text(text)
+                self.assertIsNone(reason)
+                self.assertEqual([m.path for m in found],
+                                 ["confidential_elements[0].confidentiality_details"])
+
+    def test_a_mapping_merged_twice_wins_or_loses_as_its_first_merge_does(self):
+        """The repeat is judged at the place whose pairs the loader keeps: in
+        `[*a, *c, *a]` the first `*a` shadows `c`, so a duplicate inside the
+        shadowed value hides nothing; a duplicate inside `a` itself is named
+        once, with its two lines, not once per merge."""
+        shadowed = ("a: &a\n  name: a\nc: &c\n  name: p\n  name: q\n"
+                    "confidential_elements:\n- <<: [*a, *c, *a]\n")
+        self.assertEqual(yaml.safe_load(shadowed)["confidential_elements"], [{"name": "a"}])
+        self.assertEqual(rd.unread_duplicate_keys(shadowed), [])
+        repeated = "a: &a\n  name: a\n  name: b\nconfidential_elements:\n- <<: [*a, *a]\n"
+        self.assertEqual(rd.unread_duplicate_keys(repeated),
+                         [{"path": "confidential_elements[0].<<[0]", "key": "name",
+                           "lines": [2, 3], "count": 2}])
+
     def test_every_duplicate_named_is_one_the_1029_gate_counts(self):
         """The walk groups keys as the gate does and only judges more places,
         so it names no key and no line the gate would not."""
