@@ -27,7 +27,9 @@ Usage:
     poetry run python scripts/absence_claims_baseline.py --check    # read-only: exit 1 when stale
     poetry run python scripts/absence_claims_baseline.py --sample 50 --seed 2919
         # read-only: print a seeded sample of the pinned records' phrases per
-        # class, with context, for a precision check; writes nothing
+        # class, with context, for a precision check, and the draw's sha256
+        # last; writes nothing. N is at least 1, and --seed is refused
+        # without --sample, so neither falls through to the rewrite (#3173).
 """
 from __future__ import annotations
 
@@ -56,7 +58,7 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 #: Hand-checked precision samples, keyed by the lexicon sha256 they were drawn
 #: under, so a note regenerated under another lexicon says none was checked
 #: rather than repeating a figure that describes other patterns. Each sample is
-#: `--sample 50 --seed 2919` over the pinned records named by
+#: `--sample {sample} --seed {seed}` over the pinned records named by
 #: `record_set_sha256`; a note over another record set says the sample was
 #: drawn from another one. Each phrase was read in context against its class
 #: definition by the agent that registered the lexicon — not an independent
@@ -64,11 +66,18 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 #: removed: a source conflict is legitimate content for `source_caveats`, and
 #: one worded with the ranking vocabulary is still counted in
 #: `record_self_narration`, as borderline. Class values: (in class,
-#: borderline, not in class).
+#: borderline, not in class). `draw_sha256` names the phrases drawn
+#: (`draw_sha256()`); a corpus test re-draws the sample from the pinned
+#: records and compares it (#3173). The v1 value is the draw this code makes
+#: over the record set named beside it; that it is the draw judged on the
+#: date checked rests on the round-1 comparison of the printed sample
+#: (#3045), not on anything recorded that day.
 PRECISION: dict[str, dict[str, Any]] = {
     "7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e": {     # v1
         "checked": "2026-09-28",
         "record_set_sha256": "cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711",   # 303 records
+        "sample": 50, "seed": SAMPLE_SEED,
+        "draw_sha256": "99c92000a3c2ca4b27c8ab5ab6e345d1f3971684249767a5723d5dba4a961577",
         "classes": {"bundle_wide_absence": (50, 0, 0), "record_self_narration": (47, 3, 0)},
         "note": "The three borderline phrases are source conflicts worded with the ranking "
                 "vocabulary (\"two tier-1 sources disagree\").",
@@ -302,11 +311,14 @@ def render_markdown(collected: dict[str, Any]) -> str:
                  ["It was drawn from another record set (record-set sha256",
                   f"`{checked['record_set_sha256']}`), not the one this note counts."])
         lines += [
-            f"A seeded sample (`--sample 50 --seed {SAMPLE_SEED}`) of each class's phrases, checked",
+            f"A seeded sample (`--sample {checked['sample']} --seed {checked['seed']}`) of each class's "
+            "phrases, checked",
             f"{checked['checked']}. Each phrase was read in context against its class definition by",
             "the agent that registered the lexicon, not by an independent reviewer. The sample",
             "measures class membership, not whether a statement should be removed.",
             *drawn,
+            "The draw's sha256, over each drawn phrase's class, record, pointer and span in order, is",
+            f"`{checked['draw_sha256']}`; `--sample` prints it last.",
             "",
             "| class | in class | borderline | not in class |",
             "|---|---:|---:|---:|",
@@ -328,22 +340,58 @@ def _leaves_sentence(scope: dict[str, Any]) -> str:
     return f"{keys} and every {suffixes}, at any depth; never inside {excluded_text}"
 
 
-def sample(collected: dict[str, Any], n: int, seed: int) -> list[str]:
-    """A seeded sample of each class's phrases, each with its context."""
-    out: list[str] = []
-    texts: dict[str, dict] = {}
+def draw(collected: dict[str, Any], n: int, seed: int) -> dict[str, tuple[int, list[tuple[str, dict]]]]:
+    """Each class's phrase count and its seeded draw of up to `n` phrases.
+
+    The population is the class's phrases in the order `collect` holds them
+    (record path, then as the lint reports them), and the draw is
+    `random.Random(seed).sample` over it, one generator per class.
+    """
+    drawn: dict[str, tuple[int, list[tuple[str, dict]]]] = {}
     for cls in collected["lexicon"].classes:
         hits = [(row["path"], h) for row in collected["records"] if row["result"]
                 for h in row["result"]["hits"] if h["class"] == cls]
-        picked = random.Random(seed).sample(hits, min(n, len(hits)))
-        out.append(f"## {cls}: {len(picked)} of {len(hits)} phrases")
+        drawn[cls] = (len(hits), random.Random(seed).sample(hits, min(n, len(hits))))
+    return drawn
+
+
+def draw_sha256(drawn: dict[str, tuple[int, list[tuple[str, dict]]]]) -> str:
+    """Which phrases a draw holds, in its order: the sha256 over each one's
+    class, record, pointer and span. How the sample is printed does not move
+    it; drawing other phrases, or the same ones in another order, does."""
+    return hashlib.sha256("".join(
+        f"{cls}\t{path}\t{h['pointer']}\t{h['start']}\t{h['end']}\n"
+        for cls, (_, picked) in drawn.items() for path, h in picked).encode()).hexdigest()
+
+
+def sample(collected: dict[str, Any], n: int, seed: int) -> list[str]:
+    """A seeded sample of each class's phrases, each with its context, and
+    the draw's sha256 last."""
+    out: list[str] = []
+    texts: dict[str, dict] = {}
+    drawn = draw(collected, n, seed)
+    for cls, (total, picked) in drawn.items():
+        out.append(f"## {cls}: {len(picked)} of {total} phrases")
         for i, (path, h) in enumerate(picked, 1):
             if path not in texts:
                 texts[path] = yaml.safe_load((collected["corpus"] / path).read_text(encoding="utf-8"))
             text = " ".join(_at(texts[path], h["pointer"]).split())
             before, after = text[max(0, h["start"] - 110):h["start"]], text[h["end"]:h["end"] + 70]
             out.append(f"{i}. {path} {h['pointer']} {h['patterns']}\n   …{before}[[{h['text']}]]{after}…")
+    out.append(f"draw sha256 {draw_sha256(drawn)} (--sample {n} --seed {seed})")
     return out
+
+
+def _count(text: str) -> int:
+    """`--sample N`: a count of at least one. `--sample 0` asked for no sample
+    and was read as no `--sample` at all, which rewrote the note (#3173)."""
+    try:
+        n = int(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{text!r} is not an integer") from None
+    if n < 1:
+        raise argparse.ArgumentTypeError(f"{n} is not a count of at least 1")
+    return n
 
 
 def _at(record: Any, pointer: str) -> str:
@@ -362,10 +410,14 @@ def main(argv: list[str] | None = None) -> int:
                            "match the pinned records; a record the pins do not name is reported, not stale")
     mode.add_argument("--repin", action="store_true",
                       help="pin the full records the corpus holds now, then write the pins and the note")
-    mode.add_argument("--sample", type=int, default=0, metavar="N",
-                      help="read-only: print N of the pinned records' phrases per class for a precision check")
-    ap.add_argument("--seed", type=int, default=SAMPLE_SEED)
+    mode.add_argument("--sample", type=_count, metavar="N",
+                      help="read-only: print N (at least 1) of the pinned records' phrases per class, with "
+                           "context, for a precision check, and the draw's sha256; writes nothing")
+    ap.add_argument("--seed", type=int, metavar="S",
+                    help=f"the --sample draw's seed (default {SAMPLE_SEED}); refused without --sample")
     args = ap.parse_args(argv)
+    if args.seed is not None and args.sample is None:
+        ap.error("--seed applies only with --sample")
     try:
         pins = current_records(CORPUS) if args.repin else read_pins(PINS)
         collected = collect(CORPUS, pins=pins)
@@ -378,8 +430,8 @@ def main(argv: list[str] | None = None) -> int:
         named = "; ".join(new[:10]) + (f"; and {len(new) - 10} more" if len(new) > 10 else "")
         print(f"reported, not counted: {len(new)} full record(s) under {_shown(CORPUS)}/ are not in the "
               f"pinned set ({named}); --repin counts them", file=sys.stderr)
-    if args.sample:
-        print("\n".join(sample(collected, args.sample, args.seed)))
+    if args.sample is not None:
+        print("\n".join(sample(collected, args.sample, SAMPLE_SEED if args.seed is None else args.seed)))
         return 0
     text = render_markdown(collected)
     if args.check:

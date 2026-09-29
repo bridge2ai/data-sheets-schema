@@ -74,6 +74,8 @@ A seeded sample (`--sample 50 --seed 2919`) of each class's phrases, checked
 the agent that registered the lexicon, not by an independent reviewer. The sample
 measures class membership, not whether a statement should be removed.
 It was drawn from the record set this note counts.
+The draw's sha256, over each drawn phrase's class, record, pointer and span in order, is
+`99c92000a3c2ca4b27c8ab5ab6e345d1f3971684249767a5723d5dba4a961577`; `--sample` prints it last.
 
 | class | in class | borderline | not in class |
 |---|---:|---:|---:|

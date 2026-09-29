@@ -11,6 +11,8 @@ import hashlib
 import importlib.util
 import io
 import json
+import random
+import re
 import shutil
 import tempfile
 import unittest
@@ -240,12 +242,27 @@ class Baseline(unittest.TestCase):
             f.write("# a comment changes no count\n")
         self.assertNotEqual(first, self.m.render_markdown(self.m.collect(self.corpus)))
 
+    def _run(self, *argv):
+        """Run the script's main; return its exit status, stdout and stderr."""
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
+            status = self.m.main(list(argv))
+        return status, out.getvalue(), err.getvalue()
+
     def _main(self, *argv):
         """Run the script's main; return its exit status and what it wrote to stderr."""
-        err = io.StringIO()
-        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
-            status = self.m.main(list(argv))
-        return status, err.getvalue()
+        status, _, err = self._run(*argv)
+        return status, err
+
+    def _tree(self):
+        """Every file under the test directory, with its bytes."""
+        return {p.relative_to(self.dir).as_posix(): p.read_bytes() for p in sorted(self.dir.rglob("*")) if p.is_file()}
+
+    def _spoil_note(self):
+        """Append a line no rewrite keeps: a rewrite of a current note
+        reproduces its bytes, so only a note that differs shows one."""
+        with self.m.OUT_MD.open("a", encoding="utf-8") as f:
+            f.write("a line no rewrite would keep\n")
 
     def test_check_is_read_only_and_needs_a_pinned_record_set(self):
         self.assertEqual(self._main("--check")[0], 1)                     # nothing pinned yet
@@ -331,11 +348,120 @@ class Baseline(unittest.TestCase):
                     self.m.read_pins(self.m.PINS)
                 self.assertEqual(self._main("--check")[0], 1)
 
-    def test_sample_prints_phrases_in_context_and_writes_nothing(self):
-        out = self.m.sample(self.m.collect(self.corpus), 5, 1)
+    def test_sample_prints_each_phrase_in_its_context_and_the_draw_last(self):
+        collected = self.m.collect(self.corpus)
+        out = self.m.sample(collected, 5, 1)
         self.assertEqual(out[0], f"## {BWA}: 2 of 2 phrases")
         self.assertTrue(any("[[The bundle does not]]" in line for line in out))
-        self.assertFalse(self.m.OUT_MD.exists())
+        digest = self.m.draw_sha256(self.m.draw(collected, 5, 1))
+        self.assertEqual(out[-1], f"draw sha256 {digest} (--sample 5 --seed 1)")
+
+    def test_the_sample_mode_writes_nothing(self):
+        """#3173: the mode's read-only promise is checked in `main`, where it
+        lives, not in the function that only returns lines. A run with no
+        note must not create one either."""
+        self.assertEqual(self._main("--repin")[0], 0)
+        self._spoil_note()
+        before = self._tree()
+        status, out, err = self._run("--sample", "3")
+        self.assertEqual(status, 0, err)
+        self.assertIn(f"## {BWA}: 2 of 2 phrases", out)
+        self.assertEqual(self._tree(), before)
+        self.m.OUT_MD.unlink()
+        before = self._tree()
+        self.assertEqual(self._run("--sample", "3", "--seed", "7")[0], 0)
+        self.assertEqual(self._tree(), before)
+
+    def test_the_sample_is_drawn_from_the_pinned_records_only(self):
+        """#3173: a record added since the pin is not drawn from, and a pinned
+        record whose bytes moved stops the draw rather than being sampled as
+        the bytes it holds now."""
+        self.assertEqual(self._main("--repin")[0], 0)
+        self._write("m_c/label9/T_d4d.yaml", {"notes": "No source states it, and keywords is left empty."})
+        status, out, err = self._run("--sample", "50")
+        self.assertEqual(status, 0, err)
+        self.assertIn("reported, not counted: 1 full record(s)", err)
+        self.assertIn(f"## {BWA}: 2 of 2 phrases", out)
+        self.assertIn(f"## {RSN}: 2 of 2 phrases", out)
+        self.assertNotIn("m_c/label9/T_d4d.yaml", out)
+        self.assertEqual(self._main("--repin")[0], 0)                    # the control: once pinned, it is drawn
+        status, out, err = self._run("--sample", "50")
+        self.assertIn(f"## {BWA}: 3 of 3 phrases", out)
+        self.assertIn("m_c/label9/T_d4d.yaml", out)
+        with (self.corpus / "m_b/P_d4d.yaml").open("a", encoding="utf-8") as f:
+            f.write("# a comment changes no count\n")
+        status, out, err = self._run("--sample", "50")
+        self.assertEqual((status, out), (1, ""))
+        self.assertIn("changed m_b/P_d4d.yaml", err)
+
+    @staticmethod
+    def _drawn(out, cls):
+        """The (record, pointer) of each phrase `--sample` printed for a class."""
+        section = out.split(f"## {cls}: ", 1)[1].split("\n## ", 1)[0]
+        return [(m[1], m[2]) for m in re.finditer(r"^\d+\. (\S+) (\S+) ", section, re.M)]
+
+    def test_the_sample_is_the_seeded_draw_over_the_pinned_phrases(self):
+        """#3173: `--sample N --seed S` is `random.Random(S).sample` over each
+        class's pinned phrases in record order, one generator per class: the
+        draw the committed precision table names. A seed that is ignored, a
+        draw that takes the first N, a generator one class's draw advances
+        for the next, or a default seed other than the table's fails here."""
+        for i in range(12):
+            self._write(f"m_d/label/P{i:02d}_d4d.yaml", {"source_caveats": f"The bundle does not state item {i}.",
+                                                         "notes": [f"Identifier {i} coined for this record."]})
+        self.assertEqual(self._main("--repin")[0], 0)
+        collected = self.m.collect(self.corpus, pins=self.m.read_pins(self.m.PINS))
+        hits = {cls: [(r["path"], h["pointer"]) for r in collected["records"] if r["result"]
+                      for h in r["result"]["hits"] if h["class"] == cls] for cls in (BWA, RSN)}
+        self.assertEqual((len(hits[BWA]), len(hits[RSN])), (14, 14))
+        drawn = {}
+        for seed in (5, 6):
+            status, out, err = self._run("--sample", "3", "--seed", str(seed))
+            self.assertEqual(status, 0, err)
+            self.assertEqual(self._run("--sample", "3", "--seed", str(seed))[1], out)        # reproducible
+            for cls in (BWA, RSN):
+                drawn[seed, cls] = self._drawn(out, cls)
+                self.assertEqual(drawn[seed, cls], random.Random(seed).sample(hits[cls], 3))
+            self.assertEqual(out.splitlines()[-1], f"draw sha256 {self.m.draw_sha256(self.m.draw(collected, 3, seed))}"
+                                                   f" (--sample 3 --seed {seed})")
+        self.assertNotEqual(drawn[5, BWA], drawn[6, BWA])
+        self.assertNotIn(hits[BWA][:3], [drawn[5, BWA], drawn[6, BWA]])
+        self.assertEqual(self._run("--sample", "3")[1], self._run("--sample", "3", "--seed", "2919")[1])
+
+    def test_a_sample_below_one_or_a_seed_without_sample_is_refused(self):
+        """#3173: `--sample 0` was read as no `--sample` and rewrote the note,
+        and `--sample -1` ended in a ValueError. Each is now a usage error
+        that writes nothing; so is a `--seed` that no draw would use."""
+        self.assertEqual(self._main("--repin")[0], 0)
+        self._spoil_note()
+        before = self._tree()
+        for argv, message in [(["--sample", "0"], "argument --sample: 0 is not a count of at least 1"),
+                              (["--sample", "-1"], "argument --sample: -1 is not a count of at least 1"),
+                              (["--sample", "x"], "argument --sample: 'x' is not an integer"),
+                              (["--seed", "5"], "--seed applies only with --sample"),
+                              (["--check", "--seed", "5"], "--seed applies only with --sample")]:
+            with self.subTest(argv=argv):
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaises(SystemExit) as ctx:
+                        self.m.main(argv)
+                self.assertEqual(ctx.exception.code, 2)
+                self.assertIn(message, err.getvalue())
+                self.assertEqual(self._tree(), before)
+
+    def test_the_draw_digest_names_the_phrases_drawn_and_their_order(self):
+        """What the note's draw sha256 is over: each drawn phrase's class,
+        record, pointer and span, in the order drawn, and nothing printed."""
+        p = ("m/P_d4d.yaml", {"pointer": "/notes/0", "start": 3, "end": 9, "text": "x", "patterns": ["a"]})
+        q = ("m/Q_d4d.yaml", {"pointer": "/description", "start": 0, "end": 4, "text": "y", "patterns": ["b"]})
+        r = ("m/R_d4d.yaml", {"pointer": "/notes/1", "start": 1, "end": 2, "text": "z", "patterns": ["c"]})
+        expected = hashlib.sha256((f"{BWA}\tm/Q_d4d.yaml\t/description\t0\t4\n{BWA}\tm/P_d4d.yaml\t/notes/0\t3\t9\n"
+                                   f"{RSN}\tm/R_d4d.yaml\t/notes/1\t1\t2\n").encode()).hexdigest()
+        self.assertEqual(self.m.draw_sha256({BWA: (5, [q, p]), RSN: (1, [r])}), expected)
+        reworded = (p[0], {**p[1], "text": "other words", "patterns": []})
+        self.assertEqual(self.m.draw_sha256({BWA: (9, [q, reworded]), RSN: (1, [r])}), expected)
+        self.assertNotEqual(self.m.draw_sha256({BWA: (5, [p, q]), RSN: (1, [r])}), expected)      # another order
+        self.assertNotEqual(self.m.draw_sha256({BWA: (5, [q]), RSN: (1, [p, r])}), expected)      # another class
 
     def test_precision_is_shown_only_for_the_lexicon_it_was_checked_under(self):
         """#3094: the sample is keyed by lexicon sha256, so a note under other
@@ -368,23 +494,35 @@ class Baseline(unittest.TestCase):
         md = self.m.render_markdown(collected)
         self.assertIn("It was drawn from another record set (record-set sha256", md)
         self.assertIn(f"`{checked['record_set_sha256']}`), not the one this note counts.", md)
+        self.assertIn(f"`{checked['draw_sha256']}`; `--sample` prints it last.", md)
+        self.assertIn("A seeded sample (`--sample 50 --seed 2919`)", md)
+        checked.update(sample=7, seed=11)                               # the draw it names is the entry's
+        self.assertIn("A seeded sample (`--sample 7 --seed 11`)", self.m.render_markdown(collected))
         checked["record_set_sha256"] = collected["record_set_sha256"]
         md = self.m.render_markdown(collected)
         self.assertIn("It was drawn from the record set this note counts.", md)
         self.assertNotIn("another record set", md)
 
 
-@pytest.mark.corpus   # walks the committed corpus
-def test_the_committed_baseline_is_what_its_pinned_records_reproduce():
-    """Fails only when a pinned record changed or is gone, or when the note
-    does not match the pinned records. A record added since the pin is
-    reported as a warning and not counted (#3045)."""
+@pytest.fixture(scope="module")
+def committed():
+    """The script and the committed pinned records, linted once for the
+    corpus tests below."""
     m = _script()
     pins = m.read_pins(m.PINS)
     try:
         collected = m.collect(m.CORPUS, pins=pins)
     except m.Stale as exc:
         pytest.fail(f"{exc}: run scripts/absence_claims_baseline.py --repin")
+    return m, pins, collected
+
+
+@pytest.mark.corpus   # walks the committed corpus
+def test_the_committed_baseline_is_what_its_pinned_records_reproduce(committed):
+    """Fails only when a pinned record changed or is gone, or when the note
+    does not match the pinned records. A record added since the pin is
+    reported as a warning and not counted (#3045)."""
+    m, pins, collected = committed
     assert collected["record_set_sha256"] in m.OUT_MD.read_text(encoding="utf-8")
     assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(collected), (
         "notes/absence_claims_baseline.md does not match its pinned records: run scripts/absence_claims_baseline.py")
@@ -392,6 +530,22 @@ def test_the_committed_baseline_is_what_its_pinned_records_reproduce():
     if new:
         warnings.warn(f"{len(new)} full record(s) are not in the absence baseline's pinned set and are not "
                       f"counted (reported, not stale), e.g. {new[:3]}; --repin counts them", stacklevel=1)
+
+
+@pytest.mark.corpus   # walks the committed corpus
+def test_the_committed_precision_sample_is_the_draw_it_names(committed):
+    """#3173: the precision table names a seeded draw over the pinned records
+    and its sha256; drawing it again from those records gives that sha256.
+    Nothing to re-draw when the note counts a record set other than the one
+    the sample was drawn from; the note says so itself."""
+    m, _, collected = committed
+    checked = m.PRECISION.get(collected["lexicon"].sha256)
+    if checked is None:
+        pytest.skip("no precision sample is recorded under the current lexicon's sha256")
+    if checked["record_set_sha256"] != collected["record_set_sha256"]:
+        pytest.skip("the precision sample was drawn from another record set")
+    assert m.draw_sha256(m.draw(collected, checked["sample"], checked["seed"])) == checked["draw_sha256"], (
+        "the seeded precision sample no longer draws the phrases it names")
 
 
 if __name__ == "__main__":
