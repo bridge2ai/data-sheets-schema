@@ -308,6 +308,91 @@ def related_datasets_cmd(records, project, runtime):
         raise SystemExit(1)
 
 
+@evaluate.command("slot-meaning")
+# No existence, readability or directory check at the argument (#3144): click
+# would reject the whole call with a usage error, and the records named beside
+# the bad path would go unreported. The loop reports such a path as not checked.
+@click.argument("records", nargs=-1, required=True, type=click.Path(readable=False))
+@click.option("--json", "as_json", is_flag=True, help="print one JSON document instead of text")
+def slot_meaning_cmd(records, as_json):
+    """Embargo, release-timing and availability text under
+    `confidential_elements` or `sensitive_elements` (#2931).
+
+    A temporary pre-publication embargo is a statement about when data are
+    released, not that they are confidential; recorded under
+    `confidential_elements` it asserts confidential elements on the strength
+    of a release date. Only these two slots are read: the same text is
+    correct in `known_limitations`, `distribution_dates` and the access
+    slots. Access-control language ("withheld from the public release",
+    "controlled access") is not matched.
+
+    Read-only and non-gating: exits 0 whatever it finds, and 1 only when a
+    named record was not checked (2 is a usage error, such as naming no
+    record). A record is not checked when it cannot be read (the path does
+    not exist, is a directory or is not readable; the file is not UTF-8; or
+    the YAML loader raises on it: a syntax error, or anything else, such as
+    an impossible unquoted date), is not a mapping, or repeats a key one of whose
+    dropped earlier values held something the scan reads (#1029): a scoped
+    slot, a key inside one that the scan reads (any but `id`, `source_caveats`
+    and what they hold), or an ancestor such as a second `resources` block
+    holding one. A mapping is judged wherever the scan reaches it, through an
+    alias or a merge key as well as where it is written, and a merged value
+    that an explicit key or an earlier merge overrides is never read, so a
+    key repeated inside it is no reason (#3203), nor is it looked into for a
+    scoped slot a dropped ancestor holds (#3247). A duplicated
+    ancestor whose dropped copies hold no scoped slot hides nothing from this
+    scan and does not stop the record being checked. A record is not checked
+    either when its walk runs past a fixed step budget: aliases can load a
+    small text as a graph with exponentially many paths (#3247), when a merge
+    key reaches the mapping it is written in, or when merges chain deeper
+    than the walk can recurse (#3263). A record that is not
+    checked has none of its findings reported, not even those its kept
+    values carry. A record the diagnostic never looked at is not a clean one,
+    and the other records named in the same call are still reported. Nothing
+    is written.
+    """
+    import json
+
+    from data_sheets_schema import routing_diagnostics as rd
+
+    results = []
+    for record_path in records:
+        try:
+            text = Path(record_path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            results.append((record_path, None, (str(exc).splitlines() or [type(exc).__name__])[0]))
+            continue
+        found, reason = rd.check_text(text)
+        results.append((record_path, found, reason))
+
+    checked = [found for _, found, _ in results if found is not None]
+    unchecked = len(results) - len(checked)
+    if as_json:
+        click.echo(json.dumps({
+            "instrument": rd.INSTRUMENT, "lexicon_sha256": rd.LEXICON_SHA256,
+            "gating": False, "slots": list(rd.SCOPED_SLOTS),
+            "records": [{"path": path, "checked": False, "reason": reason} if found is None else
+                        {"path": path, "checked": True, "count": len(found),
+                         "mismatches": [rd.as_dict(m) for m in found]}
+                        for path, found, reason in results],
+        }, indent=2))
+    else:
+        for path, found, reason in results:
+            if found is None:
+                click.echo(f"{path}\n  not checked: {reason}")
+            elif found:
+                click.echo(path)
+                for mismatch in found:
+                    click.echo(f"  {rd.describe(mismatch)}")
+        total = [m for found in checked for m in found]
+        click.echo("")
+        click.echo(f"{len(total)} slot-meaning mismatch(es) in {sum(1 for f in checked if f)} of "
+                   f"{len(checked)} record(s) checked, {sum(1 for m in total if m.present is True)} "
+                   f"in an entry asserting its elements present; not gating ({rd.INSTRUMENT})")
+    if unchecked:
+        raise click.ClickException(f"{unchecked} record(s) could not be checked")
+
+
 
 @evaluate.command("spelling")
 @click.option('--method', default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
