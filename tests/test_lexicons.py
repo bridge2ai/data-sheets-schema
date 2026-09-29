@@ -74,6 +74,33 @@ class TheRegistry(unittest.TestCase):
             "bwa.bundle-does-not", "bwa.bundle-silent", "bwa.none-of-the-sources",
             "rsn.omitted-here", "rsn.source-ranking"])
 
+    def test_the_v1_recorded_under_slot_counterexample_guards_only_the_verb(self):
+        """What `rsn.recorded-under-slot`'s one counterexample does and does
+        not guard (#3213).
+
+        "The authors are listed in the kickoff_webinar." misses because
+        `listed` is not one of the pattern's verbs, not because
+        `kickoff_webinar` is not a slot: the regex cannot tell a slot name
+        from any other snake_case word, so after one of its verbs every
+        underscored token counts as a slot. The counterexample therefore
+        guards only that `listed` stays out of the verb list. v1's bytes are
+        pinned, so a counterexample that tests slot-shape discrimination (and
+        a pattern able to pass it) waits for a new lexicon version. This test
+        fails when the loaded pattern stops behaving as described here, so
+        the account cannot outlive the bytes it describes."""
+        pattern = {p.id: p for p in lx.load("absence_self_narration", 1).patterns}["rsn.recorded-under-slot"]
+
+        def hits(text):
+            return bool(pattern.regex.search(text))
+
+        self.assertEqual(pattern.counterexamples, ("The authors are listed in the kickoff_webinar.",))
+        # The miss is the verb: a real slot after `listed` misses too ...
+        self.assertFalse(hits("The authors are listed in the kickoff_webinar."))
+        self.assertFalse(hits("The authors are listed in the related_datasets."))
+        # ... and a non-slot snake_case word after one of the pattern's verbs matches.
+        self.assertTrue(hits("The authors are recorded in the kickoff_webinar."))
+        self.assertTrue(hits("Consent was given in the consent_form."))
+
     def test_every_result_identity_names_the_bytes(self):
         lexicon = lx.load("absence_self_narration")
         self.assertEqual(lexicon.identity(), {
