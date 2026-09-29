@@ -842,9 +842,19 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
     rule 1. Pure and read-only.
 
     The review is model output: a malformed row, claim or evidence entry is
-    passed over or counted, never raised. An evidence entry whose `chunk`
-    names no chunk of the bundle (a list, a number, an unknown id) has its
-    context left unread and is counted under `quotes_chunk_not_in_bundle`."""
+    passed over or counted, never raised.
+
+    With `view`, an evidence entry's context is read only where it can
+    decide a flag: on a supported claim declared `fact`, for an entry whose
+    quote carries no planned marker of its own, up to the claim's first
+    planned-evidence hit. Those entries are counted under
+    `quotes_examined_for_context`, and of them, one whose `chunk` names no
+    chunk of the bundle (a list, a number, an unknown id) is counted under
+    `quotes_chunk_not_in_bundle` and one that cannot be located under
+    `unlocated_quotes`; neither has its context read. Evidence on any other
+    claim is not examined, so a bad `chunk` there is not counted: these
+    counts are not a check of the review's evidence, which
+    `source_review.check` makes (#3168)."""
     review = audit.get("source_review") if isinstance(audit, dict) and "source_review" in audit else audit
     if not isinstance(review, dict) or not isinstance(review.get("values"), list):
         raise ValueError("no source_review with a values list")
@@ -858,8 +868,8 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
             raise ValueError("the record is not the artifact this source_review is bound to (sha256 differs)")
         value_texts = {row["path"]: row["text"] for row in inv["values"]}
     counts = {"claims": 0, "supported": 0, "declared": {}, "expressed": 0,
-              "expressed_elsewhere_in_value": 0, "fact_claims": 0, "unlocated_quotes": 0,
-              "quotes_chunk_not_in_bundle": 0}
+              "expressed_elsewhere_in_value": 0, "fact_claims": 0, "quotes_examined_for_context": 0,
+              "unlocated_quotes": 0, "quotes_chunk_not_in_bundle": 0}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     for row in review["values"]:
         if not isinstance(row, dict) or not isinstance(row.get("claims"), list):
@@ -902,9 +912,10 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
                + f" · planned_evidence_declared_fact {by_rule['planned_evidence_declared_fact']['value']}"
                + f" (+{by_rule['planned_evidence_declared_fact']['label']} label)"
                + ("" if value_texts is not None else " · value text not read (no record supplied)")
-               + ("" if view is not None else " · evidence context not read (no bundle supplied)")
-               + (f" · {counts['quotes_chunk_not_in_bundle']} evidence quote(s) name no chunk of the bundle"
-                  if counts["quotes_chunk_not_in_bundle"] else ""))
+               + (" · evidence context not read (no bundle supplied)" if view is None else
+                  f" · evidence context: {counts['quotes_examined_for_context']} quote(s) on supported fact "
+                  f"claims examined, {counts['quotes_chunk_not_in_bundle']} naming no chunk of the bundle, "
+                  f"{counts['unlocated_quotes']} unlocated"))
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_REVIEW, "checked": True,
             "gating": False, "artifact": review.get("artifact"), "sha256": review.get("sha256"),
             "value_text_read": value_texts is not None, "evidence_context_read": view is not None,
@@ -914,7 +925,9 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
 
 def _planned_evidence(evidence: Any, view: BundleView | None, counts: dict[str, Any]) -> dict[str, Any] | None:
     """The first evidence quote that carries, or whose context carries, a
-    planned or prospective marker."""
+    planned or prospective marker. Entries after it are not examined, and
+    an entry whose own quote carries one is the hit, so neither reaches
+    the context counts (`review_status_expression`)."""
     for i, e in enumerate(evidence if isinstance(evidence, list) else []):
         if not isinstance(e, dict) or not isinstance(e.get("quote"), str):
             continue
@@ -924,6 +937,7 @@ def _planned_evidence(evidence: Any, view: BundleView | None, counts: dict[str, 
             return {"evidence": i, "chunk": e.get("chunk"), "class": cls, "marker": own[cls], "via": "quote"}
         if view is None:
             continue
+        counts["quotes_examined_for_context"] += 1
         if not isinstance(e.get("chunk"), str) or e["chunk"] not in view.chunks:
             counts["quotes_chunk_not_in_bundle"] += 1
             continue

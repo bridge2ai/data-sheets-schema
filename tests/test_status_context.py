@@ -616,11 +616,38 @@ def test_evidence_naming_no_chunk_of_the_bundle_is_counted_not_raised(chunk):
     out = sc.review_status_expression(_review(("/x", [
         _claim("Capabilities exist.", "fact", quote="develop capabilities", chunk=chunk)])), view=view)
     assert out["flags"] == [] and out["counts"]["quotes_chunk_not_in_bundle"] == 1
-    assert "1 evidence quote(s) name no chunk of the bundle" in out["summary"]
+    assert "1 quote(s) on supported fact claims examined, 1 naming no chunk of the bundle" in out["summary"]
     # The same quote in its own chunk is read in its context.
     [flag] = sc.review_status_expression(_review(("/x", [
         _claim("Capabilities exist.", "fact", quote="develop capabilities")])), view=view)["flags"]
     assert (flag["rule"], flag["via"], flag["marker"]) == ("planned_evidence_declared_fact", "enumeration", "will")
+
+
+def test_the_evidence_context_counts_cover_only_the_quotes_examined():
+    # #3168: a context is read only where it can decide a flag — on a
+    # supported claim declared fact, for a quote with no planned marker of
+    # its own, up to the claim's first hit. A bad chunk elsewhere is not
+    # examined and so not counted, and the summary says what was examined.
+    text, manifest = _bundle(ENUMERATION)
+    view = sc.BundleView(text, manifest)
+    bad = {"source": "d0.txt", "chunk": "c999", "quote": "develop capabilities"}
+    hit = {"source": "d0.txt", "chunk": "c002", "quote": "The service will be deployed."}
+    not_examined = [
+        _claim("Capabilities are planned.", "planned", chunk="c999"),              # declared planned
+        _claim("Capabilities are underway.", "in_progress", chunk="c999"),         # declared in progress
+        _claim("Capabilities exist.", "fact", chunk="c999", verdict="revise"),     # not supported
+        {**_claim("Capabilities exist.", "fact"), "evidence": [hit, bad]},         # after the first hit
+        {**_claim("Capabilities exist.", "fact"), "evidence": [{**hit, "chunk": "c999"}]},   # its own marker
+    ]
+    out = sc.review_status_expression(_review(("/x", not_examined)), view=view)
+    c = out["counts"]
+    assert (c["quotes_examined_for_context"], c["quotes_chunk_not_in_bundle"], c["unlocated_quotes"]) == (0, 0, 0)
+    assert "evidence context: 0 quote(s) on supported fact claims examined, 0 naming no chunk" in out["summary"]
+    examined = [{**_claim("Capabilities exist.", "fact"), "evidence": [
+        bad, {**bad, "chunk": "c002", "quote": "not a passage of this chunk"},
+        {**bad, "chunk": "c002", "quote": "perform community focus groups"}]}]
+    c = sc.review_status_expression(_review(("/x", examined)), view=view)["counts"]
+    assert (c["quotes_examined_for_context"], c["quotes_chunk_not_in_bundle"], c["unlocated_quotes"]) == (3, 1, 1)
 
 
 def test_a_review_naming_no_artifact_cannot_be_bound_to_a_record():
@@ -812,7 +839,7 @@ def test_both_clis_count_malformed_model_output_and_exit_zero(tmp_path):
     review = CliRunner().invoke(cli, ["review", "status-expression", "--audit", str(tmp_path / "audit.json"),
                                       "--bundle", str(bundle)])
     assert review.exit_code == 0 and review.exception is None, review.output
-    assert "1 evidence quote(s) name no chunk of the bundle" in review.output
+    assert "1 naming no chunk of the bundle" in review.output
     before[tmp_path / "audit.json"] = hashlib.sha256((tmp_path / "audit.json").read_bytes()).hexdigest()
     assert _tree_hashes(tmp_path) == before
 
