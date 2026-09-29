@@ -79,6 +79,12 @@ class FieldResult:
     #: crate root and no table row supplies; the report counts table rows
     #: apart from it (#2915).
     from_table: bool = True
+    #: True on an `unplaceable` nested row that does resolve into the record
+    #: but whose host slot a `Dataset` row already filled from another crate
+    #: property; merging the two is not decided (#2915). The report's
+    #: Outcome legend counts these apart, since "no route into a `Dataset`
+    #: record" is not true of them (#3258).
+    merge_undecided: bool = False
 
 
 @dataclass
@@ -523,6 +529,7 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
                 f"({prop}); not placed a second time (#2915)")
         else:
             field_result.status = "unplaceable"
+            field_result.merge_undecided = True
             field_result.detail = (
                 f"{owner_row.d4d_path} already filled {TARGET_CLASS}.{where} from "
                 f"{owner_prop or owner_row.source_path}; this row reads "
@@ -606,6 +613,8 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     applied = f"{table_rows} table rows applied" + (
         ", plus the record's `id`, taken from the crate root" if id_rows else "")
     filled_rows = c.get("filled", 0)
+    merge_undecided = sum(1 for f in res.fields
+                          if f.status == "unplaceable" and f.merge_undecided)
     # A slot is counted once however many rows filled it: nested rows fill
     # one object in their host slot (#2915).
     slots = len([k for k, v in res.record.items() if v not in (None, "", [], {})])
@@ -635,7 +644,10 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         "row already placed the same crate value in the host slot |",
         f"| empty | {c.get('empty',0)} | path valid but the crate has no value there |",
         f"| unresolvable | {c.get('unresolvable',0)} | the table declares no crate path |",
-        f"| unplaceable | {c.get('unplaceable',0)} | no route into a `Dataset` record |",
+        f"| unplaceable | {c.get('unplaceable',0)} | no route into a `Dataset` record"
+        + (f"; {merge_undecided} of them do resolve, but a `{TARGET_CLASS}` row "
+           "already filled the host slot from another crate property and "
+           "merging the two is not decided" if merge_undecided else "") + " |",
         "",
         "## Fidelity of what was filled",
         "",

@@ -304,6 +304,33 @@ class TestNestedRowsNeverOverwrite(unittest.TestCase):
                       f"(from {filled} filled rows, the `id` among them)", text)
 
 
+    def _report(self, res):
+        res.validation = "PASS"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            return path.read_text(encoding="utf-8")
+
+    def test_the_legend_counts_merge_undecided_rows_apart(self):
+        """#3258: a row refused only because merging is undecided does have a
+        route into the record, so the legend must not call every unplaceable
+        row routeless; with none such, the legend is unchanged."""
+        other = _row("PreprocessingStrategy.description", "rai:dataBiases")
+        unrouted = _row("NoSuchClass.description", PROTOCOL)
+        res = map_crate(_with_protocol(), [DATASET_ROW, other, unrouted],
+                        self.sv, "TEST")
+        self.assertEqual(res.counts()["unplaceable"], 2)
+        self.assertTrue(self.status(res, other["D4D_Full_Path"]).merge_undecided)
+        self.assertFalse(self.status(res, "NoSuchClass.description").merge_undecided)
+        self.assertIn("| unplaceable | 2 | no route into a `Dataset` record; 1 of "
+                      "them do resolve, but a `Dataset` row already filled the "
+                      "host slot from another crate property and merging the two "
+                      "is not decided |", self._report(res))
+        res = map_crate(_with_protocol(), [DATASET_ROW, unrouted], self.sv, "TEST")
+        self.assertIn("| unplaceable | 1 | no route into a `Dataset` record |",
+                      self._report(res))
+
+
 def _with_identifier(identifier):
     graph = copy.deepcopy(GRAPH)
     graph[1]["identifier"] = identifier
