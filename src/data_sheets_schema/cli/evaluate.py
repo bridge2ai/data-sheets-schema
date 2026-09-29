@@ -338,9 +338,12 @@ def slot_meaning_cmd(records, as_json):
     holding one. A mapping is judged wherever the scan reaches it, through an
     alias or a merge key as well as where it is written, and a merged value
     that an explicit key or an earlier merge overrides is never read, so a
-    key repeated inside it is no reason (#3203). A duplicated
+    key repeated inside it is no reason (#3203), nor is it looked into for a
+    scoped slot a dropped ancestor holds (#3247). A duplicated
     ancestor whose dropped copies hold no scoped slot hides nothing from this
-    scan and does not stop the record being checked. A record that is not
+    scan and does not stop the record being checked. A record is not checked
+    either when its walk runs past a fixed step budget: aliases can load a
+    small text as a graph with exponentially many paths (#3247). A record that is not
     checked has none of its findings reported, not even those its kept
     values carry. A record the diagnostic never looked at is not a clean one,
     and the other records named in the same call are still reported. Nothing

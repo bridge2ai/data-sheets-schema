@@ -87,7 +87,12 @@ does not count it, and it is not named here. The overridden value is dropped
 whole and never scanned, so a key repeated *inside* it hides nothing and is
 not named either; the same holds for a key an earlier mapping in a
 `<<: [...]` list shadows, since the loader keeps the first there (#3203). A
-merged mapping is judged only for the keys the loader takes from it.
+merged mapping is judged only for the keys the loader takes from it,
+and so is a dropped ancestor's copy: `resources: {<<: {payload: {…slot…}},
+payload: {}}` written before a second `resources` holds no scoped slot the
+loader would read, since the explicit `payload` overrides the merged one, and
+the duplicate is not named (#3247). A key written twice inside the dropped
+copy still counts, so a slot in either occurrence names the ancestor.
 
 A record the loader cannot read at all — a YAML syntax error, an impossible
 unquoted date such as `2026-02-30`, which PyYAML raises as a bare
@@ -98,6 +103,21 @@ record never stops the others in a run from being reported. The command
 cannot read as text in the same way: a missing path, a directory, a file
 without read permission or one that is not UTF-8 is not checked, and the
 other files named in the call are still reported (#3144).
+
+## Shared graphs: memoized, and a work budget per record
+
+YAML aliases let a small text load as a graph whose paths grow exponentially:
+each anchor defined as two references to the one before doubles the paths
+through it (#3247). The scan decides once per node whether anything under it
+could be a finding and walks only the branches that could, so a shared graph
+with no scoped text costs its distinct nodes, not its paths, and every
+finding keeps the path it is reported at. Where the findings themselves are
+exponential, or merge keys nest the same way, each walk — the scan and the
+duplicate check — stops after `MAX_TRAVERSAL_STEPS` steps and raises
+`TraversalBudgetExceeded`; `check_text` reports that record as not checked,
+and the command goes on to the next. The loader itself is not bounded here:
+PyYAML flattens nested merge lists by copying their pairs, so a text of
+doubling merges can stall `safe_load` before the scan starts.
 
 ## What this is not
 
@@ -182,6 +202,33 @@ def _digest(scoped_slots: tuple[str, ...], skipped_keys: frozenset[str],
 LEXICON_SHA256 = _digest(SCOPED_SLOTS, SKIPPED_KEYS, _PATTERNS)
 
 
+#: The most steps one walk of one record may take — a node visited, a pair
+#: laid out or a merge followed — before the record is reported as not
+#: checked. The largest committed record takes a small fraction of it; a
+#: record that needs more is a shared graph, not a longer datasheet (#3247).
+MAX_TRAVERSAL_STEPS = 200_000
+
+
+class TraversalBudgetExceeded(Exception):
+    """A walk of one record ran past its step budget; the record was not
+    read in full, so it is not checked, not clean."""
+
+
+class _Budget:
+    __slots__ = ("limit", "spent")
+
+    def __init__(self, limit: int | None):
+        self.limit = MAX_TRAVERSAL_STEPS if limit is None else limit
+        self.spent = 0
+
+    def spend(self, steps: int = 1) -> None:
+        self.spent += steps
+        if self.spent > self.limit:
+            raise TraversalBudgetExceeded(
+                f"the walk ran past its budget of {self.limit:,} steps (a shared YAML graph "
+                "whose paths grow faster than its text); not read in full")
+
+
 @dataclass(frozen=True)
 class Mismatch:
     """One string leaf under a scoped slot whose text is about release timing."""
@@ -194,15 +241,55 @@ class Mismatch:
     present: bool | None
 
 
-def _leaves(node: Any, path: str) -> Iterator[tuple[str, str]]:
+class _Walk:
+    """One walk of one loaded record: its budget, and per node whether a
+    finding can lie under it (#3247). A node is decided once however many
+    aliases reach it; a node on a cycle is assumed to hold one, so the walk
+    goes in and the budget or the recursion limit stops it, as before."""
+
+    def __init__(self, budget: _Budget):
+        self.budget = budget
+        self._memo: dict[tuple[int, bool], bool] = {}
+        self._active: set[tuple[int, bool]] = set()
+
+    def may_yield(self, node: Any, inside: bool) -> bool:
+        """Whether a finding lies under `node`, read inside a scoped slot or
+        walked outside one to find a slot."""
+        if isinstance(node, str):
+            return inside and bool(_match(node)[0])
+        if not isinstance(node, (dict, list)):
+            return False
+        key = (id(node), inside)
+        if key in self._memo:
+            return self._memo[key]
+        if key in self._active:
+            return True
+        self._active.add(key)
+        self.budget.spend()
+        try:
+            if isinstance(node, dict):
+                children = [(value, True) for k, value in node.items() if k not in SKIPPED_KEYS] if inside \
+                    else [(value, k in SCOPED_SLOTS) for k, value in node.items()]
+            else:
+                children = [(value, inside) for value in node]
+            result = any(self.may_yield(value, where) for value, where in children)
+        finally:
+            self._active.discard(key)
+        self._memo[key] = result
+        return result
+
+
+def _leaves(node: Any, path: str, walk: _Walk) -> Iterator[tuple[str, str]]:
+    walk.budget.spend()
     if isinstance(node, dict):
         for key, value in node.items():
-            if key in SKIPPED_KEYS:
+            if key in SKIPPED_KEYS or not walk.may_yield(value, True):
                 continue
-            yield from _leaves(value, f"{path}.{key}")
+            yield from _leaves(value, f"{path}.{key}", walk)
     elif isinstance(node, list):
         for index, value in enumerate(node):
-            yield from _leaves(value, f"{path}[{index}]")
+            if walk.may_yield(value, True):
+                yield from _leaves(value, f"{path}[{index}]", walk)
     elif isinstance(node, str):
         yield path, node
 
@@ -230,34 +317,42 @@ def _match(text: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
     return tuple(kinds), tuple(terms.values())
 
 
-def _scan(node: Any, path: str) -> Iterator[Mismatch]:
+def _scan(node: Any, path: str, walk: _Walk) -> Iterator[Mismatch]:
+    walk.budget.spend()
     if isinstance(node, dict):
         for key, value in node.items():
             child = f"{path}.{key}" if path else str(key)
             if key in SCOPED_SLOTS:
                 for entry_path, entry, present in _entries(key, value, child):
-                    for leaf_path, text in _leaves(entry, entry_path):
+                    if not walk.may_yield(entry, True):
+                        continue
+                    for leaf_path, text in _leaves(entry, entry_path, walk):
                         kinds, terms = _match(text)
                         if kinds:
                             yield Mismatch(key, leaf_path, kinds, terms, present)
-            else:
-                yield from _scan(value, child)
+            elif walk.may_yield(value, False):
+                yield from _scan(value, child, walk)
     elif isinstance(node, list):
         for index, value in enumerate(node):
-            yield from _scan(value, f"{path}[{index}]")
+            if walk.may_yield(value, False):
+                yield from _scan(value, f"{path}[{index}]", walk)
 
 
-def slot_meaning_mismatch(record: dict[str, Any]) -> list[Mismatch]:
+def slot_meaning_mismatch(record: dict[str, Any], *, max_steps: int | None = None) -> list[Mismatch]:
     """Every string leaf under `confidential_elements` or `sensitive_elements`,
     at any depth, whose text is about an embargo, release timing or
     availability timing — in record order, one finding per leaf.
 
     Raises TypeError for a record that is not a mapping: an empty list would
-    read as a clean record the diagnostic never looked at.
+    read as a clean record the diagnostic never looked at. Raises
+    TraversalBudgetExceeded when the walk takes more than `max_steps`
+    (default `MAX_TRAVERSAL_STEPS`): a shared YAML graph whose paths outgrow
+    its text (#3247). A subtree reached through many aliases is decided
+    once, and only a branch that can hold a finding is walked.
     """
     if not isinstance(record, dict):
         raise TypeError(f"a record is a mapping, not {type(record).__name__}")
-    return list(_scan(record, ""))
+    return list(_scan(record, "", _Walk(_Budget(max_steps))))
 
 
 #: Where the scan stands at a node: outside every scoped slot, walking through
@@ -272,35 +367,67 @@ def _constructed(identity: tuple[str, Any]) -> Any:
     return identity[1] if identity[0] == "value" else None
 
 
-def _holds_a_scoped_slot(node: Any) -> bool:
+def _kept_pairs(loader: yaml.SafeLoader, node: yaml.MappingNode, path: str,
+                budget: _Budget) -> list[tuple[yaml.MappingNode, str, Any, Any, Any]]:
+    """The pairs the loader reads as `node`'s — (source mapping, the path it
+    is named at, key identity, key node, value node) — in the order it reads
+    them: each merged mapping's (its own merges first), then `node`'s own. A
+    key is kept from the last source that writes it, so a merged key an
+    explicit key overrides, or an earlier mapping in a merge list shadows, is
+    dropped whole (#3203). Every pair of the kept source is listed, an
+    explicit key written twice included: that is the duplicate being judged."""
+    pairs = []
+    for source, label_path in _merge_sources(node, path, frozenset(), budget):
+        for key_node, value_node in source.value:
+            if _is_merge(key_node):
+                continue
+            budget.spend()
+            pairs.append((source, label_path, _key_identity(loader, key_node), key_node, value_node))
+    kept = {identity: id(source) for source, _, identity, _, _ in pairs}
+    return [pair for pair in pairs if kept[pair[2]] == id(pair[0])]
+
+
+def _holds_a_scoped_slot(loader: yaml.SafeLoader, node: Any, budget: _Budget,
+                         memo: dict[int, bool]) -> bool:
     """Whether `node`, walked as `_scan` walks a record, reaches a scoped slot:
     a mapping key naming one at any depth, through any key and through
-    aliases and merge keys. Iterative, so depth is no limit."""
-    stack, seen = [node], set()
-    while stack:
+    aliases and merge keys, among the keys the loader would take — a merged
+    value an explicit key overrides is not looked into (#3247), while both
+    copies of a key written twice are. Iterative, so depth is no limit;
+    each node is looked at once per call and each root once per record."""
+    if id(node) in memo:
+        return memo[id(node)]
+    stack, seen, found = [node], set(), False
+    while stack and not found:
         current = stack.pop()
         if id(current) in seen:
             continue
         seen.add(id(current))
+        budget.spend()
         if isinstance(current, yaml.MappingNode):
-            for key_node, value_node in current.value:
-                if isinstance(key_node, yaml.ScalarNode) and key_node.value in SCOPED_SLOTS:
-                    return True
+            for _, _, identity, _, value_node in _kept_pairs(loader, current, "", budget):
+                if _constructed(identity) in SCOPED_SLOTS:
+                    found = True
+                    break
                 stack.append(value_node)
         elif isinstance(current, yaml.SequenceNode):
             stack.extend(current.value)
-    return False
+    memo[id(node)] = found
+    return found
 
 
-def _hides_something(where: str, key: Any, dropped: list[Any]) -> bool:
+def _hides_something(loader: yaml.SafeLoader, where: str, key: Any, dropped: list[Any],
+                     budget: _Budget, memo: dict[int, bool]) -> bool:
     """Whether a key written more than once, in a mapping the scan reaches
     `where`, dropped a value the scan would have read. Inside a scoped slot
     every key but a skipped one is read. Outside, a scoped slot is read, and
-    so is any value that holds one at any depth: an ancestor such as a
-    second `resources` block (#2980, #3005)."""
+    so is any value that holds one at any depth among the keys the loader
+    would take from it: an ancestor such as a second `resources` block
+    (#2980, #3005, #3247)."""
     if where == _INSIDE:
         return key not in SKIPPED_KEYS
-    return key in SCOPED_SLOTS or any(_holds_a_scoped_slot(value) for value in dropped)
+    return key in SCOPED_SLOTS or any(_holds_a_scoped_slot(loader, value, budget, memo)
+                                      for value in dropped)
 
 
 def _is_merge(key_node: Any) -> bool:
@@ -308,8 +435,8 @@ def _is_merge(key_node: Any) -> bool:
             and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge")
 
 
-def _merge_sources(node: yaml.MappingNode, path: str,
-                   active: frozenset[int]) -> list[tuple[yaml.MappingNode, str]]:
+def _merge_sources(node: yaml.MappingNode, path: str, active: frozenset[int],
+                   budget: _Budget) -> list[tuple[yaml.MappingNode, str]]:
     """The mappings whose pairs the loader reads as `node`'s, each with the
     path it is named at, in the order PyYAML's `flatten_mapping` lays their
     pairs out: every `<<` in turn — a merged mapping's own merges before its
@@ -322,6 +449,7 @@ def _merge_sources(node: yaml.MappingNode, path: str,
     pairs win against the mappings between (#3226)."""
     if id(node) in active:
         return []
+    budget.spend()
     active = active | {id(node)}
     sources: list[tuple[yaml.MappingNode, str]] = []
     base = f"{path}.<<" if path else "<<"
@@ -329,17 +457,17 @@ def _merge_sources(node: yaml.MappingNode, path: str,
         if not _is_merge(key_node):
             continue
         if isinstance(value_node, yaml.MappingNode):
-            sources.extend(_merge_sources(value_node, base, active))
+            sources.extend(_merge_sources(value_node, base, active, budget))
         elif isinstance(value_node, yaml.SequenceNode):
             for index, item in reversed(list(enumerate(value_node.value))):
                 if isinstance(item, yaml.MappingNode):
-                    sources.extend(_merge_sources(item, f"{base}[{index}]", active))
+                    sources.extend(_merge_sources(item, f"{base}[{index}]", active, budget))
     sources.append((node, path))
     last = {id(source): index for index, (source, _) in enumerate(sources)}
     return [entry for index, entry in enumerate(sources) if last[id(entry[0])] == index]
 
 
-def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
+def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[dict[str, Any]]:
     """Duplicated mapping keys in a record's text one of whose dropped values
     held something the scan reads: a scoped slot written twice, a key
     repeated inside one that is neither a skipped key nor under one, or an
@@ -361,7 +489,11 @@ def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
     is in line order. Keys are compared by the #1029 gate's identity, and
     merge keys are not duplicates, as there. A text the composer rejects
     yields nothing: `safe_load` rejects it too, and the record is not
-    checked on that."""
+    checked on that. Raises TraversalBudgetExceeded when the walk takes
+    more than `max_steps` (default `MAX_TRAVERSAL_STEPS`), as nested merge
+    lists that double at each level do (#3247)."""
+    budget = _Budget(max_steps)
+    holds_memo: dict[int, bool] = {}
     try:
         loader = yaml.SafeLoader(text)
     except (yaml.YAMLError, RecursionError):
@@ -379,6 +511,7 @@ def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
             if (id(node), where) in walked:
                 continue
             walked.add((id(node), where))
+            budget.spend()
             if isinstance(node, yaml.SequenceNode):
                 stack.extend((item, f"{path}[{i}]", where) for i, item in reversed(list(enumerate(node.value))))
                 continue
@@ -389,18 +522,9 @@ def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
             # A key is kept from the last pair that writes it, so a merged key
             # an explicit key overrides, or an earlier mapping in a merge list
             # shadows, is dropped whole and never scanned (#3203).
-            pairs = []
-            for source, label_path in _merge_sources(node, path, frozenset()):
-                for key_node, value_node in source.value:
-                    if _is_merge(key_node):
-                        continue
-                    pairs.append((source, label_path, _key_identity(loader, key_node), key_node, value_node))
-            kept = {identity: id(source) for source, _, identity, _, _ in pairs}
             groups: dict[tuple[int, Any], tuple[str, str, list[tuple[int, Any]]]] = {}
             children = []
-            for source, label_path, identity, key_node, value_node in pairs:
-                if kept[identity] != id(source):
-                    continue
+            for source, label_path, identity, key_node, value_node in _kept_pairs(loader, node, path, budget):
                 text_key = getattr(key_node, "value", None)
                 label = text_key if isinstance(text_key, str) else str(text_key)
                 groups.setdefault((id(source), identity), (label_path, label, []))[2].append(
@@ -413,8 +537,9 @@ def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
                     children.append((value_node, child, _INSIDE))
             for (source_id, identity), (label_path, label, occurrences) in groups.items():
                 if (len(occurrences) > 1 and (source_id, identity) not in named
-                        and _hides_something(where, _constructed(identity),
-                                             [value for _, value in occurrences[:-1]])):
+                        and _hides_something(loader, where, _constructed(identity),
+                                             [value for _, value in occurrences[:-1]],
+                                             budget, holds_memo)):
                     named[(source_id, identity)] = {
                         "path": label_path or "$", "key": label,
                         "lines": [line for line, _ in occurrences], "count": len(occurrences)}
@@ -442,7 +567,9 @@ def check_text(text: str) -> tuple[list[Mismatch] | None, str | None]:
     checked: the loader could not read it, it is not a mapping, or a
     duplicated key dropped values the scan would have read. Never raises for
     a record the loader rejects, so one bad record in a run cannot stop the
-    others being reported (a record never looked at is not a clean one)."""
+    others being reported (a record never looked at is not a clean one), nor
+    for one whose walk runs past `MAX_TRAVERSAL_STEPS`, which is not checked
+    either (#3247)."""
     try:
         record = yaml.safe_load(text)
     except yaml.YAMLError as exc:
@@ -453,9 +580,9 @@ def check_text(text: str) -> tuple[list[Mismatch] | None, str | None]:
         # RecursionError (deep nesting): every one means the record was not read.
         return None, f"the YAML loader raised {type(exc).__name__}: {_first_line(exc)}"
     try:
-        found = slot_meaning_mismatch(record)
-        unread = unread_duplicate_keys(text)
-    except (TypeError, RecursionError) as exc:
+        found = slot_meaning_mismatch(record, max_steps=MAX_TRAVERSAL_STEPS)
+        unread = unread_duplicate_keys(text, max_steps=MAX_TRAVERSAL_STEPS)
+    except (TypeError, RecursionError, TraversalBudgetExceeded) as exc:
         return None, _first_line(exc)
     return (None, describe_unread(unread)) if unread else (found, None)
 

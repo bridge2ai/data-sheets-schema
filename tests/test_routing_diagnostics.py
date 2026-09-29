@@ -401,6 +401,95 @@ class TestAMappingIsJudgedWhereverTheScanReadsIt(unittest.TestCase):
                 self.assertLessEqual(named, {(d["key"], tuple(d["lines"])) for d in find_duplicate_keys(text)})
 
 
+def _doubling(levels, base="{name: safe}"):
+    """`a0` is `base`; each later anchor is two aliases of the one before, so
+    the text grows by a line a level and the paths through it double (#3247)."""
+    return "\n".join([f"a0: &a0 {base}"] + [f"a{i}: &a{i} [*a{i - 1}, *a{i - 1}]"
+                                            for i in range(1, levels + 1)]) + "\n"
+
+
+class TestAMergeOverrideInsideADroppedAncestorHidesNothing(unittest.TestCase):
+    """#3247 (Codex): a dropped ancestor is looked into only for the keys the
+    loader would take from it, so a merged value an explicit key overrides
+    is not a scoped slot the duplicate hid."""
+
+    OVERRIDDEN = ("confidential_elements: [embargo]\n"
+                  "resources: {<<: {payload: {sensitive_elements: [embargo]}}, payload: {}}\n"
+                  "resources: {}\n")
+
+    def test_the_review_reproduction_is_checked_and_keeps_its_finding(self):
+        self.assertEqual(rd.unread_duplicate_keys(self.OVERRIDDEN), [])
+        found, reason = rd.check_text(self.OVERRIDDEN)
+        self.assertIsNone(reason)
+        self.assertEqual([(m.slot, m.path) for m in found], [("confidential_elements", "confidential_elements[0]")])
+
+    def test_a_merge_list_shadow_inside_the_dropped_copy_hides_nothing(self):
+        text = ("confidential_elements: [embargo]\n"
+                "resources: {<<: [{payload: {}}, {payload: {sensitive_elements: [x]}}]}\n"
+                "resources: {}\n")
+        self.assertEqual(rd.unread_duplicate_keys(text), [])
+        self.assertIsNone(rd.check_text(text)[1])
+
+    def test_the_merged_slot_the_loader_would_keep_still_names_the_ancestor(self):
+        for text in (
+                # no override: the merged payload is kept
+                "resources: {<<: {payload: {sensitive_elements: [x]}}}\nresources: {}\n",
+                # the slot-holding mapping first in the merge list wins
+                "resources: {<<: [{payload: {sensitive_elements: [x]}}, {payload: {}}]}\nresources: {}\n",
+                # a key written twice in the dropped copy: either occurrence counts
+                "resources: {payload: {sensitive_elements: [x]}, payload: {}}\nresources: {}\n"):
+            with self.subTest(text=text):
+                # the third also names `payload` inside the dropped copy, as
+                # a duplicate inside a dropped ancestor always is
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)][0],
+                                 ("$", "resources"))
+                self.assertIsNone(rd.check_text(text)[0])
+
+
+class TestASharedGraphIsBounded(unittest.TestCase):
+    """#3247 (Codex): aliases can load a small text as a graph with
+    exponentially many paths. A subtree is decided once; only a branch that
+    can hold a finding is walked; and a walk that still runs past its budget
+    is reported as not checked, never as clean."""
+
+    def test_a_doubling_graph_with_no_scoped_text_costs_its_nodes_not_its_paths(self):
+        text = _doubling(40)                    # 2**40 paths to `name: safe`
+        record = yaml.safe_load(text)
+        self.assertEqual(slot_meaning_mismatch(record, max_steps=500), [])
+        self.assertEqual(rd.unread_duplicate_keys(text, max_steps=500), [])
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_a_shared_finding_is_reported_at_every_path_that_reaches_it(self):
+        text = _doubling(3, "{confidential_elements: [" + EMBARGO_TEXT + "]}")
+        paths = _paths(yaml.safe_load(text))
+        self.assertEqual(paths[0], "a0.confidential_elements[0]")
+        self.assertEqual(paths[1:3], ["a1[0].confidential_elements[0]", "a1[1].confidential_elements[0]"])
+        self.assertEqual(len(paths), 1 + 2 + 4 + 8)
+        self.assertEqual(paths[-1], "a3[1][1][1].confidential_elements[0]")
+
+    def test_a_walk_past_its_budget_is_not_checked(self):
+        text = _doubling(40, "{confidential_elements: [embargo]}")
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            slot_meaning_mismatch(yaml.safe_load(text), max_steps=1_000)
+        found, reason = rd.check_text(text)
+        self.assertIsNone(found)
+        self.assertIn(f"budget of {rd.MAX_TRAVERSAL_STEPS:,} steps", reason)
+
+    def test_doubling_merges_run_past_the_duplicate_walks_budget(self):
+        """The loader flattens these by copying, so only a few levels are
+        loadable at all; the duplicate walk stops at its budget either way."""
+        text = "\n".join(["a0: &a0 {name: safe}"] + [f"a{i}: &a{i} {{<<: [*a{i - 1}, *a{i - 1}], k{i}: 1}}"
+                                                     for i in range(1, 12)]) + "\n"
+        self.assertEqual(rd.unread_duplicate_keys(text), [])
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd.unread_duplicate_keys(text, max_steps=200)
+
+    def test_a_cycle_is_still_not_checked(self):
+        found, reason = rd.check_text("confidential_elements: &c\n- embargo\n- *c\n")
+        self.assertIsNone(found)
+        self.assertTrue(reason)
+
+
 #: Deeper than the composer (two frames a level) can recurse, whatever the limit.
 DEEP = 2 * sys.getrecursionlimit() + 100
 
@@ -664,6 +753,12 @@ class TestTheCommand(unittest.TestCase):
         latin = Path(self.tmp.name) / "latin.yaml"
         latin.write_bytes(b"id: example:ds\nname: caf\xe9 \xff\n")
         self._assert_not_checked_beside_the_others(latin, "'utf-8' codec can't decode")
+
+    def test_a_record_past_the_traversal_budget_is_not_checked_and_the_others_are_reported(self):
+        """#3247: a shared graph stops at its budget and the batch goes on."""
+        shared = Path(self.tmp.name) / "shared.yaml"
+        shared.write_text(_doubling(40, "{confidential_elements: [embargo]}"))
+        self._assert_not_checked_beside_the_others(shared, "budget of")
 
     def test_the_help_says_a_path_it_cannot_read_is_not_checked(self):
         """#3144: the help's "cannot be read" covers the file as well as the loader."""
