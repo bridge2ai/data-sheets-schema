@@ -1,6 +1,6 @@
 """The model that judges records, resolved in one place (#2928).
 
-Every LLM instrument that scores a D4D record — the support and fitness
+Five LLM instruments that score a D4D record — the support and fitness
 scorers in `evidence_score`, the referent judge in `merge`, the equivalence
 judge in `agreement`, the form-subtype classifier in `form_defects` — used to
 fall back, when no model was passed, to `api_runner._model_settings()["name"]`:
@@ -8,9 +8,11 @@ the *generation* model. Nothing separated "which model wrote the records" from
 "which model judged them", so every rubric, fitness and support score in the
 corpus was produced by the generator's own family, and no report said so.
 
-This module is the seam. `evaluation_model_settings()` is what every judging
-path asks when it was given no model, and it answers with a `basis` naming
-where the answer came from. There is no evaluation config yet — where it lives
+This module is the seam. `evaluation_model_settings()` is what those five
+paths ask when they were given no model, and it answers with a `basis` naming
+where the answer came from. The API rubric judge
+(`evaluation/evaluate_d4d_llm.py`) is not one of them: it never fell back to
+the generation model and keeps its own pinned default (#3326). There is no evaluation config yet — where it lives
 is an owner decision (#2928: `.github/workflows/` ships in the wheel, a YAML
 under `src/data_sheets_schema/` enters future audit closures) — so today the
 answer is the generation model, under the basis `defaults_to_generation_model`.
