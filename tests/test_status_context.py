@@ -130,6 +130,22 @@ def test_a_verified_snippet_is_located_at_its_exact_raw_span():
     assert view.chunk_text("c002") == chunking.chunk_texts(text, manifest["chunks"])[1]
 
 
+def test_a_snippet_the_validator_verifies_split_at_its_line_breaks_is_located_part_by_part():
+    # #3170: `receipts.snippet_in` retries a multi-line snippet with its
+    # line breaks as implicit `...` (#882); locate splits it the same way,
+    # so the snippet is read in context rather than reported unlocated.
+    doc = ("The archive holds waveform telemetry\nand clinical notes; imaging is separate.\n"
+           "Records were standardized to a common model.")
+    snippet = "The archive holds waveform telemetry\nRecords were standardized to a common model"
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    assert rc.snippet_in(snippet, view.chunk_text("c002")) == (True, "split-at-linebreaks")
+    [[(a1, b1), (a2, b2)]] = view.locate("c002", snippet)
+    assert (text[a1:b1], text[a2:b2]) == tuple(snippet.split("\n"))
+    out = _run(doc, [("x", snippet)], {"x": "Records are standardized."})
+    assert (out["counts"]["located"], out["counts"]["unlocated"]) == (1, 0)
+
+
 def test_offsets_refuse_a_fold_the_replay_cannot_reproduce():
     # NFKC composes conjoining jamo across what the replay keeps apart.
     assert sc.normalised_offsets("가 data") is None
@@ -289,6 +305,24 @@ def test_a_counter_word_in_a_sentence_is_not_a_counter_heading():
     doc = "Anticipated Final Dataset\nThe current plan covers 14 hospitals across the network."
     [flag] = _run(doc, [("x", "covers 14 hospitals across the network")], {"x": "Fourteen hospitals."})["flags"]
     assert (flag["via"], flag["governor"]) == ("heading", "Anticipated Final Dataset")
+
+
+@pytest.mark.parametrize("line,closes", [
+    # #3170: a counter word closes a scope only on a heading-like line:
+    # capitalised, at most HEADING_MAX_WORDS words and HEADING_MAX_CHARS
+    # characters. Any other short line is passed over like a count label,
+    # sentence terminator or not.
+    ("Current Released Dataset", True),
+    ("the current figures for the network", False),                                   # lower case
+    ("Current counts at six sites of the network so far", False),                    # 10 words
+    ("Current Consolidated Institutional Contributions Across Participating Hospitals", False),  # 79 chars
+])
+def test_a_counter_word_closes_a_scope_only_on_a_heading_like_line(line, closes):
+    assert (len(line.split()) <= sc.HEADING_MAX_WORDS and len(line) <= sc.HEADING_MAX_CHARS
+            and line[0].isupper()) is closes
+    doc = f"Anticipated Final Dataset\n9\nDifferent data modalities\n{line}\n14\nData contributing hospitals"
+    out = _run(doc, [("x", "14\nData contributing hospitals")], {"x": "Fourteen hospitals contribute data."})
+    assert [f["governor"] for f in out["flags"]] == ([] if closes else ["Anticipated Final Dataset"])
 
 
 @pytest.mark.parametrize("doc,snippet,governed", [
@@ -481,13 +515,24 @@ def test_the_snippet_itself_carries_the_modal_the_value_dropped():
         assert _run(doc, [("access_details", snippet)], {"access_details": kept})["flags"] == []
 
 
-def test_label_slots_are_reported_in_their_own_bucket():
+@pytest.mark.parametrize("leaf", sorted(sc.LABEL_LEAVES))
+def test_label_slots_are_reported_in_their_own_bucket(leaf):
     doc = "Anticipated Final Dataset\nContributing sites\nNorthern Hospital Network\n"
-    out = _run(doc, [("creators[0].name", "Northern Hospital Network")],
-               {"creators": [{"name": "Northern Hospital Network"}]})
+    out = _run(doc, [(f"creators[0].{leaf}", "Northern Hospital Network")],
+               {"creators": [{leaf: "Northern Hospital Network"}]})
     assert out["flags"] == []
-    assert _rules(out, "label_slot") == [("governor_outside_snippet", "creators[0].name", "prospective")]
+    assert _rules(out, "label_slot") == [("governor_outside_snippet", f"creators[0].{leaf}", "prospective")]
     assert out["counts"]["slots_flagged"] == {"value": 0, "label": 1}
+
+
+@pytest.mark.parametrize("path,kind", [
+    ("creators[0].name", "label"), ("/title", "label"), ("variables[2].label", "label"), ("/items/0/label", "label"),
+    ("creators[0].affiliation", "value"), ("/description", "value"), ("labels", "value"), ("", "value"),
+])
+def test_slot_class_reads_the_leaf_of_a_dotted_path_or_a_json_pointer(path, kind):
+    # The module and the PR name the label leaves `name`, `title` and `label`.
+    assert sc.LABEL_LEAVES == {"name", "title", "label"}
+    assert sc.slot_class(path) == kind
 
 
 def test_semicolons_separate_terms_but_a_colon_lead_in_still_governs():
@@ -496,6 +541,43 @@ def test_semicolons_separate_terms_but_a_colon_lead_in_still_governs():
     assert out["counts"]["located"] == 1 and out["flags"] == []
     clauses = "The project will: collect records; standardize data to a common model; release data."
     [flag] = _run(clauses, [("x", "standardize data to a common model")], {"x": "Data are standardized."})["flags"]
+    assert (flag["marker"], flag["via"]) == ("will", "sentence")
+
+
+@pytest.mark.parametrize("doc,snippet,value", [
+    # #3170: the ';'-clauses before the part are cut off as well as those
+    # after it — a marker in an earlier independent clause, or in an
+    # earlier term of a list, does not govern the part.
+    ("The team will expand the network; records are standardized to a common model.",
+     "records are standardized to a common model", "Records are standardized to a common model."),
+    ("Preferred terms:\nGoals;Care;Illness;Data Element;Hospitals", "Care;Illness", ["Care", "Illness"]),
+])
+def test_a_semicolon_clause_before_the_part_does_not_govern_it(doc, snippet, value):
+    out = _run(doc, [("keywords", snippet)], {"keywords": value})
+    assert out["counts"]["located"] == 1 and out["flags"] == []
+
+
+def test_a_parenthesised_letter_enumeration_is_followed_back_to_its_lead_in():
+    # The "(a)" form the module docstring names, beside "A)" and "1)".
+    doc = "The project will (a) collect records; (b) standardize data to a common model; (c) release data."
+    [flag] = _run(doc, [("x", "standardize data to a common model")], {"x": "Data are standardized."})["flags"]
+    assert (flag["marker"], flag["via"]) == ("will", "enumeration")
+
+
+def test_an_enumeration_after_the_part_does_not_govern_it():
+    # Items do not govern their lead-in: the sentence is cut at the first
+    # enumeration after the part, so the items' own "will" is not read.
+    doc = "Records are standardized to a common model, and next year the team A) will publish; B) will release."
+    out = _run(doc, [("x", "Records are standardized to a common model")], {"x": "Records are standardized."})
+    assert out["counts"]["located"] == 1 and out["flags"] == []
+
+
+def test_labels_that_are_not_consecutive_are_not_an_enumeration():
+    # An inline enumeration is a run of consecutive labels: site "A)" and
+    # site "C)" are names, so the sentence, not an item, is the context.
+    doc = "Enrolment will expand at site A) and records from site C) are standardized to a common model."
+    [flag] = _run(doc, [("x", "records from site C) are standardized to a common model")],
+                  {"x": "Records are standardized."})["flags"]
     assert (flag["marker"], flag["via"]) == ("will", "sentence")
 
 
