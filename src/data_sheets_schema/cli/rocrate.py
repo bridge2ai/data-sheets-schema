@@ -331,7 +331,8 @@ def map_cmd(project, packages_dir):
             failures += 1
             continue
         c = res.counts()
-        click.echo(f"  filled {c.get('filled',0)} | empty {c.get('empty',0)} | "
+        click.echo(f"  filled {c.get('filled',0)} | subsumed {c.get('subsumed',0)} | "
+                   f"empty {c.get('empty',0)} | "
                    f"unresolvable {c.get('unresolvable',0)} | "
                    f"unplaceable {c.get('unplaceable',0)}")
         for label, path in res.outputs.items():

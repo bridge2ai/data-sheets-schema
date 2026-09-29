@@ -43,7 +43,7 @@ TARGET_CLASS = "Dataset"
 #: still said PASS (#2916).
 DOI_SLOT = "doi"
 
-# Path grammar actually present in the table (verified against all 133 rows):
+# Path grammar actually present in the table (verified against all 136 rows):
 #   @graph[?@type='T']['prop']
 #   @graph[?@type='T']['prop'][?name='N']['prop2']
 #   bare property name, e.g. rai:dataBiases  -> looked up on the crate root
@@ -62,7 +62,7 @@ class FieldResult:
     source_path: str
     mapping_type: str
     information_loss: str
-    status: str           # filled | empty | unresolvable | unplaceable
+    status: str           # filled | subsumed | empty | unresolvable | unplaceable
     detail: str = ""
     value_preview: str = ""
     #: The crate's value, previewed, on the two identifier rows where the
@@ -75,6 +75,16 @@ class FieldResult:
     #: not set it; their note stays in `detail`, which the report does not
     #: show on a filled row.
     rewritten_from: str = ""
+    #: False only on the record's `id` row, which `map_crate` takes from the
+    #: crate root and no table row supplies; the report counts table rows
+    #: apart from it (#2915).
+    from_table: bool = True
+    #: True on an `unplaceable` nested row that does resolve into the record
+    #: but whose host slot a `Dataset` row already filled from another crate
+    #: property; merging the two is not decided (#2915). The report's
+    #: Outcome legend counts these apart, since "no route into a `Dataset`
+    #: record" is not true of them (#3258).
+    merge_undecided: bool = False
 
 
 @dataclass
@@ -160,6 +170,27 @@ def resolve_path(expr: str, graph: list[dict], root: dict | None) -> tuple[Any, 
     if root is None:
         return None, "no crate root entity"
     return None, f"'{expr}' not present on crate root"
+
+
+def crate_property(expr: str) -> str | None:
+    """The crate property a source path reads, whichever form spells it.
+
+    The table writes one property two ways: a Dataset row as
+    ``@graph[?@type='Dataset']['rai:dataPreprocessingProtocol']`` and the
+    nested row beside it as the bare ``rai:dataPreprocessingProtocol``. A
+    name-selected path names its selector too, so two different
+    ``additionalProperty`` entries are two properties. None for anything
+    `resolve_path` does not read as a path.
+    """
+    expr = (expr or "").strip()
+    if NOT_A_PATH.match(expr):
+        return None
+    m = GRAPH_RE.match(expr)
+    if not m:
+        return expr
+    if m.group("name"):
+        return f"{m.group('prop')}[?name='{m.group('name')}']['{m.group('prop2')}']"
+    return m.group("prop")
 
 
 # --------------------------------------------------------------------------
@@ -401,12 +432,30 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
 
 def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
               project: str = "") -> MapResult:
+    """Apply `rows` to the crate `graph`, reporting every row's outcome.
+
+    A ``Dataset.<slot>`` row is placed as it is read. A row for a nested
+    class is held until every row has been read, so what it may do does not
+    depend on where it sits in the table (#2915): a host slot that a
+    ``Dataset.<host>`` row filled is never replaced. Where that row read the
+    same crate value, the nested row is ``subsumed`` and its detail names the
+    row that carries the value; replacing it had turned a multi-item list of
+    objects into one object with the items '; '-joined. Where it read
+    something else, the nested row is unplaceable and says so: merging two
+    crate properties into one object is a curation decision this arm does not
+    make. Nested rows with no such Dataset row fill one object, as before.
+    """
     res = MapResult(project=project)
     counter: dict[str, int] = {}
     root = crate_root(graph)
     dataset_slots = {s.name: s for s in sv.class_induced_slots(TARGET_CLASS)}
     placement = build_placement(sv)
     nested: dict[str, dict] = {}
+    #: host slot -> (the Dataset row that filled it, crate property, crate value)
+    filled_by: dict[str, tuple[FieldResult, str | None, Any]] = {}
+    #: nested rows that resolved, in table order, awaiting the second pass:
+    #: (their report row, host slot, nested slot name, value, property, crate value)
+    held: list[tuple[FieldResult, str, str, Any, str | None, Any]] = []
 
     for row in rows:
         d4d_path = row["D4D_Full_Path"].strip()
@@ -456,11 +505,40 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
         rewritten_from = (_preview(crate_value)
                           if slot.name == DOI_SLOT and value != crate_value else "")
         where, slot = target
+        record("filled", coercion, _preview(value), rewritten_from)
         if where == "root":
             res.record[slot_name] = value
+            filled_by[slot_name] = (res.fields[-1], crate_property(source), crate_value)
         else:
+            held.append((res.fields[-1], where, slot_name, value,
+                         crate_property(source), crate_value))
+
+    # Second pass: nested rows, now that every Dataset row has been placed.
+    for field_result, where, slot_name, value, prop, crate_value in held:
+        owner = filled_by.get(where)
+        if owner is None:
             nested.setdefault(where, {})[slot_name] = value
-        record("filled", coercion, _preview(value), rewritten_from)
+            continue
+        owner_row, owner_prop, owner_value = owner
+        field_result.value_preview = ""
+        field_result.rewritten_from = ""
+        if prop is not None and prop == owner_prop and crate_value == owner_value:
+            field_result.status = "subsumed"
+            field_result.detail = (
+                f"{owner_row.d4d_path} already carries this crate value "
+                f"({prop}); not placed a second time (#2915)")
+        else:
+            field_result.status = "unplaceable"
+            field_result.merge_undecided = True
+            what = ("the same crate property with a different value (another "
+                    "entity), and merging the two values"
+                    if prop is not None and prop == owner_prop else
+                    "another crate property, and merging two crate properties")
+            field_result.detail = (
+                f"{owner_row.d4d_path} already filled {TARGET_CLASS}.{where} from "
+                f"{owner_prop or owner_row.source_path}; this row reads "
+                f"{prop or field_result.source_path}: {what} into one object is "
+                "not decided (#2915, #3270)")
 
     # The record's own required id: use the crate's identifier rather than
     # minting one, so the D4D record points back at the crate it came from.
@@ -486,7 +564,8 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
                               if res.record["id"] != crate_value else "")
             res.fields.append(FieldResult(
                 "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
-                "filled", detail, _preview(res.record["id"]), rewritten_from))
+                "filled", detail, _preview(res.record["id"]), rewritten_from,
+                from_table=False))
 
     # attach nested objects, respecting each host slot's cardinality
     for host_slot_name, obj in nested.items():
@@ -533,6 +612,16 @@ def verdict_basis(schema: Path = FULL_SCHEMA, on: str | None = None) -> str:
 
 def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     c = res.counts()
+    table_rows = sum(1 for f in res.fields if f.from_table)
+    id_rows = len(res.fields) - table_rows
+    applied = f"{table_rows} table rows applied" + (
+        ", plus the record's `id`, taken from the crate root" if id_rows else "")
+    filled_rows = c.get("filled", 0)
+    merge_undecided = sum(1 for f in res.fields
+                          if f.status == "unplaceable" and f.merge_undecided)
+    # A slot is counted once however many rows filled it: nested rows fill
+    # one object in their host slot (#2915).
+    slots = len([k for k, v in res.record.items() if v not in (None, "", [], {})])
     lines = [
         f"# Crate → D4D Static Mapping — {res.project}",
         "",
@@ -542,17 +631,28 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         "its declared path resolves in the crate.",
         "",
         f"- Crate metadata: `{source_file}`",
-        f"- Mapping table: `{MAPPING_TSV}` ({len(res.fields)} rows applied)",
+        f"- Mapping table: `{MAPPING_TSV}` ({applied})",
         f"- Validation: **{res.validation.splitlines()[0]}** — {verdict_basis()}",
+        f"- Distinct top-level `{TARGET_CLASS}` slots filled: {slots} "
+        f"(from {filled_rows} filled rows"
+        + (", the `id` among them)" if id_rows else ")"),
         "",
         "## Outcome",
         "",
         "| Status | Rows | Meaning |",
         "|--------|------|---------|",
-        f"| filled | {c.get('filled',0)} | path resolved; value placed |",
+        f"| filled | {filled_rows} | path resolved; value placed"
+        + (" (includes the record's `id`, which no table row supplies)"
+           if id_rows else "") + " |",
+        f"| subsumed | {c.get('subsumed',0)} | path resolved, but a `{TARGET_CLASS}` "
+        "row already placed the same crate value in the host slot |",
         f"| empty | {c.get('empty',0)} | path valid but the crate has no value there |",
         f"| unresolvable | {c.get('unresolvable',0)} | the table declares no crate path |",
-        f"| unplaceable | {c.get('unplaceable',0)} | no route into a `Dataset` record |",
+        f"| unplaceable | {c.get('unplaceable',0)} | no route into a `Dataset` record"
+        + (f"; {merge_undecided} of them do resolve, but a `{TARGET_CLASS}` row "
+           "already filled the host slot, from another crate property or from "
+           "the same property with a different value, and merging the two is "
+           "not decided" if merge_undecided else "") + " |",
         "",
         "## Fidelity of what was filled",
         "",

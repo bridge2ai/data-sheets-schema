@@ -487,17 +487,19 @@ cleaning_strategies:
 preprocessing_strategies:
 - description: Raw audio waveforms are converted to mono and resampled to 16 kHz using
     anti-aliasing filtering; they are then segmented by task and passed through quality
-    checks.; From the standardized audio, multiple derived feature sets are computed
+    checks.
+- description: From the standardized audio, multiple derived feature sets are computed
     including spectrograms, mel spectrograms, MFCCs, articulatory features using the
     Speech Articulatory Coding package, pitch and loudness estimates, acoustic features
     from openSMILE, phonetic and prosodic features from Praat and parselmouth, and
     phonetic posteriorgrams using a dedicated model; all are stored as dense tensors
-    in Parquet files with participant, session and task identifiers.; Tabular phenotype
-    and questionnaire files are exported from REDCap and merged using a dedicated
-    open-source b2aiprep library, reorganizing the former single phenotype table into
-    thematically organized TSV files with accompanying JSON data dictionaries; static
-    per-recording feature summaries are provided in static_features.tsv, and de-identification
-    and filtering steps are applied before packaging.
+    in Parquet files with participant, session and task identifiers.
+- description: Tabular phenotype and questionnaire files are exported from REDCap
+    and merged using a dedicated open-source b2aiprep library, reorganizing the former
+    single phenotype table into thematically organized TSV files with accompanying
+    JSON data dictionaries; static per-recording feature summaries are provided in
+    static_features.tsv, and de-identification and filtering steps are applied before
+    packaging.
 raw_sources:
 - description: The original raw data consist of high-quality voice, speech and respiratory
     audio waveforms recorded on tablet or smartphone devices with headset microphones
@@ -526,14 +528,15 @@ annotation_analyses:
 - description: Questionnaire-based labels are generated using the standard scoring
     rules for each validated instrument, yielding total and subscale scores that can
     be mapped to symptom-severity bands; the scoring logic is encoded in the REDCap
-    instruments and documented in the data dictionaries.; Diagnostic labels are derived
-    from clinical assessments and electronic health records rather than crowd workers,
-    so there is no explicit inter-rater majority-vote scheme; however, diagnoses are
-    treated as reference labels and may include multiple comorbid conditions per participant.;
-    The data release team audited the combined phenotype and feature tables for internal
-    consistency, missingness patterns and data entry issues, but per-annotator disagreement
-    statistics or detailed label-uncertainty measures are not presently included in
-    the released dataset.
+    instruments and documented in the data dictionaries.
+- description: Diagnostic labels are derived from clinical assessments and electronic
+    health records rather than crowd workers, so there is no explicit inter-rater
+    majority-vote scheme; however, diagnoses are treated as reference labels and may
+    include multiple comorbid conditions per participant.
+- description: The data release team audited the combined phenotype and feature tables
+    for internal consistency, missingness patterns and data entry issues, but per-annotator
+    disagreement statistics or detailed label-uncertainty measures are not presently
+    included in the released dataset.
 ethical_reviews:
 - name: Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics
 license_and_use_terms:

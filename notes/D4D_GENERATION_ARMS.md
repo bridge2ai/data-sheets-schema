@@ -54,9 +54,10 @@ would have revealed alone. Table went **133 → 136 rows** on 2026-07-27.
 | VOICE | n/a | 39 | **44** | — |
 
 Counts are top-level slots in the emitted record. `d4d rocrate map` separately
-reports *filled table rows* — CHORUS 32, CM4AI 42, VOICE 48 — which is higher
-for VOICE because several rows populate nested objects rather than new
-top-level slots.
+reports *filled rows* (including the crate-root `id`, which no table row
+supplies), which now equal the slot counts (CHORUS 32, CM4AI 42, VOICE 44). VOICE used to report 48, because four nested `*.description`
+rows overwrote host slots that Dataset rows had already filled and both rows
+were counted. Those four rows are now `subsumed` (#2915, #3269).
 
 **Added (3)** — present in all three crates, absent from the table:
 `Dataset.name`, `Dataset.citation`, `Dataset.total_size_bytes`.
