@@ -22,9 +22,17 @@ contains the value's tokens.
 resolves, by index, to a populated value in the final record — fig19's
 `receipted_field_paths`. Several chunks citing one path count once. It is
 not `receipts.check`'s `slots.with_receipt`, which counts populated leaf
-paths a receipt covers (an entry receipt covers its leaves), and there is no
-phase-1 snapshot join here: a path reconciliation moved counts as
-unresolved, as it does in fig19.
+paths a receipt covers (an entry receipt covers its leaves).
+
+**No phase-1 snapshot join** (the #899 identity join is not applied, as
+fig19 does not apply it): a path is read against the final record by index
+alone. Where reconciliation moved or dropped the entry a path named, the
+path counts as unresolved only when its index is gone; when another entry
+now holds that index, the path resolves and is counted, credited and
+screened at that entry (#3123). On the 24 fig19 records 19 counted paths
+are such, by `receipts.remap_path` against each record's phase-1 snapshot:
+11 on a dropped entry whose index another entry reuses, 7 on an entry that
+moved, 1 ambiguous.
 
 **The bundle preamble** is not a source document: it has no tier, a path it
 cites gains no citing document from it, and its citations are counted apart.
@@ -69,11 +77,24 @@ TOKEN_MIN_CHARS = 4
 #: Below it the set is one or two words ("English", "Research",
 #: "Bridge2AI-Voice") that most chunks of a bundle carry, and "a higher-tier
 #: chunk contains it" says nothing about which document states the value.
-#: Measured on the 24 fig19 records (#2937): 152 flags with no floor, 120
-#: at two tokens and 12 characters, 104 at three tokens and 12. The
-#: three-token flags read as the issue's case (a march-2025 release cited
-#: where the october-2025 release holds the whole passage); what the floor
-#: drops is common words, two-word names and bare grant numbers.
+#: The token floor is at least 1, and `source_dependence` refuses 0: a value
+#: with no token ("Yes", a short number) has an empty token set, which is a
+#: subset of every chunk, so with no floor at all it would flag against every
+#: higher-tier chunk (#3121).
+#: Measured on the 24 fig19 records (#2937, #3121, #3122):
+#:   - 194 flags with no floor (before a zero floor was refused), 42 of
+#:     them values with no token;
+#:   - 152 at one token and no character floor (the loosest admitted);
+#:   - 120 at two tokens and 12 characters;
+#:   - 104 at three tokens.
+#: At three tokens the character floor cannot bind: every token carries at
+#: least `TOKEN_MIN_CHARS`, so three carry 12. The flag count is 104 with
+#: the character floor or without it. The token floor does the work: the
+#: character floor alone, at one token, gives 123. The three-token flags
+#: read as the issue's case (a march-2025 release cited where the
+#: october-2025 release holds the whole passage). What the floor drops is
+#: common words, two-word names and bare grant numbers. The corpus test
+#: pins every count here at one token and above.
 MIN_MATCH_TOKENS = 3
 MIN_MATCH_CHARS = rc.MIN_MULTIPART_CHARS
 EXAMPLES = 10
@@ -129,7 +150,12 @@ def source_dependence(receipt: dict[str, Any], chunk_manifest: dict[str, Any],
     manifest; its projection supplies every tier and raises `ValueError` when
     the project is not declared. `chunk_texts` (id → text) feeds the token
     screen; a chunk without text is not screened and is counted.
+    `min_tokens` must be at least 1 (`ValueError` otherwise): an empty token
+    set is a subset of every chunk and would match each one (#3121).
     """
+    if min_tokens < 1:
+        raise ValueError(f"min_tokens must be at least 1, not {min_tokens!r}: a value with no token has an "
+                         "empty token set, which every chunk contains")
     if receipt.get("bundle_md5") != chunk_manifest.get("bundle_md5"):
         raise ValueError(f"the receipt's bundle_md5 {receipt.get('bundle_md5')!r} is not the chunk "
                          f"manifest's {chunk_manifest.get('bundle_md5')!r}: its chunk ids would name other text")

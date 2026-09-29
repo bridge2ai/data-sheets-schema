@@ -181,7 +181,7 @@ def test_preamble_unranked_undeclared_and_every_screen_outcome():
     rows = {r["path"]: r["token_screen"] for r in out["by_path"]}
     assert rows == {"description": "higher_tier_match", "creator": "no_higher_tier_match",
                     "publisher": "no_higher_tier_match",
-                    "language": "below_floor",             # "English" is in the tier-1 chunk: one token
+                    "language": "below_floor",             # "English" is in the tier-1 chunk: one token, 7 characters
                     "title": "no_higher_tier_chunk",       # cited by the release: nothing ranks above it
                     "notes": "exempt", "keywords": "preamble_only"}
     assert [e["path"] for e in screen["examples"]] == ["description"]
@@ -211,10 +211,82 @@ def test_the_floors_are_parameters_and_the_examples_are_capped():
     assert screen["verbatim"] == 1
 
 
+#: Values cited only by the tier-4 webinar whose every token the tier-1
+#: release holds, so the floors alone decide which are flagged (#3122).
+FLOOR_FULL = {"id": "https://x/ds",
+              "triple": "five clinical sites",       # 3 tokens, 17 characters
+              "pair": "sustained phonation",         # 2 tokens, 18 characters
+              "short": "five sites",                 # 2 tokens,  9 characters
+              "language": "English",                 # 1 token,   7 characters
+              "flag": "Yes"}                         # no token: "yes" is under 4 characters
+
+
+def _floor_screen(**floors) -> dict[str, str]:
+    manifest, texts = _manifest(BUNDLE3)
+    receipt = {"bundle_md5": manifest["bundle_md5"], "chunks": [
+        {"id": "c003", "status": "extracted",
+         "extracted": [{"slot": s, "snippet": "the webinar"} for s in FLOOR_FULL if s != "id"]}]}
+    out = rs.source_dependence(receipt, manifest, SOURCE_MANIFEST, "P", FLOOR_FULL, texts, **floors)
+    return {r["path"]: r["token_screen"] for r in out["by_path"]}
+
+
+@pytest.mark.parametrize("floors, flagged", [
+    ({}, {"triple"}),                                          # the defaults: 3 tokens, 12 characters
+    ({"min_tokens": 3, "min_chars": 0}, {"triple"}),           # at 3 tokens the character floor cannot bind
+    ({"min_tokens": 2}, {"triple", "pair"}),                   # "five sites" is 2 tokens but 9 characters
+    ({"min_tokens": 2, "min_chars": 9}, {"triple", "pair", "short"}),
+    ({"min_tokens": 1}, {"triple", "pair"}),                   # the character floor alone keeps out English
+    ({"min_tokens": 1, "min_chars": 7}, {"triple", "pair", "short", "language"}),
+    ({"min_tokens": 1, "min_chars": 0}, {"triple", "pair", "short", "language"}),
+])
+def test_the_token_floor_and_the_character_floor_each_bind(floors, flagged):
+    """Each floor keeps out a value the other admits, at its boundary: the
+    default token floor is what keeps "sustained phonation" (2 tokens, 18
+    characters) out, and the character floor alone keeps "five sites"
+    (2 tokens, 9 characters) out at a two-token floor (#3122)."""
+    rows = _floor_screen(**floors)
+    assert {p for p, o in rows.items() if o == "higher_tier_match"} == flagged
+    assert {p for p, o in rows.items() if o != "higher_tier_match"} == set(rows) - flagged
+    assert all(o in ("higher_tier_match", "below_floor") for o in rows.values())
+    assert rows["flag"] == "below_floor"                       # no token: never matched, whatever the floor
+
+
+def test_a_value_with_no_token_is_never_screened_and_a_zero_token_floor_is_refused():
+    """An empty token set is a subset of every chunk: with no token floor,
+    "Yes" would be flagged against the release and the handbook (#3121)."""
+    assert rc._value_tokens("Yes") == set()
+    assert _floor_screen(min_tokens=1, min_chars=0)["flag"] == "below_floor"
+    for floor in (0, -1):
+        with pytest.raises(ValueError, match="min_tokens must be at least 1"):
+            _floor_screen(min_tokens=floor, min_chars=0)
+
+
+def test_a_path_is_joined_to_the_final_record_by_index_alone():
+    """No phase-1 snapshot join (#3123): reconciliation dropped `creators[0]`,
+    so the receipt's `creators[0]` (Alpha, at phase 1) now reads Beta and is
+    counted there, while its `creators[2]` (Gamma) is unresolved because
+    index 2 is gone, though Gamma is still in the record."""
+    snapshot = {"id": "https://x/ds", "creators": [{"name": "Alpha Example"}, {"name": "Beta Example"},
+                                                   {"name": "Gamma Example"}]}
+    final = {"id": "https://x/ds", "creators": snapshot["creators"][1:]}
+    assert rc.remap_path("creators[0]", snapshot, final)["basis"] == "entry_dropped"
+    manifest, texts = _manifest(BUNDLE3)
+    receipt = {"bundle_md5": manifest["bundle_md5"], "chunks": [
+        {"id": "c003", "status": "extracted", "extracted": [
+            {"slot": "creators[0]", "snippet": "Alpha Example"},
+            {"slot": "creators[2]", "snippet": "Gamma Example"}]}]}
+    out = rs.source_dependence(receipt, manifest, SOURCE_MANIFEST, "P", final, texts)
+    assert out["paths"] == 1 and [r["path"] for r in out["by_path"]] == ["creators[0]"]
+    assert out["by_path"][0]["documents"] == ["webinar"]
+    assert out["entries"]["unresolved_in_final"] == 1 and out["paths_unresolved_in_final"] == 1
+
+
 def test_the_token_floor_stated_is_the_one_value_tokens_applies():
     assert rc._value_tokens("abc abcd") == {"abcd"}
     assert rs.TOKEN_MIN_CHARS == 4
     assert rs.MIN_MATCH_CHARS == rc.MIN_MULTIPART_CHARS
+    # the comment's "at three tokens the character floor cannot bind"
+    assert rs.MIN_MATCH_TOKENS * rs.TOKEN_MIN_CHARS >= rs.MIN_MATCH_CHARS
 
 
 def test_mismatched_bytes_and_an_undeclared_project_are_refused():
@@ -366,3 +438,62 @@ def test_a_committed_v8_voice_record_reproduces_fig19():
     assert round(next(d for d in out["documents"] if d["document"] == "project_documentation")["sole_share"], 6) == 0.480663
     assert out["preamble"]["citations"] == 0
     assert prov.read_bytes() == before
+
+
+#: The 24 records fig19 reads (#2303): the reference rescore's inputs.
+REFERENCE = ROOT / "notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json"
+
+
+@pytest.mark.corpus
+def test_the_screen_and_join_figures_the_module_states_on_the_24_fig19_records():
+    """The counts the MIN_MATCH_* comment and the module docstring state
+    (#3121, #3122, #3123), so a floor or join change cannot leave them stale."""
+    if not REFERENCE.exists():
+        pytest.skip("the reference rescore manifest is not on disk")
+    source_manifest = (ROOT / "data/preprocessed/source_manifest.yaml").read_bytes()
+    runs = []
+    for inp in sorted({j["input"] for j in json.loads(REFERENCE.read_text())["jobs"]}):
+        _data, _concat, method, label, name = Path(inp).parts
+        project = name[:-len("_d4d.yaml")]
+        core = ROOT / "data/d4d_concatenated" / f"{method}_core" / label
+        prov = core / f"{project}_provenance.yaml"
+        if not prov.exists():
+            pytest.skip(f"{prov} is not on disk")
+        try:
+            run = rs.run_chunks(prov)
+        except pv.GitUnavailable as exc:               # a drifted bundle needs the history
+            pytest.skip(f"the record's bytes need git history: {exc}")
+        runs.append((project, core, rc.load_receipt(core / f"{project}_coverage_receipt.yaml"), run,
+                     yaml.safe_load((ROOT / inp).read_text())))
+    assert len(runs) == 24
+
+    def screen(**floors):
+        out = [(project, rs.source_dependence(receipt, run["manifest"], source_manifest, project, full,
+                                              run["texts"], **floors))
+               for project, _core, receipt, run, full in runs]
+        return out, [o["lower_tier_with_higher_tier_token_match"] for _p, o in out]
+
+    reports, s = screen()
+    assert sum(x["count"] for x in s) == 104
+    assert sum(x["screened"] for x in s) == 1336 and sum(x["verbatim"] for x in s) == 30
+    by_project = {}
+    for (project, _o), x in zip(reports, s):
+        by_project[project] = by_project.get(project, 0) + x["count"]
+    assert by_project == {"AI_READI": 18, "CHORUS": 1, "CM4AI": 76, "VOICE": 9}
+    assert sum(x["count"] for x in screen(min_tokens=3, min_chars=0)[1]) == 104
+    assert sum(x["count"] for x in screen(min_tokens=2, min_chars=12)[1]) == 120
+    assert sum(x["count"] for x in screen(min_tokens=1, min_chars=12)[1]) == 123
+    loosest = screen(min_tokens=1, min_chars=0)[1]
+    assert sum(x["count"] for x in loosest) == 152
+    assert sum(x["outcomes"]["below_floor"] for x in loosest) == 42        # every one a value with no token
+
+    # the join is by index: counted paths the #899 identity join reads elsewhere
+    elsewhere = {}
+    for (project, core, _receipt, _run, full), (_p, report) in zip(runs, reports):
+        snapshot = yaml.safe_load((core / "intermediate" / f"{project}_full.yaml").read_text())
+        for row in report["by_path"]:
+            basis = rc.remap_path(row["path"], snapshot, full)["basis"]
+            if basis not in ("same", "same_key_stripped", "not_in_snapshot"):
+                elsewhere[basis] = elsewhere.get(basis, 0) + 1
+    assert elsewhere == {"entry_dropped": 11, "by_overlap": 4, "by_id": 1, "by_name": 1,
+                         "by_variable_name": 1, "ambiguous": 1}
