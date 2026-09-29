@@ -483,10 +483,12 @@ def leader_exited(process):
     id, after which a signal could reach an unrelated group that took it. So
     the run loop watches the exit with waitid(WNOWAIT), and only
     terminate_group reaps, after its last signal. A leader already reaped, by
-    `_signal_group`'s refusal path or by anyone else (ECHILD), has exited;
-    poll() then records a status, so terminate_group sends it nothing.
+    `_signal_group`'s refusal path or by anyone else (ECHILD), has exited, and
+    `leader_released` then holds, so terminate_group sends it nothing. ECHILD
+    is latched on the process itself: poll() cannot record a status while a
+    concurrent Popen.wait() holds its lock after reaping (#2961).
     """
-    if process.returncode is not None:
+    if leader_released(process):
         return True
     try:
         found = os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
@@ -494,8 +496,15 @@ def leader_exited(process):
         # asked for; only an exit, a kill or a core dump is an exit (#2960).
         return found is not None and found.si_code in _EXIT_CODES
     except ChildProcessError:
-        process.poll()                        # reaped elsewhere: the id is no longer held
+        process._leader_reaped_elsewhere = True   # the id is no longer held (#2961)
+        process.poll()
         return True
+
+
+def leader_released(process):
+    """Whether the leader has been reaped, releasing its pid and so its group id:
+    by its Popen (returncode) or by anyone else, as the exit check latched (#2961)."""
+    return process.returncode is not None or getattr(process, '_leader_reaped_elsewhere', False)
 
 
 def await_leader_exit(process, timeout):
@@ -528,16 +537,21 @@ def terminate_group(process):
     if process is None:
         return
     leader_exited(process)
-    if process.returncode is not None:
-        return
-    _signal_group(process, signal.SIGTERM)
-    if process.returncode is None:            # `_signal_group`'s refusal path reaps
+    if not leader_released(process):
+        _signal_group(process, signal.SIGTERM)
+    if not leader_released(process):          # `_signal_group`'s refusal path reaps
         await_leader_exit(process, 2)
-    if process.returncode is None:            # nor did anyone else during the wait (#2953)
+    if not leader_released(process):          # nor did anyone else during the wait (#2953)
         # Also remove descendants if the parent exited before them. The leader
         # was unreaped at the last check, so the id named this group (#2714).
         _signal_group(process, signal.SIGKILL)
-    process.wait(timeout=2)
+    try:
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        # Reaped elsewhere by a waiter that has not yet published the status:
+        # it is gone, and waiting longer would not change that (#2961).
+        if not getattr(process, '_leader_reaped_elsewhere', False):
+            raise
 
 
 #: What an in-flight handler raises when the controller closed admission:

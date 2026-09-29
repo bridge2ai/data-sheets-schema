@@ -351,6 +351,58 @@ def test_a_leader_reaped_before_cleanup_is_sent_nothing(monkeypatch):
     assert sends == [] and process.returncode == 0
 
 
+def _paused_popen_waiter(process, reap_when_exited):
+    """A concurrent Popen.wait() that has reaped the leader but not yet published its
+    status: it holds the Popen's (CPython-private) _waitpid_lock across a raw waitpid,
+    and publishes and releases 0.5 s later (#2961)."""
+    locked, done = threading.Event(), threading.Event()
+    def waiter():
+        with process._waitpid_lock:
+            locked.set()
+            _, status = os.waitpid(process.pid, 0)       # reaps as soon as the leader exits
+            time.sleep(0.5)
+            process.returncode = os.waitstatus_to_exitcode(status)
+        done.set()
+    thread = threading.Thread(target=waiter, daemon=True)
+    thread.start()
+    assert locked.wait(10)
+    if reap_when_exited:
+        wait_until_gone = time.monotonic() + 10
+        while process_state(process.pid) != '':
+            assert time.monotonic() < wait_until_gone
+            time.sleep(0.01)
+    return thread, done
+
+
+@pytest.mark.parametrize('when', ['before_cleanup', 'during_grace'])
+def test_a_reap_by_a_concurrent_popen_waiter_is_latched_before_any_signal(monkeypatch, when):
+    """#2961: a concurrent Popen.wait() that reaped the leader but still holds the Popen's
+    lock leaves returncode unset, and poll() cannot set it. The exit check's ECHILD is
+    latched on the process, so no signal follows: none at all when the reap precedes
+    cleanup, and no SIGKILL when it happens during the SIGTERM grace wait."""
+    code = 'pass' if when == 'before_cleanup' else 'import time;print("ready",flush=True);time.sleep(30)'
+    process = subprocess.Popen([sys.executable, '-c', code], stdout=subprocess.PIPE, text=True,
+                               start_new_session=True)
+    if when == 'during_grace':
+        assert process.stdout.readline().strip() == 'ready'
+    signal_group, calls = os.killpg, []
+    def killpg(pgid, sig):
+        calls.append((sig, process.returncode))
+        return signal_group(pgid, sig)
+    thread, done = _paused_popen_waiter(process, reap_when_exited=(when == 'before_cleanup'))
+    monkeypatch.setattr(os, 'killpg', killpg)
+    try:
+        error, _ = run_bounded(lambda: terminate_group(process))
+        assert error is None, error
+        assert calls == ([] if when == 'before_cleanup' else [(signal.SIGTERM, None)]), calls
+        assert runner.leader_released(process)
+        thread.join(5)
+        assert done.is_set() and process.returncode is not None
+    finally:
+        monkeypatch.undo()
+        process.stdout.close()
+
+
 def test_a_reap_by_someone_else_during_the_grace_wait_stops_the_sigkill(monkeypatch):
     """#2953: a leader reaped behind its Popen after the SIGTERM (here by a thread blocked in
     a raw waitpid) has released its group id; the exit check in the grace wait records it,
