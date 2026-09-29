@@ -32,7 +32,7 @@ version: 1.0 Beta
 license: Data Use Agreement available at 'https://chorus4ai.org/dataset/'
 download_url: http://chorus4ai.org/dataset
 issued: '2026-04-03T00:00:00Z'
-doi: https://doi.org/10.18130/V3/XNBOPG
+doi: 10.18130/V3/XNBOPG
 resources:
 - id: 08cf7419-b94d-4508-8f64-c99c557351d7
   name: CHoRUS RO-Crate EHR SubRoCrate
@@ -240,4 +240,4 @@ name: CHoRUS RO-Crate Package
 citation: 'The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical
   Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset,
   version 1.0 Beta. Harvard Dataverse, Apr. 2026.'
-id: https://doi.org/10.18130/V3/XNBOPG
+id: doi:10.18130/V3/XNBOPG

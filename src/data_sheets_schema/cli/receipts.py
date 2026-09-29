@@ -153,6 +153,67 @@ def invert(receipt_file, full_file, out_file):
         click.echo(text, nl=False)
 
 
+@receipts.command("sources")
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
+@click.option("--label", required=True)
+@click.option("--project", required=True, help="dataset identifier carried by the run's files")
+@click.option("--examples", type=click.IntRange(min=0), default=10, show_default=True,
+              help="paths to list from the higher-tier token screen")
+@click.option("--json", "as_json", is_flag=True, help="emit the whole report, one row per path included, as JSON")
+def sources(method, label, project, examples, as_json):
+    """Which source documents a run's coverage receipt cites, by tier (#2937).
+
+    Read-only: writes nothing, and no receipt, record or `receipts` block
+    changes. Tiers are the `source_priority` tiers of the selected source
+    manifest (`d4d --manifest`, default data/preprocessed/source_manifest.yaml),
+    read through `source_metadata.projection`; the chunks are the ones the
+    run's record hashed. Prints the receipted-path count in its stated unit,
+    the share cited by exactly one document overall and by tier, each
+    document's sole-citation share, and the paths cited only to a lower tier
+    while a higher-tier chunk holds every token of the value — a lexical
+    screen to spot-check, not a finding.
+    """
+    from data_sheets_schema.cli.method import resolve_method
+    if not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
+        raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")
+    method = method or resolve_method(label, project)
+    import json
+
+    import yaml
+
+    from data_sheets_schema import corpus
+    from data_sheets_schema import receipt_sources as rs
+    from data_sheets_schema import receipts as rc
+    from data_sheets_schema.provenance import GitUnavailable
+
+    p = _run_paths(method, label, project)
+    receipt_file = rc.receipt_path(p["core_dir"], project)
+    for need in (p["provenance"], receipt_file, p["full"]):
+        if not need.exists():
+            raise click.ClickException(f"no {need}")
+    selected = corpus.selected_manifest(allow_checkout_fallback=True)
+    if selected is None:
+        raise click.ClickException("tiers come from a source manifest's source_priority, and none is selected")
+    try:
+        raw = Path(selected).read_bytes()
+        run = rs.run_chunks(p["provenance"])
+        full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
+        if not isinstance(full, dict):
+            raise ValueError(f"{p['full']} is not a mapping")
+        report = rs.source_dependence(rc.load_receipt(receipt_file), run["manifest"], raw, project,
+                                      full, run["texts"], examples=examples)
+    except (OSError, ValueError, yaml.YAMLError, GitUnavailable) as exc:
+        raise click.ClickException(str(exc)) from None
+    report["run"] = {"method": method, "label": label, "bundle_basis": run["basis"],
+                     "source_manifest": str(selected),
+                     "source_manifest_basis": rs.source_manifest_basis(run["record"], raw)}
+    if as_json:
+        click.echo(json.dumps(report, indent=1, ensure_ascii=False, default=str))
+        return
+    for line in rs.render(report):
+        click.echo(line)
+
+
 @receipts.command("origin")
 @click.option("--transcript", "transcripts", multiple=True, required=True, type=click.Path(dir_okay=False),
               help="the run's stream-json transcript; repeat, first invocation first, for a killed-and-resumed run")

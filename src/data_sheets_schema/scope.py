@@ -190,6 +190,37 @@ def _norm(identifier: Any) -> str:
     return s
 
 
+def bare_doi(identifier: Any) -> str | None:
+    """The bare DOI an identifier names, in the case it was written (#2916).
+
+    The `doi` slot's pattern is anchored to the bare form (#646), so a value
+    written there must lose its resolver or `doi:` prefix:
+    `https://doi.org/10.18130/V3/XNBOPG`, `doi:10.18130/V3/XNBOPG` and the
+    bare DOI all give `10.18130/V3/XNBOPG`. `_norm` and
+    `rocrate_normalize._doi_key` lower-case, which is right for comparing —
+    DOIs are case-insensitive — and wrong for writing, where the registrant's
+    spelling is the one to keep. None when the value is not a DOI in one of
+    those forms: an ARK is not, and neither is a landing page that merely
+    contains one (`…?persistentId=doi:…`).
+
+    The shape it recognises — `10.`, four to nine digits (the registrant
+    length of Crossref's recommended DOI pattern), `/`, a suffix with no
+    whitespace — is narrower than the `doi` slot's own pattern
+    (`^10\\.\\d{4,}\\/.+$`). So it decides which values can be *repaired*,
+    never which are valid: `rocrate_map.doi_for_slot` keeps a value the slot
+    already accepts exactly as written, and asks this only of the rest
+    (#2989).
+    """
+    if not isinstance(identifier, str):
+        return None
+    s = identifier.strip().rstrip("/")
+    for prefix in _DOI_PREFIXES:
+        if s[:len(prefix)].lower() == prefix:
+            s = s[len(prefix):]
+            break
+    return s if _BARE_DOI.match(s) else None
+
+
 def check_record(project: str, record: dict | Path,
                  manifest: Path = MANIFEST) -> tuple[str, str | None]:
     """Is this record about the dataset its project declares it is about?

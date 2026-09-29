@@ -7,7 +7,7 @@ its declared path resolves in the crate.
 
 - Crate metadata: `data/ro-crate_packages/CM4AI/crate/ro-crate-metadata.json`
 - Mapping table: `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (137 rows applied)
-- Validation: **PASS**
+- Validation: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-28 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
 
 ## Outcome
 
@@ -51,13 +51,13 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.description | filled | exactMatch | none | @graph[?@type='Dataset']['description'] | This dataset is the June 2026 Data Release of Cell Maps for Artificial Intelligence (CM4A… |
 | Dataset.discouraged_uses | filled | exactMatch | none | @graph[?@type='Dataset']['prohibitedUses'] | [{"description": "These laboratory data are not to be used in clinical decision-making or… |
 | Dataset.distribution_formats | filled | exactMatch | none | @graph[?@type='Dataset']['evi:formats'] | [{"name": ".d"}, {"name": ".d directory group"}, {"name": ".tsv"}, {"name": ".xml"}, {"na… |
-| Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | https://doi.org/10.18130/V3/HIGT4C |
+| Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | 10.18130/V3/HIGT4C — rewritten from the crate's https://doi.org/10.18130/V3/HIGT4C: resolver or `doi:` prefix removed, case kept |
 | Dataset.download_url | filled | exactMatch | none | @graph[?@type='Dataset']['contentUrl'] | ftp://massive-ftp.ucsd.edu/v10/MSV000098237/ |
 | Dataset.ethical_reviews | filled | exactMatch | none | @graph[?@type='Dataset']['ethicalReview'] | [{"name": "Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pi… |
 | Dataset.existing_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… |
 | Dataset.extension_mechanism | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "https://creativecommons.org/licenses/by-nc-sa/4.0/"} |
 | Dataset.funders | filled | exactMatch | none | @graph[?@type='Dataset']['funder'] | [{"description": "National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS13156… |
-| Dataset.id | filled | exactMatch | none | crate root identifier/@id | https://doi.org/10.18130/V3/HIGT4C |
+| Dataset.id | filled | exactMatch | none | crate root identifier/@id | doi:10.18130/V3/HIGT4C — rewritten from the crate's https://doi.org/10.18130/V3/HIGT4C: required by the schema; taken from the crate itself; a DOI is written as the doi: CURIE (#974) |
 | Dataset.informed_consent | filled | exactMatch | none | @graph[?@type='Dataset']['d4d:informedConsent'] | [{"description": "Not applicable — data collected from commercially available de-identifi… |
 | Dataset.intended_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… |
 | Dataset.ip_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"description": "Attribution is required to the copyright holders and the authors. Any pu… |
