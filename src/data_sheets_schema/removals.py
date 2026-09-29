@@ -6,11 +6,16 @@ finding. The checks beside it measure other things: the receipts block counts
 receipt paths that stopped resolving (`receipts_to_removed_values`) and mixes
 deletions with list-to-string flattenings; `report_claims` compares the
 report with the record at the top level only (`removals_unrecorded`, #1054).
-Three v8 API records lost a receipted value that no audit finding named —
-VOICE 04f rep2 `data_governance`, AI_READI 04g rep3 `content_warnings`,
-CHORUS 04f rep2 `regulatory_restrictions` — and the report regate's remedy
-for an unrecorded removal is a `removed` row, which documents the deletion
-rather than restoring the value.
+That top-level check is how #2923 was found: three of nine v8 reviews named
+a receipted top-level slot removed with no record in the report — VOICE 04f
+rep2 `data_governance`, AI_READI 04g rep3 `content_warnings`, CHORUS 04f
+rep2 `regulatory_restrictions` — and the report regate's remedy for an
+unrecorded removal is a `removed` row, which documents the deletion rather
+than restoring the value. Read value by value, this module finds a receipted
+value that no finding's path covers removed in eight v8 records, not three
+(#3078): six of the twelve-record 04f/g fill — those three, VOICE 04f rep1,
+CHORUS 04f rep3 and AI_READI 04g rep2 — the AI_READI 04f rep1 record its own
+validation block declares invalid, and the 04b CM4AI canary.
 
 This module diffs the phase-1 snapshot (the API runner's
 `intermediate/{P}_full.yaml`) against the final full record, value by value,
@@ -18,13 +23,21 @@ and puts every value the final record no longer carries in one class:
 
 ``flattened``
     the value's text survives, normalised, under its nearest ancestor that
-    survives (a list collapsed to a string, an object to prose, an entry
-    folded into another). Not a deletion.
+    survives (a list collapsed to a string, an object to prose). Not a
+    deletion. Where that ancestor is a list that is still a list and the
+    object entry below it is what the join lost, the list is a set of other
+    entries and not the ancestor (#3076): the text must survive in the one
+    sibling recognisably that entry's continuation, or in entries of the
+    list beyond those its other phase-1 entries account for
+    (`_folded_into`).
 ``founded``
-    deleted, and an audit finding's `slot`, `review_paths` or
-    `remove_relationship` path covers the value's path or an ancestor of it.
+    deleted, and the `slot`, `review_paths` or `remove_relationship` path of
+    an audit finding not scoped to the core record alone covers the value's
+    path or an ancestor of it (#3079). A finding index one past the end of
+    its phase-1 list is read as the last entry and the row says so
+    (`index_past_end`, #3077).
 ``unfounded``
-    deleted, and no finding's path covers it.
+    deleted, and no such path covers it.
 
 A value is a populated scalar, or one member of a list of scalars. Its
 identity across the diff is `receipts.remap_path`'s (#899): a list entry is
@@ -43,9 +56,10 @@ output carried it and the written record does not).
 
 Reported only. No provenance block is written here and nothing is gated:
 `unfounded` says no finding's path covers the value, not that the removal was
-wrong, and `founded` says a finding named it, not that the finding was right.
-With no phase-1 snapshot (the agentic path writes none) every count is None,
-never 0 — the #899 convention: an absent snapshot is not a clean diff.
+wrong, and `founded` says a finding's path covers it, not that the finding
+was right. With no phase-1 snapshot (the agentic path writes none) every
+count is None, never 0 — the #899 convention: an absent snapshot is not a
+clean diff.
 """
 from __future__ import annotations
 
@@ -56,14 +70,16 @@ from typing import Any
 
 import yaml
 
-from data_sheets_schema.receipts import (_canonical_identifier, _populated, _resolve_value,
+from data_sheets_schema.receipts import (ENTRY_KEYS, _canonical_identifier, _populated, _resolve_value,
                                          dataset_identifier_forms, exempt, normalise, remap_path)
 
 INSTRUMENT = ("removals v1 (#2923): phase-1 snapshot against the final full record, joined by "
               "receipts.remap_path; flattened by normalised containment under the nearest "
-              "surviving ancestor; founded by a finding's slot, review_paths or "
-              "remove_relationship path covering the value or an ancestor, in a finding whose "
-              "record is not core only")
+              "surviving ancestor, a dropped list entry's only in its recognised continuation or "
+              "beyond what the list's other phase-1 entries account for; founded by a finding's "
+              "slot, review_paths or remove_relationship path covering the value or an ancestor, "
+              "an index one past the end read as the last entry, in a finding whose record is "
+              "not core only")
 
 #: Paths kept in the block per class; the counts are never capped.
 PATH_LIMIT = 50
@@ -77,9 +93,17 @@ NON_CHECKS = (
     "that a founded removal was right — a finding naming a slot is not evidence that its "
     "value was unsupported",
     "that a flattened value kept its meaning — normalised text containment under the nearest "
-    "surviving ancestor, not a semantic comparison",
+    "surviving ancestor, not a semantic comparison: a short or numeric value can coincide with "
+    "unrelated text, and a value a dropped list entry shared with its siblings is counted, not "
+    "attributed — flattened only where more final entries carry it than its other phase-1 "
+    "siblings did",
     "a finding that narrows its slot in prose ('maintainers (the Emory contact)') is read at "
     "the path it names, so founded is an upper bound where findings narrow by prose",
+    "that a finding's index means the entry it gives — one past the end of its list is read "
+    "as the last entry (founded_past_end counts those values); an index in range is read as "
+    "written, so an audit counting from 1 there founds the entry after the one it meant",
+    "a finding scoped to the core record alone founds nothing here, though its path may cover "
+    "the value (unfounded_named_by_core_finding counts those)",
 )
 
 
@@ -201,27 +225,130 @@ class _Presence:
         return self._members[list_path]
 
 
-def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict[str, Any]) -> str | None:
+def _carries(hay: str, needle: str) -> bool:
+    """Normalised containment on token boundaries."""
+    return bool(needle) and f" {needle} " in f" {hay} "
+
+
+def _hay(node: Any, form=_text) -> str:
+    """A node's scalars as one normalised text."""
+    return " ".join(form(s) for s in _scalars(node))
+
+
+def _identity(entry: dict[str, Any]) -> list[str]:
+    """The identifying texts of a list entry: every `receipts.ENTRY_KEYS`
+    string on the entry and on the objects nested in it by key — not on the
+    entries of a list inside it, which are other things (an affiliation is
+    not the creator). An identifier is read as the CURIE it names."""
+    out: list[str] = []
+    stack: list[Any] = [entry]
+    while stack:
+        node = stack.pop()
+        out += [_member(node[k]) for k in ENTRY_KEYS if isinstance(node.get(k), str)]
+        stack += [v for v in node.values() if isinstance(v, dict)]
+    return [t for t in out if t]
+
+
+def _join(base: str, rel: str) -> str:
+    return f"{base}{rel}" if rel.startswith("[") else f"{base}.{rel}"
+
+
+def _fold_target(entry_path: str, entry: dict[str, Any], survivors: list[Any],
+                 record_id: str | None, carried: frozenset[str]) -> int | None:
+    """The index of the one surviving entry recognisably the dropped
+    entry's continuation, or None: the entry carrying the most of its
+    identifying texts (`_identity`), no other as many — the CM4AI v4 rep3
+    creator whose minted id was replaced by the PI's ORCID, the name moving
+    to `principal_investigator` — or, for an entry with no identifying key,
+    the one entry carrying every value it had that is inside the
+    classification: the CHORUS 2026-08-11 leadership team folded into one
+    entry's notes, name and affiliation each."""
+    needles = _identity(entry)
+    need_all = not needles
+    if need_all:
+        needles = [t for t in (_member(v) for p, v, lp in values(entry)
+                               if not isinstance(v, bool)
+                               and not exempt_value(_join(entry_path, lp if lp is not None else p), v,
+                                                    record_id, carried)) if t]
+    if not needles:
+        return None
+    scores = [sum(_carries(h, t) for t in needles) for h in (_hay(e, _member) for e in survivors)]
+    best = max(scores, default=0)
+    if best == 0 or (need_all and best < len(needles)) or scores.count(best) > 1:
+        return None
+    return scores.index(best)
+
+
+def _folded_into(value: Any, entry_path: str, entry: dict[str, Any], snapshot_list: list[Any],
+                 final_path: str, survivors: list[Any], record_id: str | None,
+                 carried: frozenset[str]) -> str | None:
+    """Where a value of a dropped list entry — an object `receipts.remap_path`
+    no longer finds in a list that is still a list — survives, or None
+    (#3076). The whole list is not the surviving ancestor: it is a set of
+    distinct entries, and a word of the dropped entry that recurs in one of
+    them is the root's coincidence at list level. The AI_READI v7 rep2
+    `file_collections[9]` entry "Root metadata files" is in no sibling, yet
+    its `collection_type` 'metadata' is a word of another entry's
+    description and its conformance standard every sibling's. So the value
+    survives only
+
+    - in the sibling `_fold_target` recognises as the entry's continuation,
+      or
+    - in the list, where more of its final entries carry the value's text
+      than the list's other phase-1 entries did: the surplus is the dropped
+      entry's — an entry split in several (CM4AI 22c rep1's image archives,
+      one entry per file), one whose key and name were both rewritten
+      ('Ulrika Axelsson' as 'Axelsson U'), one folded into a sibling's
+      prose. A text its siblings carried as often before (the conformance
+      standard, a shared affiliation, an enum) is counted, not attributed.
+
+    The path returned is the sibling's in the first case and the list's in
+    the second."""
+    needle = _text(value)
+    j = _fold_target(entry_path, entry, survivors, record_id, carried)
+    if j is not None and _carries(_hay(survivors[j]), needle):
+        return f"{final_path}[{j}]"
+    k = int(entry_path[entry_path.rindex("[") + 1:-1])
+    after = sum(_carries(_hay(e), needle) for e in survivors)
+    before = sum(_carries(_hay(e), needle) for i, e in enumerate(snapshot_list) if i != k)
+    return final_path if after > before else None
+
+
+def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict[str, Any], *,
+                    record_id: str | None = None, carried: frozenset[str] = frozenset()) -> str | None:
     """The final-record path of the nearest surviving ancestor whose text
     carries the value's, normalised and on token boundaries; None when the
     nearest surviving ancestor does not carry it, or none survives short of
     the root. The root never counts: a top-level slot whose words happen to
-    occur elsewhere in the record was deleted, not flattened. A boolean is
-    never flattened — its text is not the fact it states."""
+    occur elsewhere in the record was deleted, not flattened. Nor, for the
+    same reason, does a list that is still a list when the object entry
+    below it is what identity lost (`_folded_into`, #3076). A member of a
+    list of scalars is one value of that slot, and its text surviving
+    anywhere in the list is still read as flattened (a string split into
+    members). A boolean is never flattened — its text is not the fact it
+    states."""
     if isinstance(value, bool):
         return None
     needle = _text(value)
     if not needle:
         return None
+    below = path
     for anc in _ancestors(path):
         rm = remap_path(anc, original, final)
         if rm["path"] is None:
+            below = anc
             continue
         ok, node = _resolve_value(final, rm["path"])
         if not ok or not _populated(node):
+            below = anc
             continue
+        if isinstance(node, list) and below.startswith(anc + "["):
+            _ok, entry = _resolve_value(original, below)
+            _ok, snapshot_list = _resolve_value(original, anc)
+            if isinstance(entry, dict) and isinstance(snapshot_list, list):
+                return _folded_into(value, below, entry, snapshot_list, rm["path"], node, record_id, carried)
         hay = " ".join(_text(s) for s in _scalars(node))
-        return rm["path"] if f" {needle} " in f" {hay} " else None
+        return rm["path"] if _carries(hay, needle) else None
     return None
 
 
@@ -324,12 +451,21 @@ def _selects(selector: str, entry: Any) -> bool:
     return isinstance(entry, str) and _text(entry) == want
 
 
-def covers(finding_path: list[Any], path: str, original: dict[str, Any]) -> bool:
+def covers(finding_path: list[Any], path: str, original: dict[str, Any], *, past_end: bool = False) -> bool:
     """Does a finding's path name `path` or one of its ancestors? Keys must
     agree step for step; at a list index the finding may give the index, a
     wildcard, a set of indexes or an entry's name, or step over it with the
     next key (`creators.affiliations` for `creators[3].affiliations`). The
-    empty path — the root — covers nothing."""
+    empty path — the root — covers nothing.
+
+    With `past_end`, an index exactly one past the end of the snapshot list
+    it indexes is read as the list's last entry (#3077): as written it
+    names no entry, and counting from 1 is the only reading under which it
+    names one. The 04f v8 rep3 VOICE finding on `preprocessing_strategies[6]`
+    of a six-entry list describes entry 5 (12 words shared, at most 3 with
+    any other); the v7 rep2 AI_READI findings on `file_collections[10].id`
+    and `.file_count` of ten quote entry 9's `#root-metadata` id. An index
+    further past the end, or one in range, is read as written."""
     if not finding_path:
         return False
     steps = _tokens(path)
@@ -347,7 +483,9 @@ def covers(finding_path: list[Any], path: str, original: dict[str, Any]) -> bool
                 if step not in want:
                     return False
             elif isinstance(want, int) and not isinstance(want, bool):
-                if want != step:
+                last = (past_end and isinstance(node, list) and len(node) > 0
+                        and want == len(node) and step == len(node) - 1)
+                if want != step and not last:
                     return False
             elif want != "*":
                 # a key where the path has an index: the finding stepped over it
@@ -382,6 +520,26 @@ def finding_paths(finding: dict[str, Any], original: dict[str, Any]) -> list[tup
         if toks:
             out.append(("remove_relationship", toks))
     return out
+
+
+def past_end(finding_path: list[Any], original: dict[str, Any]) -> tuple[int, int] | None:
+    """(index, length) where a finding's path gives a literal index at or
+    past the end of the snapshot list it indexes, else None. Followed while
+    each step is a key the snapshot has or an index; a wildcard, a set, a
+    selector or a stepped-over index ends the walk, having no one entry to
+    test."""
+    node: Any = original
+    for want in finding_path:
+        if isinstance(node, list) and isinstance(want, int) and not isinstance(want, bool):
+            if want >= len(node):
+                return want, len(node)
+            node = node[want]
+        elif (isinstance(node, dict) and isinstance(want, str) and not isinstance(want, _Selector)
+              and want in node):
+            node = node[want]
+        else:
+            return None
+    return None
 
 
 def _core_only(finding: dict[str, Any]) -> bool:
@@ -421,7 +579,7 @@ def _unchecked(reason: str) -> dict[str, Any]:
     return {"instrument": INSTRUMENT, "checked": False, "reason": reason,
             "snapshot_values": None, "exempt": None, "unaddressable": None,
             "removed": None, "flattened": None, "deleted": None,
-            "founded": None, "unfounded": None, "founded_by": None,
+            "founded": None, "unfounded": None, "founded_by": None, "founded_past_end": None,
             "unfounded_named_by_core_finding": None, "unfounded_mentioned_in_finding_text": None,
             "receipted": None, "phase": None, "audit": None,
             **{f"{cls}_paths{suffix}": ([] if not suffix else None)
@@ -495,7 +653,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if paths_receipted is not None:
             row["receipted"] = _receipted(path, list_path, paths_receipted)
             receipted["removed"] += row["receipted"]
-        into = _flattened_into(path, value, original, final)
+        into = _flattened_into(path, value, original, final, record_id=record_id, carried=carried)
         if into is not None:
             rows["flattened"].append({**row, "into": into})
             receipted["flattened"] += bool(row.get("receipted"))
@@ -504,10 +662,16 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if named is None:
             rows["unsorted"].append(row)
             continue
-        hit = next(((n, via) for n, via, fp in named if covers(fp, path, original)), None)
+        hit = next(((n, via, False) for n, via, fp in named if covers(fp, path, original)), None)
+        if hit is None:
+            # An index one past the end of its list names no entry as
+            # written; read as the last entry, and said so on the row (#3077).
+            hit = next(((n, via, True) for n, via, fp in named
+                        if covers(fp, path, original, past_end=True)), None)
         if hit is not None:
             founded_by[hit[1]] += 1
-            rows["founded"].append({**row, "by": hit[1], "finding": hit[0]})
+            rows["founded"].append({**row, "by": hit[1], "finding": hit[0],
+                                    **({"index_past_end": True} if hit[2] else {})})
             receipted["founded"] += bool(row.get("receipted"))
             continue
         # Not founded. Two reported annotations, never a class: a finding
@@ -521,6 +685,11 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         receipted["unfounded"] += bool(row.get("receipted"))
 
     sorted_ = named is not None
+    # Every finding path (not core only) whose literal index runs past the
+    # end of the snapshot list: True where by exactly one of a non-empty
+    # list, the reading `covers(past_end=True)` makes; False where further,
+    # or into an empty list, which names nothing.
+    ends = [e[0] == e[1] > 0 for _n, _via, fp in (named or []) if (e := past_end(fp, original))]
     deleted = len(rows["founded"]) + len(rows["unfounded"]) + len(rows["unsorted"])
     block: dict[str, Any] = {
         "instrument": INSTRUMENT, "checked": True, "reason": None,
@@ -530,6 +699,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         "founded": len(rows["founded"]) if sorted_ else None,
         "unfounded": len(rows["unfounded"]) if sorted_ else None,
         "founded_by": founded_by if sorted_ else None,
+        "founded_past_end": (sum(1 for r in rows["founded"] if r.get("index_past_end"))
+                             if sorted_ else None),
         "unfounded_named_by_core_finding": (sum(1 for r in rows["unfounded"] if r.get("named_by_core_finding"))
                                             if sorted_ else None),
         "unfounded_mentioned_in_finding_text": (sum(1 for r in rows["unfounded"]
@@ -538,7 +709,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         "receipted": ({k: (v if sorted_ or k not in ("founded", "unfounded") else None)
                        for k, v in receipted.items()} if paths_receipted is not None else None),
         "phase": by_phase if attributed else None,
-        "audit": ({"findings": len(findings), "core_only": sum(1 for f in findings if _core_only(f))}
+        "audit": ({"findings": len(findings), "core_only": sum(1 for f in findings if _core_only(f)),
+                   "paths_past_end": ends.count(True) + ends.count(False),
+                   "paths_one_past_end": ends.count(True)}
                   if findings is not None else None),
     }
     for cls in ("flattened", "founded", "unfounded", "unsorted"):
@@ -556,6 +729,8 @@ def _summary(block: dict[str, Any]) -> str:
     if block["founded"] is None:
         return head + " · no audit to sort the deletions against"
     s = head + f" · {block['founded']} founded · {block['unfounded']} unfounded"
+    if block.get("founded_past_end"):
+        s += f" ({block['founded_past_end']} founded by an index one past the end)"
     if block["receipted"] is not None:
         s += (f" · receipted: {block['receipted']['deleted']} deleted, "
               f"{block['receipted']['flattened']} flattened")

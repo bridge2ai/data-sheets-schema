@@ -246,3 +246,21 @@ class RemovalRows(unittest.TestCase):
     def test_the_three_rows_are_in_the_table(self):
         for key in ("unfoundedremovals", "receipteddeleted", "unrecordedremovals"):
             self.assertIn(key, self.m.METRICS)
+
+    def test_the_row_definition_states_the_exclusions_the_classifier_applies(self):
+        """#3079: a value only a core-only finding's path covers is counted
+        in the row, and the published definition says so rather than 'no
+        audit finding's path covers'; the past-end reading (#3077) and the
+        dropped-entry rule (#3076) are stated with it."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "data_governance": {"committee_name": "DAC"}}
+        block = classify(before, {"id": "doi:10.1/x"},
+                         {"findings": [{"record": "core", "slot": "data_governance", "issue": "x"}]})
+        rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 1})
+        self.assertEqual((rows["unfoundedremovals"], block["unfounded_named_by_core_finding"]), (1, 1))
+        definition = self.m.METRICS["unfoundedremovals"][3]
+        for phrase in ("not scoped to the core record alone", "a value only a core-only finding's path covers "
+                       "is counted here", "one past the end of its list read as the last entry",
+                       "for an entry dropped from a list"):
+            self.assertIn(phrase, definition)
+        self.assertNotIn("no finding named the value", definition)

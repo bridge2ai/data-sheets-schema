@@ -199,10 +199,11 @@ def check(method, label, project, write, strict):
 @click.option("--json", "as_json", is_flag=True, help="print the whole block as JSON")
 def removals_cmd(method, label, project, show_flattened, as_json):
     """Classify every value the phase-1 snapshot carried and the final full
-    record does not (#2923): flattened (its text survives), founded (an
-    audit finding's path covers it) or unfounded, with the phase that
-    removed it. Read-only: nothing is written, and a run with no phase-1
-    snapshot prints that it was not checked rather than zero."""
+    record does not (#2923): flattened (its text survives), founded (the
+    path of an audit finding not scoped to the core record alone covers it)
+    or unfounded, with the phase that removed it. Read-only: nothing is
+    written, and a run with no phase-1 snapshot prints that it was not
+    checked rather than zero."""
     import json
 
     from data_sheets_schema.cli.method import resolve_method
@@ -220,6 +221,11 @@ def removals_cmd(method, label, project, show_flattened, as_json):
         return
     if block["founded_by"] is not None:
         click.echo("   founded by: " + ", ".join(f"{k} {v}" for k, v in block["founded_by"].items()))
+    audit = block.get("audit") or {}
+    if audit.get("paths_past_end"):
+        click.echo(f"   finding paths indexing past the end of their list: {audit['paths_past_end']}"
+                   f" ({audit['paths_one_past_end']} one past, read as the last entry;"
+                   f" {block['founded_past_end']} value(s) founded so)")
     if block["phase"] is not None:
         click.echo("   removed at: " + (", ".join(f"{k} {v}" for k, v in block["phase"].items()) or "nothing"))
     else:

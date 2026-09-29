@@ -198,15 +198,21 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
     "unfoundedremovals": ("removals without a finding", "live", True,
                           "removals v1 (#2923): values the phase-1 snapshot carried and the final "
                           "full record does not, whose text does not survive under their nearest "
-                          "surviving ancestor, and that no audit finding's slot, review_paths or "
-                          "remove_relationship path covers. Reported, not gated: unfounded says no "
-                          "finding named the value, not that removing it was wrong. Needs the "
-                          "snapshot, so an agentic arm is – here, not 0 (#899); – also where the "
-                          "run's audit cannot be read unambiguously"),
+                          "surviving ancestor (for an entry dropped from a list, in its recognised "
+                          "continuation or beyond what the list's other entries account for, "
+                          "#3076), and that no slot, review_paths or remove_relationship path of an "
+                          "audit finding not scoped to the core record alone covers (#3079; a "
+                          "finding index one past the end of its list read as the last entry, "
+                          "#3077). Reported, not gated: unfounded says no such path covers the "
+                          "value, not that removing it was wrong, and a value only a core-only "
+                          "finding's path covers is counted here. Needs the snapshot, so an "
+                          "agentic arm is – here, not 0 (#899); – also where the run's audit "
+                          "cannot be read unambiguously"),
     "receipteddeleted": ("receipted values deleted, not flattened", "live", True,
                          "removals v1 (#2923): removed values a coverage receipt named (on the "
                          "value, an entry above it, or the list it was a member of) whose text "
-                         "did not survive, founded or not. Counted per value, so not a subset of "
+                         "did not survive by the rule above, founded or not. Counted per value, "
+                         "so not a subset of "
                          "the receipts block's `receipts_to_removed_values`, which counts receipt "
                          "paths that stopped resolving, flattenings included. – where the run "
                          "wrote no receipt or no snapshot"),

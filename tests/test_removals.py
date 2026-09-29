@@ -1,7 +1,9 @@
 """Values deleted after phase 1, classified against the audit (#2923).
 
-`reconcile_full` is told to remove what a finding identifies as unsupported,
-and three v8 API records lost a receipted value no finding named. These pin
+`reconcile_full` is told to remove what a finding identifies as unsupported.
+Three v8 reviews found a receipted top-level slot removed with nothing in the
+report; read value by value, eight v8 records lost a receipted value that no
+finding's path covers (#3078, pinned by the corpus test below). These pin
 the three classes on synthetic records — flattened (the text survives),
 founded (a finding's path covers the value), unfounded — the identity join
 that keeps a reorder or a stripped key from reading as a removal, and the
@@ -128,6 +130,103 @@ class Identity(unittest.TestCase):
         self.assertEqual(b["removed"], 1)
 
 
+class DroppedEntries(unittest.TestCase):
+    """#3076: a value of a list entry the join lost is not flattened by a
+    word some sibling happens to carry — the list is not its ancestor."""
+
+    def test_a_word_a_sibling_already_carried_does_not_flatten_a_dropped_entry(self):
+        """The review's synthetic record: 'directory' is a word of the
+        survivor's description, before and after."""
+        survivor = {"name": "Retinal images", "collection_type": "archive", "description": "one directory per site"}
+        before = _record(file_collections=[{"name": "ECG waveforms", "collection_type": "directory", "file_count": 12},
+                                           survivor])
+        b = rm.classify(before, _record(file_collections=[survivor]), _audit(), receipt=_receipt("file_collections[0]"))
+        self.assertEqual((b["flattened"], b["unfounded"]), (0, 3))
+        self.assertEqual(b["receipted"]["deleted"], 3)
+
+    def test_a_value_every_sibling_shares_does_not_flatten_a_dropped_entry(self):
+        """The AI_READI v7 rep2 `file_collections[9]` shape: the entry is in
+        no sibling, its conformance standard is in every one."""
+        def entry(n):
+            return {"name": f"Collection {n}", "conforms_to": "CDS v0.1.1", "conforms_to_standard": ["CDS"]}
+
+        b = rm.classify(_record(file_collections=[entry("a"), entry("b"), {**entry("root"), "name": "Root metadata files"}]),
+                        _record(file_collections=[entry("a"), entry("b")]), _audit())
+        self.assertEqual(sorted(r["path"] for r in b["unfounded_paths"]),
+                         ["file_collections[2].conforms_to", "file_collections[2].conforms_to_standard[0]",
+                          "file_collections[2].name"])
+        self.assertEqual(b["flattened"], 0)
+
+    def test_an_entry_whose_key_was_rewritten_is_flattened_into_the_sibling_carrying_its_identity(self):
+        """The CM4AI v4 rep3 creator: the minted id replaced by the PI's ORCID,
+        the PI object flattened to its name. The shared affiliation and role
+        survive in that entry, not in the list at large; with the person
+        gone they are deleted though the other creator still carries both."""
+        krogan = {"id": "urn:x:creator:krogan",
+                  "principal_investigator": {"id": "https://orcid.org/0000-0003-4902-337X", "name": "Nevan Krogan"},
+                  "affiliations": [{"name": "University of California San Francisco"}], "credit_roles": ["investigation"]}
+        other = {"id": "urn:x:creator:obernier", "principal_investigator": {"name": "Kirsten Obernier"},
+                 "affiliations": [{"name": "University of California San Francisco"}], "credit_roles": ["investigation"]}
+        rewritten = {"id": "ORCID:0000-0003-4902-337X", "principal_investigator": "Nevan Krogan",
+                     "affiliations": [{"name": "University of California San Francisco"}], "credit_roles": ["investigation"]}
+        before = _record(creators=[krogan, other])
+        b = rm.classify(before, _record(creators=[rewritten, other]), _audit())
+        self.assertEqual({r["path"]: r["into"] for r in b["flattened_paths"]},
+                         {"creators[0].principal_investigator.name": "creators[0]",
+                          "creators[0].affiliations[0].name": "creators[0]",
+                          "creators[0].credit_roles[0]": "creators[0]"})
+        gone = rm.classify(before, _record(creators=[other]), _audit())
+        self.assertEqual(gone["flattened"], 0)
+        self.assertIn("creators[0].affiliations[0].name", [r["path"] for r in gone["unfounded_paths"]])
+
+    def test_an_entry_with_no_identifying_key_is_folded_where_one_sibling_carries_all_of_it(self):
+        """The CHORUS 2026-08-11 leadership team, folded into one entry's
+        notes: the shared affiliation survives in the fold, although as many
+        entries carry it after as other entries did before."""
+        before = _record(creators=[{"principal_investigator": "Eric R", "affiliations": ["MGH"]},
+                                   {"principal_investigator": "Azra B", "affiliations": ["UF"]},
+                                   {"principal_investigator": "Parisa R", "affiliations": ["UF"]}])
+        after = _record(creators=[{"principal_investigator": "Eric R", "affiliations": ["MGH"]},
+                                  {"notes": "The leadership team comprises Azra B (UF) and Parisa R (UF)."}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual({r["path"]: r["into"] for r in b["flattened_paths"]},
+                         {"creators[1].principal_investigator": "creators[1]", "creators[1].affiliations[0]": "creators[1]",
+                          "creators[2].principal_investigator": "creators[1]", "creators[2].affiliations[0]": "creators[1]"})
+        self.assertEqual(b["deleted"], 0)
+
+    def test_a_value_its_siblings_shared_survives_a_split_as_a_surplus(self):
+        """An entry split into one entry per file: more entries carry the
+        shared format than its sibling did before, and the surplus is the
+        split entry's. Dropped outright, the same value is deleted."""
+        tables = {"id": "x#tables", "name": "Tables", "formats": ["zip"]}
+        before = _record(file_collections=[{"id": "x#images", "name": "Image archives", "formats": ["zip"]}, tables])
+        split = rm.classify(before, _record(file_collections=[{"id": "x#img-a", "name": "img_a", "formats": ["zip"]},
+                                                               {"id": "x#img-b", "name": "img_b", "formats": ["zip"]},
+                                                               tables]), _audit())
+        self.assertEqual({r["path"]: r["into"] for r in split["flattened_paths"]},
+                         {"file_collections[0].formats[0]": "file_collections"})
+        dropped = rm.classify(before, _record(file_collections=[tables]), _audit())
+        self.assertEqual(dropped["flattened"], 0)
+        self.assertIn("file_collections[0].formats[0]", [r["path"] for r in dropped["unfounded_paths"]])
+
+    def test_two_siblings_carrying_the_identity_equally_are_no_fold(self):
+        """A tie names no continuation: the shared site is then counted, and
+        as many entries carry it after as its siblings did before."""
+        jr = {"id": "x#1", "name": "Pat Lee Jr", "affiliations": [{"name": "Site A"}]}
+        sr = {"id": "x#2", "name": "Pat Lee Sr", "affiliations": [{"name": "Site A"}]}
+        before = _record(creators=[{"id": "x#dup", "name": "Pat Lee", "affiliations": [{"name": "Site A"}]}, jr, sr])
+        b = rm.classify(before, _record(creators=[jr, sr]), _audit())
+        self.assertEqual(b["flattened"], 0)
+        self.assertEqual(sorted(r["path"] for r in b["unfounded_paths"]),
+                         ["creators[0].affiliations[0].name", "creators[0].id", "creators[0].name"])
+
+    def test_a_list_collapsed_to_a_string_is_still_the_surviving_ancestor(self):
+        """Only a list that is still a list is set aside."""
+        before = _record(file_collections=[{"name": "ECG", "notes": "waveforms"}, {"name": "OCT", "notes": "scans"}])
+        b = rm.classify(before, _record(file_collections="ECG waveforms; OCT scans"), _audit())
+        self.assertEqual((b["flattened"], b["deleted"]), (4, 0))
+
+
 class Coverage(unittest.TestCase):
     BEFORE = _record(ethical_reviews=[{"name": "IRB A", "review_details": "approved", "contact": {"name": "Pat"}},
                                       {"name": "IRB B", "review_details": "exempt", "contact": {"name": "Sam"}}],
@@ -199,6 +298,50 @@ class Coverage(unittest.TestCase):
             with self.subTest(record=record):
                 b = rm.classify(self.BEFORE, self.AFTER, _audit({"slot": "regulatory_restrictions", "record": record}))
                 self.assertEqual(b["founded"], 2)
+
+    def test_a_finding_index_one_past_the_end_founds_the_last_entry_and_says_so(self):
+        """#3077: 04f v8 rep3 VOICE names `preprocessing_strategies[6]` of a
+        six-entry list and means entry 5. As written it names no entry;
+        counting from 1 is the only reading under which it names one."""
+        for finding, via in (({"slot": "ethical_reviews[2].review_details"}, "slot"),
+                             ({"slot": "", "review_paths": ["/ethical_reviews/2/review_details"]}, "review_paths")):
+            with self.subTest(finding=finding):
+                founded, b = self._founded(finding)
+                self.assertEqual(founded, ["ethical_reviews[1].review_details"])
+                self.assertEqual(b["founded_paths"][0]["by"], via)
+                self.assertTrue(b["founded_paths"][0]["index_past_end"])
+                self.assertEqual(b["founded_past_end"], 1)
+                self.assertEqual((b["audit"]["paths_past_end"], b["audit"]["paths_one_past_end"]), (1, 1))
+                self.assertIn("1 founded by an index one past the end", b["summary"])
+
+    def test_an_index_in_range_or_further_past_the_end_is_read_as_written(self):
+        founded, b = self._founded({"slot": "ethical_reviews[3].review_details"})
+        self.assertEqual(founded, [])
+        self.assertEqual((b["audit"]["paths_past_end"], b["audit"]["paths_one_past_end"], b["founded_past_end"]), (1, 0, 0))
+        founded, b = self._founded({"slot": "ethical_reviews[0].review_details"})
+        self.assertEqual(founded, ["ethical_reviews[0].review_details"])
+        self.assertNotIn("index_past_end", b["founded_paths"][0])
+        self.assertEqual((b["audit"]["paths_past_end"], b["founded_past_end"]), (0, 0))
+
+    def test_an_index_into_an_empty_list_is_past_the_end_and_read_as_nothing(self):
+        b = rm.classify(_record(tags=[], license="CC-BY"), _record(), _audit({"slot": "tags[0]"}))
+        self.assertEqual((b["audit"]["paths_past_end"], b["audit"]["paths_one_past_end"]), (1, 0))
+        self.assertEqual((b["founded"], b["unfounded"]), (0, 1))
+
+    def test_an_exact_path_wins_over_a_past_end_reading(self):
+        """A value an in-range path covers is not credited to a past-end one."""
+        _founded, b = self._founded({"slot": "ethical_reviews[2]"}, {"slot": "ethical_reviews[1].review_details"})
+        row = next(r for r in b["founded_paths"] if r["path"] == "ethical_reviews[1].review_details")
+        self.assertEqual((row["finding"], row.get("index_past_end")), (1, None))
+
+    def test_past_end_walks_literal_steps_only(self):
+        original = {"a": [{"b": [1, 2]}], "c": {"d": []}}
+        self.assertEqual(rm.past_end(["a", 1], original), (1, 1))
+        self.assertEqual(rm.past_end(["a", 0, "b", 2], original), (2, 2))
+        self.assertEqual(rm.past_end(["c", "d", 0], original), (0, 0))
+        for fp in (["a", 0, "b", 1], ["a", "*", "b", 5], ["a", "b"], ["x", 3], ["a", frozenset({4})]):
+            with self.subTest(fp=fp):
+                self.assertIsNone(rm.past_end(fp, original))
 
     def test_a_mention_in_a_findings_text_is_reported_and_founds_nothing(self):
         b = rm.classify(self.BEFORE, self.AFTER,
@@ -366,6 +509,21 @@ class OnDisk(unittest.TestCase):
         self.assertEqual(json.loads(j.output)["unfounded"], 4)
 
 
+class CliPastEnd(unittest.TestCase):
+    def test_the_cli_reports_finding_paths_past_the_end(self):
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        block = rm.classify(Coverage.BEFORE, Coverage.AFTER,
+                            _audit({"slot": "ethical_reviews[2].review_details"}, {"slot": "ethical_reviews[9]"}))
+        with mock.patch("data_sheets_schema.cli.review._provenance", lambda *_: Path(__file__)), \
+                mock.patch("data_sheets_schema.removals.for_record", return_value=block):
+            r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_api", "--label", "L",
+                                                              "--project", "VOICE"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("finding paths indexing past the end of their list: 2 (1 one past, read as the last entry;"
+                      " 1 value(s) founded so)", r.output)
+
+
 # ------------------------------------------------------------ corpus replay
 CONCAT = Path(__file__).resolve().parents[1] / "data" / "d4d_concatenated"
 
@@ -405,3 +563,62 @@ def test_an_agentic_record_is_unmeasured_not_zero(monkeypatch):
     monkeypatch.chdir(CONCAT.parents[1])
     b = _replay("2026-08-28_claude-opus-5-claudecode-generic-v6_rep1", "CHORUS", method="claudecode_agent")
     assert b["checked"] is False and b["unfounded"] is None
+
+
+@pytest.mark.corpus
+def test_the_v7_root_metadata_entry_is_deleted_and_its_past_end_findings_found_it(monkeypatch):
+    """#3076 and #3077 on the record both reviews named: the dropped
+    `file_collections[9]` ("Root metadata files") is in no sibling, so its
+    'metadata' and CDS values are deleted, not flattened into the list; the
+    audit's `file_collections[10].id` / `.file_count` of a ten-entry list
+    quote that entry and found exactly those two leaves."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    b = _replay("2026-09-01_claude-opus-5-api-generic-v7_rep2", "AI_READI", method="claudecode_agent")
+    entry = "file_collections[9]."
+    assert not [r for r in b["flattened_paths"] if r["path"].startswith(entry)]
+    assert {r["path"] for r in b["unfounded_paths"] if r["path"].startswith(entry)} == {
+        entry + k for k in ("name", "path", "description", "collection_type", "conforms_to",
+                            "conforms_to_standard[0]")}
+    assert {r["path"] for r in b["founded_paths"] if r.get("index_past_end")} == {entry + "id", entry + "file_count"}
+    assert (b["unfounded"], b["founded_past_end"], b["receipted"]["deleted"]) == (6, 2, 33)
+
+
+@pytest.mark.corpus
+@pytest.mark.parametrize("label, project, path", [
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep1", "VOICE", "preprocessing_strategies[6].preprocessing_details"),
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep3", "VOICE", "preprocessing_strategies[5].preprocessing_details"),
+])
+def test_a_v8_finding_one_past_the_end_founds_the_last_entry(label, project, path, monkeypatch):
+    """#3077: the two v8 VOICE findings that index one past the end of
+    `preprocessing_strategies` describe its last entry."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    b = _replay(label, project)
+    assert [r["path"] for r in b["founded_paths"] if r.get("index_past_end")] == [path]
+    assert path not in {r["path"] for r in b["unfounded_paths"]}
+
+
+#: Every v8 API record with a receipted value removed that no finding's path
+#: covers (#3078): the three whole-slot cases the reviews found and five more.
+RECEIPTED_UNFOUNDED_V8 = {
+    ("2026-09-04b_claude-opus-5-api-generic-v8_rep1", "CM4AI"),       # canary
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep1", "AI_READI"),    # declared invalid by its own block
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep1", "VOICE"),
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep2", "CHORUS"),      # regulatory_restrictions
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep2", "VOICE"),       # data_governance
+    ("2026-09-04f_claude-opus-5-api-generic-v8_rep3", "CHORUS"),
+    ("2026-09-04g_claude-opus-5-api-generic-v8_rep2", "AI_READI"),
+    ("2026-09-04g_claude-opus-5-api-generic-v8_rep3", "AI_READI"),    # content_warnings
+}
+
+
+@pytest.mark.corpus
+def test_the_v8_records_that_lost_a_receipted_value_no_finding_covers(monkeypatch):
+    """The module docstring's count: eight v8 records, not the three whole
+    slots the reviews found — six of the twelve-record fill."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    provs = sorted(CONCAT.glob("claudecode_api_core/*-v8_rep*/*_provenance.yaml"))
+    if not provs:
+        pytest.skip("no v8 API records in this checkout")
+    found = {(p.parent.name, p.name.split("_provenance")[0]) for p in provs
+             if ((rm.for_record(p)["receipted"] or {}).get("unfounded") or 0) > 0}
+    assert found == RECEIPTED_UNFOUNDED_V8
