@@ -308,6 +308,72 @@ def related_datasets_cmd(records, project, runtime):
         raise SystemExit(1)
 
 
+@evaluate.command("slot-meaning")
+@click.argument("records", nargs=-1, required=True, type=click.Path(exists=True, dir_okay=False))
+@click.option("--json", "as_json", is_flag=True, help="print one JSON document instead of text")
+def slot_meaning_cmd(records, as_json):
+    """Embargo, release-timing and availability text under
+    `confidential_elements` or `sensitive_elements` (#2931).
+
+    A temporary pre-publication embargo is a statement about when data are
+    released, not that they are confidential; recorded under
+    `confidential_elements` it asserts confidential elements on the strength
+    of a release date. Only these two slots are read: the same text is
+    correct in `known_limitations`, `distribution_dates` and the access
+    slots. Access-control language ("withheld from the public release",
+    "controlled access") is not matched.
+
+    Read-only and non-gating: exits 0 whatever it finds, and 1 only when a
+    named record could not be read as a mapping, or repeats a key whose
+    earlier values the scan would never see (#1029) — a record the
+    diagnostic never looked at is not a clean one. Nothing is written.
+    """
+    import json
+
+    import yaml
+
+    from data_sheets_schema import routing_diagnostics as rd
+
+    results = []
+    for record_path in records:
+        try:
+            text = Path(record_path).read_text(encoding="utf-8")
+            found = rd.slot_meaning_mismatch(yaml.safe_load(text))
+        except (OSError, UnicodeDecodeError, yaml.YAMLError, TypeError) as exc:
+            reason = (str(exc).splitlines() or [type(exc).__name__])[0]
+            results.append((record_path, None, reason))
+            continue
+        unread = rd.unread_duplicate_keys(text)
+        results.append((record_path, None, rd.describe_unread(unread)) if unread else (record_path, found, None))
+
+    checked = [found for _, found, _ in results if found is not None]
+    unchecked = len(results) - len(checked)
+    if as_json:
+        click.echo(json.dumps({
+            "instrument": rd.INSTRUMENT, "lexicon_sha256": rd.LEXICON_SHA256,
+            "gating": False, "slots": list(rd.SCOPED_SLOTS),
+            "records": [{"path": path, "checked": False, "reason": reason} if found is None else
+                        {"path": path, "checked": True, "count": len(found),
+                         "mismatches": [rd.as_dict(m) for m in found]}
+                        for path, found, reason in results],
+        }, indent=2))
+    else:
+        for path, found, reason in results:
+            if found is None:
+                click.echo(f"{path}\n  not checked: {reason}")
+            elif found:
+                click.echo(path)
+                for mismatch in found:
+                    click.echo(f"  {rd.describe(mismatch)}")
+        total = [m for found in checked for m in found]
+        click.echo("")
+        click.echo(f"{len(total)} slot-meaning mismatch(es) in {sum(1 for f in checked if f)} of "
+                   f"{len(checked)} record(s) checked, {sum(1 for m in total if m.present is True)} "
+                   f"in an entry asserting its elements present; not gating ({rd.INSTRUMENT})")
+    if unchecked:
+        raise click.ClickException(f"{unchecked} record(s) could not be checked")
+
+
 
 @evaluate.command("spelling")
 @click.option('--method', default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
