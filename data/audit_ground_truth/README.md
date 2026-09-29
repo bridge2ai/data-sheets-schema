@@ -121,6 +121,11 @@ a hash, id or date followed by a newline (a YAML `|` block scalar adds one),
 an absolute or `..` note path, and a duplicated id. Entries pin originals by
 hash and never edit them.
 
+A refusal never quotes the file's text, since an observation may be what was
+refused: a schema violation names the rule and the schema's own values
+(#3255), and a duplicated mapping key is named only when the schema declares
+it, otherwise by its YAML line and column (#3267; JSON gives no position).
+
 The pinned sha256 values make the numbers reproducible. An entry scores only
 against the exact original it names. `bundle_sha256` fixes the line numbers,
 because bundles drift (#452).

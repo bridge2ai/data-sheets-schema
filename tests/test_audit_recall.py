@@ -401,6 +401,32 @@ def test_a_schema_refusal_names_the_rule_and_never_quotes_the_value(change, wher
     assert "Planted" not in str(caught.value) and "Planted" not in repr(caught.value.problems)
 
 
+DUPLICATED_SECRET = {
+    "yaml": ("format: audit_ground_truth_v1\nproject: A\nentries:\n- id: gt\n"
+             f"  {SECRET}: one\n  {SECRET}: two\n").encode(),
+    "json": ('{"format": "audit_ground_truth_v1", "project": "A", "entries": [{"id": "gt", '
+             f'"{SECRET}": "one", "{SECRET}": "two"}}]}}').encode(),
+}
+
+
+@pytest.mark.parametrize("dialect", sorted(DUPLICATED_SECRET))
+def test_a_duplicated_key_is_named_only_when_the_schema_declares_it(dialect):
+    """Parsing runs before the #3255 redaction, and a key may be held-out prose (#3267)."""
+    with pytest.raises(recall.GroundTruthError) as caught:
+        recall.load_ground_truth(DUPLICATED_SECRET[dialect])
+    [problem] = caught.value.problems
+    assert problem["problem"].startswith("duplicate mapping key the schema does not declare")
+    assert "Planted" not in str(caught.value) and "Planted" not in repr(caught.value.problems)
+    if dialect == "yaml":
+        assert problem["problem"].endswith(" at line 6 column 3")
+    declared = b"format: audit_ground_truth_v1\nproject: A\nproject: B\nentries: []\n"
+    with pytest.raises(recall.GroundTruthError, match="duplicate mapping key 'project' at line 3 column 1"):
+        recall.load_ground_truth(declared)
+    nested = b"entries:\n- governing_source: {lines: [1, 2], lines: [3, 4]}\n"
+    with pytest.raises(recall.GroundTruthError, match="duplicate mapping key 'lines' at line 2"):
+        recall.load_ground_truth(nested)
+
+
 def test_every_rule_the_schema_uses_has_a_description_that_quotes_no_value():
     """A rule missing from the describer would fall back to naming only the rule (#3255)."""
     annotations = {"$schema", "$id", "title", "description", "properties", "items", "$defs"}
@@ -652,6 +678,16 @@ class TestCommand:
                           "--output", p["audit"])
         assert out.exit_code == 2 and "names an input" in out.output
         assert p["audit"].read_bytes() == before
+
+    @pytest.mark.parametrize("dialect", sorted(DUPLICATED_SECRET))
+    def test_a_duplicated_prose_key_never_reaches_the_terminal(self, tmp_path, dialect):
+        """The Codex reproduction of #3267, through the command."""
+        p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))
+        p["truth"].write_bytes(DUPLICATED_SECRET[dialect])
+        out = self.invoke("--audit", p["audit"], "--original", p["original"], "--ground-truth", p["truth"])
+        assert out.exit_code == 1, out.output
+        assert "ground truth refused:\n  /: duplicate mapping key the schema does not declare" in out.output
+        assert "Planted" not in out.output
 
     def test_ground_truth_nested_too_deeply_is_refused_with_the_message(self, tmp_path):
         p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))

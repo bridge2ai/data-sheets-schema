@@ -142,6 +142,31 @@ def schema_text() -> str:
     return json.dumps(ground_truth_schema(), indent=2, ensure_ascii=False) + "\n"
 
 
+def _declared_names(node=None) -> frozenset:
+    """Every property name the ground-truth schema declares, at any depth."""
+    node = ground_truth_schema() if node is None else node
+    names = set(node.get("properties", {}))
+    for child in node.get("properties", {}).values():
+        names |= _declared_names(child)
+    for key in ("items", "additionalProperties"):
+        if isinstance(node.get(key), dict):
+            names |= _declared_names(node[key])
+    return frozenset(names)
+
+
+def _duplicate_key_problem(key, where: str) -> str:
+    """A duplicated key, named only when the schema declares it (#3267).
+
+    A duplicated key may be any text, held-out prose included, and the
+    refusal reaches the terminal before schema validation (and its #3255
+    redaction) runs. A key the schema declares is the schema's own word; any
+    other is reported by position alone, which JSON's hook does not give.
+    """
+    if isinstance(key, str) and key in _declared_names():
+        return f"duplicate mapping key {key!r}{where}"
+    return f"duplicate mapping key the schema does not declare{where}"
+
+
 class _Loader(yaml.SafeLoader):
     """No duplicate or merge keys; dates stay the strings the file wrote."""
 
@@ -154,7 +179,9 @@ class _Loader(yaml.SafeLoader):
             if not isinstance(key, str):
                 raise GroundTruthError([{"at": "", "problem": "mapping keys must be strings"}])
             if key in seen:
-                raise GroundTruthError([{"at": "", "problem": f"duplicate mapping key {key!r}"}])
+                mark = key_node.start_mark
+                raise GroundTruthError([{"at": "", "problem": _duplicate_key_problem(
+                    key, f" at line {mark.line + 1} column {mark.column + 1}")}])
             seen.add(key)
         return super().construct_mapping(node, deep=deep)
 
@@ -167,7 +194,8 @@ def _json_object(pairs):
     value = {}
     for key, item in pairs:
         if key in value:
-            raise GroundTruthError([{"at": "", "problem": f"duplicate mapping key {key!r}"}])
+            # object_pairs_hook is given no position; the key is named or not as in YAML.
+            raise GroundTruthError([{"at": "", "problem": _duplicate_key_problem(key, "")}])
         value[key] = item
     return value
 
