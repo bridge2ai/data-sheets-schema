@@ -56,8 +56,12 @@ name leaf is exactly one of:
     `C. Metallo` for `Christian Metallo`. The token is not itself a run of
     two or three capitals: initials the record kept (`JC Bélisle-Pipon`)
     or a degree (`Jorge Contreras, JD`) expand nothing and are `absent`.
-    The surname is a token the record writes capitalised and not as
-    initials, so `the` in an organisation's name stands in for none.
+    A longer run is a name written in capitals and is judged like any
+    other (`CHRISTIAN METALLO`). The surname is a token the record writes
+    capitalised and not as initials, so `the` in an organisation's name
+    stands in for none. A token the record writes in lower case
+    (`christian Metallo`, `Access requests`) is `absent`: an initial
+    expands into a capitalised name.
 ``absent``
     none of these.
 
@@ -74,10 +78,18 @@ the word sets alone.
   no `C`). Where the surname has its initials before it on its line,
   whatever follows it opens the next entry (`C. Metallo, T. Clark` gives
   Metallo no `T`).
+- A **compound surname** is capitalised words, none of them initials,
+  joined by hyphens or spaces on one line (`Bélisle-Pipon`, `Ballllosero
+  Navarro`). Its initials sit before its first word, and are credited to
+  that word only; the rule above then holds for every word of it
+  (`J.-C. Bélisle-Pipon, T. Clark` gives Pipon no `T`, and `F. Ballllosero
+  Navarro, T. Clark` gives Navarro none).
 - **After the surname**, an initial may be separated from it by whitespace
   and at most one comma (`Metallo C`, `Metallo, C.`, `Metallo\\nC`). A run
   of two or three capitals followed on its line by a word is an acronym in
-  prose, not initials (`The IRB will`, `RO-Crate`).
+  prose, not initials (`The IRB will`, `RO-Crate`). A word on the next
+  line does not count, so a bundle that lists one author per line keeps
+  their initials (`Levinson MA\\nMarquez C`, `Levinson M A\\nMarquez C`).
 - **Initials written together** are single capitals with only joiners
   (`.`, `-`) and spaces between them, on one line (`J-C`, `J.-C.`,
   `M. A.`), in either direction. After the surname, one joined
@@ -90,9 +102,17 @@ directions: `Levinson MA and` gives Levinson no initials there; a two- or
 three-letter given name in capitals (`TIM CLARK`) reads as initials kept;
 a suffix in mixed case (`Jr`) is judged like a given name; a run of
 capitals ending the line before a surname (`La Jolla, CA\\nClark T`) is
-read as that surname's initials; and a capitalised word that is not a
-surname (`The` opening an organisation's name) can still stand in for
-one.
+read as that surname's initials, and so is one ending the line after it
+(the CM4AI bundle's `Zhandos Sembay, UAB` gives Sembay `UAB`); a surname
+after a given name spelled out takes the next entry's initial
+(`Christian Metallo, T. Clark` gives Metallo `T`: only initials before
+it show where its entry starts, and `Ballllosero Navarro, F.` is laid out
+the same way); a surname with a lower-case particle (`J. van der Berg,
+T. Clark`) is not read as one compound, so `Berg` takes the `T`; a list
+of initials-first entries one per line (`C. Metallo\\nT. Clark`) reads
+the `T` as Metallo's trailing initial, which Metallo does not take
+either, so Clark gets none; and a capitalised word that is not a surname
+(`The` opening an organisation's name) can still stand in for one.
 
 Every token that is not `grounded` is a finding
 (`{kind: name_token_not_in_bundle, path, name, token, class}`). Occurrences
@@ -237,11 +257,18 @@ def _gap_ok(gap: str, allowed: str, commas: int = 0) -> bool:
 
 #: A word of two or more letters after an initial on the same line, across
 #: spaces or a hyphen: `The IRB will`, `RO-Crate`, `T. A study`. Not across
-#: a line break, which ends an author entry (`Axelsson U\nKTH`).
+#: a line break, which ends an author entry where the bundle lists one per
+#: line: `Levinson MA\nMarquez C` gives Levinson `MA`. The cost is capitals
+#: ending a line after a surname (`Zhandos Sembay, UAB` in the CM4AI
+#: bundle gives Sembay `UAB`).
 _WORD_AFTER = re.compile(r"[ \t\-\u2010\u2011]+[^\W\d_]{2}")
 
 #: Spaces on one line: what may sit between two initials besides joiners.
 _SPACES = " \t"
+
+#: What may sit between the words of one compound surname, on one line:
+#: `Bélisle-Pipon`, `Ballllosero Navarro`.
+_COMPOUND = "-\u2010\u2011" + _SPACES
 
 
 class BundleIndex:
@@ -281,6 +308,18 @@ class BundleIndex:
         return (_letters(self.tokens[i].text) == 1 and _letters(self.tokens[j].text) == 1
                 and all(ch in _JOINERS or ch in _SPACES for ch in self._gap(i, j)))
 
+    def _surname_start(self, k: int) -> int:
+        """The first word of the compound surname that token `k` ends or
+        sits in: capitalised words, none of them initials, with only
+        hyphens and spaces between them on one line (`Bélisle-Pipon`,
+        `Ballllosero Navarro`). `k` itself when the word before it is not
+        one. A lower-case particle (`van der Berg`) or a period ends it."""
+        while (k - 1 >= 0 and self.tokens[k - 1].text[:1].isupper()
+               and not _is_initial(self.tokens[k - 1].text)
+               and all(ch in _COMPOUND for ch in self._gap(k - 1, k))):
+            k -= 1
+        return k
+
     def initials_beside(self, surname: str) -> set[str]:
         """Folded initial letters written next to `surname` in the bundle,
         where the bundle writes it capitalised: `access R` is not a name.
@@ -290,10 +329,13 @@ class BundleIndex:
         for k in self.positions.get(folded_key(surname), ()):
             if not self.tokens[k].text[:1].isupper():
                 continue
-            # Before it: `C. Metallo`, `J.-C. Bélisle-Pipon`.
+            # Before it: `C. Metallo`, `J.-C. Bélisle-Pipon`. A compound
+            # surname's initials sit before its first word only
+            # (`F. Ballllosero Navarro`), so they are sought there.
+            start = self._surname_start(k)
             run: list[int] = []
-            j = k - 1
-            if self._initial_at(j) and _gap_ok(self._gap(j, k), _JOINERS):
+            j = start - 1
+            if self._initial_at(j) and _gap_ok(self._gap(j, start), _JOINERS):
                 run.append(j)
                 while self._initial_at(j - 1) and self._joined(j - 1, j):
                     j -= 1
@@ -307,13 +349,16 @@ class BundleIndex:
                                        and not _is_initial(self.tokens[prev].text)
                                        and _gap_ok(self._gap(prev, first), ""))
                 if not belongs_to_previous:
-                    for i in run:
-                        out.update(folded_key(self.tokens[i].text))
+                    if start == k:           # credited to the word they sit beside
+                        for i in run:
+                            out.update(folded_key(self.tokens[i].text))
                     # Written `C. Metallo` on one line, so what follows it
                     # opens the next entry: in `C. Metallo, T. Clark` the T
-                    # is Clark's. Not across a line break, where the "initials"
-                    # may end the line before (`La Jolla, CA\nClark T`).
-                    if not any(ch in "\r\n" for ch in self._gap(run[0], k)):
+                    # is Clark's, and in `J.-C. Bélisle-Pipon, T. Clark` it
+                    # is not Pipon's either. Not across a line break, where
+                    # the "initials" may end the line before (`La Jolla,
+                    # CA\nClark T`).
+                    if not any(ch in "\r\n" for ch in self._gap(run[0], start)):
                         continue
             # After it: `Metallo C`, `Metallo, C.`, `Levinson MA`, `Pipon J-C`.
             j = k + 1

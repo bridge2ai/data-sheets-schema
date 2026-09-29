@@ -116,10 +116,30 @@ class ClassTest(unittest.TestCase):
                 self.assertEqual(cls("Christian Metallo", "Christian", bundle), "absent")
 
     def test_a_word_in_lower_case_is_never_an_expanded_initial(self):
-        """Prose in a person slot: `access requests` beside `Access R` is not
-        a person whose initial R was expanded."""
+        """Prose in a person slot: `Access requests` beside `Access R` is not
+        a person whose initial R was expanded, and a given name the record
+        writes in lower case is no expansion either. Each name has a
+        capitalised surname the bundle gives with that initial, so the
+        token's own case is all that decides (#3058); the controls expand."""
+        self.assertEqual(cls("Access requests", "requests", "Access R forms"), "absent")
+        self.assertEqual(cls("christian Metallo", "christian", "Metallo C"), "absent")
+        self.assertEqual(cls("Access Requests", "Requests", "Access R forms"), "initial_expanded")
+        self.assertEqual(cls("Christian Metallo", "Christian", "Metallo C"), "initial_expanded")
+
+    def test_a_surname_in_lower_case_stands_in_for_none(self):
+        """The other two places case is read: the record's stand-in surname
+        (`access`) and the bundle's (`metallo C`)."""
         self.assertEqual(cls("access requests", "requests", "Access R forms"), "absent")
         self.assertEqual(cls("Christian Metallo", "Christian", "metallo C"), "absent")
+
+    def test_a_longer_run_of_capitals_is_a_name_written_in_capitals(self):
+        """Only a run of two or three capitals is initials (#3062): the
+        token `JD` expands nothing, `JOHN` and `CHRISTIAN` are given names
+        in capitals, and `METALLO` stands in as a surname."""
+        self.assertEqual(cls("JOHN Metallo", "JOHN", "Metallo J"), "initial_expanded")
+        self.assertEqual(cls("CHRISTIAN METALLO", "CHRISTIAN", "Metallo C"), "initial_expanded")
+        self.assertEqual(cls("JD Metallo", "JD", "Metallo J"), "absent")
+        self.assertEqual(cls("Christian MC", "Christian", "MC C"), "absent")
 
 
 class InitialExpandedIsAnExpansionTest(unittest.TestCase):
@@ -195,6 +215,59 @@ class InitialExpandedIsAnExpansionTest(unittest.TestCase):
         self.assertEqual(cls("Christian Metallo", "Christian", bundle), "initial_expanded")
         self.assertEqual(cls("Tim Clark", "Tim", bundle), "initial_expanded")
 
+    def test_a_compound_surnames_next_entry_is_not_its_own(self):
+        """#3059: the initials of `J.-C. Bélisle-Pipon` and `F. Ballllosero
+        Navarro` sit before the compound's first word, so the `T` after its
+        last word opens Clark's entry, for every word of the surname."""
+        for bundle, surname, given in (
+                ("J.-C. Bélisle-Pipon, T. Clark", "Bélisle-Pipon", "Jean"),
+                ("F. Ballllosero Navarro, T. Clark", "Ballllosero Navarro", "Frida"),
+                ("J.-C. Bélisle-Pipon; T. Clark", "Bélisle-Pipon", "Jean"),
+                # Initials without periods: the `F` is not a word of the compound.
+                ("F Ballllosero Navarro, T. Clark", "Ballllosero Navarro", "Frida"),
+                ("J C Bélisle-Pipon, T. Clark", "Bélisle-Pipon", "Jean")):
+            last = surname.replace("-", " ").split()[-1]
+            with self.subTest(bundle=bundle):
+                self.assertEqual(BundleIndex(bundle).initials_beside(last), set())
+                self.assertEqual(cls(f"Tim {surname}", "Tim", bundle), "absent")
+                self.assertEqual(cls(f"Tim {last}", "Tim", bundle), "absent")
+                self.assertEqual(cls(f"{given} {surname}", given, bundle), "initial_expanded")
+                self.assertEqual(cls("Tim Clark", "Tim", bundle), "initial_expanded")
+
+    def test_a_compound_surname_after_the_previous_entry_keeps_its_initial(self):
+        """The initial before a compound can be the previous entry's
+        trailing one (`Clark T Ballllosero Navarro F`), and a comma can
+        separate the entries: the `F` after the compound is then its own."""
+        for bundle in ("Clark T Ballllosero Navarro F", "Clark T.\nBallllosero Navarro F.",
+                       "Axelsson U, Ballllosero Navarro F", "Axelsson U\nBélisle-Pipon J-C"):
+            with self.subTest(bundle=bundle):
+                name = ("Frida Ballllosero Navarro" if "Navarro" in bundle
+                        else "Jean-Christophe Bélisle-Pipon")
+                self.assertEqual(cls(name, name.split("-")[0].split()[0], bundle), "initial_expanded")
+
+    def test_a_compound_is_capitalised_words_on_one_line_in_one_sentence(self):
+        """`C. Metallo` before a line break, a period or a lower-case word
+        does not make the next surname part of its compound, so Clark keeps
+        the `T` after it."""
+        for bundle in ("Correspondence: C. Metallo\nClark T, Lundberg E",
+                       "Written by C. Metallo. Clark T, Lundberg E",
+                       "C. Metallo and Clark T, Lundberg E"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(cls("Tim Clark", "Tim", bundle), "initial_expanded")
+
+    def test_one_author_per_line_keeps_the_initials_before_the_line_break(self):
+        """A word on the next line is not a word after the initials (#3061):
+        a bundle that lists one author per line gives Levinson `MA` and
+        `M A`. Read across the line break, `MA` would be an acronym and the
+        spaced `A` a sentence, as they are in `Levinson MA and`."""
+        for bundle in ("Levinson MA\nMarquez C", "Levinson M A\nMarquez C",
+                       "Levinson MA\r\nMarquez C"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(BundleIndex(bundle).initials_beside("Levinson"), {"m", "a"})
+                self.assertEqual(cls("Maxwell Adam Levinson", "Adam", bundle), "initial_expanded")
+        self.assertEqual(BundleIndex("Levinson MA and Marquez C").initials_beside("Levinson"), set())
+        self.assertEqual(BundleIndex("Levinson M A and Marquez C").initials_beside("Levinson"), {"m"})
+
     def test_capitals_ending_the_line_before_do_not_take_the_initial_after(self):
         """`La Jolla, CA\\nClark T`: whatever `CA` is, it is on another line,
         so Clark's own `T` still counts."""
@@ -204,6 +277,47 @@ class InitialExpandedIsAnExpansionTest(unittest.TestCase):
         """`Clark T.\\nA. Metallo`: the A is Metallo's. Read across the line
         break, `T. A.` would be one run that is Clark's trailing initials."""
         self.assertEqual(cls("Amy Metallo", "Amy", "Clark T.\nA. Metallo"), "initial_expanded")
+
+
+class DocumentedCostTest(unittest.TestCase):
+    """Each case the module docstring says the layout rules still get wrong
+    is wrong in the way it says, so the list stays true: a change that fixes
+    one fails here and takes it off the list."""
+
+    def test_an_acronym_shaped_pair_before_a_word(self):
+        self.assertEqual(BundleIndex("Levinson MA and Marquez C").initials_beside("Levinson"), set())
+
+    def test_a_short_given_name_in_capitals(self):
+        self.assertEqual(cls("TIM CLARK", "TIM", "Clark T"), "absent")
+
+    def test_a_suffix_in_mixed_case(self):
+        self.assertEqual(cls("Tim Clark Jr", "Jr", "Clark J"), "initial_expanded")
+
+    def test_capitals_ending_the_line_before_or_after_a_surname(self):
+        self.assertLessEqual({"c", "a"}, BundleIndex("La Jolla, CA\nClark T").initials_beside("Clark"))
+        self.assertEqual(BundleIndex("Zhandos Sembay, UAB\nand the").initials_beside("Sembay"),
+                         {"u", "a", "b"})
+
+    def test_a_surname_after_a_given_name_spelled_out(self):
+        """No initials before it, so nothing shows where its entry starts:
+        the layout of `Ballllosero Navarro, F.`."""
+        self.assertEqual(cls("Tim Metallo", "Tim", "Christian Metallo, T. Clark"), "initial_expanded")
+        self.assertEqual(cls("Frida Ballllosero Navarro", "Frida", "Ballllosero Navarro, F."),
+                         "initial_expanded")
+
+    def test_a_lower_case_particle_ends_the_compound(self):
+        self.assertEqual(BundleIndex("J. van der Berg, T. Clark").initials_beside("Berg"), {"t"})
+
+    def test_initials_before_the_surname_one_author_per_line(self):
+        """The `T` opening the second line is read as Metallo's trailing
+        initial (the `Marquez C\\nMetallo` rule), which Metallo, written
+        `C. Metallo`, does not take either: Clark gets none."""
+        self.assertEqual(BundleIndex("C. Metallo\nT. Clark").initials_beside("Clark"), set())
+        self.assertEqual(BundleIndex("C. Metallo\nT. Clark").initials_beside("Metallo"), {"c"})
+        self.assertEqual(cls("Tim Clark", "Tim", "C. Metallo\nT. Clark"), "absent")
+
+    def test_a_capitalised_word_that_is_not_a_surname(self):
+        self.assertEqual(cls("The Data Consortium", "Data", "The D, and"), "initial_expanded")
 
 
 class AfterTheSurnameSeparatorTest(unittest.TestCase):
@@ -295,12 +409,63 @@ class WalkTest(unittest.TestCase):
             ("data_governance.committee_members[1].name", "Tim Clark"),
         ])
 
-    def test_the_slots_come_from_the_schema(self):
-        """Derived, never listed: a new Person-ranged slot changes this set,
-        and this test says so."""
+    def test_todays_slots(self):
+        """Today's set from the real schemas. A new Person-ranged slot
+        changes it and this test says so, because the set is derived: that
+        is pinned by the fixture test below, not by this equality."""
         self.assertEqual(ng.person_name_slots(), frozenset({
             "committee_contact", "committee_members", "contact_person", "creators",
             "governance_committee_contact", "principal_investigator"}))
+
+    #: A full schema with a Person-ranged slot no real schema has, and
+    #: `principal_investigator` ranged as a string.
+    FULL = """\
+id: https://example.org/full
+name: full
+default_range: string
+classes:
+  Person:
+    attributes:
+      name: {}
+  Creator:
+    attributes:
+      name: {}
+  Dataset:
+    attributes:
+      creators: {range: Creator, multivalued: true}
+      data_steward: {range: Person}
+      principal_investigator: {}
+      title: {}
+"""
+    #: A core schema with a Creator-ranged slot the full schema lacks.
+    CORE = """\
+id: https://example.org/core
+name: core
+default_range: string
+classes:
+  Creator:
+    attributes:
+      name: {}
+  CoreDataset:
+    attributes:
+      authors: {range: Creator, multivalued: true}
+      title: {}
+"""
+
+    def test_the_slots_come_from_both_schemas_and_principal_investigator_is_kept(self):
+        """#3060: fixture schemas in place of the real ones. `data_steward`
+        is found only by deriving the set, `authors` only by reading the
+        core schema too, and `principal_investigator`, ranged as a string
+        here, only because the issue scopes it whatever its range."""
+        with tempfile.TemporaryDirectory() as tmp:
+            full, core = Path(tmp) / "full.yaml", Path(tmp) / "core.yaml"
+            full.write_text(self.FULL)
+            core.write_text(self.CORE)
+            with mock.patch("data_sheets_schema.provenance.FULL_SCHEMA", full), \
+                    mock.patch("data_sheets_schema.provenance.CORE_SCHEMA", core):
+                slots = ng.person_name_slots()
+        self.assertEqual(slots, frozenset({"creators", "data_steward", "authors",
+                                           "principal_investigator"}))
 
 
 class CountTest(unittest.TestCase):
@@ -699,25 +864,46 @@ NOT_EXPANSIONS = {
 }
 
 
+#: A role written in lower case where a creator's name belongs: `member`
+#: in 'Bridge2AI CHoRUS leadership team member', five creators in the full
+#: record and five in the core. The CHORUS bundle's page headers end a line
+#: in a timestamp's `PM` before `CHoRUS` (`5:25 PM\n\nCHoRUS for`), which
+#: reads as CHoRUS's initials (the docstring's `La Jolla, CA\nClark T`
+#: case), so only the rule that a token in lower case expands nothing keeps
+#: these `absent` (#3058).
+LOWER_CASE_WORDS = {
+    ("claudecode_agent", "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2", "CHORUS"):
+        {(which, f"creators[{i}].name", "member") for which in ("full", "core") for i in range(1, 6)},
+}
+
+
+def _absent_as_listed(case: unittest.TestCase, listed: dict) -> None:
+    from data_sheets_schema.provenance import record_path_for
+    for (method, label, project), expected in listed.items():
+        path = record_path_for(project, method, label)
+        if not path.exists():
+            case.skipTest(f"{path} is not in this checkout")
+        out = ng.check_run(path)
+        _skip_if_shallow(out)
+        for which, where, token in expected:
+            with case.subTest(run=label, record=which, path=where, token=token):
+                rec = out["records"][which]
+                case.assertTrue(rec.get("checked"), rec)
+                case.assertIn((where, token, "absent"),
+                              {(f["path"], f["token"], f["class"]) for f in rec["findings"]})
+
+
 @pytest.mark.corpus   # reads committed records under data/d4d_concatenated (#1203)
 class NotAnExpansionCorpusTest(unittest.TestCase):
-    """Record scope: the records named in `NOT_EXPANSIONS`. Each token is
-    still a finding; only its class is `absent`, not `initial_expanded`."""
+    """Record scope: the records named in `NOT_EXPANSIONS` and
+    `LOWER_CASE_WORDS`. Each token is still a finding; only its class is
+    `absent`, not `initial_expanded`."""
 
     def test_a_degree_and_an_organisation_word_are_absent(self):
-        from data_sheets_schema.provenance import record_path_for
-        for (method, label, project), expected in NOT_EXPANSIONS.items():
-            path = record_path_for(project, method, label)
-            if not path.exists():
-                self.skipTest(f"{path} is not in this checkout")
-            out = ng.check_run(path)
-            _skip_if_shallow(out)
-            for which, where, token in expected:
-                with self.subTest(run=label, record=which, token=token):
-                    rec = out["records"][which]
-                    self.assertTrue(rec.get("checked"), rec)
-                    self.assertIn((where, token, "absent"),
-                                  {(f["path"], f["token"], f["class"]) for f in rec["findings"]})
+        _absent_as_listed(self, NOT_EXPANSIONS)
+
+    def test_a_role_word_in_lower_case_is_absent(self):
+        _absent_as_listed(self, LOWER_CASE_WORDS)
 
 
 #: A run whose bundle drifted after it. The AI_READI bytes it hashed (the
