@@ -32,9 +32,11 @@ Bases, stated once and printed into the output:
   output, so adjusted maxima can differ between evaluations of comparable
   records; points and adjusted maximum are both shown.
 - **item discrimination** (#2927): per evaluator, never pooled across
-  evaluators, the items at ceiling or floor, each project's distinct totals
-  and the rubrics' pair agreement on both bases. A project with at most two
-  distinct totals is flagged in the rubric tables: no within-project order.
+  evaluators, and per rubric version where an evaluator's evaluations span
+  more than one (#3290), the items at ceiling or floor, each project's
+  distinct totals and the rubrics' pair agreement on both bases. A project
+  with at most two distinct totals is flagged in the rubric tables: no
+  within-project order.
 - **removal rows** (#2923): values deleted without a finding, the share of
   them `reconcile_full` removed (#3150) and receipted values deleted are
   recomputed live and read-only (`removals.for_record`); the
@@ -67,7 +69,7 @@ os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema.grounding import form_facts  # noqa: E402
 from data_sheets_schema.semantic_comparison import (  # noqa: E402
-    discrimination, render_discrimination, withheld_projects,
+    discrimination, instruments_of, render_discrimination, withheld_projects,
 )
 CONCAT = ROOT / "data" / "d4d_concatenated"
 EVAL_DIRS = {
@@ -636,8 +638,12 @@ def render_markdown(data, scores) -> str:
                   "|---|" + "|".join("---" for _ in ARMS) + "|"]
         withheld: dict[str, list[tuple[str, dict[str, str]]]] = {}
         for evaluator, _arms, _versions, cohort in cohorts:
-            for project, reasons in withheld_projects(cohort, f"{rubric}-semantic").items():
-                withheld.setdefault(project, []).append((evaluator, reasons))
+            for name in instruments_of(cohort, f"{rubric}-semantic"):
+                # A rubric the cohort holds under several versions is gated
+                # per version (#3290); the cell names the version then.
+                who = evaluator + name[len(f"{rubric}-semantic"):]
+                for project, reasons in withheld_projects(cohort, name).items():
+                    withheld.setdefault(project, []).append((who, reasons))
         for p in PROJECTS:
             cells = []
             for key, _d, pfx, _rt, _role in ARMS:
@@ -659,7 +665,8 @@ def render_markdown(data, scores) -> str:
         lines += render_discrimination(cohort, scope=f", {evaluator} evaluations")
         lines += [f"This cohort is every {evaluator} evaluation in the rubric tables above "
                   f"(arms {', '.join(arms)}; {versions}); evaluations by different evaluators "
-                  "are not pooled, since an evaluator is an instrument (#1058). A project the "
+                  "are not pooled, since an evaluator is an instrument (#1058), and a rubric held "
+                  "under more than one version is measured per version (#3290). A project the "
                   "rubric tables flag has too few distinct totals across these arms' records to "
                   "rank them against each other on that rubric.", ""]
     return "\n".join(lines)
@@ -669,7 +676,9 @@ def rubric_discrimination(scores) -> list[tuple[str, list[str], str, dict[str, A
     """The #2927 block per evaluator over every evaluation the rubric tables
     show, each file once however many arms list it: (evaluator, arm keys,
     rubric versions, block). Pooling evaluators would count their offsets as
-    distinct totals and hide a project one evaluator cannot separate."""
+    distinct totals and hide a project one evaluator cannot separate; for the
+    same reason `discrimination` splits a rubric the cohort holds under more
+    than one version by version (#3290)."""
     groups: dict[str, dict[str, tuple[str, dict]]] = {}
     for rubric, rs in scores.items():
         for arm, per_project in rs.items():

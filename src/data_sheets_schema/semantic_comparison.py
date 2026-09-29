@@ -227,45 +227,74 @@ def withholding_reason(distinct: int) -> str | None:
             "order or better/worse verdict is given")
 
 
+def _instrument_names(results: list[dict[str, Any]]) -> dict[tuple[str, str | None], str]:
+    """(rubric, version) -> the name its totals are counted under. A rubric
+    the cohort holds under one version keeps its bare name; one it holds under
+    several is split by version, so a version offset is never counted as a
+    distinct total or as a pair ordering (#3290)."""
+    versions: dict[str, set] = {}
+    for result in results:
+        version = result.get("version")
+        versions.setdefault(result.get("rubric", "unknown"), set()).add(
+            None if version is None else str(version))
+    return {(rubric, version): rubric if len(found) == 1 else
+            f"{rubric} v{version if version is not None else 'unrecorded'}"
+            for rubric, found in versions.items() for version in found}
+
+
 def discrimination(results: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """How far a cohort of semantic evaluations can separate its records.
 
-    Per rubric: the items at ceiling or floor wherever they were scored; per
-    project, the distinct totals, the items that vary, the tied record pairs
-    and whether a within-project order is withheld — each on both the
-    N/A-adjusted and the fixed basis. Across rubrics: record pairs joined by
-    (project, label), classified as ordered the same way, opposite ways, or
-    tied on at least one rubric, within and between projects, on each basis.
+    Per rubric instrument: the items at ceiling or floor wherever they were
+    scored; per project, the distinct totals, the items that vary, the tied
+    record pairs and whether a within-project order is withheld — each on both
+    the N/A-adjusted and the fixed basis. Across the two rubrics: record pairs
+    joined by (project, label), classified as ordered the same way, opposite
+    ways, or tied on at least one rubric, within and between projects, on each
+    basis — one table per pair of instruments.
 
-    One evaluation per (project, label, rubric) is assumed; a record rated
+    A rubric present under more than one `version` is split by version and
+    each version measured on its own (#3290): totals under different versions
+    are neither distinct totals of one another nor ordered against each other.
+
+    One evaluation per (project, label, instrument) is assumed; a record rated
     more than once is named under `duplicates` and left out of every count
-    rather than having one of its ratings chosen for it.
+    rather than having one of its ratings chosen for it. Its rating under the
+    other rubric then joins nothing, and is listed under
+    `cross_rubric.partner_duplicated`, not as having no partner (#3291).
     """
     results = list(results)
+    names = _instrument_names(results)
+
+    def instrument(result):
+        version = result.get("version")
+        return names[(result.get("rubric", "unknown"), None if version is None else str(version))]
+
     seen: dict[tuple, int] = {}
     for result in results:
         label = record_label(result)
         if label is not None:
-            key = (result.get("project", "unknown"), label, result.get("rubric", "unknown"))
+            key = (result.get("project", "unknown"), label, instrument(result))
             seen[key] = seen.get(key, 0) + 1
     duplicates = sorted(key for key, n in seen.items() if n > 1)
     dropped = set(duplicates)
     rows = []
     for result in results:
-        rubric = result.get("rubric", "unknown")
+        rubric, name = result.get("rubric", "unknown"), instrument(result)
         project, label = result.get("project", "unknown"), record_label(result)
-        if label is not None and (project, label, rubric) in dropped:
+        if label is not None and (project, label, name) in dropped:
             continue
-        rows.append({"rubric": rubric, "project": project, "label": label,
+        rows.append({"rubric": name, "family": rubric, "project": project, "label": label,
+                     "version": result.get("version"),
                      "bases": score_bases(result, _rubric_default_max(rubric)),
                      "items": item_scores(result)})
 
     rubrics: dict[str, Any] = {}
     for rubric in sorted({row["rubric"] for row in rows}):
         members = [row for row in rows if row["rubric"] == rubric]
-        names = sorted({name for row in members for name in row["items"]}, key=_item_order)
+        items = sorted({name for row in members for name in row["items"]}, key=_item_order)
         ceiling, floor, never, not_scored = [], [], [], {}
-        for name in names:
+        for name in items:
             scored = [row["items"][name] for row in members
                       if name in row["items"] and row["items"][name][0] is not None]
             missing = len(members) - len(scored)
@@ -280,7 +309,7 @@ def discrimination(results: Iterable[dict[str, Any]]) -> dict[str, Any]:
         projects = {}
         for project in sorted({row["project"] for row in members}):
             group = [row for row in members if row["project"] == project]
-            varying = [name for name in names
+            varying = [name for name in items
                        if len({row["items"].get(name, ("absent",))[0] for row in group}) > 1]
             entry = {"records": len(group), "pairs": len(group) * (len(group) - 1) // 2,
                      "varying_items": varying, "distinct_totals": {}, "tied_pairs": {},
@@ -294,47 +323,70 @@ def discrimination(results: Iterable[dict[str, Any]]) -> dict[str, Any]:
                     if a is not None and a == b)
                 entry["withheld"][basis] = withholding_reason(len(set(defined)))
             projects[project] = entry
-        rubrics[rubric] = {"records": len(members), "items": len(names), "ceiling": ceiling,
-                           "floor": floor, "never_scored": never, "not_scored": not_scored,
+        rubrics[rubric] = {"family": members[0]["family"], "records": len(members),
+                           "items": len(items), "ceiling": ceiling, "floor": floor,
+                           "never_scored": never, "not_scored": not_scored,
                            "projects": projects}
 
-    cross: dict[str, Any] = {"rubrics": None, "joined_records": 0, "unjoined": [],
-                             "bases": {}, "reason": None}
-    names = sorted(rubrics)
-    if len(names) != 2:
-        cross["reason"] = (f"{len(names)} rubric{'s' if len(names) != 1 else ''} in the cohort; "
+    cross: dict[str, Any] = {"rubrics": None, "tables": [], "unjoined": [],
+                             "partner_duplicated": [], "reason": None}
+    families = sorted({row["family"] for row in rows})
+    if len(families) != 2:
+        cross["reason"] = (f"{len(families)} rubric{'s' if len(families) != 1 else ''} in the cohort; "
                            "the cross-rubric comparison needs exactly two")
     else:
-        cross["rubrics"] = tuple(names)
+        cross["rubrics"] = tuple(families)
         keyed = {name: {(row["project"], row["label"]): row for row in rows
-                        if row["rubric"] == name and row["label"] is not None} for name in names}
-        joined = sorted(set(keyed[names[0]]) & set(keyed[names[1]]))
-        cross["joined_records"] = len(joined)
-        cross["unjoined"] = sorted(
-            [(name, row["project"], row["label"] or "unlabelled")
-             for name in names for row in rows if row["rubric"] == name
-             and (row["label"] is None or (row["project"], row["label"]) not in joined)],
-            key=lambda item: (item[0], item[1], item[2]))
-        for basis in BASES:
-            values = {key: tuple(_basis_value(keyed[name][key]["bases"], basis) for name in names)
-                      for key in joined}
-            within, between = _pair_counts(), _pair_counts()
-            for i, a in enumerate(joined):
-                for b in joined[i + 1:]:
-                    _classify(values[a], values[b], within if a[0] == b[0] else between)
-            cross["bases"][basis] = {"within": within, "between": between}
+                        if row["rubric"] == name and row["label"] is not None}
+                 for name in rubrics}
+        joined_anywhere: set[tuple[str, str, str]] = set()
+        for first in sorted(n for n in rubrics if rubrics[n]["family"] == families[0]):
+            for second in sorted(n for n in rubrics if rubrics[n]["family"] == families[1]):
+                joined = sorted(set(keyed[first]) & set(keyed[second]))
+                if not joined:
+                    continue
+                joined_anywhere |= {(name, *key) for key in joined for name in (first, second)}
+                table = {"rubrics": (first, second), "joined_records": len(joined), "bases": {}}
+                for basis in BASES:
+                    values = {key: tuple(_basis_value(keyed[name][key]["bases"], basis)
+                                         for name in (first, second)) for key in joined}
+                    within, between = _pair_counts(), _pair_counts()
+                    for i, a in enumerate(joined):
+                        for b in joined[i + 1:]:
+                            _classify(values[a], values[b], within if a[0] == b[0] else between)
+                    table["bases"][basis] = {"within": within, "between": between}
+                cross["tables"].append(table)
+        family_of = {name: rubric for (rubric, _version), name in names.items()}
+        duplicated = {(project, label, family_of[name]) for project, label, name in duplicates}
+        for row in sorted(rows, key=lambda r: (r["rubric"], r["project"], r["label"] or "")):
+            if row["label"] is not None and (row["rubric"], row["project"], row["label"]) in joined_anywhere:
+                continue
+            item = (row["rubric"], row["project"], row["label"] or "unlabelled")
+            other = families[1] if row["family"] == families[0] else families[0]
+            if row["label"] is not None and (row["project"], row["label"], other) in duplicated:
+                cross["partner_duplicated"].append(item)
+            else:
+                cross["unjoined"].append(item)
     return {"withheld_at_most": ORDER_WITHHELD_AT_MOST, "duplicates": duplicates,
             "rubrics": rubrics, "cross_rubric": cross}
 
 
 def withheld_projects(block: dict[str, Any], rubric: str) -> dict[str, dict[str, str]]:
-    """project -> {basis: reason} for every basis whose order is withheld."""
+    """project -> {basis: reason} for every basis whose order is withheld, on
+    the instrument named `rubric` (a rubric's bare name, or its versioned name
+    where the cohort splits it)."""
     out = {}
     for project, entry in (block["rubrics"].get(rubric) or {}).get("projects", {}).items():
         reasons = {basis: reason for basis, reason in entry["withheld"].items() if reason}
         if reasons:
             out[project] = reasons
     return out
+
+
+def instruments_of(block: dict[str, Any], rubric: str) -> list[str]:
+    """The instrument names a rubric is measured under in a block: its bare
+    name, or one per version where the cohort held more than one (#3290)."""
+    return [name for name, entry in block["rubrics"].items() if entry["family"] == rubric]
 
 
 def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str = "") -> list[str]:
@@ -380,26 +432,39 @@ def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str
                          f"{p['distinct_totals']['adjusted']} / {p['distinct_totals']['fixed']} | {ties} | "
                          f"{len(p['varying_items'])}: {', '.join(p['varying_items']) or 'none'} | {order} |")
         lines.append("")
+    split = sorted({entry["family"] for name, entry in block["rubrics"].items()
+                    if name != entry["family"]})
+    if split:
+        lines += [f"Split by instrument version: {', '.join(split)}. Each version is measured on "
+                  "its own; totals under different versions are not counted as distinct totals of "
+                  "one another nor ordered against each other (#3290).", ""]
     cross = block["cross_rubric"]
     if cross["rubrics"] is None:
         return lines + [f"Cross-rubric agreement: not computed — {cross['reason']}.", ""]
-    first, second = cross["rubrics"]
-    lines += [f"**Cross-rubric agreement** — record pairs ordered the same way by {first} and "
-              f"{second}, opposite ways, or tied on at least one rubric; {cross['joined_records']} "
-              "records joined by (project, label). Each basis is shown: adjusted-basis agreement is "
-              "confounded by what each evaluation judged applicable (#2912).", "",
-              "| basis | scope | pairs | same order | opposite | tied on at least one rubric |"
-              + (" undefined |" if any(c[s]["undefined"] for c in cross["bases"].values() for s in c) else ""),
-              "|---|---|---|---|---|---|"
-              + ("---|" if any(c[s]["undefined"] for c in cross["bases"].values() for s in c) else "")]
-    show_undefined = any(c[s]["undefined"] for c in cross["bases"].values() for s in c)
-    for basis in BASES:
-        for scope in ("within", "between"):
-            c = cross["bases"][basis][scope]
-            lines.append(f"| {BASIS_NAMES[basis]} | {scope} {'project' if scope == 'within' else 'projects'} | {c['pairs']} | {c['same']} | "
-                         f"{c['opposite']} | {c['tied']} |" + (f" {c['undefined']} |" if show_undefined else ""))
-    lines.append("")
+    for table in cross["tables"]:
+        first, second = table["rubrics"]
+        undefined = any(c[s]["undefined"] for c in table["bases"].values() for s in c)
+        lines += [f"**Cross-rubric agreement** — record pairs ordered the same way by {first} and "
+                  f"{second}, opposite ways, or tied on at least one rubric; {table['joined_records']} "
+                  "records joined by (project, label). Each basis is shown: adjusted-basis agreement is "
+                  "confounded by what each evaluation judged applicable (#2912).", "",
+                  "| basis | scope | pairs | same order | opposite | tied on at least one rubric |"
+                  + (" undefined |" if undefined else ""),
+                  "|---|---|---|---|---|---|" + ("---|" if undefined else "")]
+        for basis in BASES:
+            for scope in ("within", "between"):
+                c = table["bases"][basis][scope]
+                lines.append(f"| {BASIS_NAMES[basis]} | {scope} {'project' if scope == 'within' else 'projects'} | {c['pairs']} | {c['same']} | "
+                             f"{c['opposite']} | {c['tied']} |" + (f" {c['undefined']} |" if undefined else ""))
+        lines.append("")
+    if not cross["tables"]:
+        lines += [f"Cross-rubric agreement: not computed — no record is rated under both "
+                  f"{cross['rubrics'][0]} and {cross['rubrics'][1]}.", ""]
     if cross["unjoined"]:
         lines += ["Not joined (no rating of the same (project, label) under the other rubric): "
                   + ", ".join(f"{p} `{l}` ({r})" for r, p, l in cross["unjoined"]) + ".", ""]
+    if cross["partner_duplicated"]:
+        lines += ["Not joined because the record's rating under the other rubric was rated more "
+                  "than once and left out: "
+                  + ", ".join(f"{p} `{l}` ({r})" for r, p, l in cross["partner_duplicated"]) + ".", ""]
     return lines

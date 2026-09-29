@@ -24,15 +24,18 @@ ROOT = Path(__file__).resolve().parents[2]
 REFERENCE = "reference_2026-09-12_cborg_runtime"
 
 
-def r10(project, label, subs, adjusted=50):
-    """subs: sub-element scores for element 1 (None = N/A); total is their sum
-    plus a constant so totals stay inside the rubric maximum."""
+def r10(project, label, subs, adjusted=50, version=None):
+    """subs: sub-element scores for element 1 (None = N/A); total is their sum,
+    which stays at or below the rubric maximum of 50 for any fixture here."""
     total = sum(s for s in subs if s is not None)
-    return {"rubric": "rubric10-semantic", "project": project, "label": label,
+    doc = {"rubric": "rubric10-semantic", "project": project, "label": label,
             "overall_score": {"total_points": total, "max_points": 50,
                               "adjusted_max_points": adjusted, "excluded_max_points": 50 - adjusted},
             "elements": [{"id": 1, "sub_elements": [
                 {"score": s, **({"applicable": False} if s is None else {})} for s in subs]}]}
+    if version is not None:
+        doc["version"] = version
+    return doc
 
 
 def r20(project, label, total, adjusted=88, in_metadata=True):
@@ -129,9 +132,12 @@ def test_cross_rubric_pairs_join_on_project_and_label_and_report_both_bases():
         r10("P", "c", [1, 1, 0]), r20("P", "c", 60),
         r10("Q", "a", [1, 0, 0]), r20("Q", "a", 50, adjusted=58),
     ]
-    cross = discrimination(docs)["cross_rubric"]
+    block = discrimination(docs)["cross_rubric"]
+    assert block["rubrics"] == ("rubric10-semantic", "rubric20-semantic")
+    assert block["unjoined"] == [] and len(block["tables"]) == 1
+    cross = block["tables"][0]
     assert cross["rubrics"] == ("rubric10-semantic", "rubric20-semantic")
-    assert cross["joined_records"] == 4 and cross["unjoined"] == []
+    assert cross["joined_records"] == 4
     # fixed: P.a>P.b, P.a>P.c same; P.b vs P.c tied on both.
     assert cross["bases"]["fixed"]["within"] == {"pairs": 3, "same": 2, "opposite": 0,
                                                   "tied": 1, "undefined": 0}
@@ -152,7 +158,7 @@ def test_cross_rubric_pairs_join_on_project_and_label_and_report_both_bases():
 def test_a_record_rated_once_under_one_rubric_is_named_not_joined():
     docs = [r10("P", "a", [1]), r20("P", "a", 70), r10("P", "b", [0]), r20("P", "c", 60)]
     cross = discrimination(docs)["cross_rubric"]
-    assert cross["joined_records"] == 1
+    assert cross["tables"][0]["joined_records"] == 1
     assert cross["unjoined"] == [("rubric10-semantic", "P", "b"), ("rubric20-semantic", "P", "c")]
     assert "Not joined" in "\n".join(render_discrimination(discrimination(docs)))
 
@@ -170,6 +176,55 @@ def test_a_record_rated_twice_is_left_out_not_chosen_between():
     assert block["duplicates"] == [("P", "a", "rubric10-semantic")]
     assert block["rubrics"]["rubric10-semantic"]["records"] == 2
     assert "Rated more than once" in "\n".join(render_discrimination(block))
+
+
+def test_a_duplicate_records_other_rating_is_not_said_to_have_no_partner():
+    """#3291: P/a's rubric20 rating has a partner; the partner was set aside."""
+    docs = [r10("P", "a", [1]), r10("P", "a", [0]), r20("P", "a", 70),
+            r10("P", "b", [1]), r20("P", "b", 60), r10("P", "c", [0]), r20("P", "c", 50),
+            r20("P", "d", 40)]
+    block = discrimination(docs)
+    cross = block["cross_rubric"]
+    assert cross["partner_duplicated"] == [("rubric20-semantic", "P", "a")]
+    assert cross["unjoined"] == [("rubric20-semantic", "P", "d")]
+    assert cross["tables"][0]["joined_records"] == 2
+    text = "\n".join(render_discrimination(block))
+    assert ("Not joined (no rating of the same (project, label) under the other rubric): "
+            "P `d` (rubric20-semantic).") in text
+    assert ("Not joined because the record's rating under the other rubric was rated more than "
+            "once and left out: P `a` (rubric20-semantic).") in text
+
+
+def test_a_rubric_held_under_two_versions_is_measured_per_version():
+    """#3290: a version offset is neither a distinct total nor a pair order."""
+    docs = [r10("P", "a", [1, 1, 1], version="1.1"), r20("P", "a", 70, adjusted=88),
+            r10("P", "b", [1, 0, 0], version="1.0"), r20("P", "b", 60),
+            r10("P", "c", [1, 0, 0], version="1.0"), r20("P", "c", 50)]
+    for doc in docs:
+        if doc["rubric"] == "rubric20-semantic":
+            doc["version"] = "1.0"
+    block = discrimination(docs)
+    assert sorted(block["rubrics"]) == ["rubric10-semantic v1.0", "rubric10-semantic v1.1",
+                                        "rubric20-semantic"]
+    # Pooled, P would have 2 distinct rubric10 totals (3 and 1) from a version offset.
+    assert block["rubrics"]["rubric10-semantic v1.0"]["projects"]["P"]["distinct_totals"] == {
+        "adjusted": 1, "fixed": 1}
+    assert block["rubrics"]["rubric10-semantic v1.1"]["records"] == 1
+    tables = {t["rubrics"]: t for t in block["cross_rubric"]["tables"]}
+    assert set(tables) == {("rubric10-semantic v1.0", "rubric20-semantic"),
+                           ("rubric10-semantic v1.1", "rubric20-semantic")}
+    # Only b-c is ordered: rubric10 v1.0 ties them, so the pair is tied.
+    assert tables[("rubric10-semantic v1.0", "rubric20-semantic")]["bases"]["fixed"]["within"] == {
+        "pairs": 1, "same": 0, "opposite": 0, "tied": 1, "undefined": 0}
+    assert tables[("rubric10-semantic v1.1", "rubric20-semantic")]["bases"]["fixed"]["within"]["pairs"] == 0
+    assert block["cross_rubric"]["unjoined"] == []
+    text = "\n".join(render_discrimination(block))
+    assert "Split by instrument version: rubric10-semantic." in text
+    assert "**rubric10-semantic v1.1** — 1 records" in text
+    # One version throughout keeps the bare name.
+    single = discrimination([r10("P", "a", [1], version="1.0"), r10("P", "b", [0], version="1.0")])
+    assert list(single["rubrics"]) == ["rubric10-semantic"]
+    assert "Split by instrument version" not in "\n".join(render_discrimination(single))
 
 
 # --- the reports -----------------------------------------------------------------
@@ -228,6 +283,29 @@ def test_arm_comparison_partitions_by_evaluator_and_flags_the_project_cell():
         "CM4AI (no within-project order — e, fixed basis: 2 distinct totals)")
 
 
+def test_arm_comparison_gates_each_rubric_version_of_one_evaluator_apart():
+    """#3290: one evaluator's v1.0 and v1.1 totals are not pooled."""
+    spec = importlib.util.spec_from_file_location("arm_comparison_3290", ROOT / "scripts" / "arm_comparison.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    scores = {"rubric10": {k: {p: [] for p in m.PROJECTS} for k, *_ in m.ARMS}}
+    arms = [k for k, *_ in m.ARMS]
+
+    def entry(label, total, version):
+        doc = r10("VOICE", label, [1] * total + [0] * (3 - total), version=version)
+        return {"label": label, "total": total, "max": 50, "adjusted_max": 50, "pct": 2.0 * total,
+                "evaluator": "one", "file": f"VOICE_{label}_evaluation.json", "doc": doc}
+
+    # Pooled: 3 distinct totals, not withheld. Per version: 2 and 1, both withheld.
+    scores["rubric10"][arms[-1]]["VOICE"] = [entry("x_rep1", 3, "1.1"), entry("x_rep2", 2, "1.0"),
+                                             entry("x_rep3", 1, "1.0"), entry("x_rep4", 3, "1.1")]
+    text = m.render_markdown({k: {p: [] for p in m.PROJECTS} for k in arms}, scores)
+    assert ("| VOICE (no within-project order — one v1.0: 2 distinct totals; "
+            "one v1.1: 1 distinct total) |") in text
+    assert "rubric10-semantic v1.0, v1.1" in text
+    assert "measured per version (#3290)" in text
+
+
 @pytest.mark.corpus
 def test_the_2026_09_12_reference_set_reproduces_the_issue_and_is_not_written(tmp_path):
     """#2927's evidence, recomputed from the committed rating1 files."""
@@ -254,7 +332,8 @@ def test_the_2026_09_12_reference_set_reproduces_the_issue_and_is_not_written(tm
     assert projects["VOICE"]["varying_items"] == ["E3.4", "E10.3"]
     assert set(withheld_projects(block, "rubric10-semantic")) == {"AI_READI", "VOICE"}
     assert withheld_projects(block, "rubric20-semantic") == {}
-    cross = block["cross_rubric"]["bases"]
+    assert len(block["cross_rubric"]["tables"]) == 1
+    cross = block["cross_rubric"]["tables"][0]["bases"]
     triple = lambda c: (c["pairs"], c["same"], c["opposite"], c["tied"])  # noqa: E731
     assert triple(cross["adjusted"]["within"]) == (60, 25, 8, 27)
     assert triple(cross["adjusted"]["between"]) == (216, 193, 2, 21)
