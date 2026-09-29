@@ -103,6 +103,11 @@ class Cues(unittest.TestCase):
         self.assertEqual(hits["variables"], {"var.variable": 2, "var.codebook": 1})
         self.assertEqual(hits["version"], {"ver.version-token": 2})
 
+    def test_cues_match_over_whitespace_collapsed_text(self):
+        # var.codebook allows one whitespace character (code\s?books?), so a line
+        # break plus a space between the words matches only after the collapse (#3312).
+        self.assertEqual(self.m.chunk_cues("see the code \n book"), {"variables": {"var.codebook": 1}})
+
     def test_only_chunks_marked_nothing_relevant_or_redundant_with_are_candidates(self):
         receipt = {"chunks": [
             {"id": "c001", "status": "extracted", "extracted": []},
