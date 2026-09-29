@@ -276,3 +276,43 @@ def status_context(method, label, project, receipt_file, bundle_file, record_fil
     else:
         for line in sc.report_lines(out):
             click.echo(line)
+
+
+@receipts.command("origin")
+@click.option("--transcript", "transcripts", multiple=True, required=True, type=click.Path(dir_okay=False),
+              help="the run's stream-json transcript; repeat, first invocation first, for a killed-and-resumed run")
+@click.option("--receipt", "receipt_file", required=True, type=click.Path(dir_okay=False),
+              help="the coverage receipt, spelled or resolving as the transcript's Writes name it")
+@click.option("--full", "full_file", required=True, type=click.Path(dir_okay=False),
+              help="the full record, spelled or resolving as the transcript's Writes name it")
+@click.option("--json", "as_json", is_flag=True, help="print the whole block as JSON")
+def origin(transcripts, receipt_file, full_file, as_json):
+    """Report which receipt snippets were written before the full record
+    existed, and which after it (#2933). Report-only: it writes nothing.
+
+    Rebuilds the receipt from the transcript's successful Writes and
+    classifies each final (chunk, snippet, slot) element as
+    `contemporaneous`, `phase1_correction` (after the first full-record
+    Write, before the first successful `derive core`, or to the end when
+    none succeeded) or `phase3_backport`. A derive counts only where its
+    call's result carries its own status: it is the command's last part, or
+    every join after it is `&&` and the call succeeded. A piped,
+    backgrounded, grouped or multi-line derive, one after `||` or followed
+    by `;`, or a failed `&&` chain cannot be placed, unless the native
+    control denied the call, which then never ran. A relative `--full`
+    after a `cd`, `pushd` or `popd` resolves against the new directory only
+    where every join from the change to the derive is `&&`. Where the
+    history cannot be rebuilt the status is `unknown`, with the reasons,
+    and nothing is classified; that includes a receipt Write in flight
+    together with another receipt Write, the draft or the derive. Prints counts, chunk ids, slot paths and hashes, never
+    snippet text.
+    """
+    import json
+
+    from data_sheets_schema import receipt_origin as ro
+    block = ro.origin([Path(t) for t in transcripts], Path(receipt_file), Path(full_file))
+    if as_json:
+        click.echo(json.dumps(block, indent=2))
+    else:
+        for line in ro.summary(block):
+            click.echo(f"   {line}")
