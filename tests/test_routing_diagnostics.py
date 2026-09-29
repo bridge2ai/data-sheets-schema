@@ -485,9 +485,15 @@ class TestASharedGraphIsBounded(unittest.TestCase):
             rd.unread_duplicate_keys(text, max_steps=200)
 
     def test_a_cycle_is_still_not_checked(self):
-        found, reason = rd.check_text("confidential_elements: &c\n- embargo\n- *c\n")
-        self.assertIsNone(found)
-        self.assertTrue(reason)
+        """A node on a cycle is assumed to hold a finding, so the walk goes in
+        and stops at its budget or the recursion limit: a cycle is not
+        pruned as clean, even one holding no timing text."""
+        for text in ("confidential_elements: &c\n- embargo\n- *c\n",
+                     "confidential_elements:\n- &c [safe, *c]\n"):
+            with self.subTest(text=text):
+                found, reason = rd.check_text(text)
+                self.assertIsNone(found)
+                self.assertTrue(reason)
 
 
 #: Deeper than the composer (two frames a level) can recurse, whatever the limit.
