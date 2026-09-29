@@ -329,6 +329,38 @@ class TestTheOtherCohortAbsorbedOneLevelDown(unittest.TestCase):
         self.assertEqual(1, len(scope.foreign_references("VOICE", record)))
 
 
+class TestTheBareDoiAnIdentifierNames(unittest.TestCase):
+    """#2916. `_norm` lower-cases because it compares; `bare_doi` writes, so it
+    keeps the case and returns nothing for a value that is not a DOI."""
+
+    def test_every_surface_form_gives_the_bare_doi_in_its_own_case(self):
+        for form in ("https://doi.org/10.18130/V3/XNBOPG",
+                     "http://dx.doi.org/10.18130/V3/XNBOPG",
+                     "HTTPS://DOI.ORG/10.18130/V3/XNBOPG/",
+                     "doi:10.18130/V3/XNBOPG",
+                     "DOI:10.18130/V3/XNBOPG",
+                     " 10.18130/V3/XNBOPG "):
+            with self.subTest(form=form):
+                self.assertEqual("10.18130/V3/XNBOPG", scope.bare_doi(form))
+
+    def test_what_it_writes_satisfies_the_anchored_doi_pattern(self):
+        """The #646 pattern, as the schema declares it."""
+        pattern = re.compile(r"^10\.\d{4,}\/.+$")
+        self.assertRegex(scope.bare_doi("https://doi.org/10.13026/k81f-qr68"), pattern)
+
+    def test_a_value_that_is_not_a_doi_gives_none(self):
+        for value in ("ark:59853/rocrate-chorus-ro-crate-package/",
+                      "https://chorus4ai.org/",
+                      "https://dataverse.lib.virginia.edu/dataset.xhtml"
+                      "?persistentId=doi:10.18130/V3/XNBOPG",
+                      "https://doi.org/",
+                      "doi:not-a-doi",
+                      "10.18130/has space",
+                      "", None, 10.5555, ["https://doi.org/10.5555/x"]):
+            with self.subTest(value=value):
+                self.assertIsNone(scope.bare_doi(value))
+
+
 class TestAMalformedDeclarationIsCaught(unittest.TestCase):
     """`check_manifest` is the reason the declaration can be trusted; if it
     passed anything, the block would be prose again."""

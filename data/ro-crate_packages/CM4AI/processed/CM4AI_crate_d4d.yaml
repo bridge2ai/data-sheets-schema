@@ -257,7 +257,7 @@ distribution_formats:
 - description: image/jpeg
 - description: pdf
 - description: unknown
-doi: https://doi.org/10.18130/V3/HIGT4C
+doi: 10.18130/V3/HIGT4C
 ethical_reviews:
 - description: Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe
     Belisle-Pipon jean-christophe_belisle-pipon@sfu.ca.

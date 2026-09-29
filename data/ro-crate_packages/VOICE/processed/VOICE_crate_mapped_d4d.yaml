@@ -46,7 +46,7 @@ version: 3.0.0
 license: https://physionet.org/content/b2ai-voice/view-license/3.0.0/
 download_url: file:///features/ppgs.parquet
 issued: '2025-12-16T00:00:00Z'
-doi: https://doi.org/10.13026/k81f-qr68
+doi: 10.13026/k81f-qr68
 creators:
 - name: Yael Bensoussan
 - name: Alexandros Sigaras
@@ -553,4 +553,4 @@ citation: 'Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Do
   Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse
   voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345.
   https://doi.org/10.13026/k81f-qr68'
-id: https://doi.org/10.13026/k81f-qr68
+id: doi:10.13026/k81f-qr68
