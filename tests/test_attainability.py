@@ -392,8 +392,9 @@ def test_a_synthetic_credit_on_an_absent_item_is_flagged():
 def test_the_bundle_version_comes_from_the_records_provenance(tmp_path):
     """#3110: an evaluation of a record that read AI_READI 8abd7bf5 is joined
     to the file for 8abd7bf5, not to the AI_READI bundle on disk today — the
-    project-name lookup the design rejects, which no other test could tell
-    apart while the CHORUS bundle on disk is still the version it read."""
+    project-name lookup the design rejects. Before #3110 no test told the two
+    apart: the CHORUS bundle on disk is still the version its records read.
+    Runs on pull requests; the corpus test below pins the reference arms."""
     disk_md5 = hashlib.md5((ROOT / AI_READI).read_bytes()).hexdigest()
     assert disk_md5 != AI_READI_V7_MD5
     record = tmp_path / "AI_READI_provenance.yaml"
@@ -403,13 +404,14 @@ def test_the_bundle_version_comes_from_the_records_provenance(tmp_path):
                   "d4d_file": "data/d4d_concatenated/claudecode_agent/LABEL_v7/AI_READI_d4d.yaml"}
     path = tmp_path / "AI_READI_evaluation.json"
     path.write_text(json.dumps(evaluation), encoding="utf-8")
-    covered = at.write_document(_git_or_skip(lambda: at.build_document(AI_READI, md5=AI_READI_V7_MD5)),
-                                tmp_path / "attainability")
     with mock.patch.object(pv, "record_path_for", return_value=record) as where:
+        # Needs no git, so a shallow checkout still runs it.
         assert at.evaluation_bundle(evaluation) == {"path": AI_READI, "md5": AI_READI_V7_MD5,
                                                     "record": str(record)}
+        where.assert_called_with("AI_READI", "claudecode_agent", "LABEL_v7")
+        covered = at.write_document(_git_or_skip(lambda: at.build_document(AI_READI, md5=AI_READI_V7_MD5)),
+                                    tmp_path / "attainability")
         [row] = at.credited_report([path], tmp_path / "attainability")
-    where.assert_called_with("AI_READI", "claudecode_agent", "LABEL_v7")
     assert row["bundle"]["md5"] == AI_READI_V7_MD5
     assert row["attainability"] == str(covered)
 
