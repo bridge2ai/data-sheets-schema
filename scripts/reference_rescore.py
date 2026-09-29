@@ -800,7 +800,10 @@ def report_results(manifest: dict) -> dict:
     paths = [ROOT / j["output"] for j, _, _ in complete]
     text = f"# Reference rescore status — {DATE}\n\nCompleted {len(complete)} of {len(manifest['jobs'])} planned evaluations.\n\n"
     if paths:
-        text += report(paths) + "\n"
+        # The discrimination block (#2927) reads one rating per record: the
+        # primaries, not the repeatability ratings of the same v7 rep1 records.
+        text += report(paths, [ROOT / j["output"] for j, _, _ in complete
+                               if j["purpose"] == "primary"]) + "\n"
     text += ("Rubric10 repeatability uses three independent ratings of one v7 record per project. "
              "Percentages and spread are computed from point totals and their denominators, "
              "so serialized percentage precision does not create apparent rating variation. "

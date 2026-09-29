@@ -562,3 +562,26 @@ def status_expression(audit_file, record_file, bundle_file, chunk_manifest, as_j
     else:
         for line in sc.report_lines(out):
             click.echo(line)
+
+@review.command("self-disclaimed")
+@click.option("--original", "original", required=True, type=click.Path(exists=True, dir_okay=False),
+              help="the record the audit and any receipt were written against (the phase-1 full record)")
+@click.option("--final", "final", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="the final record: each original flag is followed to it by identity and classified")
+@click.option("--audit", "audit", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="the audit JSON: removal_declared and named_by_finding come from its findings (needs --final)")
+@click.option("--receipt", "receipt", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="the coverage receipt for check (b), the person-role predicates, reported in its own bucket")
+def self_disclaimed_cmd(original, final, audit, receipt):
+    """Typed-container entries whose own prose disclaims their role or
+    presence (#2913). Prints JSON; never gating: the exit status is 0
+    whenever the inputs were read, whatever is flagged."""
+    import json
+
+    from data_sheets_schema import self_disclaimed as sd
+    try:
+        out = sd.check_files(Path(original), Path(final) if final else None,
+                             Path(audit) if audit else None, Path(receipt) if receipt else None)
+    except (OSError, UnicodeError, ValueError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps(out, indent=2, ensure_ascii=False))
