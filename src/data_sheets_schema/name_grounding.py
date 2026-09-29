@@ -57,11 +57,15 @@ name leaf is exactly one of:
     two or three capitals: initials the record kept (`JC Bélisle-Pipon`)
     or a degree (`Jorge Contreras, JD`) expand nothing and are `absent`.
     A longer run is a name written in capitals and is judged like any
-    other (`CHRISTIAN METALLO`). The surname is a token the record writes
-    capitalised and not as initials, so `the` in an organisation's name
-    stands in for none. A token the record writes in lower case
-    (`christian Metallo`, `Access requests`) is `absent`: an initial
-    expands into a capitalised name.
+    other (`CHRISTIAN METALLO`); in a name written wholly in capitals with
+    a word of four or more letters, a run of two or three before the first
+    comma is a word too (`TIM CLARK`, #3026). A generational suffix (`Jr`,
+    `Sr`, `III`) expands nothing and stands in for no surname. The surname
+    is a token the record writes capitalised and not as initials, and not
+    a function word (`the`, `and`, `of`, `for`, `from`, `with`), so `The`
+    opening an organisation's name stands in for none (#3026). A token the
+    record writes in lower case (`christian Metallo`, `Access requests`)
+    is `absent`: an initial expands into a capitalised name.
 ``absent``
     none of these.
 
@@ -75,7 +79,12 @@ the word sets alone.
 - **Before the surname**, an initial may be separated from it by
   whitespace, periods and hyphens. It is not the surname's when it is the
   trailing initial of the previous word (`Marquez C Metallo` gives Metallo
-  no `C`). Where the surname has its initials before it on its line,
+  no `C`), unless that word has its own initials before it on its line,
+  written as single capitals, and so takes no trailing one: `C.
+  Metallo\\nT. Clark` gives Clark the `T` (#3126). "Its own" is read one
+  level back, without this exception. A run of two or three capitals
+  ending the line before is not the surname's (`La Jolla, CA\\nClark T`,
+  #3026). Where the surname has its initials before it on its line,
   written as single capitals, whatever follows it opens the next entry
   (`C. Metallo, T. Clark` gives Metallo no `T`). A run of two or three
   capitals there is credited as its initials but does not show where its
@@ -91,7 +100,9 @@ the word sets alone.
 - **After the surname**, an initial may be separated from it by whitespace
   and at most one comma (`Metallo C`, `Metallo, C.`, `Metallo\\nC`). A run
   of two or three capitals followed on its line by a word is an acronym in
-  prose, not initials (`The IRB will`, `RO-Crate`). A word on the next
+  prose, not initials (`The IRB will`, `RO-Crate`), except `and` or `&`
+  and then a capitalised word, the next entry of an author list
+  (`Levinson MA and Marquez C`, #3026). A word on the next
   line does not count, so a bundle that lists one author per line keeps
   their initials (`Levinson MA\\nMarquez C`, `Levinson M A\\nMarquez C`).
 - **Initials written together** are single capitals with only joiners
@@ -102,14 +113,15 @@ the word sets alone.
   capitals, ends them (`Axelsson U\\nKTH`, `Clark T. EVI`).
 
 Layout is not meaning, so the rules can still be wrong in both
-directions: `Levinson MA and` gives Levinson no initials there; a two- or
-three-letter given name in capitals (`TIM CLARK`) reads as initials kept;
-a suffix in mixed case (`Jr`) is judged like a given name; a run of
-capitals before a surname, on its line or ending the line before
-(`La Jolla, CA Clark T`, `La Jolla, CA\\nClark T`), is read as that
-surname's initials, and so is one after it that no word follows on its
-line (the CM4AI bundle's `Zhandos Sembay, UAB` gives Sembay `UAB`, and
-`UW Medicine PHI.` gives Medicine `PHI`); a surname after a given name
+directions: a run of two or three capitals followed by any other word
+(`Levinson MA with`) gives no initials there; a name in capitals with no
+word longer than three letters (`TIM LEE`) reads as initials kept, as
+does `TIM Clark`; a run of capitals before a surname on its line (`La
+Jolla, CA Clark T`), or single capitals ending the line before
+(`U.S.A.\\nClark T`), is read as that surname's initials, and so is a
+run after it that no word follows on its line (the CM4AI bundle's
+`Zhandos Sembay, UAB` gives Sembay `UAB`, and `UW Medicine PHI.` gives
+Medicine `PHI`); a surname after a given name
 spelled out takes the next entry's initial (`Christian Metallo, T.
 Clark` gives Metallo `T`: only single capitals before it show where its
 entry starts, and `Ballllosero Navarro, F.` is laid out the same way), and
@@ -118,26 +130,48 @@ Clark`, `JC Bélisle-Pipon, T. Clark`); a single capital before
 capitalised words on one line reads as a compound surname's initials
 whatever the words are (`A Common Fund Metallo C` gives Metallo no `C`); a
 surname with a lower-case particle (`J. van der Berg, T. Clark`) is not
-read as one compound, so `Berg` takes the `T`; a list of initials-first
-entries one per line (`C. Metallo\\nT. Clark`) reads the `T` as Metallo's
-trailing initial, which Metallo does not take either, so Clark gets none;
-and a capitalised word that is not a surname (`The` opening an
-organisation's name) can still stand in for one.
+read as one compound, so `Berg` takes the `T`; initials before a surname
+joined to the previous entry's trailing one (`Axelsson U C. Metallo\\nT.
+Clark`) are read as all that entry's, so Metallo leads nothing and takes
+the `T`; and a capitalised word outside the short function-word list
+(`In` opening an organisation's name) can still stand in for a surname.
 
 Every token that is not `grounded` is a finding
 (`{kind: name_token_not_in_bundle, path, name, token, class}`). Occurrences
 and distinct tokens are both reported (#556): the first says how many name
 tokens rest on no evidence, the second how many facts are at issue.
 
-A lower bound
--------------
+A lower bound, and the v2 proximity reading
+-------------------------------------------
 **A whole-bundle token match is a lower bound on the defect.** A given name
 that occurs anywhere in the bundle grounds the token, including a different
 person's entry: a record that expands `Clark T` into `Emma Clark` reads as
-grounded, because Emma Lundberg is in the CM4AI bundle. Only a stronger
-check would require the given name to sit near the surname, and that rule
-must survive line wrapping — `Charlotte` is in the CM4AI bundle only as
-`Charlotte\\nMarquez` — and the bundle's other author forms. A source's own
+grounded, because Emma Lundberg is in the CM4AI bundle.
+
+The **v2 proximity reading** (#2978, `PROXIMITY_INSTRUMENT`) re-reads each
+v1-`grounded` token and reports, beside v1 and never as a finding, the
+ones it would demote. A leaf is split into parts at `;`, `,`, `:`,
+brackets and identifier spans (`person_parts`), and within a part the
+capitalised tokens that are not initials are read together; a part of
+fewer than two distinct such words is not judged (`Doctor Y`, `PhD`, a
+leaf written `Clark, Tim`). A judged token stays grounded when the
+bundle writes it near another word of its part — at most
+`PROXIMITY_WINDOW` capitalised tokens (or words the leaf itself writes,
+`de`, `of`) between them, only whitespace (line breaks included:
+`Charlotte\\nMarquez`), periods, hyphens, apostrophes or digits inside a
+word (`Bridge2AI`) between tokens, and one comma only where the bundle
+inverts the record's order (`Clark, Tim`) — or beside that word's
+initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon J-C` keep
+`Metallo` for `Christian Metallo`). A digit before a comma is an
+affiliation mark and ends the entry (`Levinson1, Charlotte`). A demoted
+token carries the class it would have were it absent (`initial_expanded`
+where the other word has its initial beside it: `Jing Gao` against
+`Jing Chen; Gao J`), and whether v1 found its leaf clean. On the
+committed corpus at this change (283 provenance records, 4 not
+checkable) v2 demotes 10 token occurrences in 6 records: 7 in leaves v1
+finds clean, among them `Jing` in a CM4AI `Jing Gao` (full and core),
+the rest prose in person slots (`Contact Principal Investigator`). A
+source's own
 typo is grounded as written (`Ballllosero`), and a record that corrects it
 is `absent`: the check measures agreement with the bytes, not correctness.
 A script written without spaces between words (Chinese, Japanese, Thai) is
@@ -181,8 +215,17 @@ from typing import Any, Iterator, NamedTuple
 
 import yaml
 
-#: Named so a result says which instrument produced it (#907).
-INSTRUMENT = "name_grounding v1 (#2918)"
+#: Named so a result says which instrument produced it (#907). v1.1 moved
+#: classes only, never whether a token is a finding (#3026, #3126).
+INSTRUMENT = "name_grounding v1.1 (#2918, #3026, #3126)"
+
+#: The proximity reading beside it (#2978): report-only, never a finding.
+PROXIMITY_INSTRUMENT = "name_grounding v2 proximity (#2978), report-only"
+
+#: At most this many tokens (middle names, initials) between two tokens of
+#: one name for them to be read as one entry: `Mark D. Wilkinson`,
+#: `Jean-Christophe Bélisle-Pipon`.
+PROXIMITY_WINDOW = 2
 
 #: The classes, in the order they are decided.
 CLASSES = ("grounded", "diacritic_dropped", "initial_expanded", "absent")
@@ -195,6 +238,18 @@ _ALWAYS = frozenset({"principal_investigator"})
 
 #: Ranges whose values are people, or creators that may be people.
 _PERSON_RANGES = frozenset({"Person", "Creator"})
+
+#: Generational suffixes, folded: written beside a name they expand no
+#: initial (`John Smith Jr`, #3026).
+_SUFFIXES = frozenset({"jr", "sr", "ii", "iii", "iv"})
+
+#: Words that stand in for no surname, folded: `The` opening an
+#: organisation's name is not a person's (#3026). Kept short on purpose:
+#: `An` and `To` are surnames.
+_NOT_SURNAMES = frozenset({"the", "and", "of", "for", "from", "with"})
+
+#: Neither stands in for a surname.
+_NO_STAND_IN = _NOT_SURNAMES | _SUFFIXES
 
 
 class Token(NamedTuple):
@@ -273,8 +328,22 @@ def _gap_ok(gap: str, allowed: str, commas: int = 0) -> bool:
 #: bundle gives Sembay `UAB`).
 _WORD_AFTER = re.compile(r"[ \t\-\u2010\u2011]+[^\W\d_]{2}")
 
+#: `and` or `&` and then a capitalised word, on one line, after a run of
+#: capitals: an author list (`Levinson MA and Marquez C`, #3026), where
+#: `The IRB and the` stays prose. The group is the next word's first
+#: character, whose case decides.
+_AUTHOR_AND = re.compile(r"[ \t]+(?:and|&)[ \t]+(\w)")
+
 #: Spaces on one line: what may sit between two initials besides joiners.
 _SPACES = " \t"
+
+#: What may sit between two tokens of one name in one entry (#2978):
+#: spaces and line breaks, joiners and periods (`J.-C.`, `M. D.`) and
+#: apostrophes (`O'Brien`). A comma only under the rule in `_one_entry`,
+#: and digits only inside one word (`Bridge2AI`): a digit beside anything
+#: else (an affiliation mark, `Levinson1, Charlotte`), a semicolon or a
+#: bracket ends the entry.
+_IN_ENTRY = _JOINERS + "'\u2019"
 
 #: What may sit between the words of one compound surname, on one line:
 #: `Bélisle-Pipon`, `Ballllosero Navarro`.
@@ -294,6 +363,8 @@ class BundleIndex:
             key = folded_key(t.text)
             self.folded.add(key)
             self.positions.setdefault(key, []).append(i)
+        self._exact_positions: dict[str, list[int]] | None = None
+        self._beside: dict[str, set[str]] = {}
 
     def _gap(self, i: int, j: int) -> str:
         return self.text[self.tokens[i].end:self.tokens[j].start]
@@ -309,6 +380,36 @@ class BundleIndex:
 
     def _word_after(self, j: int) -> bool:
         return bool(_WORD_AFTER.match(self.text, self.tokens[j].end))
+
+    def _author_and(self, j: int) -> bool:
+        """`and`/`&` then a capitalised word after token `j`, on its line:
+        the next entry of an author list, not prose (#3026)."""
+        m = _AUTHOR_AND.match(self.text, self.tokens[j].end)
+        return bool(m) and m.group(1).isupper()
+
+    def _trailing_of_previous(self, prev: int, first: int) -> bool:
+        """Initial `first` may be the trailing initial of word `prev`:
+        capitalised, not an initial, with only whitespace between."""
+        return (prev >= 0 and self.tokens[prev].text[:1].isupper()
+                and not _is_initial(self.tokens[prev].text)
+                and _gap_ok(self._gap(prev, first), ""))
+
+    def _leads_its_entry(self, k: int) -> bool:
+        """Word `k` (or the compound surname it ends) has its own initials
+        before it on its line, written as single capitals (`C. Metallo`), so
+        it takes no trailing initial: the capital after it opens the next
+        entry, on the next line too (`C. Metallo\\nT. Clark`, #3126). "Its
+        own" is read one level back: the initials are not the trailing
+        initial of the word before them (`Marquez C Metallo`)."""
+        start = self._surname_start(k)
+        j = start - 1
+        if not (self._initial_at(j) and _letters(self.tokens[j].text) == 1
+                and _gap_ok(self._gap(j, start), _JOINERS)
+                and not any(ch in "\r\n" for ch in self._gap(j, start))):
+            return False
+        while self._initial_at(j - 1) and self._joined(j - 1, j):
+            j -= 1
+        return not self._trailing_of_previous(j - 1, j)
 
     def _joined(self, i: int, j: int) -> bool:
         """Initials `i` < `j` written together as one person's: single
@@ -334,9 +435,15 @@ class BundleIndex:
         """Folded initial letters written next to `surname` in the bundle,
         where the bundle writes it capitalised: `access R` is not a name.
         The rule is the one the module docstring gives under
-        `initial_expanded`."""
+        `initial_expanded`. Computed once per surname."""
+        key = folded_key(surname)
+        if key not in self._beside:
+            self._beside[key] = self._initials_beside(key)
+        return set(self._beside[key])
+
+    def _initials_beside(self, key: str) -> set[str]:
         out: set[str] = set()
-        for k in self.positions.get(folded_key(surname), ()):
+        for k in self.positions.get(key, ()):
             if not self.tokens[k].text[:1].isupper():
                 continue
             # Before it: `C. Metallo`, `J.-C. Bélisle-Pipon`. A compound
@@ -354,11 +461,17 @@ class BundleIndex:
                 first = run[-1]
                 prev = first - 1
                 # Not the trailing initial of the word before: in
-                # `Marquez C\nMetallo C` the first C is Marquez's.
-                belongs_to_previous = (prev >= 0 and self.tokens[prev].text[:1].isupper()
-                                       and not _is_initial(self.tokens[prev].text)
-                                       and _gap_ok(self._gap(prev, first), ""))
-                if not belongs_to_previous:
+                # `Marquez C\nMetallo C` the first C is Marquez's. Unless
+                # that word leads its own entry with initials, and so takes
+                # no trailing one: in `C. Metallo\nT. Clark` the T is
+                # Clark's (#3126).
+                belongs_to_previous = (self._trailing_of_previous(prev, first)
+                                       and not self._leads_its_entry(prev))
+                # A run of two or three capitals ending the line before is
+                # not this surname's: `La Jolla, CA\nClark T` (#3026).
+                across = any(ch in "\r\n" for ch in self._gap(run[0], start))
+                run_of_capitals = _letters(self.tokens[run[0]].text) > 1
+                if not belongs_to_previous and not (run_of_capitals and across):
                     if start == k:           # credited to the word they sit beside
                         for i in run:
                             out.update(folded_key(self.tokens[i].text))
@@ -371,43 +484,171 @@ class BundleIndex:
                     # T`, `the NIH Common Fund Metallo C`). Nor across a
                     # line break, where the "initials" may end the line
                     # before (`La Jolla, CA\nClark T`).
-                    if (_letters(self.tokens[run[0]].text) == 1
-                            and not any(ch in "\r\n" for ch in self._gap(run[0], start))):
+                    if not run_of_capitals and not across:
                         continue
             # After it: `Metallo C`, `Metallo, C.`, `Levinson MA`, `Pipon J-C`.
             j = k + 1
             if not (self._initial_at(j) and _gap_ok(self._gap(k, j), "", commas=1)):
                 continue
-            if _letters(self.tokens[j].text) > 1 and self._word_after(j):
+            if (_letters(self.tokens[j].text) > 1 and self._word_after(j)
+                    and not self._author_and(j)):
                 continue                     # an acronym in prose: `The IRB will`, `RO-Crate`
             out.update(folded_key(self.tokens[j].text))
             while (self._initial_at(j + 1) and self._joined(j, j + 1)
                    and not (any(ch in _SPACES for ch in self._gap(j, j + 1))
-                            and self._word_after(j + 1))):     # not `Clark T. A study`
+                            and self._word_after(j + 1)
+                            and not self._author_and(j + 1))):     # not `Clark T. A study`
                 j += 1
                 out.update(folded_key(self.tokens[j].text))
         return out
 
+    def _one_entry(self, i: int, j: int, comma_ok: bool, between: frozenset[str]) -> bool:
+        """Tokens `i` < `j` read as one entry (#2978): every token between
+        them capitalised (a middle name, an initial) or one the record's
+        own leaf writes (`de` in `Michael de Riesthal`, `of` in `University
+        of Alabama`), and between tokens only whitespace, line breaks
+        included (`Charlotte\\nMarquez`), `_IN_ENTRY` characters, or digits
+        inside one word (`Bridge2AI`). One comma where `comma_ok`, the
+        `Surname, Given` form."""
+        if any(not self.tokens[m].text[:1].isupper() and exact_key(self.tokens[m].text) not in between
+               for m in range(i + 1, j)):
+            return False
+        commas = 0
+        for m in range(i, j):
+            gap = self._gap(m, m + 1)
+            if gap.isdigit():
+                continue
+            if not all(ch.isspace() or ch in _IN_ENTRY or ch == "," for ch in gap):
+                return False
+            commas += gap.count(",")
+        return commas == 0 or (comma_ok and commas == 1)
 
-def classify(token: str, name: list[str], index: BundleIndex) -> str:
-    """The class of one token of a name, given the name's other tokens."""
-    if exact_key(token) in index.exact:
-        return "grounded"
-    if folded_key(token) in index.folded:
-        return "diacritic_dropped"
+    def near(self, token: str, partner: str, token_first: bool | None = None,
+             between: frozenset[str] = frozenset()) -> bool:
+        """`token` occurs in the bundle within `PROXIMITY_WINDOW` tokens of
+        `partner`, in one entry. `token` is matched exactly (it is a v1
+        `grounded` token), `partner` folded. `token_first` is whether the
+        record writes `token` before `partner`; one comma is allowed only
+        where the bundle inverts that order, the `Surname, Given` form
+        (`Clark, Tim` for `Tim Clark`, not `Tim, Clark`), and never when
+        `token_first` is None. `between` are the exact keys of the record
+        leaf's tokens, which may sit between the two in any case."""
+        if self._exact_positions is None:
+            self._exact_positions = {}
+            for i, t in enumerate(self.tokens):
+                self._exact_positions.setdefault(exact_key(t.text), []).append(i)
+        others = set(self.positions.get(folded_key(partner), ()))
+        reach = PROXIMITY_WINDOW + 1
+        for a in self._exact_positions.get(exact_key(token), ()):
+            for b in range(a - reach, a + reach + 1):
+                inverted = token_first is not None and (a < b) != token_first
+                if b != a and b in others and self._one_entry(min(a, b), max(a, b), inverted, between):
+                    return True
+        return False
+
+
+def words_in_capitals(name: str) -> frozenset[str]:
+    """Exact keys of the tokens of `name` that look like initials (two or
+    three capitals) but are words, because the whole name is written in
+    capitals (`TIM CLARK`, #3026): every token is in capitals and one has
+    four or more letters. Only before the first comma, since a degree
+    follows one (`JORGE CONTRERAS, JD`), and never a suffix."""
+    text = _NOT_A_NAME.sub(" ", name)
+    tokens = [t for t in _runs(text) if _letters(t.text) >= 2]
+    if not (tokens and all(t.text.isupper() for t in tokens)
+            and any(_letters(t.text) > 3 for t in tokens)):
+        return frozenset()
+    comma = text.find(",")
+    return frozenset(exact_key(t.text) for t in tokens
+                     if _is_initial(t.text) and (comma < 0 or t.start < comma)
+                     and folded_key(t.text) not in _SUFFIXES)
+
+
+def _initials_like(token: str, words: frozenset[str]) -> bool:
+    return _is_initial(token) and exact_key(token) not in words
+
+
+def expansion_class(token: str, name: list[str], index: BundleIndex,
+                    words: frozenset[str] = frozenset()) -> str:
+    """`initial_expanded` or `absent`: the class of a token read as not in
+    the bundle, whether or not it is. `words` are the tokens of the name
+    that are words though written like initials (`words_in_capitals`)."""
     if not token[:1].isupper():
         return "absent"                  # an initial expands into a capitalised name
-    if _is_initial(token):
+    if folded_key(token) in _SUFFIXES:
+        return "absent"                  # `Jr`: a suffix expands nothing (#3026)
+    if _initials_like(token, words):
         return "absent"                  # initials kept (`JC`) or a degree (`JD`): nothing expanded
     initial = folded_key(token)[:1]
     for other in name:
         if folded_key(other) == folded_key(token) or folded_key(other) not in index.folded:
             continue
-        if not other[:1].isupper() or _is_initial(other):
+        if not other[:1].isupper() or _initials_like(other, words):
             continue                     # not written as a surname here (`the`, `MA`)
+        if folded_key(other) in _NO_STAND_IN:
+            continue                     # `The` opening an organisation's name (#3026)
         if initial in index.initials_beside(other):
             return "initial_expanded"
     return "absent"
+
+
+def classify(token: str, name: list[str], index: BundleIndex,
+             words: frozenset[str] = frozenset()) -> str:
+    """The class of one token of a name, given the name's other tokens
+    (and, from `words_in_capitals`, which of them are words)."""
+    if exact_key(token) in index.exact:
+        return "grounded"
+    if folded_key(token) in index.folded:
+        return "diacritic_dropped"
+    return expansion_class(token, name, index, words)
+
+
+def classify_name(name: str, index: BundleIndex) -> list[tuple[str, str]]:
+    """(token, class) for every checked token of one name leaf."""
+    tokens = name_tokens(name)
+    words = words_in_capitals(name)
+    return [(t, classify(t, tokens, index, words)) for t in tokens]
+
+
+#: What separates the people, roles and degrees of one name leaf for v2:
+#: `Forget A, Obernier K`, `Olivier Elemento, PhD`, `Access requests: …`.
+_PART_BREAK = re.compile(r"[;,:()\[\]/|]")
+
+
+def person_parts(name: str, words: frozenset[str] = frozenset()) -> list[list[str]]:
+    """The name words of each part of a leaf, split at `_PART_BREAK`, that
+    v2 judges together: capitalised tokens that are not initials. A part of
+    fewer than two distinct words has no partner and is not judged, so
+    `Doctor Y; Dailamy A`, a degree after a comma and lower-case prose
+    are not; nor is a leaf written `Clark, Tim`. An identifier span
+    (`_NOT_A_NAME`) breaks a part too."""
+    parts = []
+    for part in _PART_BREAK.split(_NOT_A_NAME.sub(";", name)):
+        parts.append([t for t in name_tokens(part)
+                      if t[:1].isupper() and not _initials_like(t, words)])
+    return parts
+
+
+def proximity(token: str, name: list[str], index: BundleIndex,
+              words: frozenset[str] = frozenset(),
+              between: frozenset[str] = frozenset()) -> str | None:
+    """The v2 reading of a v1-`grounded` token (#2978): None where it sits
+    near another token of its name — `near` it, or written beside that
+    token's initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon J-C`
+    for `Christian Metallo` grounds `Metallo`) — else the class it would
+    have were it not in the bundle (`expansion_class`). A name of one
+    distinct token is not judged: the caller skips it. `between` is as
+    `BundleIndex.near` takes it."""
+    here = name.index(token)
+    for at, other in enumerate(name):
+        if exact_key(other) == exact_key(token):
+            continue
+        if index.near(token, other, token_first=here < at, between=between):
+            return None
+        if (other[:1].isupper() and not _initials_like(other, words)
+                and folded_key(other)[:1] in index.initials_beside(token)):
+            return None
+    return expansion_class(token, name, index, words)
 
 
 @functools.lru_cache(maxsize=None)
@@ -465,22 +706,60 @@ def check_record(record: Any, bundle: str | BundleIndex,
     counts = {c: 0 for c in CLASSES}
     distinct: dict[str, set[str]] = {c: set() for c in CLASSES}
     findings: list[dict[str, str]] = []
+    prox = {"judged": 0, "near": 0, "not_judged": 0, "demoted": 0,
+            "demoted_in_clean_leaves": 0}
+    prox_counts = {"initial_expanded": 0, "absent": 0}
+    prox_distinct: set[str] = set()
+    demoted: list[dict[str, str]] = []
     leaves = 0
     for path, name in iter_name_leaves(record, slots):
         leaves += 1
         tokens = name_tokens(name)
+        words = words_in_capitals(name)
+        classes = [(t, classify(t, tokens, index, words)) for t in tokens]
         seen: set[str] = set()
-        for token in tokens:
-            cls = classify(token, tokens, index)
+        for token, cls in classes:
             counts[cls] += 1
             distinct[cls].add(exact_key(token))
             if cls != "grounded" and exact_key(token) not in seen:
                 seen.add(exact_key(token))
                 findings.append({"kind": "name_token_not_in_bundle", "path": path,
                                  "name": name, "token": token, "class": cls})
+        # v2 (#2978), beside v1 and never pooled into it.
+        clean = all(cls == "grounded" for _, cls in classes)
+        grounded = {exact_key(t) for t, cls in classes if cls == "grounded"}
+        counts_grounded = sum(1 for _, cls in classes if cls == "grounded")
+        leaf_keys = frozenset(exact_key(t) for t in tokens)
+        listed: set[str] = set()
+        judged = 0
+        for part in person_parts(name, words):
+            if len({exact_key(t) for t in part}) < 2:
+                continue
+            for token in part:
+                if exact_key(token) not in grounded:
+                    continue
+                judged += 1
+                prox["judged"] += 1
+                v2 = proximity(token, part, index, words, leaf_keys)
+                if v2 is None:
+                    prox["near"] += 1
+                    continue
+                prox["demoted"] += 1
+                prox["demoted_in_clean_leaves"] += clean
+                prox_counts[v2] += 1
+                prox_distinct.add(exact_key(token))
+                if exact_key(token) not in listed:
+                    listed.add(exact_key(token))
+                    demoted.append({"kind": "name_token_not_near_its_name", "path": path,
+                                    "name": name, "token": token, "class": v2,
+                                    "v1_class": "grounded", "leaf_clean_under_v1": clean})
+        prox["not_judged"] += counts_grounded - judged
     return {"checked": True, "instrument": INSTRUMENT, "name_leaves": leaves,
             "counts": counts, "distinct": {c: len(v) for c, v in distinct.items()},
-            "findings": findings}
+            "findings": findings,
+            "proximity": {"instrument": PROXIMITY_INSTRUMENT, "window": PROXIMITY_WINDOW,
+                          **prox, "counts": prox_counts,
+                          "demoted_distinct": len(prox_distinct), "demoted_tokens": demoted}}
 
 
 def parse_record(raw: bytes) -> tuple[Any, str | None]:

@@ -24,6 +24,7 @@ from data_sheets_schema.name_grounding import (
     BundleIndex,
     check_record,
     classify,
+    classify_name,
     exact_key,
     iter_name_leaves,
     name_tokens,
@@ -34,7 +35,9 @@ SLOTS = frozenset({"creators", "principal_investigator", "contact_person",
 
 
 def cls(name: str, token: str, bundle: str) -> str:
-    return classify(token, name_tokens(name), BundleIndex(bundle))
+    """The class `check_record` gives `token` of the name leaf `name`."""
+    [found] = {c for t, c in classify_name(name, BundleIndex(bundle)) if t == token}
+    return found
 
 
 class TokenTest(unittest.TestCase):
@@ -265,8 +268,13 @@ class InitialExpandedIsAnExpansionTest(unittest.TestCase):
             with self.subTest(bundle=bundle):
                 self.assertEqual(BundleIndex(bundle).initials_beside("Levinson"), {"m", "a"})
                 self.assertEqual(cls("Maxwell Adam Levinson", "Adam", bundle), "initial_expanded")
-        self.assertEqual(BundleIndex("Levinson MA and Marquez C").initials_beside("Levinson"), set())
-        self.assertEqual(BundleIndex("Levinson M A and Marquez C").initials_beside("Levinson"), {"m"})
+        # `and` before a capitalised word continues an author list (#3026).
+        self.assertEqual(BundleIndex("Levinson MA and Marquez C").initials_beside("Levinson"),
+                         {"m", "a"})
+        self.assertEqual(BundleIndex("Levinson M A and Marquez C").initials_beside("Levinson"),
+                         {"m", "a"})
+        self.assertEqual(BundleIndex("Levinson MA and the").initials_beside("Levinson"), set())
+        self.assertEqual(BundleIndex("Levinson M A and the").initials_beside("Levinson"), {"m"})
 
     def test_capitals_ending_the_line_before_do_not_take_the_initial_after(self):
         """`La Jolla, CA\\nClark T`: whatever the capitals are, they are on
@@ -307,20 +315,20 @@ class DocumentedCostTest(unittest.TestCase):
     one fails here and takes it off the list."""
 
     def test_an_acronym_shaped_pair_before_a_word(self):
-        self.assertEqual(BundleIndex("Levinson MA and Marquez C").initials_beside("Levinson"), set())
+        """Only `and`/`&` before a capitalised word is read as the next
+        entry (#3026); any other word after the pair makes it prose."""
+        self.assertEqual(BundleIndex("Levinson MA with Marquez C").initials_beside("Levinson"), set())
 
-    def test_a_short_given_name_in_capitals(self):
-        self.assertEqual(cls("TIM CLARK", "TIM", "Clark T"), "absent")
-
-    def test_a_suffix_in_mixed_case(self):
-        self.assertEqual(cls("Tim Clark Jr", "Jr", "Clark J"), "initial_expanded")
+    def test_a_short_given_name_in_capitals_beside_mixed_case(self):
+        """Only a name written wholly in capitals reads `TIM` as a word."""
+        self.assertEqual(cls("TIM Clark", "TIM", "Clark T"), "absent")
 
     def test_capitals_before_or_after_a_surname(self):
-        """Before it on its line or ending the line before, and after it
-        with no word following on its line."""
-        for bundle in ("La Jolla, CA Clark T", "La Jolla, CA\nClark T"):
-            with self.subTest(bundle=bundle):
-                self.assertLessEqual({"c", "a"}, BundleIndex(bundle).initials_beside("Clark"))
+        """Before it on its line, and after it with no word following on
+        its line. Single capitals ending the line before still count."""
+        self.assertLessEqual({"c", "a"}, BundleIndex("La Jolla, CA Clark T").initials_beside("Clark"))
+        self.assertLessEqual({"u", "s", "a"},
+                             BundleIndex("Stanford, U.S.A.\nClark T").initials_beside("Clark"))
         self.assertEqual(BundleIndex("Zhandos Sembay, UAB\nand the").initials_beside("Sembay"),
                          {"u", "a", "b"})
         self.assertLessEqual({"p", "h", "i"},
@@ -350,16 +358,86 @@ class DocumentedCostTest(unittest.TestCase):
     def test_a_lower_case_particle_ends_the_compound(self):
         self.assertEqual(BundleIndex("J. van der Berg, T. Clark").initials_beside("Berg"), {"t"})
 
-    def test_initials_before_the_surname_one_author_per_line(self):
-        """The `T` opening the second line is read as Metallo's trailing
-        initial (the `Marquez C\\nMetallo` rule), which Metallo, written
-        `C. Metallo`, does not take either: Clark gets none."""
-        self.assertEqual(BundleIndex("C. Metallo\nT. Clark").initials_beside("Clark"), set())
-        self.assertEqual(BundleIndex("C. Metallo\nT. Clark").initials_beside("Metallo"), {"c"})
-        self.assertEqual(cls("Tim Clark", "Tim", "C. Metallo\nT. Clark"), "absent")
+    def test_initials_before_a_word_joined_to_the_previous_entrys(self):
+        """#3126's rule asks whether the word before has its own initials.
+        In `Axelsson U C. Metallo\\nT. Clark` the `U C.` is one run of
+        single capitals trailing Axelsson, so Metallo has none of its own,
+        takes the `T`, and Clark gets none."""
+        bundle = "Axelsson U C. Metallo\nT. Clark"
+        self.assertEqual(BundleIndex(bundle).initials_beside("Clark"), set())
+        self.assertEqual(BundleIndex(bundle).initials_beside("Metallo"), {"t"})
 
-    def test_a_capitalised_word_that_is_not_a_surname(self):
-        self.assertEqual(cls("The Data Consortium", "Data", "The D, and"), "initial_expanded")
+    def test_a_name_in_capitals_with_no_long_word(self):
+        """`TIM LEE` could be two pairs of initials kept, so it is read so."""
+        self.assertEqual(cls("TIM LEE", "TIM", "Lee T"), "absent")
+
+    def test_a_function_word_outside_the_list(self):
+        """`_NOT_SURNAMES` is short (`An`, `To` are surnames): `In` stands in."""
+        self.assertEqual(cls("In Data Trust", "Data", "In D, and"), "initial_expanded")
+
+
+class LayoutFixTest(unittest.TestCase):
+    """The six layout cases v1 read wrongly and v1.1 reads rightly (#3026,
+    #3126), each beside the control the rule must keep. Class only: none
+    moves a token into or out of the findings."""
+
+    def test_an_author_pair_before_and(self):
+        """`Levinson MA and Marquez C` is an author list; `The IRB and the`
+        and `Hansen JN reports` are prose."""
+        self.assertEqual(cls("Maxwell Adam Levinson", "Adam", "Levinson MA and Marquez C"),
+                         "initial_expanded")
+        self.assertEqual(cls("Maxwell Adam Levinson", "Adam", "Levinson MA & Marquez C"),
+                         "initial_expanded")
+        self.assertEqual(cls("Ian Ross", "Ian", "Ross IRB and the"), "absent")
+        self.assertEqual(cls("Jakob Hansen", "Jakob", "Hansen JN reports"), "absent")
+
+    def test_a_short_given_name_in_a_name_in_capitals(self):
+        """`TIM CLARK` is a name in capitals, and so is each short word of
+        `TIM LEE CLARK`. A degree after a comma stays kept
+        initials, and so does a pair in a name not wholly in capitals."""
+        self.assertEqual(cls("TIM CLARK", "TIM", "Clark T"), "initial_expanded")
+        self.assertEqual(cls("TIM LEE CLARK", "TIM", "Clark T"), "initial_expanded")
+        self.assertEqual(cls("TIM LEE CLARK", "LEE", "Clark T L"), "initial_expanded")
+        self.assertEqual(cls("JORGE CONTRERAS, JD", "JD", "Contreras J"), "absent")
+        self.assertEqual(cls("JORGE CONTRERAS, JD", "JORGE", "Contreras J"), "initial_expanded")
+        self.assertEqual(cls("JC Bélisle-Pipon", "JC", "Bélisle-Pipon J-C"), "absent")
+        self.assertEqual(ng.words_in_capitals("TIM CLARK JR"), frozenset({"tim"}))
+
+    def test_a_suffix_expands_nothing(self):
+        for name, token in (("Tim Clark Jr", "Jr"), ("Tim Clark Sr", "Sr"), ("TIM CLARK III", "III")):
+            with self.subTest(name=name):
+                self.assertEqual(cls(name, token, "Clark J; Clark S; Clark I"), "absent")
+        # Nor does a suffix stand in for the surname.
+        self.assertEqual(cls("John Jr", "John", "Jr J"), "absent")
+        self.assertEqual(cls("Tim Clark Jr", "Tim", "Clark T"), "initial_expanded")
+
+    def test_capitals_ending_the_line_before_are_not_the_surnames(self):
+        """`La Jolla, CA\\nClark T` gives Clark `T` only; on Clark's line the
+        run is still read as initials (see `DocumentedCostTest`)."""
+        self.assertEqual(BundleIndex("La Jolla, CA\nClark T").initials_beside("Clark"), {"t"})
+        self.assertEqual(cls("Carl Clark", "Carl", "La Jolla, CA\nClark T"), "absent")
+        self.assertEqual(cls("Tim Clark", "Tim", "La Jolla, CA\nClark T"), "initial_expanded")
+        # A run on the surname's own line after a line break is still read.
+        self.assertEqual(BundleIndex("Authors:\nMA Levinson").initials_beside("Levinson"), {"m", "a"})
+
+    def test_a_function_word_stands_in_for_no_surname(self):
+        self.assertEqual(cls("The Data Consortium", "Data", "The D, and"), "absent")
+        self.assertEqual(cls("Tim The", "Tim", "The T"), "absent")
+        self.assertEqual(cls("Tim Clark", "Tim", "The D, Clark T"), "initial_expanded")
+
+    def test_initials_first_entries_one_per_line(self):
+        """#3126: `C. Metallo` leads its entry with its own initial, so it
+        takes no trailing one and the `T` opening the next line is
+        Clark's; one line with a comma reads the same. `Marquez C\\nMetallo
+        C` still gives the first C to Marquez, who has none before him."""
+        for bundle in ("C. Metallo\nT. Clark", "C. Metallo, T. Clark", "C Metallo\nT Clark",
+                       "J.-C. Bélisle-Pipon\nT. Clark", "F. Ballllosero Navarro\nT. Clark"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(BundleIndex(bundle).initials_beside("Clark"), {"t"})
+                self.assertEqual(cls("Tim Clark", "Tim", bundle), "initial_expanded")
+        self.assertEqual(BundleIndex("C. Metallo\nT. Clark").initials_beside("Metallo"), {"c"})
+        self.assertEqual(cls("Tim Metallo", "Tim", "C. Metallo\nT. Clark"), "absent")
+        self.assertEqual(cls("Christian Metallo", "Christian", "Marquez C\nMetallo X"), "absent")
 
 
 class AfterTheSurnameSeparatorTest(unittest.TestCase):
@@ -422,6 +500,131 @@ class LowerBoundTest(unittest.TestCase):
         fixed = check_record({"creators": [{"name": "Frida Ballesteros Navarro"}]}, bundle, SLOTS)
         self.assertEqual({(f["token"], f["class"]) for f in fixed["findings"]},
                          {("Ballesteros", "absent"), ("Frida", "initial_expanded")})
+
+
+def prox(name: str, bundle: str) -> dict:
+    return check_record({"creators": [{"name": name}]}, bundle, SLOTS)["proximity"]
+
+
+def demoted(name: str, bundle: str) -> dict[str, str]:
+    return {f["token"]: f["class"] for f in prox(name, bundle)["demoted_tokens"]}
+
+
+class ProximityTest(unittest.TestCase):
+    """The v2 reading (#2978): a v1-grounded token must sit near another
+    token of its name, or beside that token's initial. Report-only: v1's
+    counts and findings are untouched."""
+
+    def test_the_lower_bound_case_is_demoted(self):
+        """`Emma Clark` against `Emma Lundberg … Clark T`: v1 grounds both
+        tokens, v2 finds neither beside the other."""
+        bundle = "Emma Lundberg (KTH). Authors: Clark T; Parker J"
+        out = check_record({"creators": [{"name": "Emma Clark"}]}, bundle, SLOTS)
+        self.assertEqual((out["counts"]["grounded"], out["findings"]), (2, []))
+        p = out["proximity"]
+        self.assertEqual(p["instrument"], ng.PROXIMITY_INSTRUMENT)
+        self.assertEqual((p["judged"], p["near"], p["demoted"], p["demoted_distinct"],
+                          p["demoted_in_clean_leaves"]), (2, 0, 2, 2, 2))
+        self.assertEqual(p["counts"], {"initial_expanded": 0, "absent": 2})
+        self.assertEqual(p["demoted_tokens"][0], {
+            "kind": "name_token_not_near_its_name", "path": "creators[0].name",
+            "name": "Emma Clark", "token": "Emma", "class": "absent",
+            "v1_class": "grounded", "leaf_clean_under_v1": True})
+
+    def test_a_given_name_elsewhere_is_an_expansion_of_the_initial_beside(self):
+        """`Tim` is in the bundle, but not beside Clark, whose initial is T:
+        v2 reads it `initial_expanded`, and Clark near its initial."""
+        self.assertEqual(demoted("Tim Clark", "Tim Smith; Clark T"), {"Tim": "initial_expanded"})
+
+    def test_author_forms_keep_the_token_near(self):
+        """`Surname I`, `I. Surname`, `Surname, I.` and hyphenated initials
+        put the surname beside the given name's initial."""
+        for bundle in ("Christian Jones; Metallo C", "Christian Jones; C. Metallo",
+                       "Christian Jones; Metallo, C.", "Christian Jones; Metallo\nC"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(demoted("Christian Metallo", bundle), {"Christian": "initial_expanded"})
+        name = "Jean-Christophe Bélisle-Pipon"
+        for bundle in ("Jean Smith; J.-C. Bélisle-Pipon; Christophe Doe",
+                       "Jean Smith; Bélisle-Pipon J-C; Christophe Doe"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(demoted(name, bundle),
+                                 {"Jean": "initial_expanded", "Christophe": "initial_expanded"})
+
+    def test_a_line_wrapped_name_is_near(self):
+        bundle = "Maxwell Adam Levinson1, Charlotte\nMarquez2, Sami Nourreddine2"
+        self.assertEqual(prox("Charlotte Marquez", bundle)["demoted"], 0)
+        self.assertEqual(prox("Maxwell Levinson", bundle)["demoted"], 0)
+
+    def test_middle_names_and_initials_within_the_window(self):
+        for bundle in ("Mark D. Wilkinson", "Mark David Wilkinson", "Mark D. E. Wilkinson",
+                       "Mary O'Brien", "Clark, Tim", "Clark,\nTim"):
+            with self.subTest(bundle=bundle):
+                name = "Mary O'Brien" if "Brien" in bundle else (
+                    "Tim Clark" if "Clark" in bundle else "Mark Wilkinson")
+                self.assertEqual(prox(name, bundle)["demoted"], 0)
+
+    def test_what_ends_an_entry(self):
+        """Three tokens between, a word in lower case, a semicolon, a
+        bracket, an affiliation digit, or a comma with the given name first."""
+        for bundle, name in (("Mark A. B. C. Wilkinson", "Mark Wilkinson"),
+                             ("Tim and Clark", "Tim Clark"),
+                             ("Tim; Clark", "Tim Clark"),
+                             ("Tim (KTH) Clark", "Tim Clark"),
+                             ("Tim, Clark", "Tim Clark"),
+                             ("Maxwell Adam Levinson1, Charlotte Marquez", "Charlotte Levinson")):
+            with self.subTest(bundle=bundle):
+                self.assertGreater(prox(name, bundle)["demoted"], 0)
+        self.assertEqual(demoted("Charlotte Levinson", "Maxwell Adam Levinson1, Charlotte Marquez"),
+                         {"Charlotte": "absent", "Levinson": "absent"})
+
+    def test_words_the_leaf_writes_may_sit_between(self):
+        """A lower-case word between the two is prose unless the record's
+        own leaf writes it: a particle, or `of` in an organisation's name.
+        Digits inside one word (`Bridge2AI`) do not end the entry."""
+        for name, bundle in (("Michael de Riesthal", "Michael de Riesthal (Baylor)"),
+                             ("Virginia R. de Sa", "Virginia R. de Sa, UCSD"),
+                             ("University of Alabama at Birmingham",
+                              "the University of Alabama at Birmingham"),
+                             ("Bridge2AI CHoRUS", "the Bridge2AI CHoRUS team")):
+            with self.subTest(name=name):
+                self.assertEqual(demoted(name, bundle), {})
+        self.assertEqual(demoted("Michael Riesthal", "Michael de Riesthal"),
+                         {"Michael": "absent", "Riesthal": "absent"})
+
+    def test_a_leaf_is_judged_part_by_part(self):
+        """People, degrees and roles after `;`, `,`, `:` or a bracket, or an
+        identifier span, are judged apart: `PhD` and `Obernier` have no
+        partner, and `Jing` is judged with `Gao` only."""
+        bundle = "Jing Chen; Gao J; Forget A, Obernier K; Olivier Elemento, PhD"
+        for name in ("Forget A, Obernier K", "Olivier Elemento, PhD",
+                     "Olivier Elemento (ORCID:0000-0002-1825-0097) Obernier"):
+            with self.subTest(name=name):
+                self.assertEqual(prox(name, bundle)["demoted"], 0)
+        self.assertEqual(ng.person_parts("Olivier Elemento, PhD (a@b.org) Division of X"),
+                         [["Olivier", "Elemento"], ["PhD"], ["Division"]])
+        p = prox("Jing Gao; Olivier Elemento", bundle)
+        self.assertEqual((p["judged"], p["near"], p["demoted"]), (4, 3, 1))
+        self.assertEqual(demoted("Jing Gao; Olivier Elemento", bundle), {"Jing": "initial_expanded"})
+
+    def test_what_is_not_judged(self):
+        """A name of one distinct token has no partner; a token v1 does not
+        ground is v1's finding, not v2's."""
+        p = prox("Consortium", "the Consortium")
+        self.assertEqual((p["judged"], p["not_judged"], p["demoted"]), (0, 1, 0))
+        p = prox("Christian Metallo", "Metallo C")
+        self.assertEqual((p["judged"], p["near"], p["demoted"]), (1, 1, 0))
+        p = prox("Tim Metallo", "Metallo C; Tim Smith")
+        self.assertEqual((p["judged"], p["demoted"], p["demoted_in_clean_leaves"]), (2, 2, 2))
+        p = prox("Tom Metallo", "Metallo C; Tim Smith")
+        self.assertEqual((p["judged"], p["demoted"], p["demoted_in_clean_leaves"]), (1, 1, 0))
+
+    def test_v1_is_unchanged_by_v2(self):
+        bundle = "Emma Lundberg; Clark T"
+        out = check_record({"creators": [{"name": "Emma Clark"}, {"name": "Tim Clark"}]}, bundle, SLOTS)
+        self.assertEqual(out["counts"], {"grounded": 3, "diacritic_dropped": 0,
+                                         "initial_expanded": 1, "absent": 0})
+        self.assertEqual([f["token"] for f in out["findings"]], ["Tim"])
+        self.assertEqual(out["instrument"], ng.INSTRUMENT)
 
 
 class WalkTest(unittest.TestCase):
@@ -733,6 +936,16 @@ class CliTest(unittest.TestCase):
                       "initial_expanded 1 (1 distinct) · absent 0", result.output)
         self.assertIn("creators[0].name 'Christian Metallo': Christian (initial_expanded)",
                       result.output)
+        self.assertIn("v2 proximity (report-only): 1 grounded token(s) judged, 1 near their name, "
+                      "0 would be demoted", result.output)
+
+    def test_the_v2_demotions_are_listed(self):
+        self.bundle.write_text("Emma Lundberg; Clark T\n")
+        self.record.write_text(yaml.safe_dump({"creators": [{"name": "Emma Clark"}]}))
+        result = self._invoke("--full", str(self.record), "--bundle", str(self.bundle))
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("2 would be demoted (2 distinct; 2 in leaves v1 finds clean)", result.output)
+        self.assertIn("v2 creators[0].name 'Emma Clark': Emma (grounded → absent)", result.output)
 
     def test_json(self):
         result = self._invoke("--full", str(self.record), "--bundle", str(self.bundle), "--json")
@@ -946,6 +1159,35 @@ class NotAnExpansionCorpusTest(unittest.TestCase):
 
     def test_a_role_word_in_lower_case_is_absent(self):
         _absent_as_listed(self, LOWER_CASE_WORDS)
+
+
+#: The v2 reading's corpus case (#2978): `Jing Gao` in a CM4AI run whose
+#: bundle writes `Jing` only in `Jing Chen` and Gao only as `Gao J`. v1
+#: grounds both tokens; v2 demotes `Jing`, as an expansion of that `J`.
+PROXIMITY_CASE = ("claudecode_agent", "2026-08-20b_claude-opus-5-api-generic-v5_rep3", "CM4AI")
+
+
+@pytest.mark.corpus   # reads a committed record under data/d4d_concatenated (#1203)
+class ProximityCorpusTest(unittest.TestCase):
+    """Record scope: that run's final full record and derived core."""
+
+    def test_a_given_name_from_another_entry_is_demoted(self):
+        from data_sheets_schema.provenance import record_path_for
+        method, label, project = PROXIMITY_CASE
+        path = record_path_for(project, method, label)
+        if not path.exists():
+            self.skipTest(f"{path} is not in this checkout")
+        out = ng.check_run(path, ("full", "core"))
+        _skip_if_shallow(out)
+        self.assertTrue(out["checked"], out.get("reason"))
+        for which in ("full", "core"):
+            with self.subTest(record=which):
+                rec = out["records"][which]
+                self.assertTrue(rec.get("checked"), rec)
+                self.assertNotIn("Jing", {f["token"] for f in rec["findings"]})
+                self.assertIn(("creators[8].name", "Jing Gao", "Jing", "initial_expanded", True),
+                              {(f["path"], f["name"], f["token"], f["class"], f["leaf_clean_under_v1"])
+                               for f in rec["proximity"]["demoted_tokens"]})
 
 
 #: A run whose bundle drifted after it. The AI_READI bytes it hashed (the
