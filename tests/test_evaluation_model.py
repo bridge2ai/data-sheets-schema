@@ -1,11 +1,12 @@
 """The evaluation-model seam (#2928).
 
-Every judging path resolves its model through `evaluation_model` when it was
-given none. The hazard this change carries is silently changing which judge
+The five judging paths in PATHS resolve their model through
+`evaluation_model` when given none; the API rubric judge keeps its own pinned
+default and is not one of them (#3326). The hazard this change carries is silently changing which judge
 runs: a judge cache is scoped on the model name, so a default that moved would
 make every cached judgement fall out of scope (#351, #462). These tests pin the
 default to exactly the old resolution, and prove the seam is the one place a
-future evaluation config needs to change.
+future evaluation config needs to change for those five paths.
 
 Offline throughout: the fake client records the model it was asked for and
 answers nothing that matters.
