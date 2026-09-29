@@ -36,6 +36,14 @@ def evaluator_key(doc: dict) -> str:
             or "unreported")
 
 
+def evaluator_column(doc: dict) -> str:
+    """The table's Evaluator cell: the display name, and the key the
+    discrimination blocks name where it differs, so every block's
+    "the X evaluations above" names a string a row carries (#3322)."""
+    shown, key = evaluator_of(doc), evaluator_key(doc)
+    return shown if shown == key else f"{shown} (evaluator {key})"
+
+
 def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     """`cohort` names the evaluations the discrimination block measures — one
     rating per record, e.g. the primaries of a set that also holds repeats.
@@ -61,7 +69,7 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
             str(path), doc.get("project", "unknown"), doc["rubric"],
             fixed, adjusted,
             ", ".join(exclusions) if exclusions else ("unreported" if exclusions is None else "none"),
-            evaluator_of(doc),
+            evaluator_column(doc),
             metadata.get("instrument_sha256", "unreported"),
             hashlib.sha256(raw).hexdigest(),
         ])

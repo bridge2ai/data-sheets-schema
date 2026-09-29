@@ -412,3 +412,6 @@ def test_the_comparison_report_keys_evaluators_on_evaluator_model_not_display_na
     assert "evaluations (#2927)" not in text
     assert "Measured on the evaluations above, one rating per record." in text
     assert "| VOICE | 3 | 3 / 3 |" in text
+    # #3322: the block names its evaluator by key, so the row whose display
+    # name differs carries that key too.
+    assert "| Opus 5 (1M context) (evaluator claude-opus-5[1m]) |" in text
