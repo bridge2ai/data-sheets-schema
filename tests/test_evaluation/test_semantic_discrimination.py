@@ -392,3 +392,23 @@ def test_the_2026_09_12_reference_set_reproduces_the_issue_and_is_not_written(tm
     after = {p: hashlib.sha256(p.read_bytes()).hexdigest()
              for p in sorted(evaluations.rglob("*")) if p.is_file()}
     assert after == before
+
+
+def test_the_comparison_report_keys_evaluators_on_evaluator_model_not_display_name(tmp_path):
+    """#3319: one committed evaluation's `model.name` is a display label
+    ("Opus 5 (1M context)") while its evaluator_model matches the rest. The
+    blocks key on evaluator_model, as arm_comparison does, so it is one block."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from report_semantic_comparison import report
+
+    def rated(label, total, name):
+        doc = r10("VOICE", label, [1] * total + [0] * (3 - total))
+        doc["model"] = {"name": name, "evaluator_model": "claude-opus-5[1m]"}
+        return doc
+
+    docs = [rated("a", 3, "claude-opus-5[1m]"), rated("b", 2, "claude-opus-5[1m]"),
+            rated("c", 1, "Opus 5 (1M context)")]
+    text = report(_write(tmp_path, docs))
+    assert "evaluations (#2927)" not in text
+    assert "Measured on the evaluations above, one rating per record." in text
+    assert "| VOICE | 3 | 3 / 3 |" in text

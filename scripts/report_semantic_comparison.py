@@ -25,6 +25,17 @@ def evaluator_of(doc: dict) -> str:
     return model.get("name") or model.get("evaluator_model") or "unreported"
 
 
+def evaluator_key(doc: dict) -> str:
+    """The evaluator a discrimination block is keyed on: `model.evaluator_model`,
+    as arm_comparison keys it, else `model.model_id`, else the display name.
+    `model.name` is a display label — one committed evaluation says
+    "Opus 5 (1M context)" where its evaluator_model says "claude-opus-5[1m]" —
+    so keying on it splits one evaluator into two (#3319)."""
+    model = doc.get("model") or {}
+    return (model.get("evaluator_model") or model.get("model_id") or model.get("name")
+            or "unreported")
+
+
 def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     """`cohort` names the evaluations the discrimination block measures — one
     rating per record, e.g. the primaries of a set that also holds repeats.
@@ -88,11 +99,11 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     # arm_comparison does (#3309); one evaluator keeps the unscoped block.
     by_evaluator: dict[str, list[dict]] = {}
     for doc in measured:
-        by_evaluator.setdefault(evaluator_of(doc), []).append(doc)
+        by_evaluator.setdefault(evaluator_key(doc), []).append(doc)
     if len(by_evaluator) <= 1:
         text.extend(render_discrimination(discrimination(measured), left_out=left_out))
     else:
-        evaluator_by_path = {str(path): evaluator_of(doc) for path, doc in documents}
+        evaluator_by_path = {str(path): evaluator_key(doc) for path, doc in documents}
         for evaluator in sorted(by_evaluator):
             text.extend(render_discrimination(
                 discrimination(by_evaluator[evaluator]), scope=f", {evaluator} evaluations",
