@@ -850,6 +850,17 @@ def test_a_cue_in_an_acceptance_aside_does_not_say_why():
     assert withholding_sentences(item(score=3, note=_ACCEPTED_ASIDE)) == []
 
 
+def test_the_report_says_a_cue_in_an_acceptance_aside_was_not_read(tmp_path):
+    """#3264: the aside is the acceptance's scope, not its clause, and the
+    report line says so."""
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(
+            score=3, note=_ACCEPTED_ASIDE)]}]}))
+    lines, flagged = lint_report([tmp_path])
+    assert flagged == 0 and lines[0].startswith(SUBSTANTIVE_ONLY)
+    assert "a withholding cue stands in the scope of an acceptance or concession" in lines[0]
+
+
 def test_a_cue_in_a_disclaimer_aside_is_disclaimed():
     """#3264: a cue in the scope of a disclaimer does not say why and is not
     reported as unread: the disclaimer covers it."""
@@ -868,6 +879,77 @@ def test_a_cue_before_a_disclaimer_in_its_own_clause_still_says_why():
         "but because no errata are recorded.")))
     assert (result.basis, result.verdict) == (STATED, SUBSTANTIVE_ONLY)
     assert all("documents all source data" not in r.sentence for r in result.reasons)
+
+
+def test_a_cue_a_later_disclaimer_takes_back_does_not_send_the_lint_to_its_neighbours():
+    """#3264: a clause that a following "but that is not penalised" takes
+    back is not read for the disclaimer's words, so its cue does not say
+    why, and the neighbouring credit is not read as a reason."""
+    result = lint_q19(item(score=3, note=(
+        "The PROV graph documents all source data. The empty was_derived_from falls short of "
+        "the typed form, but that is not penalised. No errata are recorded.")))
+    assert (result.basis, result.verdict, result.cue_unread) == (
+        UNSTATED, SUBSTANTIVE_ONLY, False)
+
+
+def test_a_label_contrast_in_an_acceptance_aside_does_not_start_the_reason():
+    """#3264: "short of" in an acceptance's aside started the label reason,
+    and the reason then ran on over the credit after the semicolon, so
+    "typed PROV graph otherwise complete" was read as a graph_form reason."""
+    rating = item(score=3, label=(
+        "Prose lineage accepted (short of a full graph); typed PROV graph otherwise complete"),
+        note="No errata are recorded.")
+    result = lint_q19(rating)
+    assert (result.verdict, result.concerns(REPRESENTATION)) == (SUBSTANTIVE_ONLY, [])
+    assert [s for s in withholding_sentences(rating) if s[0] == "score_label"] == []
+
+
+def test_a_label_cue_is_judged_in_the_whole_label():
+    """#3264: a label's cue says why only where the whole label reads its
+    clause. Here the cue follows an acceptance and a comma with no verb of
+    its own, so the basis is unstated (the body's gaps are read too) and
+    the cue is reported as unread; read cut out of the label, "held at 4"
+    stated the basis and the body's graph_form gap went unread."""
+    result = lint_q19(item(score=3, label=(
+        "Prose accepted, was_derived_from empty and held at 4; no errata"),
+        note="The lineage is not given as a PROV graph."))
+    assert (result.basis, result.verdict, result.cue_unread) == (
+        UNSTATED, REPRESENTATION_AND_SUBSTANTIVE, True)
+    assert result.concerns(REPRESENTATION) == ["graph_form"]
+
+
+def test_a_label_clause_that_accepts_is_judged_whole_not_from_the_cut():
+    """#3264: "short of a graph" is cut from "Prose accepted short of a
+    graph", whose clause accepts; judged from the cut it stated the basis.
+    A contrast that names nothing read is about the words before it, so
+    the reason reaches back over the whole clause, as it is judged."""
+    label = "Prose accepted short of a graph whereas complete"
+    rating = item(score=3, label=label, note="No errata are recorded.")
+    result = lint_q19(rating)
+    assert (result.basis, result.verdict, result.cue_unread) == (
+        UNSTATED, SUBSTANTIVE_ONLY, True)
+    assert withholding_sentences(rating) == [("score_label", label)]
+
+
+def test_a_label_cue_in_an_accepting_clause_does_not_state_the_basis():
+    """#3264: the label reason starts at "short of", inside the clause
+    "Prose accepted short of a graph". Its cue is judged by that whole
+    clause, which accepts, so it does not state the basis and the body's
+    gap is read; judged from the cut, the clause accepted nothing."""
+    result = lint_q19(item(score=3, label="Prose accepted short of a graph whereas no errata",
+                           note="The lineage is not given as a PROV graph."))
+    assert (result.basis, result.verdict, result.cue_unread) == (
+        UNSTATED, REPRESENTATION_AND_SUBSTANTIVE, True)
+
+
+def test_a_label_cue_in_an_acceptance_list_does_not_start_the_reason():
+    """#3264: "held at 4" continues the acceptance before the comma, with
+    no verb of its own, so it starts no label reason, although read on its
+    own it would."""
+    rating = item(score=3, label="Prose accepted, held at 4 whereas complete",
+                  note="No errata are recorded.")
+    assert [s for s in withholding_sentences(rating) if s[0] == "score_label"] == []
+    assert lint_q19(rating).verdict == SUBSTANTIVE_ONLY
 
 
 @pytest.mark.parametrize("rating", [
@@ -1103,7 +1185,7 @@ def test_the_report_says_a_cue_was_not_read_rather_than_that_nothing_says_why(tm
                  "for lineage.")]}]}))
     lines, flagged = lint_report([tmp_path])
     assert flagged == 0 and lines[0].startswith(REASON_NOT_DETERMINED)
-    assert ("(a withholding cue shares a clause with an acceptance or concession and was not "
+    assert ("(a withholding cue stands in the scope of an acceptance or concession and was not "
             "read: label reason clauses and body gaps read)") in lines[0]
     assert "nothing says why" not in lines[0]
     result = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--strict", str(tmp_path)])

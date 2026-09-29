@@ -151,7 +151,11 @@ machine-readable form and lineage across fields. So:
   A label's reason clauses are ranges of the label, judged in the whole
   label, so they keep this scope too: "Good despite empty provenance
   fields (no was_derived_from)" names no reason, as the same label with
-  no punctuation names none.
+  no punctuation names none. A cue is judged by its whole clause, not
+  the part of it after a label cut, and a contrast or cue in a clause
+  that is not read starts no label reason, so the credit after it is not
+  read as the rest of one ("Prose lineage accepted (short of a full
+  graph); typed PROV graph otherwise complete").
 
 Where nothing the lint reads names a concern, the verdict is
 `REASON_NOT_DETERMINED`. The rationale may give no reason, give one outside
@@ -458,8 +462,9 @@ class Q19Lint:
     #: withholding scope and no acceptance clause: vocabulary alone.
     mentions: tuple[Reason, ...]
     #: Where the basis is UNSTATED: a withholding cue, neither negated nor
-    #: disclaimed, stands in a clause that accepts or concedes, so what it
-    #: gives as the reason was not read (#3205). The rationale may say why;
+    #: disclaimed, stands in a clause that accepts or concedes, or in that
+    #: clause's aside or list (#3264), so what it gives as the reason was
+    #: not read (#3205). The rationale may say why;
     #: the lint could not tell which words were the reason.
     cue_unread: bool = False
 
@@ -701,8 +706,8 @@ def _says_why(text: str) -> bool:
 
 
 def _cue_clauses(text: str, lo: int = 0, hi: int | None = None):
-    """For each withholding cue in `text` (within `lo`..`hi`, its clauses
-    judged in the whole of `text`) that is neither negated within
+    """For each withholding cue in `text` that starts within `lo`..`hi`
+    (its clause judged whole, in the whole of `text`) that is neither negated within
     `_DISCLAIM_WINDOW` words nor preceded by a disclaiming phrase in its
     clause: whether its clause accepts or concedes (`_accepts`). A cue in a
     clause that is not read for another clause's words is yielded as
@@ -711,18 +716,26 @@ def _cue_clauses(text: str, lo: int = 0, hi: int | None = None):
     hi = len(text) if hi is None else hi
     scoped = _scoped_clauses(text)
     for k, (a, b, read, origin) in enumerate(scoped):
-        a, b = max(a, lo), min(b, hi)
-        if a >= b:
-            continue
+        # The whole clause is judged, not the part of it inside the range:
+        # "short of a graph" in "Prose accepted short of a graph" accepts.
         clause = text[a:b]
         governing = text[scoped[origin][0]:scoped[origin][1]]
         for cue in _WITHHOLDING.finditer(clause):
+            if not lo <= a + cue.start() < hi:
+                continue
             if _negated(clause, cue.start()) or _DISCLAIMER.search(clause[:cue.start()]):
                 continue
             if origin == k:
                 yield _accepts(clause)
             elif _accepts(governing):
                 yield True
+
+
+def _read_in(text: str, lo: int, hi: int) -> bool:
+    """Whether any words of `text[lo:hi]` stand in a clause that is read,
+    its clauses judged in the whole of `text` (`_clauses`)."""
+    return any(read and text[max(a, lo):min(b, hi)].strip()
+               for a, b, read in _clauses(text))
 
 
 def _label_reasons(label: str) -> list[tuple[int, int]]:
@@ -732,6 +745,11 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
     the scope of the clause before it: in "Good despite empty provenance
     fields (no was_derived_from)" the parenthesis is the concession's
     aside and names no reason, as it does with no parenthesis (#3264).
+    For the same reason a contrast or cue that is not read in the whole
+    label (`_read_in`) does not start the reason: in "Prose lineage
+    accepted (short of a full graph); typed PROV graph otherwise complete"
+    the "short of" is the acceptance's aside, so the credit after the
+    semicolon is not read as the rest of a reason.
 
     Clauses end at `_CLAUSE_BREAK` and before a contrasting conjunction
     (`_LABEL_CONJUNCTION`). The reason runs from the first clause carrying a
@@ -760,7 +778,8 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
         for i, start in enumerate(cuts):
             part = label[start:cuts[i + 1] if i + 1 < len(cuts) else b].strip()
             end = cuts[i + 1] if i + 1 < len(cuts) else b
-            if (_LABEL_OPENS.search(part)
+            if _read_in(label, start, end) and (
+                    _LABEL_OPENS.search(part)
                     or any(not accepts for accepts in _cue_clauses(label, start, end))
                     or (_LABEL_NOT.search(part) and len(_kinds(part)) < 2)):
                 if i and not _reasons([("score_label", label, (start, b))]):
@@ -1151,9 +1170,10 @@ def lint_report(paths=(), inspections=(), *, show: bool = False) -> tuple[list[s
         if r.basis == UNSTATED:
             # Only the label's reason clauses and the body's parts naming a
             # gap were read; a part naming no gap was not (#3070, #3146). A
-            # cue in a clause that accepts or concedes was not read either,
-            # so "nothing says why" would be false there (#3205).
-            said = ("a withholding cue shares a clause with an acceptance or concession and "
+            # cue in a clause that accepts or concedes, or in its aside or
+            # list, was not read either, so "nothing says why" would be
+            # false there (#3205, #3264).
+            said = ("a withholding cue stands in the scope of an acceptance or concession and "
                     "was not read" if r.cue_unread else "nothing says why")
             line += f"  ({said}: label reason clauses and body gaps read)"
         doc, status = recorded.get(f.resolve(), (None, None))
