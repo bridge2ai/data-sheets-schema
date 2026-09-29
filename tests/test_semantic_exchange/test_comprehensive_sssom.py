@@ -629,9 +629,10 @@ class TestOnlyCuratedRowsClaimCuration(_Committed):
                 with self.subTest(table=table, slot=slot):
                     self.assertNotEqual(row["object_id"], f"d4d:{slot}")
 
-    def test_a_novel_row_still_asks_for_a_slot_uri_where_none_is_declared(self):
-        """The URI table's ``needs_slot_uri`` reads the status, not the
-        object, so a novel slot with no slot_uri still says yes."""
+    def test_a_committed_novel_row_asks_for_a_slot_uri_only_where_none_is_declared(self):
+        """On the committed table. Every novel slot there declares a
+        slot_uri (``needing slot_uri: 0/301``), so this reads only the "no"
+        half; the fixture test below reads the "yes" half (#3377)."""
         declared = raw_slot_uris(self.schema)
         for slot, row in sorted(self.uri.items()):
             if row["mapping_status"] == "novel_d4d":
@@ -639,18 +640,52 @@ class TestOnlyCuratedRowsClaimCuration(_Committed):
                     self.assertEqual(row["needs_slot_uri"],
                                      "no" if slot in declared else "yes")
 
+    def test_a_novel_row_still_asks_for_a_slot_uri_where_none_is_declared(self):
+        """The URI table's ``needs_slot_uri`` reads the status, not the
+        object, so a novel slot with no slot_uri still says yes. The study
+        schema has no such slot, so this strips ``addressing_gaps``'s
+        ``slot_uri`` from a copy of it (#3377)."""
+        slot, uri_line = "addressing_gaps", "slot_uri: d4d:addressingGaps"
+        text = SCHEMA.read_text(encoding="utf-8")
+        self.assertGreaterEqual(text.count(uri_line), 1)
+        stripped = "\n".join(line for line in text.split("\n")
+                             if line.strip() != uri_line)
+        self.assertNotIn("d4d:addressingGaps", stripped)
+        with tempfile.TemporaryDirectory() as d:
+            changed = Path(d) / SCHEMA.name
+            changed.write_text(stripped, encoding="utf-8")
+            gen = gcsu.ComprehensiveURISSSOMGenerator(changed, TTL, RECS)
+            rows = {r["d4d_slot_name"]: r
+                    for r in gen.generate_comprehensive_uri_sssom("2001-01-01")}
+        row = rows[slot]
+        self.assertEqual((row["mapping_status"], row["d4d_slot_uri_current"]),
+                         ("novel_d4d", ""))
+        self.assertEqual(row["needs_slot_uri"], "yes")
+        for other, r in sorted(rows.items()):
+            if other != slot:
+                with self.subTest(slot=other):
+                    self.assertEqual(r["needs_slot_uri"],
+                                     self.uri[other]["needs_slot_uri"])
+
 
 class TestRecommendationsAudit(_Committed):
     """#2974: since #2935 the recommendations file feeds the table's
-    ``recommended`` rows. Nine surfaced; the audit withdrew eight whose
+    ``recommended`` rows. Nine surfaced; the audit withdrew those eight, whose
     suggested term names another notion, cannot hold the slot's value, or is
-    not a schema.org term, and seven more that a curated target shadows. A
-    withdrawn entry keeps its URI and the reason in ``review_note``."""
+    not a schema.org term, and eight more that a curated target shadows
+    (16 in all; #3376). A withdrawn entry keeps its URI and the reason in
+    ``review_note``."""
 
     WITHDRAWN_FROM_THE_TABLE = {
         "credit_roles", "erratum_url", "identifiers_removed", "limitation_type",
         "missing_value_code", "tool_accuracy", "was_inferred_derived",
         "was_validated_verified",
+    }
+    #: Withdrawn too, but never surfaced: a curated target maps each slot.
+    SHADOWED_BY_A_CURATED_TARGET = {
+        "distribution_dates", "end_date", "precision",
+        "representative_verification", "start_date", "target_dataset",
+        "tools", "version_access",
     }
 
     @classmethod
@@ -670,6 +705,18 @@ class TestRecommendationsAudit(_Committed):
                 self.assertEqual((r["suggested_uri"], r["confidence"]), ("", ""))
                 self.assertIn("#2974", r["review_note"])
                 self.assertNotEqual(self.comp[attr]["mapping_status"], "recommended")
+
+    def test_the_audit_withdrew_the_eight_surfaced_and_eight_shadowed(self):
+        """The docstring's count, held to the file (#3376)."""
+        withdrawn = {a for a, r in self.recs.items()
+                     if r["review_note"].startswith("withdrawn ")}
+        self.assertEqual(withdrawn, self.WITHDRAWN_FROM_THE_TABLE
+                         | self.SHADOWED_BY_A_CURATED_TARGET)
+        self.assertEqual(len(withdrawn), 16)
+        for attr in sorted(self.SHADOWED_BY_A_CURATED_TARGET):
+            with self.subTest(attribute=attr):
+                self.assertEqual(self.comp[attr]["mapping_status"], "mapped")
+                self.assertIn(self.comp[attr]["mapping_source"], ("ttl", "schema"))
 
     def test_every_confidence_names_a_uri(self):
         """``add_slot_uris.py`` selects entries by confidence alone and writes
