@@ -308,6 +308,91 @@ def related_datasets_cmd(records, project, runtime):
         raise SystemExit(1)
 
 
+@evaluate.command("slot-meaning")
+# No existence, readability or directory check at the argument (#3144): click
+# would reject the whole call with a usage error, and the records named beside
+# the bad path would go unreported. The loop reports such a path as not checked.
+@click.argument("records", nargs=-1, required=True, type=click.Path(readable=False))
+@click.option("--json", "as_json", is_flag=True, help="print one JSON document instead of text")
+def slot_meaning_cmd(records, as_json):
+    """Embargo, release-timing and availability text under
+    `confidential_elements` or `sensitive_elements` (#2931).
+
+    A temporary pre-publication embargo is a statement about when data are
+    released, not that they are confidential; recorded under
+    `confidential_elements` it asserts confidential elements on the strength
+    of a release date. Only these two slots are read: the same text is
+    correct in `known_limitations`, `distribution_dates` and the access
+    slots. Access-control language ("withheld from the public release",
+    "controlled access") is not matched.
+
+    Read-only and non-gating: exits 0 whatever it finds, and 1 only when a
+    named record was not checked (2 is a usage error, such as naming no
+    record). A record is not checked when it cannot be read (the path does
+    not exist, is a directory or is not readable; the file is not UTF-8; or
+    the YAML loader raises on it: a syntax error, or anything else, such as
+    an impossible unquoted date), is not a mapping, or repeats a key one of whose
+    dropped earlier values held something the scan reads (#1029): a scoped
+    slot, a key inside one that the scan reads (any but `id`, `source_caveats`
+    and what they hold), or an ancestor such as a second `resources` block
+    holding one. A mapping is judged wherever the scan reaches it, through an
+    alias or a merge key as well as where it is written, and a merged value
+    that an explicit key or an earlier merge overrides is never read, so a
+    key repeated inside it is no reason (#3203), nor is it looked into for a
+    scoped slot a dropped ancestor holds (#3247). A duplicated
+    ancestor whose dropped copies hold no scoped slot hides nothing from this
+    scan and does not stop the record being checked. A record is not checked
+    either when its walk runs past a fixed step budget: aliases can load a
+    small text as a graph with exponentially many paths (#3247), when a merge
+    key reaches the mapping it is written in, or when merges chain deeper
+    than the walk can recurse (#3263). A record that is not
+    checked has none of its findings reported, not even those its kept
+    values carry. A record the diagnostic never looked at is not a clean one,
+    and the other records named in the same call are still reported. Nothing
+    is written.
+    """
+    import json
+
+    from data_sheets_schema import routing_diagnostics as rd
+
+    results = []
+    for record_path in records:
+        try:
+            text = Path(record_path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            results.append((record_path, None, (str(exc).splitlines() or [type(exc).__name__])[0]))
+            continue
+        found, reason = rd.check_text(text)
+        results.append((record_path, found, reason))
+
+    checked = [found for _, found, _ in results if found is not None]
+    unchecked = len(results) - len(checked)
+    if as_json:
+        click.echo(json.dumps({
+            "instrument": rd.INSTRUMENT, "lexicon_sha256": rd.LEXICON_SHA256,
+            "gating": False, "slots": list(rd.SCOPED_SLOTS),
+            "records": [{"path": path, "checked": False, "reason": reason} if found is None else
+                        {"path": path, "checked": True, "count": len(found),
+                         "mismatches": [rd.as_dict(m) for m in found]}
+                        for path, found, reason in results],
+        }, indent=2))
+    else:
+        for path, found, reason in results:
+            if found is None:
+                click.echo(f"{path}\n  not checked: {reason}")
+            elif found:
+                click.echo(path)
+                for mismatch in found:
+                    click.echo(f"  {rd.describe(mismatch)}")
+        total = [m for found in checked for m in found]
+        click.echo("")
+        click.echo(f"{len(total)} slot-meaning mismatch(es) in {sum(1 for f in checked if f)} of "
+                   f"{len(checked)} record(s) checked, {sum(1 for m in total if m.present is True)} "
+                   f"in an entry asserting its elements present; not gating ({rd.INSTRUMENT})")
+    if unchecked:
+        raise click.ClickException(f"{unchecked} record(s) could not be checked")
+
+
 
 @evaluate.command("spelling")
 @click.option('--method', default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
@@ -385,6 +470,46 @@ def spelling_cmd(method, label, project, show_quoted):
             click.echo(f"   {proj:16} {o.context}")
 
 
+@evaluate.command("q19-lint")
+@click.argument("paths", nargs=-1, type=click.Path(exists=True, path_type=Path))
+@click.option("--inspection", "inspections", multiple=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="A recorded Q19 inspection (semantic_errata.md or semantic_review.md, read "
+                   "with the JSON companion beside it where there is one): lint the evaluations "
+                   "it names and report agreement with it. Refused where an evaluation is "
+                   "missing, has no recorded hash, or is not the bytes or the Q19 score the "
+                   "inspection recorded.")
+@click.option("--show", is_flag=True,
+              help="Print the text each reason was read from (a sentence, a label's reason "
+                   "clauses, or the part of a sentence that names a gap).")
+@click.option("--strict", is_flag=True, help="Exit 1 if any rating is flagged.")
+def q19_lint_cmd(paths, inspections, show, strict):
+    """Flag rubric20 Q19 scores held below 5 for how provenance is represented (#2911).
+
+    PATHS are rubric20 semantic evaluation files, or directories searched for
+    *_evaluation.json. A rating is flagged when what says why Q19 is below
+    5 gives a representation or empty-slot reason (an empty
+    was_derived_from, no PROV graph, not machine-traversable, scattered
+    across fields). Where nothing says why, the score label's reason
+    clauses and the parts of the rationale's sentences that name a gap are
+    read instead; a part naming no gap is not read. A clause that accepts
+    a form, concedes, or disclaims a deduction names no reason.
+    Substantive reasons given beside a representation reason are listed. A
+    rating with only substantive reasons, or with no reason the lint can
+    determine, is reported and never shown as a pass. Evaluation files are
+    read, never written.
+    """
+    from data_sheets_schema.q19_rationale_lint import lint_report
+    try:
+        lines, flagged = lint_report(paths, inspections, show=show)
+    except ValueError as exc:
+        raise click.ClickException(str(exc))
+    for line in lines:
+        click.echo(line)
+    if strict and flagged:
+        raise SystemExit(1)
+
+
 @evaluate.command("validate")
 @click.argument("files", nargs=-1, required=True,
                 type=click.Path(exists=True, dir_okay=False, path_type=Path))
@@ -405,3 +530,57 @@ def validate_cmd(files, rubric, input_path, agent_definition, context_path):
     if validate_outputs(list(files), rubric, input_path=input_path,
                         definition_path=agent_definition, context_path=context_path):
         raise click.ClickException("Semantic output validation failed.")
+
+
+@evaluate.command("audit-recall")
+@click.option("--audit", "audits", multiple=True, required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="audit.json to score; repeat once per replicate")
+@click.option("--original", "originals", multiple=True, required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the frozen original_full each --audit reviewed, in the same order")
+@click.option("--ground-truth", "ground_truth", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="held-out ground-truth file to score against")
+@click.option("--arm", default=None, help="arm label to record; never inferred")
+@click.option("--replicate", "replicates", multiple=True,
+              help="replicate label for each --audit, in the same order")
+@click.option("--output", default=None, type=click.Path(dir_okay=False, path_type=Path),
+              help="also write the JSON report here")
+@click.option("--json", "as_json", is_flag=True, help="print the JSON report instead of the summary")
+def audit_recall_cmd(audits, originals, ground_truth, arm, replicates, output, as_json):
+    """Recall of Phase 3 audits against held-out review observations (#2921).
+
+    Offline and read-only: no model call, no source check. Each audit must
+    pass audit_grammar and name its original's sha256 in source_review; only
+    ground-truth entries pinned to that sha256 are scored, so another
+    original gives 0 applicable entries and recall n/a, not 0. The hit rule
+    is provisional until the owner signs it off. Unmatched audit flags are
+    review candidates, never false positives.
+    """
+    import json as _json
+
+    from data_sheets_schema import audit_recall
+    if len(audits) != len(originals):
+        raise click.UsageError("give one --original for each --audit, in the same order")
+    if replicates and len(replicates) != len(audits):
+        raise click.UsageError("give one --replicate for each --audit, or none")
+    if output is not None and output.resolve() in {p.resolve() for p in (*audits, *originals, ground_truth)}:
+        raise click.UsageError("--output names an input; a report never overwrites what it scored")
+    raw = ground_truth.read_bytes()
+    runs = [{"audit": a.read_bytes(), "original": o.read_bytes(), "audit_path": str(a),
+             "original_path": str(o), "replicate": replicates[i] if replicates else None}
+            for i, (a, o) in enumerate(zip(audits, originals))]
+    try:
+        truth = audit_recall.load_ground_truth(raw)
+        value = audit_recall.report(runs, truth, ground_truth_raw=raw,
+                                    ground_truth_label=str(ground_truth), arm=arm)
+    except audit_recall.GroundTruthError as exc:
+        raise click.ClickException("ground truth refused:\n" + "\n".join(
+            f"  {p['at'] or '/'}: {p['problem']}" for p in exc.problems))
+    except audit_recall.AuditRecallError as exc:
+        raise click.ClickException(f"not scored: {exc}")
+    text = _json.dumps(value, indent=2, ensure_ascii=False) + "\n"
+    if output is not None:
+        output.write_text(text, encoding="utf-8")
+    click.echo(text if as_json else audit_recall.render_text(value), nl=False)
