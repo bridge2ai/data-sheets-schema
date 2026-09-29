@@ -420,6 +420,70 @@ def scope_cmd(project, do_check, strict, selected_records, manifest):
         sys.exit(1)
 
 
+@download.command('release-inventory')
+@click.option('--project', callback=project_choice,
+              help='Limit to one project (default: all)')
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
+              default='data/preprocessed/source_manifest.yaml', show_default=True)
+@click.option('--crate-manifest', default=None,
+              help="The crate manifest, or 'none'. Default: the study's "
+                   "data/ro-crate_packages/crate_manifest.yaml, and only when "
+                   "--manifest is the study's default manifest.")
+@click.option('--json', 'as_json', is_flag=True, help='Canonical JSON instead of text.')
+def release_inventory_cmd(project, manifest, crate_manifest, as_json):
+    """Release-level evidence in each project's document corpus (#2914).
+
+    Tier-1 sources, licence/DUA/IRB sources, whether a crate or release
+    record is in the document corpus, and the crate manifest's
+    `document_corpus` policy. A project with none of them cannot fill its
+    identifier, licence or version slots from its bundle, so a cross-project
+    difference there is the corpus, not generation. Read-only.
+    """
+    from data_sheets_schema import release_inventory as ri
+    from data_sheets_schema.corpus import DEFAULT_MANIFEST, default_manifest_path
+
+    m = Path(manifest)
+    if crate_manifest is not None:
+        crate_path = None if crate_manifest.lower() == "none" else Path(crate_manifest)
+        basis = "none selected" if crate_path is None else "selected"
+    elif m == DEFAULT_MANIFEST or m.resolve() == default_manifest_path().resolve():
+        # The crate manifest is study data: it is applied to the study's
+        # manifest and never to a caller's own (#621's rule for the source
+        # manifest, applied one file along). "The study's manifest" is the
+        # file, not its spelling: an absolute, `../` or symlinked path to the
+        # default manifest is the default manifest (#3293/#3296), the
+        # resolved-identity test `Registry.bundles` also uses.
+        m = default_manifest_path()
+        crate_path = m.parents[1] / "ro-crate_packages" / "crate_manifest.yaml"
+        basis = "study default"
+        if not crate_path.is_file():
+            crate_path, basis = None, f"study default absent ({crate_path})"
+    else:
+        crate_path, basis = None, "none: --manifest is not the study default"
+    if crate_path is not None and not crate_path.is_file():
+        raise click.ClickException(f"crate manifest does not exist: {crate_path}")
+    raw = m.read_bytes()
+    crate_raw = crate_path.read_bytes() if crate_path is not None else None
+    names = [project] if project else load_registry(m).projects()
+    try:
+        invs = [ri.inventory(raw, crate_raw, name) for name in names]
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(ri.to_json(invs), nl=False)
+        return
+    click.echo(f"source manifest {m}")
+    click.echo(f"crate manifest  {crate_path if crate_path is not None else '-'} ({basis})")
+    for inv in invs:
+        for line in ri.render(inv):
+            click.echo(line)
+    lacking = ri.lacking_release_evidence(invs)
+    if lacking:
+        click.echo(f"\n⚠️  no release record and no licence/DUA source in the document corpus: "
+                   f"{', '.join(lacking)} — release-level slots (doi, license, version, "
+                   f"issued) are corpus-limited there, not a generation result")
+
+
 @download.command('audit-bundles')
 @click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
