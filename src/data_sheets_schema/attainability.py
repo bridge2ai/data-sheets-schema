@@ -74,12 +74,15 @@ The pinned rubric is resolved the same way. Curator and judge entries are
 hand-written, so a valid file is not always the generator's output; its
 deterministic entries are. A file that cannot be read, is not UTF-8 or
 names a path no file can have is reported with its problems like any
-other invalid file, not raised past them (#3180).
+other invalid file, not raised past them (#3180, #3217).
 
 `credited_despite_absence` is the generator-side check the issue asks
 for: items an evaluation credited although the bundle it scored was
 marked `not_stated_in_source` for them — content from outside the bundle,
-or an invented value. Nothing here changes a score: the rubric, its
+or an invented value. A credit on an item only a route entry marks absent
+is not one: the credit may rest on another route, so it is listed as
+`credited_on_other_route` for a curator and neither counted as a finding
+nor failed by `credited --strict` (#3219). Nothing here changes a score: the rubric, its
 agents and every evaluation stay as they are, and reporting an
 attained-over-attainable basis is a later change.
 """
@@ -101,6 +104,9 @@ FORMAT = "d4d-attainability"
 FORMAT_VERSION = 1
 ATTAINABILITY_DIR = Path("data/attainability")
 STATUSES = ("supported", "partly_supported", "not_stated_in_source", "unknown")
+#: Kinds `credited_despite_absence` reports that are findings; any other
+#: kind (`credited_on_other_route`) is listed for review, never gated (#3219).
+FINDING_KINDS = ("credited", "unjoined")
 #: Statuses that assert support: never written by a deterministic check.
 SUPPORT_STATUSES = ("supported", "partly_supported")
 RUBRIC_PATHS = {"rubric10": "data/rubric/rubric10.txt", "rubric20": "data/rubric/rubric20.txt"}
@@ -224,18 +230,22 @@ def resolve_bytes(path: str, *, md5: str | None = None, sha256: str | None = Non
         raise AttainabilityError(path.replace("\0", "\\0"), ["the path carries a NUL byte, which no file "
                                                              "or committed path can"])
     on_disk = disk if disk is not None else _anchored(path)
-    if on_disk.is_file():
-        try:
-            raw = on_disk.read_bytes()
-        except OSError:          # unreadable here: the committed version may still answer
-            raw = None
-        if raw is not None and _hashes_match(raw, md5, sha256):
-            return raw, {"source": "file on disk", "path": path}
+    try:
+        # `is_file` raises, not answers, on a component longer than NAME_MAX
+        # or a directory it may not search (#3217): unreadable here, so the
+        # committed version may still answer.
+        raw = on_disk.read_bytes() if on_disk.is_file() else None
+    except OSError:
+        raw = None
+    if raw is not None and _hashes_match(raw, md5, sha256):
+        return raw, {"source": "file on disk", "path": path}
     try:
         found = bundle_bytes_for(path, md5=md5, sha256=sha256)
     except GitUnavailable as exc:
         raise AttainabilityError(path, [f"the file on disk is not the pinned bytes and git could not "
                                         f"supply a committed version: {exc}"]) from exc
+    except (OSError, ValueError) as exc:    # a path git cannot take is not a committed path (#3217)
+        raise AttainabilityError(path, [f"neither the file on disk nor git can read this path: {exc}"]) from exc
     if found is None:
         named = " and ".join(f"{k} {v}" for k, v in (("md5", md5), ("sha256", sha256)) if v)
         raise AttainabilityError(path, [f"neither the file on disk nor any committed version of it "
@@ -286,14 +296,20 @@ def _readings(lines: dict[int, tuple[str, str]]) -> Iterable[tuple[str, list[tup
     every break a space; then, where a line ends in a hyphen, the break read
     as nothing with the hyphen dropped (a split word, 'con-' 'sent') and
     with it kept (a hyphenated compound, 'human-' 'subjects') — each with
-    every line's `(number, start, end)` span in that text."""
+    every line's `(number, start, end)` span in that text. In those two
+    readings the continuation line's indentation is part of the break
+    ('con-' '  sent' is 'consent', #3218): layout-preserving PDF and HTML
+    text indents it."""
     numbers = sorted(lines)
     hyphenated = {n for n in numbers if lines[n][1].rstrip().endswith("-")}
     for hyphen in ("space",) + (("drop", "keep") if hyphenated else ()):
-        parts, spans, at = [], [], 0
+        parts, spans, at, joined = [], [], 0, False
         for n in numbers:
             body, sep = lines[n][1], " "
-            if n in hyphenated and hyphen != "space":
+            if joined:
+                body = body.lstrip()
+            joined = n in hyphenated and hyphen != "space"
+            if joined:
                 stripped = body.rstrip()
                 body, sep = (stripped[:-1] if hyphen == "drop" else stripped), ""
             parts += [body, sep]
@@ -645,8 +661,10 @@ def _snippet_problems(snip: Any, lines: dict[int, tuple[str, str]], chunk_of: di
 
 def load(path: Path) -> Attainability:
     """A validated attainability file; raises `AttainabilityError` with every
-    problem when it is not one — a file that cannot be read or is not UTF-8
-    included, so `check` reports it and goes on to the next (#3180)."""
+    problem when it is not one — a file that cannot be read or is not UTF-8,
+    or one naming a path no file can have (a NUL byte, a component longer
+    than the file system allows, a directory it may not search) included, so
+    `check` reports it and goes on to the next (#3180, #3217)."""
     path = Path(path)
     try:
         text = path.read_text(encoding="utf-8")
@@ -654,7 +672,10 @@ def load(path: Path) -> Attainability:
         raise AttainabilityError(path, [f"not UTF-8 text: {exc}"]) from exc
     except OSError as exc:
         raise AttainabilityError(path, [f"cannot be read: {exc.strerror or exc}"]) from exc
-    problems, loaded = validate_text(text, path.name)
+    try:
+        problems, loaded = validate_text(text, path.name)
+    except OSError as exc:     # a read the validator makes that no guard names (#3217)
+        raise AttainabilityError(path, [f"a file it names cannot be read: {exc}"]) from exc
     if loaded is None:
         raise AttainabilityError(path, problems)
     return Attainability(path, loaded.document, loaded.bundle_basis, loaded.rubric_items)
@@ -730,8 +751,11 @@ def unchecked_reason(evaluation: dict[str, Any], attainability: Attainability) -
 def credited_despite_absence(evaluation: dict[str, Any], attainability: Attainability) -> list[dict[str, Any]]:
     """Items `evaluation` credited (a positive score on an applicable item)
     that `attainability` marks `not_stated_in_source` — a value from outside
-    the bundle, or an invented one. A route entry is reported with its route:
-    the credit cannot rest on that route, though it may rest on another. An
+    the bundle, or an invented one: kind `credited`. A route entry never
+    settles the item, so a credit on it is kind `credited_on_other_route`
+    (#3219): it cannot rest on that route, but may rest on another the
+    rubric admits (E1.1's persistent URI), which a curator must read — it
+    is reported for review and is not a finding. An
     item whose name differs from the pinned rubric's is reported as
     `unjoined`, never skipped. An empty list is a measured zero only where
     `absences_checked` is not empty: a file that pins no text of the
@@ -756,7 +780,12 @@ def credited_despite_absence(evaluation: dict[str, Any], attainability: Attainab
                     or item.get("applicability_status") == "not_applicable")
         score = _number(item.get("score"))
         if not excluded and score is not None and score > 0:
-            out.append({**base, "kind": "credited", "score": score})
+            if entry["route"] is None:
+                out.append({**base, "kind": "credited", "score": score})
+            else:
+                out.append({**base, "kind": "credited_on_other_route", "score": score,
+                            "detail": f"the bundle states nothing by the {entry['route']} route; "
+                                      "the credit may rest on another route, for a curator to read"})
     return out
 
 
@@ -826,7 +855,8 @@ def main(argv: list[str] | None = None) -> int:
     credited = sub.add_parser("credited", help="items credited although marked not_stated_in_source")
     credited.add_argument("evaluations", nargs="+", type=Path)
     credited.add_argument("--strict", action="store_true",
-                          help="exit 1 on any finding (a row reported unchecked is not one)")
+                          help="exit 1 on any finding (a row reported unchecked, or a credit "
+                               "on an item a route entry leaves open, is not one)")
     args = parser.parse_args(argv)
 
     if args.command == "derive":
@@ -862,7 +892,7 @@ def main(argv: list[str] | None = None) -> int:
         for problem in exc.problems:
             print(f"  - {problem}")
         return 1
-    findings = 0
+    findings = to_review = 0
     for row in rows:
         bundle = row["bundle"]
         parts = [bundle["md5"][:8] if bundle else "bundle unknown"] + ([row["attainability"]] if row["attainability"] else [])
@@ -870,14 +900,18 @@ def main(argv: list[str] | None = None) -> int:
                      else f"{row['rubric']} checked against {', '.join(row['absences_checked'])}")
         print(f"{row['evaluation']}: " + " — ".join(parts))
         for f in row["findings"]:
-            findings += 1
+            if f["kind"] in FINDING_KINDS:
+                findings += 1
+            else:
+                to_review += 1
             route = f" (route {f['route']})" if f["route"] else ""
             print(f"  {f['kind']}: {f['item_id']}{route} {f.get('score', '')} {f.get('detail', '')}".rstrip())
     covered = sum(1 for row in rows if row["attainability"])
     checked = sum(1 for row in rows if row["unchecked"] is None)
     # A row that could yield no finding is counted apart from a measured zero (#3181).
     print(f"{len(rows)} evaluation(s), {covered} on a bundle version with an attainability file, "
-          f"{checked} checked against at least one absence, {findings} finding(s)")
+          f"{checked} checked against at least one absence, {findings} finding(s)"
+          + (f", {to_review} credit(s) on another route to review" if to_review else ""))
     return 1 if (args.strict and findings) else 0
 
 

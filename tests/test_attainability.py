@@ -421,6 +421,10 @@ def _entry_over(check, text):
     ("ethics_review", "the eth-\nics committee", [1, 2]),
     ("ethics_review", "under the university's human-\nsubjects protections", [1, 2]),   # a compound
     ("consent_text", "an opt-\nout model", [1, 2]),
+    # An indented continuation line (#3218): the indentation is part of the break.
+    ("consent_text", "Participants gave con-\n  sent", [1, 2]),
+    ("ethics_review", "the eth-\n    ics committee", [1, 2]),
+    ("ethics_review", "the eth-  \n\t ics committee", [1, 2]),
     ("dataset_citation", "Users should\n\nreference it as", [1, 2, 3]),         # across a blank line
 ])
 def test_a_statement_a_line_break_splits_is_not_an_absence(check, text, hit_lines):
@@ -515,11 +519,13 @@ def test_a_synthetic_credit_on_an_absent_item_is_flagged():
     _item(evaluation, "E1.1")["score"] = "1"
     _item(evaluation, "E6.1")["score"] = 1                        # unknown: not flagged
     found = {(f["kind"], f["item_id"], f["route"]) for f in at.credited_despite_absence(evaluation, loaded)}
-    assert found == {("credited", "E4.4", None), ("credited", "E1.1", "doi_rrid")}
+    # E1.1's entry speaks for the DOI/RRID route only (#3219): its credit may
+    # rest on the persistent-URI route, so it is for review, not a finding.
+    assert found == {("credited", "E4.4", None), ("credited_on_other_route", "E1.1", "doi_rrid")}
     _item(evaluation, "E4.4").update(applicable=False, applicability_status="not_applicable")
     _item(evaluation, "E10.2")["name"] = "Something else"
     found = {(f["kind"], f["item_id"]) for f in at.credited_despite_absence(evaluation, loaded)}
-    assert found == {("credited", "E1.1"), ("unjoined", "E10.2")}
+    assert found == {("credited_on_other_route", "E1.1"), ("unjoined", "E10.2")}
     assert at.credited_despite_absence(_chorus_evaluation("rubric20", "CHORUS_v7_rep2_r20_rating1_evaluation.json"),
                                        loaded) == []
 
@@ -698,3 +704,71 @@ def test_a_bundle_path_carrying_a_nul_byte_is_a_problem_not_a_traceback():
     assert problems == ["bundle: the path carries a NUL byte, which no file or committed path can"]
     with pytest.raises(at.AttainabilityError, match=r"CHORUS\\0x\.txt: the path carries a NUL byte"):
         at.resolve_bytes(doc["bundle"]["path"], md5=CHORUS_MD5)
+
+
+def _credited_main(tmp_path, evaluation, *flags):
+    """`credited` over one CHORUS rubric10 evaluation, its record's
+    provenance naming the bundle version the CHORUS file is about."""
+    record = tmp_path / "CHORUS_provenance.yaml"
+    record.write_text(yaml.safe_dump({"inputs": {"bundle_path": CHORUS, "bundle_md5": CHORUS_MD5}}),
+                      encoding="utf-8")
+    path = tmp_path / "CHORUS_evaluation.json"
+    path.write_text(json.dumps(evaluation), encoding="utf-8")
+    with mock.patch.object(pv, "record_path_for", return_value=record):
+        return at.main(["credited", *flags, str(path)])
+
+
+def test_a_credit_on_an_item_a_route_entry_leaves_open_is_for_review_not_a_finding(tmp_path, capsys):
+    """#3219: E1.1 accepts a persistent URI, which no pattern settles, so an
+    evaluation crediting it on 'id: ark:/12345/chorus-release-1' may be
+    right. It failed `credited --strict` as a finding; it is listed for a
+    curator and the gate passes. A credit on a settled absence still fails."""
+    evaluation = _chorus_evaluation()
+    _item(evaluation, "E1.1")["score"] = 1
+    assert _credited_main(tmp_path, evaluation, "--strict") == 0
+    out = capsys.readouterr().out
+    assert "  credited_on_other_route: E1.1 (route doi_rrid) 1.0 the bundle states nothing by the doi_rrid route" in out
+    assert out.rstrip().endswith("1 checked against at least one absence, 0 finding(s), "
+                                 "1 credit(s) on another route to review")
+    _item(evaluation, "E4.4")["score"] = 1
+    assert _credited_main(tmp_path, evaluation, "--strict") == 1
+    out = capsys.readouterr().out
+    assert "  credited: E4.4 1.0\n" in out and out.rstrip().endswith(
+        "1 finding(s), 1 credit(s) on another route to review")
+    assert _credited_main(tmp_path, evaluation) == 0                         # reported, not gated
+
+
+def test_a_bundle_path_no_file_system_can_hold_is_reported_and_the_next_file_still_checked(tmp_path, capsys):
+    """#3217: a path component longer than NAME_MAX made `is_file` raise
+    OSError ('File name too long') out of `resolve_bytes`, `load` and
+    `check`, and the files after it went unchecked."""
+    doc = yaml.safe_load(CHORUS_FILE.read_text(encoding="utf-8"))
+    doc["bundle"]["path"] = "data/" + "a" * 300 + "/CHORUS_preprocessed.txt"
+    bad = tmp_path / at.file_name(doc)
+    bad.write_text(at.dump(doc), encoding="utf-8")
+    assert at.main(["check", str(bad), str(CHORUS_FILE)]) == 1
+    out = capsys.readouterr().out
+    assert f"INVALID {bad}\n  - bundle: " in out
+    assert f"ok {CHORUS_FILE} (file on disk)" in out                 # checked after it
+
+
+def test_a_path_through_a_directory_that_cannot_be_searched_falls_back_to_git(tmp_path):
+    """#3217: on Python 3.13 `is_file` raises EACCES rather than answering
+    False; the committed version may still answer, and when none does the
+    problem is named."""
+    raw = b"bundle bytes\n"
+    md5, sha = hashlib.md5(raw).hexdigest(), hashlib.sha256(raw).hexdigest()
+    locked = mock.Mock(spec=Path)
+    locked.is_file.side_effect = PermissionError(13, "Permission denied")
+    entry = {"commit": "c" * 40, "date": "2026-09-01", "matched_on": ["md5", "sha256"]}
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=(raw, entry)):
+        assert at.resolve_bytes("data/b.txt", md5=md5, sha256=sha, disk=locked)[1]["source"] == "git blob"
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=None):
+        with pytest.raises(at.AttainabilityError, match="hashes to md5"):
+            at.resolve_bytes("data/b.txt", md5=md5, disk=locked)
+    with mock.patch.object(pv, "bundle_bytes_for", side_effect=OSError(63, "File name too long")):
+        with pytest.raises(at.AttainabilityError, match="nor git can read this path"):
+            at.resolve_bytes("data/b.txt", md5=md5, disk=locked)
+    with mock.patch.object(at, "validate_text", side_effect=OSError(13, "Permission denied")):
+        with pytest.raises(at.AttainabilityError, match="a file it names cannot be read"):
+            at.load(CHORUS_FILE)

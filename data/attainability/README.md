@@ -14,7 +14,8 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
 - **The text is read line by line and whole.** The bundles are hard-wrapped,
   so a statement a line break splits still matches: the break is read as a
   space and, after a hyphen, as a split word (`con-` `sent`) or a hyphenated
-  compound (`human-` `subjects`). A word split with no hyphen is not read
+  compound (`human-` `subjects`), the continuation line's indentation read as
+  part of the break. A word split with no hyphen is not read
   that way; every entry's note says so.
 - **A valid file's deterministic entries are the generator's output**, type
   for type: `hit_count: false` or snippet lines `[45.0, 45]` are refused,
@@ -43,6 +44,9 @@ was checked against, and reports a row whose file can yield no finding as
 pins no text of the evaluation's rubric (the CHORUS file and every rubric20
 evaluation), or one that marks none of that rubric's items absent — and
 counts those rows apart from the ones checked, whose zero is a measurement.
+A credit on an item only a route entry marks absent (E1.1, whose persistent-URI
+route no pattern settles) is listed as `credited_on_other_route` for a curator
+to read, and is neither a finding nor a `--strict` failure.
 
 | File | Bundle | Entries |
 |---|---|---|
