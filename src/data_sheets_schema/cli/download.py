@@ -446,10 +446,13 @@ def release_inventory_cmd(project, manifest, crate_manifest, as_json):
     if crate_manifest is not None:
         crate_path = None if crate_manifest.lower() == "none" else Path(crate_manifest)
         basis = "none selected" if crate_path is None else "selected"
-    elif m == DEFAULT_MANIFEST:
+    elif m == DEFAULT_MANIFEST or m.resolve() == default_manifest_path().resolve():
         # The crate manifest is study data: it is applied to the study's
         # manifest and never to a caller's own (#621's rule for the source
-        # manifest, applied one file along).
+        # manifest, applied one file along). "The study's manifest" is the
+        # file, not its spelling: an absolute, `../` or symlinked path to the
+        # default manifest is the default manifest (#3293/#3296), the
+        # resolved-identity test `Registry.bundles` also uses.
         m = default_manifest_path()
         crate_path = m.parents[1] / "ro-crate_packages" / "crate_manifest.yaml"
         basis = "study default"

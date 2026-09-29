@@ -1,7 +1,9 @@
 """Release-level corpus inventory (#2914): what each document corpus can say
 about the release, read from the manifests' bytes alone."""
 import builtins
+import io
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -32,6 +34,14 @@ projects:
       - id: page
         source_type: tutorial
         processed_file: page.txt
+  AGREEMENT:
+    - id: dua
+      source_type: dua
+      processed_file: dua.txt
+  ETHICS:
+    - id: irb
+      source_type: irb
+      processed_file: irb.txt
 """
 
 
@@ -122,7 +132,13 @@ def test_unreadable_crate_manifest_and_undeclared_project_raise_valueerror():
 def test_pure_and_byte_identical(monkeypatch):
     def refuse(*a, **k):
         raise AssertionError("release_inventory must not open files")
+    # Every route to a file descriptor, not only the builtin: pathlib's
+    # Path.open calls io.open directly and never looks up builtins.open
+    # (#3294), and os.open is the level both sit on.
     monkeypatch.setattr(builtins, "open", refuse)
+    monkeypatch.setattr(io, "open", refuse)
+    monkeypatch.setattr(os, "open", refuse)
+    monkeypatch.setattr(Path, "open", refuse)
     monkeypatch.setattr(Path, "read_bytes", refuse)
     monkeypatch.setattr(Path, "read_text", refuse)
     first = ri.to_json([committed(p) for p in ("AI_READI", "CHORUS", "CM4AI", "VOICE")])
@@ -159,3 +175,39 @@ def test_a_licence_source_alone_is_release_level_evidence():
     # EXTERNAL has no release record but a licence source; BARE has neither.
     invs = [ri.inventory(NEUTRAL, None, p) for p in ("EXTERNAL", "BARE")]
     assert ri.lacking_release_evidence(invs) == ["BARE"]
+
+
+def test_a_dua_source_alone_is_release_level_evidence_and_an_irb_alone_is_not():
+    # A DUA states the terms a dataset is released under; an IRB protocol
+    # does not (#3295). Neither project has a release record or a licence.
+    invs = [ri.inventory(NEUTRAL, None, p) for p in ("AGREEMENT", "ETHICS")]
+    assert [e["source_id"] for e in invs[0]["governance"]["DUA"]] == ["dua"]
+    assert [e["source_id"] for e in invs[1]["governance"]["IRB"]] == ["irb"]
+    assert ri.lacking_release_evidence(invs) == ["ETHICS"]
+
+
+@pytest.mark.parametrize("declared", ["Exclude", " EXCLUDE ", "exclude"])
+def test_the_crate_policy_is_case_folded_as_rocrate_normalize_folds_it(declared):
+    # rocrate_normalize lower-cases document_corpus before deciding (#3297).
+    crates = f"projects:\n  EXTERNAL:\n    document_corpus: '{declared}'\n".encode()
+    assert ri.inventory(NEUTRAL, crates, "EXTERNAL")["crate_policy"]["document_corpus"] == "exclude"
+
+
+@pytest.mark.parametrize("spelling", ["absolute", "dotdot", "symlink"])
+def test_cli_treats_any_spelling_of_the_study_manifest_as_the_study_default(spelling, tmp_path, monkeypatch):
+    # The study default is a file, not a spelling (#3293/#3296).
+    monkeypatch.chdir(ROOT)
+    default = ROOT / "data/preprocessed/source_manifest.yaml"
+    if spelling == "absolute":
+        m = str(default)
+    elif spelling == "dotdot":
+        m = "data/preprocessed/../preprocessed/source_manifest.yaml"
+    else:
+        link = tmp_path / "linked_manifest.yaml"
+        link.symlink_to(default)
+        m = str(link)
+    r = CliRunner().invoke(release_inventory_cmd, ["--manifest", m, "--project", "CHORUS"])
+    assert r.exit_code == 0, r.output
+    assert "(study default)" in r.output
+    assert "crate policy: document_corpus: exclude" in r.output
+    assert "not the study default" not in r.output
