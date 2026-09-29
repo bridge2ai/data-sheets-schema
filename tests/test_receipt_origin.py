@@ -1507,7 +1507,8 @@ class DeriveSpellings(Base):
                          # #3386: whole words only, in a program that is not a reader
                          "python scripts/rederive core_x.py", "python scripts/derive core-x.py",
                          "python scripts/derive core.py", "python scripts/derive_core x.py",
-                         "python scripts/re.derive core"):
+                         "python scripts/re.derive core", "python scripts/derive corex.py",
+                         "python scripts/rederive core"):
             with self.subTest(spelling=spelling):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
