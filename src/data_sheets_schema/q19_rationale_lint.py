@@ -126,7 +126,23 @@ machine-readable form and lineage across fields. So:
   than that nothing says why (#3205). A clause that opens with "but", "whereas" or "however", and
   disclaims without naming a concern of its own, is about the clause
   before it, which is not read either ("the empty was_derived_from is
-  noted but not penalised").
+  noted but not penalised"). A clause that is not read keeps its scope
+  across the commas and parentheses that split what it is about (#3248):
+  after it, an aside in parentheses is not read, verb or not, nor is a
+  fragment with no finite verb (a list item: "nothing is deducted for the
+  empty derivation slots (was_derived_from, parent_datasets)", "not
+  because of the empty was_derived_from, parent_datasets or PROV graph"),
+  and a disclaimer that has not yet reached its verb ("not because
+  was_derived_from, parent_datasets and the PROV graph are empty") takes
+  the fragment that supplies it. A disclaimer closing a list takes the
+  list ("the empty was_derived_from, parent_datasets and PROV graph are
+  noted, but that is not a reason to withhold 5"). The scope ends at a
+  semicolon, colon or dash, at a conjunction, and at a fragment with a
+  finite verb of its own after a complete clause. A verbless fragment
+  may be an item of an outer list instead, and the lint does not guess,
+  so it is not read: the committed 09-11 CHORUS v7 rep1 rating loses "and
+  no structured was_derived_from or parent_datasets linkage" after a
+  concession, its verdict unchanged.
 
 Where nothing the lint reads names a concern, the verdict is
 `REASON_NOT_DETERMINED`. The rationale may give no reason, give one outside
@@ -191,8 +207,8 @@ and missing data is documented with reasons at instance level", which says
 the slot is populated. A sentence that says why the score is below 5 is
 still read whole, less the clauses that accept, concede or disclaim. So a
 sentence that names a populated slot as credit beside its reason would be
-read as giving that reason (#3128). Of the 88 empty-slot reasons read from
-the 133 committed ratings, 78 name the slot in a clause saying something is
+read as giving that reason (#3128). Of the 87 empty-slot reasons read from
+the 133 committed ratings, 77 name the slot in a clause saying something is
 empty, absent or negated; the other 10 name it in a list or parenthesis
 whose emptiness a neighbouring clause of the same sentence states ("the dedicated derivation
 fields (was_derived_from, parent_datasets) are empty", "No version history,
@@ -547,19 +563,100 @@ def _clauses(text: str) -> list[tuple[int, int, bool]]:
     is noted but not penalised", "was_derived_from is empty, but that is
     not a reason to withhold 5". An acceptance names its own object ("no
     PROV graph is provided, but prose is accepted"), so it removes only
-    itself."""
-    clauses, pos = [], 0
+    itself.
+
+    A clause that is not read keeps its scope across the commas and
+    parentheses that split what it is about (`_in_scope`, #3248), so a slot
+    named in a list or an aside of a disclaimer is not read as a reason:
+    "nothing is deducted for the empty derivation slots (was_derived_from,
+    parent_datasets)", "not because of the empty was_derived_from,
+    parent_datasets or PROV graph", "not because was_derived_from,
+    parent_datasets and the PROV graph are empty", "despite the dedicated
+    fields (was_derived_from, parent_datasets) being empty". Where the
+    words do not say whether a fragment continues the clause or starts one
+    of its own, it is not read."""
+    clauses, seps, pos, sep = [], [], 0, ""
     for m in _CLAUSE.finditer(text):
         clauses.append([pos, m.start(), True])
-        pos = m.end()
+        seps.append(sep)
+        pos, sep = m.end(), m.group(0).strip()
     clauses.append([pos, len(text), True])
+    seps.append(sep)
     for k, clause in enumerate(clauses):
         a, b, _ = clause
         clause[2] = not _unread(text[a:b])
         if (k and _CONTRAST_OPENS.match(text, a) and _disclaims(text[a:b])
                 and not _names_concern(text[a:b])):
-            clauses[k - 1][2] = False
+            # The disclaimed clause, and the list or aside it closes.
+            j = k - 1
+            clauses[j][2] = False
+            while j and seps[j] in _SCOPE_SEPARATORS and not _FINITE.search(
+                    text[clauses[j - 1][0]:clauses[j - 1][1]]):
+                j -= 1
+                clauses[j][2] = False
+    _in_scope(text, clauses, seps)
     return [(a, b, read) for a, b, read in clauses]
+
+
+#: What splits a clause's own list or aside from it: a comma or a
+#: parenthesis. A semicolon, colon, dash or conjunction starts a clause of
+#: its own.
+_SCOPE_SEPARATORS = frozenset({",", "(", ")"})
+#: A finite or auxiliary verb: a fragment carrying one says something of its
+#: own; a fragment carrying none is a list item or an aside of the clause
+#: before it ("was_derived_from", "parent_datasets or PROV graph", "being
+#: empty"). A lexical verb outside this list is not seen, so such a fragment
+#: after a clause that is not read is not read either: the rule reads less
+#: rather than guess.
+_FINITE = re.compile(
+    r"\b(?:is|are|was|were|be|been|has|have|had|does|do|did|can|cannot|could|would"
+    r"|should|will|may|might|must)\b|n't\b", _I)
+
+
+def _in_scope(text: str, clauses: list[list], seps: list[str]) -> None:
+    """Carry the scope of each clause that is not read forward, in place
+    (#3248).
+
+    A fragment continues the clause before it when that clause is not read,
+    only a comma or a parenthesis (`_SCOPE_SEPARATORS`) divides them, and
+    the fragment does not open with a conjunction of its own
+    (`_OWN_CLAUSE`). A continuing fragment is not read where:
+
+    - it opens or stands inside a parenthesis opened in that scope, or ends
+      one: an aside is about what it follows, verb or not;
+    - it has no finite verb (`_FINITE`): a list item or an aside of the
+      clause ("was_derived_from", "parent_datasets or PROV graph");
+    - the clause is a disclaimer with no finite verb of its own, so it has
+      not yet said what it disclaims ("not because was_derived_from"): the
+      fragment that supplies the verb ("parent_datasets and the PROV graph
+      are empty") completes the disclaimer and is not read either.
+
+    A continuing fragment with a finite verb after a complete clause says
+    something of its own and keeps its reading ("Although the lineage is
+    complete in prose, was_derived_from is empty")."""
+    depth, pending = 0, False
+    for k, clause in enumerate(clauses):
+        a, b, read = clause
+        fragment = text[a:b]
+        if not (k and not clauses[k - 1][2] and seps[k] in _SCOPE_SEPARATORS
+                and not _OWN_CLAUSE.match(fragment)):
+            depth, pending = 0, False
+        elif seps[k] == "(" or (seps[k] == ")" and depth) or depth:
+            depth += {"(": 1, ")": -1}.get(seps[k], 0)
+            clause[2] = False
+        elif not _FINITE.search(fragment):
+            clause[2] = False
+        elif pending:
+            clause[2], pending = False, False
+        if not clause[2] and _disclaims(fragment) and not _FINITE.search(fragment):
+            pending = True
+
+
+#: A fragment opening with one of these was split at a conjunction and
+#: carries its own reading.
+_OWN_CLAUSE = re.compile(
+    r"(?:but|whereas|however|although|even though|though|despite|in spite of"
+    r"|regardless of|irrespective of)\b", _I)
 
 
 def _says_why(text: str) -> bool:

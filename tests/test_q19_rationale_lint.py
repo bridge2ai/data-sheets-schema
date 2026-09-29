@@ -694,6 +694,103 @@ def test_a_label_absence_clause_naming_one_kind_or_opening_with_its_word_is_read
         REPRESENTATION_AND_SUBSTANTIVE, ["graph_form"], ["version_history"])
 
 
+#: #3248: a disclaimer, concession or acceptance keeps its scope across the
+#: parentheses and comma lists that split what it is about.
+_SCOPED = [
+    # The Codex scenario: a parenthesis names the slots the disclaimer covers.
+    "Held at 3 because no errata are recorded; nothing is deducted for the empty derivation "
+    "slots (was_derived_from, parent_datasets).",
+    # A comma list after "not because of".
+    "Held at 3 because no errata are recorded, not because of the empty was_derived_from, "
+    "parent_datasets or PROV graph.",
+    # A disclaimer with no verb yet: the fragment that supplies it completes it.
+    "Held at 3 not because was_derived_from, parent_datasets and the PROV graph are empty, "
+    "but because no errata are recorded.",
+    # A concession around a parenthesis, and the words after it closes.
+    "Held at 3 because no errata are recorded, despite the dedicated fields "
+    "(was_derived_from, parent_datasets) being empty.",
+    # An aside of a disclaimer is about it, verb or not.
+    "Held at 3 because no errata are recorded; nothing is deducted for the prose form "
+    "(the derivation slots are empty).",
+    # An acceptance whose object is listed.
+    "Held at 3 because no errata are recorded; the rubric accepts prose lineage, typed "
+    "links, PROV graph or none.",
+]
+
+
+@pytest.mark.parametrize("note", _SCOPED)
+def test_a_disclaimer_keeps_its_scope_across_parentheses_and_lists(note):
+    """#3248: splitting at a parenthesis or a comma left the slots named in
+    a disclaimer's list as reasons of their own, so a rating that says in
+    so many words that nothing is deducted for them was flagged."""
+    result = lint_q19(item(score=3, note=note))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, SUBSTANTIVE_ONLY, []), note
+    assert result.concerns(SUBSTANTIVE) == ["version_history"]
+
+
+def test_a_disclaimer_keeps_its_scope_back_over_the_list_it_closes():
+    """#3248: "…, but that is not a reason to withhold 5" disclaims the whole
+    list before it, not only its last item."""
+    result = lint_q19(item(note=(
+        "The empty was_derived_from, parent_datasets and PROV graph are noted, but that is not "
+        "a reason to withhold 5. No errata are recorded.")))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        UNSTATED, SUBSTANTIVE_ONLY, [])
+    # A clause of its own before the list is read.
+    kept = lint_q19(item(note=(
+        "No errata are recorded, the empty was_derived_from, parent_datasets and PROV graph are "
+        "noted, but that is not a reason to withhold 5.")))
+    assert (kept.verdict, kept.concerns(REPRESENTATION)) == (SUBSTANTIVE_ONLY, [])
+    assert kept.concerns(SUBSTANTIVE) == ["version_history"]
+
+
+@pytest.mark.parametrize("note, concern", [
+    # A fragment with a finite verb after a complete concession says its own.
+    ("Although the lineage is complete in prose, was_derived_from is empty, which holds it at 4.",
+     "empty_slot"),
+    # A parenthesis after a clause that is read is read.
+    ("Held at 4 because the derivation slots are empty (was_derived_from, parent_datasets).",
+     "empty_slot"),
+    # A semicolon ends the scope.
+    ("Held at 4 because nothing is deducted for prose; was_derived_from empty.", "empty_slot"),
+    # A conjunction opens a clause of its own.
+    ("Held at 4: nothing is deducted for the prose form, but no PROV graph.", "graph_form"),
+])
+def test_a_disclaimer_scope_ends_where_a_clause_of_its_own_begins(note, concern):
+    result = lint_q19(item(note=note))
+    assert result.flagged and concern in result.concerns(REPRESENTATION), note
+
+
+def test_a_verbless_fragment_after_an_unread_clause_is_not_read():
+    """#3248, the cost: a fragment with no finite verb after a clause that
+    is not read may be its list item or an item of an outer list, and the
+    lint does not guess. It is not read either way, so the reason it may
+    give is lost rather than a disclaimed slot flagged. On the committed
+    09-11 CHORUS v7 rep1 rating this drops "and no structured
+    was_derived_from or parent_datasets linkage" after a concession; its
+    verdict does not move (graph_form is read elsewhere)."""
+    result = lint_q19(item(note=(
+        "Held at 4 because no errata are recorded despite the changelog being public, "
+        "and was_derived_from empty.")))
+    assert (result.verdict, result.concerns(REPRESENTATION)) == (SUBSTANTIVE_ONLY, [])
+    chorus = lint_file(EVALUATION_DIRS[0] / "CHORUS_v7_rep1_r20_rating1_evaluation.json")
+    assert chorus.verdict == REPRESENTATION_AND_SUBSTANTIVE
+    assert chorus.concerns(REPRESENTATION) == ["graph_form"]
+    assert not any("parent_datasets linkage" in r.clause for r in chorus.reasons)
+
+
+def test_strict_passes_a_disclaimed_list(tmp_path):
+    """#3248: the Codex scenario exits 0 under --strict."""
+    from data_sheets_schema.cli import cli
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(
+            score=3, note=_SCOPED[0])]}]}))
+    result = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--strict", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    assert "substantive_only" in result.output and "0 flagged of 1" in result.output
+
+
 def test_a_score_below_maximum_with_no_reason_is_reported_as_such():
     result = lint_q19(item(note="Good provenance overall."))
     assert (result.verdict, result.flagged) == (REASON_NOT_DETERMINED, False)
@@ -1041,7 +1138,7 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     base = ROOT / "data/evaluation_llm/rubric20_semantic"
     reasons = [(path.relative_to(base).as_posix(), r) for path in ratings
                for r in lint_file(path).reasons if r.concern == "empty_slot"]
-    assert len(reasons) == 88
+    assert len(reasons) == 87
     elsewhere = {(path, r.clause): r.sentence for path, r in reasons if not empty.search(r.clause)}
     assert set(elsewhere) == set(_EMPTY_IN_A_NEIGHBOURING_CLAUSE)
     for key, said in _EMPTY_IN_A_NEIGHBOURING_CLAUSE.items():
