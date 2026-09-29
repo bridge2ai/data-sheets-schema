@@ -51,7 +51,8 @@ runs across a flattened table.
 snippet's own markers do not express (`EXPRESSED_BY`: a snippet's "will"
 expresses a "Future ..." heading's status, #3232), and the value at the receipt's slot carries no
 marker expressing that status. `modal_dropped`: the snippet itself carries
-the marker and the value does not. A snippet that occurs more than once in
+the marker and the value does not, one flag per status (a snippet's "will"
+and "future" are one dropped status, #3252). A snippet that occurs more than once in
 its chunk is flagged only when every occurrence's context carries the
 class.
 
@@ -810,11 +811,11 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
             bucket = flags[slot_class(slot)]
             base = {"slot": slot, "chunk": cid, "snippet": snippet[:80],
                     "snippet_line": view.line_of(found[0][0][0]) if found else None}
-            for cls, term in classes(snippet).items():
-                if not expresses(value_classes, cls):
-                    bucket.append({"rule": "modal_dropped", **base, "class": cls, "marker": term,
-                                   "source_line": base["snippet_line"],
-                                   **_final(final, record, slot, cls)})
+            for cls, term, equivalent in _dropped_statuses(classes(snippet), value_classes):
+                bucket.append({"rule": "modal_dropped", **base, "class": cls, "marker": term,
+                               **({"equivalent_markers": equivalent} if equivalent else {}),
+                               "source_line": base["snippet_line"],
+                               **_final(final, record, slot, cls)})
             for cls, d in (lost or {}).items():
                 if not expresses(value_classes, cls):
                     bucket.append({"rule": "governor_outside_snippet", **base, "class": cls,
@@ -837,6 +838,28 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
             "gating": False, "counts": {**counts, "flags": by_rule, "slots_flagged": slots},
             "flags": flags["value"], "label_slot": flags["label"], "unlocated": unlocated[:20],
             "summary": summary, "assurance": ASSURANCE}
+
+
+def _dropped_statuses(snippet_classes: dict[str, str], value_classes
+                      ) -> list[tuple[str, str, dict[str, str]]]:
+    """[(class, marker, {equivalent class: marker})] for each status the
+    snippet carries and the value does not express, one per status.
+
+    A status is a class of `EXPRESSED_BY`: a snippet carrying both "will"
+    (planned) and "future" (prospective) carries one not-yet status, so a
+    value that drops both is one `modal_dropped`, as a snippet carrying two
+    planned markers is (#3252). The first class in the snippet's order is
+    reported; the equivalent classes it absorbed are listed beside it."""
+    out: list[tuple[str, str, dict[str, str]]] = []
+    for cls, term in snippet_classes.items():
+        if expresses(value_classes, cls):
+            continue
+        prior = next((e for e in out if cls in EXPRESSED_BY[e[0]]), None)
+        if prior is not None:
+            prior[2][cls] = term
+        else:
+            out.append((cls, term, {}))
+    return out
 
 
 def _final(final: dict[str, Any] | None, record: dict[str, Any], slot: str, cls: str) -> dict[str, Any]:

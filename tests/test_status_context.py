@@ -589,6 +589,28 @@ def test_a_governor_the_snippets_own_marker_expresses_is_not_lost(heading):
     assert _rules(panel) == [("modal_dropped", "x", "planned")]
 
 
+@pytest.mark.parametrize("snippet,equivalent", [
+    ("will publish future imaging waveforms", {"prospective": "future"}),
+    ("will publish the waveforms and plans to add labels", None),
+])
+def test_a_dropped_status_is_one_modal_dropped_whichever_equivalent_markers_carry_it(snippet, equivalent):
+    # #3252: planned and prospective are one status (EXPRESSED_BY), so a
+    # value that drops a snippet's "will" and "future" is one loss, as it is
+    # for a snippet carrying two planned markers.
+    doc = f"The consortium {snippet}.\n"
+    out = _run(doc, [("x", snippet)], {"x": "The consortium publishes imaging waveforms."})
+    assert _rules(out) == [("modal_dropped", "x", "planned")]
+    assert out["flags"][0]["marker"] == "will"
+    assert out["flags"][0].get("equivalent_markers") == equivalent
+    assert out["counts"]["flags"]["modal_dropped"]["value"] == 1
+    # A value keeping either equivalent marker keeps the status.
+    assert _run(doc, [("x", snippet)], {"x": "Future imaging waveforms are published."})["flags"] == []
+    # A distinct status the snippet also carries is still its own flag.
+    ongoing = _run(f"The consortium {snippet}; curation is ongoing.\n",
+                   [("x", f"{snippet}; curation is ongoing")], {"x": "The consortium publishes imaging waveforms."})
+    assert _rules(ongoing) == [("modal_dropped", "x", "planned"), ("modal_dropped", "x", "in_progress")]
+
+
 @pytest.mark.parametrize("leaf", sorted(sc.LABEL_LEAVES))
 def test_label_slots_are_reported_in_their_own_bucket(leaf):
     doc = "Anticipated Final Dataset\nContributing sites\nNorthern Hospital Network\n"
@@ -987,6 +1009,10 @@ def test_the_receipts_cli_reads_named_files_writes_nothing_and_exits_zero(tmp_pa
                   ["--final", str(tmp_path / "record.yaml")], ["--chunk-manifest", str(tmp_path / "study_chunks.yaml")]):
         ignored = CliRunner().invoke(cli, ["receipts", "status-context", "--label", "L", "--project", "P", *extra])
         assert ignored.exit_code == 2 and f"{extra[0]} apply to --receipt" in ignored.output, (extra, ignored.output)
+    # #3253: --method names a run's directory family, which --receipt does
+    # not read; beside the named files it is refused, not ignored.
+    method = CliRunner().invoke(cli, args + ["--method", "claudecode_api"])
+    assert method.exit_code == 2 and "--method" in method.output, method.output
     (tmp_path / "receipt.yaml").write_text("chunks: [unclosed", encoding="utf-8")
     broken = CliRunner().invoke(cli, args)
     assert broken.exit_code == 1 and "Error:" in broken.output and broken.exception.__class__ is SystemExit
@@ -1206,6 +1232,7 @@ def test_every_file_option_says_which_mode_reads_it():
     # #3233: each option a mode refuses outside it says so in --help.
     receipts_cmd = cli.commands["receipts"].commands["status-context"]
     helps = {p.name: p.help for p in receipts_cmd.params}
+    assert helps["method"].startswith("with --label/--project:"), helps["method"]  # #3253
     for name in ("bundle_file", "record_file", "final_file", "chunk_manifest"):
         assert helps[name].startswith("with --receipt:"), (name, helps[name])
     review_cmd = cli.commands["review"].commands["status-expression"]

@@ -154,7 +154,8 @@ def invert(receipt_file, full_file, out_file):
 
 
 @receipts.command("status-context")
-@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (#934)")
+@click.option("--method", default=None,
+              help="with --label/--project: the run directory family; defaults to the one the label lives in (#934)")
 @click.option("--label", default=None, help="a run label; with --project, read the run's receipt, record and bundle")
 @click.option("--project", default=None, help="dataset identifier carried by the run's files")
 @click.option("--receipt", "receipt_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
@@ -184,8 +185,10 @@ def status_context(method, label, project, receipt_file, bundle_file, record_fil
     from data_sheets_schema import receipts as rc
     from data_sheets_schema import status_context as sc
     if receipt_file is not None:
-        if bundle_file is None or record_file is None or label or project:
-            raise click.UsageError("--receipt takes --bundle and --record, and no --label/--project")
+        if bundle_file is None or record_file is None or label or project or method:
+            # --method names a run's directory family; the files named here
+            # are read as given, so it would be silently ignored (#3253).
+            raise click.UsageError("--receipt takes --bundle and --record, and no --label/--project/--method")
     elif not label or not project:
         raise click.UsageError("name a run (--label and --project) or files (--receipt, --bundle, --record)")
     elif not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
