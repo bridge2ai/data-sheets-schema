@@ -47,6 +47,7 @@ here the chunk *is* the source bytes.
 """
 from __future__ import annotations
 
+import copy
 import re
 import unicodedata
 from pathlib import Path
@@ -816,24 +817,16 @@ def _resolve_value(record: Any, path: str) -> tuple[bool, Any]:
     return True, cur
 
 
-def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[str, str],
-          full: dict[str, Any], record_bundle_md5: str | None,
-          original: dict[str, Any] | None = None) -> dict[str, Any]:
-    """The validator. Pure: receipt + manifest + chunk texts + record → block.
+def _manifest_ids(manifest: dict[str, Any]) -> list[str]:
+    return [c["id"] for c in manifest.get("chunks") or [] if isinstance(c, dict) and "id" in c]
 
-    `original` is the record as it stood when the receipt was written (the
-    API path's phase-1 snapshot). A receipt path that resolved there but not
-    in the final record was reshaped by a later phase — reconcile flattened
-    `principal_investigator: {name: …}` to a string on the v7 canary — and is
-    reported as `reshaped_by_reconcile`, not as a path that never existed
-    (#758). The API path has no re-receipt route after reconcile (#742), so
-    this is a measured limitation, kept out of the findings and the gate.
-    """
+
+def _receipt_entries(receipt: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """(entries, findings): the receipt's chunk entries as `check` reads them.
+
+    A malformed entry is a finding, never a traceback (#724): the receipt is
+    model output, and the validator's job is to say what is wrong with it."""
     findings: list[dict[str, Any]] = []
-    manifest_ids = [c["id"] for c in manifest.get("chunks") or [] if isinstance(c, dict) and "id" in c]
-
-    # A malformed entry is a finding, never a traceback (#724): the receipt is
-    # model output, and the validator's job is to say what is wrong with it.
     entries: list[dict[str, Any]] = []
     for n, e in enumerate(receipt.get("chunks") or []):
         if not isinstance(e, dict) or not isinstance(e.get("id"), str):
@@ -847,6 +840,285 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                              "reason": "extracted is not a list of {slot, snippet} mappings"})
             e = {**e, "extracted": []}
         entries.append(e)
+    return entries, findings
+
+
+def _receipt_paths(entries: list[dict[str, Any]], unattesting_pairs: set) -> tuple[list[str], set[str]]:
+    """(every receipt path, the paths an attesting snippet receipts). A pair
+    in `unattesting_pairs` — (chunk, slot, snippet) below the #720 floors —
+    keeps its path for the resolution checks and earns no coverage (#891)."""
+    all_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
+                        for p in (e.get("extracted") or [])})
+    attesting = {str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
+                 for p in (e.get("extracted") or [])
+                 if (e.get("id"), str(p.get("slot") or ""), p.get("snippet")) not in unattesting_pairs}
+    return all_paths, attesting
+
+
+def _follow_receipt_paths(receipt_paths: list[str], full: dict[str, Any],
+                          original: dict[str, Any] | None) -> dict[str, Any]:
+    """Each receipt path followed from the phase-1 snapshot to the final
+    record (#899, #907, #1053): `effective` (written path → where it now
+    resolves), `gone` (path → why it has no credit), and the reported
+    classes `check` lists. Empty without a snapshot."""
+    # #899: with the phase-1 snapshot, every path is followed to the entry it
+    # receipted by identity, so a list entry reconciliation moved, split
+    # around or inserted ahead of keeps its receipt. A path that remaps is
+    # resolved at its new address for coverage and for the resolution
+    # classes below; the written address is reported beside it. Without a
+    # snapshot (the agentic path) the join is by index, as before.
+    remapped: list[dict[str, Any]] = []
+    effective: dict[str, str] = {}
+    # Also #899: a value rewritten at the same path after the receipt — the
+    # CM4AI rep2 `page` receipt cites the phase-1 URL, reconcile replaced it
+    # with the Dataverse landing page. The receipt attested the earlier
+    # value; the current one has no re-receipt route (#742). Reported with
+    # both values' presence, never gated; coverage credit is left as it
+    # stands, so the count states the size of the class the credit hides.
+    value_changed: list[dict[str, Any]] = []
+    # With a snapshot, identity decides: a path whose entry is gone
+    # (`entry_dropped`, `leaf_dropped`, `ambiguous`) or that the snapshot
+    # never had (`not_in_snapshot`) is NOT resolved as written even when
+    # another entry now sits at that index — that is the misjoin, and the
+    # first version of this join fell back to it silently (#907 review:
+    # CHORUS rep3 `creators[1]` credited to an unnamed entry that replaced
+    # Azra Bihorac; CM4AI rep3 `creators[38].id` credited to a creator
+    # added after the receipt). Those paths are reported and carry no credit.
+    # The one exception is an entry whose key reconciliation stripped from
+    # the whole list (#1053): joined at its own index by overlap, or by
+    # shape when the list kept its length — never when it shrank, which is
+    # the rep3 case again (#1162 review) — and listed under
+    # `located_after_key_stripped` so the class is countable from the block.
+    gone: dict[str, str] = {}
+    located_stripped: list[dict[str, Any]] = []
+    index_reused: list[dict[str, Any]] = []
+    not_in_snapshot: list[str] = []
+    if original is not None:
+        for p in receipt_paths:
+            rm = remap_path(p, original, full)
+            if rm["basis"] == "not_in_snapshot":
+                not_in_snapshot.append(p)
+                gone[p] = rm["basis"]
+                continue
+            if rm["path"] is None:
+                gone[p] = rm["basis"]
+                if resolve(full, p):
+                    index_reused.append({"path": p, "basis": rm["basis"]})
+                continue
+            if rm["path"] != p:
+                remapped.append({"path": p, "resolved_path": rm["path"], "basis": rm["basis"]})
+                effective[p] = rm["path"]
+            if rm["basis"] == "same_key_stripped":
+                located_stripped.append({"path": p, "resolved_path": rm["path"]})
+            ok_o, v_o = _resolve_value(original, p)
+            ok_f, v_f = _resolve_value(full, rm["path"])
+            if ok_o and ok_f and _rewritten(v_o, v_f):
+                value_changed.append({"path": p, "resolved_path": rm["path"]})
+    return {"remapped": remapped, "effective": effective, "value_changed": value_changed,
+            "gone": gone, "located_stripped": located_stripped, "index_reused": index_reused,
+            "not_in_snapshot": not_in_snapshot}
+
+
+def _slot_coverage(full: dict[str, Any], attesting: set[str], effective: dict[str, str],
+                   gone: dict[str, str]) -> dict[str, Any]:
+    """The populated leaves, the receiptable ones, and those no attesting
+    receipt covers — in record order, untruncated. A receipt path whose
+    entry is gone carries no credit; one that remapped is credited at its
+    new address; an entry receipt covers its leaves, a list receipt only
+    itself (#721)."""
+    leaves = populated_leaves(full)
+    record_id = full.get("id") if isinstance(full.get("id"), str) else None
+    carried = dataset_identifier_forms(full)                            # #1123
+    receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id, carried)]
+    attesting_at = {effective.get(r, r) for r in attesting if r not in gone}
+    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting_at)]
+    return {"leaves": leaves, "receiptable": receiptable, "without": without}
+
+
+def _attests_nothing(snippet: str) -> bool:
+    """Below the #720 floors: `snippet_in` refuses such a snippet before it
+    reads the chunk, so its verdict does not depend on the text."""
+    return snippet_in(snippet, "", "", "", "", "")[1].startswith("too short")
+
+
+def uncovered_receiptable_leaves(receipt: dict[str, Any], manifest: dict[str, Any],
+                                 chunk_texts: dict[str, str], full: dict[str, Any],
+                                 record_bundle_md5: str | None = None,
+                                 original: dict[str, Any] | None = None) -> list[str]:
+    """Every receiptable populated leaf of `full` that no attesting receipt
+    covers, in record order and untruncated (#2926) — the list the block's
+    `slots.without_receipt` truncates to 50, computed by the same functions
+    `check` uses, so `len(...)` is `receiptable - with_receipt` of the block
+    `check` returns for the same arguments.
+
+    The arguments are `check`'s; `record_bundle_md5` has no bearing on
+    coverage and is accepted so a caller passes both the same ones. A
+    snippet counts as `check` counts it: one below the #720 floors, in a
+    chunk the manifest lists and whose text is present, attests nothing;
+    any other snippet's path earns coverage whether or not it verified."""
+    del record_bundle_md5
+    manifest_ids = set(_manifest_ids(manifest))
+    entries, _findings = _receipt_entries(receipt)
+    unattesting_pairs = set()
+    for e in entries:
+        if e.get("status") != "extracted" or e.get("id") not in manifest_ids \
+                or chunk_texts.get(e.get("id")) is None:
+            continue
+        for pair in e.get("extracted") or []:
+            snippet = pair.get("snippet")
+            if isinstance(snippet, str) and snippet.strip() and _attests_nothing(snippet):
+                unattesting_pairs.add((e.get("id"), str(pair.get("slot") or ""), snippet))
+    receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs)
+    followed = _follow_receipt_paths(receipt_paths, full, original)
+    return _slot_coverage(full, attesting, followed["effective"], followed["gone"])["without"]
+
+
+#: The statuses a re-receipt may add a pair to. A `duplicate_of` chunk is
+#: declared to carry another chunk's content; a quote belongs to that one.
+RERECEIPT_TARGET_STATUSES = ("extracted", "nothing_relevant", "redundant_with")
+
+
+def _rereceipt_action(a: Any) -> tuple[str | None, str | None]:
+    """(action, reason-if-rejected). Exactly one typed action per answer, as
+    #958 settled for re-addressing: `receipt` a mapping, or `unsupported` the
+    boolean true with a non-empty `reason`. A truthy string is not `true`,
+    and an answer carrying both keys is ambiguous."""
+    if not isinstance(a, dict):
+        return None, "not a mapping"
+    has_receipt, has_unsupported = "receipt" in a, "unsupported" in a
+    if has_receipt and has_unsupported:
+        return None, "both receipt and unsupported"
+    if has_receipt:
+        return ("receipt", None) if isinstance(a["receipt"], dict) else \
+            (None, "receipt is not a {chunk, snippet} mapping")
+    if has_unsupported:
+        if a["unsupported"] is not True:
+            return None, f"unsupported must be the boolean true, got {a['unsupported']!r}"
+        if not isinstance(a.get("reason"), str) or not a["reason"].strip():
+            return None, "unsupported without a reason"
+        return "unsupported", None
+    return None, "no action"
+
+
+def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: list[Any],
+                    chunk_texts: dict[str, str], *, listed: list[str]) -> dict[str, Any]:
+    """Validate a slot-driven re-receipt's answers and merge the verified ones
+    into a copy of `receipt` (#2926). Pure: neither `receipt` nor `record`
+    is modified; the merged receipt is returned under `receipt`.
+
+    `listed` is the set of paths the turn asked about — in practice
+    `uncovered_receiptable_leaves` for the same record. Each answer is
+    `{path, receipt: {chunk, snippet}}` or `{path, unsupported: true,
+    reason}`, and is rejected, with the reason recorded, when it:
+
+    - carries both actions, neither, or a malformed one (#958);
+    - names a path that is not listed, or does not resolve in `record`;
+    - shares its path with another answer — two answers for one leaf
+      contradict or repeat each other, and neither is taken;
+    - names a chunk that is not in `chunk_texts`, has no single entry in the
+      receipt, or is a `duplicate_of` entry;
+    - carries a snippet `snippet_in` does not verify in that chunk — found
+      elsewhere or not at all, or below the #720 floors.
+
+    A verified receipt is merged as `{slot: path, snippet}` into that chunk's
+    `extracted`; a `nothing_relevant` or `redundant_with` chunk becomes
+    `extracted`, its earlier status and predicate kept under
+    `rereceipt_prior`. A pair already present is counted `already_present`
+    and not added again, so applying the same answers to the result changes
+    nothing. The counts are integers; `unsupported_paths` and `rejections`
+    carry the paths and reasons for the caller to route (the audit input)
+    and report."""
+    out = copy.deepcopy(receipt)
+    listed_set = {str(p) for p in listed}
+    counts: dict[str, Any] = {"added": 0, "already_present": 0, "unsupported": 0, "rejected": 0}
+    added: list[dict[str, Any]] = []
+    unsupported: list[dict[str, Any]] = []
+    rejections: list[dict[str, Any]] = []
+    status_changed: list[str] = []
+    per_path: dict[str, int] = {}
+    for a in answers:
+        if isinstance(a, dict) and isinstance(a.get("path"), str):
+            per_path[a["path"]] = per_path.get(a["path"], 0) + 1
+    by_id: dict[str, list[dict[str, Any]]] = {}
+    for c in out.get("chunks") or []:
+        if isinstance(c, dict) and isinstance(c.get("id"), str):
+            by_id.setdefault(c["id"], []).append(c)
+
+    def reject(n: int, path: Any, why: str) -> None:
+        counts["rejected"] += 1
+        rejections.append({"index": n, "path": path, "reason": why})
+
+    for n, a in enumerate(answers):
+        path = a.get("path") if isinstance(a, dict) else None
+        action, why = _rereceipt_action(a)
+        if action is None:
+            reject(n, path, why); continue
+        if not isinstance(path, str) or not path:
+            reject(n, path, "no path"); continue
+        if path not in listed_set:
+            reject(n, path, "path was not listed"); continue
+        if per_path[path] > 1:
+            reject(n, path, f"path answered {per_path[path]} times"); continue
+        if not resolve(record, path):
+            reject(n, path, "path does not resolve in the record"); continue
+        if action == "unsupported":
+            counts["unsupported"] += 1
+            unsupported.append({"path": path, "reason": a["reason"].strip()})
+            continue
+        chunk, snippet = a["receipt"].get("chunk"), a["receipt"].get("snippet")
+        if not isinstance(chunk, str) or chunk not in chunk_texts:
+            reject(n, path, f"unknown chunk {chunk!r}"); continue
+        if not isinstance(snippet, str) or not snippet.strip():
+            reject(n, path, "empty snippet"); continue
+        entries = by_id.get(chunk) or []
+        if len(entries) != 1:
+            reject(n, path, f"chunk {chunk} has {len(entries)} entries in the receipt, not one"); continue
+        entry = entries[0]
+        status = entry.get("status")
+        if status not in RERECEIPT_TARGET_STATUSES:
+            reject(n, path, f"chunk {chunk} is {status!r}"); continue
+        pairs = entry.get("extracted") if status == "extracted" else []
+        if pairs is None:
+            pairs = []
+        if not (isinstance(pairs, list) and all(isinstance(x, dict) for x in pairs)):
+            reject(n, path, f"chunk {chunk}'s extracted is not a list of {{slot, snippet}} mappings"); continue
+        ok, reason = snippet_in(snippet, chunk_texts[chunk])
+        if not ok:
+            reject(n, path, f"snippet not verified in {chunk}: {reason}"); continue
+        pair = {"slot": path, "snippet": snippet}
+        if any(str(x.get("slot") or "") == path and x.get("snippet") == snippet for x in pairs):
+            counts["already_present"] += 1
+            continue
+        if status != "extracted":
+            prior = {"status": status}
+            for key in ("reason", "chunks"):
+                if key in entry:
+                    prior[key] = entry.pop(key)
+            entry["status"] = "extracted"
+            entry["rereceipt_prior"] = prior
+            status_changed.append(chunk)
+        entry["extracted"] = pairs + [pair]
+        counts["added"] += 1
+        added.append({"chunk": chunk, **pair})
+    return {"receipt": out, **counts, "added_pairs": added, "unsupported_paths": unsupported,
+            "rejections": rejections, "status_changed": status_changed}
+
+
+def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[str, str],
+          full: dict[str, Any], record_bundle_md5: str | None,
+          original: dict[str, Any] | None = None) -> dict[str, Any]:
+    """The validator. Pure: receipt + manifest + chunk texts + record → block.
+
+    `original` is the record as it stood when the receipt was written (the
+    API path's phase-1 snapshot). A receipt path that resolved there but not
+    in the final record was reshaped by a later phase — reconcile flattened
+    `principal_investigator: {name: …}` to a string on the v7 canary — and is
+    reported as `reshaped_by_reconcile`, not as a path that never existed
+    (#758). The API path has no re-receipt route after reconcile (#742), so
+    this is a measured limitation, kept out of the findings and the gate.
+    """
+    manifest_ids = _manifest_ids(manifest)
+    entries, findings = _receipt_entries(receipt)
 
     # --- chunks: exactly once each, no strangers, a status with its predicate
     seen: dict[str, int] = {}
@@ -1027,69 +1299,16 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                                  "slot": pair.get("slot"), "snippet": snippet[:60], "reason": why})
 
     # --- slots: paths resolve; every receiptable populated leaf has one
-    all_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
-                        for p in (e.get("extracted") or [])})
-    attesting = {str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
-                 for p in (e.get("extracted") or [])
-                 if (e.get("id"), str(p.get("slot") or ""), p.get("snippet")) not in unattesting_pairs}
     # #893: an unattesting snippet forfeits coverage, but its PATH is still a
     # claim about the record's structure - it runs the same resolution,
     # off-by-one and addressing checks, so a fabricated path cannot hide
     # behind a tiny snippet.
-    receipt_paths = all_paths
-    # #899: with the phase-1 snapshot, every path is followed to the entry it
-    # receipted by identity, so a list entry reconciliation moved, split
-    # around or inserted ahead of keeps its receipt. A path that remaps is
-    # resolved at its new address for coverage and for the resolution
-    # classes below; the written address is reported beside it. Without a
-    # snapshot (the agentic path) the join is by index, as before.
-    remapped: list[dict[str, Any]] = []
-    effective: dict[str, str] = {}
-    # Also #899: a value rewritten at the same path after the receipt — the
-    # CM4AI rep2 `page` receipt cites the phase-1 URL, reconcile replaced it
-    # with the Dataverse landing page. The receipt attested the earlier
-    # value; the current one has no re-receipt route (#742). Reported with
-    # both values' presence, never gated; coverage credit is left as it
-    # stands, so the count states the size of the class the credit hides.
-    value_changed: list[dict[str, Any]] = []
-    # With a snapshot, identity decides: a path whose entry is gone
-    # (`entry_dropped`, `leaf_dropped`, `ambiguous`) or that the snapshot
-    # never had (`not_in_snapshot`) is NOT resolved as written even when
-    # another entry now sits at that index — that is the misjoin, and the
-    # first version of this join fell back to it silently (#907 review:
-    # CHORUS rep3 `creators[1]` credited to an unnamed entry that replaced
-    # Azra Bihorac; CM4AI rep3 `creators[38].id` credited to a creator
-    # added after the receipt). Those paths are reported and carry no credit.
-    # The one exception is an entry whose key reconciliation stripped from
-    # the whole list (#1053): joined at its own index by overlap, or by
-    # shape when the list kept its length — never when it shrank, which is
-    # the rep3 case again (#1162 review) — and listed under
-    # `located_after_key_stripped` so the class is countable from the block.
-    gone: dict[str, str] = {}
-    located_stripped: list[dict[str, Any]] = []
-    index_reused: list[dict[str, Any]] = []
-    not_in_snapshot: list[str] = []
-    if original is not None:
-        for p in receipt_paths:
-            rm = remap_path(p, original, full)
-            if rm["basis"] == "not_in_snapshot":
-                not_in_snapshot.append(p)
-                gone[p] = rm["basis"]
-                continue
-            if rm["path"] is None:
-                gone[p] = rm["basis"]
-                if resolve(full, p):
-                    index_reused.append({"path": p, "basis": rm["basis"]})
-                continue
-            if rm["path"] != p:
-                remapped.append({"path": p, "resolved_path": rm["path"], "basis": rm["basis"]})
-                effective[p] = rm["path"]
-            if rm["basis"] == "same_key_stripped":
-                located_stripped.append({"path": p, "resolved_path": rm["path"]})
-            ok_o, v_o = _resolve_value(original, p)
-            ok_f, v_f = _resolve_value(full, rm["path"])
-            if ok_o and ok_f and _rewritten(v_o, v_f):
-                value_changed.append({"path": p, "resolved_path": rm["path"]})
+    receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs)
+    followed = _follow_receipt_paths(receipt_paths, full, original)
+    remapped, effective = followed["remapped"], followed["effective"]
+    value_changed, gone = followed["value_changed"], followed["gone"]
+    located_stripped, index_reused = followed["located_stripped"], followed["index_reused"]
+    not_in_snapshot = followed["not_in_snapshot"]
     unresolved = [p for p in receipt_paths if p in gone or not resolve(full, effective.get(p, p))]
     reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
     # A path the snapshot never had and the final record resolves is an
@@ -1097,7 +1316,6 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # out of the findings (the model wrote it; the class is measured) and
     # out of coverage.
     unresolved = [p for p in unresolved if p not in not_in_snapshot or not resolve(full, p)]
-    attesting = {p for p in attesting if p not in gone}
     unresolved = [p for p in unresolved if p not in reshaped]
     # A path that resolves nowhere as written may be an addressing slip
     # rather than a fabricated slot — the 2026-09-01 CM4AI canary wrote
@@ -1169,15 +1387,13 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     unresolved = kept
     for p in unresolved:
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
-    leaves = populated_leaves(full)
+    coverage = _slot_coverage(full, attesting, effective, gone)
+    leaves, receiptable, without = coverage["leaves"], coverage["receiptable"], coverage["without"]
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
     carried = carried_ids                                               # one set, computed once above
-    receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id, carried)]
     # #1123: how many `id` leaves this revision exempts that v1 receipted —
     # a label minted on the dataset's doi or page rather than its own id.
     exempt_on_carried = sum(1 for p, v in leaves if exempt_on_carried_identifier(p, v, record_id, carried))
-    attesting_at = {effective.get(r, r) for r in attesting}
-    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting_at)]
     # #807: `without_receipt` is a mixture on the API path. Split against the
     # phase-1 snapshot: a path populated when the receipt was written and not
     # covered then was *never* receipted; one the snapshot lacks was added by
