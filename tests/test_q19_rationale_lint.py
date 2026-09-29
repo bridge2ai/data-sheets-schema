@@ -32,7 +32,7 @@ import pytest
 from click.testing import CliRunner
 
 from data_sheets_schema.q19_rationale_lint import (
-    FULL_SCORE, NO_STATED_REASON, NOT_SCORED, REPRESENTATION, REPRESENTATION_AND_SUBSTANTIVE,
+    FULL_SCORE, REASON_NOT_DETERMINED, NOT_SCORED, REPRESENTATION, REPRESENTATION_AND_SUBSTANTIVE,
     REPRESENTATION_ONLY, STATED, SUBSTANTIVE, SUBSTANTIVE_ONLY, UNSTATED, inspection_statuses,
     lint_file, lint_q19, lint_report, q19_item, sha256_of, withholding_sentences,
 )
@@ -404,6 +404,11 @@ def test_a_label_clause_saying_something_is_absent_is_read_and_its_credit_is_not
      "empty_slot"),
     ("Held at 4 because was_derived_from is empty in spite of a complete textual lineage.",
      "empty_slot"),
+    # "however" ends a clause as "but" does (#3146).
+    ("Held at 4: the rubric accepts text however no PROV graph is given.", "graph_form"),
+    # An acceptance names its own object, so it does not take the clause
+    # before it with it, as a disclaimer does (#3145).
+    ("Held at 4 because no PROV graph is provided but prose is accepted.", "graph_form"),
 ])
 def test_a_concession_sharing_a_clause_with_a_reason_removes_only_itself(sentence, concern):
     """#3011: the canonical #2911 rationale concedes text is complete and
@@ -432,9 +437,193 @@ def test_a_4_rather_than_a_5_withholds_and_rather_than_from_being_a_5_disclaims(
         UNSTATED, SUBSTANTIVE_ONLY, [])
 
 
+# -- review round 3: disclaimers, denied permissions, credit after a contrast
+
+@pytest.mark.parametrize("disclaimer", [
+    "Nothing is deducted for the empty was_derived_from.",
+    "No point is withheld for the absence of a PROV-O graph.",
+    "No single point was deducted for the empty was_derived_from.",
+    "The absence of a PROV-O graph does not keep it from 5.",
+    "An empty was_derived_from is not a ground for withholding 5.",
+    "The rubric does not permit withholding 5 for the absence of a PROV-O graph.",
+    "The empty was_derived_from was not deducted here because the derivation is complete in prose.",
+    # A disclaimer naming nothing of its own is about the clause before it.
+    "The empty was_derived_from is noted but not penalised.",
+    "The empty was_derived_from is noted, but not penalised.",
+])
+def test_a_negated_cue_disclaims_a_deduction_and_names_no_reason(disclaimer):
+    """#3145: a cue negated within three words is not a cue, and its clause
+    names no reason. It neither states the basis nor hands its reason to
+    the body, so the body's gap ("no errata") is read and the disclaimed
+    form is not."""
+    result = lint_q19(item(note=disclaimer + " There are no errata."))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        UNSTATED, SUBSTANTIVE_ONLY, []), disclaimer
+    assert withholding_sentences(item(note=disclaimer)) == []
+
+
+def test_a_disclaiming_sentence_does_not_hand_its_neighbours_credit():
+    """#3145: a disclaimer read as a cue that named no reason made the lint
+    read both neighbouring sentences whole, credit included."""
+    beside_a_cue = lint_q19(item(score=3, note=(
+        "Derivation is recorded in prose and a PROV graph ships in the RO-Crate. An empty "
+        "was_derived_from is not a reason to withhold 5. Held at 3 because no errata or "
+        "version history are recorded.")))
+    assert (beside_a_cue.basis, beside_a_cue.verdict, beside_a_cue.concerns(REPRESENTATION)) == (
+        STATED, SUBSTANTIVE_ONLY, [])
+    # A version-2 rationale that follows #2911's proposed clarification.
+    compliant = lint_q19(item(score=3, note=(
+        "Version history and errata are recorded. Lineage is complete in text and a PROV graph "
+        "ships in the RO-Crate. An empty was_derived_from is not a ground for withholding 5 "
+        "under the Q19 clarification. Scored 3 because no missing-data documentation is given.")))
+    assert (compliant.verdict, compliant.concerns(SUBSTANTIVE)) == (SUBSTANTIVE_ONLY, ["missing_data"])
+    alone = lint_q19(item(note="Lineage is complete in text and a PROV graph ships in the RO-Crate. "
+                               "An empty was_derived_from is not a ground for withholding 5."))
+    assert (alone.basis, alone.verdict, alone.reasons) == (UNSTATED, REASON_NOT_DETERMINED, ())
+
+
+@pytest.mark.parametrize("note, verdict, concerns", [
+    # A negation more than three words before the cue is about something else.
+    ("No errata are recorded and this keeps it from 5.", SUBSTANTIVE_ONLY, ["version_history"]),
+    ("was_derived_from is not populated so a point is deducted.", REPRESENTATION_ONLY, ["empty_slot"]),
+    # A cue that is itself a negation is not negated by it.
+    ("It does not reach 5 because no PROV graph is given.", REPRESENTATION_ONLY, ["graph_form"]),
+    ("It is not a 5 because the lineage is not expressed as a graph.", REPRESENTATION_ONLY,
+     ["graph_form"]),
+    # A disclaimer that names its own concern removes only itself.
+    ("Held at 3 because no errata are recorded but nothing is deducted for the empty "
+     "was_derived_from.", SUBSTANTIVE_ONLY, ["version_history"]),
+    ("Held at 3 for missing version history, not because was_derived_from is empty.",
+     SUBSTANTIVE_ONLY, ["version_history"]),
+])
+def test_a_cue_is_disclaimed_only_by_a_negation_within_three_words(note, verdict, concerns):
+    result = lint_q19(item(score=3, note=note))
+    assert (result.basis, result.verdict) == (STATED, verdict)
+    assert result.concerns(REPRESENTATION) + result.concerns(SUBSTANTIVE) == concerns
+
+
+def test_a_disclaimer_after_a_cue_removes_its_clause_not_the_cue():
+    """The cue still says why, so the basis stays stated and the other
+    sentence's gap is not read as a candidate reason."""
+    result = lint_q19(item(note="The lineage is not machine-readable. It falls short of 5 not "
+                                "because of form but because no errata are recorded."))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, SUBSTANTIVE_ONLY, [])
+    held = lint_q19(item(note="Held at 4 not because was_derived_from is empty but because no "
+                              "errata are recorded."))
+    assert (held.basis, held.verdict, held.concerns(SUBSTANTIVE)) == (
+        STATED, SUBSTANTIVE_ONLY, ["version_history"])
+
+
+def test_a_negation_within_three_words_always_disclaims():
+    """The documented cost of the window: a terse genuine cue cannot be told
+    from a disclaimer, so it gives no reason rather than a guessed one."""
+    result = lint_q19(item(note="No PROV graph so held at 4."))
+    assert (result.basis, result.verdict, result.flagged) == (UNSTATED, REASON_NOT_DETERMINED, False)
+
+
+@pytest.mark.parametrize("note, concern", [
+    ("Held at 4 because the empty was_derived_from does not allow a machine to traverse the "
+     "lineage.", "empty_slot"),
+    ("Held at 4 because prose lineage allows no machine traversal.", "machine_form"),
+    ("Held at 4 because a PROV-O graph is not permitted to live outside the record.", "graph_form"),
+    ("Held at 4 because the text form does not permit machine traversal.", "machine_form"),
+    ("Held at 4 because the text form allows only a human-readable reconstruction of lineage.",
+     "machine_form"),
+    ("Held at 4 because the rubric does not accept prose in place of a PROV-O graph for the "
+     "5-band.", "graph_form"),
+])
+def test_a_permission_denied_where_it_stands_states_a_limit(note, concern):
+    """#3147: "does not allow", "allows no", "is not permitted" and the
+    like accept nothing, so the reason they state is read."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, REPRESENTATION_ONLY, [concern])
+
+
+def test_a_denied_permission_that_disclaims_a_deduction_still_disclaims():
+    """The disclaimer rule, not the permission rule, decides "does not
+    permit withholding 5 for …": a plain negation guard would flag it."""
+    result = lint_q19(item(score=3, note="Held at 3 because no errata are recorded; the rubric "
+                                         "does not permit withholding 5 for the absence of a "
+                                         "PROV-O graph."))
+    assert (result.verdict, result.concerns(REPRESENTATION)) == (SUBSTANTIVE_ONLY, [])
+
+
+@pytest.mark.parametrize("note, read", [
+    ("No errata are recorded, but was_derived_from links every release to its parent dataset.",
+     "No errata are recorded,"),
+    ("There are no errata; however, a machine-readable PROV graph ships with typed "
+     "was_derived_from links.", "There are no errata;"),
+    ("Errata are absent, whereas the PROV-O graph is complete and machine-traversable.",
+     "Errata are absent,"),
+])
+def test_where_nothing_says_why_credit_after_a_contrast_is_not_read(note, read):
+    """#3146: a part after a contrast that names no gap is credit, as a part
+    before one is."""
+    result = lint_q19(item(label="Good", note=note))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        UNSTATED, SUBSTANTIVE_ONLY, [])
+    assert [(r.concern, r.sentence) for r in result.reasons] == [("version_history", read)]
+
+
+def test_a_part_naming_nothing_of_its_own_reads_its_subject_before_a_second_contrast():
+    """"but not detailed" names nothing of its own; the gap after the next
+    "but" is another part's, so the subject "changelog mentioned" is read."""
+    result = lint_q19(item(label="Good", note="Version control is well structured; changelog "
+                                              "mentioned but not detailed but was_derived_from is "
+                                              "empty."))
+    assert (result.basis, result.concerns(REPRESENTATION), result.concerns(SUBSTANTIVE)) == (
+        UNSTATED, ["empty_slot"], ["version_history"])
+    assert "Version control is well structured" not in {r.clause for r in result.reasons}
+
+
+def test_where_nothing_says_why_a_gap_after_a_contrast_keeps_its_list():
+    """A list continuing the gap after the contrast is the same part."""
+    result = lint_q19(item(label="Good", note="Version history is complete, but no PROV graph is "
+                                              "given, and the lineage is scattered across sections."))
+    assert (result.verdict, result.concerns(REPRESENTATION), result.concerns(SUBSTANTIVE)) == (
+        REPRESENTATION_ONLY, ["graph_form", "scattered"], [])
+
+
+@pytest.mark.parametrize("bare, punctuated", [
+    ("Machine-readable PROV graph lacking errata", "Machine-readable PROV graph, lacking errata"),
+    ("Typed was_derived_from links and errata missing", "Typed was_derived_from links, errata missing"),
+    ("Complete PROV-O graph with version history absent", "Complete PROV-O graph, version history absent"),
+    ("Typed PROV graph lacks errata", "Typed PROV graph, lacks errata"),
+    # "not" inside a clause, like an absence word, may follow credit.
+    ("Typed PROV graph with errata not recorded", "Typed PROV graph, errata not recorded"),
+])
+def test_a_label_absence_clause_naming_both_kinds_is_not_read(bare, punctuated):
+    """#3146: the words do not say which of the two is absent, and the
+    answer would decide the flag, so the clause is not read; the comma makes
+    the absent one a clause of its own, which is."""
+    for body, extra in ((_NEUTRAL, []), ("Held at 4 because no checksums are recorded.", ["integrity"])):
+        unread, read = (lint_q19(item(label=label, note=body)) for label in (bare, punctuated))
+        assert (unread.flagged, unread.concerns(REPRESENTATION), unread.concerns(SUBSTANTIVE)) == (
+            False, [], extra), (bare, body)
+        assert (read.verdict, read.concerns(REPRESENTATION), read.concerns(SUBSTANTIVE)) == (
+            SUBSTANTIVE_ONLY, [], sorted(extra + ["version_history"])), (punctuated, body)
+        if body == _NEUTRAL:
+            assert unread.verdict == REASON_NOT_DETERMINED
+
+
+def test_a_label_absence_clause_naming_one_kind_or_opening_with_its_word_is_read():
+    """A coordinated subject of one kind is read whole; so is a clause that
+    opens with its absence word, whose object is everything after it."""
+    result = lint_q19(item(label="Textual provenance with lineage and agents; version history and "
+                                 "missingness absent", note=_NEUTRAL))
+    assert (result.verdict, result.concerns(SUBSTANTIVE)) == (
+        SUBSTANTIVE_ONLY, ["missing_data", "version_history"])
+    opening = lint_q19(item(label="Rich prose lineage, lacking errata and a PROV graph", note=_NEUTRAL))
+    assert (opening.verdict, opening.concerns(REPRESENTATION), opening.concerns(SUBSTANTIVE)) == (
+        REPRESENTATION_AND_SUBSTANTIVE, ["graph_form"], ["version_history"])
+
+
 def test_a_score_below_maximum_with_no_reason_is_reported_as_such():
     result = lint_q19(item(note="Good provenance overall."))
-    assert (result.verdict, result.flagged) == (NO_STATED_REASON, False)
+    assert (result.verdict, result.flagged) == (REASON_NOT_DETERMINED, False)
+    assert REASON_NOT_DETERMINED == "reason_not_determined"
 
 
 @pytest.mark.parametrize("score, max_score, verdict", [

@@ -406,9 +406,13 @@ def q19_lint_cmd(paths, inspections, show, strict):
     5 gives a representation or empty-slot reason (an empty
     was_derived_from, no PROV graph, not machine-traversable, scattered
     across fields). Where nothing says why, the score label's reason
-    clauses and every gap the rationale names are read instead; credit is
-    not read. Substantive reasons given beside it are listed, never
-    reported as a pass. Evaluation files are read, never written.
+    clauses and the parts of the rationale's sentences that name a gap are
+    read instead; a part naming no gap is not read. A clause that accepts
+    a form, concedes, or disclaims a deduction names no reason.
+    Substantive reasons given beside a representation reason are listed. A
+    rating with only substantive reasons, or with no reason the lint can
+    determine, is reported and never shown as a pass. Evaluation files are
+    read, never written.
     """
     from data_sheets_schema.q19_rationale_lint import lint_report
     try:
