@@ -206,3 +206,43 @@ def test_committed_comparison_matches_current_records():
                       for key, _display, prefix, *_ in m.ARMS} for rubric in m.EVAL_DIRS}
     assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(data, scores), (
         "Run scripts/arm_comparison.py to refresh the committed table and figures")
+
+
+class RemovalRows(unittest.TestCase):
+    """The removal rows (#2923): a record the classifier could not measure —
+    no phase-1 snapshot, the agentic path's case — is `–`, never 0 (#899)."""
+
+    def setUp(self):
+        self.m = _module()
+
+    def _rows(self, block, report_claims):
+        from unittest import mock
+        with mock.patch("data_sheets_schema.removals.for_record", return_value=block):
+            return self.m.removal_metrics(Path("P_provenance.yaml"), {"report_claims": report_claims})
+
+    def test_a_record_with_no_snapshot_is_unmeasured_on_every_removal_row(self):
+        from data_sheets_schema.removals import classify
+        rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": None})
+        self.assertEqual(rows, {"unfoundedremovals": None, "receipteddeleted": None, "unrecordedremovals": None})
+        self.assertEqual({self.m.fmt(rows, k) for k in rows}, {"–"})
+        self.assertEqual(self.m.cell([rows] * 3, "unfoundedremovals", "reps"), "– [–,–,–]")
+
+    def test_a_measured_record_carries_its_counts_and_a_measured_zero_stays_zero(self):
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "data_governance": {"committee_name": "DAC"}, "license": "CC-BY"}
+        receipt = {"chunks": [{"id": "c001", "status": "extracted",
+                               "extracted": [{"slot": "data_governance.committee_name", "snippet": "the DAC"}]}]}
+        block = classify(before, {"id": "doi:10.1/x", "license": "CC-BY"}, {"findings": []}, receipt=receipt)
+        rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual(rows, {"unfoundedremovals": 1, "receipteddeleted": 1, "unrecordedremovals": 0})
+
+    def test_an_unrecorded_count_the_block_did_not_measure_is_not_read(self):
+        """`removals_unrecorded_count` is only a measurement where the report
+        block read a snapshot."""
+        from data_sheets_schema.removals import classify
+        rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": 0})
+        self.assertIsNone(rows["unrecordedremovals"])
+
+    def test_the_three_rows_are_in_the_table(self):
+        for key in ("unfoundedremovals", "receipteddeleted", "unrecordedremovals"):
+            self.assertIn(key, self.m.METRICS)

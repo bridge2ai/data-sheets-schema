@@ -31,6 +31,9 @@ Bases, stated once and printed into the output:
   would-be canonical) records. Applicability (N/A) is itself evaluator
   output, so adjusted maxima can differ between evaluations of comparable
   records; points and adjusted maximum are both shown.
+- **removal rows** (#2923): values deleted without a finding and receipted
+  values deleted are recomputed live and read-only (`removals.for_record`);
+  the unrecorded-removal count is the record's `report_claims` block.
 - **spend is deliberately absent**: `api_usage` (billed input/output) and
   `run_observed` (cache-inclusive runner totals) are different quantities and
   must never sit in one column (#400).
@@ -192,6 +195,27 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                    "receipts (#807): the receiptless leaf is absent from the phase-1 "
                    "snapshot, so reconciliation or repair added it after the receipt was "
                    "written and no receipt route existed (#742). Same snapshot caveat"),
+    "unfoundedremovals": ("removals without a finding", "live", True,
+                          "removals v1 (#2923): values the phase-1 snapshot carried and the final "
+                          "full record does not, whose text does not survive under their nearest "
+                          "surviving ancestor, and that no audit finding's slot, review_paths or "
+                          "remove_relationship path covers. Reported, not gated: unfounded says no "
+                          "finding named the value, not that removing it was wrong. Needs the "
+                          "snapshot, so an agentic arm is – here, not 0 (#899); – also where the "
+                          "run's audit cannot be read unambiguously"),
+    "receipteddeleted": ("receipted values deleted, not flattened", "live", True,
+                         "removals v1 (#2923): removed values a coverage receipt named (on the "
+                         "value, an entry above it, or the list it was a member of) whose text "
+                         "did not survive, founded or not. Counted per value, so not a subset of "
+                         "the receipts block's `receipts_to_removed_values`, which counts receipt "
+                         "paths that stopped resolving, flattenings included. – where the run "
+                         "wrote no receipt or no snapshot"),
+    "unrecordedremovals": ("removals unrecorded in the report", "record", True,
+                           "report_claims.removals_unrecorded (#1054): top-level slots the "
+                           "phase-1 snapshot populated and the final full record does not, that "
+                           "no `removed` row or removal sentence names. Top-level only, where "
+                           "the rows above are per value; a finding only where the run was asked "
+                           "for the dispositions table. – where the block read no snapshot"),
     "gc": ("GC label variants (reported)", "live", True,
            "reported-only; counted against the manifest naming declaration decided "
            "2026-08-22, so anachronistic for the v4 arm and same-day for 22c. For VOICE "
@@ -252,6 +276,21 @@ def receipt_metrics(rcp: dict[str, Any]) -> dict[str, Any]:
             "addedafter": int(added) if added is not None else None}
 
 
+def removal_metrics(prov: Path, rec: dict[str, Any]) -> dict[str, Any]:
+    """The removal rows for one record (#2923): recomputed live from the
+    phase-1 snapshot, the final record, the audit and the receipt
+    (`removals.for_record`, read-only), and the report block's own
+    unrecorded-removal count. None, never 0, where the snapshot, the audit
+    or the receipt a row needs is absent (#899)."""
+    from data_sheets_schema.removals import for_record
+    block = for_record(prov, record=rec)
+    rc = rec.get("report_claims") or {}
+    unrecorded = rc.get("removals_unrecorded_count") if rc.get("snapshot_checked") else None
+    return {"unfoundedremovals": block["unfounded"],
+            "receipteddeleted": (block["receipted"] or {}).get("deleted"),
+            "unrecordedremovals": int(unrecorded) if unrecorded is not None else None}
+
+
 def run_metrics(label: str, project: str) -> dict[str, Any] | None:
     method = _method_for(label, project)
     core_dir = CONCAT / f"{method}_core" / label
@@ -289,6 +328,7 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
         "label": label,
         "leaves": leaves,
         **receipt_vals,
+        **removal_metrics(core_dir / f"{project}_provenance.yaml", rec),
         "ungrounded": g.get("absent"),
         "minted": g.get("minted_fragment"),
         "pair": pc.get("errors"),
@@ -511,6 +551,10 @@ def render_markdown(data, scores) -> str:
              "evaluator is an instrument (#1058). N/A exclusions are evaluator "
              "judgements, so adjusted maxima can differ between comparable "
              "records, The Element 4 gate resolved both ways on CM4AI until 2026-09-08; it is now stated per sub-element and those six were rescored (#1060), so the CM4AI rubric10 cells here are not comparable to any figure quoted before that date.",
+             "- removals without a finding, receipted values deleted: **recomputed live** "
+             "from the phase-1 snapshot, the final full record, the audit and the receipt "
+             "(`removals.for_record`, #2923), read-only; no record carries a removals block. "
+             "Removals unrecorded in the report: the record's `report_claims` block.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).",
              "- a record whose own `validation` block says `passed: false` is not an arm "
