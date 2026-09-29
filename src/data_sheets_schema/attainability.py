@@ -36,7 +36,12 @@ entry is keyed to::
 
 **Only absence is deterministic.** A check is a pattern every statement of
 the item's content would match; zero matching lines establish
-`not_stated_in_source`. A match establishes nothing — the four CHORUS
+`not_stated_in_source`. The bundles are hard-wrapped, so a line matches
+when a match touches it with the text read line by line *and* whole, each
+line break read as a space and, after a hyphen, as a split word or a
+hyphenated compound (`matching_lines`, #3179): a statement a break splits
+is not an absence. A word a break splits with no hyphen is not read that
+way, and every entry's note says so. A match establishes nothing — the four CHORUS
 "IRB" lines are a training curriculum, its "license" lines the MIT
 software license and a course agreement, its "version" lines Python
 version control — so a check
@@ -60,11 +65,16 @@ checkable and a tampered hash is not accepted. `chunk_rule` must be a rule
 the chunker implements, written out in full (`chunking.validate_rule`):
 `chunk_text` reads only its two window bounds and reads an empty rule as
 this checkout's default, so without that check a file could state a rule
-nobody chunked under, or none (#3107). Every deterministic entry must
-equal what its check writes over those bytes under that rule; every
-snippet must hash to the lines it names. The pinned rubric is resolved the
-same way. Curator and judge entries are hand-written, so a valid file is
-not always the generator's output; its deterministic entries are.
+nobody chunked under, or none (#3107). Every deterministic entry must be
+identical to what its check writes over those bytes under that rule —
+type for type, since Python's `False == 0` and `45.0 == 45` would let a
+file the generator never wrote pass (#3182) — and every entry names its
+`route`, `null` included; every snippet must hash to the lines it names.
+The pinned rubric is resolved the same way. Curator and judge entries are
+hand-written, so a valid file is not always the generator's output; its
+deterministic entries are. A file that cannot be read, is not UTF-8 or
+names a path no file can have is reported with its problems like any
+other invalid file, not raised past them (#3180).
 
 `credited_despite_absence` is the generator-side check the issue asks
 for: items an evaluation credited although the bundle it scored was
@@ -76,6 +86,7 @@ attained-over-attainable basis is a later change.
 from __future__ import annotations
 
 import argparse
+import bisect
 import hashlib
 import json
 import re
@@ -127,9 +138,13 @@ class AbsenceCheck:
 # as word characters: `doi_url` must match. Every inflection of a form a
 # claim names must match too — `exemptions`, `opting out`, `HRECs`, a
 # version number that ends a sentence (#3109); `test_every_form_a_claim_names_matches`
-# lists them. A pattern carries no literal space (`\s` instead), so the
-# YAML writer never folds one across lines.
-_DOI = r"(?<![a-z])dois?(?![a-z])|10\.\d{4,9}/"
+# lists them. So must a compound written hyphenated or spaced alike
+# (`human-subjects`, #3183): the words of one are joined by `[-\s]+`. A
+# statement a line break splits is matched by reading the text whole
+# (`matching_lines`, #3179), not by the patterns. A pattern carries no
+# literal space (`\s` instead), so the YAML writer never folds one across
+# lines.
+_DOI = r"(?<![a-z])dois?(?![a-z])|10\.\d+(?:\.\d+)*/"
 _RRID = r"(?<![a-z])rrids?(?![a-z])|(?<![a-z0-9])(?:scr|ab|cvcl|nlx)_\d"
 _WAIVER = r"(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])"
 
@@ -137,18 +152,21 @@ CHECKS: tuple[AbsenceCheck, ...] = (
     AbsenceCheck(
         "doi_rrid", "rubric10", "E1.1", "doi_rrid",
         f"(?i){_DOI}|{_RRID}",
-        "A DOI in any written form carries '10.<registrant>/' or is named DOI; an RRID is named RRID "
+        "A DOI in any written form carries '10.<registrant>/', a registrant subdivided by full stops "
+        "('10.1000.10/') included, or is named DOI; an RRID is named RRID "
         "or written as a SCR_/AB_/CVCL_/NLX_ accession, so zero matching lines mean the bundle states "
         "no DOI and no RRID. E1.1 also accepts another persistent URI, which no pattern settles: "
         "this entry speaks for the DOI/RRID route only."),
     AbsenceCheck(
         "ethics_review", "rubric10", "E4.1", None,
-        r"(?i)(?<![a-z])irbs?(?![a-z])|institutional\s+review|ethic"
+        r"(?i)(?<![a-z])irbs?(?![a-z])|institutional[-\s]+review|ethic"
         r"|(?<![a-z])(?:hrec|reb|dpia)s?(?![a-z])|exempt|" + _WAIVER +
-        r"|data\s+protection\s+impact|privacy\s+board|human\s+subjects?|(?<![a-z])oversights?(?![a-z])",
+        r"|data[-\s]+protection[-\s]+impact|privacy[-\s]+board|human[-\s]+subjects?"
+        r"|(?<![a-z])oversights?(?![a-z])",
         "An ethics review, its waiver or exemption, or a data protection impact assessment is named "
         "IRB, institutional review, ethics/ethical, HREC/REB, exemption, waiver, DPIA, privacy "
-        "board, human subjects or oversight, so zero matching lines mean the bundle states none."),
+        "board, human subjects or oversight, a compound hyphenated or spaced alike "
+        "('human-subjects'), so zero matching lines mean the bundle states none."),
     AbsenceCheck(
         "consent_text", "rubric10", "E4.4", None,
         f"(?i)consent|(?<![a-z])assent|{_WAIVER}|permission"
@@ -179,6 +197,14 @@ CHECKS: tuple[AbsenceCheck, ...] = (
 )
 CHECKS_BY_NAME = {c.name: c for c in CHECKS}
 
+#: What every claim's "matching line" means (#3179). The bundles are
+#: hard-wrapped PDF and HTML text, so a statement a line break splits
+#: ('should\nreference', 'con-\nsent') is a statement too, and a check that
+#: read one line at a time would certify its absence.
+LINE_READING = ("A matching line is one a match touches, the text read line by line and whole: a line "
+                "break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen "
+                "alone (a hyphenated compound). Not seen: a word a break splits with no hyphen.")
+
 
 # --------------------------------------------------------------------------
 # Bytes
@@ -194,10 +220,16 @@ def resolve_bytes(path: str, *, md5: str | None = None, sha256: str | None = Non
     from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
     if not md5 and not sha256:
         raise AttainabilityError(path, ["no md5 or sha256 to resolve the bytes by"])
+    if "\0" in path:           # `git` would raise ValueError, not answer (#3180)
+        raise AttainabilityError(path.replace("\0", "\\0"), ["the path carries a NUL byte, which no file "
+                                                             "or committed path can"])
     on_disk = disk if disk is not None else _anchored(path)
     if on_disk.is_file():
-        raw = on_disk.read_bytes()
-        if _hashes_match(raw, md5, sha256):
+        try:
+            raw = on_disk.read_bytes()
+        except OSError:          # unreadable here: the committed version may still answer
+            raw = None
+        if raw is not None and _hashes_match(raw, md5, sha256):
             return raw, {"source": "file on disk", "path": path}
     try:
         found = bundle_bytes_for(path, md5=md5, sha256=sha256)
@@ -249,12 +281,58 @@ def snippet_sha256(lines: dict[int, tuple[str, str]], first: int, last: int) -> 
 # Deterministic entries
 
 
+def _readings(lines: dict[int, tuple[str, str]]) -> Iterable[tuple[str, list[tuple[int, int, int]]]]:
+    """The bundle's text read whole, once per reading of its line breaks —
+    every break a space; then, where a line ends in a hyphen, the break read
+    as nothing with the hyphen dropped (a split word, 'con-' 'sent') and
+    with it kept (a hyphenated compound, 'human-' 'subjects') — each with
+    every line's `(number, start, end)` span in that text."""
+    numbers = sorted(lines)
+    hyphenated = {n for n in numbers if lines[n][1].rstrip().endswith("-")}
+    for hyphen in ("space",) + (("drop", "keep") if hyphenated else ()):
+        parts, spans, at = [], [], 0
+        for n in numbers:
+            body, sep = lines[n][1], " "
+            if n in hyphenated and hyphen != "space":
+                stripped = body.rstrip()
+                body, sep = (stripped[:-1] if hyphen == "drop" else stripped), ""
+            parts += [body, sep]
+            spans.append((n, at, at + len(body)))
+            at += len(body) + len(sep)
+        yield "".join(parts), spans
+
+
+def matching_lines(pattern: str, lines: dict[int, tuple[str, str]]) -> list[int]:
+    """Every bundle line a match of `pattern` takes a character from (not a
+    blank line a match crosses): each line searched alone, and the text
+    searched whole under each of `_readings` for the leftmost match at
+    every start position — restarting one character after a match's start,
+    not at its end, so that one match does not hide another it overlaps.
+    Zero lines means no line, and no run of lines under any of the
+    readings, carries a match (#3179); a break inside a word with no hyphen
+    is not one of them."""
+    rx = re.compile(pattern)
+    hits = {n for n, (_, text) in lines.items() if rx.search(text)}
+    for text, spans in _readings(lines):
+        starts = [start for _, start, _ in spans]
+        pos = 0
+        while (m := rx.search(text, pos)) is not None:
+            begin, end = m.span()
+            i = max(bisect.bisect_right(starts, begin) - 1, 0)
+            while i < len(spans) and spans[i][1] < end:
+                n, start, stop = spans[i]
+                if max(start, begin) < min(stop, end):     # a character of the line is in the match
+                    hits.add(n)
+                i += 1
+            pos = begin + 1
+    return sorted(hits)
+
+
 def deterministic_entry(check: AbsenceCheck, lines: dict[int, tuple[str, str]]) -> dict[str, Any]:
     """The entry `check` writes over a bundle's lines: `not_stated_in_source`
-    at zero matching lines, else `unknown` with every matching line listed —
-    never a support status."""
-    rx = re.compile(check.pattern)
-    hits = [n for n in sorted(lines) if rx.search(lines[n][1])]
+    at zero matching lines (`matching_lines`), else `unknown` with every
+    matching line listed — never a support status."""
+    hits = matching_lines(check.pattern, lines)
     if hits:
         outcome = (f"Result: {len(hits)} matching line(s). A match is not evidence the item is "
                    "supported (the words recur in other senses), so the status stays unknown "
@@ -268,7 +346,7 @@ def deterministic_entry(check: AbsenceCheck, lines: dict[int, tuple[str, str]]) 
         "evidence": {"pattern": check.pattern, "hit_count": len(hits),
                      "snippets": [{"chunk": lines[n][0], "lines": [n, n],
                                    "sha256": snippet_sha256(lines, n, n)} for n in hits]},
-        "note": f"{check.claim} {outcome}",
+        "note": f"{check.claim} {LINE_READING} {outcome}",
     }
 
 
@@ -365,10 +443,11 @@ def write_document(document: dict[str, Any], directory: Path = ATTAINABILITY_DIR
         kept = [e for e in existing.get("entries") or []
                 if isinstance(e, dict) and not str(e.get("method", "")).startswith("deterministic:")]
         rubrics = existing.get("rubrics") or {}
-        moved = (["chunk_rule"] if kept and existing.get("chunk_rule") != document["chunk_rule"] else []) + \
-                sorted({f"rubric {e.get('rubric')}" for e in kept
-                        if e.get("rubric") in document["rubrics"]
-                        and rubrics.get(e.get("rubric")) != document["rubrics"][e.get("rubric")]})
+        moved = (["chunk_rule"] if kept and not identical(existing.get("chunk_rule"), document["chunk_rule"])
+                 else []) + \
+            sorted({f"rubric {e.get('rubric')}" for e in kept
+                    if e.get("rubric") in document["rubrics"]
+                    and not identical(rubrics.get(e.get("rubric")), document["rubrics"][e.get("rubric")])})
         if moved:
             raise AttainabilityError(target, [f"{len(kept)} curator or judge entr(ies) were read under "
                                               f"another {', '.join(moved)}; re-read them before rewriting"])
@@ -387,6 +466,20 @@ def _key(entry: dict[str, Any]) -> tuple:
 
 # --------------------------------------------------------------------------
 # Validation
+
+
+def identical(a: Any, b: Any) -> bool:
+    """Equal with the same types all the way down. Python's `==` holds for
+    `False == 0`, `True == 1` and `45.0 == 45`, so a file carrying
+    `hit_count: false`, snippet lines `[45.0, 45]` or `format_version: true`
+    would compare equal to the generator's output it is not (#3182)."""
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, dict):
+        return a.keys() == b.keys() and all(identical(a[k], b[k]) for k in a)
+    if isinstance(a, list):
+        return len(a) == len(b) and all(identical(x, y) for x, y in zip(a, b))
+    return a == b
 
 
 @dataclass(frozen=True)
@@ -412,13 +505,13 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
         return [describe(dups)], None
     try:
         doc = yaml.safe_load(text)
-    except yaml.YAMLError as exc:
-        return [f"not YAML: {exc}"], None
+    except (yaml.YAMLError, RecursionError) as exc:
+        return [f"not YAML: {exc!r}" if isinstance(exc, RecursionError) else f"not YAML: {exc}"], None
     if not isinstance(doc, dict):
         return ["not a mapping"], None
     problems: list[str] = []
-    if doc.get("format") != FORMAT or doc.get("format_version") != FORMAT_VERSION:
-        problems.append(f"format must be {FORMAT} version {FORMAT_VERSION}")
+    if not (identical(doc.get("format"), FORMAT) and identical(doc.get("format_version"), FORMAT_VERSION)):
+        problems.append(f"format must be {FORMAT} version {FORMAT_VERSION} (the integer)")
     bundle = doc.get("bundle")
     if not isinstance(bundle, dict) or not isinstance(bundle.get("path"), str) or not all(
             isinstance(bundle.get(k), str) and _HEX[k].fullmatch(bundle[k]) for k in ("md5", "sha256")):
@@ -429,8 +522,8 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
         raw, basis = resolve_bytes(bundle["path"], md5=bundle["md5"], sha256=bundle["sha256"])
     except AttainabilityError as exc:
         return problems + [f"bundle: {p}" for p in exc.problems], None
-    if bundle.get("bytes") != len(raw):
-        problems.append(f"bundle bytes {bundle.get('bytes')} is not {len(raw)}, the size of the pinned bytes")
+    if not identical(bundle.get("bytes"), len(raw)):
+        problems.append(f"bundle bytes {bundle.get('bytes')!r} is not {len(raw)}, the size of the pinned bytes")
     rule = doc.get("chunk_rule")
     if not isinstance(rule, dict):
         return problems + ["chunk_rule must be the chunking rule the chunk ids are named under"], None
@@ -480,7 +573,9 @@ def _entry_problems(entry: Any, items: dict[str, dict[str, str]], lines: dict[in
     if not isinstance(entry, dict):
         return ["not a mapping"]
     extra = sorted(set(entry) - _ENTRY_KEYS)
-    missing = sorted(_ENTRY_KEYS - {"route"} - set(entry))
+    # `route` too: an entry that leaves it out is not an entry with no route
+    # to every reader, and `credited` reads it by key (#3182).
+    missing = sorted(_ENTRY_KEYS - set(entry))
     if extra or missing:
         return ([f"unknown keys {', '.join(extra)}"] if extra else []) + \
                ([f"missing keys {', '.join(missing)}"] if missing else [])
@@ -511,7 +606,7 @@ def _entry_problems(entry: Any, items: dict[str, dict[str, str]], lines: dict[in
             return out + [f"{label}: {method} decides {check.rubric} {check.item_id}"
                           + (f" route {check.route}" if check.route else "") + ", not this item"]
         expected = deterministic_entry(check, lines)
-        differs = sorted(k for k in _ENTRY_KEYS if entry.get(k) != expected.get(k))
+        differs = sorted(k for k in _ENTRY_KEYS if not identical(entry[k], expected[k]))
         if differs:
             out.append(f"{label}: is not what {method} writes over the pinned bytes "
                        f"(differs in {', '.join(differs)}; expected status {expected['status']}, "
@@ -550,9 +645,16 @@ def _snippet_problems(snip: Any, lines: dict[int, tuple[str, str]], chunk_of: di
 
 def load(path: Path) -> Attainability:
     """A validated attainability file; raises `AttainabilityError` with every
-    problem when it is not one."""
+    problem when it is not one — a file that cannot be read or is not UTF-8
+    included, so `check` reports it and goes on to the next (#3180)."""
     path = Path(path)
-    problems, loaded = validate_text(path.read_text(encoding="utf-8"), path.name)
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        raise AttainabilityError(path, [f"not UTF-8 text: {exc}"]) from exc
+    except OSError as exc:
+        raise AttainabilityError(path, [f"cannot be read: {exc.strerror or exc}"]) from exc
+    problems, loaded = validate_text(text, path.name)
     if loaded is None:
         raise AttainabilityError(path, problems)
     return Attainability(path, loaded.document, loaded.bundle_basis, loaded.rubric_items)
@@ -594,14 +696,48 @@ def evaluation_items(evaluation: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return out
 
 
+def evaluation_rubric(evaluation: dict[str, Any]) -> str:
+    """The rubric an evaluation scored, as an attainability file names it."""
+    return str(evaluation.get("rubric", "")).removesuffix("-semantic")
+
+
+def _label(entry: dict[str, Any]) -> str:
+    return entry["item_id"] + (f" route {entry['route']}" if entry["route"] else "")
+
+
+def absences_checked(evaluation: dict[str, Any], attainability: Attainability) -> list[str]:
+    """The `not_stated_in_source` entries of `attainability` on the rubric
+    `evaluation` scored — the only items `credited_despite_absence` can
+    name. Empty means no finding was possible, which is not a zero."""
+    rubric = evaluation_rubric(evaluation)
+    return [_label(e) for e in attainability.entries("not_stated_in_source") if e["rubric"] == rubric]
+
+
+def unchecked_reason(evaluation: dict[str, Any], attainability: Attainability) -> str | None:
+    """Why the file can yield no finding for `evaluation`, or None when it
+    can: it pins no text of the evaluation's rubric (the CHORUS file and a
+    rubric20 evaluation), or marks none of that rubric's items absent."""
+    if absences_checked(evaluation, attainability):
+        return None
+    rubric = evaluation_rubric(evaluation)
+    if rubric not in attainability.rubric_items:
+        pinned = ", ".join(sorted(attainability.rubric_items)) or "none"
+        return (f"the file pins no {rubric or 'rubric the evaluation names'} text (it pins {pinned}), "
+                "so it decides nothing for this evaluation")
+    return f"the file marks no {rubric} item not_stated_in_source"
+
+
 def credited_despite_absence(evaluation: dict[str, Any], attainability: Attainability) -> list[dict[str, Any]]:
     """Items `evaluation` credited (a positive score on an applicable item)
     that `attainability` marks `not_stated_in_source` — a value from outside
     the bundle, or an invented one. A route entry is reported with its route:
     the credit cannot rest on that route, though it may rest on another. An
     item whose name differs from the pinned rubric's is reported as
-    `unjoined`, never skipped. Reads `evaluation`; changes nothing."""
-    rubric = str(evaluation.get("rubric", "")).removesuffix("-semantic")
+    `unjoined`, never skipped. An empty list is a measured zero only where
+    `absences_checked` is not empty: a file that pins no text of the
+    evaluation's rubric, or marks none of its items absent, cannot yield a
+    finding (#3181). Reads `evaluation`; changes nothing."""
+    rubric = evaluation_rubric(evaluation)
     names = attainability.rubric_items.get(rubric)
     if names is None:
         return []
@@ -644,23 +780,30 @@ def evaluation_bundle(evaluation: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINABILITY_DIR) -> list[dict[str, Any]]:
-    """One row per evaluation: the bundle it scored, whether an
-    attainability file covers that bundle version, and its findings."""
+    """One row per evaluation: the bundle it scored, the attainability file
+    for that bundle version if there is one, the absences it was checked
+    against, and its findings. `unchecked` says why a row could yield no
+    finding — no bundle version, no file, or a file that decides nothing for
+    the evaluation's rubric — and is None only on a row whose empty
+    `findings` is a measured zero (#3181)."""
     loaded: dict[Path, Attainability] = {}
     rows = []
     for path in evaluation_paths:
         evaluation = json.loads(Path(path).read_text(encoding="utf-8"))
         bundle = evaluation_bundle(evaluation)
-        row: dict[str, Any] = {"evaluation": str(path), "bundle": bundle}
+        row: dict[str, Any] = {"evaluation": str(path), "bundle": bundle, "rubric": evaluation_rubric(evaluation)}
         doc = document_for(bundle["path"], bundle["md5"], directory) if bundle else None
         if doc is None:
-            row["attainability"] = None
-            row["findings"] = []
+            row.update(attainability=None, absences_checked=[], findings=[],
+                       unchecked="no attainability file for this bundle version" if bundle else
+                       "no bundle version: the evaluated record's provenance was not found or names none")
         else:
             if doc not in loaded:
                 loaded[doc] = load(doc)
-            row["attainability"] = str(doc)
-            row["findings"] = credited_despite_absence(evaluation, loaded[doc])
+            got = loaded[doc]
+            row.update(attainability=str(doc), absences_checked=absences_checked(evaluation, got),
+                       unchecked=unchecked_reason(evaluation, got),
+                       findings=credited_despite_absence(evaluation, got))
         rows.append(row)
     return rows
 
@@ -682,7 +825,8 @@ def main(argv: list[str] | None = None) -> int:
     check.add_argument("files", nargs="*", type=Path)
     credited = sub.add_parser("credited", help="items credited although marked not_stated_in_source")
     credited.add_argument("evaluations", nargs="+", type=Path)
-    credited.add_argument("--strict", action="store_true", help="exit 1 on any finding")
+    credited.add_argument("--strict", action="store_true",
+                          help="exit 1 on any finding (a row reported unchecked is not one)")
     args = parser.parse_args(argv)
 
     if args.command == "derive":
@@ -720,16 +864,20 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     findings = 0
     for row in rows:
-        where = row["attainability"] or "no attainability file for this bundle version"
         bundle = row["bundle"]
-        print(f"{row['evaluation']}: {bundle['md5'][:8] if bundle else 'bundle unknown'} — {where}")
+        parts = [bundle["md5"][:8] if bundle else "bundle unknown"] + ([row["attainability"]] if row["attainability"] else [])
+        parts.append(f"unchecked: {row['unchecked']}" if row["unchecked"]
+                     else f"{row['rubric']} checked against {', '.join(row['absences_checked'])}")
+        print(f"{row['evaluation']}: " + " — ".join(parts))
         for f in row["findings"]:
             findings += 1
             route = f" (route {f['route']})" if f["route"] else ""
             print(f"  {f['kind']}: {f['item_id']}{route} {f.get('score', '')} {f.get('detail', '')}".rstrip())
     covered = sum(1 for row in rows if row["attainability"])
+    checked = sum(1 for row in rows if row["unchecked"] is None)
+    # A row that could yield no finding is counted apart from a measured zero (#3181).
     print(f"{len(rows)} evaluation(s), {covered} on a bundle version with an attainability file, "
-          f"{findings} finding(s)")
+          f"{checked} checked against at least one absence, {findings} finding(s)")
     return 1 if (args.strict and findings) else 0
 
 

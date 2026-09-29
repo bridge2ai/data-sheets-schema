@@ -28,20 +28,23 @@ entries:
   status: not_stated_in_source
   method: deterministic:doi_rrid
   evidence:
-    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d{4,9}/|(?<![a-z])rrids?(?![a-z])|(?<![a-z0-9])(?:scr|ab|cvcl|nlx)_\d
+    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d+(?:\.\d+)*/|(?<![a-z])rrids?(?![a-z])|(?<![a-z0-9])(?:scr|ab|cvcl|nlx)_\d
     hit_count: 0
     snippets: []
-  note: 'A DOI in any written form carries ''10.<registrant>/'' or is named DOI; an RRID is named RRID
-    or written as a SCR_/AB_/CVCL_/NLX_ accession, so zero matching lines mean the bundle states no DOI
-    and no RRID. E1.1 also accepts another persistent URI, which no pattern settles: this entry speaks
-    for the DOI/RRID route only. Result: no matching line.'
+  note: 'A DOI in any written form carries ''10.<registrant>/'', a registrant subdivided by full stops
+    (''10.1000.10/'') included, or is named DOI; an RRID is named RRID or written as a SCR_/AB_/CVCL_/NLX_
+    accession, so zero matching lines mean the bundle states no DOI and no RRID. E1.1 also accepts another
+    persistent URI, which no pattern settles: this entry speaks for the DOI/RRID route only. A matching
+    line is one a match touches, the text read line by line and whole: a line break read as a space and,
+    after a hyphen, as nothing (a split word) or as the hyphen alone (a hyphenated compound). Not seen:
+    a word a break splits with no hyphen. Result: no matching line.'
 - rubric: rubric10
   item_id: E4.1
   route: null
   status: unknown
   method: deterministic:ethics_review
   evidence:
-    pattern: (?i)(?<![a-z])irbs?(?![a-z])|institutional\s+review|ethic|(?<![a-z])(?:hrec|reb|dpia)s?(?![a-z])|exempt|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|data\s+protection\s+impact|privacy\s+board|human\s+subjects?|(?<![a-z])oversights?(?![a-z])
+    pattern: (?i)(?<![a-z])irbs?(?![a-z])|institutional[-\s]+review|ethic|(?<![a-z])(?:hrec|reb|dpia)s?(?![a-z])|exempt|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|data[-\s]+protection[-\s]+impact|privacy[-\s]+board|human[-\s]+subjects?|(?<![a-z])oversights?(?![a-z])
     hit_count: 17
     snippets:
     - {chunk: c002, lines: [45, 45], sha256: 956c8af5b4c932a133055928f27c75c76c14b46126e554766ece025b149c3365}
@@ -63,9 +66,12 @@ entries:
     - {chunk: c007, lines: [1206, 1206], sha256: d04a09ad13ae76eb8bb8f2fe1d5fc3e547762017883aaf03231df2e1736dbf52}
   note: 'An ethics review, its waiver or exemption, or a data protection impact assessment is named IRB,
     institutional review, ethics/ethical, HREC/REB, exemption, waiver, DPIA, privacy board, human subjects
-    or oversight, so zero matching lines mean the bundle states none. Result: 17 matching line(s). A match
-    is not evidence the item is supported (the words recur in other senses), so the status stays unknown
-    until a curator or judge reads the lines listed.'
+    or oversight, a compound hyphenated or spaced alike (''human-subjects''), so zero matching lines mean
+    the bundle states none. A matching line is one a match touches, the text read line by line and whole:
+    a line break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen alone
+    (a hyphenated compound). Not seen: a word a break splits with no hyphen. Result: 17 matching line(s).
+    A match is not evidence the item is supported (the words recur in other senses), so the status stays
+    unknown until a curator or judge reads the lines listed.'
 - rubric: rubric10
   item_id: E4.4
   route: null
@@ -78,7 +84,9 @@ entries:
   note: 'Any statement of informed consent names consent, assent, a waiver, parental permission, a HIPAA
     authorization or an opt-in/opt-out model, so zero matching lines mean the bundle states no consent
     procedure. Not seen: consent described without any of these words (''participants agreed to ...'').
-    Result: no matching line.'
+    A matching line is one a match touches, the text read line by line and whole: a line break read as
+    a space and, after a hyphen, as nothing (a split word) or as the hyphen alone (a hyphenated compound).
+    Not seen: a word a break splits with no hyphen. Result: no matching line.'
 - rubric: rubric10
   item_id: E6.1
   route: null
@@ -96,20 +104,25 @@ entries:
     - {chunk: c008, lines: [1558, 1558], sha256: 79429b316c00d95f5651ac48aec7bfb0d653f21ee42d311d4933da37e2ba2ffc}
   note: 'A dataset version is named version/release/edition/revision, or written v<n> or as a dotted number
     of three or more parts (also at the end of a sentence), so zero matching lines mean the bundle states
-    no version. Not seen: a bare two-part number with no such word (''X 2.0''). Result: 6 matching line(s).
-    A match is not evidence the item is supported (the words recur in other senses), so the status stays
-    unknown until a curator or judge reads the lines listed.'
+    no version. Not seen: a bare two-part number with no such word (''X 2.0''). A matching line is one
+    a match touches, the text read line by line and whole: a line break read as a space and, after a hyphen,
+    as nothing (a split word) or as the hyphen alone (a hyphenated compound). Not seen: a word a break
+    splits with no hyphen. Result: 6 matching line(s). A match is not evidence the item is supported (the
+    words recur in other senses), so the status stays unknown until a curator or judge reads the lines
+    listed.'
 - rubric: rubric10
   item_id: E10.2
   route: null
   status: not_stated_in_source
   method: deterministic:dataset_citation
   evidence:
-    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d{4,9}/|(?<![a-z])cit(?:e[sd]?|ing|ations?)(?![a-z])|(?<![a-z])bibtex(?![a-z])|(?<![a-z])acknowledg|(?:please|how\s+to|when|should|must|kindly)\s+(?:be\s+)?referenc|recommended\s+referenc
+    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d+(?:\.\d+)*/|(?<![a-z])cit(?:e[sd]?|ing|ations?)(?![a-z])|(?<![a-z])bibtex(?![a-z])|(?<![a-z])acknowledg|(?:please|how\s+to|when|should|must|kindly)\s+(?:be\s+)?referenc|recommended\s+referenc
     hit_count: 0
     snippets: []
   note: 'E10.2 accepts a recommended citation or a DOI. A DOI matches as for E1.1; a citation request
     names cite/citation, BibTeX or acknowledgement, or asks the reader to reference the data (please,
     how to, when, should, must or kindly, then reference or be referenced; or a recommended reference),
     so zero matching lines mean the bundle states neither. Not seen: a bare formatted reference carrying
-    none of those words. Result: no matching line.'
+    none of those words. A matching line is one a match touches, the text read line by line and whole:
+    a line break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen alone
+    (a hyphenated compound). Not seen: a word a break splits with no hyphen. Result: no matching line.'

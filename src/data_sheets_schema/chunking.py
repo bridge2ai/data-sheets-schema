@@ -337,17 +337,19 @@ def validate_rule(rule: dict[str, Any]) -> None:
     """Raise `ValueError` unless `rule` is a rule `chunk_text` implements,
     written out in full: every field of `DEFAULT_RULE` and no other, the
     segmentation fields equal to the default's, the window bounds positive
-    integers and the version `2` or `2-custom`. `chunk_text` reads only the
-    two bounds and reads an empty rule as the default, so chunking under a
-    rule attests nothing about its other fields; this check does (#1404,
-    and the attainability validator's, #3107)."""
+    integers and the version the integer `2` or the string `2-custom`.
+    `chunk_text` reads only the two bounds and reads an empty rule as the
+    default, so chunking under a rule attests nothing about its other
+    fields; this check does (#1404, and the attainability validator's,
+    #3107)."""
     for key, value in DEFAULT_RULE.items():
         selected = rule.get(key)
         if key in ("max_lines", "max_bytes"):
             if type(selected) is not int or selected < 1:
                 raise ValueError(f"chunk rule {key} must be a positive integer")
         elif key == "version":
-            if selected not in (2, "2-custom") or isinstance(selected, bool):
+            # Exactly: `2.0 in (2, ...)` and `True in (1, ...)` hold (#3182).
+            if not ((type(selected) is int and selected == 2) or selected == "2-custom"):
                 raise ValueError(f"unsupported chunk rule {key}: {selected!r}")
         elif selected != value:
             raise ValueError(f"unsupported chunk rule {key}: {selected!r}")
