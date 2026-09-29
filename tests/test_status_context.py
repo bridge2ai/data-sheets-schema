@@ -540,6 +540,42 @@ def test_a_review_naming_no_artifact_cannot_be_bound_to_a_record():
         sc.review_status_expression(review, record_raw="notes: Curation continues.\n")
 
 
+ODD_SHAPES = [None, 5, 1.5, True, "", "c002", ["c002"], {"id": "c002"}, [["x"]], [None]]
+
+
+def test_no_model_output_field_of_any_shape_raises():
+    # #3090, generalised: each field a model writes, in the receipt and in
+    # the source review, set in turn to each odd shape. A malformed field is
+    # counted or passed over; neither rule raises (only a record that cannot
+    # be bound to the review is a ValueError, which the CLI reports).
+    text, manifest = _bundle(ENUMERATION)
+    view = sc.BundleView(text, manifest)
+    pair = {"slot": D_SLOT, "snippet": D_SNIPPET}
+    record = {"preprocessing_strategies": [{"preprocessing_details": "Data are standardized."}]}
+    for odd in ODD_SHAPES:
+        entries = [odd, {"id": odd, "status": "extracted", "extracted": [pair]},
+                   {"id": "c002", "status": odd, "extracted": [pair]},
+                   {"id": "c002", "status": "extracted", "extracted": odd},
+                   {"id": "c002", "status": "extracted", "extracted": [odd]},
+                   {"id": "c002", "status": "extracted", "extracted": [{"slot": odd, "snippet": D_SNIPPET}]},
+                   {"id": "c002", "status": "extracted", "extracted": [{"slot": D_SLOT, "snippet": odd}]}]
+        for entry in entries:
+            for addressed, final in ((record, odd), (odd, record)):
+                sc.receipt_context({"bundle_md5": _md5(text), "chunks": [entry]}, manifest, text, addressed,
+                                   final=final)
+        claim = _claim("Capabilities exist.", "fact", quote="develop capabilities")
+        claims = [{**claim, "evidence": odd}, {**claim, "evidence": [odd]},
+                  {**claim, "evidence": [{**claim["evidence"][0], "chunk": odd}]},
+                  {**claim, "evidence": [{**claim["evidence"][0], "quote": odd}]},
+                  {**claim, "claim_status": odd}, {**claim, "text": odd}, {**claim, "verdict": odd}, odd]
+        rows = [{"path": "/x", "claims": claims}, {"path": odd, "claims": [claim]}, {"path": "/x", "claims": odd}, odd]
+        review = {"artifact": "original_full", "sha256": "0" * 64, "values": rows}
+        sc.review_status_expression(review, view=view)
+        sc.review_status_expression(review)
+        with pytest.raises(ValueError):
+            sc.review_status_expression({**review, "artifact": odd}, record_raw="x: 1\n")
+
+
 def test_a_name_slot_is_routed_to_the_label_bucket():
     out = sc.review_status_expression(_review(("/creators/0/name", [_claim("Northern Network", "planned")]),
                                               ("/title", [_claim("A Data Resource", "planned")])))
