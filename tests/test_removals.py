@@ -257,6 +257,18 @@ class Containment(unittest.TestCase):
         self.assertEqual([r["path"] for r in b["flattened_paths"]], ["ethical_reviews[0].contact.page"])
 
 
+    def test_a_sibling_carrying_the_curie_counts_before_so_the_list_route_can_narrow(self):
+        """#3383: the list-level surplus compares two counts `_survives`
+        widens alike. A dropped sibling carried the ROR as a CURIE, so the
+        one surviving URL is no surplus: v1 read it flattened into
+        `creators`, v2 reads it deleted."""
+        before = _record(creators=[{"id": "x#a", "name": "Ann", "affiliations": [{"id": "https://ror.org/0168r3w48"}]},
+                                   {"id": "x#b", "name": "Bob", "affiliations": [{"id": "ROR:0168r3w48"}]}])
+        after = _record(creators=[{"id": "x#c", "name": "Cat", "affiliations": [{"id": "https://ror.org/0168r3w48"}]}])
+        b = rm.classify(before, after, _audit())
+        self.assertNotIn("creators[0].affiliations[0].id", [r["path"] for r in b["flattened_paths"]])
+        self.assertIn("creators[0].affiliations[0].id", [r["path"] for r in b["unfounded_paths"]])
+
 class Identity(unittest.TestCase):
     def test_a_reordered_list_is_not_a_removal(self):
         creators = [{"name": "Ada", "affiliation": "A"}, {"name": "Grace", "affiliation": "B"}]

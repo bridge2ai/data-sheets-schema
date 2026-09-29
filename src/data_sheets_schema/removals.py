@@ -90,7 +90,11 @@ resolve to a populated value: v2 lists it in its own class,
 A resolver URL and the CURIE it names are one text in every containment test
 (#3129), as they already were for list membership and fold identity: v1
 counted the AI_READI v4 rep1 creator's eight ROR URLs and its PI's ORCID
-deleted where the final record carries them as CURIEs.
+deleted where the final record carries them as CURIEs. Each containment test
+only widens, but the move from v1 to v2 is not one-way: the list-level fold
+(`_folded_into`) compares two counts that both widen, so a phase-1 sibling that
+carried the other form now raises the count the survivors must exceed, and a
+value v1 read as flattened into its list can read as deleted under v2 (#3383).
 Class declarations, `source_caveats` and minted ids are outside the
 classification (`exempt_value`).
 
@@ -413,7 +417,9 @@ def _folded_into(value: Any, entry_path: str, entry: dict[str, Any], snapshot_li
 
     The path returned is the sibling's in the first case and the list's in
     the second. Texts are compared by `_survives`, a resolver URL and its
-    CURIE as one (#3129)."""
+    CURIE as one (#3129). That widens both counts of the second route, so it
+    can narrow: a sibling that carried the value's other form counts before,
+    where v1 did not count it, and a v1 surplus can vanish (#3383)."""
     j = _fold_target(entry_path, entry, survivors, record_id, carried)
     if j is not None and _survives(value, survivors[j]):
         return f"{final_path}[{j}]"
