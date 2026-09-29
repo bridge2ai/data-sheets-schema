@@ -413,6 +413,41 @@ def test_the_exit_check_sees_an_exited_leader_without_reaping_it():
     assert process.returncode == 0
 
 
+def test_a_stopped_leader_is_not_an_exited_one(tmp_path):
+    """#2960: Darwin's waitid reports a SIGSTOPped child (CLD_STOPPED) even when only
+    WEXITED is asked for. A stopped leader is alive: the exit check says so, and a run
+    whose leader stops is ended by its deadline, not treated as finished."""
+    process = subprocess.Popen([sys.executable, '-c', 'import sys;sys.stdin.read()'], stdin=subprocess.PIPE,
+                               start_new_session=True)
+    try:
+        os.kill(process.pid, signal.SIGSTOP)
+        deadline = time.monotonic() + 30
+        while not process_state(process.pid).startswith('T'):
+            assert time.monotonic() < deadline, process_state(process.pid)
+            time.sleep(0.01)
+        assert not runner.leader_exited(process) and process.returncode is None
+        assert not runner.await_leader_exit(process, 0.2)
+        os.kill(process.pid, signal.SIGCONT)
+        process.stdin.close()
+        wait_until_exited_unreaped(process.pid)
+        assert runner.leader_exited(process) and process.returncode is None
+    finally:
+        with contextlib.suppress(OSError):
+            process.stdin.close()
+        if process.returncode is None:
+            with contextlib.suppress(OSError):
+                os.kill(process.pid, signal.SIGCONT)
+            process.kill(); process.wait()
+    instruction = tmp_path / 'input.txt'; instruction.write_text('offline')
+    proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: None)
+    start = time.monotonic()
+    with pytest.raises(BudgetStop, match='deadline elapsed'):
+        execute_child([sys.executable, '-c', 'import os,signal;os.kill(os.getpid(),signal.SIGSTOP)'], proxy=proxy,
+                      instruction=instruction, attempt=tmp_path, cwd=tmp_path, env=dict(os.environ),
+                      deadline_seconds=1.5, verify_launch=lambda: None)
+    assert time.monotonic() - start >= 1.4
+
+
 def test_the_leader_gets_its_sigterm_grace_before_the_group_sigkill(monkeypatch):
     """#2945: terminate_group waits (without reaping) for the leader to act on SIGTERM before
     the group SIGKILL, so a leader that takes a moment to exit cleanly ends by its own exit,

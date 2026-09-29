@@ -458,6 +458,11 @@ def _signal_group(process, sig):
     raise refusal
 
 
+#: The waitid si_codes that mean the child has terminated (#2960).
+_EXIT_CODES = frozenset(getattr(os, name) for name in ('CLD_EXITED', 'CLD_KILLED', 'CLD_DUMPED')
+                        if hasattr(os, name))
+
+
 def exit_check_available():
     """Whether the leader's exit can be observed without reaping it (#2714).
 
@@ -484,7 +489,10 @@ def leader_exited(process):
     if process.returncode is not None:
         return True
     try:
-        return os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
+        found = os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+        # XNU also reports a stopped child (CLD_STOPPED) when only WEXITED is
+        # asked for; only an exit, a kill or a core dump is an exit (#2960).
+        return found is not None and found.si_code in _EXIT_CODES
     except ChildProcessError:
         process.poll()                        # reaped elsewhere: the id is no longer held
         return True
