@@ -212,8 +212,10 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                           "path covers the value, not that removing it was wrong, and a value "
                           "only a core-only finding's path covers is counted here. A value "
                           "reworded, moved to another key or slot, or split across list members "
-                          "reads as deleted, since the test is its own text surviving, so this "
-                          "is an upper bound on content lost (#3207). Needs the "
+                          "reads as deleted, since the test is its own text surviving (#3207), "
+                          "while a lost value that coincidentally matches surviving text reads "
+                          "as flattened and a scalar rewritten in place as carried, so the count "
+                          "errs both ways and bounds nothing (#3229). Needs the "
                           "snapshot, so an agentic arm is – here, not 0 (#899); – also where the "
                           "run's audit cannot be read unambiguously"),
     "unfoundedreconcile": ("of those, removed at reconcile_full", "live", True,
@@ -230,7 +232,8 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                          "removals v1 (#2923): removed values a coverage receipt named (on the "
                          "value, an entry above it, or the list it was a member of) whose text "
                          "did not survive by the rule above, founded or not — reworded or moved "
-                         "values included, so an upper bound on receipted content lost (#3207). "
+                         "values included (#3207), coincidentally flattened and in-place "
+                         "rewritten ones not, so not a bound on receipted content lost (#3229). "
                          "Counted per value, "
                          "so not a subset of "
                          "the receipts block's `receipts_to_removed_values`, which counts receipt "

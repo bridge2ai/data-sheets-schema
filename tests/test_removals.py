@@ -88,7 +88,8 @@ class Classes(unittest.TestCase):
         """#3207, the AI_READI 04g rep2 shape: `notes` dropped and its content
         restated, reworded, in the entry's new `source_caveats`. The text test
         is the value's own text, so this is a deletion — unfounded with no
-        finding — and the emitted non-checks say the counts are upper bounds."""
+        finding — and the emitted non-checks say the counts err both ways
+        and bound nothing (#3229)."""
         before = _record(sampling_strategies=[{"is_sample": True, "notes": "The healthsheet answers N/A on sampling."}])
         after = _record(sampling_strategies=[{"is_sample": True, "source_caveats":
                                               "The healthsheet answers \"N/A\" to the sampling question."}])
@@ -96,8 +97,28 @@ class Classes(unittest.TestCase):
         self.assertEqual([r["path"] for r in b["unfounded_paths"]], ["sampling_strategies[0].notes"])
         self.assertEqual(b["receipted"]["deleted"], 1)
         text = next(n for n in b["non_checks"] if n.startswith("that a deleted value's content is gone"))
-        for phrase in ("reworded", "source_caveats", "split across several list members", "upper bounds"):
+        for phrase in ("reworded", "source_caveats", "split across several list members", "coincidental containment",
+                       "rewritten in place", "bound nothing"):
             self.assertIn(phrase, text)
+        self.assertNotIn("upper bound", text)
+
+    def test_a_scalar_rewritten_in_place_is_carried_not_removed(self):
+        """#3229, the deflating route: the join asks only that the path still
+        resolve to a populated value, so replaced text is not a removal."""
+        b = rm.classify(_record(license="CC-BY 4.0", description="Voice recordings of adults."),
+                        _record(license="CC-BY 4.0", description="An unrelated sentence."), _audit())
+        self.assertEqual(b["removed"], 0)
+        self.assertEqual(b["unfounded"], 0)
+
+    def test_a_lost_numeric_value_can_be_flattened_by_coincidental_containment(self):
+        """#3229, the other deflating route (the 22c CM4AI `file_count` 3 shape):
+        a dropped key whose short value appears by chance in text under its
+        surviving parent is counted flattened, so it is in no deletion count."""
+        before = _record(file_collections=[{"name": "Images", "file_count": 3, "description": "A zip."}])
+        after = _record(file_collections=[{"name": "Images", "description": "A zip. Listed as 3.8 GB."}])
+        b = rm.classify(before, after, _audit(), receipt=_receipt("file_collections[0].file_count"))
+        self.assertEqual([r["path"] for r in b["flattened_paths"]], ["file_collections[0].file_count"])
+        self.assertEqual((b["unfounded"], b["receipted"]["deleted"]), (0, 0))
 
     def test_a_single_scalar_and_a_one_item_list_of_it_are_the_same_value(self):
         b = rm.classify(_record(keywords=["speech"], license="CC-BY"), _record(keywords="speech", license=["CC-BY"]),
@@ -802,7 +823,8 @@ def test_a_reworded_or_moved_value_is_counted_deleted_though_its_content_survive
         label, project, removed, final_path, phrase, monkeypatch):
     """#3207: the module docstring's named cases. Each reads as a receipted
     unfounded deletion at reconcile_full, and the final record restates it
-    at another path — so the counts are upper bounds on content lost."""
+    at another path — so rewording inflates the counts (which, #3229, are
+    not bounds: coincidental flattening and in-place rewrites deflate them)."""
     monkeypatch.chdir(CONCAT.parents[1])
     b = _replay(label, project)
     row = next((r for r in b["unfounded_paths"] if r["path"] == removed), None)

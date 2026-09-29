@@ -203,7 +203,10 @@ def removals_cmd(method, label, project, show_flattened, as_json):
     path of an audit finding not scoped to the core record alone covers it)
     or unfounded, with the phase that removed it. The text test is the
     value's own text surviving, so a value reworded, moved or split lists
-    as deleted (#3207). Read-only: nothing is
+    as deleted (#3207), while a lost value can list as flattened by
+    coincidental containment and a scalar rewritten in place is not listed
+    at all: the counts are not bounds on content lost (#3229). Read-only:
+    nothing is
     written, and a run with no phase-1 snapshot prints that it was not
     checked rather than zero. Where the audit is missing, or present but
     unreadable, the deletions are listed unsorted and the summary says

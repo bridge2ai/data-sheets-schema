@@ -64,8 +64,16 @@ standing, not of content); VOICE 04f rep1
 1 and 3 of a three-member list, and its `ethical_reviews[1].review_details`
 reworded into `data_governance.notes`; CHORUS 04f rep3
 `acquisition_methods[0].notes` reworded into
-`labeling_strategies[0].data_annotation_protocol`. The deleted, unfounded and
-receipted-deleted counts are therefore upper bounds on content actually lost.
+`labeling_strategies[0].data_annotation_protocol`. Those inflate the deleted,
+unfounded and receipted-deleted counts, but the counts are not upper bounds on
+content lost either (#3229): two routes deflate them. A lost value can be
+classed flattened by coincidental containment — in 2026-08-22c v5 rep1 CM4AI,
+reconcile_full dropped `file_collections[1]`, and its `file_count` 3 reads as
+flattened into `file_collections` because "3" is a token of "3.8 GB" in
+another entry — and a flattened value is in none of the three counts. And a
+scalar whose text is replaced in place is carried, not removed, since the
+join asks only that its path still resolve to a populated value. The counts
+err in both directions and bound nothing.
 Class declarations, `source_caveats` and minted ids are outside the
 classification (`exempt_value`).
 
@@ -124,8 +132,12 @@ NON_CHECKS = (
     "that a deleted value's content is gone — the text test is exact normalised containment of "
     "the value's own text, so a value reworded, moved to another key (source_caveats included) or "
     "slot, or split across several list members reads as deleted, and as unfounded when no "
-    "finding covers it: deleted, unfounded and receipted-deleted are upper bounds on content "
-    "lost (#3207)",
+    "finding covers it (#3207); and not that a value counted neither deleted nor removed kept "
+    "its content — a lost value can be flattened by coincidental containment (a file_count 3 "
+    "matching the '3' of '3.8 GB') and a scalar rewritten in place is carried, since only its "
+    "path is checked: rewording and moving inflate the deleted, unfounded and receipted-deleted "
+    "counts, coincidental flattening and in-place rewrites deflate them, so they bound nothing "
+    "(#3229)",
     "a finding that narrows its slot in prose ('maintainers (the Emory contact)') is read at "
     "the path it names, so founded is an upper bound where findings narrow by prose",
     "that a finding's index means the entry it gives — one past the end of its list is read "

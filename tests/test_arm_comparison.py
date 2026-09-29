@@ -247,12 +247,15 @@ class RemovalRows(unittest.TestCase):
 
     def test_the_deletion_rows_say_a_reworded_or_moved_value_counts_as_deleted(self):
         """#3207: the text test is the value's own text surviving, so the
-        published definitions must not read as true deletions."""
+        published definitions must not read as true deletions; and #3229:
+        coincidental flattening and in-place rewrites deflate them, so the
+        definitions must not call them upper bounds."""
         for key in ("unfoundedremovals", "receipteddeleted"):
             text = self.m.METRICS[key][3]
             self.assertIn("reworded", text)
-            self.assertIn("upper bound", text)
+            self.assertNotIn("upper bound", text)        # #3229: the counts err both ways
             self.assertIn("#3207", text)
+            self.assertIn("#3229", text)
 
     def test_the_rows_are_in_the_table(self):
         for key in ("unfoundedremovals", "unfoundedreconcile", "receipteddeleted", "unrecordedremovals"):
