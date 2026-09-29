@@ -11,16 +11,36 @@ only where its clause names the container's own role, a role verb or a
 role-assignment noun. A `self` cue counts only where a self-reference to the
 member precedes it in its own clause or, when that clause has no subject of
 its own ("It is derived, but is not yet released"), earlier in the sentence.
-A `presence` cue counts where a `self` cue would or where its clause names
-the container's own presence term. A `none` cue has no further condition:
-`role.not_necessarily` names the container's role in its cue, but
-`presence.prospective_predicate` counts whatever its clause's subject is,
-so "the consent process is prospective" in an instance's prose is flagged
-like "both statements are prospective". A clause about another subject
-never counts. A cue does not count where a guard shows the clause is about
-a date, an amount, an attribute, a narrower sub-role or a study's design;
-a guard never reads the member's own self-reference ("this contact") as
-one of those.
+A self-reference that a comma separates from the cue counts only when the
+stretch after the last such comma has no subject of its own either: "Given
+the consent terms, the raw recordings are not released" is about the
+recordings (#3159). A `presence` cue counts where a `self` cue would or
+where its clause names the container's own presence term. A `none` cue has
+no further condition: `role.not_necessarily` names the container's role in
+its cue, but `presence.prospective_predicate` counts whatever its clause's
+subject is, so "the consent process is prospective" in an instance's prose
+is flagged like "both statements are prospective". A clause whose words
+name other people or things ("those individuals") never counts; the
+member's own self-reference ("this member among the creators") is blanked
+before that check, so it is never read as someone else (#3156).
+
+A cue does not count where a guard shows that what it says is unstated is a
+date, an amount, an attribute, a narrower sub-role or a study's design. The
+date, amount and attribute guards read the cue's object. Each pattern
+declares where that lies: after an active cue up to the phrase's end,
+before a passive one together with an `as` complement, or inside a cue that
+ends on the role noun. So the source a sentence cites ("The website does
+not name her as a creator", "The 2024 slide ...") and the cue's own verb
+("do not credit her") are not read as the thing unstated (#3157, #3158).
+A role cue is read that narrowly only where its object names the role
+itself; where the role that licenses it lies elsewhere in the clause, the
+object is not located and the guards read the whole clause. A sub-role
+counts only as a complement ("as the corresponding author", "is the PI")
+or as the modifier of a role noun or of a principal investigator ("a
+principal investigator role", "the contact PI"), so "identify the contact
+as the maintainer" disclaims the maintainer role of the member it calls
+the contact (#3162). A guard never reads the member's own self-reference
+("this contact") as one of those.
 
 With a coverage receipt, the lint also reports check (b) in a bucket of its
 own: each person-role member that no receipt snippet addressed to it names
@@ -67,6 +87,10 @@ LEXICON_PATH = Path(__file__).parent / "lexicons" / "self_disclaimed_v1.yaml"
 LEXICON_RESOURCE = "src/data_sheets_schema/lexicons/self_disclaimed_v1.yaml"
 KINDS = ("person_role", "presence")
 SCOPES = ("role", "presence", "self", "none")
+# What a guard reads, and where a pattern's object lies (the lexicon's
+# `reads` and `object` keys; see its guards comment).
+GUARD_READS = ("clause", "before_cue", "cue", "after_phrase", "object")
+OBJECT_PARTS = ("before_cue", "cue", "after_phrase", "as_phrase")
 CLASSIFICATIONS = ("removal_declared", "removed", "named_by_finding", "identity_unresolved")
 NON_CHECKS = (
     "whether the source supports the placement: a flag reads the member's own words, never the bundle",
@@ -80,13 +104,19 @@ NON_CHECKS = (
 _SENTENCE = re.compile(r"(?<=[.!?;:])\s+")
 _CLAUSE = re.compile(r",\s+(?=(?:and|but|so|while|whereas|because|although|though|since)\b)", re.I)
 # The text a clause opens with before its cue when its subject is elided:
-# the conjunction, at most a subject pronoun, and adverbs ("but is not yet
-# released", "and it has not been released", "but so far is not
-# released"). A clause with a subject of its own ("but the raw images are
-# not released") is about that subject.
+# the conjunction, at most a subject pronoun, adverbs and auxiliaries ("but
+# is not yet released", "and it has not been released", "but so far is not
+# released", "but is not named as a creator"). A clause with a subject of its
+# own ("but the raw images are not released") is about that subject.
 _ELIDED = re.compile(
     r"(?:(?:and|but|so|while|whereas|because|although|though|since)\s+)?(?:(?:it|he|she)\s+)?"
-    r"(?:(?:still|also|yet|currently|however|therefore|thus|so far|as yet)\s+)*", re.I)
+    r"(?:(?:still|also|yet|currently|however|therefore|thus|so far|as yet)\s+)*"
+    r"(?:(?:is|are|was|were|has|have|had|been|be)\s+)*", re.I)
+# Where the phrase after a cue ends: punctuation, a coordinating
+# conjunction, a contrast or a subordinator. "does not name her as an author
+# and gives no ORCID": the ORCID is not what the cue says is unstated.
+_PHRASE_END = re.compile(r"[,;:.]|\b(?:and|or|but|nor|rather|because|since|while|whereas|although|though)\b",
+                         re.I)
 _EXCERPT = 240
 
 
@@ -98,6 +128,7 @@ class Pattern:
     cue: str
     scope: str
     guards: tuple
+    object: tuple = ()  # where the thing the cue says is unstated lies (OBJECT_PARTS)
 
 
 @dataclass(frozen=True)
@@ -143,9 +174,8 @@ class Lexicon:
         self._other = [re.compile(p, re.I) for p in data["other_subject"]]
         self._guards = {}
         for name, guard in data["guards"].items():
-            if guard.get("reads") not in ("clause", "before_cue", "cue", "after_cue"):
-                raise ValueError(f"guard {name} must read the clause, the text before or after the cue, "
-                                 "or the cue")
+            if guard.get("reads") not in GUARD_READS:
+                raise ValueError(f"guard {name} must read one of {', '.join(GUARD_READS)}")
             self._guards[name] = (guard["reads"], re.compile(guard["regex"], re.I))
         assignment = data["assignment_nouns"]
         patterns = []
@@ -155,8 +185,13 @@ class Lexicon:
                 raise ValueError(f"pattern {row.get('id')} names an unknown kind or scope")
             if set(row["guards"]) - set(self._guards):
                 raise ValueError(f"pattern {row['id']} names an unknown guard")
+            parts = tuple(row.get("object") or ())
+            if set(parts) - set(OBJECT_PARTS):
+                raise ValueError(f"pattern {row['id']} declares an object outside {', '.join(OBJECT_PARTS)}")
+            if not parts and any(self._guards[g][0] == "object" for g in row["guards"]):
+                raise ValueError(f"pattern {row['id']} has a guard that reads its object but declares none")
             patterns.append(Pattern(row["id"], row["class"], kinds, row["cue"],
-                                    row["scope"], tuple(row["guards"])))
+                                    row["scope"], tuple(row["guards"]), parts))
         if len({p.id for p in patterns}) != len(patterns):
             raise ValueError("pattern ids must be unique")
         self.patterns = tuple(patterns)
@@ -297,12 +332,29 @@ def _masked(sentence: str, selves) -> str:
     return "".join(chars)
 
 
+def _own_self_reference(selves, text: str) -> str | None:
+    """The first self-reference in `text` (the cue's clause up to the cue)
+    that the cue is about. One a comma separates from the cue counts only
+    when the stretch after the last such comma has no subject of its own:
+    "Given the consent terms, the raw recordings are not released" and
+    "Listed in the manifest, the waveforms are not released" are about the
+    recordings and the waveforms, while "This variable, per the codebook, is
+    not released" is about the variable (#3159)."""
+    for rx in selves:
+        for found in rx.finditer(text):
+            tail = text[found.end():]
+            if "," in tail and _ELIDED.fullmatch(tail.rsplit(",", 1)[1].lstrip()) is None:
+                continue
+            return found.group(0)
+    return None
+
+
 def _self_reference(selves, sentence: str, c0: int, at: int) -> str | None:
     """A self-reference that makes the cue at `at` about the member: one in
     the cue's own clause before it or, when that clause has no subject of
     its own, one earlier in the sentence. "This split is balanced, but the
     raw images are not released" is about the images (#3082)."""
-    own = _search(selves, sentence[c0:at])
+    own = _own_self_reference(selves, sentence[c0:at])
     if own is not None or c0 == 0:
         return own
     if _ELIDED.fullmatch(sentence[c0:at]) is None:
@@ -310,17 +362,50 @@ def _self_reference(selves, sentence: str, c0: int, at: int) -> str | None:
     return _search(selves, sentence[:at])
 
 
+def _parts(masked: str, c0: int, c1: int, m) -> dict[str, str]:
+    """The pieces of the cue's clause a guard or an object can name, read
+    from the masked sentence: `clause`, `before_cue`, `cue`, `after_phrase`
+    (after the cue up to the phrase's end, `_PHRASE_END`) and `as_phrase`
+    (`after_phrase` when it opens on `as`, else empty)."""
+    after = masked[m.end():c1]
+    end = _PHRASE_END.search(after)
+    phrase = after[:end.start()] if end else after
+    return {"clause": masked[c0:c1], "before_cue": masked[c0:m.start()], "cue": masked[m.start():m.end()],
+            "after_phrase": phrase, "as_phrase": phrase if re.match(r"\s*as\b", phrase, re.I) else ""}
+
+
+def _object_texts(pattern, container, raw: dict[str, str], masked: dict[str, str]) -> list[str]:
+    """The texts naming what the cue says is unstated, as the pattern
+    declares them, read masked: `before_cue` (a passive cue's subject),
+    `cue` (a cue that ends on the role noun: "does not state a credit
+    role"), `after_phrase` (an active cue's object) and `as_phrase` (the
+    `as` complement after a passive cue: "are not recorded as creator
+    affiliations"). The source a sentence cites is an active cue's subject
+    and is not read. A role cue is read this narrowly only where its object
+    names the role itself (read unmasked, so "this maintainer" names one).
+    Where the role that licenses it lies elsewhere in the clause ("the
+    author affiliations ... do not name the Hastings Center", "No source
+    names a further creating team, assigns CRediT roles, ...") what the cue
+    says is unstated is not located, and the guard reads the whole clause."""
+    if pattern.scope == "role" and not any(container.role_scope.search(raw[p]) for p in pattern.object):
+        return [masked["clause"]]
+    return [masked[p] for p in pattern.object]
+
+
 def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     """One cue match: a flag hit, a guarded hit, or out of scope, with why."""
     c0, c1 = _clause(sentence, m.start())
-    clause, clause_before = sentence[c0:c1], sentence[c0:m.start()]
+    clause = sentence[c0:c1]
     out = {"rule": pattern.id, "class": pattern.cls, "cue": m.group(0)}
+    selves = lexicon._self + _own_names(member)
+    masked = _masked(sentence, selves)
     # The clause is about someone or something else ("those individuals ...
     # rather than as creators"): its wording disclaims nothing of the member.
-    other = _search(lexicon._other, clause_before, clause)
+    # Read with the member's own self-references blanked: "this member among
+    # the creators" is the member, not a group of other people (#3156).
+    other = _search(lexicon._other, masked[c0:m.start()], masked[c0:c1])
     if other:
         return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
-    selves = lexicon._self + _own_names(member)
     if pattern.scope == "role":
         term = container.role_scope.search(clause)
         if term is None:
@@ -339,14 +424,15 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         if term is None:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_reference"}
         out["scope"] = term
-    masked = _masked(sentence, selves)
-    read = {"clause": masked[c0:c1], "before_cue": masked[c0:m.start()], "cue": masked[m.start():m.end()],
-            "after_cue": masked[m.end():c1]}
+    parts = _parts(masked, c0, c1, m)
+    read = {k: [parts[k]] for k in ("clause", "before_cue", "cue", "after_phrase")}
+    read["object"] = _object_texts(pattern, container, _parts(sentence, c0, c1, m), parts)
     for name in pattern.guards:
         reads, rx = lexicon._guards[name]
-        found = rx.search(read[reads])
-        if found:
-            return {**out, "outcome": "guarded", "guard": name, "term": found.group(0)}
+        for text in read[reads]:
+            found = rx.search(text)
+            if found:
+                return {**out, "outcome": "guarded", "guard": name, "term": found.group(0)}
     return {**out, "outcome": "flag"}
 
 

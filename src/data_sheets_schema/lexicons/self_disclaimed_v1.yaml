@@ -8,8 +8,10 @@
 # to the alternation of the container's own `role_terms` or
 # `presence_terms`, so a cue never matches another container's role.
 #
-# Any change to these bytes is a new instrument: bump `version`, rename the
-# file, and add its sha256 to the pins in tests/test_self_disclaimed.py.
+# Once merged, any change to these bytes is a new instrument: bump
+# `version`, rename the file, and add its sha256 to the pins in
+# tests/test_self_disclaimed.py. Version 1 was revised in review before it
+# first merged (#3029); the test module names each earlier sha.
 instrument: self_disclaimed
 version: 1
 issue: 2913
@@ -45,7 +47,7 @@ containers:
     role_terms: ['maintainers?', 'hosts?', 'stewards?', 'curators?', 'custodians?']
     role_verbs: ['maintain(?:s|ed|ing)?', 'host(?:s|ed|ing)?', 'curat(?:e|es|ed|ing)',
                  'steward(?:s|ed|ing)?']
-    role_predicates: ['maintain(?:s|ed|er|ers|ing|ance)?', 'host(?:s|ed|ing)?',
+    role_predicates: ['maintain(?:s|ed|er|ers|ing)?', 'maintenance', 'host(?:s|ed|ing)?',
                       'curat(?:e|es|ed|ing|ion|or|ors)', 'steward(?:s|ship)?',
                       'custodians?']
   data_collectors:
@@ -77,7 +79,10 @@ assignment_nouns: ['roles?', 'titles?', 'categor(?:y|ies)', 'designations?', 'po
 
 # The sentence's subject is the member itself: a deictic phrase or pronoun,
 # a sentence opening on a participle with the subject elided, or the
-# member's own `name`/`variable_name` (added by the code).
+# member's own `name`/`variable_name` (added by the code). One a comma
+# separates from the cue counts only when the stretch after the last comma
+# has no subject of its own, so "Given the consent terms, the raw
+# recordings are not released" is about the recordings.
 self_reference:
   - '\b(?:this|the present|the same) (?:member|person|individual|entry|contact|organi[sz]ation|institution|group|team|body|consortium|creator|author|maintainer|collector|variable|element|data element|data type|type|instance|modality|split|partition|set)\b'
   - '^(?:it|he|she)\b'
@@ -85,7 +90,8 @@ self_reference:
   - '^(?:named|listed|recorded|credited|identified|described|mentioned|included|given|shown|cited|stated|reported|treated|kept)\b'
 
 # The clause is about other people or things, so its role or presence
-# wording does not disclaim the member.
+# wording does not disclaim the member. Read with the member's own
+# self-references blanked: "this member among the creators" is the member.
 other_subject:
   - '\b(?:these|those|other|such|the other|the remaining|the listed|the named|individual|member) (?:[\w-]+ ){0,2}?(?:individuals|people|persons|members|investigators|personnel|staff|collaborators|institutions|organi[sz]ations|centers|centres|sites|authors|creators|maintainers|entities|partners)\b'
   - '\bthe (?:[\w-]+ ){0,2}(?:individuals|people|persons|investigators|personnel|staff|collaborators|institutions|organi[sz]ations)\b'
@@ -94,36 +100,59 @@ other_subject:
 
 # A hit whose guard matches is a caveat about a date, amount or attribute
 # of the member, or about a study's design, not about its role or presence.
-# Guarded hits are reported in their own list, never as flags. `reads:
-# clause` reads the whole clause holding the cue, `reads: before_cue` the
-# clause up to the cue, `reads: cue` the matched cue alone and `reads:
-# after_cue` the clause after the cue. A guard reads that text with the
+# Guarded hits are reported in their own list, never as flags. A guard
+# reads one of: `clause`, the whole clause holding the cue; `before_cue`,
+# the clause up to the cue; `cue`, the matched cue alone; `after_phrase`,
+# the text after the cue up to punctuation, a coordinating conjunction,
+# "rather" or a subordinator; `object`, the texts the pattern's own
+# `object` names as what the cue says is unstated. It reads them with the
 # member's own self-references blanked: "this contact" is the member, not a
 # narrower sub-role.
+#
+# A pattern's `object` lists where that thing lies: `after_phrase` for an
+# active cue ("does not name <her as an author>"), `before_cue` and
+# `as_phrase` for a passive one ("<the start date of her role> is not
+# stated", "are not recorded <as creator affiliations>"), `cue` for a cue
+# that ends on the role noun ("does not state <a credit role>"). The
+# source a sentence cites is an active cue's subject, so "The website does
+# not name her as a creator" and "The 2024 slide ..." are not read as an
+# attribute or a date, and neither is the cue's own verb ("do not credit
+# her"). A role cue is read this narrowly only where its object names the
+# role itself. Where the role that licenses it lies elsewhere in the clause
+# ("the author affiliations ... do not name the Hastings Center"), what it
+# says is unstated is not located and `object` reads the whole clause.
+#
+# A sub-role counts only in one of two shapes: as a complement ("as the
+# corresponding author", "is the PI") or as the modifier of a role noun or
+# of a principal investigator ("a principal investigator role", "the
+# contact PI"). "The contact" as a noun phrase of its own is the member
+# ("do not identify the contact as the maintainer", "the contact's role is
+# not stated"), not a narrower role.
 guards:
   date_amount:
-    reads: clause
+    reads: object
     regex: '\b(?:dates?|dated|periods?|years?|months?|weeks?|days?|timeframes?|time ?frames?|durations?|start|end|deadlines?|timelines?|schedules?|when|amounts?|counts?|numbers?|sizes?|totals?|figures?|budgets?|costs?|currenc(?:y|ies)|percent(?:ages?)?|funding)\b|\b(?:19|20)\d\d\b|\$\s?\d'
   attribute:
-    reads: clause
+    reads: object
     regex: '\b(?:orcids?|identifiers?|ids?|affiliations?|e-?mails?|address(?:es)?|departments?|urls?|homepages?|websites?|dois?|credit(?:_roles)?|taxonomy|contributor roles?)\b'
   # The role the cue says is unstated is a narrower one than the container's
   # ("does not state a principal investigator role" of a creator).
   subrole:
     reads: cue
-    regex: '\b(?:(?:co-?)?principal investigators?|pis?|corresponding|contact)\b'
+    regex: &subrole '\b(?:as|is|was|are|were|be|being|been) (?:an? |the |its |their |her |his )?(?:[\w-]+ )?(?:(?:co-?)?principal investigators?|pis?|corresponding|contact)\b|\b(?:(?:co-?)?principal investigators?|pis?|corresponding|contact)(?= (?:roles?|titles?|authors?|authorship|designations?|positions?|status|capacit(?:y|ies)|categor(?:y|ies)|(?:co-?)?principal investigators?|pis?)\b)'
   # A cue that stops at its verb ("does not assign", "does not state
   # whether") has its object after it: "... her a principal investigator
-  # role", "... whether she is the corresponding author". Read up to the
-  # next conjunction or punctuation, so a second role in a coordinated
-  # phrase ("a creator or only the contact") is not taken for the object.
+  # role", "... whether she is the corresponding author". It reads the
+  # phrase after the cue, so a second role in a coordinated phrase ("a
+  # creator or only the contact") or a contrast ("the maintainer rather
+  # than as a contact") is not taken for the object.
   subrole_object:
-    reads: after_cue
-    regex: '^(?:(?!\b(?:and|or|but|nor)\b)[^,;:.]){0,60}?\b(?:(?:co-?)?principal investigators?|pis?|corresponding|contact)\b'
+    reads: after_phrase
+    regex: *subrole
   # A passive cue ("... is not recorded") comes after the role it negates.
   subrole_in_clause:
     reads: clause
-    regex: '\b(?:(?:co-?)?principal investigators?|pis?|corresponding|contact)\b'
+    regex: *subrole
   design:
     reads: before_cue
     regex: '\b(?:study|studies|cohorts?|design|trials?|recruitment|enrol(?:l)?ment|collection|project|protocol)\s+(?:\w+\s+){0,2}$'
@@ -139,7 +168,8 @@ guards:
 # counts whatever the clause's subject is ("both statements are
 # prospective", but also "the consent process is prospective"), with only
 # the design guard. Every scope rejects an other-subject anywhere in the
-# clause holding the cue.
+# clause holding the cue, read with the member's own self-references
+# blanked.
 patterns:
   - id: role.assignment_negated
     class: role_disclaimer
@@ -147,36 +177,42 @@ patterns:
     cue: '\b(?:(?:does|do|did) not|without) (?:assign(?:ing)?|giv(?:e|ing)|nam(?:e|ing)|designat(?:e|ing)|identify(?:ing)?|credit(?:ing)?|attribut(?:e|ing))\b'
     scope: role
     guards: [date_amount, attribute, subrole_object]
+    object: [after_phrase]
   - id: role.no_role_stated
     class: role_disclaimer
     kinds: [person_role]
     cue: '\b(?:(?:does|do|did) not|without) (?:state|stating|specify|specifying|record|recording|give|giving) (?:an? |any |the |this |that |its |their |his |her )?(?:[\w''’-]+ ){0,2}(?:roles?|titles?|categor(?:y|ies)|designations?|positions?)\b'
     scope: role
     guards: [date_amount, attribute, subrole]
+    object: [cue]
   - id: role.states_no_role
     class: role_disclaimer
     kinds: [person_role]
     cue: '\b(?:states?|gives?|assigns?|names?|records?|reports?|specif(?:y|ies)) no (?:[\w''’-]+ ){0,2}(?:roles?|titles?|categor(?:y|ies)|designations?|positions?)\b'
     scope: role
     guards: [date_amount, attribute, subrole]
+    object: [cue]
   - id: role.passive_not_stated
     class: role_disclaimer
     kinds: [person_role]
     cue: '\b(?:is|are|was|were) not (?:stated|given|reported|recorded|specified|established|assigned|named)\b'
     scope: role
     guards: [date_amount, attribute, subrole_in_clause]
+    object: [before_cue, as_phrase]
   - id: role.not_stated_who
     class: role_disclaimer
     kinds: [person_role]
     cue: '\b(?:does|do|did) not (?:state|say|specify|indicate|establish|confirm) (?:who|whether|that)\b'
     scope: role
     guards: [date_amount, attribute, subrole_object]
+    object: [after_phrase]
   - id: role.none_assigns
     class: role_disclaimer
     kinds: [person_role]
     cue: '\b(?:none|neither|nothing(?: in the bundle)?|no (?:source|document|passage|page|material)s?(?: in the bundle)?)\b[^.;:]{0,40}?\b(?:assigns?|names?|designates?|credits?|identif(?:y|ies)|establish(?:es)?|states?|says|specif(?:y|ies)|indicates?)\b'
     scope: role
     guards: [date_amount, attribute, subrole, subrole_object]
+    object: [after_phrase]
   - id: role.contrast
     class: role_disclaimer
     kinds: [person_role]
@@ -219,18 +255,21 @@ patterns:
     cue: '\b(?:is|are|was|were) not (?:one|part|among|any) of the\b'
     scope: presence
     guards: [date_amount]
+    object: [before_cue]
   - id: presence.none_reports_available
     class: presence_disclaimer
     kinds: [presence]
     cue: '\b(?:none|no (?:source|document|passage|page)s?(?: in the bundle)?)\b[^.;:]{0,20}?\b(?:reports?|states?|lists?|describes?|shows?|presents?)\b[^.;:]{0,80}? as (?:available|released|present|collected|complete|delivered|distributed)\b'
     scope: presence
     guards: [date_amount]
+    object: [cue]
   - id: presence.not_yet_released
     class: presence_disclaimer
     kinds: [presence]
     cue: '\b(?:is|are|was|were|has|have) not (?:yet )?(?:been )?(?:released|available|collected|included|present|distributed|delivered|produced|generated|acquired)\b'
     scope: self
     guards: [date_amount, attribute]
+    object: [before_cue]
   - id: presence.prospective_predicate
     class: presence_disclaimer
     kinds: [presence]

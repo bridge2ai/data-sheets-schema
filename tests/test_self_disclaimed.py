@@ -18,9 +18,13 @@ LEXICON = sd.load_lexicon()
 
 #: Pins on the lexicon's exact bytes, one per version. Changing the file
 #: without a version bump fails here; so does bumping without a pin. v1 was
-#: revised in review before it merged (#3080, #3081); nothing committed
-#: names its earlier sha (9b1f536b...).
-LEXICON_PINS = {1: "728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d"}
+#: revised in review before it first merged (#3029), so this PR's commits
+#: carry two earlier byte versions under `version: 1`:
+#:   9b1f536ba02afc9971bbe9e28da316ea1c3c90e356bdbcc2c200400259521b04 (e00711d21, first commit)
+#:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
+#: Every output names the sha it ran under, and no committed output, record
+#: or note cites either of them (#3161).
+LEXICON_PINS = {1: "14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35"}
 
 
 def record(**containers):
@@ -159,6 +163,111 @@ def test_this_contact_is_the_member_not_a_narrower_subrole(text):
     assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("subrole", "contact")]
 
 
+@pytest.mark.parametrize("container,text", [
+    ("maintainers", "No source identifies the listed contact as the maintainer of the dataset."),
+    ("maintainers", "The sources do not identify the program contact as a maintainer."),
+    ("maintainers", "No source names this person as the maintainer rather than as a contact."),
+    ("maintainers", "The sources do not identify the contact as the dataset's maintainer."),
+    ("maintainers", "The sources do not state whether the contact maintains the dataset."),
+    ("maintainers", "The contact's role is not stated."),
+    ("creators", "The sources do not identify the contact as an author of the dataset."),
+    ("creators", "No source names the corresponding contact as a creator."),
+])
+def test_the_contact_named_as_the_member_is_not_a_subrole(container, text):
+    """#3162: 'the contact' as a noun phrase of its own is the member, and the
+    role disclaimed is the container's. A sub-role counts only as a
+    complement or as the modifier of a role noun or of a principal
+    investigator."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [f["path"] for f in out["flags"]] == [f"/{container}/0"] and out["guarded"] == [], text
+
+
+def test_a_passive_cue_is_guarded_by_a_subrole_in_its_clause():
+    """#3164: the passive cue's sub-role guard, and the sub-role shapes it
+    reads: a modifier of a role noun or of a principal investigator, and a
+    complement."""
+    for text, term in (("The principal investigator role of this person is not stated.", "principal investigator"),
+                       ("Roles other than that of the contact PI are not specified.", "contact"),
+                       ("Her creator role, as principal investigator, is not specified.", "as principal investigator")):
+        out = sd.scan(record(creators=[{"name": "Entry", "description": text}]), LEXICON)
+        assert out["flags"] == [], text
+        assert [(g["rule"], g["guard"], g["term"]) for g in out["guarded"]] == [
+            ("role.passive_not_stated", "subrole_in_clause", term)], text
+
+
+@pytest.mark.parametrize("container,text", [
+    ("creators", "The website does not name this person as a creator of the dataset."),
+    ("creators", "The project homepage does not state who created the dataset."),
+    ("maintainers", "The website does not state who maintains the dataset."),
+    ("maintainers", "The website does not name this maintainer."),
+    ("splits", "This split is not yet available on the project website."),
+    ("creators", "The 2024 slide does not assign this member a role."),
+    ("creators", "The funding announcement does not name her as an author."),
+    ("creators", "No source on the website names this person as a creator."),
+    ("creators", "The number of sources is small and none names this person as a creator."),
+    ("creators", "The sources do not name her as an author and give no ORCID for her."),
+    # a passive cue's object is its subject and its `as` complement
+    ("creators", "This person is not recorded as a creator because the website omits her."),
+])
+def test_the_cited_source_or_incidental_context_is_not_what_is_unstated(container, text):
+    """#3158: the date, amount and attribute guards read the cue's object
+    (after an active cue, before a passive one), so the source a sentence
+    cites and context outside the object do not suppress the hit."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [f["path"] for f in out["flags"]] == [f"/{container}/0"] and out["guarded"] == [], text
+
+
+@pytest.mark.parametrize("text,guard,term", [
+    # the object names the role, and the attribute is in it
+    ("No source assigns CRediT contributor roles to the creator, so credit_roles is left unpopulated.",
+     "attribute", "CRediT"),
+    ("The sources do not state credit roles for the dataset itself.", "attribute", "credit"),
+    # a passive cue's `as` complement
+    ("These are not recorded as creator affiliations because the page lists them elsewhere.",
+     "attribute", "affiliations"),
+    # the licensing role lies outside the object, so the whole clause is read
+    ("The preprint's author affiliations instead name another university and do not name the institute.",
+     "attribute", "affiliations"),
+    ("No source names a further creating team, assigns CRediT roles, or states which individuals did the work.",
+     "attribute", "CRediT"),
+    # a passive cue's subject
+    ("The start date of this member's role is not stated.", "date_amount", "start"),
+])
+def test_a_date_or_attribute_in_the_object_is_still_guarded(text, guard, term):
+    """#3158: the corpus's guarded shapes stay guarded under the object reading."""
+    out = sd.scan(record(creators=[{"name": "Entry", "description": text}]), LEXICON)
+    assert out["flags"] == [], text
+    assert [(g["guard"], g["term"]) for g in out["guarded"]] == [(guard, term)], text
+
+
+@pytest.mark.parametrize("container,text,rule", [
+    ("creators", "The sources do not credit this person as a creator of the dataset.", "role.assignment_negated"),
+    ("creators", "The documents did not credit her as an author.", "role.assignment_negated"),
+    ("maintainers", "The sources do not credit this organization as a maintainer.", "role.assignment_negated"),
+    ("creators", "None of the sources credit this person as a creator.", "role.none_assigns"),
+])
+def test_the_cue_verb_credit_is_not_the_credit_attribute(container, text, rule):
+    """#3157: the attribute guard's 'credit' (CRediT, credit_roles) is never
+    read in the cue's own verb."""
+    assert flagged(record(**{container: [{"name": "Entry", "description": text}]})) == {f"/{container}/0": [rule]}
+
+
+@pytest.mark.parametrize("container,text", [
+    ("creators", "The slide does not name this member among the creators."),
+    ("creators", "The sources do not name this individual among the authors."),
+    ("creators", "The paper does not credit this member among its authors."),
+    ("maintainers", "The page does not name this member of staff as a maintainer."),
+])
+def test_the_members_own_self_reference_is_not_another_subject(container, text):
+    """#3156: 'this member' / 'this individual' is blanked before the
+    other-subject check, as it is for the guards."""
+    assert flagged(record(**{container: [{"name": "Entry", "description": text}]})) == {
+        f"/{container}/0": ["role.assignment_negated"]}, text
+    assert outcomes(container, text.replace("this member", "individual consortium members")
+                    .replace("this individual", "individual consortium members")) == [
+        ("role.assignment_negated", "out_of_scope", "other_subject")], text
+
+
 @pytest.mark.parametrize("container,text,term", [
     ("maintainers", "The maintainer's address is not stated.", "address"),
     ("data_collectors", "The collector's address is not stated.", "address"),
@@ -218,6 +327,19 @@ def test_a_presence_cue_needs_a_self_reference_or_a_presence_term():
         ("presence.none_reports_available", "flag", None)]
 
 
+@pytest.mark.parametrize("container,text,expected", [
+    ("splits", "This is recorded as a planned provision.",
+     [("presence.recorded_as_planned", "This is"), ("presence.planned_element", "This is")]),
+    ("instances", "It is listed as planned.", [("presence.recorded_as_planned", "It")]),
+])
+def test_a_presence_cue_is_licensed_by_a_self_reference_alone(container, text, expected):
+    """#3163: the self-reference half of the presence scope. Neither text
+    names a presence term, so only the self-reference licenses the cue."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == expected
+    assert not LEXICON.containers[container].presence_scope.search(text)
+
+
 def test_scope_is_read_in_the_clause_holding_the_cue():
     """Clause segmentation (#3084): another subject in an earlier clause does
     not reject a cue, and a role verb in an earlier clause does not license one."""
@@ -245,12 +367,50 @@ def test_an_earlier_self_reference_counts_only_for_a_clause_without_its_own_subj
         ("presence.not_yet_released", expected)]
 
 
+@pytest.mark.parametrize("container,text", [
+    ("instances", "Given the consent terms, the raw audio recordings are not released."),
+    ("variables", "Given the privacy rules, the underlying minute-level data are not yet available."),
+    ("splits", "Given the site structure, the raw images are not distributed."),
+    ("instances", "Listed in the file manifest, the raw audio waveforms are not released."),
+    ("splits", "For this split, the raw images are not released."),
+])
+def test_an_introductory_self_reference_does_not_license_a_clause_with_its_own_subject(container, text):
+    """#3159: a self-reference a comma separates from the cue counts only
+    when the stretch after the comma has no subject of its own."""
+    assert outcomes(container, text) == [("presence.not_yet_released", "out_of_scope", "no_self_reference")]
+
+
+@pytest.mark.parametrize("container,text,rule,scope", [
+    ("instances", "Listed in the file manifest, it is not yet released.", "presence.not_yet_released", "Listed"),
+    ("variables", "This variable, per the codebook, is not yet released.", "presence.not_yet_released",
+     "This variable"),
+    ("creators", "This person is listed on the slide, but is not named as a creator.", "role.not_the_role",
+     "This person"),
+])
+def test_a_self_reference_across_a_comma_counts_where_the_cue_has_no_subject_of_its_own(container, text, rule, scope):
+    """#3159: an elided subject after the comma (a pronoun, an auxiliary)
+    keeps the self-reference, as for an earlier clause (#3082)."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert (rule, scope) in [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]], text
+
+
 def test_a_none_scope_cue_counts_whatever_its_subject():
     """#3083: presence.prospective_predicate has no subject condition, so it
     flags a caveat about something else that is prospective. Pinned so a
     change to that contract is a deliberate one."""
     assert outcomes("instances", "The consent forms are prospective.") == [
         ("presence.prospective_predicate", "flag", None)]
+
+
+@pytest.mark.parametrize("container,text", [
+    ("creators", "This person is not necessarily a creator of the dataset."),
+    ("maintainers", "A project contact is not necessarily its maintainer."),
+])
+def test_role_not_necessarily_needs_no_self_reference(container, text):
+    """#3164: the `none`-scope role cue names the container's role itself,
+    so it counts with or without a self-reference."""
+    assert outcomes(container, text) == [("role.not_necessarily", "flag", None)]
+    assert outcomes(container, text.replace("necessarily", "always")) == []
 
 
 def test_the_members_own_name_is_a_self_reference():
@@ -285,6 +445,20 @@ def test_role_predicate_miss_with_no_lexicon_hit_is_bucket_b_only():
     assert "/maintainers/0" not in {f["path"] for f in hosted["flags"]}
 
 
+@pytest.mark.parametrize("snippet,supported", [
+    ("Data maintenance: Person C", True),
+    ("Person C is responsible for maintenance of the dataset", True),
+    ("Maintained by Person C", True),
+    ("Person C, Program Manager", False),
+])
+def test_the_maintainer_predicates_read_the_noun_maintenance(snippet, supported):
+    """#3160: the predicate spelled 'maintain...ance' matched only the
+    misspelling 'maintainance'."""
+    rec = record(maintainers=[{"name": "Person C"}])
+    out = sd.role_predicates(rec, receipt(("maintainers[0]", snippet)), LEXICON)
+    assert out["supported"] == int(supported), snippet
+
+
 def test_bucket_b_is_reported_apart_from_the_lexicon_diff():
     rec = record(maintainers=[{"name": "Person C", "maintainer_details": "Listed under Contact Us."}])
     out = sd.diff(rec, copy.deepcopy(rec), receipt=receipt(("maintainers[0]", "Person C, Program Manager")),
@@ -292,6 +466,21 @@ def test_bucket_b_is_reported_apart_from_the_lexicon_diff():
     assert out["lexicon_diff"]["rows"] == []
     assert [(r["path"], r["classification"]) for r in out["role_predicate_diff"]["rows"]] == [
         ("/maintainers/0", "role_predicate_retained")]
+
+
+def test_bucket_b_reads_the_receipt_against_the_original():
+    """#3164: the receipt was written against the original, so its slot
+    paths are the original's. Person C is receipted at maintainers[1] and
+    sits at maintainers[0] in the final; read against the final, the receipt
+    would address nobody."""
+    original = record(maintainers=[{"name": "Person A"}, {"name": "Person C"}])
+    final = record(maintainers=[{"name": "Person C"}])
+    out = sd.diff(original, final, receipt=receipt(("maintainers[1]", "Person C, Program Manager")),
+                  lexicon=LEXICON)
+    assert [(f["path"], f["reason"]) for f in out["role_predicate"]["flags"]] == [
+        ("/maintainers/0", "no_receipt"), ("/maintainers/1", "no_role_predicate")]
+    assert [(r["path"], r["classification"], r["final_path"]) for r in out["role_predicate_diff"]["rows"]] == [
+        ("/maintainers/0", "removed", None), ("/maintainers/1", "role_predicate_retained", "/maintainers/0")]
 
 
 # ------------------------------------------------------------------ the diff
@@ -428,6 +617,28 @@ def test_lexicon_bytes_are_pinned_per_version():
     assert sd.LEXICON_PATH.name == f"self_disclaimed_v{LEXICON.version}.yaml"
     assert LEXICON.describe() == {"path": sd.LEXICON_RESOURCE, "version": LEXICON.version,
                                   "sha256": LEXICON_PINS[LEXICON.version]}
+
+
+def edited_lexicon(edit):
+    data = yaml.safe_load(sd.LEXICON_PATH.read_text(encoding="utf-8"))
+    edit(data)
+    return sd.Lexicon(yaml.safe_dump(data, sort_keys=False).encode("utf-8"))
+
+
+def pattern_row(data, pattern_id):
+    return next(row for row in data["patterns"] if row["id"] == pattern_id)
+
+
+def test_a_guard_reading_the_object_needs_the_pattern_to_declare_one():
+    """A pattern whose guard reads `object` must say where its object lies,
+    in the parts the code reads; a guard must read a part the code knows."""
+    assert edited_lexicon(lambda d: None).patterns == LEXICON.patterns
+    with pytest.raises(ValueError, match="declares none"):
+        edited_lexicon(lambda d: pattern_row(d, "role.assignment_negated").pop("object"))
+    with pytest.raises(ValueError, match="declares an object outside"):
+        edited_lexicon(lambda d: pattern_row(d, "role.assignment_negated").update(object=["after_cue"]))
+    with pytest.raises(ValueError, match="must read one of"):
+        edited_lexicon(lambda d: d["guards"]["subrole_object"].update(reads="after_cue"))
 
 
 def test_lexicon_is_generic():
