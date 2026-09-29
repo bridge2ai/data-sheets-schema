@@ -496,6 +496,77 @@ class TestASharedGraphIsBounded(unittest.TestCase):
                 self.assertTrue(reason)
 
 
+#: #3263 (Codex): a merge cycle PyYAML accepts. The scoped entry loads as
+#: `{name: safe}`, dropping an earlier `name: embargo`; cutting the cycle read
+#: `benign` as the override that dropped it, and the record passed as clean.
+MERGE_CYCLE = ("base: &a {<<: {name: benign}, <<: &b {<<: {name: embargo, name: safe}, <<: *a}}\n"
+               "confidential_elements: [*b]\n")
+
+
+def _merge_chain(links):
+    """A loadable chain of `links` anchors, each merging the one before, whose
+    root repeats `name` and sits under a skipped key of one scoped slot before
+    it is aliased into another: the duplicate walk recurses a frame or more a
+    link, the loader does not (#3263)."""
+    return "\n".join(["confidential_elements:", "  source_caveats:",
+                      "    a0: &a0 {name: embargo, name: safe}"]
+                     + [f"    a{i}: &a{i} {{<<: *a{i - 1}}}" for i in range(1, links)]
+                     + ["resources:", "  outer:", f"    sensitive_elements: [*a{links - 1}]"]) + "\n"
+
+
+class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
+    """#3263 (Codex): a merge cycle and a merge chain deeper than the walk can
+    recurse are reported as not checked, never as an empty list; and a
+    string shared by many aliases is matched once and charged per visit."""
+
+    def test_a_merge_cycle_is_not_checked(self):
+        self.assertEqual(yaml.safe_load(MERGE_CYCLE)["confidential_elements"], [{"name": "safe"}])
+        with self.assertRaises(rd.MergeCycle):
+            rd.unread_duplicate_keys(MERGE_CYCLE)
+        found, reason = rd.check_text(MERGE_CYCLE)
+        self.assertIsNone(found)
+        self.assertIn("a merge key reaches the mapping it is written in", reason)
+
+    def test_without_the_cycle_the_duplicate_is_named(self):
+        text = MERGE_CYCLE.replace(", <<: *a}}", "}}")
+        self.assertEqual([d["key"] for d in rd.unread_duplicate_keys(text)], ["name"])
+        self.assertIsNone(rd.check_text(text)[0])
+
+    def test_a_merge_diamond_is_not_a_cycle(self):
+        text = "d: &d {name: safe}\nl: &l {<<: *d}\nr: &r {<<: *d}\nconfidential_elements: [{<<: [*l, *r]}]\n"
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_a_merge_chain_past_the_recursion_limit_is_not_checked(self):
+        text = _merge_chain(sys.getrecursionlimit() + 20)
+        record = yaml.safe_load(text)                  # the loader reads it
+        self.assertEqual(record["resources"]["outer"]["sensitive_elements"], [{"name": "safe"}])
+        self.assertEqual(slot_meaning_mismatch(record), [])
+        with self.assertRaises(RecursionError):
+            rd.unread_duplicate_keys(text)
+        found, reason = rd.check_text(text)
+        self.assertIsNone(found)
+        self.assertIn("recursion", reason)
+
+    def test_a_short_merge_chain_names_its_duplicate(self):
+        self.assertEqual([d["key"] for d in rd.unread_duplicate_keys(_merge_chain(5))], ["name"])
+
+    def test_a_string_shared_by_many_aliases_is_matched_once_and_charged_per_visit(self):
+        from unittest import mock
+        text = "big: &s " + "x" * 2_000 + "\nconfidential_elements: [" + ", ".join(["*s"] * 500) + "]\n"
+        record = yaml.safe_load(text)
+        with mock.patch.object(rd, "_match", wraps=rd._match) as matched:
+            self.assertEqual(slot_meaning_mismatch(record), [])
+        self.assertEqual(matched.call_count, 1)
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            slot_meaning_mismatch(record, max_steps=400)
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_a_shared_matching_string_is_still_reported_at_every_path(self):
+        text = f"t: &t {EMBARGO_TEXT}\nsensitive_elements: [*t, *t, *t]\n"
+        self.assertEqual(_paths(yaml.safe_load(text)),
+                         ["sensitive_elements[0]", "sensitive_elements[1]", "sensitive_elements[2]"])
+
+
 #: Deeper than the composer (two frames a level) can recurse, whatever the limit.
 DEEP = 2 * sys.getrecursionlimit() + 100
 
@@ -765,6 +836,31 @@ class TestTheCommand(unittest.TestCase):
         shared = Path(self.tmp.name) / "shared.yaml"
         shared.write_text(_doubling(40, "{confidential_elements: [embargo]}"))
         self._assert_not_checked_beside_the_others(shared, "budget of")
+
+    def test_a_merge_cycle_or_chain_is_not_checked_and_the_others_are_reported(self):
+        """#3263: neither is reported clean with exit 0."""
+        for name, text, reason in (("cycle.yaml", MERGE_CYCLE, "a merge key reaches"),
+                                   ("chain.yaml", _merge_chain(sys.getrecursionlimit() + 20), "recursion")):
+            with self.subTest(name=name):
+                bad = Path(self.tmp.name) / name
+                bad.write_text(text)
+                self._assert_not_checked_beside_the_others(bad, reason)
+
+    def test_a_record_of_one_string_aliased_many_times_is_checked_and_the_next_is_read(self):
+        """#3263: every alias reran every pattern over the string, so the
+        command stalled on this record and never read the next."""
+        shared = Path(self.tmp.name) / "shared_string.yaml"
+        shared.write_text("big: &s " + "x" * 80_000 + "\nconfidential_elements: ["
+                          + ", ".join(["*s"] * 2_000) + "]\n")
+        from unittest import mock
+        with mock.patch.object(rd, "_match", wraps=rd._match) as matched:
+            out = self._invoke(self.flagged, shared, self.routed)
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertLess(matched.call_count, 20)
+        self.assertIn("1 slot-meaning mismatch(es) in 1 of 3 record(s) checked", out.output)
+        doc = json.loads(self._invoke("--json", self.flagged, shared, self.routed).output)
+        self.assertEqual([(r["path"], r["checked"]) for r in doc["records"]],
+                         [(str(self.flagged), True), (str(shared), True), (str(self.routed), True)])
 
     def test_the_help_says_a_path_it_cannot_read_is_not_checked(self):
         """#3144: the help's "cannot be read" covers the file as well as the loader."""

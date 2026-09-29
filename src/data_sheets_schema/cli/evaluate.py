@@ -343,7 +343,9 @@ def slot_meaning_cmd(records, as_json):
     ancestor whose dropped copies hold no scoped slot hides nothing from this
     scan and does not stop the record being checked. A record is not checked
     either when its walk runs past a fixed step budget: aliases can load a
-    small text as a graph with exponentially many paths (#3247). A record that is not
+    small text as a graph with exponentially many paths (#3247), when a merge
+    key reaches the mapping it is written in, or when merges chain deeper
+    than the walk can recurse (#3263). A record that is not
     checked has none of its findings reported, not even those its kept
     values carry. A record the diagnostic never looked at is not a clean one,
     and the other records named in the same call are still reported. Nothing

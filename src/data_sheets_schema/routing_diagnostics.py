@@ -115,7 +115,14 @@ finding keeps the path it is reported at. Where the findings themselves are
 exponential, or merge keys nest the same way, each walk — the scan and the
 duplicate check — stops after `MAX_TRAVERSAL_STEPS` steps and raises
 `TraversalBudgetExceeded`; `check_text` reports that record as not checked,
-and the command goes on to the next. The loader itself is not bounded here:
+and the command goes on to the next. A string is matched once however many
+aliases reach it, and each visit to it is a step (#3263). Two more shapes
+are not checked rather than approximated: a merge key that reaches the
+mapping it is written in (`MergeCycle`), whose kept pairs follow PyYAML's
+stateful flattening rather than the override rule reproduced here, and a
+merge chain deeper than the duplicate walk can recurse, whose
+`RecursionError` is the record's reason, never an empty list (#3263). The
+loader itself is not bounded here:
 PyYAML flattens nested merge lists by copying their pairs, so a text of
 doubling merges can stall `safe_load` before the scan starts.
 
@@ -214,6 +221,13 @@ class TraversalBudgetExceeded(Exception):
     read in full, so it is not checked, not clean."""
 
 
+class MergeCycle(Exception):
+    """A merge key reaches the mapping it is written in. PyYAML constructs
+    such a record, flattening the cycle statefully, and which pairs it keeps
+    then depends on that state rather than on the override rule this module
+    reproduces, so the record is not checked, not clean (#3263)."""
+
+
 class _Budget:
     __slots__ = ("limit", "spent")
 
@@ -251,12 +265,24 @@ class _Walk:
         self.budget = budget
         self._memo: dict[tuple[int, bool], bool] = {}
         self._active: set[tuple[int, bool]] = set()
+        self._matched: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {}
+
+    def match(self, text: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
+        """`_match`, charged one step a visit and run once per distinct text:
+        a string reached through many aliases is one object, and rerunning
+        every pattern over it at each alias made the cost of a record grow
+        with its aliases while its budget stood still (#3263)."""
+        self.budget.spend()
+        found = self._matched.get(text)
+        if found is None:
+            found = self._matched[text] = _match(text)
+        return found
 
     def may_yield(self, node: Any, inside: bool) -> bool:
         """Whether a finding lies under `node`, read inside a scoped slot or
         walked outside one to find a slot."""
         if isinstance(node, str):
-            return inside and bool(_match(node)[0])
+            return bool(self.match(node)[0]) if inside else False
         if not isinstance(node, (dict, list)):
             return False
         key = (id(node), inside)
@@ -327,7 +353,7 @@ def _scan(node: Any, path: str, walk: _Walk) -> Iterator[Mismatch]:
                     if not walk.may_yield(entry, True):
                         continue
                     for leaf_path, text in _leaves(entry, entry_path, walk):
-                        kinds, terms = _match(text)
+                        kinds, terms = walk.match(text)
                         if kinds:
                             yield Mismatch(key, leaf_path, kinds, terms, present)
             elif walk.may_yield(value, False):
@@ -441,14 +467,18 @@ def _merge_sources(node: yaml.MappingNode, path: str, active: frozenset[int],
     path it is named at, in the order PyYAML's `flatten_mapping` lays their
     pairs out: every `<<` in turn — a merged mapping's own merges before its
     pairs, and a list of merges last to first, so the first wins — then
-    `node` itself. A merge cycle, which the loader cannot construct, is cut.
+    `node` itself. A merge cycle raises MergeCycle: PyYAML does construct
+    one, but the pairs it keeps then follow its stateful flattening, which
+    cutting the cycle does not reproduce, so a duplicate the loader dropped
+    could be read as one an override dropped (#3263).
     A mapping reached more than once — merged twice, or through two merges
     of a diamond — is listed once, at its last place: the loader lays its
     pairs out at each place, but they are the same key nodes with the same
     values, so the repeat drops nothing, and its last place is the one whose
     pairs win against the mappings between (#3226)."""
     if id(node) in active:
-        return []
+        raise MergeCycle("a merge key reaches the mapping it is written in; which values the "
+                         "loader keeps there is not reproduced, so the record was not read in full")
     budget.spend()
     active = active | {id(node)}
     sources: list[tuple[yaml.MappingNode, str]] = []
@@ -491,7 +521,10 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
     yields nothing: `safe_load` rejects it too, and the record is not
     checked on that. Raises TraversalBudgetExceeded when the walk takes
     more than `max_steps` (default `MAX_TRAVERSAL_STEPS`), as nested merge
-    lists that double at each level do (#3247)."""
+    lists that double at each level do (#3247), MergeCycle for a merge key
+    that reaches its own mapping, and RecursionError for a merge chain
+    deeper than the interpreter's limit: a walk that did not finish found
+    nothing, and saying so would read as clean (#3263)."""
     budget = _Budget(max_steps)
     holds_memo: dict[int, bool] = {}
     try:
@@ -544,7 +577,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
                         "path": label_path or "$", "key": label,
                         "lines": [line for line, _ in occurrences], "count": len(occurrences)}
             stack.extend(reversed(children))
-    except (yaml.YAMLError, RecursionError):
+    except yaml.YAMLError:
         return []
     finally:
         loader.dispose()
@@ -568,8 +601,9 @@ def check_text(text: str) -> tuple[list[Mismatch] | None, str | None]:
     duplicated key dropped values the scan would have read. Never raises for
     a record the loader rejects, so one bad record in a run cannot stop the
     others being reported (a record never looked at is not a clean one), nor
-    for one whose walk runs past `MAX_TRAVERSAL_STEPS`, which is not checked
-    either (#3247)."""
+    for one whose walk runs past `MAX_TRAVERSAL_STEPS`, holds a merge cycle,
+    or nests past the recursion limit, none of which is checked either
+    (#3247, #3263)."""
     try:
         record = yaml.safe_load(text)
     except yaml.YAMLError as exc:
@@ -582,7 +616,7 @@ def check_text(text: str) -> tuple[list[Mismatch] | None, str | None]:
     try:
         found = slot_meaning_mismatch(record, max_steps=MAX_TRAVERSAL_STEPS)
         unread = unread_duplicate_keys(text, max_steps=MAX_TRAVERSAL_STEPS)
-    except (TypeError, RecursionError, TraversalBudgetExceeded) as exc:
+    except (TypeError, RecursionError, TraversalBudgetExceeded, MergeCycle) as exc:
         return None, _first_line(exc)
     return (None, describe_unread(unread)) if unread else (found, None)
 
