@@ -21,17 +21,30 @@ from pathlib import Path
 import yaml
 
 from data_sheets_schema import schema_digest
+from tests import running_interpreter
 
 CANARY = "2026-08-11_claude-opus-5-claudecode-generic_rep1"
 RECORD = Path("data/d4d_concatenated/claudecode_agent_core") / CANARY / \
     "CHORUS_provenance.yaml"
 
 
+def _record_help():
+    """`d4d provenance record --help` from the running interpreter (#2979).
+
+    `poetry run d4d` from a worktree ran a virtualenv without the package,
+    and with `check=False` the failure read as an empty help text. A help
+    that did not run is an error here, with its stderr, not a missing flag.
+    """
+    result = subprocess.run(running_interpreter.d4d("provenance", "record", "--help"),
+                            capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        raise AssertionError(f"d4d provenance record --help exited {result.returncode}:\n{result.stderr}")
+    return result.stdout
+
+
 class TestRecordCliSurface(unittest.TestCase):
     def test_the_spec_options_exist(self):
-        out = subprocess.run(
-            ["poetry", "run", "d4d", "provenance", "record", "--help"],
-            capture_output=True, text=True, check=False).stdout
+        out = _record_help()
         for flag in ("--condition", "--arm", "--runtime", "--provider"):
             with self.subTest(flag=flag):
                 self.assertIn(flag, out)
@@ -144,9 +157,7 @@ class TestArmSpelling(unittest.TestCase):
     def test_the_option_is_the_same_choice_render_prompt_offers(self):
         from data_sheets_schema.cli.api import ARMS
 
-        out = subprocess.run(
-            ["poetry", "run", "d4d", "provenance", "record", "--help"],
-            capture_output=True, text=True, check=False).stdout
+        out = _record_help()
         for arm in ARMS:
             with self.subTest(arm=arm):
                 self.assertIn(arm, out)

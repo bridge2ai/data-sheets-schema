@@ -8,6 +8,7 @@ import subprocess
 import pytest
 
 from data_sheets_schema import schema_sync
+from tests import running_interpreter
 
 
 def source_text(word):
@@ -134,7 +135,7 @@ def test_snapshot_matches_direct_generation_for_supported_source_paths(tmp_path,
     else:
         source.write_text(source_text("country"))
     direct = tmp_path / "direct.yaml"
-    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
                    check=True, capture_output=True, text=True)
     rebuilt = tmp_path / "rebuilt.yaml"
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
@@ -148,7 +149,7 @@ def test_package_import_spellings_match_direct_generation(tmp_path, spelling):
     source.write_text(source_text("country") + "prefixes: {lm: https://w3id.org/linkml/}\n"
                       + f"imports: [{spelling}]\n")
     direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
-    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
                    check=True, capture_output=True, text=True)
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
@@ -208,7 +209,7 @@ def test_source_prefix_override_matches_direct_generation(tmp_path):
     from tests.test_schema_snapshot_compatibility import selection_root
     source = selection_root(tmp_path)
     direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
-    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
                    check=True, capture_output=True, text=True)
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
@@ -218,7 +219,7 @@ def test_source_name_inferred_by_the_generator_is_preserved(tmp_path):
     source = tmp_path / "source.yaml"
     source.write_text(source_text("country").replace("name: source\n", ""))
     direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
-    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
                    check=True, capture_output=True, text=True)
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
