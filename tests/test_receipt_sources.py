@@ -1,6 +1,8 @@
 """A receipt's citations by source document and tier, read-only (#2937)."""
 import hashlib
 import json
+import re
+from collections import Counter
 from pathlib import Path
 from unittest import mock
 
@@ -281,6 +283,37 @@ def test_a_path_is_joined_to_the_final_record_by_index_alone():
     assert out["entries"]["unresolved_in_final"] == 1 and out["paths_unresolved_in_final"] == 1
 
 
+def test_a_moved_or_dropped_entrys_path_is_unresolved_where_the_entry_at_its_index_lacks_it():
+    """The index is still there, but the entry now at it does not hold the
+    path, or holds it empty: the path is unresolved, not counted at that
+    entry (#3190). Dropped: Alpha's affiliation, where index 0 is now Beta,
+    whose affiliation is empty. Moved: reconciliation swapped the funders, so
+    `funders[0].award` reads Fund Two, which has no award, while Fund One's
+    award still resolves at `funders[1]`. `creators[0].name` is still read
+    by index and credited to Beta, as #3123 states."""
+    snapshot = {"id": "https://x/ds",
+                "creators": [{"name": "Alpha Example", "affiliation": "Alpha Example Laboratory"},
+                             {"name": "Beta Example", "affiliation": ""}],
+                "funders": [{"name": "Fund One", "award": "R01 Example Award"}, {"name": "Fund Two"}]}
+    final = {"id": "https://x/ds", "creators": snapshot["creators"][1:],
+             "funders": [snapshot["funders"][1], snapshot["funders"][0]]}
+    assert rc.remap_path("creators[0].affiliation", snapshot, final)["basis"] == "entry_dropped"
+    assert rc.remap_path("funders[0].award", snapshot, final) == {"path": "funders[1].award", "basis": "by_name"}
+    # both indexes are still there; one entry holds the leaf empty, the other not at all
+    assert rc.resolve(final, "creators[0].affiliation") and not rc.resolve(final, "funders[0].award")
+    assert rc.resolve(final, "funders[0]")
+    manifest, texts = _manifest(BUNDLE3)
+    receipt = {"bundle_md5": manifest["bundle_md5"], "chunks": [
+        {"id": "c003", "status": "extracted", "extracted": [
+            {"slot": "creators[0].name", "snippet": "Alpha Example"},
+            {"slot": "creators[0].affiliation", "snippet": "Alpha Example Laboratory"},
+            {"slot": "funders[0].award", "snippet": "R01 Example Award"}]}]}
+    out = rs.source_dependence(receipt, manifest, SOURCE_MANIFEST, "P", final, texts)
+    assert [r["path"] for r in out["by_path"]] == ["creators[0].name"] and out["paths"] == 1
+    assert out["entries"]["kept"] == 1
+    assert out["entries"]["unresolved_in_final"] == 2 and out["paths_unresolved_in_final"] == 2
+
+
 def test_the_token_floor_stated_is_the_one_value_tokens_applies():
     assert rc._value_tokens("abc abcd") == {"abcd"}
     assert rs.TOKEN_MIN_CHARS == 4
@@ -444,13 +477,13 @@ def test_a_committed_v8_voice_record_reproduces_fig19():
 REFERENCE = ROOT / "notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json"
 
 
-@pytest.mark.corpus
-def test_the_screen_and_join_figures_the_module_states_on_the_24_fig19_records():
-    """The counts the MIN_MATCH_* comment and the module docstring state
-    (#3121, #3122, #3123), so a floor or join change cannot leave them stale."""
+def _fig19_runs() -> list[tuple]:
+    """(project, core directory, receipt, run chunks, final record) for each
+    of the 24 records, loaded once per process; skips where they cannot be."""
+    if _FIG19_RUNS:
+        return _FIG19_RUNS
     if not REFERENCE.exists():
         pytest.skip("the reference rescore manifest is not on disk")
-    source_manifest = (ROOT / "data/preprocessed/source_manifest.yaml").read_bytes()
     runs = []
     for inp in sorted({j["input"] for j in json.loads(REFERENCE.read_text())["jobs"]}):
         _data, _concat, method, label, name = Path(inp).parts
@@ -466,34 +499,113 @@ def test_the_screen_and_join_figures_the_module_states_on_the_24_fig19_records()
         runs.append((project, core, rc.load_receipt(core / f"{project}_coverage_receipt.yaml"), run,
                      yaml.safe_load((ROOT / inp).read_text())))
     assert len(runs) == 24
+    _FIG19_RUNS.extend(runs)
+    return _FIG19_RUNS
 
+
+_FIG19_RUNS: list[tuple] = []
+
+
+def _fig19_reports(**floors) -> list[tuple[str, dict]]:
+    source_manifest = (ROOT / "data/preprocessed/source_manifest.yaml").read_bytes()
+    return [(project, rs.source_dependence(receipt, run["manifest"], source_manifest, project, full,
+                                           run["texts"], **floors))
+            for project, _core, receipt, run, full in _fig19_runs()]
+
+
+@pytest.mark.corpus
+def test_the_screen_figures_the_module_states_on_the_24_fig19_records():
+    """The counts the MIN_MATCH_* comment and the module docstring state
+    (#3121, #3122), so a floor change cannot leave them stale."""
     def screen(**floors):
-        out = [(project, rs.source_dependence(receipt, run["manifest"], source_manifest, project, full,
-                                              run["texts"], **floors))
-               for project, _core, receipt, run, full in runs]
-        return out, [o["lower_tier_with_higher_tier_token_match"] for _p, o in out]
+        return [o["lower_tier_with_higher_tier_token_match"] for _p, o in _fig19_reports(**floors)]
 
-    reports, s = screen()
+    reports = _fig19_reports()
+    s = [o["lower_tier_with_higher_tier_token_match"] for _p, o in reports]
     assert sum(x["count"] for x in s) == 104
     assert sum(x["screened"] for x in s) == 1336 and sum(x["verbatim"] for x in s) == 30
     by_project = {}
     for (project, _o), x in zip(reports, s):
         by_project[project] = by_project.get(project, 0) + x["count"]
     assert by_project == {"AI_READI": 18, "CHORUS": 1, "CM4AI": 76, "VOICE": 9}
-    assert sum(x["count"] for x in screen(min_tokens=3, min_chars=0)[1]) == 104
-    assert sum(x["count"] for x in screen(min_tokens=2, min_chars=12)[1]) == 120
-    assert sum(x["count"] for x in screen(min_tokens=1, min_chars=12)[1]) == 123
-    loosest = screen(min_tokens=1, min_chars=0)[1]
+    assert sum(x["count"] for x in screen(min_tokens=3, min_chars=0)) == 104
+    assert sum(x["count"] for x in screen(min_tokens=2, min_chars=12)) == 120
+    assert sum(x["count"] for x in screen(min_tokens=1, min_chars=12)) == 123
+    loosest = screen(min_tokens=1, min_chars=0)
     assert sum(x["count"] for x in loosest) == 152
     assert sum(x["outcomes"]["below_floor"] for x in loosest) == 42        # every one a value with no token
 
-    # the join is by index: counted paths the #899 identity join reads elsewhere
+
+@pytest.mark.corpus
+def test_the_join_figures_the_module_states_on_the_24_fig19_records():
+    """The by-index join the module docstring states (#3123, #3190): every
+    path left unresolved, by its identity basis (`receipts.remap_path`
+    against the phase-1 snapshot) and by where its by-index read stops in
+    the final record, and the counted paths the identity join reads
+    elsewhere."""
     elsewhere = {}
-    for (project, core, _receipt, _run, full), (_p, report) in zip(runs, reports):
+    unresolved = Counter()
+    unresolved_at_a_held_index = {}
+    for (project, core, receipt, run, full), (_p, report) in zip(_fig19_runs(), _fig19_reports()):
         snapshot = yaml.safe_load((core / "intermediate" / f"{project}_full.yaml").read_text())
         for row in report["by_path"]:
             basis = rc.remap_path(row["path"], snapshot, full)["basis"]
             if basis not in ("same", "same_key_stripped", "not_in_snapshot"):
                 elsewhere[basis] = elsewhere.get(basis, 0) + 1
+        known = {c["id"] for c in run["manifest"]["chunks"]}
+        slots = {str(p.get("slot") or "") for e in receipt.get("chunks") or []
+                 if isinstance(e, dict) and e.get("status") == "extracted" and e.get("id") in known
+                 for p in e.get("extracted") or [] if isinstance(p, dict)}
+        left = {s for s in slots if s.strip()} - {row["path"] for row in report["by_path"]}
+        assert len(left) == report["paths_unresolved_in_final"]
+        for path in left:
+            remap = rc.remap_path(path, snapshot, full)
+            key = (remap["basis"], _where_the_read_stops(full, path))
+            unresolved[key] += 1
+            if _moved_or_dropped(key[0]) and key[1] != "index_gone":
+                # where the identity join would read it, when the value is still there
+                there = remap["path"] if remap["path"] and _where_the_read_stops(full, remap["path"]) == "resolves" \
+                    else None
+                unresolved_at_a_held_index[(project, core.name, path)] = (*key, there)
+    assert {k: n for k, n in unresolved.items() if _moved_or_dropped(k[0])} == {
+        ("entry_dropped", "index_gone"): 28, ("by_overlap", "index_gone"): 2, ("ambiguous", "index_gone"): 1,
+        ("by_overlap", "leaf_missing"): 1, ("entry_dropped", "leaf_missing"): 1}
+    assert unresolved_at_a_held_index == {
+        ("AI_READI", "2026-09-01_claude-opus-5-api-generic-v7_rep3", "distribution_formats[0].media_type"):
+            ("by_overlap", "leaf_missing", "distribution_formats[2].media_type"),
+        ("CHORUS", "2026-09-01_claude-opus-5-api-generic-v7_rep3", "creators[1].principal_investigator.name"):
+            ("entry_dropped", "leaf_missing", None)}
+    # the rest are not moved or dropped: a leaf reconciliation removed or
+    # reshaped under an entry that stayed, and paths phase 1 never had
+    assert {k: n for k, n in unresolved.items() if not _moved_or_dropped(k[0])} == {
+        ("leaf_dropped", "leaf_missing"): 97, ("leaf_dropped", "shape"): 5, ("unresolved", "shape"): 26,
+        ("not_in_snapshot", "leaf_missing"): 3}
+    assert sum(unresolved.values()) == 164
     assert elsewhere == {"entry_dropped": 11, "by_overlap": 4, "by_id": 1, "by_name": 1,
                          "by_variable_name": 1, "ambiguous": 1}
+
+def _moved_or_dropped(basis: str) -> bool:
+    """A `receipts.remap_path` basis for an entry reconciliation moved or dropped."""
+    return basis in ("entry_dropped", "ambiguous") or basis.startswith("by_")
+
+
+def _where_the_read_stops(record, path: str) -> str:
+    """Where a by-index read of `path` stops in `record`: `index_gone` (a list
+    shorter than the index), `leaf_missing` (a mapping without the key),
+    `shape` (a step into a value of the other kind), `empty` (it reaches an
+    unpopulated value), or `resolves`."""
+    cur = record
+    for part in re.findall(r"[\w]+|\[\d+\]", path):
+        if part.startswith("["):
+            if not isinstance(cur, list):
+                return "shape"
+            if int(part[1:-1]) >= len(cur):
+                return "index_gone"
+            cur = cur[int(part[1:-1])]
+        else:
+            if not isinstance(cur, dict):
+                return "shape"
+            if part not in cur:
+                return "leaf_missing"
+            cur = cur[part]
+    return "resolves" if rc._populated(cur) else "empty"

@@ -26,13 +26,28 @@ paths a receipt covers (an entry receipt covers its leaves).
 
 **No phase-1 snapshot join** (the #899 identity join is not applied, as
 fig19 does not apply it): a path is read against the final record by index
-alone. Where reconciliation moved or dropped the entry a path named, the
-path counts as unresolved only when its index is gone; when another entry
-now holds that index, the path resolves and is counted, credited and
-screened at that entry (#3123). On the 24 fig19 records 19 counted paths
-are such, by `receipts.remap_path` against each record's phase-1 snapshot:
-11 on a dropped entry whose index another entry reuses, 7 on an entry that
-moved, 1 ambiguous.
+alone, and it is counted only where that read reaches a populated value.
+Where reconciliation moved or dropped the entry a path named, the path
+reads whatever entry now holds its index. When that entry holds a populated
+value at the path, the path is counted, credited and screened there
+(#3123). Otherwise it is unresolved: its index is gone, or the entry now at
+its index does not hold the path or holds it empty (#3190). A value that
+survives elsewhere in the record does not rescue the path. On the 24 fig19
+records, the paths on an entry that `receipts.remap_path`, against each
+record's phase-1 snapshot, finds moved or dropped are:
+
+- 19 counted at another entry: 11 on a dropped entry whose index another
+  entry reuses, 7 on an entry that moved, 1 ambiguous;
+- 31 unresolved because their index is gone: 28 on a dropped entry, 2 on
+  an entry that moved, 1 ambiguous;
+- 2 unresolved at an index another entry holds without the path, both in
+  2026-09-01 v7 rep3 records: AI_READI `distribution_formats[0].media_type`
+  (the entry moved to `[2]`, where the value still resolves) and CHORUS
+  `creators[1].principal_investigator.name` (the entry was dropped).
+
+The other 131 unresolved paths are not on a moved or dropped entry: a leaf
+reconciliation removed or reshaped, such as a list of strings written as
+one string (128), or a path phase 1 never had (3).
 
 **The bundle preamble** is not a source document: it has no tier, a path it
 cites gains no citing document from it, and its citations are counted apart.
