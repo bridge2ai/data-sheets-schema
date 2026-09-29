@@ -44,48 +44,48 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 
 | D4D path | Status | Mapping | Loss | Source path | Value / note |
 |---|---|---|---|---|---|
-| Dataset.acquisition_methods | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data collection processes are generally described in Clark T et al. (20… |
+| Dataset.acquisition_methods | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data collection processes are generally described in Clark T et al. (20… — string -> InstanceAcquisition.description; wrapped scalar into a list |
 | Dataset.citation | filled | exactMatch | none | @graph[?@type='Dataset']['citation'] | Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dai… |
-| Dataset.collection_mechanisms | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data collection processes are generally described in Clark T et al. (20… |
-| Dataset.collection_timeframes | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollectionTimeframe'] | [{"name": "9/1/2022"}, {"name": "6/1/2026"}] |
-| Dataset.created_by | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | {'@id': 'https://orcid.org/0000-0003-4060-7360'}; {'@id': 'https://orcid.org/0000-0003-45… |
-| Dataset.creators | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | [{"id": "https://orcid.org/0000-0003-4060-7360"}, {"id": "https://orcid.org/0000-0003-453… |
+| Dataset.collection_mechanisms | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data collection processes are generally described in Clark T et al. (20… — string -> CollectionMechanism.description; wrapped scalar into a list |
+| Dataset.collection_timeframes | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollectionTimeframe'] | [{"name": "9/1/2022"}, {"name": "6/1/2026"}] — string -> CollectionTimeframe.name |
+| Dataset.created_by | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | {'@id': 'https://orcid.org/0000-0003-4060-7360'}; {'@id': 'https://orcid.org/0000-0003-45… — joined 47 list items |
+| Dataset.creators | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | [{"id": "https://orcid.org/0000-0003-4060-7360"}, {"id": "https://orcid.org/0000-0003-453… — crate reference -> Creator; string -> Creator.name |
 | Dataset.description | filled | exactMatch | none | @graph[?@type='Dataset']['description'] | This dataset is the June 2026 Data Release of Cell Maps for Artificial Intelligence (CM4A… |
-| Dataset.discouraged_uses | filled | exactMatch | none | @graph[?@type='Dataset']['prohibitedUses'] | [{"description": "These laboratory data are not to be used in clinical decision-making or… |
-| Dataset.distribution_formats | filled | exactMatch | none | @graph[?@type='Dataset']['evi:formats'] | [{"name": ".d"}, {"name": ".d directory group"}, {"name": ".tsv"}, {"name": ".xml"}, {"na… |
+| Dataset.discouraged_uses | filled | exactMatch | none | @graph[?@type='Dataset']['prohibitedUses'] | [{"description": "These laboratory data are not to be used in clinical decision-making or… — string -> DiscouragedUse.description; wrapped scalar into a list |
+| Dataset.distribution_formats | filled | exactMatch | none | @graph[?@type='Dataset']['evi:formats'] | [{"name": ".d"}, {"name": ".d directory group"}, {"name": ".tsv"}, {"name": ".xml"}, {"na… — string -> DistributionFormat.name |
 | Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | 10.18130/V3/HIGT4C — rewritten from the crate's https://doi.org/10.18130/V3/HIGT4C: resolver or `doi:` prefix removed, case kept |
 | Dataset.download_url | filled | exactMatch | none | @graph[?@type='Dataset']['contentUrl'] | ftp://massive-ftp.ucsd.edu/v10/MSV000098237/ |
-| Dataset.ethical_reviews | filled | exactMatch | none | @graph[?@type='Dataset']['ethicalReview'] | [{"name": "Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pi… |
-| Dataset.existing_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… |
-| Dataset.extension_mechanism | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "https://creativecommons.org/licenses/by-nc-sa/4.0/"} |
-| Dataset.funders | filled | exactMatch | none | @graph[?@type='Dataset']['funder'] | [{"description": "National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS13156… |
+| Dataset.ethical_reviews | filled | exactMatch | none | @graph[?@type='Dataset']['ethicalReview'] | [{"name": "Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pi… — string -> EthicalReview.name; wrapped scalar into a list |
+| Dataset.existing_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… — string -> ExistingUse.description; wrapped scalar into a list |
+| Dataset.extension_mechanism | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "https://creativecommons.org/licenses/by-nc-sa/4.0/"} — string -> ExtensionMechanism.name |
+| Dataset.funders | filled | exactMatch | none | @graph[?@type='Dataset']['funder'] | [{"description": "National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS13156… — string -> FundingMechanism.description; wrapped scalar into a list |
 | Dataset.id | filled | exactMatch | none | crate root identifier/@id | doi:10.18130/V3/HIGT4C — rewritten from the crate's https://doi.org/10.18130/V3/HIGT4C: required by the schema; taken from the crate itself; a DOI is written as the doi: CURIE (#974) |
-| Dataset.informed_consent | filled | exactMatch | none | @graph[?@type='Dataset']['d4d:informedConsent'] | [{"description": "Not applicable — data collected from commercially available de-identifi… |
-| Dataset.intended_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… |
-| Dataset.ip_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"description": "Attribution is required to the copyright holders and the authors. Any pu… |
-| Dataset.issued | filled | exactMatch | none | @graph[?@type='Dataset']['datePublished'] | 2026-06-30T00:00:00Z |
+| Dataset.informed_consent | filled | exactMatch | none | @graph[?@type='Dataset']['d4d:informedConsent'] | [{"description": "Not applicable — data collected from commercially available de-identifi… — string -> InformedConsent.description; wrapped scalar into a list |
+| Dataset.intended_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… — string -> IntendedUse.description; wrapped scalar into a list |
+| Dataset.ip_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"description": "Attribution is required to the copyright holders and the authors. Any pu… — string -> IPRestrictions.description |
+| Dataset.issued | filled | exactMatch | none | @graph[?@type='Dataset']['datePublished'] | 2026-06-30T00:00:00Z — date -> date-time |
 | Dataset.keywords | filled | exactMatch | none | @graph[?@type='Dataset']['keywords'] | ["AI", "affinity purification", "AP-MS", "artificial intelligence", "breast cancer", "Bri… |
-| Dataset.known_biases | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataBiases'] | [{"description": "Data in this release was derived from commercially available de-identif… |
-| Dataset.known_limitations | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataLimitations'] | [{"description": "This is an interim release. It does not contain predicted cell maps, wh… |
+| Dataset.known_biases | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataBiases'] | [{"description": "Data in this release was derived from commercially available de-identif… — string -> DatasetBias.description; wrapped scalar into a list |
+| Dataset.known_limitations | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataLimitations'] | [{"description": "This is an interim release. It does not contain predicted cell maps, wh… — string -> DatasetLimitation.description; wrapped scalar into a list |
 | Dataset.license | filled | exactMatch | none | @graph[?@type='Dataset']['license'] | https://creativecommons.org/licenses/by-nc-sa/4.0/ |
-| Dataset.license_and_use_terms | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "https://creativecommons.org/licenses/by-nc-sa/4.0/"} |
-| Dataset.missing_data_documentation | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollectionMissingData'] | [{"description": "Some datasets are under temporary pre-publication embargo. Protein-prot… |
+| Dataset.license_and_use_terms | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "https://creativecommons.org/licenses/by-nc-sa/4.0/"} — string -> LicenseAndUseTerms.name |
+| Dataset.missing_data_documentation | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollectionMissingData'] | [{"description": "Some datasets are under temporary pre-publication embargo. Protein-prot… — string -> MissingDataDocumentation.description; wrapped scalar into a list |
 | Dataset.name | filled | exactMatch | none | @graph[?@type='Dataset']['name'] | Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) |
-| Dataset.other_tasks | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… |
+| Dataset.other_tasks | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… — string -> OtherTask.description; wrapped scalar into a list |
 | Dataset.page | filled | exactMatch | none | @graph[?@type='Dataset']['url'] | https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=ad8b8084f5b14af5bafac70fdd42a577 |
-| Dataset.prohibited_uses | filled | exactMatch | none | @graph[?@type='Dataset']['prohibitedUses'] | [{"description": "These laboratory data are not to be used in clinical decision-making or… |
+| Dataset.prohibited_uses | filled | exactMatch | none | @graph[?@type='Dataset']['prohibitedUses'] | [{"description": "These laboratory data are not to be used in clinical decision-making or… — string -> ProhibitedUse.description; wrapped scalar into a list |
 | Dataset.publisher | filled | exactMatch | none | @graph[?@type='Dataset']['publisher'] | https://dataverse.lib.virginia.edu/ |
-| Dataset.purposes | filled | closeMatch | minimal | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… |
-| Dataset.regulatory_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"description": "Attribution is required to the copyright holders and the authors. Any pu… |
-| Dataset.resources | filled | relatedMatch | moderate | @graph[?@type='Dataset']['hasPart'] | [{"id": "https://orcid.org/0000-0003-4060-7360"}, {"id": "https://orcid.org/0000-0003-453… |
-| Dataset.retention_limit | filled | narrowMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"description": "Attribution is required to the copyright holders and the authors. Any pu… |
-| Dataset.subsets | filled | relatedMatch | high | @graph[?@type='Dataset']['hasPart'] | [{"id": "https://orcid.org/0000-0003-4060-7360"}, {"id": "https://orcid.org/0000-0003-453… |
-| Dataset.tasks | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… |
+| Dataset.purposes | filled | closeMatch | minimal | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… — string -> Purpose.description; wrapped scalar into a list |
+| Dataset.regulatory_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"description": "Attribution is required to the copyright holders and the authors. Any pu… — string -> ExportControlRegulatoryRestrictions.description |
+| Dataset.resources | filled | relatedMatch | moderate | @graph[?@type='Dataset']['hasPart'] | [{"id": "https://orcid.org/0000-0003-4060-7360"}, {"id": "https://orcid.org/0000-0003-453… — crate reference -> Dataset |
+| Dataset.retention_limit | filled | narrowMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"description": "Attribution is required to the copyright holders and the authors. Any pu… — string -> RetentionLimits.description |
+| Dataset.subsets | filled | relatedMatch | high | @graph[?@type='Dataset']['hasPart'] | [{"id": "https://orcid.org/0000-0003-4060-7360"}, {"id": "https://orcid.org/0000-0003-453… — crate reference -> DataSubset |
+| Dataset.tasks | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "AI-ready datasets to support research in functional genomics, AI/machin… — string -> Task.description; wrapped scalar into a list |
 | Dataset.title | filled | exactMatch | none | @graph[?@type='Dataset']['name'] | Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) |
 | Dataset.total_size_bytes | filled | exactMatch | none | @graph[?@type='Dataset']['evi:totalContentSizeBytes'] | 21051331945400 |
-| Dataset.updates | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataReleaseMaintenancePlan'] | {"description": "Dataset will be regularly updated and augmented on a quarterly basis thr… |
+| Dataset.updates | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataReleaseMaintenancePlan'] | {"description": "Dataset will be regularly updated and augmented on a quarterly basis thr… — string -> UpdatePlan.description |
 | Dataset.version | filled | exactMatch | none | @graph[?@type='Dataset']['version'] | 1.0 |
-| Dataset.version_access | filled | relatedMatch | minimal | @graph[?@type='Dataset']['version'] | {"name": "1.0"} |
+| Dataset.version_access | filled | relatedMatch | minimal | @graph[?@type='Dataset']['version'] | {"name": "1.0"} — string -> VersionAccess.name |
 | AnnotationAnalysis.description | empty | closeMatch | moderate | rai:dataAnnotationAnalysis | 'rai:dataAnnotationAnalysis' not present on crate root |
 | CleaningStrategy.description | empty | closeMatch | moderate | rai:dataManipulationProtocol | 'rai:dataManipulationProtocol' not present on crate root |
 | CleaningStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'pipeline_step' is not a slot on CleaningStrategy |

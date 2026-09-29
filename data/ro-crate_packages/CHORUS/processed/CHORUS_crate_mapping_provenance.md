@@ -44,38 +44,38 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 
 | D4D path | Status | Mapping | Loss | Source path | Value / note |
 |---|---|---|---|---|---|
-| Dataset.acquisition_methods | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data are derived from routine clinical care at participating hospitals … |
+| Dataset.acquisition_methods | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data are derived from routine clinical care at participating hospitals … — string -> InstanceAcquisition.description; wrapped scalar into a list |
 | Dataset.citation | filled | exactMatch | none | @graph[?@type='Dataset']['citation'] | The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Datase… |
-| Dataset.collection_mechanisms | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data are derived from routine clinical care at participating hospitals … |
-| Dataset.confidential_elements | filled | exactMatch | none | @graph[?@type='Dataset']['rai:personalSensitiveInformation'] | [{"name": "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 c… |
+| Dataset.collection_mechanisms | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Data are derived from routine clinical care at participating hospitals … — string -> CollectionMechanism.description; wrapped scalar into a list |
+| Dataset.confidential_elements | filled | exactMatch | none | @graph[?@type='Dataset']['rai:personalSensitiveInformation'] | [{"name": "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 c… — string -> Confidentiality.name |
 | Dataset.created_by | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. … |
-| Dataset.creators | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | [{"description": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekal… |
+| Dataset.creators | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | [{"description": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekal… — string -> Creator.description; wrapped scalar into a list |
 | Dataset.description | filled | exactMatch | none | @graph[?@type='Dataset']['description'] | The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is … |
 | Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | 10.18130/V3/XNBOPG — rewritten from the crate's https://doi.org/10.18130/V3/XNBOPG: resolver or `doi:` prefix removed, case kept |
 | Dataset.download_url | filled | exactMatch | none | @graph[?@type='Dataset']['contentUrl'] | http://chorus4ai.org/dataset |
-| Dataset.ethical_reviews | filled | exactMatch | none | @graph[?@type='Dataset']['ethicalReview'] | [{"description": "Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and… |
-| Dataset.extension_mechanism | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"} |
-| Dataset.funders | filled | exactMatch | none | @graph[?@type='Dataset']['funder'] | [{"name": "NIH Common Fund OT2OD032701"}] |
+| Dataset.ethical_reviews | filled | exactMatch | none | @graph[?@type='Dataset']['ethicalReview'] | [{"description": "Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and… — string -> EthicalReview.description; wrapped scalar into a list |
+| Dataset.extension_mechanism | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"} — string -> ExtensionMechanism.name |
+| Dataset.funders | filled | exactMatch | none | @graph[?@type='Dataset']['funder'] | [{"name": "NIH Common Fund OT2OD032701"}] — string -> FundingMechanism.name; wrapped scalar into a list |
 | Dataset.id | filled | exactMatch | none | crate root identifier/@id | doi:10.18130/V3/XNBOPG — rewritten from the crate's https://doi.org/10.18130/V3/XNBOPG: required by the schema; taken from the crate itself; a DOI is written as the doi: CURIE (#974) |
-| Dataset.ip_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"} |
-| Dataset.issued | filled | exactMatch | none | @graph[?@type='Dataset']['datePublished'] | 2026-04-03T00:00:00Z |
+| Dataset.ip_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"} — string -> IPRestrictions.name |
+| Dataset.issued | filled | exactMatch | none | @graph[?@type='Dataset']['datePublished'] | 2026-04-03T00:00:00Z — date -> date-time |
 | Dataset.keywords | filled | exactMatch | none | @graph[?@type='Dataset']['keywords'] | ["Bridge2AI", "CHoRUS", "Electronic health records", "physiological data", "medical image… |
-| Dataset.known_biases | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataBiases'] | [{"description": "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeco… |
-| Dataset.known_limitations | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataLimitations'] | [{"description": "•\tObservational data; and not randomized; collected as real-world clin… |
+| Dataset.known_biases | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataBiases'] | [{"description": "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeco… — string -> DatasetBias.description; wrapped scalar into a list |
+| Dataset.known_limitations | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataLimitations'] | [{"description": "•\tObservational data; and not randomized; collected as real-world clin… — string -> DatasetLimitation.description; wrapped scalar into a list |
 | Dataset.license | filled | exactMatch | none | @graph[?@type='Dataset']['license'] | Data Use Agreement available at 'https://chorus4ai.org/dataset/' |
-| Dataset.license_and_use_terms | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"} |
-| Dataset.missing_data_documentation | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollectionMissingData'] | [{"name": "Variable sampling rates across real-world data from hospital waveform systems … |
+| Dataset.license_and_use_terms | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"} — string -> LicenseAndUseTerms.name |
+| Dataset.missing_data_documentation | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollectionMissingData'] | [{"name": "Variable sampling rates across real-world data from hospital waveform systems … — string -> MissingDataDocumentation.name; wrapped scalar into a list |
 | Dataset.name | filled | exactMatch | none | @graph[?@type='Dataset']['name'] | CHoRUS RO-Crate Package |
 | Dataset.publisher | filled | exactMatch | none | @graph[?@type='Dataset']['publisher'] | B2AI CHoRUS |
-| Dataset.regulatory_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"} |
-| Dataset.resources | filled | relatedMatch | moderate | @graph[?@type='Dataset']['hasPart'] | [{"id": "08cf7419-b94d-4508-8f64-c99c557351d7", "name": "CHoRUS RO-Crate EHR SubRoCrate"}… |
-| Dataset.retention_limit | filled | narrowMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"} |
-| Dataset.sensitive_elements | filled | exactMatch | none | @graph[?@type='Dataset']['rai:personalSensitiveInformation'] | [{"name": "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 c… |
-| Dataset.subsets | filled | relatedMatch | high | @graph[?@type='Dataset']['hasPart'] | [{"id": "08cf7419-b94d-4508-8f64-c99c557351d7", "name": "CHoRUS RO-Crate EHR SubRoCrate"}… |
+| Dataset.regulatory_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"} — string -> ExportControlRegulatoryRestrictions.name |
+| Dataset.resources | filled | relatedMatch | moderate | @graph[?@type='Dataset']['hasPart'] | [{"id": "08cf7419-b94d-4508-8f64-c99c557351d7", "name": "CHoRUS RO-Crate EHR SubRoCrate"}… — crate reference -> Dataset |
+| Dataset.retention_limit | filled | narrowMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"} — string -> RetentionLimits.name |
+| Dataset.sensitive_elements | filled | exactMatch | none | @graph[?@type='Dataset']['rai:personalSensitiveInformation'] | [{"name": "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 c… — string -> SensitiveElement.name |
+| Dataset.subsets | filled | relatedMatch | high | @graph[?@type='Dataset']['hasPart'] | [{"id": "08cf7419-b94d-4508-8f64-c99c557351d7", "name": "CHoRUS RO-Crate EHR SubRoCrate"}… — crate reference -> DataSubset |
 | Dataset.title | filled | exactMatch | none | @graph[?@type='Dataset']['name'] | CHoRUS RO-Crate Package |
-| Dataset.updates | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataReleaseMaintenancePlan'] | {"description": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes doc… |
+| Dataset.updates | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataReleaseMaintenancePlan'] | {"description": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes doc… — string -> UpdatePlan.description |
 | Dataset.version | filled | exactMatch | none | @graph[?@type='Dataset']['version'] | 1.0 Beta |
-| Dataset.version_access | filled | relatedMatch | minimal | @graph[?@type='Dataset']['version'] | {"name": "1.0 Beta"} |
+| Dataset.version_access | filled | relatedMatch | minimal | @graph[?@type='Dataset']['version'] | {"name": "1.0 Beta"} — string -> VersionAccess.name |
 | AnnotationAnalysis.description | empty | closeMatch | moderate | rai:dataAnnotationAnalysis | 'rai:dataAnnotationAnalysis' not present on crate root |
 | CleaningStrategy.description | empty | closeMatch | moderate | rai:dataManipulationProtocol | 'rai:dataManipulationProtocol' not present on crate root |
 | CleaningStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'pipeline_step' is not a slot on CleaningStrategy |
