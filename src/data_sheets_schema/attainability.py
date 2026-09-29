@@ -18,7 +18,7 @@ entry is keyed to::
     format: d4d-attainability
     format_version: 1
     bundle: {path, md5, sha256, bytes}   # the bytes every entry is about
-    chunk_rule: {...}                    # the rule the chunk ids are named under
+    chunk_rule: {...}                    # the rule the chunk ids are named under, in full
     rubrics:
       rubric10: {path: data/rubric/rubric10.txt, sha256: ...}
     entries:
@@ -56,9 +56,15 @@ bundle the way a receipt recompute does (#1140): the file on disk where
 it hashes to both recorded hashes, else the committed version of the
 declared path that does (`provenance.bundle_bytes_for`), and refuses the
 file when neither does — so an entry about a drifted bundle stays
-checkable and a tampered hash is not accepted. Every deterministic entry
-must equal what its check writes over those bytes; every snippet must
-hash to the lines it names. The pinned rubric is resolved the same way.
+checkable and a tampered hash is not accepted. `chunk_rule` must be a rule
+the chunker implements, written out in full (`chunking.validate_rule`):
+`chunk_text` reads only its two window bounds and reads an empty rule as
+this checkout's default, so without that check a file could state a rule
+nobody chunked under, or none (#3107). Every deterministic entry must
+equal what its check writes over those bytes under that rule; every
+snippet must hash to the lines it names. The pinned rubric is resolved the
+same way. Curator and judge entries are hand-written, so a valid file is
+not always the generator's output; its deterministic entries are.
 
 `credited_despite_absence` is the generator-side check the issue asks
 for: items an evaluation credited although the bundle it scored was
@@ -118,8 +124,11 @@ class AbsenceCheck:
 # words (`bioethics`, `unconsented`) unless that makes an unrelated common
 # word match (`doing`, `excite`, `conversion`). Letters around a token are
 # excluded with lookarounds rather than `\b`, which treats `_` and digits
-# as word characters: `doi_url` must match. A pattern carries no literal
-# space (`\s` instead), so the YAML writer never folds one across lines.
+# as word characters: `doi_url` must match. Every inflection of a form a
+# claim names must match too — `exemptions`, `opting out`, `HRECs`, a
+# version number that ends a sentence (#3109); `test_every_form_a_claim_names_matches`
+# lists them. A pattern carries no literal space (`\s` instead), so the
+# YAML writer never folds one across lines.
 _DOI = r"(?<![a-z])dois?(?![a-z])|10\.\d{4,9}/"
 _RRID = r"(?<![a-z])rrids?(?![a-z])|(?<![a-z0-9])(?:scr|ab|cvcl|nlx)_\d"
 _WAIVER = r"(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])"
@@ -135,15 +144,15 @@ CHECKS: tuple[AbsenceCheck, ...] = (
     AbsenceCheck(
         "ethics_review", "rubric10", "E4.1", None,
         r"(?i)(?<![a-z])irbs?(?![a-z])|institutional\s+review|ethic"
-        r"|(?<![a-z])(?:hrec|reb|dpia)(?![a-z])|(?<![a-z])exempt(?:ion|ed)?(?![a-z])|" + _WAIVER +
-        r"|data\s+protection\s+impact|privacy\s+board|human\s+subjects?|(?<![a-z])oversight(?![a-z])",
+        r"|(?<![a-z])(?:hrec|reb|dpia)s?(?![a-z])|exempt|" + _WAIVER +
+        r"|data\s+protection\s+impact|privacy\s+board|human\s+subjects?|(?<![a-z])oversights?(?![a-z])",
         "An ethics review, its waiver or exemption, or a data protection impact assessment is named "
         "IRB, institutional review, ethics/ethical, HREC/REB, exemption, waiver, DPIA, privacy "
         "board, human subjects or oversight, so zero matching lines mean the bundle states none."),
     AbsenceCheck(
         "consent_text", "rubric10", "E4.4", None,
         f"(?i)consent|(?<![a-z])assent|{_WAIVER}|permission"
-        r"|authori[sz]ation|(?<![a-z])opt(?:ed|s)?[-\s]?(?:in|out)(?![a-z])",
+        r"|authori[sz]ation|(?<![a-z])opt(?:ed|s|ing)?[-\s]?(?:in|out)s?(?![a-z])",
         "Any statement of informed consent names consent, assent, a waiver, parental permission, "
         "a HIPAA authorization or an opt-in/opt-out model, so zero matching lines mean the bundle "
         "states no consent procedure. Not seen: consent described without any of these words "
@@ -152,19 +161,21 @@ CHECKS: tuple[AbsenceCheck, ...] = (
         "version_string", "rubric10", "E6.1", None,
         r"(?i)(?<![a-z])version(?:s|ed|ing)?(?![a-z])|releas(?:e|es|ed|ing)(?![a-z])"
         r"|(?<![a-z])(?:edition|revision)s?(?![a-z])|(?<![a-z0-9])v\d+(?:\.\d+)*(?![a-z])"
-        r"|(?<![\d.])\d+\.\d+\.\d+(?![\d.])",
+        r"|(?<![\d.])\d+(?:\.\d+){2,}(?!\.?\d)",
         "A dataset version is named version/release/edition/revision, or written v<n> or as a "
-        "three-part number, so zero matching lines mean the bundle states no version. Not seen: "
-        "a bare two-part number with no such word ('X 2.0')."),
+        "dotted number of three or more parts (also at the end of a sentence), so zero matching "
+        "lines mean the bundle states no version. Not seen: a bare two-part number with no such "
+        "word ('X 2.0')."),
     AbsenceCheck(
         "dataset_citation", "rubric10", "E10.2", None,
         f"(?i){_DOI}|(?<![a-z])cit(?:e[sd]?|ing|ations?)(?![a-z])|(?<![a-z])bibtex(?![a-z])"
-        r"|(?<![a-z])acknowledg|(?:please|how\s+to|when)\s+(?:reference|acknowledge)"
-        r"|recommended\s+reference",
+        r"|(?<![a-z])acknowledg|(?:please|how\s+to|when|should|must|kindly)\s+(?:be\s+)?referenc"
+        r"|recommended\s+referenc",
         "E10.2 accepts a recommended citation or a DOI. A DOI matches as for E1.1; a citation "
         "request names cite/citation, BibTeX or acknowledgement, or asks the reader to reference "
-        "the data, so zero matching lines mean the bundle states neither. Not seen: a bare "
-        "formatted reference carrying none of those words."),
+        "the data (please, how to, when, should, must or kindly, then reference or be referenced; "
+        "or a recommended reference), so zero matching lines mean the bundle states neither. Not "
+        "seen: a bare formatted reference carrying none of those words."),
 )
 CHECKS_BY_NAME = {c.name: c for c in CHECKS}
 
@@ -423,6 +434,13 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
     rule = doc.get("chunk_rule")
     if not isinstance(rule, dict):
         return problems + ["chunk_rule must be the chunking rule the chunk ids are named under"], None
+    from data_sheets_schema.chunking import validate_rule
+    try:
+        validate_rule(rule)
+    except ValueError as exc:
+        # `chunk_text` reads only the two bounds and an empty rule as this
+        # checkout's default: chunking under a rule attests nothing else (#3107).
+        return problems + [f"chunk_rule is not a rule the chunker implements, written in full: {exc}"], None
     try:
         _, lines = _lines_by_chunk(raw.decode("utf-8"), rule)
     except (UnicodeDecodeError, KeyError, TypeError) as exc:
@@ -517,6 +535,8 @@ def _snippet_problems(snip: Any, lines: dict[int, tuple[str, str]], chunk_of: di
     span = snip["lines"]
     if not (isinstance(span, list) and len(span) == 2 and all(type(n) is int for n in span)):
         return ["lines must be [first, last]"]
+    if not isinstance(snip["chunk"], str):          # a list or mapping is not a key (#3108)
+        return [f"chunk must be a chunk id, not {type(snip['chunk']).__name__}"]
     bounds = chunk_of.get(snip["chunk"])
     if bounds is None:
         return [f"no chunk {snip['chunk']!r} under chunk_rule"]

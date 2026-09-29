@@ -62,10 +62,18 @@ def _git_or_skip(fn):
 
 def test_the_committed_chorus_file_is_the_generators_output_and_validates():
     """`load` re-derives every deterministic entry from the pinned bytes under
-    the recorded chunk rule, so a valid file is the generator's output. The
-    rubric text and chunk rule stay pinned when this checkout's move on."""
+    the recorded chunk rule, so every deterministic entry of a valid file is
+    what its check writes (a curator or judge entry is hand-written, #3107).
+    The committed file holds no such entry and is byte for byte what `derive`
+    writes while the rubric text and chunk rule it pins are this checkout's;
+    they stay pinned when this checkout's move on."""
     loaded = _git_or_skip(lambda: at.load(CHORUS_FILE))
-    assert CHORUS_FILE.read_text(encoding="utf-8").startswith("# Attainability of rubric items")
+    text = CHORUS_FILE.read_text(encoding="utf-8")
+    assert text.startswith("# Attainability of rubric items")
+    assert {e["method"].split(":")[0] for e in loaded.document["entries"]} == {"deterministic"}
+    fresh = _git_or_skip(lambda: at.build_document(CHORUS, md5=CHORUS_MD5))
+    if (fresh["rubrics"], fresh["chunk_rule"]) == (loaded.document["rubrics"], loaded.document["chunk_rule"]):
+        assert at.dump(fresh) == text
     bundle = loaded.document["bundle"]
     raw = _chorus_bytes()
     assert (bundle["md5"], bundle["sha256"], bundle["bytes"]) == (
@@ -149,6 +157,10 @@ def test_tampered_entries_and_snippets_are_refused():
     assert "differs in evidence" in refused(lambda d: by_item(d, "E4.4")["evidence"].update(hit_count=1))
     assert "differs in evidence" in refused(
         lambda d: by_item(d, "E6.1")["evidence"]["snippets"][0].update(sha256="0" * 64))
+    assert "differs in note" in refused(                                          # #3111
+        lambda d: by_item(d, "E4.4").update(note=by_item(d, "E4.4")["note"] + " Also a curator agreed."))
+    assert "decides rubric10 E4.1, not this item" in refused(
+        lambda d: by_item(d, "E1.1").update(method="deterministic:ethics_review"))
     assert "decides rubric10 E1.1 route doi_rrid" in refused(lambda d: by_item(d, "E1.1").update(route=None))
     assert "second entry" in refused(lambda d: d["entries"].append(copy.deepcopy(by_item(d, "E4.4"))))
     assert "no item 'E11.1'" in refused(lambda d: by_item(d, "E4.4").update(item_id="E11.1"))
@@ -161,6 +173,39 @@ def test_tampered_entries_and_snippets_are_refused():
     dup = CHORUS_FILE.read_text(encoding="utf-8").replace("status: unknown\n", "status: unknown\n  status: supported\n", 1)
     problems, _ = at.validate_text(dup)
     assert problems and "duplicate mapping key" in problems[0]
+
+
+@pytest.mark.parametrize("rule, why", [
+    ({}, "unsupported chunk rule version: None"),       # chunk_text reads {} as this checkout's default
+    ({"max_lines": 400, "max_bytes": 48000}, "unsupported chunk rule version: None"),
+    ({**DEFAULT_RULE, "version": 99}, "unsupported chunk rule version: 99"),
+    ({**DEFAULT_RULE, "unit": "paragraph"}, "unsupported chunk rule unit: 'paragraph'"),
+    ({**DEFAULT_RULE, "split": "nonsense"}, "unsupported chunk rule split: 'nonsense'"),
+    ({**DEFAULT_RULE, "overlap": 0}, "unsupported chunk rule fields"),
+    ({**DEFAULT_RULE, "max_lines": True}, "chunk rule max_lines must be a positive integer"),
+])
+def test_a_chunk_rule_the_chunker_does_not_implement_is_refused(rule, why):
+    """`chunk_text` reads only the two window bounds, and an empty rule as the
+    default, so all but the last case chunk exactly like the pinned rule and
+    were accepted before #3107: the file attested a rule nobody chunked
+    under, or none. The last (`True` is the bound 1) is now refused as a
+    rule rather than by the entries it happens to move."""
+    doc = yaml.safe_load(CHORUS_FILE.read_text(encoding="utf-8"))
+    doc["chunk_rule"] = rule
+    problems, loaded = at.validate_text(at.dump(doc), at.file_name(doc))
+    assert loaded is None
+    assert problems == [f"chunk_rule is not a rule the chunker implements, written in full: {why}"]
+
+
+def test_a_custom_chunk_rule_is_checked_under_its_own_bounds():
+    """A `2-custom` rule is one the chunker implements, so it is accepted as a
+    rule — and the chunk ids and hits are then re-derived under its bounds,
+    which the committed entries were not written under."""
+    doc = yaml.safe_load(CHORUS_FILE.read_text(encoding="utf-8"))
+    doc["chunk_rule"] = {**DEFAULT_RULE, "version": "2-custom", "max_lines": 100}
+    problems, loaded = at.validate_text(at.dump(doc), at.file_name(doc))
+    assert loaded is None
+    assert problems and all("differs in evidence" in p for p in problems), problems
 
 
 def test_curator_entries_are_verified_against_the_bytes_and_kept_on_rewrite(tmp_path):
@@ -193,11 +238,22 @@ def test_curator_entries_are_verified_against_the_bytes_and_kept_on_rewrite(tmp_
     assert "needs at least one snippet" in refused({**curator, "status": "supported", "evidence": {"snippets": []}})
     assert "method must be" in refused({**curator, "method": "judge:"})
     assert "note must say" in refused({**curator, "note": " "})
+    for chunk in (["c003"], {"id": "c003"}):                         # a crash before #3108
+        assert "chunk must be a chunk id" in refused(
+            {**curator, "evidence": {"snippets": [{**hits[0], "chunk": chunk}]}})
 
+    # A kept reading was made under the file's chunk rule and rubric texts:
+    # a rewrite that moves either is refused and leaves the file as it was.
+    before = target.read_bytes()
     moved = copy.deepcopy(doc)
     moved["chunk_rule"] = {**doc["chunk_rule"], "max_lines": 100}
     with pytest.raises(at.AttainabilityError, match="another chunk_rule"):
         at.write_document(moved, tmp_path)
+    moved = copy.deepcopy(doc)
+    moved["rubrics"]["rubric10"] = {**doc["rubrics"]["rubric10"], "sha256": "0" * 64}     # #3111
+    with pytest.raises(at.AttainabilityError, match="another rubric rubric10"):
+        at.write_document(moved, tmp_path)
+    assert target.read_bytes() == before
 
 
 # -- where the bytes come from -----------------------------------------------
@@ -263,6 +319,52 @@ def test_patterns(check, text, matches):
     assert bool(re.search(at.CHECKS_BY_NAME[check].pattern, text)) is matches
 
 
+_CLAIMED_FORMS = {
+    # Every form a check's claim names, with its inflections: a miss can only
+    # turn unknown into not_stated_in_source, the one status a check certifies.
+    "doi_rrid": ["doi:10.5281/zenodo.1", "the DOI", "DOIs", "10.13026/abc", "RRID", "RRIDs",
+                 "SCR_012345", "AB_2336877", "CVCL_0030", "NLX_143813"],
+    "ethics_review": ["IRB", "IRBs", "Institutional Review Board", "institutional\treview", "ethics committee",
+                      "ethical approval", "HREC", "HRECs", "REB", "REBs", "exempt", "exemption",
+                      "Category 4 exemptions apply", "exempted", "exempts", "exempting", "non-exempt",
+                      "nonexempt", "waiver", "waived", "waivers", "DPIA", "DPIAs",
+                      "data protection impact assessment", "privacy board", "human subject",
+                      "human subjects research", "oversight", "oversights"],
+    "consent_text": ["consent", "consented", "informed consents", "assent", "assented", "waiver",
+                     "waivers", "parental permission", "permissions", "HIPAA authorization",
+                     "authorisations", "opt-in", "opt-out", "opt out", "opted out", "opts in",
+                     "participants opting out were removed", "opting-in", "opt-outs", "optout"],
+    "version_string": ["version", "versions", "versioned", "Release", "released", "releases",
+                       "releasing", "edition", "revisions", "v2", "V1.0.3", "Dataset 2.0.1 is out",
+                       "The dataset is 2.0.1.", "at 1.2.3.", "1.0.0.2", "(2.0.1)"],
+    "dataset_citation": ["DOI", "10.1234/x", "cite", "cites", "cited", "citing", "citation", "citations",
+                         "BibTeX", "acknowledgement", "acknowledgment", "Please acknowledge",
+                         "please reference", "how to reference", "when referencing",
+                         "Users should reference this dataset as", "it must be referenced as",
+                         "kindly reference", "recommended reference"],
+}
+
+
+@pytest.mark.parametrize("check, text", [(c, t) for c, forms in _CLAIMED_FORMS.items() for t in forms])
+def test_every_form_a_claim_names_matches(check, text):
+    """#3109: 'The dataset is 2.0.1.', 'exemptions' and 'opting out' were
+    missed although each claim names them."""
+    import re
+    assert re.search(at.CHECKS_BY_NAME[check].pattern, text), (check, text)
+
+
+@pytest.mark.parametrize("check, text", [
+    ("version_string", "X 2.0"),                                # the claim's own 'not seen'
+    ("version_string", "Python 3.10 and 1.2"),
+    ("consent_text", "participants agreed to take part"),
+    ("consent_text", "opting to use a smaller cohort"),
+    ("dataset_citation", "Smith J (2020). A dataset. Journal 1:2"),
+])
+def test_what_a_claim_says_it_does_not_see_is_not_matched(check, text):
+    import re
+    assert not re.search(at.CHECKS_BY_NAME[check].pattern, text)
+
+
 def test_no_pattern_carries_a_literal_space():
     """A space lets the YAML writer fold the pattern across lines."""
     assert not [c.name for c in at.CHECKS if " " in c.pattern]
@@ -287,6 +389,31 @@ def test_a_synthetic_credit_on_an_absent_item_is_flagged():
                                        loaded) == []
 
 
+def test_the_bundle_version_comes_from_the_records_provenance(tmp_path):
+    """#3110: an evaluation of a record that read AI_READI 8abd7bf5 is joined
+    to the file for 8abd7bf5, not to the AI_READI bundle on disk today — the
+    project-name lookup the design rejects, which no other test could tell
+    apart while the CHORUS bundle on disk is still the version it read."""
+    disk_md5 = hashlib.md5((ROOT / AI_READI).read_bytes()).hexdigest()
+    assert disk_md5 != AI_READI_V7_MD5
+    record = tmp_path / "AI_READI_provenance.yaml"
+    record.write_text(yaml.safe_dump({"inputs": {"bundle_path": AI_READI, "bundle_md5": AI_READI_V7_MD5}}),
+                      encoding="utf-8")
+    evaluation = {"rubric": "rubric10-semantic", "project": "AI_READI", "elements": [],
+                  "d4d_file": "data/d4d_concatenated/claudecode_agent/LABEL_v7/AI_READI_d4d.yaml"}
+    path = tmp_path / "AI_READI_evaluation.json"
+    path.write_text(json.dumps(evaluation), encoding="utf-8")
+    covered = at.write_document(_git_or_skip(lambda: at.build_document(AI_READI, md5=AI_READI_V7_MD5)),
+                                tmp_path / "attainability")
+    with mock.patch.object(pv, "record_path_for", return_value=record) as where:
+        assert at.evaluation_bundle(evaluation) == {"path": AI_READI, "md5": AI_READI_V7_MD5,
+                                                    "record": str(record)}
+        [row] = at.credited_report([path], tmp_path / "attainability")
+    where.assert_called_with("AI_READI", "claudecode_agent", "LABEL_v7")
+    assert row["bundle"]["md5"] == AI_READI_V7_MD5
+    assert row["attainability"] == str(covered)
+
+
 @pytest.mark.corpus   # reads the reference records' provenance under data/d4d_concatenated
 def test_no_cborg_runtime_rubric10_record_is_credited_on_a_chorus_absence():
     rows = at.credited_report(sorted(REFERENCE["rubric10"].glob("*_evaluation.json")))
@@ -296,6 +423,17 @@ def test_no_cborg_runtime_rubric10_record_is_credited_on_a_chorus_absence():
     assert all(r["bundle"]["md5"] == CHORUS_MD5 and r["attainability"] for r in chorus)
     assert all(r["attainability"] is None for r in rows if r not in chorus)
     assert [f for r in rows for f in r["findings"]] == []
+    # The version each arm read, from its records' provenance (#3110): the v7
+    # AI_READI and VOICE records read bundles the disk no longer holds.
+    read = {}
+    for r in rows:
+        name = Path(r["evaluation"]).name
+        arm = name[: name.index("_rep")]
+        read.setdefault(arm, set()).add(r["bundle"]["md5"][:8])
+    assert read == {"AI_READI_v7": {"8abd7bf5"}, "AI_READI_v8": {"d22b61a9"},
+                    "CHORUS_v7": {"9b2ef4b6"}, "CHORUS_v8": {"9b2ef4b6"},
+                    "CM4AI_v7": {"50037fc6"}, "CM4AI_v8": {"50037fc6"},
+                    "VOICE_v7": {"dcd71717"}, "VOICE_v8": {"9193c3cb"}}
 
 
 def test_attainability_moves_no_score():
@@ -334,3 +472,20 @@ def test_the_command_line_checks_and_refuses(tmp_path, capsys):
     bad.write_text(at.dump(doc), encoding="utf-8")
     assert at.main(["check", str(bad)]) == 1
     assert "INVALID" in capsys.readouterr().out
+
+    # The reviewers' two reproductions: an empty chunk rule printed `ok`
+    # (#3107), and a curator snippet naming its chunk as a list raised a
+    # TypeError out of `check` instead of listing the problem (#3108).
+    doc = yaml.safe_load(CHORUS_FILE.read_text(encoding="utf-8"))
+    doc["chunk_rule"] = {}
+    bad.write_text(at.dump(doc), encoding="utf-8")
+    assert at.main(["check", str(bad)]) == 1
+    assert f"INVALID {bad}\n  - chunk_rule is not a rule the chunker implements" in capsys.readouterr().out
+    doc = yaml.safe_load(CHORUS_FILE.read_text(encoding="utf-8"))
+    doc["entries"].append({"rubric": "rubric10", "item_id": "E5.1", "route": None, "status": "unknown",
+                           "method": "curator", "note": "A reading.",
+                           "evidence": {"snippets": [{"chunk": ["c003"], "lines": [414, 414], "sha256": "0" * 64}]}})
+    bad.write_text(at.dump(doc), encoding="utf-8")
+    assert at.main(["check", str(bad)]) == 1
+    out = capsys.readouterr().out
+    assert f"INVALID {bad}" in out and "snippets[0]: chunk must be a chunk id, not list" in out

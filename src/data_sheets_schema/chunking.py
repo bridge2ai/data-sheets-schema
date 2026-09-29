@@ -327,6 +327,20 @@ def validate_manifest_mapping(manifest: dict[str, Any], raw: bytes, name: str) -
     if not isinstance(manifest, dict) or not isinstance(manifest.get("rule"), dict):
         raise ValueError("chunk manifest must declare a chunking rule")
     rule = manifest["rule"]
+    validate_rule(rule)
+    expected = manifest_from_bytes(raw, name, rule)
+    if manifest != expected:
+        raise ValueError("chunk manifest does not reproduce canonical chunk identities under its recorded rule")
+
+
+def validate_rule(rule: dict[str, Any]) -> None:
+    """Raise `ValueError` unless `rule` is a rule `chunk_text` implements,
+    written out in full: every field of `DEFAULT_RULE` and no other, the
+    segmentation fields equal to the default's, the window bounds positive
+    integers and the version `2` or `2-custom`. `chunk_text` reads only the
+    two bounds and reads an empty rule as the default, so chunking under a
+    rule attests nothing about its other fields; this check does (#1404,
+    and the attainability validator's, #3107)."""
     for key, value in DEFAULT_RULE.items():
         selected = rule.get(key)
         if key in ("max_lines", "max_bytes"):
@@ -339,9 +353,6 @@ def validate_manifest_mapping(manifest: dict[str, Any], raw: bytes, name: str) -
             raise ValueError(f"unsupported chunk rule {key}: {selected!r}")
     if set(rule) != set(DEFAULT_RULE):
         raise ValueError("unsupported chunk rule fields")
-    expected = manifest_from_bytes(raw, name, rule)
-    if manifest != expected:
-        raise ValueError("chunk manifest does not reproduce canonical chunk identities under its recorded rule")
 
 
 def file_sha256(path: Path) -> str:

@@ -41,7 +41,7 @@ entries:
   status: unknown
   method: deterministic:ethics_review
   evidence:
-    pattern: (?i)(?<![a-z])irbs?(?![a-z])|institutional\s+review|ethic|(?<![a-z])(?:hrec|reb|dpia)(?![a-z])|(?<![a-z])exempt(?:ion|ed)?(?![a-z])|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|data\s+protection\s+impact|privacy\s+board|human\s+subjects?|(?<![a-z])oversight(?![a-z])
+    pattern: (?i)(?<![a-z])irbs?(?![a-z])|institutional\s+review|ethic|(?<![a-z])(?:hrec|reb|dpia)s?(?![a-z])|exempt|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|data\s+protection\s+impact|privacy\s+board|human\s+subjects?|(?<![a-z])oversights?(?![a-z])
     hit_count: 17
     snippets:
     - {chunk: c002, lines: [45, 45], sha256: 956c8af5b4c932a133055928f27c75c76c14b46126e554766ece025b149c3365}
@@ -72,7 +72,7 @@ entries:
   status: not_stated_in_source
   method: deterministic:consent_text
   evidence:
-    pattern: (?i)consent|(?<![a-z])assent|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|permission|authori[sz]ation|(?<![a-z])opt(?:ed|s)?[-\s]?(?:in|out)(?![a-z])
+    pattern: (?i)consent|(?<![a-z])assent|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|permission|authori[sz]ation|(?<![a-z])opt(?:ed|s|ing)?[-\s]?(?:in|out)s?(?![a-z])
     hit_count: 0
     snippets: []
   note: 'Any statement of informed consent names consent, assent, a waiver, parental permission, a HIPAA
@@ -85,7 +85,7 @@ entries:
   status: unknown
   method: deterministic:version_string
   evidence:
-    pattern: (?i)(?<![a-z])version(?:s|ed|ing)?(?![a-z])|releas(?:e|es|ed|ing)(?![a-z])|(?<![a-z])(?:edition|revision)s?(?![a-z])|(?<![a-z0-9])v\d+(?:\.\d+)*(?![a-z])|(?<![\d.])\d+\.\d+\.\d+(?![\d.])
+    pattern: (?i)(?<![a-z])version(?:s|ed|ing)?(?![a-z])|releas(?:e|es|ed|ing)(?![a-z])|(?<![a-z])(?:edition|revision)s?(?![a-z])|(?<![a-z0-9])v\d+(?:\.\d+)*(?![a-z])|(?<![\d.])\d+(?:\.\d+){2,}(?!\.?\d)
     hit_count: 6
     snippets:
     - {chunk: c003, lines: [414, 414], sha256: d21ea6aadcedae26e0ba9a174510fbd3f3d078610b02be32f7bc4344018b4c0b}
@@ -94,21 +94,22 @@ entries:
     - {chunk: c006, lines: [1074, 1074], sha256: ed317fcfb59dadb708bc4a1efd8612d77dba1086f922784d9d38fb3cb69de7a4}
     - {chunk: c007, lines: [1357, 1357], sha256: 45d6597f3d1df5c65aee5a530235580253dea13cde8fa0efa1cf9c73c3edc502}
     - {chunk: c008, lines: [1558, 1558], sha256: 79429b316c00d95f5651ac48aec7bfb0d653f21ee42d311d4933da37e2ba2ffc}
-  note: 'A dataset version is named version/release/edition/revision, or written v<n> or as a three-part
-    number, so zero matching lines mean the bundle states no version. Not seen: a bare two-part number
-    with no such word (''X 2.0''). Result: 6 matching line(s). A match is not evidence the item is supported
-    (the words recur in other senses), so the status stays unknown until a curator or judge reads the
-    lines listed.'
+  note: 'A dataset version is named version/release/edition/revision, or written v<n> or as a dotted number
+    of three or more parts (also at the end of a sentence), so zero matching lines mean the bundle states
+    no version. Not seen: a bare two-part number with no such word (''X 2.0''). Result: 6 matching line(s).
+    A match is not evidence the item is supported (the words recur in other senses), so the status stays
+    unknown until a curator or judge reads the lines listed.'
 - rubric: rubric10
   item_id: E10.2
   route: null
   status: not_stated_in_source
   method: deterministic:dataset_citation
   evidence:
-    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d{4,9}/|(?<![a-z])cit(?:e[sd]?|ing|ations?)(?![a-z])|(?<![a-z])bibtex(?![a-z])|(?<![a-z])acknowledg|(?:please|how\s+to|when)\s+(?:reference|acknowledge)|recommended\s+reference
+    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d{4,9}/|(?<![a-z])cit(?:e[sd]?|ing|ations?)(?![a-z])|(?<![a-z])bibtex(?![a-z])|(?<![a-z])acknowledg|(?:please|how\s+to|when|should|must|kindly)\s+(?:be\s+)?referenc|recommended\s+referenc
     hit_count: 0
     snippets: []
   note: 'E10.2 accepts a recommended citation or a DOI. A DOI matches as for E1.1; a citation request
-    names cite/citation, BibTeX or acknowledgement, or asks the reader to reference the data, so zero
-    matching lines mean the bundle states neither. Not seen: a bare formatted reference carrying none
-    of those words. Result: no matching line.'
+    names cite/citation, BibTeX or acknowledgement, or asks the reader to reference the data (please,
+    how to, when, should, must or kindly, then reference or be referenced; or a recommended reference),
+    so zero matching lines mean the bundle states neither. Not seen: a bare formatted reference carrying
+    none of those words. Result: no matching line.'

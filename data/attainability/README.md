@@ -16,6 +16,10 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
   is not.
 - A file about a bundle that has since changed on disk stays valid: the
   validator reads the committed version whose hashes it records.
+- The chunk rule is written out in full and must be one the chunker
+  implements (`chunking.validate_rule`). The chunker reads only the two
+  window bounds, and an empty rule as its own default, so an empty or
+  invented rule is refused rather than silently chunked as another one.
 
 ```bash
 python -m data_sheets_schema.attainability check                 # validate every file here
