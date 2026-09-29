@@ -299,7 +299,11 @@ def origin(transcripts, receipt_file, full_file, as_json):
     every join after it is `&&` and the call succeeded. A piped,
     backgrounded, grouped or multi-line derive, one after `||` or followed
     by `;`, or a failed `&&` chain cannot be placed, unless the native
-    control denied the call, which then never ran. A relative `--full`
+    control denied the call, or the runtime did in `dontAsk` mode and its
+    terminal `result` lists the call, which then never ran. `timeout`,
+    `env` and `nice` wrappers are read through; any other spelling that
+    carries the words `derive core` (`bash -c`, `xargs`, a substitution)
+    cannot be placed. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,

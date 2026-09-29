@@ -1394,6 +1394,253 @@ class RipgrepHostnameHelper(Base):
         self.assertIn("a ripgrep hostname helper set in a config file the same way", " ".join(ro.__doc__.split()))
 
 
+class DeriveSpellings(Base):
+    """A `derive core` the parser does not read was invisible: no attempt row,
+    no boundary, and a Phase 3 snippet reported as `phase1_correction` with
+    the status `checked` (#3137). The `timeout`, `env` and `nice` wrappers and
+    an interpreter held in a variable are read through; any other part that
+    carries the words `derive core` is a derive that cannot be placed."""
+
+    FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
+    OUT = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
+
+    def _derived(self, spelling, **result):
+        """Draft, a Phase 1 entry, the call under test, a Phase 3 entry."""
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        identity = r.bash(spelling, **result)
+        r.write(r.receipt, Boundaries.C004)
+        return identity, r.report()
+
+    def test_wrapped_and_variable_interpreter_spellings_are_the_boundary(self):
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        for spelling in (f"timeout 600 poetry run d4d {derive}",
+                         f"timeout -s KILL --preserve-status 10m d4d {derive}",
+                         f"timeout --kill-after=5 1.5h d4d {derive}",
+                         f"env PYTHONPATH=src python -m data_sheets_schema.cli {derive}",
+                         f"env -i -u HOME -- D4D_PROFILE=bridge2ai poetry run d4d {derive}",
+                         f"$PY -m data_sheets_schema.cli {derive}",
+                         f"${{PY}} -m data_sheets_schema.cli {derive}",
+                         f"nice -n 10 d4d {derive}",
+                         f"nice -5 poetry run d4d {derive}",
+                         f"X=1 timeout 60 env Y=2 nice d4d {derive} && d4d receipts check --label L"):
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+                self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
+                                                   "phase3_backport": 1})
+
+    def test_a_wrapped_derive_carries_its_own_status(self):
+        # `timeout` passes the derive's exit status through; its own 124 is a failure.
+        identity, block = self._derived(f"timeout 600 poetry run d4d derive core --full {self.FULL} {self.OUT}",
+                                        ok=False)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+        self.assertIsNone(block["boundaries"]["derive_core"])
+        self.assertEqual(block["origin"]["phase1_correction"], 2)
+
+    def test_an_unparsed_derive_spelling_is_unknown(self):
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        for spelling in (f"bash -c 'poetry run d4d {derive}'",
+                         f"sh -c \"cd data && d4d {derive}\"",
+                         f"echo {self.FULL} | xargs -I{{}} poetry run d4d derive core --full {{}} {self.OUT}",
+                         f"echo \"$(poetry run d4d {derive})\"",
+                         f"cat `d4d {derive}`",
+                         f"env -C data d4d {derive}",
+                         f"timeout --unknown 5 d4d {derive}",
+                         f"timeout forever d4d {derive}",
+                         f"nice --weird d4d {derive}",
+                         f"poetry run d4d -v {derive}",
+                         f"poetry run d4d derive",
+                         f"python -X utf8 -m data_sheets_schema.cli {derive}",
+                         f"$PY -c 'x' -m data_sheets_schema.cli {derive}",
+                         f"sed -n 'e d4d {derive}' {self.FULL}",
+                         f"d4d receipts check --label \"$(d4d {derive})\""):
+            for ok in (True, False):
+                with self.subTest(spelling=spelling, ok=ok):
+                    identity, block = self._derived(spelling, ok=ok)
+                    if spelling == "poetry run d4d derive":
+                        # no `derive core` words at all: nothing to place
+                        self.assertEqual(block["derive_core_attempts"], [])
+                        continue
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed")
+                    self.assertIn("a spelling of `derive core` the parser does not follow",
+                                  " ".join(block["reasons"]))
+                    attempt = block["derive_core_attempts"][0]
+                    self.assertEqual((attempt["targets_full"], attempt["status_basis"], attempt["outcome"]),
+                                     (None, "unparsed", "ambiguous"))
+
+    def test_an_unparsed_derive_the_native_control_denied_never_ran(self):
+        identity, block = self._derived(
+            f"bash -c 'poetry run d4d derive core --full {self.FULL} {self.OUT}'", ok=False,
+            content=ro.NATIVE_DENIAL_PREFIX + "compound command", metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+        self.assertEqual(block["origin"]["phase1_correction"], 2)
+
+    def test_the_words_derive_core_where_nothing_runs_them_are_not_a_derive(self):
+        for spelling in ("grep -n 'derive core' .claude/commands/d4d-full-core.md",
+                         "echo derive core && printf '%s\\n' 'derive core'",
+                         "sed -n '/derive core/,+3p' .claude/commands/d4d-full-core.md",
+                         "poetry run d4d provenance record --project CHORUS --label L "
+                         "--phase '{\"name\": \"derive core\"}'",
+                         "poetry run d4d receipts check --label L --project CHORUS --note 'after derive core'",
+                         "cat derive-core.log", "ls data/rederive core"):
+            with self.subTest(spelling=spelling):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.bash(spelling)
+                identity = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                block = r.report()
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual([a["tool_use_id"] for a in block["derive_core_attempts"]], [identity])
+
+    def test_wrapper_skip(self):
+        cases = {"timeout 600 d4d": 2, "timeout -v -s TERM -k 5 10s d4d": 7, "timeout --signal=HUP 1d d4d": 3,
+                 "timeout -sKILL 5 d4d": 3, "timeout 5": 2, "timeout x d4d": None, "timeout --x 5 d4d": None,
+                 "env A=1 d4d": 1, "env -i - -u X --unset=Y -uZ d4d": 7, "env -- d4d": 2, "env -C d d4d": None,
+                 "env -S 'd4d'": None, "nice d4d": 1, "nice -n 5 d4d": 3, "nice -n5 d4d": 2, "nice -10 d4d": 2,
+                 "nice --adjustment=-3 d4d": 2, "nice -x d4d": None, "d4d derive core": None, "": None}
+        for command, skip in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._wrapper_skip(command.split()), skip)
+        self.assertEqual(ro._unwrapped("A=1 timeout 5 env B=2 poetry run nice -n 1 d4d x".split()), ["d4d", "x"])
+        self.assertEqual(ro._unwrapped("timeout 5".split()), ["timeout", "5"])
+        self.assertEqual(ro._unwrapped("env -C d d4d".split()), ["env", "-C", "d", "d4d"])
+
+    def test_a_wrapped_directory_change_is_not_a_directory_change(self):
+        # A wrapper runs `cd` as a program, which cannot move the shell: the
+        # relative `--full` resolves where the call started, not under `elsewhere`.
+        identity, block = self._derived(f"env cd elsewhere && d4d derive core --full {self.FULL} {self.OUT}")
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+
+    def test_the_route_it_cannot_see_is_named(self):
+        text = " ".join(ro.NON_CHECKS)
+        self.assertIn("a `derive core` run without the words `derive core` on the command line", text)
+        self.assertIn("`python -c` building the argument list", text)
+        doc = " ".join(ro.__doc__.split())
+        self.assertIn("carries the words `derive core` and is neither a d4d call of another subcommand "
+                      "nor a program known to read", doc)
+
+
+class RuntimeDenial(Base):
+    """A Bash call the runtime refused in `dontAsk` mode never ran, but only
+    where the transcript's terminal `result` lists it under
+    `permission_denials` with the call's own tool name and input (#3201)."""
+
+    WRITE = f"sed -i '' 's/a/b/' {REL}"
+    REFUSAL = ro.DONT_ASK_DENIAL_PREFIX + " IMPORTANT: You *may* attempt to accomplish this action another way."
+    DERIVE = ("poetry run d4d derive core --full data/claudecode_direct/L/CHORUS_d4d.yaml "
+              "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml 2>&1 | tail -5")
+
+    def _refused(self, command=WRITE, *, terminal=None, content=None, ok=False, derive_after=True):
+        """Draft, then the call the runtime refused, then (by default) a
+        derive, then the terminal `result` event; `terminal` edits that event
+        (or returns None to drop it)."""
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        identity = r.bash(command, ok=ok, content=self.REFUSAL if content is None else content,
+                          metadata="Error: " + ro.DONT_ASK_DENIAL_PREFIX)
+        if derive_after:
+            r.derive()
+        event = {"type": "result", "subtype": "success", "is_error": False, "session_id": "s",
+                 "permission_denials": [{"tool_name": "Bash", "tool_use_id": identity,
+                                         "tool_input": {"command": command, "description": "x"}}]}
+        if terminal is not None:
+            event = terminal(event)
+        if event is not None:
+            r.events.append(event)
+        return identity, r
+
+    def test_a_corroborated_refusal_is_listed_not_a_mutation(self):
+        identity, r = self._refused()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["non_write_mutations"], [])
+        self.assertEqual([(w["tool_use_id"], w["target"], w["tool"], w["rejection"]) for w in block["rejected_writes"]],
+                         [(identity, "receipt", "Bash", "runtime_denial")])
+        self.assertIn("· rejected Bash of the receipt (runtime_denial), transcript 0 line 6", ro.summary(block))
+
+    def test_an_uncorroborated_refusal_stays_a_possible_change(self):
+        def denial(**edit):
+            def change(event):
+                event["permission_denials"][0].update(edit)
+                return event
+            return change
+
+        def twice(event):
+            event["permission_denials"] *= 2
+            return event
+        cases = {
+            "no terminal event": dict(terminal=lambda e: None),
+            "not listed": dict(terminal=lambda e: {**e, "permission_denials": []}),
+            "no denial list": dict(terminal=lambda e: {k: v for k, v in e.items() if k != "permission_denials"}),
+            "listed twice": dict(terminal=twice),
+            "another input": dict(terminal=denial(tool_input={"command": "true", "description": "x"})),
+            "another tool": dict(terminal=denial(tool_name="Edit")),
+            "another id": dict(terminal=denial(tool_use_id="toolu_999")),
+            "an error terminal": dict(terminal=lambda e: {**e, "is_error": True}),
+            "a terminal that is not success": dict(terminal=lambda e: {**e, "subtype": "error_during_execution"}),
+            "text not the refusal": dict(content="Exit code 1\n" + ro.DONT_ASK_DENIAL_PREFIX),
+            "a result that is not an error": dict(ok=True),
+        }
+        for label, kwargs in cases.items():
+            with self.subTest(label):
+                _, r = self._refused(**kwargs)
+                block = r.report()
+                self.assertUnknown(block, "may change the receipt other than by a Write")
+                self.assertEqual(block["rejected_writes"], [])
+
+    def test_two_terminal_events_corroborate_nothing(self):
+        identity, r = self._refused()
+        r.events.append(dict(r.events[-1]))
+        self.assertUnknown(r.report(), f"Bash call {identity}")
+
+    def test_the_terminal_must_follow_the_result_in_the_calls_own_transcript(self):
+        # A killed-and-resumed pair: the refusal is in the first file, which
+        # has no terminal; the second file's terminal lists it.
+        identity, r = self._refused(derive_after=False)
+        terminal = r.events.pop()
+        split = len(r.events)
+        r.derive()
+        for _ in range(5):                          # the terminal's line is past the refusal's
+            r.bash("wc -l data/x.yaml")
+        r.events.append(terminal)
+        block = ro.origin([r.transcript("t1.jsonl", r.events[:split]),
+                           r.transcript("t2.jsonl", r.events[:1] + r.events[split:])], r.receipt, r.full)
+        self.assertUnknown(block, f"Bash call {identity}")
+        # A terminal before the refusal's result is not its listing either.
+        identity, r = self._refused(derive_after=False)
+        terminal = r.events.pop()
+        r.events.insert(len(r.events) - 1, terminal)
+        r.derive()
+        self.assertUnknown(r.report(), f"Bash call {identity}")
+
+    def test_a_refused_derive_never_ran(self):
+        command = self.DERIVE
+        identity, r = self._refused(command, derive_after=False)
+        terminal = r.events.pop()
+        r.write(r.receipt, DeriveStatus.ADDED)
+        r.events.append(terminal)
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+        self.assertIsNone(block["boundaries"]["derive_core"])
+        self.assertEqual(block["origin"]["phase1_correction"], 1)
+        # Uncorroborated, the same refusal is a derive that cannot be placed.
+        identity, r = self._refused(command, derive_after=False, terminal=lambda e: None)
+        r.write(r.receipt, DeriveStatus.ADDED)
+        self.assertUnknown(r.report(), f"derive core {identity} cannot be placed")
+
+
 class Listing(unittest.TestCase):
     """Which slot each listed entry names depends on the three multisets,
     never on the receipt's order (#3115)."""
@@ -1484,6 +1731,10 @@ class Cli(unittest.TestCase):
         self.assertNotIn("followed by another command", text)
         self.assertIn("every join after it is `&&` and the call succeeded", text)
         self.assertIn("a failed `&&` chain cannot be placed", text)
+        # #3137, #3201: the wrappers read through and the runtime's own refusal
+        self.assertIn("`timeout`, `env` and `nice` wrappers are read through", text)
+        self.assertIn("any other spelling that carries the words `derive core`", text)
+        self.assertIn("the runtime did in `dontAsk` mode and its terminal `result` lists the call", text)
 
     def test_unknown_prints_its_reasons_and_exits_zero(self):
         with tempfile.TemporaryDirectory() as tmp:

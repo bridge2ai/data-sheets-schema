@@ -37,14 +37,24 @@ Phase 3 labels then go in slot order.
 Only a successful Write, paired with its tool_result by id, changes state.
 A Write the runtime refused (the unread-file wrapper, #2285) or that
 returned an error is listed and changes nothing, and so is a shell call
-the native control denied: it never ran (#3185). A `derive core` succeeded
+the native control denied: it never ran (#3185). So is one the runtime
+refused in `dontAsk` mode, but only where the transcript's terminal
+`result` event lists it under `permission_denials` with the call's own
+tool name and input (#3201); the refusal text alone is not evidence, and
+an uncorroborated one stays a possible change. A `derive core` succeeded
 only where its call's result carries the derive's own status (#3113). With
 every join in the command `&&` or `;`, the call's success or failure is the
 derive's when the derive is the last part, and its success alone is when
 every join after the derive is `&&` (a failure may be a later part's).
 Otherwise (piped, backgrounded, grouped, after `||`, followed by `;`, in a
 multi-line command, or a failed `&&` chain) the derive is ambiguous, unless
-the native control denied the call, which then never ran. A call the runtime
+the call was denied as above, and then never ran. A `timeout`, `env` or
+`nice` wrapper with options this reads, and an interpreter held in a
+variable (`$PY -m data_sheets_schema.cli`), are read through; any other
+part that carries the words `derive core` and is neither a d4d call of
+another subcommand nor a program known to read (a nested `bash -c`,
+`xargs`, a substitution, a wrapper option or CLI option it does not read)
+is a derive that cannot be placed (#3137). A call the runtime
 backgrounded is ambiguous too: its result is the launch, not the end. A
 shell command is read as bash reads it: `#` starts a comment only at the
 start of a word, outside quotes (#3184), and a `cd`, `pushd` or `popd`
@@ -134,6 +144,12 @@ READ_ONLY_D4D = frozenset({("receipts", "check"), ("receipts", "invert"), ("rece
 #: The pinned native control's PreToolUse denial reason
 #: (`native_control.hook_output`): a call answered with it never ran.
 NATIVE_DENIAL_PREFIX = "Outside the registered tool policy: "
+#: The Claude Code runtime's own refusal of a Bash call in `dontAsk` mode, as
+#: `scripts/reference_rescore.py` (`denied_bash_calls`) reads it. The text
+#: alone is not evidence: a call answered with it counts as never run only
+#: where the transcript's terminal `result` event lists it (#3201).
+DONT_ASK_DENIAL_PREFIX = ("Permission to use Bash has been denied because Claude Code is running "
+                          "in don't ask mode.")
 #: Joins between the parts of a shell command after which the command's own
 #: status can still be the derive's (#3113).
 _SEQUENTIAL = frozenset({"&&", ";"})
@@ -149,6 +165,9 @@ NON_CHECKS = (
     "the command (exported earlier or inherited), or a hostname helper (`--hostname-bin`) set "
     "there: `rg` is read-only only when neither its arguments nor its own assignments set "
     "either (#3256, #3268)",
+    "a `derive core` run without the words `derive core` on the command line (a script, an "
+    "alias or function, a variable holding the subcommand, or `python -c` building the argument "
+    "list): such a derive is not seen, and the Phase 1 / Phase 3 boundary is missed (#3137)",
 )
 
 _ABSENT = object()
@@ -158,6 +177,9 @@ _PUNCT = frozenset("();<>|&")
 _CLEAN_PATH = re.compile(r"[A-Za-z0-9_./+@-]+")
 _ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*")
 _PYTHON = re.compile(r"python(\d+(\.\d+)*)?")
+_VARIABLE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})")
+_DURATION = re.compile(r"\d+(\.\d+)?[smhd]?")
+_DERIVE_CORE = re.compile(r"(?<![\w.-])derive\s+core(?![\w.-])")
 
 
 def _sha256(data: bytes) -> str:
@@ -349,19 +371,64 @@ def _denied(result: dict | None) -> bool:
     return isinstance(text, str) and text.startswith(NATIVE_DENIAL_PREFIX)
 
 
-def _derive_outcome(result: dict | None, basis: str) -> str:
+def _runtime_denials(events: list[tuple[int, int, dict]], calls: list[dict],
+                     results: dict[str, dict]) -> set[str]:
+    """The Bash calls the runtime itself refused in `dontAsk` mode (#3201),
+    corroborated as `scripts/reference_rescore.py` corroborates them: the
+    call's own transcript ends in exactly one terminal `result` event, a
+    `success` with `is_error: false`, after the call's result; that event's
+    `permission_denials` lists the call once, with `tool_name` Bash and
+    `tool_input` equal to the call's input; and the call's result is an
+    error opening with the runtime's refusal. The refusal text without the
+    terminal listing is not evidence: a command can print it."""
+    terminals: dict[int, list[tuple[int, dict]]] = defaultdict(list)
+    for t, n, event in events:
+        if event.get("type") == "result":
+            terminals[t].append((n, event))
+    by_id = {call["id"]: call for call in calls}
+    proven: set[str] = set()
+    for t, found in terminals.items():
+        if len(found) != 1:
+            continue
+        line, terminal = found[0]
+        denials = terminal.get("permission_denials")
+        if (terminal.get("subtype") != "success" or terminal.get("is_error") is not False
+                or not isinstance(denials, list)):
+            continue
+        listed = Counter(d.get("tool_use_id") for d in denials if isinstance(d, dict))
+        for denial in denials:
+            if not isinstance(denial, dict):
+                continue
+            identity = denial.get("tool_use_id")
+            call, result = by_id.get(identity), results.get(identity)
+            if (listed[identity] != 1 or call is None or result is None
+                    or call["transcript"] != t or result["transcript"] != t
+                    or not call["line"] < result["line"] < line
+                    or call["name"] != "Bash" or denial.get("tool_name") != "Bash"
+                    or not isinstance(call["input"], dict) or denial.get("tool_input") != call["input"]
+                    or result["is_error"] is not True):
+                continue
+            text = _result_text(result["content"])
+            if isinstance(text, str) and text.startswith(DONT_ASK_DENIAL_PREFIX):
+                proven.add(identity)
+    return proven
+
+
+def _derive_outcome(result: dict | None, basis: str, denied: bool = False) -> str:
     """A `derive core` part's own outcome from its call's result (#3113).
     `basis` says what the call's status tells about the part: `command` (it
     is the part's status), `and_chain` (a success is the part's; a failure
-    may be a later part's) or `none` (piped, backgrounded, grouped, after
-    `||`, followed by `;`, or in a multi-line command). A part whose status
-    the result does not carry is `ambiguous`, unless the native control
-    denied the call, which then never ran."""
+    may be a later part's), `none` (piped, backgrounded, grouped, after
+    `||`, followed by `;`, or in a multi-line command) or `unparsed` (a
+    spelling the parser does not read, #3137). A part whose status the
+    result does not carry is `ambiguous`, unless the call was `denied` --
+    by the native control or, corroborated, by the runtime (#3201) -- and
+    so never ran."""
     overall = _shell_outcome(result)
     if overall in ("pending", "ambiguous") or basis == "command":
         return overall
     if overall == "failed":
-        return "failed" if _denied(result) else "ambiguous"
+        return "failed" if denied else "ambiguous"
     return "succeeded" if basis == "and_chain" else "ambiguous"
 
 
@@ -569,16 +636,80 @@ def _program(segment: list[str]) -> list[str]:
     return rest
 
 
+def _wrapper_skip(rest: list[str]) -> int | None:
+    """How many words a `timeout`, `env` or `nice` wrapper and its options
+    take before the program it runs (#3137), or None when `rest` is not one
+    or carries an option this does not know (`env -C DIR`, `env -S STRING`,
+    ...). Each passes the program's exit status through, so the status basis
+    of a part it wraps is unchanged; `timeout`'s own 124 is a failure."""
+    head = os.path.basename(rest[0]) if rest else None
+    i = 1
+    if head == "timeout":
+        while i < len(rest) and rest[i].startswith("-"):
+            a = rest[i]
+            if a in ("--preserve-status", "--foreground", "-v", "--verbose"):
+                i += 1
+            elif a in ("-s", "-k", "--signal", "--kill-after"):
+                i += 2
+            elif a.startswith(("--signal=", "--kill-after=")) or (a[:2] in ("-s", "-k") and len(a) > 2):
+                i += 1
+            else:
+                return None
+        return i + 1 if i < len(rest) and _DURATION.fullmatch(rest[i]) else None
+    if head == "env":
+        while i < len(rest) and rest[i].startswith("-"):
+            a = rest[i]
+            if a in ("-i", "-", "--ignore-environment"):
+                i += 1
+            elif a in ("-u", "--unset"):
+                i += 2
+            elif a.startswith("--unset=") or (a.startswith("-u") and len(a) > 2):
+                i += 1
+            elif a == "--":
+                return i + 1
+            else:
+                return None
+        return i                                    # `_program` drops the assignments
+    if head == "nice":
+        if i < len(rest) and rest[i] in ("-n", "--adjustment"):
+            i += 2
+        elif i < len(rest) and re.fullmatch(r"(-n|--adjustment=|-)-?\d+", rest[i]):
+            i += 1
+        elif i < len(rest) and rest[i].startswith("-"):
+            return None
+        return i
+    return None
+
+
+def _unwrapped(segment: list[str]) -> list[str]:
+    """The segment from the program it runs: leading assignments, `poetry
+    run`, and any `timeout`, `env` or `nice` wrapper `_wrapper_skip` reads,
+    in any order and repeated. A wrapper it cannot read stays the program."""
+    rest = _program(segment)
+    while (skip := _wrapper_skip(rest)) is not None and skip < len(rest):
+        rest = _program(rest[skip:])
+    return rest
+
+
 def _cli_args(rest: list[str]) -> list[str] | None:
-    """The arguments to the d4d CLI, when the segment runs it."""
+    """The arguments to the d4d CLI, when the segment runs it: `d4d`, or
+    `python* -m data_sheets_schema.cli` with the interpreter named or held
+    in a variable (`$PY -m ...`, #3137)."""
     if not rest:
         return None
     program = os.path.basename(rest[0])
     if program == "d4d":
         return rest[1:]
-    if _PYTHON.fullmatch(program) and rest[1:3] == ["-m", "data_sheets_schema.cli"]:
+    if ((_PYTHON.fullmatch(program) or _VARIABLE.fullmatch(rest[0]))
+            and rest[1:3] == ["-m", "data_sheets_schema.cli"]):
         return rest[3:]
     return None
+
+
+def _mentions_derive(segment: list[str]) -> bool:
+    """Whether the words `derive core` appear in the segment: as adjacent
+    words, or inside one (`bash -c 'd4d derive core ...'`) (#3137)."""
+    return bool(_DERIVE_CORE.search(" ".join(segment)))
 
 
 def _subcommand(args: list[str]) -> tuple[tuple[str, ...], list[str]]:
@@ -817,7 +948,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # Read-only: no redirection except to /dev/null or a descriptor, no
     # unescaped newline (a second command), and every program known to read.
     # A command substitution hides its command inside a word (#3240).
-    read_only = not newline and not _substitutes(_strip_comments(command))
+    substitutes = _substitutes(_strip_comments(command))
+    read_only = not newline and not substitutes
     for i, token in enumerate(tokens):
         if set(token) <= _PUNCT and ">" in token:
             following = tokens[i + 1] if i + 1 < len(tokens) else ""
@@ -871,7 +1003,13 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             if len(rest) > 1 or not reached:
                 pushed = [None] * len(pushed)
             continue
-        args = _cli_args(rest)
+        args = _cli_args(_unwrapped(segment))
+        # A part that carries the words `derive core` but is not read here as
+        # a d4d call of that subcommand, nor as a program known to read, may
+        # run the derive through a spelling this parser does not follow (a
+        # nested shell, `xargs`, a substitution, a wrapper or a CLI option it
+        # does not know): a derive that cannot be placed, never none (#3137).
+        opaque = substitutes
         if args is not None:
             sub, sub_args = _subcommand(args)
             outs = _option(sub_args, "--out", "-o")
@@ -888,13 +1026,20 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                     verdict = full.matches(spelled[-1], local)
                 out["derives"].append({"targets_full": verdict, "segment": index,
                                        "basis": _status_basis(index, joins, leading, newline)})
-            continue
-        if program not in READ_ONLY_PROGRAMS:
-            read_only = False
-        elif program == "sed" and not _sed_reads_only(rest[1:]):
-            read_only = False
-        elif program == "rg" and not _rg_reads_only(segment):
-            read_only = False
+                continue
+            # A d4d call runs only its own subcommand: `derive core` in an
+            # option value (the recorder's `--phase`) runs nothing, unless
+            # the subcommand itself was not read (`d4d -v derive core`).
+            opaque = opaque or len(sub) < 2 or any(word.startswith("-") for word in sub)
+        else:
+            reads = program in READ_ONLY_PROGRAMS and not (
+                (program == "sed" and not _sed_reads_only(rest[1:]))
+                or (program == "rg" and not _rg_reads_only(segment)))
+            if not reads:
+                read_only = False
+            opaque = opaque or not reads
+        if opaque and full is not None and _mentions_derive(segment):
+            out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
     out["read_only"] = read_only
     return out
 
@@ -1026,9 +1171,10 @@ def _touches(target: _Target, spelled: str, cwd: str | None) -> bool:
 
 
 def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target],
-             reasons: list[str]) -> dict[str, Any]:
+             reasons: list[str], runtime_denied: set[str] | frozenset = frozenset()) -> dict[str, Any]:
     """Every call that bears on the two files, sorted into successful Writes,
-    unsettled Writes, refusals, other mutations and `derive core` runs."""
+    unsettled Writes, refusals, other mutations and `derive core` runs.
+    `runtime_denied` names the shell calls `_runtime_denials` corroborated."""
     h: dict[str, Any] = {"writes": {"receipt": [], "full": []}, "unsettled": {"receipt": [], "full": []},
                          "mutations": [], "rejected": [], "derives": []}
     for call in calls:
@@ -1067,20 +1213,25 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                 reasons.append(f"shell call {call['id']} has no command string")
                 continue
             shell = _shell(command, call["cwd"], targets)
+            # A call the native control refused (#3185), or the runtime in
+            # `dontAsk` mode with its terminal listing to say so (#3201),
+            # never ran.
+            denial = ("native_denial" if _denied(result) else
+                      "runtime_denial" if call["id"] in runtime_denied else None)
             # One row per part that derives the core, with that part's own
             # outcome (#3113): `targets_full` is None when its `--full`
             # cannot be placed.
             h["derives"].extend({**where, "segment": part["segment"], "targets_full": part["targets_full"],
-                                 "outcome": _derive_outcome(result, part["basis"]),
+                                 "outcome": _derive_outcome(result, part["basis"], denial is not None),
                                  "command_outcome": _shell_outcome(result), "status_basis": part["basis"]}
                                 for part in shell["derives"])
             if shell["read_only"]:
                 continue
-            if _denied(result):
-                # The native control refused the call before it ran (#3185):
-                # listed like a refused Edit, never a possible change.
+            if denial is not None:
+                # Refused before it ran: listed like a refused Edit, never a
+                # possible change.
                 h["rejected"].extend({**_where(call, result), "target": kind, "tool": name,
-                                      "rejection": "native_denial"} for kind in shell["named"])
+                                      "rejection": denial} for kind in shell["named"])
             else:
                 h["mutations"].extend({**where, "target": kind, "tool": name, "outcome": _shell_outcome(result)}
                                       for kind in shell["named"])
@@ -1138,8 +1289,10 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
         if row["outcome"] in ("ambiguous", "pending") and row["command_outcome"] == row["outcome"]:
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: its result is {row['outcome']}")
         elif row["outcome"] == "ambiguous":
-            why = ("a later `&&` part may be what failed" if row["status_basis"] == "and_chain" else
-                   "piped, backgrounded, grouped, after `||`, followed by `;`, or multi-line")
+            why = {"and_chain": "a later `&&` part may be what failed",
+                   "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
+                               "`xargs`, a substitution, or a wrapper or option it does not read)"}.get(
+                row["status_basis"], "piped, backgrounded, grouped, after `||`, followed by `;`, or multi-line")
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: the call {row['command_outcome']} "
                            f"but its status is not the derive's own ({row['status_basis']}: {why})")
         elif row["outcome"] == "succeeded":
@@ -1190,7 +1343,8 @@ def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]
     reasons: list[str] = []
     info, events = _load([Path(p) for p in transcripts], reasons)
     calls, results = _pair(events, reasons)
-    h = _history(calls, results, [_Target("receipt", receipt), _Target("full", full)], reasons)
+    h = _history(calls, results, [_Target("receipt", receipt), _Target("full", full)], reasons,
+                 _runtime_denials(events, calls, results))
     first, derived = _boundaries(h, reasons)
     writes = h["writes"]["receipt"]
     try:
