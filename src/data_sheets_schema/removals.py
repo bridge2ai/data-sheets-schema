@@ -52,7 +52,11 @@ classification (`exempt_value`).
 
 The removing phase is the first stage after the last one that still carried
 the value: `reconcile_full`, `repair_full_rN`, or `write` (the last phase
-output carried it and the written record does not).
+output carried it and the written record does not). A phase output that is
+missing or cannot be read leaves every removal unattributed (#3152). A
+repair round acts on validation errors, not on the audit, so a value it
+removes has a finding only by coincidence: `unfounded_phase` splits the
+unfounded count by the phase that removed each value (#3150).
 
 Reported only. No provenance block is written here and nothing is gated:
 `unfounded` says no finding's path covers the value, not that the removal was
@@ -94,9 +98,10 @@ NON_CHECKS = (
     "value was unsupported",
     "that a flattened value kept its meaning — normalised text containment under the nearest "
     "surviving ancestor, not a semantic comparison: a short or numeric value can coincide with "
-    "unrelated text, and a value a dropped list entry shared with its siblings is counted, not "
-    "attributed — flattened only where more final entries carry it than its other phase-1 "
-    "siblings did",
+    "unrelated text, and a value a dropped list entry shared with its siblings is not traced "
+    "to the entry — it is flattened where the sibling recognised as the entry's continuation "
+    "carries it, though that copy may be the sibling's own, and otherwise only where more "
+    "final entries carry it than the entry's other phase-1 siblings did (#3151)",
     "a finding that narrows its slot in prose ('maintainers (the Emory contact)') is read at "
     "the path it names, so founded is an upper bound where findings narrow by prose",
     "that a finding's index means the entry it gives — one past the end of its list is read "
@@ -463,8 +468,11 @@ def covers(finding_path: list[Any], path: str, original: dict[str, Any], *, past
     names no entry, and counting from 1 is the only reading under which it
     names one. The 04f v8 rep3 VOICE finding on `preprocessing_strategies[6]`
     of a six-entry list describes entry 5 (12 words shared, at most 3 with
-    any other); the v7 rep2 AI_READI findings on `file_collections[10].id`
-    and `.file_count` of ten quote entry 9's `#root-metadata` id. An index
+    any other). Of the v7 rep2 AI_READI findings on a ten-entry
+    `file_collections`, the one on `file_collections[10].id` quotes entry
+    9's `#root-metadata` id, the only such id in the list, and the one on
+    `.file_count` quotes `file_count: 9` and the nine metadata files that
+    count covers — entry 9's count, and no other entry's (#3155). An index
     further past the end, or one in range, is read as written."""
     if not finding_path:
         return False
@@ -581,7 +589,7 @@ def _unchecked(reason: str) -> dict[str, Any]:
             "removed": None, "flattened": None, "deleted": None,
             "founded": None, "unfounded": None, "founded_by": None, "founded_past_end": None,
             "unfounded_named_by_core_finding": None, "unfounded_mentioned_in_finding_text": None,
-            "receipted": None, "phase": None, "audit": None,
+            "receipted": None, "phase": None, "unfounded_phase": None, "audit": None,
             **{f"{cls}_paths{suffix}": ([] if not suffix else None)
                for cls in ("flattened", "founded", "unfounded", "unsorted")
                for suffix in ("", "_truncated")},
@@ -596,7 +604,8 @@ def _cap(rows: list[dict[str, Any]], key: str, block: dict[str, Any]) -> None:
 def classify(original: dict[str, Any] | None, final: dict[str, Any],
              audit: dict[str, Any] | None = None, *,
              receipt: dict[str, Any] | None = None,
-             intermediates: list[tuple[str, dict[str, Any] | None]] | None = None) -> dict[str, Any]:
+             intermediates: list[tuple[str, dict[str, Any] | None]] | None = None,
+             audit_unread: str | None = None) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
     receipt, + the phase outputs in order) -> block.
 
@@ -604,10 +613,13 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     None, or one without a `findings` list, leaves `founded`/`unfounded`
     None while `flattened` and `deleted` are still counted, the deleted
     values listed under `unsorted_paths`: a missing audit is not an audit
-    with no findings. `receipt` None leaves `receipted` None.
-    `intermediates` is `[(phase name, output or None), ...]` between the
-    snapshot and the final record, in run order; without them, or with any
-    output None (it could not be read), `phase` is None."""
+    with no findings. `audit_unread` is why an audit that exists could not
+    be read (`for_record` passes the reason), so the summary says that
+    rather than that there is no audit (#3153). `receipt` None leaves
+    `receipted` None. `intermediates` is `[(phase name, output or None),
+    ...]` between the snapshot and the final record, in run order; without
+    them, or with any output None (it is missing or could not be read),
+    `phase` and `unfounded_phase` are None."""
     if not isinstance(original, dict):
         return _unchecked("no phase-1 snapshot: the removals cannot be read against what phase 1 wrote (#899)")
     final = final if isinstance(final, dict) else {}
@@ -620,9 +632,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
               for via, fp in finding_paths(f, original)] if findings is not None else None)
     core_named = ([fp for f in findings if _core_only(f) for _via, fp in finding_paths(f, original)]
                   if findings is not None else None)
-    # A phase output that could not be read leaves every removal
-    # unattributed: across the gap, "the stage after the last one that
-    # carried it" would name a later phase for a value an earlier one
+    # A phase output that is missing or could not be read leaves every
+    # removal unattributed: across the gap, "the stage after the last one
+    # that carried it" would name a later phase for a value an earlier one
     # removed.
     attributed = intermediates is not None and all(isinstance(doc, dict) for _n, doc in intermediates)
     at_final = _Presence(original, final)
@@ -709,6 +721,11 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         "receipted": ({k: (v if sorted_ or k not in ("founded", "unfounded") else None)
                        for k, v in receipted.items()} if paths_receipted is not None else None),
         "phase": by_phase if attributed else None,
+        # The unfounded count by removing phase (#3150): a repair round acts
+        # on validation errors, not on the audit, so a value it removes has a
+        # finding only by coincidence; reconcile_full is the phase told to
+        # remove what a finding identifies.
+        "unfounded_phase": (_by_phase(rows["unfounded"]) if attributed and sorted_ else None),
         "audit": ({"findings": len(findings), "core_only": sum(1 for f in findings if _core_only(f)),
                    "paths_past_end": ends.count(True) + ends.count(False),
                    "paths_one_past_end": ends.count(True)}
@@ -716,18 +733,33 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     }
     for cls in ("flattened", "founded", "unfounded", "unsorted"):
         _cap(rows[cls], f"{cls}_paths", block)
-    block["summary"] = _summary(block)
+    if findings is not None:
+        unsorted_why = None
+    elif audit_unread:
+        unsorted_why = f"the audit could not be read ({audit_unread}), so the deletions are not sorted"
+    elif isinstance(audit, dict):
+        unsorted_why = "the audit carries no findings list to sort the deletions against"
+    else:
+        unsorted_why = "no audit to sort the deletions against"
+    block["summary"] = _summary(block, unsorted_why)
     block["non_checks"] = list(NON_CHECKS)
     return block
 
 
-def _summary(block: dict[str, Any]) -> str:
+def _by_phase(rows: list[dict[str, Any]]) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for r in rows:
+        out[r["phase"]] = out.get(r["phase"], 0) + 1
+    return out
+
+
+def _summary(block: dict[str, Any], unsorted_why: str | None = None) -> str:
     if not block["checked"]:
         return f"not checked: {block['reason']}"
     head = (f"{block['snapshot_values']} phase-1 values ({block['exempt']} exempt)"
             f" · {block['flattened']} flattened")
     if block["founded"] is None:
-        return head + " · no audit to sort the deletions against"
+        return head + f" · {block['deleted']} deleted · {unsorted_why or 'the deletions are not sorted'}"
     s = head + f" · {block['founded']} founded · {block['unfounded']} unfounded"
     if block.get("founded_past_end"):
         s += f" ({block['founded_past_end']} founded by an index one past the end)"
@@ -804,8 +836,11 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
     phases: list[dict[str, Any]] = []
     for name in ["reconcile_full", *(f"repair_full_r{n}" for n in repair_rounds(core_dir, project, record))]:
         state, path, doc, why = _phase_output(core_dir, project, f"{project}_{name}.yaml", record)
-        if state == "absent":
-            continue
+        # A missing output is a gap like an unreadable one (#3152), not a
+        # phase to skip: the runner snapshots every phase it runs, and runs
+        # reconcile_full always, so the output was lost, and attributing
+        # across the gap would name a later phase for a value an earlier
+        # one removed. Its None leaves the removals unattributed.
         stages.append((name, doc))
         phases.append({"phase": name, "state": state, "path": str(path) if path else None,
                        **({"reason": why} if why else {})})
@@ -820,7 +855,8 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
             receipt = None
         r_state = "usable" if receipt_paths(receipt) is not None else "unusable"
     block = classify(original, final, audit if a_state == "usable" else None,
-                     receipt=receipt, intermediates=stages if stages else None)
+                     receipt=receipt, intermediates=stages,
+                     audit_unread=(a_why or "unreadable") if a_state == "unusable" else None)
     block["artifacts"] = {
         "phase1_snapshot": pin, "final": str(paths["full"]),
         "audit": {"state": a_state, "path": str(a_path) if a_path else None,

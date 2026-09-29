@@ -220,6 +220,38 @@ class DroppedEntries(unittest.TestCase):
         self.assertEqual(sorted(r["path"] for r in b["unfounded_paths"]),
                          ["creators[0].affiliations[0].name", "creators[0].id", "creators[0].name"])
 
+    def test_an_entry_with_no_identifying_key_is_no_fold_where_a_sibling_carries_only_part_of_it(self):
+        """#3154: a keyless entry's continuation must carry every value it
+        had. Parisa's entry folds into the note that names her and her site;
+        Azra's shares only 'UF' with that note, so the note is not her
+        continuation, and her 'UF' — as many entries carry it after as her
+        siblings did before — is deleted, not credited to Parisa's fold."""
+        before = _record(creators=[{"principal_investigator": "Eric R", "affiliations": ["MGH"]},
+                                   {"principal_investigator": "Azra B", "affiliations": ["UF"]},
+                                   {"principal_investigator": "Parisa R", "affiliations": ["UF"]}])
+        after = _record(creators=[{"principal_investigator": "Eric R", "affiliations": ["MGH"]},
+                                  {"notes": "Parisa R leads the UF site."}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual({r["path"]: r["into"] for r in b["flattened_paths"]},
+                         {"creators[2].principal_investigator": "creators[1]", "creators[2].affiliations[0]": "creators[1]"})
+        self.assertEqual(sorted(r["path"] for r in b["unfounded_paths"]),
+                         ["creators[1].affiliations[0]", "creators[1].principal_investigator"])
+
+    def test_the_published_non_check_names_both_routes_a_shared_value_is_flattened_by(self):
+        """#3151: the continuation route flattens a value the dropped entry
+        shared with that sibling though no more entries carry it after than
+        before — the sibling's own copy is credited — and the emitted limit
+        statement says so rather than naming the surplus route alone."""
+        pat = {"id": "x#1", "name": "Pat Lee", "affiliations": [{"name": "Site A"}]}
+        sam = {"id": "x#2", "name": "Sam Roe", "affiliations": [{"name": "Site A"}]}
+        b = rm.classify(_record(creators=[pat, sam]), _record(creators=[{**sam, "notes": "With Pat Lee."}]), _audit())
+        self.assertEqual({r["path"]: r["into"] for r in b["flattened_paths"]},
+                         {"creators[0].name": "creators[0]", "creators[0].affiliations[0].name": "creators[0]"})
+        text = next(n for n in b["non_checks"] if n.startswith("that a flattened value"))
+        self.assertIn("the sibling recognised as the entry's continuation carries it", text)
+        self.assertIn("otherwise only where more final entries carry it", text)
+        self.assertNotIn("flattened only where", text)
+
     def test_a_list_collapsed_to_a_string_is_still_the_surviving_ancestor(self):
         """Only a list that is still a list is set aside."""
         before = _record(file_collections=[{"name": "ECG", "notes": "waveforms"}, {"name": "OCT", "notes": "scans"}])
@@ -381,6 +413,19 @@ class Absent(unittest.TestCase):
         self.assertEqual(b["receipted"], {"removed": 4, "flattened": 0, "deleted": 4, "founded": None, "unfounded": None})
         self.assertIn("no audit", b["summary"])
 
+    def test_an_audit_that_could_not_be_read_is_not_called_absent(self):
+        """#3153: an audit that exists but could not be read, or one with no
+        findings list, sorts nothing — and the summary says which, never
+        that there is no audit."""
+        b = rm.classify(_record(data_governance=GOVERNANCE), _record(), None,
+                        audit_unread="JSONDecodeError: Expecting value")
+        self.assertEqual((b["deleted"], b["founded"], b["unfounded"]), (4, None, None))
+        self.assertIn("4 deleted · the audit could not be read (JSONDecodeError: Expecting value)", b["summary"])
+        self.assertNotIn("no audit", b["summary"])
+        b = rm.classify(_record(data_governance=GOVERNANCE), _record(), {"summary": "no findings key"})
+        self.assertIn("the audit carries no findings list", b["summary"])
+        self.assertNotIn("no audit", b["summary"])
+
     def test_no_receipt_leaves_the_receipted_counts_none(self):
         self.assertIsNone(rm.classify(_record(a="x"), _record(), _audit())["receipted"])
 
@@ -403,7 +448,33 @@ class Phase(unittest.TestCase):
         stages = [("reconcile_full", None), ("repair_full_r1", _record())]
         b = rm.classify(_record(a="1"), _record(), _audit(), intermediates=stages)
         self.assertIsNone(b["phase"])
+        self.assertIsNone(b["unfounded_phase"])
         self.assertNotIn("phase", b["unfounded_paths"][0])
+
+    def test_the_unfounded_count_is_split_by_the_phase_that_removed_each_value(self):
+        """#3150: a repair round acts on validation errors, not on the
+        audit, so the unfounded values it removes are counted apart from
+        reconcile_full's. The v4 VOICE rep2 shape: reconcile_full kept the
+        PI object, repair_full_r1 collapsed it to its name and dropped the
+        constructed id. Founded and flattened values are not in the split."""
+        pi = {"id": "https://b2ai-voice.org/person/pat", "name": "Pat Lee"}
+        before = _record(creators=[{"name": "Lab", "principal_investigator": pi}], license="CC-BY", a="1")
+        reconciled = _record(creators=[{"name": "Lab", "principal_investigator": pi}])
+        repaired = _record(creators=[{"name": "Lab", "principal_investigator": "Pat Lee"}])
+        stages = [("reconcile_full", reconciled), ("repair_full_r1", repaired)]
+        b = rm.classify(before, repaired, _audit({"slot": "license"}), intermediates=stages)
+        self.assertEqual({r["path"]: r["phase"] for r in b["unfounded_paths"]},
+                         {"creators[0].principal_investigator.id": "repair_full_r1", "a": "reconcile_full"})
+        self.assertEqual(b["unfounded_phase"], {"repair_full_r1": 1, "reconcile_full": 1})
+        self.assertEqual(b["phase"], {"reconcile_full": 2, "repair_full_r1": 2})
+        self.assertEqual(rm.classify(before, repaired, None, intermediates=stages)["unfounded_phase"], None)
+
+    def test_the_split_counts_past_the_listed_paths(self):
+        """The split is over every unfounded value, not the capped list."""
+        before = _record(**{f"s{i}": str(i) for i in range(rm.PATH_LIMIT + 5)})
+        b = rm.classify(before, _record(), _audit(), intermediates=[("reconcile_full", _record())])
+        self.assertEqual(b["unfounded_phase"], {"reconcile_full": rm.PATH_LIMIT + 5})
+        self.assertEqual(b["unfounded_paths_truncated"], 5)
 
 
 class SlotGrammar(unittest.TestCase):
@@ -491,6 +562,39 @@ class OnDisk(unittest.TestCase):
         self.assertEqual((b["deleted"], b["unfounded"]), (4, None))
         self.assertEqual(b["artifacts"]["audit"]["state"], "absent")
 
+    def test_a_missing_phase_output_is_a_gap_not_a_phase_to_skip(self):
+        """#3152: with reconcile_full's output gone, a value it removed is
+        not credited to repair_full_r1, which never saw it: the removals are
+        unattributed and the missing output is listed."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov = self._run(tmp)
+            (prov.parent / "intermediate" / "VOICE_reconcile_full.yaml").unlink()
+            b = rm.for_record(prov)
+        self.assertEqual((b["unfounded"], b["flattened"]), (4, 2))
+        self.assertIsNone(b["phase"])
+        self.assertIsNone(b["unfounded_phase"])
+        self.assertNotIn("phase", b["unfounded_paths"][0])
+        self.assertEqual([(p["phase"], p["state"]) for p in b["artifacts"]["phases"]],
+                         [("reconcile_full", "absent"), ("repair_full_r1", "usable")])
+
+    def test_an_unreadable_audit_is_reported_as_such_on_disk_and_by_the_cli(self):
+        """#3153: the audit is there and cannot be read; neither the
+        summary nor a row says the run has no audit."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov = self._run(tmp)
+            (prov.parent / "intermediate" / "VOICE_audit.json").write_text("{not json")
+            b = rm.for_record(prov)
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_api",
+                                                                  "--label", "L", "--project", "VOICE"])
+        self.assertEqual(b["artifacts"]["audit"]["state"], "unusable")
+        self.assertIn("the audit could not be read (JSONDecodeError", b["summary"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertNotIn("no audit", r.output)
+        self.assertIn("? deleted, unsorted data_governance.committee_name (reconcile_full, receipted)", r.output)
+
     def test_the_cli_prints_the_unfounded_values_and_writes_nothing(self):
         import click.testing
         from data_sheets_schema.cli.review import review as review_cli
@@ -506,6 +610,7 @@ class OnDisk(unittest.TestCase):
         self.assertIn("4 unfounded", r.output)
         self.assertIn("✗ unfounded data_governance.committee_name (reconcile_full, receipted)", r.output)
         self.assertIn("~ keywords[0] → keywords (repair_full_r1)", r.output)
+        self.assertIn("unfounded, by the phase that removed them: reconcile_full 4", r.output)
         self.assertEqual(json.loads(j.output)["unfounded"], 4)
 
 
@@ -559,6 +664,29 @@ def test_the_v9_canary_has_no_unfounded_removal(monkeypatch):
 
 
 @pytest.mark.corpus
+def test_an_audit_of_ambiguous_generation_is_named_not_called_absent(monkeypatch):
+    """#3153 on the arm record the review named: v4 rep1 VOICE carries
+    VOICE_audit.json and VOICE_audit_2.json with no index to say which is
+    the run's."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    b = _replay("2026-08-13_claude-opus-5-api-generic-v4_rep1", "VOICE", method="claudecode_agent")
+    assert b["artifacts"]["audit"]["state"] == "unusable" and b["unfounded"] is None
+    assert "the audit could not be read (portable phase snapshots have ambiguous generation ownership" in b["summary"]
+    assert "no audit" not in b["summary"]
+
+
+@pytest.mark.corpus
+def test_the_v4_voice_rep2_unfounded_removals_are_all_the_repair_rounds(monkeypatch):
+    """#3150: the 14 unfounded values of v4 VOICE rep2 are constructed ids
+    that reconcile_full still carried and repair_full_r1 dropped when it
+    collapsed each person object to a name."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    b = _replay("2026-08-13_claude-opus-5-api-generic-v4_rep2", "VOICE", method="claudecode_agent")
+    assert (b["unfounded"], b["unfounded_phase"]) == (14, {"repair_full_r1": 14})
+    assert {r["path"].rsplit(".", 1)[-1] for r in b["unfounded_paths"]} == {"id"}
+
+
+@pytest.mark.corpus
 def test_an_agentic_record_is_unmeasured_not_zero(monkeypatch):
     monkeypatch.chdir(CONCAT.parents[1])
     b = _replay("2026-08-28_claude-opus-5-claudecode-generic-v6_rep1", "CHORUS", method="claudecode_agent")
@@ -571,9 +699,19 @@ def test_the_v7_root_metadata_entry_is_deleted_and_its_past_end_findings_found_i
     `file_collections[9]` ("Root metadata files") is in no sibling, so its
     'metadata' and CDS values are deleted, not flattened into the list; the
     audit's `file_collections[10].id` / `.file_count` of a ten-entry list
-    quote that entry and found exactly those two leaves."""
+    describe that entry — the first quotes its `#root-metadata` id, the
+    second its `file_count: 9`, and no other entry has either (#3155) — and
+    found exactly those two leaves."""
     monkeypatch.chdir(CONCAT.parents[1])
     b = _replay("2026-09-01_claude-opus-5-api-generic-v7_rep2", "AI_READI", method="claudecode_agent")
+    inter = CONCAT / "claudecode_agent_core" / "2026-09-01_claude-opus-5-api-generic-v7_rep2" / "intermediate"
+    issues = {f["slot"]: f["issue"] for f in json.loads((inter / "AI_READI_audit.json").read_text())["findings"]}
+    snapshot = yaml.safe_load((inter / "AI_READI_full.yaml").read_text())["file_collections"]
+    assert "#root-metadata" in issues["file_collections[10].id"]
+    assert "#root-metadata" not in issues["file_collections[10].file_count"]
+    assert "file_count: 9" in issues["file_collections[10].file_count"]
+    assert [i for i, e in enumerate(snapshot) if str(e.get("id")).endswith("#root-metadata")] == [9]
+    assert [i for i, e in enumerate(snapshot) if e.get("file_count") == 9] == [9]
     entry = "file_collections[9]."
     assert not [r for r in b["flattened_paths"] if r["path"].startswith(entry)]
     assert {r["path"] for r in b["unfounded_paths"] if r["path"].startswith(entry)} == {

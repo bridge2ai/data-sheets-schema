@@ -223,7 +223,8 @@ class RemovalRows(unittest.TestCase):
     def test_a_record_with_no_snapshot_is_unmeasured_on_every_removal_row(self):
         from data_sheets_schema.removals import classify
         rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": None})
-        self.assertEqual(rows, {"unfoundedremovals": None, "receipteddeleted": None, "unrecordedremovals": None})
+        self.assertEqual(rows, {"unfoundedremovals": None, "unfoundedreconcile": None, "receipteddeleted": None,
+                                "unrecordedremovals": None})
         self.assertEqual({self.m.fmt(rows, k) for k in rows}, {"–"})
         self.assertEqual(self.m.cell([rows] * 3, "unfoundedremovals", "reps"), "– [–,–,–]")
 
@@ -234,7 +235,8 @@ class RemovalRows(unittest.TestCase):
                                "extracted": [{"slot": "data_governance.committee_name", "snippet": "the DAC"}]}]}
         block = classify(before, {"id": "doi:10.1/x", "license": "CC-BY"}, {"findings": []}, receipt=receipt)
         rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
-        self.assertEqual(rows, {"unfoundedremovals": 1, "receipteddeleted": 1, "unrecordedremovals": 0})
+        self.assertEqual(rows, {"unfoundedremovals": 1, "unfoundedreconcile": None, "receipteddeleted": 1,
+                                "unrecordedremovals": 0})
 
     def test_an_unrecorded_count_the_block_did_not_measure_is_not_read(self):
         """`removals_unrecorded_count` is only a measurement where the report
@@ -243,9 +245,38 @@ class RemovalRows(unittest.TestCase):
         rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": 0})
         self.assertIsNone(rows["unrecordedremovals"])
 
-    def test_the_three_rows_are_in_the_table(self):
-        for key in ("unfoundedremovals", "receipteddeleted", "unrecordedremovals"):
+    def test_the_rows_are_in_the_table(self):
+        for key in ("unfoundedremovals", "unfoundedreconcile", "receipteddeleted", "unrecordedremovals"):
             self.assertIn(key, self.m.METRICS)
+        keys = list(self.m.METRICS)
+        self.assertEqual(keys.index("unfoundedreconcile"), keys.index("unfoundedremovals") + 1)
+
+    def test_the_reconcile_row_counts_only_what_reconcile_full_removed(self):
+        """#3150: the all-phase row counts a repair round's removals too; the
+        row below it counts reconcile_full's alone, a measured 0 where every
+        unfounded value went at repair, and – where no phase is attributed."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "a": "1", "b": "2", "c": "3"}
+        stages = [("reconcile_full", {"id": "doi:10.1/x", "b": "2", "c": "3"}),
+                  ("repair_full_r1", {"id": "doi:10.1/x"})]
+        claims = {"snapshot_checked": True, "removals_unrecorded_count": 0}
+        rows = self._rows(classify(before, {"id": "doi:10.1/x"}, {"findings": []}, intermediates=stages), claims)
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedreconcile"]), (3, 1))
+        at_repair = [("reconcile_full", before), ("repair_full_r1", {"id": "doi:10.1/x"})]
+        rows = self._rows(classify(before, {"id": "doi:10.1/x"}, {"findings": []}, intermediates=at_repair), claims)
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedreconcile"]), (3, 0))
+        gap = [("reconcile_full", None), ("repair_full_r1", {"id": "doi:10.1/x"})]
+        rows = self._rows(classify(before, {"id": "doi:10.1/x"}, {"findings": []}, intermediates=gap), claims)
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedreconcile"]), (3, None))
+
+    def test_the_all_phase_row_says_it_counts_every_phase(self):
+        """#3150: the published definition names the repair rounds it
+        counts and why they are split out."""
+        definition = self.m.METRICS["unfoundedremovals"][3]
+        for phrase in ("Every phase after phase 1 is counted", "repair_full_rN",
+                       "acts on validation errors, not on the audit", "the row below isolates reconcile_full"):
+            self.assertIn(phrase, definition)
+        self.assertIn("reconcile_full removed", self.m.METRICS["unfoundedreconcile"][3])
 
     def test_the_row_definition_states_the_exclusions_the_classifier_applies(self):
         """#3079: a value only a core-only finding's path covers is counted

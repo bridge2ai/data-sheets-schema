@@ -31,9 +31,10 @@ Bases, stated once and printed into the output:
   would-be canonical) records. Applicability (N/A) is itself evaluator
   output, so adjusted maxima can differ between evaluations of comparable
   records; points and adjusted maximum are both shown.
-- **removal rows** (#2923): values deleted without a finding and receipted
-  values deleted are recomputed live and read-only (`removals.for_record`);
-  the unrecorded-removal count is the record's `report_claims` block.
+- **removal rows** (#2923): values deleted without a finding, the share of
+  them `reconcile_full` removed (#3150) and receipted values deleted are
+  recomputed live and read-only (`removals.for_record`); the
+  unrecorded-removal count is the record's `report_claims` block.
 - **spend is deliberately absent**: `api_usage` (billed input/output) and
   `run_observed` (cache-inclusive runner totals) are different quantities and
   must never sit in one column (#400).
@@ -203,11 +204,25 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                           "#3076), and that no slot, review_paths or remove_relationship path of an "
                           "audit finding not scoped to the core record alone covers (#3079; a "
                           "finding index one past the end of its list read as the last entry, "
-                          "#3077). Reported, not gated: unfounded says no such path covers the "
-                          "value, not that removing it was wrong, and a value only a core-only "
-                          "finding's path covers is counted here. Needs the snapshot, so an "
-                          "agentic arm is – here, not 0 (#899); – also where the run's audit "
-                          "cannot be read unambiguously"),
+                          "#3077). Every phase after phase 1 is counted: reconcile_full, the "
+                          "validator-driven repair rounds (repair_full_rN) and the record write. "
+                          "A repair round acts on validation errors, not on the audit, so a value "
+                          "it removes has a finding only by coincidence; the row below isolates "
+                          "reconcile_full (#3150). Reported, not gated: unfounded says no such "
+                          "path covers the value, not that removing it was wrong, and a value "
+                          "only a core-only finding's path covers is counted here. Needs the "
+                          "snapshot, so an agentic arm is – here, not 0 (#899); – also where the "
+                          "run's audit cannot be read unambiguously"),
+    "unfoundedreconcile": ("of those, removed at reconcile_full", "live", True,
+                           "removals v1 (#3150): the removals without a finding that "
+                           "reconcile_full removed — the phase told to remove what a finding "
+                           "identifies as unsupported, and so the one this row compares across "
+                           "arms. The rest of the row above is values a repair round or the "
+                           "write removed after reconcile_full still carried them, typically a "
+                           "repair collapsing an object to a string and dropping its "
+                           "constructed id. – wherever the row above is –, and where a phase "
+                           "output is missing or unreadable, which leaves the removing phase "
+                           "unattributed (#3152)"),
     "receipteddeleted": ("receipted values deleted, not flattened", "live", True,
                          "removals v1 (#2923): removed values a coverage receipt named (on the "
                          "value, an entry above it, or the list it was a member of) whose text "
@@ -286,13 +301,15 @@ def removal_metrics(prov: Path, rec: dict[str, Any]) -> dict[str, Any]:
     """The removal rows for one record (#2923): recomputed live from the
     phase-1 snapshot, the final record, the audit and the receipt
     (`removals.for_record`, read-only), and the report block's own
-    unrecorded-removal count. None, never 0, where the snapshot, the audit
-    or the receipt a row needs is absent (#899)."""
+    unrecorded-removal count. None, never 0, where the snapshot, the audit,
+    the receipt or the phase outputs a row needs is absent (#899, #3152)."""
     from data_sheets_schema.removals import for_record
     block = for_record(prov, record=rec)
     rc = rec.get("report_claims") or {}
     unrecorded = rc.get("removals_unrecorded_count") if rc.get("snapshot_checked") else None
+    by_phase = block.get("unfounded_phase")
     return {"unfoundedremovals": block["unfounded"],
+            "unfoundedreconcile": by_phase.get("reconcile_full", 0) if by_phase is not None else None,
             "receipteddeleted": (block["receipted"] or {}).get("deleted"),
             "unrecordedremovals": int(unrecorded) if unrecorded is not None else None}
 
@@ -557,10 +574,12 @@ def render_markdown(data, scores) -> str:
              "evaluator is an instrument (#1058). N/A exclusions are evaluator "
              "judgements, so adjusted maxima can differ between comparable "
              "records, The Element 4 gate resolved both ways on CM4AI until 2026-09-08; it is now stated per sub-element and those six were rescored (#1060), so the CM4AI rubric10 cells here are not comparable to any figure quoted before that date.",
-             "- removals without a finding, receipted values deleted: **recomputed live** "
-             "from the phase-1 snapshot, the final full record, the audit and the receipt "
-             "(`removals.for_record`, #2923), read-only; no record carries a removals block. "
-             "Removals unrecorded in the report: the record's `report_claims` block.",
+             "- removals without a finding (all phases, and the reconcile_full share), "
+             "receipted values deleted: **recomputed live** "
+             "from the phase-1 snapshot, the phase outputs, the final full record, the audit "
+             "and the receipt (`removals.for_record`, #2923), read-only; no record carries a "
+             "removals block. Removals unrecorded in the report: the record's `report_claims` "
+             "block.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).",
              "- a record whose own `validation` block says `passed: false` is not an arm "

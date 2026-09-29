@@ -203,7 +203,9 @@ def removals_cmd(method, label, project, show_flattened, as_json):
     path of an audit finding not scoped to the core record alone covers it)
     or unfounded, with the phase that removed it. Read-only: nothing is
     written, and a run with no phase-1 snapshot prints that it was not
-    checked rather than zero."""
+    checked rather than zero. Where the audit is missing, or present but
+    unreadable, the deletions are listed unsorted and the summary says
+    which (#3153)."""
     import json
 
     from data_sheets_schema.cli.method import resolve_method
@@ -230,6 +232,10 @@ def removals_cmd(method, label, project, show_flattened, as_json):
         click.echo("   removed at: " + (", ".join(f"{k} {v}" for k, v in block["phase"].items()) or "nothing"))
     else:
         click.echo("   removed at: not attributed (a phase output is missing or unreadable)")
+    if block.get("unfounded_phase"):
+        # A repair round acts on validation errors, not on the audit (#3150).
+        click.echo("   unfounded, by the phase that removed them: "
+                   + ", ".join(f"{k} {v}" for k, v in block["unfounded_phase"].items()))
     sorted_ = block["unfounded"] is not None
     for row in block["unfounded_paths"] + block["unsorted_paths"]:
         notes = [row.get("phase") or "phase unattributed"]
@@ -239,7 +245,8 @@ def removals_cmd(method, label, project, show_flattened, as_json):
             notes.append("named by a core-only finding")
         if row.get("mentioned_in_finding_text"):
             notes.append("its slot is mentioned in a finding's text")
-        click.echo(f"   {'✗ unfounded' if sorted_ else '? deleted, no audit'} {row['path']} ({', '.join(notes)})")
+        # Unsorted: the summary says why — no audit, or one that could not be read (#3153).
+        click.echo(f"   {'✗ unfounded' if sorted_ else '? deleted, unsorted'} {row['path']} ({', '.join(notes)})")
     for cls in ("unfounded", "unsorted"):
         if block.get(f"{cls}_paths_truncated"):
             click.echo(f"   … and {block[f'{cls}_paths_truncated']} more {cls} value(s) not listed")
