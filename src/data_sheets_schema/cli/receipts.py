@@ -170,10 +170,14 @@ def origin(transcripts, receipt_file, full_file, as_json):
     `contemporaneous`, `phase1_correction` (after the first full-record
     Write, before the first successful `derive core`, or to the end when
     none succeeded) or `phase3_backport`. A derive counts only where its
-    call's result carries its own status (not piped, backgrounded or
-    followed by another command). Where the history cannot be rebuilt the
-    status is `unknown`, with the reasons, and nothing is classified. Prints
-    counts, chunk ids, slot paths and hashes, never snippet text.
+    call's result carries its own status: it is the command's last part, or
+    every join after it is `&&` and the call succeeded. A piped,
+    backgrounded, grouped or multi-line derive, one after `||` or followed
+    by `;`, or a failed `&&` chain cannot be placed, unless the native
+    control denied the call, which then never ran. Where the history cannot
+    be rebuilt the status is `unknown`, with the reasons, and nothing is
+    classified. Prints counts, chunk ids, slot paths and hashes, never
+    snippet text.
     """
     import json
 

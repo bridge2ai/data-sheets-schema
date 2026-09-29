@@ -36,15 +36,18 @@ Phase 3 labels then go in slot order.
 
 Only a successful Write, paired with its tool_result by id, changes state.
 A Write the runtime refused (the unread-file wrapper, #2285) or that
-returned an error is listed and changes nothing. A `derive core` succeeded
+returned an error is listed and changes nothing, and so is a shell call
+the native control denied: it never ran (#3185). A `derive core` succeeded
 only where its call's result carries the derive's own status (#3113). With
 every join in the command `&&` or `;`, the call's success or failure is the
 derive's when the derive is the last part, and its success alone is when
 every join after the derive is `&&` (a failure may be a later part's).
-Otherwise (piped, backgrounded, after `||`, followed by `;`, or a failed
-`&&` chain) the derive is ambiguous, unless the native control denied the
-call, which then never ran. A call the runtime backgrounded is ambiguous
-too: its result is the launch, not the end.
+Otherwise (piped, backgrounded, grouped, after `||`, followed by `;`, in a
+multi-line command, or a failed `&&` chain) the derive is ambiguous, unless
+the native control denied the call, which then never ran. A call the runtime
+backgrounded is ambiguous too: its result is the launch, not the end. A
+shell command is read as bash reads it: `#` starts a comment only at the
+start of a word, outside quotes (#3184).
 
 The status is `unknown`, with every reason, and no classification is
 reported when the history cannot be rebuilt: a transcript is missing,
@@ -52,7 +55,8 @@ unreadable or malformed; a tool id is duplicated or a result has no call
 (#2077); a Write of the receipt, or of the full record before its first
 successful Write, has no result or no success evidence; the receipt is
 changed by anything other than a Write (an edit tool, or a shell command
-that names it and is not known to be read-only) where the change can reach
+that names it, is not known to be read-only and was not denied by the
+native control) where the change can reach
 the pre-draft or derive-time snapshot, or the full record is changed that
 way before its first Write; the first observed Write of either file updated
 an existing file, or carries no create/update metadata to say it did not; a
@@ -320,10 +324,10 @@ def _derive_outcome(result: dict | None, basis: str) -> str:
     """A `derive core` part's own outcome from its call's result (#3113).
     `basis` says what the call's status tells about the part: `command` (it
     is the part's status), `and_chain` (a success is the part's; a failure
-    may be a later part's) or `none` (piped, backgrounded, after `||`, or
-    followed by another command). A part whose status the result does not
-    carry is `ambiguous`, unless the native control denied the call, which
-    then never ran."""
+    may be a later part's) or `none` (piped, backgrounded, grouped, after
+    `||`, followed by `;`, or in a multi-line command). A part whose status
+    the result does not carry is `ambiguous`, unless the native control
+    denied the call, which then never ran."""
     overall = _shell_outcome(result)
     if overall in ("pending", "ambiguous") or basis == "command":
         return overall
@@ -342,9 +346,62 @@ def _result_text(content: Any) -> str | None:
 
 
 # ---------------------------------------------------------------- shell
+def _strip_comments(command: str) -> str:
+    """The command with its comments removed as bash reads them: a `#`
+    starts one only at the start of a word (at the start, or after
+    whitespace or a metacharacter) and outside quotes, and it runs to the
+    end of the line. A `#` inside a word (`s/#//g`, `a#b`, `$#`) or quoted
+    is text (#3184). An unterminated quote keeps the rest as written, which
+    the tokeniser then refuses."""
+    out: list[str] = []
+    i, n = 0, len(command)
+    quote: str | None = None                        # "'", '"' or "$'" (ANSI-C)
+    word_start = True
+    while i < n:
+        ch = command[i]
+        if quote is not None:
+            if ch == "\\" and quote != "'" and i + 1 < n:
+                out.append(command[i:i + 2])
+                i += 2
+                continue
+            out.append(ch)
+            if ch == quote[-1]:
+                quote = None
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            out.append(command[i:i + 2])
+            i += 2
+            word_start = False
+            continue
+        if ch == "#" and word_start:
+            end = command.find("\n", i)
+            if end < 0:
+                break
+            i = end                                 # the newline itself is kept
+            continue
+        if ch == "$" and command[i + 1:i + 2] == "'":
+            quote = "$'"
+            out.append("$'")
+            i += 2
+            word_start = False
+            continue
+        if ch in "'\"":
+            quote = ch
+        out.append(ch)
+        word_start = ch.isspace() or ch in "();<>|&"
+        i += 1
+    return "".join(out)
+
+
 def _tokens(command: str) -> list[str] | None:
-    lexer = shlex.shlex(command.replace("\\\n", " "), posix=True, punctuation_chars=True)
+    """The command's words and operators, or None when it does not tokenise.
+    Comments are removed first, the way bash removes them, and the lexer's
+    own comment rule is off: shlex ends a word at any `#`, which would drop
+    everything after `s/#//g` (#3184)."""
+    lexer = shlex.shlex(_strip_comments(command.replace("\\\n", " ")), posix=True, punctuation_chars=True)
     lexer.whitespace_split = True
+    lexer.commenters = ""
     try:
         return list(lexer)
     except ValueError:
@@ -686,7 +743,14 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                                  "outcome": _derive_outcome(result, part["basis"]),
                                  "command_outcome": _shell_outcome(result), "status_basis": part["basis"]}
                                 for part in shell["derives"])
-            if not shell["read_only"]:
+            if shell["read_only"]:
+                continue
+            if _denied(result):
+                # The native control refused the call before it ran (#3185):
+                # listed like a refused Edit, never a possible change.
+                h["rejected"].extend({**_where(call, result), "target": kind, "tool": name,
+                                      "rejection": "native_denial"} for kind in shell["named"])
+            else:
                 h["mutations"].extend({**where, "target": kind, "tool": name, "outcome": _shell_outcome(result)}
                                       for kind in shell["named"])
         elif name not in READ_TOOLS:
@@ -743,7 +807,7 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: its result is {row['outcome']}")
         elif row["outcome"] == "ambiguous":
             why = ("a later `&&` part may be what failed" if row["status_basis"] == "and_chain" else
-                   "piped, backgrounded, after `||`, or followed by another command")
+                   "piped, backgrounded, grouped, after `||`, followed by `;`, or multi-line")
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: the call {row['command_outcome']} "
                            f"but its status is not the derive's own ({row['status_basis']}: {why})")
         elif row["outcome"] == "succeeded":

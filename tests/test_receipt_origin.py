@@ -523,6 +523,31 @@ class Unknown(Base):
                 self.assertUnknown(block, "Bash call")
                 self.assertEqual([m["covered_by_final_sha256"] for m in block["non_write_mutations"]], [False])
 
+    def test_a_shell_call_the_native_control_denied_is_listed_not_a_mutation(self):
+        # The control denied it before it ran (#3185): like a refused Edit,
+        # it is listed and changes nothing.
+        r = self._drafted()
+        denial = ro.NATIVE_DENIAL_PREFIX + "compound command"
+        identity = r.bash(f"python3 -c \"import yaml; print(open('{REL}').read())\"", ok=False,
+                          content=denial, metadata="Error: " + denial)
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["non_write_mutations"], [])
+        self.assertEqual([(w["tool_use_id"], w["target"], w["tool"], w["rejection"]) for w in block["rejected_writes"]],
+                         [(identity, "receipt", "Bash", "native_denial")])
+        self.assertIn("· rejected Bash of the receipt (native_denial), transcript 0 line 6", ro.summary(block))
+
+    def test_a_failure_that_only_quotes_the_denial_is_still_a_mutation(self):
+        # The control's reason must open the result: a command that ran and
+        # printed it failed like any other command.
+        r = self._drafted()
+        r.bash(f"sed -i '' 's/a/b/' {REL}", ok=False, content="Exit code 1\n" + ro.NATIVE_DENIAL_PREFIX + "x")
+        r.derive()
+        block = r.report()
+        self.assertUnknown(block, "may change the receipt other than by a Write")
+        self.assertEqual(block["rejected_writes"], [])
+
     def test_read_only_shell_commands_are_not_mutations(self):
         r = self._drafted()
         for command in (f"grep -n c001 {REL} 2>&1 | head -5",
@@ -596,6 +621,50 @@ class Unknown(Base):
         block = r.report()
         self.assertUnknown(block, "(pre_draft) is not a receipt")
         self.assertNotIn(SECRET, json.dumps(block))
+
+
+class ShellComments(Base):
+    """A `#` starts a comment only at the start of a word, as bash reads it,
+    never inside a word or a quote (#3184)."""
+
+    def _before_draft(self, command):
+        """receipt, the call under test, draft, derive: a change it made
+        reaches the pre-draft snapshot."""
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.bash(command)
+        r.write(r.full, "id: x\n")
+        r.derive()
+        return r.report()
+
+    def test_a_hash_inside_a_word_hides_no_shell_edit_of_the_receipt(self):
+        for command in (f"sed -i '' -e /OT2OD032701/d -e s/#//g {REL}",
+                        f"echo a#b >> {REL}",
+                        f"printf '%s' x#y 1> {REL}",
+                        f"echo '#' a#b | tee {REL}"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertUnknown(block, "may change the receipt other than by a Write")
+
+    def test_a_comment_at_the_start_of_a_word_is_not_part_of_the_command(self):
+        for command in (f"cat {REL} # > {REL}",
+                        f"sed -n '1,5p' {REL}  # don't edit it here",
+                        f"wc -l {REL};# rm {REL}",
+                        f"echo $# {REL}"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["non_write_mutations"], [])
+
+    def test_strip_comments_reads_quotes_and_words_as_bash_does(self):
+        cases = {"a#b 'c #d' \"e #f\" g # h": "a#b 'c #d' \"e #f\" g ",
+                 "x\\ #y": "x\\ #y", "$'q\\' #r' s #t": "$'q\\' #r' s ", "'p\\' #k": "'p\\' ",
+                 "\"m\\\" #n\" #o": "\"m\\\" #n\" ",
+                 "a;#b\nc # d\ne": "a;\nc \ne", "#only": "", "u=#v ${#w} $#": "u=#v ${#w} $#",
+                 "'open #": "'open #"}
+        for command, expected in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._strip_comments(command), expected)
 
 
 #: The playbook's recorder step (d4d-full-core, "Provenance record"): its
@@ -800,7 +869,10 @@ class DeriveStatus(Base):
                  "a ; d4d derive core --full F && b && c": "and_chain",
                  "d4d derive core --full F && b ; c": "none", "d4d derive core --full F | tail": "none",
                  "a | d4d derive core --full F": "none", "(d4d derive core --full F)": "none",
-                 "a || d4d derive core --full F": "none", "d4d derive core --full F &": "none"}
+                 "a || d4d derive core --full F": "none", "d4d derive core --full F &": "none",
+                 # a `#` inside a word hides nothing after it; one starting a word does (#3184)
+                 "d4d derive core --full F --tag a#b | tail": "none",
+                 "d4d derive core --full F # then | tail ; echo": "command"}
         for command, basis in cases.items():
             with self.subTest(command=command):
                 segments, joins, leading = ro._layout(ro._tokens(command))
@@ -808,6 +880,93 @@ class DeriveStatus(Base):
                 self.assertEqual(ro._status_basis(index, joins, leading, False), basis)
         segments, joins, leading = ro._layout(ro._tokens("d4d derive core --full F"))
         self.assertEqual(ro._status_basis(0, joins, leading, True), "none")
+
+
+class Boundaries(Base):
+    """The draft is the first successful full-record Write, and every
+    registered spelling of `derive core` is seen; a regression in either
+    would leave the status `checked` with the wrong classification (#3187)."""
+
+    C003 = receipt_text(("c001", [("title", "The CHORUS dataset"), ("funders[0].grant_id", "OT2OD032701")]),
+                        ("c002", [("description", "a multimodal collection")]),
+                        ("c003", [("license", "CC BY 4.0 license")]))
+    C004 = receipt_text(("c001", [("title", "The CHORUS dataset"), ("funders[0].grant_id", "OT2OD032701")]),
+                        ("c002", [("description", "a multimodal collection")]),
+                        ("c003", [("license", "CC BY 4.0 license")]),
+                        ("c004", [("version", "release 2.0")]))
+
+    def test_the_draft_is_the_first_successful_full_record_write_not_the_last(self):
+        r = self.run_
+        r.write(r.receipt, PRE)
+        draft = r.write(r.full, "id: x\n")
+        r.write(r.receipt, self.C003)
+        r.write(r.full, "id: x\ntitle: corrected\n")          # a later correction of the record
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["full"]["writes"], 2)
+        self.assertEqual(block["boundaries"]["full_record_write"]["tool_use_id"], draft)
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 0})
+
+    def test_a_derive_with_no_result_cannot_be_placed(self):
+        # A run killed mid-derive: the call has no result, in one transcript
+        # or across a killed-and-resumed pair.
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        identity = r.call("Bash", command=r.derive_command(), description="x")
+        split = len(r.events)
+        r.write(r.receipt, self.C003)
+        self.assertUnknown(r.report(), f"derive core {identity} cannot be placed: its result is pending")
+        resumed = ro.origin([r.transcript("t1.jsonl", r.events[:split]),
+                             r.transcript("t2.jsonl", r.events[:1] + r.events[split:])], r.receipt, r.full)
+        self.assertUnknown(resumed, f"derive core {identity} cannot be placed: its result is pending")
+
+    def test_every_registered_derive_spelling_is_the_boundary(self):
+        full = "data/claudecode_direct/L/CHORUS_d4d.yaml"
+        out = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
+        for spelling in (f"D4D_PROFILE=bridge2ai poetry run d4d derive core --full {full} {out}",
+                         f"cd data && poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml {out}",
+                         f"poetry run d4d derive core --full={full} {out}",
+                         f"poetry run d4d --manifest data/preprocessed/source_manifest.yaml derive core "
+                         f"--full {full} {out}",
+                         f"poetry run d4d --manifest=m.yaml derive core --full {full} {out}"):
+            with self.subTest(spelling=spelling):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, self.C003)
+                identity = r.bash(spelling)
+                r.write(r.receipt, self.C004)
+                block = r.report()
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+                self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
+                                                   "phase3_backport": 1})
+
+    def test_a_read_of_the_receipt_is_not_a_change(self):
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        identity = r.call("Read", file_path=str(r.receipt))
+        r.result(identity, "1\tbundle_md5: ...", {"type": "text", "file": {"filePath": str(r.receipt)}})
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["non_write_mutations"], [])
+
+    def test_a_shell_change_of_the_full_record_after_the_draft_is_listed_not_a_reason(self):
+        # The draft boundary is already placed; later changes to the record
+        # cannot move it (each owner-step run carries 15 to 21 such calls).
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        identity = r.bash("sed -i '' 's/x/y/' data/claudecode_direct/L/CHORUS_d4d.yaml")
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual([(m["tool_use_id"], m["target"]) for m in block["non_write_mutations"]],
+                         [(identity, "full")])
 
 
 class Listing(unittest.TestCase):
@@ -848,6 +1007,15 @@ class Listing(unittest.TestCase):
             self.assertEqual((block["readdressed"], block["removed_contemporaneous"]), (1, 1))
             self.assertEqual([e["slot"] for e in block["removed_entries"]], ["B"])
 
+    def test_removed_entries_are_listed_by_chunk_whatever_the_pre_draft_order(self):
+        # Three removed entries over two chunks: only the list's own sort
+        # makes its order independent of the pre-draft receipt's (#3188).
+        base = [("c2", "T", "X"), ("c1", "S", "Z"), ("c1", "S", "Y")]
+        blocks = [ro.classify(list(order), list(order), []) for order in itertools.permutations(base)]
+        self.assertEqual([(e["chunk"], e["slot"]) for e in blocks[0]["removed_entries"]],
+                         [("c1", "Y"), ("c1", "Z"), ("c2", "X")])
+        self.assertTrue(all(b == blocks[0] for b in blocks))
+
     def test_entries_are_listed_by_chunk_whatever_the_receipt_order(self):
         final = [("c2", "T", "X"), ("c1", "S", "Y")]
         block = ro.classify([], [], final)
@@ -882,6 +1050,15 @@ class Cli(unittest.TestCase):
         self.assertEqual(out.exit_code, 0, out.output)
         for option in ("--transcript", "--receipt", "--full", "--json"):
             self.assertIn(option, out.output)
+
+    def test_help_states_the_derive_rule_the_code_applies(self):
+        # A successful `derive && …` is the boundary (and_chain), so the help
+        # must not say a derive followed by another command never counts (#3186).
+        from data_sheets_schema.cli import cli
+        text = " ".join(CliRunner().invoke(cli, ["receipts", "origin", "--help"]).output.split())
+        self.assertNotIn("followed by another command", text)
+        self.assertIn("every join after it is `&&` and the call succeeded", text)
+        self.assertIn("a failed `&&` chain cannot be placed", text)
 
     def test_unknown_prints_its_reasons_and_exits_zero(self):
         with tempfile.TemporaryDirectory() as tmp:
