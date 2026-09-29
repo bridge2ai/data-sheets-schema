@@ -611,6 +611,91 @@ def test_a_dropped_status_is_one_modal_dropped_whichever_equivalent_markers_carr
     assert _rules(ongoing) == [("modal_dropped", "x", "planned"), ("modal_dropped", "x", "in_progress")]
 
 
+def test_a_lost_status_is_one_governor_flag_whichever_equivalent_governors_carry_it():
+    # #3245/#3262: a marker-less snippet whose sentence carries "will"
+    # (planned) under a "Future ..." heading (prospective) lost one status.
+    # One flag, at the nearer governor (the sentence); the heading is listed
+    # beside it, so neither governor is dropped from the output.
+    doc = "Future Data Releases\nThe consortium will release the imaging waveforms.\n"
+    record = {"x": "The consortium releases the imaging waveforms."}
+    out = _run(doc, [("x", "release the imaging waveforms")], record)
+    text, _m = _bundle(doc)
+    assert _rules(out) == [("governor_outside_snippet", "x", "planned")]
+    [flag] = out["flags"]
+    assert (flag["marker"], flag["via"], flag["source_line"]) == ("will", "sentence", _line(text, "The consortium"))
+    assert flag["equivalent_governors"] == [{"class": "prospective", "marker": "future", "via": "heading",
+                                             "source_line": _line(text, "Future Data"),
+                                             "governor": "Future Data Releases"}]
+    assert out["counts"]["flags"]["governor_outside_snippet"]["value"] == 1
+    # Two governors of one class were one flag already, with nothing beside it.
+    [same] = _run(doc.replace("Future", "Planned"), [("x", "release the imaging waveforms")], record)["flags"]
+    assert (same["class"], same["via"]) == ("planned", "sentence") and "equivalent_governors" not in same
+    # A distinct status is still its own flag.
+    ongoing = _run(doc.replace("Future", "Ongoing"), [("x", "release the imaging waveforms")], record)
+    assert _rules(ongoing) == [("governor_outside_snippet", "x", "in_progress"),
+                               ("governor_outside_snippet", "x", "planned")]
+    assert not any("equivalent_governors" in f for f in ongoing["flags"])
+    # A value expressing either equivalent class keeps the status.
+    assert _run(doc, [("x", "release the imaging waveforms")],
+                {"x": "Future releases include the imaging waveforms."})["flags"] == []
+
+
+def test_equivalent_governors_in_one_sentence_report_the_nearer_line():
+    # Both classes in the snippet's own sentence: the governor on the line
+    # nearer the snippet is reported, the other listed beside it.
+    doc = ("In future the consortium,\nafter review by the board,\nwill release\n"
+           "the imaging waveforms to approved users.")
+    out = _run(doc, [("x", "the imaging waveforms to approved users")], {"x": "Waveforms are released."})
+    [flag] = out["flags"]
+    assert (flag["class"], flag["marker"]) == ("planned", "will")
+    assert [(e["class"], e["marker"], e["via"]) for e in flag["equivalent_governors"]] == [
+        ("prospective", "future", "sentence")]
+
+
+@pytest.mark.parametrize("doc,form", [
+    # #789: a PDF extractor's hyphenated wrap inside the quoted words.
+    ("The consortium will release the imag-\ning waveforms to approved users.", "linewrap-joined"),
+    # #887: a lone section-number line inside the quoted words.
+    ("The consortium will release the\n7.\nimaging waveforms to approved users.", "artifact-line-elided"),
+    # Both at once.
+    ("The consortium will release the\n7.\nimag-\ning waveforms to approved users.", "artifact-line-elided"),
+])
+def test_a_snippet_verified_only_across_a_joined_break_or_an_elided_line_is_located(doc, form):
+    # #3043: such a snippet was counted unlocated, so its context was never
+    # read; it is now located through that form's offset map, its raw span
+    # covering the break or the elided line.
+    snippet = "the imaging waveforms to approved users"
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    assert rc.snippet_in(snippet, view.chunk_text("c002")) == (True, form)
+    [[(a, b)]] = view.locate("c002", snippet)
+    assert text[a:b] == doc[doc.rindex("the", 0, doc.index("imag")):doc.index(" users") + len(" users")]
+    out = _run(doc, [("x", snippet)], {"x": "The consortium releases the imaging waveforms."})
+    assert (out["counts"]["located"], out["counts"]["unlocated"]) == (1, 0)
+    [flag] = out["flags"]
+    assert (flag["rule"], flag["class"], flag["marker"], flag["via"]) == (
+        "governor_outside_snippet", "planned", "will", "sentence")
+    # The negative control: a value keeping the status is located, unflagged.
+    kept = _run(doc, [("x", snippet)], {"x": "The consortium will release the imaging waveforms."})
+    assert (kept["counts"]["located"], kept["flags"]) == (1, [])
+
+
+@pytest.mark.parametrize("form", sc.HAYSTACK_FORMS)
+def test_each_haystack_form_maps_to_the_validators_own_haystack(form):
+    raw = ("Partic-\r\nipants were   enrolled\n6.\nat SITE-\n  One; “data” \\n were\n 12. \n"
+           "shared-\nwith 100. partners\n7.")
+    hay = {"plain": rc.normalise(raw), "linewrap-joined": rc.normalise_joined(raw),
+           "artifact-line-elided": rc.normalise(rc.elide_artifact_lines(raw)),
+           "joined-elided": rc.normalise_joined(rc.elide_artifact_lines(raw))}[form]
+    norm, offs = sc.form_offsets(raw, form)
+    assert norm == hay and len(offs) == len(norm)
+    assert offs == sorted(offs)
+    # Every folded word character comes from a raw character that folds to it.
+    for ch, o in zip(norm, offs):
+        if ch != " ":
+            assert rc.normalise(raw[o]) == ch, (ch, raw[o])
+
+
 @pytest.mark.parametrize("leaf", sorted(sc.LABEL_LEAVES))
 def test_label_slots_are_reported_in_their_own_bucket(leaf):
     doc = "Anticipated Final Dataset\nContributing sites\nNorthern Hospital Network\n"
