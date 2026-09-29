@@ -302,6 +302,7 @@ def test_schema_status_and_derivation_are_not_presented_as_attributions():
     'Here it is: {"verdict": "supported", "reason": "x"}',       # prose around
     '["supported", "x"]',
     "```json\n" + '{"verdict": "supported", "reason": "x"}',     # open fence
+    "```json\n" + '{"verdict": "supported", "reason": "x"}' + "\nok",   # unterminated fence, trailing prose
 ])
 def test_malformed_replies_are_rejected_not_coerced(text):
     with pytest.raises(VerdictError):
@@ -371,6 +372,22 @@ def test_a_changed_corpus_or_context_is_a_new_question(tmp_path):
     assert len(client.requests) == 3
     j.judge(project="P", record=RECORD, slot="creators", bundle=BUNDLE)
     assert len(client.requests) == 3 and j.memo_hits == 1
+
+
+def test_different_declarations_on_the_same_value_are_different_questions(tmp_path):
+    """The declarations are part of the value context's digest, so a verdict
+    under one attribution is never served for another."""
+    cache = tmp_path / "support_v2_2929_decl.jsonl"
+    client = RecordingClient(*(reply("supported") for _ in range(3)))
+    j = judge(client, cache_path=cache)
+    j.judge(project="P", record=RECORD, slot="sites", bundle=BUNDLE,
+            declarations={"attributed_to": ["x.txt"]})
+    j.judge(project="P", record=RECORD, slot="sites", bundle=BUNDLE,
+            declarations={"attributed_to": ["y.txt"]})
+    assert len(client.requests) == 2
+    j.judge(project="P", record=RECORD, slot="sites", bundle=BUNDLE,
+            declarations={"attributed_to": ["x.txt"]})
+    assert len(client.requests) == 2 and j.memo_hits == 1
 
 
 def test_the_v2_loader_rejects_every_july_cm4ai_entry(tmp_path):
