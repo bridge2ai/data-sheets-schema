@@ -370,6 +370,57 @@ def test_a_one_word_status_line_is_a_table_cell_not_a_heading():
         ("governor_outside_snippet", "x", "planned")]
 
 
+TABLE_LAYOUTS = {
+    # A flattened two-column status table under a status heading, in three
+    # row orders: the item-first rows, the same rows swapped, and a
+    # status-first layout. {cell} is the first row's status cell.
+    "item first": "Planned Data Collection\nModality\nStatus\nWaveform telemetry\n{cell}\nImaging studies\nPending",
+    "rows swapped": "Planned Data Collection\nModality\nStatus\nImaging studies\nPending\nWaveform telemetry\n{cell}",
+    "status first": "Planned Data Collection\nStatus\nModality\n{cell}\nWaveform telemetry\nPending\nImaging studies",
+}
+TABLE_PAIRS = [("a", "Waveform telemetry"), ("b", "Imaging studies")]
+TABLE_RECORD = {"a": "Waveform telemetry is collected.", "b": "Imaging studies are collected."}
+
+
+@pytest.mark.parametrize("layout", TABLE_LAYOUTS)
+@pytest.mark.parametrize("cell", ["Completed", "Released", "Current", "Existing", "Pending"])
+def test_a_one_word_counter_cell_does_not_close_a_status_headings_scope(cell, layout):
+    # #3166: a one-word line is a table cell as often as a heading, for a
+    # counter word as for a status word. A "Completed" cell closed the
+    # heading's scope for every row below it, so the result depended on the
+    # row order; now every row of every layout is read under the heading.
+    out = _run(TABLE_LAYOUTS[layout].format(cell=cell), TABLE_PAIRS, TABLE_RECORD)
+    assert out["counts"]["located"] == 2
+    assert sorted((f["slot"], f["via"], f["governor"]) for f in out["flags"]) == [
+        ("a", "heading", "Planned Data Collection"), ("b", "heading", "Planned Data Collection")]
+
+
+@pytest.mark.parametrize("cell", ["Completed Studies", "Completed:"])
+def test_a_two_word_counter_heading_or_a_counter_lead_in_still_closes_the_scope(cell):
+    # The two-word minimum is the only change: a counter heading of two
+    # words, or a one-word counter lead-in, closes the scope below it.
+    out = _run(TABLE_LAYOUTS["status first"].format(cell=cell), TABLE_PAIRS, TABLE_RECORD)
+    assert out["counts"]["located"] == 2 and out["flags"] == []
+
+
+@pytest.mark.parametrize("doc,snippet,governor,cls", [
+    # An own line carrying a status marker is a status heading, not a
+    # counter-heading, whatever counter word it also carries — with or
+    # without a sentence terminator on it (#3171). The heading above still
+    # governs the classes the own line does not carry.
+    ("Ongoing Work Streams\nCurrent Planned Release\n50,000\nPatient admissions",
+     "Current Planned Release\n50,000", "Ongoing Work Streams", "in_progress"),
+    ("Anticipated Final Dataset\nCurrent Planned Release\n50,000\nPatient admissions",
+     "Current Planned Release\n50,000", "Anticipated Final Dataset", "prospective"),
+    ("Anticipated Final Dataset\nCurrent release; planned expansion\n50,000",
+     "Current release", "Anticipated Final Dataset", "prospective"),
+])
+def test_an_own_line_carrying_a_status_marker_does_not_close_the_scope(doc, snippet, governor, cls):
+    out = _run(doc, [("x", snippet)], {"x": "50,000 admissions"})
+    assert [(f["class"], f["via"], f["governor"]) for f in out["flags"]
+            if f["rule"] == "governor_outside_snippet"] == [(cls, "heading", governor)]
+
+
 def test_a_colon_lead_in_governs_the_short_lines_below_it_and_a_wrapped_item_is_not_a_heading():
     doc = ("Training will include:\n\nWorkshops on using notebooks\n\nOngoing mentorship and support\n"
            "using cloud platforms\n\nWorkshops on the common data model\n")

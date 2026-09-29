@@ -29,12 +29,12 @@ offsets, and two contexts are read:
 (b) the nearest preceding heading-like line, or lead-in clause ending in
     `:`, in the same block that carries a status marker. Count labels in a
     flattened panel are heading-like and carry none, so they are passed
-    over; a heading with a counter marker ("Current Released Dataset")
-    closes the scope first, including one on the line the snippet's own
-    sentence or item starts on (a snippet that quotes the counter-heading
-    is under it); a one-word line is not a status heading (a flattened
-    table's "Planned" cell); a prose line, a document separator or two
-    blank lines end the block.
+    over; a heading with a counter marker and no status marker ("Current
+    Released Dataset") closes the scope first, including one on the line
+    the snippet's own sentence or item starts on (a snippet that quotes the
+    counter-heading is under it); a one-word line is neither a status nor a
+    counter heading (a flattened table's "Planned" or "Completed" cell); a
+    prose line, a document separator or two blank lines end the block.
 
 Each `...`-part of a snippet is read in its own context, so the text a
 snippet elides counts where it shares a part's sentence and not where it
@@ -537,29 +537,55 @@ class BundleView:
             return s, "heading"
         return None
 
+    @staticmethod
+    def _scope(k: int, read: tuple[str, str]) -> dict[str, Any]:
+        """What line `k`, read as a heading or lead-in (`read`, from
+        `_read_as_heading`), says about the lines below it: a status marker
+        governs them ({"line", "text", "classes", "via"}); a counter marker
+        with no status marker closes the scope ({"closed_by", "text"}); {}
+        otherwise, and the line is passed over.
+
+        A line carrying a status marker never closes a scope, whatever
+        counter word it also carries ("Current Planned Release" is a status
+        heading). A heading-like line needs two words to do either: a
+        one-word line — "Planned", "Completed", "Current" — is a flattened
+        table cell as often as a heading, and a cell does not govern the
+        rows below it, so a one-word status cell does not open a scope and a
+        one-word counter cell does not close one (#3166). A lead-in's ':'
+        says it governs, so "Planned:" or "Completed:" is enough."""
+        text, via = read
+        norm = rc.normalise(text)
+        if via != "lead-in" and len(norm.split()) < 2:
+            return {}
+        found = markers(norm)
+        if found:
+            cls: dict[str, str] = {}
+            for c, term, _o in found:
+                cls.setdefault(c, term)
+            return {"line": k, "text": text, "classes": cls, "via": via}
+        return {"closed_by": k, "text": text} if _counter(norm) else {}
+
     def _counter_heading(self, k: int) -> dict[str, Any]:
         """{"closed_by": k, "text"} when line `k` reads as a heading or
-        lead-in carrying a counter marker and no status marker, else {}."""
+        lead-in that closes a scope (`_scope`), else {}."""
         read = self._read_as_heading(k) if 1 <= k <= len(self.starts) and self.line(k).strip() else None
-        if read is None:
-            return {}
-        norm = rc.normalise(read[0])
-        return {"closed_by": k, "text": read[0]} if _counter(norm) and not markers(norm) else {}
+        scope = self._scope(k, read) if read is not None else {}
+        return scope if "closed_by" in scope else {}
 
     def _heading(self, from_line: int) -> dict[str, Any]:
         """Scan up from `from_line` for what governs the lines below it.
 
         A lead-in clause ending in ':' ("Training will include:") and a
-        heading-like line are read the same way: a status marker governs
-        ({"line", "text", "classes", "via"}); a counter marker with no status
-        marker closes the scope ({"closed_by": line}); anything else is
-        passed over, so a count label between a status heading and its
-        figures does not hide the heading. A status heading needs two words:
-        a one-word line ("Planned") is a flattened table cell as often as a
-        heading. A heading-like line that wraps onto a lower-case line is a
-        list item or a phrase, not a heading. A prose line, a document
-        separator, two blank lines or HEADING_WINDOW non-blank lines end the
-        block. {} when nothing governs."""
+        heading-like line are read the same way (`_scope`): a status marker
+        governs ({"line", "text", "classes", "via"}); a counter marker with
+        no status marker closes the scope ({"closed_by": line}); anything
+        else is passed over, so a count label between a status heading and
+        its figures does not hide the heading. Neither a status nor a
+        counter heading can be one word: a one-word line is a flattened
+        table cell as often as a heading. A heading-like line that wraps
+        onto a lower-case line is a list item or a phrase, not a heading. A
+        prose line, a document separator, two blank lines or HEADING_WINDOW
+        non-blank lines end the block. {} when nothing governs."""
         k, scanned, blanks = from_line, 0, 0
         while k >= 1 and scanned < HEADING_WINDOW:
             line = self.line(k)
@@ -574,23 +600,11 @@ class BundleView:
             if _SEPARATOR.match(s):
                 return {}
             read = self._read_as_heading(k)
-            if read is not None:
-                text, via = read
-            elif _prose_line(line):
+            if read is None and _prose_line(line):
                 return {}
-            else:
-                scanned += 1
-                k -= 1
-                continue
-            norm = rc.normalise(text)
-            found = markers(norm)
-            if found and (via == "lead-in" or len(norm.split()) >= 2):
-                cls: dict[str, str] = {}
-                for c, term, _o in found:
-                    cls.setdefault(c, term)
-                return {"line": k, "text": text, "classes": cls, "via": via}
-            if _counter(norm) and not found:
-                return {"closed_by": k, "text": text}
+            scope = self._scope(k, read) if read is not None else {}
+            if scope:
+                return scope
             scanned += 1
             k -= 1
         return {}
