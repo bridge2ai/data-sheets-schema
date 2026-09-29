@@ -71,7 +71,10 @@ Nothing is reported as contemporaneous on incomplete evidence, except
 through a shell write the parser cannot attribute to the receipt because
 the command does not name it literally -- a glob or variable, a script or
 program that writes it without its name on the command line, a command on
-a directory that holds it -- which `NON_CHECKS` names (#3221).
+a directory that holds it -- or through a ripgrep preprocessor set in a
+config file from outside the command (#3256), which `NON_CHECKS` names
+(#3221). `rg --pre CMD` runs CMD on each file it searches, so an `rg`
+call that sets a preprocessor on its command line is not read-only.
 
 The output carries counts, chunk ids, slot paths and sha256 digests, never
 snippet text or tool payloads: transcripts hold model output.
@@ -103,9 +106,10 @@ READ_TOOLS = frozenset({"Read", "Grep", "Glob", "LS", "NotebookRead"})
 #: Shell programs that read their operands and write only to stdout (`sed`
 #: only when `_sed_reads_only` admits its options and script: no in-place
 #: flag, no script file, and no `w`/`W`/`e` command or `s///w`/`s///e`
-#: flag, #3220). Anything else that names a tracked file is a possible
-#: mutation, and so is any command that substitutes one (`_substitutes`,
-#: #3240).
+#: flag, #3220; `rg` only when `_rg_reads_only` admits it: no `--pre`
+#: preprocessor, which runs a command on each file searched, #3256).
+#: Anything else that names a tracked file is a possible mutation, and so
+#: is any command that substitutes one (`_substitutes`, #3240).
 READ_ONLY_PROGRAMS = frozenset({"cat", "head", "tail", "grep", "egrep", "fgrep", "rg", "wc", "ls",
                                 "stat", "file", "md5", "md5sum", "shasum", "sha256sum", "cmp",
                                 "diff", "nl", "sed", "echo", "printf", "pwd", "true", "test", "["})
@@ -131,6 +135,9 @@ NON_CHECKS = (
     "it is caught by the final sha256): a glob or variable, a program or script that writes it "
     "without its name on the command line (`python fix.py`), or a command on a directory that "
     "holds it (`git checkout -- DIR`, `rm -r DIR`) (#3221)",
+    "a ripgrep preprocessor set in a config file that `RIPGREP_CONFIG_PATH` names from outside "
+    "the command (exported earlier or inherited): `rg` is read-only only when neither its "
+    "arguments nor its own assignments set one (#3256)",
 )
 
 _ABSENT = object()
@@ -561,6 +568,20 @@ _SED_LABELLED = frozenset(":btTv")
 _SED_S_FLAGS = frozenset("gpiImM0123456789")
 
 
+def _rg_reads_only(segment: list[str]) -> bool:
+    """Whether a ripgrep invocation writes only to stdout (#3256): ripgrep
+    runs `--pre COMMAND` on each file it searches, so neither a `--pre`
+    argument (in either spelling, before or after `--`) nor an assignment of
+    `RIPGREP_CONFIG_PATH` on the segment, whose file may set one, is
+    admitted. `--pre-glob` only narrows a `--pre` and is harmless alone."""
+    for token in segment:
+        if not _ASSIGNMENT.fullmatch(token):
+            break
+        if token.startswith("RIPGREP_CONFIG_PATH="):
+            return False
+    return not any(a == "--pre" or a.startswith("--pre=") for a in _program(segment)[1:])
+
+
 def _sed_reads_only(args: list[str]) -> bool:
     """Whether a sed invocation writes only to stdout (#3220): no in-place
     flag, no script from a file (it cannot be read here), and every script
@@ -748,7 +769,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     local = cwd
     # `pushd` moves like `cd` and remembers where it left; `popd` returns
     # there (#3222). A stack the command did not build (a `popd` with
-    # nothing pushed, a bare `pushd` that swaps) leaves no known directory.
+    # nothing pushed, a bare `pushd` that swaps) leaves no known directory,
+    # and so does an argument that is not a plain directory: an option, or
+    # `cd -` (OLDPWD) and `pushd +N`/`-N` (a stack rotation), which bash
+    # reads as no directory name (#3257).
     pushed: list[str | None] = []
     full = next((x for x in targets if x.kind == "full"), None)
     for index, segment in enumerate(segments):
@@ -760,7 +784,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             if program == "pushd":
                 pushed.append(local)
             where = rest[1] if len(rest) == 2 else None
-            if where is None or not _CLEAN_PATH.fullmatch(where):
+            if where is None or not _CLEAN_PATH.fullmatch(where) or where[:1] in "-+":
                 local = None
             elif os.path.isabs(where):
                 local = where
@@ -793,6 +817,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         if program not in READ_ONLY_PROGRAMS:
             read_only = False
         elif program == "sed" and not _sed_reads_only(rest[1:]):
+            read_only = False
+        elif program == "rg" and not _rg_reads_only(segment):
             read_only = False
     out["read_only"] = read_only
     return out

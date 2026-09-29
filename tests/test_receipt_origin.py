@@ -707,6 +707,55 @@ class SedWrites(Base):
                 self.assertEqual(block["non_write_mutations"], [])
 
 
+class RipgrepPreprocessor(Base):
+    """`rg --pre CMD` runs CMD on every file it searches, so an `rg` that
+    names the receipt and sets a preprocessor can delete or rewrite it
+    (#3256). Such a call is not read-only; plain searches still are."""
+
+    def _before_draft(self, command):
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.bash(command)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, PRE)
+        r.derive()
+        return r.report()
+
+    def test_a_preprocessor_on_the_receipt_is_unknown(self):
+        for command in (f"rg --pre rm x {REL}",
+                        f"rg --pre=rm x {REL}",
+                        f"rg -n --pre-glob '*.yaml' --pre ./fix.sh x {REL}",
+                        f"rg x {REL} --pre rm",
+                        f"/opt/homebrew/bin/rg --pre rm x {REL}",
+                        f"RIPGREP_CONFIG_PATH=rg.cfg rg x {REL}",
+                        f"LC_ALL=C RIPGREP_CONFIG_PATH=rg.cfg rg x {REL}"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertUnknown(block, "may change the receipt other than by a Write")
+                self.assertEqual(len(block["non_write_mutations"]), 1)
+
+    def test_a_plain_search_of_the_receipt_is_read_only(self):
+        for command in (f"rg -n c001 {REL}",
+                        f"rg -z --pre-glob '*.gz' x {REL}",
+                        f"rg --no-pre x {REL}",
+                        f"rg -e --prefix {REL}",
+                        f"LC_ALL=C rg x {REL}"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["non_write_mutations"], [])
+
+    def test_rg_reads_only(self):
+        cases = {("rg", "x", "R"): True, ("rg", "--pre", "rm", "x", "R"): False,
+                 ("rg", "--pre=rm", "x", "R"): False, ("rg", "--pre-glob=*.gz", "x", "R"): True,
+                 ("RIPGREP_CONFIG_PATH=c", "rg", "x"): False, ("A=1", "rg", "x"): True,
+                 ("poetry", "run", "rg", "--pre", "rm", "R"): False,
+                 ("rg", "x", "RIPGREP_CONFIG_PATH=c"): True}
+        for segment, expected in cases.items():
+            with self.subTest(segment=segment):
+                self.assertIs(ro._rg_reads_only(list(segment)), expected)
+
+
 class CommandSubstitution(Base):
     """A command inside backticks, a double-quoted `$(...)` or a process
     substitution is a word of the outer command to the tokeniser, so the
@@ -765,6 +814,14 @@ class NonChecks(unittest.TestCase):
                       "a command on a directory that holds it", "git checkout -- DIR", "rm -r DIR"):
             self.assertIn(route, text)
         self.assertIn("does not name it literally", ro.__doc__)
+
+    def test_a_ripgrep_config_preprocessor_is_named(self):
+        # #3256: a `--pre` from a config file named outside the command is
+        # not seen; the exception must say so.
+        text = " ".join(ro.NON_CHECKS)
+        self.assertIn("ripgrep preprocessor set in a config file", text)
+        self.assertIn("RIPGREP_CONFIG_PATH", text)
+        self.assertIn("ripgrep preprocessor set in a", ro.__doc__)
 
 
 #: The playbook's recorder step (d4d-full-core, "Provenance record"): its
@@ -1079,6 +1136,33 @@ class Boundaries(Base):
     def test_popd_with_nothing_pushed_leaves_no_known_directory(self):
         _, block = self._derived("popd && poetry run d4d derive core --full data/claudecode_direct/L/CHORUS_d4d.yaml")
         self.assertUnknown(block, "its --full cannot be resolved")
+
+    def test_a_directory_that_is_not_a_name_leaves_no_known_directory(self):
+        # #3257: `cd -` returns to OLDPWD and `pushd +N`/`-N` rotates the
+        # stack; neither is a directory named `-` or `+N`.
+        full = "data/claudecode_direct/L/CHORUS_d4d.yaml"
+        for spelling in (f"cd data && cd - && poetry run d4d derive core --full {full}",
+                         f"pushd data && pushd +1 && poetry run d4d derive core --full {full}",
+                         f"pushd data && pushd -0 && poetry run d4d derive core --full {full}",
+                         f"cd +1 && poetry run d4d derive core --full {full}",
+                         f"cd -P data && poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml"):
+            with self.subTest(spelling=spelling):
+                _, block = self._derived(spelling)
+                self.assertUnknown(block, "its --full cannot be resolved")
+
+    def test_an_absolute_full_after_cd_minus_is_still_the_boundary(self):
+        # With no known directory an absolute --full still resolves.
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, self.C003)
+        identity = r.bash(f"cd data && cd - && poetry run d4d derive core --full {r.full}")
+        r.write(r.receipt, self.C004)
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
+                                           "phase3_backport": 1})
 
     def test_a_read_of_the_receipt_is_not_a_change(self):
         r = self.run_
