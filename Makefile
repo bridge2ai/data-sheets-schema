@@ -465,9 +465,11 @@ $(SSSOM_URI): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(SSSOM_URI_SC
 		--rocrate $(ROCRATE_JSON) \
 		--output $(SSSOM_URI)
 
-gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for ALL 270 attributes
+gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for every schema slot
 
-$(SSSOM_URI_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_URI_COMPREHENSIVE_SCRIPT)
+# The URI table imports the comprehensive generator's resolver (#2935), so a
+# change to that script must rebuild it too.
+$(SSSOM_URI_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_URI_COMPREHENSIVE_SCRIPT) $(SSSOM_COMPREHENSIVE_SCRIPT)
 	@echo "Generating comprehensive URI-level SSSOM (all attributes)..."
 	$(RUN) python $(SSSOM_URI_COMPREHENSIVE_SCRIPT) \
 		--schema $(D4D_SCHEMA_ALL) \
@@ -475,7 +477,22 @@ $(SSSOM_URI_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDA
 		--recommendations $(URI_RECOMMENDATIONS) \
 		--output $(SSSOM_URI_COMPREHENSIVE)
 
-gen-sssom-comprehensive: $(SSSOM_COMPREHENSIVE) ## Generate comprehensive SSSOM for ALL 270 D4D attributes
+gen-sssom-comprehensive: $(SSSOM_COMPREHENSIVE) ## Generate comprehensive SSSOM for every schema slot
+
+# Both checks run whatever the first finds, so a drift in both tables is
+# reported as two (#2995); the target fails if either does.
+.PHONY: check-sssom-comprehensive
+check-sssom-comprehensive: ## Report drift between both committed comprehensive SSSOM tables and their generators (writes nothing)
+	@status=0; \
+	$(RUN) python $(SSSOM_COMPREHENSIVE_SCRIPT) --check \
+		--schema $(D4D_SCHEMA_ALL) --skos $(SKOS_ALIGNMENT) \
+		--recommendations $(URI_RECOMMENDATIONS) \
+		--output $(SSSOM_COMPREHENSIVE) || status=1; \
+	$(RUN) python $(SSSOM_URI_COMPREHENSIVE_SCRIPT) --check \
+		--schema $(D4D_SCHEMA_ALL) --skos $(SKOS_ALIGNMENT) \
+		--recommendations $(URI_RECOMMENDATIONS) \
+		--output $(SSSOM_URI_COMPREHENSIVE) || status=1; \
+	exit $$status
 
 $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_COMPREHENSIVE_SCRIPT)
 	@echo "Generating comprehensive SSSOM mapping (all D4D attributes)..."

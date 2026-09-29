@@ -23,7 +23,10 @@ from data_sheets_schema.rocrate_normalize import (
     document_corpus_exclusions,
     normalize_linkml,
     reduce_metadata,
+    validate_d4d,
+    write_report,
 )
+from data_sheets_schema.schema_cache import sha256_of
 
 PERSON_GRAPH = {
     "@graph": [
@@ -118,6 +121,91 @@ class TestNormalizeLinkML(unittest.TestCase):
         self.assertEqual(first, _org_urn("University of California, San Diego"))
         self.assertTrue(first.startswith("urn:d4d:org:"))
         self.assertNotIn(" ", first)
+
+    def test_a_resolver_url_doi_is_rewritten_bare_and_logged(self):
+        """#2916. Upstream writes the resolver URL; the pattern is anchored to
+        the bare DOI (#646). The repair keeps the case upstream wrote."""
+        out, res = self.normalize(
+            {"name": "d", "doi": "https://doi.org/10.18130/V3/XNBOPG"})
+        self.assertEqual(out["doi"], "10.18130/V3/XNBOPG")
+        change = next(c for c in res.changes if c.step == "doi")
+        self.assertEqual(change.action, "rewrite")
+        self.assertEqual(change.before, "https://doi.org/10.18130/V3/XNBOPG")
+        self.assertEqual(change.after, "10.18130/V3/XNBOPG")
+        # The row the committed CHORUS and CM4AI changes reports carry.
+        self.assertEqual(change.detail, "the slot takes the bare DOI (#646); "
+                                        "resolver or `doi:` prefix removed, case kept")
+
+    def test_a_bare_doi_is_left_alone_and_not_logged(self):
+        out, res = self.normalize({"name": "d", "doi": "10.18130/V3/XNBOPG"})
+        self.assertEqual(out["doi"], "10.18130/V3/XNBOPG")
+        self.assertFalse([c for c in res.changes if c.step == "doi"])
+
+    def test_a_doi_that_is_not_one_is_dropped_with_the_reason(self):
+        out, res = self.normalize({"name": "d", "doi": "ark:59853/not-a-doi"})
+        self.assertNotIn("doi", out)
+        change = next(c for c in res.changes if c.step == "doi")
+        self.assertEqual(change.action, "drop")
+        self.assertIn("not a DOI", change.detail)
+
+    def test_case_variants_of_one_doi_are_rewritten_not_dropped(self):
+        """#2987. Two spellings that differ only in case are one DOI: the first
+        is written, and the log does not call them two distinct DOIs."""
+        value = ["https://doi.org/10.18130/V3/HIGT4C", "doi:10.18130/v3/higt4c"]
+        out, res = self.normalize({"name": "d", "doi": value})
+        self.assertEqual(out["doi"], "10.18130/V3/HIGT4C")
+        change = next(c for c in res.changes if c.step == "doi")
+        self.assertEqual(change.action, "rewrite")
+        self.assertNotIn("distinct", change.detail)
+
+    def test_a_doi_the_slot_pattern_accepts_is_left_as_written(self):
+        """#2989. The arm is repaired only as far as schema validity requires:
+        a value the anchored pattern accepts is neither dropped nor trimmed,
+        though `bare_doi` would not recognise it."""
+        for value in ("10.5555/a b", "10.1234567890/x", "10.5555/x/"):
+            with self.subTest(value=value):
+                out, res = self.normalize({"name": "d", "doi": value})
+                self.assertEqual(out.get("doi"), value)
+                self.assertFalse([c for c in res.changes if c.step == "doi"])
+
+    def test_a_kept_doi_passes_the_validator(self):
+        """#2989. What the step leaves alone is valid by the validator the
+        changes report uses, not only by a regex this file restates."""
+        out, _ = self.normalize({"id": "ark:59853/x", "name": "d",
+                                 "doi": "10.1234567890/x"})
+        self.assertEqual(out.get("doi"), "10.1234567890/x")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_d4d.yaml"
+            path.write_text(yaml.safe_dump(out, sort_keys=False), encoding="utf-8")
+            self.assertEqual(validate_d4d(path), "PASS")
+
+    def test_a_rewrite_says_only_what_came_off(self):
+        """#2989. A list or a stray space is not a prefix, and the log no
+        longer says one was removed."""
+        for value, said in ((" 10.18130/V3/XNBOPG", "surrounding whitespace removed"),
+                            (["10.18130/V3/XNBOPG"], "the one DOI among 1 list item(s)")):
+            with self.subTest(value=value):
+                out, res = self.normalize({"name": "d", "doi": value})
+                self.assertEqual(out["doi"], "10.18130/V3/XNBOPG")
+                change = next(c for c in res.changes if c.step == "doi")
+                self.assertEqual(change.action, "rewrite")
+                self.assertIn(said, change.detail)
+                self.assertNotIn("prefix", change.detail)
+
+
+class TestWriteReport(unittest.TestCase):
+    def test_each_verdict_names_the_schema_it_was_reached_against(self):
+        """#2916. A bare PASS stayed PASS after #646 made the records fail."""
+        res = Result(project="TEST")
+        res.validation["TEST_crate_d4d.yaml"] = "PASS"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_changes.md"
+            write_report(res, path, {})
+            line = next(l for l in path.read_text(encoding="utf-8").splitlines()
+                        if l.startswith("- `TEST_crate_d4d.yaml`:"))
+        self.assertTrue(line.startswith("- `TEST_crate_d4d.yaml`: **PASS** — schema "), line)
+        self.assertIn(f"sha256 {sha256_of(FULL_SCHEMA)}", line)
+        self.assertRegex(line, r" / \d{4}-\d{2}-\d{2} ")
 
 
 class TestReduceMetadata(unittest.TestCase):

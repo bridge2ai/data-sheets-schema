@@ -7,7 +7,7 @@ its declared path resolves in the crate.
 
 - Crate metadata: `data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json`
 - Mapping table: `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (137 rows applied)
-- Validation: **PASS**
+- Validation: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-28 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
 
 ## Outcome
 
@@ -54,14 +54,14 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.creators | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | [{"name": "Yael Bensoussan"}, {"name": "Alexandros Sigaras"}, {"name": "Anais Rameau"}, {… |
 | Dataset.data_protection_impacts | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataSocialImpact'] | [{"description": "The project aims to create an ethically sourced, diverse voice dataset … |
 | Dataset.description | filled | exactMatch | none | @graph[?@type='Dataset']['description'] | The human voice contains complex acoustic markers which have been linked to important hea… |
-| Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | https://doi.org/10.13026/k81f-qr68 |
+| Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | 10.13026/k81f-qr68 — rewritten from the crate's https://doi.org/10.13026/k81f-qr68: resolver or `doi:` prefix removed, case kept |
 | Dataset.download_url | filled | exactMatch | none | @graph[?@type='Dataset']['contentUrl'] | file:///features/ppgs.parquet |
 | Dataset.ethical_reviews | filled | exactMatch | none | @graph[?@type='Dataset']['ethicalReview'] | [{"name": "Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics"}] |
 | Dataset.existing_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "Development, training and fine-tuning of machine-learning models that a… |
 | Dataset.extension_mechanism | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "https://physionet.org/content/b2ai-voice/view-license/3.0.0/"} |
 | Dataset.funders | filled | exactMatch | none | @graph[?@type='Dataset']['funder'] | [{"name": "Funded by the NIH Common Fund. Award #3Tf-OTOD03272001S2"}] |
 | Dataset.future_use_impacts | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataSocialImpact'] | [{"description": "The project aims to create an ethically sourced, diverse voice dataset … |
-| Dataset.id | filled | exactMatch | none | crate root identifier/@id | https://doi.org/10.13026/k81f-qr68 |
+| Dataset.id | filled | exactMatch | none | crate root identifier/@id | doi:10.13026/k81f-qr68 — rewritten from the crate's https://doi.org/10.13026/k81f-qr68: required by the schema; taken from the crate itself; a DOI is written as the doi: CURIE (#974) |
 | Dataset.intended_uses | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "Development, training and fine-tuning of machine-learning models that a… |
 | Dataset.ip_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://physionet.org/content/b2ai-voice/view-dua/3.0.0/"} |
 | Dataset.issued | filled | exactMatch | none | @graph[?@type='Dataset']['datePublished'] | 2025-12-16T00:00:00Z |

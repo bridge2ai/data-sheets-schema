@@ -190,6 +190,78 @@ def check(method, label, project, write, strict):
     if strict and (block["findings"] or block["unanswered"]):
         sys.exit(1)
 
+
+@review.command("removals")
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
+@click.option("--label", required=True)
+@click.option("--project", callback=project_choice, required=True)
+@click.option("--flattened", "show_flattened", is_flag=True, help="also list the flattened values and where their text survives")
+@click.option("--json", "as_json", is_flag=True, help="print the whole block as JSON")
+def removals_cmd(method, label, project, show_flattened, as_json):
+    """Classify every value the phase-1 snapshot carried and the final full
+    record does not (#2923): flattened (its text survives), founded (the
+    path of an audit finding not scoped to the core record alone covers it)
+    or unfounded, with the phase that removed it. The text test is the
+    value's own text surviving, so a value reworded, moved or split lists
+    as deleted (#3207), while a lost value can list as flattened by
+    coincidental containment and a scalar rewritten in place is not listed
+    at all: the counts are not bounds on content lost (#3229). Read-only:
+    nothing is
+    written, and a run with no phase-1 snapshot prints that it was not
+    checked rather than zero. Where the audit is missing, or present but
+    unreadable, the deletions are listed unsorted and the summary says
+    which (#3153)."""
+    import json
+
+    from data_sheets_schema.cli.method import resolve_method
+    from data_sheets_schema.removals import for_record
+    method = method or resolve_method(label, project)
+    prov = _provenance(method, label, project)
+    if not prov.exists():
+        raise click.ClickException(f"no provenance record at {prov}")
+    block = for_record(prov)
+    if as_json:
+        click.echo(json.dumps(block, indent=2, default=str))
+        return
+    click.echo(f"   {block['summary']}")
+    if not block["checked"]:
+        return
+    if block["founded_by"] is not None:
+        click.echo("   founded by: " + ", ".join(f"{k} {v}" for k, v in block["founded_by"].items()))
+    audit = block.get("audit") or {}
+    if audit.get("paths_past_end"):
+        click.echo(f"   finding paths indexing past the end of their list: {audit['paths_past_end']}"
+                   f" ({audit['paths_one_past_end']} one past, read as the last entry;"
+                   f" {block['founded_past_end']} value(s) founded so)")
+    if block["phase"] is not None:
+        click.echo("   removed at: " + (", ".join(f"{k} {v}" for k, v in block["phase"].items()) or "nothing"))
+    else:
+        click.echo("   removed at: not attributed (a phase output is missing or unreadable)")
+    if block.get("unfounded_phase"):
+        # A repair round acts on validation errors, not on the audit (#3150).
+        click.echo("   unfounded, by the phase that removed them: "
+                   + ", ".join(f"{k} {v}" for k, v in block["unfounded_phase"].items()))
+    sorted_ = block["unfounded"] is not None
+    for row in block["unfounded_paths"] + block["unsorted_paths"]:
+        notes = [row.get("phase") or "phase unattributed"]
+        if row.get("receipted"):
+            notes.append("receipted")
+        if row.get("named_by_core_finding"):
+            notes.append("named by a core-only finding")
+        if row.get("mentioned_in_finding_text"):
+            notes.append("its slot is mentioned in a finding's text")
+        # Unsorted: the summary says why — no audit, or one that could not be read (#3153).
+        click.echo(f"   {'✗ unfounded' if sorted_ else '? deleted, unsorted'} {row['path']} ({', '.join(notes)})")
+    for cls in ("unfounded", "unsorted"):
+        if block.get(f"{cls}_paths_truncated"):
+            click.echo(f"   … and {block[f'{cls}_paths_truncated']} more {cls} value(s) not listed")
+    if show_flattened:
+        for row in block["flattened_paths"]:
+            click.echo(f"   ~ {row['path']} → {row['into']} ({row.get('phase') or 'phase unattributed'})")
+        if block.get("flattened_paths_truncated"):
+            click.echo(f"   … and {block['flattened_paths_truncated']} more flattened value(s) not listed")
+
+
 @review.command("disposition")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
@@ -421,6 +493,38 @@ def agree_cmd(method, label, project, write):
         ProvenanceRecord(data=rec).write(prov)
         click.echo(f"   ✓ reliability written into {prov}")
 
+
+@review.command("absence-lint")
+@click.option("--record", "records", multiple=True, required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="a full or core record YAML; repeatable")
+@click.option("--json", "as_json", is_flag=True, help="print one JSON result per record, as a list")
+def absence_lint_cmd(records, as_json):
+    """Bundle-wide absence claims and record self-narration in a record's
+    free text (#2919): each phrase the registered lexicon matches in a
+    `description`, `notes`, `source_caveats` or `*_details` leaf, by class, at
+    its JSON pointer. Read-only and never gating: a record with matches still
+    exits 0. A match is a regex hit, not a reviewed finding."""
+    import json
+
+    from data_sheets_schema import absence_lint
+    from data_sheets_schema.lexicon import LexiconError, load
+    try:
+        lexicon = load(absence_lint.LEXICON)
+        results = [absence_lint.lint_path(p, lexicon) for p in records]
+    except (LexiconError, ValueError, OSError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(json.dumps(results, indent=2, ensure_ascii=False))
+        return
+    click.echo(f"   {lexicon.instrument} · sha256 {lexicon.sha256[:12]}… · not gating")
+    for r in results:
+        click.echo(f"{r['record']}")
+        click.echo(f"   {r['leaves']} free-text leaves · " + " · ".join(
+            f"{cls} {c['phrases']} phrase(s) in {c['leaves']} leaf/leaves" for cls, c in r["by_class"].items()))
+        for h in r["hits"]:
+            text = h["text"] if len(h["text"]) <= 100 else h["text"][:97] + "…"
+            click.echo(f"   {h['pointer']}  {h['class']}  {','.join(h['patterns'])}  \"{text}\"")
 
 @review.command("self-disclaimed")
 @click.option("--original", "original", required=True, type=click.Path(exists=True, dir_okay=False),

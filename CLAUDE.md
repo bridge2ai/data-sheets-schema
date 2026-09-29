@@ -1490,6 +1490,12 @@ blocks attest the schema hashes they ran under and are never rewritten, so
 the corpus reproduction test accepts any registered release for a stored
 block and requires the newest for a recompute. A change that moves the
 merged-schema bytes adds its entry there in the same commit.
+The same commit regenerates the two comprehensive SSSOM tables
+(`make gen-sssom-comprehensive gen-sssom-uri-comprehensive`, one row per
+schema slot, #2935) wherever the change moves a slot, its owning classes,
+its description or its mappings: `tests/test_semantic_exchange/test_comprehensive_sssom.py`
+rebuilds both in memory under the date each file records and fails on any
+difference, and `make check-sssom-comprehensive` reports it without writing.
 
 ## Profiles: the study's text and vocabularies (#628, #1302)
 
