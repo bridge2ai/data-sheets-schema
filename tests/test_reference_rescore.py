@@ -1070,6 +1070,7 @@ def test_repeatability_report_separates_repeated_ratings_from_generation_records
         d["overall_score"]["total_points"] = 40 + index
         d["overall_score"]["fixed_percentage"] = 80 + 2 * index
         d["overall_score"]["normalized_percentage"] = round(100 * (40 + index) / 48, 1)
+        d["label"] = "one-record"   # the repeats rate the primary's record (#2927)
         if changed_applicability and index == 1:
             # Equal denominators can conceal different excluded item identities.
             first, second = d["elements"][7]["sub_elements"][::2][:2]
@@ -1089,6 +1090,12 @@ def test_repeatability_report_separates_repeated_ratings_from_generation_records
     assert primary["records"] == min(rating_count, 1)
     ai_readi = next(r for r in results["repeatability"] if r["project"] == "AI_READI")
     assert ai_readi["fixed_sample_sd"] is None
+    # The discrimination block reads the primaries only, so the repeats of
+    # one record are not reported as a record rated more than once (#2927).
+    text = (runner.PLAN / "results.md").read_text()
+    if rating_count:
+        assert "Item discrimination and within-project orderings" in text
+        assert "Rated more than once" not in text
 
 
 @pytest.mark.parametrize("different_scores", [False, True])
