@@ -328,11 +328,17 @@ def _judge(path, rows, flags):
 
 
 def _populated(original_raw: bytes):
+    """The populated paths of the original, or a refusal naming why it cannot be read.
+
+    ``TypeError`` is a refusal too (#3236): YAML resolves ``!!set`` to a set and
+    ``!!binary`` to bytes, which ``source_review.inventory`` cannot serialise to
+    JSON, so such an original is "not scored" rather than a traceback.
+    """
     from data_sheets_schema.source_review import inventory
     try:
         text = original_raw.decode("utf-8", errors="strict")
         return [row["path"] for row in inventory(text, "original_full")["values"]]
-    except (UnicodeError, ValueError, RecursionError, yaml.YAMLError) as exc:
+    except (UnicodeError, ValueError, TypeError, RecursionError, yaml.YAMLError) as exc:
         raise AuditRecallError(f"original is not a readable YAML record: {exc.__class__.__name__}") from None
 
 

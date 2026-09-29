@@ -286,7 +286,7 @@ ECMA_WHITESPACE = ({"\t", "\v", "\f", " ", "\xa0", "\ufeff", "\n", "\r", "\u2028
 
 
 def test_text_fields_refuse_the_same_characters_in_both_dialects():
-    """``\S`` classifies U+FEFF, U+001C-U+001F and U+0085 differently in Python's
+    r"""``\S`` classifies U+FEFF, U+001C-U+001F and U+0085 differently in Python's
     re and ECMA-262 (#3215). The text pattern refuses the union, so a lone such
     character is refused by the loader and by an ECMA-262 validator alike."""
     pattern = recall._TEXT["pattern"]
@@ -397,6 +397,14 @@ def test_an_original_nested_too_deeply_is_not_scored_rather_than_raised():
     deep = b"- " * 5_000 + b"x"
     with pytest.raises(recall.AuditRecallError, match="not a readable YAML record: RecursionError"):
         scored(audit(deep, []), deep, truth(entry("gt", original(), "/title")))
+
+
+@pytest.mark.parametrize("raw", [b"title: T\nx: !!set {a, b}\n", b"title: T\nx: !!binary aGk=\n"],
+                         ids=["set", "binary"])
+def test_an_original_holding_a_value_json_cannot_carry_is_not_scored_rather_than_raised(raw):
+    """``!!set`` and ``!!binary`` load as set and bytes, which the inventory cannot serialise (#3236)."""
+    with pytest.raises(recall.AuditRecallError, match="not a readable YAML record: TypeError"):
+        scored(audit(raw, []), raw, truth(entry("gt", raw, "/title")))
 
 
 def test_a_complete_entry_loads_with_its_date_as_written():
@@ -608,6 +616,17 @@ class TestCommand:
         assert out.exit_code == 1, out.output
         assert out.exception is None or isinstance(out.exception, SystemExit), repr(out.exception)
         assert "ground truth refused:\n  /: nested too deeply to read" in out.output
+
+    def test_an_original_with_a_set_value_is_not_scored_with_the_message(self, tmp_path):
+        p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))
+        o = b"title: T\nx: !!set {a, b}\n"
+        p["original"].write_bytes(o)
+        p["audit"].write_bytes(audit(o, []))
+        p["truth"].write_text(yaml.safe_dump(truth(entry("gt", o, "/title")), sort_keys=False))
+        out = self.invoke("--audit", p["audit"], "--original", p["original"], "--ground-truth", p["truth"])
+        assert out.exit_code == 1, out.output
+        assert out.exception is None or isinstance(out.exception, SystemExit), repr(out.exception)
+        assert "not scored: " in out.output and "original is not a readable YAML record: TypeError" in out.output
 
     def test_an_audit_failing_the_grammar_writes_no_report_and_is_left_unchanged(self, tmp_path):
         p = self.files(tmp_path, lambda o: truth(entry("gt", o, "/title")))
