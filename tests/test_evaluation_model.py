@@ -207,3 +207,72 @@ def test_same_family():
     assert same_family_label("claude-opus-5", "claude-opus-5") == "yes"
     assert same_family_label("claude-opus-5", "gpt-5") == "no"
     assert same_family_label("claude-opus-5", None) == "unknown"
+
+
+# --- the arm-comparison disclosure (#2928) -------------------------------
+
+import hashlib  # noqa: E402
+import importlib.util  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _arm_comparison():
+    spec = importlib.util.spec_from_file_location(
+        "arm_comparison_2928", ROOT / "scripts" / "arm_comparison.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _scores(*evaluations):
+    return {"rubric10": {"arm": {"P": [dict(e) for e in evaluations]}}}
+
+
+def test_the_arm_comparison_shows_evaluator_generator_and_same_family():
+    m = _arm_comparison()
+    lines = m.same_family_section(_scores(
+        {"evaluator": "claude-opus-5[1m]", "generator": "claude-opus-5"},
+        {"evaluator": "claude-opus-5[1m]", "generator": "claude-opus-5"},
+        {"evaluator": "claude-sonnet-4-5-20250929", "generator": "openai:gpt-5"}))
+    text = "\n".join(lines)
+    assert "| rubric10 | `claude-opus-5[1m]` | `claude-opus-5` | yes | 2 |" in lines
+    assert "| rubric10 | `claude-sonnet-4-5-20250929` | `openai:gpt-5` | no | 1 |" in lines
+    assert evaluation_model.SAME_FAMILY_DISCLAIMER in text
+
+
+def test_an_unrecorded_side_is_unknown_never_different():
+    m = _arm_comparison()
+    lines = m.same_family_section(_scores({"evaluator": "claude-fable-5", "generator": None}))
+    assert "| rubric10 | `claude-fable-5` | `unrecorded` | unknown | 1 |" in lines
+
+
+def test_the_generator_is_read_from_the_record_provenance(tmp_path, monkeypatch):
+    m = _arm_comparison()
+    prov = tmp_path / "claudecode_api_core" / "L_rep1" / "P_provenance.yaml"
+    prov.parent.mkdir(parents=True)
+    prov.write_text("model:\n  model: google/claude-opus-5-high\n", encoding="utf-8")
+    monkeypatch.setattr(m, "CONCAT", tmp_path)
+    monkeypatch.setattr(m, "_method_for", lambda label, project: "claudecode_api")
+    assert m.generator_model("L_rep1", "P") == "google/claude-opus-5-high"
+    assert m.generator_model("L_rep2", "P") is None
+
+
+def _tree_digest(root: Path) -> dict[str, str]:
+    return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(root.rglob("*")) if p.is_file()}
+
+
+@pytest.mark.corpus
+def test_rendering_the_comparison_rewrites_no_evaluation_or_judge_cache():
+    """The flag is derived at report time: no evaluation JSON, judgement
+    cache or record is written to carry it (#2928)."""
+    m = _arm_comparison()
+    evals = ROOT / "data" / "evaluation_llm"
+    before = _tree_digest(evals)
+    data = m.collect()
+    scores = {r: {k: {p: m.rubric_scores(pfx, p, r) for p in m.PROJECTS}
+                  for k, _d, pfx, *_ in m.ARMS} for r in m.EVAL_DIRS}
+    text = m.render_markdown(data, scores)
+    assert evaluation_model.SAME_FAMILY_DISCLAIMER in text
+    assert _tree_digest(evals) == before
