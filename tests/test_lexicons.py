@@ -63,6 +63,17 @@ class TheRegistry(unittest.TestCase):
                 self.assertEqual(hashlib.sha256(raw).hexdigest(), sha)
                 self.assertEqual(lx.load(name, version).sha256, sha)
 
+    def test_which_v1_patterns_carry_no_counterexample(self):
+        """Every v1 pattern has an example; five have no counterexample, so
+        for those the self-test shows what they match, not what they miss.
+        v1's bytes are fixed, so this list can only shrink in a new version."""
+        lexicon = lx.load("absence_self_narration", 1)
+        self.assertEqual(len(lexicon.patterns), 18)
+        self.assertTrue(all(p.examples for p in lexicon.patterns))
+        self.assertEqual(sorted(p.id for p in lexicon.patterns if not p.counterexamples), [
+            "bwa.bundle-does-not", "bwa.bundle-silent", "bwa.none-of-the-sources",
+            "rsn.omitted-here", "rsn.source-ranking"])
+
     def test_every_result_identity_names_the_bytes(self):
         lexicon = lx.load("absence_self_narration")
         self.assertEqual(lexicon.identity(), {
@@ -127,6 +138,19 @@ class Pinning(unittest.TestCase):
         self.assertTrue(any("does not match its example 'no match'" in p for p in problems), problems)
         self.assertTrue(any("matches its counterexample 'a word'" in p for p in problems), problems)
 
+    def test_a_pattern_with_no_example_cannot_be_registered(self):
+        """The review's case (#3093): a pattern matching every string, with no
+        example and no counterexample, passed `check_registry`, which then
+        attested nothing about it. It is now refused at load and reported."""
+        raw = (b"name: tiny\nversion: 1\ninstrument: tiny lexicon v1\nclasses:\n  a: the a class\n"
+               b"patterns:\n  - {id: a.any, class: a, regex: '.'}\n")
+        (self.dir / "tiny_v1.yaml").write_bytes(raw)
+        self._register([{"version": 1, "file": "tiny_v1.yaml", "sha256": hashlib.sha256(raw).hexdigest()}])
+        with self.assertRaisesRegex(lx.LexiconError, "'a.any' lists no examples"):
+            lx.load("tiny", directory=self.dir)
+        problems = lx.check_registry(self.dir)
+        self.assertTrue(any("'a.any' lists no examples" in p for p in problems), problems)
+
     def test_an_unregistered_name_or_version_is_refused(self):
         with self.assertRaisesRegex(lx.LexiconError, "no lexicon 'other'"):
             lx.load("other", directory=self.dir)
@@ -163,6 +187,24 @@ class Shape(unittest.TestCase):
         text = MINIMAL.replace("'\\bword\\b'", "'(unclosed'")
         self.assertNotEqual(text, MINIMAL)
         self._refused(text, "does not compile")
+
+    def test_a_pattern_without_an_example_or_with_a_blank_one_is_refused(self):
+        """Without an example the self-test cannot fail for a pattern (#3093)."""
+        for old, new, message in [
+            ("    examples: [one word here]\n", "", "'a.word' lists no examples"),
+            ("[one word here]", "[]", "'a.word' lists no examples"),
+            ("[one word here]", "['one word here', '  ']", "blank entry in examples"),
+            ("[wordy]", "['']", "blank entry in counterexamples"),
+        ]:
+            with self.subTest(new=new):
+                text = MINIMAL.replace(old, new)
+                self.assertNotEqual(text, MINIMAL)
+                self._refused(text, message)
+
+    def test_a_counterexample_is_optional(self):
+        text = MINIMAL.replace("    counterexamples: [wordy]\n", "")
+        self.assertNotEqual(text, MINIMAL)
+        self.assertEqual(lx.parse(text.encode(), file="t.yaml").patterns[0].counterexamples, ())
 
 
 if __name__ == "__main__":

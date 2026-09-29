@@ -2,8 +2,12 @@
 
 A lexicon is a YAML file under `lexicons/` that names itself, its version and
 the instrument it defines, declares the classes it reports, and lists
-class-tagged patterns. Each pattern has an id, a regular expression, the
-examples it must match and, where one matters, a counterexample it must not.
+class-tagged patterns. Each pattern has an id, a regular expression, at least
+one example it must match (`parse` refuses a pattern with none, or with a
+blank one) and, where one matters, a counterexample it must not. A
+counterexample is optional and not every registered pattern carries one; for
+a pattern without one, the self-test shows that it matches what it should,
+not that it misses anything.
 A lexicon may also carry a `scope` block that its reader interprets (which
 keys of a record it walks, for instance); the loader passes it through.
 
@@ -138,6 +142,13 @@ def parse(raw: bytes, *, file: str) -> Lexicon:
             if not isinstance(texts, list) or not all(isinstance(t, str) for t in texts):
                 raise LexiconError(f"{file}: pattern {pid!r} {key} must be a list of strings "
                                    "(quote a text that contains ': ')")
+            if any(not t.strip() for t in texts):
+                raise LexiconError(f"{file}: pattern {pid!r} has a blank entry in {key}, which attests nothing")
+        if not row.get("examples"):
+            # Without one the self-test cannot fail for the pattern: a regex
+            # that matches every string, or none, would pass `check_registry`.
+            raise LexiconError(f"{file}: pattern {pid!r} lists no examples; a pattern must name at least "
+                               "one text it has to match")
         if not isinstance(row["regex"], str):
             raise LexiconError(f"{file}: pattern {pid!r} regex must be a string")
         try:
@@ -195,7 +206,10 @@ def check_registry(directory: Path = LEXICON_DIR) -> list[str]:
     Checks each pin against the file's bytes, the file name against
     `{name}_v{version}.yaml`, each pattern against its own examples and
     counterexamples, and that no lexicon file in the directory is
-    unregistered — an unregistered file is a lexicon nothing pins.
+    unregistered — an unregistered file is a lexicon nothing pins. Every
+    pattern has at least one example, because `load` compiles through
+    `parse`, which refuses a pattern without one. A counterexample is checked
+    only where the pattern lists one; none is required.
     """
     problems: list[str] = []
     try:
