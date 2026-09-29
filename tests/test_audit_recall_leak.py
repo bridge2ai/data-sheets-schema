@@ -18,16 +18,26 @@ directory or quotes an observation. These scans cover:
   name the directory;
 - every file under src/ other than the instrument itself.
 
+Each file is read as text, and a Python, JSON or YAML file also as the strings
+it decodes to, so a quotation split across implicitly concatenated literals,
+or written with escapes (``\\'``, ``\\"``, ``\\u2013``, YAML's ``''``), is
+still found (#3175).
+
 The files under notes/ are pinned: they are read here and never edited. A
 committed ground-truth file that does not load, at any depth of the directory,
 fails here too, and so does a file there that is neither a ground-truth file
-nor the README or schema.
+nor the top-level README or schema (#3176). Finder's ``.DS_Store``, recognised
+by its binary header, is the one other file skipped, at any depth.
 
 Not scanned: a launch message typed at run time, and a registration or a
 rendered instruction written outside the repository. Those are the
-operator's to keep clean.
+operator's to keep clean. Not found: an observation paraphrased, or assembled
+at run time from pieces that are not string literals in the scanned source.
 """
+import ast
+import json
 from pathlib import Path
+import sys
 
 import pytest
 import yaml
@@ -71,19 +81,32 @@ MODEL_FACING_UNDER_NOTES = (
 REGISTERED_INPUT_TREES = ("data/preprocessed/chunks", "data/preprocessed/concatenated")
 REGISTERED_INPUT_FILES = ("data/preprocessed/source_manifest.yaml",)
 GROUND_TRUTH_SUFFIXES = {".yaml", ".yml", ".json"}
-NOT_GROUND_TRUTH = {"README.md", SCHEMA_NAME, ".DS_Store"}
+#: Relative to the directory: the top-level README and schema only (#3176).
+NOT_GROUND_TRUTH = {Path("README.md"), Path(SCHEMA_NAME)}
+FINDER_HEADER = b"\x00\x00\x00\x01Bud1"
+
+
+def _finder_metadata(path):
+    """A ``.DS_Store`` in Finder's binary format; one holding anything else is not skipped."""
+    if path.name != ".DS_Store":
+        return False
+    with path.open("rb") as stream:
+        return stream.read(len(FINDER_HEADER)) == FINDER_HEADER
 
 
 def committed_observations(directory=GROUND_TRUTH):
     """Every observation in every ground-truth file under ``directory``, at any depth.
 
     A file that does not load raises, and so does any file that is neither a
-    ground-truth file nor the README or schema: under another name it would be
-    neither loaded nor scanned for (#3103).
+    ground-truth file nor the top-level README or schema: under another name,
+    or as a README or schema one level down, it would be neither loaded nor
+    scanned for (#3103, #3176). Only Finder's own ``.DS_Store`` is skipped
+    at any depth.
     """
     found = []
     for path in sorted(directory.rglob("*")):
-        if not path.is_file() or path.name in NOT_GROUND_TRUTH:
+        if (not path.is_file() or path.relative_to(directory) in NOT_GROUND_TRUTH
+                or _finder_metadata(path)):
             continue
         if path.suffix.lower() not in GROUND_TRUTH_SUFFIXES:
             raise ValueError(f"{path.relative_to(directory)}: not .yaml, .yml or .json, so its "
@@ -129,9 +152,78 @@ def registration_records():
     return sorted(p for p in (ROOT / "notes").rglob("*registration*.json") if p.is_file())
 
 
+def registered_inputs():
+    return [ROOT / p for p in (*SCHEMAS, *AGENT_PLAYBOOKS)] + files_under(*REGISTERED_INPUT_TREES,
+                                                                          *REGISTERED_INPUT_FILES)
+
+
+def src_files():
+    """Every file under src/ other than the instrument."""
+    return [p for p in files_under("src") if p.resolve() != INSTRUMENT.resolve()]
+
+
+def _python_strings(text):
+    """The file's string constants in source order, or None where it does not parse.
+
+    ``ast`` joins implicitly concatenated literals and resolves escapes, which
+    the raw text keeps as ``" "`` seams and ``\\'`` (#3175). f-string pieces are
+    constants too.
+    """
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return None
+    constants = [node for node in ast.walk(tree)
+                 if isinstance(node, ast.Constant) and isinstance(node.value, str)]
+    return [node.value for node in sorted(constants, key=lambda n: (n.lineno, n.col_offset))]
+
+
+def _strings_in(value):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield from _strings_in(key)
+            yield from _strings_in(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _strings_in(item)
+
+
+def decoded_strings(path, text):
+    """The strings a .py, .json, .yaml or .yml file decodes to; None for any other
+    file, or one that does not decode."""
+    suffix = path.suffix.lower()
+    try:
+        if suffix == ".py":
+            return _python_strings(text)
+        if suffix == ".json":
+            return list(_strings_in(json.loads(text)))
+        if suffix in (".yaml", ".yml"):
+            loader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+            return [s for document in yaml.load_all(text, Loader=loader) for s in _strings_in(document)]
+    except (ValueError, yaml.YAMLError):
+        return None
+    return None
+
+
+def views(path):
+    """The texts a scan reads for ``path``: the file as text and, where it
+    decodes, its strings joined with nothing (a word split across ``+``) and
+    with newlines (a sentence split across list items)."""
+    text = path.read_bytes().decode("utf-8", errors="replace")
+    strings = decoded_strings(path, text)
+    return [text] if strings is None else [text, "".join(strings), "\n".join(strings)]
+
+
 def leaks(paths, needles, root=ROOT):
-    return {str(p.relative_to(root)): found for p in paths
-            if (found := matches(p.read_bytes().decode("utf-8", errors="replace"), needles))}
+    out = {}
+    for path in paths:
+        found = sorted({needle for view in views(path) for needle in matches(view, needles)},
+                       key=needles.index)
+        if found:
+            out[str(path.relative_to(root))] = found
+    return out
 
 
 @pytest.fixture(scope="module")
@@ -167,8 +259,7 @@ def test_no_instruction_file_names_the_directory_or_quotes_an_observation(needle
 
 
 def test_no_registered_native_input_does(needles):
-    registered = [ROOT / p for p in (*SCHEMAS, *AGENT_PLAYBOOKS)]
-    registered += files_under(*REGISTERED_INPUT_TREES, *REGISTERED_INPUT_FILES)
+    registered = registered_inputs()
     assert all(p.is_file() for p in registered)
     assert [p for p in registered if GROUND_TRUTH in p.resolve().parents] == []
     assert leaks(registered, needles) == {}
@@ -180,9 +271,8 @@ def test_no_registration_record_under_notes_does(needles):
 
 
 def test_only_the_instrument_under_src_names_the_directory(needles):
-    others = [p for p in files_under("src") if p.resolve() != INSTRUMENT.resolve()]
-    assert leaks(others, needles) == {}
-    assert matches(INSTRUMENT.read_text(encoding="utf-8"), committed_observations()) == []
+    assert leaks(src_files(), needles) == {}
+    assert leaks([INSTRUMENT], committed_observations()) == {}
 
 
 def test_audit_duties_and_output_contracts_do_not(needles):
@@ -224,6 +314,30 @@ def test_a_committed_file_that_does_not_load_or_is_not_ground_truth_fails_the_gu
         committed_observations(tmp_path)
 
 
+def test_only_the_top_level_readme_and_schema_are_exempt(tmp_path):
+    """A README or schema one level down is loaded or refused like any other file (#3176)."""
+    nested = tmp_path / "CHORUS"
+    nested.mkdir()
+    (tmp_path / "README.md").write_text("Not ground truth.\n")
+    (tmp_path / SCHEMA_NAME).write_text("{}\n")
+    (nested / SCHEMA_NAME).write_text(_ground_truth_file("Kept under the schema's name, one level down."))
+    assert committed_observations(tmp_path) == ["Kept under the schema's name, one level down."]
+    (nested / "README.md").write_text(_ground_truth_file("Kept under the README's name, one level down."))
+    with pytest.raises(ValueError, match=r"CHORUS/README\.md: not \.yaml.*neither loaded nor scanned"):
+        committed_observations(tmp_path)
+
+
+def test_finder_metadata_is_skipped_at_any_depth_and_any_other_ds_store_is_not(tmp_path):
+    finder = FINDER_HEADER + bytes(28)
+    (tmp_path / "sub").mkdir()
+    (tmp_path / ".DS_Store").write_bytes(finder)
+    (tmp_path / "sub" / ".DS_Store").write_bytes(finder)
+    assert committed_observations(tmp_path) == []
+    (tmp_path / "sub" / ".DS_Store").write_text(_ground_truth_file("Kept in a .DS_Store."))
+    with pytest.raises(ValueError, match=r"\.DS_Store: not \.yaml.*neither loaded nor scanned"):
+        committed_observations(tmp_path)
+
+
 def test_a_collected_observation_quoted_in_an_instruction_is_a_leak(tmp_path):
     """The observation half of the scan, end to end, on a synthetic directory."""
     truth = tmp_path / "truth"
@@ -236,6 +350,58 @@ def test_a_collected_observation_quoted_in_an_instruction_is_a_leak(tmp_path):
     needles = [*NAMES, *committed_observations(truth)]
     assert leaks([prompt, clean], needles, root=tmp_path) == {
         "system.md": ["A planted synthetic observation of a defect."]}
+
+
+PLAIN = "A planted synthetic observation of a defect."
+APOSTROPHE = "The planted record's maintainer is a synthetic observation."
+QUOTED = 'A "planted" synthetic observation of a defect.'
+DASHED = "A planted synthetic observation \u2013 of a defect."
+
+
+@pytest.mark.parametrize("name, observation, content", [
+    # The style of native_command_policy.command_guidance and batch_registration.child_system.
+    ("wrapped.py", PLAIN, 'GUIDANCE = ("Audit carefully. A planted synthetic "\n'
+                          '            "observation of a defect.")\n'),
+    ("apostrophe.py", APOSTROPHE, "TEXT = 'The planted record\\'s maintainer is a synthetic observation.'\n"),
+    ("quote.py", QUOTED, 'TEXT = "A \\"planted\\" synthetic observation of a defect."\n'),
+    ("fstring.py", APOSTROPHE, "TEXT = f'The planted record\\'s maintainer is a synthetic observation. {x}'\n"),
+    ("plus.py", PLAIN, 'TEXT = "A planted synth" + "etic observation of a defect."\n'),
+    # ast.walk is breadth first, so " of a defect." comes out first unless sorted.
+    ("nested_plus.py", PLAIN, 'TEXT = ("A planted synth" + "etic observation") + " of a defect."\n'),
+    # json.dumps with its default ensure_ascii, as the registration records are written.
+    ("registration.json", DASHED, json.dumps({"system": "Audit. " + DASHED})),
+    ("lines.json", PLAIN, json.dumps({"system": ["A planted synthetic", "observation of a defect."]})),
+    ("single.yaml", APOSTROPHE, yaml.safe_dump({"text": APOSTROPHE}, default_style="'")),
+    ("double.yaml", DASHED, yaml.safe_dump({"text": DASHED}, default_style='"', allow_unicode=False)),
+])
+def test_an_observation_is_found_in_the_strings_a_file_decodes_to(tmp_path, name, observation, content):
+    """Seams between literals and escapes hide a quotation from the raw text (#3175)."""
+    path = tmp_path / name
+    path.write_text(content, encoding="utf-8")
+    assert matches(content, [observation]) == []
+    assert leaks([path], [*NAMES, observation], root=tmp_path) == {name: [observation]}
+
+
+def test_a_file_that_does_not_decode_is_still_read_as_text(tmp_path):
+    broken = tmp_path / "broken.py"
+    broken.write_text(f'GUIDANCE = ("{PLAIN}"\n')
+    assert decoded_strings(broken, broken.read_text()) is None
+    assert leaks([broken], [PLAIN], root=tmp_path) == {"broken.py": [PLAIN]}
+
+
+def test_every_scanned_python_json_and_yaml_file_decodes():
+    """Otherwise its decoded strings are lost and only its raw text is scanned (#3175)."""
+    scanned = {p.resolve(): p for p in (*instruction_surfaces(), *registered_inputs(),
+                                        *registration_records(), *src_files(), INSTRUMENT)}
+    structured = [p for p in scanned.values() if p.suffix.lower() in (".py", ".json", ".yaml", ".yml")]
+    if sys.version_info < (3, 12):
+        # PEP 701 f-strings (src/download/claude_max_d4d_processor.py) parse only
+        # from 3.12; the 3.12 lane reads the same bytes.
+        structured = [p for p in structured if p.suffix != ".py"]
+    assert len(structured) > 200
+    undecoded = [str(p.relative_to(ROOT)) for p in structured
+                 if decoded_strings(p, p.read_bytes().decode("utf-8", errors="replace")) is None]
+    assert undecoded == []
 
 
 @pytest.fixture

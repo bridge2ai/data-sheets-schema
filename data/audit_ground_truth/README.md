@@ -54,12 +54,23 @@ every observation committed here in:
 - every file under `src/` other than `audit_recall.py`, whose docstring
   names the schema file here.
 
-It reads those files and never edits them. It fails on a match. It also
-fails when a file here, at any depth, does not load, or is neither a `.yaml`,
-`.yml` or `.json` ground-truth file nor this README or the schema. It does not
-see a launch message typed at run time, or a registration or rendered
-instruction written outside the repository; keeping those clean is the
-operator's job.
+It reads those files and never edits them. It reads each one as text, with
+whitespace and case folded, and a Python, JSON or YAML file also as the
+strings it decodes to. So an observation is still found when it is split
+across implicitly concatenated or `+`-joined literals, or written with
+escapes (`\'`, `\"`, a JSON `\u2013`, YAML's `''`). It fails on a match.
+
+It also fails when a file here, at any depth, does not load, or is neither a
+`.yaml`, `.yml` or `.json` ground-truth file nor this README or the schema at
+the top level. A README or schema one level down is loaded or refused like
+any other file. Finder's `.DS_Store`, recognised by its binary header, is the
+one file skipped at any depth; a `.DS_Store` holding anything else is refused.
+
+It does not see a launch message typed at run time, or a registration or
+rendered instruction written outside the repository; keeping those clean is
+the operator's job. No text scan finds an observation that is paraphrased, or
+assembled at run time from pieces that are not string literals in the scanned
+source.
 
 A report from the command carries entry ids, kinds and pointers. It never
 carries observation text or any of the audit's prose.
