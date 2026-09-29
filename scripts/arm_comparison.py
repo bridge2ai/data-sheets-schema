@@ -69,7 +69,7 @@ os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema.grounding import form_facts  # noqa: E402
 from data_sheets_schema.semantic_comparison import (  # noqa: E402
-    discrimination, instruments_of, render_discrimination, withheld_projects,
+    discrimination, evaluator_key, instruments_of, render_discrimination, withheld_projects,
 )
 CONCAT = ROOT / "data" / "d4d_concatenated"
 EVAL_DIRS = {
@@ -398,7 +398,7 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
                         "max": s.get("max_points"),
                         "adjusted_max": s.get("adjusted_max_points"),
                         "pct": s.get("normalized_percentage"),
-                        "evaluator": (d.get("model") or {}).get("evaluator_model"),
+                        "evaluator": evaluator_key(d),
                         "file": path.name, "doc": d})
     return out
 

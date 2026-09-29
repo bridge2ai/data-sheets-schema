@@ -242,6 +242,18 @@ def _instrument_names(results: list[dict[str, Any]]) -> dict[tuple[str, str | No
             for rubric, found in versions.items() for version in found}
 
 
+
+def evaluator_key(doc: dict) -> str | None:
+    """The evaluator an evaluation is measured under: `model.evaluator_model`,
+    else `model.model_id`, else `model.name`; None when it records none.
+    `model.name` is a display label on some evaluations ("Opus 5 (1M
+    context)" beside evaluator_model "claude-opus-5[1m]"), so it comes last
+    (#3319); an evaluation that records only a name is still its own
+    evaluator, never pooled with the unrecorded (Codex review of #3275).
+    Both reports key their per-evaluator blocks on this."""
+    model = doc.get("model") or {}
+    return model.get("evaluator_model") or model.get("model_id") or model.get("name") or None
+
 def discrimination(results: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """How far a cohort of semantic evaluations can separate its records.
 

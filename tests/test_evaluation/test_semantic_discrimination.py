@@ -415,3 +415,25 @@ def test_the_comparison_report_keys_evaluators_on_evaluator_model_not_display_na
     # #3322: the block names its evaluator by key, so the row whose display
     # name differs carries that key too.
     assert "| Opus 5 (1M context) (evaluator claude-opus-5[1m]) |" in text
+
+
+def test_arm_comparison_reads_a_name_only_evaluator_as_its_own(tmp_path, monkeypatch):
+    """Codex review of #3275: evaluations that record only `model.name` were
+    pooled under 'unrecorded' by arm_comparison. A scores 38, 37 and B 36:
+    pooled that is three distinct totals; apart, each is withheld."""
+    spec = importlib.util.spec_from_file_location("arm_comparison_3324", ROOT / "scripts" / "arm_comparison.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    labels = {"L_rep1": ("A", 3), "L_rep2": ("A", 2), "L_rep3": ("B", 1)}
+    for label, (name, total) in labels.items():
+        doc = r10("VOICE", label, [1] * total + [0] * (3 - total))
+        doc["model"] = {"name": name}
+        (tmp_path / f"VOICE_{label}_evaluation.json").write_text(json.dumps(doc), encoding="utf-8")
+    monkeypatch.setitem(m.EVAL_DIRS, "rubric10", tmp_path)
+    monkeypatch.setattr(m, "arm_labels", lambda prefix: set(labels))
+    got = m.rubric_scores("L", "VOICE")
+    assert sorted(s["evaluator"] for s in got) == ["A", "A", "B"]
+    arms = [k for k, *_ in m.ARMS]
+    scores = {"rubric10": {k: {p: [] for p in m.PROJECTS} for k in arms}}
+    scores["rubric10"][arms[-1]]["VOICE"] = got
+    assert [e for e, *_ in m.rubric_discrimination(scores)] == ["A", "B"]

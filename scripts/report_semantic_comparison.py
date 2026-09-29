@@ -16,6 +16,7 @@ from pathlib import Path
 from data_sheets_schema.semantic_comparison import (
     comparison_warnings, discrimination, excluded_items, render_discrimination, score_bases,
 )
+from data_sheets_schema.semantic_comparison import evaluator_key as shared_evaluator_key
 
 
 def evaluator_of(doc: dict) -> str:
@@ -26,14 +27,9 @@ def evaluator_of(doc: dict) -> str:
 
 
 def evaluator_key(doc: dict) -> str:
-    """The evaluator a discrimination block is keyed on: `model.evaluator_model`,
-    as arm_comparison keys it, else `model.model_id`, else the display name.
-    `model.name` is a display label — one committed evaluation says
-    "Opus 5 (1M context)" where its evaluator_model says "claude-opus-5[1m]" —
-    so keying on it splits one evaluator into two (#3319)."""
-    model = doc.get("model") or {}
-    return (model.get("evaluator_model") or model.get("model_id") or model.get("name")
-            or "unreported")
+    """The key a discrimination block is measured under, shared with
+    arm_comparison (`semantic_comparison.evaluator_key`, #3319)."""
+    return shared_evaluator_key(doc) or "unreported"
 
 
 def evaluator_column(doc: dict) -> str:
