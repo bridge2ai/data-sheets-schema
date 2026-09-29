@@ -136,11 +136,16 @@ def test_the_disagreements_are_the_six_the_inspections_left_unflagged(statuses, 
 
 
 def test_the_grades_of_the_flagged_ratings(statuses, linted):
-    """Documented in the module docstring; this keeps the docstring honest."""
+    """Documented in the module docstring; this keeps the docstring honest.
+    CBORG CM4AI v8 rep2 moved from 15 to 9 (#3128): its identifier and
+    fixity co-reasons were credit before "but the top band requires …"."""
     grades = Counter((s.flagged, linted[key].verdict) for key, s in statuses.items()
                      if s.q19_score < 5)
-    assert grades == Counter({(True, REPRESENTATION_ONLY): 9,
-                              (True, REPRESENTATION_AND_SUBSTANTIVE): 15,
+    cm4ai = linted[("cborg", "CM4AI_v8_rep2_r20_rating1")]
+    assert (statuses[("cborg", "CM4AI_v8_rep2_r20_rating1")].flagged, cm4ai.verdict,
+            cm4ai.concerns(SUBSTANTIVE)) == (True, REPRESENTATION_ONLY, [])
+    assert grades == Counter({(True, REPRESENTATION_ONLY): 10,
+                              (True, REPRESENTATION_AND_SUBSTANTIVE): 14,
                               (False, REPRESENTATION_ONLY): 1,
                               (False, REPRESENTATION_AND_SUBSTANTIVE): 5})
 
@@ -764,20 +769,46 @@ def test_a_disclaimer_scope_ends_where_a_clause_of_its_own_begins(note, concern)
 
 def test_a_verbless_fragment_after_an_unread_clause_is_not_read():
     """#3248, the cost: a fragment with no finite verb after a clause that
-    is not read may be its list item or an item of an outer list, and the
-    lint does not guess. It is not read either way, so the reason it may
-    give is lost rather than a disclaimed slot flagged. On the committed
-    09-11 CHORUS v7 rep1 rating this drops "and no structured
-    was_derived_from or parent_datasets linkage" after a concession; its
-    verdict does not move (graph_form is read elsewhere)."""
+    is not read may be its list item or an item of an outer list. Where
+    nothing sets it apart as the outer list's (below), it is not read, so
+    the reason it may give is lost rather than a disclaimed slot flagged."""
     result = lint_q19(item(note=(
         "Held at 4 because no errata are recorded despite the changelog being public, "
         "and was_derived_from empty.")))
     assert (result.verdict, result.concerns(REPRESENTATION)) == (SUBSTANTIVE_ONLY, [])
+
+
+def test_an_outer_list_item_after_a_concession_is_read_by_parallel_structure():
+    """#3260: the committed 09-11 CHORUS v7 rep1 rating's last "no …" item
+    after a concession is an item of the outer "no …" list, and is read; its
+    verdict does not move (graph_form was read already)."""
     chorus = lint_file(EVALUATION_DIRS[0] / "CHORUS_v7_rep1_r20_rating1_evaluation.json")
     assert chorus.verdict == REPRESENTATION_AND_SUBSTANTIVE
-    assert chorus.concerns(REPRESENTATION) == ["graph_form"]
-    assert not any("parent_datasets linkage" in r.clause for r in chorus.reasons)
+    assert chorus.concerns(REPRESENTATION) == ["empty_slot", "graph_form"]
+    assert any("parent_datasets linkage" in r.clause for r in chorus.reasons
+               if r.concern == "empty_slot")
+    result = lint_q19(item(note=(
+        "Held at 4: no version_access, no errata channel despite the changelog being thorough, "
+        "and no structured was_derived_from linkage.")))
+    assert result.concerns(REPRESENTATION) == ["empty_slot"]
+
+
+@pytest.mark.parametrize("note", [
+    # The concession's own list opens with the same word: whose item is it?
+    "Held at 4 because no errata are recorded, no changelog despite no PROV graph, "
+    "and no was_derived_from.",
+    # A disclaimer's list is never an outer list.
+    "Held at 4 because no errata are recorded, no changelog, not because of the prose form, "
+    "no was_derived_from.",
+    # An acceptance whose item does not repeat the outer list's opening.
+    "Held at 4 because no errata are recorded, no changelog, which the rubric accepts, "
+    "and was_derived_from.",
+])
+def test_an_outer_list_item_is_not_guessed_without_parallel_structure(note):
+    """#3260: no flag on a disclaimed list, and no guess where the words do
+    not say which list the fragment belongs to."""
+    result = lint_q19(item(note=note))
+    assert result.concerns(REPRESENTATION) == [], note
 
 
 def test_strict_passes_a_disclaimed_list(tmp_path):
@@ -1259,6 +1290,140 @@ def test_an_evaluation_whose_q19_is_not_the_recorded_score_is_refused(tmp_path):
     assert lint_report(inspections=[doc])[1] == 1
 
 
+# -- credit read as a reason (#2982, #3128, #3194) ----------------------------
+
+@pytest.mark.parametrize("note", [
+    "Held at 4 because errata are thin; was_derived_from links every release to its parent.",
+    "It falls short of 5 on version history: the changelog is thin and parent_datasets names "
+    "the source release.",
+])
+def test_an_empty_slot_named_as_credit_in_a_sentence_saying_nothing_is_empty_is_not_read(note):
+    """#2982: the empty-slot concern matches a slot's name; where nothing
+    the lint reads with it says anything is empty or absent, the slot is
+    credit. It is still reported as a mention: vocabulary alone."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, SUBSTANTIVE_ONLY, []), note
+    assert any(m.concern == "empty_slot" for m in result.mentions)
+
+
+@pytest.mark.parametrize("note", [
+    # The emptiness word in a neighbouring clause of the same sentence.
+    "Held at 4 because the dedicated derivation fields (was_derived_from, parent_datasets) "
+    "are empty.",
+    "No version history, errata or structured derivation, so held at 4.",
+    "Held at 4 because what is missing is the typed representation: derivation lives in "
+    "prose rather than in was_derived_from edges.",
+])
+def test_an_empty_slot_whose_emptiness_a_neighbouring_clause_states_is_read(note):
+    """#2982: the requirement is sentence-level, because a clause-level one
+    loses the committed reasons that name the slot in a list or parenthesis
+    and say it is empty beside it."""
+    assert "empty_slot" in lint_q19(item(note=note)).concerns(REPRESENTATION), note
+
+
+def test_credit_before_a_contrast_in_a_sentence_that_says_why_is_not_read():
+    """#3128: the committed CBORG CM4AI v8 rep2 form. A sentence carrying a
+    cue was read whole, so the credit before its "but" gave identifier and
+    fixity co-reasons."""
+    result = lint_q19(item(note=(
+        "Above the version-history band on several counts - named sources with persistent "
+        "identifiers and file-level fixity - but the top band requires the links to be "
+        "represented as a graph.")))
+    assert (result.basis, result.verdict) == (STATED, REPRESENTATION_ONLY)
+    assert (result.concerns(REPRESENTATION), result.concerns(SUBSTANTIVE)) == (["graph_form"], [])
+
+
+@pytest.mark.parametrize("note", [
+    # #3128's own example, with a vocabulary word in the credit.
+    "Checksums are recorded (md5 on every archive), and it is held at 4 because no PROV "
+    "graph is given.",
+    "Checksums are recorded on every archive, but it falls short of 5 because no PROV graph "
+    "is given.",
+])
+def test_credit_before_a_cue_that_names_its_own_reason_is_not_read(note):
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, result.concerns(SUBSTANTIVE)) == (
+        STATED, REPRESENTATION_ONLY, []), note
+
+
+@pytest.mark.parametrize("note, concerns", [
+    # A cue that names nothing points back at the words before it.
+    ("Checksums are missing on every archive, which keeps it from 5.", ["integrity"]),
+    ("The PROV graph is referenced, not given, which keeps it from 5.", ["graph_form"]),
+    # Credit after the cue is read (disclosed: a clause rule there drops
+    # real reasons on the committed ratings).
+    ("Held at 4 because no PROV graph is given, and checksums are recorded.",
+     ["graph_form", "integrity"]),
+])
+def test_what_a_cue_sentence_still_reads(note, concerns):
+    result = lint_q19(item(note=note))
+    assert sorted(result.concerns(REPRESENTATION) + result.concerns(SUBSTANTIVE)) == concerns, note
+
+
+def test_where_nothing_says_why_a_credit_clause_sharing_a_part_with_a_gap_is_not_read():
+    """#3128: the committed CHORUS 2026-08-28b API rep1 form. A gap part with
+    no contrast word was read whole, so its credit clause ("missing data is
+    documented") gave a missing-data reason."""
+    result = lint_q19(item(note=(
+        "Relationships are recoverable from prose, giving a partial lineage, and missing data "
+        "is documented per modality.")))
+    assert result.basis == UNSTATED
+    assert "missing_data" not in result.concerns(SUBSTANTIVE)
+    assert result.concerns(SUBSTANTIVE) == ["lineage_content"]
+    aside = lint_q19(item(note="Checksums are recorded (md5 on every archive), and no PROV graph."))
+    assert (aside.verdict, aside.concerns(SUBSTANTIVE)) == (REPRESENTATION_ONLY, [])
+
+
+@pytest.mark.parametrize("note, concerns", [
+    # A verbless clause may be an item of the list whose gap a neighbour states.
+    ("No version history, errata or structured derivation graph.",
+     ["empty_slot", "graph_form", "version_history"]),
+    # Credit sharing a clause with a gap is read (disclosed).
+    ("Checksums are recorded on every archive and was_derived_from is empty.",
+     ["empty_slot", "integrity"]),
+])
+def test_where_nothing_says_why_what_a_gap_part_still_reads(note, concerns):
+    result = lint_q19(item(note=note))
+    assert result.basis == UNSTATED
+    assert sorted(result.concerns(REPRESENTATION) + result.concerns(SUBSTANTIVE)) == concerns, note
+
+
+@pytest.mark.parametrize("label, read", [
+    ("No PROV graph, but excellent version history", ["graph_form"]),
+    ("No PROV graph but excellent version history", ["graph_form"]),
+    # A later contrast that names a gap, or a cue, is part of the reason.
+    ("No PROV graph, but no errata either", ["graph_form", "version_history"]),
+    ("Short of a full graph, but errata not recorded", ["graph_form", "version_history"]),
+])
+def test_label_credit_after_its_reason_turning_back_with_a_contrast_is_not_read(label, read):
+    """#3128: a label's reason ran from its first cue to its end, so credit
+    after it was read."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert sorted(result.concerns(REPRESENTATION) + result.concerns(SUBSTANTIVE)) == read, label
+
+
+@pytest.mark.parametrize("label", [
+    "Typed PROV graph falls short on errata",
+    "Held at 4 because the typed PROV graph lacks errata",
+])
+def test_a_label_cue_clause_naming_both_kinds_is_not_read(label):
+    """#3194: the one-kind rule covers a label clause whose withholding cue
+    stands inside it or opens it; its words do not say which concern is
+    credit. The committed ratings have no such label clause."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.verdict, result.reasons) == (REASON_NOT_DETERMINED, ()), label
+
+
+@pytest.mark.parametrize("label, concern", [
+    ("Held at 4 because was_derived_from is empty", "empty_slot"),
+    ("Typed PROV graph falls short of a machine-readable form", "graph_form"),
+])
+def test_a_label_cue_clause_naming_one_kind_is_read(label, concern):
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert result.flagged and concern in result.concerns(REPRESENTATION), label
+
+
 # -- the committed corpus -----------------------------------------------------
 
 #: Empty-slot reasons on the committed ratings whose clause names the slot in
@@ -1295,7 +1460,8 @@ _EMPTY_IN_A_NEIGHBOURING_CLAUSE = {
 
 @pytest.mark.corpus
 def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
-    """The module docstring's count (#3069). The empty-slot concern matches a
+    """The module docstring's count (#3069, #2982, 88 since #3260 read
+    CHORUS v7 rep1's outer-list item). The empty-slot concern matches a
     slot's name; on the 133 committed ratings each such reason names the slot
     in a clause saying something is empty or negated, or in one of the ten
     hand-read lists above whose emptiness a neighbouring clause states. A
@@ -1313,7 +1479,7 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     base = ROOT / "data/evaluation_llm/rubric20_semantic"
     reasons = [(path.relative_to(base).as_posix(), r) for path in ratings
                for r in lint_file(path).reasons if r.concern == "empty_slot"]
-    assert len(reasons) == 87
+    assert len(reasons) == 88
     elsewhere = {(path, r.clause): r.sentence for path, r in reasons if not empty.search(r.clause)}
     assert set(elsewhere) == set(_EMPTY_IN_A_NEIGHBOURING_CLAUSE)
     for key, said in _EMPTY_IN_A_NEIGHBOURING_CLAUSE.items():
