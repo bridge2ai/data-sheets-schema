@@ -85,7 +85,11 @@ A record the loader cannot read at all — a YAML syntax error, an impossible
 unquoted date such as `2026-02-30`, which PyYAML raises as a bare
 `ValueError`, or nesting past the interpreter's recursion limit — is likewise
 not checked. `check_text` catches whatever the loader raises, so one such
-record never stops the others in a run from being reported.
+record never stops the others in a run from being reported. The command
+`d4d evaluate slot-meaning` reads each named file itself and reports one it
+cannot read as text in the same way: a missing path, a directory, a file
+without read permission or one that is not UTF-8 is not checked, and the
+other files named in the call are still reported (#3144).
 
 ## What this is not
 

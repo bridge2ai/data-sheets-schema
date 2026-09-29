@@ -309,7 +309,10 @@ def related_datasets_cmd(records, project, runtime):
 
 
 @evaluate.command("slot-meaning")
-@click.argument("records", nargs=-1, required=True, type=click.Path(exists=True, dir_okay=False))
+# No existence, readability or directory check at the argument (#3144): click
+# would reject the whole call with a usage error, and the records named beside
+# the bad path would go unreported. The loop reports such a path as not checked.
+@click.argument("records", nargs=-1, required=True, type=click.Path(readable=False))
 @click.option("--json", "as_json", is_flag=True, help="print one JSON document instead of text")
 def slot_meaning_cmd(records, as_json):
     """Embargo, release-timing and availability text under
@@ -324,9 +327,11 @@ def slot_meaning_cmd(records, as_json):
     "controlled access") is not matched.
 
     Read-only and non-gating: exits 0 whatever it finds, and 1 only when a
-    named record was not checked. A record is not checked when it cannot be
-    read (a syntax error, or anything else the YAML loader raises, such as an
-    impossible unquoted date), is not a mapping, or repeats a key one of whose
+    named record was not checked (2 is a usage error, such as naming no
+    record). A record is not checked when it cannot be read (the path does
+    not exist, is a directory or is not readable; the file is not UTF-8; or
+    the YAML loader raises on it: a syntax error, or anything else, such as
+    an impossible unquoted date), is not a mapping, or repeats a key one of whose
     dropped earlier values held something the scan reads (#1029): a scoped
     slot, a key inside one that the scan reads (any but `id`, `source_caveats`
     and what they hold), or an ancestor such as a second `resources` block

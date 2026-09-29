@@ -8,6 +8,7 @@ their nine core twins, each by path.
 """
 
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -551,6 +552,53 @@ class TestTheCommand(unittest.TestCase):
         doc = json.loads(self._invoke("--json", self.flagged, bad_date).output.split("\nError:")[0])
         self.assertEqual([(r["path"], r["checked"]) for r in doc["records"]],
                          [(str(self.flagged), True), (str(bad_date), False)])
+
+    def _assert_not_checked_beside_the_others(self, bad, reason):
+        """The bad path is reported as not checked (exit 1, not click's
+        usage error 2), and the records named before and after it still are."""
+        out = self._invoke(self.flagged, bad, self.routed)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIsInstance(out.exception, SystemExit, out.exception)        # not a traceback
+        self.assertIn(f"{self.flagged}\n  confidential_elements[0].confidentiality_details", out.output)
+        self.assertIn(f"{bad}\n  not checked: ", out.output)
+        self.assertIn(reason, out.output.split(f"{bad}\n  not checked: ")[1].splitlines()[0])
+        self.assertIn("1 slot-meaning mismatch(es) in 1 of 2 record(s) checked", out.output)
+        self.assertIn("1 record(s) could not be checked", out.output)
+        doc = json.loads(self._invoke("--json", self.flagged, bad, self.routed).output.split("\nError:")[0])
+        self.assertEqual([(r["path"], r["checked"]) for r in doc["records"]],
+                         [(str(self.flagged), True), (str(bad), False), (str(self.routed), True)])
+
+    def test_a_missing_path_is_not_checked_and_the_others_are_reported(self):
+        """#3144: click's `exists=True` made this a usage error that reported nothing."""
+        self._assert_not_checked_beside_the_others(Path(self.tmp.name) / "missing.yaml",
+                                                   "No such file or directory")
+
+    def test_a_directory_is_not_checked_and_the_others_are_reported(self):
+        """#3144: click's `dir_okay=False` made this a usage error that reported nothing."""
+        folder = Path(self.tmp.name) / "folder.yaml"
+        folder.mkdir()
+        self._assert_not_checked_beside_the_others(folder, "Is a directory")
+
+    @unittest.skipIf(sys.platform == "win32" or getattr(os, "geteuid", lambda: 0)() == 0,
+                     "needs a POSIX mode that a non-root user cannot read through")
+    def test_a_file_without_read_permission_is_not_checked_and_the_others_are_reported(self):
+        """#3144: click's default `readable=True` made this a usage error that reported nothing."""
+        locked = Path(self.tmp.name) / "locked.yaml"
+        locked.write_text(yaml.safe_dump({"confidential_elements": [EMBARGO_TEXT]}))
+        locked.chmod(0)
+        self.addCleanup(locked.chmod, 0o600)
+        self._assert_not_checked_beside_the_others(locked, "Permission denied")
+
+    def test_a_file_that_is_not_utf8_is_not_checked_and_the_others_are_reported(self):
+        latin = Path(self.tmp.name) / "latin.yaml"
+        latin.write_bytes(b"id: example:ds\nname: caf\xe9 \xff\n")
+        self._assert_not_checked_beside_the_others(latin, "'utf-8' codec can't decode")
+
+    def test_the_help_says_a_path_it_cannot_read_is_not_checked(self):
+        """#3144: the help's "cannot be read" covers the file as well as the loader."""
+        text = " ".join(self._invoke("--help").output.split())
+        self.assertIn("the path does not exist, is a directory or is not readable; the file is not UTF-8", text)
+        self.assertIn("the other records named in the same call are still reported", text)
 
 
 #: The nine CM4AI records #2931 parsed, by (method directory, label).
