@@ -6,12 +6,18 @@ A source can label a passage with its own section heading — a Dataverse page's
 whose meaning is wrong. The case that found this: CM4AI's "Some datasets are
 under temporary pre-publication embargo" sits under
 `confidential_elements[].confidentiality_details`, with
-`confidential_elements_present: true`, in 5 of the 9 committed CM4AI records
-(v6 2026-08-28 rep2 and rep3, v7 2026-09-01 rep2, v8 2026-09-04g rep1 and
-rep2). An embargo is a statement about *when* data are released, not that the
-data are confidential, so the record asserts confidential elements on the
+`confidential_elements_present: true`, in 5 of the 9 CM4AI full records the
+issue parsed — v6 agentic 2026-08-28, v7 API 2026-09-01 and v8 API
+2026-09-04g, reps 1-3 of each — namely v6 rep2 and rep3, v7 rep2, and v8 rep1
+and rep2. An embargo is a statement about *when* data are released, not that
+the data are confidential, so the record asserts confidential elements on the
 strength of a release date. The fact itself is supported and kept elsewhere
-(`known_limitations` in 8 of the 9); the defect is the claim the slot makes.
+(`known_limitations` in 8 of those 9); the defect is the claim the slot makes.
+
+Those nine are a selection, not the corpus. On 2026-09-28 the repository
+commits 71 CM4AI full records and 63 cores; this scan flags 37 of the full
+records and 35 of the cores, 13 of each with an entry asserting
+`confidential_elements_present: true`, and no record of another project.
 
 `slot_meaning_mismatch` reports such values. It is a **slot-meaning** finding,
 not an unsupported claim: the text may be quoted exactly from the source.
@@ -54,10 +60,21 @@ of the object. Each finding carries the entry's own `<slot>_present` value, so
 a reader sees whether the misrouted text is also asserting the elements exist.
 
 A record is read as `yaml.safe_load` reads it, which keeps the last of a
-duplicated mapping key (#1029). Where the duplicate is a scoped slot or sits
-under one, the values before the last were never scanned, so
-`unread_duplicate_keys` names them and the command reports that record as not
-checked rather than clean.
+duplicated mapping key (#1029). The values before the last are never scanned.
+`unread_duplicate_keys` names a duplicate whenever one of those dropped values
+held something the scan reads: the duplicate is a scoped slot or sits under
+one, or it is an ancestor — a second `resources` block, say — whose dropped
+copy holds a scoped slot at any depth. `check_text` then reports the record as
+not checked rather than clean. A duplicated ancestor whose dropped copies hold
+no scoped slot hides nothing from this scan and is not named. The findings the
+dropped values would have produced are not reported: the record is not
+checked, not partly checked.
+
+A record the loader cannot read at all — a YAML syntax error, an impossible
+unquoted date such as `2026-02-30`, which PyYAML raises as a bare
+`ValueError`, or nesting past the interpreter's recursion limit — is likewise
+not checked. `check_text` catches whatever the loader raises, so one such
+record never stops the others in a run from being reported.
 
 ## What this is not
 
@@ -75,13 +92,20 @@ import re
 from dataclasses import asdict, dataclass
 from typing import Any, Iterator
 
-from data_sheets_schema.duplicate_keys import find_duplicate_keys
+import yaml
+
+# The #1029 gate's key identity (the constructed key, as the loader compares
+# it), so this module and the gate agree on what a duplicate is.
+from data_sheets_schema.duplicate_keys import _key_identity, find_duplicate_keys
 
 INSTRUMENT_NAME = "routing_diagnostics"
-#: Bump on any change to SCOPED_SLOTS, SKIPPED_KEYS or LEXICON. The test keeps
-#: one LEXICON_SHA256 per released version: an edit here fails it until the
-#: new digest is pinned, and pinning it under an old version rewrites that
-#: version's line, which the diff shows.
+#: Bump on any change to SCOPED_SLOTS, SKIPPED_KEYS or LEXICON, or to how the
+#: lexicon is compiled. LEXICON_SHA256 covers all four; it does not cover the
+#: traversal code, whose changes are a bump by convention only. The test keeps
+#: one LEXICON_SHA256 per released version and fails until the current
+#: version's digest is pinned. It cannot tell a new version's pin from an old
+#: version's pin rewritten in place: that edit passes the test and shows only
+#: in the diff of the pin table.
 INSTRUMENT_VERSION = 1
 INSTRUMENT = f"{INSTRUMENT_NAME} v{INSTRUMENT_VERSION} (#2931)"
 
@@ -121,9 +145,18 @@ LEXICON: dict[str, tuple[str, ...]] = {
 _PATTERNS = {kind: re.compile(r"\b(?:" + "|".join(alternatives) + r")\b", re.IGNORECASE)
              for kind, alternatives in LEXICON.items()}
 
-#: What the instrument reads, as bytes: scope, skipped keys and lexicon.
-LEXICON_SHA256 = hashlib.sha256(repr((SCOPED_SLOTS, sorted(SKIPPED_KEYS),
-                                      sorted(LEXICON.items()))).encode("utf-8")).hexdigest()
+
+def _digest(scoped_slots: tuple[str, ...], skipped_keys: frozenset[str],
+            patterns: dict[str, re.Pattern[str]]) -> str:
+    """What the instrument reads, as bytes: scope, skipped keys and each kind's
+    compiled pattern with its flags, so the word-boundary wrapper and the case
+    rule are covered as well as the alternatives."""
+    compiled = sorted((kind, pattern.pattern, pattern.flags) for kind, pattern in patterns.items())
+    return hashlib.sha256(repr((tuple(scoped_slots), sorted(skipped_keys), compiled))
+                          .encode("utf-8")).hexdigest()
+
+
+LEXICON_SHA256 = _digest(SCOPED_SLOTS, SKIPPED_KEYS, _PATTERNS)
 
 
 @dataclass(frozen=True)
@@ -215,14 +248,89 @@ def _read_by_the_scan(path: str, key: str) -> bool:
     return False
 
 
+def _holds_a_scoped_slot(node: Any) -> bool:
+    """Whether `node`, walked as `_scan` walks a record, reaches a scoped slot:
+    a mapping key naming one at any depth, through any key and through
+    aliases and merge keys. Iterative, so depth is no limit."""
+    stack, seen = [node], set()
+    while stack:
+        current = stack.pop()
+        if id(current) in seen:
+            continue
+        seen.add(id(current))
+        if isinstance(current, yaml.MappingNode):
+            for key_node, value_node in current.value:
+                if isinstance(key_node, yaml.ScalarNode) and key_node.value in SCOPED_SLOTS:
+                    return True
+                stack.append(value_node)
+        elif isinstance(current, yaml.SequenceNode):
+            stack.extend(current.value)
+    return False
+
+
+def _ancestors_hiding_a_slot(text: str) -> list[dict[str, Any]]:
+    """Duplicated keys outside every scoped slot one of whose dropped values
+    holds a scoped slot (#2980), in `find_duplicate_keys`'s shape and path
+    spelling. Keys are compared by the #1029 gate's identity and merge keys
+    are not duplicates, as there. A text the composer rejects yields nothing:
+    `safe_load` rejects it too, and the record is not checked on that."""
+    out: list[dict[str, Any]] = []
+    try:
+        loader = yaml.SafeLoader(text)
+    except yaml.YAMLError:
+        return out
+    try:
+        root = loader.get_single_node()
+        stack = [(root, "")] if root is not None else []
+        seen: set[int] = set()
+        while stack:
+            node, path = stack.pop()
+            if id(node) in seen:
+                continue
+            seen.add(id(node))
+            if isinstance(node, yaml.SequenceNode):
+                stack.extend((item, f"{path}[{i}]") for i, item in reversed(list(enumerate(node.value))))
+                continue
+            if not isinstance(node, yaml.MappingNode):
+                continue
+            groups: dict[Any, tuple[str, list[tuple[int, Any]]]] = {}
+            children = []
+            for key_node, value_node in node.value:
+                text_key = getattr(key_node, "value", None)
+                label = text_key if isinstance(text_key, str) else str(text_key)
+                child = f"{path}.{label}" if path else label
+                if text_key == "<<" and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge":
+                    children.append((value_node, f"{path}.<<" if path else "<<"))
+                    continue
+                groups.setdefault(_key_identity(loader, key_node), (label, []))[1].append(
+                    (key_node.start_mark.line + 1, value_node))
+                # A scoped slot's own contents are `_read_by_the_scan`'s to judge.
+                if text_key not in SCOPED_SLOTS:
+                    children.append((value_node, child))
+            for label, occurrences in groups.values():
+                dropped = [value for _, value in occurrences[:-1]]
+                if len(occurrences) > 1 and any(_holds_a_scoped_slot(value) for value in dropped):
+                    out.append({"path": path or "$", "key": label,
+                                "lines": [line for line, _ in occurrences], "count": len(occurrences)})
+            stack.extend(reversed(children))
+    except yaml.YAMLError:
+        return []
+    finally:
+        loader.dispose()
+    return out
+
+
 def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
-    """Duplicated mapping keys in a record's text whose earlier values the scan
-    never read: a scoped slot written twice, or a key repeated inside one.
-    `safe_load` keeps the last value (#1029), so a record carrying one of
-    these is not a clean record whatever its last values say. A duplicated
-    ancestor — two `resources` blocks, each with its own
-    `confidential_elements` — is not traced."""
-    return [d for d in find_duplicate_keys(text) if _read_by_the_scan(d["path"], d["key"])]
+    """Duplicated mapping keys in a record's text one of whose dropped values
+    held something the scan reads: a scoped slot written twice, a key
+    repeated inside one, or an ancestor — two `resources` blocks, say — whose
+    earlier copy holds a scoped slot at any depth. `safe_load` keeps the last
+    value (#1029), so a record carrying one of these is not a clean record
+    whatever its last values say. Each is named once, in line order."""
+    named = [d for d in find_duplicate_keys(text) if _read_by_the_scan(d["path"], d["key"])]
+    known = {(d["path"], d["key"], tuple(d["lines"])) for d in named}
+    named += [d for d in _ancestors_hiding_a_slot(text) if (d["path"], d["key"], tuple(d["lines"])) not in known]
+    return sorted(named, key=lambda d: d["lines"][0])
 
 
 def describe_unread(duplicates: list[dict[str, Any]]) -> str:
@@ -230,6 +338,33 @@ def describe_unread(duplicates: list[dict[str, Any]]) -> str:
     where = "; ".join(f"`{d['key']}` at {d['path']} on lines {', '.join(map(str, d['lines']))}"
                       for d in duplicates)
     return f"duplicate key {where}: a loader keeps only the last, so the earlier values were never scanned"
+
+
+def _first_line(exc: BaseException) -> str:
+    return (str(exc).splitlines() or [type(exc).__name__])[0]
+
+
+def check_text(text: str) -> tuple[list[Mismatch] | None, str | None]:
+    """A record's findings from its YAML text, or None and why it was not
+    checked: the loader could not read it, it is not a mapping, or a
+    duplicated key dropped values the scan would have read. Never raises for
+    a record the loader rejects, so one bad record in a run cannot stop the
+    others being reported (a record never looked at is not a clean one)."""
+    try:
+        record = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        return None, _first_line(exc)
+    except Exception as exc:                                   # noqa: BLE001
+        # PyYAML's constructors raise bare ValueError (an impossible unquoted
+        # date), AttributeError (`!!timestamp` on a non-date) and
+        # RecursionError (deep nesting): every one means the record was not read.
+        return None, f"the YAML loader raised {type(exc).__name__}: {_first_line(exc)}"
+    try:
+        found = slot_meaning_mismatch(record)
+        unread = unread_duplicate_keys(text)
+    except (TypeError, RecursionError) as exc:
+        return None, _first_line(exc)
+    return (None, describe_unread(unread)) if unread else (found, None)
 
 
 def as_dict(mismatch: Mismatch) -> dict[str, Any]:

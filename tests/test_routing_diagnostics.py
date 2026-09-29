@@ -8,6 +8,7 @@ their nine core twins, each by path.
 """
 
 import json
+import sys
 import unittest
 from pathlib import Path
 
@@ -152,27 +153,134 @@ class TestADuplicatedKeyHidesWhatItReplaced(unittest.TestCase):
         for text in ("source_caveats: a\nsource_caveats: b\n",
                      "known_limitations:\n- description: a\n  description: b\n",
                      "confidential_elements:\n- id: x:a\n  id: x:b\n",
-                     "confidential_elements:\n- source_caveats:\n    note: a\n    note: b\n"):
+                     "confidential_elements:\n- source_caveats:\n    note: a\n    note: b\n",
+                     # an ancestor whose dropped copy holds no scoped slot
+                     "resources:\n- known_limitations:\n  - description: a\nresources:\n- id: x:part\n",
+                     # the kept copy is the one holding the slot, and it is scanned
+                     "resources:\n- id: x:part\nresources:\n- confidential_elements:\n  - name: a\n",
+                     # `1` and `"1"` are two keys to the loader, so nothing is dropped
+                     "1:\n  confidential_elements:\n  - name: a\n\"1\":\n  id: x:part\n",
+                     # the loader merges every `<<`, so two are not a duplicate
+                     "a: &a\n  confidential_elements: [x]\nb: &b\n  y: 1\nc:\n  <<: *a\n  <<: *b\n"):
             with self.subTest(text=text):
                 self.assertEqual(rd.unread_duplicate_keys(text), [])
 
 
-#: What each released version reads. A new version adds a line; a line is
-#: never edited, so the findings of v1 mean one thing wherever they are cited.
+#: Two `resources` blocks: `safe_load` keeps the second, so the embargo entry
+#: in the first is never scanned and the parse reads clean (#3005, #2980).
+DUPLICATED_ANCESTOR = (
+    "resources:\n"
+    "- confidential_elements:\n"
+    "  - confidential_elements_present: true\n"
+    "    confidentiality_details: Two assay deposits are held under embargo.\n"
+    "resources:\n"
+    "- id: x:part\n"
+)
+
+
+class TestADuplicatedAncestorHidesAScopedSlot(unittest.TestCase):
+    def test_the_parse_reads_clean_and_the_ancestor_is_named(self):
+        self.assertEqual(_paths(yaml.safe_load(DUPLICATED_ANCESTOR)), [])  # what the parse shows
+        self.assertEqual(_paths(yaml.safe_load(DUPLICATED_ANCESTOR.split("resources:\n- id")[0])),
+                         ["resources[0].confidential_elements[0].confidentiality_details"])
+        self.assertEqual([(d["path"], d["key"], d["lines"]) for d in rd.unread_duplicate_keys(DUPLICATED_ANCESTOR)],
+                         [("$", "resources", [1, 5])])
+
+    def test_the_slot_is_found_at_any_depth_and_through_any_key(self):
+        for text, where in (
+                ("resources:\n- parts:\n    x:\n      sensitive_elements: []\n  parts: {}\n",
+                 ("resources[0]", "parts")),
+                ("source_caveats:\n  confidential_elements: [a]\nsource_caveats: b\n", ("$", "source_caveats")),
+                ("resources:\n- id: x:a\n- id: x:b\n  sub:\n  - confidential_elements: [a]\n  sub: []\n",
+                 ("resources[1]", "sub")),
+                ("base: &b\n  confidential_elements: [a]\nresources:\n  <<: *b\nresources: {}\n",
+                 ("$", "resources"))):
+            with self.subTest(text=text):
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)], [where])
+
+    def test_a_scoped_slot_duplicated_inside_a_dropped_ancestor_is_named_with_it(self):
+        text = ("resources:\n- confidential_elements: [a]\n  confidential_elements: [b]\n"
+                "resources:\n- id: x:part\n")
+        self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)],
+                         [("$", "resources"), ("resources[0]", "confidential_elements")])
+
+    def test_each_duplicate_is_named_once(self):
+        """A scoped slot written twice whose dropped value also nests a scoped
+        slot is caught by both rules and named once."""
+        text = "confidential_elements:\n- sensitive_elements: [a]\nconfidential_elements: []\n"
+        self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)],
+                         [("$", "confidential_elements")])
+
+
+#: Deeper than the composer (two frames a level) can recurse, whatever the limit.
+DEEP = 2 * sys.getrecursionlimit() + 100
+
+
+class TestARecordTheLoaderRejectsIsNotChecked(unittest.TestCase):
+    """`check_text` never raises for a record the loader rejects (#3006)."""
+
+    def test_whatever_the_loader_raises_is_a_reason_not_a_crash(self):
+        for text, raised in (("created_on: 2026-02-30\n", "ValueError: day is out of range for month"),
+                             ("created_on: 2026-13-01\n", "ValueError: month must be in 1..12"),
+                             ("n: !!int abc\n", "ValueError"),
+                             ("t: !!timestamp nope\n", "AttributeError"),
+                             ("[" * DEEP + "]" * DEEP, "RecursionError")):
+            with self.subTest(text=text[:30]):
+                found, reason = rd.check_text(text)
+                self.assertIsNone(found)
+                self.assertIn(f"the YAML loader raised {raised}", reason)
+
+    def test_a_syntax_error_and_a_list_keep_their_reasons(self):
+        self.assertEqual(rd.check_text("a: b: c\n"), (None, "mapping values are not allowed here"))
+        self.assertEqual(rd.check_text("- a list\n"), (None, "a record is a mapping, not list"))
+
+    def test_a_scan_nested_past_the_limit_is_not_checked(self):
+        from unittest import mock
+        with mock.patch.object(rd, "slot_meaning_mismatch", side_effect=RecursionError("too deep")):
+            self.assertEqual(rd.check_text("a: b\n"), (None, "too deep"))
+
+    def test_a_readable_record_is_checked(self):
+        found, reason = rd.check_text(yaml.safe_dump({"confidential_elements": [{"description": EMBARGO_TEXT}]}))
+        self.assertIsNone(reason)
+        self.assertEqual([m.path for m in found], ["confidential_elements[0].description"])
+        self.assertEqual(rd.check_text("known_limitations: []\n"), ([], None))
+
+
+#: What each released version reads. A new version adds a line, and a line
+#: is not edited, so the findings of v1 mean one thing wherever they are
+#: cited. Nothing here enforces that last rule: an old line rewritten in
+#: place passes every test below and shows only in the diff.
 LEXICON_PINS = {
-    1: "8618556c6789d008db940dca7c9a5e6e1d646436e0a36072e71166f90c3a864d",
+    1: "03262c5bc4b3676d479ec509226545e7527dbb7090b62c003fbbca60e4834299",
 }
 
 
 class TestTheInstrument(unittest.TestCase):
     def test_the_lexicon_digest_is_pinned_to_the_version(self):
-        """Editing the scope, the skipped keys or the lexicon fails here until
-        the new digest is pinned under a new version."""
+        """Editing the scope, the skipped keys, the lexicon or how it is
+        compiled fails here until the new digest is pinned under the current
+        version. A bump is what makes that pin a new line; re-pinning under
+        an existing version also passes, and only the diff shows it (#3008).
+        Two versions pinning one digest fail: a bump that changed nothing."""
         self.assertEqual(rd.INSTRUMENT_VERSION, max(LEXICON_PINS))
         self.assertEqual(rd.LEXICON_SHA256, LEXICON_PINS[rd.INSTRUMENT_VERSION])
         self.assertEqual(len(set(LEXICON_PINS.values())), len(LEXICON_PINS),
                          "two versions pin one lexicon: a bump that changed nothing, or an old pin rewritten")
         self.assertEqual(rd.INSTRUMENT, f"routing_diagnostics v{rd.INSTRUMENT_VERSION} (#2931)")
+
+    def test_the_digest_covers_how_the_lexicon_is_compiled(self):
+        """The alternatives alone do not fix what matches: the word-boundary
+        wrapper and the case rule do too, so both move the digest."""
+        import re
+        digest = lambda patterns: rd._digest(rd.SCOPED_SLOTS, rd.SKIPPED_KEYS, patterns)  # noqa: E731
+        self.assertEqual(digest(rd._PATTERNS), rd.LEXICON_SHA256)
+        case_sensitive = {k: re.compile(p.pattern) for k, p in rd._PATTERNS.items()}
+        unbounded = {k: re.compile("(?:" + "|".join(rd.LEXICON[k]) + ")", p.flags)
+                     for k, p in rd._PATTERNS.items()}
+        for changed in (case_sensitive, unbounded):
+            self.assertNotEqual(digest(changed), rd.LEXICON_SHA256)
+        self.assertNotEqual(rd._digest(rd.SCOPED_SLOTS[:1], rd.SKIPPED_KEYS, rd._PATTERNS), rd.LEXICON_SHA256)
+        self.assertNotEqual(rd._digest(rd.SCOPED_SLOTS, frozenset({"id"}), rd._PATTERNS), rd.LEXICON_SHA256)
 
     def test_the_report_says_it_is_not_a_gate(self):
         block = rd.report({"confidential_elements": [{"description": EMBARGO_TEXT}]})
@@ -248,6 +356,33 @@ class TestTheCommand(unittest.TestCase):
         self.assertIn(f"{duplicated}\n  not checked: duplicate key `confidential_elements` at $ on lines 1, 6: "
                       "a loader keeps only the last", out.output)
         self.assertIn("0 slot-meaning mismatch(es) in 0 of 1 record(s) checked", out.output)
+
+    def test_a_record_whose_ancestor_hides_a_scoped_slot_is_not_checked(self):
+        """#3005: the second `resources` parses clean; the first held the embargo."""
+        duplicated = Path(self.tmp.name) / "ancestor.yaml"
+        duplicated.write_text(DUPLICATED_ANCESTOR)
+        out = self._invoke(duplicated)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{duplicated}\n  not checked: duplicate key `resources` at $ on lines 1, 5", out.output)
+        self.assertIn("0 slot-meaning mismatch(es) in 0 of 0 record(s) checked", out.output)
+        doc = json.loads(self._invoke("--json", duplicated).output.split("\nError:")[0])
+        self.assertEqual([(r["checked"], "resources" in r["reason"]) for r in doc["records"]], [(False, True)])
+
+    def test_a_record_the_loader_rejects_does_not_silence_the_others(self):
+        """#3006: an impossible unquoted date raises a bare ValueError."""
+        bad_date = Path(self.tmp.name) / "bad_date.yaml"
+        bad_date.write_text("id: example:ds\ncreated_on: 2026-02-30\n")
+        out = self._invoke(self.flagged, bad_date, self.routed)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIsInstance(out.exception, SystemExit, out.exception)        # not a traceback
+        self.assertIn(f"{self.flagged}\n  confidential_elements[0].confidentiality_details", out.output)
+        self.assertIn(f"{bad_date}\n  not checked: the YAML loader raised ValueError: day is out of range",
+                      out.output)
+        self.assertIn("1 slot-meaning mismatch(es) in 1 of 2 record(s) checked", out.output)
+        self.assertIn("1 record(s) could not be checked", out.output)
+        doc = json.loads(self._invoke("--json", self.flagged, bad_date).output.split("\nError:")[0])
+        self.assertEqual([(r["path"], r["checked"]) for r in doc["records"]],
+                         [(str(self.flagged), True), (str(bad_date), False)])
 
 
 #: The nine CM4AI records #2931 parsed, by (method directory, label).

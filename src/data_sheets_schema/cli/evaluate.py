@@ -324,13 +324,17 @@ def slot_meaning_cmd(records, as_json):
     "controlled access") is not matched.
 
     Read-only and non-gating: exits 0 whatever it finds, and 1 only when a
-    named record could not be read as a mapping, or repeats a key whose
-    earlier values the scan would never see (#1029) — a record the
-    diagnostic never looked at is not a clean one. Nothing is written.
+    named record was not checked. A record is not checked when it cannot be
+    read (a syntax error, or anything else the YAML loader raises, such as an
+    impossible unquoted date), is not a mapping, or repeats a key one of whose
+    dropped earlier values held something the scan reads (#1029): a scoped
+    slot, a key inside one, or an ancestor such as a second `resources` block
+    holding one. A duplicate whose dropped values hold no scoped slot hides
+    nothing from this scan and does not stop the record being checked. A
+    record the diagnostic never looked at is not a clean one, and the other
+    records named in the same call are still reported. Nothing is written.
     """
     import json
-
-    import yaml
 
     from data_sheets_schema import routing_diagnostics as rd
 
@@ -338,13 +342,11 @@ def slot_meaning_cmd(records, as_json):
     for record_path in records:
         try:
             text = Path(record_path).read_text(encoding="utf-8")
-            found = rd.slot_meaning_mismatch(yaml.safe_load(text))
-        except (OSError, UnicodeDecodeError, yaml.YAMLError, TypeError) as exc:
-            reason = (str(exc).splitlines() or [type(exc).__name__])[0]
-            results.append((record_path, None, reason))
+        except (OSError, UnicodeDecodeError) as exc:
+            results.append((record_path, None, (str(exc).splitlines() or [type(exc).__name__])[0]))
             continue
-        unread = rd.unread_duplicate_keys(text)
-        results.append((record_path, None, rd.describe_unread(unread)) if unread else (record_path, found, None))
+        found, reason = rd.check_text(text)
+        results.append((record_path, found, reason))
 
     checked = [found for _, found, _ in results if found is not None]
     unchecked = len(results) - len(checked)
