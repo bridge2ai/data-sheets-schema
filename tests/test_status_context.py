@@ -525,8 +525,11 @@ def test_a_two_word_counter_heading_or_a_counter_lead_in_still_closes_the_scope(
     # governs the classes the own line does not carry.
     ("Ongoing Work Streams\nCurrent Planned Release\n50,000\nPatient admissions",
      "Current Planned Release\n50,000", "Ongoing Work Streams", "in_progress"),
-    ("Anticipated Final Dataset\nCurrent Planned Release\n50,000\nPatient admissions",
-     "Current Planned Release\n50,000", "Anticipated Final Dataset", "prospective"),
+    # An in-progress own line under a prospective heading. (A planned own
+    # line there already expresses the heading's status, so nothing is
+    # lost from the snippet and the heading is not flagged, #3232.)
+    ("Anticipated Final Dataset\nCurrent Release in Progress\n50,000\nPatient admissions",
+     "Current Release in Progress\n50,000", "Anticipated Final Dataset", "prospective"),
     ("Anticipated Final Dataset\nCurrent release; planned expansion\n50,000",
      "Current release", "Anticipated Final Dataset", "prospective"),
 ])
@@ -556,6 +559,34 @@ def test_the_snippet_itself_carries_the_modal_the_value_dropped():
     for kept in ("Access will be granted to approved researchers.",
                  "Access is anticipated for approved researchers."):
         assert _run(doc, [("access_details", snippet)], {"access_details": kept})["flags"] == []
+
+
+@pytest.mark.parametrize("heading", ["Future Data Releases", "Planned Data Releases"])
+def test_a_governor_the_snippets_own_marker_expresses_is_not_lost(heading):
+    # #3232: planned and prospective express each other (EXPRESSED_BY), so
+    # a snippet whose own "will" sits under a "Future ..." heading carries
+    # that status; a value that drops it is one loss, `modal_dropped`,
+    # whichever of the two equivalent classes the heading uses.
+    doc = f"{heading}\nThe consortium will release the imaging waveforms.\n"
+    snippet = "will release the imaging waveforms"
+    out = _run(doc, [("x", snippet)], {"x": "The consortium releases the imaging waveforms."})
+    assert _rules(out) == [("modal_dropped", "x", "planned")]
+    assert out["counts"]["flags"]["governor_outside_snippet"]["value"] == 0
+    # The heading still governs a snippet that carries no marker of its own.
+    bare = _run(doc, [("x", "release the imaging waveforms")], {"x": "The consortium releases the imaging waveforms."})
+    assert bare["flags"] and {f["rule"] for f in bare["flags"]} == {"governor_outside_snippet"}
+    # A status the snippet's marker does not express is still lost: "will"
+    # does not express in-progress.
+    ongoing = _run("Ongoing Data Releases\nThe consortium will release the imaging waveforms.\n",
+                   [("x", snippet)], {"x": "The consortium releases the imaging waveforms."})
+    assert sorted(_rules(ongoing)) == [("governor_outside_snippet", "x", "in_progress"),
+                                       ("modal_dropped", "x", "planned")]
+    # The same on a heading-shaped own line the snippet quotes (a case
+    # #3171's test carried before this): its "Planned" answers the
+    # "Anticipated" heading above.
+    panel = _run("Anticipated Final Dataset\nCurrent Planned Release\n50,000\nPatient admissions",
+                 [("x", "Current Planned Release\n50,000")], {"x": "50,000 admissions"})
+    assert _rules(panel) == [("modal_dropped", "x", "planned")]
 
 
 @pytest.mark.parametrize("leaf", sorted(sc.LABEL_LEAVES))
@@ -1108,3 +1139,74 @@ def test_replay_the_v8_rep3_chorus_receipt_quoting_the_counter_heading_is_not_fl
     governed = {f["slot"] for f in out["flags"] if f.get("governor") == "Anticipated Final Dataset"}
     assert "instances[0].counts" not in governed and "creators[0].notes" in governed
     assert {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in files} == before
+
+
+# ------------------------------------------------ run mode's refusals (#3234)
+def _run_dir(tmp_path, *, chunk_count_offset=0, snapshot="usable"):
+    """A run laid out as `run_status_context` reads it: a provenance record
+    declaring the bundle's path, md5 and chunking rule (and the chunk count
+    it cites), the coverage receipt beside it, an optional phase-1 snapshot
+    under `intermediate/`, and the final record."""
+    text, _m = _bundle(ENUMERATION)
+    bundle = tmp_path / "study.txt"
+    bundle.write_text(text, encoding="utf-8")
+    manifest = chunking.manifest_from_bytes(text.encode("utf-8"), bundle.name, chunking.DEFAULT_RULE)
+    core = tmp_path / "core"
+    (core / "intermediate").mkdir(parents=True)
+    provenance = core / "P_provenance.yaml"
+    provenance.write_text("# header\n" + yaml.safe_dump({"run": {"project": "P"}, "inputs": {
+        "bundle_path": str(bundle), "bundle_md5": _md5(text),
+        "chunks": {"rule": chunking.DEFAULT_RULE, "bundle_name": bundle.name,
+                   "chunk_count": manifest["chunk_count"] + chunk_count_offset}}}), encoding="utf-8")
+    receipt = core / "P_coverage_receipt.yaml"
+    receipt.write_text(yaml.safe_dump(_receipt(text, [(D_SLOT, D_SNIPPET)])), encoding="utf-8")
+    dropped = {"preprocessing_strategies": [{"preprocessing_details": "Data are standardized."}]}
+    kept = {"preprocessing_strategies": [{"preprocessing_details": "Data will be standardized."}]}
+    if snapshot == "usable":
+        (core / "intermediate" / "P_full.yaml").write_text(yaml.safe_dump(dropped), encoding="utf-8")
+    elif snapshot is not None:
+        (core / "intermediate" / "P_full.yaml").write_text(snapshot, encoding="utf-8")
+    # The final record keeps the status: read in the snapshot's place, it
+    # would report nothing, which is why an unusable snapshot must refuse.
+    full = tmp_path / "P_d4d.yaml"
+    full.write_text(yaml.safe_dump(kept), encoding="utf-8")
+    return provenance, receipt, full
+
+
+def test_run_mode_reads_the_snapshot_the_record_cites_chunk_count_for(tmp_path):
+    out = sc.run_status_context(*_run_dir(tmp_path))
+    assert out["checked"] and out["value_basis"].startswith("phase-1 snapshot")
+    assert [(f["rule"], f["slot"], f["final_expresses_status"]) for f in out["flags"]] == [
+        ("governor_outside_snippet", D_SLOT, True)]
+
+
+@pytest.mark.parametrize("offset", [1, -1])
+def test_run_mode_refuses_bytes_its_rule_chunks_to_another_count_than_the_record_cites(tmp_path, offset):
+    out = sc.run_status_context(*_run_dir(tmp_path, chunk_count_offset=offset))
+    assert out["checked"] is False and "not the" in out["reason"] and "it cites" in out["reason"]
+    assert "flags" not in out
+
+
+@pytest.mark.parametrize("snapshot", ["- a list\n- not a record\n", "key: [unclosed\n", "", "just a scalar\n"])
+def test_run_mode_refuses_a_snapshot_present_but_not_usable_rather_than_reading_the_final_record(tmp_path, snapshot):
+    out = sc.run_status_context(*_run_dir(tmp_path, snapshot=snapshot))
+    snap = tmp_path / "core" / "intermediate" / "P_full.yaml"
+    assert out["checked"] is False and f"snapshot {snap} is present but not usable" in out["reason"], out
+    assert "flags" not in out and "value_basis" not in out
+
+
+def test_run_mode_without_a_snapshot_reads_the_final_record(tmp_path):
+    # The agentic path writes no snapshot; the full record is then the
+    # record the receipt addresses, which here keeps the status.
+    out = sc.run_status_context(*_run_dir(tmp_path, snapshot=None))
+    assert out["checked"] and out["value_basis"].startswith("record ") and out["flags"] == []
+
+
+def test_every_file_option_says_which_mode_reads_it():
+    # #3233: each option a mode refuses outside it says so in --help.
+    receipts_cmd = cli.commands["receipts"].commands["status-context"]
+    helps = {p.name: p.help for p in receipts_cmd.params}
+    for name in ("bundle_file", "record_file", "final_file", "chunk_manifest"):
+        assert helps[name].startswith("with --receipt:"), (name, helps[name])
+    review_cmd = cli.commands["review"].commands["status-expression"]
+    assert {p.name: p.help for p in review_cmd.params}["chunk_manifest"].startswith("with --bundle:")

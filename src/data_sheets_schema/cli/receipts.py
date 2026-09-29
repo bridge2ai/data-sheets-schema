@@ -166,7 +166,7 @@ def invert(receipt_file, full_file, out_file):
 @click.option("--final", "final_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="with --receipt: the final record, to say whether each flagged value there expresses the status")
 @click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="the bundle's chunk manifest; default the one beside it or the study's")
+              help="with --receipt: the bundle's chunk manifest; default the one beside it or the study's")
 @click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
 def status_context(method, label, project, receipt_file, bundle_file, record_file, final_file,
                    chunk_manifest, as_json):

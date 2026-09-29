@@ -431,7 +431,7 @@ def agree_cmd(method, label, project, write):
 @click.option("--bundle", "bundle_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="the bundle the evidence quotes, to read each quote's context")
 @click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="the bundle's chunk manifest; default the one beside it or the study's")
+              help="with --bundle: that bundle's chunk manifest; default the one beside it or the study's")
 @click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
 def status_expression(audit_file, record_file, bundle_file, chunk_manifest, as_json):
     """Declared status the claim text does not carry (#2917):

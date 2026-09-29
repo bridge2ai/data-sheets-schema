@@ -47,8 +47,9 @@ Each `...`-part of a snippet is read in its own context, so the text a
 snippet elides counts where it shares a part's sentence and not where it
 runs across a flattened table.
 
-`governor_outside_snippet`: that context carries a marker of a class the
-snippet does not carry, and the value at the receipt's slot carries no
+`governor_outside_snippet`: that context carries a marker of a status the
+snippet's own markers do not express (`EXPRESSED_BY`: a snippet's "will"
+expresses a "Future ..." heading's status, #3232), and the value at the receipt's slot carries no
 marker expressing that status. `modal_dropped`: the snippet itself carries
 the marker and the value does not. A snippet that occurs more than once in
 its chunk is flagged only when every occurrence's context carries the
@@ -729,11 +730,17 @@ class BundleView:
     def lost_classes(self, cid: str, snippet: str, occurrences: list[list[tuple[int, int]]] | None = None
                      ) -> tuple[dict[str, dict[str, Any]] | None, int]:
         """({class: detail} carried by the context of every occurrence and not
-        by the snippet, occurrences), or (None, 0) when the snippet cannot be
-        located. An occurrence's context is the union of its parts' contexts:
-        each quoted part is read in its own sentence, so the text a `...`
-        elides counts where it shares a part's sentence and not where it
-        runs across a flattened table."""
+        expressed by the snippet, occurrences), or (None, 0) when the snippet
+        cannot be located. An occurrence's context is the union of its parts'
+        contexts: each quoted part is read in its own sentence, so the text a
+        `...` elides counts where it shares a part's sentence and not where it
+        runs across a flattened table.
+
+        "Expressed" is `EXPRESSED_BY`, the relation the value is judged by: a
+        snippet whose own "will" (planned) sits under a "Future ..." heading
+        (prospective) already carries that status, so the heading is not
+        lost, and a value that drops the "will" is counted once, as
+        `modal_dropped` (#3232)."""
         occurrences = self.locate(cid, snippet) if occurrences is None else occurrences
         if not occurrences:
             return None, 0
@@ -743,7 +750,7 @@ class BundleView:
             merged: dict[str, dict[str, Any]] = {}
             for part in parts:
                 for c, d in self.context(part).items():
-                    if c not in own:
+                    if not expresses(own, c):
                         merged.setdefault(c, d)
             per.append(merged)
         common = set(per[0]).intersection(*per[1:])
