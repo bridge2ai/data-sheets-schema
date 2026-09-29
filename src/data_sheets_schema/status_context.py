@@ -128,7 +128,12 @@ STATUS_MARKERS: dict[str, tuple[tuple[str, str], ...]] = {
 #: Terms deliberately not registered, with the reason — the list a curator
 #: signs off together with STATUS_MARKERS (#2917, owner decision 3). An
 #: exclusion carved out of a registered pattern (a negative lookahead) is
-#: listed here too, so the list is complete without reading the patterns.
+#: listed here too, and so is a sense a registered pattern's shape leaves
+#: out ("expected" beside "expected to"). A test derives every lookahead
+#: carve-out from the patterns and requires it here; a narrowing by shape
+#: cannot be derived, so the vocabulary's digest is pinned in the tests
+#: and any change to a pattern fails there until this list is reviewed
+#: (#3172).
 EXCLUDED_TERMS: dict[str, str] = {
     "target": "the noun sense dominates (target population, target variable)",
     "intended": "purpose vocabulary (intended uses), not a status",
@@ -136,6 +141,8 @@ EXCLUDED_TERMS: dict[str, str] = {
     "shall": "an obligation in licences and agreements, not a plan",
     "expected": "the statistical sense (expected value); only 'expected to' is registered",
     "plan": "the noun (a data management plan); only 'planned' and 'plan(s) to' are registered",
+    "in the process": ("the noun phrase (described in the process documentation); only 'in process' and "
+                       "'in the process of' are registered"),
     "to be used": ("an instruction, not a status (a licence's 'is not to be used for'); excluded from the "
                    "registered 'to be <participle>' pattern by a negative lookahead"),
 }

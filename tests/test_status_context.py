@@ -71,22 +71,65 @@ EXCLUDED_EXAMPLES = {
     "prospective": "a prospective cohort", "shall": "the licensee shall not redistribute",
     "expected": "the expected value", "plan": "a data management plan",
     "to be used": "the data are not to be used for commercial purposes",
+    "in the process": "described in the process documentation",
 }
 
 
-@pytest.mark.parametrize("phrase", [*EXCLUDED_EXAMPLES.values(), "described in the process documentation"])
+@pytest.mark.parametrize("phrase", EXCLUDED_EXAMPLES.values())
 def test_excluded_terms_carry_no_status(phrase):
     assert sc.classes(phrase) == {}
 
 
-def test_the_curator_list_names_every_exclusion_the_detector_makes():
-    # EXCLUDED_TERMS is what a curator signs off (#2917, owner decision 3),
-    # so an exclusion carved out of a registered pattern is listed there too
-    # (#3091): every tested exclusion is a listed term, and every listed
-    # term has a tested example.
+def test_every_listed_exclusion_has_a_tested_example_and_every_tested_exclusion_is_listed():
+    # EXCLUDED_TERMS is what a curator signs off (#2917, owner decision 3)
+    # (#3091, #3172): the examples above are the only exclusions this file
+    # tests, each names its term, and the two lists are the same list.
     assert set(EXCLUDED_EXAMPLES) == set(sc.EXCLUDED_TERMS)
     for term, phrase in EXCLUDED_EXAMPLES.items():
         assert term in phrase and sc.classes(phrase) == {}, term
+
+
+def _negative_lookaheads(pattern):
+    """(literal prefix, alternatives) for each `(?!...)` in a pattern."""
+    out, i = [], pattern.find("(?!")
+    while i >= 0:
+        depth, j = 1, i + 3
+        while depth:
+            depth += {"(": 1, ")": -1}.get(pattern[j], 0) if pattern[j - 1] != "\\" else 0
+            j += 1
+        body = pattern[i + 3:j - 1]
+        out.append((pattern[:i], body.split("|")))
+        i = pattern.find("(?!", j)
+    return out
+
+
+def test_every_lookahead_carve_out_in_a_registered_pattern_is_a_listed_exclusion():
+    # #3172: derived from the patterns, not from a hand-kept list, so a
+    # carve-out added to a pattern and not to EXCLUDED_TERMS fails here.
+    carved = set()
+    for terms in [*sc.STATUS_MARKERS.values(), sc.COUNTER_MARKERS]:
+        for term, pattern in terms:
+            assert "(?<!" not in pattern, f"{term}: read negative lookbehinds here before adding one"
+            for prefix, alternatives in _negative_lookaheads(pattern):
+                lead = prefix.split("|")[-1].replace("\\b", "")
+                assert re.fullmatch(r"[a-z ]*", lead), f"{term}: a carve-out follows literal words"
+                for alt in alternatives:
+                    word = alt.replace("\\b", "")
+                    assert re.fullmatch(r"[a-z ]+", word), f"{term}: carve-out {alt!r} is not a literal word"
+                    carved.add((lead + word).strip())
+    assert "to be used" in carved                          # the derivation sees today's carve-out
+    assert carved <= set(sc.EXCLUDED_TERMS), carved - set(sc.EXCLUDED_TERMS)
+    # The helper reads what a new carve-out would look like.
+    assert _negative_lookaheads(r"\bto be (?!used\b|funded\b)\w+(?:ed|en)\b") == [
+        (r"\bto be ", [r"used\b", r"funded\b"])]
+
+
+def test_the_vocabulary_digest_is_pinned():
+    # #3172: any change to a registered pattern, counter marker, class map
+    # or label leaf moves this digest. Rotate the pin in the same change,
+    # after listing in EXCLUDED_TERMS any sense the change leaves out.
+    assert sc.VOCABULARY == {"version": 1,
+                             "sha256": "59184b2d2ff47c54b231deefeb030369d5ebb4d956f44e9b1e96b27ccdf3efcc"}
 
 
 def test_registry_is_one_versioned_dataset_neutral_vocabulary():
