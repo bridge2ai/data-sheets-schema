@@ -55,7 +55,10 @@ more repair: both mappers write the bare DOI in the crate's own case, and
 the slot's pattern already accepts is left as written (#2989), spellings
 that differ only in case count as one DOI (#2987), and normalize repairs
 the Dataset's own `doi` only, not one nested in another object (#2988). The
-record `id` of `d4d rocrate map` takes the `doi:` CURIE form. Each verdict in
+record `id` of `d4d rocrate map` takes the `doi:` CURIE form, and its
+provenance report names the crate's own value beside each `doi` or `id` it
+rewrote (#3139); its other coercion notes, such as a date widened to a
+date-time, are still not shown on a filled row. Each verdict in
 `processed/` names the schema version, merged-schema sha256 and date it was
 reached against, and `tests/test_rocrate/test_committed_outputs.py` (corpus
 lane) re-validates the committed records against today's schema.

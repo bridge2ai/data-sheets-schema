@@ -49,12 +49,12 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.created_by | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. … |
 | Dataset.creators | filled | closeMatch | minimal | @graph[?@type='Dataset']['author'] | [{"description": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekal… |
 | Dataset.description | filled | exactMatch | none | @graph[?@type='Dataset']['description'] | The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is … |
-| Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | 10.18130/V3/XNBOPG |
+| Dataset.doi | filled | exactMatch | none | @graph[?@type='Dataset']['identifier'] | 10.18130/V3/XNBOPG — rewritten from the crate's https://doi.org/10.18130/V3/XNBOPG: resolver or `doi:` prefix removed, case kept |
 | Dataset.download_url | filled | exactMatch | none | @graph[?@type='Dataset']['contentUrl'] | http://chorus4ai.org/dataset |
 | Dataset.ethical_reviews | filled | exactMatch | none | @graph[?@type='Dataset']['ethicalReview'] | [{"description": "Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and… |
 | Dataset.extension_mechanism | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"} |
 | Dataset.funders | filled | exactMatch | none | @graph[?@type='Dataset']['funder'] | [{"name": "NIH Common Fund OT2OD032701"}] |
-| Dataset.id | filled | exactMatch | none | crate root identifier/@id | doi:10.18130/V3/XNBOPG |
+| Dataset.id | filled | exactMatch | none | crate root identifier/@id | doi:10.18130/V3/XNBOPG — rewritten from the crate's https://doi.org/10.18130/V3/XNBOPG: required by the schema; taken from the crate itself; a DOI is written as the doi: CURIE (#974) |
 | Dataset.ip_restrictions | filled | closeMatch | minimal | @graph[?@type='Dataset']['conditionsOfAccess'] | {"name": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"} |
 | Dataset.issued | filled | exactMatch | none | @graph[?@type='Dataset']['datePublished'] | 2026-04-03T00:00:00Z |
 | Dataset.keywords | filled | exactMatch | none | @graph[?@type='Dataset']['keywords'] | ["Bridge2AI", "CHoRUS", "Electronic health records", "physiological data", "medical image… |

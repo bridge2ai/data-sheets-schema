@@ -260,6 +260,85 @@ class TestDoi(unittest.TestCase):
                 self.assertEqual(doi_for_slot(written, self.pattern),
                                  ("10.5555/Test", note))
 
+    def report_cells(self, graph):
+        """The `Value / note` cell of each filled doi or id row in the
+        provenance report `write_provenance` writes for `graph`."""
+        res = map_crate(graph, self.rows, self.sv, "TEST")
+        res.validation = "PASS"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            text = path.read_text(encoding="utf-8")
+        cells = {}
+        for line in text.splitlines():
+            for name in ("Dataset.doi", "Dataset.id"):
+                if line.startswith(f"| {name} | filled |"):
+                    cells[name] = line.rstrip(" |").rsplit(" | ", 1)[1]
+        return cells
+
+    def test_the_report_names_the_crate_value_a_doi_and_id_were_rewritten_from(self):
+        """#3139. The report showed only the rewritten values, beside
+        `exactMatch / none` and the crate path, as though the crate held
+        them; the repair note and the id's #974 note reached no file."""
+        cells = self.report_cells(GRAPH)
+        self.assertEqual(
+            cells["Dataset.doi"],
+            "10.5555/Test — rewritten from the crate's https://doi.org/10.5555/Test: "
+            "resolver or `doi:` prefix removed, case kept")
+        self.assertEqual(
+            cells["Dataset.id"],
+            "doi:10.5555/Test — rewritten from the crate's https://doi.org/10.5555/Test: "
+            "required by the schema; taken from the crate itself; "
+            "a DOI is written as the doi: CURIE (#974)")
+
+    def test_the_report_claims_no_rewrite_where_the_crate_value_was_kept(self):
+        """A value written as the crate holds it is shown alone: the bare DOI
+        in `doi`, and the `doi:` CURIE in `id`. Each form rewrites only the
+        other slot."""
+        bare = self.report_cells(_with_identifier("10.5555/Test"))
+        self.assertEqual(bare["Dataset.doi"], "10.5555/Test")
+        self.assertEqual(bare["Dataset.id"],
+                         "doi:10.5555/Test — rewritten from the crate's 10.5555/Test: "
+                         "required by the schema; taken from the crate itself; "
+                         "a DOI is written as the doi: CURIE (#974)")
+        curie = self.report_cells(_with_identifier("doi:10.5555/Test"))
+        self.assertEqual(curie["Dataset.id"], "doi:10.5555/Test")
+        self.assertEqual(curie["Dataset.doi"],
+                         "10.5555/Test — rewritten from the crate's doi:10.5555/Test: "
+                         "resolver or `doi:` prefix removed, case kept")
+        # An identifier that is not a DOI fills no doi row, and the id is
+        # written as the crate wrote it.
+        ark = self.report_cells(_with_identifier("ark:59853/other"))
+        self.assertEqual(ark, {"Dataset.id": "ark:59853/other"})
+
+    def test_an_id_taken_from_a_list_names_the_whole_list(self):
+        """The id row names what the crate holds at its path, the list, and
+        says which item it took, whether or not that item is a DOI."""
+        both = ["https://doi.org/10.5555/Test", "https://doi.org/10.5555/Other"]
+        cells = self.report_cells(_with_identifier(both))
+        self.assertEqual(
+            cells["Dataset.id"],
+            'doi:10.5555/Test — rewritten from the crate\'s ["https://doi.org/10.5555/Test", '
+            '"https://doi.org/10.5555/Other"]: required by the schema; taken from the '
+            "crate itself; the first of 2 list item(s); a DOI is written as the doi: "
+            "CURIE (#974)")
+        self.assertNotIn("Dataset.doi", cells)   # two DOIs: the slot stays empty
+        ark = self.report_cells(_with_identifier(["ark:59853/other"]))
+        self.assertEqual(ark["Dataset.id"],
+                         'ark:59853/other — rewritten from the crate\'s ["ark:59853/other"]: '
+                         "required by the schema; taken from the crate itself; "
+                         "the first of 1 list item(s)")
+
+    def test_a_list_names_the_crate_list_it_gave_its_doi_up_from(self):
+        res = map_crate(_with_identifier(["ark:59853/other",
+                                          "https://doi.org/10.5555/Test"]),
+                        self.rows, self.sv, "TEST")
+        field = self.doi_field(res)
+        self.assertEqual(field.value_preview, "10.5555/Test")
+        self.assertEqual(field.rewritten_from,
+                         '["ark:59853/other", "https://doi.org/10.5555/Test"]')
+        self.assertIn("one DOI among 2", field.detail)
+
     def test_a_slot_that_declares_no_pattern_takes_only_the_bare_doi(self):
         self.assertEqual(doi_for_slot("https://doi.org/10.5555/x", None)[0],
                          "10.5555/x")

@@ -65,6 +65,16 @@ class FieldResult:
     status: str           # filled | empty | unresolvable | unplaceable
     detail: str = ""
     value_preview: str = ""
+    #: The crate's value, previewed, on the two identifier rows where the
+    #: value written is not the crate's: a `doi` slot the DOI rule repaired
+    #: (#2916), and the record `id` written as a `doi:` CURIE or taken from
+    #: one item of a list. `write_provenance` shows it and `detail` beside
+    #: the value, so the report never presents a rewritten value as the one
+    #: the crate holds at the source path (#3139). Empty when the value is
+    #: the crate's own. The other coercions (dates, joins, object shaping) do
+    #: not set it; their note stays in `detail`, which the report does not
+    #: show on a filled row.
+    rewritten_from: str = ""
 
 
 @dataclass
@@ -405,9 +415,10 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
         loss = (row.get("Information_Loss") or "").strip()
         cls, _, slot_name = d4d_path.partition(".")
 
-        def record(status, detail="", preview=""):
+        def record(status, detail="", preview="", rewritten_from=""):
             res.fields.append(FieldResult(d4d_path, source, mtype, loss,
-                                          status, detail, preview))
+                                          status, detail, preview,
+                                          rewritten_from))
 
         # Can this row be placed in a Dataset record at all?
         if cls == TARGET_CLASS:
@@ -434,34 +445,48 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
             record("unresolvable" if note == "not a crate path" else "empty", note)
             continue
 
+        crate_value = value
         value, coercion = _coerce(value, slot, sv, project or 'd4d', counter)
         if value is None:
             record("empty", coercion)
             continue
+        # Where the DOI rule in `_coerce` wrote something other than the
+        # crate's value, the report names the crate's value (#3139). A value
+        # the slot's pattern kept verbatim (#2989) is the crate's own.
+        rewritten_from = (_preview(crate_value)
+                          if slot.name == DOI_SLOT and value != crate_value else "")
         where, slot = target
         if where == "root":
             res.record[slot_name] = value
         else:
             nested.setdefault(where, {})[slot_name] = value
-        record("filled", coercion, _preview(value))
+        record("filled", coercion, _preview(value), rewritten_from)
 
     # The record's own required id: use the crate's identifier rather than
     # minting one, so the D4D record points back at the crate it came from.
     # A DOI is written as the `doi:` CURIE, the form #974's write-time
     # normaliser gives the generated arms, so the two compare as one value.
     if "id" not in res.record and root is not None:
-        crate_id = root.get("identifier") or root.get("@id")
+        crate_value = root.get("identifier") or root.get("@id")
+        crate_id = crate_value
         if isinstance(crate_id, list):
             crate_id = crate_id[0] if crate_id else None
         if crate_id:
             doi = bare_doi(crate_id)
             res.record["id"] = f"doi:{doi}" if doi else str(crate_id)
             detail = "required by the schema; taken from the crate itself"
+            if isinstance(crate_value, list):
+                detail += f"; the first of {len(crate_value)} list item(s)"
             if doi:
                 detail += "; a DOI is written as the doi: CURIE (#974)"
+            # Wherever the id written is not what the crate holds there — the
+            # CURIE of a DOI, or one item of a list — the report names the
+            # crate's value, as a `doi` row does (#3139).
+            rewritten_from = (_preview(crate_value)
+                              if res.record["id"] != crate_value else "")
             res.fields.append(FieldResult(
                 "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
-                "filled", detail, _preview(res.record["id"])))
+                "filled", detail, _preview(res.record["id"]), rewritten_from))
 
     # attach nested objects, respecting each host slot's cardinality
     for host_slot_name, obj in nested.items():
@@ -555,6 +580,11 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     ]
     for f in sorted(res.fields, key=lambda x: (x.status != "filled", x.d4d_path)):
         cell = f.value_preview or f.detail
+        if f.rewritten_from:
+            # The value written is not the crate's: say what the crate holds
+            # at the source path and what was done to it (#3139).
+            cell = (f"{f.value_preview} — rewritten from the crate's "
+                    f"{f.rewritten_from}" + (f": {f.detail}" if f.detail else ""))
         row = [f.d4d_path, f.status, f.mapping_type or "—",
                f.information_loss or "—", f.source_path or "—", cell or ""]
         lines.append("| " + " | ".join(
