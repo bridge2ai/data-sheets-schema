@@ -509,15 +509,12 @@ def leader_released(process):
 
 
 def exit_status(process):
-    """The leader's exit status as the kernel reported it before the reap, else
-    from this Popen's own reap; None when someone else reaped it unobserved,
-    because Popen would then report an invented 0 (#2985)."""
-    observed = getattr(process, '_leader_observed_status', None)
-    if observed is not None:
-        return observed
-    if getattr(process, '_leader_reaped_elsewhere', False):
-        return None
-    return process.returncode
+    """The leader's exit status as waitid reported it for an observed exit, before
+    any reap; None otherwise. Popen's returncode is never trusted on its own: after
+    ECHILD, poll() and wait() invent 0, whichever waiter calls them (#2985, #2986).
+    Every reap in this module follows an observation (reap_observed), so a run
+    the controller reaped always has one."""
+    return getattr(process, '_leader_observed_status', None)
 
 
 def reap_observed(process, timeout):

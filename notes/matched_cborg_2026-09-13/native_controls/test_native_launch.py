@@ -434,23 +434,31 @@ def test_an_exit_status_never_published_is_not_a_success(monkeypatch, tmp_path):
                       verify_launch=lambda: None)
 
 
-@pytest.mark.parametrize('reaper', ['raw_waitpid', 'ignored_sigchld'])
+@pytest.mark.parametrize('reaper', ['raw_waitpid', 'ignored_sigchld', 'raw_waitpid_then_popen_wait',
+                                    'ignored_sigchld_popen_wait'])
 def test_a_failed_child_reaped_elsewhere_is_never_returned_as_success(tmp_path, reaper):
     """#2985: when someone else reaps the leader, Popen's poll() and wait() invent status 0
     on ECHILD. execute_child returns only a status the kernel reported before the reap, else
     stops: a child that exited 3 is never returned as 0, whether a raw waitpid in another
-    thread or an ignored SIGCHLD (the kernel reaping) took the status."""
+    thread or an ignored SIGCHLD (the kernel reaping) took the status, and whether or not
+    another waiter's Popen.wait() then published an invented 0 (#2986)."""
     instruction = tmp_path / 'input.txt'; instruction.write_text('offline')
     proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: None)
     real_popen, previous = subprocess.Popen, signal.getsignal(signal.SIGCHLD)
     def reaped_elsewhere(*args, **kwargs):
         child = real_popen(*args, **kwargs)
-        if reaper == 'raw_waitpid' and kwargs.get('start_new_session'):
-            threading.Thread(target=os.waitpid, args=(child.pid, 0), daemon=True).start()
+        if kwargs.get('start_new_session'):
+            def reap():
+                if reaper.startswith('raw_waitpid'):
+                    os.waitpid(child.pid, 0)
+                if reaper.endswith('popen_wait'):
+                    child.wait()          # after ECHILD this publishes an invented 0 (#2986)
+            if reaper != 'ignored_sigchld':
+                threading.Thread(target=reap, daemon=True).start()
         return child
     outcomes = []
     try:
-        if reaper == 'ignored_sigchld':
+        if reaper.startswith('ignored_sigchld'):
             signal.signal(signal.SIGCHLD, signal.SIG_IGN)
         runner.subprocess.Popen = reaped_elsewhere
         for n in range(3):
