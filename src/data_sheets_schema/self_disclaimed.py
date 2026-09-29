@@ -6,13 +6,25 @@ is read: `creators`, `maintainers` and `data_collectors` record a role, and
 released data. The lint reads the member's own narrative leaves against a
 versioned lexicon (`lexicons/self_disclaimed_v1.yaml`). It flags the member
 when one of those leaves says the source does not establish that role or
-presence: check (a). The lexicon is scoped. A cue counts only where the
-sentence is about the member or names the container's own role or presence.
-It does not count where a guard shows the clause is about a date, an amount,
-an attribute or a study's design. With a coverage receipt, the lint also
-reports check (b) in a bucket of its own: each person-role member that no
-receipt snippet addressed to it names in one of its container's role
-predicates.
+presence: check (a). The lexicon is scoped, per pattern. A `role` cue counts
+only where its clause names the container's own role, a role verb or a
+role-assignment noun. A `self` cue counts only where a self-reference to the
+member precedes it in its own clause or, when that clause has no subject of
+its own ("It is derived, but is not yet released"), earlier in the sentence.
+A `presence` cue counts where a `self` cue would or where its clause names
+the container's own presence term. A `none` cue has no further condition:
+`role.not_necessarily` names the container's role in its cue, but
+`presence.prospective_predicate` counts whatever its clause's subject is,
+so "the consent process is prospective" in an instance's prose is flagged
+like "both statements are prospective". A clause about another subject
+never counts. A cue does not count where a guard shows the clause is about
+a date, an amount, an attribute, a narrower sub-role or a study's design;
+a guard never reads the member's own self-reference ("this contact") as
+one of those.
+
+With a coverage receipt, the lint also reports check (b) in a bucket of its
+own: each person-role member that no receipt snippet addressed to it names
+in one of its container's role predicates.
 
 Given the final record as well, the lint diffs the two. It follows each flag
 on the original to the final by identity (`receipts.remap_path`, #899) and
@@ -67,6 +79,14 @@ NON_CHECKS = (
 
 _SENTENCE = re.compile(r"(?<=[.!?;:])\s+")
 _CLAUSE = re.compile(r",\s+(?=(?:and|but|so|while|whereas|because|although|though|since)\b)", re.I)
+# The text a clause opens with before its cue when its subject is elided:
+# the conjunction, at most a subject pronoun, and adverbs ("but is not yet
+# released", "and it has not been released", "but so far is not
+# released"). A clause with a subject of its own ("but the raw images are
+# not released") is about that subject.
+_ELIDED = re.compile(
+    r"(?:(?:and|but|so|while|whereas|because|although|though|since)\s+)?(?:(?:it|he|she)\s+)?"
+    r"(?:(?:still|also|yet|currently|however|therefore|thus|so far|as yet)\s+)*", re.I)
 _EXCERPT = 240
 
 
@@ -123,8 +143,9 @@ class Lexicon:
         self._other = [re.compile(p, re.I) for p in data["other_subject"]]
         self._guards = {}
         for name, guard in data["guards"].items():
-            if guard.get("reads") not in ("clause", "before_cue", "cue"):
-                raise ValueError(f"guard {name} must read the clause, the text before the cue or the cue")
+            if guard.get("reads") not in ("clause", "before_cue", "cue", "after_cue"):
+                raise ValueError(f"guard {name} must read the clause, the text before or after the cue, "
+                                 "or the cue")
             self._guards[name] = (guard["reads"], re.compile(guard["regex"], re.I))
         assignment = data["assignment_nouns"]
         patterns = []
@@ -246,7 +267,11 @@ def _search(patterns, *texts) -> str | None:
 
 def _own_names(member: dict) -> list[re.Pattern]:
     """The member's own name as a self-reference: in full, and by its last
-    word when it reads as a personal name ("Jane Doe" -> "Doe")."""
+    word when the name reads as a personal name (two to four capitalized
+    words) and that word has at least four letters ("Jane Dough" ->
+    "Dough"). A shorter last word is too often an ordinary word or an
+    initialism, so "Jane Doe" or "Wei Li" is a self-reference only in full:
+    "Doe is not a creator" is out of scope for lack of one."""
     out = []
     for key in ("name", "variable_name"):
         name = member.get(key)
@@ -260,9 +285,33 @@ def _own_names(member: dict) -> list[re.Pattern]:
     return out
 
 
+def _masked(sentence: str, selves) -> str:
+    """The sentence with the member's own self-references blanked, offsets
+    kept, for the guards: in "which category of maintainer this contact
+    represents is not stated", "this contact" is the member, not a narrower
+    sub-role (#3080)."""
+    chars = list(sentence)
+    for rx in selves:
+        for found in rx.finditer(sentence):
+            chars[found.start():found.end()] = " " * (found.end() - found.start())
+    return "".join(chars)
+
+
+def _self_reference(selves, sentence: str, c0: int, at: int) -> str | None:
+    """A self-reference that makes the cue at `at` about the member: one in
+    the cue's own clause before it or, when that clause has no subject of
+    its own, one earlier in the sentence. "This split is balanced, but the
+    raw images are not released" is about the images (#3082)."""
+    own = _search(selves, sentence[c0:at])
+    if own is not None or c0 == 0:
+        return own
+    if _ELIDED.fullmatch(sentence[c0:at]) is None:
+        return None
+    return _search(selves, sentence[:at])
+
+
 def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     """One cue match: a flag hit, a guarded hit, or out of scope, with why."""
-    before = sentence[:m.start()]
     c0, c1 = _clause(sentence, m.start())
     clause, clause_before = sentence[c0:c1], sentence[c0:m.start()]
     out = {"rule": pattern.id, "class": pattern.cls, "cue": m.group(0)}
@@ -278,7 +327,7 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
             return {**out, "outcome": "out_of_scope", "reason": "no_role_term"}
         out["scope"] = term.group(0)
     elif pattern.scope == "presence":
-        term = _search(selves, before, clause_before)
+        term = _self_reference(selves, sentence, c0, m.start())
         if term is None:
             found = container.presence_scope.search(clause)
             term = found.group(0) if found else None
@@ -286,13 +335,16 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_or_presence_term"}
         out["scope"] = term
     elif pattern.scope == "self":
-        term = _search(selves, before, clause_before)
+        term = _self_reference(selves, sentence, c0, m.start())
         if term is None:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_reference"}
         out["scope"] = term
+    masked = _masked(sentence, selves)
+    read = {"clause": masked[c0:c1], "before_cue": masked[c0:m.start()], "cue": masked[m.start():m.end()],
+            "after_cue": masked[m.end():c1]}
     for name in pattern.guards:
         reads, rx = lexicon._guards[name]
-        found = rx.search({"clause": clause, "before_cue": clause_before, "cue": m.group(0)}[reads])
+        found = rx.search(read[reads])
         if found:
             return {**out, "outcome": "guarded", "guard": name, "term": found.group(0)}
     return {**out, "outcome": "flag"}
@@ -416,22 +468,31 @@ def _names_member(member: tuple, named: tuple, container: Container) -> bool:
 
 
 def _follow(tokens: tuple, original: Any, final: Any) -> tuple[tuple | None, str]:
-    """Where the member sits in the final record, joined by identity."""
+    """Where the member sits in the final record, joined by identity.
+
+    The member is `removed` when it, or any ancestor of it, is gone from the
+    final record or holds null or an empty list there: its own container,
+    or a list further up (a nested member under `resources: null`, #3088).
+    The nearest ancestor that resolves decides; when it is present and not
+    empty, the member is `identity_unresolved` with remap_path's basis."""
     from data_sheets_schema.receipts import remap_path
     moved = remap_path(_dotted(tokens), original, final)
     if moved["path"] is not None:
         return _undotted(moved["path"]), moved["basis"]
     if moved["basis"] in ("entry_dropped", "leaf_dropped"):
         return None, "removed"
-    holder = remap_path(_dotted(tokens[:-1]), original, final)
-    if holder["path"] is None and holder["basis"] in ("entry_dropped", "leaf_dropped"):
-        return None, "removed"
-    if holder["path"] is not None:
+    for depth in range(len(tokens) - 1, 0, -1):
+        holder = remap_path(_dotted(tokens[:depth]), original, final)
+        if holder["path"] is None:
+            if holder["basis"] in ("entry_dropped", "leaf_dropped"):
+                return None, "removed"
+            continue
         value: Any = final
         for t in _undotted(holder["path"]):
             value = value[t]
         if value is None or value == []:
             return None, "removed"
+        break
     return None, moved["basis"]
 
 
