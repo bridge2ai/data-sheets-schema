@@ -667,6 +667,56 @@ class ShellComments(Base):
                 self.assertEqual(ro._strip_comments(command), expected)
 
 
+class SedWrites(Base):
+    """sed without an in-place flag still writes a file through its `w` and
+    `W` commands, the `s///w` flag, and runs one through `e`; a script from
+    a file cannot be read (#3220)."""
+
+    def _before_draft(self, command):
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.bash(command)
+        r.write(r.full, "id: x\n")
+        r.derive()
+        return r.report()
+
+    def test_a_sed_script_that_writes_the_receipt_is_unknown(self):
+        for command in (f"sed -n 'w {REL}' /dev/null",
+                        f"sed -n 's/x/y/w {REL}' other.txt",
+                        f"sed -n -e '1p' -e 'W {REL}' other.txt",
+                        f"sed -ne '$w {REL}' other.txt",
+                        f"sed --expression='/a/w {REL}' other.txt",
+                        f"sed -n 'b end; w {REL}' other.txt",
+                        f"sed 's/.*/cp x {REL}/e' other.txt",
+                        f"sed -f fix.sed {REL}",
+                        f"sed p {REL} -i ''"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertUnknown(block, "may change the receipt other than by a Write")
+
+    def test_a_sed_script_that_only_prints_is_read_only(self):
+        for command in (f"sed -n '1,20p' {REL}",
+                        f"sed -n '/c001/,+3p' {REL}",
+                        f"sed -n '1,5p;/window/p' {REL}",
+                        f"sed -E 's|a/b|c|g; y/ab/cd/' {REL}",
+                        f"sed '$!N;P;D' {REL}",
+                        f"sed -n -e /OT2OD/p -e 's/#//gp' {REL}"):
+            with self.subTest(command=command):
+                block = self._before_draft(command)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["non_write_mutations"], [])
+
+
+class NonChecks(unittest.TestCase):
+    def test_the_unattributable_shell_write_names_every_unnamed_route(self):
+        # A write that never names the receipt is not seen at all; the stated
+        # exception must cover it, not only a glob or variable (#3221).
+        text = " ".join(ro.NON_CHECKS)
+        for route in ("glob or variable", "python fix.py", "git checkout -- DIR", "rm -r DIR"):
+            self.assertIn(route, text)
+        self.assertIn("does not name it literally", ro.__doc__)
+
+
 #: The playbook's recorder step (d4d-full-core, "Provenance record"): its
 #: `--phase` JSON and the registered line's `--render-spec-json` both name
 #: the receipt.
@@ -943,6 +993,42 @@ class Boundaries(Base):
                 self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
                 self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
                                                    "phase3_backport": 1})
+
+    def _derived(self, spelling):
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, self.C003)
+        identity = r.bash(spelling)
+        r.write(r.receipt, self.C004)
+        return identity, r.report()
+
+    def test_pushd_moves_the_directory_a_derive_resolves_against(self):
+        # #3222: pushd is a cd for `--full`, and popd returns.
+        out = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
+        for spelling in (f"pushd data && poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
+                         f"pushd data/claudecode_direct && d4d derive core --full L/CHORUS_d4d.yaml",
+                         f"pushd /elsewhere; popd; poetry run d4d derive core "
+                         f"--full data/claudecode_direct/L/CHORUS_d4d.yaml {out}"):
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+                self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
+                                                   "phase3_backport": 1})
+
+    def test_a_derive_after_pushd_elsewhere_is_not_the_boundary(self):
+        identity, block = self._derived("pushd /elsewhere && poetry run d4d derive core "
+                                        "--full data/claudecode_direct/L/CHORUS_d4d.yaml")
+        # Another record derived: no boundary, both later snippets Phase 1.
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertIsNone(block["boundaries"]["derive_core"])
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 2,
+                                           "phase3_backport": 0})
+
+    def test_popd_with_nothing_pushed_leaves_no_known_directory(self):
+        _, block = self._derived("popd && poetry run d4d derive core --full data/claudecode_direct/L/CHORUS_d4d.yaml")
+        self.assertUnknown(block, "its --full cannot be resolved")
 
     def test_a_read_of_the_receipt_is_not_a_change(self):
         r = self.run_

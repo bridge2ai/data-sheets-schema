@@ -66,8 +66,10 @@ after the last receipt Write, the draft and the derive boundary had all
 returned can reach only the final receipt, which the sha256 comparison
 covers: it is listed with `covered_by_final_sha256` and is not a reason.
 Nothing is reported as contemporaneous on incomplete evidence, except
-through a shell write the parser cannot attribute to the receipt, which
-`NON_CHECKS` names.
+through a shell write the parser cannot attribute to the receipt because
+the command does not name it literally -- a glob or variable, a script or
+program that writes it without its name on the command line, a command on
+a directory that holds it -- which `NON_CHECKS` names (#3221).
 
 The output carries counts, chunk ids, slot paths and sha256 digests, never
 snippet text or tool payloads: transcripts hold model output.
@@ -97,8 +99,10 @@ UNREAD_WRITE_ERROR = ("<tool_use_error>File has not been read yet. "
 #: file (Edit, MultiEdit, NotebookEdit, ...) changes it other than by a Write.
 READ_TOOLS = frozenset({"Read", "Grep", "Glob", "LS", "NotebookRead"})
 #: Shell programs that read their operands and write only to stdout (`sed`
-#: without an in-place flag). Anything else that names a tracked file is a
-#: possible mutation.
+#: only when `_sed_reads_only` admits its options and script: no in-place
+#: flag, no script file, and no `w`/`W`/`e` command or `s///w`/`s///e`
+#: flag, #3220). Anything else that names a tracked file is a possible
+#: mutation.
 READ_ONLY_PROGRAMS = frozenset({"cat", "head", "tail", "grep", "egrep", "fgrep", "rg", "wc", "ls",
                                 "stat", "file", "md5", "md5sum", "shasum", "sha256sum", "cmp",
                                 "diff", "nl", "sed", "echo", "printf", "pwd", "true", "test", "["})
@@ -120,8 +124,10 @@ _SEQUENTIAL = frozenset({"&&", ";"})
 NON_CHECKS = (
     "that a contemporaneous snippet supports the value it sits under (#2067: post-draft "
     "snippets stay unaccepted for semantic support until independent review)",
-    "a shell write that names the receipt only through a glob or variable, before the last "
-    "Write (one after it is caught by the final sha256)",
+    "a shell write that does not name the receipt literally, before the last Write (one after "
+    "it is caught by the final sha256): a glob or variable, a program or script that writes it "
+    "without its name on the command line (`python fix.py`), or a command on a directory that "
+    "holds it (`git checkout -- DIR`, `rm -r DIR`) (#3221)",
 )
 
 _ABSENT = object()
@@ -493,6 +499,174 @@ def _option(args: list[str], *names: str) -> list[str]:
     return values
 
 
+#: sed options that take no value and change nothing but how it reads and
+#: prints; `-l N` / `--line-length` take one. `--sandbox` refuses `w`, `e`
+#: and `r` outright.
+_SED_FLAGS = frozenset("nEsruz")
+_SED_LONG = frozenset({"--quiet", "--silent", "--regexp-extended", "--separate", "--unbuffered",
+                       "--null-data", "--zero-terminated", "--posix", "--debug", "--sandbox",
+                       "--follow-symlinks"})
+#: sed commands that take no argument and print, hold, edit the pattern
+#: space, or quit. `a`, `i`, `c` print their text; `b`, `t`, `T`, `v` and
+#: `:` name a label; `r` and `R` read a file: none writes one.
+_SED_PLAIN = frozenset("pPnNdDgGhHxz=lFq Q{}".replace(" ", ""))
+_SED_TO_EOL = frozenset("aicrR#")
+#: Commands whose label ends at `;` or a newline, so the next command is
+#: still read.
+_SED_LABELLED = frozenset(":btTv")
+_SED_S_FLAGS = frozenset("gpiImM0123456789")
+
+
+def _sed_reads_only(args: list[str]) -> bool:
+    """Whether a sed invocation writes only to stdout (#3220): no in-place
+    flag, no script from a file (it cannot be read here), and every script
+    is one `_sed_script_reads_only` admits. A spelling it does not know is
+    not read-only."""
+    scripts: list[str] = []
+    operands: list[str] = []
+    sandbox = False
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a == "-" or not a.startswith("-"):
+            operands.append(a)                      # GNU reads options after operands too
+        elif a == "--":
+            operands.extend(args[i + 1:] or [""])
+            break
+        elif a.startswith("--"):
+            name, eq, value = a.partition("=")
+            if name == "--expression":
+                if not eq:
+                    i += 1
+                    if i >= len(args):
+                        return False
+                    value = args[i]
+                scripts.append(value)
+            elif name == "--line-length":
+                if not eq:
+                    i += 1
+            elif a in _SED_LONG:
+                sandbox = sandbox or a == "--sandbox"
+            else:
+                return False                        # --in-place, --file, or unknown
+        else:
+            j = 1
+            while j < len(a):
+                c = a[j]
+                if c in "el":
+                    value = a[j + 1:]
+                    if not value:
+                        i += 1
+                        if i >= len(args):
+                            return False
+                        value = args[i]
+                    if c == "e":
+                        scripts.append(value)
+                    break
+                if c not in _SED_FLAGS:
+                    return False                    # -i, -I, -f, or unknown
+                j += 1
+        i += 1
+    if not scripts:
+        if not operands:
+            return False
+        scripts.append(operands[0])
+    return sandbox or all(_sed_script_reads_only(x) for x in scripts)
+
+
+def _sed_script_reads_only(script: str) -> bool:
+    """Whether a sed script can write only to stdout: it parses, every
+    command is one `_SED_PLAIN`, `_SED_TO_EOL`, `s` or `y` covers, and no
+    `s` carries the `w` or `e` flag. The `w`, `W` and `e` commands, and
+    anything unparsed, are writes (#3220)."""
+    n, i = len(script), 0
+
+    def delimited(i: int, delim: str) -> int | None:
+        """The index after the closing `delim` of a part starting at i."""
+        while i < n:
+            if script[i] == "\\":
+                i += 2
+                continue
+            if script[i] == "\n" and delim != "\n":
+                return None
+            if script[i] == delim:
+                return i + 1
+            i += 1
+        return None
+
+    def address(i: int) -> int | None:
+        if i < n and script[i].isdigit():
+            while i < n and (script[i].isdigit() or script[i] == "~"):
+                i += 1
+        elif i < n and script[i] == "$":
+            i += 1
+        elif i < n and script[i] in "/\\":
+            if script[i] == "\\":
+                if i + 1 >= n:
+                    return None
+                delim, i = script[i + 1], i + 2
+            else:
+                delim, i = "/", i + 1
+            i = delimited(i, delim)
+            if i is None:
+                return None
+            while i < n and script[i] in "IM":
+                i += 1
+        return i
+
+    while i < n:
+        c = script[i]
+        if c in " \t\n;":
+            i += 1
+            continue
+        start = i
+        i = address(i)
+        if i is None:
+            return False
+        if i > start and i < n and script[i] == ",":
+            i += 1
+            if i < n and script[i] in "+~":
+                i += 1
+            i = address(i)
+            if i is None:
+                return False
+        while i < n and script[i] in " \t!":
+            i += 1
+        if i >= n:
+            return False                            # an address with no command
+        c = script[i]
+        if c in _SED_PLAIN:
+            i += 1
+            if c in "qQlL":
+                while i < n and script[i].isdigit():
+                    i += 1
+        elif c in _SED_TO_EOL:
+            end = script.find("\n", i)
+            i = n if end < 0 else end + 1
+        elif c in _SED_LABELLED:
+            i += 1
+            while i < n and script[i] not in ";\n":
+                i += 1
+        elif c in "sy":
+            if i + 1 >= n or script[i + 1] in "\\\n":
+                return False
+            delim = script[i + 1]
+            i = delimited(i + 2, delim)
+            if i is None:
+                return False
+            i = delimited(i, delim)
+            if i is None:
+                return False
+            if c == "s":
+                while i < n and script[i] not in ";\n}":
+                    if script[i] not in _SED_S_FLAGS and script[i] not in " \t":
+                        return False               # w FILE, e, or unknown
+                    i += 1
+        else:
+            return False                            # w, W, e, or unknown
+    return True
+
+
 def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, Any]:
     """What one shell command does to the tracked files: the targets it names,
     whether it is known to be read-only, and each part that derives the core
@@ -506,7 +680,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
-    changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"]) for s in segments)
+    changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) for s in segments)
     for target in named:
         for token in tokens:
             if target.name not in token:
@@ -527,20 +701,31 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             if not (following == "/dev/null" or (token == ">&" and following.isdigit())):
                 read_only = False
     local = cwd
+    # `pushd` moves like `cd` and remembers where it left; `popd` returns
+    # there (#3222). A stack the command did not build (a `popd` with
+    # nothing pushed, a bare `pushd` that swaps) leaves no known directory.
+    pushed: list[str | None] = []
     full = next((x for x in targets if x.kind == "full"), None)
     for index, segment in enumerate(segments):
         rest = _program(segment)
         if not rest:
             continue
         program = os.path.basename(rest[0])
-        if program == "cd":
-            where = rest[1] if len(rest) > 1 else None
+        if program in ("cd", "pushd"):
+            if program == "pushd":
+                pushed.append(local)
+            where = rest[1] if len(rest) == 2 else None
             if where is None or not _CLEAN_PATH.fullmatch(where):
                 local = None
             elif os.path.isabs(where):
                 local = where
             else:
                 local = os.path.join(local, where) if local is not None else None
+            continue
+        if program == "popd":
+            local = pushed.pop() if pushed and len(rest) == 1 else None
+            if len(rest) > 1:
+                pushed.clear()
             continue
         args = _cli_args(rest)
         if args is not None:
@@ -562,9 +747,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             continue
         if program not in READ_ONLY_PROGRAMS:
             read_only = False
-        elif program == "sed" and any(a == "-i" or a == "-I" or a.startswith("--in-place")
-                                      or (a.startswith("-") and not a.startswith("--") and "i" in a[1:])
-                                      for a in rest[1:]):
+        elif program == "sed" and not _sed_reads_only(rest[1:]):
             read_only = False
     out["read_only"] = read_only
     return out
