@@ -118,16 +118,20 @@ other_subject:
   - '^(?:they|none of these|none of those)\b'
   - '\bthey (?:are|were)\b'
 
-# The subject of the cue's clause names other items of a presence
-# container's own kind: "Two other variables are not part of the public
-# release", "The remaining partitions are not one of the released files"
-# (#3231). Read only in the subject (a passive cue's `subject`, the stretch
-# before the cue after its last comma, self-references blanked), never in
-# the whole clause: "Unlike the other splits, this split is not released"
-# and "it is not one of the listed data types" are about the member. An
-# item named with no such determiner ("The external test set is described
-# as planned") is not read as another's: without the member's identity it
-# may be the member.
+# The item a presence container's cue says is unstated names other items of
+# the container's own kind: "Two other variables are not part of the public
+# release", "The remaining partitions are not one of the released files",
+# "No source reports the other splits as available" (#3231, #3250). Read
+# only in that item, self-references blanked: the cue's `item` group where
+# the pattern declares its object inside the cue, else the cue's subject
+# (the stretch before the cue after its last comma). Never in the whole
+# clause: "Unlike the other splits, this split is not released" and "it is
+# not one of the listed data types" are about the member. Never for a
+# person-role container, whose active cues' subject is the source they cite
+# ("These data sets do not name her as a creator", #3249). An item named
+# with no such determiner ("The external test set is described as
+# planned") is not read as another's: without the member's identity it may
+# be the member.
 other_item_subject:
   - '\b(?:another|these|those|other|such|the other|the remaining|the rest of the) (?!than\b)(?:[\w-]+ ){0,2}?(?:variables?|data elements?|elements|fields?|columns?|measures?|instances?|data types?|modalit(?:y|ies)|record types?|splits?|partitions?|(?:holdout |test |validation |training )?(?:data )?sets?)\b'
 
@@ -200,7 +204,10 @@ guards:
 
 # Scope: `role` needs one of the container's role terms or role verbs, or an
 # assignment noun no other thing owns (`assignment_owner`), in the clause
-# holding the cue; `self` needs a
+# holding the cue outside the member's own self-references, or a role term
+# or verb inside a self-reference that is the cue's own object ("does not
+# name this maintainer") and does not own it ("this author's institution",
+# "the email of this author" name no role, #3251); `self` needs a
 # self-reference before the cue, in the cue's own clause or, when that
 # clause has no subject of its own ("It is derived, but is not yet
 # released"), earlier in the sentence; `presence` needs what `self` needs
@@ -216,9 +223,10 @@ guards:
 # names no presence term of its own (#3230). A pattern that declares its
 # object inside the cue (`object: [cue]`) is read with the cue, whose free
 # span names the item it reports ("No source reports the holdout set as
-# available"). Every scope rejects an other-subject anywhere in the clause
-# holding the cue and an other-item subject in the cue's subject, each read
-# with the member's own self-references blanked.
+# available"). Every cue is rejected by an other-subject anywhere in the
+# clause holding it, and a presence container's cue also by an other item
+# in the item it reports (`other_item_subject`), each read with the
+# member's own self-references blanked.
 patterns:
   - id: role.assignment_negated
     class: role_disclaimer
@@ -308,7 +316,8 @@ patterns:
   - id: presence.none_reports_available
     class: presence_disclaimer
     kinds: [presence]
-    cue: '\b(?:none|no (?:source|document|passage|page)s?(?: in the bundle)?)\b[^.;:]{0,20}?\b(?:reports?|states?|lists?|describes?|shows?|presents?)\b[^.;:]{0,80}? as (?:available|released|present|collected|complete|delivered|distributed)\b'
+    # `item` is the item the cue reports, the span the other-item check reads.
+    cue: '\b(?:none|no (?:source|document|passage|page)s?(?: in the bundle)?)\b[^.;:]{0,20}?\b(?:reports?|states?|lists?|describes?|shows?|presents?)\b(?P<item>[^.;:]{0,80}?) as (?:available|released|present|collected|complete|delivered|distributed)\b'
     scope: presence
     guards: [date_amount]
     object: [cue]

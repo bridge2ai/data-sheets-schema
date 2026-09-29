@@ -30,13 +30,23 @@ no further condition: `role.not_necessarily` names the container's role in
 its cue, but `presence.prospective_predicate` counts whatever its clause's
 subject is, so "the consent process is prospective" in an instance's prose
 is flagged like "both statements are prospective". A clause whose words
-name other people or organisations ("those individuals") never counts, and
-nor does one whose subject names other items of a presence container's
-kind ("Two other variables are not part of the public release", "The
-remaining partitions ..."); that second check reads the subject alone, so
-"Unlike the other splits, this split is not released" still counts (#3231).
+name other people or organisations ("those individuals") never counts. In
+a presence container, nor does a cue whose reported item names other items
+of the container's kind ("Two other variables are not part of the public
+release", "The remaining partitions ...", "No source reports the other
+splits as available"); that second check reads the item alone, the cue's
+subject or, where the pattern declares its object inside the cue, the
+cue's `item` group, so "Unlike the other splits, this split is not
+released" still counts (#3231, #3250). It is not applied to a person-role
+container, where an active cue's subject is the source it cites: "These
+data sets do not name her as a creator" is the member's disclaimer (#3249).
 The member's own self-reference ("this member among the creators") is
 blanked before both checks, so it is never read as someone else (#3156).
+Nor does the role noun inside a self-reference put a clause in `role`
+scope by itself: it counts only where the self-reference is the cue's own
+object ("does not name this maintainer") and does not own it, so "this
+author's institution is not stated" is out of scope as "her institution"
+is (#3251).
 
 A cue does not count where a guard shows that what it says is unstated is a
 date, an amount, an attribute, a narrower sub-role or a study's design. The
@@ -363,6 +373,39 @@ def _masked(sentence: str, selves) -> str:
     return "".join(chars)
 
 
+_POSSESSIVE_AFTER = re.compile(r"['\u2019]s?\b|['\u2019](?=\s)")
+_POSSESSIVE_BEFORE = re.compile(r"\b(?:of|for)\s+$", re.I)
+
+
+def _possessors_blanked(sentence: str, selves) -> str:
+    """The sentence with those of the member's self-references blanked that
+    own something rather than name the member: a possessive ("this author's
+    institution") or the object of `of`/`for` ("the email of this author").
+    Offsets are kept. What is unstated there is the possessed thing, so the
+    role noun inside the self-reference does not name the role (#3251);
+    "does not name this maintainer" keeps its self-reference."""
+    chars = list(sentence)
+    for rx in selves:
+        for found in rx.finditer(sentence):
+            if (_POSSESSIVE_AFTER.match(sentence, found.end())
+                    or _POSSESSIVE_BEFORE.search(sentence[:found.start()])):
+                chars[found.start():found.end()] = " " * (found.end() - found.start())
+    return "".join(chars)
+
+
+def _item_text(pattern, parts: dict[str, str], masked: str, m) -> str:
+    """Where a presence cue names the item it says is unstated, for the
+    other-item check: the cue's `item` group when the pattern declares its
+    object inside the cue ("No source reports <the other splits> as
+    available", #3250), the whole cue when that pattern has no such group,
+    and otherwise the cue's subject."""
+    if "cue" in pattern.object:
+        if "item" in m.re.groupindex and m.start("item") >= 0:
+            return masked[m.start("item"):m.end("item")]
+        return parts["cue"]
+    return parts["subject"]
+
+
 def _own_self_reference(selves, text: str) -> str | None:
     """The first self-reference in `text` (the cue's clause up to the cue)
     that the cue is about. One a comma separates from the cue counts only
@@ -451,23 +494,32 @@ def _owned_by_other(lexicon, container, sentence: str, masked: str, noun) -> str
     return f"{preposition} {owner}"
 
 
-def _role_scope(lexicon, container, sentence: str, masked: str, c0: int, c1: int, m) -> tuple[str, str]:
+def _role_scope(lexicon, container, sentence: str, masked: str, c0: int, c1: int, m,
+                objects=()) -> tuple[str, str]:
     """(`scope`, term) for a `role` cue: the first role term, role verb or
     member-owned assignment noun in its clause, or (`out_of_scope` reason,
     term) when there is none or the cue's own assignment noun is another
-    thing's (#3209)."""
+    thing's (#3209). The clause is read with the member's self-references
+    blanked, so the role noun in "this author" puts nothing in scope by
+    itself: "For this creator, the dataset license is not stated" names no
+    role. A self-reference counts only inside the cue's own object
+    (`objects`, possessor self-references already blanked), where it is what
+    the cue says is unstated: "does not name this maintainer" (#3251)."""
     for noun in lexicon._assignment.finditer(sentence, m.start(), m.end()):
         owner = _owned_by_other(lexicon, container, sentence, masked, noun)
         if owner is not None:
             return "assignment_noun_of_other", f"{noun.group(0)} {owner}"
     foreign = None
-    for found in container.role_scope.finditer(sentence, c0, c1):
+    for found in container.role_scope.finditer(masked, c0, c1):
         if lexicon._assignment.fullmatch(found.group(0)):
             owner = _owned_by_other(lexicon, container, sentence, masked, found)
             if owner is not None:
                 foreign = foreign or f"{found.group(0)} {owner}"
                 continue
         return "scope", found.group(0)
+    found = _search([container.role_words], *objects)
+    if found:
+        return "scope", found
     return ("assignment_noun_of_other", foreign) if foreign else ("no_role_term", None)
 
 
@@ -479,7 +531,9 @@ def _object_texts(pattern, container, raw: dict[str, str], masked: dict[str, str
     `as` complement after a passive cue: "are not recorded as creator
     affiliations"). The source a sentence cites is an active cue's subject
     and is not read. A role cue is read this narrowly only where its object
-    names the role itself (read unmasked, so "this maintainer" names one).
+    names the role itself (read with only possessor self-references blanked,
+    so "this maintainer" names one and "this author's institution" does
+    not, #3251).
     Where the role that licenses it lies elsewhere in the clause ("the
     author affiliations ... do not name the Hastings Center", "No source
     names a further creating team, assigns CRediT roles, ...") what the cue
@@ -518,16 +572,25 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     other = _search(lexicon._other, masked[c0:m.start()], masked[c0:c1])
     if other:
         return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
-    # The cue's subject names other items of a presence container's kind
-    # ("Two other variables are not part of the public release"), read in
-    # the subject alone: "Unlike the other splits, this split is not
-    # released" is about the member (#3231).
+    # The item a presence cue says is unstated names other items of the
+    # container's kind ("Two other variables are not part of the public
+    # release", "No source reports the other splits as available"), read in
+    # that item alone: "Unlike the other splits, this split is not released"
+    # is about the member (#3231). Only a presence container's: a role cue's
+    # subject is the source it cites, not another item (#3249, #3250).
     parts = _parts(masked, c0, c1, m, sentence)
-    other = _search(lexicon._other_item, parts["subject"])
-    if other:
-        return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
+    if container.kind == "presence":
+        other = _search(lexicon._other_item, _item_text(pattern, parts, masked, m))
+        if other:
+            return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
+    # The object read with only the member's possessor self-references
+    # blanked ("this author's institution", "the email of this author"): a
+    # self-reference that is itself the object ("does not name this
+    # maintainer") names the role, one that owns the object does not (#3251).
+    objects = _parts(_possessors_blanked(sentence, selves), c0, c1, m, sentence)
     if pattern.scope == "role":
-        verdict, term = _role_scope(lexicon, container, sentence, masked, c0, c1, m)
+        verdict, term = _role_scope(lexicon, container, sentence, masked, c0, c1, m,
+                                    [objects[p] for p in pattern.object])
         if verdict != "scope":
             return {**out, "outcome": "out_of_scope", "reason": verdict,
                     **({"term": term} if term else {})}
@@ -546,7 +609,7 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_reference"}
         out["scope"] = term
     read = {k: [parts[k]] for k in ("clause", "before_cue", "cue", "after_phrase")}
-    read["object"] = _object_texts(pattern, container, _parts(sentence, c0, c1, m), parts)
+    read["object"] = _object_texts(pattern, container, objects, parts)
     for name in pattern.guards:
         reads, rx = lexicon._guards[name]
         for text in read[reads]:

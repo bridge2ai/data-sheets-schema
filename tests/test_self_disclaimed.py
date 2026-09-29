@@ -19,15 +19,16 @@ LEXICON = sd.load_lexicon()
 #: Pins on the lexicon's exact bytes, one per version. Changing the file
 #: without a version bump fails here; so does bumping without a pin. v1 was
 #: revised in review before it first merged (#3029), so this PR's commits
-#: carry five earlier byte versions under `version: 1`:
+#: carry six earlier byte versions under `version: 1`:
 #:   9b1f536ba02afc9971bbe9e28da316ea1c3c90e356bdbcc2c200400259521b04 (e00711d21, first commit)
 #:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
 #:   14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35 (cf3d16cb3, review round 2)
 #:   56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4 (df35537aa, review round 2)
 #:   3b2949e29c7aebef79c6e77894d735c6fa2ce1a0ae8800463374d63fe45a5f3a (7e327b512, review round 3)
+#:   626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6 (5705a4f3f, review round 4)
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161).
-LEXICON_PINS = {1: "626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6"}
+LEXICON_PINS = {1: "d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c"}
 
 
 def record(**containers):
@@ -315,11 +316,13 @@ def test_the_members_own_self_reference_is_not_another_subject(container, text):
 @pytest.mark.parametrize("container,text,term", [
     ("maintainers", "The maintainer's address is not stated.", "address"),
     ("data_collectors", "The collector's address is not stated.", "address"),
-    ("maintainers", "The postal address of this maintainer is not given in any source.", "address"),
-    ("creators", "This creator's department is not stated.", "department"),
+    ("maintainers", "The postal address of the maintainer is not given in any source.", "address"),
+    ("creators", "The creator's department is not stated.", "department"),
 ])
 def test_a_singular_address_or_a_department_is_an_attribute(container, text, term):
-    """#3081: the attribute guard matched only the plural 'addresses'."""
+    """#3081: the attribute guard matched only the plural 'addresses'. The
+    owner is "the maintainer", not the member's own self-reference: "this
+    creator's department" puts nothing in role scope at all (#3251)."""
     out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
     assert out["flags"] == [], text
     assert [(g["guard"], g["term"]) for g in out["guarded"]] == [("attribute", term)]
@@ -487,6 +490,74 @@ def test_other_items_outside_the_subject_do_not_reject_the_member(container, tex
     items named as a contrast or as the reference set leave the member's
     own disclaimer counted."""
     assert outcomes(container, text) == [(rule, "flag", None)]
+
+
+@pytest.mark.parametrize("container,text,rule", [
+    ("creators", "These data sets list her as a contact but do not name her as a creator.",
+     "role.assignment_negated"),
+    ("creators", "The other data sets do not name her as a creator.", "role.assignment_negated"),
+    ("maintainers", "Those columns do not identify this person as the maintainer.", "role.assignment_negated"),
+    ("data_collectors", "The other instances of the survey do not name this person as a collector.",
+     "role.assignment_negated"),
+    ("creators", "Such fields do not state a role for this person.", "role.no_role_stated"),
+])
+def test_a_role_cues_cited_source_is_not_another_item(container, text, rule):
+    """#3249: the other-item check is a presence container's. A role cue's
+    subject is the source it cites, so a source named with a determiner and
+    an item noun leaves the member's role disclaimer counted."""
+    assert outcomes(container, text) == [(rule, "flag", None)], text
+
+
+@pytest.mark.parametrize("text,term", [
+    ("No source reports the other splits as available.", "the other splits"),
+    ("No source reports those partitions as available.", "those partitions"),
+    ("No source reports the remaining partitions as released.", "the remaining partitions"),
+])
+def test_an_other_item_in_a_cue_that_holds_its_object_is_another_subject(text, term):
+    """#3250: `presence.none_reports_available` names the item it reports
+    inside the cue; the other-item check reads that item, not the empty
+    stretch before "No source"."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert out["flags"] == [], text
+    assert [(r["rule"], r["reason"], r["term"]) for r in out["out_of_scope"]] == [
+        ("presence.none_reports_available", "other_subject", term)]
+
+
+def test_the_cited_source_of_a_cue_that_holds_its_object_is_not_the_item():
+    """#3250: the source "none of the other data sets" is outside the `item`
+    group, so it does not reject the member's own presence disclaimer."""
+    assert outcomes("splits", "None of the other sets reports the holdout set as available.") == [
+        ("presence.none_reports_available", "flag", None)]
+
+
+@pytest.mark.parametrize("text,rule", [
+    ("The sources do not give this author's institution.", "role.assignment_negated"),
+    ("The sources do not give this author's employer.", "role.assignment_negated"),
+    ("This author's institution is not stated.", "role.passive_not_stated"),
+    ("The institution of this author is not stated.", "role.passive_not_stated"),
+    ("For this creator, the dataset license is not stated.", "role.passive_not_stated"),
+])
+def test_a_possessor_or_incidental_self_reference_does_not_name_the_role(text, rule):
+    """#3251: the role noun inside the member's own self-reference names the
+    role only where the self-reference is the cue's object. Owning what is
+    unstated, or standing outside the cue's clause object, it reads like
+    "her": out of scope for want of a role term."""
+    assert outcomes("creators", text) == [(rule, "out_of_scope", "no_role_term")], text
+    plain = text.replace("this author's", "her").replace("of this author", "of her") \
+        .replace("For this creator", "For her")
+    assert outcomes("creators", plain) == [(rule, "out_of_scope", "no_role_term")], plain
+
+
+@pytest.mark.parametrize("container,text,rule,scope", [
+    ("maintainers", "The sources do not name this maintainer.", "role.assignment_negated", "maintainer"),
+    ("maintainers", "This maintainer is not named in any source.", "role.passive_not_stated", "maintainer"),
+    ("creators", "No source names this author.", "role.none_assigns", "author"),
+])
+def test_a_self_reference_that_is_the_cues_object_still_names_the_role(container, text, rule, scope):
+    """#3251: the self-reference that is itself what the cue says is unstated
+    keeps licensing role scope."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [(rule, scope)], text
 
 
 def test_scope_is_read_in_the_clause_holding_the_cue():
