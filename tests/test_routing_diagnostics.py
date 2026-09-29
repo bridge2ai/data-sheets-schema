@@ -609,7 +609,8 @@ class TestTheLoaderIsBounded(unittest.TestCase):
         found, reason = rd.check_text(text)
         elapsed = time.perf_counter() - started
         self.assertIsNone(found)
-        self.assertIn(f"would copy more than {rd.MAX_TRAVERSAL_STEPS:,} pairs", reason)
+        self.assertTrue(reason.startswith(
+            f"the loader's merge keys would copy more than {rd.MAX_TRAVERSAL_STEPS:,} pairs"), reason)
         self.assertLess(elapsed, 10.0)
 
     def test_the_bound_counts_the_pairs_merges_copy(self):
