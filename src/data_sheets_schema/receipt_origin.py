@@ -47,7 +47,11 @@ multi-line command, or a failed `&&` chain) the derive is ambiguous, unless
 the native control denied the call, which then never ran. A call the runtime
 backgrounded is ambiguous too: its result is the launch, not the end. A
 shell command is read as bash reads it: `#` starts a comment only at the
-start of a word, outside quotes (#3184).
+start of a word, outside quotes (#3184), and a `cd`, `pushd` or `popd`
+moves the directory a later part's `--full` resolves against only where
+that part runs only if the change ran and succeeded -- reached by `;` or
+`&&` and followed by `&&` alone up to the part; otherwise, and in a
+multi-line command, the directory is not known (#3268).
 
 The status is `unknown`, with every reason, and no classification is
 reported when the history cannot be rebuilt: a transcript is missing,
@@ -62,8 +66,11 @@ since the inner command is not parsed, #3240) where the change can reach
 the pre-draft or derive-time snapshot, or the full record is changed that
 way before its first Write; the first observed Write of either file updated
 an existing file, or carries no create/update metadata to say it did not; a
-`derive core` of the full record cannot be placed; or the rebuilt final
-receipt's sha256 differs from the file on disk. A non-Write change issued
+`derive core` of the full record cannot be placed; a receipt Write was in
+flight (issued before the other had returned) together with another
+receipt Write, the first full-record Write or the derive boundary, so which
+took effect first cannot be told (#3268); or the rebuilt final receipt's
+sha256 differs from the file on disk. A non-Write change issued
 after the last receipt Write, the draft and the derive boundary had all
 returned can reach only the final receipt, which the sha256 comparison
 covers: it is listed with `covered_by_final_sha256` and is not a reason.
@@ -72,9 +79,11 @@ through a shell write the parser cannot attribute to the receipt because
 the command does not name it literally -- a glob or variable, a script or
 program that writes it without its name on the command line, a command on
 a directory that holds it -- or through a ripgrep preprocessor set in a
-config file from outside the command (#3256), which `NON_CHECKS` names
-(#3221). `rg --pre CMD` runs CMD on each file it searches, so an `rg`
-call that sets a preprocessor on its command line is not read-only.
+config file from outside the command (#3256), or a ripgrep hostname helper
+set in a config file the same way (#3268), which `NON_CHECKS` names
+(#3221). `rg --pre CMD` runs CMD on each file it searches and `rg
+--hostname-bin CMD` runs CMD for its hyperlinks, so an `rg` call that
+sets either on its command line is not read-only.
 
 The output carries counts, chunk ids, slot paths and sha256 digests, never
 snippet text or tool payloads: transcripts hold model output.
@@ -107,7 +116,8 @@ READ_TOOLS = frozenset({"Read", "Grep", "Glob", "LS", "NotebookRead"})
 #: only when `_sed_reads_only` admits its options and script: no in-place
 #: flag, no script file, and no `w`/`W`/`e` command or `s///w`/`s///e`
 #: flag, #3220; `rg` only when `_rg_reads_only` admits it: no `--pre`
-#: preprocessor, which runs a command on each file searched, #3256).
+#: preprocessor, which runs a command on each file searched, #3256, and no
+#: `--hostname-bin` helper, which runs a command for hyperlinks, #3268).
 #: Anything else that names a tracked file is a possible mutation, and so
 #: is any command that substitutes one (`_substitutes`, #3240).
 READ_ONLY_PROGRAMS = frozenset({"cat", "head", "tail", "grep", "egrep", "fgrep", "rg", "wc", "ls",
@@ -136,8 +146,9 @@ NON_CHECKS = (
     "without its name on the command line (`python fix.py`), or a command on a directory that "
     "holds it (`git checkout -- DIR`, `rm -r DIR`) (#3221)",
     "a ripgrep preprocessor set in a config file that `RIPGREP_CONFIG_PATH` names from outside "
-    "the command (exported earlier or inherited): `rg` is read-only only when neither its "
-    "arguments nor its own assignments set one (#3256)",
+    "the command (exported earlier or inherited), or a hostname helper (`--hostname-bin`) set "
+    "there: `rg` is read-only only when neither its arguments nor its own assignments set "
+    "either (#3256, #3268)",
 )
 
 _ABSENT = object()
@@ -453,12 +464,52 @@ def _substitutes(command: str) -> bool:
     return False
 
 
+def _newlines_as_joins(command: str) -> str:
+    """The (comment-free) command with each unquoted newline read as the
+    command separator it is to bash. shlex takes a newline for a space, so
+    `cd data\\nd4d derive core ...` was one part whose program is `cd`, and
+    the derive on the second line was never seen (#3268). A newline inside
+    quotes stays text. A here-document's body lines become parts too, which
+    can only add a part: never a known directory or a read-only call, since
+    a multi-line command is neither."""
+    out: list[str] = []
+    i, n = 0, len(command)
+    quote: str | None = None
+    while i < n:
+        ch = command[i]
+        if quote is not None:
+            if ch == "\\" and quote != "'" and i + 1 < n:
+                out.append(command[i:i + 2])
+                i += 2
+                continue
+            out.append(ch)
+            if ch == quote[-1]:
+                quote = None
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            out.append(command[i:i + 2])
+            i += 2
+            continue
+        if ch == "$" and command[i + 1:i + 2] == "'":
+            quote = "$'"
+            out.append("$'")
+            i += 2
+            continue
+        if ch in "'\"":
+            quote = ch
+        out.append(" ; " if ch == "\n" else ch)
+        i += 1
+    return "".join(out)
+
+
 def _tokens(command: str) -> list[str] | None:
     """The command's words and operators, or None when it does not tokenise.
     Comments are removed first, the way bash removes them, and the lexer's
     own comment rule is off: shlex ends a word at any `#`, which would drop
     everything after `s/#//g` (#3184)."""
-    lexer = shlex.shlex(_strip_comments(command.replace("\\\n", " ")), posix=True, punctuation_chars=True)
+    text = _newlines_as_joins(_strip_comments(command.replace("\\\n", " ")))
+    lexer = shlex.shlex(text, posix=True, punctuation_chars=True)
     lexer.whitespace_split = True
     lexer.commenters = ""
     try:
@@ -568,18 +619,24 @@ _SED_LABELLED = frozenset(":btTv")
 _SED_S_FLAGS = frozenset("gpiImM0123456789")
 
 
+#: ripgrep options whose value is a command ripgrep runs (#3256, #3268).
+_RG_RUNS = ("--pre", "--hostname-bin")
+
+
 def _rg_reads_only(segment: list[str]) -> bool:
     """Whether a ripgrep invocation writes only to stdout (#3256): ripgrep
-    runs `--pre COMMAND` on each file it searches, so neither a `--pre`
-    argument (in either spelling, before or after `--`) nor an assignment of
-    `RIPGREP_CONFIG_PATH` on the segment, whose file may set one, is
+    runs `--pre COMMAND` on each file it searches, and `--hostname-bin
+    COMMAND` to name the host for its hyperlinks (#3268), so neither
+    argument (in either spelling, before or after `--`) nor an assignment
+    of `RIPGREP_CONFIG_PATH` on the segment, whose file may set either, is
     admitted. `--pre-glob` only narrows a `--pre` and is harmless alone."""
     for token in segment:
         if not _ASSIGNMENT.fullmatch(token):
             break
         if token.startswith("RIPGREP_CONFIG_PATH="):
             return False
-    return not any(a == "--pre" or a.startswith("--pre=") for a in _program(segment)[1:])
+    return not any(a == name or a.startswith(name + "=")
+                   for a in _program(segment)[1:] for name in _RG_RUNS)
 
 
 def _sed_reads_only(args: list[str]) -> bool:
@@ -775,16 +832,33 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # reads as no directory name (#3257).
     pushed: list[str | None] = []
     full = next((x for x in targets if x.kind == "full"), None)
+    # A directory change holds for a later part only where that part runs
+    # only if the change ran and succeeded (#3268): the change is reached
+    # by `;` or `&&` alone (never after `||`, a pipe, `&` or a group
+    # bracket), and every join from it to the part is `&&`. `cd /missing;
+    # derive` runs the derive where the call started, and `false && cd X;
+    # derive` skips the cd: neither leaves a known directory. A multi-line
+    # command hides its joins, so a change in one leaves none either.
+    unsettled = False                               # a change was made; only `&&` keeps it
     for index, segment in enumerate(segments):
+        before = leading if index == 0 else joins[index - 1]
+        if unsettled and before != ["&&"]:
+            local = None
+            pushed = [None] * len(pushed)
         rest = _program(segment)
         if not rest:
             continue
         program = os.path.basename(rest[0])
+        if program in ("cd", "pushd", "popd"):
+            reached = not newline and before in ([], [";"], ["&&"])
+            unsettled = True
         if program in ("cd", "pushd"):
             if program == "pushd":
                 pushed.append(local)
+                if not reached:
+                    pushed = [None] * len(pushed)
             where = rest[1] if len(rest) == 2 else None
-            if where is None or not _CLEAN_PATH.fullmatch(where) or where[:1] in "-+":
+            if not reached or where is None or not _CLEAN_PATH.fullmatch(where) or where[:1] in "-+":
                 local = None
             elif os.path.isabs(where):
                 local = where
@@ -792,9 +866,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 local = os.path.join(local, where) if local is not None else None
             continue
         if program == "popd":
-            local = pushed.pop() if pushed and len(rest) == 1 else None
-            if len(rest) > 1:
-                pushed.clear()
+            local = pushed.pop() if pushed and len(rest) == 1 and reached else None
+            if len(rest) > 1 or not reached:
+                pushed = [None] * len(pushed)
             continue
         args = _cli_args(rest)
         if args is not None:
@@ -1054,8 +1128,9 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
         if row["targets_full"] is False:
             continue                                    # another record's derivation
         if row["outcome"] == "succeeded" and row["targets_full"] is True:
-            if pre_draft(row):
-                reasons.append(f"core derived ({row['tool_use_id']}) before the first full-record Write")
+            if first is None or not row["_at"] > first["_settled"]:
+                reasons.append(f"core derived ({row['tool_use_id']}) before the first full-record Write "
+                               "had returned")
                 continue
             derived = row
             break
@@ -1068,12 +1143,31 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
                            f"but its status is not the derive's own ({row['status_basis']}: {why})")
         elif row["outcome"] == "succeeded":
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: its --full cannot be resolved "
-                           "(a variable, or a relative path with no working directory)")
+                           "(a variable, or a relative path with no known working directory: none recorded, or "
+                           "after a directory change it may not have made)")
     # A non-Write change of the receipt issued after the draft, the last
     # receipt Write and the derive boundary had all returned reaches no
     # snapshot but the final one, which the sha256 against the file on disk
     # covers (#3112). Any earlier one may have changed a snapshot unseen.
     receipt_writes = h["writes"]["receipt"]
+    # The snapshots are chosen by the order calls were issued, which is the
+    # order they took effect only where no two relevant calls were in flight
+    # together (#3268). A receipt Write issued before the draft that returned
+    # after it may have landed on either side, and of two receipt Writes in
+    # flight together either may have landed last; the transcript cannot say.
+    # The draft is placed by the first-issued full-record Write alone: no
+    # full record existed before it was issued, and one existed once it had
+    # returned.
+    in_flight = lambda a, b: not (a["_settled"] < b["_at"] or b["_settled"] < a["_at"])
+    for i, row in enumerate(receipt_writes):
+        for other in receipt_writes[i + 1:]:
+            if in_flight(row, other):
+                reasons.append(f"receipt Writes {row['tool_use_id']} and {other['tool_use_id']} were in flight "
+                               "together: which landed last cannot be told")
+        for label, boundary in (("the first full-record Write", first), ("the derive core boundary", derived)):
+            if boundary is not None and in_flight(row, boundary):
+                reasons.append(f"receipt Write {row['tool_use_id']} was in flight with {label} "
+                               f"({boundary['tool_use_id']}): which took effect first cannot be told")
     settled = [row["_settled"] for row in (first, receipt_writes[-1] if receipt_writes else None, derived)
                if row is not None]
     for row in h["mutations"]:

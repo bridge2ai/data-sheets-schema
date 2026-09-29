@@ -1014,7 +1014,8 @@ class DeriveStatus(Base):
         for command in (lambda r: "false || " + r.derive_command(),
                         lambda r: r.derive_command() + " ; echo done",
                         lambda r: r.derive_command() + " &",
-                        lambda r: r.derive_command().replace(" \\\n", "\n")):
+                        lambda r: r.derive_command() + "\necho done",
+                        lambda r: "echo start\n" + r.derive_command()):
             with self.subTest(command=command(self.new_run())[-20:]):
                 self.run_ = self.new_run()
                 identity, block = self._around(command)
@@ -1116,7 +1117,7 @@ class Boundaries(Base):
         out = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
         for spelling in (f"pushd data && poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
                          f"pushd data/claudecode_direct && d4d derive core --full L/CHORUS_d4d.yaml",
-                         f"pushd /elsewhere; popd; poetry run d4d derive core "
+                         f"pushd /elsewhere && popd && poetry run d4d derive core "
                          f"--full data/claudecode_direct/L/CHORUS_d4d.yaml {out}"):
             with self.subTest(spelling=spelling):
                 identity, block = self._derived(spelling)
@@ -1188,6 +1189,202 @@ class Boundaries(Base):
         self.assertEqual(block["status"], "checked", block["reasons"])
         self.assertEqual([(m["tool_use_id"], m["target"]) for m in block["non_write_mutations"]],
                          [(identity, "full")])
+
+
+class InFlight(Base):
+    """The snapshots are chosen by the order calls were issued, which is the
+    order they took effect only where no two relevant calls were in flight
+    together (#3268). A receipt Write in flight with another receipt Write,
+    the first full-record Write or the derive boundary cannot be placed."""
+
+    ADDED = receipt_text(("c001", [("title", "The CHORUS dataset"), ("funders[0].grant_id", "OT2OD032701")]),
+                         ("c002", [("description", "a multimodal collection")]),
+                         ("c003", [("license", "CC BY 4.0 license")]))
+
+    @staticmethod
+    def start(r, path, content):
+        return r.call("Write", file_path=str(path), content=content)
+
+    @staticmethod
+    def finish(r, identity, path, content):
+        kind = "update" if path in r.created else "create"
+        r.created.add(path)
+        r.result(identity, f"File written at: {path}", {"type": kind, "filePath": str(path), "content": content})
+        if path == r.receipt:
+            r.last_receipt = content
+
+    def test_a_receipt_write_returning_after_the_draft_was_issued_is_unknown(self):
+        # The reviewer's case: issued before the draft Write, returned after
+        # it, in either order of the two results.
+        for receipt_first in (True, False):
+            with self.subTest(receipt_result_first=receipt_first):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                update = self.start(r, r.receipt, self.ADDED)
+                draft = self.start(r, r.full, "id: x\n")
+                steps = [(update, r.receipt, self.ADDED), (draft, r.full, "id: x\n")]
+                for identity, path, content in (steps if receipt_first else steps[::-1]):
+                    self.finish(r, identity, path, content)
+                r.derive()
+                self.assertUnknown(r.report(), f"receipt Write {update} was in flight with the first "
+                                               f"full-record Write ({draft})")
+
+    def test_two_receipt_writes_in_flight_together_are_unknown(self):
+        r = self.run_
+        a = self.start(r, r.receipt, PRE)
+        b = self.start(r, r.receipt, self.ADDED)
+        self.finish(r, b, r.receipt, self.ADDED)
+        self.finish(r, a, r.receipt, PRE)
+        r.last_receipt = self.ADDED                    # the disk agrees with the later-issued one
+        r.write(r.full, "id: x\n")
+        r.derive()
+        self.assertUnknown(r.report(), f"receipt Writes {a} and {b} were in flight together")
+
+    def test_a_receipt_write_in_flight_with_the_derive_is_unknown(self):
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        derive = r.call("Bash", command=r.derive_command(), description="x")
+        update = self.start(r, r.receipt, self.ADDED)
+        r.result(derive, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
+        self.finish(r, update, r.receipt, self.ADDED)
+        self.assertUnknown(r.report(), f"receipt Write {update} was in flight with the derive core boundary")
+
+    def test_a_derive_issued_before_the_draft_returned_is_unknown(self):
+        r = self.run_
+        r.write(r.receipt, PRE)
+        draft = self.start(r, r.full, "id: x\n")
+        derive = r.call("Bash", command=r.derive_command(), description="x")
+        self.finish(r, draft, r.full, "id: x\n")
+        r.result(derive, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
+        r.write(r.receipt, self.ADDED)
+        self.assertUnknown(r.report(), f"core derived ({derive}) before the first full-record Write had returned")
+
+    def test_calls_in_flight_that_cannot_reorder_a_snapshot_are_checked(self):
+        # A receipt Write in flight with a read, or with a later correction of
+        # the full record (not the draft), moves no snapshot.
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        update = self.start(r, r.receipt, self.ADDED)
+        read = r.call("Read", file_path=str(r.full))
+        fix = self.start(r, r.full, "id: x\ntitle: y\n")
+        r.result(read, "id: x", {"type": "text"})
+        self.finish(r, fix, r.full, "id: x\ntitle: y\n")
+        self.finish(r, update, r.receipt, self.ADDED)
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 0})
+
+
+class UnestablishedDirectory(Base):
+    """A `cd`, `pushd` or `popd` moves the directory a later part's
+    relative `--full` resolves against only where that part runs only if
+    the change ran and succeeded (#3268). Bash runs `cd /missing; derive`
+    in the call's own directory, so resolving the `--full` under
+    `/missing` dropped a real derive of the record as another record's."""
+
+    C003 = Boundaries.C003
+    C004 = Boundaries.C004
+    FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
+
+    def _derived(self, spelling):
+        return Boundaries._derived(self, spelling)
+
+    def test_a_directory_change_that_may_not_have_happened_leaves_no_known_directory(self):
+        out = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
+        for spelling in (f"cd /unavailable; d4d derive core --full {self.FULL} {out}",
+                         f"false && cd /elsewhere; poetry run d4d derive core --full {self.FULL}",
+                         f"cd /elsewhere || true && poetry run d4d derive core --full {self.FULL}",
+                         f"true || cd /elsewhere && poetry run d4d derive core --full {self.FULL}",
+                         f"(cd /elsewhere) && poetry run d4d derive core --full {self.FULL}",
+                         f"cd /elsewhere & poetry run d4d derive core --full {self.FULL}",
+                         f"pushd /elsewhere; popd; poetry run d4d derive core --full {self.FULL}",
+                         f"cd data && echo a ; poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
+                         f"cd /elsewhere\npoetry run d4d derive core --full {self.FULL}",
+                         "cd data\npoetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml"):
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling)
+                # Not dropped as another record's: the derive cannot be placed
+                # (by its --full, or also by its status where that is not its own).
+                self.assertUnknown(block, f"derive core {identity} cannot be placed")
+                self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
+
+    def test_a_change_every_later_join_depends_on_is_followed(self):
+        for spelling in ("cd data && cd claudecode_direct && d4d derive core --full L/CHORUS_d4d.yaml",
+                         "cd data && echo a && d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
+                         "echo a; cd data && d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
+                         f"pushd /elsewhere && popd && d4d derive core --full {self.FULL}"):
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+                self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
+                                                   "phase3_backport": 1})
+
+    def test_shell_resolves_full_only_through_a_change_that_ran(self):
+        full = [ro._Target("full", Path("/r/data/F.yaml"))]
+        cases = {"cd data && d4d derive core --full F.yaml": True,
+                 "echo a; d4d derive core --full data/F.yaml": True,
+                 "cd data && echo a && d4d derive core --full F.yaml": True,
+                 "cd /x; cd /r/data && d4d derive core --full F.yaml": True,
+                 "pushd data && popd && d4d derive core --full data/F.yaml": True,
+                 "cd /x && d4d derive core --full data/F.yaml": False,
+                 "cd /x; d4d derive core --full data/F.yaml": None,
+                 "cd data && echo a ; d4d derive core --full F.yaml": None,
+                 "false && cd /x; d4d derive core --full data/F.yaml": None,
+                 "true || cd /x && d4d derive core --full data/F.yaml": None,
+                 "cd /x || true && d4d derive core --full data/F.yaml": None,
+                 "(cd /x) && d4d derive core --full data/F.yaml": None,
+                 "cd /x | d4d derive core --full data/F.yaml": None,
+                 "pushd /x; popd && d4d derive core --full data/F.yaml": None,
+                 "pushd data && pushd /x ; popd && d4d derive core --full F.yaml": None,
+                 "cd data\nd4d derive core --full F.yaml": None,
+                 "echo a\nd4d derive core --full /r/data/F.yaml": True}
+        for command, expected in cases.items():
+            with self.subTest(command=command):
+                derives = ro._shell(command, "/r", full)["derives"]
+                self.assertEqual([d["targets_full"] for d in derives], [expected])
+
+    def test_newlines_are_joins_outside_quotes(self):
+        self.assertEqual(ro._tokens("cd data\nd4d derive core"), ["cd", "data", ";", "d4d", "derive", "core"])
+        for command in ('python -c "a\nb"', "echo 'a\nb'", "echo $'a\nb'"):
+            with self.subTest(command=command):
+                self.assertNotIn(";", ro._tokens(command))
+
+
+class RipgrepHostnameHelper(Base):
+    """`rg --hostname-bin CMD` runs CMD to name the host for its hyperlinks
+    (#3268): a helper that rewrites the receipt before the draft, restored
+    by a later Write, left stale evidence reported as contemporaneous."""
+
+    def test_a_hostname_helper_restored_after_the_draft_is_unknown(self):
+        for command in (f"rg --hostname-bin ./fix-receipt --hyperlink-format 'file://{{host}}{{path}}' x {REL}",
+                        f"rg --hostname-bin=./fix-receipt x {REL}",
+                        f"rg x {REL} --hostname-bin ./fix-receipt"):
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)                         # the helper may rewrite the receipt here
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, PRE)                 # ... and this Write restores it
+                r.derive()
+                block = r.report()
+                self.assertUnknown(block, "may change the receipt other than by a Write")
+                self.assertEqual(len(block["non_write_mutations"]), 1)
+
+    def test_rg_reads_only_refuses_a_hostname_helper(self):
+        cases = {("rg", "--hostname-bin", "h", "x", "R"): False, ("rg", "--hostname-bin=h", "x", "R"): False,
+                 ("rg", "--hyperlink-format", "default", "x", "R"): True, ("rg", "--hostname", "x", "R"): True}
+        for segment, expected in cases.items():
+            with self.subTest(segment=segment):
+                self.assertIs(ro._rg_reads_only(list(segment)), expected)
+
+    def test_a_config_hostname_helper_is_named(self):
+        text = " ".join(ro.NON_CHECKS)
+        self.assertIn("or a hostname helper (`--hostname-bin`) set there", text)
+        self.assertIn("a ripgrep hostname helper set in a config file the same way", " ".join(ro.__doc__.split()))
 
 
 class Listing(unittest.TestCase):

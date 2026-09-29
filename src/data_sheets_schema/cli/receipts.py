@@ -174,9 +174,12 @@ def origin(transcripts, receipt_file, full_file, as_json):
     every join after it is `&&` and the call succeeded. A piped,
     backgrounded, grouped or multi-line derive, one after `||` or followed
     by `;`, or a failed `&&` chain cannot be placed, unless the native
-    control denied the call, which then never ran. Where the history cannot
-    be rebuilt the status is `unknown`, with the reasons, and nothing is
-    classified. Prints counts, chunk ids, slot paths and hashes, never
+    control denied the call, which then never ran. A relative `--full`
+    after a `cd`, `pushd` or `popd` resolves against the new directory only
+    where every join from the change to the derive is `&&`. Where the
+    history cannot be rebuilt the status is `unknown`, with the reasons,
+    and nothing is classified; that includes a receipt Write in flight
+    together with another receipt Write, the draft or the derive. Prints counts, chunk ids, slot paths and hashes, never
     snippet text.
     """
     import json
