@@ -26,9 +26,10 @@ Per value, the request carries:
 - for a relationship slot (one whose declared range is an inlined class:
   `creators`, `funders`, …) the entity the value is asserted *of*, so "this
   person is a creator" is judged as a claim about this dataset;
-- the value's own declarations about its source document and status — keys
-  in `DECLARATION_FIELDS` found inside the value, and any the caller passes
-  from an audit claim — presented as claims under test, never as evidence.
+- the value's own attribution declarations — the document it names as its
+  source and the claim status it asserts: keys in `DECLARATION_FIELDS` found
+  inside the value, and any the caller passes from an audit claim —
+  presented as claims under test, never as evidence.
   A judge told where a value came from is inclined to believe it; the prompt
   says the declaration is checked like the value, and a wrong declaration is
   itself a defect.
@@ -74,13 +75,22 @@ AXIS = "grounding_v2"
 VERDICTS = ("contradicted", "status_shifted", "relationship_unsupported",
             "wrong_document", "unsupported", "partially_supported", "supported")
 
-#: Keys that declare where a value came from or what state it is in. Read
-#: from inside the value (any depth) and shown to the judge as claims to
-#: test. `attributed_to` / `claim_status` / `source_status` are the audit
-#: grammar's declarations (`audit_grammar.CLAIM_KEYS`); `status` and
-#: `was_derived_from` are the schema's own slots for the same two things.
-DECLARATION_FIELDS = ("attributed_to", "claim_status", "source_status",
-                      "status", "was_derived_from")
+#: Keys that attribute a value to a source document or assert its claim
+#: status: the audit grammar's declarations (`audit_grammar.CLAIM_KEYS`).
+#: Read from inside the value (any depth) and shown to the judge as claims
+#: to test.
+#:
+#: The schema's `status` and `was_derived_from` are deliberately absent
+#: (#3347). They are not about the value's source document: `status` is a
+#: resource's publication status (draft, published, deprecated) and
+#: `was_derived_from` is prov:wasDerivedFrom, a resource this resource was
+#: derived from (D4D_Base_import.yaml). The corpus uses the nested
+#: `was_derived_from` for derivation-provenance identifiers — an ark naming
+#: a processing computation, a repository DOI — that are not documents in
+#: any bundle, so listing them as the value's declarations would frame a
+#: derivation link as a citation and invite `wrong_document`. Where such a
+#: key sits inside the value it is still judged, as part of the value.
+DECLARATION_FIELDS = ("attributed_to", "claim_status", "source_status")
 
 #: Scalar keys that identify the entity a relationship value is asserted of.
 ENTITY_FIELDS = ("id", "name", "title", "doi", "version")
@@ -90,12 +100,13 @@ _REPLY_KEYS = frozenset({"verdict", "reason"})
 SUPPORT_V2_SYSTEM = (
     "You judge whether one value in a dataset-documentation record is supported "
     "by the source documents supplied: in the role its field gives it, with the "
-    "status it asserts, and from the document it cites. You are not assessing "
-    "whether the value is well written, complete or desirable.\n\n"
+    "status it asserts, and from the document it is attributed to. You are not "
+    "assessing whether the value is well written, complete or desirable.\n\n"
     "You are given the field's schema specification; for a field that relates "
     "an entity to the dataset, the entity the value is asserted of; any "
-    "declarations the record makes about the value's source document or "
-    "status; and the value.\n\n"
+    "attribution declarations the record makes for the value (the document "
+    "it names as the value's source, the claim status it asserts); and the "
+    "value.\n\n"
     "The record's declarations are claims under test, not evidence. Check them "
     "against the documents exactly as you check the value. Never accept a value "
     "because the record says where it came from or what state it is in; a "
@@ -114,14 +125,17 @@ SUPPORT_V2_SYSTEM = (
     "documents name only in another capacity, placed in a field that makes "
     "them a creator.\n"
     "  wrong_document — the fact is in the documents, but not in the document "
-    "the value or its declaration cites.\n"
+    "an explicit attribution for the value names as its source. Only an "
+    "attribution counts: a resource the value says it was derived from, or "
+    "an identifier inside the value, is not a citation of a source "
+    "document.\n"
     "  unsupported — the documents do not state it. A value that is plausible, "
     "or whose words appear in the documents without stating this fact, is "
     "unsupported.\n"
     "  partially_supported — the documents state part of the value and not the "
     "rest.\n"
     "  supported — the documents state the value directly, in this role, with "
-    "this status, and in the cited document where one is cited.\n\n"
+    "this status, and in the attributed document where one is attributed.\n\n"
     "Reply with a JSON object and nothing else, with exactly these keys:\n"
     '  {"verdict": "<one of the seven above>", "reason": "<one sentence>"}\n\n'
     "Keep `reason` under 25 words. A reply that is cut off is discarded, not "
@@ -245,11 +259,11 @@ def render_request(slot: str, value: Any, spec: str, context: ValueContext) -> s
             f"the role the field names:\n\n```yaml\n{_dump(context.entity)}```")
     if context.declarations:
         parts.append(
-            "# The record's own declarations about this value\n\nClaims to "
+            "# The record's attribution declarations for this value\n\nClaims to "
             "test against the documents, not evidence:\n\n"
             f"```yaml\n{_dump(context.declarations)}```")
     else:
-        parts.append("# The record's own declarations about this value\n\n"
+        parts.append("# The record's attribution declarations for this value\n\n"
                      "None declared.")
     parts.append(f"# Value\n\nRecord field `{slot}` asserts:\n\n"
                  f"```yaml\n{_dump({slot: value})}```\n\n"

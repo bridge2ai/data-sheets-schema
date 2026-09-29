@@ -8,6 +8,14 @@ provider call. A fake client cannot judge, so these tests prove what the
 judge is *told* and what it will *accept* — whether a model actually returns
 `status_shifted` for a status shift is the calibration's question, and that
 run is paid (#2929).
+
+Section headers name the acceptance criteria of #2929 they bear on, in that
+issue's own numbering (seven criteria). Offline tests reach criteria 1 and 2
+only: the instrument itself (criterion 1) and the synthetic-document tests
+(criterion 2). Criterion 2's tests show what the judge is sent and that it
+accepts each typed verdict; they cannot show a judging outcome. Criteria
+3-7 (calibration, run manifest, canary and run, join report, figure
+updates) are not covered here.
 """
 
 from __future__ import annotations
@@ -139,7 +147,8 @@ def judge(client, **kw):
     return SupportJudgeV2(client=client, model="judge-m", **kw)
 
 
-# --- acceptance 1-3: what the judge is told, and what it accepts ---------
+# --- criterion 2 (request side only): what the judge is told about each
+# defect class, and that it accepts the verdict. The verdicts are canned. ---
 
 def test_a_status_shift_sends_the_values_own_status_and_the_slot_spec():
     """Source: a portal is planned. Value: data are available through one,
@@ -202,10 +211,18 @@ def test_a_word_match_only_value_is_sent_and_unsupported_is_accepted():
     assert "None declared." in text
 
 
-def test_a_directly_stated_value_is_supported():
+def test_a_canned_supported_reply_parses_unflagged_and_the_value_is_sent():
+    """What this shows: a `supported` reply is parsed, not propagated and not
+    served from cache, and the request carries the value and its spec. It
+    cannot show that a directly stated value is judged supported — the reply
+    is canned (#3349)."""
     client = RecordingClient(reply("supported"))
     v = judge(client).judge(project="P", record=RECORD, slot="sites", bundle=BUNDLE)
     assert (v.verdict, v.propagated, v.from_cache) == ("supported", False, False)
+    text = client.value_text()
+    assert SPECS["sites"] in text
+    assert "Record field `sites` asserts:\n\n```yaml\nsites: 12\n```" in text
+    assert "# Containing entity" not in text and "None declared." in text
 
 
 def test_the_prompt_names_every_verdict_and_refuses_deference():
@@ -213,6 +230,22 @@ def test_the_prompt_names_every_verdict_and_refuses_deference():
         assert f"  {verdict} — " in SUPPORT_V2_SYSTEM
     assert "claims under test, not evidence" in SUPPORT_V2_SYSTEM
     assert "Matching words are not support" in SUPPORT_V2_SYSTEM
+    # The sentence that forbids deference itself (#3350).
+    assert ("Never accept a value because the record says where it came from "
+            "or what state it is in; a declaration the documents do not bear "
+            "out is itself a defect.") in SUPPORT_V2_SYSTEM
+
+
+def test_only_an_explicit_attribution_counts_toward_wrong_document():
+    """A derivation link or an identifier inside the value is not a citation
+    of the value's source document (#3347)."""
+    flat = " ".join(SUPPORT_V2_SYSTEM.split())
+    assert ("wrong_document — the fact is in the documents, but not in the "
+            "document an explicit attribution for the value names as its "
+            "source. Only an attribution counts: a resource the value says it "
+            "was derived from, or an identifier inside the value, is not a "
+            "citation of a source document.") in flat
+    assert "declaration cites" not in flat
 
 
 def test_every_verdict_parses():
@@ -222,14 +255,38 @@ def test_every_verdict_parses():
 
 
 def test_declarations_are_found_at_any_depth():
-    record = {"x": [{"a": {"status": "draft"}}, {"was_derived_from": "d"}]}
+    record = {"x": [{"a": {"claim_status": "planned"}},
+                    {"attributed_to": ["d.txt"]}, {"b": {"source_status": "s"}}]}
     ctx = build_value_context(record, "x", relationship=False)
-    assert ctx.declarations == {"/x/0/a/status": "draft", "/x/1/was_derived_from": "d"}
+    assert ctx.declarations == {"/x/0/a/claim_status": "planned",
+                                "/x/1/attributed_to": ["d.txt"],
+                                "/x/2/b/source_status": "s"}
     assert ctx.entity is None
-    assert set(DECLARATION_FIELDS) >= {"attributed_to", "claim_status", "status"}
+    assert DECLARATION_FIELDS == ("attributed_to", "claim_status", "source_status")
 
 
-# --- acceptance 4: malformed and truncated replies are rejected ----------
+def test_schema_status_and_derivation_are_not_presented_as_attributions():
+    """`status` (publication status) and `was_derived_from`
+    (prov:wasDerivedFrom) are resource facts, not the value's source
+    document (#3347): they stay in the value and are never listed as its
+    declarations."""
+    record = {"subsets": [{"name": "features", "status": "Beta",
+                           "was_derived_from": "ark:00000/computation-x"}]}
+    ctx = build_value_context(record, "subsets", relationship=False)
+    assert ctx.declarations == {}
+    client = RecordingClient(reply("supported"))
+    SupportJudgeV2(client=client, model="judge-m", specification=SupportSpecification(
+        digest="s", render=lambda s: "Field: `subsets`", relationship=lambda s: False)
+    ).judge(project="P", record=record, slot="subsets", bundle=BUNDLE)
+    text = client.value_text()
+    head, value = text.split("# Value", 1)
+    assert "None declared." in head and "ark:00000" not in head
+    assert "was_derived_from: ark:00000/computation-x" in value
+    assert "status: Beta" in value
+
+
+# --- criterion 1 (the instrument): malformed and truncated replies are
+# rejected ---
 
 @pytest.mark.parametrize("text", [
     "",
@@ -265,7 +322,7 @@ def test_the_judge_raises_and_caches_nothing_on_a_truncated_reply(tmp_path):
     assert not cache.exists()
 
 
-# --- acceptance 5: cache identity, re-read, rejection ---------------------
+# --- criterion 1 (the instrument): cache identity, re-read, rejection ---
 
 def test_entries_carry_the_identity_and_reload_without_a_call(tmp_path):
     cache = tmp_path / "support_v2_2929.jsonl"
@@ -342,7 +399,27 @@ def test_a_hand_edited_entry_is_skipped_and_named(tmp_path):
     assert j.cache_skipped == {"propagated": 1, "verdict": 1, "unreadable": 1}
 
 
-# --- acceptance 6-7: the old instrument and its caches do not move -------
+@pytest.mark.parametrize("edit", [
+    lambda e: {k: v for k, v in e.items() if k != "value_context"},
+    lambda e: {**e, "slot": 3},
+    lambda e: {**e, "value": None},
+])
+def test_an_entry_missing_its_key_fields_is_skipped_as_key(tmp_path, edit):
+    """A context-matching entry without a string slot, value or value_context
+    is skipped and named `key`, not loaded and not a crash (#3351)."""
+    cache = tmp_path / "support_v2_2929.jsonl"
+    judge(RecordingClient(reply("supported")), cache_path=cache).judge(
+        project="P", record=RECORD, slot="sites", bundle=BUNDLE)
+    good = json.loads(cache.read_text())
+    cache.write_text(json.dumps(edit(good)) + "\n" + json.dumps(good) + "\n")
+    client = RecordingClient()                     # the good entry answers
+    j = judge(client, cache_path=cache)
+    v = j.judge(project="P", record=RECORD, slot="sites", bundle=BUNDLE)
+    assert v.from_cache and client.requests == []
+    assert j.cache_loaded == 1 and j.cache_skipped == {"key": 1}
+
+
+# --- criterion 1 (the old judge and its cache semantics unchanged) -------
 
 def test_scorer_system_is_byte_identical():
     """SCORER_SYSTEM is part of every v1 grounding entry's identity."""
@@ -381,7 +458,7 @@ def test_the_july_caches_hash_identically_and_v2_does_not_touch_them(tmp_path):
     assert _july_digests() == JULY_CACHE_SHA256
 
 
-# --- acceptance 8: never propagated ---------------------------------------
+# --- criterion 1 (the instrument): never propagated ---------------------
 
 def test_verdicts_cannot_be_marked_propagated():
     with pytest.raises(TypeError):
