@@ -821,7 +821,8 @@ class NonChecks(unittest.TestCase):
         text = " ".join(ro.NON_CHECKS)
         self.assertIn("ripgrep preprocessor set in a config file", text)
         self.assertIn("RIPGREP_CONFIG_PATH", text)
-        self.assertIn("ripgrep preprocessor set in a", ro.__doc__)
+        self.assertIn("ripgrep preprocessor set in a config file from outside the command",
+                      " ".join(ro.__doc__.split()))
 
 
 #: The playbook's recorder step (d4d-full-core, "Provenance record"): its
