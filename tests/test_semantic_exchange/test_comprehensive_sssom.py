@@ -19,6 +19,7 @@ import csv
 import functools
 import io
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -261,6 +262,52 @@ def curated_sources(schema, names):
     out = {slot: "schema" for slot in raw_external_declarations(schema)}
     out.update({slot: "ttl" for slot in ttl_all_alignments(schema, names)})
     return out
+
+
+def raw_declaration_places(schema):
+    """{slot: {(metaslot, target): {place}}} for every declaration in the raw
+    YAML, D4D targets included. A place is a class that declares the slot in
+    its ``attributes`` or ``slot_usage``, or '' for the top-level slot."""
+    found = {}
+
+    def add(slot, place, sdef):
+        for metaslot, _ in SCHEMA_KINDS:
+            value = (sdef or {}).get(metaslot)
+            for v in ([value] if isinstance(value, str) else value or []):
+                found.setdefault(slot, {}).setdefault((metaslot, v), set()).add(place)
+
+    for slot, sdef in (schema.get("slots") or {}).items():
+        add(slot, "", sdef)
+    for cls, cdef in (schema.get("classes") or {}).items():
+        for group in ("attributes", "slot_usage"):
+            for slot, sdef in ((cdef or {}).get(group) or {}).items():
+                add(slot, cls, sdef)
+    return found
+
+
+def raw_path_class(schema, slot):
+    """The row's path class by the rule, from the raw YAML: ``Dataset`` when
+    it carries the slot, else the first owner by name, else ''."""
+    if slot in raw_carried(schema, "Dataset"):
+        return "Dataset"
+    declared = raw_declarers(schema).get(slot, set())
+    owners = sorted(c for c in declared
+                    if not declared & raw_ancestors(schema, c))
+    return owners[0] if owners else ""
+
+
+def raw_seen_by(schema, cls):
+    """The places whose declarations a row with path class ``cls`` sees: the
+    class, its ancestors, and the top-level slot ('')."""
+    return ({cls} | raw_ancestors(schema, cls) if cls else set()) | {""}
+
+
+#: A schema declaration a listing's reason cites: a metaslot, then its target
+#: ("slot_uri dcat:keyword", "the schema's slot_uri is schema:creator",
+#: "exact_mappings says schema:url").
+REASON_CITES = re.compile(
+    r"\b(" + "|".join(m for m, _ in SCHEMA_KINDS) + r")\s+(?:is\s+|says\s+)?"
+    r"([A-Za-z][\w.-]*:[\w.-]*\w)")
 
 
 class _Committed(unittest.TestCase):
@@ -896,6 +943,101 @@ class TestDisagreementsAreListed(unittest.TestCase):
                     with self.subTest(slot=slot, object=obj):
                         self.assertIn(f"https://schema.org/{obj[len('schema:'):]}", SDO)
         self.assertNotIn("https://schema.org/conformsTo", SDO)
+
+    def test_every_declaration_a_reason_cites_is_attributed_to_its_class(self):
+        """#3140: the regulatory_restrictions reason said the schema
+        serialises the slot as dcterms:accessRights. The row's path class,
+        Dataset, declares slot_uri d4d:regulatoryRestrictions; dcterms:
+        accessRights is the slot_uri of
+        ExportControlRegulatoryRestrictions.regulatory_restrictions, another
+        attribute with the same name. From the raw YAML: every
+        ``<metaslot> <target>`` a reason cites is declared for the slot name,
+        and one the path class does not see (its own, an ancestor's or the
+        top-level slot's) is named with a class that declares it."""
+        schema = raw_schema()
+        places = raw_declaration_places(schema)
+        for slot, entry in sorted(self.listed.items()):
+            seen = raw_seen_by(schema, raw_path_class(schema, slot))
+            for metaslot, target in REASON_CITES.findall(entry.reason):
+                with self.subTest(slot=slot, cites=f"{metaslot} {target}"):
+                    where = places.get(slot, {}).get((metaslot, target), set())
+                    self.assertTrue(where, "no declaration of the slot says so")
+                    if not where & seen:
+                        self.assertTrue(
+                            any(f"{cls}.{slot}" in entry.reason for cls in where),
+                            f"only {sorted(where)} declare it, the path class "
+                            "sees none of them, and the reason names none")
+        self.assertIn(("slot_uri", "dcterms:title"),
+                      REASON_CITES.findall(self.listed["title"].reason))
+        self.assertIn(("slot_uri", "dcterms:accessRights"),
+                      REASON_CITES.findall(
+                          self.listed["regulatory_restrictions"].reason))
+
+    def test_a_reason_names_the_attribute_whose_pairs_the_path_class_cannot_see(self):
+        """Checked on the listing's schema pairs, not on what its reason
+        cites, so a reason that cites none of them is held to it too: the
+        reason before #3140 cited only "the DUO broad_mappings" for the DUO
+        pairs. A pair that no declaration the path class sees makes is another
+        class's, and the reason names each class that owns it as
+        ``<Class>.<slot>``."""
+        schema = raw_schema()
+        places = raw_declaration_places(schema)
+        metaslots = {}
+        for metaslot, predicate in SCHEMA_KINDS:
+            metaslots.setdefault(predicate, []).append(metaslot)
+        unseen = set()
+        for slot, entry in sorted(self.listed.items()):
+            seen = raw_seen_by(schema, raw_path_class(schema, slot))
+            for pair in entry.schema:
+                predicate, target = pair.split(" ", 1)
+                where = set().union(*(places.get(slot, {}).get((m, target), set())
+                                      for m in metaslots[predicate]))
+                with self.subTest(slot=slot, pair=pair):
+                    self.assertTrue(where)
+                    if where & seen:
+                        continue
+                    unseen.add(slot)
+                    for cls in sorted(c for c in where
+                                      if not where & raw_ancestors(schema, c)):
+                        self.assertIn(f"{cls}.{slot}", entry.reason)
+        self.assertIn("regulatory_restrictions", unseen)
+
+    def test_regulatory_restrictions_is_listed_as_a_shared_name(self):
+        """#3140, from the raw YAML and as the reason states it: Dataset's
+        regulatory_restrictions is an ExportControlRegulatoryRestrictions
+        object with a D4D slot_uri and no external mapping; the schema's
+        pairs are those of a multivalued string attribute of that class; the
+        core schema's counterpart, CoreDataset.regulatory_restrictions,
+        carries the TTL's target as a broad mapping. So it is not the
+        cross-vocabulary case the reason used to call it."""
+        from data_sheets_schema.schema_cache import load_yaml
+        slot = "regulatory_restrictions"
+        classes = raw_schema()["classes"]
+        on_dataset = classes["Dataset"]["attributes"][slot]
+        other = classes["ExportControlRegulatoryRestrictions"]["attributes"][slot]
+        self.assertEqual((on_dataset["slot_uri"], on_dataset["range"]),
+                         ("d4d:regulatoryRestrictions",
+                          "ExportControlRegulatoryRestrictions"))
+        self.assertEqual([m for m, _ in SCHEMA_KINDS[1:] if on_dataset.get(m)], [])
+        self.assertEqual((other["slot_uri"], other["range"], other["multivalued"]),
+                         ("dcterms:accessRights", "string", True))
+        self.assertEqual(sorted(other["broad_mappings"]),
+                         ["DUO:0000021", "DUO:0000022", "DUO:0000028"])
+        core = load_yaml(REPO / "src/data_sheets_schema/schema/D4D_Core.yaml")
+        self.assertEqual(
+            core["classes"]["CoreDataset"]["attributes"][slot]["broad_mappings"],
+            ["schema:conditionsOfAccess"])
+        self.assertEqual(self.gen.declared_slot_uri(slot),
+                         "d4d:regulatoryRestrictions")
+        self.assertEqual({p.where for p, _ in self.gen.schema_pairs(slot)},
+                         {"ExportControlRegulatoryRestrictions"})
+        reason = gcs.ACCEPTED_DISAGREEMENTS[slot].reason
+        self.assertFalse(reason.startswith("cross-vocabulary"))
+        for phrase in ("Dataset, declares regulatory_restrictions with slot_uri "
+                       "d4d:regulatoryRestrictions",
+                       "ExportControlRegulatoryRestrictions.regulatory_restrictions",
+                       "CoreDataset.regulatory_restrictions"):
+            self.assertIn(phrase, reason)
 
     def test_the_conforms_to_slots_are_open(self):
         for slot in ("conforms_to", "conforms_to_class", "conforms_to_schema"):

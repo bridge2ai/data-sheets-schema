@@ -47,7 +47,13 @@ Where the TTL and the schema disagree, the TTL wins the row. "Disagree" means
 the schema declares external targets for the slot and an external TTL pair is
 not among them. Every such TTL pair is checked, slot-level and class-scoped
 alike (#3053): the primary comes from a slot-level triple when there is one,
-but a ``<Class>_<slot>`` triple is the TTL's word on the slot as well. Each
+but a ``<Class>_<slot>`` triple is the TTL's word on the slot as well. The
+schema side is every declaration of the slot *name*, in whichever class, so
+two attributes that share a name are compared as one:
+``regulatory_restrictions`` disagrees although its path class, Dataset,
+declares no external target, because ExportControlRegulatoryRestrictions
+declares an attribute of the same name that has them. A listing's reason says
+whose declarations it compares (#3140). Each
 such slot must be listed in ACCEPTED_DISAGREEMENTS or
 OPEN_DISAGREEMENTS with the TTL and schema pairs it was reviewed for and a
 reason. A listing matches only while both sides declare exactly those pairs
@@ -184,11 +190,17 @@ class Listed:
     ``ttl`` and ``schema`` are the pairs each side declared for the slot when
     the reason was written, as ``'<predicate> <object>'``: every external TTL
     pair, from slot-level and ``<Class>_<slot>`` subjects (#3053), and every
-    external schema declaration. A listing holds
+    external schema declaration of the slot name, in whichever class declares
+    it. A listing holds
     only while both sides still declare exactly these pairs: any change on
     either side makes the slot ``changed``, which warns and fails the tests,
     because the reason was written for the pairs listed and may no longer be
     true.
+
+    ``reason`` names each schema declaration it cites by its metaslot
+    (``slot_uri dcat:keyword``). A declaration the row's path class does not
+    see (not its own, an ancestor's or the top-level slot's) is another
+    class's, and the reason names it as ``<Class>.<slot>`` (#3140).
     """
     ttl: Tuple[str, ...]
     schema: Tuple[str, ...]
@@ -239,13 +251,30 @@ ACCEPTED_DISAGREEMENTS: Dict[str, Listed] = {
         _CROSS_VOCABULARY.format(
             schema='slot_uri prov:wasDerivedFrom, exact_mappings '
                    'dcterms:source')),
+    # #3140: not a cross-vocabulary choice. The row's path class declares no
+    # external target; the schema's pairs are those of another attribute that
+    # shares the slot name.
     'regulatory_restrictions': Listed(
         ('skos:closeMatch schema:conditionsOfAccess',),
         ('skos:broadMatch DUO:0000021', 'skos:broadMatch DUO:0000022',
          'skos:broadMatch DUO:0000028', 'skos:exactMatch dcterms:accessRights'),
-        _CROSS_VOCABULARY.format(
-            schema='slot_uri dcterms:accessRights; the DUO broad_mappings name '
-                   'consent codes a restriction may carry')),
+        "a shared slot name, not two alignments of one slot: the row's path "
+        "class, Dataset, declares regulatory_restrictions with slot_uri "
+        "d4d:regulatoryRestrictions (range "
+        "ExportControlRegulatoryRestrictions, an inlined object) and no "
+        "external mapping, and its subclass "
+        "DataSubset inherits that declaration. The schema's pairs belong to "
+        "ExportControlRegulatoryRestrictions.regulatory_restrictions, a "
+        "different attribute with the same name: a multivalued string naming "
+        "each restriction, with slot_uri dcterms:accessRights and "
+        "broad_mappings DUO:0000021, DUO:0000022 and DUO:0000028. The TTL's "
+        "slot-level closeMatch schema:conditionsOfAccess names no class. It "
+        "is the target the core schema (D4D_Core.yaml) gives the core's "
+        "counterpart, CoreDataset.regulatory_restrictions, as a broad "
+        "mapping; the full schema gives Dataset.regulatory_restrictions no "
+        "external target. The row carries the TTL's target, and "
+        "other_curated_mappings labels each schema pair with the class that "
+        "declares it"),
     'md5': Listed(
         ('skos:exactMatch evi:md5',),
         ('skos:broadMatch dcterms:identifier',),
