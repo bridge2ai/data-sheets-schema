@@ -7,6 +7,7 @@ Usage:
     d4d download sources --project AI_READI
     d4d evaluate presence --project AI_READI --method gpt5
     d4d utils status --quick
+    d4d validate datasheet.yaml --schema core
 """
 
 import click
@@ -22,7 +23,7 @@ def cli(manifest):
     pass
 
 # Import and register subcommands
-from . import download, evaluate, utils, rocrate, schema, render, healthsheet, runs, provenance, api, enrich, prompt, derive, bundle, receipts, review, agents
+from . import download, evaluate, utils, rocrate, schema, render, healthsheet, runs, provenance, api, enrich, prompt, derive, bundle, receipts, review, agents, validate
 
 cli.add_command(download.download)
 cli.add_command(evaluate.evaluate)
@@ -41,6 +42,7 @@ cli.add_command(bundle.bundle)
 cli.add_command(receipts.receipts)
 cli.add_command(review.review)
 cli.add_command(agents.agents)
+cli.add_command(validate.validate)
 
 if __name__ == "__main__":
     cli()
