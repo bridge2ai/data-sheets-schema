@@ -65,7 +65,9 @@ receipt's sha256 differs from the file on disk. A non-Write change issued
 after the last receipt Write, the draft and the derive boundary had all
 returned can reach only the final receipt, which the sha256 comparison
 covers: it is listed with `covered_by_final_sha256` and is not a reason.
-Nothing is ever reported as contemporaneous on incomplete evidence.
+Nothing is reported as contemporaneous on incomplete evidence, except
+through a shell write the parser cannot attribute to the receipt, which
+`NON_CHECKS` names.
 
 The output carries counts, chunk ids, slot paths and sha256 digests, never
 snippet text or tool payloads: transcripts hold model output.
