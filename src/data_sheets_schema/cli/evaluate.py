@@ -336,7 +336,9 @@ def slot_meaning_cmd(records, as_json):
     slot, a key inside one that the scan reads (any but `id`, `source_caveats`
     and what they hold), or an ancestor such as a second `resources` block
     holding one. A mapping is judged wherever the scan reaches it, through an
-    alias or a merge key as well as where it is written. A duplicated
+    alias or a merge key as well as where it is written, and a merged value
+    that an explicit key or an earlier merge overrides is never read, so a
+    key repeated inside it is no reason (#3203). A duplicated
     ancestor whose dropped copies hold no scoped slot hides nothing from this
     scan and does not stop the record being checked. A record that is not
     checked has none of its findings reported, not even those its kept

@@ -14,11 +14,15 @@ the data are confidential, so the record asserts confidential elements on the
 strength of a release date. The fact itself is supported and kept elsewhere
 (`known_limitations` in 8 of those 9); the defect is the claim the slot makes.
 
-Those nine are a selection, not the corpus. On 2026-09-28, 71 CM4AI full
-records and 63 cores are committed under `data/d4d_concatenated`. This scan
-flags 37 of those full records and 35 of those cores, 13 of each with an
-entry asserting `confidential_elements_present: true`, and no record of
-another project there. Those counts are of that directory only: archived
+Those nine are a selection, not the corpus. On 2026-09-28 the `*d4d*.yaml`
+files committed under `data/d4d_concatenated` include 73 CM4AI full records
+and 63 cores (every core named `CM4AI_d4d_core.yaml`). Of the full records,
+71 are named `CM4AI_d4d.yaml`; the other two are `gpt5/CM4AI_d4d_alldocs.yaml`
+and `gpt5/CM4AI_d4d_fixed.yaml`, which the loader cannot read, so the scan
+checks 72 full records and all 63 cores (#3204). It flags 37 of those full
+records and 35 of those cores, 13 of each with an entry asserting
+`confidential_elements_present: true`, and no record of another project
+there. Those counts are of that directory only: archived
 copies under `data/ATTIC`, and CM4AI records elsewhere in the repository, are
 not in them, and the scan flags some of the archived ones too.
 
@@ -79,7 +83,11 @@ is not checked, not partly checked.
 
 A key that a merge key brings in and an explicit key of the same mapping
 overrides is YAML's override rule, not a key written twice. The #1029 gate
-does not count it, and it is not named here.
+does not count it, and it is not named here. The overridden value is dropped
+whole and never scanned, so a key repeated *inside* it hides nothing and is
+not named either; the same holds for a key an earlier mapping in a
+`<<: [...]` list shadows, since the loader keeps the first there (#3203). A
+merged mapping is judged only for the keys the loader takes from it.
 
 A record the loader cannot read at all — a YAML syntax error, an impossible
 unquoted date such as `2026-02-30`, which PyYAML raises as a bare
@@ -295,6 +303,36 @@ def _hides_something(where: str, key: Any, dropped: list[Any]) -> bool:
     return key in SCOPED_SLOTS or any(_holds_a_scoped_slot(value) for value in dropped)
 
 
+def _is_merge(key_node: Any) -> bool:
+    return (getattr(key_node, "value", None) == "<<"
+            and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge")
+
+
+def _merge_sources(node: yaml.MappingNode, path: str,
+                   active: frozenset[int]) -> list[tuple[yaml.MappingNode, str]]:
+    """The mappings whose pairs the loader reads as `node`'s, each with the
+    path it is named at, in the order PyYAML's `flatten_mapping` lays their
+    pairs out: every `<<` in turn — a merged mapping's own merges before its
+    pairs, and a list of merges last to first, so the first wins — then
+    `node` itself. A merge cycle, which the loader cannot construct, is cut."""
+    if id(node) in active:
+        return []
+    active = active | {id(node)}
+    sources: list[tuple[yaml.MappingNode, str]] = []
+    base = f"{path}.<<" if path else "<<"
+    for key_node, value_node in node.value:
+        if not _is_merge(key_node):
+            continue
+        if isinstance(value_node, yaml.MappingNode):
+            sources.extend(_merge_sources(value_node, base, active))
+        elif isinstance(value_node, yaml.SequenceNode):
+            for index, item in reversed(list(enumerate(value_node.value))):
+                if isinstance(item, yaml.MappingNode):
+                    sources.extend(_merge_sources(item, f"{base}[{index}]", active))
+    sources.append((node, path))
+    return sources
+
+
 def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
     """Duplicated mapping keys in a record's text one of whose dropped values
     held something the scan reads: a scoped slot written twice, a key
@@ -308,7 +346,11 @@ def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
     mapping is judged at every place the scan reaches it, through an alias
     or a merge key as well as where it is written: a duplicate inside a
     mapping anchored outside the scoped slots and aliased under one is named
-    under the slot (#3063). Each duplicate is named once, at the first such
+    under the slot (#3063). A merged mapping is judged only for the keys
+    the loader takes from it: a key an explicit key of the mapping
+    overrides, or an earlier mapping in a merge list shadows, is dropped
+    whole, so a duplicate inside that dropped value hides nothing and is
+    neither named nor walked (#3203). Each duplicate is named once, at the first such
     place in document order, with the lines its key is written on; the list
     is in line order. Keys are compared by the #1029 gate's identity, and
     merge keys are not duplicates, as there. A text the composer rejects
@@ -336,29 +378,39 @@ def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
                 continue
             if not isinstance(node, yaml.MappingNode):
                 continue
-            groups: dict[Any, tuple[str, list[tuple[int, Any]]]] = {}
+            # The pairs the loader reads here, in the order it reads them: each
+            # merged mapping's (its own merges first), then this mapping's own.
+            # A key is kept from the last pair that writes it, so a merged key
+            # an explicit key overrides, or an earlier mapping in a merge list
+            # shadows, is dropped whole and never scanned (#3203).
+            pairs = []
+            for source, label_path in _merge_sources(node, path, frozenset()):
+                for key_node, value_node in source.value:
+                    if _is_merge(key_node):
+                        continue
+                    pairs.append((source, label_path, _key_identity(loader, key_node), key_node, value_node))
+            kept = {identity: id(source) for source, _, identity, _, _ in pairs}
+            groups: dict[tuple[int, Any], tuple[str, str, list[tuple[int, Any]]]] = {}
             children = []
-            for key_node, value_node in node.value:
-                text_key = getattr(key_node, "value", None)
-                if text_key == "<<" and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge":
-                    # The loader reads a merged mapping's keys as this one's.
-                    children.append((value_node, f"{path}.<<" if path else "<<", where))
+            for source, label_path, identity, key_node, value_node in pairs:
+                if kept[identity] != id(source):
                     continue
-                identity = _key_identity(loader, key_node)
+                text_key = getattr(key_node, "value", None)
                 label = text_key if isinstance(text_key, str) else str(text_key)
-                groups.setdefault(identity, (label, []))[1].append((key_node.start_mark.line + 1, value_node))
+                groups.setdefault((id(source), identity), (label_path, label, []))[2].append(
+                    (key_node.start_mark.line + 1, value_node))
                 key = _constructed(identity)
-                child = f"{path}.{label}" if path else label
+                child = f"{label_path}.{label}" if label_path else label
                 if where == _OUTSIDE:
                     children.append((value_node, child, _INSIDE if key in SCOPED_SLOTS else _OUTSIDE))
                 elif key not in SKIPPED_KEYS:
                     children.append((value_node, child, _INSIDE))
-            for identity, (label, occurrences) in groups.items():
-                if (len(occurrences) > 1 and (id(node), identity) not in named
+            for (source_id, identity), (label_path, label, occurrences) in groups.items():
+                if (len(occurrences) > 1 and (source_id, identity) not in named
                         and _hides_something(where, _constructed(identity),
                                              [value for _, value in occurrences[:-1]])):
-                    named[(id(node), identity)] = {
-                        "path": path or "$", "key": label,
+                    named[(source_id, identity)] = {
+                        "path": label_path or "$", "key": label,
                         "lines": [line for line, _ in occurrences], "count": len(occurrences)}
             stack.extend(reversed(children))
     except (yaml.YAMLError, RecursionError):

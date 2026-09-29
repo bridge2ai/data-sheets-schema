@@ -317,6 +317,44 @@ class TestAMappingIsJudgedWhereverTheScanReadsIt(unittest.TestCase):
         self.assertEqual(yaml.safe_load(text)["confidential_elements"], [{"name": "b"}])
         self.assertEqual(rd.unread_duplicate_keys(text), [])
 
+    def test_a_duplicate_inside_a_merged_value_that_is_overridden_hides_nothing(self):
+        """#3203: the loader drops an overridden or shadowed merged value
+        whole, so a key repeated inside it was never going to be scanned."""
+        for text, loaded in (
+                # an explicit key of the merging mapping overrides it
+                ("base: &a\n  name: a\n  name: b\nconfidential_elements:\n- <<: *a\n  name: c\n",
+                 {"confidential_elements": [{"name": "c"}]}),
+                # an earlier mapping in a merge list shadows it
+                ("x: &n\n  name: a\n  name: b\ny: &m {name: c}\nsensitive_elements:\n- <<: [*m, *n]\n",
+                 {"sensitive_elements": [{"name": "c"}]}),
+                # a scoped slot merged under a non-slot key, then overridden;
+                # anchored under a skipped key, so no other place reads it
+                ("confidential_elements:\n- source_caveats: &s\n    sensitive_elements:\n"
+                 "    - name: a\n      name: b\nother:\n  <<: *s\n  sensitive_elements: []\n",
+                 {"other": {"sensitive_elements": []}})):
+            with self.subTest(text=text):
+                self.assertLessEqual(loaded.items(), yaml.safe_load(text).items())   # what the loader keeps
+                self.assertEqual(rd.unread_duplicate_keys(text), [])
+                found, reason = rd.check_text(text)
+                self.assertIsNone(reason)
+                self.assertEqual(found, [])
+
+    def test_the_merged_value_the_loader_keeps_is_still_judged(self):
+        """The control for #3203: without the override, or where the merged
+        mapping holding the duplicate comes first in the list, the loader
+        reads it and the dropped earlier value is named."""
+        for text, where in (
+                ("base: &a\n  name: a\n  name: b\nconfidential_elements:\n- <<: *a\n",
+                 ("confidential_elements[0].<<", "name")),
+                ("x: &n\n  name: a\n  name: b\ny: &m {name: c}\nsensitive_elements:\n- <<: [*n, *m]\n",
+                 ("sensitive_elements[0].<<[0]", "name")),
+                # a merged mapping's own merge, kept through two levels
+                ("a: &a\n  name: a\n  name: b\nb: &b\n  <<: *a\nconfidential_elements:\n- <<: *b\n",
+                 ("confidential_elements[0].<<.<<", "name"))):
+            with self.subTest(text=text):
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)], [where])
+                self.assertIsNone(rd.check_text(text)[0])
+
     def test_every_duplicate_named_is_one_the_1029_gate_counts(self):
         """The walk groups keys as the gate does and only judges more places,
         so it names no key and no line the gate would not."""
