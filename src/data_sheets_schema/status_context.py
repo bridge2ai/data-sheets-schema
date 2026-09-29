@@ -1127,7 +1127,7 @@ def file_status_expression(audit: Path, *, record: Path | None = None, bundle: P
 
 
 #: Every line boundary `str.splitlines` recognises.
-_LINE_BREAK = re.compile(r"\r\n|[\n\r\v\f\x1c\x1d\x1e\x85  ]")
+_LINE_BREAK = re.compile(r"\r\n|[\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029]")
 
 
 def _one_line(text: str) -> str:

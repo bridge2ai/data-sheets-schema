@@ -943,7 +943,7 @@ def test_the_text_report_prints_each_flag_on_one_line_whatever_its_text_spans():
     assert len(lines) == 5 and all(len(line.splitlines()) == 1 for line in lines)
     assert "snippet=14\\nData contributing hospitals" in lines[2] and "governor=The consortium\\nwill:" in lines[3]
     flag = out["flags"][0]
-    breaks = "a\nb\r\nc\rd\x0be\x0cf\x1cg\x85h i j"
+    breaks = "a\nb\r\nc\rd\x0be\x0cf\x1cg\x85h\u2028i\u2029j"
     synthetic = {**out, "summary": "claims " + breaks,
                  "flags": [{**flag, "snippet": breaks, "governor": breaks}],
                  "label_slot": [{**flag, "slot": "creators[0].name\nx"}],
