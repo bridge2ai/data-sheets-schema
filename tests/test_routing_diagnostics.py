@@ -212,6 +212,123 @@ class TestADuplicatedAncestorHidesAScopedSlot(unittest.TestCase):
                          [("$", "confidential_elements")])
 
 
+#: The kept `confidential_elements` entry is a finding; the first `resources`
+#: block, which `safe_load` drops, held another the scan never read (#3066).
+KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR = (
+    "resources:\n"
+    "- sensitive_elements:\n"
+    "  - sensitivity_details: Deposits will be released upon publication.\n"
+    "confidential_elements:\n"
+    "- confidential_elements_present: true\n"
+    "  confidentiality_details: Two assay deposits are held under embargo.\n"
+    "resources:\n"
+    "- id: x:part\n"
+)
+
+
+class TestARecordWithAnUnreadDuplicateIsNotPartlyChecked(unittest.TestCase):
+    """#3066: the kept values' findings are withheld too, so a record is
+    either checked whole or not checked."""
+
+    def test_the_kept_findings_are_not_reported(self):
+        for text, kept, reason in (
+                (KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR, ["confidential_elements[0].confidentiality_details"],
+                 "`resources` at $ on lines 1, 7"),
+                ("confidential_elements:\n- name: Deposits under embargo\n"
+                 "  confidentiality_details: Deposits will be released upon publication.\n"
+                 "  confidentiality_details: Participant ZIP codes.\n",
+                 ["confidential_elements[0].name"], "`confidentiality_details` at confidential_elements[0]")):
+            with self.subTest(reason=reason):
+                self.assertEqual(_paths(yaml.safe_load(text)), kept)          # what the parse would report
+                found, why = rd.check_text(text)
+                self.assertIsNone(found)
+                self.assertIn(reason, why)
+
+
+#: A mapping anchored outside the scoped slots, with a key written twice, and
+#: aliased under `confidential_elements`, where the scan reads it (#3063).
+ALIASED_DUPLICATE = (
+    "base: &b\n"
+    "  confidential_elements_present: true\n"
+    "  confidentiality_details: Two assay deposits are held under embargo.\n"
+    "  confidentiality_details: None known.\n"
+    "confidential_elements:\n"
+    "- *b\n"
+)
+
+#: (text, (path, key) named): a shared node, judged where the scan reads it.
+ALIASED_CASES = (
+    # a leaf written twice in a node anchored outside the slots
+    ("x: &n\n  name: a\n  name: b\nconfidential_elements:\n- *n\n", ("confidential_elements[0]", "name")),
+    # the dropped value a mapping that holds no scoped slot
+    ("x: &n\n  details: {text: a}\n  details: {text: b}\nresources:\n- sensitive_elements: *n\n",
+     ("resources[0].sensitive_elements", "details")),
+    # anchored under a skipped key, merged into another entry
+    ("confidential_elements:\n- source_caveats: &c\n    name: a\n    name: b\n- <<: *c\n",
+     ("confidential_elements[1].<<", "name")),
+    # merged from outside, as one of a list of merges
+    ("x: &n\n  name: a\n  name: b\ny: &m {z: 1}\nsensitive_elements:\n- <<: [*m, *n]\n",
+     ("sensitive_elements[0].<<[1]", "name")),
+)
+
+#: Anchored under the slot and aliased outside it, where its dropped value
+#: holds a scoped slot too: two places, one duplicate.
+SHARED_TWICE = "confidential_elements:\n- &x\n  sub:\n    sensitive_elements: [a]\n  sub: {}\nother: *x\n"
+
+
+class TestAMappingIsJudgedWhereverTheScanReadsIt(unittest.TestCase):
+    """#3063: the #1029 gate visits a shared node once, at its anchor; the
+    scan reads it at every alias and merge."""
+
+    def test_a_duplicate_anchored_outside_and_aliased_under_a_slot_is_named_there(self):
+        without = ALIASED_DUPLICATE.replace("  confidentiality_details: None known.\n", "")
+        self.assertEqual(_paths(yaml.safe_load(without)),                  # the scan reads through the alias
+                         ["confidential_elements[0].confidentiality_details"])
+        self.assertEqual(_paths(yaml.safe_load(ALIASED_DUPLICATE)), [])    # what the parse shows
+        self.assertEqual([(d["path"], d["key"], d["lines"]) for d in rd.unread_duplicate_keys(ALIASED_DUPLICATE)],
+                         [("confidential_elements[0]", "confidentiality_details", [3, 4])])
+        found, reason = rd.check_text(ALIASED_DUPLICATE)
+        self.assertIsNone(found)
+        self.assertIn("`confidentiality_details` at confidential_elements[0] on lines 3, 4", reason)
+
+    def test_through_any_alias_or_merge_key(self):
+        for text, where in ALIASED_CASES:
+            with self.subTest(text=text):
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)], [where])
+
+    def test_a_shared_duplicate_is_named_once_at_the_first_place_the_scan_reads_it(self):
+        self.assertEqual(rd.unread_duplicate_keys(SHARED_TWICE),
+                         [{"path": "confidential_elements[0]", "key": "sub", "lines": [3, 5], "count": 2}])
+
+    def test_a_shared_mapping_the_scan_never_reads_is_not_named(self):
+        for text in (
+                # aliased only outside the scoped slots, and holding none
+                "x: &n\n  name: a\n  name: b\ny: *n\nknown_limitations:\n- *n\n",
+                # inside a slot only under skipped keys
+                "confidential_elements:\n- source_caveats: &c\n    name: a\n    name: b\n  id: x:a\n"
+                "- source_caveats: *c\n"):
+            with self.subTest(text=text):
+                self.assertEqual(rd.unread_duplicate_keys(text), [])
+
+    def test_a_merged_key_an_explicit_key_overrides_is_not_a_duplicate(self):
+        """YAML's override rule, which the #1029 gate does not count either."""
+        text = "x: &n\n  name: a\nconfidential_elements:\n- <<: *n\n  name: b\n"
+        self.assertEqual(yaml.safe_load(text)["confidential_elements"], [{"name": "b"}])
+        self.assertEqual(rd.unread_duplicate_keys(text), [])
+
+    def test_every_duplicate_named_is_one_the_1029_gate_counts(self):
+        """The walk groups keys as the gate does and only judges more places,
+        so it names no key and no line the gate would not."""
+        from data_sheets_schema.duplicate_keys import find_duplicate_keys
+        texts = [DUPLICATED_SLOT, DUPLICATED_ANCESTOR, KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR,
+                 ALIASED_DUPLICATE, SHARED_TWICE, *(text for text, _ in ALIASED_CASES)]
+        for text in texts:
+            with self.subTest(text=text[:40]):
+                named = {(d["key"], tuple(d["lines"])) for d in rd.unread_duplicate_keys(text)}
+                self.assertTrue(named)
+                self.assertLessEqual(named, {(d["key"], tuple(d["lines"])) for d in find_duplicate_keys(text)})
+
+
 #: Deeper than the composer (two frames a level) can recurse, whatever the limit.
 DEEP = 2 * sys.getrecursionlimit() + 100
 
@@ -367,6 +484,57 @@ class TestTheCommand(unittest.TestCase):
         self.assertIn("0 slot-meaning mismatch(es) in 0 of 0 record(s) checked", out.output)
         doc = json.loads(self._invoke("--json", duplicated).output.split("\nError:")[0])
         self.assertEqual([(r["checked"], "resources" in r["reason"]) for r in doc["records"]], [(False, True)])
+
+    def test_a_record_not_checked_reports_none_of_its_findings(self):
+        """#3066: its kept entry is a finding, and it is still not reported."""
+        mixed = Path(self.tmp.name) / "mixed.yaml"
+        mixed.write_text(KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR)
+        out = self._invoke(self.routed, mixed)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{mixed}\n  not checked: duplicate key `resources` at $ on lines 1, 7", out.output)
+        self.assertNotIn("confidential_elements[0].confidentiality_details", out.output)
+        self.assertIn("0 slot-meaning mismatch(es) in 0 of 1 record(s) checked, 0 in an entry", out.output)
+        doc = json.loads(self._invoke("--json", mixed).output.split("\nError:")[0])
+        self.assertEqual([sorted(r) for r in doc["records"]], [["checked", "path", "reason"]])
+        self.assertFalse(doc["records"][0]["checked"])
+
+    def test_a_record_whose_aliased_mapping_repeats_a_key_is_not_checked(self):
+        """#3063: the duplicate is written under `base` and read under the slot."""
+        aliased = Path(self.tmp.name) / "aliased.yaml"
+        aliased.write_text(ALIASED_DUPLICATE)
+        out = self._invoke(aliased)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{aliased}\n  not checked: duplicate key `confidentiality_details` at "
+                      "confidential_elements[0] on lines 3, 4", out.output)
+        self.assertIn("0 slot-meaning mismatch(es) in 0 of 0 record(s) checked", out.output)
+
+    def test_the_help_confines_the_hides_nothing_rule_to_ancestors(self):
+        """#3065: a key repeated inside a scoped slot stops the check even
+        when its dropped value holds no scoped slot, and the help says so."""
+        text = " ".join(self._invoke("--help").output.split())
+        self.assertIn("A duplicated ancestor whose dropped copies hold no scoped slot hides nothing", text)
+        self.assertNotIn("A duplicate whose dropped values hold no scoped slot", text)
+        repeated = Path(self.tmp.name) / "repeated.yaml"
+        repeated.write_text("confidential_elements:\n- confidential_elements_present: true\n"
+                            "  confidentiality_details: Two deposits are under embargo until 2027.\n"
+                            "  confidentiality_details: Participant ZIP codes.\n")
+        out = self._invoke(repeated)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn("not checked: duplicate key `confidentiality_details` at confidential_elements[0]", out.output)
+
+    def test_the_present_count_is_of_entries_asserting_present_only(self):
+        """#3067: one finding each under `true`, `false` and no flag."""
+        absent = Path(self.tmp.name) / "absent.yaml"
+        absent.write_text(yaml.safe_dump({"sensitive_elements": [
+            {"sensitive_elements_present": False, "sensitivity_details": EMBARGO_TEXT}]}))
+        bare = Path(self.tmp.name) / "bare.yaml"
+        bare.write_text(yaml.safe_dump({"confidential_elements": ["Under embargo until 2027."]}))
+        out = self._invoke(self.flagged, absent, bare)
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn("; the entry asserts sensitive_elements_present: false", out.output)
+        self.assertIn("; the entry carries no confidential_elements_present", out.output)
+        self.assertIn("3 slot-meaning mismatch(es) in 3 of 3 record(s) checked, 1 in an entry "
+                      "asserting its elements present", out.output)
 
     def test_a_record_the_loader_rejects_does_not_silence_the_others(self):
         """#3006: an impossible unquoted date raises a bare ValueError."""

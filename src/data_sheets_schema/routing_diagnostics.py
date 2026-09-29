@@ -14,10 +14,13 @@ the data are confidential, so the record asserts confidential elements on the
 strength of a release date. The fact itself is supported and kept elsewhere
 (`known_limitations` in 8 of those 9); the defect is the claim the slot makes.
 
-Those nine are a selection, not the corpus. On 2026-09-28 the repository
-commits 71 CM4AI full records and 63 cores; this scan flags 37 of the full
-records and 35 of the cores, 13 of each with an entry asserting
-`confidential_elements_present: true`, and no record of another project.
+Those nine are a selection, not the corpus. On 2026-09-28, 71 CM4AI full
+records and 63 cores are committed under `data/d4d_concatenated`. This scan
+flags 37 of those full records and 35 of those cores, 13 of each with an
+entry asserting `confidential_elements_present: true`, and no record of
+another project there. Those counts are of that directory only: archived
+copies under `data/ATTIC`, and CM4AI records elsewhere in the repository, are
+not in them, and the scan flags some of the archived ones too.
 
 `slot_meaning_mismatch` reports such values. It is a **slot-meaning** finding,
 not an unsupported claim: the text may be quoted exactly from the source.
@@ -62,13 +65,21 @@ a reader sees whether the misrouted text is also asserting the elements exist.
 A record is read as `yaml.safe_load` reads it, which keeps the last of a
 duplicated mapping key (#1029). The values before the last are never scanned.
 `unread_duplicate_keys` names a duplicate whenever one of those dropped values
-held something the scan reads: the duplicate is a scoped slot or sits under
-one, or it is an ancestor — a second `resources` block, say — whose dropped
-copy holds a scoped slot at any depth. `check_text` then reports the record as
-not checked rather than clean. A duplicated ancestor whose dropped copies hold
-no scoped slot hides nothing from this scan and is not named. The findings the
-dropped values would have produced are not reported: the record is not
-checked, not partly checked.
+held something the scan reads: the duplicate is a scoped slot, or a key inside
+one that is neither a skipped key nor under one, or it is an ancestor — a
+second `resources` block, say — whose dropped copy holds a scoped slot at any
+depth. A mapping is judged at every place the scan reaches it, through an
+alias or a merge key as well as where it is written, so a duplicate inside a
+mapping anchored elsewhere and aliased under a scoped slot is named there
+(#3063). `check_text` then reports the record as not checked rather than
+clean. A duplicated ancestor whose dropped copies hold no scoped slot hides
+nothing from this scan and is not named. Neither the findings the dropped
+values would have produced nor the kept values' own are reported: the record
+is not checked, not partly checked.
+
+A key that a merge key brings in and an explicit key of the same mapping
+overrides is YAML's override rule, not a key written twice. The #1029 gate
+does not count it, and it is not named here.
 
 A record the loader cannot read at all — a YAML syntax error, an impossible
 unquoted date such as `2026-02-30`, which PyYAML raises as a bare
@@ -96,7 +107,7 @@ import yaml
 
 # The #1029 gate's key identity (the constructed key, as the loader compares
 # it), so this module and the gate agree on what a duplicate is.
-from data_sheets_schema.duplicate_keys import _key_identity, find_duplicate_keys
+from data_sheets_schema.duplicate_keys import _key_identity
 
 INSTRUMENT_NAME = "routing_diagnostics"
 #: Bump on any change to SCOPED_SLOTS, SKIPPED_KEYS or LEXICON, or to how the
@@ -237,15 +248,16 @@ def slot_meaning_mismatch(record: dict[str, Any]) -> list[Mismatch]:
     return list(_scan(record, ""))
 
 
-def _read_by_the_scan(path: str, key: str) -> bool:
-    """Whether the scan reads `key` in the mapping at `path` (a
-    `duplicate_keys` path, `$` for the top level): the key is a scoped slot,
-    or it sits under one and not under a skipped key."""
-    names = [segment.split("[", 1)[0] for segment in path.split(".")] + [key]
-    for index, name in enumerate(names):
-        if name in SCOPED_SLOTS:
-            return not SKIPPED_KEYS.intersection(names[index + 1:])
-    return False
+#: Where the scan stands at a node: outside every scoped slot, walking through
+#: to find one, or inside one, reading every leaf but a skipped key's. A node
+#: under a skipped key inside a scoped slot is never read and is not walked.
+_OUTSIDE, _INSIDE = "outside", "inside"
+
+
+def _constructed(identity: tuple[str, Any]) -> Any:
+    """The key the loader builds from a `_key_identity`, or None where it
+    builds none this module could compare with a slot name."""
+    return identity[1] if identity[0] == "value" else None
 
 
 def _holds_a_scoped_slot(node: Any) -> bool:
@@ -268,28 +280,55 @@ def _holds_a_scoped_slot(node: Any) -> bool:
     return False
 
 
-def _ancestors_hiding_a_slot(text: str) -> list[dict[str, Any]]:
-    """Duplicated keys outside every scoped slot one of whose dropped values
-    holds a scoped slot (#2980), in `find_duplicate_keys`'s shape and path
-    spelling. Keys are compared by the #1029 gate's identity and merge keys
-    are not duplicates, as there. A text the composer rejects yields nothing:
-    `safe_load` rejects it too, and the record is not checked on that."""
-    out: list[dict[str, Any]] = []
+def _hides_something(where: str, key: Any, dropped: list[Any]) -> bool:
+    """Whether a key written more than once, in a mapping the scan reaches
+    `where`, dropped a value the scan would have read. Inside a scoped slot
+    every key but a skipped one is read. Outside, a scoped slot is read, and
+    so is any value that holds one at any depth: an ancestor such as a
+    second `resources` block (#2980, #3005)."""
+    if where == _INSIDE:
+        return key not in SKIPPED_KEYS
+    return key in SCOPED_SLOTS or any(_holds_a_scoped_slot(value) for value in dropped)
+
+
+def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
+    """Duplicated mapping keys in a record's text one of whose dropped values
+    held something the scan reads: a scoped slot written twice, a key
+    repeated inside one that is neither a skipped key nor under one, or an
+    ancestor — two `resources` blocks, say — whose earlier copy holds a
+    scoped slot at any depth. `safe_load` keeps the last value (#1029), so a
+    record carrying one of these is not a clean record whatever its last
+    values say.
+
+    The composed node tree is walked as `_scan` walks the loaded record, so a
+    mapping is judged at every place the scan reaches it, through an alias
+    or a merge key as well as where it is written: a duplicate inside a
+    mapping anchored outside the scoped slots and aliased under one is named
+    under the slot (#3063). Each duplicate is named once, at the first such
+    place in document order, with the lines its key is written on; the list
+    is in line order. Keys are compared by the #1029 gate's identity, and
+    merge keys are not duplicates, as there. A text the composer rejects
+    yields nothing: `safe_load` rejects it too, and the record is not
+    checked on that."""
     try:
         loader = yaml.SafeLoader(text)
-    except yaml.YAMLError:
-        return out
+    except (yaml.YAMLError, RecursionError):
+        return []
+    named: dict[tuple[int, Any], dict[str, Any]] = {}
     try:
         root = loader.get_single_node()
-        stack = [(root, "")] if root is not None else []
-        seen: set[int] = set()
+        stack = [(root, "", _OUTSIDE)] if root is not None else []
+        # A node is walked at most once outside the scoped slots and once
+        # inside one, so a cyclic or widely shared graph neither recurses
+        # forever nor is walked once per alias, as in the #1029 gate (#1032).
+        walked: set[tuple[int, str]] = set()
         while stack:
-            node, path = stack.pop()
-            if id(node) in seen:
+            node, path, where = stack.pop()
+            if (id(node), where) in walked:
                 continue
-            seen.add(id(node))
+            walked.add((id(node), where))
             if isinstance(node, yaml.SequenceNode):
-                stack.extend((item, f"{path}[{i}]") for i, item in reversed(list(enumerate(node.value))))
+                stack.extend((item, f"{path}[{i}]", where) for i, item in reversed(list(enumerate(node.value))))
                 continue
             if not isinstance(node, yaml.MappingNode):
                 continue
@@ -297,40 +336,32 @@ def _ancestors_hiding_a_slot(text: str) -> list[dict[str, Any]]:
             children = []
             for key_node, value_node in node.value:
                 text_key = getattr(key_node, "value", None)
-                label = text_key if isinstance(text_key, str) else str(text_key)
-                child = f"{path}.{label}" if path else label
                 if text_key == "<<" and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge":
-                    children.append((value_node, f"{path}.<<" if path else "<<"))
+                    # The loader reads a merged mapping's keys as this one's.
+                    children.append((value_node, f"{path}.<<" if path else "<<", where))
                     continue
-                groups.setdefault(_key_identity(loader, key_node), (label, []))[1].append(
-                    (key_node.start_mark.line + 1, value_node))
-                # A scoped slot's own contents are `_read_by_the_scan`'s to judge.
-                if text_key not in SCOPED_SLOTS:
-                    children.append((value_node, child))
-            for label, occurrences in groups.values():
-                dropped = [value for _, value in occurrences[:-1]]
-                if len(occurrences) > 1 and any(_holds_a_scoped_slot(value) for value in dropped):
-                    out.append({"path": path or "$", "key": label,
-                                "lines": [line for line, _ in occurrences], "count": len(occurrences)})
+                identity = _key_identity(loader, key_node)
+                label = text_key if isinstance(text_key, str) else str(text_key)
+                groups.setdefault(identity, (label, []))[1].append((key_node.start_mark.line + 1, value_node))
+                key = _constructed(identity)
+                child = f"{path}.{label}" if path else label
+                if where == _OUTSIDE:
+                    children.append((value_node, child, _INSIDE if key in SCOPED_SLOTS else _OUTSIDE))
+                elif key not in SKIPPED_KEYS:
+                    children.append((value_node, child, _INSIDE))
+            for identity, (label, occurrences) in groups.items():
+                if (len(occurrences) > 1 and (id(node), identity) not in named
+                        and _hides_something(where, _constructed(identity),
+                                             [value for _, value in occurrences[:-1]])):
+                    named[(id(node), identity)] = {
+                        "path": path or "$", "key": label,
+                        "lines": [line for line, _ in occurrences], "count": len(occurrences)}
             stack.extend(reversed(children))
-    except yaml.YAMLError:
+    except (yaml.YAMLError, RecursionError):
         return []
     finally:
         loader.dispose()
-    return out
-
-
-def unread_duplicate_keys(text: str) -> list[dict[str, Any]]:
-    """Duplicated mapping keys in a record's text one of whose dropped values
-    held something the scan reads: a scoped slot written twice, a key
-    repeated inside one, or an ancestor — two `resources` blocks, say — whose
-    earlier copy holds a scoped slot at any depth. `safe_load` keeps the last
-    value (#1029), so a record carrying one of these is not a clean record
-    whatever its last values say. Each is named once, in line order."""
-    named = [d for d in find_duplicate_keys(text) if _read_by_the_scan(d["path"], d["key"])]
-    known = {(d["path"], d["key"], tuple(d["lines"])) for d in named}
-    named += [d for d in _ancestors_hiding_a_slot(text) if (d["path"], d["key"], tuple(d["lines"])) not in known]
-    return sorted(named, key=lambda d: d["lines"][0])
+    return sorted(named.values(), key=lambda d: d["lines"][0])
 
 
 def describe_unread(duplicates: list[dict[str, Any]]) -> str:

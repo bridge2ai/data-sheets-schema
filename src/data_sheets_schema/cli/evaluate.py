@@ -328,11 +328,16 @@ def slot_meaning_cmd(records, as_json):
     read (a syntax error, or anything else the YAML loader raises, such as an
     impossible unquoted date), is not a mapping, or repeats a key one of whose
     dropped earlier values held something the scan reads (#1029): a scoped
-    slot, a key inside one, or an ancestor such as a second `resources` block
-    holding one. A duplicate whose dropped values hold no scoped slot hides
-    nothing from this scan and does not stop the record being checked. A
-    record the diagnostic never looked at is not a clean one, and the other
-    records named in the same call are still reported. Nothing is written.
+    slot, a key inside one that the scan reads (any but `id`, `source_caveats`
+    and what they hold), or an ancestor such as a second `resources` block
+    holding one. A mapping is judged wherever the scan reaches it, through an
+    alias or a merge key as well as where it is written. A duplicated
+    ancestor whose dropped copies hold no scoped slot hides nothing from this
+    scan and does not stop the record being checked. A record that is not
+    checked has none of its findings reported, not even those its kept
+    values carry. A record the diagnostic never looked at is not a clean one,
+    and the other records named in the same call are still reported. Nothing
+    is written.
     """
     import json
 
