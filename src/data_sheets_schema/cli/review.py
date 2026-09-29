@@ -196,16 +196,19 @@ def check(method, label, project, write, strict):
 @click.option("--label", required=True)
 @click.option("--project", callback=project_choice, required=True)
 @click.option("--flattened", "show_flattened", is_flag=True, help="also list the flattened values and where their text survives")
+@click.option("--rewritten", "show_rewritten", is_flag=True,
+              help="also list the carried values whose path now holds other text (#3243)")
 @click.option("--json", "as_json", is_flag=True, help="print the whole block as JSON")
-def removals_cmd(method, label, project, show_flattened, as_json):
+def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json):
     """Classify every value the phase-1 snapshot carried and the final full
     record does not (#2923): flattened (its text survives), founded (the
     path of an audit finding not scoped to the core record alone covers it)
     or unfounded, with the phase that removed it. The text test is the
     value's own text surviving, so a value reworded, moved or split lists
-    as deleted (#3207), while a lost value can list as flattened by
-    coincidental containment and a scalar rewritten in place is not listed
-    at all: the counts are not bounds on content lost (#3229). Read-only:
+    as deleted (#3207), while a lost word or long number can list as
+    flattened by coincidental containment: the counts are not bounds on
+    content lost (#3229). A scalar rewritten in place is not a removal; the
+    summary counts it and --rewritten lists it (#3243). Read-only:
     nothing is
     written, and a run with no phase-1 snapshot prints that it was not
     checked rather than zero. Where the audit is missing, or present but
@@ -260,6 +263,12 @@ def removals_cmd(method, label, project, show_flattened, as_json):
             click.echo(f"   ~ {row['path']} → {row['into']} ({row.get('phase') or 'phase unattributed'})")
         if block.get("flattened_paths_truncated"):
             click.echo(f"   … and {block['flattened_paths_truncated']} more flattened value(s) not listed")
+    if show_rewritten:
+        for row in block["rewritten_paths"]:
+            state = {True: "founded", False: "unfounded"}.get(row.get("founded"), "unsorted")
+            click.echo(f"   ≠ {state} {row['path']} → {row['at']} ({row.get('phase') or 'phase unattributed'})")
+        if block.get("rewritten_paths_truncated"):
+            click.echo(f"   … and {block['rewritten_paths_truncated']} more rewritten value(s) not listed")
 
 
 @review.command("disposition")
