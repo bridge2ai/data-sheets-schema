@@ -211,3 +211,116 @@ def test_cli_treats_any_spelling_of_the_study_manifest_as_the_study_default(spel
     assert "(study default)" in r.output
     assert "crate policy: document_corpus: exclude" in r.output
     assert "not the study default" not in r.output
+
+
+# A companion dataset's release in the corpus (#3283). OWN's only release
+# record belongs to COMPANION by the scope declaration, as does one licence;
+# the list form of in_bundle, an id the project lists no source for, and a
+# second declaration naming the same source are all exercised.
+SCOPED = b"""version: 1
+projects:
+  OWN:
+    - id: landing
+      source_type: documentation
+      processed_file: landing.txt
+    - id: companion_release
+      source_type: data resource
+      processed_file: companion_release.txt
+      priority: 1
+    - id: companion_terms
+      source_type: license
+      processed_file: companion_terms.txt
+    - id: own_irb
+      source_type: IRB
+      processed_file: own_irb.txt
+  COMPANION:
+    - id: companion_release
+      source_type: data resource
+      processed_file: companion_release.txt
+scope:
+  OWN:
+    referent_id: https://example.org/own
+    related_but_distinct:
+      - id: https://example.org/companion
+        name: Companion dataset
+        manifest_key: COMPANION
+        in_bundle: [companion_release, companion_terms, not_a_source]
+      - id: https://example.org/umbrella
+        in_bundle: companion_release
+  COMPANION:
+    referent_id: https://example.org/companion
+    related_but_distinct: []
+"""
+
+
+def test_voice_counts_only_its_own_releases_and_names_the_pediatric_one():
+    inv = committed("VOICE")
+    assert inv["instrument"] == ri.INSTRUMENT and "v2" in ri.INSTRUMENT
+    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": []}
+    own = [e["source_id"] for e in inv["release_records"]]
+    assert "physionet_pediatric_1_1_0" not in own and "physionet_3_1_0" in own
+    assert "physionet_pediatric_1_1_0" not in [e["source_id"] for e in inv["tier1"]]
+    assert (inv["tier1_count"], inv["tier1_current_count"]) == (3, 2)   # was 4 (3 current) under v1
+    [related] = inv["related_sources"]
+    assert related["source_id"] == "physionet_pediatric_1_1_0"
+    assert [d["manifest_key"] for d in related["related_datasets"]] == ["VOICE_PEDIATRIC"]
+    # The pediatric project's own record of the same release stays its own.
+    ped = committed("VOICE_PEDIATRIC")
+    assert [e["source_id"] for e in ped["release_records"]] == ["physionet_pediatric_1_1_0"]
+    assert ped["related_sources"] == []
+
+
+def test_a_related_release_is_not_this_datasets_release_evidence():
+    inv = ri.inventory(SCOPED, None, "OWN")
+    assert inv["release_records"] == [] and inv["tier1"] == []
+    assert inv["release_record_in_document_corpus"] is False
+    assert inv["governance"]["license"] == []                      # the companion's licence too
+    assert [e["source_id"] for e in inv["governance"]["IRB"]] == ["own_irb"]
+    assert inv["sources"] == 4                                     # the corpus is unchanged
+    moved = {e["source_id"]: e["related_datasets"] for e in inv["related_sources"]}
+    assert set(moved) == {"companion_release", "companion_terms"}
+    assert [d["id"] for d in moved["companion_release"]] == ["https://example.org/companion",
+                                                            "https://example.org/umbrella"]
+    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": ["not_a_source"]}
+    assert ri.lacking_release_evidence([inv]) == ["OWN"]
+    # The companion's own inventory counts the same source as its release.
+    assert ri.inventory(SCOPED, None, "COMPANION")["release_record_in_document_corpus"] is True
+    text = "\n".join(ri.render(inv))
+    assert "companion_release (data resource): declared in_bundle for COMPANION, " \
+           "https://example.org/umbrella, not counted above" in text
+    assert "in_bundle names no source of this project: not_a_source" in text
+    assert ri.render(inv)[-1].startswith("   crate in corpus")
+
+
+@pytest.mark.parametrize("scope_yaml, status", [
+    (b"", "undeclared"),
+    (b"scope:\n  OTHER:\n    related_but_distinct: []\n", "undeclared"),
+    (b"scope:\n  EXTERNAL: [a, b]\n", "malformed"),
+    (b"scope:\n  EXTERNAL:\n    related_but_distinct: promoted\n", "malformed"),
+    (b"scope: [EXTERNAL]\n", "malformed"),
+    (b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - just-a-string\n", "declared"),
+])
+def test_scope_shapes_are_statuses_and_move_nothing_unless_declared(scope_yaml, status):
+    inv = ri.inventory(NEUTRAL + scope_yaml, None, "EXTERNAL")
+    assert inv["scope"]["status"] == status
+    assert inv["related_sources"] == []
+    assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
+    ri.render(inv)
+
+
+def test_scope_is_read_from_the_bytes_given():
+    from data_sheets_schema import scope
+    assert scope.scope_in(SCOPED, "OWN")["referent_id"] == "https://example.org/own"
+    assert scope.scope_in(SCOPED.decode(), "MISSING") is None
+    assert scope.in_bundle_of({"in_bundle": ["a", " a ", True, None, 7]}) == ["a", "7"]
+    assert scope.in_bundle_of({"in_bundle": "a"}) == ["a"] and scope.in_bundle_of("a") == []
+    with pytest.raises(ValueError, match="not readable YAML"):
+        scope.scope_in(b"scope: [unclosed\n", "OWN")
+
+
+def test_cli_names_the_related_source(monkeypatch):
+    monkeypatch.chdir(ROOT)
+    r = CliRunner().invoke(release_inventory_cmd, ["--project", "VOICE"])
+    assert r.exit_code == 0, r.output
+    assert ("related source     physionet_pediatric_1_1_0 (data resource): "
+            "declared in_bundle for VOICE_PEDIATRIC, not counted above") in r.output

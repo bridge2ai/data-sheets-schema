@@ -20,9 +20,19 @@ What it states is a declaration about the corpus, not about the documents'
 content: a source typed ``license`` is counted as a licence source whatever
 its text says, and a project with none may still mention a licence in prose
 (CHORUS's bundle quotes a training-programme "Licensing Agreement" and an
-MIT software licence, neither a dataset licence). Nor does it consult the
-``scope:`` block: a release record in a project's corpus may describe a
-related-but-distinct dataset, as VOICE's ``physionet_pediatric_1_1_0`` does.
+MIT software licence, neither a dataset licence).
+
+A source in a project's corpus may describe a related-but-distinct dataset
+rather than this one, as VOICE's ``physionet_pediatric_1_1_0`` describes the
+pediatric release. The manifest's ``scope:`` block says so
+(``related_but_distinct[].in_bundle``), and from v2 (#3283) the inventory
+reads it off the same bytes: such a source is listed under
+``related_sources`` with the dataset it belongs to and is left out of every
+count of this dataset's evidence -- tier 1, governance and release records.
+Only the declaration moves a source; nothing is inferred from a source's
+type, name or text, so an undeclared related source is still counted as
+this dataset's, and ``scope.status`` says whether there was a declaration to
+read.
 """
 from __future__ import annotations
 
@@ -31,6 +41,7 @@ import json
 
 import yaml
 
+from data_sheets_schema import scope as scope_decl
 from data_sheets_schema import source_metadata
 
 #: Source types that carry the terms a dataset is released under. Spelled as
@@ -49,7 +60,7 @@ RELEASE_RECORD_TYPES = ("RO-Crate", "structured metadata", "data resource")
 #: The type that means the crate itself is in the document corpus.
 CRATE_TYPE = "RO-Crate"
 
-INSTRUMENT = "release_inventory v1 (#2914)"
+INSTRUMENT = "release_inventory v2 (#2914, #3283)"
 
 
 def _fold(value: str) -> str:
@@ -106,6 +117,39 @@ def _crate_policy(raw: bytes | str | None, project: str) -> dict:
             "crate_manifest_sha256": digest}
 
 
+def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict, dict[str, list[dict]]]:
+    """The project's scope declaration, and source id -> the related-but-
+    distinct datasets whose ``in_bundle`` names it.
+
+    Every shape short of a usable declaration is a status: ``undeclared``
+    (no scope entry for the project), ``malformed`` (the entry, or its
+    ``related_but_distinct``, is not the shape ``scope.check_manifest``
+    reads), ``declared``. An ``in_bundle`` id the project lists no source
+    for moves nothing and is named under ``in_bundle_unmatched``, which is
+    ``check_manifest``'s finding surfaced where its effect would be.
+    """
+    declared = scope_decl.scope_in(raw, project)
+    status = {"status": "declared", "in_bundle_unmatched": []}
+    if declared is None:
+        return {**status, "status": "undeclared"}, {}
+    related = declared.get("related_but_distinct") if isinstance(declared, dict) else None
+    if not isinstance(declared, dict) or not isinstance(related or [], list):
+        return {**status, "status": "malformed"}, {}
+    moved: dict[str, list[dict]] = {}
+    for entry in related or []:
+        dataset = {"id": entry.get("id") if scope_decl._is_identifier(entry.get("id")) else None,
+                   "name": entry.get("name") if isinstance(entry.get("name"), str) else None,
+                   "manifest_key": (entry.get("manifest_key")
+                                    if scope_decl._is_identifier(entry.get("manifest_key")) else None)
+                   } if isinstance(entry, dict) else None
+        for sid in scope_decl.in_bundle_of(entry):
+            if sid in source_ids:
+                moved.setdefault(sid, []).append(dataset)
+            elif sid not in status["in_bundle_unmatched"]:
+                status["in_bundle_unmatched"].append(sid)
+    return status, moved
+
+
 def inventory(manifest: bytes | str, crate_manifest: bytes | str | None, project: str) -> dict:
     """The release-level corpus inventory of one project.
 
@@ -115,7 +159,10 @@ def inventory(manifest: bytes | str, crate_manifest: bytes | str | None, project
     project the manifest does not declare, or a manifest it cannot bind.
     """
     authority = source_metadata.projection(manifest, project)
-    rows = authority["sources"]
+    scope, moved = _related(manifest, project, {row["source_id"] for row in authority["sources"]})
+    related = [{**_brief(row), "related_datasets": moved[row["source_id"]]}
+               for row in authority["sources"] if row["source_id"] in moved]
+    rows = [row for row in authority["sources"] if row["source_id"] not in moved]
     tier1 = [_brief(row) for row in rows if row["effective_priority"] == 1]
     governance = _typed(rows, GOVERNANCE_TYPES)
     release_types = {_fold(t) for t in RELEASE_RECORD_TYPES}
@@ -124,7 +171,9 @@ def inventory(manifest: bytes | str, crate_manifest: bytes | str | None, project
         "instrument": INSTRUMENT,
         "project": project,
         "source_manifest_sha256": authority["sha256"],
-        "sources": len(rows),
+        "sources": len(authority["sources"]),
+        "scope": scope,
+        "related_sources": related,
         "tier1_count": len(tier1),
         "tier1_current_count": sum(not e["superseded"] for e in tier1),
         "tier1": tier1,
@@ -165,6 +214,17 @@ def render(inv: dict) -> list[str]:
         lines.append(f"   {kind + ' sources':18} {_ids(inv['governance'][kind])}")
     lines.append(f"   release record     {'yes' if inv['release_record_in_document_corpus'] else 'no'}"
                  + (f": {_ids(inv['release_records'])}" if inv["release_records"] else ""))
+    for entry in inv["related_sources"]:
+        owners = ", ".join(d["manifest_key"] or d["name"] or d["id"] or "an unnamed dataset"
+                           if d else "a malformed entry" for d in entry["related_datasets"])
+        lines.append(f"   {'related source':18} {_ids([entry])} ({entry['source_type']}): "
+                     f"declared in_bundle for {owners}, not counted above")
+    scope = inv["scope"]
+    if scope["status"] == "malformed":
+        lines.append("   scope              declaration is malformed; no source moved")
+    if scope["in_bundle_unmatched"]:
+        lines.append(f"   scope              in_bundle names no source of this project: "
+                     f"{', '.join(scope['in_bundle_unmatched'])}")
     lines.append(f"   crate in corpus    {'yes' if inv['crate_in_document_corpus'] else 'no'}"
                  f" · crate policy: {crate}")
     return lines
@@ -172,8 +232,9 @@ def render(inv: dict) -> list[str]:
 
 def lacking_release_evidence(inventories: list[dict]) -> list[str]:
     """Projects whose document corpus holds no release record and no
-    licence or DUA source -- the ones whose release-level slots a record
-    cannot fill from its bundle."""
+    licence or DUA source of their own -- the ones whose release-level slots
+    a record cannot fill from its bundle. A related-but-distinct dataset's
+    release record is not this dataset's release evidence (#3283)."""
     return [inv["project"] for inv in inventories
             if not inv["release_record_in_document_corpus"]
             and not inv["governance"]["license"] and not inv["governance"]["DUA"]]
