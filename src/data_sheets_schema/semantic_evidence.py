@@ -55,7 +55,10 @@ prints it, and of a number as Python prints it. The parsed input no longer
 holds the text the record wrote, so a quote of a whole non-string scalar also
 matches when YAML reads the quote as that same value. A timestamp must keep
 its UTC offset. So `2026-05-01T00:00:00Z`, `yes` and `1.10` match the values a
-record wrote that way.
+record wrote that way. A quote YAML cannot read as a value, such as the
+impossible date `2026-02-30`, matches only as text. Whitespace is normalised
+on both sides, so a single-spaced quote matches a value written across lines,
+as a literal block scalar is.
 
 Declared fields. A rubric item's `field` names are read as the deterministic
 presence instrument reads them, through `evaluation_context.field_values` and
@@ -141,7 +144,8 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
     general-context semantic rubric, the rating declares another rubric, or its
     applicability context or input document is malformed. A malformed evidence
     list, evidence entry or issue entry is reported as a finding rather than
-    raised; the rating's item structure is `validate_scope`'s to refuse.
+    raised, and so is a quote YAML cannot read, such as an impossible date; the
+    rating's item structure is `validate_scope`'s to refuse.
     """
     rubric_name = rubric_name.removesuffix("-semantic")
     if rubric_name not in {"rubric10", "rubric20"}:
@@ -319,6 +323,24 @@ def _same_value(read: Any, scalar: Any) -> bool:
     return False
 
 
+def _yaml_reading(quote: str) -> Any:
+    """The value YAML reads a whole quote as; None when it reads none.
+
+    Only `yaml.YAMLError` is PyYAML's own exception. Its constructors raise
+    plain ones for text that matches a pattern but builds no value: ValueError
+    for an impossible date or time (`2026-02-30`, `2026-01-01T25:00:00Z`) or
+    `!!int abc`, AttributeError for `!!timestamp x`, KeyError for
+    `!!bool maybe`, and RecursionError for deeply nested brackets. Every one
+    means the quote is not a value the record could hold, so a misquoted
+    date is a `quote_not_found` finding, not an exception out of
+    `check_evidence` that a caller would take for a malformed input (#3072).
+    """
+    try:
+        return yaml.safe_load(quote)
+    except Exception:
+        return None
+
+
 def _quote_found(quote: str, values: list[Any]) -> bool:
     wanted = _normalise(quote)
     read, parsed = None, False
@@ -330,10 +352,7 @@ def _quote_found(quote: str, values: list[Any]) -> bool:
         if any(wanted in text for text in _texts(scalar)):
             return True
         if not parsed:
-            try:
-                read = yaml.safe_load(wanted)
-            except yaml.YAMLError:
-                read = None
+            read = _yaml_reading(wanted)
             parsed = True
         if read is not None and _same_value(read, scalar):
             return True
@@ -426,7 +445,13 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
 
 
 def _named_paths(row: dict) -> list[str]:
-    """The well-formed paths a row cites or lists as considered."""
+    """The well-formed paths a row cites or lists as considered.
+
+    A malformed path is already an error and accounts for no field. It can
+    still resolve, because `_resolve` follows any key the input holds: on a
+    record carrying a key that is not snake_case, `version_access.Change Log`
+    reaches a location inside the populated `version_access` (#3073).
+    """
     cited = row.get("cited") if isinstance(row.get("cited"), list) else []
     considered = row.get("considered") if isinstance(row.get("considered"), list) else []
     paths = [_entry_path(entry) for entry in cited] + [entry for entry in considered if isinstance(entry, str)]

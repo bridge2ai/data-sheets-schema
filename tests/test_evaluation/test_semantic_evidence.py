@@ -179,6 +179,28 @@ def test_an_absence_claim_is_checked_against_the_input(source):
     assert "/version_access/version_details" in errors[0].message
 
 
+def test_an_absence_claim_passes_on_a_null_or_empty_value(source):
+    # The committed record has no null or empty value, so this half of the
+    # rule is shown on a copy of it (#3075).
+    document = copy.deepcopy(source[0])
+    document["version_access"]["version_details"] = None
+    document["errata"] = []
+    document["updates"] = {}
+    document["keywords"] = "  \n"
+    document["maintainers"] = [{"maintainer_details": None, "role": ""}, {"maintainer_details": []}]
+    paths = ("version_access.version_details", "/errata", "updates", "/keywords", "maintainers",
+             "maintainers.maintainer_details", "/maintainers/0/role")
+    result = _rating("rubric20", source)
+    _row(result, "Q19", absent=[{"path": path} for path in paths])
+    assert check_evidence(result, document, "rubric20").findings == ()
+    # One populated value among them is an error that names where it is.
+    document["maintainers"].append({"maintainer_details": "Fixture maintainer"})
+    errors = check_evidence(result, document, "rubric20").errors
+    assert _codes(errors) == [("absent_path_populated", "Q19", "maintainers"),
+                              ("absent_path_populated", "Q19", "maintainers.maintainer_details")]
+    assert "populates /maintainers/2/maintainer_details" in errors[1].message
+
+
 def test_a_cited_path_must_resolve_to_a_populated_value(source):
     result = _rating("rubric20", source)
     _row(result, "Q13", cited=[{"path": "/creator"}, {"path": "version_access.change_log"},
@@ -214,6 +236,44 @@ def test_a_quote_must_lie_inside_the_cited_value_up_to_whitespace(source):
         ("quote_not_found", "Q13", "version_access.version_details"),
         ("quote_not_found", "Q13", "/keywords"),
         ("malformed_evidence", "Q13", "/version")]
+    # The value is normalised too. Every string in the committed record is
+    # single-spaced, so a value written across lines, as a literal block
+    # scalar is, is shown on a copy of it (#3074).
+    document = copy.deepcopy(source[0])
+    document["version_access"].update(yaml.safe_load(
+        "version_details: |\n  Each quarterly release\n  is deposited   as a distinct\n  Dataverse dataset\n"))
+    value = document["version_access"]["version_details"]
+    assert "\n" in value and "   " in value
+    _row(result, "Q13", cited=[
+        {"path": "version_access.version_details", "quote": "release is deposited as a distinct Dataverse dataset"}])
+    assert check_evidence(result, document, "rubric20").findings == ()
+    _row(result, "Q13", cited=[
+        {"path": "version_access.version_details", "quote": "release is deposited as a distinct Dataverse record"}])
+    assert _codes(check_evidence(result, document, "rubric20").errors) == [
+        ("quote_not_found", "Q13", "version_access.version_details")]
+
+
+def test_a_quote_yaml_cannot_read_is_not_found_rather_than_raised(source):
+    # PyYAML's constructors raise ValueError, AttributeError, KeyError or
+    # RecursionError, none of them a YAMLError, for text that matches a
+    # pattern but builds no value. Each is a false quote of a non-string
+    # scalar, not a malformed input (#3072).
+    assert source[0]["total_file_count"] == 10
+    assert source[0]["human_subject_research"]["involves_human_subjects"] is False
+    result = _rating("rubric20", source)
+    unreadable = ("2026-02-30", "2025-09-31", "2026-13-01", "2026-01-01T25:00:00Z", "!!int abc",
+                  "!!float abc", "!!timestamp x", "!!bool maybe", "[" * 1200 + "]" * 1200)
+    for path in ("/total_file_count", "/human_subject_research/involves_human_subjects"):
+        for quote in unreadable:
+            _row(result, "Q13", cited=[{"path": path, "quote": quote}])
+            assert _codes(_check(result, source).errors) == [("quote_not_found", "Q13", path)], (path, quote[:30])
+    # The same dates against a datetime are not found either.
+    document = copy.deepcopy(source[0])
+    document.update(yaml.safe_load("issued: 2026-05-01T00:00:00Z\n"))
+    for quote in unreadable[:4]:
+        _row(result, "Q13", cited=[{"path": "issued", "quote": quote}])
+        assert _codes(check_evidence(result, document, "rubric20").errors) == [
+            ("quote_not_found", "Q13", "issued")], quote
 
 
 def test_a_quote_of_a_whole_non_string_value_matches_as_yaml_reads_it(source):
@@ -307,6 +367,29 @@ def test_a_q13_deduction_that_never_reads_version_access_warns(source):
         row["cited"] += evidence.get("cited", [])
         row["considered"] = evidence.get("considered", [])
         assert _check(result, source).findings == ()
+
+
+@pytest.mark.parametrize("name", ["cited", "considered"])
+def test_a_malformed_path_accounts_for_no_field_even_where_it_resolves(source, name):
+    # A key that is not snake_case lets a malformed dotted path resolve: the
+    # committed gpt5 CM4AI record holds "Point of Contact" keys inside
+    # maintainers. The path is an error, and it accounts for nothing (#3073).
+    document = copy.deepcopy(source[0])
+    document["version_access"]["Change Log"] = "Fixture change log"
+    result = _rating("rubric20", source)
+    _issue(result, ["Q13"])
+    five = [{"path": path} for path in ("version", "updates", "maintainers", "doi", "publisher")]
+    for path, codes in [
+            ("version_access.Change Log", [("malformed_path", "Q13", "version_access.Change Log")]),
+            ("/version_access/Change Log", [])]:
+        _row(result, "Q13", score=3, cited=five + ([{"path": path}] if name == "cited" else []),
+             considered=[path] if name == "considered" else [])
+        report = check_evidence(result, document, "rubric20")
+        assert _codes(report.errors) == codes, path
+        # Both spellings reach /version_access/Change Log; only the
+        # well-formed pointer accounts for version_access.
+        assert _codes(report.warnings) == (
+            [("uncovered_populated_field", "Q13", "version_access")] if codes else []), path
 
 
 def test_a_misreading_of_a_field_the_row_cites_passes_these_checks(source):
