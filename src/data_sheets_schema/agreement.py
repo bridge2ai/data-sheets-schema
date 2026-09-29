@@ -376,8 +376,10 @@ class EquivalenceJudge:
         credentials just to read a file.
         """
         if self._model is None:
-            from data_sheets_schema.api_runner import _model_settings
-            self._model = _model_settings()["name"]
+            # The evaluation model (#2928), which defaults to the generation
+            # pin — the cache scope is unchanged.
+            from data_sheets_schema.evaluation_model import evaluation_model_name
+            self._model = evaluation_model_name()
         return self._model
 
     def _resolve(self):
@@ -605,12 +607,13 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
     slots cannot quietly buy ~1400 embeddings on the way past. The embedder
     reads its cache and stops there unless asked otherwise.
 
-    `judge_model` pins the instrument. Left as None the judge inherits the
-    live config pin — right for a fresh measurement, wrong for reproducing a
-    published one: when #345 switched the pin, every model-scoped cached
-    verdict silently fell out of scope and the offline rebuild of an already
-    frozen artifact failed (#351). A reproduction passes the judge_model the
-    publication records.
+    `judge_model` pins the instrument. Left as None the judge takes the
+    evaluation model (`evaluation_model.evaluation_model_settings`, #2928),
+    which today defaults to the live generation config pin — right for a
+    fresh measurement, wrong for reproducing a published one: when #345
+    switched the pin, every model-scoped cached verdict silently fell out of
+    scope and the offline rebuild of an already frozen artifact failed
+    (#351). A reproduction passes the judge_model the publication records.
     """
     configs = configs or DEFAULT_CONFIGS
     projects = tuple(projects) if projects else default_projects()

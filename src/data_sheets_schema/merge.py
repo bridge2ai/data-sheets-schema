@@ -422,7 +422,10 @@ class LLMReferentJudge:
                  ) -> ReferentJudgement:
         from data_sheets_schema import api_runner
         client = self._client or api_runner._client()
-        model = self._model or api_runner._model_settings()["name"]
+        # Resolved as an evaluation model (#2928); today that is the
+        # generation model, as before.
+        from data_sheets_schema.evaluation_model import evaluation_model_name
+        model = self._model or evaluation_model_name()
 
         rendered = "\n".join(f"  {lab}: {v[:600]}"
                              for lab, v in sorted(values.items()))

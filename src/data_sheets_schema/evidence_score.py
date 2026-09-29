@@ -500,7 +500,10 @@ class LLMSlotScorer:
         if self._client is None:
             self._client = api_runner._client()
         if self._model is None:
-            self._model = api_runner._model_settings()["name"]
+            # The evaluation model, not the generation model (#2928); today
+            # the one defaults to the other, so the cache scope is unchanged.
+            from data_sheets_schema.evaluation_model import evaluation_model_name
+            self._model = evaluation_model_name()
         return self._client, self._model
 
     def _load_cache(self, ctx: "JudgementContext") -> None:
@@ -867,7 +870,10 @@ class LLMSlotFitnessScorer:
         if self._client is None:
             self._client = api_runner._client()
         if self._model is None:
-            self._model = api_runner._model_settings()["name"]
+            # The evaluation model, not the generation model (#2928); today
+            # the one defaults to the other, so the cache scope is unchanged.
+            from data_sheets_schema.evaluation_model import evaluation_model_name
+            self._model = evaluation_model_name()
         return self._client, self._model
 
     def _snapshot(self) -> tuple:
