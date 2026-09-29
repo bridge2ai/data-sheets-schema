@@ -12,8 +12,14 @@ when a higher source is silent (#2935):
    ``exact_``/``close_``/``narrow_``/``broad_``/``related_mappings``, emitted
    with the matching SKOS predicate.
 3. ``notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv``, where it suggests a URI. An
-   entry with no suggested URI is silent and falls through.
+   entry with no suggested URI is silent and falls through; that includes the
+   suggestions #2974 withdrew, whose ``review_note`` keeps the URI and why.
 4. The keyword heuristics (``free_text`` / ``novel_d4d``), else ``unmapped``.
+   A heuristic row is a status and asserts no mapping: no object, confidence
+   0, and never ``semapv:ManualMappingCuration``, which only rungs 1 and 2
+   earn. Until #2972 a ``novel_d4d`` row mapped ``d4d:<slot>`` to itself by
+   exactMatch at confidence 1.0 under that justification, and an SSSOM
+   consumer reads the justification, not ``mapping_source``.
 
 In both curated rungs only targets outside the D4D namespace count (#3054). A
 ``d4d:`` target is the slot itself or another D4D term, not an external
@@ -200,7 +206,11 @@ class Listed:
     ``reason`` names each schema declaration it cites by its metaslot
     (``slot_uri dcat:keyword``). A declaration the row's path class does not
     see (not its own, an ancestor's or the top-level slot's) is another
-    class's, and the reason names it as ``<Class>.<slot>`` (#3140).
+    class's, and the reason names it as ``<Class>.<slot>`` (#3140). A path
+    class that declares the name as its own attribute, or has an ancestor
+    that does, hides the top-level slot: that slot's declarations are then
+    another's too, and the reason says they are the top-level slot's
+    (#3193).
     """
     ttl: Tuple[str, ...]
     schema: Tuple[str, ...]
@@ -289,12 +299,21 @@ ACCEPTED_DISAGREEMENTS: Dict[str, Listed] = {
         ('skos:exactMatch schema:encodingFormat',),
         _STRENGTH_ONLY.format(schema='slot_uri schema:encodingFormat',
                               ttl='closeMatch')),
+    # #3193: the path class redeclares media_type as its own attribute, so it
+    # does not see the top-level slot, and an exact mapping is not a
+    # serialisation (only a slot_uri is).
     'media_type': Listed(
         ('skos:closeMatch schema:encodingFormat',),
         ('skos:exactMatch dcat:mediaType',
          'skos:exactMatch schema:encodingFormat'),
-        _STRENGTH_ONLY.format(schema='exact_mappings schema:encodingFormat',
-                              ttl='closeMatch')),
+        "same target, different strength, on declarations the row's path "
+        "class does not make: DistributionFormat declares its own media_type "
+        "attribute with slot_uri dcat:mediaType and no exact mapping. The "
+        "exact_mappings schema:encodingFormat is on the top-level media_type "
+        "slot and on File.media_type, and says the two terms are equivalent; "
+        "it does not serialise the slot, whose slot_uri is dcat:mediaType in "
+        "every declaration. The TTL's slot-level triple qualifies that "
+        "equivalence as closeMatch; the row keeps the TTL predicate"),
     # #3053: the TTL's two class-scoped triples (DatasetCollection_resources,
     # FileCollection_resources) say exactMatch schema:hasPart and agree with
     # the schema; its slot-level triple is the one that qualifies it.
@@ -419,6 +438,16 @@ REGENERATE_HINT = (
     "them: an edit to the schema, to the SKOS alignment TTL (a slot-level or "
     "<Class>_<slot> triple, as /d4d-add-mapping adds) or to "
     "notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv moves them")
+
+
+#: The comment on a ``novel_d4d`` row. The status is the keyword heuristic's
+#: guess that no external vocabulary has the notion; nobody reviewed it.
+NOVEL_D4D_COMMENT = ('Keyword heuristic: probably a novel D4D concept with no '
+                     'external counterpart - not curated, no mapping asserted')
+
+#: The justification only a curated source earns: a TTL triple or a schema
+#: declaration. A heuristic or recommended row never carries it (#2972).
+CURATED_JUSTIFICATION = 'semapv:ManualMappingCuration'
 
 
 def heuristic_hint(slot: str, description: str) -> str:
@@ -591,6 +620,14 @@ class ComprehensiveSSSOMGenerator:
         other class by name; within a class, ``slot_usage`` before
         ``attributes``. The first external target in this order is the schema's
         primary mapping, so a row's mapping is the one its path class sees.
+
+        Where the path class or an ancestor declares the name as its own
+        attribute, that attribute replaces the top-level slot for the class,
+        which then does not see the slot's declarations (#3193). They keep
+        their place here, after the path class and its ancestors and before
+        every other class, as another class's would if it came first by name;
+        so no row moves, and the rule changes only what a listing's reason
+        must attribute (``Listed``).
         """
         sv = self.sv
         near = list(sv.class_ancestors(path_class)) if path_class else []
@@ -734,7 +771,7 @@ class ComprehensiveSSSOMGenerator:
                 **base, status='mapped', source=source,
                 predicate=primary.predicate, object=primary.object,
                 confidence=self._get_confidence(primary.predicate.split(':')[1]),
-                justification='semapv:ManualMappingCuration',
+                justification=CURATED_JUSTIFICATION,
                 comment=comment, origin=origin,
                 others=self._others(primary, curated),
                 disagreement=disagreement,
@@ -757,11 +794,14 @@ class ComprehensiveSSSOMGenerator:
                 comment=f"Recommended mapping (confidence: {rec['confidence']})")
 
         if base['hint'] == 'novel_d4d':                     # 4. heuristics
+            # A status, not a mapping (#2972): the keyword verdict names no
+            # target, and a ``d4d:<slot>`` object would map the slot to itself
+            # under a justification no curator gave.
             return Resolution(
                 **base, status='novel_d4d', source='heuristic',
-                predicate='skos:exactMatch', object=f'd4d:{slot}',
-                confidence=1.0, justification='semapv:ManualMappingCuration',
-                comment='Novel D4D concept - uses D4D namespace')
+                predicate='semapv:UnmappedProperty', object='',
+                confidence=0.0, justification='semapv:UnspecifiedMatching',
+                comment=NOVEL_D4D_COMMENT)
         if base['hint'] == 'free_text':
             return Resolution(
                 **base, status='free_text', source='heuristic',

@@ -31,7 +31,10 @@ from generate_comprehensive_sssom import (  # noqa: E402
 #: The slot_uri-flavoured comment for each (status, source).
 URI_COMMENTS = {
     ('mapped', 'ttl'): 'Has SKOS alignment to RO-Crate vocabulary',
-    ('novel_d4d', 'heuristic'): 'Novel D4D concept - should use d4d: namespace',
+    # #2972: the heuristic's guess, not a curated target, so no URI is named
+    ('novel_d4d', 'heuristic'): ('Keyword heuristic: probably a novel D4D '
+                                 'concept - a d4d: slot_uri would serve; '
+                                 'not curated'),
     ('free_text', 'heuristic'): 'Free text/narrative field - no slot_uri needed',
     ('unmapped', 'none'): 'Unmapped - needs vocabulary research for slot_uri',
 }
