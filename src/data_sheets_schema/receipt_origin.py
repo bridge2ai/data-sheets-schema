@@ -19,25 +19,49 @@ receipt's history from the run's own tool calls and classifies each final
   successful `derive core` of that record ran;
 - `phase3_backport` — added after that derivation.
 
+With no successful derive the Phase 1 window runs to the end of the
+transcripts: every element added after the draft is a `phase1_correction`,
+there is no derive-time snapshot, and the block reports `draft_to_final`
+where the two derive-core deltas would be.
+
 The comparison is between those three snapshots as multisets: a duplicated
 final triple counts twice, and one added and removed between snapshots is
 not counted. `readdressed` counts contemporaneous elements whose slot
 changed; `removed_contemporaneous` counts pre-draft elements the final
-receipt no longer carries.
+receipt no longer carries. Which slot each listed entry names is a function
+of the three multisets, never of the receipt's order: a final slot the
+pre-draft snapshot carried is contemporaneous, the slots the derive-time
+snapshot added are preferred as the Phase 1 ones, and the re-addressed and
+Phase 3 labels then go in slot order.
 
 Only a successful Write, paired with its tool_result by id, changes state.
 A Write the runtime refused (the unread-file wrapper, #2285) or that
-returned an error is listed and changes nothing. The status is `unknown`,
-with every reason, and no classification is reported when the history
-cannot be rebuilt: a transcript is missing, unreadable or malformed; a tool
-id is duplicated or a result has no call (#2077); a Write of either file has
-no result or no success evidence; the receipt is changed by anything other
-than a Write (an edit tool, or a shell command that names it and is not
-known to be read-only), or the full record is changed that way before its
-first Write; the first observed Write of either file updated a file the
-transcripts never created; a `derive core` of the full record cannot be
-placed; or the rebuilt final receipt's sha256 differs from the file on
-disk. Nothing is ever reported as contemporaneous on incomplete evidence.
+returned an error is listed and changes nothing. A `derive core` succeeded
+only where its call's result carries the derive's own status (#3113). With
+every join in the command `&&` or `;`, the call's success or failure is the
+derive's when the derive is the last part, and its success alone is when
+every join after the derive is `&&` (a failure may be a later part's).
+Otherwise (piped, backgrounded, after `||`, followed by `;`, or a failed
+`&&` chain) the derive is ambiguous, unless the native control denied the
+call, which then never ran. A call the runtime backgrounded is ambiguous
+too: its result is the launch, not the end.
+
+The status is `unknown`, with every reason, and no classification is
+reported when the history cannot be rebuilt: a transcript is missing,
+unreadable or malformed; a tool id is duplicated or a result has no call
+(#2077); a Write of the receipt, or of the full record before its first
+successful Write, has no result or no success evidence; the receipt is
+changed by anything other than a Write (an edit tool, or a shell command
+that names it and is not known to be read-only) where the change can reach
+the pre-draft or derive-time snapshot, or the full record is changed that
+way before its first Write; the first observed Write of either file updated
+an existing file, or carries no create/update metadata to say it did not; a
+`derive core` of the full record cannot be placed; or the rebuilt final
+receipt's sha256 differs from the file on disk. A non-Write change issued
+after the last receipt Write, the draft and the derive boundary had all
+returned can reach only the final receipt, which the sha256 comparison
+covers: it is listed with `covered_by_final_sha256` and is not a reason.
+Nothing is ever reported as contemporaneous on incomplete evidence.
 
 The output carries counts, chunk ids, slot paths and sha256 digests, never
 snippet text or tool payloads: transcripts hold model output.
@@ -73,9 +97,19 @@ READ_ONLY_PROGRAMS = frozenset({"cat", "head", "tail", "grep", "egrep", "fgrep",
                                 "stat", "file", "md5", "md5sum", "shasum", "sha256sum", "cmp",
                                 "diff", "nl", "sed", "echo", "printf", "pwd", "true", "test", "["})
 #: `d4d` subcommands that write neither the receipt nor the full record
-#: (unless an `--out` names one).
+#: (unless an `--out` names one). `provenance record` writes only
+#: `{project}_provenance.yaml` and the check blocks inside it (cli/provenance.py
+#: `record`, `backfill_checks.apply`); the playbook's recorder line names the
+#: receipt in its `--phase` and `--render-spec-json` values (#3112).
 READ_ONLY_D4D = frozenset({("receipts", "check"), ("receipts", "invert"), ("receipts", "origin"),
-                           ("derive", "core")})
+                           ("derive", "core"), ("provenance", "record")})
+
+#: The pinned native control's PreToolUse denial reason
+#: (`native_control.hook_output`): a call answered with it never ran.
+NATIVE_DENIAL_PREFIX = "Outside the registered tool policy: "
+#: Joins between the parts of a shell command after which the command's own
+#: status can still be the derive's (#3113).
+_SEQUENTIAL = frozenset({"&&", ";"})
 
 NON_CHECKS = (
     "that a contemporaneous snippet supports the value it sits under (#2067: post-draft "
@@ -254,8 +288,10 @@ def _outcome(result: dict | None) -> str:
 
 
 def _shell_outcome(result: dict | None) -> str:
-    """The same for a shell helper, read as the phase history reads it: an
-    explicit `is_error: false`, not interrupted, not backgrounded, exit 0."""
+    """The same for a shell call's command as a whole, read as the phase
+    history reads it: an explicit `is_error: false`, not interrupted, exit 0.
+    A backgrounded call is `ambiguous`: its result is the launch, not the
+    command's end (#3113)."""
     if result is None:
         return "pending"
     flag, metadata = result["is_error"], result["metadata"]
@@ -263,12 +299,37 @@ def _shell_outcome(result: dict | None) -> str:
         return "ambiguous"
     if flag:
         return "failed"
+    if isinstance(metadata, dict) and (metadata.get("backgroundTaskId") or metadata.get("background_task_id")):
+        return "ambiguous"
     if isinstance(metadata, dict) and (
-            metadata.get("interrupted") or metadata.get("backgroundTaskId")
-            or metadata.get("background_task_id")
+            metadata.get("interrupted")
             or metadata.get("exitCode") not in (None, 0) or metadata.get("exit_code") not in (None, 0)):
         return "failed"
     return "succeeded"
+
+
+def _denied(result: dict | None) -> bool:
+    """The native control refused the call before it ran."""
+    if result is None or result["is_error"] is not True:
+        return False
+    text = _result_text(result["content"])
+    return isinstance(text, str) and text.startswith(NATIVE_DENIAL_PREFIX)
+
+
+def _derive_outcome(result: dict | None, basis: str) -> str:
+    """A `derive core` part's own outcome from its call's result (#3113).
+    `basis` says what the call's status tells about the part: `command` (it
+    is the part's status), `and_chain` (a success is the part's; a failure
+    may be a later part's) or `none` (piped, backgrounded, after `||`, or
+    followed by another command). A part whose status the result does not
+    carry is `ambiguous`, unless the native control denied the call, which
+    then never ran."""
+    overall = _shell_outcome(result)
+    if overall in ("pending", "ambiguous") or basis == "command":
+        return overall
+    if overall == "failed":
+        return "failed" if _denied(result) else "ambiguous"
+    return "succeeded" if basis == "and_chain" else "ambiguous"
 
 
 def _result_text(content: Any) -> str | None:
@@ -290,14 +351,45 @@ def _tokens(command: str) -> list[str] | None:
         return None
 
 
-def _segments(tokens: list[str]) -> list[list[str]]:
-    out: list[list[str]] = [[]]
+def _layout(tokens: list[str]) -> tuple[list[list[str]], list[list[str]], list[str]]:
+    """(segments, joins, leading): the command's parts between operators,
+    with joins[i] the operators after part i (before part i + 1, or at the
+    end for the last) and `leading` any before the first."""
+    segments: list[list[str]] = []
+    joins: list[list[str]] = []
+    leading: list[str] = []
+    current: list[str] = []
     for token in tokens:
-        if token in _OPERATORS or token == "\n":
-            out.append([])
+        if token in _OPERATORS:
+            if current:
+                segments.append(current)
+                joins.append([])
+                current = []
+            (joins[-1] if joins else leading).append(token)
         else:
-            out[-1].append(token)
-    return [s for s in out if s]
+            current.append(token)
+    if current:
+        segments.append(current)
+        joins.append([])
+    return segments, joins, leading
+
+
+def _status_basis(index: int, joins: list[list[str]], leading: list[str], newline: bool) -> str:
+    """What the command's status tells about part `index` (#3113): `command`
+    when it is that part's status, `and_chain` when a success is (every
+    later join is `&&`), else `none`. Only `&&` and `;` joins keep it; a
+    trailing `;` changes nothing; an unescaped newline is a join shlex
+    cannot see, so it keeps nothing."""
+    tail = list(joins[-1]) if joins else []
+    while tail and tail[-1] == ";":
+        tail.pop()
+    ops = leading + [op for j in joins[:-1] for op in j] + tail
+    if newline or not set(ops) <= _SEQUENTIAL:
+        return "none"
+    after = [op for j in joins[index:-1] for op in j] + tail
+    if not after:
+        return "command"
+    return "and_chain" if set(after) == {"&&"} else "none"
 
 
 def _program(segment: list[str]) -> list[str]:
@@ -344,15 +436,17 @@ def _option(args: list[str], *names: str) -> list[str]:
 
 def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, Any]:
     """What one shell command does to the tracked files: the targets it names,
-    whether it is known to be read-only, and whether it derives the core
-    from the full record (and whether that `--full` is the tracked one)."""
+    whether it is known to be read-only, and each part that derives the core
+    (whether its `--full` is the tracked record, and what the call's status
+    says about that part)."""
     tokens = _tokens(command)
     named = [x for x in targets if x.name in command]
     out: dict[str, Any] = {"named": [], "read_only": False, "derives": []}
     if tokens is None:
         out["named"] = [x.kind for x in named]
         return out
-    segments = _segments(tokens)
+    newline = "\n" in command.replace("\\\n", " ")
+    segments, joins, leading = _layout(tokens)
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"]) for s in segments)
     for target in named:
         for token in tokens:
@@ -367,7 +461,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 break
     # Read-only: no redirection except to /dev/null or a descriptor, no
     # unescaped newline (a second command), and every program known to read.
-    read_only = "\n" not in command.replace("\\\n", " ")
+    read_only = not newline
     for i, token in enumerate(tokens):
         if set(token) <= _PUNCT and ">" in token:
             following = tokens[i + 1] if i + 1 < len(tokens) else ""
@@ -375,7 +469,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 read_only = False
     local = cwd
     full = next((x for x in targets if x.kind == "full"), None)
-    for segment in segments:
+    for index, segment in enumerate(segments):
         rest = _program(segment)
         if not rest:
             continue
@@ -404,7 +498,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                     verdict = None                  # a variable or glob: cannot be placed
                 else:
                     verdict = full.matches(spelled[-1], local)
-                out["derives"].append(verdict)
+                out["derives"].append({"targets_full": verdict, "segment": index,
+                                       "basis": _status_basis(index, joins, leading, newline)})
             continue
         if program not in READ_ONLY_PROGRAMS:
             read_only = False
@@ -450,13 +545,13 @@ def _delta(before: Counter, after: Counter) -> dict[str, int]:
     return {"removed": sum((before - after).values()), "added": sum((after - before).values())}
 
 
-def _split(items: list[str], available: Counter, limit: int | None = None) -> tuple[list[str], list[str]]:
+def _split(items: list[str], available: Counter) -> tuple[list[str], list[str]]:
     """(matched, unmatched): items matched one-for-one against a multiset,
-    in order, at most `limit` of them."""
+    in order."""
     left = Counter(available)
     matched, unmatched = [], []
     for item in items:
-        if left[item] > 0 and (limit is None or len(matched) < limit):
+        if left[item] > 0:
             left[item] -= 1
             matched.append(item)
         else:
@@ -469,7 +564,8 @@ def classify(base: list[tuple[str, str, str]], core: list[tuple[str, str, str]],
     """Each final element's origin, by (chunk, snippet) multiset against the
     pre-draft and derive-time snapshots. An element whose triple is in the
     pre-draft snapshot is matched first; a contemporaneous element matched
-    only by (chunk, snippet) was re-addressed."""
+    only by (chunk, snippet) was re-addressed. Which slots the entries name
+    is a function of the three multisets, never of receipt order (#3115)."""
     pairs = lambda rows: Counter((c, s) for c, s, _ in rows)
     b_pairs, c_pairs = pairs(base), pairs(core)
     b_slots: dict[tuple, list[str]] = defaultdict(list)
@@ -489,18 +585,24 @@ def classify(base: list[tuple[str, str, str]], core: list[tuple[str, str, str]],
         chunk, snippet = pair
         contemporaneous = min(len(finals), b_pairs[pair])
         phase1 = min(len(finals) - contemporaneous, max(c_pairs[pair] - b_pairs[pair], 0))
-        exact, rest = _split(finals, Counter(b_slots[pair]), contemporaneous)
+        # Final slots in slot order: those the pre-draft snapshot carried are
+        # contemporaneous as they stand (never more than `contemporaneous`).
+        exact, rest = _split(sorted(finals), Counter(b_slots[pair]))
         moved = contemporaneous - len(exact)
         readdressed += moved
-        # Of the elements left after the re-addressed ones, those the
-        # derive-time snapshot carried are listed as the Phase 1 ones.
-        at_core, later = _split(rest[moved:], c_slots[pair])
+        # Of the rest, the slots the derive-time snapshot added are the Phase
+        # 1 ones first; the re-addressed contemporaneous elements come next,
+        # and what is left, preferring slots absent at derive, is Phase 3.
+        at_core, later = _split(rest, c_slots[pair] - Counter(b_slots[pair]))
         ordered = at_core + later
-        labels = ["phase1_correction"] * phase1 + ["phase3_backport"] * (len(ordered) - phase1)
+        labels = (["phase1_correction"] * phase1 + [None] * moved
+                  + ["phase3_backport"] * (len(ordered) - phase1 - moved))
         row = by_chunk.setdefault(chunk, dict.fromkeys(ORIGINS, 0))
         counts["contemporaneous"] += contemporaneous
         row["contemporaneous"] += contemporaneous
         for slot, label in zip(ordered, labels):
+            if label is None:
+                continue                                # a re-addressed contemporaneous element
             counts[label] += 1
             row[label] += 1
             post.append({"chunk": chunk, "slot": slot, "snippet_sha256": _digest(snippet), "origin": label})
@@ -508,15 +610,16 @@ def classify(base: list[tuple[str, str, str]], core: list[tuple[str, str, str]],
         finals = f_slots.get(pair, [])
         gone = len(slots) - min(len(slots), len(finals))
         if gone:
-            # Unmatched pre-draft slots feed the re-addressed elements first;
-            # the last `gone` of them are the ones the final receipt dropped.
-            _, unmatched = _split(slots, Counter(finals))
+            # Unmatched pre-draft slots, in slot order, feed the re-addressed
+            # elements first; the last `gone` are the ones the final receipt dropped.
+            _, unmatched = _split(sorted(slots), Counter(finals))
             for slot in unmatched[len(unmatched) - gone:]:
                 removed.append({"chunk": pair[0], "slot": slot, "snippet_sha256": _digest(pair[1])})
     return {"origin": counts, "post_draft": counts["phase1_correction"] + counts["phase3_backport"],
             "removed_contemporaneous": len(removed), "readdressed": readdressed,
             "by_chunk": {c: by_chunk[c] for c in sorted(by_chunk)},
-            "post_draft_entries": post, "removed_entries": removed}
+            "post_draft_entries": sorted(post, key=lambda e: (e["chunk"], e["slot"], e["snippet_sha256"], e["origin"])),
+            "removed_entries": sorted(removed, key=lambda e: (e["chunk"], e["slot"], e["snippet_sha256"]))}
 
 
 # ---------------------------------------------------------------- the report
@@ -546,7 +649,10 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
             reasons.append(f"tool call {call['id']} (transcript {call['transcript']} line {call['line']}) "
                            "has no input mapping")
             continue
-        where = {**_where(call, result), "pos": call["pos"]}
+        # `_at` is where the call was issued and `_settled` where its result
+        # came back, as (transcript, line): internal, never output.
+        where = {**_where(call, result), "pos": call["pos"], "_at": (call["transcript"], call["line"]),
+                 "_settled": (result["transcript"], result["line"]) if result is not None else None}
         if name == "Write":
             spelled = inputs.get("file_path")
             for target in targets:
@@ -573,11 +679,13 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                 reasons.append(f"shell call {call['id']} has no command string")
                 continue
             shell = _shell(command, call["cwd"], targets)
-            if shell["derives"]:
-                # True if any segment derives this record, None if one cannot be placed.
-                verdicts = shell["derives"]
-                placed = True if True in verdicts else None if None in verdicts else False
-                h["derives"].append({**where, "outcome": _shell_outcome(result), "targets_full": placed})
+            # One row per part that derives the core, with that part's own
+            # outcome (#3113): `targets_full` is None when its `--full`
+            # cannot be placed.
+            h["derives"].extend({**where, "segment": part["segment"], "targets_full": part["targets_full"],
+                                 "outcome": _derive_outcome(result, part["basis"]),
+                                 "command_outcome": _shell_outcome(result), "status_basis": part["basis"]}
+                                for part in shell["derives"])
             if not shell["read_only"]:
                 h["mutations"].extend({**where, "target": kind, "tool": name, "outcome": _shell_outcome(result)}
                                       for kind in shell["named"])
@@ -608,17 +716,20 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
     draft = first["pos"] if first else None
     pre_draft = lambda row: draft is None or row["pos"] < draft
     for kind in ("receipt", "full"):
-        if h["writes"][kind] and h["writes"][kind][0]["created"] == "update":
+        opening = h["writes"][kind][0]["created"] if h["writes"][kind] else "create"
+        if opening == "update":
             reasons.append(f"the first observed Write of the {_LABEL[kind]} updated an existing file: "
                            "its earlier history is not in the transcripts")
+        elif opening != "create":
+            # An explicit `is_error: false` is success evidence without the
+            # runtime's metadata, which alone says the file was new (#3116).
+            reasons.append(f"the first observed Write of the {_LABEL[kind]} carries no create/update "
+                           "metadata: whether its earlier history is in the transcripts cannot be told")
         for row in h["unsettled"][kind]:
             if kind == "receipt" or pre_draft(row):
                 reasons.append(f"Write {row['tool_use_id']} of the {_LABEL[kind]} has no success evidence "
                                f"({row['outcome']})")
-    for row in h["mutations"]:
-        if row["target"] == "receipt" or pre_draft(row):
-            reasons.append(f"{row['tool']} call {row['tool_use_id']} (transcript {row['transcript']} line "
-                           f"{row['line']}) may change the {_LABEL[row['target']]} other than by a Write")
+    derived = None
     for row in h["derives"]:
         if row["targets_full"] is False:
             continue                                    # another record's derivation
@@ -626,13 +737,35 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
             if pre_draft(row):
                 reasons.append(f"core derived ({row['tool_use_id']}) before the first full-record Write")
                 continue
-            return first, row
-        if row["outcome"] in ("ambiguous", "pending"):
+            derived = row
+            break
+        if row["outcome"] in ("ambiguous", "pending") and row["command_outcome"] == row["outcome"]:
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: its result is {row['outcome']}")
+        elif row["outcome"] == "ambiguous":
+            why = ("a later `&&` part may be what failed" if row["status_basis"] == "and_chain" else
+                   "piped, backgrounded, after `||`, or followed by another command")
+            reasons.append(f"derive core {row['tool_use_id']} cannot be placed: the call {row['command_outcome']} "
+                           f"but its status is not the derive's own ({row['status_basis']}: {why})")
         elif row["outcome"] == "succeeded":
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: its --full cannot be resolved "
                            "(a variable, or a relative path with no working directory)")
-    return first, None
+    # A non-Write change of the receipt issued after the draft, the last
+    # receipt Write and the derive boundary had all returned reaches no
+    # snapshot but the final one, which the sha256 against the file on disk
+    # covers (#3112). Any earlier one may have changed a snapshot unseen.
+    receipt_writes = h["writes"]["receipt"]
+    settled = [row["_settled"] for row in (first, receipt_writes[-1] if receipt_writes else None, derived)
+               if row is not None]
+    for row in h["mutations"]:
+        if row["target"] == "receipt":
+            row["covered_by_final_sha256"] = bool(first is not None and receipt_writes
+                                                  and all(row["_at"] > s for s in settled))
+            if row["covered_by_final_sha256"]:
+                continue
+        if row["target"] == "receipt" or pre_draft(row):
+            reasons.append(f"{row['tool']} call {row['tool_use_id']} (transcript {row['transcript']} line "
+                           f"{row['line']}) may change the {_LABEL[row['target']]} other than by a Write")
+    return first, derived
 
 
 def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]:
@@ -672,7 +805,7 @@ def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]
                                f"{write['line']} ({stage}) is not a receipt")
             snapshots[stage] = rows
 
-    strip = lambda row: {k: v for k, v in row.items() if k not in ("pos", "content")}
+    strip = lambda row: {k: v for k, v in row.items() if k not in ("pos", "content") and not k.startswith("_")}
     block: dict[str, Any] = {
         "instrument": INSTRUMENT,
         "status": "unknown" if reasons else "checked",
@@ -693,9 +826,12 @@ def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]
     pairs = lambda rows: Counter((c, s) for c, s, _ in rows)
     block["snippets"] = {"pre_draft": len(base), "at_derive_core": len(core) if derived else None,
                          "final": len(final)}
+    # With no successful derive there is no derive-time snapshot: the two
+    # derive-core deltas are None and `draft_to_final` carries the step (#3114).
     block["deltas"] = {
-        "draft_to_derive_core": _delta(pairs(base), pairs(core)),
+        "draft_to_derive_core": _delta(pairs(base), pairs(core)) if derived else None,
         "derive_core_to_final": _delta(pairs(core), pairs(final)) if derived else None,
+        "draft_to_final": _delta(pairs(base), pairs(final)),
         "triples_draft_to_final": _delta(Counter(base), Counter(final)),
     }
     block.update(classify(base, core, final))
@@ -710,11 +846,13 @@ def summary(block: dict[str, Any]) -> list[str]:
     s, d, o = block["snippets"], block["deltas"], block["origin"]
     core = "no successful derive core" if s["at_derive_core"] is None else f"{s['at_derive_core']} at derive core"
     lines.append(f"snippets {s['pre_draft']} pre-draft · {core} · {s['final']} final")
-    step = d["draft_to_derive_core"]
-    text = f"draft → derive core −{step['removed']} / +{step['added']}"
-    if d["derive_core_to_final"] is not None:
-        step = d["derive_core_to_final"]
-        text += f" · derive core → final −{step['removed']} / +{step['added']}"
+    if d["draft_to_derive_core"] is not None:
+        step, then = d["draft_to_derive_core"], d["derive_core_to_final"]
+        text = (f"draft → derive core −{step['removed']} / +{step['added']}"
+                f" · derive core → final −{then['removed']} / +{then['added']}")
+    else:
+        step = d["draft_to_final"]
+        text = f"draft → final −{step['removed']} / +{step['added']}"
     step = d["triples_draft_to_final"]
     lines.append(text + f" · (chunk, snippet, slot) triples −{step['removed']} / +{step['added']}")
     lines.append(" · ".join(f"{o[k]} {k}" for k in ORIGINS)

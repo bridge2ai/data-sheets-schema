@@ -168,10 +168,12 @@ def origin(transcripts, receipt_file, full_file, as_json):
     Rebuilds the receipt from the transcript's successful Writes and
     classifies each final (chunk, snippet, slot) element as
     `contemporaneous`, `phase1_correction` (after the first full-record
-    Write, before the first successful `derive core`) or `phase3_backport`.
-    Where the history cannot be rebuilt the status is `unknown`, with the
-    reasons, and nothing is classified. Prints counts, chunk ids, slot paths
-    and hashes, never snippet text.
+    Write, before the first successful `derive core`, or to the end when
+    none succeeded) or `phase3_backport`. A derive counts only where its
+    call's result carries its own status (not piped, backgrounded or
+    followed by another command). Where the history cannot be rebuilt the
+    status is `unknown`, with the reasons, and nothing is classified. Prints
+    counts, chunk ids, slot paths and hashes, never snippet text.
     """
     import json
 
