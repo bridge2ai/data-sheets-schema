@@ -287,6 +287,23 @@ class TestNestedRowsNeverOverwrite(unittest.TestCase):
         self.assertNotIn("rows applied)", text.replace("taken from the crate root)", ""))
 
 
+    def test_the_report_counts_slots_apart_from_rows_when_they_differ(self):
+        """#3242: two nested rows filling one host with no Dataset row for it are
+        two filled rows but one top-level slot, and the report says so."""
+        rows = [NESTED_ROW, _row("PreprocessingStrategy.name", "name")]
+        res = map_crate(_with_protocol(), rows, self.sv, "TEST")
+        res.validation = "PASS"
+        filled = res.counts()["filled"]
+        slots = len([k for k, v in res.record.items() if v not in (None, "", [], {})])
+        self.assertLess(slots, filled)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            text = path.read_text(encoding="utf-8")
+        self.assertIn(f"- Distinct top-level `Dataset` slots filled: {slots} "
+                      f"(from {filled} filled rows, the `id` among them)", text)
+
+
 def _with_identifier(identifier):
     graph = copy.deepcopy(GRAPH)
     graph[1]["identifier"] = identifier
