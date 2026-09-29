@@ -23,7 +23,10 @@ offsets, and two contexts are read:
     `A) ... E)` / `(a)` / `1)` items or bulleted and numbered lines — back
     to the governing clause. Only the governing clause and the snippet's
     own item are read; a sibling item's marker governs that item, not this
-    one. The governing clause is the open clause before the first item
+    one. An enumeration nested in an item is governed by that item's text
+    before it and, through it, by the enclosing lead-in, never by the
+    enclosing list's other items; an item ends at the next item marker of
+    any enumeration (#3266). The governing clause is the open clause before the first item
     (ending in `:` or in no sentence terminator), or a finished sentence
     that announces the list ("the following", "as follows"); any other
     finished sentence — the end of the paragraph above a bulleted list or a
@@ -54,7 +57,10 @@ marker expressing that status. `modal_dropped`: the snippet itself carries
 the marker and the value does not, one flag per status (a snippet's "will"
 and "future" are one dropped status, #3252). A snippet that occurs more than once in
 its chunk is flagged only when every occurrence's context carries the
-class.
+class: every ordered choice of matches of its parts, not only each first
+part's earliest completion; where a part matches more than
+`MAX_PART_MATCHES` times the context is counted `indeterminate` and not
+read, never flagged (#3266).
 
 Rule 2, source-review status expression (`review_status_expression`). For
 each `supported` claim of an audit's `source_review`:
@@ -309,6 +315,7 @@ _SEPARATOR = re.compile(r"^(?:={10,}|-{10,})$|^(?:FILE|PATH|SIZE|ROLE): ")
 
 MAX_SENTENCE_LINES = 12     # a sentence is followed across at most this many wrapped lines
 MAX_ITEMS = 26              # an enumeration is followed back across at most this many items
+MAX_PART_MATCHES = 200     # matches of one snippet part read; past it the context is indeterminate (#3266)
 HEADING_WINDOW = 30         # non-blank lines scanned above a snippet for a status heading
 HEADING_MAX_CHARS = 60
 HEADING_MAX_WORDS = 8
@@ -429,17 +436,22 @@ class BundleView:
                                rc.normalise_joined(rc.elide_artifact_lines(text)))
         return rc.snippet_in(snippet, text, *self._hays[cid])[0]
 
-    def locate(self, cid: str, snippet: str) -> list[list[tuple[int, int]]]:
-        """Every occurrence of the snippet in its chunk, each as the bundle
-        (start, end) span of every part. Parts split at `...`, else at the
+    def _part_matches(self, cid: str, snippet: str) -> tuple[list[list[tuple[int, int]]], bool] | None:
+        """(every match of every part, as bundle (start, end) spans in order,
+        complete) for the first way of splitting the snippet that locates
+        it; None when none does. Parts split at `...`, else at the
         snippet's own line breaks, as the validator splits them; a snippet
         the validator verified only across a joined line break or an elided
-        artifact line is not located here (reported as unlocated)."""
+        artifact line is not located here (reported as unlocated).
+
+        `complete` is False when a part matches more than
+        MAX_PART_MATCHES times: the matches past the cap are not read, so
+        no claim about every occurrence can be made (#3266)."""
         if cid not in self._norm:
             self._norm[cid] = normalised_offsets(self.chunk_text(cid))
         mapped = self._norm[cid]
         if mapped is None:
-            return []
+            return None
         norm, offs = mapped
         base = self.chunks[cid][0]
         splits = [rc._ELLIPSIS.split(snippet)]
@@ -449,22 +461,39 @@ class BundleView:
             parts = [p for p in (rc.normalise(x) for x in raw_parts) if p]
             if not parts:
                 continue
-            found: list[list[tuple[int, int]]] = []
-            i = norm.find(parts[0])
-            while i >= 0 and len(found) < 50:
-                spans = [(i, i + len(parts[0]))]
-                for p in parts[1:]:
-                    j = norm.find(p, spans[-1][1])
-                    if j < 0:
+            per: list[list[tuple[int, int]]] = []
+            complete = True
+            for part in parts:
+                spans: list[tuple[int, int]] = []
+                i = norm.find(part)
+                while i >= 0:
+                    if len(spans) == MAX_PART_MATCHES:
+                        complete = False
                         break
-                    spans.append((j, j + len(p)))
-                if len(spans) < len(parts):
-                    break                  # a later start cannot find what this one did not
-                found.append([(base + offs[s], base + offs[e - 1] + 1) for s, e in spans])
-                i = norm.find(parts[0], i + 1)
-            if found:
-                return found
-        return []
+                    spans.append((base + offs[i], base + offs[i + len(part) - 1] + 1))
+                    i = norm.find(part, i + 1)
+                per.append(spans)
+            if all(per) and (not complete or _ordered(per, 0) is not None):
+                return per, complete
+        return None
+
+    def locate(self, cid: str, snippet: str) -> list[list[tuple[int, int]]]:
+        """The occurrences of the snippet in its chunk: for each match of its
+        first part that the later parts can follow in order, the earliest
+        such sequence, as the bundle (start, end) span of every part. Which
+        occurrence's context counts is `lost_classes`' question: it reads
+        every admissible sequence, not only these."""
+        found = self._part_matches(cid, snippet)
+        if found is None:
+            return []
+        per, _complete = found
+        out = []
+        for j in range(len(per[0])):
+            seq = _ordered(per, 0, first=j)
+            if seq is None:
+                break                      # a later start cannot find what this one did not
+            out.append([per[k][i] for k, i in enumerate(seq)])
+        return out
 
     # --- sentences
     def _sentence_start(self, pos: int) -> tuple[int, int | None]:
@@ -675,11 +704,26 @@ class BundleView:
             if before:
                 candidates.append((before[-1], run))
         if candidates:
+            # The part's own item is the innermost one holding it, and it
+            # ends at the next item marker of any enumeration — its own
+            # sibling, an enclosing list's next item, or a list it
+            # introduces. Its lead-in is bounded by its container: an
+            # enumeration nested in an item ("B) maintains (a) ...; (b)
+            # ...") is governed by that item's text before it, and that
+            # item by its own lead-in, up to the sentence's governing
+            # clause — never by an enclosing list's sibling items (#3266).
             item, run = max(candidates, key=lambda c: c[0])
-            after = [m[0] for m in run if m[0] >= b]
+            after = [m[0] for r in runs for m in r if m[0] >= b] + [p for p in line_items if p >= b]
             pieces = [(item, min(after) if after else s_end)]
-            if _governs_enumeration(self.text[start:run[0][0]]):
-                pieces.insert(0, (start, run[0][0]))
+            while True:
+                head = run[0][0]
+                outer = [c for c in candidates if c[0] < head]
+                lead_lo = max(outer, key=lambda c: c[0])[0] if outer else start
+                if _governs_enumeration(self.text[lead_lo:head]):
+                    pieces.insert(0, (lead_lo, head))
+                if not outer:
+                    break
+                run = max(outer, key=lambda c: c[0])[1]
             via, own = "enumeration", item
         else:
             # No enumeration governs the part: its sentence, cut at the
@@ -728,34 +772,77 @@ class BundleView:
                                    "governor": heading["text"]})
         return found
 
-    def lost_classes(self, cid: str, snippet: str, occurrences: list[list[tuple[int, int]]] | None = None
-                     ) -> tuple[dict[str, dict[str, Any]] | None, int]:
+    def lost_classes(self, cid: str, snippet: str) -> tuple[dict[str, dict[str, Any]] | None, int, bool]:
         """({class: detail} carried by the context of every occurrence and not
-        expressed by the snippet, occurrences), or (None, 0) when the snippet
-        cannot be located. An occurrence's context is the union of its parts'
-        contexts: each quoted part is read in its own sentence, so the text a
-        `...` elides counts where it shares a part's sentence and not where it
-        runs across a flattened table.
+        expressed by the snippet, occurrences, complete), or (None, 0, True)
+        when the snippet cannot be located. An occurrence's context is the
+        union of its parts' contexts: each quoted part is read in its own
+        sentence, so the text a `...` elides counts where it shares a part's
+        sentence and not where it runs across a flattened table.
+
+        "Every occurrence" is every admissible sequence of part matches in
+        order, not only each first part's earliest completion: a class is
+        lost only when no ordered choice of matches avoids it in every part
+        (#3266). Matches of one part are all the same length, so choosing
+        the earliest admissible match of each part in turn finds such a
+        choice whenever one exists. When a part matches more than
+        MAX_PART_MATCHES times the search is incomplete: the result is
+        (None, occurrences, False) — indeterminate, not a flag.
 
         "Expressed" is `EXPRESSED_BY`, the relation the value is judged by: a
         snippet whose own "will" (planned) sits under a "Future ..." heading
         (prospective) already carries that status, so the heading is not
         lost, and a value that drops the "will" is counted once, as
         `modal_dropped` (#3232)."""
-        occurrences = self.locate(cid, snippet) if occurrences is None else occurrences
-        if not occurrences:
-            return None, 0
+        found = self._part_matches(cid, snippet)
+        if found is None:
+            return None, 0, True
+        per, complete = found
+        occurrences = len(self.locate(cid, snippet))
+        if not complete:
+            return None, occurrences, False
         own = classes(snippet)
-        per = []
-        for parts in occurrences:
-            merged: dict[str, dict[str, Any]] = {}
-            for part in parts:
-                for c, d in self.context(part).items():
-                    if not expresses(own, c):
-                        merged.setdefault(c, d)
-            per.append(merged)
-        common = set(per[0]).intersection(*per[1:])
-        return {c: per[0][c] for c in sorted(common)}, len(occurrences)
+        cache: dict[tuple[int, int], dict[str, dict[str, Any]]] = {}
+
+        def ctx(k: int, i: int) -> dict[str, dict[str, Any]]:
+            span = per[k][i]
+            if span not in cache:
+                cache[span] = {c: d for c, d in self.context(span).items() if not expresses(own, c)}
+            return cache[span]
+
+        first = _ordered(per, 0)
+        merged: dict[str, dict[str, Any]] = {}
+        for k, i in enumerate(first or []):
+            for c, d in ctx(k, i).items():
+                merged.setdefault(c, d)
+        lost = {c: merged[c] for c in sorted(merged)
+                if _ordered(per, 0, ok=lambda k, i, c=c: c not in ctx(k, i)) is None}
+        return lost, occurrences, True
+
+
+def _ordered(per: list[list[tuple[int, int]]], k: int, *, first: int | None = None,
+             ok=lambda k, i: True, after: int = -1) -> list[int] | None:
+    """The earliest sequence of match indices, one per part from part `k`
+    on, each starting at or after the previous one's end (the first after
+    `after`), whose matches all satisfy `ok`; with `first`, part `k`'s
+    match is that one. None when there is none. Greedy earliest is exact:
+    a part's matches share one length, so the earliest admissible match
+    leaves the most room for the parts after it."""
+    seq: list[int] = []
+    pos = after
+    for kk in range(k, len(per)):
+        spans = per[kk]
+        if kk == k and first is not None:
+            candidates = [first] if spans[first][0] >= pos and ok(kk, first) else []
+        else:
+            lo = bisect.bisect_left(spans, (pos, -1))
+            candidates = (i for i in range(lo, len(spans)) if ok(kk, i))
+        i = next(iter(candidates), None)
+        if i is None:
+            return None
+        seq.append(i)
+        pos = spans[i][1]
+    return seq
 
 
 # ------------------------------------------------------------------ rule 1
@@ -775,7 +862,7 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     the validator reads none of them."""
     view = BundleView(bundle_text, manifest)
     counts = {"snippets": 0, "verified": 0, "not_verified": 0, "value_unresolved": 0,
-              "located": 0, "unlocated": 0, "malformed_entries": 0}
+              "located": 0, "unlocated": 0, "indeterminate": 0, "malformed_entries": 0}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     unlocated: list[dict[str, Any]] = []
     for entry in receipt.get("chunks") or []:
@@ -802,10 +889,12 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                 continue
             value_classes = classes(_value_text(value))
             found = view.locate(cid, snippet)
-            lost, occurrences = view.lost_classes(cid, snippet, found)
-            if lost is None:
+            lost, occurrences, complete = view.lost_classes(cid, snippet)
+            if lost is None and complete:
                 counts["unlocated"] += 1
                 unlocated.append({"chunk": cid, "slot": slot, "snippet": snippet[:60]})
+            elif lost is None:
+                counts["indeterminate"] += 1
             else:
                 counts["located"] += 1
             bucket = flags[slot_class(slot)]
@@ -828,6 +917,8 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     slots = {k: len({f["slot"] for f in flags[k]}) for k in ("value", "label")}
     summary = (f"snippets {counts['verified']}/{counts['snippets']} verified · {counts['located']} located"
                + (f" ({counts['unlocated']} unlocated)" if counts["unlocated"] else "")
+               + (f" · {counts['indeterminate']} indeterminate (a part matched more than "
+                  f"{MAX_PART_MATCHES} times; context not read)" if counts["indeterminate"] else "")
                + (f" · {counts['malformed_entries']} malformed receipt entr"
                   f"{'y' if counts['malformed_entries'] == 1 else 'ies'} not read" if counts["malformed_entries"] else "")
                + f" · governor_outside_snippet {by_rule['governor_outside_snippet']['value']}"
@@ -894,7 +985,9 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
     `quotes_examined_for_context`, and of them, one whose `chunk` names no
     chunk of the bundle (a list, a number, an unknown id) is counted under
     `quotes_chunk_not_in_bundle` and one that cannot be located under
-    `unlocated_quotes`; neither has its context read. Evidence on any other
+    `unlocated_quotes`, and one a part of which matches more than
+    MAX_PART_MATCHES times under `indeterminate_quotes`; none of these
+    has its context read. Evidence on any other
     claim is not examined, so a bad `chunk` there is not counted: these
     counts are not a check of the review's evidence, which
     `source_review.check` makes (#3168)."""
@@ -912,7 +1005,7 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
         value_texts = {row["path"]: row["text"] for row in inv["values"]}
     counts = {"claims": 0, "supported": 0, "declared": {}, "expressed": 0,
               "expressed_elsewhere_in_value": 0, "fact_claims": 0, "quotes_examined_for_context": 0,
-              "unlocated_quotes": 0, "quotes_chunk_not_in_bundle": 0}
+              "unlocated_quotes": 0, "indeterminate_quotes": 0, "quotes_chunk_not_in_bundle": 0}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     for row in review["values"]:
         if not isinstance(row, dict) or not isinstance(row.get("claims"), list):
@@ -958,7 +1051,9 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
                + (" · evidence context not read (no bundle supplied)" if view is None else
                   f" · evidence context: {counts['quotes_examined_for_context']} quote(s) on supported fact "
                   f"claims examined, {counts['quotes_chunk_not_in_bundle']} naming no chunk of the bundle, "
-                  f"{counts['unlocated_quotes']} unlocated"))
+                  f"{counts['unlocated_quotes']} unlocated"
+                  + (f", {counts['indeterminate_quotes']} indeterminate (a part matched more than "
+                     f"{MAX_PART_MATCHES} times)" if counts["indeterminate_quotes"] else "")))
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_REVIEW, "checked": True,
             "gating": False, "artifact": review.get("artifact"), "sha256": review.get("sha256"),
             "value_text_read": value_texts is not None, "evidence_context_read": view is not None,
@@ -984,9 +1079,9 @@ def _planned_evidence(evidence: Any, view: BundleView | None, counts: dict[str, 
         if not isinstance(e.get("chunk"), str) or e["chunk"] not in view.chunks:
             counts["quotes_chunk_not_in_bundle"] += 1
             continue
-        lost, _n = view.lost_classes(e["chunk"], e["quote"])
+        lost, _n, complete = view.lost_classes(e["chunk"], e["quote"])
         if lost is None:
-            counts["unlocated_quotes"] += 1
+            counts["unlocated_quotes" if complete else "indeterminate_quotes"] += 1
             continue
         cls = next((c for c in PLANNED_EVIDENCE_CLASSES if c in lost), None)
         if cls:

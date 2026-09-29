@@ -712,6 +712,87 @@ def test_a_repeated_snippet_is_flagged_only_when_every_occurrence_is_governed():
     assert _run(both, [("x", "harmonise records to a common model")], record)["flags"] == []
 
 
+TRAILING = ("Nursing flowsheets\n\nPlanned Collection Streams\nWaveform telemetry\n\n\n"
+            "{second} Dataset\nWaveform telemetry")
+TRAILING_SNIPPET = "Nursing flowsheets...Waveform telemetry"
+
+
+@pytest.mark.parametrize("second,flagged", [("Current Released", False), ("Planned Future", True)])
+def test_a_later_part_matched_twice_is_governed_only_when_every_ordered_choice_is(second, flagged):
+    # #3266: the trailing part occurs under a status heading and again under
+    # a counter-heading. The first part's earliest completion is the
+    # governed row; the other row is an equally admissible occurrence, so
+    # the planned status is not carried by every occurrence.
+    doc = TRAILING.format(second=second)
+    record = {"x": "Nursing flowsheets and waveform telemetry."}
+    out = _run(doc, [("x", TRAILING_SNIPPET)], record)
+    assert out["counts"]["located"] == 1
+    assert bool(_rules(out)) is flagged
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    review = _review(("/x", [_claim("Nursing flowsheets and waveform telemetry.", "fact",
+                                    quote=TRAILING_SNIPPET)]))
+    flags = sc.review_status_expression(review, view=view)["flags"]
+    assert [f["rule"] for f in flags] == (["planned_evidence_declared_fact"] if flagged else [])
+
+
+def test_an_ungoverned_occurrence_past_the_fiftieth_is_read():
+    governed = "The team will harmonise records to a common model. " * 50
+    record = {"x": "Records are harmonised to a common model."}
+    snippet = "harmonise records to a common model"
+    assert len(_run(governed, [("x", snippet)], record)["flags"]) == 1
+    doc = governed + "Separately, the archive can harmonise records to a common model today."
+    out = _run(doc, [("x", snippet)], record)
+    assert out["counts"]["located"] == 1 and out["flags"] == []
+
+
+def test_a_part_matched_past_the_cap_is_indeterminate_not_flagged():
+    doc = "The team will harmonise records to a common model. " * (sc.MAX_PART_MATCHES + 1)
+    record = {"x": "Records are harmonised to a common model."}
+    out = _run(doc, [("x", "harmonise records to a common model")], record)
+    assert out["flags"] == []
+    assert (out["counts"]["located"], out["counts"]["unlocated"], out["counts"]["indeterminate"]) == (0, 0, 1)
+    assert "1 indeterminate" in out["summary"]
+    text, manifest = _bundle(doc)
+    review = _review(("/x", [_claim("Records are harmonised.", "fact", quote="harmonise records to a common model")]))
+    rule2 = sc.review_status_expression(review, view=sc.BundleView(text, manifest))
+    assert rule2["flags"] == [] and rule2["counts"]["indeterminate_quotes"] == 1
+    assert rule2["counts"]["unlocated_quotes"] == 0 and "1 indeterminate" in rule2["summary"]
+    # At the cap itself every occurrence is read, and all are governed.
+    at_cap = "The team will harmonise records to a common model. " * sc.MAX_PART_MATCHES
+    assert len(_run(at_cap, [("x", "harmonise records to a common model")], record)["flags"]) == 1
+
+
+NESTED = "The consortium A) {a} imaging; B) {b} (a) {ia}waveform telemetry; (b) standardized records; C) {c} records."
+NESTED_ITEMS = {"a": "acquires", "b": "maintains", "ia": "", "c": "shares"}
+
+
+@pytest.mark.parametrize("change,flagged", [
+    ({}, False),
+    ({"a": "will acquire"}, False),            # an outer sibling item's marker (the #3266 case)
+    ({"c": "will share"}, False),              # an outer item after the nested list
+    ({"ia": "will add "}, False),              # an inner sibling item's marker
+    ({"b": "will maintain"}, True),            # the containing item governs its sub-items
+])
+def test_a_nested_enumeration_inherits_its_containing_items_governor_and_no_siblings(change, flagged):
+    doc = NESTED.format(**{**NESTED_ITEMS, **change})
+    record = {"x": "Records are standardized."}
+    out = _run(doc, [("x", "standardized records")], record)
+    assert out["counts"]["located"] == 1
+    assert _rules(out) == ([("governor_outside_snippet", "x", "planned")] if flagged else [])
+    text, manifest = _bundle(doc)
+    review = _review(("/x", [_claim("Records are standardized.", "fact", quote="standardized records")]))
+    flags = sc.review_status_expression(review, view=sc.BundleView(text, manifest))["flags"]
+    assert [f["rule"] for f in flags] == (["planned_evidence_declared_fact"] if flagged else [])
+
+
+def test_a_nested_enumeration_inherits_the_sentences_governing_clause():
+    doc = NESTED.format(**NESTED_ITEMS).replace("The consortium A) acquires", "The consortium will A) acquire")
+    out = _run(doc, [("x", "standardized records")], {"x": "Records are standardized."})
+    [flag] = out["flags"]
+    assert (flag["class"], flag["marker"], flag["via"]) == ("planned", "will", "enumeration")
+
+
 def test_each_part_of_a_multipart_snippet_is_read_in_its_own_context():
     doc = "Nursing flowsheets\nThe archive will be rebuilt next year.\nYes (common schema with extensions)"
     record = {"x": "Nursing flowsheets use the common schema."}
