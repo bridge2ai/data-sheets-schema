@@ -3,8 +3,9 @@ alignment, and regenerate exactly (#2935).
 
 Until #2935 the keyword heuristics ran before the TTL was consulted, so 29
 TTL-aligned slots were labelled free text or novel. The schema's own
-``slot_uri`` and ``*_mappings`` were never read, so 95 slots with declared
-external targets had none in the table. The table was also stale: 284 rows
+``slot_uri`` and ``*_mappings`` were never read: of the 136 slots that declare
+an external target there, 101 had no row or no ``mapped`` row in the table
+(#3202 corrected an earlier count of 95). The table was also stale: 284 rows
 against 301 slot names. The only test asked for more than 200 rows.
 
 The expectations here are computed from the inputs by other means than the
