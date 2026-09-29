@@ -530,11 +530,15 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
         else:
             field_result.status = "unplaceable"
             field_result.merge_undecided = True
+            what = ("the same crate property with a different value (another "
+                    "entity), and merging the two values"
+                    if prop is not None and prop == owner_prop else
+                    "another crate property, and merging two crate properties")
             field_result.detail = (
                 f"{owner_row.d4d_path} already filled {TARGET_CLASS}.{where} from "
                 f"{owner_prop or owner_row.source_path}; this row reads "
-                f"{prop or field_result.source_path}, and merging two crate "
-                "properties into one object is not decided (#2915)")
+                f"{prop or field_result.source_path}: {what} into one object is "
+                "not decided (#2915, #3270)")
 
     # The record's own required id: use the crate's identifier rather than
     # minting one, so the D4D record points back at the crate it came from.
@@ -646,8 +650,9 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         f"| unresolvable | {c.get('unresolvable',0)} | the table declares no crate path |",
         f"| unplaceable | {c.get('unplaceable',0)} | no route into a `Dataset` record"
         + (f"; {merge_undecided} of them do resolve, but a `{TARGET_CLASS}` row "
-           "already filled the host slot from another crate property and "
-           "merging the two is not decided" if merge_undecided else "") + " |",
+           "already filled the host slot, from another crate property or from "
+           "the same property with a different value, and merging the two is "
+           "not decided" if merge_undecided else "") + " |",
         "",
         "## Fidelity of what was filled",
         "",

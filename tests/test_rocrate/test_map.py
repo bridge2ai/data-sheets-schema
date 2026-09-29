@@ -260,6 +260,9 @@ class TestNestedRowsNeverOverwrite(unittest.TestCase):
         self.assert_one_object_per_item(res)
         self.assertEqual(self.status(res, NESTED_ROW["D4D_Full_Path"]).status,
                          "unplaceable")
+        detail = self.status(res, NESTED_ROW["D4D_Full_Path"]).detail
+        self.assertIn("the same crate property with a different value", detail)  # #3270
+        self.assertNotIn("another crate property", detail)
 
     def test_crate_property_reads_both_spellings_as_one(self):
         self.assertEqual(crate_property(DATASET_ROW["RO_Crate_JSON_Path"]), PROTOCOL)
@@ -324,8 +327,9 @@ class TestNestedRowsNeverOverwrite(unittest.TestCase):
         self.assertFalse(self.status(res, "NoSuchClass.description").merge_undecided)
         self.assertIn("| unplaceable | 2 | no route into a `Dataset` record; 1 of "
                       "them do resolve, but a `Dataset` row already filled the "
-                      "host slot from another crate property and merging the two "
-                      "is not decided |", self._report(res))
+                      "host slot, from another crate property or from the same "
+                      "property with a different value, and merging the two is "
+                      "not decided |", self._report(res))
         res = map_crate(_with_protocol(), [DATASET_ROW, unrouted], self.sv, "TEST")
         self.assertIn("| unplaceable | 1 | no route into a `Dataset` record |",
                       self._report(res))
