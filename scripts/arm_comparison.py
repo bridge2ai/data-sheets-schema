@@ -567,6 +567,102 @@ def receipt_section(data) -> list[str]:
     return lines
 
 
+# Arms whose records are not replicates of one configuration: the v7 API
+# canaries are four labels, each one run under its own settings (#777).
+NOT_REPLICATES = {"v7api": "four canary labels, one run each under its own settings (#777)"}
+
+
+def replicate_structure_section(data) -> list[str]:
+    """Structural agreement across each arm x project's replicates (#2932):
+    which slots every, some or no replicate fills, and how far the entry
+    counts of nested lists held by all of them disagree. The records are the
+    ones the metric table counts — `collect()`'s labels, less
+    EXCLUDED_INVALID."""
+    from data_sheets_schema.replicate_structure import compare_structure, dataset_slots, summarize
+    slots = dataset_slots()
+    kinds = {k: sum(1 for v in slots.values() if v == k) for k in ("nested", "list", "scalar")}
+    rows, wide, outside, totals = [], [], set(), {}
+    for key, disp, _pfx, _rt, _role in ARMS:
+        if key in NOT_REPLICATES:
+            rows.append(f"| {disp} | – | – | not replicates: {NOT_REPLICATES[key]} | | | | |")
+            continue
+        tot: dict[str, int] = {}
+        for p in PROJECTS:
+            reps = data[key][p]
+            if len(reps) < 2:
+                rows.append(f"| {disp} | {p} | {len(reps)} | – | – | – | – | – |")
+                continue
+            recs = {_rep_tag(r["label"]): load(CONCAT / _method_for(r["label"], p) / r["label"] / f"{p}_d4d.yaml")
+                    for r in reps}
+            result = compare_structure(recs, slots)
+            s = summarize(result)
+            outside.update(s["outside_universe"])
+            vals = {"records": len(reps), "all": s["all"], "some": s["some"], "none": s["none"],
+                    "identical": s["identical"], "nested_in_all": s["nested_in_all"],
+                    "nested_counted": s["nested_counted"], "differ": len(s["counts_differ"]),
+                    "ge2": len(s["ratio_ge_2"]), "key": s["joined_by_key"],
+                    "pos": s["joined_by_position"], "unaligned": s["unaligned"]}
+            for k, v in vals.items():
+                tot[k] = tot.get(k, 0) + v
+            names = ", ".join(f"`{n}` ({c}/{len(reps)})" for n, c in s["intermittent"].items()) or "none"
+            rows.append(_structure_row(disp, p, vals, names))
+            if s["ratio_ge_2"]:
+                wide.append(f"| {disp} | {p} | " + ", ".join(
+                    f"`{n}` " + "/".join(str(c) for c in result["slots"][n]["counts"].values())
+                    for n in s["ratio_ge_2"]) + " |")
+        if tot:
+            totals[key] = tot
+            rows.append(_structure_row(f"**{disp}**", "**all projects**", tot, ""))
+    prod = [totals[k] for k in ("v7prod", "v8prod") if k in totals]
+    both = {k: sum(t[k] for t in prod) for k in ("nested_in_all", "nested_counted", "differ", "ge2", "some")}
+    return ["## Replicate structure (#2932)", "",
+            f"Per arm × project, over class `Dataset`'s {len(slots)} induced slots less "
+            f"`source_caveats` ({kinds['nested']} class-ranged, {kinds['list']} lists of values, "
+            f"{kinds['scalar']} scalar; `replicate_structure.dataset_slots`, today's merged "
+            "schema for every arm). A replicate fills a slot when its value is not null, `\"\"`, "
+            "`[]` or `{}`. **all / some / none**: slots filled in every, in some but not every "
+            "(intermittent), and in no replicate; **identical**: of the slots filled in all, "
+            "those whose key-sorted, whitespace-collapsed YAML is equal in every replicate. "
+            "**Nested in all**: class-ranged slots filled in every replicate; **with a count**: "
+            "those that are a list in every replicate — a single object has no item count and "
+            "is outside the next two columns; **counts differ** and **max/min ≥ 2** are of those. "
+            "**Entries joined**: list entries of those slots aligned one to one across each pair "
+            "of replicates, by identity key (`receipts._entry_key`: the first `id`, `name`, "
+            "`title`, … an entry carries) or, for a keyless entry, by its index "
+            "(`joined_by_position`, #908's caveat: position is no evidence of identity), and "
+            "the entries neither joined, counted on both sides.", "",
+            "| arm | project | records | all / some / none | identical | nested in all: with a "
+            "count / counts differ / max/min ≥ 2 | entries joined by key / by position / "
+            "unaligned | intermittent slots (replicates filling it) |",
+            "|---|---|---|---|---|---|---|---|", *rows, "",
+            "Class-ranged slots filled in every replicate whose entry counts reach max/min ≥ 2 "
+            "(counts per replicate, in label order):", "",
+            "| arm | project | slots |", "|---|---|---|", *(wide or ["| – | – | none |"]), "",
+            "Differences from the other measures. fig12 (#2303, `scripts/figures/"
+            "fig12_replication_stability.py`, not on main) uses the same slot universe, "
+            "emptiness and canonical form, over the 24 records of the frozen 2026-09-12 "
+            "rescore manifest — exactly the v7 and v8 production records here — and compares "
+            "whole values only (it also splits scalar strings into long text by observed "
+            "length, which changes no count here). Its nested cells filled in all three "
+            "include the single objects this table sets apart"
+            + (f": over the v7 and v8 production arms, {both['nested_in_all']} such cells, of "
+               f"which {both['nested_counted']} are lists with an item count, {both['differ']} "
+               f"of those differing in count and {both['ge2']} reaching max/min ≥ 2; "
+               f"{both['some']} intermittent cells" if len(prod) == 2 else "") + ". "
+            "`runs.compare` counts record keys, so a key holding null or `[]` is present "
+            "there and absent here. Only top-level slots are compared; nothing below the top "
+            "level is. Every arm shown ran under an earlier schema release than today's, so a "
+            "slot its release did not declare counts as unfilled. Record keys holding a value "
+            "outside the universe: "
+            + (", ".join(f"`{k}`" for k in sorted(outside)) if outside else "none") + ".", ""]
+
+
+def _structure_row(arm: str, project: str, v: dict[str, int], names: str) -> str:
+    return (f"| {arm} | {project} | {v['records']} | {v['all']} / {v['some']} / {v['none']} | "
+            f"{v['identical']} | {v['nested_in_all']}: {v['nested_counted']} / {v['differ']} / "
+            f"{v['ge2']} | {v['key']} / {v['pos']} / {v['unaligned']} | {names} |")
+
+
 def render_markdown(data, scores) -> str:
     lines = ["# Cross-arm comparison (regenerated)", "",
              f"Generated by `scripts/arm_comparison.py` from the provenance records under "
@@ -624,6 +720,7 @@ def render_markdown(data, scores) -> str:
               "cell with no measured replicate shows only its raw values.", ""]
 
     lines += receipt_section(data)
+    lines += replicate_structure_section(data)
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
     for mk, (disp, src, _hiw, cav) in METRICS.items():
