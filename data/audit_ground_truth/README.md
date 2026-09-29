@@ -33,11 +33,33 @@ these files to any registered input list.
 
 The native file policy checks instruction conformance. It is not an OS
 filesystem sandbox, so absence from the instructions is the guard.
-`tests/test_audit_recall_leak.py` scans the instruction surfaces and the
-registered native inputs for this directory's name and for every observation
-committed here. It fails on a match, and it fails when a committed file here
-does not load. A report from the command carries entry ids, kinds and
-pointers. It never carries observation text or any of the audit's prose.
+`tests/test_audit_recall_leak.py` looks for this directory's name and for
+every observation committed here in:
+
+- the condition prompts, `.claude/` and `.github/workflows/`;
+- the matched arms' launch prompts and rubric system prompts
+  (`notes/matched_cborg_2026-09-13/prompts/`);
+- the direct and native arms' system prompts
+  (`notes/claudecode_direct/system.md`,
+  `notes/matched_cborg_2026-09-13/native_controls/system.md`);
+- the source of every non-test Python file under `notes/claudecode_direct/`
+  and `notes/matched_cborg_2026-09-13/`, which is where the command guidance
+  appended to both arms' system prompts, the audit system prompts and batch
+  framing, and the finalization and evaluation instructions are written;
+- the rendered audit-batch contexts and output contracts;
+- the registered native inputs (schemas, playbooks, source manifest, chunk
+  manifests, bundles);
+- every file under `src/` other than `audit_recall.py`, whose docstring
+  names the schema file here.
+
+It reads those files and never edits them. It fails on a match. It also
+fails when a file here, at any depth, does not load, or is neither a `.yaml`,
+`.yml` or `.json` ground-truth file nor this README or the schema. It does not
+see a launch message typed at run time or a registration written outside the
+repository; keeping those clean is the operator's job.
+
+A report from the command carries entry ids, kinds and pointers. It never
+carries observation text or any of the audit's prose.
 
 ## File format (`audit_ground_truth_v1`)
 
@@ -68,17 +90,19 @@ entries:
 ```
 
 An entry that lacks a field, or carries one that is not declared, is refused
-with every problem named. The same applies to `held_out` other than `true`, a
-pointer with a bad `~` escape, a date that is not on the calendar, lines out
-of order, an absolute or `..` note path, and a duplicated id. Entries pin
-originals by hash and never edit them.
+with every problem named (up to 50). The same applies to `held_out` other
+than `true`, a pointer with a bad `~` escape, a date that is not on the
+calendar, lines out of order, a line number written as a float such as `9.0`,
+a hash, id or date followed by a newline (a YAML `|` block scalar adds one),
+an absolute or `..` note path, and a duplicated id. Entries pin originals by
+hash and never edit them.
 
 The pinned sha256 values make the numbers reproducible. An entry scores only
 against the exact original it names. `bundle_sha256` fixes the line numbers,
 because bundles drift (#452).
 
-**`kind` is provisional** (#2921 owner decision 2). It takes the issue's seven
-values plus `other` and `omission` (#2930):
+**`kind` is provisional** until the owner signs the list off on #2921. It
+takes the issue's seven values plus `other` and `omission` (#2930):
 
 `role_placement`, `status_scope`, `date_scope`, `absence_or_self_narration`,
 `quotation_fidelity`, `identifier_count`, `attribution`, `omission`, `other`.
@@ -98,8 +122,8 @@ Only entries whose `target_original_full_sha256` is that sha256 apply. An
 original that no entry names has **0 applicable entries and recall n/a, not
 0**.
 
-**Hit rule `pointer_cover_v1`. It is provisional and requires owner sign-off
-before any report on real audits is quoted** (#2921 owner decision 4). A
+**Hit rule `pointer_cover_v1`. It is provisional and requires the owner's
+sign-off on #2921 before any report on real audits is quoted.** A
 ground-truth path is *hit* when the audit names that pointer, or an ancestor
 of it on JSON Pointer segments, in one of three ways:
 
@@ -136,8 +160,10 @@ for review, not false positives.** The reviewed set is small and says nothing
 about what it did not review. `inside_entries` names any entry whose path
 contains the flag.
 
-The report pins its own sha256 and the hit rule, the grammar instrument and
-its sha256, and the ground-truth file's sha256. It also pins, for each
-replicate, the audit's and the original's sha256 and the arm and replicate
-labels as given. It states that the result covers one project and a small
-reviewed set, not general audit quality.
+The report pins the scorer module's sha256 (`instrument_sha256`, the sha256
+of `audit_recall.py`, not of the report), the hit rule, the grammar
+instrument and its sha256, and the ground-truth file's sha256. The arm label
+is given once for the whole report (`--arm`), never inferred. Each replicate
+pins the audit's and the original's sha256 and its replicate label as given.
+The report states that the result covers one project and a small reviewed
+set, not general audit quality.
