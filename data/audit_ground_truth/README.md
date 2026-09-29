@@ -6,7 +6,7 @@ used only to measure what a Phase 3 source audit of that original missed:
 
 ```bash
 d4d evaluate audit-recall --ground-truth data/audit_ground_truth/<FILE>.yaml \
-    --audit <run>/evidence/audit.json --original <run>/original_full.yaml \
+    --audit <run>/evidence/audit.json --original <run>/evidence/original_full.yaml \
     [--audit … --original … ] [--replicate rep1 …] [--arm direct] [--output report.json] [--json]
 ```
 
@@ -68,8 +68,10 @@ carries observation text or any of the audit's prose.
 
 The JSON Schema is `ground_truth.schema.json`, rendered from
 `audit_recall.ground_truth_schema()`, and a test holds the two equal. Files
-are YAML or JSON. Duplicate and merge keys are refused, and dates are read as
-written.
+are YAML or JSON. Text that is valid JSON is read as JSON, so tab whitespace
+is admitted there; anything else is read as YAML 1.1 (PyYAML), whose scanner
+refuses a tab used as whitespace. Duplicate keys are refused in both, merge
+keys in YAML, and dates are read as written.
 
 ```yaml
 format: audit_ground_truth_v1

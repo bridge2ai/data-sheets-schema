@@ -157,6 +157,35 @@ _Loader.add_constructor("tag:yaml.org,2002:timestamp",
                         lambda loader, node: loader.construct_scalar(node))
 
 
+def _json_object(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise GroundTruthError([{"at": "", "problem": f"duplicate mapping key {key!r}"}])
+        value[key] = item
+    return value
+
+
+def _parse(text: str):
+    """JSON text as JSON, anything else as YAML.
+
+    PyYAML reads YAML 1.1, whose scanner refuses a tab used as whitespace, so
+    well-formed JSON indented with tabs (``json.dump(indent="\\t")``, ``jq
+    --tab``) was refused as "not YAML" (#3177). Only text the JSON grammar
+    rejects goes to the YAML loader. Both refuse duplicate keys.
+    """
+    try:
+        return json.loads(text, object_pairs_hook=_json_object)
+    except json.JSONDecodeError as not_json:
+        try:
+            return yaml.load(text, Loader=_Loader)
+        except yaml.YAMLError as not_yaml:
+            # Positions and class names only: a YAML message quotes the file.
+            raise GroundTruthError([{"at": "", "problem": (
+                f"neither JSON ({not_json.msg} at line {not_json.lineno} column {not_json.colno}) "
+                f"nor YAML ({not_yaml.__class__.__name__})")}]) from None
+
+
 def _at(parts):
     return "".join("/" + str(p).replace("~", "~0").replace("/", "~1") for p in parts)
 
@@ -172,11 +201,10 @@ def load_ground_truth(raw: bytes) -> dict:
     if len(raw) > MAX_GROUND_TRUTH_BYTES:
         raise GroundTruthError([{"at": "", "problem": "file exceeds the byte bound"}])
     try:
-        value = yaml.load(raw.decode("utf-8", errors="strict"), Loader=_Loader)
+        text = raw.decode("utf-8", errors="strict")
     except UnicodeError:
         raise GroundTruthError([{"at": "", "problem": "file is not UTF-8"}]) from None
-    except yaml.YAMLError as exc:
-        raise GroundTruthError([{"at": "", "problem": f"not YAML: {exc.__class__.__name__}"}]) from None
+    value = _parse(text)
     problems = [{"at": _at(error.absolute_path),
                  # The one anyOf; its default message repeats the whole mapping.
                  "problem": ("must name a source or a chunk" if error.validator == "anyOf"

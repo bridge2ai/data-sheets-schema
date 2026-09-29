@@ -7,6 +7,7 @@ ground-truth entries pinned to its sha256.
 from copy import deepcopy
 import hashlib
 import json
+import re
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -313,6 +314,33 @@ def test_file_level_problems_are_refused():
         recall.load_ground_truth(b"\xff\xfe")
 
 
+@pytest.mark.parametrize("dump", [
+    lambda v: json.dumps(v, indent="\t"),
+    lambda v: json.dumps(v).replace('": ', '":\t'),
+    lambda v: json.dumps(v, indent=2).replace("\n    ", "\n\t  "),
+], ids=["tab-indented", "tab-after-a-colon-on-one-line", "tab-below-the-first-level"])
+def test_json_with_tab_whitespace_is_read_as_json(dump):
+    """PyYAML reads YAML 1.1, which refuses a tab used as whitespace (#3177)."""
+    value = truth(entry("tab", original(), "/title"))
+    raw = dump(value).encode()
+    assert b"\t" in raw and json.loads(raw) == value
+    with pytest.raises(yaml.YAMLError):
+        yaml.safe_load(raw)
+    assert recall.load_ground_truth(raw) == value
+
+
+def test_json_refuses_duplicate_keys_and_text_neither_grammar_reads_is_named_without_its_content():
+    raw = b'{"format": "audit_ground_truth_v1",\t"project": "A", "project": "B", "entries": []}'
+    with pytest.raises(recall.GroundTruthError, match="duplicate mapping key 'project'"):
+        recall.load_ground_truth(raw)
+    with pytest.raises(recall.GroundTruthError) as caught:
+        recall.load_ground_truth(b'observation: "A planted observation left unterminated\n')
+    [problem] = caught.value.problems
+    assert problem["problem"] == ("neither JSON (Expecting value at line 1 column 1) "
+                                  "nor YAML (ScannerError)")
+    assert "planted" not in str(caught.value)
+
+
 def test_a_complete_entry_loads_with_its_date_as_written():
     o = original()
     raw = yaml.safe_dump(truth(entry("ok", o, "/title")), sort_keys=False).replace(
@@ -440,6 +468,16 @@ def test_the_report_carries_pins_and_no_observation_or_audit_prose():
 
 def test_the_committed_schema_file_is_the_loaders_schema():
     assert SCHEMA_FILE.read_text(encoding="utf-8") == recall.schema_text()
+
+
+def test_the_readme_example_takes_the_original_from_beside_the_audit():
+    """The runs keep original_full.yaml in <run>/evidence/ beside audit.json
+    (api_runner.native_evidence_instructions and the audit controls), #3178."""
+    text = (SCHEMA_FILE.parent / "README.md").read_text(encoding="utf-8")
+    audit_path = re.search(r"--audit (\S+/audit\.json)", text).group(1)
+    original_path = re.search(r"--original (\S+/original_full\.yaml)", text).group(1)
+    assert audit_path == "<run>/evidence/audit.json"
+    assert original_path == "<run>/evidence/original_full.yaml"
 
 
 #: The issue's proposed list plus ``omission`` (#2930), written out so that a
