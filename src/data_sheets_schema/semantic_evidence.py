@@ -22,25 +22,40 @@ below the maximum. Per `semantic_analysis.issues_detected` entry, `item_ids`
 names the rubric items the issue concerns and `score_effect` is `lowered` or
 `noted_only`.
 
-Errors mark false evidence: a cited path that does not resolve or is empty, a
-quote the value does not contain, an "absent" path that is populated, a
-miscount, an issue naming an unknown or non-applicable item, and a lowered
-issue that names no item scored below its maximum. Warnings mark accounting
-gaps: a populated declared field that a below-maximum row neither cites nor
-considers, and a below-maximum item that no lowered issue and no reason
-explains. The checker reads the rating and never changes a score.
+Errors mark false or unreadable evidence: a path outside the grammar below, a
+cited path that does not resolve or is empty, a quote the value does not
+contain, an "absent" path that is populated, a miscount, an issue naming an
+unknown or non-applicable item, and a lowered issue that names no item scored
+below its maximum. Warnings mark accounting gaps: a populated declared field
+that a below-maximum row neither cites nor considers, and a below-maximum item
+that no lowered issue and no reason explains. The checker reads the rating and
+never changes a score.
 
 Paths. A path that begins with `/` is a JSON pointer (RFC 6901) and names one
-value. Any other path uses the rubric's dotted notation: each segment is a
-mapping key, and a list met before the last segment is read element by
-element. So `creators.name` reaches every creator's name, while `creators` is
-the list itself. A list index is written only in pointer form
-(`/creators/0/name`); a dotted segment is always a key, so `creators.0.name`
-and `creators[0].name` reach nothing. A value is populated when it is a scalar
-other than null or a blank string, or a list or mapping that holds one. A
-stated `false` or `0` is populated. A quote is matched against each scalar's
-text: a string as written, `true` or `false` for a boolean, and a number as
-Python prints it.
+value. Its tokens are keys or list indices; none is empty or padded with
+whitespace, and `~` appears only in the escapes `~0` and `~1`. Any other path
+uses the rubric's dotted notation. Each segment is a lowercase snake_case key,
+as every schema slot and rubric field name is, and a list met before the last
+segment is read element by element. So `creators.name` reaches every
+creator's name, while `creators` is the list itself. A list index is written
+only in pointer form (`/creators/0/name`), and so is a key that is not a
+snake_case name, such as the few model-written `DOI` keys. Any other spelling
+is a `malformed_path` error in every list, never a path that reaches nothing:
+`#/creators` (a pointer begins with `/` and is relative to the row's
+resource), `creators/0`, `creators.0.name`, `creators[0].name`, `Creators`,
+and a path with a stray space. This matters most for `absent`, where a path
+that reaches nothing is a true absence. A value is populated when it is a
+scalar other than null or a blank string, or a list or mapping that holds one.
+A stated `false` or `0` is populated.
+
+Quotes. A quote is matched, with whitespace normalised, against each scalar
+under the path. It may be a substring of a string as written, of `true` or
+`false` for a boolean, of a date or timestamp in ISO 8601 form or as Python
+prints it, and of a number as Python prints it. The parsed input no longer
+holds the text the record wrote, so a quote of a whole non-string scalar also
+matches when YAML reads the quote as that same value. A timestamp must keep
+its UTC offset. So `2026-05-01T00:00:00Z`, `yes` and `1.10` match the values a
+record wrote that way.
 
 Declared fields. A rubric item's `field` names are read as the deterministic
 presence instrument reads them, through `evaluation_context.field_values` and
@@ -48,32 +63,45 @@ its aliases for names that are not root slots (`format`, `media_type`,
 `file_collections.total_bytes`). A name that does not resolve from the
 resource root, such as rubric10's bare `confidentiality_level`,
 `reidentification_risk` or `is_data_split`, is never populated and never
-warns. A cited or considered path accounts for a declared field when one
-names the other or a field inside it; list indices are ignored.
+warns. A cited or considered path accounts for a declared field when it
+reaches a location where the input populates that field, a value inside one,
+or a container of one. The declared name, as the rubric writes it, names all
+of those locations. An alias spelling accounts for nothing where it holds no
+value: citing `file_collections` does not account for `format`, whose aliases
+include `file_collections.resources.format`, when no file collection holds a
+format.
 
 Limits. These checks are mechanical. They catch fabricated quotes, false
 absences, miscounts and unmentioned declared fields. They do not establish
 that a cited value supports the judgement, so an inference drawn against the
-record or an overstated reading of a populated field passes them. A count is
-the `len()` of one list. A filtered claim such as "38 with an ORCID" cannot be
-checked here and must not be written as a count. Call this after
+record, or a misreading of a field the row cites, passes them. #1355's Q13
+deduction cited the `version_access` fields it misread. An absence claim is
+checked only as far as its path is well formed. A misspelled key in a
+well-formed path (`version_acess.version_details`) reads as missing, because
+no schema or rubric declares every name an absence may be claimed for: #2920
+requires `was_generated_by`, which neither declares, to pass as absent. A
+count is the `len()` of one list. A filtered claim such as "38 with an ORCID"
+cannot be checked here and must not be written as a count. Call this after
 `validate_scope`, which pins the rubric bytes and the applicability context
 this module reads.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
+import datetime
 import re
 from typing import Any, Iterator
 
 import yaml
 
-from data_sheets_schema.evaluation_context import FIELD_ALIASES, dataset_units, field_values
+from data_sheets_schema.evaluation_context import dataset_units, field_values
 from data_sheets_schema.judge_contract import evaluation_contract
 from data_sheets_schema.resources import resource_path
 
 SCORE_EFFECTS = frozenset({"lowered", "noted_only"})
 _INDEX = re.compile(r"0|[1-9][0-9]*")
+_NAME = re.compile(r"[a-z_][a-z0-9_]*")
+_BAD_ESCAPE = re.compile(r"~(?![01])")
 
 
 @dataclass(frozen=True)
@@ -226,21 +254,90 @@ def _resolve(unit: dict, path: str) -> list[tuple[str, Any]]:
     return walk(unit, path.split("."), "")
 
 
+def _path_problem(path: str) -> str | None:
+    """Why a path is outside the grammar in the module docstring; None when it is inside."""
+    if path != path.strip():
+        return "has leading or trailing whitespace"
+    if path.startswith("/"):
+        tokens = path[1:].split("/")
+        if any(not token or token != token.strip() for token in tokens):
+            return "has an empty or whitespace-padded pointer token"
+        if _BAD_ESCAPE.search(path):
+            return "has a ~ that is neither the pointer escape ~0 nor ~1"
+        return None
+    if path.startswith("#"):
+        return "begins with #; a pointer begins with / and is relative to the row's resource"
+    for segment in path.split("."):
+        if _NAME.fullmatch(segment):
+            continue
+        if "/" in segment:
+            return "uses / in dotted notation; a pointer begins with /"
+        if "[" in segment or "]" in segment or re.fullmatch(r"[0-9]+", segment):
+            return "indexes a list in dotted notation; an index is written only in pointer form"
+        return f"has the segment {segment!r}; a key that is not lowercase snake_case is written in pointer form"
+    return None
+
+
 def _normalise(text: str) -> str:
     return " ".join(text.split())
 
 
-def _scalars(value: Any) -> Iterator[str]:
+def _scalars(value: Any) -> Iterator[Any]:
+    """Every non-null scalar under a value."""
     if isinstance(value, dict):
         for child in value.values():
             yield from _scalars(child)
     elif isinstance(value, list):
         for child in value:
             yield from _scalars(child)
-    elif isinstance(value, bool):
-        yield "true" if value else "false"
     elif value is not None:
-        yield str(value)
+        yield value
+
+
+def _texts(scalar: Any) -> tuple[str, ...]:
+    """The renderings of a non-string scalar that a partial quote may lie inside."""
+    if isinstance(scalar, bool):
+        return ("true" if scalar else "false",)
+    if isinstance(scalar, datetime.datetime):
+        return (scalar.isoformat(), str(scalar))
+    if isinstance(scalar, datetime.date):
+        return (scalar.isoformat(),)
+    return (str(scalar),)
+
+
+def _same_value(read: Any, scalar: Any) -> bool:
+    """Whether YAML's reading of a whole quote is this non-string scalar."""
+    if isinstance(scalar, bool) or isinstance(read, bool):
+        return read is scalar
+    if isinstance(scalar, (int, float)):
+        return isinstance(read, (int, float)) and read == scalar
+    if isinstance(scalar, datetime.datetime):
+        return (isinstance(read, datetime.datetime) and read == scalar
+                and read.utcoffset() == scalar.utcoffset())
+    if isinstance(scalar, datetime.date):
+        return type(read) is datetime.date and read == scalar
+    return False
+
+
+def _quote_found(quote: str, values: list[Any]) -> bool:
+    wanted = _normalise(quote)
+    read, parsed = None, False
+    for scalar in (s for value in values for s in _scalars(value)):
+        if isinstance(scalar, str):
+            if wanted in _normalise(scalar):
+                return True
+            continue
+        if any(wanted in text for text in _texts(scalar)):
+            return True
+        if not parsed:
+            try:
+                read = yaml.safe_load(wanted)
+            except yaml.YAMLError:
+                read = None
+            parsed = True
+        if read is not None and _same_value(read, scalar):
+            return True
+    return False
 
 
 def _entry_path(entry: Any) -> str | None:
@@ -251,6 +348,12 @@ def _entry_path(entry: Any) -> str | None:
 def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[EvidenceFinding]:
     def error(code, path, message):
         return EvidenceFinding("error", code, key, path, f"{key} {unit_path}: {message}", unit=unit_path)
+
+    def malformed(name, index, path):
+        # A path outside the grammar reaches nothing, and under `absent`
+        # reaching nothing would pass as a true absence (#3017).
+        problem = _path_problem(path)
+        return None if problem is None else error("malformed_path", path, f"{name}[{index}] path {path!r} {problem}")
 
     lists = {}
     for name in ("cited", "absent", "counts", "considered"):
@@ -266,6 +369,9 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
         if path is None:
             yield error("malformed_evidence", None, f"cited[{index}] needs a non-empty path")
             continue
+        if (finding := malformed("cited", index, path)) is not None:
+            yield finding
+            continue
         hits = _resolve(unit, path)
         if not hits:
             yield error("cited_path_unresolved", path, f"cites {path}, which the input does not contain")
@@ -278,13 +384,16 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
         quote = entry["quote"]
         if not isinstance(quote, str) or not quote.strip():
             yield error("malformed_evidence", path, f"cited[{index}] quote must be a non-blank string")
-        elif not any(_normalise(quote) in _normalise(text) for _, value in hits for text in _scalars(value)):
+        elif not _quote_found(quote, [value for _, value in hits]):
             yield error("quote_not_found", path, f"quotes {quote!r}, which no value at {path} contains")
 
     for index, entry in enumerate(lists["absent"]):
         path = _entry_path(entry)
         if path is None:
             yield error("malformed_evidence", None, f"absent[{index}] needs a non-empty path")
+            continue
+        if (finding := malformed("absent", index, path)) is not None:
+            yield finding
             continue
         populated = [pointer for pointer, value in _resolve(unit, path) if _populated(value)]
         if populated:
@@ -296,6 +405,9 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
         claimed = entry.get("claimed") if isinstance(entry, dict) else None
         if path is None or not isinstance(claimed, int) or isinstance(claimed, bool) or claimed < 0:
             yield error("malformed_evidence", path, f"counts[{index}] needs a path and a non-negative integer claim")
+            continue
+        if (finding := malformed("counts", index, path)) is not None:
+            yield finding
             continue
         hits = _resolve(unit, path)
         if not hits:
@@ -309,32 +421,38 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
     for index, entry in enumerate(lists["considered"]):
         if not isinstance(entry, str) or not entry.strip():
             yield error("malformed_evidence", None, f"considered[{index}] must be a non-empty path")
+        elif (finding := malformed("considered", index, entry)) is not None:
+            yield finding
 
 
-def _name_parts(path: str) -> list[str]:
-    """A cited path as field names: pointer escapes undone, list indices dropped."""
-    if path.startswith("/"):
-        parts = [raw.replace("~1", "/").replace("~0", "~") for raw in path[1:].split("/")]
-        return [part for part in parts if not _INDEX.fullmatch(part)]
-    return path.split(".")
+def _named_paths(row: dict) -> list[str]:
+    """The well-formed paths a row cites or lists as considered."""
+    cited = row.get("cited") if isinstance(row.get("cited"), list) else []
+    considered = row.get("considered") if isinstance(row.get("considered"), list) else []
+    paths = [_entry_path(entry) for entry in cited] + [entry for entry in considered if isinstance(entry, str)]
+    return [path for path in paths if path and path.strip() and _path_problem(path) is None]
+
+
+def _parts(pointer: str) -> list[str]:
+    return pointer.split("/")[1:]
 
 
 def _coverage(key: str, unit_path: str, unit: dict, row: dict,
               declared: tuple[str, ...]) -> Iterator[EvidenceFinding]:
-    """Warn on each populated declared field a deduction does not account for."""
-    cited = row.get("cited") if isinstance(row.get("cited"), list) else []
-    considered = row.get("considered") if isinstance(row.get("considered"), list) else []
-    named = [_name_parts(path) for path in
-             [_entry_path(entry) for entry in cited]
-             + [entry for entry in considered if isinstance(entry, str) and entry.strip()]
-             if path is not None]
-    named = [parts for parts in named if parts]
+    """Warn on each populated declared field a deduction does not account for.
+
+    A named path accounts for a field only where it reaches a location the
+    input populates for that field, or a container or value of one. Comparing
+    spellings instead let a container an alias passes through, such as
+    `file_collections` for `format`, stand for values it does not hold (#3018).
+    """
+    named = _named_paths(row)
+    reached = [_parts(pointer) for path in named for pointer, _ in _resolve(unit, path)]
     for name in declared:
-        if not any(_populated(value) for _, value in field_values(unit, name)):
+        populated = [_parts(pointer) for pointer, value in field_values(unit, name) if _populated(value)]
+        if not populated or name in named:
             continue
-        spellings = [name.split("."), *(alias.split(".") for alias in FIELD_ALIASES.get(name, ()))]
-        if not any(parts[:len(spelling)] == spelling[:len(parts)]
-                   for parts in named for spelling in spellings):
+        if not any(a[:len(b)] == b[:len(a)] for a in reached for b in populated):
             yield EvidenceFinding(
                 "warning", "uncovered_populated_field", key, name,
                 f"{key} {unit_path}: scored below its maximum without citing or considering "

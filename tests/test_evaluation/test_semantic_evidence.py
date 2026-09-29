@@ -2,10 +2,15 @@
 
 The fixtures are version-2.0 ratings built over one committed input: the CM4AI
 v7 rep2 record whose rubric20 rating counted 38 creators where the record has
-39, and lowered Q13 without reading `version_access` (#1355). `validate_scope`
-accepts both of those ratings. Every expectation below is a fact about the
-bytes pinned by INPUT_SHA256, so a change to that record fails here first
-rather than silently moving what these tests prove.
+39 (#1355). `validate_scope` accepts a rating carrying that count, and this
+module reports it. The same rating lowered Q13 on a misreading of
+`version_access.version_details`, a field it cited. That is beyond these
+mechanical checks, as `test_a_misreading_of_a_field_the_row_cites_passes_these_checks`
+shows. The Q13 deduction that warns
+here is #2920's synthetic acceptance case, which never reads `version_access`.
+It is not a reproduction of the #1355 rating. Every expectation below is a
+fact about the bytes pinned by INPUT_SHA256, so a change to that record fails
+here first rather than silently moving what these tests prove.
 """
 import copy
 import hashlib
@@ -24,7 +29,9 @@ ROOT = Path(__file__).resolve().parents[2]
 INPUT = (ROOT / "data/d4d_concatenated/claudecode_agent"
          / "2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml")
 INPUT_SHA256 = "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1"
-# The record states involves_human_subjects: false; shared_dataset makes Q13 applicable.
+# The record states involves_human_subjects: false. Declaring shared_dataset
+# changes Q13's (and E3.2's) status from unknown to applicable; an undeclared
+# predicate leaves an item applicable too, so this does not decide applicability.
 CONTEXT = {"human_subjects": False, "shared_dataset": True}
 
 
@@ -175,12 +182,11 @@ def test_an_absence_claim_is_checked_against_the_input(source):
 def test_a_cited_path_must_resolve_to_a_populated_value(source):
     result = _rating("rubric20", source)
     _row(result, "Q13", cited=[{"path": "/creator"}, {"path": "version_access.change_log"},
-                               {"path": "/creators/39"}, {"path": "creators[0].name"},
+                               {"path": "/creators/39"},
                                {"path": "/creators/0/name"}, {"path": "creators.affiliations.name"}])
     assert _codes(_check(result, source).errors) == [
         ("cited_path_unresolved", "Q13", "/creator"), ("cited_path_unresolved", "Q13", "version_access.change_log"),
-        # An index is written only in pointer form; a dotted segment is a key.
-        ("cited_path_unresolved", "Q13", "/creators/39"), ("cited_path_unresolved", "Q13", "creators[0].name")]
+        ("cited_path_unresolved", "Q13", "/creators/39")]
     # The committed record has no null or empty value, so emptiness is shown on a copy of it.
     document = copy.deepcopy(source[0])
     document["version_access"]["version_details"] = "  \n"
@@ -210,6 +216,79 @@ def test_a_quote_must_lie_inside_the_cited_value_up_to_whitespace(source):
         ("malformed_evidence", "Q13", "/version")]
 
 
+def test_a_quote_of_a_whole_non_string_value_matches_as_yaml_reads_it(source):
+    # The input is parsed, so an unquoted timestamp, a YAML 1.1 boolean or a
+    # float no longer holds the text the record wrote (#3022).
+    document = copy.deepcopy(source[0])
+    document.update(yaml.safe_load("issued: 2026-05-01T00:00:00Z\nfixture_date: 2026-05-01\n"
+                                   "fixture_flag: no\nfixture_ratio: 1.10\nfixture_count: 1\n"))
+    result = _rating("rubric20", source)
+    for path, quote in [
+            ("issued", "2026-05-01T00:00:00Z"), ("issued", "2026-05-01T00:00:00+00:00"),
+            ("issued", "2026-05-01 00:00:00+00:00"), ("issued", "2026-05-01T00:00:00"), ("issued", "2026-05-01"),
+            ("fixture_date", "2026-05-01"), ("fixture_flag", "no"), ("fixture_flag", "False"),
+            ("fixture_flag", "false"), ("fixture_ratio", "1.10"), ("fixture_ratio", "1.1"),
+            ("fixture_count", "1")]:
+        _row(result, "Q13", cited=[{"path": path, "quote": quote}])
+        assert check_evidence(result, document, "rubric20").findings == (), (path, quote)
+    for path, quote in [
+            ("issued", "2026-04-30T19:00:00-05:00"),  # the same instant, not the offset written
+            ("issued", "2026-05-02T00:00:00Z"), ("fixture_date", "2026-05-01T00:00:00Z"),
+            ("fixture_flag", "yes"), ("fixture_flag", "0"), ("fixture_ratio", "1.11"), ("fixture_count", "true")]:
+        _row(result, "Q13", cited=[{"path": path, "quote": quote}])
+        assert _codes(check_evidence(result, document, "rubric20").errors) == [
+            ("quote_not_found", "Q13", path)], (path, quote)
+
+
+# Each spells a value the input populates. Read as a path that reaches
+# nothing, each would pass as a true absence (#3017).
+OFF_GRAMMAR = ("#/version_access/version_details", "version_access/version_details", "creators[0].name",
+               "creators.0.name", "Version_Access.version_details", " version_access.version_details",
+               "version_access.version_details ", "version_access..version_details",
+               "/version_access/version_details/", "/version_access/ version_details",
+               "/version_access/version~2details")
+
+
+def test_an_absence_claim_on_a_path_outside_the_grammar_is_an_error(source):
+    result = _rating("rubric20", source)
+    _row(result, "Q19", absent=[{"path": path} for path in OFF_GRAMMAR])
+    findings = _check(result, source).findings
+    assert _codes(findings) == [("malformed_path", "Q19", path) for path in OFF_GRAMMAR]
+    assert {finding.severity for finding in findings} == {"error"}
+    messages = dict(zip(OFF_GRAMMAR, (finding.message for finding in findings)))
+    assert "begins with #" in messages["#/version_access/version_details"]
+    for path in (" version_access.version_details", "version_access.version_details "):
+        assert "leading or trailing whitespace" in messages[path]
+    # A dotted segment is a key name, never a list index (#3021).
+    for path in ("creators[0].name", "creators.0.name"):
+        assert "an index is written only in pointer form" in messages[path]
+    # The same values, spelled in the grammar, are populated.
+    _row(result, "Q19", absent=[{"path": "version_access.version_details"}, {"path": "/creators/0/name"}])
+    assert _codes(_check(result, source).errors) == [
+        ("absent_path_populated", "Q19", "version_access.version_details"),
+        ("absent_path_populated", "Q19", "/creators/0/name")]
+
+
+@pytest.mark.parametrize("name", ["cited", "counts", "considered"])
+def test_a_path_outside_the_grammar_is_an_error_in_every_other_list(source, name):
+    result = _rating("rubric20", source)
+    entries = {"cited": [{"path": path} for path in OFF_GRAMMAR],
+               "counts": [{"path": path, "claimed": 1} for path in OFF_GRAMMAR],
+               "considered": list(OFF_GRAMMAR)}[name]
+    _row(result, "Q19", **{name: entries})
+    assert _codes(_check(result, source).findings) == [("malformed_path", "Q19", path) for path in OFF_GRAMMAR]
+
+
+def test_a_key_that_is_not_a_snake_case_name_is_written_in_pointer_form(source):
+    # A few model-written records carry keys such as DOI or "Point of Contact".
+    document = copy.deepcopy(source[0])
+    document.update({"DOI": "Fixture identifier", "Point of Contact": "Fixture contact"})
+    result = _rating("rubric20", source)
+    _row(result, "Q13", cited=[{"path": "/DOI", "quote": "Fixture"}, {"path": "/Point of Contact"},
+                               {"path": "DOI"}])
+    assert _codes(check_evidence(result, document, "rubric20").errors) == [("malformed_path", "Q13", "DOI")]
+
+
 def test_a_q13_deduction_that_never_reads_version_access_warns(source):
     result = _rating("rubric20", source)
     _issue(result, ["Q13"])
@@ -228,6 +307,21 @@ def test_a_q13_deduction_that_never_reads_version_access_warns(source):
         row["cited"] += evidence.get("cited", [])
         row["considered"] = evidence.get("considered", [])
         assert _check(result, source).findings == ()
+
+
+def test_a_misreading_of_a_field_the_row_cites_passes_these_checks(source):
+    """#1355's Q13 deduction named the three `version_access` fields cited
+    here and misread `version_details`. It scored 4 of 5 under version 1.0,
+    whose domain version 2.0 narrows to 0, 3 and 5. Coverage asks whether a
+    field was named, not whether it was read correctly, so a deduction of that
+    shape raises nothing."""
+    result = _rating("rubric20", source)
+    _issue(result, ["Q13"])
+    _row(result, "Q13", score=3, cited=[{"path": path} for path in (
+        "version", "updates", "maintainers", "doi", "publisher", "version_access.versions_available",
+        "version_access.version_details", "version_access.latest_version_doi")])
+    assert _accepted_by_scope(result, source)
+    assert _check(result, source).findings == ()
 
 
 def test_a_full_score_row_needs_no_field_coverage(source):
@@ -253,6 +347,29 @@ def test_declared_names_that_are_not_root_slots_follow_the_presence_rule(source)
     _row(result, "E2.2", cited=[{"path": "regulatory_restrictions.governance_committee_contact"}])
     _row(result, "E2.4", cited=[{"path": "/distribution_formats/0"}])
     assert _check(result, source).findings == ()
+
+
+def test_a_container_an_alias_passes_through_accounts_only_for_values_it_holds(source):
+    # format's aliases include file_collections.resources.format, but this
+    # input populates format only at /distribution_formats/{0,1}/format and no
+    # file collection holds one (#3018).
+    result = _rating("rubric10", source)
+    _issue(result, ["E3.2"])
+    _row(result, "E3.2", score=0)
+    assert _accepted_by_scope(result, source)
+    uncovered = [("uncovered_populated_field", "E3.2", "format")]
+    assert _codes(_check(result, source).warnings) == uncovered
+    _row(result, "E3.2", cited=[{"path": "/file_collections/0"}])
+    assert _check(result, source).errors == () and _codes(_check(result, source).warnings) == uncovered
+    for path in ("file_collections", "/file_collections/0", "file_collections.resources.format",
+                 "/file_collections/0/compression", "distribution_formats.media_type"):
+        _row(result, "E3.2", cited=[], considered=[path])
+        assert _codes(_check(result, source).warnings) == uncovered, path
+    # A location that holds a format, a container of one, or the declared name itself.
+    for path in ("format", "distribution_formats", "distribution_formats.format", "/distribution_formats/1",
+                 "/distribution_formats/0/format"):
+        _row(result, "E3.2", cited=[], considered=[path])
+        assert _check(result, source).findings == (), path
 
 
 def test_an_issue_must_name_rubric_items_that_apply(source):
