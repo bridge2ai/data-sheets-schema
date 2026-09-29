@@ -389,8 +389,11 @@ def spelling_cmd(method, label, project, show_quoted):
 @click.argument("paths", nargs=-1, type=click.Path(exists=True, path_type=Path))
 @click.option("--inspection", "inspections", multiple=True,
               type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="A recorded Q19 inspection (semantic_errata.md or semantic_review.md): "
-                   "lint the evaluations it names and report agreement with it.")
+              help="A recorded Q19 inspection (semantic_errata.md or semantic_review.md, read "
+                   "with the JSON companion beside it where there is one): lint the evaluations "
+                   "it names and report agreement with it. Refused where an evaluation is "
+                   "missing, has no recorded hash, or is not the bytes or the Q19 score the "
+                   "inspection recorded.")
 @click.option("--show", is_flag=True, help="Print the sentence each reason was read from.")
 @click.option("--strict", is_flag=True, help="Exit 1 if any rating is flagged.")
 def q19_lint_cmd(paths, inspections, show, strict):

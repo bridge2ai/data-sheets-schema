@@ -1,24 +1,30 @@
 """The Q19 rationale lint (#2911), calibrated against the recorded inspections.
 
-Two inspections read every recorded 1.0 rubric20 Q19 rationale for
-representation-based deductions: the 09-11 errata (#1337) flagged 15 of 24,
-the CBORG review (#1349) 9 of 24. Those 48 labels are the calibration set,
-parsed from the inspections' own Markdown and checked against their JSON
-companions, so a parser that misread a row cannot pass as agreement.
+Two inspections read the Q19 rationales of the two recorded 1.0 reference
+rescores, 24 each, for representation-based deductions: the 09-11 errata
+(#1337) flagged 15 of 24, the CBORG review (#1349) 9 of 24. The other 85
+committed rubric20 semantic outputs are labelled by no inspection. Those 48
+labels are the calibration set, parsed from the inspections' own Markdown
+and checked against their JSON companions, so a parser that misread a row
+cannot pass as agreement.
 
 What the calibration shows, and what these tests hold the lint to:
 
 - every one of the 24 flagged ratings is flagged;
 - none of the 18 Q19=5 ratings is, although every one of them names
-  `was_derived_from`, a graph or PROV (so vocabulary alone would flag them);
-  none of them contains a sentence the lint reads as withholding;
+  representation vocabulary (17 `was_derived_from`, a graph or PROV; CBORG
+  AI_READI v8 rep2 `parent_datasets`, typed and machine-readable form), so
+  vocabulary alone would flag them; none of them contains a sentence the
+  lint reads as withholding;
 - the six ratings below 5 that the inspections left unflagged are flagged
   too. That disagreement is pinned by name, not hidden: the module
   docstring explains why reproducing it would mean fitting the phrasing.
 """
 import hashlib
 import json
+import re
 import shutil
+import subprocess
 from collections import Counter
 from pathlib import Path
 
@@ -76,12 +82,19 @@ def test_each_inspection_parses_to_its_structured_companion(name, companion, fla
     assert len(parsed) == 24 and sum(s.flagged for s in parsed.values()) == flagged
 
 
-def test_the_bytes_linted_are_the_bytes_the_inspections_read(statuses):
-    """The CBORG review hashes every evaluation it read, the errata every
-    one it flagged; a rewritten file would make agreement meaningless."""
-    hashed = {key: s for key, s in statuses.items() if s.sha256}
-    assert len(hashed) == 15 + 24
-    assert {key for key, s in hashed.items() if sha256_of(s.path) != s.sha256} == set()
+def test_the_bytes_linted_are_the_bytes_the_inspections_read(statuses, tmp_path):
+    """Both JSON companions hash every evaluation their inspection read; the
+    errata's Markdown hashes only the 15 it flagged, so the hash a status
+    carries is the companion's. A rewritten file would make agreement
+    meaningless."""
+    assert all(s.sha256 for s in statuses.values()) and len(statuses) == 48
+    assert {key for key, s in statuses.items() if sha256_of(s.path) != s.sha256} == set()
+    # Read without its companion, the errata could tie only 15 of 24 to bytes.
+    shutil.copy(ERRATA, tmp_path / ERRATA.name)
+    alone = inspection_statuses(tmp_path / ERRATA.name)
+    assert sum(1 for s in alone.values() if s.sha256) == 15
+    assert {job for job, s in alone.items() if s.sha256} == {
+        job for job, s in alone.items() if s.flagged}
 
 
 def test_every_rating_an_inspection_flagged_is_flagged(statuses, linted):
@@ -91,9 +104,18 @@ def test_every_rating_an_inspection_flagged_is_flagged(statuses, linted):
     assert sum(s.flagged for s in statuses.values()) == 24
 
 
+#: The words the docstrings say 17 of the 18 Q19=5 rationales use.
+_NAMED = re.compile(r"was_derived_from|wasDerivedFrom|\bgraphs?\b|\bPROV\b", re.I)
+
+
 def test_no_full_score_is_flagged_though_every_one_names_the_vocabulary(statuses, linted):
     fives = {key for key, s in statuses.items() if s.q19_score == 5}
     assert len(fives) == 18
+    rationale = {key: " ".join(str(q19_item(json.loads(statuses[key].path.read_text(
+        encoding="utf-8"))).get(field) or "") for field in
+        ("score_label", "quality_note", "semantic_analysis")) for key in fives}
+    assert {key for key in fives if not _NAMED.search(rationale[key])} == {
+        ("cborg", "AI_READI_v8_rep2_r20_rating1")}
     for key in sorted(fives):
         result = linted[key]
         assert (result.verdict, result.flagged, result.reasons) == (FULL_SCORE, False, ()), key
@@ -121,6 +143,28 @@ def test_the_grades_of_the_flagged_ratings(statuses, linted):
                               (True, REPRESENTATION_AND_SUBSTANTIVE): 15,
                               (False, REPRESENTATION_ONLY): 1,
                               (False, REPRESENTATION_AND_SUBSTANTIVE): 5})
+
+
+def test_concern_profiles_do_not_separate_the_labels(statuses, linted):
+    """The module docstring's worked examples, kept honest: identical
+    profiles carry both labels, and the reason one unflagged rating gives
+    beyond a flagged one is given by as many flagged ratings as unflagged."""
+    def profile(key):
+        return (tuple(linted[key].concerns(REPRESENTATION)), tuple(linted[key].concerns(SUBSTANTIVE)))
+    below = {key: s for key, s in statuses.items() if s.q19_score < 5}
+    bare = {key: s.flagged for key, s in below.items()
+            if profile(key) == (("empty_slot", "graph_form"), ())}
+    assert bare == {("09-11", "CM4AI_v8_rep1_r20_rating1"): False,
+                    ("09-11", "AI_READI_v7_rep3_r20_rating1"): True,
+                    ("09-11", "CM4AI_v7_rep1_r20_rating1"): True,
+                    ("09-11", "CM4AI_v8_rep3_r20_rating1"): True,
+                    ("cborg", "CM4AI_v8_rep1_r20_rating1"): True}
+    flagged, unflagged = ("09-11", "CHORUS_v8_rep3_r20_rating1"), ("cborg", "CHORUS_v7_rep2_r20_rating1")
+    assert (statuses[flagged].flagged, statuses[unflagged].flagged) == (True, False)
+    assert profile(flagged)[0] == profile(unflagged)[0] == ("empty_slot",)
+    assert set(profile(unflagged)[1]) - set(profile(flagged)[1]) == {"missing_data"}
+    missing = Counter(s.flagged for key, s in below.items() if "missing_data" in profile(key)[1])
+    assert missing == Counter({True: 4, False: 4})
 
 
 # -- the rules, on rationales written to isolate one each ---------------------
@@ -170,6 +214,9 @@ def test_only_the_sentences_that_withhold_are_read():
     "Held at 3 because version history is absent, although was_derived_from is empty.",
     "Held at 3 because version history is absent; the rubric accepts text in place of a PROV-O graph.",
     "An empty was_derived_from is not a reason to withhold 5 here; held at 3 because version history is absent.",
+    # A concession needs no comma to be judged apart from the reason (#3011).
+    "Held at 3 because version history is absent though was_derived_from is empty.",
+    "Held at 3 because version history is absent in spite of an empty was_derived_from.",
 ])
 def test_a_clause_that_accepts_or_disclaims_names_no_reason(sentence):
     result = lint_q19(item(score=3, note=sentence))
@@ -200,6 +247,75 @@ def test_a_label_without_contrast_is_credit():
     result = lint_q19(item(label="Full provenance graph with derivation paths",
                            note="Held at 4 because no errata are recorded."))
     assert (result.verdict, result.concerns(REPRESENTATION)) == (SUBSTANTIVE_ONLY, [])
+
+
+_NEUTRAL = "Lineage is documented in prose across the collection and preprocessing sections."
+
+
+@pytest.mark.parametrize("label, concern", [
+    ("Held at 4 because was_derived_from is empty", "empty_slot"),
+    ("Held at 4 because the lineage is scattered across sections", "scattered"),
+    ("Complete in prose; PROV graph absent", "graph_form"),
+    ("Prose lineage; was_derived_from empty", "empty_slot"),
+    ("Very Good - provenance graph documented as packaged, derivation fields unpopulated", "empty_slot"),
+])
+def test_a_label_that_gives_its_reason_without_a_contrast_is_read(label, concern):
+    """A label can be the only place a reason is stated (#3012)."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.verdict, result.concerns(REPRESENTATION)) == (REPRESENTATION_ONLY, [concern])
+    assert all(r.field == "score_label" for r in result.reasons)
+
+
+def test_a_label_clause_saying_something_is_absent_is_read_and_its_credit_is_not():
+    result = lint_q19(item(label="Derivation fields unpopulated, strong version history",
+                           note="Held at 4 because no checksums are recorded."))
+    assert result.verdict == REPRESENTATION_AND_SUBSTANTIVE
+    assert (result.concerns(REPRESENTATION), result.concerns(SUBSTANTIVE)) == (
+        ["empty_slot"], ["integrity"])
+    # "missing-data documentation" names content, not an absence.
+    credit = lint_q19(item(label="Missing-data documentation and version history",
+                           note="Held at 4 because no checksums are recorded."))
+    assert (credit.verdict, credit.concerns(SUBSTANTIVE)) == (SUBSTANTIVE_ONLY, ["integrity"])
+
+
+@pytest.mark.parametrize("sentence, concern", [
+    ("Held at 4: text is permitted but no PROV graph is provided.", "graph_form"),
+    ("Held at 4 because was_derived_from is empty even though the lineage is complete in prose.",
+     "empty_slot"),
+    ("Held at 4 because was_derived_from is empty though the lineage is complete in prose.",
+     "empty_slot"),
+    ("Held at 4 because the lineage is not expressed as a PROV-O graph although every step "
+     "is described.", "graph_form"),
+    ("Held at 4 because was_derived_from is empty despite a complete textual lineage.",
+     "empty_slot"),
+    ("Held at 4 because was_derived_from is empty in spite of a complete textual lineage.",
+     "empty_slot"),
+])
+def test_a_concession_sharing_a_clause_with_a_reason_removes_only_itself(sentence, concern):
+    """#3011: the canonical #2911 rationale concedes text is complete and
+    withholds for form in one clause."""
+    result = lint_q19(item(note=sentence))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, REPRESENTATION_ONLY, [concern])
+
+
+def test_a_conceded_withholding_sentence_does_not_hand_its_reason_to_a_neighbour():
+    """With the reason lost, the credit sentence beside it was read as a
+    substantive reason and the rating reported as substantive only."""
+    result = lint_q19(item(note="The record documents version history and errata. Held at 4 "
+                                "because was_derived_from is empty even though the lineage is "
+                                "complete in prose."))
+    assert (result.verdict, result.concerns(SUBSTANTIVE)) == (REPRESENTATION_ONLY, [])
+
+
+def test_a_4_rather_than_a_5_withholds_and_rather_than_from_being_a_5_disclaims():
+    withheld = lint_q19(item(note="A 4 rather than a 5 because was_derived_from is empty."))
+    assert (withheld.basis, withheld.verdict) == (STATED, REPRESENTATION_ONLY)
+    # Read whole, as no sentence withholds; the second disclaims its gap.
+    disclaimed = lint_q19(item(note="No errata are recorded. The empty was_derived_from keeps "
+                                    "this from being unimprovable rather than from being a 5."))
+    assert (disclaimed.basis, disclaimed.verdict, disclaimed.concerns(REPRESENTATION)) == (
+        UNSTATED, SUBSTANTIVE_ONLY, [])
 
 
 def test_a_score_below_maximum_with_no_reason_is_reported_as_such():
@@ -262,9 +378,14 @@ def test_only_rubric20_semantic_evaluations_are_linted(tmp_path):
 
 # -- reading an inspection strictly -------------------------------------------
 
-def _section(job, status, link, sha="0" * 64):
-    return (f"## {job}\n\nRecorded Q19: 4/5. Status: `{status}`.\n\n"
+def _section(job, status, link, sha="0" * 64, score=4):
+    return (f"## {job}\n\nRecorded Q19: {score}/5. Status: `{status}`.\n\n"
             f"Original output: [evaluation]({link}); SHA256 `{sha}`\n\n")
+
+
+_TABLE = ("| Record | Q19 | Recorded total /88 | Inspection status | Evidence |\n"
+          "|---|---|---|---|---|\n"
+          "| A | 4 | 70 | Requires adjudication | [Q19 rationale](a.json#L1) |\n")
 
 
 @pytest.mark.parametrize("text, message", [
@@ -273,12 +394,55 @@ def _section(job, status, link, sha="0" * 64):
     (_section("A", "requires_adjudication", "a.json") * 2, "two sections"),
     ("## A\n\nRecorded Q19: 4/5.\n", "no Q19 status"),
     ("| A | 4 | 70 | Requires adjudication | [x](a.json#L1) |\n" * 2, "listed twice"),
+    # A table row that is not a record is refused, not skipped (#3014).
+    (_TABLE + "| B | 4 | n/a | Requires adjudication | [x](b.json#L1) |\n", "review.md:4: table row"),
+    (_TABLE + "| B | 4.5 | 70 | Requires adjudication | [x](b.json#L1) |\n", "review.md:4: table row"),
+    (_TABLE + "| B | 4 | 70 | Requires adjudication | [x](b.json#L1) extra |\n", "review.md:4: table row"),
+    (_TABLE + "| B-2 | 4 | 70 | Requires adjudication | [x](b.json#L1) |\n", "review.md:4: table row"),
 ])
 def test_an_inspection_that_cannot_be_read_whole_is_refused(tmp_path, text, message):
     doc = tmp_path / "review.md"
     doc.write_text(text)
     with pytest.raises(ValueError, match=message):
         inspection_statuses(doc)
+
+
+def test_a_table_header_and_separator_are_not_records(tmp_path):
+    doc = tmp_path / "review.md"
+    doc.write_text("Prose.\n\n" + _TABLE)
+    assert list(inspection_statuses(doc)) == ["A"]
+
+
+def _companion_case(job="A", status="requires_adjudication", output="a.json", sha="0" * 64, **extra):
+    return {"job_id": job, "status": status, "output": output, "evaluation_sha256": sha, **extra}
+
+
+@pytest.mark.parametrize("cases, message", [
+    ([_companion_case(), _companion_case(job="B")], r"only in the companion \['B'\]"),
+    ([_companion_case(status="not_flagged_by_this_inspection")], "A: status disagree"),
+    ([_companion_case(output="elsewhere/a.json")], "A: output disagree"),
+    ([_companion_case(q19_score=3)], "A: Q19 score disagree"),
+    ([_companion_case(q19={"score": 5})], "A: Q19 score disagree"),
+    ([_companion_case(sha="1" * 64)], "A: sha256 disagree"),
+    ([_companion_case(sha=None)], "A: no evaluation_sha256"),
+    ([_companion_case(), _companion_case()], "A is listed twice"),
+    ([], "no cases"),
+])
+def test_a_companion_that_disagrees_with_its_markdown_is_refused(tmp_path, cases, message):
+    doc = tmp_path / "review.md"
+    doc.write_text(_section("A", "requires_adjudication", "a.json"))
+    doc.with_suffix(".json").write_text(json.dumps({"cases": cases}))
+    with pytest.raises(ValueError, match=message):
+        inspection_statuses(doc)
+
+
+def test_a_companion_supplies_the_hash_the_markdown_does_not(tmp_path):
+    doc = tmp_path / "review.md"
+    doc.write_text(_TABLE)
+    assert inspection_statuses(doc)["A"].sha256 is None
+    doc.with_suffix(".json").write_text(json.dumps({"cases": [
+        _companion_case(sha="2" * 64, q19_score=4)]}))
+    assert inspection_statuses(doc)["A"].sha256 == "2" * 64
 
 
 # -- the command --------------------------------------------------------------
@@ -332,3 +496,70 @@ def test_the_command_refuses_an_inspection_of_other_bytes(tmp_path):
     result = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--inspection", str(doc)])
     assert result.exit_code == 1
     assert "not the bytes the inspection read" in result.output
+
+
+def _mirror_errata(tmp_path):
+    """The 09-11 errata, its companion and the 24 evaluations it read, laid
+    out as in the repository so its relative links resolve."""
+    notes = tmp_path / ERRATA.parent.relative_to(ROOT)
+    notes.mkdir(parents=True)
+    for doc in (ERRATA, ERRATA.with_suffix(".json")):
+        shutil.copy(doc, notes / doc.name)
+    evaluations = tmp_path / EVALUATION_DIRS[0].relative_to(ROOT)
+    shutil.copytree(EVALUATION_DIRS[0], evaluations)
+    return notes / ERRATA.name, evaluations
+
+
+def test_an_evaluation_the_errata_left_unflagged_is_checked_against_its_bytes(tmp_path):
+    """#3010: the errata's Markdown hashes only the 15 it flagged; the 9 it
+    left unflagged, two of the pinned disagreements among them, are checked
+    against the companion's hashes."""
+    doc, evaluations = _mirror_errata(tmp_path)
+    lines, _ = lint_report(inspections=[doc])
+    assert "inspection agreement: 22/24 (flagged by both 15, by neither 7)" in lines
+    target = evaluations / "CM4AI_v8_rep1_r20_rating1_evaluation.json"
+    assert not inspection_statuses(doc)["CM4AI_v8_rep1_r20_rating1"].flagged
+    target.write_bytes(target.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="CM4AI_v8_rep1_r20_rating1: .* is not the bytes"):
+        lint_report(inspections=[doc])
+
+
+def test_an_inspection_record_with_no_hash_is_refused(tmp_path):
+    doc, _ = _mirror_errata(tmp_path)
+    doc.with_suffix(".json").unlink()
+    with pytest.raises(ValueError, match="AI_READI_v7_rep1_r20_rating1: the inspection records no sha256"):
+        lint_report(inspections=[doc])
+
+
+def test_an_evaluation_whose_q19_is_not_the_recorded_score_is_refused(tmp_path):
+    """The hash matches; the inspection recorded another score for it."""
+    evaluation = tmp_path / "A_evaluation.json"
+    shutil.copy(EVALUATION_DIRS[1] / "CHORUS_v7_rep2_r20_rating1_evaluation.json", evaluation)
+    doc = tmp_path / "semantic_review.md"
+    doc.write_text(_section("A", "not_flagged_by_this_inspection", evaluation.name,
+                            sha=sha256_of(evaluation), score=3))
+    with pytest.raises(ValueError, match="records Q19 3, .* scores 4"):
+        lint_report(inspections=[doc])
+    doc.write_text(_section("A", "not_flagged_by_this_inspection", evaluation.name,
+                            sha=sha256_of(evaluation), score=4))
+    assert lint_report(inspections=[doc])[1] == 1
+
+
+# -- the committed corpus -----------------------------------------------------
+
+@pytest.mark.corpus
+def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
+    """The module docstring's count: the empty-slot concern matches a slot's
+    name, and on the 133 committed ratings every such reason comes from a
+    sentence carrying an emptiness or negation word."""
+    listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
+                            capture_output=True, text=True, check=True).stdout.split("\0")
+    ratings = [ROOT / f for f in listed if f.endswith("_evaluation.json")
+               and json.loads((ROOT / f).read_text(encoding="utf-8")).get("rubric")
+               == "rubric20-semantic"]
+    assert len(ratings) == 133
+    empty = re.compile(r"\b(?:empty|absent|unpopulated|no|not|none|nor|neither|lacks?|lacking"
+                       r"|missing|without|null)\b", re.I)
+    reasons = [r for path in ratings for r in lint_file(path).reasons if r.concern == "empty_slot"]
+    assert len(reasons) == 89
+    assert [r.sentence for r in reasons if not empty.search(r.sentence)] == []
