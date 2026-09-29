@@ -404,6 +404,12 @@ def test_a_label_clause_saying_something_is_absent_is_read_and_its_credit_is_not
      "empty_slot"),
     ("Held at 4 because was_derived_from is empty in spite of a complete textual lineage.",
      "empty_slot"),
+    # Every concession phrase ends a clause, "regardless of" and
+    # "irrespective of" included (#3206).
+    ("Held at 4 because was_derived_from is empty regardless of the prose lineage.",
+     "empty_slot"),
+    ("Held at 4 because was_derived_from is empty irrespective of the prose lineage.",
+     "empty_slot"),
     # "however" ends a clause as "but" does (#3146).
     ("Held at 4: the rubric accepts text however no PROV graph is given.", "graph_form"),
     # An acceptance names its own object, so it does not take the clause
@@ -416,6 +422,51 @@ def test_a_concession_sharing_a_clause_with_a_reason_removes_only_itself(sentenc
     result = lint_q19(item(note=sentence))
     assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
         STATED, REPRESENTATION_ONLY, [concern])
+
+
+@pytest.mark.parametrize("phrase", ["regardless of", "irrespective of"])
+def test_a_label_concession_without_a_comma_removes_only_itself(phrase):
+    """#3206, in a score label: the concession is its own clause with or
+    without a comma, so the reason before it is read either way."""
+    for label in (f"Held at 4 because was_derived_from is empty {phrase} the prose lineage",
+                  f"Held at 4 because was_derived_from is empty, {phrase} the prose lineage"):
+        result = lint_q19(item(label=label))
+        assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+            STATED, REPRESENTATION_ONLY, ["empty_slot"]), label
+
+
+@pytest.mark.parametrize("connective", ["in place of", "instead of", "rather than"])
+def test_in_place_of_names_a_form_and_accepts_nothing(connective):
+    """#3205: "in place of", like "instead of" and "rather than", says what
+    the lineage is given as. Only "accept", "permit" or "allow" accepts."""
+    result = lint_q19(item(note=f"Held at 4 because the lineage is given as prose {connective} "
+                                f"a PROV-O graph."))
+    assert (result.basis, result.verdict, result.concerns(REPRESENTATION)) == (
+        STATED, REPRESENTATION_ONLY, ["graph_form"])
+    accepted = lint_q19(item(note="Held at 4 because no errata exist. The lineage is text, which "
+                                  f"the rubric accepts {connective} a PROV-O graph."))
+    assert (accepted.verdict, accepted.concerns(REPRESENTATION)) == (SUBSTANTIVE_ONLY, [])
+
+
+def test_an_acceptance_joined_by_and_takes_its_clause_and_says_so():
+    """#3205: clauses do not end at "and", so an acceptance joined to a
+    reason by "and" alone takes the reason and the cue with it. The lint
+    reports that the reason was not determined, and that a cue was not
+    read; with a comma before "and" the reason is its own clause."""
+    joined = lint_q19(item(note="Held at 4 because was_derived_from is empty and the rubric "
+                                "accepts prose for lineage."))
+    assert (joined.basis, joined.verdict, joined.cue_unread) == (
+        UNSTATED, REASON_NOT_DETERMINED, True)
+    comma = lint_q19(item(note="Held at 4 because was_derived_from is empty, and the rubric "
+                               "accepts prose for lineage."))
+    assert (comma.basis, comma.verdict, comma.cue_unread) == (STATED, REPRESENTATION_ONLY, False)
+    # A disclaimed cue is not an unread one: nothing there says why.
+    disclaimed = lint_q19(item(note="Nothing is deducted for the empty was_derived_from."))
+    assert (disclaimed.basis, disclaimed.cue_unread) == (UNSTATED, False)
+    # Nor is a cue in a clause that is read but names no reason ("Short of
+    # 5"): the lint read it, and it does not say why.
+    bare = lint_q19(item(label="Short of 5", note="parent_datasets is empty."))
+    assert (bare.basis, bare.cue_unread) == (UNSTATED, False)
 
 
 def test_a_conceded_withholding_sentence_does_not_hand_its_reason_to_a_neighbour():
@@ -798,6 +849,24 @@ def test_the_report_says_what_an_unstated_rating_was_read_for(tmp_path):
     assert flagged == 1 and "whole rationale" not in "\n".join(lines)
     assert "(nothing says why: label reason clauses and body gaps read)" in lines[0]
     assert "Version history is documented" not in "\n".join(lines)
+
+
+def test_the_report_says_a_cue_was_not_read_rather_than_that_nothing_says_why(tmp_path):
+    """#3205: a rating opening "Held at 4 because" does say why; where its
+    cue shares a clause with an acceptance the line says the cue was not
+    read. --strict still exits 0: the verdict is not a flag."""
+    from data_sheets_schema.cli import cli
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(
+            note="Held at 4 because was_derived_from is empty and the rubric accepts prose "
+                 "for lineage.")]}]}))
+    lines, flagged = lint_report([tmp_path])
+    assert flagged == 0 and lines[0].startswith(REASON_NOT_DETERMINED)
+    assert ("(a withholding cue shares a clause with an acceptance or concession and was not "
+            "read: label reason clauses and body gaps read)") in lines[0]
+    assert "nothing says why" not in lines[0]
+    result = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--strict", str(tmp_path)])
+    assert result.exit_code == 0, result.output
 
 
 def test_the_report_refuses_an_inspection_whose_evaluation_is_gone(tmp_path):

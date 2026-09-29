@@ -81,12 +81,16 @@ machine-readable form and lineage across fields. So:
   negation within three words (`_says_why`); a disclaimer after the cue
   removes its clause from what is read, not the cue ("It falls short of 5
   not because of form but because no errata are recorded" says why):
-  - it accepts where the rubric accepts, permits or allows a form, or takes
-    it in place of or on equal footing with another ("which the rubric
-    accepts in place of a PROV-O serialization"). A permission negated or
-    restricted where it stands states a limit and is read ("does not allow
-    a machine to traverse the lineage", "is not permitted", "allows only a
-    human-readable reconstruction"; #3147);
+  - it accepts where it says "accept", "permit" or "allow" ("which the
+    rubric accepts in place of a PROV-O serialization"). A permission
+    negated or restricted where it stands states a limit and is read ("does
+    not allow a machine to traverse the lineage", "is not permitted",
+    "allows only a human-readable reconstruction"; #3147). "In place of",
+    like "instead of" and "rather than", says what a form is given as, not
+    that it is accepted, so on its own it accepts nothing: "the lineage is
+    given as prose in place of a PROV-O graph" is a reason (#3205). The
+    lint does not check who accepts: whatever the subject of the
+    permission, its clause is not read;
   - it concedes with "despite", "in spite of", "although", "(even) though",
     "regardless of" or "irrespective of" ("despite the dedicated field
     being empty");
@@ -101,11 +105,20 @@ machine-readable form and lineage across fields. So:
     a terse "No PROV graph so held at 4" gives no reason: the lint cannot
     tell it from a disclaimer.
   Clauses end at punctuation and before "but", "whereas", "however",
-  "although", "(even) though", "despite" and "in spite of", so a clause
-  that accepts or concedes removes only itself even when it shares a
+  "although", "(even) though", "despite", "in spite of", "regardless of"
+  and "irrespective of", so a clause that concedes, or accepts after one of
+  those words or punctuation, removes only itself even when it shares a
   sentence with a reason ("was_derived_from is empty even though the
-  lineage is complete in prose", "text is permitted but no PROV graph is
-  provided"). A clause that opens with "but", "whereas" or "however", and
+  lineage is complete in prose", "… is empty regardless of the prose
+  lineage", "text is permitted but no PROV graph is provided"; #3206).
+  Clauses do not end at "and", so an acceptance joined to a reason by
+  "and" alone shares its clause, and the whole clause, reason and any
+  withholding cue included, is not read: "Held at 4 because
+  was_derived_from is empty and the rubric accepts prose for lineage"
+  gives `REASON_NOT_DETERMINED`, where the same sentence with a comma
+  before "and" gives the empty-slot reason. Such a rating is marked
+  `cue_unread`, and the report says a withholding cue was not read rather
+  than that nothing says why (#3205). A clause that opens with "but", "whereas" or "however", and
   disclaims without naming a concern of its own, is about the clause
   before it, which is not read either ("the empty was_derived_from is
   noted but not penalised").
@@ -300,11 +313,13 @@ _DISCLAIMER = re.compile(
     r"|\brather than (?:a deduction|from being a 5)\b"
     r"|\bwithout (?:moving|reducing|lowering|penali[sz]ing)"
     r"|\b(?:is|are) not required\b|\b(?:does|do|need) not (?:require|need|count|matter)", _I)
-#: A clause that accepts a form: the rubric accepts, permits or allows it,
-#: or takes it in place of, or on equal footing with, another ...
+#: A clause that accepts a form says "accept", "permit" or "allow" ...
+#: "In place of" and "on equal footing" name no acceptance on their own:
+#: "the lineage is given as prose in place of a PROV-O graph" is a reason,
+#: as it is with "instead of" (#3205). Every committed rationale that says
+#: either also says "accepts".
 _PERMISSION = re.compile(
-    r"\baccepts?\b|\baccepted\b|\bpermits?\b|\bpermitted\b|\ballows?\b"
-    r"|\bin place of\b|\bon equal footing\b", _I)
+    r"\baccepts?\b|\baccepted\b|\bpermits?\b|\bpermitted\b|\ballows?\b", _I)
 #: ... unless the permission is negated or restricted where it stands, which
 #: states a limit rather than accepting one (#3147): "does not allow a
 #: machine to traverse", "is not permitted", "cannot be accepted", "allows
@@ -373,14 +388,15 @@ _BODY_CONTRAST = re.compile(r"\b(?:but|whereas|however)\b", _I)
 #: sentence may open with a lower-case slot name ("missing_information on …").
 _SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[\w\"'(])|\n+")
 #: Clauses end at punctuation and before a contrasting or conceding
-#: conjunction, so a concession ("…is empty even though the lineage is
+#: conjunction (every `_CONCESSION` phrase, #3206), so a concession ("…is empty even though the lineage is
 #: complete", "text is permitted but no PROV graph is provided") is judged
 #: apart from the reason it shares a sentence with. The conjunction opens the
 #: clause it heads, where `_CONCESSION` sees a concessive one; "but",
 #: "whereas" and "however" head either side of a contrast and accept nothing.
 _CLAUSE = re.compile(
     rf"\s*(?:{_CLAUSE_BREAK})\s*"
-    r"|\s+(?=(?:but|whereas|however|although|even though|despite|in spite of)\b)"
+    r"|\s+(?=(?:but|whereas|however|although|even though|despite|in spite of"
+    r"|regardless of|irrespective of)\b)"
     r"|(?<!\beven)\s+(?=though\b)", _I)
 _CONTRAST_OPENS = re.compile(r"(?:but|whereas|however)\b", _I)
 
@@ -408,6 +424,11 @@ class Q19Lint:
     #: Every concern named anywhere in the rationale, with no score gate, no
     #: withholding scope and no acceptance clause: vocabulary alone.
     mentions: tuple[Reason, ...]
+    #: Where the basis is UNSTATED: a withholding cue, neither negated nor
+    #: disclaimed, stands in a clause that accepts or concedes, so what it
+    #: gives as the reason was not read (#3205). The rationale may say why;
+    #: the lint could not tell which words were the reason.
+    cue_unread: bool = False
 
     def concerns(self, kind: str) -> list[str]:
         return sorted({r.concern for r in self.reasons if r.kind == kind})
@@ -541,14 +562,18 @@ def _says_why(text: str) -> bool:
     cue removes its own clause from what is read, not the cue: "It falls
     short of 5 not because of form but because no errata are recorded"
     says why."""
+    return any(not accepts for accepts in _cue_clauses(text))
+
+
+def _cue_clauses(text: str):
+    """For each withholding cue in `text` that is neither negated within
+    `_DISCLAIM_WINDOW` words nor preceded by a disclaiming phrase in its
+    clause: whether its clause accepts or concedes (`_accepts`)."""
     for a, b, _ in _clauses(text):
         clause = text[a:b]
-        if _accepts(clause):
-            continue
         for cue in _WITHHOLDING.finditer(clause):
             if not (_negated(clause, cue.start()) or _DISCLAIMER.search(clause[:cue.start()])):
-                return True
-    return False
+                yield _accepts(clause)
 
 
 def _label_reasons(label: str) -> list[str]:
@@ -693,7 +718,8 @@ def lint_q19(item: dict) -> Q19Lint:
     # name a gap are read (`_gap_parts`); a part naming no gap is not.
     body = [(name, s, part) for name, s in sentences if name != "score_label"
             for part in _gap_parts(s)]
-    return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions)
+    unread = any(accepts for _, s in sentences for accepts in _cue_clauses(s))
+    return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions, unread)
 
 
 def lint_file(path: Path | str) -> Q19Lint:
@@ -958,8 +984,12 @@ def lint_report(paths=(), inspections=(), *, show: bool = False) -> tuple[list[s
             line = f"{r.verdict:32}{score:>6}  rep={rep}  sub={sub}"
         if r.basis == UNSTATED:
             # Only the label's reason clauses and the body's parts naming a
-            # gap were read; a part naming no gap was not (#3070, #3146).
-            line += "  (nothing says why: label reason clauses and body gaps read)"
+            # gap were read; a part naming no gap was not (#3070, #3146). A
+            # cue in a clause that accepts or concedes was not read either,
+            # so "nothing says why" would be false there (#3205).
+            said = ("a withholding cue shares a clause with an acceptance or concession and "
+                    "was not read" if r.cue_unread else "nothing says why")
+            line += f"  ({said}: label reason clauses and body gaps read)"
         doc, status = recorded.get(f.resolve(), (None, None))
         if status is not None:
             key = ("both" if status.flagged and r.flagged else "lint_only" if r.flagged
