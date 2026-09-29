@@ -545,13 +545,10 @@ def terminate_group(process):
         # Also remove descendants if the parent exited before them. The leader
         # was unreaped at the last check, so the id named this group (#2714).
         _signal_group(process, signal.SIGKILL)
-    try:
-        process.wait(timeout=2)
-    except subprocess.TimeoutExpired:
-        # Reaped elsewhere by a waiter that has not yet published the status:
-        # it is gone, and waiting longer would not change that (#2961).
-        if not getattr(process, '_leader_reaped_elsewhere', False):
-            raise
+    # A waiter that reaped the leader elsewhere and does not publish its status
+    # within the bound raises here, as on main: an unknown status is never
+    # passed off as an exit (#2984).
+    process.wait(timeout=2)
 
 
 #: What an in-flight handler raises when the controller closed admission:
@@ -657,6 +654,9 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
         else:
             _close_responsive_control(proxy, process, control, attempt, primary_error)
     # Read after the cleanup above, which is what reaps the leader (#2714).
+    # Callers read a falsy status as success, so an unknown one stops (#2984).
+    if process.returncode is None:
+        raise BudgetStop('native CLI exit status is unavailable after cleanup')
     return process.returncode
 
 

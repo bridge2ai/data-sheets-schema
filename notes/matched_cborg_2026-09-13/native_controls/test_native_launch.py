@@ -351,16 +351,16 @@ def test_a_leader_reaped_before_cleanup_is_sent_nothing(monkeypatch):
     assert sends == [] and process.returncode == 0
 
 
-def _paused_popen_waiter(process, reap_when_exited):
+def _paused_popen_waiter(process, reap_when_exited, hold=0.5):
     """A concurrent Popen.wait() that has reaped the leader but not yet published its
     status: it holds the Popen's (CPython-private) _waitpid_lock across a raw waitpid,
-    and publishes and releases 0.5 s later (#2961)."""
+    and publishes and releases `hold` seconds later (#2961)."""
     locked, done = threading.Event(), threading.Event()
     def waiter():
         with process._waitpid_lock:
             locked.set()
             _, status = os.waitpid(process.pid, 0)       # reaps as soon as the leader exits
-            time.sleep(0.5)
+            time.sleep(hold)
             process.returncode = os.waitstatus_to_exitcode(status)
         done.set()
     thread = threading.Thread(target=waiter, daemon=True)
@@ -401,6 +401,35 @@ def test_a_reap_by_a_concurrent_popen_waiter_is_latched_before_any_signal(monkey
     finally:
         monkeypatch.undo()
         process.stdout.close()
+
+
+def test_an_exit_status_never_published_is_not_a_success(monkeypatch, tmp_path):
+    """#2984: a waiter that reaped the leader elsewhere and holds the Popen's lock past the
+    cleanup bound leaves the exit status unknown. Cleanup sends nothing and fails loudly,
+    and execute_child never returns None, which its callers read as success."""
+    process = subprocess.Popen([sys.executable, '-c', 'raise SystemExit(3)'], stdout=subprocess.PIPE, text=True,
+                               start_new_session=True)
+    sends = []
+    thread, done = _paused_popen_waiter(process, reap_when_exited=True, hold=4)
+    monkeypatch.setattr(os, 'killpg', lambda pgid, sig: sends.append(sig))
+    try:
+        with pytest.raises(subprocess.TimeoutExpired):
+            terminate_group(process)
+        assert sends == [] and runner.leader_released(process)
+    finally:
+        monkeypatch.undo()
+        thread.join(10)
+        process.stdout.close()
+    assert done.is_set() and process.returncode == 3
+    # The guard at execute_child's return: a cleanup that left no status stops the run.
+    instruction = tmp_path / 'input.txt'; instruction.write_text('offline')
+    proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: None)
+    monkeypatch.setattr(runner, 'terminate_group', lambda process: None)     # a cleanup that reaps nothing
+    monkeypatch.setattr(runner, 'leader_exited', lambda process: True)
+    with pytest.raises(BudgetStop, match='exit status is unavailable'):
+        execute_child([sys.executable, '-c', 'pass'], proxy=proxy, instruction=instruction,
+                      attempt=tmp_path, cwd=tmp_path, env=dict(os.environ), deadline_seconds=30,
+                      verify_launch=lambda: None)
 
 
 def test_a_reap_by_someone_else_during_the_grace_wait_stops_the_sigkill(monkeypatch):
