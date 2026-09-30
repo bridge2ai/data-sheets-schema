@@ -255,6 +255,12 @@ def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json
         notes = [row.get("phase") or "phase unattributed"]
         if row.get("receipted"):
             notes.append("receipted")
+        if row.get("curator_amend"):
+            notes.append("a curator's amend")                  # #3702: not the model's deletion
+        elif row.get("amended_after_model_removal"):
+            notes.append("amended by a curator after the model removed it")
+        elif row.get("curator_amend_ambiguous"):
+            notes.append("an amend on its list may have emptied it (ambiguous)")   # #3802
         if row.get("named_by_core_finding"):
             notes.append("named by a core-only finding")
         if row.get("mentioned_in_finding_text"):
