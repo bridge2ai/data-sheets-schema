@@ -54,8 +54,14 @@ It has no case, so no such token is `initial_expanded`, and v2 (below)
 does not judge it. Identifier-shaped
 spans in a string leaf — a URL, an email address, a CURIE such as
 `ORCID:0000-…` — are removed first. Tokens compare
-casefolded and NFKC-composed; the *folded* form used for
-`diacritic_dropped` also decomposes (NFKD) and drops the combining marks.
+casefolded and NFKC-composed. A character that is not a letter but that
+NFKC composes to letters of a script written without spaces — a Kangxi
+radical, which text extracted from CJK PDFs writes for the ideograph
+(`⼭⽥` for `山田`), or a circled ideograph — is read as that letter when
+runs are cut, so `⼭⽥太郎` in the bundle grounds `山田太郎` (#3721). No
+other character is: `™` beside a Latin word still ends its run. The
+*folded* form used for `diacritic_dropped` also decomposes (NFKD) and
+drops the combining marks.
 The bundle is tokenised the same way, so a name the bundle wraps across a
 line (`Charlotte\\nMarquez`) is still two tokens of it; in the scripts
 written without spaces a wrap inside the name is not (above). Each token of a
@@ -277,7 +283,9 @@ import yaml
 #: text in those scripts and on letters of any other script written
 #: against them (`研究员Tim Clark` now writes `Tim`): on the committed
 #: corpus, none (286 provenance records, the same findings, classes and
-#: v2 readings as v1.1).
+#: v2 readings as v1.1). It also reads a character NFKC composes to such
+#: letters (a Kangxi radical) as one of them (#3721): no bundle on disk
+#: or record carries one, and the corpus reading is the same.
 INSTRUMENT = "name_grounding v1.2 (#2918, #3026, #3126, #3401)"
 
 #: The proximity reading beside it (#2978): report-only, never a finding.
@@ -338,10 +346,40 @@ _UNSPACED_RANGES = (
 )
 
 
-def _unspaced(ch: str) -> bool:
-    """`ch` is a letter of a script written without spaces (#3401)."""
+def _in_unspaced_ranges(ch: str) -> bool:
     cp = ord(ch)
     return any(lo <= cp <= hi for lo, hi in _UNSPACED_RANGES)
+
+
+@functools.lru_cache(maxsize=None)
+def _compat_unspaced(ch: str) -> bool:
+    """`ch` is not a letter, but NFKC makes it letters of a script written
+    without spaces: a Kangxi radical (U+2F2D `⼭` is `山`), one of the two
+    CJK radicals supplement characters NFKC maps, a circled ideograph
+    (`㊤`). Text extracted from CJK PDFs writes these for ordinary
+    ideographs; by category they are symbols (So) and would end a run
+    before NFKC is applied to it (#3721). Read as the letter they compose
+    to, so NFKC decides a run as it decides a token. Only into these
+    scripts: `™` (`TM`) or `㎏` (`kg`) beside a Latin word is not read as
+    letters, and Latin runs are split as before."""
+    if unicodedata.category(ch)[0] in "LM":
+        return False
+    form = unicodedata.normalize("NFKC", ch)
+    return (form != ch and bool(form)
+            and all(unicodedata.category(c)[0] == "L" and _in_unspaced_ranges(c)
+                    for c in form))
+
+
+def _unspaced(ch: str) -> bool:
+    """`ch` is a letter of a script written without spaces (#3401), or a
+    character NFKC composes to such letters (#3721)."""
+    return _in_unspaced_ranges(ch) or _compat_unspaced(ch)
+
+
+def _is_letter(ch: str) -> bool:
+    """A letter, or a character NFKC composes to letters of a script
+    written without spaces (#3721)."""
+    return unicodedata.category(ch)[0] == "L" or _compat_unspaced(ch)
 
 
 def _runs(text: str) -> list[Token]:
@@ -352,13 +390,15 @@ def _runs(text: str) -> list[Token]:
     of a script written without spaces and one of any other script do not
     share a run (`Tim王小明` is two, #3401); a mark stays in the run it
     follows, whatever its script (Thai vowel and tone marks, a voicing mark).
+    A character NFKC composes to letters of such a script (a Kangxi radical)
+    is read as one of them, so `⼭⽥太郎` is one run (#3721).
     """
     out: list[Token] = []
     start = None
     unspaced = False
     for i, ch in enumerate(text):
         cat = unicodedata.category(ch)
-        if cat[0] == "L":
+        if cat[0] == "L" or _compat_unspaced(ch):
             if start is not None and _unspaced(ch) != unspaced:
                 out.append(Token(text[start:i], start, i))
                 start = None
@@ -382,7 +422,7 @@ def is_unspaced(token: str) -> bool:
 
 
 def _letters(token: str) -> int:
-    return sum(1 for ch in token if unicodedata.category(ch)[0] == "L")
+    return sum(1 for ch in token if _is_letter(ch))
 
 
 def exact_key(token: str) -> str:

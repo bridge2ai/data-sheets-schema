@@ -11,6 +11,7 @@ cannot see it because a name is not an identifier.
 import hashlib
 import json
 import tempfile
+import unicodedata
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -706,6 +707,27 @@ class UnspacedScriptTest(unittest.TestCase):
             with self.subTest(script=script):
                 self.assertEqual(name_tokens(name), [name])
                 self.assertEqual(cls(name, name, bundle), "grounded")
+
+    def test_a_character_nfkc_composes_to_such_letters_joins_their_run(self):
+        """#3721: a Kangxi radical (U+2F2D `⼭` is `山` under NFKC) is a
+        symbol by category, so cutting runs before NFKC dropped it and a
+        name the bundle writes with radicals read `absent`. It is read as
+        the letter it composes to, in the bundle and in the leaf. Controls:
+        a different given name is still absent, and a character NFKC turns
+        into Latin letters (`™`, `㎏`) is still not a letter."""
+        radicals = "⼭⽥"  # ⼭⽥
+        self.assertEqual(unicodedata.normalize("NFKC", radicals), "山田")
+        self.assertEqual(unicodedata.category("⼭"), "So")
+        self.assertEqual(name_tokens(radicals + "太郎"), [radicals + "太郎"])
+        self.assertEqual(name_tokens(radicals), [radicals])
+        self.assertEqual(cls("山田太郎", "山田太郎", "責任者は" + radicals + "太郎です"), "grounded")
+        self.assertEqual(cls(radicals + "太郎", radicals + "太郎", "責任者は山田太郎です"),
+                         "grounded")
+        # A circled ideograph (U+32A4 `㊤` is `上`) too.
+        self.assertEqual(cls("上田", "上田", "作者㊤田教授"), "grounded")
+        self.assertEqual(cls("山田太郎", "山田太郎", "責任者は" + radicals + "二郎です"), "absent")
+        self.assertEqual([t.text for t in ng._runs("Bridge™AI")], ["Bridge", "AI"])
+        self.assertEqual(name_tokens("㎏"), [])  # ㎏ is `kg`, not read as letters
 
     def test_latin_letters_beside_such_a_script_are_a_token_of_their_own(self):
         """In the bundle too: `研究员Tim Clark` writes `Tim`, which v1 read
