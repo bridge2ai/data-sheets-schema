@@ -297,10 +297,33 @@ def raw_path_class(schema, slot):
     return owners[0] if owners else ""
 
 
-def raw_seen_by(schema, cls):
+def raw_hides_top_level(schema, cls, slot):
+    """Whether ``cls`` or an ancestor declares ``slot`` as its own attribute,
+    which replaces the top-level slot for the class (#3193).
+
+    This is LinkML's rule: ``SchemaView.induced_slot`` takes the attribute of
+    the class or of any ancestor whenever one exists, and never consults
+    ``slots:``. A class that lists the name under ``slots:`` as well as under
+    ``attributes`` still hides the top-level slot (#3392); six classes in the
+    merged schema do so."""
+    classes = schema.get("classes") or {}
+    near = {cls} | raw_ancestors(schema, cls) if cls else set()
+    return any(slot in ((classes.get(c) or {}).get("attributes") or {})
+               for c in near)
+
+
+def raw_seen_by(schema, cls, slot):
     """The places whose declarations a row with path class ``cls`` sees: the
-    class, its ancestors, and the top-level slot ('')."""
-    return ({cls} | raw_ancestors(schema, cls) if cls else set()) | {""}
+    class, its ancestors, and the top-level slot ('') unless one of them
+    redeclares the name as its own attribute (#3193)."""
+    near = {cls} | raw_ancestors(schema, cls) if cls else set()
+    return near | (set() if raw_hides_top_level(schema, cls, slot) else {""})
+
+
+def declaration_name(place, slot):
+    """How a reason names a declaration: ``<Class>.<slot>``, or the top-level
+    slot for place ''."""
+    return f"{place}.{slot}" if place else f"top-level {slot} slot"
 
 
 #: A schema declaration a listing's reason cites: a metaslot, then its target
@@ -560,6 +583,176 @@ class TestHeuristicsNeverOverrideCuration(_Committed):
                     self.assertIn(row["mapping_status"], ("free_text", "novel_d4d"))
 
 
+class TestOnlyCuratedRowsClaimCuration(_Committed):
+    """#2972: the 22 ``novel_d4d`` rows were written as ``d4d:<slot>
+    skos:exactMatch d4d:<slot>`` under semapv:ManualMappingCuration at
+    confidence 1.0: a keyword guess that mapped the slot to itself and said
+    a curator had. An SSSOM consumer reads ``mapping_justification``, not the
+    table's own ``mapping_source``. Checked on both committed tables and on a
+    fresh generation."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        generated = study_generator().generate_comprehensive_sssom("2001-01-01")
+        cls.tables = {"comprehensive": cls.comp, "uri": cls.uri,
+                      "generated": {r["subject_id"][len("d4d:"):]: r
+                                    for r in generated}}
+        cls.curated = curated_sources(cls.schema, cls.names)
+
+    def test_manual_curation_is_claimed_exactly_where_a_curated_source_speaks(self):
+        for table, rows in self.tables.items():
+            for slot, row in sorted(rows.items()):
+                with self.subTest(table=table, slot=slot):
+                    self.assertEqual(
+                        row["mapping_justification"] == gcs.CURATED_JUSTIFICATION,
+                        slot in self.curated)
+
+    def test_a_heuristic_row_asserts_no_mapping(self):
+        novel = 0
+        for table, rows in self.tables.items():
+            for slot, row in sorted(rows.items()):
+                if row["mapping_source"] != "heuristic":
+                    continue
+                with self.subTest(table=table, slot=slot):
+                    self.assertEqual((row["object_id"], float(row["confidence"])),
+                                     ("", 0.0))
+                    self.assertTrue(row["predicate_id"].startswith("semapv:"))
+                    if row["mapping_status"] == "novel_d4d":
+                        novel += 1
+                        self.assertEqual(
+                            (row["predicate_id"], row["mapping_justification"]),
+                            ("semapv:UnmappedProperty",
+                             "semapv:UnspecifiedMatching"))
+                        self.assertIn("not curated", row["comment"])
+        self.assertGreaterEqual(novel, 3 * 15, "too few novel_d4d rows to test")
+
+    def test_no_row_maps_a_slot_to_itself(self):
+        for table, rows in self.tables.items():
+            for slot, row in sorted(rows.items()):
+                with self.subTest(table=table, slot=slot):
+                    self.assertNotEqual(row["object_id"], f"d4d:{slot}")
+
+    def test_a_committed_novel_row_asks_for_a_slot_uri_only_where_none_is_declared(self):
+        """On the committed table. Every novel slot there declares a
+        slot_uri (``needing slot_uri: 0/301``), so this reads only the "no"
+        half; the fixture test below reads the "yes" half (#3377)."""
+        declared = raw_slot_uris(self.schema)
+        for slot, row in sorted(self.uri.items()):
+            if row["mapping_status"] == "novel_d4d":
+                with self.subTest(slot=slot):
+                    self.assertEqual(row["needs_slot_uri"],
+                                     "no" if slot in declared else "yes")
+
+    def test_a_novel_row_still_asks_for_a_slot_uri_where_none_is_declared(self):
+        """The URI table's ``needs_slot_uri`` reads the status, not the
+        object, so a novel slot with no slot_uri still says yes. The study
+        schema has no such slot, so this strips ``addressing_gaps``'s
+        ``slot_uri`` from a copy of it (#3377)."""
+        slot, uri_line = "addressing_gaps", "slot_uri: d4d:addressingGaps"
+        text = SCHEMA.read_text(encoding="utf-8")
+        self.assertGreaterEqual(text.count(uri_line), 1)
+        stripped = "\n".join(line for line in text.split("\n")
+                             if line.strip() != uri_line)
+        self.assertNotIn("d4d:addressingGaps", stripped)
+        with tempfile.TemporaryDirectory() as d:
+            changed = Path(d) / SCHEMA.name
+            changed.write_text(stripped, encoding="utf-8")
+            gen = gcsu.ComprehensiveURISSSOMGenerator(changed, TTL, RECS)
+            rows = {r["d4d_slot_name"]: r
+                    for r in gen.generate_comprehensive_uri_sssom("2001-01-01")}
+        row = rows[slot]
+        self.assertEqual((row["mapping_status"], row["d4d_slot_uri_current"]),
+                         ("novel_d4d", ""))
+        self.assertEqual(row["needs_slot_uri"], "yes")
+        for other, r in sorted(rows.items()):
+            if other != slot:
+                with self.subTest(slot=other):
+                    self.assertEqual(r["needs_slot_uri"],
+                                     self.uri[other]["needs_slot_uri"])
+
+
+class TestRecommendationsAudit(_Committed):
+    """#2974: since #2935 the recommendations file feeds the table's
+    ``recommended`` rows. Nine surfaced; the audit withdrew those eight, whose
+    suggested term names another notion, cannot hold the slot's value, or is
+    not a schema.org term, and eight more that a curated target shadows
+    (16 in all; #3376). A withdrawn entry keeps its URI and the reason in
+    ``review_note``."""
+
+    WITHDRAWN_FROM_THE_TABLE = {
+        "credit_roles", "erratum_url", "identifiers_removed", "limitation_type",
+        "missing_value_code", "tool_accuracy", "was_inferred_derived",
+        "was_validated_verified",
+    }
+    #: Withdrawn too, but never surfaced: a curated target maps each slot.
+    SHADOWED_BY_A_CURATED_TARGET = {
+        "distribution_dates", "end_date", "precision",
+        "representative_verification", "start_date", "target_dataset",
+        "tools", "version_access",
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        with open(RECS, encoding="utf-8", newline="") as f:
+            cls.recs = {r["attribute"]: r
+                        for r in csv.DictReader(f, delimiter="\t")}
+
+    def test_a_withdrawn_suggestion_is_silent_and_says_why(self):
+        withdrawn = {a for a, r in self.recs.items()
+                     if r["review_note"].startswith("withdrawn ")}
+        self.assertLessEqual(self.WITHDRAWN_FROM_THE_TABLE, withdrawn)
+        for attr in sorted(withdrawn):
+            with self.subTest(attribute=attr):
+                r = self.recs[attr]
+                self.assertEqual((r["suggested_uri"], r["confidence"]), ("", ""))
+                self.assertIn("#2974", r["review_note"])
+                self.assertNotEqual(self.comp[attr]["mapping_status"], "recommended")
+
+    def test_the_audit_withdrew_the_eight_surfaced_and_eight_shadowed(self):
+        """The docstring's count, held to the file (#3376)."""
+        withdrawn = {a for a, r in self.recs.items()
+                     if r["review_note"].startswith("withdrawn ")}
+        self.assertEqual(withdrawn, self.WITHDRAWN_FROM_THE_TABLE
+                         | self.SHADOWED_BY_A_CURATED_TARGET)
+        self.assertEqual(len(withdrawn), 16)
+        for attr in sorted(self.SHADOWED_BY_A_CURATED_TARGET):
+            with self.subTest(attribute=attr):
+                self.assertEqual(self.comp[attr]["mapping_status"], "mapped")
+                self.assertIn(self.comp[attr]["mapping_source"], ("ttl", "schema"))
+
+    def test_every_confidence_names_a_uri(self):
+        """``add_slot_uris.py`` selects entries by confidence alone and writes
+        their ``suggested_uri`` into the schema, so a graded entry with no URI
+        would write an empty slot_uri."""
+        for attr, r in sorted(self.recs.items()):
+            if r["confidence"] in ("high", "medium"):
+                with self.subTest(attribute=attr):
+                    self.assertTrue(r["suggested_uri"])
+
+    def test_no_suggestion_names_a_term_schema_org_does_not_define(self):
+        """``schema:date`` is not a schema.org term (#3124); rdflib's list."""
+        from rdflib.namespace import SDO
+        for attr, r in sorted(self.recs.items()):
+            uri = r["suggested_uri"]
+            if uri.startswith("schema:"):
+                with self.subTest(attribute=attr, uri=uri):
+                    self.assertIn(f"https://schema.org/{uri[len('schema:'):]}", SDO)
+
+    def test_each_recommended_row_is_a_suggestion_the_file_still_makes(self):
+        for slot, row in sorted(self.comp.items()):
+            if row["mapping_status"] == "recommended":
+                with self.subTest(slot=slot):
+                    self.assertEqual(row["object_id"],
+                                     self.recs[slot]["suggested_uri"])
+                    self.assertEqual(row["mapping_justification"],
+                                     "semapv:SuggestedMapping")
+        self.assertEqual(
+            sorted(s for s, r in self.comp.items()
+                   if r["mapping_status"] == "recommended"), ["access_url"])
+
+
 class TestSchemaPathNamesACarrier(_Committed):
 
     @classmethod
@@ -780,10 +973,11 @@ class TestRoCratePathFollowsTheContext(unittest.TestCase):
         }.items():
             with self.subTest(curie=curie):
                 self.assertEqual(self.gen.rocrate_key(curie), key)
+        # No row's object is prov:wasDerivedFrom since #2974 withdrew
+        # was_inferred_derived's suggestion; the key is checked above.
         for table, rows in self.tables.items():
             by_slot = {r["subject_id"]: r for r in rows}
             for slot, key in {"d4d:conforms_to_standard": "conformsTo",
-                              "d4d:was_inferred_derived": "wasDerivedFrom",
                               "d4d:conforms_to": "schema:conformsTo"}.items():
                 with self.subTest(table=table, slot=slot):
                     self.assertEqual(by_slot[slot]["rocrate_json_path"],
@@ -958,14 +1152,15 @@ class TestDisagreementsAreListed(unittest.TestCase):
         schema = raw_schema()
         places = raw_declaration_places(schema)
         for slot, entry in sorted(self.listed.items()):
-            seen = raw_seen_by(schema, raw_path_class(schema, slot))
+            seen = raw_seen_by(schema, raw_path_class(schema, slot), slot)
             for metaslot, target in REASON_CITES.findall(entry.reason):
                 with self.subTest(slot=slot, cites=f"{metaslot} {target}"):
                     where = places.get(slot, {}).get((metaslot, target), set())
                     self.assertTrue(where, "no declaration of the slot says so")
                     if not where & seen:
                         self.assertTrue(
-                            any(f"{cls}.{slot}" in entry.reason for cls in where),
+                            any(declaration_name(cls, slot) in entry.reason
+                                for cls in where),
                             f"only {sorted(where)} declare it, the path class "
                             "sees none of them, and the reason names none")
         self.assertIn(("slot_uri", "dcterms:title"),
@@ -988,7 +1183,7 @@ class TestDisagreementsAreListed(unittest.TestCase):
             metaslots.setdefault(predicate, []).append(metaslot)
         unseen = set()
         for slot, entry in sorted(self.listed.items()):
-            seen = raw_seen_by(schema, raw_path_class(schema, slot))
+            seen = raw_seen_by(schema, raw_path_class(schema, slot), slot)
             for pair in entry.schema:
                 predicate, target = pair.split(" ", 1)
                 where = set().union(*(places.get(slot, {}).get((m, target), set())
@@ -1000,8 +1195,103 @@ class TestDisagreementsAreListed(unittest.TestCase):
                     unseen.add(slot)
                     for cls in sorted(c for c in where
                                       if not where & raw_ancestors(schema, c)):
-                        self.assertIn(f"{cls}.{slot}", entry.reason)
+                        self.assertIn(declaration_name(cls, slot), entry.reason)
         self.assertIn("regulatory_restrictions", unseen)
+        self.assertIn("media_type", unseen)
+
+    def test_media_type_attributes_its_exact_mapping_and_calls_it_none_a_serialisation(self):
+        """#3193, from the raw YAML: the row's path class, DistributionFormat,
+        declares its own media_type attribute (slot_uri dcat:mediaType, no
+        exact_mappings) and does not list the top-level slot, so it does not
+        see the top-level slot's exact_mappings schema:encodingFormat, which
+        File.media_type repeats. The reason used to say that exact mapping
+        "serialises the slot"; only a slot_uri serialises one."""
+        schema = raw_schema()
+        slot = "media_type"
+        classes = schema["classes"]
+        self.assertEqual(raw_path_class(schema, slot), "DistributionFormat")
+        own = classes["DistributionFormat"]["attributes"][slot]
+        self.assertEqual((own.get("slot_uri"), own.get("exact_mappings")),
+                         ("dcat:mediaType", None))
+        self.assertNotIn(slot, classes["DistributionFormat"].get("slots") or [])
+        self.assertTrue(raw_hides_top_level(schema, "DistributionFormat", slot))
+        self.assertNotIn("", raw_seen_by(schema, "DistributionFormat", slot))
+        self.assertEqual(
+            raw_declaration_places(schema)[slot][("exact_mappings",
+                                                  "schema:encodingFormat")],
+            {"", "File"})
+        reason = gcs.ACCEPTED_DISAGREEMENTS[slot].reason
+        for phrase in ("DistributionFormat declares its own media_type attribute",
+                       declaration_name("", slot), "File.media_type"):
+            self.assertIn(phrase, reason)
+        self.assertNotIn("serialises the slot as", reason)
+
+    def test_the_hiding_rule_is_linkmls_whether_or_not_slots_lists_the_name(self):
+        """#3392: an attribute on the class or an ancestor replaces the
+        top-level slot even when the class also lists the name under
+        ``slots:``. The helper is checked against linkml_runtime's
+        ``SchemaView.induced_slot`` on a fixture where the two declarations
+        carry different slot_uris, and against every class of the merged
+        schema that lists a name both ways."""
+        from linkml_runtime.utils.schemaview import SchemaView
+        fixture = textwrap.dedent("""\
+            id: https://example.org/s3371
+            name: s3371
+            prefixes:
+              linkml: https://w3id.org/linkml/
+              ex: https://example.org/
+            default_prefix: ex
+            imports:
+              - linkml:types
+            slots:
+              foo:
+                slot_uri: ex:top
+            classes:
+              Both:
+                slots:
+                  - foo
+                attributes:
+                  foo:
+                    slot_uri: ex:attr
+              Child:
+                is_a: Both
+              SlotsOnly:
+                slots:
+                  - foo
+            """)
+        import yaml
+        schema = yaml.safe_load(fixture)
+        sv = SchemaView(fixture)
+        for cls in ("Both", "Child", "SlotsOnly"):
+            with self.subTest(cls=cls):
+                induced = sv.induced_slot("foo", cls).slot_uri
+                self.assertEqual(raw_hides_top_level(schema, cls, "foo"),
+                                 induced == "ex:attr")
+        self.assertTrue(raw_hides_top_level(schema, "Both", "foo"))
+        self.assertFalse(raw_hides_top_level(schema, "SlotsOnly", "foo"))
+
+        merged = raw_schema()
+        both = sorted((c, n) for c, cdef in merged["classes"].items()
+                      for n in set((cdef or {}).get("attributes") or {})
+                      & set((cdef or {}).get("slots") or []))
+        self.assertTrue(both, "the merged schema lists no name both ways")
+        for cls, name in both:
+            with self.subTest(cls=cls, slot=name):
+                self.assertTrue(raw_hides_top_level(merged, cls, name))
+                self.assertNotIn("", raw_seen_by(merged, cls, name))
+
+    def test_only_a_slot_uri_is_said_to_serialise_the_slot(self):
+        """#3193: the strength-only template says "the schema's <metaslot>
+        <target> serialises the slot"; an exact or other mapping states an
+        equivalence and is not how the slot is written."""
+        cites = re.compile(r"the schema's (\w+) \S+ serialises the slot")
+        found = 0
+        for slot, entry in sorted(self.listed.items()):
+            for metaslot in cites.findall(entry.reason):
+                found += 1
+                with self.subTest(slot=slot):
+                    self.assertEqual(metaslot, "slot_uri")
+        self.assertGreaterEqual(found, 4)
 
     def test_regulatory_restrictions_is_listed_as_a_shared_name(self):
         """#3140, from the raw YAML and as the reason states it: Dataset's
@@ -1343,6 +1633,20 @@ class TestPrecedenceOnAFixture(unittest.TestCase):
     def test_the_keywords_decide_only_what_nothing_curated_covers(self):
         self.assertEqual(self.res["retention_impacts"].status, "novel_d4d")
         self.assertEqual(self.res["plain"].status, "unmapped")
+
+    def test_a_novel_row_is_a_status_and_claims_no_curation(self):
+        """#2972: not ``d4d:retention_impacts skos:exactMatch
+        d4d:retention_impacts`` at 1.0 under manual curation."""
+        r = self.res["retention_impacts"]
+        self.assertEqual(
+            (r.status, r.source, r.predicate, r.object, r.confidence,
+             r.justification),
+            ("novel_d4d", "heuristic", "semapv:UnmappedProperty", "", 0.0,
+             "semapv:UnspecifiedMatching"))
+        row = next(x for x in self.gen.generate_comprehensive_sssom("2001-01-01")
+                   if x["subject_id"] == "d4d:retention_impacts")
+        self.assertEqual((row["object_id"], row["rocrate_json_path"],
+                          row["object_source"]), ("", "", ""))
 
     def test_a_d4d_slot_uri_is_not_an_alignment(self):
         r = self.res["own_uri"]
