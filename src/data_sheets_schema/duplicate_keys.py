@@ -104,7 +104,10 @@ def nesting_exceeds(text: str, loader: type, limit: int) -> bool:
     passing the limit is not too deep here; the composer then reports its
     error at the same place. There is no textual shortcut: two of them were
     defeated in review (#3817, #3826), so every text is parsed once here and
-    once more by the composer."""
+    once more by the composer. A text libyaml cannot take at all — a lone
+    surrogate, which libyaml's `CParser` fails to UTF-8-encode with
+    `UnicodeEncodeError` before reading a byte (#3834) — is rejected before
+    any collection opens, so it is not too deep either."""
     depth = 0
     try:
         for event in yaml.parse(text, Loader=loader):
@@ -114,9 +117,39 @@ def nesting_exceeds(text: str, loader: type, limit: int) -> bool:
                     return True
             elif isinstance(event, _COLLECTION_END):
                 depth -= 1
-    except yaml.YAMLError:
+    except (yaml.YAMLError, UnicodeEncodeError):
         return False
     return False
+
+
+def _unencodable(text: Any) -> yaml.YAMLError | None:
+    """The error the pure-Python reader raises for a `str` that libyaml
+    cannot be handed, or None when it can (#3834).
+
+    libyaml's `CParser` UTF-8-encodes a `str` before reading it, and a lone
+    surrogate (`'\\udcff'`, which `errors='surrogateescape'` decoding produces)
+    has no UTF-8 form, so it raises `UnicodeEncodeError` — not a
+    `yaml.YAMLError`. The pure-Python reader rejects every surrogate as a
+    non-printable character with a `yaml.reader.ReaderError`. So the text is
+    checked here and that same `ReaderError` is returned: the one the
+    pure-Python reader builds for the text, naming the first character it
+    rejects, so both loaders fail alike. Every other code point, including
+    the non-printable ones both readers reject, is encodable, and libyaml's
+    reader rejects it with a `ReaderError` of its own."""
+    if not isinstance(text, str):
+        return None
+    try:
+        text.encode("utf-8")
+        return None
+    except UnicodeEncodeError as exc:
+        try:
+            yaml.reader.Reader(text)
+        except yaml.reader.ReaderError as reader_error:
+            return reader_error
+        # Unreachable while the pure-Python reader rejects surrogates; built
+        # by hand so a PyYAML that stopped doing so still gets a YAMLError.
+        return yaml.reader.ReaderError("<unicode string>", exc.start, ord(text[exc.start]),
+                                       "unicode", "special characters are not allowed")
 
 
 def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
@@ -158,9 +191,33 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
     key position, which the walk does not enter, is refused too, as the
     pure-Python loader refuses it.
     The pure-Python `SafeLoader` is not checked: it raises `RecursionError`
-    itself, so the default path is unchanged."""
+    itself, so the default path is unchanged.
+
+    A `str` holding a lone surrogate is unscannable under either loader and
+    is treated like any other unscannable text: `[]`, or under `strict` the
+    `yaml.reader.ReaderError` the pure-Python reader raises for it. libyaml
+    would raise `UnicodeEncodeError` on encoding it, so the text is checked
+    first (`_unencodable`, #3834). Every other code point is rejected, or
+    accepted, alike by both readers.
+
+    The findings are the same wherever both implementations can scan the
+    text. Their scanners are not the same grammar at the edges: PyYAML's
+    pure-Python scanner rejects a tab inside a plain scalar (`b: x<TAB>y`)
+    and a byte-order mark after the start of the stream, both of which
+    libyaml accepts. On such a text the default gives `[]` (or raises under
+    `strict`) and `FAST_LOADER` reports the keys it scanned — what
+    `yaml.load(..., Loader=FAST_LOADER)` would load from the same text.
+    None of the 1,616 YAML files under `data/d4d_concatenated` is scannable
+    by one and not the other (checked 2026-09-30). The scan does not paper
+    over the difference: neither answer misreads what its own loader would
+    load."""
     out: list[dict[str, Any]] = []
     if _CParser is not None and isinstance(loader, type) and issubclass(loader, _CParser):
+        unencodable = _unencodable(text)
+        if unencodable is not None:
+            if strict:
+                raise unencodable
+            return out
         limit = min(sys.getrecursionlimit(), LIBYAML_MAX_DEPTH)
         if nesting_exceeds(text, loader, limit):
             if strict:

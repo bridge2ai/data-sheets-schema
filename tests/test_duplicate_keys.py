@@ -115,6 +115,83 @@ class TestTheLoader(unittest.TestCase):
                                  ["a"])
 
 
+class TestUnencodableText(unittest.TestCase):
+    """#3834: a lone surrogate is unscannable under either loader, alike."""
+
+    SURROGATE = "a: 1\na: 2\nb: \udcff\n"
+
+    def _scan(self, text, loader, strict):
+        try:
+            return ("found", find_duplicate_keys(text, loader=loader, strict=strict))
+        except Exception as exc:                                  # noqa: BLE001
+            return ("raised", type(exc), getattr(exc, "position", None), getattr(exc, "character", None))
+
+    def test_a_lone_surrogate_is_nothing_by_default_and_a_reader_error_under_strict(self):
+        from data_sheets_schema.duplicate_keys import FAST_LOADER
+        for loader in {yaml.SafeLoader, FAST_LOADER}:
+            for text in (self.SURROGATE, "\ud800a: 1\na: 2\n", "a: 1\na: 2\nb: \"x\udfffy\"\n",
+                         "a: 1\na: 2\n# \udcff\n", "a: \0\nb: \udcff\n"):
+                with self.subTest(loader=loader.__name__, text=text.encode("utf-8", "backslashreplace")):
+                    self.assertEqual(find_duplicate_keys(text, loader=loader), [])
+                    with self.assertRaises(yaml.reader.ReaderError):
+                        find_duplicate_keys(text, loader=loader, strict=True)
+
+    def test_both_loaders_raise_the_same_reader_error(self):
+        """The same class, position and character: the pure-Python reader's
+        error, naming the first character it rejects (the NUL before the
+        surrogate in the second text)."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        for text, position in ((self.SURROGATE, 13), ("a: \0\nb: \udcff\n", 3)):
+            with self.subTest(position=position):
+                pure = self._scan(text, yaml.SafeLoader, True)
+                self.assertEqual(pure[:3], ("raised", yaml.reader.ReaderError, position))
+                self.assertEqual(self._scan(text, yaml.CSafeLoader, True), pure)
+
+    def test_code_points_at_every_reader_boundary_are_accepted_or_rejected_alike(self):
+        """In a double-quoted scalar, strict and not, over the code points
+        around each boundary of the readers' printable set (C0 and C1
+        controls, NEL, NBSP, the surrogates, U+FEFF, U+FFFE/U+FFFF, the astral
+        planes): before #3834 the surrogates raised UnicodeEncodeError under
+        libyaml. Outcomes compare by class — each reader words its own
+        `ReaderError`. All 1,114,112 code points were compared once, outside
+        the suite: the surrogates were the only difference."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        differ = []
+        for cp in list(range(0x0, 0x200)) + list(range(0x2020, 0x2030)) + list(range(0xD7F0, 0xE010)) + list(range(0xFFF0, 0x10010)) \
+                + [0x10FFFF]:
+            text = 'a: 1\na: 2\nb: "x' + chr(cp) + 'y"\n'
+            for strict in (False, True):
+                pure = self._scan(text, yaml.SafeLoader, strict)
+                fast = self._scan(text, yaml.CSafeLoader, strict)
+                if pure[:2] != fast[:2]:
+                    differ.append((hex(cp), strict, pure[:2], fast[:2]))
+        self.assertEqual(differ, [])
+
+    def test_the_depth_guard_does_not_raise_on_an_unencodable_text(self):
+        from data_sheets_schema.duplicate_keys import nesting_exceeds
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        self.assertIs(nesting_exceeds(self.SURROGATE, yaml.CSafeLoader, 10), False)
+
+    def test_the_scanners_differ_on_a_tab_in_a_plain_scalar(self):
+        """Pinned as documented, not as desired: PyYAML's pure-Python scanner
+        rejects a tab inside a plain scalar and a byte-order mark after the
+        start of the stream; libyaml accepts both and loads the text, so the
+        libyaml scan reports what that load would drop."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        for text in ("a: 1\na: 2\nb: x\ty\n", "a: 1\na: 2\n\ufeff"):
+            with self.subTest(text=text):
+                self.assertEqual(find_duplicate_keys(text, loader=yaml.SafeLoader), [])
+                with self.assertRaises(yaml.YAMLError):
+                    yaml.load(text, Loader=yaml.SafeLoader)   # noqa: S506
+                self.assertEqual([d["key"] for d in find_duplicate_keys(text, loader=yaml.CSafeLoader,
+                                                                         strict=True)], ["a"])
+                self.assertEqual(yaml.load(text, Loader=yaml.CSafeLoader)["a"], 2)   # noqa: S506
+
+
 #: A child process that scans texts nested 50,000 deep with libyaml. Before
 #: #3817 the flow case killed the interpreter with SIGSEGV (exit 139), which
 #: is why it runs in a subprocess and not in pytest's own process.
