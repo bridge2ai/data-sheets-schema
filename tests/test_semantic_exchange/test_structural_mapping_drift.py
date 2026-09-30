@@ -604,6 +604,11 @@ class TestRowsStateTheSchema(unittest.TestCase):
     The expected values come from linkml's `SchemaView.induced_slot`, not from
     the generator's own parser, so the generator is not graded against its own
     answer.
+
+    A class-level row (`d4d:DataSubset`) names a class, not a slot. Its range
+    is the class itself and it is not multivalued (#3388), and the class must
+    be one the full or the core merged schema declares: the `Core*` classes
+    live only in the core schema.
     """
 
     CARDINALITY = "Cardinality mismatch: multivalued slot mapping to single value"
@@ -619,6 +624,8 @@ class TestRowsStateTheSchema(unittest.TestCase):
         )
         schema = REPO / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
         cls.sv = SchemaView(str(schema))
+        cls.core_sv = SchemaView(str(
+            REPO / "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"))
         cls.d4d = D4DSchemaParser(schema)
         gen = StructuralMappingGenerator(
             cls.d4d,
@@ -641,9 +648,51 @@ class TestRowsStateTheSchema(unittest.TestCase):
 
     def test_every_committed_slot_row_states_the_schema(self):
         """Hand rows included: `FileCollection/collection_type` said
-        multivalued after #382 made the slot single-valued. The four
-        class-level rows name a class, not a slot, and are not checked."""
+        multivalued after #382 made the slot single-valued. The class-level
+        rows are checked by the test below."""
         self._assert_rows_state_the_schema(self.committed)
+
+    def _class_row_problems(self, rows):
+        """What each class-level row says that its class does not."""
+        problems = []
+        for r in rows:
+            if "/" in r["subject_id"]:
+                continue
+            name = r["subject_id"][len("d4d:"):]
+            if not (self.sv.get_class(name) or self.core_sv.get_class(name)):
+                problems.append(f"{name}: a class in neither the full nor the "
+                                "core merged schema")
+            if r["d4d_subject_range"] != name:
+                problems.append(f"{name}: range {r['d4d_subject_range']!r}")
+            if r["subject_multivalued"] != "False":
+                problems.append(
+                    f"{name}: multivalued {r['subject_multivalued']!r}")
+        return problems
+
+    def test_every_committed_class_row_states_its_class(self):
+        """#3388. `d4d:DataSubset` gave its parent `Dataset` as its range,
+        and nothing read the column on a row without a slot."""
+        self.assertTrue([r for r in self.committed if "/" not in r["subject_id"]],
+                        "no class-level rows to check")
+        self.assertEqual(self._class_row_problems(self.committed), [])
+
+    def test_a_class_row_that_misstates_its_class_is_found(self):
+        """The check's own controls: the `DataSubset` row as it was before
+        #3388, a multivalued class row, and a class no schema declares."""
+        def row(subject, rng, multivalued="False"):
+            return {"subject_id": subject, "d4d_subject_range": rng,
+                    "subject_multivalued": multivalued}
+        self.assertEqual(
+            self._class_row_problems([row("d4d:DataSubset", "Dataset")]),
+            ["DataSubset: range 'Dataset'"])
+        self.assertEqual(
+            self._class_row_problems(
+                [row("d4d:CoreDataset", "CoreDataset", "True")]),
+            ["CoreDataset: multivalued 'True'"])
+        self.assertEqual(
+            self._class_row_problems([row("d4d:NoSuchClass", "NoSuchClass")]),
+            ["NoSuchClass: a class in neither the full nor the core merged "
+             "schema"])
 
     def test_every_regenerated_slot_row_states_the_schema(self):
         self._assert_rows_state_the_schema(self.regenerated)
