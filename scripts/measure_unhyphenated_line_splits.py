@@ -28,8 +28,13 @@ are certified:
   reading the issue weighs adding, spurious joins and all. `status` where the check
   is `not_stated_in_source` on the bytes as they are, so the reading would
   move it to `unknown`; `lines` where it is `unknown` already and would only
-  list more lines. A match that needs this join and another break's
-  reading at once is not searched;
+  list more lines. Each break is joined on its own: a match that needs this
+  join and another break's reading at once is not searched — a word split
+  over two unhyphenated breaks ('con' / 'sen' / 't'), one join beside a
+  hyphen's reading ('con-' / 'sen' / 't'), or a statement over three lines
+  whose one break is a space and the other the join ('a data' /
+  'protection im' / 'pact assessment'). So both columns are lower bounds
+  (#3470);
 - the cost of those windows (#3246): hyphenated breaks, the windows of
   `MIXED_WINDOW_LINES` lines holding two or more, and the most in one
   (each such window is read 3^k - 3 ways for its k breaks); and, with

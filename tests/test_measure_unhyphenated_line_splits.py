@@ -145,3 +145,38 @@ def test_the_wider_window_reports_its_own_load(m):
     six = {**got, "most_in_one_window": 5, "compare_most_in_one_window": 2, "compare_mixed_windows": 9}
     result["rows"].insert(0, {"bundle": "x/A.txt", "md5": "a" * 32, "records": 1, **six})
     assert "window is 3 (`B.txt`" in m.markdown(result)
+
+
+def test_a_match_that_only_touches_the_break_does_not_cross_it(m):
+    """#3471: a match crosses a join only when it takes a character from
+    each side. One that ends where the first line ends ('consent' / 'from')
+    or starts where the second begins ('nothing' / 'consent') is a match on
+    one line as it stands, and joining the break adds nothing to it. The
+    review of #3471 counted such matches as crossing and the column gained
+    `ethics_review` on the CHORUS document versions and five checks on the
+    CM4AI, AI_READI, VOICE and VOICE_PEDIATRIC ones."""
+    for text in ("We obtained consent\nfrom all.", "We obtained nothing\nconsent later."):
+        lines = text.split("\n")
+        assert m.crossing_checks(lines, 1) == set(), text
+        assert m.measure(text)["moved_if_every_break_joins"] == {}, text
+    # A crossing on a check both lines already match adds no line.
+    assert m.crossing_checks(["consent was con", "sent twice, consent"], 1) == {"consent_text"}
+    assert m.measure("consent was con\nsent twice, consent")["moved_if_every_break_joins"] == {}
+    # One character past the break on each side is a crossing.
+    assert m.crossing_checks(["We obtained consen", "t from all."], 1) == {"consent_text"}
+    assert m.crossing_checks(["We obtained c", "onsent from all."], 1) == {"consent_text"}
+
+
+def test_every_break_joins_is_searched_one_break_at_a_time(m):
+    """#3470: the every-break column joins the two lines around one break
+    and reads every other break as a space, so a match needing two breaks at
+    once is not found. The note and README call the column a lower bound for
+    that reason; these pin the cases they name."""
+    assert m.measure("Participants gave con\nsent to take part.")["moved_if_every_break_joins"] == {
+        "consent_text": "status"}
+    for text in ("Participants gave con\nsen\nt to take part.",       # two unhyphenated breaks
+                 "Participants gave con-\nsen\nt to take part.",      # one beside a hyphen's reading
+                 "a data\nprotection im\npact assessment was done"):  # a space, then the join
+        assert m.measure(text)["moved_if_every_break_joins"] == {}, text
+    assert m.measure("a data pro\ntection impact assessment was done")["moved_if_every_break_joins"] == {
+        "ethics_review": "status"}

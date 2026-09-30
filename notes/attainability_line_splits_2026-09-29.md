@@ -78,7 +78,8 @@ The one split found is 'a priori' / 'ty for the Bridge2AI-Voice
 consortium', which is "a priority". It is in all four VOICE document
 versions and in no other bundle. No check's pattern matches "priority".
 
-Reading every break as nothing moves no check's status on any version. It
+Reading each break as nothing, one break at a time, moves no check's status
+on any version. It
 adds lines to `version_string`, which is `unknown` on every version it
 touches, in the AI_READI, VOICE and VOICE_PEDIATRIC document bundles. One of
 those joins is a real split: 'This documentation is for v' / '2.0.0' in
@@ -99,10 +100,21 @@ uncertifiable.
   already, most of them from joins it invents.
 - Adding the reading would join ordinary wraps in every large bundle.
 
-The word list and the bundle vocabulary leave out words neither contains,
-so the split-word count is a lower bound. The "every break joins" column
-has no such limit, because it joins every break the reading could apply to,
-and it moves no check's status.
+Both columns are lower bounds. The word list and the bundle vocabulary
+leave out words neither contains, so the split-word count misses a split
+into a word neither knows. The "every break joins" column has no word-list
+limit, since it joins every break the reading could apply to, but it joins
+them one at a time: the two lines on either side of one break, every other
+break read as a space. A match that needs two breaks at once is not
+searched (#3470) — a word split over two unhyphenated breaks ('con' /
+'sen' / 't'), one join beside a hyphen's reading ('con-' / 'sen' / 't'), or
+a statement over three lines whose one break is a space and the other the
+join ('a data' / 'protection im' / 'pact assessment', which the one-break
+search reads as nothing while 'a data pro' / 'tection impact assessment'
+moves `ethics_review`). So "moves no check's status" is a result about
+single joins. The decision does not rest on it being exhaustive: it rests
+on the cost of the reading, which a search over more breaks would only
+raise.
 
 A version PR3 certifies beyond these 22 should be measured first. If a
 check moves on it, the reading or a "not certifiable" flag needs deciding
@@ -112,7 +124,9 @@ then.
 
 **Decision.** The bound `MIXED_WINDOW_LINES = 6` stays.
 - Widening the window to 10 lines or to 14 lines moves no check's matching
-  lines on any of the 22 versions.
+  lines on any of the 22 versions. That is a result at those two widths; a
+  statement whose hyphens need different readings over more than 14 lines
+  was not searched.
 - A window costs 3^k - 3 readings for its k hyphenated breaks. At the
   current 6 lines the most breaks in one window is 4 (VOICE, 78 readings),
   and VOICE has 104 windows with two or more. The wider windows cost more

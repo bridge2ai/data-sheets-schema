@@ -20,10 +20,14 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
   `protec-` `tion impact`). A word split with no hyphen is not read that way,
   nor a statement over more than six lines whose hyphens need different
   readings; every entry's note says so. Both limits were measured over the
-  22 bundle versions provenance records name, and neither moves a check's
-  status on any of them; reading every break as nothing only adds lines to
-  `version_string` entries that are `unknown` already
-  (`notes/attainability_line_splits_2026-09-29.md`, #3199, #3246, #3438).
+  22 bundle versions provenance records name, within stated bounds, and
+  neither moved a check's status there: reading each break as nothing, one
+  break at a time, only adds lines to `version_string` entries that are
+  `unknown` already, and widening the mixed window to 10 or 14 lines moves
+  no check's lines. A match needing two unhyphenated joins at once, or one
+  join beside another break's reading, was not searched, nor a window wider
+  than 14 lines, so these are lower bounds
+  (`notes/attainability_line_splits_2026-09-29.md`, #3199, #3246, #3438, #3470).
   Measure a new version before certifying it:
   `python scripts/measure_unhyphenated_line_splits.py --compare-window 10`.
 - **A valid file's deterministic entries are the generator's output**, type
@@ -59,7 +63,8 @@ A credit on an item only a route entry marks absent (E1.1, whose persistent-URI
 route no pattern settles) is listed as `credited_on_other_route` for a curator
 to read, and is neither a finding nor a `--strict` failure. An evaluation
 that cannot be read — not UTF-8, not JSON, an element with no `id` — or whose
-record's provenance cannot be read is reported on its own row as `unreadable`
+record's provenance cannot be read, or names a bundle version whose
+attainability file name cannot be looked up (#3469), is reported on its own row as `unreadable`
 with the file and the error, counted apart, and fails the run with or without
 `--strict`; the evaluations after it are still reported.
 
