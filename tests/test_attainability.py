@@ -679,7 +679,7 @@ def test_a_file_that_decides_nothing_for_the_evaluations_rubric_is_reported_unch
     out = capsys.readouterr().out
     assert f"{r10}: 9b2ef4b6 — " in out and " — rubric10 checked against E1.1 route doi_rrid, E4.4, E10.2\n" in out
     assert f"{r20}: 9b2ef4b6 — " in out and " — unchecked: the file pins no rubric20 text" in out
-    assert out.rstrip().endswith("2 evaluation(s), 2 on a bundle version with an attainability file, "
+    assert out.rstrip().endswith("2 evaluation(s), 2 on a bundle version with a valid attainability file, "
                                  "1 checked against at least one absence, 0 finding(s)")
 
 
@@ -1016,7 +1016,7 @@ def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checke
     assert f"{broken}: bundle unknown — unreadable: {why}" in out
     assert "\0" not in out                   # a NUL in the record is never printed raw (#3541)
     assert out.count(" — rubric10 checked against E1.1 route doi_rrid, E4.4, E10.2\n") == 2   # the one after it too
-    assert out.rstrip().endswith("3 evaluation(s), 1 that could not be read, 2 on a bundle version with an "
+    assert out.rstrip().endswith("3 evaluation(s), 1 that could not be read, 2 on a bundle version with a valid "
                                  "attainability file, 2 checked against at least one absence, 0 finding(s)")
 
 
@@ -1061,3 +1061,169 @@ def test_a_nul_in_the_provenance_lookup_path_is_unreadable_not_missing(tmp_path,
     assert at.main(["credited", "--strict", str(good), str(broken), str(good)]) == 1
     out = capsys.readouterr().out
     assert "\0" not in out and out.count(" — rubric10 checked against ") == 2
+
+
+def test_an_invalid_attainability_file_is_reported_per_row_and_the_next_still_checked(tmp_path, capsys):
+    """#3407: `credited_report` loaded each bundle version's file outside
+    the per-row handler, so an invalid one raised out of `credited`, which
+    printed INVALID and returned 1 with no row after it reported. Each row
+    on that file now names it and its problems, is counted apart, and the
+    file is validated once however many rows name it; the rows after it are
+    still checked and the run still fails, with or without --strict."""
+    att = tmp_path / "attainability"
+    att.mkdir()
+    (att / CHORUS_FILE.name).write_bytes(CHORUS_FILE.read_bytes())
+    bad_md5 = "0" * 32
+    invalid = att / f"CHORUS_preprocessed_{bad_md5}.yaml"
+    invalid.write_text(CHORUS_FILE.read_text(encoding="utf-8") + "overrides: {}\n", encoding="utf-8")
+    for label, md5 in (("GOOD", CHORUS_MD5), ("BAD", bad_md5)):
+        (tmp_path / f"{label}.yaml").write_text(
+            yaml.safe_dump({"inputs": {"bundle_path": CHORUS, "bundle_md5": md5}}), encoding="utf-8")
+    paths = {}
+    for label in ("GOOD", "BAD"):
+        evaluation = _chorus_evaluation()
+        evaluation["d4d_file"] = f"data/d4d_concatenated/claudecode_agent/{label}/CHORUS_d4d.yaml"
+        paths[label] = tmp_path / f"{label}_evaluation.json"
+        paths[label].write_text(json.dumps(evaluation), encoding="utf-8")
+    order = [paths["GOOD"], paths["BAD"], paths["BAD"], paths["GOOD"]]
+
+    def where(project, method, label):
+        return tmp_path / f"{label}.yaml"
+
+    with mock.patch.object(pv, "record_path_for", side_effect=where), \
+            mock.patch.object(at, "load", wraps=at.load) as loads:
+        first, middle, again, last = at.credited_report(order, att)
+        assert sorted(Path(c.args[0]).name for c in loads.call_args_list) == sorted([CHORUS_FILE.name, invalid.name])
+    assert first == last and first["unchecked"] is None and first["invalid"] is False
+    assert first["absences_checked"] == ["E1.1 route doi_rrid", "E4.4", "E10.2"]
+    assert middle == {**again, "evaluation": str(paths["BAD"])}
+    assert (middle["invalid"], middle["unreadable"], middle["attainability"], middle["bundle"]["md5"]) == (
+        True, False, str(invalid), bad_md5)
+    assert (middle["absences_checked"], middle["findings"]) == ([], [])
+    assert middle["unchecked"].startswith("the attainability file is invalid: unknown keys overrides; "), middle
+    assert f"file name {invalid.name} is not {CHORUS_FILE.name}" in middle["unchecked"]
+
+    real = at.credited_report
+    with mock.patch.object(pv, "record_path_for", side_effect=where), \
+            mock.patch.object(at, "credited_report", side_effect=lambda p: real(p, att)):
+        assert at.main(["credited", *map(str, order)]) == 1
+    out = capsys.readouterr().out
+    assert "INVALID" not in out
+    assert out.count(f"{bad_md5[:8]} — {invalid} — invalid: the attainability file is invalid: unknown keys "
+                     "overrides; ") == 2
+    assert out.count(" — rubric10 checked against E1.1 route doi_rrid, E4.4, E10.2\n") == 2   # the one after it too
+    assert out.rstrip().endswith("4 evaluation(s), 2 on an invalid attainability file, 2 on a bundle version "
+                                 "with a valid attainability file, 2 checked against at least one absence, "
+                                 "0 finding(s)")
+
+
+# -- the certification gate (#3408) ------------------------------------------
+
+def _lines(text):
+    return at._lines_by_chunk(text, dict(DEFAULT_RULE))[1]
+
+
+def test_the_gate_reads_the_breaks_the_entries_do_not():
+    """#3408: a check with no matching line under `matching_lines` is
+    reported by the gate when a match crosses up to two breaks read as
+    nothing, or needs hyphenated breaks read each on its own over ten
+    lines rather than six. Neither needs a word list."""
+    consent = at.CHECKS_BY_NAME["consent_text"]
+    ethics = at.CHECKS_BY_NAME["ethics_review"]
+    for text in ("Participants gave con\nsent to take part.", "Participants gave con\nsen\nt to take part.",
+                 "Participants gave con-\nsen\nt to take part."):
+        assert at.matching_lines(consent.pattern, _lines(text)) == [], text
+        [reason] = at.line_split_gate(_lines(text), [consent])["consent_text"]
+        assert reason.startswith("a match across up to 2 line break(s) read as nothing, on line(s) 1, 2"), reason
+    assert at.line_split_gate(_lines("Participants gave co\nns\nen\nt to take part."), [consent]) == {}  # 3 joins
+    # #3672: one join, but over four lines, is outside the gate's three-line
+    # runs; the same statement over three lines is seen. The README, the note
+    # and the docstrings state this limit, and this pins it.
+    four, three = "a data\nprotection\nim\npact assessment was done", "a data\nprotection im\npact assessment was done"
+    assert at.matching_lines(ethics.pattern, _lines(four)) == []
+    assert at.line_split_gate(_lines(four), [ethics]) == {}
+    assert at.line_split_gate(_lines(three), [ethics]) == {"ethics_review": [
+        "a match across up to 2 line break(s) read as nothing, on line(s) 1, 2, 3"]}
+    wide = "a data-\n-\n-\n-\n-\n-\nprotec-\ntion impact assessment"
+    assert at.matching_lines(ethics.pattern, _lines(wide)) == []
+    assert at.line_split_gate(_lines(wide), [ethics]) == {"ethics_review": [
+        "a match with the hyphenated breaks read each on its own within 10 lines, on line(s) 1, 2, 3, 4, 5, 6, "
+        "7, 8"]}
+    assert at.line_split_gate(_lines("Nothing is stated\nhere at all."), at.CHECKS) == {}
+
+
+def test_the_join_readings_search_up_to_k_breaks_at_once():
+    """#3481: at one join the search reads the two lines around one break;
+    at two, every run of two breaks every way with at least one join, a
+    hyphen's break under each of its readings. A match that only touches a
+    joined break crosses nothing (#3471)."""
+    pattern = at.CHECKS_BY_NAME["consent_text"].pattern
+    one, two = "we got con\nsent here", "we got con\nsen\nt here"
+    assert at.join_matching_lines(pattern, _lines(one), 1) == {1, 2}
+    assert at.join_matching_lines(pattern, _lines(two), 1) == set()
+    assert at.join_matching_lines(pattern, _lines(two), 2) == {1, 2, 3}
+    assert at.join_matching_lines(pattern, _lines("we got con-\nsen\nt here"), 2) == {1, 2, 3}
+    assert at.join_matching_lines(pattern, _lines("we got consent\nfrom all"), 2) == set()
+    assert at.join_matching_lines(pattern, _lines("we got co\nns\nen\nt here"), 3) == {1, 2, 3, 4}
+    # #3672: no line outside the run is read, so one join in a match over
+    # four lines needs a run of three breaks, not two.
+    ethics, four = at.CHECKS_BY_NAME["ethics_review"].pattern, "a data\nprotection\nim\npact assessment"
+    assert at.join_matching_lines(ethics, _lines(four), 2) == set()
+    assert at.join_matching_lines(ethics, _lines(four), 3) == {1, 2, 3, 4}
+    assert at.joinable_breaks(_lines("10.\n1234/x\n\ny\ncon-\nsent\nz")) == {1, 4, 6}
+
+
+def _gated_bundle(tmp_path, text):
+    bundle = tmp_path / "B_preprocessed.txt"
+    bundle.write_text(text, encoding="utf-8")
+    return at.build_document(str(bundle))
+
+
+def test_write_document_refuses_an_absence_the_gate_moves_and_writes_nothing(tmp_path):
+    """#3408: `write_document` is where a bundle version is certified, so a
+    deterministic `not_stated_in_source` entry the gate moves is refused
+    there, naming the item and the lines, and no file is written. A curator
+    entry for the item is kept in place of the deterministic one, which is
+    the way past the gate once someone has read the lines."""
+    doc = _gated_bundle(tmp_path, "Participants gave con\nsent to take part.\n")
+    assert _entry(at.Attainability(None, doc, {}, {}), "E4.4")["status"] == "not_stated_in_source"
+    att = tmp_path / "attainability"
+    with pytest.raises(at.AttainabilityError) as refused:
+        at.write_document(doc, att)
+    [problem] = refused.value.problems
+    assert problem.startswith("E4.4 would be certified not_stated_in_source by deterministic:consent_text, but "
+                              "a match across up to 2 line break(s) read as nothing, on line(s) 1, 2; "), problem
+    assert not att.exists()
+
+    curated = {**doc, "entries": [e for e in doc["entries"] if e["item_id"] != "E4.4"] + [{
+        "rubric": "rubric10", "item_id": "E4.4", "route": None, "status": "unknown", "method": "curator",
+        "evidence": {"snippets": []}, "note": "Lines 1-2 read 'con' 'sent': consent, split with no hyphen."}]}
+    att.mkdir()
+    (att / at.file_name(doc)).write_text(at.dump(curated), encoding="utf-8")
+    target = at.write_document(doc, att)
+    assert [e["method"] for e in at.load(target).document["entries"] if e["item_id"] == "E4.4"] == ["curator"]
+
+    (tmp_path / "clean").mkdir()
+    clean = _gated_bundle(tmp_path / "clean", "Nothing is stated\nhere at all.\n")
+    assert len(at.load(at.write_document(clean, att)).entries("not_stated_in_source")) == len(at.CHECKS)
+
+
+def test_derive_write_prints_the_refusal_and_exits_1(tmp_path, capsys):
+    doc = _gated_bundle(tmp_path, "Participants gave con\nsent to take part.\n")
+    att = tmp_path / "attainability"
+    real = at.write_document
+    with mock.patch.object(at, "write_document", side_effect=lambda d: real(d, att)):
+        assert at.main(["derive", "--bundle", doc["bundle"]["path"], "--write"]) == 1
+    out = capsys.readouterr().out
+    assert out.startswith(f"REFUSED {att / at.file_name(doc)}\n  - E4.4 would be certified"), out
+    assert not att.exists()
+
+
+def test_the_committed_chorus_absences_pass_the_gate():
+    """The one committed file's three `not_stated_in_source` entries hold
+    under the gate's readings, as they did in the 22-version measure
+    (notes/attainability_line_splits_2026-09-29.md)."""
+    doc = _git_or_skip(lambda: at.build_document(CHORUS, md5=CHORUS_MD5))
+    assert len(doc["entries"]) and [e["item_id"] for e in doc["entries"] if e["status"] == "not_stated_in_source"] \
+        == ["E1.1", "E4.4", "E10.2"]
+    assert at._certification_problems(doc, doc["entries"]) == []

@@ -21,15 +21,27 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
   nor a statement over more than six lines whose hyphens need different
   readings; every entry's note says so. Both limits were measured over the
   22 bundle versions provenance records name, within stated bounds, and
-  neither moved a check's status there: reading each break as nothing, one
-  break at a time, only adds lines to `version_string` entries that are
-  `unknown` already, and widening the mixed window to 10 or 14 lines moves
-  no check's lines. A match needing two unhyphenated joins at once, or one
-  join beside another break's reading, was not searched, nor a window wider
-  than 14 lines, so these are lower bounds
-  (`notes/attainability_line_splits_2026-09-29.md`, #3199, #3246, #3438, #3470).
-  Measure a new version before certifying it:
-  `python scripts/measure_unhyphenated_line_splits.py --compare-window 10`.
+  neither moved a check's status there: reading breaks as nothing, up to two
+  consecutive breaks at once in every combination (#3481), only adds lines to
+  `version_string` entries that are `unknown` already, and widening the mixed
+  window to 10 or 14 lines moves no check's lines. The join search reads
+  only the three lines around each run of two breaks. So a match needing
+  three joins at once, a join and a hyphen's reading on breaks not both in
+  one run of two, or even a single join in a match that runs over four or
+  more lines ('a data' / 'protection' / 'im' / 'pact assessment', #3672) were
+  not searched, nor a mixed window wider than 14 lines, so these are lower
+  bounds (`notes/attainability_line_splits_2026-09-29.md`, #3199, #3246,
+  #3438, #3470).
+- **Certifying an absence is gated** (#3408). `derive --write` refuses a
+  file whose deterministic `not_stated_in_source` entry gains a match when up
+  to two consecutive breaks are read as nothing, or when the hyphenated
+  breaks are read each on its own over 10 lines; it names the item and the
+  lines and writes nothing. It searches what the measure searches, with the
+  same limits: a match over more than three lines that needs a join is not
+  seen (#3672). A curator entry for the item, which a rewrite
+  keeps in place of the deterministic one, is the way past it. The gate
+  reads no word list. The full measure is still
+  `python scripts/measure_unhyphenated_line_splits.py --compare-window 10 --joins-per-window 2`.
 - **A valid file's deterministic entries are the generator's output**, type
   for type: `hit_count: false` or snippet lines `[45.0, 45]` are refused,
   although Python compares them equal to `0` and `[45, 45]`. Every entry
@@ -70,7 +82,10 @@ method or label, #3578), or names a bundle version whose
 attainability file name cannot be looked up — a component too long for
 the file system, or a NUL byte in its path or md5 (#3469, #3541) — is reported on its own row as `unreadable`
 with the file and the error, counted apart, and fails the run with or without
-`--strict`; the evaluations after it are still reported.
+`--strict`; the evaluations after it are still reported. So is an
+evaluation on a bundle version whose attainability file is invalid: its row
+says `invalid` with the file's problems, the rows on that file are counted
+apart, the file is validated once, and the run fails (#3407).
 
 | File | Bundle | Entries |
 |---|---|---|

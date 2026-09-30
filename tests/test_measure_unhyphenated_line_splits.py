@@ -206,7 +206,8 @@ def test_every_break_joins_is_searched_one_break_at_a_time(m):
     """#3470: the every-break column joins the two lines around one break
     and reads no other line, so a match needing two breaks at once (or a
     third line at all) is not found (#3490). The note and README call the column a lower bound for
-    that reason; these pin the cases they name."""
+    that reason; these pin the cases they name. `--joins-per-window 2`
+    finds them (#3481, the test below); this column keeps its scope."""
     assert m.measure("Participants gave con\nsent to take part.")["moved_if_every_break_joins"] == {
         "consent_text": "status"}
     for text in ("Participants gave con\nsen\nt to take part.",       # two unhyphenated breaks
@@ -215,3 +216,52 @@ def test_every_break_joins_is_searched_one_break_at_a_time(m):
         assert m.measure(text)["moved_if_every_break_joins"] == {}, text
     assert m.measure("a data pro\ntection impact assessment was done")["moved_if_every_break_joins"] == {
         "ethics_review": "status"}
+
+
+def test_joins_per_window_searches_up_to_k_breaks_at_once(m):
+    """#3481: `--joins-per-window K` reads every run of K consecutive breaks
+    every way in which at least one joins, a hyphen's break under each of
+    its readings. At K=2 it finds the three cases the one-break column
+    misses; a word split over three unhyphenated breaks needs K=3."""
+    for text, moved in (("Participants gave con\nsen\nt to take part.", {"consent_text": "status"}),
+                        ("Participants gave con-\nsen\nt to take part.", {"consent_text": "status"}),
+                        ("a data\nprotection im\npact assessment was done", {"ethics_review": "status"})):
+        got = m.measure(text, joins_per_window=2)
+        assert got["moved_if_every_break_joins"] == {}, text
+        assert got["moved_if_up_to_k_breaks_join"] == moved, text
+    three = "Participants gave co\nns\nen\nt to take part."
+    assert m.measure(three, joins_per_window=2)["moved_if_up_to_k_breaks_join"] == {}
+    assert m.measure(three, joins_per_window=3)["moved_if_up_to_k_breaks_join"] == {"consent_text": "status"}
+    assert "moved_if_up_to_k_breaks_join" not in m.measure(three)
+    # #3672: one join, but a match over four lines, is outside K=2's runs.
+    four = "a data\nprotection\nim\npact assessment was done"
+    assert m.measure(four, joins_per_window=2)["moved_if_up_to_k_breaks_join"] == {}
+    assert m.measure(four, joins_per_window=3)["moved_if_up_to_k_breaks_join"] == {"ethics_review": "status"}
+
+
+@pytest.mark.parametrize("text", [TEXT, "This documentation is for v\n2.0.0 of the data.",
+                                  "This documentation is for v\n2 of the data.", "We obtained consent\nfrom all.",
+                                  "consent was con\nsent twice, consent", "We obtained c\nonsent from all."])
+def test_one_join_per_window_is_the_every_break_column(m, text):
+    """K=1 is the every-break column read by the module's search
+    (`attainability.join_matching_lines`) rather than the script's own, so
+    the two must agree; K=2 reads every single join too."""
+    got = m.measure(text, joins_per_window=1)
+    assert got["moved_if_up_to_k_breaks_join"] == got["moved_if_every_break_joins"], text
+    assert m.measure(text, joins_per_window=2)["moved_if_up_to_k_breaks_join"] == got["moved_if_every_break_joins"]
+
+
+def test_joins_per_window_adds_a_column_and_refuses_zero(m, tmp_path, capsys):
+    got = m.measure("Participants gave con\nsen\nt to take part.", joins_per_window=2)
+    result = {"words": {"path": None, "sha256": None, "entries": 0}, "mixed_window_lines": 6,
+              "compare_window": None, "joins_per_window": 2, "unreadable_records": [],
+              "rows": [{"bundle": "x/B.txt", "md5": "f" * 32, "records": 1, **got},
+                       {"bundle": "x/C.txt", "md5": "c" * 32, "records": 1, "error": "gone"}]}
+    table = m.markdown(result).splitlines()
+    assert table[2].endswith("| Most in one | Moved if up to 2 breaks join |")
+    assert table[3].endswith("|---:|---|")
+    assert table[4].endswith("| none | 0 | 0 | 0 | consent_text (status) |"), table[4]
+    assert all(line.count("|") == table[2].count("|") for line in table[2:6])
+    assert "Moved if up to" not in m.markdown({**result, "joins_per_window": None})
+    assert m.main(["--no-word-list", "--corpus", str(tmp_path), "--joins-per-window", "0"]) == 2
+    assert "--joins-per-window must be at least 1" in capsys.readouterr().err

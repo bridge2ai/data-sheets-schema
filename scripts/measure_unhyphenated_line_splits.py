@@ -35,6 +35,16 @@ are certified:
   whose one break is a space and the other the join ('a data' /
   'protection im' / 'pact assessment'). So both columns are lower bounds
   (#3470);
+- with `--joins-per-window K`, `moved_if_up_to_k_breaks_join`: the same
+  for every run of K consecutive breaks read every way in which at least
+  one of them joins (`attainability.join_matching_lines`, #3481): a
+  joinable break as a space or as nothing, a break after a hyphen under
+  each of the hyphen readings, any other break a space. That finds the
+  three cases above at K=2; a match needing more than K joins at once, or a
+  join and a hyphen's reading on breaks not both in one run of K, is still
+  not searched, and nor is any match over more than the run's K+1 lines,
+  even one needing a single join ('a data' / 'protection' / 'im' / 'pact
+  assessment' at K=2, #3672). K=1 is the every-break column, read by the module's search;
 - the cost of those windows (#3246): hyphenated breaks, the windows of
   `MIXED_WINDOW_LINES` lines holding two or more, and the most in one
   (each such window is read 3^k - 3 ways for its k breaks); and, with
@@ -61,6 +71,7 @@ Usage:
     poetry run python scripts/measure_unhyphenated_line_splits.py --json
     poetry run python scripts/measure_unhyphenated_line_splits.py --words /path/to/wordlist
     poetry run python scripts/measure_unhyphenated_line_splits.py --compare-window 10
+    poetry run python scripts/measure_unhyphenated_line_splits.py --joins-per-window 2
 """
 from __future__ import annotations
 
@@ -183,16 +194,26 @@ def window_moves(lines: dict[int, tuple[str, str]], window: int,
     """Check name -> [lines now, lines under `window`] for every check whose
     matching lines differ when the hyphenated breaks are read each on its
     own within `window` consecutive lines rather than `MIXED_WINDOW_LINES`."""
-    kept = at.MIXED_WINDOW_LINES
-    at.MIXED_WINDOW_LINES = window
-    try:
-        wider = {c.name: set(at.matching_lines(c.pattern, lines)) for c in at.CHECKS}
-    finally:
-        at.MIXED_WINDOW_LINES = kept
+    wider = {c.name: set(at.matching_lines(c.pattern, lines, window)) for c in at.CHECKS}
     return {name: [len(hits[name]), len(wider[name])] for name in hits if wider[name] != hits[name]}
 
 
-def measure(text: str, dictionary: set[str] = frozenset(), compare_window: int | None = None) -> dict[str, Any]:
+def joined_moves(lines: dict[int, tuple[str, str]], joins: int, hits: dict[str, set[int]]) -> dict[str, str]:
+    """Check name -> `status` or `lines`, as `moved_checks` says them, for a
+    match across a break read as nothing in some run of up to `joins`
+    consecutive breaks (`attainability.join_matching_lines`, #3481)."""
+    out = {}
+    for check in at.CHECKS:
+        joined = at.join_matching_lines(check.pattern, lines, joins)
+        if joined and not hits[check.name]:
+            out[check.name] = "status"
+        elif joined - hits[check.name]:
+            out[check.name] = "lines"
+    return out
+
+
+def measure(text: str, dictionary: set[str] = frozenset(), compare_window: int | None = None,
+            joins_per_window: int | None = None) -> dict[str, Any]:
     """The counts the module docstring names, for one bundle's text."""
     raw_lines = text.split("\n")
     words = set(dictionary) | interior_words(raw_lines)
@@ -217,6 +238,8 @@ def measure(text: str, dictionary: set[str] = frozenset(), compare_window: int |
         wider_mixed, wider_most = window_load(lines, compare_window)
         wider = {"window_moves": window_moves(lines, compare_window, hits),
                  "compare_mixed_windows": wider_mixed, "compare_most_in_one_window": wider_most}
+    if joins_per_window:
+        wider["moved_if_up_to_k_breaks_join"] = joined_moves(lines, joins_per_window, hits)
     return {"lines": len(raw_lines), "letter_breaks": len(breaks), "joinable_breaks": len(joinable),
             "split_words": splits, "wraps_that_join": joins, "moved": moved,
             "moved_if_every_break_joins": moved_all, **wider,
@@ -232,7 +255,8 @@ def load_words(path: Path | None) -> tuple[set[str], dict[str, Any]]:
     return words, {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest(), "entries": len(words)}
 
 
-def report(corpus: Path, words_path: Path | None, compare_window: int | None = None) -> dict[str, Any]:
+def report(corpus: Path, words_path: Path | None, compare_window: int | None = None,
+           joins_per_window: int | None = None) -> dict[str, Any]:
     from data_sheets_schema.corpus import anchored
     dictionary, identity = load_words(words_path)
     versions, unreadable = bundle_versions(anchored(corpus))
@@ -245,30 +269,33 @@ def report(corpus: Path, words_path: Path | None, compare_window: int | None = N
             rows.append({"bundle": path, "md5": md5, "records": records, "error": str(exc)})
             continue
         rows.append({"bundle": path, "md5": md5, "records": records, "source": basis["source"],
-                     **measure(text, dictionary, compare_window)})
+                     **measure(text, dictionary, compare_window, joins_per_window)})
     return {"words": identity, "mixed_window_lines": at.MIXED_WINDOW_LINES, "compare_window": compare_window,
+            "joins_per_window": joins_per_window,
             "unreadable_records": unreadable, "rows": rows}
 
 
 def markdown(result: dict[str, Any]) -> str:
-    words = result["words"]
+    words, k = result["words"], result.get("joins_per_window")
     out = [f"Word list: `{words['path']}` (sha256 `{words['sha256']}`, {words['entries']} entries), "
            "plus each bundle's own line-interior tokens.", "",
            "| Bundle | md5 | Records | Letter/letter breaks | Split words | Wraps that join | Checks moved | "
-           "Breaks joined | Moved if every break joins | Hyphenated breaks | Mixed windows | Most in one |",
-           "|---|---|---:|---:|---|---:|---|---:|---|---:|---:|---:|"]
+           "Breaks joined | Moved if every break joins | Hyphenated breaks | Mixed windows | Most in one |"
+           + (f" Moved if up to {k} breaks join |" if k else ""),
+           "|---|---|---:|---:|---|---:|---|---:|---|---:|---:|---:|" + ("---|" if k else "")]
     for r in result["rows"]:
         if "error" in r:
             out.append(f"| `{Path(r['bundle']).name}` | `{r['md5'][:8]}` | {r['records']} | "
-                       f"not measured: {r['error']} | | | | | | | | |")
+                       f"not measured: {r['error']} | | | | | | | | |" + (" |" if k else ""))
             continue
         splits = ", ".join(f"{s['tail']}/{s['head']} (line {s['line']})" for s in r["split_words"]) or "0"
-        moved, moved_all = (", ".join(f"{k} ({v})" for k, v in sorted(m.items())) or "none"
-                            for m in (r["moved"], r["moved_if_every_break_joins"]))
+        moved, moved_all, moved_k = (", ".join(f"{name} ({v})" for name, v in sorted(m.items())) or "none"
+                                     for m in (r["moved"], r["moved_if_every_break_joins"],
+                                               r.get("moved_if_up_to_k_breaks_join", {})))
         out.append(f"| `{Path(r['bundle']).name}` | `{r['md5'][:8]}` | {r['records']} | {r['letter_breaks']} | "
                    f"{splits} | {r['wraps_that_join']} | {moved} | {r['joinable_breaks']} | {moved_all} | "
                    f"{r['hyphenated_breaks']} | "
-                   f"{r['mixed_windows']} | {r['most_in_one_window']} |")
+                   f"{r['mixed_windows']} | {r['most_in_one_window']} |" + (f" {moved_k} |" if k else ""))
     if result["compare_window"]:
         moved = [f"`{Path(r['bundle']).name}` `{r['md5'][:8]}`: "
                  + ", ".join(f"{k} {a} -> {b} lines" for k, (a, b) in sorted(r["window_moves"].items()))
@@ -283,8 +310,8 @@ def markdown(result: dict[str, Any]) -> str:
             out += ["", f"At {result['compare_window']} lines the most hyphenated breaks in one window is "
                         f"{top['compare_most_in_one_window']} (`{Path(top['bundle']).name}` `{top['md5'][:8]}`, "
                         f"{top['compare_mixed_windows']} windows with two or more), read "
-                        f"{3 ** top['compare_most_in_one_window'] - 3} ways; the table's last two columns "
-                        f"are at {result['mixed_window_lines']} lines."]
+                        f"{3 ** top['compare_most_in_one_window'] - 3} ways; the table's Mixed windows and "
+                        f"Most in one columns are at {result['mixed_window_lines']} lines."]
     if result["unreadable_records"]:
         out += ["", "Provenance records that could not be read: " + "; ".join(result["unreadable_records"])]
     return "\n".join(out) + "\n"
@@ -300,6 +327,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--compare-window", type=int, metavar="N",
                         help="also report the checks whose matching lines differ with a mixed-reading "
                              "window of N lines (slow: the readings grow as 3^k per window)")
+    parser.add_argument("--joins-per-window", type=int, metavar="K",
+                        help="also report the checks a match moves when up to K consecutive breaks are read "
+                             "as nothing at once, every combination (#3481)")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     words = None if args.no_word_list else args.words
@@ -309,7 +339,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.compare_window is not None and args.compare_window < 2:
         print("--compare-window must be at least 2 lines", file=sys.stderr)
         return 2
-    result = report(args.corpus, words, args.compare_window)
+    if args.joins_per_window is not None and args.joins_per_window < 1:
+        print("--joins-per-window must be at least 1 break", file=sys.stderr)
+        return 2
+    result = report(args.corpus, words, args.compare_window, args.joins_per_window)
     sys.stdout.write(json.dumps(result, indent=2) + "\n" if args.json else markdown(result))
     # The table is printed either way, but a corpus with a record that could
     # not be read is incomplete, and that is not a success (#3579).

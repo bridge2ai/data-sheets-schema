@@ -83,6 +83,26 @@ deterministic entries are. A file that cannot be read, is not UTF-8 or
 names a path no file can have is reported with its problems like any
 other invalid file, not raised past them (#3180, #3217).
 
+**Writing an absence is gated** (#3408). `write_document`, where `derive
+--write` certifies a bundle version, refuses a deterministic
+`not_stated_in_source` entry when the reading the entries leave out gives
+its check a match on those bytes: a break with no hyphen read as nothing,
+up to `GATE_JOINS_PER_WINDOW` (two) consecutive breaks at once
+(`join_matching_lines`, #3481), or the hyphenated breaks read each on its
+own over `GATE_COMPARE_WINDOW` (ten) lines. The join search reads only the
+three lines around each run of two breaks, so it does not see a match that
+needs three joins, nor one that needs a single join but runs over four or
+more lines ('a data' / 'protection' / 'im' / 'pact assessment', #3672): an
+absence like that is certified without the gate seeing it. No file is
+written; a curator
+entry for the item, kept in place of the deterministic one, is the way
+past it once someone has read the lines. The gate reads no word list, so
+it runs wherever `derive` does. On the 22 versions the decisions in
+notes/attainability_line_splits_2026-09-29.md rest on it refuses nothing:
+the only absences are on the two CHORUS document versions, and they hold. The
+validator does not run it: a valid file's deterministic entries are what
+their check writes, which the gate does not change.
+
 `credited_despite_absence` is the generator-side check the issue asks
 for: items an evaluation credited although the bundle it scored was
 marked `not_stated_in_source` for them — content from outside the bundle,
@@ -92,7 +112,10 @@ is not one: the credit may rest on another route, so it is listed as
 nor failed by `credited --strict` (#3219). An evaluation that is not JSON,
 or whose items cannot be keyed, or whose record's provenance cannot be read,
 is reported on its own row as `unreadable` and fails the run; the
-evaluations after it are still reported (#3200). Nothing here changes a score: the rubric, its
+evaluations after it are still reported (#3200). So is an evaluation on a
+bundle version whose attainability file is not valid: `invalid`, with the
+file's problems, counted apart, the file validated once however many rows
+name it (#3407). Nothing here changes a score: the rubric, its
 agents and every evaluation stay as they are, and reporting an
 attained-over-attainable basis is a later change.
 """
@@ -354,19 +377,22 @@ def _hyphenated(lines: dict[int, tuple[str, str]]) -> set[int]:
     return {n for n, (_, text) in lines.items() if text.rstrip().endswith("-")}
 
 
-def _readings(lines: dict[int, tuple[str, str]]) -> Iterable[tuple[str, list[tuple[int, int, int]]]]:
+def _readings(lines: dict[int, tuple[str, str]],
+              window_lines: int | None = None) -> Iterable[tuple[str, list[tuple[int, int, int]]]]:
     """The bundle's text read whole, once per way of reading its line breaks
     after a hyphen (`HYPHEN_READINGS`): every break read alike over the whole
-    text, then — in every run of `MIXED_WINDOW_LINES` lines holding two or
-    more such breaks — each of those breaks read on its own, every
-    combination that is not all alike (#3238). Each reading comes with every
-    line's `(number, start, end)` span in its text."""
+    text, then — in every run of `MIXED_WINDOW_LINES` lines (or
+    `window_lines`, #3408) holding two or more such breaks — each of those
+    breaks read on its own, every combination that is not all alike
+    (#3238). Each reading comes with every line's `(number, start, end)`
+    span in its text."""
     numbers = sorted(lines)
     hyphenated = _hyphenated(lines)
+    width = window_lines or MIXED_WINDOW_LINES
     for hyphen in HYPHEN_READINGS[:1] + (HYPHEN_READINGS[1:] if hyphenated else ()):
         yield _read(lines, numbers, {n: hyphen for n in hyphenated})
     for start in range(len(numbers)):
-        window = numbers[start:start + MIXED_WINDOW_LINES]
+        window = numbers[start:start + width]
         breaks = [n for n in window[:-1] if n in hyphenated]
         if len(breaks) < 2:
             continue
@@ -375,7 +401,7 @@ def _readings(lines: dict[int, tuple[str, str]]) -> Iterable[tuple[str, list[tup
                 yield _read(lines, window, dict(zip(breaks, combo)))
 
 
-def matching_lines(pattern: str, lines: dict[int, tuple[str, str]]) -> list[int]:
+def matching_lines(pattern: str, lines: dict[int, tuple[str, str]], window_lines: int | None = None) -> list[int]:
     """Every bundle line a match of `pattern` takes a character from (not a
     blank line a match crosses): each line searched alone, and the text
     searched whole under each of `_readings` for the leftmost match at
@@ -384,10 +410,12 @@ def matching_lines(pattern: str, lines: dict[int, tuple[str, str]]) -> list[int]
     Zero lines means no line, and no run of lines under any of the
     readings, carries a match (#3179); a break inside a word with no hyphen
     is not one of them, nor a statement over more than `MIXED_WINDOW_LINES`
-    lines whose hyphenated breaks must be read differently (#3238)."""
+    lines whose hyphenated breaks must be read differently (#3238).
+    `window_lines` widens that run for the certification gate (#3408);
+    every entry is derived at the default."""
     rx = re.compile(pattern)
     hits = {n for n, (_, text) in lines.items() if rx.search(text)}
-    for text, spans in _readings(lines):
+    for text, spans in _readings(lines, window_lines):
         starts = [start for _, start, _ in spans]
         pos = 0
         while (m := rx.search(text, pos)) is not None:
@@ -422,6 +450,115 @@ def deterministic_entry(check: AbsenceCheck, lines: dict[int, tuple[str, str]]) 
                                    "sha256": snippet_sha256(lines, n, n)} for n in hits]},
         "note": f"{check.claim} {LINE_READING} {outcome}",
     }
+
+
+# --------------------------------------------------------------------------
+# Breaks no reading joins, and the gate before certifying an absence
+
+
+#: A line break with no hyphen read as nothing: the two lines joined with
+#: their facing white space removed ('priori' 'ty'). `matching_lines` never
+#: reads a break this way (#3199); the line-split measure and the gate do.
+JOIN = "join"
+#: The certification gate `write_document` runs on every deterministic
+#: `not_stated_in_source` entry it writes (#3408): no match across up to
+#: this many consecutive breaks read as nothing, and none with the
+#: hyphenated breaks read each on its own within this many lines — the
+#: widths the measured versions were checked at
+#: (notes/attainability_line_splits_2026-09-29.md, #3246, #3481). The join
+#: search reads only the `GATE_JOINS_PER_WINDOW` + 1 lines around a run, so
+#: a match wider than that is not searched, even one needing a single join
+#: (#3672).
+GATE_JOINS_PER_WINDOW = 2
+GATE_COMPARE_WINDOW = 10
+
+
+def joinable_breaks(lines: dict[int, tuple[str, str]]) -> set[int]:
+    """The line number of every break the no-hyphen reading could apply to:
+    both lines carry something other than white space, and the first does
+    not end in a hyphen, whose break `matching_lines` reads already (the
+    compound reading is this join). What ends and starts the lines is not
+    judged, so a letter/digit, digit/digit or punctuation break is one
+    (#3438)."""
+    return {n for n, (_, text) in lines.items()
+            if text.strip() and n + 1 in lines and lines[n + 1][1].strip() and not text.rstrip().endswith("-")}
+
+
+def _join_readings(lines: dict[int, tuple[str, str]], joins: int
+                   ) -> Iterable[tuple[str, list[tuple[int, int, int]], list[int]]]:
+    """Every run of `joins` consecutive breaks (`joins` + 1 lines) read every
+    way in which at least one of them is joined (#3481): a joinable break
+    (`joinable_breaks`) as a space or as `JOIN`, a break after a hyphen
+    under each of `HYPHEN_READINGS`, any other a space. Each reading comes
+    with its lines' spans and the offsets of its joined breaks. At `joins` 1 that is each joinable break alone: the two
+    lines around it and no other. No line outside the run is read, so a
+    match that spans more than `joins` + 1 lines is never found here,
+    however few of its breaks join (#3672)."""
+    numbers = sorted(lines)
+    joinable, hyphenated = joinable_breaks(lines), _hyphenated(lines)
+    for start in range(len(numbers) - 1):
+        window = numbers[start:start + joins + 1]
+        breaks = window[:-1]
+        if not joinable.intersection(breaks):
+            continue
+        options = [("space", JOIN) if n in joinable else HYPHEN_READINGS if n in hyphenated else ("space",)
+                   for n in breaks]
+        for combo in itertools.product(*options):
+            if JOIN not in combo:
+                continue                        # a reading with no join is `matching_lines`'s
+            reading = {n: r for n, r in zip(breaks, combo) if r != "space"}
+            text, spans = _read(lines, window, reading)
+            yield text, spans, [stop for n, _, stop in spans if reading.get(n) == JOIN]
+
+
+def join_matching_lines(pattern: str, lines: dict[int, tuple[str, str]], joins: int = 1) -> set[int]:
+    """Every line a match of `pattern` takes a character from, where the
+    match crosses a joined break — takes a character from each side of it —
+    under one of `_join_readings`. A match that only touches the break
+    ('consent' / 'from') is a match on one line as it stands and crosses
+    nothing (#3471). Each start position is searched, as in `matching_lines`."""
+    rx, out = re.compile(pattern), set()
+    for text, spans, cuts in _join_readings(lines, joins):
+        pos = 0
+        while (m := rx.search(text, pos)) is not None:
+            begin, end = m.span()
+            if any(begin < cut < end for cut in cuts):
+                out.update(n for n, start, stop in spans if max(start, begin) < min(stop, end))
+            pos = begin + 1
+    return out
+
+
+def line_split_gate(lines: dict[int, tuple[str, str]], checks: Iterable[AbsenceCheck], *,
+                    joins: int = GATE_JOINS_PER_WINDOW, window_lines: int = GATE_COMPARE_WINDOW
+                    ) -> dict[str, list[str]]:
+    """Check name → what gives it a match the entry's reading does not, for
+    each of `checks`: a match across up to `joins` consecutive breaks read
+    as nothing (`join_matching_lines`), or one with the hyphenated breaks
+    read each on its own within `window_lines` lines. The first reads only
+    the `joins` + 1 lines around each run, so a match that spans more lines
+    than that is not reported, even one needing a single join (#3672).
+    Meant for checks with
+    no matching line, where either is a status the entry would not have
+    (#3408). Reads no word list, so it runs wherever the validator does, and
+    counts every join, the spurious ones included, for a curator to read."""
+    out: dict[str, list[str]] = {}
+    for check in checks:
+        found = []
+        joined = sorted(join_matching_lines(check.pattern, lines, joins))
+        if joined:
+            found.append(f"a match across up to {joins} line break(s) read as nothing, on line(s) "
+                         f"{_some(joined)}")
+        wider = matching_lines(check.pattern, lines, window_lines)
+        if wider:
+            found.append(f"a match with the hyphenated breaks read each on its own within {window_lines} "
+                         f"lines, on line(s) {_some(wider)}")
+        if found:
+            out[check.name] = found
+    return out
+
+
+def _some(numbers: list[int], shown: int = 10) -> str:
+    return ", ".join(map(str, numbers[:shown])) + (f" and {len(numbers) - shown} more" if len(numbers) > shown else "")
 
 
 def rubric_items(raw: bytes, rubric: str) -> dict[str, str]:
@@ -508,7 +645,9 @@ def write_document(document: dict[str, Any], directory: Path = ATTAINABILITY_DIR
     someone made, and a deterministic entry is not written over one. A kept
     entry was read under the existing file's chunk rule and rubric texts, so
     a rewrite that would change either is refused rather than re-keying
-    those readings to chunk ids or item texts nobody read them under."""
+    those readings to chunk ids or item texts nobody read them under. A
+    deterministic `not_stated_in_source` entry the line-split gate moves is
+    refused too (`_certification_problems`, #3408), and nothing is written."""
     from data_sheets_schema.corpus import anchored
     target = anchored(Path(directory)) / file_name(document)
     entries, pinned = document["entries"], dict(document["rubrics"])
@@ -529,9 +668,38 @@ def write_document(document: dict[str, Any], directory: Path = ATTAINABILITY_DIR
         entries = [e for e in entries if _key(e) not in held] + kept
         for rubric, identity in rubrics.items():
             pinned.setdefault(rubric, identity)
+    refused = _certification_problems(document, entries)
+    if refused:
+        raise AttainabilityError(target, refused)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(dump({**document, "rubrics": pinned, "entries": entries}), encoding="utf-8")
     return target
+
+
+def _certification_problems(document: dict[str, Any], entries: list[dict[str, Any]]) -> list[str]:
+    """Why `write_document` must not certify the deterministic
+    `not_stated_in_source` entries among `entries` (#3408): the reading
+    `matching_lines` leaves out — a break with no hyphen read as nothing, up
+    to `GATE_JOINS_PER_WINDOW` at once, or hyphens read each on its own over
+    `GATE_COMPARE_WINDOW` lines — gives the check a match on these bytes, so
+    its absence was measured under a reading that misses one. The 22
+    versions the decision in notes/attainability_line_splits_2026-09-29.md
+    rests on refuse nothing; a new version is checked here rather than by
+    remembering to run the script. A curator or judge entry is not gated: it is a reading."""
+    certifying = [(e, CHECKS_BY_NAME[name]) for e in entries
+                  if e.get("status") == "not_stated_in_source" and isinstance(e.get("method"), str)
+                  and e["method"].startswith("deterministic:")
+                  and (name := e["method"].removeprefix("deterministic:")) in CHECKS_BY_NAME]
+    if not certifying:
+        return []
+    bundle = document["bundle"]
+    raw, _ = resolve_bytes(bundle["path"], md5=bundle["md5"], sha256=bundle["sha256"])
+    _, lines = _lines_by_chunk(raw.decode("utf-8"), document["chunk_rule"])
+    moved = line_split_gate(lines, [check for _, check in certifying])
+    return [f"{_label(entry)} would be certified not_stated_in_source by {entry['method']}, but {reason}; "
+            "a curator must read those lines before this bundle version is certified, and a curator "
+            "entry for the item is kept in place of the deterministic one (#3408)"
+            for entry, check in certifying for reason in moved.get(check.name, [])]
 
 
 def _key(entry: dict[str, Any]) -> tuple:
@@ -988,8 +1156,11 @@ def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINAB
     provenance record cannot be read is `unreadable`, its `unchecked` the
     reason, and the evaluations after it are still reported (#3200) — as
     are those after one whose provenance path carries a NUL byte (#3578) or
-    whose consumed score is not a finite number (#3577)."""
-    loaded: dict[Path, Attainability] = {}
+    whose consumed score is not a finite number (#3577). A row on a bundle
+    version whose attainability file is not valid is `invalid`, its
+    `unchecked` the file's problems, and so is every later row on the same
+    file, which is loaded once (#3407); the rows after it are still read."""
+    loaded: dict[Path, Attainability | AttainabilityError] = {}
     rows = []
     for path in evaluation_paths:
         try:
@@ -1008,8 +1179,17 @@ def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINAB
             got = None
             if doc is not None:
                 if doc not in loaded:
-                    loaded[doc] = load(doc)
+                    try:
+                        loaded[doc] = load(doc)
+                    except AttainabilityError as exc:
+                        loaded[doc] = exc       # not re-validated for each row naming it
                 got = loaded[doc]
+                if isinstance(got, AttainabilityError):
+                    rows.append({"evaluation": str(path), "bundle": bundle, "rubric": evaluation_rubric(evaluation),
+                                 "attainability": str(doc), "absences_checked": [], "findings": [],
+                                 "unchecked": "the attainability file is invalid: " + "; ".join(got.problems),
+                                 "unreadable": False, "invalid": True})
+                    continue
                 try:
                     findings = credited_despite_absence(evaluation, got)
                 except UnreadableEvaluation as exc:
@@ -1019,10 +1199,11 @@ def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINAB
                                                f"{exc}") from exc
         except UnreadableEvaluation as exc:
             rows.append({"evaluation": str(path), "bundle": None, "rubric": None, "attainability": None,
-                         "absences_checked": [], "findings": [], "unchecked": str(exc), "unreadable": True})
+                         "absences_checked": [], "findings": [], "unchecked": str(exc), "unreadable": True,
+                         "invalid": False})
             continue
         row: dict[str, Any] = {"evaluation": str(path), "bundle": bundle, "rubric": evaluation_rubric(evaluation),
-                               "unreadable": False}
+                               "unreadable": False, "invalid": False}
         if got is None:
             row.update(attainability=None, absences_checked=[], findings=[],
                        unchecked="no attainability file for this bundle version" if bundle else
@@ -1060,7 +1241,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "derive":
         doc = build_document(args.bundle, md5=args.md5, sha256=args.sha256)
         if args.write:
-            print(write_document(doc))
+            try:
+                print(write_document(doc))
+            except AttainabilityError as exc:     # a kept reading moved, or the gate refused (#3408)
+                print(f"REFUSED {exc.path}")
+                for problem in exc.problems:
+                    print(f"  - {problem}")
+                return 1
         else:
             sys.stdout.write(dump(doc))
         return 0
@@ -1083,18 +1270,13 @@ def main(argv: list[str] | None = None) -> int:
         if not files:
             print(f"no attainability files under {ATTAINABILITY_DIR}")
         return 1 if failed else 0
-    try:
-        rows = credited_report(args.evaluations)
-    except AttainabilityError as exc:
-        print(f"INVALID {exc.path}")
-        for problem in exc.problems:
-            print(f"  - {problem}")
-        return 1
+    rows = credited_report(args.evaluations)
     findings = to_review = 0
     for row in rows:
         bundle = row["bundle"]
         parts = [bundle["md5"][:8] if bundle else "bundle unknown"] + ([row["attainability"]] if row["attainability"] else [])
-        parts.append(f"{'unreadable' if row['unreadable'] else 'unchecked'}: {row['unchecked']}" if row["unchecked"]
+        kind = "unreadable" if row["unreadable"] else "invalid" if row["invalid"] else "unchecked"
+        parts.append(f"{kind}: {row['unchecked']}" if row["unchecked"]
                      else f"{row['rubric']} checked against {', '.join(row['absences_checked'])}")
         print(f"{row['evaluation']}: " + " — ".join(parts))
         for f in row["findings"]:
@@ -1104,19 +1286,23 @@ def main(argv: list[str] | None = None) -> int:
                 to_review += 1
             route = f" (route {f['route']})" if f["route"] else ""
             print(f"  {f['kind']}: {f['item_id']}{route} {f.get('score', '')} {f.get('detail', '')}".rstrip())
-    covered = sum(1 for row in rows if row["attainability"])
+    invalid = sum(1 for row in rows if row["invalid"])
+    covered = sum(1 for row in rows if row["attainability"] and not row["invalid"])
     checked = sum(1 for row in rows if row["unchecked"] is None)
     unreadable = sum(1 for row in rows if row["unreadable"])
     # A row that could yield no finding is counted apart from a measured zero
-    # (#3181), and one that could not be read apart from both (#3200).
+    # (#3181), one that could not be read apart from both (#3200), and one on
+    # an invalid attainability file apart from all three (#3407).
     print(f"{len(rows)} evaluation(s), "
           + (f"{unreadable} that could not be read, " if unreadable else "")
-          + f"{covered} on a bundle version with an attainability file, "
+          + (f"{invalid} on an invalid attainability file, " if invalid else "")
+          + f"{covered} on a bundle version with a valid attainability file, "
           f"{checked} checked against at least one absence, {findings} finding(s)"
           + (f", {to_review} credit(s) on another route to review" if to_review else ""))
-    # An input that cannot be read fails the run as an INVALID file fails
-    # `check`, with or without --strict: it is not a pass (#3200).
-    return 1 if unreadable or (args.strict and findings) else 0
+    # An input that cannot be read, or an invalid attainability file, fails
+    # the run as an INVALID file fails `check`, with or without --strict: it
+    # is not a pass (#3200, #3407).
+    return 1 if unreadable or invalid or (args.strict and findings) else 0
 
 
 if __name__ == "__main__":
