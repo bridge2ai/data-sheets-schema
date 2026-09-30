@@ -31,7 +31,7 @@ d4d:title\ttitle\tskos:exactMatch\tname\tname\tsemapv:ManualMappingCuration\t1.0
 d4d:description\tdescription\tskos:exactMatch\tdescription\tdescription\tsemapv:ManualMappingCuration\t1.0\td4d:schema\trocrate:schema\tDirect mapping\tmapped
 d4d:keywords\tkeywords\tskos:exactMatch\tkeywords\tkeywords\tsemapv:ManualMappingCuration\t0.9\td4d:schema\trocrate:schema\tArray field\tmapped
 d4d:version\tversion\tskos:closeMatch\tversion\tversion\tsemapv:ManualMappingCuration\t0.8\td4d:schema\trocrate:schema\tType differs\trecommended
-d4d:novel_field\tnovel_field\tsemapv:UnmappedProperty\t\t\tsemapv:UnmappableProperty\t\td4d:schema\t\tNo RO-Crate equivalent\tunmapped
+d4d:novel_field\tnovel_field\tskos:exactMatch\tsssom:NoTermFound\t\tsemapv:UnspecifiedMatching\t\td4d:schema\t\tNo RO-Crate equivalent\tunmapped
 """
         self.temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.tsv', delete=False, encoding='utf-8')
         self.temp_file.write(self.sssom_content)
@@ -113,7 +113,10 @@ d4d:novel_field\tnovel_field\tsemapv:UnmappedProperty\t\t\tsemapv:UnmappableProp
         """Test getting mappings by predicate."""
         mappings = self.reader.get_by_predicate('skos:exactMatch')
 
-        self.assertEqual(len(mappings), 3)
+        # Four: the three exact matches and novel_field's no-match row, which
+        # SSSOM writes as skos:exactMatch sssom:NoTermFound (#3361). The
+        # reader reads rows literally and does not set that row apart.
+        self.assertEqual(len(mappings), 4)
         for mapping in mappings:
             self.assertEqual(mapping.predicate_id, 'skos:exactMatch')
 
@@ -128,7 +131,8 @@ d4d:novel_field\tnovel_field\tsemapv:UnmappedProperty\t\t\tsemapv:UnmappableProp
         """Test getting exact match mappings."""
         mappings = self.reader.get_exact_matches()
 
-        self.assertEqual(len(mappings), 3)
+        # novel_field's sssom:NoTermFound row included, as above (#3361).
+        self.assertEqual(len(mappings), 4)
         for mapping in mappings:
             self.assertEqual(mapping.predicate_id, 'skos:exactMatch')
 
@@ -158,7 +162,9 @@ d4d:novel_field\tnovel_field\tsemapv:UnmappedProperty\t\t\tsemapv:UnmappableProp
         self.assertIsInstance(predicates, set)
         self.assertIn('skos:exactMatch', predicates)
         self.assertIn('skos:closeMatch', predicates)
-        self.assertIn('semapv:UnmappedProperty', predicates)
+        # A no-match row carries a real predicate (#3361), so no
+        # semapv:UnmappedProperty, which SEMAPV does not define.
+        self.assertEqual(predicates, {'skos:exactMatch', 'skos:closeMatch'})
 
     def test_get_statistics(self):
         """Test getting mapping statistics."""
@@ -176,10 +182,10 @@ d4d:novel_field\tnovel_field\tsemapv:UnmappedProperty\t\t\tsemapv:UnmappableProp
         # Verify counts
         self.assertEqual(stats['total_mappings'], 5)
         self.assertEqual(stats['unique_subjects'], 5)
-        self.assertEqual(stats['predicates'], 3)
+        self.assertEqual(stats['predicates'], 2)
 
-        # Verify predicate counts
-        self.assertEqual(stats['predicate_counts']['skos:exactMatch'], 3)
+        # Verify predicate counts (novel_field's no-match row is exactMatch)
+        self.assertEqual(stats['predicate_counts']['skos:exactMatch'], 4)
         self.assertEqual(stats['predicate_counts']['skos:closeMatch'], 1)
 
         # Verify status counts

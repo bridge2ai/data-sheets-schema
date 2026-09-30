@@ -616,14 +616,12 @@ class TestOnlyCuratedRowsClaimCuration(_Committed):
                     continue
                 with self.subTest(table=table, slot=slot):
                     self.assertEqual((row["object_id"], float(row["confidence"])),
-                                     ("", 0.0))
-                    self.assertTrue(row["predicate_id"].startswith("semapv:"))
+                                     ("sssom:NoTermFound", 0.0))
+                    self.assertEqual(
+                        (row["predicate_id"], row["mapping_justification"]),
+                        ("skos:exactMatch", "semapv:UnspecifiedMatching"))
                     if row["mapping_status"] == "novel_d4d":
                         novel += 1
-                        self.assertEqual(
-                            (row["predicate_id"], row["mapping_justification"]),
-                            ("semapv:UnmappedProperty",
-                             "semapv:UnspecifiedMatching"))
                         self.assertIn("not curated", row["comment"])
         self.assertGreaterEqual(novel, 3 * 15, "too few novel_d4d rows to test")
 
@@ -670,6 +668,81 @@ class TestOnlyCuratedRowsClaimCuration(_Committed):
                 with self.subTest(slot=other):
                     self.assertEqual(r["needs_slot_uri"],
                                      self.uri[other]["needs_slot_uri"])
+
+
+def sssom_justification_pattern():
+    """The ``mapping_justification`` pattern of the SSSOM schema the
+    installed ``sssom`` package ships: the SEMAPV terms SSSOM admits."""
+    import yaml
+    try:
+        import sssom_schema
+    except ImportError:
+        return None
+    path = Path(sssom_schema.__file__).parent / "schema" / "sssom_schema.yaml"
+    slots = yaml.safe_load(path.read_text(encoding="utf-8"))["slots"]
+    return re.compile(slots["mapping_justification"]["pattern"])
+
+
+class TestStatusRowsUseSSSOMsNoMatchForm(_Committed):
+    """#3361: the ``free_text``, ``novel_d4d`` and ``unmapped`` rows were
+    written with ``semapv:UnmappedProperty`` / ``semapv:UnmappableProperty``
+    as the predicate, ``semapv:FreeTextProperty`` /
+    ``semapv:RequiresResearch`` as the justification and an empty
+    ``object_id``. SEMAPV defines none of those four terms, and SSSOM
+    requires an object. SSSOM's form for "no match" is ``object_id
+    sssom:NoTermFound`` with a justification SEMAPV defines.
+
+    The admitted justifications are read from the SSSOM schema the installed
+    ``sssom`` package ships, not from the generator. Checked on both
+    committed tables and on a fresh generation. Not checked here: the one
+    ``recommended`` row's ``semapv:SuggestedMapping``, which that pattern
+    does not admit either. That row asserts a mapping, not a status, so it
+    is outside #3361 and needs its own decision."""
+
+    NO_MATCH = ("free_text", "novel_d4d", "unmapped")
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        generated = study_generator().generate_comprehensive_sssom("2001-01-01")
+        cls.tables = {"comprehensive": cls.comp, "uri": cls.uri,
+                      "generated": {r["subject_id"][len("d4d:"):]: r
+                                    for r in generated}}
+        cls.pattern = sssom_justification_pattern()
+
+    def test_a_status_row_names_no_term_found_and_only_a_status_row_does(self):
+        seen = 0
+        for table, rows in self.tables.items():
+            for slot, row in sorted(rows.items()):
+                with self.subTest(table=table, slot=slot):
+                    no_match = row["mapping_status"] in self.NO_MATCH
+                    self.assertEqual(row["object_id"] == "sssom:NoTermFound",
+                                     no_match)
+                    self.assertNotEqual(row["object_id"], "")
+                    if no_match:
+                        seen += 1
+                        self.assertEqual(
+                            (row["predicate_id"], row["mapping_justification"],
+                             row["object_label"], row["object_source"]),
+                            ("skos:exactMatch", "semapv:UnspecifiedMatching",
+                             "", ""))
+        self.assertGreaterEqual(seen, 3 * 100, "too few status rows to test")
+
+    def test_no_row_uses_a_semapv_term_as_its_predicate(self):
+        for table, rows in self.tables.items():
+            for slot, row in sorted(rows.items()):
+                with self.subTest(table=table, slot=slot):
+                    self.assertFalse(row["predicate_id"].startswith("semapv:"))
+
+    def test_every_justification_but_a_suggestion_is_one_sssom_admits(self):
+        if self.pattern is None:
+            self.skipTest("the sssom_schema package is not installed")
+        for table, rows in self.tables.items():
+            for slot, row in sorted(rows.items()):
+                if row["mapping_status"] == "recommended":
+                    continue
+                with self.subTest(table=table, slot=slot):
+                    self.assertRegex(row["mapping_justification"], self.pattern)
 
 
 class TestRecommendationsAudit(_Committed):
@@ -993,7 +1066,8 @@ class TestRoCratePathFollowsTheContext(unittest.TestCase):
             for row in rows:
                 obj, path = row["object_id"], row["rocrate_json_path"]
                 with self.subTest(table=table, slot=row["subject_id"], object=obj):
-                    if not obj:
+                    # A row that asserts no mapping names no key (#3361).
+                    if obj == "sssom:NoTermFound":
                         self.assertEqual(path, "")
                         continue
                     namespace = row["object_source"]
@@ -1641,12 +1715,13 @@ class TestPrecedenceOnAFixture(unittest.TestCase):
         self.assertEqual(
             (r.status, r.source, r.predicate, r.object, r.confidence,
              r.justification),
-            ("novel_d4d", "heuristic", "semapv:UnmappedProperty", "", 0.0,
+            ("novel_d4d", "heuristic", "skos:exactMatch", "", 0.0,
              "semapv:UnspecifiedMatching"))
         row = next(x for x in self.gen.generate_comprehensive_sssom("2001-01-01")
                    if x["subject_id"] == "d4d:retention_impacts")
-        self.assertEqual((row["object_id"], row["rocrate_json_path"],
-                          row["object_source"]), ("", "", ""))
+        self.assertEqual((row["object_id"], row["object_label"],
+                          row["rocrate_json_path"], row["object_source"]),
+                         ("sssom:NoTermFound", "", "", ""))
 
     def test_a_d4d_slot_uri_is_not_an_alignment(self):
         r = self.res["own_uri"]
@@ -1664,8 +1739,8 @@ class TestPrecedenceOnAFixture(unittest.TestCase):
                 self.assertEqual(
                     (r.status, r.source, r.predicate, r.object, r.confidence,
                      r.justification),
-                    ("unmapped", "none", "semapv:UnmappedProperty", "", 0.0,
-                     "semapv:RequiresResearch"))
+                    ("unmapped", "none", "skos:exactMatch", "", 0.0,
+                     "semapv:UnspecifiedMatching"))
         self.assertEqual(self.res["own_uri"].others, [])
         self.assertEqual(self.res["own_uri_ttl"].others,
                          ["skos:exactMatch d4d:ownUriTtl (ttl)"])

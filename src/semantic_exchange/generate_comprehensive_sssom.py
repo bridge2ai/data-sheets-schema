@@ -15,11 +15,20 @@ when a higher source is silent (#2935):
    entry with no suggested URI is silent and falls through; that includes the
    suggestions #2974 withdrew, whose ``review_note`` keeps the URI and why.
 4. The keyword heuristics (``free_text`` / ``novel_d4d``), else ``unmapped``.
-   A heuristic row is a status and asserts no mapping: no object, confidence
+   A heuristic row is a status and asserts no mapping: no target, confidence
    0, and never ``semapv:ManualMappingCuration``, which only rungs 1 and 2
    earn. Until #2972 a ``novel_d4d`` row mapped ``d4d:<slot>`` to itself by
    exactMatch at confidence 1.0 under that justification, and an SSSOM
    consumer reads the justification, not ``mapping_source``.
+
+   Every row of rung 4 is written in SSSOM's own form for "no match"
+   (#3361): ``skos:exactMatch sssom:NoTermFound`` under
+   ``semapv:UnspecifiedMatching``. The status (``free_text``, ``novel_d4d``,
+   ``unmapped``) is in ``mapping_status``. Until #3361 these rows carried
+   ``semapv:UnmappedProperty`` / ``semapv:UnmappableProperty`` as the
+   predicate and ``semapv:FreeTextProperty`` / ``semapv:RequiresResearch``
+   as the justification, none of which SEMAPV defines, with an empty
+   ``object_id``, which SSSOM requires.
 
 In both curated rungs only targets outside the D4D namespace count (#3054). A
 ``d4d:`` target is the slot itself or another D4D term, not an external
@@ -449,6 +458,21 @@ NOVEL_D4D_COMMENT = ('Keyword heuristic: probably a novel D4D concept with no '
 #: declaration. A heuristic or recommended row never carries it (#2972).
 CURATED_JUSTIFICATION = 'semapv:ManualMappingCuration'
 
+#: SSSOM's object for "no term was found" (#3361). A row that asserts no
+#: mapping (``free_text``, ``novel_d4d``, ``unmapped``) carries it as its
+#: ``object_id``, with the predicate a match was looked for under and a
+#: justification SEMAPV defines. The resolution's own ``object`` stays empty:
+#: it names a target, and there is none, so the RO-Crate path, object label,
+#: object source and recommended slot_uri stay empty too.
+NO_TERM_FOUND = 'sssom:NoTermFound'
+NO_TERM_PREDICATE = 'skos:exactMatch'
+NO_TERM_JUSTIFICATION = 'semapv:UnspecifiedMatching'
+
+
+def sssom_object_id(res: 'Resolution') -> str:
+    """The row's ``object_id``: the target, else ``sssom:NoTermFound``."""
+    return res.object or NO_TERM_FOUND
+
 
 def heuristic_hint(slot: str, description: str) -> str:
     """The keyword verdict: 'free_text', 'novel_d4d' or ''.
@@ -802,19 +826,19 @@ class ComprehensiveSSSOMGenerator:
             # under a justification no curator gave.
             return Resolution(
                 **base, status='novel_d4d', source='heuristic',
-                predicate='semapv:UnmappedProperty', object='',
-                confidence=0.0, justification='semapv:UnspecifiedMatching',
+                predicate=NO_TERM_PREDICATE, object='',
+                confidence=0.0, justification=NO_TERM_JUSTIFICATION,
                 comment=NOVEL_D4D_COMMENT)
         if base['hint'] == 'free_text':
             return Resolution(
                 **base, status='free_text', source='heuristic',
-                predicate='semapv:UnmappableProperty', object='',
-                confidence=0.0, justification='semapv:FreeTextProperty',
+                predicate=NO_TERM_PREDICATE, object='',
+                confidence=0.0, justification=NO_TERM_JUSTIFICATION,
                 comment='Free text/narrative field - no URI needed')
         return Resolution(
             **base, status='unmapped', source='none',
-            predicate='semapv:UnmappedProperty', object='', confidence=0.0,
-            justification='semapv:RequiresResearch',
+            predicate=NO_TERM_PREDICATE, object='', confidence=0.0,
+            justification=NO_TERM_JUSTIFICATION,
             comment='Unmapped - needs vocabulary research')
 
     def _disagreement(self, slot: str, ttl: List[CuratedPair],
@@ -953,7 +977,7 @@ class ComprehensiveSSSOMGenerator:
                 'subject_label': slot.replace('_', ' ').title(),
                 'predicate_id': res.predicate,
                 'rocrate_json_path': self._get_rocrate_path(res.object),
-                'object_id': res.object,
+                'object_id': sssom_object_id(res),
                 'object_label': self._object_label(res.object),
                 'mapping_justification': res.justification,
                 'confidence': res.confidence,
