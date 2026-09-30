@@ -325,7 +325,9 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     by `;`, or a failed `&&` chain cannot be placed, unless the native
     control denied the call, or the runtime did in `dontAsk` mode and its
     terminal `result` lists the call, which then never ran. `timeout`,
-    `env` and `nice` wrappers are read through. Three kinds of part carrying
+    `env` and `nice` wrappers are read through. A derive whose program is a
+    variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`)
+    cannot be placed, as that program may be a wrapper. Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a
@@ -357,15 +359,18 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     issued (one in flight with it, backgrounded by its `run_in_background` input or its result,
     or started with `&`, `coproc`, `setsid` and the like, or by a process substitution
     `<(...)` or `>(...)`, which bash does not wait for, counts, a `&` inside a nested shell's
-    word read as that shell splits a word with a space in it) and was issued before the derive, with a receipt change returning after both
+    word read as that shell splits a word with a space in it, and the word a shell nested in
+    it gives its `-c`, or `eval` or `ssh` runs, read so in turn) and was issued before the derive, with a receipt change returning after both
     it and the first full-record Write were issued,
     makes the status `unknown`; its cost is a false `unknown` for such a program that
     derived nothing. A command the tokenizer cannot split is such a call, open-ended where its
     text carries a `&`, `coproc`, `setsid` and the like, `<(` or `>(`. A script that detaches a child itself
     is not seen as open-ended, nor is an
-    environment set outside the command read, nor a package in the call's own starting
-    directory that a `python -c` or `-m` part imports first, nor the project there whose
-    virtualenv a `poetry run` part takes. A relative `--full`
+    environment set outside the command read, nor a package in the directory the session's
+    shell started in that a `python -c` or `-m` part imports first, nor the project there whose
+    virtualenv a `poetry run` part takes; after an earlier call whose `cd`, `pushd` or `popd`
+    may have left that directory, or where the transcript records another, such a part counts
+    as after a directory change, and a relative `--full` cannot be placed. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,

@@ -539,10 +539,13 @@ class Unknown(Base):
             with self.subTest(command=command):
                 r = self._drafted()
                 r.bash(command, ok=False)             # a failed command may still have written
-                r.derive()
+                # An absolute `--full`: after `cd data` a relative one no
+                # longer resolves where the next call starts (#3719).
+                r.derive(full=r.full)
                 block = r.report()
                 self.assertUnknown(block, "Bash call")
-                self.assertEqual([m["covered_by_final_sha256"] for m in block["non_write_mutations"]], [False])
+                self.assertEqual([m["covered_by_final_sha256"] for m in block["non_write_mutations"]
+                                  if m["target"] == "receipt"], [False])
 
     def test_a_shell_call_the_native_control_denied_is_listed_not_a_mutation(self):
         # The control denied it before it ran (#3185): like a refused Edit,
@@ -978,7 +981,7 @@ class EditReplay(Base):
         r.derive()
         block = r.report()
         self.assertEqual(block["status"], "checked", block["reasons"])
-        self.assertEqual(block["instrument"], "receipt_origin v3 (#2933, #3047, #3369)")
+        self.assertEqual(block["instrument"], "receipt_origin v4 (#2933, #3047, #3369, #3693)")
         self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 0})
         self.assertEqual(block["snippets"], {"pre_draft": 3, "at_derive_core": 4, "final": 4})
         self.assertEqual((block["receipt"]["writes"], block["receipt"]["edits"]), (1, 1))
@@ -1864,15 +1867,18 @@ class DeriveSpellings(Base):
         r.write(r.receipt, Boundaries.C004)
         return identity, r.report()
 
-    def test_wrapped_and_variable_interpreter_spellings_are_the_boundary(self):
+    def test_wrapped_and_interpreter_spellings_are_the_boundary(self):
         derive = f"derive core --full {self.FULL} {self.OUT}"
         for spelling in (f"timeout 600 poetry run d4d {derive}",
                          f"timeout -s KILL --preserve-status 10m d4d {derive}",
                          f"timeout --kill-after=5 1.5h d4d {derive}",
                          f"env PYTHONPATH=src python -m data_sheets_schema.cli {derive}",
                          f"env -i -u HOME -- D4D_PROFILE=bridge2ai poetry run d4d {derive}",
-                         f"$PY -m data_sheets_schema.cli {derive}",
-                         f"${{PY}} -m data_sheets_schema.cli {derive}",
+                         # An interpreter named by a bare word or an absolute
+                         # path is taken to be one (#3693).
+                         f"python3 -m data_sheets_schema.cli {derive}",
+                         f"/venv/bin/python3.12 -m data_sheets_schema.cli {derive}",
+                         f"timeout 60 /venv/bin/python -m data_sheets_schema.cli {derive}",
                          f"nice -n 10 d4d {derive}",
                          f"nice -5 poetry run d4d {derive}",
                          f"X=1 timeout 60 env Y=2 nice d4d {derive} && d4d receipts check --label L",
@@ -1886,6 +1892,65 @@ class DeriveSpellings(Base):
                 self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
                 self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
                                                    "phase3_backport": 1})
+
+    def test_a_derive_whose_program_is_a_variable_or_relative_path_is_not_placed(self):
+        # `$PY` may name a wrapper rather than an interpreter, as `./d4d` may
+        # name any program: the derive the words spell may not have run, so
+        # the row places nothing and the block is `unknown` (#3693).
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        for spelling in (f"$PY -m data_sheets_schema.cli {derive}",
+                         f"${{PY}} -m data_sheets_schema.cli {derive}",
+                         f"timeout 60 $PY -m data_sheets_schema.cli {derive}",
+                         f"$PY -m data_sheets_schema.cli {derive} && echo done",
+                         f"./python -m data_sheets_schema.cli {derive}",
+                         f"./d4d {derive}", f"bin/d4d {derive}", f"./timeout 60 d4d {derive}",
+                         f"$NICE d4d {derive}"):
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling)
+                self.assertIsNone(block["boundaries"]["derive_core"])
+                if spelling.startswith("$NICE"):
+                    # Not read as the CLI at all: the words make it a derive
+                    # that cannot be placed (#3137).
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed")
+                    continue
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: the call succeeded but its "
+                                          "status is not the derive's own (unnamed_program: its program is a "
+                                          "variable or a relative path")
+                attempt = block["derive_core_attempts"][0]
+                self.assertEqual((attempt["targets_full"], attempt["status_basis"], attempt["outcome"]),
+                                 (None, "unnamed_program", "ambiguous"))
+        # One the native control refused never ran, whatever its program.
+        identity, block = self._derived(f"$PY -m data_sheets_schema.cli {derive}", ok=False,
+                                        content=ro.NATIVE_DENIAL_PREFIX + "not registered",
+                                        metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+
+    def test_names_its_program(self):
+        full = ro._Target("full", Path("/w/data/claudecode_direct/L/CHORUS_d4d.yaml"))
+        cases = {"d4d x": True, "/venv/bin/d4d x": True, "python -m data_sheets_schema.cli x": True,
+                 "X=1 timeout 60 env Y=2 nice poetry run d4d x": True,
+                 "$PY -m data_sheets_schema.cli x": False, "${PY} -m data_sheets_schema.cli x": False,
+                 "./d4d x": False, "bin/python -m data_sheets_schema.cli x": False,
+                 "./timeout 60 d4d x": False, "timeout 60 $PY -m x": False, "": False}
+        for command, named in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._names_its_program(ro._tokens(command) or []), named)
+        # A read-only subcommand is read-only only where the program runs as
+        # its words name it; one aimed at another record keeps its placement.
+        for command, read_only in (("python -m data_sheets_schema.cli receipts check --receipt R", True),
+                                   ("$PY -m data_sheets_schema.cli receipts check --receipt R", False),
+                                   ("./d4d receipts check --receipt R", False)):
+            with self.subTest(command=command):
+                self.assertEqual(ro._shell(command, "/w", [full])["read_only"], read_only)
+        other = ro._shell("$PY -m data_sheets_schema.cli derive core --full /o/f.yaml", "/w", [full])
+        self.assertEqual([(d["targets_full"], d["basis"]) for d in other["derives"]], [(False, "command")])
+        self.assertTrue(other["runs_unread"])                                        # #3722
+        # The recorder's `--phase 'derive core'` beside a variable program
+        # is a derive that cannot be placed: the backstop reads a `$`
+        # invocation (#3478).
+        phase = ro._shell("$PY -m data_sheets_schema.cli provenance record --phase 'derive core'", "/w", [full])
+        self.assertEqual([(d["targets_full"], d["basis"]) for d in phase["derives"]], [(None, "unparsed")])
 
     def test_a_wrapped_derive_carries_its_own_status(self):
         # `timeout` passes the derive's exit status through; its own 124 is a failure.
@@ -2234,15 +2299,19 @@ class DeriveSpellings(Base):
                       "metadata says so, #3744), a part is started with `&` (at the top level, or ending a "
                       "command inside a word a nested shell may run: `bash -c './derive.sh &'`, and, as that "
                       "shell splits a word with a space in it, `bash -c './derive.sh&echo started'` (#3745); "
-                      "in a word with no space, in a word inside that one (a shell nested in the nested "
-                      "shell), and in a command the tokenizer cannot split, only a `&` followed by a space, `)`, `}`, `;`, `#` or the end counts, so `R&D` does not) or by "
+                      "in a word with no space, in a word inside that one that no program in it runs as a "
+                      "command (the argument a shell program's `-c` receives there, and `eval`'s and "
+                      "`ssh`'s, are read by the whole rule in turn, however deep, #3748: `bash -c \"bash -c "
+                      "'./derive.sh&echo x'\"`), and in a command the tokenizer cannot split, only a `&` "
+                      "followed by a space, `)`, `}`, `;`, `#` or the end counts, so `R&D` does not) or by "
                       "`coproc` (#3690), or a part's "
                       "program detaches what it runs (`setsid`, `daemon`, `disown`, `screen`, `tmux`, `at`, "
                       "`batch`, `systemd-run`, `start-stop-daemon`, #3674), read through `timeout`, `env`, "
                       "`nice`, `nohup`, `exec` and `command` and as a command's first word inside such a nested "
                       "word (#3690), or a part starts a process substitution, which bash does not wait for "
                       "(`true <(bash step.sh)`: a `<(` or `>(` outside quotes, anywhere after a command "
-                      "substitution opens, or in a nested shell's word with a space in it, #3752), and a "
+                      "substitution opens, or in a nested shell's word with a space in it, #3752), each read "
+                      "in the words a nested shell runs as a command however deep (#3748), and a "
                       "command the tokenizer cannot split is open-ended where its whole text carries such a "
                       "`&`, `coproc`, detaching program, `<(` or `>(` (#3698, #3752); a script or program that "
                       "backgrounds or daemonises a child itself, or a "
@@ -2251,10 +2320,34 @@ class DeriveSpellings(Base):
         # #3689: an environment set outside the command is not read
         self.assertIn("Nor is an environment set outside the command (exported earlier or inherited) read: a "
                       "bare name is taken to be the program `PATH` finds, and an absolute path the program it "
-                      "names (#3689); nor is a package in the directory the call started in that a `python -c` "
-                      "or `python -m` part imports before the installed one (a `linkml` or `data_sheets_schema` "
-                      "directory there, #3699), nor the project there whose virtualenv a `poetry run` part "
-                      "takes (#3723)", text)
+                      "names (#3689); nor is a package in the directory the session's shell started in that a "
+                      "`python -c` or `python -m` part imports before the installed one (a `linkml` or "
+                      "`data_sheets_schema` directory there, #3699), nor the project there whose virtualenv a "
+                      "`poetry run` part takes (#3723)", text)
+        # #3719: a directory an earlier call left the shell in is read
+        self.assertIn("A directory an earlier call left the shell in is read (#3719): after a call not denied "
+                      "whose builtin `cd`, `pushd` or `popd`, or one `eval` runs, may leave anywhere but where it "
+                      "started (one in a subshell counts, the rule's cost), or where the transcript records a "
+                      "working directory other than its first, such a part counts as after a directory change "
+                      "and a relative `--full` cannot be placed; a directory a `source`d script or a function "
+                      "changed to is not seen", text)
+        self.assertIn("The runtime's shell keeps its directory between calls (#3719)", flat := " ".join(
+            ro.__doc__.split()))
+        self.assertIn("a resumed run's next transcript starts afresh. A package in the directory the session's "
+                      "shell started in that such a part imports first is not read, nor a directory a "
+                      "`source`d script or a function changed to", flat)
+        self.assertNotIn("A package in the call's own starting directory", flat)
+        # #3693: a variable or relative-path program's derive is not placed
+        self.assertIn("A d4d call whose program, or a wrapper's, is a variable or a relative path (`$PY -m "
+                      "data_sheets_schema.cli`, `./d4d`) is read as one, but a `derive core` of the full record "
+                      "it spells cannot be placed, since the program may be a wrapper that did not run it, and "
+                      "no subcommand of it is read-only (#3693)", text)
+        self.assertIn("A d4d call whose program, or a wrapper's, is a variable or a relative path (`$PY -m "
+                      "data_sheets_schema.cli`, `./d4d`) is read as one, but a `derive core` of the full record "
+                      "it spells cannot be placed, as the program may be a wrapper that did not run it, and no "
+                      "subcommand of it is read-only (#3693)", flat)
+        self.assertNotIn("and an interpreter held in a variable (`$PY -m data_sheets_schema.cli`), are read "
+                         "through", flat)
         flat = " ".join(ro.__doc__.split())
         self.assertIn("or such a part not run as its words name (a variable or relative path as its program, "
                       "an assignment before it or as an earlier part, `printf -v` included, #3689, #3700, or "
@@ -2267,7 +2360,8 @@ class DeriveSpellings(Base):
                       "result's metadata says so, #3744 -- and a part started with `&` -- at the top level or "
                       "ending a command inside a word a nested shell may run, which is read as that shell "
                       "splits it where the word has a space in it, `bash -c './derive.sh&echo started'`, "
-                      "#3745, a shell nested in that one not split again, and otherwise only where a space, "
+                      "#3745, and the word a shell nested in that one gives its `-c`, or `eval` or `ssh` runs, "
+                      "read so in turn, however deep, #3748, and otherwise only where a space, "
                       "`)`, `}`, `;`, `#` or the end follows the `&`, so `R&D` is text -- "
                       "or by `coproc`, or by a program that detaches it, `setsid`, `screen`, `tmux` and the "
                       "like, may outlive it, so none of them has, #3674, #3690; nor has a call that starts a "
@@ -2390,7 +2484,9 @@ class UnseenDerive(Base):
         identity = r.bash(command, **result)
         r.write(r.receipt, Boundaries.C003)
         if derive:
-            r.derive()
+            # An absolute `--full`: after a call that moved the directory a
+            # relative one cannot be placed (#3719).
+            r.derive(full=r.full)
             r.write(r.receipt, Boundaries.C004)
         return identity, r.report()
 
@@ -2581,7 +2677,18 @@ class UnseenDerive(Base):
         # there, which is the rule's cost.
         for command in ("bash -c './derive.sh&echo started'", "bash -c './derive.sh&#note'",
                         "bash -c 'cd x; ./derive.sh&wait'", "sh -c \"./derive.sh>log 2>&1&echo ok\"",
-                        "bash -c 'echo R&D work'"):
+                        "bash -c 'echo R&D work'",
+                        # The argument a shell nested in the nested shell
+                        # gives its `-c`, or `eval` or `ssh` runs, is read by
+                        # the same rules, however deep (#3748).
+                        "bash -c \"bash -c './derive.sh&echo x'\"",
+                        "bash -c \"bash -lc './derive.sh&echo x'\"",
+                        "bash -c \"eval './derive.sh&echo x'\"",
+                        "bash -c \"ssh host './derive.sh&echo x'\"",
+                        "sh -c \"timeout 60 bash -c 'setsid ./derive.sh'\"",
+                        "bash -c \"nohup bash -c 'coproc ./derive.sh'\"",
+                        "bash -c \"bash -c 'cat <(./derive.sh)'\"",
+                        "bash -c \"X=1 bash -o pipefail -c 'bash -c \\\"./derive.sh&echo x\\\"'\""):
             with self.subTest(command=command):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -2593,10 +2700,13 @@ class UnseenDerive(Base):
                 self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 4) runs a program")
                 self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
         # A `&` the nested word quotes is text, and a word with no space in
-        # it keeps the narrow rule (a URL's query, `R&D`), as does a word a
-        # shell nested in the nested shell runs.
+        # it keeps the narrow rule (a URL's query, `R&D`), as does any word
+        # in a shell nested in the nested shell that it does not run as a
+        # command (#3748).
         for command in ("bash -c 'echo \"R&D team\"; ./derive.sh'", "bash -c \"./derive.sh 'a=1&b=2'\"",
-                        "bash -c \"bash -c './derive.sh&echo x'\"",
+                        "bash -c \"bash -c 'echo \\\"R&D team\\\"; ./derive.sh'\"",
+                        "bash -c \"bash -c './derive.sh' 'R&D team'\"",
+                        "bash -c \"bash -c './derive.sh && echo done'\"",
                         "bash -c './derive.sh && echo done'", "bash derive.sh 'R&D'"):
             with self.subTest(command=command):
                 r = self.new_run()
@@ -2689,6 +2799,28 @@ class UnseenDerive(Base):
                                   ("cat <<< x", False), ("x=$((1<2))", False)):
             with self.subTest(command=command):
                 self.assertEqual(ro._process_substitutes(command), expected)
+
+    def test_command_strings(self):
+        # The words a nested command runs as commands of their own: a shell
+        # program's `-c` argument, and `eval`'s or `ssh`'s (#3748).
+        cases = {"bash -c 'a & b' name": ["a & b"], "bash -lc x": ["x"], "sh -e -c x y": ["x"],
+                 "bash -o pipefail -c x": ["x"], "bash --norc -c x": ["x"], "/bin/zsh -c x": ["x"],
+                 "X=1 timeout 60 nohup bash -c x": ["x"], "ls; bash -c x | eval y z": ["x", "y", "z"],
+                 "ssh host 'a & b'": ["host", "a & b"], "bash x.sh 'a & b'": [], "bash -- -c x": [],
+                 "bash -c": [], "echo 'R&D team'": [], "python -c 'a & b'": [], "": []}
+        for command, strings in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._command_strings(ro._tokens(command) or []), strings)
+
+    def test_nested_open_ended(self):
+        for word, open_ended in (("./derive.sh &", True), ("bash -c './derive.sh&echo x'", True),
+                                 ("eval './derive.sh&echo x'", True), ("bash -c 'setsid ./derive.sh'", True),
+                                 ("bash -c 'cat <(./derive.sh)'", True),
+                                 ("bash -c \"sh -c 'bash -c \\\"./derive.sh&echo x\\\"'\"", True),
+                                 ("echo 'R&D team'", False), ("bash -c 'echo \"R&D team\"'", False),
+                                 ("bash x.sh 'a&b c'", False), ("R&D", False)):
+            with self.subTest(word=word):
+                self.assertEqual(ro._nested_open_ended(word), open_ended)
 
     def test_directory_builtin(self):
         for segment, expected in ((["cd", "x"], "cd"), (["pushd", "x"], "pushd"), (["popd"], "popd"),
@@ -2875,6 +3007,125 @@ class UnseenDerive(Base):
         for command, plain in cases.items():
             with self.subTest(command=command):
                 self.assertEqual(ro._plainly_run(ro._tokens(command) or []), plain)
+
+
+class EarlierDirectoryChange(Base):
+    """The runtime's shell keeps its directory between calls, so `cd hack`
+    in one call starts the next in `hack`, where a `python -c` or `-m` part
+    imports a `linkml` or `data_sheets_schema` package first and `poetry run`
+    takes that project's virtualenv. Only a change in the same command was
+    read (#3699, #3723); one in an earlier call, or a recorded working
+    directory other than the one the transcript started in, is now read too
+    (#3719)."""
+
+    FULL = UnseenDerive.FULL
+    READ_HERE = (UnseenDerive.VALIDATE, UnseenDerive.TERMS,
+                 "python -m data_sheets_schema.cli receipts check --receipt R",
+                 "poetry run linkml-validate -s s.yaml F")
+
+    def _run(self, earlier, command, *, cwd=None, split=False, **earlier_result):
+        """`earlier` before the draft, then the draft, `command` (recorded
+        in `cwd` where given), a receipt change, the derive and another."""
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        if earlier is not None:
+            r.bash(earlier.replace("ROOT", str(r.root)), **earlier_result)
+        resumed_at = len(r.events)
+        r.write(r.full, "id: x\n")
+        identity = r.bash(command)
+        if cwd is not None:
+            r.events[-2]["cwd"] = cwd.replace("ROOT", str(r.root))
+        r.write(r.receipt, Boundaries.C003)
+        r.derive(full=r.full)
+        r.write(r.receipt, Boundaries.C004)
+        if not split:
+            return identity, r.report()
+        # A killed-and-resumed run: the second invocation's shell starts afresh.
+        r.receipt.write_text(r.last_receipt, encoding="utf-8")
+        first = r.transcript("first.jsonl", r.events[:resumed_at])
+        second = r.transcript("second.jsonl", r.events[:1] + r.events[resumed_at:])
+        return identity, ro.origin([first, second], r.receipt, r.full)
+
+    def test_a_part_the_directory_chooses_after_an_earlier_change_is_a_possible_derive(self):
+        for earlier in ("cd hack", "cd hack && ls", "pushd hack", "ls; cd /tmp",
+                        "cd -", "false || cd ROOT", "popd",
+                        # A change in a subshell does not move the call's shell;
+                        # reading it as one is the rule's cost.
+                        "(cd hack; ls)",
+                        # A command the tokenizer cannot split, read by its text.
+                        "cd hack; cat <<EOF\nit's\nEOF"):
+            for command in self.READ_HERE:
+                with self.subTest(earlier=earlier, command=command):
+                    identity, block = self._run(earlier, command)
+                    self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 8) runs a program this "
+                                              "does not read")
+                    self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]],
+                                     [identity])
+
+    def test_a_recorded_directory_other_than_the_start_is_read_as_a_change(self):
+        for command in self.READ_HERE:
+            with self.subTest(command=command):
+                identity, block = self._run(None, command, cwd="ROOT/hack")
+                self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program")
+                _, block = self._run(None, command, cwd="ROOT/./")
+                self.assertEqual(block["status"], "checked", block["reasons"])
+
+    def test_a_call_after_no_change_away_from_the_start_is_read_as_before(self):
+        for earlier in (None, "ls", "cd ROOT", "cd ROOT && ls", "cd .", "pushd ROOT && popd",
+                        "bash -c 'cd hack'", "./cd hack", "echo cd hack", "cat <<EOF\nit's\nEOF"):
+            for command in self.READ_HERE:
+                with self.subTest(earlier=earlier, command=command):
+                    _, block = self._run(earlier, command)
+                    self.assertEqual(block["status"], "checked", block["reasons"])
+                    self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
+                                                       "phase3_backport": 1})
+        # A console script run by name takes its code from its own `bin`.
+        _, block = self._run("cd hack", "linkml-validate -s s.yaml F")
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        # A change the native control refused never ran.
+        _, block = self._run("cd hack", UnseenDerive.VALIDATE, ok=False,
+                             content=ro.NATIVE_DENIAL_PREFIX + "not registered",
+                             metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        # A resumed run's next transcript starts where its own shell did.
+        _, block = self._run("cd hack", UnseenDerive.VALIDATE, split=True)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+
+    def test_a_relative_full_after_an_earlier_change_cannot_be_placed(self):
+        # The transcript's init names where the shell started, not where an
+        # earlier `cd` left it, so a relative `--full` does not resolve.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.bash("cd data")
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        identity = r.derive()
+        r.write(r.receipt, Boundaries.C004)
+        block = r.report()
+        self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be resolved")
+        self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
+
+    def test_shell_moves(self):
+        for command, cwd, moves in (("cd hack", "/w", True), ("cd hack && ls", "/w", True),
+                                    ("cd /w && ls", "/w", False), ("cd /w/", "/w", False),
+                                    ("cd . && ls", "/w", False), ("cd hack/..", "/w", False), ("cd /w", None, True),
+                                    ("pushd /w && popd", "/w", False), ("pushd hack && popd", "/w", True),
+                                    ("popd", "/w", True), ("cd -", "/w", True), ("cd", "/w", True),
+                                    ("false || cd /w", "/w", True), ("(cd hack; ls)", "/w", True),
+                                    ("ls", "/w", False), ("./cd hack", "/w", False),
+                                    ("poetry run cd hack", "/w", False), ("bash -c 'cd hack'", "/w", False),
+                                    ("echo cd", "/w", False), ("eval 'cd hack'", "/w", True),
+                                    ("eval \"ls; pushd hack\"", "/w", True), ("eval ls", "/w", False),
+                                    ("cat <<EOF\nit's\nEOF", "/w", False),
+                                    ("cat <<EOF\nit's\nEOF\ncd /w", "/w", True)):
+            with self.subTest(command=command, cwd=cwd):
+                self.assertEqual(ro._shell(command, cwd, [])["moves"], moves)
+        # `moved` reads a `python -c`/`-m` or `poetry run` part as after a change.
+        for command, unread in ((UnseenDerive.VALIDATE, True), ("poetry run d4d receipts check", True),
+                                ("linkml-validate -s s.yaml F", False), ("d4d receipts check", False)):
+            with self.subTest(command=command):
+                self.assertFalse(ro._shell(command, "/w", [])["runs_unread"])
+                self.assertEqual(ro._shell(command, "/w", [], moved=True)["runs_unread"], unread)
 
 
 class RuntimeDenial(Base):
@@ -3149,7 +3400,10 @@ class Cli(unittest.TestCase):
         # A successful `derive && …` is the boundary (and_chain), so the help
         # must not say a derive followed by another command never counts (#3186).
         from data_sheets_schema.cli import cli
-        text = " ".join(CliRunner().invoke(cli, ["receipts", "origin", "--help"]).output.split())
+        # Rendered unwrapped: click breaks a long line at a hyphen, and
+        # `linkml-term- validator` is not the text the help carries.
+        text = " ".join(CliRunner().invoke(cli, ["receipts", "origin", "--help"], terminal_width=100_000,
+                                           max_content_width=100_000).output.split())
         self.assertNotIn("followed by another command", text)
         self.assertIn("every join after it is `&&` and the call succeeded", text)
         self.assertIn("a failed `&&` chain cannot be placed", text)
@@ -3187,15 +3441,20 @@ class Cli(unittest.TestCase):
                       "flight with it, backgrounded by its `run_in_background` input or its result, or started "
                       "with `&`, `coproc`, `setsid` and the like, or by a process substitution `<(...)` or "
                       "`>(...)`, which bash does not wait for, counts, a `&` inside a nested shell's word "
-                      "read as that shell splits a word with a space in it) and was "
+                      "read as that shell splits a word with a space in it, and the word a shell nested in it "
+                      "gives its `-c`, or `eval` or `ssh` runs, read so in turn) and was "
                       "issued before the derive, with a receipt change returning after both it and the first",
                       text)
         self.assertIn("Write were issued, makes the status `unknown`", text)                 # #3369, #3674, #3675, #3676, #3697, #3699, #3700, #3752, #3753
         self.assertIn("A command the tokenizer cannot split is such a call, open-ended where its text carries "
                       "a `&`, `coproc`, `setsid` and the like, `<(` or `>(`.", text)            # #3698, #3752
-        self.assertIn("nor a package in the call's own starting directory that a `python -c` or `-m` part "
-                      "imports first, nor the project there whose virtualenv a `poetry run` part takes",
-                      text)                                                                    # #3699, #3723
+        self.assertIn("nor a package in the directory the session's shell started in that a `python -c` or "
+                      "`-m` part imports first, nor the project there whose virtualenv a `poetry run` part "
+                      "takes; after an earlier call whose `cd`, `pushd` or `popd` may have left that "
+                      "directory, or where the transcript records another, such a part counts as after a "
+                      "directory change, and a relative `--full` cannot be placed", text)   # #3699, #3719, #3723
+        self.assertIn("A derive whose program is a variable or a relative path (`$PY -m data_sheets_schema.cli`, "
+                      "`./d4d`) cannot be placed, as that program may be a wrapper.", text)                 # #3693
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674
         self.assertIn("nor is an environment set outside the command read", text)                  # #3689
         self.assertNotIn("issued after the first full-record Write", text)                        # #3676
