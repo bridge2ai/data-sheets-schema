@@ -604,6 +604,22 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
         self.assertIsNone(found)
         self.assertTrue(reason.startswith("the loader's merge keys would copy more than 200,000 pairs"), reason)
 
+    def test_a_chain_the_walk_expands_once_is_checked_past_the_quadratic_bound(self):
+        """#3542: the 629- and 446-link bounds hold for the shape walked link
+        by link. A chain under a skipped key, aliased once, is expanded once
+        and costs about a step a link, so 700 and 1020 links are checked, and
+        the help confines the bound to the other shape."""
+        for links in (700, 1020):
+            text = _merge_chain(links).replace("{name: embargo, name: safe}", "{name: safe}")
+            self.assertEqual(rd.check_text(text), ([], None), links)
+            self.assertEqual(rd.unread_duplicate_keys(text, max_steps=links + 100), [])
+        from data_sheets_schema.cli.evaluate import evaluate
+        help_text = " ".join(CliRunner().invoke(evaluate, ["slot-meaning", "--help"]).output.split())
+        self.assertIn("a merge chain whose every link the walk visits", help_text)
+        self.assertIn("a chain the walk expands only once, such as one under a key the scan skips, "
+                      "costs about a step a link and is checked far beyond that (#3542)", help_text)
+        self.assertNotIn("a merge chain of a few hundred links or more costs", help_text)
+
     def test_the_stack_lays_merges_out_in_the_loaders_order(self):
         """Each merge's own merges first, a merge list last to first, each
         mapping at its last place: the order the recursive expansion had."""

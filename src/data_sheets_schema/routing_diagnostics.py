@@ -131,6 +131,9 @@ the walk costs about L² steps: one of 445 links is checked, one of 446 or
 more is not checked on the budget. The loader copies about L²/2 pairs for
 that shape, so its bound is reached only from 633 links; it trips before
 the walk starts, so from there the reason is the loader's (#3491, #3504).
+A chain the walk expands only once — one whose links sit under a key the
+scan skips and whose last link is aliased once — costs about one step a
+link, so one of thousands of links is checked (#3542).
 
 The loader is bounded too. PyYAML flattens a merge by copying the merged
 pairs, so a text whose anchors each merge the one before twice grows
