@@ -122,14 +122,20 @@ command or process substitution, whose inner command is not read (#3675),
 or a command the tokenizer cannot split -- is a possible derive where one
 would move the boundary: it had not
 returned before the draft was issued, so a call issued before the draft
-counts too (a backgrounded call's result is its launch, and a part started
-with `&` -- at the top level or ending a command inside a word a nested
-shell may run -- or by `coproc`, or by a program that detaches it,
-`setsid`, `screen`, `tmux` and the like, may outlive it, so none of them
-has, #3674, #3690; a command the tokenizer cannot split is open-ended
-where its whole text carries such a `&`, `coproc` or detaching program,
-#3698; a script that detaches a child itself, or a detaching program
-behind a wrapper not read, `sudo`, is not seen), it was issued before the
+counts too (a backgrounded call's result is its launch -- its own
+`run_in_background` input or its result's metadata says so, #3744 -- and
+a part started with `&` -- at the top level or ending a command inside a
+word a nested shell may run, which is read as that shell splits it where
+the word has a space in it, `bash -c './derive.sh&echo started'`, #3745,
+a shell nested in that one not split again, and otherwise only where a
+space, `)`, `}`, `;`, `#` or the end follows the `&`, so `R&D` is text --
+or by `coproc`, or by a program that detaches it, `setsid`, `screen`,
+`tmux` and the like, may outlive it, so none of them has, #3674, #3690; a
+command the tokenizer cannot split is open-ended where its whole text
+carries such a `&`, by the rule for a word with no space, `coproc` or
+detaching program, #3698; a script that detaches a child itself, or a
+detaching program behind a wrapper not read, `sudo`, is not seen), it
+was issued before the
 derive boundary (if any), and a receipt change issued before that
 boundary returned after both it and the draft were issued (#3697). A
 package in the call's own starting directory that such a `python -c` or
@@ -294,8 +300,13 @@ NON_CHECKS = (
     "receipt change issued before that boundary returning after both it and the draft were "
     "issued (#3697), is a reason; its cost is "
     "a false `unknown` for such a program that derived nothing. A call's run is open-ended "
-    "where the runtime backgrounded it, a part is started with `&` (at the top level, or ending "
-    "a command inside a word a nested shell may run: `bash -c './derive.sh &'`) or by `coproc` "
+    "where the runtime backgrounded it (its `run_in_background` input or its result's metadata "
+    "says so, #3744), a part is started with `&` (at the top level, or ending "
+    "a command inside a word a nested shell may run: `bash -c './derive.sh &'`, and, as that "
+    "shell splits a word with a space in it, `bash -c './derive.sh&echo started'` (#3745); in a "
+    "word with no space, in a word inside that one (a shell nested in the nested shell), and in a "
+    "command the tokenizer cannot split, only a `&` followed by a "
+    "space, `)`, `}`, `;`, `#` or the end counts, so `R&D` does not) or by `coproc` "
     "(#3690), or a part's program detaches what it runs (`setsid`, `daemon`, `disown`, "
     "`screen`, `tmux`, `at`, `batch`, `systemd-run`, `start-stop-daemon`, #3674), read through "
     "`timeout`, `env`, `nice`, `nohup`, `exec` and `command` and as a command's first word "
@@ -519,11 +530,24 @@ def _outcome(result: dict | None) -> str:
     return "ambiguous"
 
 
-def _shell_outcome(result: dict | None) -> str:
+def _backgrounded(result: dict | None, inputs: dict | None = None) -> bool:
+    """The runtime ran the call in the background: its input asked for it
+    (`run_in_background` other than absent or `false`, as the native phase
+    history reads it), or its result's metadata names a background task.
+    The input is read too because the metadata is per event and absent where
+    an event carries several results or none (#3744)."""
+    if isinstance(inputs, dict) and inputs.get("run_in_background") not in (None, False):
+        return True
+    metadata = result["metadata"] if isinstance(result, dict) else None
+    return isinstance(metadata, dict) and bool(metadata.get("backgroundTaskId")
+                                               or metadata.get("background_task_id"))
+
+
+def _shell_outcome(result: dict | None, inputs: dict | None = None) -> str:
     """The same for a shell call's command as a whole, read as the phase
     history reads it: an explicit `is_error: false`, not interrupted, exit 0.
-    A backgrounded call is `ambiguous`: its result is the launch, not the
-    command's end (#3113)."""
+    A backgrounded call (`_backgrounded`, given the call's `inputs`) is
+    `ambiguous`: its result is the launch, not the command's end (#3113)."""
     if result is None:
         return "pending"
     flag, metadata = result["is_error"], result["metadata"]
@@ -531,7 +555,7 @@ def _shell_outcome(result: dict | None) -> str:
         return "ambiguous"
     if flag:
         return "failed"
-    if isinstance(metadata, dict) and (metadata.get("backgroundTaskId") or metadata.get("background_task_id")):
+    if _backgrounded(result, inputs):
         return "ambiguous"
     if isinstance(metadata, dict) and (
             metadata.get("interrupted")
@@ -600,7 +624,7 @@ def _runtime_denials(events: list[tuple[int, int, dict]], calls: list[dict],
     return proven
 
 
-def _derive_outcome(result: dict | None, basis: str, denied: bool = False) -> str:
+def _derive_outcome(result: dict | None, basis: str, denied: bool = False, inputs: dict | None = None) -> str:
     """A `derive core` part's own outcome from its call's result (#3113).
     `basis` says what the call's status tells about the part: `command` (it
     is the part's status), `and_chain` (a success is the part's; a failure
@@ -609,8 +633,8 @@ def _derive_outcome(result: dict | None, basis: str, denied: bool = False) -> st
     spelling the parser does not read, #3137). A part whose status the
     result does not carry is `ambiguous`, unless the call was `denied` --
     by the native control or, corroborated, by the runtime (#3201) -- and
-    so never ran."""
-    overall = _shell_outcome(result)
+    so never ran. `inputs` are the call's, for `_backgrounded`."""
+    overall = _shell_outcome(result, inputs)
     if overall in ("pending", "ambiguous") or basis == "command":
         return overall
     if overall == "failed":
@@ -1218,9 +1242,13 @@ def _validator(rest: list[str]) -> bool:
 _DETACHERS = frozenset({"setsid", "daemon", "disown", "screen", "tmux", "at", "batch", "systemd-run",
                         "start-stop-daemon"})
 #: A `&` ending a command inside a word (a nested shell's command string):
-#: not `&&`, `|&`, a redirection's `>&`, `<&` or `&>`, nor a `&` inside a
-#: word (`R&D`, `?a=1&b=2`); followed by a space, `)`, `}`, `;` or the end.
-_NESTED_DETACH = re.compile(r"(?<![&|<>])&(?=[\s)};]|$)")
+#: not `&&`, `|&`, a redirection's `>&`, `<&` or `&>`; followed by a space,
+#: `)`, `}`, `;`, a comment's `#` or the end. On its own this misses a `&`
+#: followed directly by the next command (`./derive.sh&echo started`), which
+#: in a word with no space in it cannot be told from a `&` inside a word
+#: (`R&D`, `?a=1&b=2`); a word with a space in it is also read as the shell
+#: reads it (`_nested_detaches`, #3745).
+_NESTED_DETACH = re.compile(r"(?<![&|<>])&(?=[\s)};#]|$)")
 #: Reserved words and prefixes that may stand before a command's program
 #: without changing whether it detaches (#3690): a group or compound
 #: opener, `!`, `time` (and its `-p`), and `nohup`, `exec` and `command`,
@@ -1239,6 +1267,33 @@ _COPROC = "coproc"
 _NESTED_DETACHER = re.compile(
     r"(?:^|[;&|({\n])(?:\s*(?:[{!]|then|do|else|elif|if|while|until|time|-p|nohup|exec|command)(?=\s))*\s*"
     r"(?:coproc|(?:[^\s;&|()]*/)?(?:" + "|".join(re.escape(d) for d in sorted(_DETACHERS)) + r"))(?=[\s;&|)}]|$)")
+
+
+def _lone_ampersand(token: str) -> bool:
+    """An operator token that carries a `&` starting what precedes it in the
+    background: never `&&`, `|&` or a redirection's `>&`, `<&` or `&>` (the
+    lexer may join a lone `&` to a closing bracket: `&)`)."""
+    return set(token) <= _PUNCT and "&" in token.replace("&&", "").replace("|&", "").replace(
+        ">&", "").replace("<&", "").replace("&>", "")
+
+
+def _nested_detaches(word: str) -> bool:
+    """Whether a `&` ends a command inside `word`, a string a nested shell
+    may run: by `_NESTED_DETACH`, or, for a word with a space in it, as the
+    shell splits that word -- a lone `&` among its tokens (`bash -c
+    './derive.sh&echo started'`, #3745). A `&` the word quotes (`bash -c
+    'echo "R&D team"'`) is text, and a word inside it is read by
+    `_NESTED_DETACH` alone, so a shell nested in a nested shell (`bash -c
+    "bash -c './derive.sh&echo x'"`) is read by the narrow rule. Its cost
+    is a false open-ended run for such a word that is not a command, a
+    message `R&D work`, where the call also runs a program not read."""
+    if _NESTED_DETACH.search(word):
+        return True
+    if not re.search(r"\s", word):
+        return False
+    inner = _tokens(word)
+    return inner is not None and any(
+        _lone_ampersand(t) if set(t) <= _PUNCT else bool(_NESTED_DETACH.search(t)) for t in inner)
 
 
 def _detacher(segment: list[str]) -> bool:
@@ -1495,7 +1550,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         if full is not None and (_mentions_derive([command]) or _backstop(command)):
             out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
         # Its run is open-ended by the same text rules a nested shell's word
-        # is read by, applied to the whole command: a `&` ending a command,
+        # with no space in it is read by, applied to the whole command (it
+        # cannot be split, #3745): a `&` a space, `)`, `}`, `;`, `#` or the
+        # end follows,
         # or `coproc` or a detaching program where a command may start (a
         # here-document body fed to a shell may carry either). Where neither
         # is there, a call that returned before the draft was issued could
@@ -1506,15 +1563,15 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     segments, joins, leading = _layout(tokens)
     # A lone `&` (the lexer may join it to a closing bracket: `&)`), never
     # `&&`, `|&` or a redirection's `>&`, `<&` or `&>`; the same `&` ending a
-    # command inside a word a nested shell may run (`bash -c './derive.sh &'`);
+    # command inside a word a nested shell may run (`bash -c './derive.sh &'`,
+    # and `bash -c './derive.sh&echo started'` as that shell splits it, #3745);
     # or a part whose program detaches what it runs (`setsid`, `screen`,
     # `tmux`, ...), directly or under a wrapper `_unwrapped` reads (#3674),
     # or a `coproc`, at the top level or at a command's start inside such a
     # word, as a detaching program may be there too (#3690).
     out["detaches"] = any(
-        (set(t) <= _PUNCT and "&" in t.replace("&&", "").replace("|&", "").replace(
-            ">&", "").replace("<&", "").replace("&>", ""))
-        or (not set(t) <= _PUNCT and (_NESTED_DETACH.search(t) or (
+        _lone_ampersand(t)
+        or (not set(t) <= _PUNCT and (_nested_detaches(t) or (
             re.search(r"\s", t) and _NESTED_DETACHER.search(t))))
         for t in tokens) or any(_detacher(s) for s in segments)
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) for s in segments)
@@ -1943,8 +2000,8 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
             # outcome (#3113): `targets_full` is None when its `--full`
             # cannot be placed.
             h["derives"].extend({**where, "segment": part["segment"], "targets_full": part["targets_full"],
-                                 "outcome": _derive_outcome(result, part["basis"], denial is not None),
-                                 "command_outcome": _shell_outcome(result), "status_basis": part["basis"]}
+                                 "outcome": _derive_outcome(result, part["basis"], denial is not None, inputs),
+                                 "command_outcome": _shell_outcome(result, inputs), "status_basis": part["basis"]}
                                 for part in shell["derives"])
             if shell["runs_unread"] and denial is None:
                 # A call that ran a program this does not read may have run
@@ -1952,11 +2009,11 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                 # (#3369); `_boundaries` decides whether that could matter.
                 # A backgrounded call's result is its launch, and a part
                 # started with `&` may outlive the result: either may still
-                # be running after it, so `_ran_until` is then open.
-                background = shell["detaches"] or isinstance(result, dict) and isinstance(
-                    result["metadata"], dict) and bool(result["metadata"].get("backgroundTaskId")
-                                                       or result["metadata"].get("background_task_id"))
-                h["unread"].append({**where, "outcome": _shell_outcome(result),
+                # be running after it, so `_ran_until` is then open. The
+                # call's own `run_in_background` says so where the result
+                # carries no metadata (#3744).
+                background = shell["detaches"] or _backgrounded(result, inputs)
+                h["unread"].append({**where, "outcome": _shell_outcome(result, inputs),
                                     "_ran_until": None if background else where["_settled"]})
             if shell["read_only"]:
                 continue
@@ -1966,7 +2023,7 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                 h["rejected"].extend({**_where(call, result), "target": kind, "tool": name,
                                       "rejection": denial} for kind in shell["named"])
             else:
-                h["mutations"].extend({**where, "target": kind, "tool": name, "outcome": _shell_outcome(result)}
+                h["mutations"].extend({**where, "target": kind, "tool": name, "outcome": _shell_outcome(result, inputs)}
                                       for kind in shell["named"])
         elif name not in READ_TOOLS:
             # An edit tool, or any other tool given a path: a change that is

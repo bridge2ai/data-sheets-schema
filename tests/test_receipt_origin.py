@@ -1420,6 +1420,23 @@ class DeriveStatus(Base):
                                                  "backgroundTaskId": "bg1"})
         self.assertUnknown(block, f"derive core {identity} cannot be placed: its result is ambiguous")
 
+    def test_a_derive_backgrounded_by_its_input_is_ambiguous_without_metadata(self):
+        # The result's metadata is per event; the call's own input still says
+        # its result is the launch (#3744).
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        identity = r.call("Bash", command=r.derive_command(), description="x", run_in_background=True)
+        r.result(identity, "Command running in background with ID: bg1", is_error=False)
+        block = r.report()
+        self.assertUnknown(block, f"derive core {identity} cannot be placed: its result is ambiguous")
+        self.assertEqual(ro._backgrounded(None, {"run_in_background": "yes"}), True)
+        self.assertEqual(ro._backgrounded({"metadata": ro._ABSENT}, {"run_in_background": False}), False)
+        self.assertEqual(ro._shell_outcome({"is_error": False, "metadata": ro._ABSENT},
+                                           {"run_in_background": True}), "ambiguous")
+        self.assertEqual(ro._shell_outcome({"is_error": False, "metadata": ro._ABSENT}), "succeeded")
+
     def test_an_interrupted_or_non_zero_derive_is_not_the_boundary(self):
         for metadata in ({"stdout": "", "stderr": "", "interrupted": True},
                          {"stdout": "", "stderr": "", "interrupted": False, "exitCode": 1},
@@ -2209,8 +2226,13 @@ class DeriveSpellings(Base):
                       "reason; its cost is a false `unknown` for such a program that derived nothing", text)
         self.assertNotIn("issued after the draft and before the derive boundary", text)
         # #3674: what makes a call's run open-ended, and the detach it cannot see
-        self.assertIn("a part is started with `&` (at the top level, or ending a command inside a word a "
-                      "nested shell may run: `bash -c './derive.sh &'`) or by `coproc` (#3690), or a part's "
+        self.assertIn("where the runtime backgrounded it (its `run_in_background` input or its result's "
+                      "metadata says so, #3744), a part is started with `&` (at the top level, or ending a "
+                      "command inside a word a nested shell may run: `bash -c './derive.sh &'`, and, as that "
+                      "shell splits a word with a space in it, `bash -c './derive.sh&echo started'` (#3745); "
+                      "in a word with no space, in a word inside that one (a shell nested in the nested "
+                      "shell), and in a command the tokenizer cannot split, only a `&` followed by a space, `)`, `}`, `;`, `#` or the end counts, so `R&D` does not) or by "
+                      "`coproc` (#3690), or a part's "
                       "program detaches what it runs (`setsid`, `daemon`, `disown`, `screen`, `tmux`, `at`, "
                       "`batch`, `systemd-run`, `start-stop-daemon`, #3674), read through `timeout`, `env`, "
                       "`nice`, `nohup`, `exec` and `command` and as a command's first word inside such a nested "
@@ -2234,10 +2256,16 @@ class DeriveSpellings(Base):
                       "through `poetry run` one too, as poetry takes its virtualenv from the project that "
                       "directory is in, #3723; a d4d `derive core` call aimed at another record is held to the "
                       "same, #3722)", flat)
-        self.assertIn("or by `coproc`, or by a program that detaches it, `setsid`, `screen`, `tmux` and the "
+        self.assertIn("a backgrounded call's result is its launch -- its own `run_in_background` input or its "
+                      "result's metadata says so, #3744 -- and a part started with `&` -- at the top level or "
+                      "ending a command inside a word a nested shell may run, which is read as that shell "
+                      "splits it where the word has a space in it, `bash -c './derive.sh&echo started'`, "
+                      "#3745, a shell nested in that one not split again, and otherwise only where a space, "
+                      "`)`, `}`, `;`, `#` or the end follows the `&`, so `R&D` is text -- "
+                      "or by `coproc`, or by a program that detaches it, `setsid`, `screen`, `tmux` and the "
                       "like, may outlive it, so none of them has, #3674, #3690; a command the tokenizer cannot "
-                      "split is open-ended where its whole text carries such a `&`, `coproc` or detaching "
-                      "program, #3698; a script that detaches a child "
+                      "split is open-ended where its whole text carries such a `&`, by the rule for a word "
+                      "with no space, `coproc` or detaching program, #3698; a script that detaches a child "
                       "itself, or a detaching program behind a wrapper not read, `sudo`, is not seen", flat)
         self.assertIn("and a receipt change issued before that boundary returned after both it and the draft "
                       "were issued (#3697)", flat)
@@ -2457,6 +2485,42 @@ class UnseenDerive(Base):
         r.write(r.receipt, Boundaries.C003)
         r.derive()
         self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # The call's own `run_in_background` says so too where its result
+        # carries no metadata: none at all, or a user event carrying two
+        # results, whose metadata describes neither (#3744).
+        for shared in (False, True):
+            with self.subTest(run_in_background_without_metadata=shared):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.call("Bash", command="./derive.sh", description="x", run_in_background=True)
+                if shared:
+                    other = r.call("Bash", command="ls", description="x")
+                    r.events.append({"type": "user", "session_id": "s", "parent_tool_use_id": None,
+                                     "message": {"role": "user", "content": [
+                                         {"type": "tool_result", "tool_use_id": identity,
+                                          "content": "Command running in background with ID: bg1",
+                                          "is_error": False},
+                                         {"type": "tool_result", "tool_use_id": other, "content": "x",
+                                          "is_error": False}]},
+                                     "tool_use_result": {"stdout": "x", "stderr": "", "interrupted": False}})
+                else:
+                    r.result(identity, "Command running in background with ID: bg1", is_error=False)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive()
+                block = r.report()
+                self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 4) runs a program")
+                self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
+        # `run_in_background: false` is a foreground call that returned.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        identity = r.call("Bash", command="./derive.sh", description="x", run_in_background=False)
+        r.result(identity, "out", is_error=False)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
         # So may a part the command started with `&`, whatever the result says.
         for command in ("bash derive.sh &", "(bash derive.sh &)", "bash derive.sh & wait",
                         "bash derive.sh > /tmp/log 2>&1 &"):
@@ -2492,6 +2556,38 @@ class UnseenDerive(Base):
                 r.write(r.receipt, Boundaries.C003)
                 r.derive()
                 self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # A `&` followed directly by the next command, or by a comment,
+        # inside a nested shell's word with a space in it ends a command as
+        # the shell splits that word (#3745); so does an unquoted `R&D`
+        # there, which is the rule's cost.
+        for command in ("bash -c './derive.sh&echo started'", "bash -c './derive.sh&#note'",
+                        "bash -c 'cd x; ./derive.sh&wait'", "sh -c \"./derive.sh>log 2>&1&echo ok\"",
+                        "bash -c 'echo R&D work'"):
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive()
+                block = r.report()
+                self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 4) runs a program")
+                self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
+        # A `&` the nested word quotes is text, and a word with no space in
+        # it keeps the narrow rule (a URL's query, `R&D`), as does a word a
+        # shell nested in the nested shell runs.
+        for command in ("bash -c 'echo \"R&D team\"; ./derive.sh'", "bash -c \"./derive.sh 'a=1&b=2'\"",
+                        "bash -c \"bash -c './derive.sh&echo x'\"",
+                        "bash -c './derive.sh && echo done'", "bash derive.sh 'R&D'"):
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive()
+                block = r.report()
+                self.assertEqual(block["status"], "checked", block["reasons"])
         # A `&&`, `|&` or a redirection's `&` detaches nothing, at the top
         # level or inside a word; nor does a `&` inside a word (`R&D`, a URL's
         # query), nor `nohup` without a `&`.
@@ -3007,8 +3103,9 @@ class Cli(unittest.TestCase):
                       "`python -c` or `-m` part or a `poetry run` part, a `derive core` call aimed at another "
                       "record included; the inner command of a command or process substitution is "
                       "never read), that had not returned when the first full-record Write was issued (one in "
-                      "flight with it, backgrounded, or started with `&`, `coproc`, `setsid` and the like "
-                      "counts) and was "
+                      "flight with it, backgrounded by its `run_in_background` input or its result, or started "
+                      "with `&`, `coproc`, `setsid` and the like counts, a `&` inside a nested shell's word "
+                      "read as that shell splits a word with a space in it) and was "
                       "issued before the derive, with a receipt change returning after both it and the first "
                       "full-record Write were issued, makes the status `unknown`",
                       text)                               # #3369, #3674, #3675, #3676, #3697, #3699, #3700

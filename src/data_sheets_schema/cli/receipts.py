@@ -354,8 +354,9 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     change before a `python -c` or `-m` part or a `poetry run` part, a `derive core` call
     aimed at another record included; the inner command of a command or
     process substitution is never read), that had not returned when the first full-record Write was
-    issued (one in flight with it, backgrounded, or started with `&`, `coproc`, `setsid` and the
-    like counts) and was issued before the derive, with a receipt change returning after both
+    issued (one in flight with it, backgrounded by its `run_in_background` input or its result,
+    or started with `&`, `coproc`, `setsid` and the like counts, a `&` inside a nested shell's
+    word read as that shell splits a word with a space in it) and was issued before the derive, with a receipt change returning after both
     it and the first full-record Write were issued,
     makes the status `unknown`; its cost is a false `unknown` for such a program that
     derived nothing. A command the tokenizer cannot split is such a call, open-ended where its
