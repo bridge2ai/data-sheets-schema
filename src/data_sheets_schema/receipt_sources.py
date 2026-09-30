@@ -63,6 +63,30 @@ only above a token-count and character floor, and every flagged path is an
 item for a human spot-check, not a finding. Each flag also says whether the
 value's folded text occurs there as one run (`verbatim`): on the 24 fig19
 records, 30 of the 104 flags do.
+
+**Supersession** (#3049) is a second screen beside the tier one, with the
+same token rule and floors: a path cited only to documents the manifest
+marks `superseded_by`, while a chunk of a replacement (any source down the
+`superseded_by` chain that the path does not itself cite) holds every token
+of the value. The tier screen cannot see it when the replacement shares the
+superseded source's tier — CM4AI's `october_2025_dataverse_release` and its
+replacement are both tier 1 — and `source_priority.decide` already ranks
+supersession above tier for disagreements (#600). It is a separate count:
+no tier outcome and no projection field changes, and a path can be flagged
+by both screens (`also_higher_tier_match` says how many were). On the 24
+fig19 records, 83 paths are cited only to superseded sources, every one with
+a replacement chunk in its bundle. 9 of them are exempt (they owe no bundle
+receipt) and keep the outcome `exempt` unscreened; of the other 74, 62 clear
+the floors and are screened, and 12 of those are flagged (8 CM4AI against
+`june_2026_dataverse_release`, 4 VOICE against `physionet_3_1_0`), 1
+verbatim, and none of the 12 is also a tier-screen flag.
+
+**Which manifest ranks**: the selected one by default, its sha256 stated
+beside whether it is the run's recorded `inputs.source_manifest`. With
+`--at-run-commit` (#3050) it is the bytes the run recorded, recovered by
+hash (`run_source_manifest`). The 24 fig19 records recorded two versions
+(md5 41408d… and 6c71e8…, 12 each, both recovered from git), and both rank
+every document of those runs as today's manifest does: no count moves.
 """
 from __future__ import annotations
 
@@ -75,7 +99,8 @@ from data_sheets_schema import receipts as rc
 from data_sheets_schema import source_metadata
 from data_sheets_schema.chunking import PREAMBLE
 
-INSTRUMENT = "receipt_sources v1 (#2937)"
+#: v2 adds the supersession screen (#3049); every v1 key and count is unchanged.
+INSTRUMENT = "receipt_sources v2 (#2937, #3049)"
 
 UNIT = ("distinct receipt slot paths as written that resolve, by index, to a populated value in the "
         "final record (fig19's receipted_field_paths; several citing chunks count once; not "
@@ -118,6 +143,10 @@ VALUE_EXCERPT = 80
 #: The token screen's outcome for each path; every path has exactly one.
 SCREEN_OUTCOMES = ("higher_tier_match", "no_higher_tier_match", "below_floor",
                    "no_higher_tier_chunk", "exempt", "preamble_only")
+#: The supersession screen's outcome for each path; every path has exactly
+#: one. `cites_a_current_source`: some citing document is not superseded.
+SUPERSESSION_OUTCOMES = ("replacement_match", "no_replacement_match", "below_floor",
+                         "no_replacement_chunk", "cites_a_current_source", "exempt", "preamble_only")
 
 NON_CHECKS = (
     "that a citation supports its value — this counts citation dependence in the run's own receipt; "
@@ -125,8 +154,20 @@ NON_CHECKS = (
     "that a higher-tier chunk containing a value's tokens states that value — the screen is lexical; "
     "spot-check the listed paths",
     "which tiers the run itself saw — tiers are read from the selected source manifest's bytes, "
-    "whose sha256 is stated, not from the manifest at the run's commit",
+    "whose sha256 is stated, not from the bytes the run recorded in inputs.source_manifest "
+    "(`--at-run-commit` reads those, recovered by hash rather than from the run's commit)",
 )
+
+#: With `--at-run-commit` (#3050) the last non-check above no longer holds;
+#: this one takes its place.
+NON_CHECK_AT_RUN_COMMIT = (
+    "today's ranking — the tiers are the source manifest bytes the run recorded, recovered by hash "
+    "(`--at-run-commit`), so a tier or source list changed since the run is not applied")
+
+
+def non_checks(at_run_commit: bool = False) -> list[str]:
+    """The report's non-checks for where its tiers were read from."""
+    return list(NON_CHECKS[:-1]) + [NON_CHECK_AT_RUN_COMMIT] if at_run_commit else list(NON_CHECKS)
 
 
 def _leaf_text(value: Any) -> str:
@@ -203,6 +244,15 @@ def source_dependence(receipt: dict[str, Any], chunk_manifest: dict[str, Any],
         chunk_doc[c["id"]] = key
     tier = {k: d["tier"] for k, d in documents.items()}
 
+    def replacements(doc: str) -> list[str]:
+        """Every source down `doc`'s `superseded_by` chain (acyclic: the
+        projection refuses a cycle)."""
+        out, current = [], documents[doc].get("superseded_by")
+        while current is not None:
+            out.append(current)
+            current = documents[current].get("superseded_by")
+        return out
+
     # --- citations: receipt path → citing documents
     citing: dict[str, dict[str, Any]] = {}
     entries = Counter()
@@ -277,6 +327,10 @@ def source_dependence(receipt: dict[str, Any], chunk_manifest: dict[str, Any],
     by_cited_tier = Counter()
     verbatim = 0
     flagged: list[dict[str, Any]] = []
+    s_outcomes = Counter()
+    s_verbatim = 0
+    s_also_tier = 0
+    s_flagged: list[dict[str, Any]] = []
     by_path = []
     for path in sorted(citing):
         v = citing[path]
@@ -325,6 +379,44 @@ def source_dependence(receipt: dict[str, Any], chunk_manifest: dict[str, Any],
                     row["higher_tier_chunks"] = hits
         outcomes[outcome] += 1
         row["token_screen"] = outcome
+
+        # --- supersession screen (#3049): the same token rule, against the
+        # chunks of the cited sources' replacements rather than of a higher tier
+        if outcome in ("preamble_only", "exempt"):
+            s_outcome = outcome
+        elif not all(documents[d].get("superseded_by") for d in v["documents"]):
+            s_outcome = "cites_a_current_source"
+        else:
+            successors = {r for d in v["documents"] for r in replacements(d)} - v["documents"]
+            candidates = sorted(cid for cid, doc in chunk_doc.items() if doc in successors)
+            tokens = rc._value_tokens(_leaf_text(value))
+            if not candidates:
+                s_outcome = "no_replacement_chunk"
+            elif len(tokens) < min_tokens or sum(len(t) for t in tokens) < min_chars:
+                s_outcome = "below_floor"
+            else:
+                hits = [cid for cid in candidates if cid in hay and tokens <= hay[cid]]
+                s_outcome = "replacement_match" if hits else "no_replacement_match"
+                if hits:
+                    phrase = _folded(_leaf_text(value))
+                    in_order = any(phrase in folded[c] for c in hits)
+                    s_verbatim += in_order
+                    s_also_tier += outcome == "higher_tier_match"
+                    excerpt = " ".join(_leaf_text(value).split())
+                    s_flagged.append({
+                        "path": path,
+                        "value": excerpt[:VALUE_EXCERPT] + ("…" if len(excerpt) > VALUE_EXCERPT else ""),
+                        "tokens": len(tokens),
+                        "verbatim": in_order,
+                        "also_higher_tier_match": outcome == "higher_tier_match",
+                        "cited": [{"document": d, "tier": tier[d], "superseded_by": documents[d]["superseded_by"],
+                                   "chunks": sorted(c for c in v["chunks"] if chunk_doc.get(c) == d)}
+                                  for d in sorted(v["documents"], key=lambda d: (tier[d], d))],
+                        "replacement_chunks": [{"chunk": c, "document": chunk_doc[c], "tier": tier[chunk_doc[c]]}
+                                               for c in hits]})
+                    row["replacement_chunks"] = hits
+        s_outcomes[s_outcome] += 1
+        row["supersession_screen"] = s_outcome
         by_path.append(row)
 
     documents_cited = Counter(len(v["documents"]) for v in citing.values())
@@ -359,8 +451,18 @@ def source_dependence(receipt: dict[str, Any], chunk_manifest: dict[str, Any],
             "chunks_without_text": no_text,
             "examples": flagged[:examples],
             "examples_truncated": max(0, len(flagged) - examples) or None},
+        "superseded_with_replacement_token_match": {
+            "count": s_outcomes["replacement_match"],
+            "screened": s_outcomes["replacement_match"] + s_outcomes["no_replacement_match"],
+            "verbatim": s_verbatim,
+            "also_higher_tier_match": s_also_tier,
+            "outcomes": {k: s_outcomes[k] for k in SUPERSESSION_OUTCOMES},
+            "superseded_documents": [{"document": k, "superseded_by": d["superseded_by"]}
+                                     for k, d in documents.items() if d.get("superseded_by")],
+            "examples": s_flagged[:examples],
+            "examples_truncated": max(0, len(s_flagged) - examples) or None},
         "by_path": by_path,
-        "non_checks": list(NON_CHECKS),
+        "non_checks": non_checks(),
     }
 
 
@@ -426,6 +528,45 @@ def run_chunks(provenance: Path) -> dict[str, Any]:
     return {"record": record, "manifest": manifest, "texts": texts, "basis": basis}
 
 
+def run_source_manifest(record: dict[str, Any], provenance: Path) -> tuple[bytes, dict[str, Any]]:
+    """The source manifest bytes a run recorded (`inputs.source_manifest`),
+    for `--at-run-commit` (#3050). Read-only.
+
+    The bytes are the manifest on disk at the recorded path when they hash to
+    every hash the run kept, else the newest committed version of that path
+    that does — recovered by hash, as `run_chunks` recovers a bundle
+    (`provenance.bundle_bytes_for`, #1140), not by the record's commit. Raises
+    `ValueError` naming why when the run recorded no path or no hash or no
+    version matches, and `provenance.GitUnavailable` when git cannot answer
+    (a shallow clone among them).
+    """
+    from data_sheets_schema.provenance import bundle_bytes_for, resolve_record_input
+
+    inputs = record.get("inputs") if isinstance(record.get("inputs"), dict) else {}
+    recorded = inputs.get("source_manifest") if isinstance(inputs.get("source_manifest"), dict) else {}
+    rel = recorded.get("path")
+    if not isinstance(rel, str) or not rel:
+        why = f" ({recorded['basis']})" if isinstance(recorded.get("basis"), str) else ""
+        raise ValueError(f"{provenance} records no source manifest path (inputs.source_manifest){why}, so the "
+                         "bytes its run read cannot be looked for")
+    hashes = {k: recorded[k] for k in ("md5", "sha256") if isinstance(recorded.get(k), str) and recorded[k]}
+    if not hashes:
+        raise ValueError(f"{provenance} records no source manifest hash, so the bytes its run read cannot be "
+                         "identified")
+    digest = {"md5": lambda b: hashlib.md5(b).hexdigest(), "sha256": lambda b: hashlib.sha256(b).hexdigest()}
+    disk = resolve_record_input(Path(rel), provenance)
+    if disk is not None and disk.is_file():
+        raw = disk.read_bytes()
+        if all(digest[k](raw) == v for k, v in hashes.items()):
+            return raw, {"source": "manifest on disk", "path": str(disk)}
+    found = bundle_bytes_for(rel, md5=hashes.get("md5"), sha256=hashes.get("sha256"))
+    if found is None:
+        raise ValueError(f"no committed version of {rel} hashes to the run's recorded "
+                         f"{' and '.join(hashes)}")
+    raw, entry = found
+    return raw, {"source": "git blob", "path": rel, "commit": entry["commit"]}
+
+
 def source_manifest_basis(record: dict[str, Any], raw: bytes) -> dict[str, Any]:
     """Whether the source manifest the tiers come from is the one the run
     recorded (`inputs.source_manifest`), compared by whichever hash the run
@@ -438,6 +579,17 @@ def source_manifest_basis(record: dict[str, Any], raw: bytes) -> dict[str, Any]:
             "same_bytes": all(here[k] == v for k, v in hashes.items()) if hashes else None}
 
 
+def basis_label(basis: dict[str, Any]) -> str:
+    """Where bytes were read from, for a text line. A `git blob` basis
+    carries the *commit* the blob was found at, not the blob's own hash, so
+    the line says `git blob at commit <hash>` (#3476): `git cat-file blob`
+    on a commit hash fails. The JSON keeps the basis as it is."""
+    source = basis.get("source", "?")
+    if not basis.get("commit"):
+        return source
+    return f"{source} at commit {basis['commit'][:12]}"
+
+
 def render(report: dict[str, Any]) -> list[str]:
     """The report as terminal lines (`d4d receipts sources`)."""
     n = report["paths"]
@@ -447,8 +599,10 @@ def render(report: dict[str, Any]) -> list[str]:
 
     run = report.get("run") or {}
     basis = run.get("bundle_basis") or {}
-    where = basis.get("source", "?") + (f" {basis['commit'][:12]}" if basis.get("commit") else "")
+    where = basis_label(basis)
     tiers_from = run.get("source_manifest", "the source manifest")
+    if run.get("source_manifest_bytes"):              # --at-run-commit: say where the recorded bytes came from
+        tiers_from = f"{tiers_from} ({basis_label(run['source_manifest_bytes'])})"
     same = (run.get("source_manifest_basis") or {}).get("same_bytes")
     note = {True: "the bytes the run recorded", False: "not the bytes the run recorded",
             None: "the run recorded no hash to compare"}[same]
@@ -502,5 +656,22 @@ def render(report: dict[str, Any]) -> list[str]:
                      f"{'verbatim' if ex['verbatim'] else 'tokens'} in {found}")
     if m["examples_truncated"]:
         lines.append(f"     … {m['examples_truncated']} more (--examples, or --json for every path)")
+    s = report["superseded_with_replacement_token_match"]
+    so = s["outcomes"]
+    lines.append(f"   superseded, replacement token match: {s['count']} of {s['screened']} screened paths "
+                 f"({s['verbatim']} verbatim, {s['also_higher_tier_match']} also in the tier screen) are cited "
+                 "only by superseded documents while a replacement's chunk holds every token of the value "
+                 f"(same floors) · {so['cites_a_current_source']} cite a current source · "
+                 f"{so['no_replacement_chunk']} with no replacement chunk in the bundle · "
+                 f"{so['below_floor']} below the floors · {so['exempt']} exempt · "
+                 f"{so['preamble_only']} preamble only")
+    for ex in s["examples"]:
+        cited = "; ".join(f"{c['document']} (tier {c['tier']}, superseded by {c['superseded_by']}, "
+                          f"{', '.join(c['chunks'])})" for c in ex["cited"])
+        found = "; ".join(f"{h['chunk']} {h['document']} (tier {h['tier']})" for h in ex["replacement_chunks"])
+        lines.append(f"     {ex['path']} = {ex['value']!r}: cited {cited}; "
+                     f"{'verbatim' if ex['verbatim'] else 'tokens'} in {found}")
+    if s["examples_truncated"]:
+        lines.append(f"     … {s['examples_truncated']} more (--examples, or --json for every path)")
     lines += [f"   · not checked here: {nc}" for nc in report["non_checks"]]
     return lines
