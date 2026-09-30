@@ -40,9 +40,12 @@ runtime's playbook permits and which is replayed exactly on the receipt as
 it last stood (#3047): each `old_string` must occur once, or at least once
 under `replace_all`, and a replay that cannot be exact is a reason -- one
 with no earlier state to apply to (except an edit whose first `old_string`
-is empty, which the runtime accepts only on an absent or empty file and so
-replays on the empty text, creating the receipt; an empty `old_string` on
-a receipt already non-empty as replayed is a reason), a string that does not occur or occurs
+is empty, which the runtime accepts only on an absent file or one whose
+content is blank under JavaScript's `trim()`, and whose result is then the
+whole `new_string`: it is replayed on the empty text, or on the blank
+`originalFile` its result names, creating the receipt; an empty
+`old_string` on a receipt that is not blank as replayed is a reason,
+#3604), a string that does not occur or occurs
 more than once without `replace_all`, a deletion the runtime may extend to
 the following newline, a replacement carrying a `$` pattern a JavaScript
 replace may expand, or a result whose metadata says the runtime applied
@@ -152,6 +155,7 @@ import json
 import os
 import re
 import shlex
+import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -182,6 +186,15 @@ EDIT_TOOLS = frozenset({"Edit", "MultiEdit"})
 #: nothing) is not known here, so a replacement carrying one of the four
 #: cannot be replayed exactly; a dollar amount such as "$10 million" can.
 _JS_REPLACEMENT = re.compile(r"\$[$&`']")
+# What JavaScript's `String.prototype.trim()` removes: WhiteSpace (tab, VT,
+# FF, space, NBSP, BOM and every Zs character) and LineTerminator (#3604).
+_JS_TRIM = frozenset("\t\v\f \u00a0\ufeff\n\r\u2028\u2029")
+
+
+def _js_blank(text: str) -> bool:
+    """`text.trim() === ""` in JavaScript: the runtime's test for a file an
+    empty `old_string` may create over (#3604)."""
+    return all(c in _JS_TRIM or unicodedata.category(c) == "Zs" for c in text)
 #: Shell programs that read their operands and write only to stdout (`sed`
 #: only when `_sed_reads_only` admits its options and script: no in-place
 #: flag, no script file, and no `w`/`W`/`e` command or `s///w`/`s///e`
@@ -1493,10 +1506,13 @@ def _replace(text: str, old: Any, new: Any, replace_all: Any) -> tuple[str | Non
     """One edit applied exactly, or (None, why) when it cannot be (#3047)."""
     if not isinstance(old, str) or not isinstance(new, str):
         return None, "an `old_string` that is not a string, or a `new_string` that is not a string"
-    if old == "" and text != "":
-        # The runtime accepts an empty `old_string` only on an absent or
-        # empty file, where it creates the file (#3588).
-        return None, "an empty `old_string` on a receipt that is not empty as replayed"
+    if old == "":
+        # The runtime accepts an empty `old_string` only on an absent file or
+        # one blank under `trim()`, and its result is then the whole
+        # `new_string`, whatever whitespace was there (#3588, #3604).
+        if not _js_blank(text):
+            return None, "an empty `old_string` on a receipt that is not blank as replayed"
+        return new, None
     if replace_all not in (None, True, False):
         return None, "a `replace_all` that is not a boolean"
     found = text.count(old)
@@ -1642,9 +1658,13 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                     created = "edit"
                     if not earlier and _creates(name, inputs):
                         # An empty first `old_string` is accepted only on an
-                        # absent or empty file: the text it edited is known
-                        # to be empty, and the result is in the call (#3588).
-                        prior, created = "", "create"
+                        # absent file or a blank one, and the result is the
+                        # call's `new_string` either way (#3588). The text it
+                        # edited is the blank `originalFile` its result names,
+                        # else taken as empty (#3604).
+                        said = result["metadata"].get("originalFile") if isinstance(result["metadata"], dict) else None
+                        prior = said if isinstance(said, str) and _js_blank(said) else ""
+                        created = "create"
                     content = None
                     if prior is not None:
                         content, why = _replay(name, inputs, result["metadata"], prior)
@@ -1799,8 +1819,10 @@ def origin(transcripts: list[Path], receipt: Path, full: Path, *, receipt_at_run
 
     strip = lambda row: {k: v for k, v in row.items() if k not in ("pos", "content") and not k.startswith("_")}
     # A successful edit of the receipt is replayed where its row carries the
-    # text it left; one whose replay failed, or that followed a failed one,
-    # carries None and is listed apart (#3589).
+    # text it left; one whose replay failed, or that followed a failed one
+    # before the next successful Write of the receipt, carries None and is
+    # listed apart (#3589). An edit after such a Write is replayed on the
+    # Write's content (#3605).
     edit_rows = [w for w in writes if w["tool"] != "Write"]
     listed = lambda rows: [{k: v for k, v in strip(w).items() if k != "created"} for w in rows]
     block: dict[str, Any] = {

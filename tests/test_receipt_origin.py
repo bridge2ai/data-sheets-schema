@@ -1025,7 +1025,7 @@ class EditReplay(Base):
                 (PRE, {"old_string": "not in the receipt", "new_string": "x"}, None, "does not occur"),
                 (twice, {"old_string": TITLE, "new_string": LICENSE}, None, "occurs 2 times"),
                 (PRE, {"old_string": "", "new_string": "x"}, None,
-                 "an empty `old_string` on a receipt that is not empty"),                  # #3588
+                 "an empty `old_string` on a receipt that is not blank"),                  # #3588, #3604
                 (PRE, {"old_string": None, "new_string": "x"}, None, "`old_string` that is not a string"),
                 (PRE, {"old_string": TITLE, "new_string": 7}, None, "`new_string` that is not a string"),
                 (PRE, {"old_string": TITLE, "new_string": LICENSE, "replace_all": "yes"}, None, "not a boolean"),
@@ -1080,10 +1080,9 @@ class EditReplay(Base):
         self.assertFalse(any("rebuilt from" in x for x in ro.summary(block)))
 
     def test_an_edit_that_creates_the_receipt_is_replayed_on_empty_text(self):
-        # #3588: an empty `old_string` is accepted only on an absent or empty
-        # file, so the text it edited is known (empty) and the result is the
-        # call's own `new_string`; never "the text it edited is not in the
-        # transcripts".
+        # #3588: an empty `old_string` is accepted only on an absent file or
+        # one blank under `trim()` (#3604), and the result is the call's own
+        # `new_string`; never "the text it edited is not in the transcripts".
         for name, inputs in (("Edit", {"old_string": "", "new_string": PRE}),
                              ("MultiEdit", {"edits": [{"old_string": "", "new_string": PRE}]})):
             with self.subTest(tool=name):
@@ -1097,6 +1096,59 @@ class EditReplay(Base):
                 self.assertEqual(block["origin"]["contemporaneous"], 3)
                 self.assertEqual(block["receipt"]["rebuilt_sha256"], block["receipt"]["sha256"])
                 self.assertEqual([e["tool_use_id"] for e in block["replayed_edits"]], [identity])
+
+    def test_js_blank_is_javascripts_trim(self):
+        # #3604: the runtime refuses an empty `old_string` only where
+        # `content.trim() !== ""`. JavaScript trims BOM and every Zs space;
+        # Python's `isspace` also counts the information separators, which
+        # `trim()` keeps.
+        for text in ("", " \n\t\r\v\f", "\u00a0\ufeff\u2028\u2029", "\u3000\u2003"):
+            with self.subTest(text=repr(text)):
+                self.assertTrue(ro._js_blank(text))
+        for text in ("x", "  x\n", "\x1c", "\x85", "\u200b"):
+            with self.subTest(text=repr(text)):
+                self.assertFalse(ro._js_blank(text))
+
+    def test_an_empty_old_string_on_a_blank_receipt_is_replayed(self):
+        # #3604: a receipt left holding only whitespace is accepted by the
+        # runtime, which writes the whole `new_string`.
+        r = self._drafted()
+        r.write(r.receipt, " \n\t\u3000\n")
+        identity = r.edit(old_string="", new_string=WITH_LICENSE,
+                          metadata={"filePath": str(r.receipt), "originalFile": " \n\t\u3000\n"})
+        r.last_receipt = WITH_LICENSE
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["receipt"]["rebuilt_sha256"], block["receipt"]["sha256"])
+        self.assertEqual([e["tool_use_id"] for e in block["replayed_edits"]], [identity])
+
+    def test_a_creating_edit_over_a_blank_file_is_replayed(self):
+        # #3604: the file it created over was blank, not absent; its result
+        # names that text as `originalFile`, which is not a mismatch.
+        r = self.run_
+        identity = r.edit(old_string="", new_string=PRE,
+                          metadata={"filePath": str(r.receipt), "originalFile": "\n\n"})
+        r.write(r.full, "id: x\n")
+        r.last_receipt = PRE
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["receipt"]["rebuilt_sha256"], block["receipt"]["sha256"])
+        self.assertEqual([e["tool_use_id"] for e in block["replayed_edits"]], [identity])
+
+    def test_an_edit_after_a_failed_one_and_a_later_write_is_replayed(self):
+        # #3605: an edit after a failed replay is unreplayed only until the
+        # next successful Write of the receipt; after it, the edit replays on
+        # the Write's content.
+        r = self._drafted()
+        failed = r.edit(old_string="absent", new_string="x")
+        r.write(r.receipt, PRE)
+        after = r.edit(old_string=TITLE, new_string=TITLE + LICENSE)
+        r.last_receipt = WITH_LICENSE
+        block = r.report()
+        self.assertUnknown(block, f"Edit {failed} of the receipt")
+        self.assertEqual([e["tool_use_id"] for e in block["replayed_edits"]], [after])
+        self.assertEqual([e["tool_use_id"] for e in block["unreplayed_edits"]], [failed])
+        self.assertEqual(block["receipt"]["rebuilt_sha256"], block["receipt"]["sha256"])
 
     def test_an_opening_create_edit_that_cannot_be_replayed_names_the_replay(self):
         # #3588: the reason is the replay's, never the opening-edit one.
