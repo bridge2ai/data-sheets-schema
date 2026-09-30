@@ -426,3 +426,29 @@ def test_an_entry_malformed_in_skips_moves_nothing(entry, tmp_path):
     assert claimed == sorted(f"related dataset claims source {v!r} is in this bundle; the "
                              f"manifest lists no such source for EXTERNAL"
                              for v in inv["scope"]["in_bundle_unmatched"])
+
+
+# An entry identified only by also_known_as is usable to every scope reader
+# (scope.aliases_of gives its alias, so malformed_in does not skip it) and
+# moves its source; its aliases are then the only identifier that says which
+# dataset took the source, so the inventory records and renders them (#3494).
+@pytest.mark.parametrize("entry, aliases, owner", [
+    (b"{also_known_as: 'doi:10.1/x', in_bundle: promoted}", ["doi:10.1/x"],
+     "a dataset also known as doi:10.1/x"),
+    (b"{also_known_as: ['doi:10.1/x', ' ark:/1/y '], in_bundle: promoted}", ["doi:10.1/x", "ark:/1/y"],
+     "a dataset also known as doi:10.1/x / ark:/1/y"),
+    (b"{id: https://example.org/z, also_known_as: 'doi:10.1/z', in_bundle: promoted}", ["doi:10.1/z"],
+     "https://example.org/z"),
+])
+def test_an_entry_named_only_by_its_aliases_records_them(entry, aliases, owner):
+    from data_sheets_schema import scope
+    raw = NEUTRAL + b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - " + entry + b"\n"
+    assert not [r for r in scope.malformed_in(scope.scope_in(raw, "EXTERNAL")) if r["skipped"]]
+    inv = ri.inventory(raw, None, "EXTERNAL")
+    assert inv["scope"]["skipped_entries"] == []
+    [related] = inv["related_sources"]
+    [dataset] = related["related_datasets"]
+    assert related["source_id"] == "promoted" and dataset["also_known_as"] == aliases
+    text = "\n".join(ri.render(inv))
+    assert f"declared in_bundle for {owner}, not counted above" in text
+    assert "an unnamed dataset" not in text

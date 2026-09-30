@@ -155,7 +155,12 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
         dataset = {"id": entry.get("id") if scope_decl._is_identifier(entry.get("id")) else None,
                    "name": entry.get("name") if isinstance(entry.get("name"), str) else None,
                    "manifest_key": (entry.get("manifest_key")
-                                    if scope_decl._is_identifier(entry.get("manifest_key")) else None)
+                                    if scope_decl._is_identifier(entry.get("manifest_key")) else None),
+                   # The entry's aliases, as every scope reader takes them: an
+                   # entry identified by also_known_as alone is usable, and
+                   # this is then the only identifier that names it (#3494).
+                   "also_known_as": scope_decl.aliases_of(
+                       {"also_known_as": entry.get("also_known_as")}),
                    } if isinstance(entry, dict) else None
         for sid in scope_decl.in_bundle_of(entry):
             if sid in source_ids and index not in skipped:
@@ -220,6 +225,22 @@ def _written(value) -> str:
     return repr(value)
 
 
+def _owner(dataset: dict | None) -> str:
+    """The name a related dataset is rendered under: its manifest_key, name
+    or id, else its aliases -- an entry identified by ``also_known_as``
+    alone is usable to every scope reader, and they are then all that
+    names it (#3494). ``str()``: an id or manifest_key a manifest wrote as
+    a number is kept, which ``scope._is_identifier`` admits (#3446)."""
+    if dataset is None:
+        return "a malformed entry"
+    named = dataset["manifest_key"] or dataset["name"] or dataset["id"]
+    if named:
+        return str(named)
+    if dataset.get("also_known_as"):
+        return "a dataset also known as " + " / ".join(dataset["also_known_as"])
+    return "an unnamed dataset"
+
+
 def render(inv: dict) -> list[str]:
     """Human-readable lines for one inventory, stable for the same input."""
     policy = inv["crate_policy"]
@@ -239,10 +260,7 @@ def render(inv: dict) -> list[str]:
     lines.append(f"   release record     {'yes' if inv['release_record_in_document_corpus'] else 'no'}"
                  + (f": {_ids(inv['release_records'])}" if inv["release_records"] else ""))
     for entry in inv["related_sources"]:
-        # str(): `_related` keeps an id or manifest_key a manifest wrote as
-        # a number, which `scope._is_identifier` admits (#3446).
-        owners = ", ".join(str(d["manifest_key"] or d["name"] or d["id"] or "an unnamed dataset")
-                           if d else "a malformed entry" for d in entry["related_datasets"])
+        owners = ", ".join(_owner(d) for d in entry["related_datasets"])
         lines.append(f"   {'related source':18} {_ids([entry])} ({entry['source_type']}): "
                      f"declared in_bundle for {owners}, not counted above")
     scope = inv["scope"]
