@@ -763,6 +763,8 @@ class DigestMeasurement(CorpusFixture, unittest.TestCase):
         # L_rep1 Q pins no digest, so it has no render.
         self.assertIn("Counted records with no render measured: `claudecode_agent/L_rep1/Q_d4d.yaml`.", md)
         self.assertIn("In all 1 reproduced renders (1 distinct digests), `used_software` is named only", md)
+        # The arm's prompt is counted and names the slot (#3760).
+        self.assertIn("A prompt file that names `used_software` is counted above", md)
         self.assertLess(md.index("(#3525)"), md.index("## Lexical candidates by record"))
 
     def test_a_digest_that_shows_software_is_named_and_the_conclusion_withheld(self):
@@ -776,8 +778,24 @@ class DigestMeasurement(CorpusFixture, unittest.TestCase):
         md5 = hashlib.md5(self.digest.encode()).hexdigest()
         self._pin("claudecode_api", "M_rep1", "P", md5)
         md = self._note(self._measure())
-        self.assertIn(f"Renders that show `Software` or a key of it: `{self.commit[:10]}` (license, url, version).", md)
+        self.assertIn("Renders that show `Software`, a key of it, or a `used_software` heading of its own: "
+                      f"`{self.commit[:10]}` (license, url, version).", md)
         self.assertNotIn("is named only", md)
+
+    def test_a_used_software_heading_without_a_software_entry_claims_no_entry(self):
+        # #3761: the render gives `used_software` its own heading, but
+        # `Software` has no entry, so no entry may be claimed for it.
+        self._recommit_digest("# Target class `Dataset`\n\n## `used_software` — *Software* [many]\nTools.\n\n"
+                              + PREAMBLE + TOOLS)
+        self._pin("claudecode_api", "M_rep1", "P", self.md5)
+        dig = self._measure()
+        r = dig["renders"][0]
+        self.assertEqual((r["own_slot_heading"], r["software_entry"], r["software_keys"]), (True, False, []))
+        md = self._note(dig)
+        self.assertIn("Renders that show `Software`, a key of it, or a `used_software` heading of its own: "
+                      f"`{self.commit[:10]}` (no `Software` entry; `used_software` has its own heading).", md)
+        self.assertNotIn("entry, no keys", md)
+        self.assertNotIn("Software` has no entry and", md)
 
     def _recommit_digest(self, digest):
         import subprocess
@@ -830,6 +848,10 @@ class DigestMeasurement(CorpusFixture, unittest.TestCase):
                       "| none | – | 0 |", md)
         self.assertIn("(`–`: no record in the arm hashed a prompt file whose bytes\n"
                       "reproduce at its commit, either because it hashes none or because none it hashed does)", md)
+        # And the closing note does not say a prompt naming the slot is
+        # counted above, since none is (#3760).
+        self.assertIn("In all 1 reproduced renders (1 distinct digests), `used_software` is named only", md)
+        self.assertNotIn("counted above", md)
 
     def test_a_render_from_another_copy_of_the_package_is_refused(self):
         # #3735: an interpreter that finds `data_sheets_schema` somewhere

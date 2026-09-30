@@ -1077,6 +1077,7 @@ def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
         "|---|---|---:|---|---:|---|---|---|---|---|---|---:|",
     ]
     unmeasured = []
+    counted_prompt_names_slot = False
     for key, display, _ in arms:
         mine = [r for r in rows if r["arm"] == key]
         if not mine:
@@ -1096,6 +1097,9 @@ def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
             files = [f for f in files if f and f["at_commit"]]
             if files:
                 prompt.append(any(f["names_used_software"] for f in files))
+        # Only a prompt the column above counted may be said to be counted
+        # there: one whose bytes reproduce at the commit (#3760).
+        counted_prompt_names_slot = counted_prompt_names_slot or any(prompt)
         lines.append(
             f"| {display} | {', '.join(sorted({str(r.get('runtime')) for r in mine}))} | {len(mine)} "
             f"| {', '.join(f'`{d[:8]}`' for d in sorted({str(r.get('digest_md5')) for r in mine}))} "
@@ -1149,16 +1153,27 @@ def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
             "does not show. Showing it is a digest change: `schema_digest.py` is pinned, and the change",
             "would be its own condition boundary. It is recorded here, not made.",
         ]
-        if any(p["names_used_software"] for p in dig["prompts"]):
+        if counted_prompt_names_slot:
             lines += ["", "A prompt file that names `used_software` is counted above; what it says of the slot is",
                       "not read by this measurement."]
     elif ok:
-        lines.append(f"Renders that show `Software` or a key of it: "
-                     + "; ".join(f"`{m['commit'][:10]}` ({', '.join(m['software_keys']) or 'entry, no keys'})"
-                                 for m in shows) + ".")
+        lines.append("Renders that show `Software`, a key of it, or a `used_software` heading of its own: "
+                     + "; ".join(f"`{m['commit'][:10]}` ({_shown(m)})" for m in shows) + ".")
     else:
         lines.append("No render reproduces its record's md5, so nothing here says what any arm was shown.")
     return lines
+
+
+def _shown(m: dict) -> str:
+    """What one render shows of `Software` and `used_software`, claiming an
+    entry only where the render has one (#3761): a render can give
+    `used_software` its own heading and still have no `Software` entry."""
+    # Keys are read only from the entry (`software_in_digest`), so a render
+    # without an entry shows none.
+    what = (", ".join(m["software_keys"]) or "entry, no keys") if m["software_entry"] else "no `Software` entry"
+    if m["own_slot_heading"]:
+        what += "; `used_software` has its own heading"
+    return what
 
 
 def main(argv: list[str] | None = None) -> int:
