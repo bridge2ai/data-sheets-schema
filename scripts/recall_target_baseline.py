@@ -41,6 +41,17 @@ each counted record's sha256 and its receipt's, so a record amended later
 makes the note stale rather than quietly describing other bytes; a
 corpus-lane test regenerates it and compares the committed bytes.
 
+The zeros alone do not say whether a bundle states what a record lacks
+(#3289). `notes/recall_target_bundle_adjudication.yaml` is a hand reading
+that does: a verdict on every lexical candidate with a version or lineage
+cue, keyed on the chunk text's sha256, and each versioned software
+statement the bundles make, with a verbatim snippet. The script renders
+the reading into the note and measures against it: which candidates have
+no verdict, which verdicts match no candidate, whether each snippet is in
+the bytes a record hashed, and whether the record carries the name with
+the version (`fact_carriage`). The reading is not re-derived; the
+measurement is.
+
 Usage:
     poetry run python scripts/recall_target_baseline.py            # rewrite the note
     poetry run python scripts/recall_target_baseline.py --check    # read-only: exit 1 when stale
@@ -61,6 +72,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 CORPUS = ROOT / "data" / "d4d_concatenated"
 OUT_MD = ROOT / "notes" / "recall_target_baseline.md"
+ADJUDICATION = ROOT / "notes" / "recall_target_bundle_adjudication.yaml"
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
 #: The two directories a generic-arm label can live in (#690): agentic and
 #: API runs through v7 under the first, the API baseline from v8 the second.
@@ -213,38 +225,47 @@ def chunk_cues(text: str) -> dict[str, dict[str, int]]:
     return found
 
 
-def chunk_texts_for(inputs: dict[str, Any], root: Path) -> tuple[dict[str, str] | None, str]:
-    """The record's chunk texts by id, and the basis they were read on; or
-    None and why not. The bytes are the ones the record hashed — the bundle
-    on disk where it still hashes to them, else the committed version that
-    does — and the chunks are the record's own rule over them."""
-    from data_sheets_schema.chunking import chunk_text, chunk_texts
-
+def hashed_bundle(inputs: dict[str, Any], root: Path) -> tuple[bytes | None, str]:
+    """The bundle bytes the record hashed, and the basis they were read on;
+    or None and why not: the bundle on disk where it still hashes to the
+    record's md5/sha256, else the committed version that does."""
     bundle_rel = inputs.get("bundle_path")
     md5, sha = inputs.get("bundle_md5"), inputs.get("bundle_sha256")
-    chunks = inputs.get("chunks") or {}
-    rule = chunks.get("rule") if isinstance(chunks, dict) else None
     if not bundle_rel or not (md5 or sha):
         return None, "the record declares no bundle path and hash"
-    if not isinstance(rule, dict):
-        return None, "the record declares no chunk rule"
-    raw: bytes | None = None
-    basis = ""
     disk = root / bundle_rel
     if disk.is_file():
         b = disk.read_bytes()
         if ((not md5 or hashlib.md5(b).hexdigest() == md5)
                 and (not sha or hashlib.sha256(b).hexdigest() == sha)):
-            raw, basis = b, "bundle on disk"
+            return b, "bundle on disk"
+    from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
+    try:
+        recovered = bundle_bytes_for(bundle_rel, md5=md5, sha256=sha)
+    except GitUnavailable as exc:
+        return None, f"the bundle drifted and git could not supply the version hashed ({exc})"
+    if recovered is None:
+        return None, "the bundle drifted and no committed version hashes to the record's"
+    return recovered[0], "committed version (git)"
+
+
+def chunk_texts_for(inputs: dict[str, Any], root: Path,
+                    bundle: tuple[bytes | None, str] | None = None) -> tuple[dict[str, str] | None, str]:
+    """The record's chunk texts by id, and the basis they were read on; or
+    None and why not. The bytes are the ones the record hashed
+    (`hashed_bundle`, or `bundle` where the caller already read them) and
+    the chunks are the record's own rule over them."""
+    from data_sheets_schema.chunking import chunk_text, chunk_texts
+
+    chunks = inputs.get("chunks") or {}
+    rule = chunks.get("rule") if isinstance(chunks, dict) else None
+    if not inputs.get("bundle_path") or not (inputs.get("bundle_md5") or inputs.get("bundle_sha256")):
+        return None, "the record declares no bundle path and hash"
+    if not isinstance(rule, dict):
+        return None, "the record declares no chunk rule"
+    raw, basis = bundle if bundle is not None else hashed_bundle(inputs, root)
     if raw is None:
-        from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
-        try:
-            recovered = bundle_bytes_for(bundle_rel, md5=md5, sha256=sha)
-        except GitUnavailable as exc:
-            return None, f"the bundle drifted and git could not supply the version hashed ({exc})"
-        if recovered is None:
-            return None, "the bundle drifted and no committed version hashes to the record's"
-        raw, basis = recovered[0], "committed version (git)"
+        return None, basis
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
@@ -276,11 +297,127 @@ def receipt_candidates(receipt: dict[str, Any], texts: dict[str, str] | None) ->
             continue
         found = chunk_cues(text)
         if found:
-            cands.append({"chunk": str(c.get("id")), "status": c["status"], "cues": found})
+            cands.append({"chunk": str(c.get("id")), "status": c["status"], "cues": found,
+                          "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()})
     # A marked chunk whose text is unknown was not inspected, so the count is
     # unmeasured, not a floor: a stale id must not read as zero candidates.
     out["candidates"] = None if out["missing_chunks"] else cands
     return out
+
+
+#: The cue classes the adjudication must cover (#3289): software versions
+#: and lineage. Variables are not adjudicated here; whether a variables row
+#: is a variable in a data file is #2079's question, not a bundle reading.
+ADJUDICATED_CLASSES = ("version", "lineage")
+SOFTWARE_VERDICTS = ("none", "referent", "companion", "cited")
+PARENT_VERDICTS = ("none", "stated")
+#: How a record carries a versioned software fact, strongest first.
+CARRIAGE = ("structured", "elsewhere", "name_only", "absent")
+
+
+def load_adjudication(path: Path) -> dict[str, Any]:
+    """The hand adjudication, checked for shape: a malformed entry is an
+    error, never a silently skipped verdict."""
+    raw = path.read_bytes()
+    data = _load(raw)
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: not a mapping")
+    chunks, facts, bundles = data.get("chunks") or [], data.get("facts") or [], data.get("bundles") or []
+    for i, c in enumerate(chunks):
+        where = f"{path}: chunks[{i}]"
+        if not isinstance(c, dict) or not all(c.get(k) for k in ("project", "chunk", "sha256", "reading")):
+            raise ValueError(f"{where}: needs project, chunk, sha256 and reading")
+        if not isinstance(c["sha256"], list) or not all(re.fullmatch(r"[0-9a-f]{64}", str(s)) for s in c["sha256"]):
+            raise ValueError(f"{where}: sha256 must be a list of full hex digests")
+        if c.get("software_version") not in SOFTWARE_VERDICTS:
+            raise ValueError(f"{where}: software_version must be one of {', '.join(SOFTWARE_VERDICTS)}")
+        if c.get("parent_dataset") not in PARENT_VERDICTS:
+            raise ValueError(f"{where}: parent_dataset must be one of {', '.join(PARENT_VERDICTS)}")
+    seen: dict[str, str] = {}
+    for c in chunks:
+        for s in c["sha256"]:
+            if s in seen:
+                raise ValueError(f"{path}: chunk sha256 {s[:12]}… adjudicated twice")
+            seen[s] = c["chunk"]
+    ids = set()
+    for i, f in enumerate(facts):
+        where = f"{path}: facts[{i}]"
+        if not isinstance(f, dict) or not all(f.get(k) for k in ("id", "project", "names", "version", "snippet")):
+            raise ValueError(f"{where}: needs id, project, names, version and snippet")
+        if f.get("scope") not in SOFTWARE_VERDICTS[1:]:
+            raise ValueError(f"{where}: scope must be one of {', '.join(SOFTWARE_VERDICTS[1:])}")
+        if not isinstance(f["names"], list):
+            raise ValueError(f"{where}: names must be a list")
+        if f["id"] in ids:
+            raise ValueError(f"{where}: duplicate id {f['id']}")
+        ids.add(f["id"])
+    return {"chunks": chunks, "facts": facts, "bundles": bundles,
+            "sha256": hashlib.sha256(raw).hexdigest(), "path": path}
+
+
+def _collapse(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _fact_patterns(fact: dict[str, Any]) -> tuple[re.Pattern, re.Pattern]:
+    """The fact's name (any of `names`) and its version, each as a whole
+    token; the version may carry a `v`, `v.` or `version` prefix."""
+    names = re.compile(r"(?<![\w-])(?:" + "|".join(re.escape(str(n)) for n in fact["names"]) + r")(?![\w-])",
+                       re.IGNORECASE)
+    version = re.compile(r"(?<![\w.])(?:v\.?\s?|version\s)?" + re.escape(str(fact["version"])) + r"(?!\w|\.\d)",
+                         re.IGNORECASE)
+    return names, version
+
+
+def _strings(node: Any):
+    """Every scalar leaf, as text."""
+    if isinstance(node, dict):
+        for v in node.values():
+            yield from _strings(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _strings(v)
+    elif node not in (None, ""):
+        yield _collapse(str(node))
+
+
+def _mappings(node: Any):
+    if isinstance(node, dict):
+        yield node
+        for v in node.values():
+            yield from _mappings(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _mappings(v)
+
+
+def fact_carriage(record: Any, fact: dict[str, Any]) -> str:
+    """How the record carries a versioned software fact (`CARRIAGE`):
+    `structured` is a `used_software` entry naming it with that `version`,
+    or a `tools` string holding both; `elsewhere` is any other string, or
+    one mapping's own values, holding both (prose, a resource entry);
+    `name_only` the name without the version; `absent` neither. Lexical,
+    like the cues: a match does not check that the value is right."""
+    names, version = _fact_patterns(fact)
+    for key, value in _walk(record):
+        if key == "used_software":
+            for sw in entries(value):
+                if (isinstance(sw, dict) and _populated(sw.get("version"))
+                        and version.search(_collapse(str(sw["version"])))
+                        and any(names.search(s) for s in _strings(sw))):
+                    return "structured"
+        elif key == "tools":
+            for tool in entries(value):
+                if isinstance(tool, str) and names.search(tool) and version.search(tool):
+                    return "structured"
+    strings = list(_strings(record))
+    if any(names.search(s) and version.search(s) for s in strings):
+        return "elsewhere"
+    for m in _mappings(record):
+        own = [_collapse(str(v)) for v in m.values() if v not in (None, "") and not isinstance(v, (dict, list))]
+        if any(names.search(s) for s in own) and any(version.search(s) for s in own):
+            return "elsewhere"
+    return "name_only" if any(names.search(s) for s in strings) else "absent"
 
 
 def locate(label: str, project: str, corpus: Path) -> tuple[str, Path, Path] | None:
@@ -299,12 +436,20 @@ def _load(raw: bytes) -> Any:
 
 
 def collect(corpus: Path | None = None, arms=None, root: Path | None = None,
-            projects: tuple[str, ...] | None = None) -> dict[str, Any]:
+            projects: tuple[str, ...] | None = None,
+            adjudication: dict[str, Any] | None = None) -> dict[str, Any]:
     """One row per record of every arm: its counts, its receipt's, and the
     basis of each. `root` is what a record's repository-relative bundle path
-    resolves against (the checkout by default)."""
+    resolves against (the checkout by default). `adjudication` is a
+    `load_adjudication` result (the committed file when it exists, for the
+    default corpus); each row then carries, per fact of its project,
+    whether its hashed bytes state the snippet and how it carries it."""
     corpus, arms, root = corpus or CORPUS, ARMS if arms is None else arms, root or ROOT
     projects = PROJECTS if projects is None else projects
+    if adjudication is None and corpus == CORPUS and ADJUDICATION.is_file():
+        adjudication = load_adjudication(ADJUDICATION)
+    facts = (adjudication or {}).get("facts") or []
+    bundles: dict[tuple, tuple[bytes | None, str]] = {}
     rows: list[dict[str, Any]] = []
     excluded: list[str] = []
     for key, _, labels in arms:
@@ -328,16 +473,76 @@ def collect(corpus: Path | None = None, arms=None, root: Path | None = None,
                     "counts": target_counts(record if isinstance(record, dict) else {}),
                     "receipt": None, "receipt_sha256": None, "text_basis": None,
                 }
+                inputs = prov_rec.get("inputs") or {}
+                mine = [f for f in facts if f["project"] == project]
                 rpath = corpus / f"{method}_core" / label / f"{project}_coverage_receipt.yaml"
+                bundle = None
+                if rpath.is_file() or mine:
+                    bkey = (inputs.get("bundle_path"), inputs.get("bundle_md5"), inputs.get("bundle_sha256"))
+                    if bkey not in bundles:
+                        bundles[bkey] = hashed_bundle(inputs, root)
+                    bundle = bundles[bkey]
+                texts = None
                 if rpath.is_file():
                     rraw = rpath.read_bytes()
                     receipt = _load(rraw)
                     row["receipt_sha256"] = hashlib.sha256(rraw).hexdigest()
-                    texts, basis = chunk_texts_for(prov_rec.get("inputs") or {}, root)
+                    texts, basis = chunk_texts_for(inputs, root, bundle)
                     row["text_basis"] = basis
                     row["receipt"] = receipt_candidates(receipt if isinstance(receipt, dict) else {}, texts)
+                if mine:
+                    row["facts"] = fact_rows(mine, record, bundle, texts)
                 rows.append(row)
-    return {"rows": rows, "excluded": excluded, "corpus": corpus}
+    return {"rows": rows, "excluded": excluded, "corpus": corpus, "adjudication": adjudication}
+
+
+def fact_rows(facts: list[dict[str, Any]], record: Any, bundle: tuple[bytes | None, str] | None,
+              texts: dict[str, str] | None) -> dict[str, dict[str, Any]]:
+    """Per fact: `stated` (the snippet is in the bytes the record hashed;
+    None where they are not recovered), the chunks that carry it where the
+    chunk text is known, and the record's `fact_carriage`."""
+    flat = None
+    if bundle is not None and bundle[0] is not None:
+        try:
+            flat = _collapse(bundle[0].decode("utf-8"))
+        except UnicodeDecodeError:
+            flat = None
+    out = {}
+    for f in facts:
+        snippet = _collapse(str(f["snippet"]))
+        out[f["id"]] = {
+            "stated": None if flat is None else snippet in flat,
+            "chunks": ([cid for cid, t in texts.items() if snippet in _collapse(t)] if texts is not None else None),
+            "carried": fact_carriage(record, f),
+        }
+    return out
+
+
+def adjudication_coverage(collected: dict[str, Any], arms=None) -> dict[str, Any]:
+    """Which lexical candidates with an adjudicated cue class have a
+    verdict, which do not, and which verdicts match no candidate. A
+    candidate is identified by its project and chunk text sha256."""
+    arms = ARMS if arms is None else arms
+    order = {key: i for i, (key, _, _) in enumerate(arms)}
+    adj = collected.get("adjudication") or {"chunks": []}
+    by_sha = {(c["project"], s): c for c in adj["chunks"] for s in c["sha256"]}
+    seen: dict[tuple[str, str], dict[str, Any]] = {}
+    for r in collected["rows"]:
+        rc = r["receipt"]
+        for c in (rc or {}).get("candidates") or []:
+            if not any(cls in c["cues"] for cls in ADJUDICATED_CLASSES):
+                continue
+            k = (r["project"], c["sha256"])
+            e = seen.setdefault(k, {"project": r["project"], "chunk": c["chunk"], "sha256": c["sha256"], "arms": []})
+            if r["arm"] not in e["arms"]:
+                e["arms"].append(r["arm"])
+    for e in seen.values():
+        e["arms"].sort(key=lambda a: order.get(a, len(order)))
+    matched = [dict(e, verdict=by_sha[k]) for k, e in sorted(seen.items(), key=lambda kv: (kv[0][0], kv[1]["chunk"]))
+               if k in by_sha]
+    missing = [e for k, e in sorted(seen.items(), key=lambda kv: (kv[0][0], kv[1]["chunk"])) if k not in by_sha]
+    unmatched = [c for c in adj["chunks"] if not any((c["project"], s) in seen for s in c["sha256"])]
+    return {"matched": matched, "missing": missing, "unmatched": unmatched}
 
 
 COUNT_COLUMNS = (("lineage", "lineage entries"), ("was_derived_from", "was_derived_from"),
@@ -455,6 +660,8 @@ def render_markdown(collected: dict[str, Any], arms=None) -> str:
     if collected["excluded"]:
         lines += ["", "Not counted, declared invalid by their own validation block: "
                   + "; ".join(f"`{p}`" for p in collected["excluded"]) + "."]
+    if collected.get("adjudication"):
+        lines += render_adjudication(collected, arms)
     lines += ["", "## Lexical candidates by record", "",
               "Each receipted record: the basis its chunk text was read on, then each",
               "`nothing_relevant`/`redundant_with` chunk with a cue, its cue classes and the",
@@ -483,6 +690,86 @@ def render_markdown(collected: dict[str, Any], arms=None) -> str:
                 lines.append(f"| {c['chunk']} | {c['status']} | {cues} |")
             lines.append("")
     return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def _one_line(text: Any) -> str:
+    return _collapse(str(text)).replace("|", "\\|")
+
+
+def render_adjudication(collected: dict[str, Any], arms=None) -> list[str]:
+    """The #3289 section: the hand reading as written, and what the script
+    measures against it."""
+    arms = ARMS if arms is None else arms
+    adj = collected["adjudication"]
+    path = adj["path"]
+    shown = path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name
+    cov = adjudication_coverage(collected, arms)
+    rows = collected["rows"]
+    lines = [
+        "", "## Bundle adjudication (#3289)", "",
+        f"A hand reading, `{shown}` (sha256 `{adj['sha256']}`), rendered here: edit that file, not",
+        "this note. It asks whether the zeros above are bundle facts or omissions. Keep #1349 in",
+        "view: lineage stated in text form is valid, so a biological or clinical source written as",
+        "prose is not a missing parent dataset. Variables are not adjudicated (#2079: whether a row",
+        "is a variable in a data file is not a lexical question). The verdicts are a reading; the",
+        "coverage, the snippet checks and the carriage counts below are measured.",
+        "", "### The answer by project", "",
+        "| project | software versions | parent datasets |", "|---|---|---|",
+    ]
+    for b in adj["bundles"]:
+        lines.append(f"| {b.get('project')} | {_one_line(b.get('software_version'))} "
+                     f"| {_one_line(b.get('parent_dataset'))} |")
+    lines += [
+        "", "### Lexical candidates with a version or lineage cue", "",
+        "Each distinct candidate text, keyed on its sha256 (the chunk manifests' `sha256`), with the",
+        "arms whose receipts mark it `nothing_relevant`/`redundant_with`. **software version**: `none`",
+        "(the cue is not a software version), `referent` (stated as used for the dataset the record",
+        "describes), `companion` (stated for an analysis the bundle documents, not said to be applied",
+        "to the released data) or `cited` (a versioned citation with no stated use). **parent",
+        "dataset**: `none` or `stated`.", "",
+        "| project | chunk | chunk sha256 | candidate in | software version | parent dataset | reading |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for e in cov["matched"]:
+        v = e["verdict"]
+        lines.append(f"| {e['project']} | {e['chunk']} | `{e['sha256'][:12]}` | {', '.join(e['arms'])} "
+                     f"| {v['software_version']} | {v['parent_dataset']} | {_one_line(v['reading'])} |")
+    lines.append("")
+    lines.append("Not adjudicated: " + ("; ".join(f"{e['project']} {e['chunk']} `{e['sha256'][:12]}` "
+                                                   f"({', '.join(e['arms'])})" for e in cov["missing"])
+                                         if cov["missing"] else "none") + ".")
+    lines.append("Adjudicated but matching no candidate: "
+                 + ("; ".join(f"{c['project']} {c['chunk']}" for c in cov["unmatched"]) if cov["unmatched"]
+                    else "none") + ".")
+    lines += [
+        "", "### Versioned software the bundles state, and where the records carry it", "",
+        "Every versioned software statement found in the four bundles, searched in full. Per arm,",
+        "over the records of the fact's project: **stated** is the records whose hashed bundle bytes",
+        "contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a",
+        "`used_software` entry naming the software with that `version`, or a `tools` string with",
+        "both; **elsewhere** is any other string, or one mapping's own values, holding the name and",
+        "the version (prose, a resource entry); **name only** is the name without the version;",
+        "**absent** is neither. Lexical, like the cues: a match does not check that the value is",
+        "right, and a `companion` or `cited` fact carried is not thereby in scope.", "",
+        "| fact | scope | stated in chunks | arm | records | stated | used_software/tools | elsewhere "
+        "| name only | absent |",
+        "|---|---|---|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for f in adj["facts"]:
+        mine = [r for r in rows if f["id"] in (r.get("facts") or {})]
+        chunk_ids = sorted({c for r in mine for c in (r["facts"][f["id"]]["chunks"] or [])})
+        for key, display, _ in arms:
+            arm_rows = [r["facts"][f["id"]] for r in mine if r["arm"] == key]
+            if not arm_rows:
+                continue
+            known = [x["stated"] for x in arm_rows if x["stated"] is not None]
+            stated = f"{sum(known)}" + (f" of {len(known)}" if len(known) != len(arm_rows) else "") if known else "–"
+            n = {c: sum(x["carried"] == c for x in arm_rows) for c in CARRIAGE}
+            lines.append(f"| `{f['id']}` | {f['scope']} | {', '.join(chunk_ids) or '–'} | {display} "
+                         f"| {len(arm_rows)} | {stated} | " + " | ".join(str(n[c]) for c in CARRIAGE) + " |")
+    lines += ["", "Where each fact is stated, as read:", ""]
+    lines += [f"- `{f['id']}`: {_one_line(f.get('reading', ''))}" for f in adj["facts"]]
+    return lines
 
 
 def main(argv: list[str] | None = None) -> int:
