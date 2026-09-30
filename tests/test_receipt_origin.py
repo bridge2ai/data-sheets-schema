@@ -3676,7 +3676,8 @@ class EarlierDirectoryChange(Base):
         self.assertTrue(ro._may_run_code_here(["{", "myfunc"]))
         # #3920: an arithmetic argument does not exempt the part; only `((`
         # at the program position does.
-        for command in ("source env.sh $((1))", "myfunc $((1))", "myfunc x $(( n + 1 ))", ". ./env.sh $((1+2))"):
+        for command in ("source env.sh $((1))", "myfunc $((1))", "myfunc x $(( n + 1 ))", ". ./env.sh $((1+2))",
+                        "((source env.sh; ls) )", "((myfunc; ls) )"):   # the last two: nested subshells (#3922)
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command, "/w", [])["moves"], True)
                 full = ro._Target("full", "/w/data/X_full.yaml")

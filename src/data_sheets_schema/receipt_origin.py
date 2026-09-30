@@ -1642,7 +1642,8 @@ def _may_run_code_here(segment: list[str]) -> bool:
     `_wrapper_skip` reads, whose program runs in a child, a d4d call or a
     validator. A function or alias named as one of those is not seen. Nor
     is an arithmetic command (`(( i++ ))`), which runs no command; only a
-    part whose program position is `((` is exempt, so `source env.sh
+    part that is a whole arithmetic command (`((` at the program position
+    and closing with `))`, #3922) is exempt, so `source env.sh
     $((1))` still counts (#3920). That exemption is this rule's alone, and
     the directory rules read the part as before."""
     rest = _behind_prefixes(segment)[0]
@@ -1651,7 +1652,9 @@ def _may_run_code_here(segment: list[str]) -> bool:
     # `((` is read as a compound prefix, so an arithmetic command is the one
     # whose last prefix read is `((` (or whose head is, where it is not).
     read = segment[:len(segment) - len(rest)]
-    if (read and read[-1] == "((") or rest[0] == "((":
+    # bash reads `((` as nested subshells unless the command closes with `))`
+    # (#3922), so a part is exempt only when it is a whole arithmetic command.
+    if ((read and read[-1] == "((") or rest[0] == "((") and segment[-1] == "))":
         return False
     head = rest[0]
     if head in ("source", "."):
