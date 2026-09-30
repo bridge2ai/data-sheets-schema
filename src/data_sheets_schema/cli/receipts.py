@@ -313,7 +313,13 @@ def origin(transcripts, receipt_file, full_file, as_json):
     ends its command, redirections such as `2>&1` aside, or after a `derive` with a
     redirection directly after it) cannot be placed either. A command the tokenizer
     cannot split (an apostrophe in a heredoc body) is tested whole for the same
-    words, and a match cannot be placed. A
+    words, and a match cannot be placed, and so does a derive call with a
+    redirection among its words (`--full 2>/dev/null F`). Last, a command-wide
+    backstop: a call these rules give no derive, whose raw text with quotes
+    and escapes removed carries the whole word `derive` anywhere (a
+    substitution, an assignment, a `cd` part, an `xargs` argument) beside a
+    `d4d`, `data_sheets_schema` or `$`-variable invocation, cannot be placed;
+    its cost is a false `unknown` (`grep 'd4d derive core' notes.md`). A
     derive whose words are not on the command line (a script, an alias, a variable supplying
     `derive` itself) is not seen. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only

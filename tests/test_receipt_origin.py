@@ -1425,7 +1425,11 @@ class DeriveSpellings(Base):
                          f"${{PY}} -m data_sheets_schema.cli {derive}",
                          f"nice -n 10 d4d {derive}",
                          f"nice -5 poetry run d4d {derive}",
-                         f"X=1 timeout 60 env Y=2 nice d4d {derive} && d4d receipts check --label L"):
+                         f"X=1 timeout 60 env Y=2 nice d4d {derive} && d4d receipts check --label L",
+                         # #3478: redirections after the call's words leave it read as written
+                         f"poetry run d4d {derive} 2>&1",
+                         f"poetry run d4d {derive} > /tmp/derive-3374.log 2>&1",
+                         f"poetry run d4d {derive} 2 >& 1"):
             with self.subTest(spelling=spelling):
                 identity, block = self._derived(spelling)
                 self.assertEqual(block["status"], "checked", block["reasons"])
@@ -1517,11 +1521,10 @@ class DeriveSpellings(Base):
                          f"poetry run d4d derive $SUB --full {self.FULL} {self.OUT}"):
             for ok in (True, False):
                 with self.subTest(spelling=spelling, ok=ok):
+                    # `poetry run d4d derive` carries no `derive core` words, but the
+                    # command-wide backstop (#3478-#3480) reads it as a derive that
+                    # cannot be placed; before the backstop it was no derive at all.
                     identity, block = self._derived(spelling, ok=ok)
-                    if spelling == "poetry run d4d derive":
-                        # no `derive core` words at all: nothing to place
-                        self.assertEqual(block["derive_core_attempts"], [])
-                        continue
                     self.assertUnknown(block, f"derive core {identity} cannot be placed")
                     self.assertIn("a spelling of `derive core` the parser does not follow",
                                   " ".join(block["reasons"]))
@@ -1541,9 +1544,6 @@ class DeriveSpellings(Base):
         for spelling in ("grep -n 'derive core' .claude/commands/d4d-full-core.md",
                          "echo derive core && printf '%s\\n' 'derive core'",
                          "sed -n '/derive core/,+3p' .claude/commands/d4d-full-core.md",
-                         "poetry run d4d provenance record --project CHORUS --label L "
-                         "--phase '{\"name\": \"derive core\"}'",
-                         "poetry run d4d receipts check --label L --project CHORUS --note 'after derive core'",
                          "cat derive-core.log", "ls data/rederive core",
                          # #3384: a reader's words piped only into readers run nothing
                          "grep -n 'derive core' x.md | head -3 | wc -l",
@@ -1556,7 +1556,6 @@ class DeriveSpellings(Base):
                          # #3397: quote removal joins only what the shell joins
                          "bash -c 'python scripts/\"re\"derive core'",
                          "bash -c 'python scripts/\"derive\" \"core.py\"'",
-                         "grep -n \"derive $x\" x.md",
                          "poetry run d4d receipts check --label \"$L\" --project CHORUS",
                          # #3426: an xargs replacement string or appended word that is not
                          # the word after `derive` supplies nothing to it
@@ -1577,6 +1576,74 @@ class DeriveSpellings(Base):
                 block = r.report()
                 self.assertEqual(block["status"], "checked", block["reasons"])
                 self.assertEqual([a["tool_use_id"] for a in block["derive_core_attempts"]], [identity])
+
+    def test_the_command_wide_backstop_catches_what_the_parts_miss(self):
+        # #3478-#3480: Codex's reproductions, each read as `checked` with the
+        # Phase 3 entry counted as Phase 1 before the backstop.
+        for spelling in (f"d4d derive 2>/dev/null core --full {self.FULL} {self.OUT}",            # #3478
+                         f"d4d derive core --full 2>/dev/null {self.FULL} {self.OUT}",            # #3478
+                         f"result=\"$(d4d derive core --full {self.FULL} {self.OUT})\"",          # #3479
+                         f"printf 'core\\n' | xargs -I'|' d4d derive '|' --full {self.FULL} {self.OUT}",  # #3480
+                         # #3479: a cd part, and other assignments
+                         f"cd \"$(d4d derive core --full {self.FULL} {self.OUT})\"",
+                         f"export X=\"$(d4d derive core --full {self.FULL} {self.OUT})\"",
+                         f"X=`poetry run d4d derive core --full {self.FULL} {self.OUT}`",
+                         # #3480: the other operator placeholders
+                         f"printf 'core\\n' | xargs -I';' d4d derive ';' --full {self.FULL} {self.OUT}",
+                         f"printf 'core\\n' | xargs -I'&' d4d derive '&' --full {self.FULL} {self.OUT}",
+                         # a `$`-variable invocation, and data_sheets_schema
+                         f"$D4D derive 2>/dev/null core --full {self.FULL} {self.OUT}",
+                         f"python -m data_sheets_schema.cli derive 2>/dev/null core --full {self.FULL} {self.OUT}",
+                         # a command the tokenizer cannot split, whose words no rule matches
+                         f"cat > /tmp/notes-3374.txt <<EOF\nit's done\nEOF\n"
+                         f"d4d derive 2>/dev/null core --full {self.FULL} {self.OUT}"):
+            for ok in (True, False):
+                with self.subTest(spelling=spelling, ok=ok):
+                    identity, block = self._derived(spelling, ok=ok)
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed")
+                    self.assertIn("the command-wide backstop", " ".join(block["reasons"]))
+                    self.assertEqual([(a["targets_full"], a["status_basis"], a["outcome"])
+                                      for a in block["derive_core_attempts"]], [(None, "unparsed", "ambiguous")])
+
+    def test_the_backstops_cost_is_a_false_unknown(self):
+        # These run no derive, but the word `derive` sits beside a d4d or `$`
+        # invocation, so the backstop reads each as one that cannot be placed.
+        # The first three were `checked` (not a derive) before #3478-#3480.
+        for spelling in ("poetry run d4d provenance record --project CHORUS --label L "
+                         "--phase '{\"name\": \"derive core\"}'",
+                         "poetry run d4d receipts check --label L --project CHORUS --note 'after derive core'",
+                         "grep -n \"derive $x\" x.md",
+                         "grep 'd4d derive core' notes.md"):
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling)
+                self.assertUnknown(block, f"derive core {identity} cannot be placed")
+                self.assertEqual(block["derive_core_attempts"][0]["status_basis"], "unparsed")
+
+    def test_backstop(self):
+        cases = {"d4d derive core": True, "x=\"$(d4d derive core)\"": True, "cd $(d4d derive core)": True,
+                 "printf core | xargs -I'|' d4d derive '|'": True, "$PY -m x derive": True,
+                 "${PY} derive": True, "python -m data_sheets_schema.cli derive": True,
+                 "d4d de\"\"rive core": True, "/venv/bin/d4d derive": True,
+                 # no invocation of the CLI at all: the one exception
+                 "grep -n 'derive core' notes.md": False, "python scripts/derive corex": False,
+                 "cat .claude/commands/d4d-full-core.md | grep derive": False,
+                 # `derive` only inside a longer word
+                 "d4d rederive core": False, "d4d derive_core": False, "d4d derive-core": False,
+                 "d4d derive.py": False, "d4d receipts check": False,
+                 # `d4d` only inside a longer word
+                 "cd d4d-executions && grep derive x": False, "ls data/d4d_concatenated derive": False}
+        for command, expected in cases.items():
+            with self.subTest(command=command):
+                self.assertIs(ro._backstop(command), expected)
+
+    def test_redirection_interleaved(self):
+        cases = {"core --full F --out O": False, "core --full F --out O 2 >& 1": False,
+                 "core --full F --out O > log 2 >& 1": False, "core --full F < in": False,
+                 "core --full 2 > /dev/null F --out O": True, "2 > /dev/null core --full F": True,
+                 "core --full F > log --out O": True, "core --full F &> log x": True}
+        for words, expected in cases.items():
+            with self.subTest(words=words):
+                self.assertIs(ro._redirection_interleaved(words.split()), expected)
 
     def test_xargs_supplies_derive_word(self):
         # #3426: the replacement string xargs sets, whatever it is, or the word it
@@ -1647,12 +1714,11 @@ class DeriveSpellings(Base):
                       "not known to read", doc)                                    # #3384
         self.assertIn("in a command that substitutes anywhere (`$(...)`, backticks, `<(...)`), every part "
                       "that carries them, readers and the recorder's `--phase` included", doc)   # #3385
-        self.assertIn("a file that an earlier part wrote the words into and a later part runs", text)
+        self.assertIn("a file that an earlier call wrote the words into and a later call runs", text)
         # #3397: the quote rule, the run-time word and the route still unseen
         self.assertIn("The words are matched after quote and escape characters are removed", text)
         self.assertIn("`xargs ... derive {}`) counts as a derive that cannot be placed", text)
         self.assertIn("a variable or substitution supplying the word `derive` itself", text)
-        self.assertIn("A word the shell builds some other way (a glob, `derive c*`) is not seen", text)
         # #3426: any xargs replacement string, and the one xargs route still unseen
         self.assertIn("as does a word carrying any replacement string an `xargs` in the command sets "
                       "(`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`)", text)
@@ -1666,8 +1732,26 @@ class DeriveSpellings(Base):
                       "whatever follows (#3457)", text)
         self.assertIn("A command the tokenizer cannot split (an apostrophe in a here-document body) is "
                       "tested whole, quote characters removed, by the same rules (#3458)", text)
-        self.assertIn("nor is a word xargs appends to a `derive` that neither ends the xargs command nor "
-                      "has a redirection directly after it", text)
+        # #3478-#3480: the command-wide backstop, its cost, and what no rule sees
+        self.assertIn("Last, a command-wide backstop (#3478-#3480): a call these rules give no derive, "
+                      "whose raw text, quote and escape characters removed, carries the word `derive` as a "
+                      "whole word anywhere (in a substitution, an assignment, a `cd` part, an `xargs` "
+                      "argument) beside a `d4d`, `data_sheets_schema` or `$`-variable invocation, is one "
+                      "derive that cannot be placed; its cost is a false `unknown` (`grep 'd4d derive core' "
+                      "notes.md`", text)
+        self.assertIn("A derive call with a redirection among its words (`--full 2>/dev/null F`) cannot be "
+                      "placed (#3478)", text)
+        self.assertIn("what no rule sees is a command with no whole word `derive`, or with one but no such "
+                      "invocation", text)
+        self.assertNotIn("A word the shell builds some other way (a glob, `derive c*`) is not seen", text)
+        self.assertNotIn("nor is a word xargs appends to a `derive` that neither ends", text)
+        self.assertIn("Last, a command-wide backstop (#3478-#3480): a call every rule above gave no derive, "
+                      "whose raw text, quote and escape characters removed, carries the word `derive` as a "
+                      "whole word anywhere -- inside a substitution, an assignment, a `cd` part or an "
+                      "`xargs` argument included -- and also a `d4d`, `data_sheets_schema` or `$`-variable "
+                      "invocation, is one derive that cannot be placed", doc)
+        self.assertIn("its cost is a false `unknown` for a call that only mentions the word beside such an "
+                      "invocation", doc)
         self.assertIn("one with a redirection directly after it in an xargs command, whatever follows the "
                       "redirection", doc)
         self.assertIn("A command the tokenizer cannot split at all (an apostrophe in a here-document's body) "
@@ -1966,6 +2050,13 @@ class Cli(unittest.TestCase):
                       "whole for the same words, and a match cannot be placed", text)      # #3458
         self.assertIn("A derive whose words are not on the command line (a script, an alias, a variable "
                       "supplying `derive` itself) is not seen", text)
+        # #3478-#3480: the command-wide backstop and its cost
+        self.assertIn("so does a derive call with a redirection among its words (`--full 2>/dev/null F`)", text)
+        self.assertIn("Last, a command-wide backstop: a call these rules give no derive, whose raw text with "
+                      "quotes and escapes removed carries the whole word `derive` anywhere (a substitution, an "
+                      "assignment, a `cd` part, an `xargs` argument) beside a `d4d`, `data_sheets_schema` or "
+                      "`$`-variable invocation, cannot be placed; its cost is a false `unknown` (`grep 'd4d "
+                      "derive core' notes.md`)", text)
         self.assertIn("the runtime did in `dontAsk` mode and its terminal `result` lists the call", text)
 
     def test_unknown_prints_its_reasons_and_exits_zero(self):

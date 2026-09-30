@@ -74,7 +74,17 @@ derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
 substitutes anywhere (`$(...)`, backticks, `<(...)`), every part that
 carries them, readers and the recorder's `--phase` included: the parts
 inside a substitution are split out of it, so none can be shown not to be
-in one (#3385). A call the runtime
+in one (#3385). A `derive core` call with a redirection among its words
+rather than after them (`--full 2>/dev/null F`) cannot be placed either
+(#3478). Last, a command-wide backstop (#3478-#3480): a call every rule
+above gave no derive, whose raw text, quote and escape characters
+removed, carries the word `derive` as a whole word anywhere -- inside a
+substitution, an assignment, a `cd` part or an `xargs` argument included
+-- and also a `d4d`, `data_sheets_schema` or `$`-variable invocation, is
+one derive that cannot be placed. It does not depend on how the command
+is spelled, and its cost is a false `unknown` for a call that only
+mentions the word beside such an invocation (`grep 'd4d derive core'
+notes.md`, the recorder's `--phase 'derive core'`). A call the runtime
 backgrounded is ambiguous too: its result is the launch, not the end. A
 shell command is read as bash reads it: `#` starts a comment only at the
 start of a word, outside quotes (#3184), and a `cd`, `pushd` or `popd`
@@ -187,8 +197,8 @@ NON_CHECKS = (
     "either (#3256, #3268)",
     "a `derive core` run without the words `derive core` on the command line (a script, an "
     "alias or function, a variable or substitution supplying the word `derive` itself (`d4d "
-    "$SUB`), `python -c` building the argument list, or a file that an earlier part wrote the "
-    "words into and a later part runs): such a derive is not seen, and the Phase 1 / Phase 3 "
+    "$SUB`), `python -c` building the argument list, or a file that an earlier call wrote the "
+    "words into and a later call runs): such a derive is not seen, and the Phase 1 / Phase 3 "
     "boundary is missed (#3137, #3384). The words are matched after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -198,9 +208,17 @@ NON_CHECKS = (
     "`>log`, `< args`) aside, since they are the shell's (#3453), and a `derive` with a "
     "redirection directly after it in an xargs command, whatever follows (#3457). A command "
     "the tokenizer cannot split (an apostrophe in a here-document body) is tested whole, "
-    "quote characters removed, by the same rules (#3458). A word the shell builds some other "
-    "way (a glob, `derive c*`) is not seen, nor is a word xargs appends to a `derive` that "
-    "neither ends the xargs command nor has a redirection directly after it",
+    "quote characters removed, by the same rules (#3458). A derive call with a redirection "
+    "among its words (`--full 2>/dev/null F`) cannot be placed (#3478). Last, a command-wide "
+    "backstop (#3478-#3480): a call these rules give no derive, whose raw text, quote and "
+    "escape characters removed, carries the word `derive` as a whole word anywhere (in a "
+    "substitution, an assignment, a `cd` part, an `xargs` argument) beside a `d4d`, "
+    "`data_sheets_schema` or `$`-variable invocation, is one derive that cannot be placed; its "
+    "cost is a false `unknown` (`grep 'd4d derive core' notes.md`, the recorder's `--phase "
+    "'derive core'`). So a word the shell builds some other way (a glob, `derive c*`), or one "
+    "xargs appends after a `derive` mid-command, is left to the backstop, and what no rule sees "
+    "is a command with no whole word `derive`, or with one but no such invocation (a script, "
+    "alias or program under another name: `run.sh derive core`)",
 )
 
 _ABSENT = object()
@@ -220,6 +238,12 @@ _QUOTING = re.compile(r"[\"'\\]")
 #: A subcommand word spelled literally; anything else (`$SUB`, `{}`, a
 #: substitution) is supplied at run time.
 _LITERAL_WORD = re.compile(r"[A-Za-z0-9_-]+")
+#: The command-wide backstop (#3478-#3480): the word `derive` anywhere in a
+#: command, after quote and escape removal, and something that may invoke
+#: the CLI -- `d4d`, `data_sheets_schema`, or a `$` variable that may hold
+#: either.
+_DERIVE_WORD = re.compile(r"(?<![\w.-])derive(?![\w.-])")
+_INVOCATION = re.compile(r"(?<![\w.-])d4d(?![\w.-])|data_sheets_schema|\$\{?[A-Za-z_]")
 
 
 def _sha256(data: bytes) -> str:
@@ -823,6 +847,46 @@ def _without_redirections(words: list[str]) -> tuple[list[str], list[bool]]:
     return kept, redirected
 
 
+def _backstop(command: str) -> bool:
+    """The command-wide backstop (#3478-#3480): whether the raw command,
+    quote and escape characters removed, carries the word `derive` as a
+    whole word anywhere -- inside a substitution, an assignment, a `cd`
+    part, an `xargs` argument, a redirection or an option value included --
+    and also a `d4d`, `data_sheets_schema` or `$`-variable invocation.
+    `_shell` applies it last, to a call the part-by-part reading gave no
+    derive row, and a match is one derive that cannot be placed. Six review
+    rounds each found a new spelling the special cases missed; this does not
+    depend on how the command is spelled. Its cost is a false `unknown` for
+    a call that only mentions the word beside such an invocation (`grep
+    'd4d derive core' notes.md`, the recorder's `--phase 'derive core'`)."""
+    text = _QUOTING.sub("", command)
+    return bool(_DERIVE_WORD.search(text)) and bool(_INVOCATION.search(text))
+
+
+def _redirection_interleaved(words: list[str]) -> bool:
+    """Whether a redirection sits among a d4d call's words rather than after
+    them (#3478): shlex splits `--full 2>/dev/null F` into `--full`, `2`,
+    `>`, `/dev/null`, `F`, so the option would read `2` as its value. Only
+    redirections (each with one target, and any descriptor word before its
+    operator) may follow the first one; anything else means the words were
+    not read as the program receives them, and the derive cannot be placed."""
+    def operator(word: str) -> bool:
+        return bool(word) and set(word) <= _PUNCT and ("<" in word or ">" in word)
+    first = next((i for i, word in enumerate(words) if operator(word)), None)
+    if first is None:
+        return False
+    j = first
+    while j < len(words):
+        if operator(words[j]):
+            j += 2                                  # the operator and its target
+        elif (re.fullmatch(r"\d+|\{[A-Za-z_][A-Za-z0-9_]*\}", words[j]) and j + 1 < len(words)
+              and operator(words[j + 1])):
+            j += 1                                  # a descriptor before its operator
+        else:
+            return True
+    return False
+
+
 def _xargs_supplies_derive_word(text: str) -> bool:
     """Whether an `xargs` in `text` supplies the word after `derive` at run
     time (#3426): through a replacement string (`-I%`, `-I %`, `-J %`, `-i`
@@ -1108,7 +1172,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         # them, and a match is a derive that cannot be placed, never none.
         out["named"] = [x.kind for x in named]
         full = next((x for x in targets if x.kind == "full"), None)
-        if full is not None and _mentions_derive([command]):
+        if full is not None and (_mentions_derive([command]) or _backstop(command)):
             out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
         return out
     newline = "\n" in command.replace("\\\n", " ")
@@ -1205,6 +1269,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 read_only = False
             if sub == ("derive", "core") and full is not None:
                 spelled = _option(sub_args, "--full")
+                if _redirection_interleaved(sub_args):
+                    out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
+                    continue
                 if not spelled:
                     verdict = False
                 elif not _CLEAN_PATH.fullmatch(spelled[-1]):
@@ -1242,6 +1309,12 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     for index in mentioning_readers:
         if any(j > index for j in piped_into_unknown):
             out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
+    # The command-wide backstop (#3478-#3480), after every rule above: a call
+    # that gave no derive row but carries the word `derive` beside a d4d,
+    # `data_sheets_schema` or `$`-variable invocation, anywhere in its raw
+    # text, is one derive that cannot be placed. A false `unknown` is its cost.
+    if full is not None and not out["derives"] and _backstop(command):
+        out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
     out["derives"].sort(key=lambda row: row["segment"])
     out["read_only"] = read_only
     return out
@@ -1494,8 +1567,10 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
         elif row["outcome"] == "ambiguous":
             why = {"and_chain": "a later `&&` part may be what failed",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
-                               "`xargs`, a substitution, a wrapper or option it does not read, or a command "
-                               "the tokenizer cannot split)"}.get(
+                               "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
+                               "among its words, a command the tokenizer cannot split, or the command-wide "
+                               "backstop: the word `derive` beside a d4d, `data_sheets_schema` or "
+                               "`$`-variable invocation)"}.get(
                 row["status_basis"], "piped, backgrounded, grouped, after `||`, followed by `;`, or multi-line")
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: the call {row['command_outcome']} "
                            f"but its status is not the derive's own ({row['status_basis']}: {why})")
