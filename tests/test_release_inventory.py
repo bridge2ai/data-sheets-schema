@@ -292,28 +292,45 @@ def test_a_related_release_is_not_this_datasets_release_evidence():
     assert ri.render(inv)[-1].startswith("   crate in corpus")
 
 
-@pytest.mark.parametrize("scope_yaml, status", [
-    (b"", "undeclared"),
-    (b"scope:\n  OTHER:\n    related_but_distinct: []\n", "undeclared"),
-    (b"scope:\n  EXTERNAL: [a, b]\n", "malformed"),
-    (b"scope:\n  EXTERNAL:\n    related_but_distinct: promoted\n", "malformed"),
-    (b"scope: [EXTERNAL]\n", "malformed"),
-    (b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - just-a-string\n", "declared"),
+# Every malformed shape that carries an ``in_bundle`` names ``promoted``, so
+# "moves nothing" is tested against a declaration that would move it if it
+# were read (#3449); the last case is the control that it does move when the
+# declaration is usable.
+@pytest.mark.parametrize("scope_yaml, status, moved", [
+    (b"", "undeclared", False),
+    (b"scope:\n  OTHER:\n    related_but_distinct: [{in_bundle: promoted}]\n",
+     "undeclared", False),
+    (b"scope:\n  EXTERNAL: [a, b]\n", "malformed", False),
+    (b"scope:\n  EXTERNAL: [{related_but_distinct: [{in_bundle: promoted}]}]\n",
+     "malformed", False),
+    (b"scope:\n  EXTERNAL:\n    related_but_distinct: promoted\n", "malformed", False),
+    (b"scope:\n  EXTERNAL:\n    related_but_distinct: {in_bundle: promoted}\n",
+     "malformed", False),
+    (b"scope:\n  EXTERNAL:\n    related_but_distinct: {x: {in_bundle: promoted}}\n",
+     "malformed", False),
+    (b"scope: [EXTERNAL]\n", "malformed", False),
+    (b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - just-a-string\n",
+     "declared", False),
+    (b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - {id: x, in_bundle: promoted}\n",
+     "declared", True),
 ])
-def test_scope_shapes_are_statuses_and_move_nothing_unless_declared(scope_yaml, status):
+def test_scope_shapes_are_statuses_and_move_nothing_unless_declared(scope_yaml, status, moved):
     inv = ri.inventory(NEUTRAL + scope_yaml, None, "EXTERNAL")
     assert inv["scope"]["status"] == status
-    assert inv["related_sources"] == []
-    assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
-    ri.render(inv)
+    assert [e["source_id"] for e in inv["related_sources"]] == (["promoted"] if moved else [])
+    assert [e["source_id"] for e in inv["tier1"]] == ([] if moved else ["promoted"])
+    text = "\n".join(ri.render(inv))
+    assert ("declaration is malformed; no source moved" in text) == (status == "malformed")
 
 
 def test_scope_is_read_from_the_bytes_given():
     from data_sheets_schema import scope
     assert scope.scope_in(SCOPED, "OWN")["referent_id"] == "https://example.org/own"
     assert scope.scope_in(SCOPED.decode(), "MISSING") is None
-    assert scope.in_bundle_of({"in_bundle": ["a", " a ", True, None, 7]}) == ["a", "7"]
+    # As written: no strip, no cast to text (#3447); bools and None dropped.
+    assert scope.in_bundle_of({"in_bundle": ["a", " a ", True, None, 7, "a"]}) == ["a", " a ", 7]
     assert scope.in_bundle_of({"in_bundle": "a"}) == ["a"] and scope.in_bundle_of("a") == []
+    assert scope.in_bundle_of({"in_bundle": ""}) == [] and scope.in_bundle_of({"in_bundle": 0}) == []
     with pytest.raises(ValueError, match="not readable YAML"):
         scope.scope_in(b"scope: [unclosed\n", "OWN")
 
@@ -324,3 +341,49 @@ def test_cli_names_the_related_source(monkeypatch):
     assert r.exit_code == 0, r.output
     assert ("related source     physionet_pediatric_1_1_0 (data resource): "
             "declared in_bundle for VOICE_PEDIATRIC, not counted above") in r.output
+
+
+# An in_bundle value check_manifest calls unmatched moves nothing here and is
+# reported as unmatched (#3447): a padded string and a number that would
+# match a source id only after normalising.
+PADDED = NEUTRAL.replace(b"    - id: promoted", b"    - id: '7'\n      source_type: License\n"
+                                                 b"      processed_file: seven.txt\n"
+                                                 b"    - id: promoted") + b"""scope:
+  EXTERNAL:
+    referent_id: https://example.org/external
+    related_but_distinct:
+      - id: https://example.org/other
+        in_bundle: [' promoted ', 7, promoted2]
+"""
+
+
+def test_in_bundle_matches_sources_exactly_as_check_manifest_does(tmp_path):
+    from data_sheets_schema import scope
+    inv = ri.inventory(PADDED, None, "EXTERNAL")
+    assert inv["related_sources"] == []
+    assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
+    assert [e["source_id"] for e in inv["governance"]["license"]] == ["terms", "7"]
+    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [" promoted ", 7, "promoted2"]}
+    assert "in_bundle names no source of this project: ' promoted ', 7, promoted2" \
+        in "\n".join(ri.render(inv))
+    manifest = tmp_path / "manifest_3423.yaml"
+    manifest.write_bytes(PADDED)
+    claimed = sorted(p["problem"] for p in scope.check_manifest(manifest)
+                     if p["project"] == "EXTERNAL" and "claims source" in p["problem"])
+    assert claimed == sorted(f"related dataset claims source {v!r} is in this bundle; the "
+                             f"manifest lists no such source for EXTERNAL"
+                             for v in inv["scope"]["in_bundle_unmatched"])
+
+
+# A related dataset's id or manifest_key written as a number is kept (the
+# scope reader admits bare accessions) and must render, not raise (#3446).
+@pytest.mark.parametrize("entry, owner", [
+    (b"{id: 12345, in_bundle: promoted}", "12345"),
+    (b"{id: x2, manifest_key: 7, in_bundle: promoted}", "7"),
+])
+def test_a_numeric_related_dataset_id_renders(entry, owner):
+    inv = ri.inventory(NEUTRAL + b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - "
+                       + entry + b"\n", None, "EXTERNAL")
+    [related] = inv["related_sources"]
+    assert related["source_id"] == "promoted"
+    assert f"declared in_bundle for {owner}, not counted above" in "\n".join(ri.render(inv))

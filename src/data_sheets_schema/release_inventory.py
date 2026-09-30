@@ -125,8 +125,10 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
     (no scope entry for the project), ``malformed`` (the entry, or its
     ``related_but_distinct``, is not the shape ``scope.check_manifest``
     reads), ``declared``. An ``in_bundle`` id the project lists no source
-    for moves nothing and is named under ``in_bundle_unmatched``, which is
-    ``check_manifest``'s finding surfaced where its effect would be.
+    for moves nothing and is named under ``in_bundle_unmatched`` as
+    written. Ids are compared exactly as ``check_manifest`` compares them
+    -- no stripping, no cast to text (#3447) -- so this list is that
+    checker's unmatched-source finding surfaced where its effect would be.
     """
     declared = scope_decl.scope_in(raw, project)
     status = {"status": "declared", "in_bundle_unmatched": []}
@@ -196,6 +198,15 @@ def _ids(entries) -> str:
     return ", ".join(e["source_id"] + (" (superseded)" if e["superseded"] else "") for e in entries)
 
 
+def _written(value) -> str:
+    """An in_bundle value as the manifest wrote it: a plain string as
+    itself, anything else (a number, a padded or empty string) in repr so
+    the reader can see why it matched no source (#3446, #3447)."""
+    if isinstance(value, str) and value and value == value.strip():
+        return value
+    return repr(value)
+
+
 def render(inv: dict) -> list[str]:
     """Human-readable lines for one inventory, stable for the same input."""
     policy = inv["crate_policy"]
@@ -215,7 +226,9 @@ def render(inv: dict) -> list[str]:
     lines.append(f"   release record     {'yes' if inv['release_record_in_document_corpus'] else 'no'}"
                  + (f": {_ids(inv['release_records'])}" if inv["release_records"] else ""))
     for entry in inv["related_sources"]:
-        owners = ", ".join(d["manifest_key"] or d["name"] or d["id"] or "an unnamed dataset"
+        # str(): `_related` keeps an id or manifest_key a manifest wrote as
+        # a number, which `scope._is_identifier` admits (#3446).
+        owners = ", ".join(str(d["manifest_key"] or d["name"] or d["id"] or "an unnamed dataset")
                            if d else "a malformed entry" for d in entry["related_datasets"])
         lines.append(f"   {'related source':18} {_ids([entry])} ({entry['source_type']}): "
                      f"declared in_bundle for {owners}, not counted above")
@@ -224,7 +237,7 @@ def render(inv: dict) -> list[str]:
         lines.append("   scope              declaration is malformed; no source moved")
     if scope["in_bundle_unmatched"]:
         lines.append(f"   scope              in_bundle names no source of this project: "
-                     f"{', '.join(scope['in_bundle_unmatched'])}")
+                     f"{', '.join(_written(v) for v in scope['in_bundle_unmatched'])}")
     lines.append(f"   crate in corpus    {'yes' if inv['crate_in_document_corpus'] else 'no'}"
                  f" · crate policy: {crate}")
     return lines

@@ -88,19 +88,25 @@ def scope_in(raw: bytes | str, project: str) -> Any:
     return scopes.get(project)
 
 
-def in_bundle_of(entry: Any) -> list[str]:
+def in_bundle_of(entry: Any) -> list[str | int | float]:
     """The source ids a `related_but_distinct` entry says are in this
     project's bundle: `in_bundle` as a scalar or a list, the shapes
-    `check_manifest` accepts. A value that is not an identifier is dropped
-    here and reported by `check_manifest`."""
+    `check_manifest` accepts, each exactly as written. Nothing is stripped
+    or cast to text (#3447): `check_manifest` compares the raw value with
+    the project's source ids, so `' a '` or `7` names no source there and
+    must name none here -- a reader that normalised would move a source
+    the checker reports as unmatched. A falsy `in_bundle` names nothing,
+    as `check_manifest` skips it; a value that is not an identifier is
+    dropped here and reported by `check_manifest`."""
     if not isinstance(entry, dict):
         return []
     src = entry.get("in_bundle")
-    out = []
+    if not src:
+        return []
+    out: list[str | int | float] = []
     for value in (list(src) if isinstance(src, (list, tuple)) else [src]):
-        text = str(value).strip() if _is_identifier(value) else ""
-        if text and text not in out:
-            out.append(text)
+        if _is_identifier(value) and value not in out:
+            out.append(value)
     return out
 
 
