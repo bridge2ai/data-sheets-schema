@@ -1579,6 +1579,15 @@ def test_a_gap_a_slot_is_said_not_to_fill_is_still_an_absence(note):
         STATED, REPRESENTATION_ONLY, ["empty_slot"]), note
 
 
+def test_a_negated_passive_closing_verb_leaves_the_gap_named():
+    """#3680: `_names_absence` itself, since "not" and "never" are
+    `_EMPTINESS` words and the gate reads the sentence either way."""
+    from data_sheets_schema.q19_rationale_lint import _names_absence
+    assert _names_absence("the two gaps are not filled by was_derived_from")
+    assert _names_absence("the one gap was never closed by parent_datasets")
+    assert not _names_absence("the two gaps are filled by was_derived_from")
+
+
 def test_the_committed_absences_covered_by_sibling_slots_still_name_an_absence():
     """The committed sentence the #3544 measurement counts among the 11:
     the passive closing verb is read after a gap only (#3680)."""
