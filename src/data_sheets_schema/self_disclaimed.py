@@ -159,12 +159,18 @@ from typing import Any, Iterator
 
 import yaml
 
+from data_sheets_schema import lexicon as lx
+
 INSTRUMENT = "self_disclaimed v2 (#2913, #3131)"
 # Not under lexicons/: that directory is the pattern-lexicon registry (#2919),
 # whose check refuses any file it does not register, and this file is a
-# container registry with its own shape and its own pins.
+# container registry with its own shape. Its pins are its own registry.yaml,
+# held to the same rule by the same code (`lexicon.registered_bytes`,
+# `lexicon.check_pins`; #3040).
 LEXICON_DIR = Path(__file__).parent / "container_lexicons"
 LEXICON_RESOURCE_DIR = "src/data_sheets_schema/container_lexicons"
+#: The lexicon's name in its registry, and the `instrument` its files declare.
+LEXICON_NAME = "self_disclaimed"
 #: The registered lexicon. Every earlier version stays in LEXICON_DIR and
 #: loads (`lexicon_path(1)`): the rules a later version adds are declared in
 #: its file, so an earlier file read by this code reproduces its output.
@@ -247,9 +253,30 @@ def _word(terms) -> re.Pattern:
 
 class Lexicon:
     """The lexicon file, parsed and compiled. `sha256` is of its exact bytes,
-    so a run's output names the instrument that produced it."""
+    so a run's output names the instrument that produced it.
+
+    A file this cannot compile is refused with a ValueError, never another
+    exception: a missing or wrongly typed block, a pattern that does not
+    compile or bytes that are not YAML raise `lexicon.LexiconError` naming
+    the file, so `check_registry` reports a malformed pinned lexicon rather
+    than raising (#3901), as `lexicon.parse` does for the pattern lexicons.
+    The checks below that raise a ValueError keep their messages, prefixed
+    with the file, as do bytes that are not UTF-8 (#3915)."""
 
     def __init__(self, raw: bytes, *, path: str | None = None):
+        try:
+            self._compile(raw, path)
+        except (KeyError, IndexError, TypeError, AttributeError, OverflowError, RecursionError,
+                re.error, yaml.YAMLError) as exc:   # OverflowError: a repeat count re cannot hold (#3909)
+            kind = "re.error" if isinstance(exc, re.error) else type(exc).__name__  # PatternError on 3.13
+            raise lx.LexiconError(f"{path or 'the lexicon'} is not a well-formed self_disclaimed "
+                                  f"lexicon ({kind}: {exc})") from exc
+        except ValueError as exc:   # the checks below, and bytes that are not UTF-8 (#3915)
+            if isinstance(exc, lx.LexiconError):
+                raise
+            raise lx.LexiconError(f"{path or 'the lexicon'}: {exc}") from exc
+
+    def _compile(self, raw: bytes, path: str | None) -> None:
         data = yaml.safe_load(raw.decode("utf-8"))
         if not isinstance(data, dict) or data.get("instrument") != "self_disclaimed":
             raise ValueError("not a self_disclaimed lexicon")
@@ -400,15 +427,74 @@ class Lexicon:
 def lexicon_path(version: int) -> Path:
     """The file of a lexicon version in LEXICON_DIR, the current one or an
     earlier one kept for replay."""
-    return LEXICON_DIR / f"self_disclaimed_v{version}.yaml"
+    return LEXICON_DIR / f"{LEXICON_NAME}_v{version}.yaml"
+
+
+def registered_versions(directory: Path = LEXICON_DIR) -> list[int]:
+    """The versions the registry in `directory` pins, oldest first."""
+    return sorted(e["version"] for e in lx.registered(directory).get(LEXICON_NAME, []))
+
+
+def load_registered(version: int | None = None, *, name: str = LEXICON_NAME,
+                    directory: Path = LEXICON_DIR) -> Lexicon:
+    """A registered lexicon version, the newest unless one is named.
+
+    Refused (`lexicon.LexiconError`, a ValueError) when its bytes are not the
+    pinned ones or when the file declares another version than its registry
+    entry (#3040): the pattern-lexicon registry's rule, held by its code. A
+    file in LEXICON_DIR is named by its repository-relative spelling
+    wherever the package is installed.
+    """
+    entry, raw = lx.registered_bytes(name, version, directory=directory)
+    shown = (f"{LEXICON_RESOURCE_DIR}/{entry['file']}" if _same_dir(directory, LEXICON_DIR)
+             else str(directory / entry["file"]))
+    lexicon = Lexicon(raw, path=shown)
+    lx.check_declared(directory / entry["file"], name, entry["version"], LEXICON_NAME, lexicon.version)
+    return lexicon
+
+
+def _same_dir(a: Path, b: Path) -> bool:
+    """Whether two spellings name one directory, as the filesystem resolves
+    them: a relative, symlinked or `..` spelling is the directory it
+    reaches, never compared as text (#3889)."""
+    return Path(a).resolve() == Path(b).resolve()
 
 
 def load_lexicon(path: Path = LEXICON_PATH) -> Lexicon:
     """The registered lexicon, an earlier version of it (`lexicon_path`), or
-    another lexicon file a test names. A file in LEXICON_DIR is named by its
-    repository-relative spelling wherever the package is installed."""
-    shown = f"{LEXICON_RESOURCE_DIR}/{path.name}" if path.parent == LEXICON_DIR else str(path)
-    return Lexicon(path.read_bytes(), path=shown)
+    another lexicon file a test names. A file in LEXICON_DIR must be
+    registered there and is loaded through `load_registered`, so its bytes
+    are checked against their pin; a file elsewhere is compiled unpinned,
+    like `lexicon.parse`.
+
+    "In LEXICON_DIR" is decided on resolved paths (#3889), however the path
+    is spelled — relative, through a symlink or with `..` — and whether the
+    name sits in LEXICON_DIR or the file it reaches does: a link elsewhere
+    to a registered file loads through that file's pin, and a link in
+    LEXICON_DIR is held to the pin of the name it has there. An unpinned
+    file is named by its resolved absolute path, never by the
+    repository-relative spelling a pinned load reports, so `describe()`
+    tells the two apart.
+    """
+    path = Path(path)
+    if _same_dir(path.parent, LEXICON_DIR):
+        name = path.name
+    elif _same_dir(path.resolve().parent, LEXICON_DIR):
+        name = path.resolve().name
+    else:
+        return Lexicon(path.read_bytes(), path=str(path.resolve()))
+    entry = next((e for e in lx.registered(LEXICON_DIR).get(LEXICON_NAME, []) if e["file"] == name), None)
+    if entry is None:
+        raise lx.LexiconError(f"{LEXICON_RESOURCE_DIR}/{name} is not registered in "
+                              f"{LEXICON_RESOURCE_DIR}/{lx.REGISTRY_FILE}")
+    return load_registered(entry["version"], directory=LEXICON_DIR)
+
+
+def check_registry(directory: Path = LEXICON_DIR) -> list[str]:
+    """Every problem with the registered container lexicons, as messages;
+    [] when none: `lexicon.check_pins`' checks (pins, file names, versions
+    declared, no unregistered file), each version compiled by `Lexicon`."""
+    return lx.check_pins(directory, lambda name, version: load_registered(version, name=name, directory=directory))
 
 
 # ------------------------------------------------------------------ paths

@@ -15,38 +15,17 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
+from data_sheets_schema import lexicon as lx
 from data_sheets_schema import self_disclaimed as sd
 
 LEXICON = sd.load_lexicon()
 #: v1 stays loadable for replay; this code reads it as v1's own code did.
 V1 = sd.load_lexicon(sd.lexicon_path(1))
 
-#: Pins on the lexicon's exact bytes, one per version. Changing the file
-#: without a version bump fails here; so does bumping without a pin. v1 was
-#: revised in review before it first merged (#3029), so this PR's commits
-#: carry seven earlier byte versions under `version: 1`:
-#:   9b1f536ba02afc9971bbe9e28da316ea1c3c90e356bdbcc2c200400259521b04 (e00711d21, first commit)
-#:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
-#:   14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35 (cf3d16cb3, review round 2)
-#:   56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4 (df35537aa, review round 2)
-#:   3b2949e29c7aebef79c6e77894d735c6fa2ce1a0ae8800463374d63fe45a5f3a (7e327b512, review round 3)
-#:   626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6 (5705a4f3f, review round 4)
-#:   d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c (9607a6416, review round 5)
-#: Every output names the sha it ran under, and no committed output, record
-#: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
-#: new file beside v1, whose bytes are unchanged. v2 was revised in review
-#: before it first merged, so this PR's commits carry eight earlier byte
-#: versions under `version: 2`:
-#:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
-#:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
-#:   aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73 (e3e1ca227, review round 2)
-#:   15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9 (0d1ada61e, review round 3)
-#:   63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9 (4cf8faa65, review round 4)
-#:   2edac57763fddb717a237e3fe4d0444526f93fcbc5dfe286e5584ca676f3aa24 (348526f6e, review round 5)
-#:   560b1c55b406ad9df6e5c03dfd35c9c020f9173f2fceaf11234679acb8b03757 (f59a0827d, review round 6)
-#:   741e0834f79bc20e4a5aea65870380e8df23deefd6125b19b5d95bcefd2fe888 (bbd955fb9, review round 6)
-LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "e05cfaf00a62c042c120542b19317b286c6fa2c03223fe79d6566c6fe79834d4"}
+#: The registered versions and their pins, from container_lexicons/registry.yaml.
+#: tests/test_lexicons.py holds the append-only copy these must equal, and
+#: the byte history of each version before it first merged (#3040).
+PINS = {e["version"]: e["sha256"] for e in lx.registered(sd.LEXICON_DIR)[sd.LEXICON_NAME]}
 
 
 def record(**containers):
@@ -1534,26 +1513,192 @@ def test_a_flag_new_in_the_final_is_reported_final_only():
 
 # ------------------------------------------------------------------ instrument
 def test_lexicon_bytes_are_pinned_per_version():
-    raw = sd.LEXICON_PATH.read_bytes()
-    assert LEXICON.version in LEXICON_PINS, "a new lexicon version needs a pin"
-    assert hashlib.sha256(raw).hexdigest() == LEXICON_PINS[LEXICON.version], \
-        "the lexicon changed without a version bump"
+    """The module reads the newest registered version, through its pin, and
+    names the bytes it read (#3040: the pins are the registry's)."""
+    assert sd.check_registry() == []
     assert sd.LEXICON_PATH.name == f"self_disclaimed_v{LEXICON.version}.yaml"
-    assert LEXICON.version == max(LEXICON_PINS), "the loader reads the newest version"
+    assert LEXICON.version == max(PINS) == sd.load_registered().version, "the loader reads the newest version"
     assert LEXICON.describe() == {"path": sd.LEXICON_RESOURCE, "version": LEXICON.version,
-                                  "sha256": LEXICON_PINS[LEXICON.version]}
+                                  "sha256": PINS[LEXICON.version]}
 
 
 def test_every_lexicon_version_is_kept_pinned_and_loadable():
     """#3131: an earlier version stays byte for byte and loads for replay,
     named by its repository-relative spelling."""
-    files = sorted(p.name for p in sd.LEXICON_DIR.glob("*.yaml"))
-    assert files == [f"self_disclaimed_v{v}.yaml" for v in sorted(LEXICON_PINS)]
-    for version, sha in LEXICON_PINS.items():
+    files = sorted(p.name for p in sd.LEXICON_DIR.glob("*.yaml") if p.name != lx.REGISTRY_FILE)
+    assert files == [f"self_disclaimed_v{v}.yaml" for v in sd.registered_versions()]
+    for version, sha in PINS.items():
         loaded = sd.load_lexicon(sd.lexicon_path(version))
         assert loaded.describe() == {"path": f"src/data_sheets_schema/container_lexicons/self_disclaimed_v{version}.yaml",
                                      "version": version, "sha256": sha}
     assert V1.resolve_by == ("identity_keys",) and not V1._axes and V1._statement is None
+
+
+def _registry(directory: Path, versions: dict) -> None:
+    (directory / lx.REGISTRY_FILE).write_text(yaml.safe_dump({"lexicons": {"self_disclaimed": [
+        {"version": v, "file": f, "sha256": hashlib.sha256((directory / f).read_bytes()).hexdigest()}
+        for v, f in versions.items()]}}), encoding="utf-8")
+
+
+def test_a_registered_container_lexicon_is_refused_when_its_bytes_change(tmp_path):
+    """#3040: the pattern-lexicon registry's rule, through its code. An
+    edit to a registered file, a comment included, is refused at load and
+    reported by the check; so is a file that declares another version than
+    its entry, a file nothing registers, and a file name without its
+    version."""
+    raw = sd.lexicon_path(1).read_bytes()
+    (tmp_path / "self_disclaimed_v1.yaml").write_bytes(raw)
+    _registry(tmp_path, {1: "self_disclaimed_v1.yaml"})
+    assert sd.load_registered(directory=tmp_path).sha256 == PINS[1]
+    assert sd.check_registry(tmp_path) == []
+
+    (tmp_path / "self_disclaimed_v1.yaml").write_bytes(raw + b"# a comment\n")
+    with pytest.raises(lx.LexiconError, match="never edited — add self_disclaimed_v2.yaml"):
+        sd.load_registered(directory=tmp_path)
+    assert any("not the registered" in p for p in sd.check_registry(tmp_path))
+
+    (tmp_path / "self_disclaimed_v1.yaml").write_bytes(raw.replace(b"\nversion: 1\n", b"\nversion: 3\n"))
+    _registry(tmp_path, {1: "self_disclaimed_v1.yaml"})
+    with pytest.raises(lx.LexiconError, match="declares self_disclaimed v3; the registry entry is self_disclaimed v1"):
+        sd.load_registered(directory=tmp_path)
+
+    (tmp_path / "self_disclaimed_v1.yaml").write_bytes(raw)
+    _registry(tmp_path, {1: "self_disclaimed_v1.yaml"})
+    (tmp_path / "self_disclaimed_v9.yaml").write_bytes(raw)
+    assert sd.check_registry(tmp_path) == [f"self_disclaimed_v9.yaml is in {tmp_path} but not registered"]
+    (tmp_path / "self_disclaimed_v9.yaml").unlink()
+    (tmp_path / "self_disclaimed_v1.yaml").rename(tmp_path / "self_disclaimed.yaml")
+    _registry(tmp_path, {1: "self_disclaimed.yaml"})
+    assert sd.check_registry(tmp_path) == [
+        "self_disclaimed v1: file 'self_disclaimed.yaml' is not self_disclaimed_v1.yaml"]
+
+
+def test_a_pinned_container_lexicon_that_does_not_compile_is_reported_not_raised(tmp_path):
+    """#3901: `check_registry` reports every problem as a message. A pinned
+    file whose bytes match its pin but that the reader cannot compile — a
+    missing block, a pattern that is not a regex, a block of the wrong type,
+    or not a self_disclaimed lexicon at all (the plain ValueError
+    `check_pins` catches) — is one problem among the others, and the
+    unregistered-file scan still runs."""
+    data = yaml.safe_load(sd.lexicon_path(1).read_text(encoding="utf-8"))
+    cases = {
+        "missing narrative": ({k: v for k, v in data.items() if k != "narrative"},
+                              "is not a well-formed self_disclaimed lexicon (KeyError: 'narrative')"),
+        "bad regex": ({**data, "self_reference": ["(unclosed"]},
+                      "is not a well-formed self_disclaimed lexicon (re.error: missing ), unterminated subpattern at position 0)"),
+        "wrongly typed guards": ({**data, "guards": ["a list"]},
+                                 "is not a well-formed self_disclaimed lexicon (AttributeError: "),
+        "another instrument": ({**data, "instrument": "other"}, "not a self_disclaimed lexicon"),
+        # #3909: re.compile raises OverflowError, not re.error, for this.
+        "repeat count too large": ({**data, "self_reference": ["a{4294967296}"]},
+                                   "is not a well-formed self_disclaimed lexicon (OverflowError: "),
+    }
+    for case, (content, message) in cases.items():
+        for stale in tmp_path.glob("*.yaml"):
+            stale.unlink()
+        (tmp_path / "self_disclaimed_v1.yaml").write_text(yaml.safe_dump(content, sort_keys=False),
+                                                         encoding="utf-8")
+        _registry(tmp_path, {1: "self_disclaimed_v1.yaml"})
+        (tmp_path / "self_disclaimed_v9.yaml").write_text("draft: true\n", encoding="utf-8")
+        with pytest.raises(ValueError, match=re.escape(message)):
+            sd.load_registered(directory=tmp_path)
+        problems = sd.check_registry(tmp_path)
+        assert len(problems) == 2, (case, problems)
+        assert message in problems[0], (case, problems)
+        assert problems[1] == f"self_disclaimed_v9.yaml is in {tmp_path} but not registered", case
+
+
+def test_load_registered_names_a_file_outside_the_lexicon_directory_by_its_own_path(tmp_path):
+    """#3901: only a file in LEXICON_DIR takes the repository-relative name;
+    a registered file in another directory is named where it is, never as
+    the shipped file (the #3889 false identity, on `load_registered`)."""
+    (tmp_path / "self_disclaimed_v1.yaml").write_bytes(sd.lexicon_path(1).read_bytes())
+    _registry(tmp_path, {1: "self_disclaimed_v1.yaml"})
+    loaded = sd.load_registered(directory=tmp_path)
+    assert loaded.describe() == {"path": str(tmp_path / "self_disclaimed_v1.yaml"), "version": 1,
+                                 "sha256": PINS[1]}
+
+
+def test_a_file_in_the_lexicon_directory_loads_only_through_its_pin(tmp_path, monkeypatch):
+    """#3040: `load_lexicon` on a file in LEXICON_DIR goes through the
+    registry, so an unregistered or edited file there is refused; a file
+    elsewhere, a draft, compiles unpinned as before."""
+    raw = sd.LEXICON_PATH.read_bytes()
+    (tmp_path / "self_disclaimed_v2.yaml").write_bytes(raw)
+    (tmp_path / "self_disclaimed_v3.yaml").write_bytes(raw)
+    _registry(tmp_path, {2: "self_disclaimed_v2.yaml"})
+    monkeypatch.setattr(sd, "LEXICON_DIR", tmp_path)
+    assert sd.load_lexicon(tmp_path / "self_disclaimed_v2.yaml").sha256 == PINS[2]
+    with pytest.raises(lx.LexiconError, match="self_disclaimed_v3.yaml is not registered"):
+        sd.load_lexicon(tmp_path / "self_disclaimed_v3.yaml")
+    (tmp_path / "self_disclaimed_v2.yaml").write_bytes(raw + b"# a comment\n")
+    with pytest.raises(lx.LexiconError, match="not the registered"):
+        sd.load_lexicon(tmp_path / "self_disclaimed_v2.yaml")
+    draft = tmp_path / "draft" / "self_disclaimed_v3.yaml"
+    draft.parent.mkdir()
+    draft.write_bytes(raw + b"# a comment\n")
+    assert sd.load_lexicon(draft).path == str(draft.resolve())
+
+
+def test_every_spelling_of_the_lexicon_directory_loads_through_its_pin(tmp_path, monkeypatch):
+    """#3889: "in LEXICON_DIR" is decided on resolved paths. A relative
+    spelling, a `..` spelling, a symlinked directory, a link from elsewhere
+    to a file there, and a link there to a file elsewhere are each held to
+    the registry; an unpinned file is reported by its absolute path, never
+    by the repository-relative spelling a pinned load reports."""
+    raw = sd.LEXICON_PATH.read_bytes()
+    lex = tmp_path / "lex"
+    lex.mkdir()
+    (lex / "self_disclaimed_v2.yaml").write_bytes(raw)
+    (lex / "self_disclaimed_v3.yaml").write_bytes(raw)
+    _registry(lex, {2: "self_disclaimed_v2.yaml"})
+    monkeypatch.setattr(sd, "LEXICON_DIR", lex)
+    (tmp_path / "alias").symlink_to(lex, target_is_directory=True)
+    (tmp_path / "other").mkdir()
+    monkeypatch.chdir(tmp_path / "other")
+    spellings = {
+        "relative": lambda f: Path("..") / "lex" / f,
+        "dotdot": lambda f: lex / ".." / "lex" / f,
+        "symlinked directory": lambda f: tmp_path / "alias" / f,
+    }
+    for label, spell in spellings.items():
+        assert sd.load_lexicon(spell("self_disclaimed_v2.yaml")).sha256 == PINS[2], label
+        with pytest.raises(lx.LexiconError, match="self_disclaimed_v3.yaml is not registered"):
+            sd.load_lexicon(spell("self_disclaimed_v3.yaml"))
+    # A link elsewhere to a file there is the file it reaches.
+    (tmp_path / "other" / "mine.yaml").symlink_to(lex / "self_disclaimed_v3.yaml")
+    with pytest.raises(lx.LexiconError, match="self_disclaimed_v3.yaml is not registered"):
+        sd.load_lexicon(Path("mine.yaml"))
+    # A link there to a draft elsewhere is held to the pin of its name there.
+    draft = tmp_path / "other" / "draft.yaml"
+    draft.write_bytes(raw + b"# a comment\n")
+    (lex / "self_disclaimed_v2.yaml").unlink()
+    (lex / "self_disclaimed_v2.yaml").symlink_to(draft)
+    for label, spell in spellings.items():
+        with pytest.raises(lx.LexiconError, match="not the registered"):
+            sd.load_lexicon(spell("self_disclaimed_v2.yaml"))
+    assert sd.load_lexicon(Path("draft.yaml")).path == str(draft.resolve())
+
+
+def test_the_real_lexicon_directory_is_pinned_under_any_spelling(tmp_path, monkeypatch):
+    """#3889, on the shipped directory: its repository-relative spelling and
+    a `..` spelling load through the pin and report the pinned name, as
+    does `load_registered` given a non-canonical spelling of the
+    directory; an unpinned copy elsewhere never reports that name."""
+    root = sd.LEXICON_DIR.parents[2]
+    monkeypatch.chdir(root)
+    pinned = sd.load_lexicon(sd.LEXICON_PATH).describe()
+    assert pinned["path"] == sd.LEXICON_RESOURCE
+    for spelling in (Path(sd.LEXICON_RESOURCE),
+                     sd.LEXICON_DIR / ".." / "container_lexicons" / sd.LEXICON_PATH.name):
+        assert sd.load_lexicon(spelling).describe() == pinned
+    for directory in (Path(sd.LEXICON_RESOURCE_DIR), sd.LEXICON_DIR / ".." / "container_lexicons"):
+        assert sd.load_registered(directory=directory).describe() == pinned
+    elsewhere = tmp_path / "src" / "data_sheets_schema" / "container_lexicons" / sd.LEXICON_PATH.name
+    elsewhere.parent.mkdir(parents=True)
+    elsewhere.write_bytes(sd.LEXICON_PATH.read_bytes())
+    monkeypatch.chdir(tmp_path)
+    assert sd.load_lexicon(Path(sd.LEXICON_RESOURCE)).path == str(elsewhere.resolve()) != sd.LEXICON_RESOURCE
 
 
 def edited_lexicon(edit):
@@ -1587,7 +1732,7 @@ def test_the_assignment_owner_block_is_validated():
         edited_lexicon(lambda d: d["assignment_owner"].update(after=r"\s+(?:of|for)\s+"))
 
 
-@pytest.mark.parametrize("version", sorted(LEXICON_PINS))
+@pytest.mark.parametrize("version", sd.registered_versions())
 def test_lexicon_is_generic(version):
     text = sd.lexicon_path(version).read_text(encoding="utf-8").lower()
     for token in ("chorus", "ai-readi", "ai_readi", "voice", "cm4ai", "bridge2ai", "fairhub",
@@ -1635,7 +1780,7 @@ def test_cli_prints_json_and_never_gates(tmp_path):
     assert result.exit_code == 0, result.output
     out = json.loads(result.output)
     assert (out["instrument"], out["gating"]) == (sd.INSTRUMENT, False)
-    assert out["lexicon"]["sha256"] == LEXICON_PINS[LEXICON.version]
+    assert out["lexicon"]["sha256"] == PINS[LEXICON.version]
     assert out["inputs"]["original"]["sha256"] == hashlib.sha256(original.read_bytes()).hexdigest()
     assert out["counts"]["lexicon_diff"]["self_disclaimed_retained"] == 1
     assert out["counts"]["role_predicate_diff"]["role_predicate_retained"] == 1
@@ -1709,7 +1854,7 @@ def rules(scanned):
     return {f["path"]: {h["rule"] for h in f["hits"]} for f in scanned["flags"]}
 
 
-@pytest.mark.parametrize("version", sorted(LEXICON_PINS))
+@pytest.mark.parametrize("version", sd.registered_versions())
 @pytest.mark.parametrize("name", sorted(CANARY_OUTCOMES))
 def test_the_direct_canaries_replay_to_the_acceptance_outcomes(name, version):
     """#3515: `d4d review self-disclaimed --original O --final F --audit A
@@ -1753,3 +1898,19 @@ def test_the_canary_fixtures_are_neutral_and_documented():
         if path.suffix == ".yaml":
             assert text.startswith("# Neutralised fixture (#3515)"), path
     assert len(set(re.findall(r"`([0-9a-f]{64})`", readme))) == len(files)
+
+
+def test_every_registry_problem_names_its_file(tmp_path):
+    """#3915: a plain ValueError from the reader, and bytes that are not
+    UTF-8, are reported naming the registered file they came from."""
+    data = yaml.safe_load(sd.lexicon_path(1).read_text(encoding="utf-8"))
+    (tmp_path / "self_disclaimed_v1.yaml").write_text(
+        yaml.safe_dump({**data, "instrument": "other"}, sort_keys=False), encoding="utf-8")
+    (tmp_path / "self_disclaimed_v2.yaml").write_bytes(b"\xff\xfe bad")
+    _registry(tmp_path, {1: "self_disclaimed_v1.yaml", 2: "self_disclaimed_v2.yaml"})
+    problems = sd.check_registry(tmp_path)
+    assert len(problems) == 2, problems
+    assert "self_disclaimed_v1.yaml" in problems[0] and "not a self_disclaimed lexicon" in problems[0]
+    assert "self_disclaimed_v2.yaml" in problems[1] and "codec can't decode" in problems[1]
+    with pytest.raises(lx.LexiconError, match="self_disclaimed_v2.yaml"):
+        sd.load_registered(2, directory=tmp_path)
