@@ -193,6 +193,33 @@ def test_a_record_too_deep_to_scan_is_refused_as_the_cli_refuses_it(head):
         m.load_record(text.encode())
 
 
+def test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing():
+    """#3817: libyaml's composer recursed on the C stack and killed the
+    process at this depth; `load_record` now refuses the record with
+    ValueError. A subprocess, so a crash cannot take pytest down with it."""
+    import os
+    import subprocess
+    import sys
+    if not hasattr(yaml, "CSafeLoader"):
+        pytest.skip("PyYAML built without libyaml")
+    child = (
+        "import importlib.util, sys\n"
+        f"spec = importlib.util.spec_from_file_location('sdb', {str(SCRIPT)!r})\n"
+        "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)\n"
+        "n = 50_000\n"
+        "raw = ('a: 1\\na: 2\\nb: ' + '{x: ' * n + '1' + '}' * n + '\\n').encode()\n"
+        "try:\n"
+        "    m.load_record(raw)\n"
+        "except ValueError as exc:\n"
+        "    print('refused:', exc)\n"
+    )
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join([str(ROOT / "src"), str(ROOT), env.get("PYTHONPATH", "")])
+    proc = subprocess.run([sys.executable, "-c", child], capture_output=True, text=True, env=env, timeout=300)
+    assert proc.returncode == 0, proc.stderr[-2000:]
+    assert proc.stdout.startswith("refused: artifact nests past the recursion limit"), proc.stdout
+
+
 def test_the_note_carries_the_pr1_subtotal_and_says_which_finals_it_counted(corpus, monkeypatch):
     """#3029's figures counted two methods' finals; the note says so and
     carries their subtotal beside the all-methods total (#3703). A method

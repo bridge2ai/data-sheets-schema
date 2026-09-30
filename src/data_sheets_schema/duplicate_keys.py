@@ -18,6 +18,8 @@ merge.
 
 from __future__ import annotations
 
+import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -74,6 +76,70 @@ def _walk(loader: yaml.SafeLoader, node: Any, path: str, out: list[dict[str, Any
 #: one: what a caller scanning many files passes as `loader=` (#3704).
 FAST_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
+#: The deepest collection nesting a libyaml loader is asked to compose.
+#: libyaml's composer recurses on the C stack, where the interpreter's
+#: recursion limit does not apply: at 50,000 nested flow mappings it kills
+#: the process with SIGSEGV instead of raising (#3817). A tree deeper than
+#: the recursion limit cannot be walked anyway, so it is refused before
+#: libyaml composes it; the bound is the smaller of the two.
+LIBYAML_MAX_DEPTH = 1000
+
+try:                                                       # PyYAML built without libyaml has none
+    from yaml._yaml import CParser as _CParser
+except ImportError:                                        # pragma: no cover
+    _CParser = None
+
+_COLLECTION_START = (yaml.MappingStartEvent, yaml.SequenceStartEvent)
+_COLLECTION_END = (yaml.MappingEndEvent, yaml.SequenceEndEvent)
+#: The run of indentation, block indicators (`-`, `?`, `:`, `---`) and node
+#: properties at a line's start. A block collection starts within it, at its
+#: end at the latest. It admits forms libyaml rejects (tabs, `--- -`), which
+#: only raises the bound.
+_BLOCK_PREFIX = re.compile(r"[ ]*(?:(?:---|[-?:])(?:[ \t]+|$)|[&!][^ \t]*[ \t]+)*")
+
+
+def depth_bound(text: str) -> int:
+    """An upper bound on the collection nesting depth of `text`, from its
+    characters alone (#3817). Along a chain of nested block collections the
+    start column strictly increases, except that a sequence may sit at its
+    mapping key's column, so block nesting is at most twice (the largest
+    start column + 1). A flow collection opens with `{` or `[`, and a `[` may
+    also hold a single-pair mapping (`[a: b]`), so flow nesting is at most
+    `2 * count("[") + count("{")`. Flow content cannot hold a block
+    collection, so the two add. Brackets and prefixes inside scalars only
+    raise the bound."""
+    column = max((_BLOCK_PREFIX.match(line).end() for line in text.splitlines()), default=0)
+    return 2 * (column + 1) + 2 * text.count("[") + text.count("{")
+
+
+def nesting_exceeds(text: str, loader: type, limit: int) -> bool:
+    """Whether `text` nests collections more than `limit` deep, decided
+    without composing it: `depth_bound` first, and only where that is over the
+    limit, the loader's event stream, which libyaml parses with explicit
+    stacks rather than recursion. A stream the parser rejects before passing
+    the limit is not too deep here; the composer then reports its error."""
+    if depth_bound(text) <= limit:
+        return False
+    try:
+        parser = loader(text)
+    except yaml.YAMLError:
+        return False
+    depth = 0
+    try:
+        while parser.check_event():
+            event = parser.get_event()
+            if isinstance(event, _COLLECTION_START):
+                depth += 1
+                if depth > limit:
+                    return True
+            elif isinstance(event, _COLLECTION_END):
+                depth -= 1
+    except yaml.YAMLError:
+        return False
+    finally:
+        parser.dispose()
+    return False
+
 
 def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
                         strict: bool = False) -> list[dict[str, Any]]:
@@ -85,19 +151,39 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
     `loader` composes the node tree the rule walks; the rule is the same
     whichever composes it. The default is the pure-Python `SafeLoader`, as
     it always was; `FAST_LOADER` (libyaml's) gives the same findings about
-    thirteen times faster (CPU time over the 1,616 YAML files under
-    `data/d4d_concatenated` on 2026-09-30: 55.3 s against 4.2 s; #3704, #3800).
+    twelve times faster (CPU time over the 1,616 YAML files under
+    `data/d4d_concatenated` on 2026-09-30, the depth guard below included:
+    58.4 s against 4.8 s; #3704, #3800, #3817).
 
     A text that cannot be scanned — the reader or composer rejects it, or it
     nests past the interpreter's recursion limit — gives `[]` by default:
     nothing is claimed about its keys. With `strict=True` that failure is
     raised instead (the `yaml.YAMLError` or `RecursionError` itself), for a
-    caller that must refuse what it cannot check. libyaml composes a deep
-    tree without recursing and PyYAML constructs one without recursing, so
-    under `FAST_LOADER` the walk can be the only step that fails; a caller
-    that treats `[]` as "no duplicates" and then loads the value would accept
-    a record whose duplicate keys it never looked at (#3799)."""
+    caller that must refuse what it cannot check. Under `FAST_LOADER` the walk
+    can be the only step that fails: libyaml composes a tree deeper than the
+    recursion limit (on the C stack) and PyYAML constructs one without
+    recursing, so a caller that treats `[]` as "no duplicates" and then loads
+    the value would accept a record whose duplicate keys it never looked at
+    (#3799).
+
+    libyaml's composer is never handed a tree nested more than
+    `min(sys.getrecursionlimit(), LIBYAML_MAX_DEPTH)` deep: past some tens of
+    thousands of levels its C recursion overflows the stack and the process
+    dies with SIGSEGV, which no `except` can catch (#3817). Such a text is
+    refused as one nested past the recursion limit — `[]`, or under `strict`
+    a `RecursionError` — before libyaml composes it. The walk could not have
+    reached its keys; a tree nested that deep only in key position, which the
+    walk does not enter, is refused too, as the pure-Python loader refuses it.
+    The pure-Python `SafeLoader` is not checked: it raises `RecursionError`
+    itself, so the default path is unchanged."""
     out: list[dict[str, Any]] = []
+    if _CParser is not None and isinstance(loader, type) and issubclass(loader, _CParser):
+        limit = min(sys.getrecursionlimit(), LIBYAML_MAX_DEPTH)
+        if nesting_exceeds(text, loader, limit):
+            if strict:
+                raise RecursionError(f"the text nests collections more than {limit} deep; "
+                                     "libyaml is not asked to compose it (#3817)")
+            return out
     # A stream the reader rejects (a NUL byte), a document the composer
     # rejects (two documents), or one nested past the interpreter's limit
     # is not scannable here; `safe_load` fails on the same text and the

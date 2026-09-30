@@ -91,8 +91,11 @@ def load_record(raw: bytes) -> dict:
     loader. The scan is strict: a record it cannot check is refused, never
     loaded. One nested past the interpreter's recursion limit is refused with
     ValueError, where the CLI's pure-Python `safe_load` raises RecursionError
-    on the same bytes; libyaml would load it, and a non-strict scan would
-    have passed a duplicate key it never reached (#3799)."""
+    on the same bytes; a non-strict scan would have passed a duplicate key it
+    never reached (#3799). The scan refuses such a record before libyaml
+    composes it, because libyaml's composer recurses on the C stack and, some
+    tens of thousands of levels down, crashes the process instead of raising
+    (#3817)."""
     try:
         text = raw.decode("utf-8")
         try:

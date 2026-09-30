@@ -115,6 +115,123 @@ class TestTheLoader(unittest.TestCase):
                                  ["a"])
 
 
+#: A child process that scans texts nested 50,000 deep with libyaml. Before
+#: #3817 the flow case killed the interpreter with SIGSEGV (exit 139), which
+#: is why it runs in a subprocess and not in pytest's own process.
+_DEEP_CHILD = """
+import sys, yaml
+from data_sheets_schema.duplicate_keys import FAST_LOADER, find_duplicate_keys
+n = 50_000
+texts = {
+    "flow": "a: 1\\na: 2\\nb: " + "{x: " * n + "1" + "}" * n + "\\n",
+    "block sequence": "- " * n + "x\\n",
+    "key position": "? " * n + "x\\n",
+}
+for name, text in texts.items():
+    assert find_duplicate_keys(text, loader=FAST_LOADER) == [], name
+    try:
+        find_duplicate_keys(text, loader=FAST_LOADER, strict=True)
+    except RecursionError as exc:
+        assert "#3817" in str(exc), (name, str(exc))
+    else:
+        raise SystemExit(f"{name}: strict scan returned instead of raising")
+print("refused", len(texts))
+"""
+
+
+def _event_depth(text: str) -> int:
+    """The nesting depth, from the pure-Python parser's event stream."""
+    depth = deepest = 0
+    for event in yaml.parse(text, Loader=yaml.SafeLoader):
+        if isinstance(event, (yaml.MappingStartEvent, yaml.SequenceStartEvent)):
+            depth += 1
+            deepest = max(deepest, depth)
+        elif isinstance(event, (yaml.MappingEndEvent, yaml.SequenceEndEvent)):
+            depth -= 1
+    return deepest
+
+
+def _block(depth: int) -> str:
+    """Block mappings nested `depth` deep, a duplicate key in the innermost."""
+    pad = "  " * (depth - 1)
+    return "".join("  " * i + "k:\n" for i in range(depth - 1)) + pad + "a: 1\n" + pad + "a: 2\n"
+
+
+def _flow(depth: int) -> str:
+    """Flow mappings under a top-level mapping with a duplicate key: `depth` deep."""
+    return "a: 1\na: 2\nb: " + "{x: " * (depth - 1) + "1" + "}" * (depth - 1) + "\n"
+
+
+class TestTheLibyamlDepthGuard(unittest.TestCase):
+    """#3817: libyaml's composer recurses on the C stack, so a deep enough
+    tree crashed the process instead of raising. It is never handed one."""
+
+    def setUp(self):
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+
+    def test_a_scan_of_a_tree_nested_fifty_thousand_deep_raises_and_does_not_crash(self):
+        import os
+        import subprocess
+        import sys
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join([str(ROOT / "src"), str(ROOT), env.get("PYTHONPATH", "")])
+        proc = subprocess.run([sys.executable, "-c", _DEEP_CHILD], capture_output=True, text=True,
+                              env=env, timeout=300)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        self.assertEqual(proc.stdout.strip(), "refused 3")
+
+    def test_the_guard_refuses_one_level_past_the_limit_and_scans_at_it(self):
+        """With the limit lowered, the boundary is testable without deep text:
+        the refusal is the guard's (its message), not the walk's."""
+        from data_sheets_schema import duplicate_keys
+        with unittest.mock.patch.object(duplicate_keys, "LIBYAML_MAX_DEPTH", 6):
+            for make in (_flow, _block):
+                with self.subTest(form=make.__name__):
+                    self.assertEqual(_event_depth(make(6)), 6)
+                    self.assertEqual(len(find_duplicate_keys(make(6), loader=yaml.CSafeLoader, strict=True)), 1)
+                    self.assertEqual(find_duplicate_keys(make(7), loader=yaml.CSafeLoader), [])
+                    with self.assertRaisesRegex(RecursionError, "more than 6 deep.*#3817"):
+                        find_duplicate_keys(make(7), loader=yaml.CSafeLoader, strict=True)
+                    # The pure-Python loader is not guarded: the default path is unchanged.
+                    self.assertEqual(len(find_duplicate_keys(make(7), strict=True)), 1)
+
+    def test_the_default_loader_never_consults_the_guard(self):
+        from data_sheets_schema import duplicate_keys
+        with unittest.mock.patch.object(duplicate_keys, "nesting_exceeds", side_effect=AssertionError):
+            self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n")], ["a"])
+            self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n", loader=yaml.SafeLoader)], ["a"])
+
+    def test_the_textual_bound_is_never_below_the_nesting(self):
+        from data_sheets_schema.duplicate_keys import depth_bound
+        unparseable = ("id: [unterminated\n", "a: \0", "a: 1\n---\nb: 2\n")
+        texts = [t for t in PARITY if t not in unparseable] + [
+            _block(40), _flow(40), "- - - - - x\n", "? - - a\n: - - b\n", "- a:\n  - b:\n    - c: 1\n",
+            "a:\n- b:\n  - c\n", "[a: [b: [c: [d: 1]]]]\n", "{a: [{b: [x]}]}\n", "- &x !!map\n  k: [1, [2]]\n",
+            "k: |\n  [[[[\n", "a:\r\n  b:\r\n    - [c]\r\n", "a:\u2028  b: 1\n", "",
+        ]
+        for text in texts:
+            with self.subTest(text=text[:60]):
+                self.assertGreaterEqual(depth_bound(text), _event_depth(text))
+
+    def test_the_event_pass_runs_only_where_the_bound_cannot_clear_the_text(self):
+        """A text whose bound is within the limit is parsed once, not twice."""
+        from data_sheets_schema import duplicate_keys
+        opened = []
+
+        class Counting(yaml.CSafeLoader):
+            def __init__(self, stream):
+                opened.append(1)
+                super().__init__(stream)
+
+        self.assertEqual(len(find_duplicate_keys("a: 1\na: 2\nb: [[1]]\n", loader=Counting)), 1)
+        self.assertEqual(len(opened), 1)
+        with unittest.mock.patch.object(duplicate_keys, "LIBYAML_MAX_DEPTH", 3):
+            opened.clear()
+            self.assertEqual(len(find_duplicate_keys("a: 1\na: 2\nb: [[1]]\n", loader=Counting)), 1)
+            self.assertEqual(len(opened), 2)
+
+
 GOOD = {"pair": {"ran": True, "errors": 0}, "report": {"checked": True, "findings": [], "claims_checked": 3},
         "grounding": {"ran": True, "distinct": {"absent": 0}, "findings": []},
         "form": {"ran": True, "organisational_fragments": 0, "undeclared_prefix_occurrences": 0, "british_spellings": 0}}
