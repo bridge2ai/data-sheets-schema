@@ -61,7 +61,14 @@ at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) counts (#3397), as does
 one carrying any replacement string an `xargs` in the command sets (`-I%`,
 `-J %`, `-i`, `--replace`), and a `derive` that ends an `xargs` command
 setting none, where xargs appends the word (#3426) -- ends it once the
-shell's redirections are set aside (`2>&1`, `>log`, `< args`, #3453). So is a reader part that carries them where a
+shell's redirections are set aside (`2>&1`, `>log`, `< args`, #3453), and one with a
+redirection directly after it in an xargs command, whatever follows the
+redirection, since a quoted target holding spaces cannot be told from
+arguments there (`xargs d4d derive <<< "core ..."`, #3457). A command the
+tokenizer cannot split at all (an apostrophe in a here-document's body)
+is not read part by part: it is tested whole, quote characters removed,
+for the same words, and a match is a derive that cannot be placed (#3458),
+a reader's words included. So is a reader part that carries them where a
 pipe later in the command feeds a program not known to read (`echo '...
 derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
 substitutes anywhere (`$(...)`, backticks, `<(...)`), every part that
@@ -188,9 +195,12 @@ NON_CHECKS = (
     "placed (#3397), as does a word carrying any replacement string an `xargs` in the command "
     "sets (`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`) and a `derive` ending an `xargs` "
     "command that sets none, where xargs appends the word (#3426), redirections (`2>&1`, "
-    "`>log`, `< args`) aside, since they are the shell's (#3453); a word the shell builds "
-    "some other way (a glob, `derive c*`) is not seen, nor is a word xargs appends to a "
-    "`derive` that does not end the xargs command",
+    "`>log`, `< args`) aside, since they are the shell's (#3453), and a `derive` with a "
+    "redirection directly after it in an xargs command, whatever follows (#3457). A command "
+    "the tokenizer cannot split (an apostrophe in a here-document body) is tested whole, "
+    "quote characters removed, by the same rules (#3458). A word the shell builds some other "
+    "way (a glob, `derive c*`) is not seen, nor is a word xargs appends to a `derive` that "
+    "neither ends the xargs command nor has a redirection directly after it",
 )
 
 _ABSENT = object()
@@ -777,17 +787,22 @@ _SHELL_WORDS = re.compile(rf"[<>]\(|{_REDIRECTION_OPERATOR}[^\s|;&()<>]*|[|;&()\
 _SEPARATOR_WORD = re.compile(r"[|;&()\n]+")
 
 
-def _without_redirections(words: list[str]) -> list[str]:
-    """`words` with every redirection and its target removed (#3453): a
-    redirection is the shell's, so the program never sees it as an argument,
-    and a `derive` before `2>&1` or `>log` is still the last word xargs
-    receives. A bare operator (`>`, `2>`) takes the next word as its target.
-    The command reaches here as the tokenizer's words joined by spaces, and
-    shlex splits `2>&1` into `2`, `>&`, `1`, so a number or `{name}` word
-    right before an operator is taken for its descriptor; where it was an
-    argument (`derive 2 >&1`) the derive is then read as unplaceable, a false
-    `unknown` rather than a miss."""
+def _without_redirections(words: list[str]) -> tuple[list[str], list[bool]]:
+    """`words` with every redirection and its target removed (#3453), and,
+    for each word kept, whether a redirection came directly after it
+    (#3457): a redirection is the shell's, so the program never sees it as
+    an argument, and a `derive` before `2>&1` or `>log` is still the last
+    word xargs receives. A bare operator (`>`, `2>`) takes the next word as
+    its target. The command reaches here as the tokenizer's words joined by
+    spaces, and shlex splits `2>&1` into `2`, `>&`, `1`, so a number or
+    `{name}` word right before an operator is taken for its descriptor;
+    where it was an argument (`derive 2 >&1`) the derive is then read as
+    unplaceable, a false `unknown` rather than a miss. A quoted target
+    holding spaces (`< "my args.txt"`, `<<< "core --full F"`) comes back
+    here as several words, of which only the first is set aside; the flag
+    is what keeps that from hiding the derive before it."""
     kept: list[str] = []
+    redirected: list[bool] = []
     skip_target = False
     for at, word in enumerate(words):
         if skip_target:
@@ -796,13 +811,18 @@ def _without_redirections(words: list[str]) -> list[str]:
                 continue
         if (re.fullmatch(r"\d+|\{[A-Za-z_][A-Za-z0-9_]*\}", word) and at + 1 < len(words)
                 and _REDIRECTION.fullmatch(words[at + 1])):
+            if redirected:
+                redirected[-1] = True
             continue
         match = _REDIRECTION.fullmatch(word)
         if match:
             skip_target = not match.group(2)
+            if redirected:
+                redirected[-1] = True
             continue
         kept.append(word)
-    return kept
+        redirected.append(False)
+    return kept, redirected
 
 
 def _xargs_supplies_derive_word(text: str) -> bool:
@@ -812,8 +832,14 @@ def _xargs_supplies_derive_word(text: str) -> bool:
     in that word, since `{}` is only a convention, or, with no replacement
     string, by appending it after a `derive` that ends the command -- read
     with the command's redirections removed, since they are the shell's
-    (`xargs d4d derive 2>&1 | tail -5` still appends the word, #3453)."""
-    words = _without_redirections(_SHELL_WORDS.findall(text))
+    (`xargs d4d derive 2>&1 | tail -5` still appends the word, #3453).
+    A `derive` in an xargs command with a redirection directly after it
+    counts whatever follows the redirection (#3457): a quoted target is
+    re-split here (`xargs d4d derive <<< "core --full F"`, `< "my
+    args.txt"`), so the words after it cannot be told from arguments, and
+    reading them as arguments would hide a derive; the cost is a false
+    `unknown` (`xargs d4d derive >log full`)."""
+    words, redirected = _without_redirections(_SHELL_WORDS.findall(text))
     for start, word in enumerate(words):
         if os.path.basename(word) != "xargs":
             continue
@@ -851,6 +877,8 @@ def _xargs_supplies_derive_word(text: str) -> bool:
         for at, part in enumerate(command):
             if part != "derive":
                 continue
+            if redirected[k + at]:
+                return True
             following = command[at + 1] if at + 1 < len(command) else None
             if following is None and not tokens:
                 return True
@@ -1076,7 +1104,14 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     named = [x for x in targets if x.name in command]
     out: dict[str, Any] = {"named": [], "read_only": False, "derives": []}
     if tokens is None:
+        # A command shlex cannot split (an apostrophe in a here-document's
+        # body, #3458) is not read part by part, but the words may still be
+        # on it: the whole command, quote characters removed, is tested for
+        # them, and a match is a derive that cannot be placed, never none.
         out["named"] = [x.kind for x in named]
+        full = next((x for x in targets if x.kind == "full"), None)
+        if full is not None and _mentions_derive([command]):
+            out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
@@ -1461,7 +1496,8 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
         elif row["outcome"] == "ambiguous":
             why = {"and_chain": "a later `&&` part may be what failed",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
-                               "`xargs`, a substitution, or a wrapper or option it does not read)"}.get(
+                               "`xargs`, a substitution, a wrapper or option it does not read, or a command "
+                               "the tokenizer cannot split)"}.get(
                 row["status_basis"], "piped, backgrounded, grouped, after `||`, followed by `;`, or multi-line")
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: the call {row['command_outcome']} "
                            f"but its status is not the derive's own ({row['status_basis']}: {why})")

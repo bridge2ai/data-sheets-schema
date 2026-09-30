@@ -310,7 +310,10 @@ def origin(transcripts, receipt_file, full_file, as_json):
     characters are removed (`bash -c 'd4d derive "core"'`), and `derive` followed by a word
     supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}` or any other replacement
     string it sets, such as `-I%` or `-J %`, or the word xargs appends after a `derive` that
-    ends its command, redirections such as `2>&1` aside) cannot be placed either. A
+    ends its command, redirections such as `2>&1` aside, or after a `derive` with a
+    redirection directly after it) cannot be placed either. A command the tokenizer
+    cannot split (an apostrophe in a heredoc body) is tested whole for the same
+    words, and a match cannot be placed. A
     derive whose words are not on the command line (a script, an alias, a variable supplying
     `derive` itself) is not seen. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only

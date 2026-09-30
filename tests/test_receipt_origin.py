@@ -1501,7 +1501,20 @@ class DeriveSpellings(Base):
                          f"echo core --full {self.FULL} {self.OUT} | xargs d4d derive >/tmp/log",
                          f"echo core --full {self.FULL} {self.OUT} | xargs d4d derive 2>/dev/null",
                          f"echo core --full {self.FULL} {self.OUT} | xargs d4d derive > /tmp/log",
-                         f"xargs d4d derive < /tmp/args-3374"):
+                         f"xargs d4d derive < /tmp/args-3374",
+                         # #3457: a quoted redirection target holding spaces is re-split,
+                         # so a redirection directly after the derive is enough
+                         f"xargs d4d derive <<< \"core --full {self.FULL} {self.OUT}\"",
+                         f"xargs d4d derive <<< 'core --full {self.FULL} {self.OUT}'",
+                         "xargs d4d derive < \"/tmp/my args-3374.txt\"",
+                         # #3458: a command shlex cannot split (an apostrophe in a
+                         # here-document body) is tested whole for the words
+                         f"cat > /tmp/notes-3374.txt <<EOF\nit's done\nEOF\n"
+                         f"poetry run d4d derive core --full {self.FULL} {self.OUT}",
+                         f"cat > /tmp/notes-3374.txt <<EOF\nit's done\nEOF\n"
+                         f"poetry run d4d derive \"core\" --full {self.FULL} {self.OUT}",
+                         f"cat > /tmp/notes-3374.txt <<EOF\nit's done\nEOF\n"
+                         f"poetry run d4d derive $SUB --full {self.FULL} {self.OUT}"):
             for ok in (True, False):
                 with self.subTest(spelling=spelling, ok=ok):
                     identity, block = self._derived(spelling, ok=ok)
@@ -1549,7 +1562,10 @@ class DeriveSpellings(Base):
                          # the word after `derive` supplies nothing to it
                          "ls | xargs -I% python scripts/derive corex %",
                          "ls | xargs grep -n derive x.md",
-                         "ls | xargs -I% cat %; python scripts/derive corex %"):
+                         "ls | xargs -I% cat %; python scripts/derive corex %",
+                         # #3458: a command shlex cannot split, without the words
+                         "cat > /tmp/notes-3374.txt <<EOF\nit's done\nEOF\nls",
+                         "cat > /tmp/notes-3374.txt <<EOF\nit's derived\nEOF\npython scripts/derive corex"):
             with self.subTest(spelling=spelling):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -1579,8 +1595,14 @@ class DeriveSpellings(Base):
                  "xargs d4d derive >>log 2>&1": True, "xargs <args d4d derive": True,
                  # as the segment's words arrive, split by shlex and joined by spaces
                  "xargs d4d derive 2 >& 1": True, "xargs d4d derive 2 > /dev/null": True,
-                 "xargs d4d derive 2> err full": False, "xargs d4d derive >log full": False,
                  "xargs d4d derive full 2>&1": False, "xargs d4d derive <(ls)": False,
+                 # #3457: a redirection directly after the derive counts whatever follows
+                 # it, since a quoted target arrives re-split into several words
+                 "xargs d4d derive <<< core --full F --out O": True,
+                 "xargs d4d derive < my args.txt": True, "xargs d4d derive > my log.txt": True,
+                 "xargs d4d derive 2 > my log.txt": True, "xargs -I% d4d derive > log": True,
+                 "xargs d4d derive 2> err full": True, "xargs d4d derive >log full": True,
+                 "ls > derive.log; xargs d4d derive full": False,
                  # with a replacement string set, xargs appends nothing
                  "xargs -I% d4d derive": False, "xargs -i d4d derive": False, "xargs -i d4d derive full": False,
                  "xargs -I% d4d derive full %": False, "xargs -I% d4d receipts check %": False,
@@ -1630,14 +1652,27 @@ class DeriveSpellings(Base):
         self.assertIn("The words are matched after quote and escape characters are removed", text)
         self.assertIn("`xargs ... derive {}`) counts as a derive that cannot be placed", text)
         self.assertIn("a variable or substitution supplying the word `derive` itself", text)
-        self.assertIn("a word the shell builds some other way (a glob, `derive c*`) is not seen", text)
+        self.assertIn("A word the shell builds some other way (a glob, `derive c*`) is not seen", text)
         # #3426: any xargs replacement string, and the one xargs route still unseen
         self.assertIn("as does a word carrying any replacement string an `xargs` in the command sets "
                       "(`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`)", text)
-        self.assertIn("nor is a word xargs appends to a `derive` that does not end the xargs command", text)
+
         # #3453: the appended-word rule reads the command with its redirections aside
         self.assertIn("redirections (`2>&1`, `>log`, `< args`) aside, since they are the shell's (#3453)", text)
         self.assertIn("ends it once the shell's redirections are set aside", doc)
+        # #3457, #3458: a redirection directly after the derive, and a command
+        # the tokenizer cannot split, and what stays unseen
+        self.assertIn("and a `derive` with a redirection directly after it in an xargs command, "
+                      "whatever follows (#3457)", text)
+        self.assertIn("A command the tokenizer cannot split (an apostrophe in a here-document body) is "
+                      "tested whole, quote characters removed, by the same rules (#3458)", text)
+        self.assertIn("nor is a word xargs appends to a `derive` that neither ends the xargs command nor "
+                      "has a redirection directly after it", text)
+        self.assertIn("one with a redirection directly after it in an xargs command, whatever follows the "
+                      "redirection", doc)
+        self.assertIn("A command the tokenizer cannot split at all (an apostrophe in a here-document's body) "
+                      "is not read part by part: it is tested whole, quote characters removed, for the same "
+                      "words, and a match is a derive that cannot be placed (#3458)", doc)
         self.assertIn("as does one carrying any replacement string an `xargs` in the command sets", doc)
         self.assertIn("The words are matched after quote and escape characters are removed, as the shell "
                       "running a nested string removes them", doc)
@@ -1924,8 +1959,11 @@ class Cli(unittest.TestCase):
                       "(`bash -c 'd4d derive \"core\"'`)", text)                               # #3397
         self.assertIn("`derive` followed by a word supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}` "
                       "or any other replacement string it sets, such as `-I%` or `-J %`, or the word xargs "
-                      "appends after a `derive` that ends its command, redirections such as `2>&1` aside) "
-                      "cannot be placed either", text)                                    # #3426, #3453
+                      "appends after a `derive` that ends its command, redirections such as `2>&1` aside, "
+                      "or after a `derive` with a redirection directly after it) cannot be placed either",
+                      text)                                                               # #3426, #3453, #3457
+        self.assertIn("A command the tokenizer cannot split (an apostrophe in a heredoc body) is tested "
+                      "whole for the same words, and a match cannot be placed", text)      # #3458
         self.assertIn("A derive whose words are not on the command line (a script, an alias, a variable "
                       "supplying `derive` itself) is not seen", text)
         self.assertIn("the runtime did in `dontAsk` mode and its terminal `result` lists the call", text)
