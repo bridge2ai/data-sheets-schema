@@ -402,7 +402,8 @@ def instruments_of(block: dict[str, Any], rubric: str) -> list[str]:
 
 
 def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str = "",
-                          left_out: Sequence[str] = (), evaluator: str | None = None) -> list[str]:
+                          left_out: Sequence[str] = (), evaluator: str | None = None,
+                          measured_on: str | None = None) -> list[str]:
     """Markdown lines for a discrimination block; the basis is named on every
     figure that depends on one. `scope` qualifies the heading. `left_out` names
     the evaluations listed above the block that it does not measure (a report
@@ -410,16 +411,25 @@ def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str
     block never claims to measure every evaluation above it. `evaluator`
     scopes the block to one evaluator's evaluations where the tables above
     hold more than one evaluator's (#3309, #3310): the block then says it
-    measured that evaluator's evaluations only."""
-    whose = "the evaluations above" if evaluator is None else f"the {evaluator} evaluations above"
+    measured that evaluator's evaluations only. `measured_on` replaces the
+    phrase naming what was measured ("Measured on <measured_on>, one rating
+    per record.") where the cohort is a counted part of the evaluations above
+    that names too many left out to list (#3570); it excludes `left_out`."""
+    if measured_on is not None and left_out:
+        raise ValueError("measured_on states the cohort itself; pass it or left_out, not both")
+    whose = ("the evaluations above" if evaluator is None else f"the {evaluator} evaluations above"
+             ) if measured_on is None else measured_on
     measured = (f"Measured on {whose}, one rating per record." if not left_out else
                 f"Measured on {whose} except the {len(left_out)} left out of this "
                 "block's cohort, one rating per record. Left out, and in no count below: "
                 + ", ".join(f"`{name}`" for name in left_out) + ".")
     if evaluator is not None:
-        measured += (" Evaluations by any other evaluator are in no count below: an evaluator "
-                     "is an instrument (#1058), and pooling two would count their offset as "
-                     "distinct totals.")
+        # "In this block", not "below": every caller that names an evaluator
+        # renders one block per evaluator, and the blocks after this one do
+        # count the other evaluators' evaluations (#3598).
+        measured += (" Evaluations by any other evaluator are in no count in this block: an "
+                     "evaluator is an instrument (#1058), and pooling two would count their "
+                     "offset as distinct totals.")
     lines = [f"{heading} Item discrimination and within-project orderings{scope} (#2927)", "",
              measured + " An item at ceiling "
              "(or floor) scored its maximum (or 0) on every record where it was scored, so it "
@@ -495,4 +505,69 @@ def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str
         lines += ["Not joined because the record's rating under the other rubric was rated more "
                   "than once and left out: "
                   + ", ".join(f"{p} `{l}` ({r})" for r, p, l in cross["partner_duplicated"]) + ".", ""]
+    return lines
+
+
+# --- The legacy summarizers' own cohorts (#3281) ------------------------------
+#
+# scripts/summarize_rubric{10,20}_results.py read data/evaluation_llm/rubric10
+# and rubric20: the presence/direct-API evaluations, whose items already have
+# the shape item_scores() reads (rubric10 `elements[].sub_elements[]`, rubric20
+# `questions[]` with `max_score`). What they lack is a generation label, and
+# each directory mixes evaluators and record kinds, so the block is measured
+# per cohort rather than over the folder. The cohort is also split by fixed
+# maximum as a safeguard (#275): a rubric20 directory could hold two maxima,
+# though the committed one holds only 84 (#3599).
+
+def legacy_record(result: dict[str, Any]) -> dict[str, Any]:
+    """A legacy evaluation as discrimination() reads it. It names no
+    generation label; the record it rated is `d4d_file`, so that is its label
+    where it names none, and a file rated twice in one cohort is a duplicate
+    rather than two records. The evaluation itself is not modified."""
+    if record_label(result) is not None or not result.get("d4d_file"):
+        return result
+    return {**result, "label": str(result["d4d_file"])}
+
+
+def legacy_cohorts(results: Iterable[dict[str, Any]]
+                   ) -> list[tuple[tuple[str, str | None, float], list[dict[str, Any]]]]:
+    """((evaluation type, evaluator, fixed maximum), evaluations), sorted.
+
+    An individual (single-source) record and a concatenated synthesis are
+    different kinds of record; an evaluator is an instrument (#1058); and a
+    total over another maximum is not a distinct total of this one (#275). Any
+    of the three pooled would count its offset as separation."""
+    groups: dict[tuple[str, str | None, float], list[dict[str, Any]]] = {}
+    for result in results:
+        maximum = score_bases(result, _rubric_default_max(result.get("rubric", "unknown"))).fixed_max
+        key = (str(result.get("evaluation_type") or "unknown"), evaluator_key(result), maximum)
+        groups.setdefault(key, []).append(result)
+    return sorted(groups.items(), key=lambda item: (item[0][0], item[0][1] or "", item[0][2]))
+
+
+def render_legacy_discrimination(results: Iterable[dict[str, Any]],
+                                 heading: str = "##") -> list[str]:
+    """The #2927 block for each of a legacy summarizer's cohorts (#3281)."""
+    results = list(results)
+    lines: list[str] = []
+    for (kind, evaluator, maximum), members in legacy_cohorts(results):
+        who = evaluator or "an unrecorded evaluator"
+        block = discrimination(legacy_record(result) for result in members)
+        # The report above lists every evaluation the summarizer loaded, of
+        # every kind, evaluator and maximum; the block measures one cohort of
+        # them, so it counts what it measures against what is above (#3570).
+        others = len(results) - len(members)
+        measured_on = (f"{len(members)} of the {len(results)} evaluations above: the {kind} "
+                       f"evaluations by {who} scored out of {maximum:g}"
+                       + (f". The other {others} are in no count in this block; each is "
+                          "measured in a block of its own" if others else ""))
+        lines += render_discrimination(
+            block, heading, scope=f", {kind} evaluations by {who} scored out of {maximum:g}",
+            evaluator=evaluator, measured_on=measured_on)
+        lines += [f"This cohort is the {len(members)} {kind} evaluation"
+                  f"{'s' if len(members) != 1 else ''} by {who} scored out of {maximum:g}, "
+                  "each record named by the D4D file it rated. Evaluations of another kind "
+                  "(individual or concatenated), by another evaluator or over another maximum "
+                  "are measured in a block of their own: pooled, their offsets would be counted "
+                  "as distinct totals (#1058, #275).", ""]
     return lines
