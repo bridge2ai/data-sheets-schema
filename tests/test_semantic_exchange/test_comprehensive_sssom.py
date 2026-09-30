@@ -298,13 +298,17 @@ def raw_path_class(schema, slot):
 
 
 def raw_hides_top_level(schema, cls, slot):
-    """Whether ``cls`` or an ancestor declares ``slot`` as its own attribute
-    without listing the top-level slot under ``slots:``, which replaces the
-    top-level slot for the class (#3193)."""
+    """Whether ``cls`` or an ancestor declares ``slot`` as its own attribute,
+    which replaces the top-level slot for the class (#3193).
+
+    This is LinkML's rule: ``SchemaView.induced_slot`` takes the attribute of
+    the class or of any ancestor whenever one exists, and never consults
+    ``slots:``. A class that lists the name under ``slots:`` as well as under
+    ``attributes`` still hides the top-level slot (#3392); six classes in the
+    merged schema do so."""
     classes = schema.get("classes") or {}
     near = {cls} | raw_ancestors(schema, cls) if cls else set()
     return any(slot in ((classes.get(c) or {}).get("attributes") or {})
-               and slot not in ((classes.get(c) or {}).get("slots") or [])
                for c in near)
 
 
@@ -1221,6 +1225,60 @@ class TestDisagreementsAreListed(unittest.TestCase):
                        declaration_name("", slot), "File.media_type"):
             self.assertIn(phrase, reason)
         self.assertNotIn("serialises the slot as", reason)
+
+    def test_the_hiding_rule_is_linkmls_whether_or_not_slots_lists_the_name(self):
+        """#3392: an attribute on the class or an ancestor replaces the
+        top-level slot even when the class also lists the name under
+        ``slots:``. The helper is checked against linkml_runtime's
+        ``SchemaView.induced_slot`` on a fixture where the two declarations
+        carry different slot_uris, and against every class of the merged
+        schema that lists a name both ways."""
+        from linkml_runtime.utils.schemaview import SchemaView
+        fixture = textwrap.dedent("""\
+            id: https://example.org/s3371
+            name: s3371
+            prefixes:
+              linkml: https://w3id.org/linkml/
+              ex: https://example.org/
+            default_prefix: ex
+            imports:
+              - linkml:types
+            slots:
+              foo:
+                slot_uri: ex:top
+            classes:
+              Both:
+                slots:
+                  - foo
+                attributes:
+                  foo:
+                    slot_uri: ex:attr
+              Child:
+                is_a: Both
+              SlotsOnly:
+                slots:
+                  - foo
+            """)
+        import yaml
+        schema = yaml.safe_load(fixture)
+        sv = SchemaView(fixture)
+        for cls in ("Both", "Child", "SlotsOnly"):
+            with self.subTest(cls=cls):
+                induced = sv.induced_slot("foo", cls).slot_uri
+                self.assertEqual(raw_hides_top_level(schema, cls, "foo"),
+                                 induced == "ex:attr")
+        self.assertTrue(raw_hides_top_level(schema, "Both", "foo"))
+        self.assertFalse(raw_hides_top_level(schema, "SlotsOnly", "foo"))
+
+        merged = raw_schema()
+        both = sorted((c, n) for c, cdef in merged["classes"].items()
+                      for n in set((cdef or {}).get("attributes") or {})
+                      & set((cdef or {}).get("slots") or []))
+        self.assertTrue(both, "the merged schema lists no name both ways")
+        for cls, name in both:
+            with self.subTest(cls=cls, slot=name):
+                self.assertTrue(raw_hides_top_level(merged, cls, name))
+                self.assertNotIn("", raw_seen_by(merged, cls, name))
 
     def test_only_a_slot_uri_is_said_to_serialise_the_slot(self):
         """#3193: the strength-only template says "the schema's <metaslot>
