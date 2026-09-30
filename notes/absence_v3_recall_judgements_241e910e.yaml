@@ -1051,10 +1051,13 @@ judgements:
     cause: window
     flagged:
     - rsn.recorded-here
-    reading: source
-    verdict: borderline
-    reason: Reports what the highest-ranked source lists; 'recorded here' names the award URI the record carries,
-      not a choice between sources.
+    reading: construction
+    verdict: in_class
+    reason: 'Says the award URI recorded here is the one the highest-ranked source lists, as #3 says of its start
+      date; the verb is past the 80-character window.'
+    correction: 'Re-read in review (#3807): first judged source/borderline because the sentence makes no choice
+      between sources, a criterion the header does not state. The sentence says what the record carries (''recorded
+      here'') and the ranking term bears on it, the header''s construction reading, and the same structure as #3.'
   - n: 72
     record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml
     pointer: /ethical_reviews/0/source_caveats

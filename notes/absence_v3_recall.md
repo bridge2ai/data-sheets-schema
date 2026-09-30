@@ -36,15 +36,15 @@ to its full stop as it was judged, so v3 still counts that sentence though not t
 
 | reading | verdict | dropped | sentence flagged by v3 | sentence not flagged |
 |---|---|---:|---:|---:|
-| construction | in_class | 23 | 18 | 5 |
+| construction | in_class | 24 | 19 | 5 |
 | referent | in_class | 11 | 11 | 0 |
-| source | borderline | 51 | 9 | 42 |
+| source | borderline | 50 | 8 | 42 |
 | absence | not_in_class | 3 | 0 | 3 |
 | **all** | | 88 | 38 | 50 |
 
 ## By cause
 
-The cause is computed, not judged: the v3 regex with one bound lifted at a time, as the
+The cause is computed, not judged: the v3 regex with its bounds lifted in turn, as the
 script's docstring defines. The bounds are cumulative. An unbounded window admits the `window`
 rows; one that also crosses `;` admits the `semicolon` rows; `other_sentence` needs it to cross
 a full stop, and `no_verb` a verb the list lacks. Each admits its rows whatever their reading,
@@ -55,24 +55,49 @@ on a listed verb anywhere in reach, which need not be the verb the sentence turn
 |---|---:|---:|---:|---:|---:|---:|
 | `absorbed` | 1 | 1 | 0 | 0 | 0 | 0 |
 | `consumed` | 2 | 2 | 0 | 0 | 0 | 0 |
-| `window` | 9 | 6 | 0 | 3 | 0 | 0 |
+| `window` | 9 | 7 | 0 | 2 | 0 | 0 |
 | `semicolon` | 18 | 14 | 3 | 0 | 1 | 5 |
 | `other_sentence` | 48 | 0 | 8 | 38 | 2 | 0 |
 | `no_verb` | 10 | 0 | 0 | 10 | 0 | 0 |
 
+## What each change would admit
+
+Each possible change to v3's rule is its regex with that change made, run over the dropped
+rows as the cause is (`absorbed` and `consumed` rows need no bound lifted and are left out).
+The first three rows lift one bound and keep the others as v3 spells them. The last three
+lift them cumulatively, in the causes' order, so each includes the rows above it; their
+counts are the cause table's rows summed. The two readings differ: the `semicolon` rows
+are the ones that need *both* the window widened and `;` crossed, so crossing `;` alone
+admits only some of them. A single lift can also admit a row of another cause, through a
+listed verb it brings into reach that is not the one the sentence turns on.
+
+| change | admits | construction | referent | source | absence | in class, sentence not flagged |
+|---|---:|---:|---:|---:|---:|---:|
+| Widen the window only | 9 | 7 | 0 | 2 | 0 | 0 |
+| Cross `;` only (80-character window kept) | 8 | 6 | 1 | 0 | 1 | 2 |
+| Cross a full stop only (80-character window and `;` kept) | 12 | 3 | 3 | 6 | 0 | 0 |
+| *cumulative* | | | | | | |
+| Widen the window | 9 | 7 | 0 | 2 | 0 | 0 |
+| Widen the window and cross `;` | 27 | 21 | 3 | 2 | 1 | 5 |
+| Widen the window, cross `;` and cross a full stop | 75 | 21 | 11 | 40 | 3 | 5 |
+
+A verb the list lacks is not a bound: the 10 `no_verb` rows are admitted by none of
+these, and what adding verbs would admit depends on which verbs.
+
 ## Recall
 
-Of the 88 dropped matches, 34 are in class, 51 borderline and 3 not in class.
-v3 therefore gives up 34 in-class matches of `rsn.source-ranking`. If all 248 of v3's matches
-are in class it keeps 248 of 282 (87.9%) of the in-class matches v2 had;
+Of the 88 dropped matches, 35 are in class, 50 borderline and 3 not in class.
+v3 therefore gives up 35 in-class matches of `rsn.source-ranking`. If all 248 of v3's matches
+are in class it keeps 248 of 283 (87.6%) of the in-class matches v2 had;
 the kept matches' precision for this pattern is not measured here, so that figure is an upper
 bound on the pattern's recall relative to v2.
 
-By sentence the loss is smaller. 29 of the 34 in-class phrases sit in a sentence another v3
+By sentence the loss is smaller. 30 of the 35 in-class phrases sit in a sentence another v3
 record_self_narration phrase still flags; 5 do not, and v3 counts nothing in their
 sentences.
 
 Whether a v4 should widen the window, cross `;` or add verbs is the owner's call (#3705). The
-cause table is the evidence for it: what each lifted bound would recover in class, and what
-it would also admit. `absorbed` terms are still inside a flagged span, and `consumed` ones are
+cause table and the change table are the evidence for it: what each lifted bound would
+recover in class, on its own and on top of the others, and what it would also admit.
+`absorbed` terms are still inside a flagged span, and `consumed` ones are
 the non-overlap `notes/absence_lexicon_v3_2026-09-30.md` describes (#3732).

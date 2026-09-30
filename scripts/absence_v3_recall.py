@@ -95,6 +95,19 @@ FROM_VERSION, TO_VERSION = 2, 3
 #: carries (the judgement file's header defines each).
 READINGS = {"construction": "in_class", "referent": "in_class", "source": "borderline", "absence": "not_in_class"}
 CAUSES = ("absorbed", "consumed", "window", "semicolon", "other_sentence", "no_verb")
+#: The possible v4 changes the recall note reports, each as the `_variants`
+#: name that makes it: first each bound lifted on its own, then the bounds
+#: lifted cumulatively (the causes' order). A row admitted by a change is
+#: one whose cause is not `absorbed` or `consumed` (those need no bound
+#: lifted) and that the changed regex admits on its own (#3806).
+LIFTS = (
+    ("window", "Widen the window only", "window"),
+    ("semicolon_alone", "Cross `;` only (80-character window kept)", "semicolon_alone"),
+    ("full_stop_alone", "Cross a full stop only (80-character window and `;` kept)", "full_stop_alone"),
+    ("window", "Widen the window", "cumulative_window"),
+    ("semicolon", "Widen the window and cross `;`", "cumulative_semicolon"),
+    ("other_sentence", "Widen the window, cross `;` and cross a full stop", "cumulative_full_stop"),
+)
 #: The bounds of v3's rule as its regex spells them. `_variants` refuses a
 #: pattern that does not spell them so, rather than lifting nothing.
 _WINDOW = "{0,80}?"
@@ -112,7 +125,7 @@ RECALL: dict[str, Any] = {
     "record_set_sha256": "cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711",     # 303 records
     "sample": 88, "seed": baseline.SAMPLE_SEED,
     "draw_sha256": "241e910ec4781ea3467152b31e89aa6a302a2385370544d69ac5f427a47641aa",
-    "classes": {RSN: (34, 51, 3)},
+    "classes": {RSN: (35, 50, 3)},
     "judgements": "notes/absence_v3_recall_judgements_241e910e.yaml",
 }
 
@@ -148,9 +161,12 @@ def _alternatives(source: str) -> list[str]:
 def _variants(pattern: lx.Pattern) -> dict[str, tuple[re.Pattern, re.Pattern, re.Pattern]]:
     """v3's pattern split into its three alternatives — the names of the
     declared ranking, verb then term, term then verb — as v3 spells them
-    (`rule`) and with its bounds lifted in turn, each on top of the last:
-    the 80-character window, then `;` as an end, then every full stop.
-    Each value is (names, verb-first, term-first)."""
+    (`rule`), with its bounds lifted in turn, each on top of the last (the
+    80-character window, then `;` as an end, then every full stop: `window`,
+    `semicolon`, `other_sentence`), and with each bound lifted on its own
+    while the others stay as v3 spells them (`window`, `semicolon_alone`,
+    `full_stop_alone`; see `LIFTS`). Each value is (names, verb-first,
+    term-first)."""
     alts = _alternatives(pattern.regex.pattern)
     if len(alts) != 3 or any(a.count(_WINDOW) != 1 or a.count(_GAP) != 1 for a in alts[1:]):
         raise Refused(f"{PATTERN} is not v3's three alternatives with one 80-character window each")
@@ -160,6 +176,9 @@ def _variants(pattern: lx.Pattern) -> dict[str, tuple[re.Pattern, re.Pattern, re
         "window": ("*?", _GAP),
         "semicolon": ("*?", r"(?:[^.]|\.(?!\s))"),
         "other_sentence": ("*?", r"[\s\S]"),
+        # One bound lifted on its own, the others kept as v3 spells them.
+        "semicolon_alone": (_WINDOW, r"(?:[^.]|\.(?!\s))"),
+        "full_stop_alone": (_WINDOW, r"[^;]"),
     }
     return {name: tuple(re.compile(a if i == 0 else a.replace(_WINDOW, w).replace(_GAP, g), flags)
                         for i, a in enumerate(alts))
@@ -251,8 +270,12 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
                 ss, se = _sentence(text, s, e)
                 flagged = sorted({pid for h in phrases.get(pointer, []) if h["start"] < se and ss < h["end"]
                                   for pid in h["patterns"]})
+                why = cause(variants, text, s, e, new)
+                admitted = sorted({key for name, _, key in LIFTS
+                                   if why not in ("absorbed", "consumed")
+                                   and _admits(variants[name], text, s, e)})
                 rows.append((rel, {"pointer": pointer, "start": s, "end": e, "text": text[s:e],
-                                   "patterns": [PATTERN], "cause": cause(variants, text, s, e, new),
+                                   "patterns": [PATTERN], "cause": why, "admitted_by": admitted,
                                    "flagged": flagged, "sentence": (ss, se)}))
     if changed or missing:
         raise baseline.Stale(f"{len(changed)} pinned record(s) changed and {len(missing)} gone", changed, missing)
@@ -368,7 +391,7 @@ def render_markdown(found: dict[str, Any]) -> str:
         "",
         "## By cause",
         "",
-        "The cause is computed, not judged: the v3 regex with one bound lifted at a time, as the",
+        "The cause is computed, not judged: the v3 regex with its bounds lifted in turn, as the",
         "script's docstring defines. The bounds are cumulative. An unbounded window admits the `window`",
         "rows; one that also crosses `;` admits the `semicolon` rows; `other_sentence` needs it to cross",
         "a full stop, and `no_verb` a verb the list lacks. Each admits its rows whatever their reading,",
@@ -383,6 +406,37 @@ def render_markdown(found: dict[str, Any]) -> str:
         tally = Counter(r["reading"] for r in cs)
         lines.append(f"| `{cz}` | {len(cs)} | " + " | ".join(str(tally[k]) for k in READINGS)
                      + f" | {sum(1 for r in cs if r in lost)} |")
+    computed = {(p, h["pointer"], h["start"], h["end"]): h for p, h in found["rows"]}
+    admitted = {r["n"]: computed[(r["record"], r["pointer"], r["start"], r["end"])]["admitted_by"] for r in rows}
+    lines += [
+        "",
+        "## What each change would admit",
+        "",
+        "Each possible change to v3's rule is its regex with that change made, run over the dropped",
+        "rows as the cause is (`absorbed` and `consumed` rows need no bound lifted and are left out).",
+        "The first three rows lift one bound and keep the others as v3 spells them. The last three",
+        "lift them cumulatively, in the causes' order, so each includes the rows above it; their",
+        "counts are the cause table's rows summed. The two readings differ: the `semicolon` rows",
+        "are the ones that need *both* the window widened and `;` crossed, so crossing `;` alone",
+        "admits only some of them. A single lift can also admit a row of another cause, through a",
+        "listed verb it brings into reach that is not the one the sentence turns on.",
+        "",
+        "| change | admits | construction | referent | source | absence | in class, sentence not flagged |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for i, (_, label, key) in enumerate(LIFTS):
+        if i == 3:
+            lines.append("| *cumulative* | | | | | | |")
+        cs = [r for r in rows if key in admitted[r["n"]]]
+        tally = Counter(r["reading"] for r in cs)
+        lines.append(f"| {label} | {len(cs)} | " + " | ".join(str(tally[k]) for k in READINGS)
+                     + f" | {sum(1 for r in cs if r in lost)} |")
+    lines += [
+        "",
+        "A verb the list lacks is not a bound: the "
+        f"{sum(r['cause'] == 'no_verb' for r in rows)} `no_verb` rows are admitted by none of",
+        "these, and what adding verbs would admit depends on which verbs.",
+    ]
     lines += [
         "",
         "## Recall",
@@ -402,8 +456,9 @@ def render_markdown(found: dict[str, Any]) -> str:
         "sentences.",
         "",
         "Whether a v4 should widen the window, cross `;` or add verbs is the owner's call (#3705). The",
-        "cause table is the evidence for it: what each lifted bound would recover in class, and what",
-        "it would also admit. `absorbed` terms are still inside a flagged span, and `consumed` ones are",
+        "cause table and the change table are the evidence for it: what each lifted bound would",
+        "recover in class, on its own and on top of the others, and what it would also admit.",
+        "`absorbed` terms are still inside a flagged span, and `consumed` ones are",
         "the non-overlap `notes/absence_lexicon_v3_2026-09-30.md` describes (#3732).",
     ]
     return "\n".join(lines) + "\n"

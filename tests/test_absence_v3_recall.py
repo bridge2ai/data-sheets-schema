@@ -36,7 +36,22 @@ LEAVES = [
     ("The value used from the input manifest is the higher-ranked one.", "input manifest", "absorbed"),
     ("It was preferred over the lower-ranked source, the higher-ranked one being older.",
      "higher-ranked", "consumed"),
+    ("The higher-ranked source gives 19 July 2023 as the start of the collection period for the "
+     "whole of the study; that date is recorded here.", "higher-ranked", "semicolon"),
 ]
+
+#: The changes `LIFTS` names that admit each fixture leaf's dropped term: one
+#: bound lifted on its own, or the bounds lifted cumulatively (#3806).
+ADMITTED = {
+    "/source_caveats/1": [],                                                     # no_verb
+    "/source_caveats/2": ["cumulative_full_stop", "cumulative_semicolon", "cumulative_window", "window"],
+    "/source_caveats/3": ["cumulative_full_stop", "cumulative_semicolon", "semicolon_alone"],
+    "/source_caveats/4": ["cumulative_full_stop", "full_stop_alone"],
+    "/source_caveats/5": [],                                                     # absorbed
+    "/source_caveats/6": [],                                                     # consumed
+    # past a `;` and more than 80 characters away: crossing `;` alone is not enough
+    "/source_caveats/7": ["cumulative_full_stop", "cumulative_semicolon"],
+}
 
 
 def _script():
@@ -79,6 +94,15 @@ class Causes(unittest.TestCase):
         self.assertEqual(rows["/source_caveats/2"]["flagged"], ["rsn.recorded-here"])
         self.assertEqual(rows["/source_caveats/3"]["flagged"], ["rsn.recorded-here"])   # past the `;`
         self.assertEqual(rows["/source_caveats/4"]["flagged"], [])     # the verb is in the next sentence
+
+    def test_each_change_admits_its_rows_alone_and_cumulatively(self):
+        """A `semicolon` row whose verb is also past the window is admitted
+        only when the window is widened as well: crossing `;` alone is not
+        the `semicolon` cause (#3806)."""
+        rows = {h["pointer"]: h for _, h in self.m.dropped(self.corpus, self.pins)["rows"]}
+        got = {p: rows[p]["admitted_by"] for p in ADMITTED}
+        self.assertEqual(got, ADMITTED)
+        self.assertEqual(rows["/notes"]["admitted_by"], [])
 
     def test_a_pattern_without_the_window_is_refused(self):
         v3 = lx.load(al.LEXICON, 3)
@@ -136,6 +160,12 @@ class Judgements(unittest.TestCase):
         self.assertIn(f"| construction | in_class | {len(self.rows) - 1} |", md)
         self.assertIn("| source | borderline | 1 |", md)
         self.assertIn("| `no_verb` | 1 | 0 | 0 | 1 | 0 | 0 |", md)
+        # all fixture rows but no_verb are construction; see ADMITTED
+        self.assertIn("| Widen the window only | 1 | 1 | 0 | 0 | 0 | 0 |", md)
+        self.assertIn("| Cross `;` only (80-character window kept) | 1 | 1 | 0 | 0 | 0 |", md)
+        self.assertIn("| Cross a full stop only (80-character window and `;` kept) | 1 | 1 |", md)
+        self.assertIn("| Widen the window and cross `;` | 3 | 3 | 0 | 0 | 0 |", md)
+        self.assertIn("| Widen the window, cross `;` and cross a full stop | 4 | 4 | 0 | 0 | 0 |", md)
         self.assertIn(f"v3 therefore gives up {len(self.rows) - 1} in-class matches", md)
 
     def test_a_row_whose_cause_is_not_the_computed_one_is_refused(self):
