@@ -15,6 +15,8 @@ from click.testing import CliRunner
 from data_sheets_schema import self_disclaimed as sd
 
 LEXICON = sd.load_lexicon()
+#: v1 stays loadable for replay; this code reads it as v1's own code did.
+V1 = sd.load_lexicon(sd.lexicon_path(1))
 
 #: Pins on the lexicon's exact bytes, one per version. Changing the file
 #: without a version bump fails here; so does bumping without a pin. v1 was
@@ -28,8 +30,20 @@ LEXICON = sd.load_lexicon()
 #:   626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6 (5705a4f3f, review round 4)
 #:   d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c (9607a6416, review round 5)
 #: Every output names the sha it ran under, and no committed output, record
-#: or note cites any of them (#3161).
-LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a"}
+#: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
+#: new file beside v1, whose bytes are unchanged. v2 was revised in review
+#: before it first merged, so this PR's commits carry eight earlier byte
+#: versions under `version: 2`:
+#:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
+#:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
+#:   aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73 (e3e1ca227, review round 2)
+#:   15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9 (0d1ada61e, review round 3)
+#:   63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9 (4cf8faa65, review round 4)
+#:   2edac57763fddb717a237e3fe4d0444526f93fcbc5dfe286e5584ca676f3aa24 (348526f6e, review round 5)
+#:   560b1c55b406ad9df6e5c03dfd35c9c020f9173f2fceaf11234679acb8b03757 (f59a0827d, review round 6)
+#:   741e0834f79bc20e4a5aea65870380e8df23deefd6125b19b5d95bcefd2fe888 (bbd955fb9, review round 6)
+LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
+                2: "e05cfaf00a62c042c120542b19317b286c6fa2c03223fe79d6566c6fe79834d4"}
 
 
 def record(**containers):
@@ -330,9 +344,13 @@ def test_a_singular_address_or_a_department_is_an_attribute(container, text, ter
 
 
 def test_the_study_design_is_not_the_members_presence():
+    """v1 guards it as the study's design; v2's subject scope finds no
+    member subject first (#3131)."""
     rec = record(instances=[{"name": "Entry", "description": "The study is prospective."}])
-    out = sd.scan(rec, LEXICON)
+    out = sd.scan(rec, V1)
     assert out["flags"] == [] and [g["guard"] for g in out["guarded"]] == ["design"]
+    assert outcomes("instances", "The study is prospective.") == [
+        ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
 
 
 def test_only_the_members_own_narrative_leaves_are_read():
@@ -355,9 +373,9 @@ def test_nested_dataset_containers_are_read_with_their_pointer():
 
 
 # ------------------------------------------------------------------ scoping
-def outcomes(container, text, name="Entry"):
+def outcomes(container, text, name="Entry", lexicon=LEXICON, **leaves):
     """Each cue match in one member's description: (rule, outcome, reason)."""
-    out = sd.scan(record(**{container: [{"name": name, "description": text}]}), LEXICON)
+    out = sd.scan(record(**{container: [{"name": name, **leaves, "description": text}]}), lexicon)
     rows = [(h["rule"], "flag", None) for f in out["flags"] for h in f["hits"]]
     rows += [(g["rule"], "guarded", g["guard"]) for g in out["guarded"]]
     return rows + [(o["rule"], "out_of_scope", o["reason"]) for o in out["out_of_scope"]]
@@ -678,11 +696,547 @@ def test_a_pronoun_that_is_not_the_cues_subject_is_not_a_self_reference(containe
 
 
 def test_a_none_scope_cue_counts_whatever_its_subject():
-    """#3083: presence.prospective_predicate has no subject condition, so it
-    flags a caveat about something else that is prospective. Pinned so a
-    change to that contract is a deliberate one."""
-    assert outcomes("instances", "The consent forms are prospective.") == [
+    """#3083: in v1 presence.prospective_predicate has no subject condition,
+    so it flags a caveat about something else that is prospective. Pinned so
+    a change to that contract is a deliberate one: v2 is that change (#3131)."""
+    assert outcomes("instances", "The consent forms are prospective.", lexicon=V1) == [
         ("presence.prospective_predicate", "flag", None)]
+    assert outcomes("instances", "The consent forms are prospective.") == [
+        ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
+
+
+V3_SPLIT = "Both statements are prospective on that page, and neither gives split sizes or a splitting procedure."
+
+
+@pytest.mark.parametrize("container,text,scope", [
+    # the v3 direct canary's final /splits/0 split_details, verbatim (#3131)
+    ("splits", V3_SPLIT, "statements"),
+    ("splits", "The descriptions are all prospective.", "descriptions"),
+    ("splits", "Mentions of the holdout set remain prospective.", "holdout set"),
+    ("splits", "References to this split are prospective.", "this split"),
+    ("splits", "Descriptions of this split are prospective.", "this split"),
+    ("splits", "Both of the two source statements are prospective.", "statements"),
+    ("splits", "The statements on the program page are prospective.", "statements"),
+    ("splits", "This split remains prospective.", "This split"),
+    ("instances", "It is prospective.", "It"),
+    ("splits", "The holdout set is still prospective.", "holdout set"),
+    ("variables", "Per the protocol, the measures are prospective.", "measures"),
+    # a head followed by what `tail` admits still ends its phrase (#3606)
+    ("splits", "The holdout set itself is prospective.", "holdout set"),
+    ("splits", "The holdout set, as described, is prospective.", "holdout set"),
+    ("splits", "This split and its labels are prospective.", "This split"),
+    # "for" introduces a topic headed by the member (#3615); "on" is no topic
+    ("splits", "Statements for this split are prospective.", "this split"),
+    ("splits", "Statements for the holdout set are prospective.", "holdout set"),
+    # a determiner that only opens on a negating word is not negated (#3614)
+    ("splits", "Notably the holdout set is prospective.", "holdout set"),
+    ("splits", "Nonetheless both statements are prospective.", "statements"),
+])
+def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, text, scope):
+    """#3131: `presence.prospective_predicate` has `subject` scope in v2. A
+    self-reference, a source-statement subject (with a topic that is the
+    member) or a presence-term subject licenses it."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+@pytest.mark.parametrize("container,text,reason", [
+    # the three false-positive shapes #3131 names, all flagged by v1
+    ("instances", "The consent process is prospective.", "no_member_subject"),
+    ("splits", "Enrollment of the pediatric arm remains prospective.", "no_member_subject"),
+    ("variables", "The follow-up schedule is prospective.", "no_member_subject"),
+    # a self-reference that owns the subject is not the subject
+    ("splits", "This split's schedule is prospective.", "no_member_subject"),
+    ("splits", "The consent process for this split is prospective.", "no_member_subject"),
+    # a statement about something else
+    ("splits", "Statements about the consent process are prospective.", "statement_about_other"),
+    ("instances", "Descriptions of the consent materials are prospective.", "statement_about_other"),
+    ("splits", "The references to the consent process are prospective.", "statement_about_other"),
+    # a statement noun that does not head the subject (#3560)
+    ("splits", "The consent process described in both statements is prospective.", "no_member_subject"),
+    ("splits", "The consent process mentioned in the statements is prospective.", "no_member_subject"),
+    ("splits", "Consent in the statements is prospective.", "no_member_subject"),
+    # a presence term that does not head the subject, or owns it (#3592)
+    ("splits", "Enrollment of the pediatric arm of the split remains prospective.", "no_member_subject"),
+    ("splits", "The consent process for the splits is prospective.", "no_member_subject"),
+    ("splits", "The split's schedule is prospective.", "no_member_subject"),
+    # a topic whose self-reference or presence term owns something (#3593)
+    ("splits", "Statements about the consent process for this split are prospective.",
+     "statement_about_other"),
+    ("splits", "Statements about this split's consent process are prospective.", "statement_about_other"),
+    ("splits", "Descriptions of the consent process of this split are prospective.", "statement_about_other"),
+    ("splits", "Statements about the consent process for the splits are prospective.",
+     "statement_about_other"),
+    ("splits", "Statements about the labels in this split are prospective.", "statement_about_other"),
+    ("splits", "The labels in this split are prospective.", "no_member_subject"),
+    # a statement noun, presence term or self-reference that only modifies
+    # the noun after it heads nothing (#3606)
+    ("splits", "The split consent forms are prospective.", "no_member_subject"),
+    ("splits", "The holdout set consent process is prospective.", "no_member_subject"),
+    ("splits", "The split labels are prospective.", "no_member_subject"),
+    ("splits", "The split-level labels are prospective.", "no_member_subject"),
+    ("splits", "This split assignment is prospective.", "no_member_subject"),
+    ("splits", "The statement authors are prospective.", "no_member_subject"),
+    ("splits", "The statements' authors are prospective.", "no_member_subject"),
+    ("splits", "Statements about this split assignment are prospective.", "statement_about_other"),
+    ("splits", "The split sizes are prospective.", "no_member_subject"),
+    # a statement topic introduced by "for" (#3615)
+    ("splits", "Statements for the consent process are prospective.", "statement_about_other"),
+    ("instances", "Descriptions for the consent materials are prospective.", "statement_about_other"),
+    # a negated subject says nothing it names is prospective (#3614)
+    ("splits", "Neither statement is prospective.", "negated_subject"),
+    ("splits", "None of the statements are prospective.", "negated_subject"),
+    ("splits", "No statements are prospective.", "negated_subject"),
+    ("splits", "Neither of the two source statements is prospective.", "negated_subject"),
+    ("splits", "Not all statements are prospective.", "negated_subject"),
+    ("splits", "No holdout set is prospective.", "negated_subject"),
+    ("splits", "The split is complete, and no statement is prospective.", "negated_subject"),
+    ("splits", "Per the page, neither statement is prospective.", "negated_subject"),
+])
+def test_a_subject_cue_about_something_else_is_out_of_scope(container, text, reason):
+    assert outcomes(container, text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
+    assert outcomes(container, text) == [("presence.prospective_predicate", "out_of_scope", reason)], text
+
+
+@pytest.mark.parametrize("text", ["Both 2025 statements are prospective.", "The 2025 split is prospective."])
+def test_a_subject_cue_on_a_date_is_guarded(text):
+    """#3131: the pattern's object is its subject, so a year in a subject
+    the cue counts on is a date, not the split's presence. "The split sizes
+    are prospective" is not guarded but out of scope: the split term only
+    modifies "sizes", so it heads nothing (#3606)."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("date_amount", "2025")]
+
+
+def test_without_a_tail_any_ending_counts():
+    """#3606: `statement_subject.tail` is what makes a head end its noun
+    phrase. A lexicon that declares none reads any ending as #3592 did."""
+    lexicon = edited_lexicon(lambda d: d["statement_subject"].pop("tail"))
+    for text in ("The split labels are prospective.", "The statement authors are prospective."):
+        assert outcomes("splits", text, lexicon=lexicon) == [("presence.prospective_predicate", "flag", None)]
+        assert outcomes("splits", text) == [
+            ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
+
+
+# A comma-less coordinated clause before the cue is not its subject (#3619):
+# every sentence here was flagged by v1 and, before the conjunct cut, read
+# by v2 as the earlier clause's subject.
+@pytest.mark.parametrize("text,scope", [
+    ("Its release is pending and this split remains prospective.", "this split"),
+    ("Its release is pending and it remains prospective.", "it"),
+    ("Sizes are unknown and the holdout set remains prospective.", "holdout set"),
+    ("No sizes are given and this split remains prospective.", "this split"),
+    ("No data from this split has been released so it remains prospective.", "it"),
+    ("No release has occurred and the holdout set remains prospective.", "holdout set"),
+    ("It was announced in 2024 and remains prospective.", "It"),
+    ("The split was delayed while this split remains prospective.", "this split"),
+    ("Nothing is released yet, but the holdout set is prospective.", "holdout set"),
+    # no verb before the conjunction: coordinated noun phrases, kept whole
+    ("This split and its labels are prospective.", "This split"),
+    ("The holdout set and the test set remain prospective.", "holdout set"),
+])
+def test_a_subject_cue_reads_its_own_conjunct(text, scope):
+    assert outcomes("splits", text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+@pytest.mark.parametrize("text,reason", [
+    # the cue's own conjunct is about something else, whatever the first says
+    ("This split is balanced and the consent process remains prospective.", "no_member_subject"),
+    ("The holdout set is balanced while the consent process remains prospective.", "no_member_subject"),
+    ("Its release is pending but neither statement is prospective.", "negated_subject"),
+    ("Its release is pending and the consent process is prospective.", "no_member_subject"),
+])
+def test_a_subject_cue_whose_own_conjunct_is_another_thing_is_out_of_scope(text, reason):
+    assert outcomes("splits", text) == [("presence.prospective_predicate", "out_of_scope", reason)], text
+
+
+def test_a_date_in_the_cues_own_conjunct_is_still_guarded():
+    """#3619: the date/amount guard reads the cue's own conjunct, so a year
+    there is a date and a year in the earlier clause is not."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description":
+                                  "Its release is pending and the 2025 split is prospective."}]), LEXICON)
+    assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("date_amount", "2025")]
+
+
+def test_without_a_conjunction_the_subject_is_the_whole_clause():
+    """#3619: `statement_subject.conjunction` and `clause_verb` are what cut
+    the subject to the cue's own conjunct; a lexicon that declares neither
+    reads it as round 4 did, and one that declares only one is refused."""
+    lexicon = edited_lexicon(lambda d: [d["statement_subject"].pop(k) for k in ("conjunction", "clause_verb")])
+    assert outcomes("splits", "No sizes are given and this split remains prospective.", lexicon=lexicon) == [
+        ("presence.prospective_predicate", "out_of_scope", "negated_subject")]
+    for key in ("conjunction", "clause_verb"):
+        with pytest.raises(ValueError, match="declared together"):
+            edited_lexicon(lambda d, key=key: d["statement_subject"].pop(key))
+
+
+def test_without_negated_a_negated_subject_is_read_as_before():
+    """#3614: `statement_subject.negated` is what puts a negated subject
+    out of scope. A lexicon that declares none reads "Neither statement" as
+    a statement subject, as round 3 did."""
+    lexicon = edited_lexicon(lambda d: d["statement_subject"].pop("negated"))
+    assert outcomes("splits", "Neither statement is prospective.", lexicon=lexicon) == [
+        ("presence.prospective_predicate", "flag", None)]
+
+
+def test_the_subject_scope_needs_a_statement_subject_block():
+    with pytest.raises(ValueError, match="no statement_subject"):
+        edited_lexicon(lambda d: d.pop("statement_subject"))
+    with pytest.raises(ValueError, match="`topic` group"):
+        edited_lexicon(lambda d: d["statement_subject"].update(topic=r"\s+about\s+.+"))
+    with pytest.raises(ValueError, match="outside a presence container"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.prospective_predicate").update(
+            kinds=["person_role", "presence"]))
+
+
+# ------------------------------------------------------ another item (#3244)
+EXTERNAL = "The external test set is described as planned rather than as a released split."
+
+
+@pytest.mark.parametrize("leaves", [
+    {"name": "Internal validation set"},
+    {"name": "Internal test set"},
+    {"name": "Validation split"},
+    {"name": "Entry", "id": "https://example.org/ds#internal_validation"},
+    {"name": "Entry", "id": "doi:10.1234/x#training-split"},
+    {"variable_name": "internal_validation_split"},
+])
+def test_a_presence_term_whose_qualifier_disagrees_with_the_member_is_another_item(leaves):
+    """#3244: the member's name tokens or id fragment name a qualifier on an
+    axis the presence noun phrase also names, and none is shared."""
+    rows = outcomes("splits", EXTERNAL, **leaves)
+    assert rows == [("presence.recorded_as_planned", "out_of_scope", "other_qualified_item"),
+                    ("presence.contrast_released", "out_of_scope", "other_qualified_item")], leaves
+    assert outcomes("splits", EXTERNAL, lexicon=V1, **leaves) == [
+        ("presence.recorded_as_planned", "flag", None), ("presence.contrast_released", "flag", None)]
+
+
+@pytest.mark.parametrize("leaves", [
+    {"name": "External test set"},
+    {"name": "Holdout set"},          # names test/holdout: shared on that axis
+    {"name": "Entry"},                # names no qualifier: v1's reading
+    {"name": "Entry", "id": "https://example.org/ds"},
+    # only the id's fragment is its identity: the base's qualifiers are not (#3564)
+    {"name": "Entry", "id": "https://example.org/internal-validation#split-1"},
+    {},
+])
+def test_a_presence_term_that_agrees_or_cannot_be_told_apart_still_licenses(leaves):
+    assert outcomes("splits", EXTERNAL, **leaves) == [
+        ("presence.recorded_as_planned", "flag", None), ("presence.contrast_released", "flag", None)], leaves
+
+
+def test_another_qualified_item_reported_or_in_the_clause_does_not_license():
+    """#3244: in the `item` a cue reports, and as the presence term the
+    clause fallback would read."""
+    out = sd.scan(record(splits=[{"name": "Training split",
+                                  "description": "No source reports the test set as available."}]), LEXICON)
+    assert [(r["reason"], r["term"]) for r in out["out_of_scope"]] == [("other_qualified_item", "the test set")]
+    assert outcomes("splits", "The data are recorded as planned for the external test set.",
+                    name="Internal validation set") == [
+        ("presence.recorded_as_planned", "out_of_scope", "no_self_or_presence_term")]
+    # the member's own name is a self-reference and blanked, so the agreeing
+    # phrase is another spelling of it
+    assert outcomes("splits", "The data are recorded as planned for the internal validation set.",
+                    name="Internal validation split") == [("presence.recorded_as_planned", "flag", None)]
+
+
+def test_a_qualifier_counts_only_within_the_declared_words_before_the_presence_term():
+    """#3244, #3594: a presence noun phrase is its presence term with at
+    most `item_qualifiers.words` (2) words before it, so a qualifier
+    earlier in the sentence ("Internal reviewers ...") does not make "the
+    test set" another item than the external test set."""
+    text = "Internal reviewers note that the data are recorded as planned for the test set."
+    assert outcomes("splits", text, name="External test set") == [
+        ("presence.recorded_as_planned", "flag", None)]
+    # within the bound it does
+    assert outcomes("splits", "The data are recorded as planned for the internal test set.",
+                    name="External test set") == [
+        ("presence.recorded_as_planned", "out_of_scope", "no_self_or_presence_term")]
+
+
+@pytest.mark.parametrize("text,row", [
+    ("The data are recorded as planned for the test set.", ("presence.recorded_as_planned", "flag", None)),
+    ("No source reports the test set as available.", ("presence.none_reports_available", "flag", None)),
+])
+def test_a_phrase_sharing_one_of_the_members_alternatives_is_not_another_item(text, row):
+    """#3244, #3595: another item only where no alternative on an axis is
+    shared, not wherever the sets differ. The member names validation and
+    test; "the test set" names test, which is shared."""
+    assert outcomes("splits", text, name="Validation and test set") == [row]
+    assert outcomes("splits", text, id="https://example.org/ds#validation-test") == [row]
+
+
+def test_the_item_qualifiers_block_is_validated():
+    with pytest.raises(ValueError, match="two or more alternatives"):
+        edited_lexicon(lambda d: d["item_qualifiers"].update(axes=[["external"]]))
+    with pytest.raises(ValueError, match="nonnegative integer"):
+        edited_lexicon(lambda d: d["item_qualifiers"].update(words=-1))
+
+
+# ------------------------------------------- a self-reference in the item (#3261)
+@pytest.mark.parametrize("text,scope", [
+    ("No source reports this split as available.", "this split"),
+    ("No document lists it as released.", "it"),
+    ("None of the pages describes this partition as complete.", "this partition"),
+    # what follows the self-reference is punctuation: it still heads (#3607)
+    ("No source reports this split, or its labels, as available.", "this split"),
+])
+def test_a_self_reference_in_the_reported_item_licenses_the_cue(text, scope):
+    """#3261: `presence.none_reports_available` declares
+    `self_reference_in: [item]` in v2."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.none_reports_available", scope)], text
+    assert outcomes("splits", text, lexicon=V1) == [
+        ("presence.none_reports_available", "out_of_scope", "no_self_or_presence_term")]
+
+
+@pytest.mark.parametrize("text,rule", [
+    # the #3230 comma-rule case stays out of scope
+    ("For this split, the data are recorded as planned.", "presence.recorded_as_planned"),
+    # a self-reference in the item that owns what is reported
+    ("No source reports the consent form for this split as available.", "presence.none_reports_available"),
+    # a self-reference in the item that does not head it (#3607)
+    ("No source reports the labels in this split as available.", "presence.none_reports_available"),
+    ("No source reports the labels with this split as available.", "presence.none_reports_available"),
+    ("No source reports this split data as available.", "presence.none_reports_available"),
+])
+def test_a_self_reference_outside_the_reported_item_or_owning_it_does_not(text, rule):
+    assert outcomes("splits", text) == [(rule, "out_of_scope", "no_self_or_presence_term")]
+
+
+def test_self_reference_in_is_validated():
+    with pytest.raises(ValueError, match="outside item"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.none_reports_available").update(
+            self_reference_in=["cue"]))
+    with pytest.raises(ValueError, match="outside presence scope"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.none_reports_available").update(scope="self"))
+    # an `item` self-reference on a cue with no `item` group (#3563)
+    with pytest.raises(ValueError, match="in an `item` group its cue lacks"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.recorded_as_planned").update(
+            self_reference_in=["item"]))
+
+
+# ------------------------------------ v1/v2 differential table (#3625-#3628)
+#: The design rule: v2 departs from v1 only in the cases #3131, #3244, #3261
+#: and #3273 name, each with a named reason; for every other sentence v2's
+#: verdict equals v1's. #3273 is a diff rule, not a sentence verdict, so it
+#: has no row here. Each departure names the issue that documents it.
+DEPARTURES = {
+    "no_member_subject": 3131,       # narrowing: the cue's subject is not the member
+    "statement_about_other": 3131,   # narrowing: a statement topic that is not the member
+    "negated_subject": 3131,         # narrowing (#3614): nothing the subject names is prospective
+    "date_amount": 3131,             # narrowing: the date/amount guard reads the cue's subject
+    "other_qualified_item": 3244,    # narrowing: the item names another qualified item, not the member
+    "item_self_reference": 3261,     # widening: a self-reference heading the reported item
+}
+IVS = "Internal validation set"
+
+#: (container, text, member name, departure): None where v1 == v2. Every
+#: Codex example of #3625-#3628, and every earlier regression example.
+DIFFERENTIAL = [
+    # #3625: a negated source-to-report span voids the #3261 licence
+    ("splits", "No source fails to report this split as available.", "Entry", None),
+    ("splits", "No source does not report this split as available.", "Entry", None),
+    ("splits", "No source fails to report the holdout set as available.", "Entry", None),
+    ("splits", "No source reports this split as available.", "Entry", "item_self_reference"),
+    ("splits", "No document lists it as released.", "Entry", "item_self_reference"),
+    ("splits", "No source reports the labels in this split as available.", "Entry", None),
+    ("splits", "For this split, the data are recorded as planned.", "Entry", None),
+    # #3626: an item that names the member as well is the member's
+    ("splits", "This split and the external test set are not yet released.", IVS, None),
+    ("splits", "The external test set and this split are not yet released.", IVS, None),
+    ("splits", "The validation set and the external test set are described as planned.", IVS, None),
+    ("splits", "The external test set is described as planned rather than as a released split.", IVS,
+     "other_qualified_item"),
+    ("splits", "The external test set is described as planned rather than as a released split.", "Entry", None),
+    ("splits", "This split's external test set is not yet released.", IVS, "other_qualified_item"),
+    ("splits", "No source reports the test set as available.", "Training split", "other_qualified_item"),
+    # #3627: an elided conjunct inherits the governing subject
+    ("splits", "The holdout set was announced and remains prospective.", "Entry", None),
+    ("splits", "Both statements have been published and remain prospective.", "Entry", None),
+    ("splits", "The holdout set was announced and was delayed and remains prospective.", "Entry", None),
+    ("splits", "The holdout set was announced and still remains prospective.", "Entry", None),
+    ("splits", "The holdout set was announced, and remains prospective.", "Entry", None),
+    ("splits", "The holdout set was announced, was delayed and remains prospective.", "Entry", None),
+    ("splits", "This split was announced, and remains prospective.", "Entry", None),
+    ("splits", "This split, planned for 2025, was announced and remains prospective.", "Entry", None),
+    ("splits", "Per the page, the holdout set was announced, and remains prospective.", "Entry", None),
+    ("splits", "Its release is pending and this split was announced, and remains prospective.", "Entry", None),
+    ("splits", "The consent process was announced, and remains prospective.", "Entry", "no_member_subject"),
+    ("splits", "The consent process was announced and it remains prospective.", "Entry", None),
+    ("splits", "It was announced in 2024 and remains prospective.", "Entry", None),
+    ("splits", "The consent process was announced and remains prospective.", "Entry", "no_member_subject"),
+    ("splits", "No statement was published and remains prospective.", "Entry", "negated_subject"),
+    ("splits", "The 2025 split was announced and remains prospective.", "Entry", "date_amount"),
+    # #3628: "not only ... but also" coordinates
+    ("splits", "Not only this split but also the holdout set are prospective.", "Entry", None),
+    ("splits", "Not just this split but also its labels are prospective.", "Entry", None),
+    ("splits", "Not only the labels but also this split are prospective.", "Entry", None),
+    ("splits", "Not only the holdout set but the labels are prospective.", "Entry", None),
+    ("splits", "Not all statements are prospective.", "Entry", "negated_subject"),
+    # #3619: the cue's own conjunct
+    ("splits", "Its release is pending and this split remains prospective.", "Entry", None),
+    ("splits", "Its release is pending and it remains prospective.", "Entry", None),
+    ("splits", "Sizes are unknown and the holdout set remains prospective.", "Entry", None),
+    ("splits", "No sizes are given and this split remains prospective.", "Entry", None),
+    ("splits", "No data from this split has been released so it remains prospective.", "Entry", None),
+    ("splits", "No release has occurred and the holdout set remains prospective.", "Entry", None),
+    ("splits", "The split was delayed while this split remains prospective.", "Entry", None),
+    ("splits", "Nothing is released yet, but the holdout set is prospective.", "Entry", None),
+    ("splits", "This split and its labels are prospective.", "Entry", None),
+    ("splits", "The holdout set and the test set remain prospective.", "Entry", None),
+    ("splits", "This split is balanced and the consent process remains prospective.", "Entry",
+     "no_member_subject"),
+    # the subject's last conjunct, whatever joins it (design rule)
+    ("splits", "The page lists no sizes and this split remains prospective.", "Entry", None),
+    ("splits", "No page lists sizes and this split remains prospective.", "Entry", None),
+    ("splits", "The consent process and this split remain prospective.", "Entry", None),
+    ("splits", "The page lists no sizes and the 2025 split remains prospective.", "Entry", "date_amount"),
+    ("splits", "The page lists no sizes and remains prospective.", "Entry", "no_member_subject"),
+    ("splits", "The split is complete, and no statement is prospective.", "Entry", "negated_subject"),
+    ("splits", "Its release is pending but neither statement is prospective.", "Entry", "negated_subject"),
+    ("splits", "Its release is pending and the 2025 split is prospective.", "Entry", "date_amount"),
+    # #3131 and rounds 1-4: what v2 keeps, and what it narrows
+    ("splits", V3_SPLIT, "Entry", None),
+    ("splits", "The descriptions are all prospective.", "Entry", None),
+    ("splits", "Mentions of the holdout set remain prospective.", "Entry", None),
+    ("splits", "Descriptions of this split are prospective.", "Entry", None),
+    ("splits", "The statements on the program page are prospective.", "Entry", None),
+    ("splits", "This split remains prospective.", "Entry", None),
+    ("instances", "It is prospective.", "Entry", None),
+    ("splits", "The holdout set itself is prospective.", "Entry", None),
+    ("splits", "Statements for this split are prospective.", "Entry", None),
+    ("splits", "Notably the holdout set is prospective.", "Entry", None),
+    ("splits", "Nonetheless both statements are prospective.", "Entry", None),
+    ("instances", "The consent process is prospective.", "Entry", "no_member_subject"),
+    ("splits", "Enrollment of the pediatric arm remains prospective.", "Entry", "no_member_subject"),
+    ("variables", "The follow-up schedule is prospective.", "Entry", "no_member_subject"),
+    ("splits", "This split's schedule is prospective.", "Entry", "no_member_subject"),
+    ("splits", "The consent process described in both statements is prospective.", "Entry", "no_member_subject"),
+    ("splits", "The split labels are prospective.", "Entry", "no_member_subject"),
+    ("splits", "The split sizes are prospective.", "Entry", "no_member_subject"),
+    ("splits", "Statements about the consent process are prospective.", "Entry", "statement_about_other"),
+    ("splits", "Statements for the consent process are prospective.", "Entry", "statement_about_other"),
+    ("splits", "Neither statement is prospective.", "Entry", "negated_subject"),
+    ("splits", "None of the statements are prospective.", "Entry", "negated_subject"),
+    ("splits", "Both 2025 statements are prospective.", "Entry", "date_amount"),
+    ("splits", "The 2025 split is prospective.", "Entry", "date_amount"),
+]
+
+
+def test_every_departure_names_its_issue():
+    assert {d for *_x, d in DIFFERENTIAL} - {None} == set(DEPARTURES)
+    assert set(DEPARTURES.values()) == {3131, 3244, 3261}
+
+
+@pytest.mark.parametrize("container,text,name,departure", DIFFERENTIAL)
+def test_v2_equals_v1_except_a_documented_departure(container, text, name, departure):
+    """#3625-#3628: v2's verdict (flag, guarded or out of scope) equals
+    v1's on every row, except where the row names a documented departure;
+    a narrowing turns v1's flags into that reason, the one widening (#3261)
+    turns v1's out-of-scope into a flag."""
+    v1 = outcomes(container, text, name=name, lexicon=V1)
+    v2 = outcomes(container, text, name=name)
+    assert v1 and v2, text
+    if departure is None:
+        assert [r[:2] for r in v2] == [r[:2] for r in v1], text
+    elif departure == "item_self_reference":
+        assert all(r[1:] == ("out_of_scope", "no_self_or_presence_term") for r in v1), text
+        assert all(r[1] == "flag" for r in v2), text
+    else:
+        assert all(r[1] == "flag" for r in v1), text
+        assert all(r[1:] in (("out_of_scope", departure), ("guarded", departure)) for r in v2), text
+
+
+def test_a_negated_report_span_voids_only_the_item_self_reference():
+    """#3625: `self_reference_unless` voids the #3261 licence; the presence
+    term licence is v1's and still reads "No source fails to report the
+    holdout set as available" as v1 does. A lexicon without the key reads
+    the negated span as round 5 did."""
+    text = "No source fails to report this split as available."
+    assert outcomes("splits", text) == [
+        ("presence.none_reports_available", "out_of_scope", "no_self_or_presence_term")]
+    lexicon = edited_lexicon(lambda d: pattern_row(d, "presence.none_reports_available").pop(
+        "self_reference_unless"))
+    assert outcomes("splits", text, lexicon=lexicon) == [("presence.none_reports_available", "flag", None)]
+    with pytest.raises(ValueError, match="self_reference_unless without"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.none_reports_available").pop("self_reference_in"))
+
+
+def test_an_item_naming_the_member_is_not_vetoed_by_a_coordinated_other_item():
+    """#3626: the scope is the member's own self-reference."""
+    out = sd.scan(record(splits=[{"name": IVS, "description":
+                                  "This split and the external test set are not yet released."}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.not_yet_released", "This split")]
+
+
+@pytest.mark.parametrize("text,scope", [
+    ("The holdout set was announced and remains prospective.", "holdout set"),
+    ("Both statements have been published and remain prospective.", "statements"),
+    ("The holdout set was announced and was delayed and remains prospective.", "holdout set"),
+    # an adverb is no subject of its own; a pronoun is
+    ("The holdout set was announced and still remains prospective.", "holdout set"),
+    ("The consent process was announced and it remains prospective.", "it"),
+    # across a comma, past an appositive (#3627)
+    ("The holdout set was announced, and remains prospective.", "holdout set"),
+    ("The holdout set was announced, was delayed and remains prospective.", "holdout set"),
+    ("This split was announced, and remains prospective.", "This split"),
+    ("This split, planned for 2025, was announced and remains prospective.", "This split"),
+    ("Its release is pending and this split was announced, and remains prospective.", "this split"),
+])
+def test_an_elided_conjunct_inherits_the_governing_subject(text, scope):
+    """#3627: the scope is the governing subject's head."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+@pytest.mark.parametrize("text,scope", [
+    ("Not only this split but also the holdout set are prospective.", "this split"),
+    ("Not just this split but also its labels are prospective.", "this split"),
+    ("Not only the holdout set but the labels are prospective.", "holdout set"),
+])
+def test_not_only_but_also_is_affirmative_coordination(text, scope):
+    """#3628: `statement_subject.correlative`."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+@pytest.mark.parametrize("text,scope", [
+    ("The page lists no sizes and this split remains prospective.", "this split"),
+    ("No page lists sizes and this split remains prospective.", "this split"),
+    ("The consent process and this split remain prospective.", "this split"),
+    ("The page lists no sizes and the holdout set remains prospective.", "holdout set"),
+])
+def test_an_out_of_scope_subject_is_read_again_on_its_last_conjunct(text, scope):
+    """Design rule (#3625-#3628): v1 flags these. The subject as cut is
+    not the member (a lexical-verb clause is not cut, "No" negates only the
+    first clause), so the cue is read again on the stretch after the
+    subject's last conjunction."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+def test_without_the_correlative_not_only_reads_as_a_negated_subject():
+    """#3628: a lexicon without `correlative` reads the opening "Not" as a
+    negated subject, as round 5 did, where the last conjunct does not name
+    the member either."""
+    lexicon = edited_lexicon(lambda d: d["statement_subject"].pop("correlative"))
+    assert outcomes("splits", "Not just this split but also its labels are prospective.", lexicon=lexicon) == [
+        ("presence.prospective_predicate", "out_of_scope", "negated_subject")]
+
+
+def test_the_correlative_must_name_open_and_join():
+    with pytest.raises(ValueError, match="`open` and `join`"):
+        edited_lexicon(lambda d: d["statement_subject"].update(correlative=r"\bnot only\b"))
 
 
 @pytest.mark.parametrize("container,text", [
@@ -899,10 +1453,11 @@ def test_a_resolver_url_and_its_curie_are_one_identity():
 
 def test_two_originals_followed_to_one_final_entry_are_not_both_retained():
     """#3265: keyless entries both joined by overlap to the one survivor.
-    Neither identity is confirmed by a key, so neither is retained."""
+    Neither identity is confirmed by a key, so under v1 neither is retained
+    (v2 lets a strictly greater overlap decide, #3273, below)."""
     one = {"split_details": "This split is recorded as a planned provision.", "size": "10"}
     two = {"split_details": one["split_details"], "size": "20"}
-    out = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=LEXICON)
+    out = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=V1)
     assert [(r["path"], r["classification"], r["identity_basis"]) for r in out["lexicon_diff"]["rows"]] == [
         ("/splits/0", "identity_unresolved", "shared_final_entry"),
         ("/splits/1", "identity_unresolved", "shared_final_entry")]
@@ -911,6 +1466,45 @@ def test_two_originals_followed_to_one_final_entry_are_not_both_retained():
     b = {"name": "Split B", "split_details": one["split_details"]}
     kept = sd._resolve_all(record(splits=[a, b]), record(splits=[{**a, "size": "1"}]), LEXICON)
     assert kept == {("splits", 0): ((("splits", 0)), "same"), ("splits", 1): (None, "identity_conflict")}
+
+
+def test_two_keyless_originals_on_one_final_entry_resolve_by_strictly_greater_overlap():
+    """#3273: in v2 the keyless member whose scalar leaves overlap the
+    survivor strictly more keeps it; v1 left both unresolved (above), and a
+    tie still does."""
+    one = {"split_details": "This split is recorded as a planned provision.", "size": "10"}
+    two = {"split_details": one["split_details"], "size": "20"}
+    out = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=LEXICON)
+    assert [(r["path"], r["classification"], r["final_path"], r["identity_basis"])
+            for r in out["lexicon_diff"]["rows"]] == [
+        ("/splits/0", "self_disclaimed_retained", "/splits/0", "shared_final_entry_by_overlap"),
+        ("/splits/1", "identity_unresolved", None, "shared_final_entry")]
+    v1 = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=V1)
+    assert {r["identity_basis"] for r in v1["lexicon_diff"]["rows"]} == {"shared_final_entry"}
+    # the member further down wins as well; a tie leaves both unresolved
+    moved = sd._resolve_all(record(splits=[two, one]), record(splits=[dict(one)]), LEXICON)
+    assert moved == {("splits", 0): (None, "shared_final_entry"),
+                     ("splits", 1): (("splits", 0), "shared_final_entry_by_overlap")}
+    tie = sd._resolve_all(record(splits=[{**one, "size": "20"}, {**one, "size": "30"}]),
+                          record(splits=[dict(one)]), LEXICON)
+    assert set(tie.values()) == {(None, "shared_final_entry")}
+
+
+def test_the_overlap_rule_does_not_apply_where_members_identity_keys_agree():
+    """#3273, #3562: `scalar_overlap` resolves only where no member's
+    identity keys agree. Two members whose keys both agree with the one
+    survivor stay unresolved even though one overlaps it strictly more."""
+    one = {"id": "ex:s1", "split_details": "This split is recorded as a planned provision.", "size": "10"}
+    two = {**one, "size": "20"}
+    both = sd._resolve_all(record(splits=[one, two]), record(splits=[dict(one)]), LEXICON)
+    assert both == {("splits", 0): (None, "shared_final_entry"),
+                    ("splits", 1): (None, "shared_final_entry")}
+
+
+def test_shared_final_entry_resolve_by_is_validated():
+    for bad in ([], ["scalar_overlap"], ["identity_keys", "size"], ["identity_keys", "identity_keys"]):
+        with pytest.raises(ValueError, match="resolve_by"):
+            edited_lexicon(lambda d: d["shared_final_entry"].update(resolve_by=bad))
 
 
 def test_a_container_emptied_or_nulled_in_the_final_is_removed():
@@ -942,8 +1536,21 @@ def test_lexicon_bytes_are_pinned_per_version():
     assert hashlib.sha256(raw).hexdigest() == LEXICON_PINS[LEXICON.version], \
         "the lexicon changed without a version bump"
     assert sd.LEXICON_PATH.name == f"self_disclaimed_v{LEXICON.version}.yaml"
+    assert LEXICON.version == max(LEXICON_PINS), "the loader reads the newest version"
     assert LEXICON.describe() == {"path": sd.LEXICON_RESOURCE, "version": LEXICON.version,
                                   "sha256": LEXICON_PINS[LEXICON.version]}
+
+
+def test_every_lexicon_version_is_kept_pinned_and_loadable():
+    """#3131: an earlier version stays byte for byte and loads for replay,
+    named by its repository-relative spelling."""
+    files = sorted(p.name for p in sd.LEXICON_DIR.glob("*.yaml"))
+    assert files == [f"self_disclaimed_v{v}.yaml" for v in sorted(LEXICON_PINS)]
+    for version, sha in LEXICON_PINS.items():
+        loaded = sd.load_lexicon(sd.lexicon_path(version))
+        assert loaded.describe() == {"path": f"src/data_sheets_schema/container_lexicons/self_disclaimed_v{version}.yaml",
+                                     "version": version, "sha256": sha}
+    assert V1.resolve_by == ("identity_keys",) and not V1._axes and V1._statement is None
 
 
 def edited_lexicon(edit):
@@ -977,8 +1584,9 @@ def test_the_assignment_owner_block_is_validated():
         edited_lexicon(lambda d: d["assignment_owner"].update(after=r"\s+(?:of|for)\s+"))
 
 
-def test_lexicon_is_generic():
-    text = sd.LEXICON_PATH.read_text(encoding="utf-8").lower()
+@pytest.mark.parametrize("version", sorted(LEXICON_PINS))
+def test_lexicon_is_generic(version):
+    text = sd.lexicon_path(version).read_text(encoding="utf-8").lower()
     for token in ("chorus", "ai-readi", "ai_readi", "voice", "cm4ai", "bridge2ai", "fairhub",
                   "physionet", "reporter", "nih", "webinar"):
         assert token not in text, token
@@ -1024,7 +1632,7 @@ def test_cli_prints_json_and_never_gates(tmp_path):
     assert result.exit_code == 0, result.output
     out = json.loads(result.output)
     assert (out["instrument"], out["gating"]) == (sd.INSTRUMENT, False)
-    assert out["lexicon"]["sha256"] == LEXICON_PINS[1]
+    assert out["lexicon"]["sha256"] == LEXICON_PINS[LEXICON.version]
     assert out["inputs"]["original"]["sha256"] == hashlib.sha256(original.read_bytes()).hexdigest()
     assert out["counts"]["lexicon_diff"]["self_disclaimed_retained"] == 1
     assert out["counts"]["role_predicate_diff"]["role_predicate_retained"] == 1
