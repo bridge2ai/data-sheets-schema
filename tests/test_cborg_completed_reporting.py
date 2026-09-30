@@ -28,6 +28,10 @@ def condition_directory_gains_nothing():
 
     Ignored files count: the audit once left an empty ``.canary.lock`` there.
     Bytecode caches written by importing its execution tools are excluded.
+    The guard sees an added path only, so it cannot fire in a checkout that
+    already carries a stale ``.canary.lock`` (#3774); the per-test assertion
+    that the lock was taken under ``tmp_path`` is the check that holds in
+    any tree.
     """
     def listing():
         return {p for p in PLAN.rglob("*") if "__pycache__" not in p.parts}
