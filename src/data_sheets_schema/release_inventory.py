@@ -159,14 +159,18 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
     or an alias, compared as ``scope._norm`` compares spellings) is the
     declaration's ``referent_id``, or its ``manifest_key`` is this project --
     contradicts the declaration it sits in, and ``check_manifest`` reports
-    the exact-id case as "the referent is also listed as related-but-
-    distinct". Moving its sources would take this dataset's own release
-    evidence out of its counts on the strength of that contradiction, so it
-    moves nothing (#3581). It is listed under ``self_referential_entries``
+    it as "the referent is also listed as related-but-distinct". Moving
+    its sources would take this dataset's own release evidence out of its
+    counts on the strength of that contradiction, so it moves nothing
+    (#3581). It is listed under ``self_referential_entries``
     with what it matched on and its ``in_bundle`` as written; its unmatched
-    ids are still named. The test is wider than ``check_manifest``'s (aliases,
-    spelling, ``manifest_key``) on purpose: a narrower one would let an
-    alias or a ``doi:`` spelling of the referent remove the evidence.
+    ids are still named. The test is ``scope.names_referent``, the one
+    ``check_manifest`` reports on (#3584): a narrower one would let an
+    alias or a ``doi:`` spelling of the referent remove the evidence. Both
+    apply it only to entries ``scope.malformed_in`` does not skip (#3679):
+    a skipped entry whose ``manifest_key`` is this project is listed under
+    ``skipped_entries`` alone, and ``check_manifest`` reports it as skipped
+    alone.
     """
     declared = scope_decl.scope_in(raw, project)
     status = {"status": "declared", "in_bundle_unmatched": [], "in_bundle_not_ids": [],
@@ -179,8 +183,6 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
     skipped = {row["index"]: row["problem"]
                for row in scope_decl.malformed_in(declared) if row["skipped"]}
     referent = declared.get("referent_id")
-    own = (scope_decl._norm(referent)
-           if scope_decl._is_identifier(referent) and str(referent).strip() else None)
     moved: dict[str, list[dict]] = {}
     for index, entry in enumerate(related or []):
         claimed: set[str] = set()      # this entry's moved sources, each once
@@ -188,7 +190,7 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
             status["skipped_entries"].append({"index": index, "problem": skipped[index],
                                               "in_bundle": scope_decl.in_bundle_of(entry)})
         else:
-            itself = _itself(entry, own, referent, project)
+            itself = scope_decl.names_referent(entry, referent, project)
             if itself:
                 skipped[index] = "names this dataset itself"
                 status["self_referential_entries"].append(
@@ -217,21 +219,6 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
                 claimed.add(sid)
                 moved.setdefault(sid, []).append(dataset)
     return status, moved
-
-
-def _itself(entry, own: str | None, referent, project: str) -> list[dict]:
-    """What makes a usable related entry name this dataset itself: each of
-    its identifiers that is the referent (compared as ``scope._norm``
-    compares spellings), and its ``manifest_key`` when that is this
-    project. Empty when it names another dataset (#3581)."""
-    out = []
-    if own is not None:
-        out += [{"field": "id / also_known_as", "value": ident, "referent_id": referent}
-                for ident in scope_decl.aliases_of(entry) if scope_decl._norm(ident) == own]
-    key = entry.get("manifest_key")
-    if isinstance(key, str) and key == project:
-        out.append({"field": "manifest_key", "value": key})
-    return out
 
 
 #: Types a rejected value can keep as it is: JSON writes them unchanged.

@@ -644,12 +644,14 @@ def test_an_entry_naming_this_dataset_itself_moves_nothing(entry, matched, tmp_p
     assert "; its in_bundle moves nothing: own_release" in text
     assert "declared in_bundle for OTHER, not counted above" in text
     json.loads(ri.to_json([inv]))
-    if entry.startswith(b"{id: https://doi.org/10.1234/OWN,"):
-        # The exact-id case is the one check_manifest itself reports.
-        manifest = tmp_path / "manifest_3423_3581.yaml"
-        manifest.write_bytes(raw)
-        assert any(p["problem"] == "the referent is also listed as related-but-distinct"
-                   for p in scope.check_manifest(manifest) if p["project"] == "OWN")
+    # check_manifest reports every one of these, not only the exact id (#3584).
+    manifest = tmp_path / "manifest_3423_3581.yaml"
+    manifest.write_bytes(raw)
+    how = "; ".join(f"{m['field']} {m['value']!r}" for m in matched)
+    assert [p["problem"] for p in scope.check_manifest(manifest)
+            if p["project"] == "OWN" and "names the referent itself" in p["problem"]] == [
+        f"related_but_distinct[0] names the referent itself ({how}): "
+        "the referent is also listed as related-but-distinct"]
 
 
 def test_the_committed_manifest_has_no_self_referential_entry():

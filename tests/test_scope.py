@@ -423,6 +423,180 @@ class TestAMalformedDeclarationIsCaught(unittest.TestCase):
         self.assertTrue(any("also listed as" in p["problem"]
                             for p in scope.check_manifest(m)))
 
+    def test_an_entry_naming_the_referent_by_alias_spelling_or_key_is_caught(self):
+        """#3584. The exact raw id was the only self-reference reported, so
+        an alias, a `doi:`/bare/cased/slashed spelling of the referent's DOI
+        or a manifest_key naming the project itself passed -- while
+        `check_record` would read a record carrying its own DOI as out of
+        scope. Each entry is named by its index and what it matched on; a
+        control entry beside it is not."""
+        own = "https://doi.org/10.1234/OWN"
+        cases = [
+            ({"id": own}, "id / also_known_as 'https://doi.org/10.1234/OWN'"),
+            ({"id": "https://example.org/x", "also_known_as": "doi:10.1234/own"},
+             "id / also_known_as 'doi:10.1234/own'"),
+            ({"also_known_as": ["https://example.org/y", "10.1234/OWN/"]},
+             "id / also_known_as '10.1234/OWN/'"),
+            ({"id": "HTTP://DX.DOI.ORG/10.1234/own"}, "id / also_known_as 'HTTP://DX.DOI.ORG/10.1234/own'"),
+            ({"id": "https://example.org/x", "manifest_key": "P"}, "manifest_key 'P'"),
+        ]
+        for entry, how in cases:
+            with self.subTest(entry=entry):
+                m = self._manifest({"P": {"referent_id": own, "related_but_distinct": [
+                    {"id": "https://example.org/other"}, entry]}})
+                rows = [p["problem"] for p in scope.check_manifest(m)]
+                self.assertEqual(rows, [f"related_but_distinct[1] names the referent itself ({how}): "
+                                        "the referent is also listed as related-but-distinct"])
+        # Another dataset, and a referent that is not an identifier, name
+        # nothing.
+        for block in ({"P": {"referent_id": own, "related_but_distinct": [
+                           {"id": "doi:10.1234/OWN.v2", "also_known_as": "10.1234/OWNER"}]}},
+                      {"P": {"referent_id": [own], "related_but_distinct": [{"id": own}]}}):
+            with self.subTest(block=block):
+                self.assertFalse(any("names the referent itself" in p["problem"]
+                                     for p in scope.check_manifest(self._manifest(block))))
+
+    def test_the_checker_and_the_release_inventory_apply_one_self_reference_test(self):
+        """Proved by wiring (#3584): a sentinel patched onto
+        `scope.names_referent` decides both what `check_manifest` reports
+        and what `release_inventory` lists as self-referential."""
+        from unittest import mock
+        from data_sheets_schema import release_inventory as ri
+        m = self._manifest({"P": {"referent_id": "x", "related_but_distinct": [
+            {"id": "y", "in_bundle": "src_a"}]}})
+        m.write_text(yaml.safe_dump({"projects": {"P": [{"id": "src_a", "source_type": "documentation",
+                                                          "processed_file": "src_a.txt"}]},
+                                     "scope": yaml.safe_load(m.read_text())["scope"]}))
+        sentinel = [{"field": "SENTINEL-3584", "value": "y"}]
+        with mock.patch.object(scope, "names_referent", lambda entry, referent, project: sentinel):
+            rows = [p["problem"] for p in scope.check_manifest(m)]
+            inv = ri.inventory(m.read_bytes(), None, "P")
+        self.assertEqual(rows, ["related_but_distinct[0] names the referent itself (SENTINEL-3584 'y'): "
+                                "the referent is also listed as related-but-distinct"])
+        self.assertEqual(inv["scope"]["self_referential_entries"],
+                         [{"index": 0, "matched_on": sentinel, "in_bundle": ["src_a"]}])
+
+
+    def _inventoried(self, related):
+        m = self._manifest({"P": {"referent_id": "https://doi.org/10.1/p",
+                                  "related_but_distinct": related}})
+        m.write_text(yaml.safe_dump({"projects": {"P": [{"id": "src_a", "source_type": "documentation",
+                                                          "processed_file": "src_a.txt"}]},
+                                     "scope": yaml.safe_load(m.read_text())["scope"]}))
+        return m
+
+    def test_a_skipped_entry_keyed_on_the_project_is_reported_as_skipped_alone(self):
+        """#3679. An entry with no id and no alias is skipped by every
+        reader; its manifest_key naming the project made `check_manifest`
+        also call it the referent, while `release_inventory` -- which tests
+        only unskipped entries -- listed it as skipped alone. Both now say
+        the same one thing about it."""
+        from data_sheets_schema import release_inventory as ri
+        m = self._inventoried([{"manifest_key": "P", "in_bundle": "src_a"}])
+        rows = [p["problem"] for p in scope.check_manifest(m)]
+        self.assertEqual(rows, ["related_but_distinct[0]: no `id` and no usable alias; skipped"])
+        inv = ri.inventory(m.read_bytes(), None, "P")["scope"]
+        self.assertEqual([e["index"] for e in inv["skipped_entries"]], [0])
+        self.assertEqual(inv["self_referential_entries"], [])
+
+    def test_both_readers_apply_the_self_reference_test_to_the_same_entries(self):
+        """#3679, by wiring: with `names_referent` patched to match every
+        entry, the checker and the inventory name the same indexes -- the
+        unskipped entry, never the skipped one beside it."""
+        from unittest import mock
+        from data_sheets_schema import release_inventory as ri
+        m = self._inventoried([{"manifest_key": "P"}, {"id": "y"}])
+        sentinel = [{"field": "SENTINEL-3679", "value": "v"}]
+        with mock.patch.object(scope, "names_referent", lambda entry, referent, project: sentinel):
+            rows = [p["problem"] for p in scope.check_manifest(m)
+                    if "names the referent itself" in p["problem"]]
+            inv = ri.inventory(m.read_bytes(), None, "P")["scope"]
+        self.assertEqual(rows, ["related_but_distinct[1] names the referent itself (SENTINEL-3679 'v'): "
+                                "the referent is also listed as related-but-distinct"])
+        self.assertEqual([e["index"] for e in inv["self_referential_entries"]], [1])
+
+
+class TestOneReaderOfTheManifestBytes(unittest.TestCase):
+    """#3415. `scope_in` (#3283) reads a declaration off the bytes
+    `release_inventory` hashes; the path readers and `check_manifest` used
+    to parse the file themselves and repeat the `in_bundle` shape handling.
+    Now there is one parse and one reading of `in_bundle`."""
+
+    def _manifest(self, text):
+        tmp = tempfile.NamedTemporaryFile("wb", suffix="_3415.yaml", delete=False)
+        tmp.write(text.encode("utf-8") if isinstance(text, str) else text)
+        tmp.close()
+        self.addCleanup(lambda: Path(tmp.name).unlink(missing_ok=True))
+        return Path(tmp.name)
+
+    def test_the_path_readers_and_the_byte_reader_share_one_parse(self):
+        from unittest import mock
+        m = self._manifest("scope: {}\n")
+        parsed = {"scope": {"P": {"referent_id": "SENTINEL-3415"}}}
+        with mock.patch.object(scope, "_parse", lambda encoded: parsed):
+            self.assertEqual(scope.scope_of("P", m), {"referent_id": "SENTINEL-3415"})
+            self.assertEqual(scope.scope_in(b"scope: {}\n", "P"), {"referent_id": "SENTINEL-3415"})
+
+    def test_check_manifest_reads_the_file_once(self):
+        """It used to re-open the file per project for the malformed-entry
+        rows, so those rows and the rest could describe two files."""
+        from unittest import mock
+        m = self._manifest(yaml.safe_dump({"projects": {"P": [{"id": "s"}], "Q": [{"id": "t"}]}, "scope": {
+            "P": {"referent_id": "x", "related_but_distinct": ["bare"]},
+            "Q": {"referent_id": "y", "related_but_distinct": [None]}}}))
+        real, calls = scope._parse, []
+        with mock.patch.object(scope, "_parse", lambda encoded: calls.append(1) or real(encoded)):
+            problems = [p["problem"] for p in scope.check_manifest(m)]
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(problems, ["related_but_distinct[0]: entry is a str, not a mapping; skipped",
+                                    "related_but_distinct[0]: entry is a NoneType, not a mapping; skipped"])
+
+    def test_check_manifest_reads_in_bundle_through_the_shared_helper(self):
+        """Structural, because the wiring is behaviour-preserving: an inline
+        copy of the `in_bundle` shape handling gives the same rows as the
+        helper, so no output-only test can tell them apart (#3662). Patching
+        the helper to answer a sentinel shows `check_manifest` asks it."""
+        from unittest import mock
+        m = self._manifest(yaml.safe_dump({"projects": {"P": [{"id": "s1"}]}, "scope": {"P": {
+            "referent_id": "x", "related_but_distinct": [{"id": "y", "in_bundle": ["s1"]}]}}}))
+        with mock.patch.object(scope, "_in_bundle_as_written", lambda entry: ["SENTINEL-3650"]):
+            problems = [p["problem"] for p in scope.check_manifest(m)]
+            self.assertEqual(scope.in_bundle_of({"in_bundle": ["s1"]}), ["SENTINEL-3650"])
+        self.assertEqual(problems, [
+            "related dataset claims source 'SENTINEL-3650' is in this bundle; "
+            "the manifest lists no such source for P"])
+
+    def test_the_in_bundle_rows_keep_the_order_written(self):
+        """A value that is not an identifier is reported in its place among
+        the identifiers, and the identifiers `check_manifest` matches are
+        the ones `in_bundle_of` gives. This checks output only; that the
+        checker reads `in_bundle` through the shared helper is the test
+        above (#3662)."""
+        written = ["gone", {"k": 1}, "s1", True, 7]
+        m = self._manifest(yaml.safe_dump({"projects": {"P": [{"id": "s1"}]}, "scope": {"P": {
+            "referent_id": "x", "related_but_distinct": [{"id": "y", "in_bundle": written}]}}}))
+        problems = [p["problem"] for p in scope.check_manifest(m)]
+        self.assertEqual(problems, [
+            "related dataset claims source 'gone' is in this bundle; the manifest lists no such source for P",
+            "related dataset's in_bundle carries a dict, not a source id",
+            "related dataset's in_bundle carries a bool, not a source id",
+            "related dataset claims source 7 is in this bundle; the manifest lists no such source for P"])
+        self.assertEqual(scope.in_bundle_of({"in_bundle": written}), ["gone", "s1", 7])
+
+    def test_a_path_reader_keeps_the_parsers_own_errors(self):
+        """Behaviour-preserving: the path readers raised the decoder's or
+        the parser's error when they opened the file themselves, and still
+        do; the byte reader says `ValueError`, as it did."""
+        bad_yaml, bad_utf8 = self._manifest("scope: [unclosed\n"), self._manifest(b"scope: \xff\n")
+        with self.assertRaises(yaml.YAMLError):
+            scope.load_manifest(bad_yaml)
+        with self.assertRaises(UnicodeDecodeError):
+            scope.scope_of("P", bad_utf8)
+        for raw in (bad_yaml.read_bytes(), bad_utf8.read_bytes()):
+            with self.assertRaises(ValueError):
+                scope.scope_in(raw, "P")
+        self.assertEqual(scope.load_manifest(Path(tempfile.gettempdir()) / "absent_3415.yaml"), {})
+
 
 class TestTheInstructionCarriesNoProjectSpecificScope(unittest.TestCase):
     """The mirror of the existing test that the prompt *file* names no project
