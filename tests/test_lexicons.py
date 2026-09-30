@@ -17,6 +17,7 @@ from pathlib import Path
 import yaml
 
 from data_sheets_schema import lexicon as lx
+from data_sheets_schema import self_disclaimed as sd
 
 #: Append-only. Never change a line: a registered lexicon's bytes are fixed,
 #: and a change is a new version with a new line here.
@@ -35,6 +36,45 @@ V4_GAP = (r"(?:[^.]|\.(?!\s)|(?<=\bSt)\.(?=\s)|(?<=\bDr)\.(?=\s)|(?<=\be\.g)\.(?
 #: The gap as first written, whose abbreviation alternatives also took a `.`
 #: that `\.(?!\s)` takes: the same language, matched in exponential time.
 V4_GAP_OVERLAPPING = r"(?:[^.]|\.(?!\s)|(?<=\bSt)\.|(?<=\bDr)\.|(?<=\be\.g)\.|(?<=\bi\.e)\.|(?<=\bU\.S)\.)*?"
+
+#: Append-only, as REGISTERED: the container lexicons read by
+#: `self_disclaimed` (#2913), pinned in container_lexicons/registry.yaml and
+#: held here since #3040 (they were `LEXICON_PINS` in
+#: tests/test_self_disclaimed.py, whose history follows). v1 was revised in
+#: review before it first merged (#3029), so that PR's commits carry seven
+#: earlier byte versions under `version: 1`:
+#:   9b1f536ba02afc9971bbe9e28da316ea1c3c90e356bdbcc2c200400259521b04 (e00711d21, first commit)
+#:   728e4e8b87aeefce7c2de27541392e53ee11cbf8d74fe7587309abf227a24a6d (387e20653, review round 1)
+#:   14428534895e1cec840dde5eec6eb0d06bbeac50e89007573611d89c79d14c35 (cf3d16cb3, review round 2)
+#:   56c9abda1c6fea3dcbd5b44372e2e85a5fc38d50c65bffdad4f8f3791f1b54e4 (df35537aa, review round 2)
+#:   3b2949e29c7aebef79c6e77894d735c6fa2ce1a0ae8800463374d63fe45a5f3a (7e327b512, review round 3)
+#:   626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6 (5705a4f3f, review round 4)
+#:   d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c (9607a6416, review round 5)
+#: Every output names the sha it ran under, and no committed output, record
+#: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
+#: new file beside v1, whose bytes are unchanged. v2 was revised in review
+#: before it first merged, so its PR's commits carry eight earlier byte
+#: versions under `version: 2`:
+#:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
+#:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
+#:   aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73 (e3e1ca227, review round 2)
+#:   15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9 (0d1ada61e, review round 3)
+#:   63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9 (4cf8faa65, review round 4)
+#:   2edac57763fddb717a237e3fe4d0444526f93fcbc5dfe286e5584ca676f3aa24 (348526f6e, review round 5)
+#:   560b1c55b406ad9df6e5c03dfd35c9c020f9173f2fceaf11234679acb8b03757 (f59a0827d, review round 6)
+#:   741e0834f79bc20e4a5aea65870380e8df23deefd6125b19b5d95bcefd2fe888 (bbd955fb9, review round 6)
+CONTAINER_REGISTERED = {
+    ("self_disclaimed", 1): "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
+    ("self_disclaimed", 2): "e05cfaf00a62c042c120542b19317b286c6fa2c03223fe79d6566c6fe79834d4",
+}
+
+#: Every registered directory (#3040): its append-only pins and the check
+#: that holds its files to them — `lexicon.check_pins` under each reader.
+#: A new registry is a new row here, so its pins are held the same way.
+REGISTRIES = {
+    "lexicons": (lx.LEXICON_DIR, REGISTERED, lx.check_registry),
+    "container_lexicons": (sd.LEXICON_DIR, CONTAINER_REGISTERED, sd.check_registry),
+}
 
 #: The v1 precision sample's three borderline phrases (#3520), in their
 #: sentences: source conflicts worded with the ranking vocabulary.
@@ -63,6 +103,39 @@ patterns:
 
 def _registry_text(entries):
     return yaml.safe_dump({"lexicons": entries}, sort_keys=False)
+
+
+class EveryRegistry(unittest.TestCase):
+    """One pin rule for every registered directory (#3040)."""
+
+    def test_every_registry_checks_clean(self):
+        for kind, (directory, _pins, check) in REGISTRIES.items():
+            with self.subTest(registry=kind):
+                self.assertEqual(check(directory), [])
+
+    def test_every_registry_pins_are_the_append_only_pins(self):
+        for kind, (directory, pins, _check) in REGISTRIES.items():
+            with self.subTest(registry=kind):
+                pinned = {(name, e["version"]): e["sha256"]
+                          for name, versions in lx.registered(directory).items() for e in versions}
+                self.assertEqual(pinned, pins,
+                                 "a registered lexicon's pin changed or a version disappeared: "
+                                 "register a new version instead of editing a registered one")
+
+    def test_every_pin_is_the_sha256_of_the_file_bytes(self):
+        for kind, (directory, pins, _check) in REGISTRIES.items():
+            for (name, version), sha in pins.items():
+                with self.subTest(registry=kind, name=name, version=version):
+                    raw = (directory / f"{name}_v{version}.yaml").read_bytes()
+                    self.assertEqual(hashlib.sha256(raw).hexdigest(), sha)
+                    self.assertEqual(lx.registered_bytes(name, version, directory=directory)[1], raw)
+
+    def test_the_container_lexicons_load_through_their_pins(self):
+        for (name, version), sha in CONTAINER_REGISTERED.items():
+            with self.subTest(version=version):
+                self.assertEqual(sd.load_registered(version, name=name).describe(), {
+                    "path": f"{sd.LEXICON_RESOURCE_DIR}/{name}_v{version}.yaml", "version": version,
+                    "sha256": sha})
 
 
 class TheRegistry(unittest.TestCase):

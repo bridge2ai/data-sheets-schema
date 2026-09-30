@@ -27,6 +27,11 @@ Every result computed from a lexicon should carry `Lexicon.identity()`: the
 name, version, instrument, file and sha256 of the bytes the patterns were
 compiled from. A count reported without them cannot be compared with
 another.
+
+The pin rule is not specific to this file shape (#3040). `registered_bytes`,
+`check_declared` and `check_pins` hold it for any directory that keeps a
+`registry.yaml` of this form, whatever its lexicons parse into:
+`container_lexicons/` (#2913) is pinned through them with its own reader.
 """
 from __future__ import annotations
 
@@ -34,7 +39,7 @@ import hashlib
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -188,12 +193,14 @@ def parse(raw: bytes, *, file: str) -> Lexicon:
                    patterns=tuple(patterns), scope=scope, counterexamples_required=required)
 
 
-def load(name: str, version: int | None = None, *, directory: Path = LEXICON_DIR) -> Lexicon:
-    """A registered lexicon, the newest version unless one is named.
+def registered_bytes(name: str, version: int | None = None, *,
+                     directory: Path = LEXICON_DIR) -> tuple[dict[str, Any], bytes]:
+    """A registered file's entry and its bytes, the newest version unless one
+    is named; refused when the bytes are not the pinned ones.
 
-    Refused when the file's bytes are not the registered ones, or when the
-    file names another lexicon or version than its registry entry: a result
-    that claims v1 must have been computed from v1's bytes.
+    Shared by every registry of this form (#3040): what the bytes parse into
+    is the caller's business, and `check_declared` is then its check that
+    they name the lexicon and version the entry does.
     """
     versions = _read_registry(directory).get(name)
     if not versions:
@@ -212,24 +219,44 @@ def load(name: str, version: int | None = None, *, directory: Path = LEXICON_DIR
         raise LexiconError(
             f"{path} hashes to {digest[:12]}…, not the registered {str(entry['sha256'])[:12]}…; a registered "
             f"lexicon is never edited — add {name}_v{newest + 1}.yaml and a registry entry instead")
+    return entry, raw
+
+
+def check_declared(path: Path, entry_name: str, entry_version: int, declared_name: str,
+                   declared_version: int) -> None:
+    """Refuse a file that names another lexicon or version than its registry
+    entry: a result that claims v1 must have been computed from v1's bytes."""
+    if declared_name != entry_name or declared_version != entry_version:
+        raise LexiconError(f"{path} declares {declared_name} v{declared_version}; "
+                           f"the registry entry is {entry_name} v{entry_version}")
+
+
+def load(name: str, version: int | None = None, *, directory: Path = LEXICON_DIR) -> Lexicon:
+    """A registered lexicon, the newest version unless one is named.
+
+    Refused when the file's bytes are not the registered ones, or when the
+    file names another lexicon or version than its registry entry: a result
+    that claims v1 must have been computed from v1's bytes.
+    """
+    entry, raw = registered_bytes(name, version, directory=directory)
     lexicon = parse(raw, file=entry["file"])
-    if lexicon.name != name or lexicon.version != entry["version"]:
-        raise LexiconError(f"{path} declares {lexicon.name} v{lexicon.version}; "
-                           f"the registry entry is {name} v{entry['version']}")
+    check_declared(directory / entry["file"], name, entry["version"], lexicon.name, lexicon.version)
     return lexicon
 
 
-def check_registry(directory: Path = LEXICON_DIR) -> list[str]:
-    """Every problem with the registered lexicons, as messages; [] when none.
+def check_pins(directory: Path, load_version: Callable[[str, int], Any],
+               check_loaded: Callable[[str, Any], list[str]] | None = None) -> list[str]:
+    """The registry checks every registered directory shares (#3040), as
+    messages; [] when none.
 
-    Checks each pin against the file's bytes, the file name against
-    `{name}_v{version}.yaml`, each pattern against its own examples and
-    counterexamples, and that no lexicon file in the directory is
-    unregistered — an unregistered file is a lexicon nothing pins. Every
-    pattern has at least one example, because `load` compiles through
-    `parse`, which refuses a pattern without one. Every lexicon but those in
-    `COUNTEREXAMPLES_OPTIONAL` must declare `counterexamples_required`, so
-    each of its patterns has a counterexample too (#3132).
+    Each registered version is loaded through `load_version(name, version)`,
+    which is to read it through `registered_bytes` and `check_declared`, so
+    its pin and its declared name and version are checked; a `ValueError`
+    from it is reported, not raised. The file name must be
+    `{name}_v{version}.yaml`, no version is registered twice, and no `.yaml`
+    file in the directory is unregistered — an unregistered file is a
+    lexicon nothing pins. `check_loaded(name, loaded)` adds a reader's own
+    checks for each version that loaded.
     """
     problems: list[str] = []
     try:
@@ -247,21 +274,42 @@ def check_registry(directory: Path = LEXICON_DIR) -> list[str]:
                 problems.append(f"{name} v{entry['version']}: file {entry['file']!r} is not "
                                 f"{name}_v{entry['version']}.yaml")
             try:
-                lexicon = load(name, entry["version"], directory=directory)
-            except LexiconError as exc:
+                loaded = load_version(name, entry["version"])
+            except ValueError as exc:
                 problems.append(str(exc))
                 continue
-            if not lexicon.counterexamples_required and (name, lexicon.version) not in COUNTEREXAMPLES_OPTIONAL:
-                problems.append(f"{name} v{lexicon.version}: does not declare `counterexamples_required: true`; "
-                                "every lexicon registered after absence_self_narration v1 must (#3132)")
-            for pattern in lexicon.patterns:
-                for text in pattern.examples:
-                    if not pattern.regex.search(" ".join(text.split())):
-                        problems.append(f"{name} v{lexicon.version} {pattern.id}: does not match its example {text!r}")
-                for text in pattern.counterexamples:
-                    if pattern.regex.search(" ".join(text.split())):
-                        problems.append(f"{name} v{lexicon.version} {pattern.id}: matches its counterexample {text!r}")
+            if check_loaded is not None:
+                problems += check_loaded(name, loaded)
     for path in sorted(directory.glob("*.yaml")):
         if path.name != REGISTRY_FILE and path.name not in files:
             problems.append(f"{path.name} is in {directory} but not registered")
     return problems
+
+
+def check_registry(directory: Path = LEXICON_DIR) -> list[str]:
+    """Every problem with the registered lexicons, as messages; [] when none.
+
+    `check_pins`' checks — each pin against the file's bytes, the file name
+    against `{name}_v{version}.yaml`, and that no lexicon file in the
+    directory is unregistered — and then each pattern against its own
+    examples and counterexamples. Every pattern has at least one example,
+    because `load` compiles through `parse`, which refuses a pattern without
+    one. Every lexicon but those in `COUNTEREXAMPLES_OPTIONAL` must declare
+    `counterexamples_required`, so each of its patterns has a counterexample
+    too (#3132).
+    """
+    def self_test(name: str, lexicon: Lexicon) -> list[str]:
+        problems: list[str] = []
+        if not lexicon.counterexamples_required and (name, lexicon.version) not in COUNTEREXAMPLES_OPTIONAL:
+            problems.append(f"{name} v{lexicon.version}: does not declare `counterexamples_required: true`; "
+                            "every lexicon registered after absence_self_narration v1 must (#3132)")
+        for pattern in lexicon.patterns:
+            for text in pattern.examples:
+                if not pattern.regex.search(" ".join(text.split())):
+                    problems.append(f"{name} v{lexicon.version} {pattern.id}: does not match its example {text!r}")
+            for text in pattern.counterexamples:
+                if pattern.regex.search(" ".join(text.split())):
+                    problems.append(f"{name} v{lexicon.version} {pattern.id}: matches its counterexample {text!r}")
+        return problems
+
+    return check_pins(directory, lambda name, version: load(name, version, directory=directory), self_test)
