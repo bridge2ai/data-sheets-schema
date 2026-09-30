@@ -811,9 +811,7 @@ def _without_redirections(words: list[str]) -> tuple[list[str], list[bool]]:
                 continue
         if (re.fullmatch(r"\d+|\{[A-Za-z_][A-Za-z0-9_]*\}", word) and at + 1 < len(words)
                 and _REDIRECTION.fullmatch(words[at + 1])):
-            if redirected:
-                redirected[-1] = True
-            continue
+            continue                                # the operator after it flags the word
         match = _REDIRECTION.fullmatch(word)
         if match:
             skip_target = not match.group(2)
