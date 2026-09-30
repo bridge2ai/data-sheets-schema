@@ -469,3 +469,38 @@ class ReleaseInventory(unittest.TestCase):
             "(`cccccccccc`) | differs: AI_READI | as today | |",
             "| v8 API production (2026-09-04f/g) | `bbbbbbbbbbbb` (1 records) | – | – | "
             "no committed version of `data/preprocessed/source_manifest.yaml` hashes to it |"])
+
+    def test_a_record_pinning_no_manifest_or_no_hash_says_so_and_git_is_not_asked(self):
+        """#3903: `path: null` (a run that selected no manifest, #621) and a
+        path with no hash are named as such, never as a git miss on `None`."""
+        import tempfile
+        from unittest import mock
+        today = (self.m.ROOT / self.m.SOURCE_MANIFEST).read_bytes()
+        crate = (self.m.ROOT / self.m.CRATE_MANIFEST).read_bytes()
+        blocks = {"AI_READI": "path: null\n",
+                  "CHORUS": f"path: {self.m.SOURCE_MANIFEST}\n",
+                  "VOICE": "path: null\n    md5: " + "d" * 32 + "\n"}
+        asked = []
+        with tempfile.TemporaryDirectory() as tmp:
+            concat = Path(tmp)
+            data = {k: {p: [] for p in self.m.PROJECTS} for k, *_ in self.m.ARMS}
+            d = concat / "claudecode_api_core" / "L_rep1"
+            d.mkdir(parents=True)
+            for p, block in blocks.items():
+                (d / f"{p}_provenance.yaml").write_text("inputs:\n  source_manifest:\n    " + block)
+                data["v8prod"][p] = [{"label": "L_rep1"}]
+            with mock.patch.object(self.m, "CONCAT", concat), \
+                    mock.patch.object(self.m, "_method_for", lambda label, project: "claudecode_api"), \
+                    mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                               lambda *a, **k: asked.append(a) or None):
+                rows = self.m._pinned_manifest_rows(data, today, crate)
+        self.assertEqual(asked, [])
+        arm = "| v8 API production (2026-09-04f/g) |"
+        self.assertEqual(sorted(rows), sorted([
+            f"{arm} no hash recorded (1 records) | – | – | the records pinned no source manifest |",
+            f"{arm} no hash recorded (1 records) | – | – | the records name "
+            "`data/preprocessed/source_manifest.yaml` but pinned no hash of it, "
+            "so no version can be recovered |",
+            f"{arm} `dddddddddddd` (1 records) | – | – | "
+            "the records pinned a hash but no source-manifest path |"]))
+        self.assertFalse(any("`None`" in r for r in rows))

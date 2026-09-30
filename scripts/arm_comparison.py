@@ -899,8 +899,19 @@ def _pinned_manifest_rows(data, today: bytes, crate: bytes | None) -> list[str]:
         for (path, md5, sha), projects in sorted(pins.items(), key=lambda kv: str(kv[0])):
             named = f"`{(md5 or sha or '')[:12]}` ({len(projects)} records)" if (md5 or sha) else \
                 f"no hash recorded ({len(projects)} records)"
+            # Git is asked only for a path and a hash; without either there is
+            # nothing to recover, and the note says which is missing (#3903).
+            if not path:
+                rows.append(f"| {disp} | {named} | – | – | "
+                            + ("the records pinned a hash but no source-manifest path" if (md5 or sha)
+                               else "the records pinned no source manifest") + " |")
+                continue
+            if not (md5 or sha):
+                rows.append(f"| {disp} | {named} | – | – | the records name `{path}` but pinned no "
+                            "hash of it, so no version can be recovered |")
+                continue
             try:
-                got = committed_bytes_for(path, md5=md5, sha256=sha) if path and (md5 or sha) else None
+                got = committed_bytes_for(path, md5=md5, sha256=sha)
             except GitUnavailable as exc:
                 rows.append(f"| {disp} | {named} | – | – | git could not supply it: {exc} |")
                 continue
