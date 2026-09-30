@@ -1431,7 +1431,10 @@ class DeriveStatus(Base):
         r.result(identity, "Command running in background with ID: bg1", is_error=False)
         block = r.report()
         self.assertUnknown(block, f"derive core {identity} cannot be placed: its result is ambiguous")
+        # Anything but absent or `false` asks for the background, as the
+        # native phase history reads the flag.
         self.assertEqual(ro._backgrounded(None, {"run_in_background": "yes"}), True)
+        self.assertEqual(ro._backgrounded(None, {"run_in_background": ""}), True)
         self.assertEqual(ro._backgrounded({"metadata": ro._ABSENT}, {"run_in_background": False}), False)
         self.assertEqual(ro._shell_outcome({"is_error": False, "metadata": ro._ABSENT},
                                            {"run_in_background": True}), "ambiguous")
