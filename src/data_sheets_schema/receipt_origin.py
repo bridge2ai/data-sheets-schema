@@ -54,7 +54,10 @@ variable (`$PY -m data_sheets_schema.cli`), are read through; any other
 part that carries the words `derive core` and is neither a d4d call of
 another subcommand nor a program known to read (a nested `bash -c`,
 `xargs`, a wrapper option or CLI option it does not read) is a derive that
-cannot be placed (#3137). So is a reader part that carries them where a
+cannot be placed (#3137). The words are matched after quote and escape
+characters are removed, as the shell running a nested string removes them
+(`bash -c 'd4d derive "core"'`), and `derive` followed by a word supplied
+at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) counts (#3397). So is a reader part that carries them where a
 pipe later in the command feeds a program not known to read (`echo '...
 derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
 substitutes anywhere (`$(...)`, backticks, `<(...)`), every part that
@@ -172,9 +175,13 @@ NON_CHECKS = (
     "there: `rg` is read-only only when neither its arguments nor its own assignments set "
     "either (#3256, #3268)",
     "a `derive core` run without the words `derive core` on the command line (a script, an "
-    "alias or function, a variable holding the subcommand, `python -c` building the argument "
-    "list, or a file that an earlier part wrote the words into and a later part runs): such a "
-    "derive is not seen, and the Phase 1 / Phase 3 boundary is missed (#3137, #3384)",
+    "alias or function, a variable or substitution supplying the word `derive` itself (`d4d "
+    "$SUB`), `python -c` building the argument list, or a file that an earlier part wrote the "
+    "words into and a later part runs): such a derive is not seen, and the Phase 1 / Phase 3 "
+    "boundary is missed (#3137, #3384). The words are matched after quote and escape "
+    "characters are removed, and `derive` followed by a word supplied at run time (`derive "
+    "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
+    "placed (#3397); a word the shell builds some other way (a glob, `derive c*`) is not seen",
 )
 
 _ABSENT = object()
@@ -186,7 +193,14 @@ _ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*")
 _PYTHON = re.compile(r"python(\d+(\.\d+)*)?")
 _VARIABLE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})")
 _DURATION = re.compile(r"\d+(\.\d+)?[smhd]?")
-_DERIVE_CORE = re.compile(r"(?<![\w.-])derive\s+core(?![\w.-])")
+_DERIVE_CORE = re.compile(r"(?<![\w.-])derive\s+(core(?![\w.-])|[$`{])")
+#: Quote and escape characters, removed before the words are matched: the
+#: outer tokenizer removes only the outer level, so inside a nested shell or
+#: `eval` string `d4d derive "core"` still carries its quotes (#3397).
+_QUOTING = re.compile(r"[\"'\\]")
+#: A subcommand word spelled literally; anything else (`$SUB`, `{}`, a
+#: substitution) is supplied at run time.
+_LITERAL_WORD = re.compile(r"[A-Za-z0-9_-]+")
 
 
 def _sha256(data: bytes) -> str:
@@ -721,8 +735,13 @@ def _cli_args(rest: list[str]) -> list[str] | None:
 
 def _mentions_derive(segment: list[str]) -> bool:
     """Whether the words `derive core` appear in the segment: as adjacent
-    words, or inside one (`bash -c 'd4d derive core ...'`) (#3137)."""
-    return bool(_DERIVE_CORE.search(" ".join(segment)))
+    words, or inside one (`bash -c 'd4d derive core ...'`) (#3137), after
+    quote and escape characters are removed as the shell that runs a nested
+    string would remove them (`bash -c 'd4d derive "core"'`, `eval "d4d
+    'derive' core"`, #3397). `derive` followed by a word supplied at run time
+    (`derive $SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts too:
+    it may be `core`, so it is a derive that cannot be placed, never none."""
+    return bool(_DERIVE_CORE.search(_QUOTING.sub("", " ".join(segment))))
 
 
 def _subcommand(args: list[str]) -> tuple[tuple[str, ...], list[str]]:
@@ -1050,7 +1069,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             # A d4d call runs only its own subcommand: `derive core` in an
             # option value (the recorder's `--phase`) runs nothing, unless
             # the subcommand itself was not read (`d4d -v derive core`).
-            opaque = len(sub) < 2 or any(word.startswith("-") for word in sub)
+            # Nor is a subcommand supplied at run time (`d4d derive $SUB`, #3397).
+            opaque = len(sub) < 2 or not all(_LITERAL_WORD.fullmatch(word) and not word.startswith("-")
+                                             for word in sub)
         else:
             reads = program in READ_ONLY_PROGRAMS and not (
                 (program == "sed" and not _sed_reads_only(rest[1:]))

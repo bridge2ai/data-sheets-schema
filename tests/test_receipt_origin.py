@@ -1470,7 +1470,20 @@ class DeriveSpellings(Base):
                          "grep -n 'derive core' x.md && ls | python scripts/tally.py",
                          # #3385: a substitution anywhere makes a reader's words opaque
                          f"grep -c 'derive core' .claude/commands/d4d-full-core.md; echo $((1+1))",
-                         "poetry run d4d provenance record --phase 'derive core' --recorded-at \"$(date -u)\""):
+                         "poetry run d4d provenance record --phase 'derive core' --recorded-at \"$(date -u)\"",
+                         # #3397: quoted or escaped words inside a nested shell or `eval`
+                         f"bash -c 'poetry run d4d derive \"core\" --full {self.FULL} {self.OUT}'",
+                         f"eval 'd4d derive \"core\" --full {self.FULL} {self.OUT}'",
+                         f"bash -c \"d4d 'derive' core --full {self.FULL} {self.OUT}\"",
+                         f"bash -c \"d4d derive \\\"core\\\" --full {self.FULL} {self.OUT}\"",
+                         f"bash -c 'd4d derive \\core --full {self.FULL} {self.OUT}'",
+                         f"echo 'd4d derive \"core\" --full {self.FULL} {self.OUT}' | bash",
+                         # #3397: the subcommand word supplied at run time
+                         f"d4d derive $(echo core) --full {self.FULL} {self.OUT}",
+                         f"d4d derive `echo core` --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs -I{{}} d4d derive {{}} --full {self.FULL} {self.OUT}",
+                         f"d4d derive $SUB --full {self.FULL} {self.OUT}",
+                         f"d4d derive ${{SUB}} --full {self.FULL} {self.OUT}"):
             for ok in (True, False):
                 with self.subTest(spelling=spelling, ok=ok):
                     identity, block = self._derived(spelling, ok=ok)
@@ -1508,7 +1521,12 @@ class DeriveSpellings(Base):
                          "python scripts/rederive core_x.py", "python scripts/derive core-x.py",
                          "python scripts/derive core.py", "python scripts/derive_core x.py",
                          "python scripts/re.derive core", "python scripts/derive corex.py",
-                         "python scripts/rederive core"):
+                         "python scripts/rederive core",
+                         # #3397: quote removal joins only what the shell joins
+                         "bash -c 'python scripts/\"re\"derive core'",
+                         "bash -c 'python scripts/\"derive\" \"core.py\"'",
+                         "grep -n \"derive $x\" x.md",
+                         "poetry run d4d receipts check --label \"$L\" --project CHORUS"):
             with self.subTest(spelling=spelling):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -1553,6 +1571,13 @@ class DeriveSpellings(Base):
         self.assertIn("in a command that substitutes anywhere (`$(...)`, backticks, `<(...)`), every part "
                       "that carries them, readers and the recorder's `--phase` included", doc)   # #3385
         self.assertIn("a file that an earlier part wrote the words into and a later part runs", text)
+        # #3397: the quote rule, the run-time word and the route still unseen
+        self.assertIn("The words are matched after quote and escape characters are removed", text)
+        self.assertIn("`xargs ... derive {}`) counts as a derive that cannot be placed", text)
+        self.assertIn("a variable or substitution supplying the word `derive` itself", text)
+        self.assertIn("a word the shell builds some other way (a glob, `derive c*`) is not seen", text)
+        self.assertIn("The words are matched after quote and escape characters are removed, as the shell "
+                      "running a nested string removes them", doc)
 
 
 class RuntimeDenial(Base):
@@ -1672,6 +1697,33 @@ class RuntimeDenial(Base):
         r.derive()
         self.assertUnknown(r.report(), f"Bash call {identity}")
 
+    def test_the_call_and_its_result_must_each_be_in_the_terminals_transcript(self):
+        # #3399: each own-transcript condition, one at a time. `_pair` joins
+        # ids across files, so a call in one file whose result and terminal
+        # are in another reaches the check; so does a result in another file.
+        identity, r = self._refused()
+        events, calls, results = self._paired(r)
+        self.assertIn(identity, ro._runtime_denials(events, calls, results))
+        call = next(c for c in calls if c["id"] == identity)
+        for moved in (call, results[identity]):
+            with self.subTest(moved="call" if moved is call else "result"):
+                moved["transcript"] = 1
+                self.assertNotIn(identity, ro._runtime_denials(events, calls, results))
+                moved["transcript"] = 0
+        self.assertIn(identity, ro._runtime_denials(events, calls, results))
+
+    def test_a_call_in_another_file_from_its_result_and_terminal_is_not_corroborated(self):
+        # #3399, end to end: the call alone in the first file; its result,
+        # the derive and the terminal in the second, each past the call's line.
+        identity, r = self._refused()
+        at = next(i for i, e in enumerate(r.events) if e.get("type") == "assistant"
+                  and any(b.get("id") == identity for b in e["message"]["content"]))
+        first = r.events[:at + 1]
+        second = r.events[:1] + [{"type": "system", "subtype": "status"}] * (at + 1) + r.events[at + 1:]
+        block = ro.origin([r.transcript("t1.jsonl", first), r.transcript("t2.jsonl", second)], r.receipt, r.full)
+        self.assertEqual(block["rejected_writes"], [], block)
+        self.assertUnknown(block, f"Bash call {identity}")
+
     def test_a_refused_derive_never_ran(self):
         command = self.DERIVE
         identity, r = self._refused(command, derive_after=False)
@@ -1785,7 +1837,12 @@ class Cli(unittest.TestCase):
         self.assertIn("a reader part carrying them in a command where a later pipe feeds such a program", text)
         self.assertIn("in a command with a substitution anywhere, every part carrying them cannot be placed",
                       text)                                                                     # #3385
-        self.assertIn("A derive whose words are not on the command line (a script, an alias) is not seen", text)
+        self.assertIn("The words are matched after quote and escape characters are removed "
+                      "(`bash -c 'd4d derive \"core\"'`)", text)                               # #3397
+        self.assertIn("`derive` followed by a word supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) "
+                      "cannot be placed either", text)
+        self.assertIn("A derive whose words are not on the command line (a script, an alias, a variable "
+                      "supplying `derive` itself) is not seen", text)
         self.assertIn("the runtime did in `dontAsk` mode and its terminal `result` lists the call", text)
 
     def test_unknown_prints_its_reasons_and_exits_zero(self):
