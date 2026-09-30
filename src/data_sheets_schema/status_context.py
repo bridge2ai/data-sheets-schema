@@ -57,7 +57,8 @@ snippet's own markers do not express (`EXPRESSED_BY`: a snippet's "will"
 expresses a "Future ..." heading's status, #3232), and the value at the receipt's slot carries no
 marker expressing that status, one flag per status: a sentence's "will" and
 a heading's "Future ..." are one lost status, reported at the nearer
-governor with the other listed beside it (#3245, #3262). `modal_dropped`: the snippet itself carries
+governor (line distance measured from the snippet's span, first line to
+last) with the other listed beside it (#3245, #3262). `modal_dropped`: the snippet itself carries
 the marker and the value does not, one flag per status (a snippet's "will"
 and "future" are one dropped status, #3252). A snippet that occurs more than once in
 its chunk is flagged only when every occurrence's context carries the
@@ -1001,7 +1002,12 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                                **({"equivalent_markers": equivalent} if equivalent else {}),
                                "source_line": base["snippet_line"],
                                **_final(final, record, slot, cls)})
-            for cls, d, equivalent in _lost_statuses(lost or {}, value_classes, base["snippet_line"]):
+            # The snippet's span, first line to last, over the occurrence
+            # `snippet_line` reports: a governor's distance is measured from
+            # the span, not from its first line alone (#3488).
+            span = ((base["snippet_line"], view.line_of(max(b for _a, b in found[0]) - 1))
+                    if found else None)
+            for cls, d, equivalent in _lost_statuses(lost or {}, value_classes, span):
                 bucket.append({"rule": "governor_outside_snippet", **base, "class": cls,
                                "marker": d["term"], "via": d["via"], "source_line": d["source_line"],
                                **({"governor": d["governor"]} if "governor" in d else {}),
@@ -1055,7 +1061,7 @@ def _dropped_statuses(snippet_classes: dict[str, str], value_classes
 _VIA_RANK = {"sentence": 0, "enumeration": 0, "lead-in": 1, "heading": 1}
 
 
-def _lost_statuses(lost: dict[str, dict[str, Any]], value_classes, snippet_line: int | None
+def _lost_statuses(lost: dict[str, dict[str, Any]], value_classes, span: tuple[int, int] | None
                    ) -> list[tuple[str, dict[str, Any], list[dict[str, Any]]]]:
     """[(class, detail, [equivalent governor])] for each status the lost
     context classes carry and the value does not express, one per status.
@@ -1065,13 +1071,15 @@ def _lost_statuses(lost: dict[str, dict[str, Any]], value_classes, snippet_line:
     lost from one marker-less snippet are one not-yet status, so one
     `governor_outside_snippet` (#3245, #3262). The nearest governor is
     reported — one in the part's own sentence or enumeration before one in
-    a heading or lead-in, then the smaller line distance from the snippet,
-    then the class name — and every other is listed beside it with its
-    class, marker, via, source line and heading text, so no governor is
-    dropped from the output."""
+    a heading or lead-in, then the smaller line distance from the snippet's
+    span (`span` is its first and last bundle line: 0 on a line the snippet
+    covers, else the lines to its nearer end, #3488), then the class name —
+    and every other is listed beside it with its class, marker, via, source
+    line and heading text, so no governor is dropped from the output."""
     def rank(item: tuple[str, dict[str, Any]]) -> tuple[int, int, str]:
         cls, d = item
-        dist = abs(d["source_line"] - snippet_line) if snippet_line is not None else 0
+        line = d["source_line"]
+        dist = (max(0, span[0] - line, line - span[1]) if span is not None else 0)
         return _VIA_RANK.get(d["via"], 2), dist, cls
     out: list[tuple[str, dict[str, Any], list[dict[str, Any]]]] = []
     for cls, d in sorted(lost.items(), key=rank):

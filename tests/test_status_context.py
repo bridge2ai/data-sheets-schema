@@ -661,6 +661,35 @@ def test_equivalent_governors_in_one_sentence_report_the_nearer_line(doc, report
         (*beside, "sentence")]
 
 
+@pytest.mark.parametrize("doc,reported,beside", [
+    # #3488: the governor right after the snippet's last line is nearer than
+    # one three lines above its first; measured from the first line alone it
+    # was the farther. Its class ("prospective") sorts after the other's, so
+    # the class name cannot be what reports it.
+    (("The consortium will,\nafter careful review\nby the board,\nthe imaging waveforms\n"
+      "and the labels\nand the reports\nand the codes\nin future to approved users."),
+     ("prospective", "future", "in future to"), ("planned", "will", "The consortium will")),
+    # The mirror: the governor above is the farther, the one below nearer.
+    (("In future,\nafter careful review\nby the board,\nthe imaging waveforms\n"
+      "and the labels\nand the reports\nand the codes\nwill go to approved users."),
+     ("planned", "will", "will go to"), ("prospective", "future", "In future")),
+])
+@pytest.mark.parametrize("snippet", [
+    "the imaging waveforms and the labels and the reports and the codes",
+    # A quote in parts: the span ends at its last part's end, not its first's.
+    "the imaging waveforms ... and the codes",
+])
+def test_line_distance_is_measured_from_the_snippets_span(doc, reported, beside, snippet):
+    out = _run(doc, [("x", snippet)], {"x": "Waveforms are released."})
+    text, _m = _bundle(doc)
+    [flag] = out["flags"]
+    assert flag["snippet_line"] == _line(text, "the imaging")
+    assert (flag["class"], flag["marker"], flag["via"], flag["source_line"]) == (
+        reported[0], reported[1], "sentence", _line(text, reported[2]))
+    assert flag["equivalent_governors"] == [{"class": beside[0], "marker": beside[1], "via": "sentence",
+                                             "source_line": _line(text, beside[2])}]
+
+
 @pytest.mark.parametrize("heading,sentence_tail,reported,beside,via", [
     ("Future Data Releases", "will be released to approved users.",
      ("planned", "will"), ("prospective", "future"), "heading"),
