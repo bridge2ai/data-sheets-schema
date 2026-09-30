@@ -532,8 +532,9 @@ def _merge_chain(links):
 
 class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
     """#3263 (Codex): a merge cycle is reported as not checked, never as an
-    empty list; a merge chain deeper than the recursion limit is followed to
-    its end (#3272); and a string shared by many aliases is matched once and
+    empty list; a merge chain deeper than the recursion limit is no longer
+    cut by it (#3272), though one walked link by link runs past the step
+    budget (#3491); and a string shared by many aliases is matched once and
     charged per visit."""
 
     def test_a_merge_cycle_is_not_checked(self):
@@ -554,8 +555,10 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
         self.assertEqual(rd.check_text(text), ([], None))
 
     def test_a_merge_chain_past_the_recursion_limit_names_its_duplicate(self):
-        """#3272: the chain is checked like a short one, so the `name` its
-        root repeats is named, not the recursion limit."""
+        """#3272: the recursion limit no longer stops the chain, so the `name`
+        its root repeats is named. This chain sits under a skipped key, so
+        the walk expands it once rather than at every link; the usual shape
+        is the next test (#3491)."""
         links = sys.getrecursionlimit() + 20
         text = _merge_chain(links)
         record = yaml.safe_load(text)                  # the loader reads it
@@ -566,6 +569,28 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
         found, reason = rd.check_text(text)
         self.assertIsNone(found)
         self.assertTrue(reason.startswith("duplicate key `name`"), reason)
+
+    def test_a_chain_walked_link_by_link_is_checked_until_its_steps_pass_the_budget(self):
+        """#3491: in the usual shape, every link a top-level anchor merging
+        the one before, the walk visits each link and expands the chain
+        below it, about L**2/2 steps for L links. 500 links are checked;
+        past the recursion limit the record is not checked on the step
+        budget, and given steps enough the same walk finishes, so the
+        budget is what stops it. A chain whose links each add a key trips
+        the loader's copy bound instead."""
+        def chain(links, added=False):
+            return "\n".join(["a0: &a0 {name: safe}"]
+                             + [f"a{i}: &a{i} {{<<: *a{i - 1}" + (f", k{i}: 1" if added else "") + "}"
+                                for i in range(1, links)]) + "\n"
+        self.assertEqual(rd.check_text(chain(500)), ([], None))
+        links = sys.getrecursionlimit() + 20
+        found, reason = rd.check_text(chain(links))
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith("the walk ran past its budget of 200,000 steps"), reason)
+        self.assertEqual(rd.unread_duplicate_keys(chain(links), max_steps=links * links), [])
+        found, reason = rd.check_text(chain(links, added=True))
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith("the loader's merge keys would copy more than 200,000 pairs"), reason)
 
     def test_the_stack_lays_merges_out_in_the_loaders_order(self):
         """Each merge's own merges first, a merge list last to first, each

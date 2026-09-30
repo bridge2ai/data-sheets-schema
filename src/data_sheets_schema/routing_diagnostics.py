@@ -120,8 +120,14 @@ aliases reach it, and each visit to it is a step (#3263). A merge key that
 reaches the mapping it is written in (`MergeCycle`) is not checked rather
 than approximated: its kept pairs follow PyYAML's stateful flattening rather
 than the override rule reproduced here (#3263). A merge chain is followed
-with an explicit stack, so one longer than the interpreter's recursion limit
-is checked like a short one (#3272).
+with an explicit stack, so the interpreter's recursion limit no longer stops
+it (#3272); the step budget still does. Each mapping the duplicate check
+visits expands the whole chain below it, so a chain whose links are each
+visited — the usual shape, every link a top-level anchor merging the one
+before — costs about L²/2 steps for L links: one of about 600 links is
+checked, one of 650 or more is not checked on the budget. Where each link
+also adds a key, the loader copies about L²/2 pairs and its bound trips
+first, from about 630 links (#3491).
 
 The loader is bounded too. PyYAML flattens a merge by copying the merged
 pairs, so a text whose anchors each merge the one before twice grows
@@ -556,8 +562,9 @@ def _merge_sources(node: yaml.MappingNode, path: str,
     values, so the repeat drops nothing, and its last place is the one whose
     pairs win against the mappings between (#3226).
     Iterative, with an explicit stack of the merges still to follow at each
-    open mapping, so a merge chain of any length is read; each mapping
-    opened is a step (#3272)."""
+    open mapping, so the recursion limit does not cut a merge chain; each
+    mapping opened is a step, so one call on a chain of L links spends L
+    (#3272, #3491)."""
     def merges(current: yaml.MappingNode, current_path: str) -> Iterator[tuple[yaml.MappingNode, str]]:
         base = f"{current_path}.<<" if current_path else "<<"
         for key_node, value_node in current.value:
@@ -626,8 +633,11 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
     more than `max_steps` (default `MAX_TRAVERSAL_STEPS`), as nested merge
     lists that double at each level do (#3247), and MergeCycle for a merge
     key that reaches its own mapping: a walk that did not finish found
-    nothing, and saying so would read as clean (#3263). A merge chain of
-    any length is followed, not cut at the recursion limit (#3272)."""
+    nothing, and saying so would read as clean (#3263). A merge chain is
+    not cut at the recursion limit (#3272), but every mapping visited
+    expands the chain below it, so a chain whose links are each visited
+    costs about L²/2 steps and one of about 650 links or more raises
+    TraversalBudgetExceeded (#3491)."""
     budget = _Budget(max_steps)
     holds_memo: dict[int, bool] = {}
     try:
