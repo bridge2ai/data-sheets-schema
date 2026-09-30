@@ -351,7 +351,8 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     directory change, a d4d call of a literal subcommand, or `linkml-validate` or
     `linkml-term-validator` with the options it reads, each run as its words name it: a bare
     name or absolute path, no assignment before it, `printf -v` included, and no directory
-    change before a `python -c` or `-m` part; the inner command of a command or
+    change before a `python -c` or `-m` part or a `poetry run` part, a `derive core` call
+    aimed at another record included; the inner command of a command or
     process substitution is never read), that had not returned when the first full-record Write was
     issued (one in flight with it, backgrounded, or started with `&`, `coproc`, `setsid` and the
     like counts) and was issued before the derive, with a receipt change returning after both
@@ -361,7 +362,8 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     text carries a `&`, `coproc` or `setsid` and the like. A script that detaches a child itself
     is not seen as open-ended, nor is an
     environment set outside the command read, nor a package in the call's own starting
-    directory that a `python -c` or `-m` part imports first. A relative `--full`
+    directory that a `python -c` or `-m` part imports first, nor the project there whose
+    virtualenv a `poetry run` part takes. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,

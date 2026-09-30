@@ -1378,13 +1378,32 @@ class DeriveStatus(Base):
         for ok, boundary_is_first in ((True, True), (False, False)):
             with self.subTest(ok=ok):
                 self.run_ = self.new_run()
-                identity, block = self._around(lambda r: f"cd {r.root} && " + r.derive_command(), ok=ok)
+                identity, block = self._around(
+                    lambda r: f"cd {r.root} && " + r.derive_command().replace("poetry run ", "", 1), ok=ok)
                 self.assertEqual(block["status"], "checked", block["reasons"])
                 attempt = block["derive_core_attempts"][0]
                 self.assertEqual((attempt["status_basis"], attempt["outcome"]),
                                  ("command", "succeeded" if ok else "failed"))
                 self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"] == identity, boundary_is_first)
                 self.assertEqual(block["origin"]["phase3_backport" if ok else "phase1_correction"], 1)
+
+    def test_a_poetry_run_derive_after_cd_that_failed_may_have_run_another_projects_d4d(self):
+        # After `cd`, `poetry run` takes the virtualenv of the project the new
+        # directory is in (#3723). A successful derive of the tracked record
+        # is the boundary whatever ran it; a failed one is not, and may have
+        # derived the record through another project's `d4d`.
+        for ok in (True, False):
+            with self.subTest(ok=ok):
+                self.run_ = self.new_run()
+                identity, block = self._around(lambda r: f"cd {r.root} && " + r.derive_command(), ok=ok)
+                if ok:
+                    self.assertEqual(block["status"], "checked", block["reasons"])
+                    self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+                    self.assertEqual(block["possible_unseen_derives"], [])
+                else:
+                    self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program this "
+                                              "does not read")
+                    self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
 
     def test_a_compound_derive_the_native_control_denied_never_ran(self):
         identity, block = self._around(
@@ -1530,13 +1549,21 @@ class Boundaries(Base):
                                                    "phase3_backport": 1})
 
     def test_a_derive_after_pushd_elsewhere_is_not_the_boundary(self):
-        identity, block = self._derived("pushd /elsewhere && poetry run d4d derive core "
+        identity, block = self._derived("pushd /elsewhere && d4d derive core "
                                         "--full data/claudecode_direct/L/CHORUS_d4d.yaml")
         # Another record derived: no boundary, both later snippets Phase 1.
         self.assertEqual(block["status"], "checked", block["reasons"])
         self.assertIsNone(block["boundaries"]["derive_core"])
         self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 2,
                                            "phase3_backport": 0})
+        self.assertEqual(block["possible_unseen_derives"], [])
+        # Through `poetry run` the d4d that runs is the one the project
+        # `/elsewhere` is in installs, which may derive the tracked record:
+        # the call is a possible derive (#3723).
+        identity, block = self._derived("pushd /elsewhere && poetry run d4d derive core "
+                                        "--full data/claudecode_direct/L/CHORUS_d4d.yaml")
+        self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 8) runs a program this does not read")
+        self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
 
     def test_popd_with_nothing_pushed_leaves_no_known_directory(self):
         _, block = self._derived("popd && poetry run d4d derive core --full data/claudecode_direct/L/CHORUS_d4d.yaml")
@@ -2170,7 +2197,10 @@ class DeriveSpellings(Base):
                       "before it or as an earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`, `printf -v "
                       "PATH`), #3689, #3700, nor, for a `python -c` or `python -m` part, a directory change "
                       "before it in the command, since the interpreter imports from the directory it starts in "
-                      "first (#3699) -- or runs a command or process substitution, whose inner command is not "
+                      "first (#3699), nor, for a part run through `poetry run`, one either, since poetry takes "
+                      "its virtualenv from the project that directory is in (#3723), a d4d `derive core` call "
+                      "aimed at another record included (#3722) -- or runs a command or process substitution, "
+                      "whose inner command is not "
                       "read (#3675), or cannot be split by the tokenizer, that "
                       "had not returned when the draft was issued (one issued before the draft that returned "
                       "after it, or one whose run is open-ended, counts: #3676), was issued before the derive "
@@ -2194,12 +2224,16 @@ class DeriveSpellings(Base):
                       "bare name is taken to be the program `PATH` finds, and an absolute path the program it "
                       "names (#3689); nor is a package in the directory the call started in that a `python -c` "
                       "or `python -m` part imports before the installed one (a `linkml` or `data_sheets_schema` "
-                      "directory there, #3699)", text)
+                      "directory there, #3699), nor the project there whose virtualenv a `poetry run` part "
+                      "takes (#3723)", text)
         flat = " ".join(ro.__doc__.split())
         self.assertIn("or such a part not run as its words name (a variable or relative path as its program, "
                       "an assignment before it or as an earlier part, `printf -v` included, #3689, #3700, or "
                       "for a `python -c` or `python -m` part a directory change before it in the command, as "
-                      "the interpreter imports from the directory it starts in first, #3699)", flat)
+                      "the interpreter imports from the directory it starts in first, #3699, and for a part run "
+                      "through `poetry run` one too, as poetry takes its virtualenv from the project that "
+                      "directory is in, #3723; a d4d `derive core` call aimed at another record is held to the "
+                      "same, #3722)", flat)
         self.assertIn("or by `coproc`, or by a program that detaches it, `setsid`, `screen`, `tmux` and the "
                       "like, may outlive it, so none of them has, #3674, #3690; a command the tokenizer cannot "
                       "split is open-ended where its whole text carries such a `&`, `coproc` or detaching "
@@ -2282,7 +2316,23 @@ class UnseenDerive(Base):
               # first, so after a directory change they may run a package
               # it holds (#3699).
               f"cd hack && {VALIDATE}", f"cd hack; {TERMS}", f"pushd hack && {VALIDATE}",
-              "cd hack && python -m data_sheets_schema.cli receipts check --receipt R")
+              "cd hack && python -m data_sheets_schema.cli receipts check --receipt R",
+              # `poetry run` takes its virtualenv, and so the console script
+              # it runs, from the project the new directory is in (#3723).
+              "cd hack && poetry run linkml-validate -s s.yaml F",
+              "cd hack && poetry run d4d receipts check --receipt R",
+              "cd hack && timeout 60 poetry run d4d receipts check --receipt R",
+              "pushd hack && env poetry run linkml-validate -s s.yaml F",
+              # A `derive core` aimed at another record places nothing, and is
+              # held to the same rules as any other part read here (#3722).
+              "./d4d derive core --full /other/full.yaml --out /o/c.yaml",
+              "PYTHONPATH=./hack d4d derive core --full /other/full.yaml --out /o/c.yaml",
+              "$PY -m data_sheets_schema.cli derive core --full /other/full.yaml --out /o/c.yaml",
+              "cd hack && python -m data_sheets_schema.cli derive core --full /other/full.yaml --out /o/c.yaml",
+              "cd hack && poetry run d4d derive core --full /other/full.yaml --out /o/c.yaml",
+              "PATH=./bin:$PATH; d4d derive core --full /other/full.yaml --out /o/c.yaml",
+              "printf -v PATH '%s' ./bin; d4d derive core --full /other/full.yaml --out /o/c.yaml",
+              "./d4d derive core --full /other/full.yaml 2>/dev/null --out /o/c.yaml")
 
     def _run(self, command, *, derive=True, **result):
         """Draft, the call under test, a receipt change, then (by default) the
@@ -2333,7 +2383,16 @@ class UnseenDerive(Base):
                         # (#3699, #3700).
                         "printf '%s' -v; linkml-validate -s s.yaml F", "printf -- -v x; linkml-validate F",
                         "cd hack && linkml-validate -s s.yaml F", "cd hack && d4d receipts check --receipt R",
-                        "cd data && head -c 200 x.yaml"):
+                        "cd data && head -c 200 x.yaml",
+                        # `poetry run` with no directory change, and a
+                        # `derive core` aimed at another record run as its
+                        # words name it (#3722, #3723).
+                        "poetry run d4d receipts check --receipt R",
+                        "d4d derive core --full /other/full.yaml --out /o/c.yaml",
+                        "cd hack && d4d derive core --full /other/full.yaml --out /o/c.yaml",
+                        "poetry run d4d derive core --full /other/full.yaml --out /o/c.yaml",
+                        "/venv/bin/python -m data_sheets_schema.cli derive core --full /other/full.yaml "
+                        "--out /o/c.yaml"):
             with self.subTest(command=command):
                 _, block = self._run(command)
                 self.assertEqual(block["status"], "checked", block["reasons"])
@@ -2554,6 +2613,36 @@ class UnseenDerive(Base):
         for command, imports in cases.items():
             with self.subTest(command=command):
                 self.assertEqual(ro._imports_from_cwd(ro._unwrapped(ro._tokens(command) or [])), imports)
+
+    def test_poetry_run_and_chosen_by_cwd(self):
+        cases = {"poetry run linkml-validate F": (True, True),
+                 "timeout 60 poetry run d4d receipts check": (True, True),
+                 "X=1 env nice poetry run d4d x": (True, True),
+                 "linkml-validate F": (False, False), "d4d receipts check": (False, False),
+                 "python -m data_sheets_schema.cli x": (False, True),
+                 "poetry install": (False, False), "echo poetry run d4d": (False, False),
+                 "/usr/bin/poetry run d4d x": (False, False), "timeout 60": (False, False), "": (False, False)}
+        for command, (poetry, chosen) in cases.items():
+            with self.subTest(command=command):
+                segment = ro._tokens(command) or []
+                self.assertEqual(ro._poetry_run(segment), poetry)
+                self.assertEqual(ro._chosen_by_cwd(segment), chosen)
+
+    def test_a_derive_part_is_held_to_the_rules_of_the_parts_read_here(self):
+        # The part is read as a derive row (placing nothing, as `--full`
+        # names another record) and is still a possible derive of the tracked
+        # one where it may not run what its words name (#3722).
+        full = ro._Target("full", Path("/x/L/CHORUS_d4d.yaml"))
+        for command, unread in (("./d4d derive core --full /o/f.yaml", True),
+                                ("./d4d derive core --full 2>/dev/null /o/f.yaml", True),
+                                ("cd hack && poetry run d4d derive core --full /o/f.yaml", True),
+                                ("d4d derive core --full /o/f.yaml", False),
+                                ("cd hack && d4d derive core --full /o/f.yaml", False)):
+            with self.subTest(command=command):
+                shell = ro._shell(command, None, [full])
+                self.assertEqual(len(shell["derives"]), 1)
+                self.assertIn(shell["derives"][0]["targets_full"], (False, None))
+                self.assertEqual(shell["runs_unread"], unread)
 
     def test_a_denied_call_never_ran(self):
         r = self.new_run()
@@ -2915,7 +3004,8 @@ class Cli(unittest.TestCase):
                       "change, a d4d call of a literal subcommand, or `linkml-validate` or `linkml-term-validator` "
                       "with the options it reads, each run as its words name it: a bare name or absolute path, "
                       "no assignment before it, `printf -v` included, and no directory change before a "
-                      "`python -c` or `-m` part; the inner command of a command or process substitution is "
+                      "`python -c` or `-m` part or a `poetry run` part, a `derive core` call aimed at another "
+                      "record included; the inner command of a command or process substitution is "
                       "never read), that had not returned when the first full-record Write was issued (one in "
                       "flight with it, backgrounded, or started with `&`, `coproc`, `setsid` and the like "
                       "counts) and was "
@@ -2925,7 +3015,8 @@ class Cli(unittest.TestCase):
         self.assertIn("A command the tokenizer cannot split is such a call, open-ended where its text carries "
                       "a `&`, `coproc` or `setsid` and the like.", text)                         # #3698
         self.assertIn("nor a package in the call's own starting directory that a `python -c` or `-m` part "
-                      "imports first", text)                                                   # #3699
+                      "imports first, nor the project there whose virtualenv a `poetry run` part takes",
+                      text)                                                                    # #3699, #3723
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674
         self.assertIn("nor is an environment set outside the command read", text)                  # #3689
         self.assertNotIn("issued after the first full-record Write", text)                        # #3676

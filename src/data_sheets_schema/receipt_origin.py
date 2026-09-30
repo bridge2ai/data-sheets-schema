@@ -114,7 +114,10 @@ the pipeline spells each with), or such a part not run as its words name
 (a variable or relative path as its program, an assignment before it or
 as an earlier part, `printf -v` included, #3689, #3700, or for a `python
 -c` or `python -m` part a directory change before it in the command, as
-the interpreter imports from the directory it starts in first, #3699), a
+the interpreter imports from the directory it starts in first, #3699, and
+for a part run through `poetry run` one too, as poetry takes its
+virtualenv from the project that directory is in, #3723; a d4d `derive
+core` call aimed at another record is held to the same, #3722), a
 command or process substitution, whose inner command is not read (#3675),
 or a command the tokenizer cannot split -- is a possible derive where one
 would move the boundary: it had not
@@ -280,7 +283,10 @@ NON_CHECKS = (
     "variable or a relative path (`$PY`, `./python`), and no assignment before it or as an "
     "earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`, `printf -v PATH`), #3689, #3700, "
     "nor, for a `python -c` or `python -m` part, a directory change before it in the command, "
-    "since the interpreter imports from the directory it starts in first (#3699) -- or runs a "
+    "since the interpreter imports from the directory it starts in first (#3699), nor, for a "
+    "part run through `poetry run`, one either, since poetry takes its virtualenv from the "
+    "project that directory is in (#3723), a d4d `derive core` call aimed at another record "
+    "included (#3722) -- or runs a "
     "command or process substitution, whose inner command is not read (#3675), or cannot be "
     "split by the tokenizer, that had not returned "
     "when the draft was issued (one issued before the draft that returned after it, or one "
@@ -302,7 +308,8 @@ NON_CHECKS = (
     "earlier or inherited) read: a bare name is taken to be the program `PATH` finds, and an "
     "absolute path the program it names (#3689); nor is a package in the directory the call "
     "started in that a `python -c` or `python -m` part imports before the installed one "
-    "(a `linkml` or `data_sheets_schema` directory there, #3699). The words are matched "
+    "(a `linkml` or `data_sheets_schema` directory there, #3699), nor the project there whose "
+    "virtualenv a `poetry run` part takes (#3723). The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -1121,9 +1128,38 @@ def _imports_from_cwd(rest: list[str]) -> bool:
     """Whether a part (from its program on) is a `python*` interpreter run
     with `-c` or `-m`, which puts the directory it starts in first on
     `sys.path`: a `linkml` or `data_sheets_schema` package there is imported
-    before the installed one (#3699). The console scripts put their own
-    `bin` directory there instead."""
+    before the installed one (#3699). A console script run by a bare name or
+    an absolute path puts its own `bin` directory there instead, which the
+    working directory does not choose; one run through `poetry run` is
+    `_poetry_run`'s case (#3723)."""
     return bool(rest) and bool(_PYTHON.fullmatch(os.path.basename(rest[0]))) and rest[1:2] in (["-c"], ["-m"])
+
+
+def _poetry_run(segment: list[str]) -> bool:
+    """Whether the part runs its program through `poetry run`, first or
+    behind the assignments and wrappers `_unwrapped` reads (#3723). Poetry
+    finds its project, and so the virtualenv whose `bin` supplies the
+    program, from the `pyproject.toml` in the directory it starts in or the
+    nearest above it: after a directory change the console script that runs
+    (`linkml-validate`, `d4d`) is whatever that project installs."""
+    rest = list(segment)
+    while rest:
+        while rest and _ASSIGNMENT.fullmatch(rest[0]):
+            rest.pop(0)
+        if rest[:2] == ["poetry", "run"]:
+            return True
+        skip = _wrapper_skip(rest)
+        if skip is None or skip >= len(rest):
+            return False
+        rest = rest[skip:]
+    return False
+
+
+def _chosen_by_cwd(segment: list[str]) -> bool:
+    """Whether the working directory may choose the code a part runs: a
+    `python -c` or `-m` interpreter (`_imports_from_cwd`, #3699) or a program
+    run through `poetry run` (`_poetry_run`, #3723)."""
+    return _imports_from_cwd(_unwrapped(segment)) or _poetry_run(segment)
 
 
 def _printf_assigns(args: list[str]) -> bool:
@@ -1534,7 +1570,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # Whether a directory change has run: `python -c` and `python -m` put
     # the directory they start in first on `sys.path`, so after one the
     # interpreter may import a `linkml` or `data_sheets_schema` package the
-    # new directory holds rather than the installed one (#3699).
+    # new directory holds rather than the installed one (#3699); `poetry
+    # run` picks its project's virtualenv from that directory (#3723).
     moved = False
     mentioning_readers: list[int] = []
     for index, segment in enumerate(segments):
@@ -1569,6 +1606,14 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             if len(rest) > 1 or not reached:
                 pushed = [None] * len(pushed)
             continue
+        # Whether the part may not run what its words name (#3689, #3699,
+        # #3700, #3723): an assignment before it (on the part, to `env`, as an
+        # earlier part or by `printf -v`), a variable or relative-path program
+        # or wrapper, or, after a directory change, a program the new
+        # directory chooses. A `derive core` part is held to it as well, since
+        # one aimed at another record places nothing and must still count
+        # where it may run something else (#3722).
+        unplain = assigned or not _plainly_run(segment) or (moved and _chosen_by_cwd(segment))
         args = _cli_args(_unwrapped(segment))
         # A part that carries the words `derive core` but is not read here as
         # a d4d call of that subcommand, nor as a program known to read, may
@@ -1586,6 +1631,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                     target.matches(o, local) is not False for o in outs for target in targets):
                 read_only = False
             if sub == ("derive", "core") and full is not None:
+                may_derive[index] = unplain
                 spelled = _option(sub_args, "--full")
                 if _redirection_interleaved(sub_args):
                     out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
@@ -1615,9 +1661,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         runs_unknown[index] = opaque
         # A part read here (a reader, a d4d call, a validator) still counts
         # where it may not run what its words name (#3689).
-        may_derive[index] = ((opaque and not _validator(_unwrapped(segment)))
-                             or assigned or not _plainly_run(segment)
-                             or (moved and _imports_from_cwd(_unwrapped(segment))))
+        may_derive[index] = (opaque and not _validator(_unwrapped(segment))) or unplain
         # `printf -v NAME` assigns a shell variable, which a later part runs
         # under as it would after `NAME=...;` (`printf -v PATH %s ./bin;
         # linkml-validate`, #3700).
