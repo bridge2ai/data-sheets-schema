@@ -492,11 +492,18 @@ def _validate_deterministic(path: Path) -> tuple[list[str] | None, str | None]:
     like a record — is the same: not measured, never a crash, as
     `api_runner.validation_block`'s `_dupes` treats it (#1190; review
     #3616), so the section stays reported and never fatal.
+
+    The duplicates are composed by libyaml (`duplicate_keys.FAST_LOADER`,
+    #3786): the same findings as `duplicate_keys_in`'s pure-Python default,
+    which stays as it is for the callers that pin it, about nine times
+    faster. Not strict, as before: a text neither loader can scan claims
+    no duplicate, and the validator reports why it cannot be loaded.
     """
     from data_sheets_schema.api_runner import _validator_lines
-    from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
+    from data_sheets_schema.duplicate_keys import FAST_LOADER, describe, find_duplicate_keys
     try:
-        text_dups = duplicate_keys_in(path)
+        text_dups = find_duplicate_keys(Path(path).read_text(encoding="utf-8", errors="replace"),
+                                        loader=FAST_LOADER)
     except OSError as exc:
         return None, f"record could not be read: {exc}"
     dups = [describe(d) for d in [text_dups] if d]

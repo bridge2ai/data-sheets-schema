@@ -124,6 +124,34 @@ class TestTheInstrument(unittest.TestCase):
             self.assertEqual(len(findings), 1)
             self.assertIn("duplicate mapping key", findings[0])
 
+    def test_the_duplicate_scan_is_libyaml_and_not_strict(self):
+        """#3786: the walk asks `find_duplicate_keys` with `FAST_LOADER`, not
+        `duplicate_keys_in`'s pure-Python default, and not strictly — a text
+        that cannot be scanned claims no duplicate, as before. Its findings
+        are the default loader's, word for word."""
+        from data_sheets_schema import duplicate_keys
+        real = duplicate_keys.find_duplicate_keys
+        seen = []
+
+        def scan(text, loader=yaml.SafeLoader, *, strict=False):
+            seen.append((loader, strict))
+            return real(text, loader=loader, strict=strict)
+
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch("data_sheets_schema.api_runner._validator_lines",
+                           return_value=([], None)), \
+                mock.patch.object(duplicate_keys, "find_duplicate_keys", scan):
+            dup = Path(tmp) / "dup.yaml"
+            dup.write_text(VALID_RECORD + "title: Another\ntitle: Third\n", encoding="utf-8")
+            findings, failure = _validate_deterministic(dup)
+            seen_fast = list(seen)
+            seen.clear()
+            expected = [duplicate_keys.describe(duplicate_keys.duplicate_keys_in(dup))]
+        self.assertEqual(seen_fast, [(duplicate_keys.FAST_LOADER, False)])
+        self.assertEqual(seen, [(yaml.SafeLoader, False)])      # the default is untouched
+        self.assertIsNone(failure)
+        self.assertEqual(findings, expected)
+
     def test_a_duplicate_key_survives_a_validator_that_did_not_run(self):
         """#1032, review #3610: the duplicate is read off the text, which
         needs no validator, so a record known to be invalid is reported
