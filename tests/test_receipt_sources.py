@@ -379,7 +379,10 @@ SUPERSEDED_FULL = {"id": "https://x/ds",
                    "count": "1,200",                                     # no token
                    "guidelines": "annotation guidelines vowel phonation",  # v1; v2 lacks it, v3 holds it
                    "calibration": "retired calibration procedures",      # replacement has no chunk
-                   "workshop": "nothing about annotation"}               # cited to v1 and v2; only v2 holds it
+                   "workshop": "nothing about annotation",               # cited to v1 and v2; only v2 holds it
+                   # exempt (owes no receipt), cited only to October, and June holds every token:
+                   # it must stay `exempt`, never be screened into a replacement match (#3444)
+                   "notes": "recordings from five clinical sites"}
 
 
 def _superseded():
@@ -389,7 +392,7 @@ def _superseded():
     assert [c["id"] for c in manifest["chunks"]] == ["c001", "c002", "c003", "c004", "c005", "c006"]
     receipt = {"bundle_md5": manifest["bundle_md5"], "chunks": [
         {"id": "c001", "status": "extracted", "extracted": [
-            {"slot": s, "snippet": "the october release"} for s in ("sites", "steward", "both", "count")]},
+            {"slot": s, "snippet": "the october release"} for s in ("sites", "steward", "both", "count", "notes")]},
         {"id": "c002", "status": "extracted", "extracted": [{"slot": "both", "snippet": "the june release"}]},
         {"id": "c003", "status": "extracted", "extracted": [{"slot": "guidelines", "snippet": "workshop one"},
                                                            {"slot": "workshop", "snippet": "workshop one"}]},
@@ -411,14 +414,17 @@ def test_a_path_cited_only_to_a_superseded_source_is_screened_against_its_replac
         "count": "below_floor",
         "calibration": "no_replacement_chunk",      # `absent` is declared but not in the bundle
         # v2 is cited too, so its own chunk is no replacement: only v3's is read
-        "workshop": "no_replacement_match"}
+        "workshop": "no_replacement_match",
+        # cited only to October, June holds its tokens, but an exempt path is not screened (#3444)
+        "notes": "exempt"}
+    assert rows["notes"]["token_screen"] == "exempt" and "replacement_chunks" not in rows["notes"]
     assert rows["sites"]["token_screen"] == "no_higher_tier_chunk"      # the tier screen cannot see it
     assert rows["sites"]["replacement_chunks"] == ["c002"]
     assert rows["guidelines"]["replacement_chunks"] == ["c005"]           # v2 (c004) lacks the tokens
     s = out["superseded_with_replacement_token_match"]
     assert s["count"] == 2 and s["screened"] == 4
     assert s["outcomes"] == {"replacement_match": 2, "no_replacement_match": 2, "below_floor": 1,
-                             "no_replacement_chunk": 1, "cites_a_current_source": 1, "exempt": 0,
+                             "no_replacement_chunk": 1, "cites_a_current_source": 1, "exempt": 1,
                              "preamble_only": 0}
     assert sum(s["outcomes"].values()) == out["paths"]
     assert s["superseded_documents"] == [{"document": "october", "superseded_by": "june"},
@@ -449,7 +455,7 @@ def test_the_supersession_screen_changes_no_tier_outcome():
         ("retired.txt", RETIRED))))
     receipt = {"bundle_md5": manifest["bundle_md5"], "chunks": [
         {"id": "c001", "status": "extracted", "extracted": [
-            {"slot": s, "snippet": "x"} for s in ("sites", "steward", "both", "count")]},
+            {"slot": s, "snippet": "x"} for s in ("sites", "steward", "both", "count", "notes")]},
         {"id": "c002", "status": "extracted", "extracted": [{"slot": "both", "snippet": "x"}]},
         {"id": "c003", "status": "extracted", "extracted": [{"slot": "guidelines", "snippet": "x"},
                                                            {"slot": "workshop", "snippet": "x"}]},
@@ -557,6 +563,20 @@ def test_run_source_manifest_reads_the_bytes_the_run_recorded(tmp_path):
     assert git.call_args.args == (str(sm),)
     assert git.call_args.kwargs == {"md5": hashlib.md5(SOURCE_MANIFEST).hexdigest(), "sha256": None}
     assert raw == SOURCE_MANIFEST and basis == {"source": "git blob", "path": str(sm), "commit": "b" * 40}
+    # Every hash the run kept must match the file on disk (#3443): with md5
+    # and sha256 recorded and only the md5 matching, the disk is not used.
+    sm.write_bytes(SOURCE_MANIFEST)
+    both = {"inputs": {"source_manifest": {"path": str(sm), "md5": hashlib.md5(SOURCE_MANIFEST).hexdigest(),
+                                           "sha256": "0" * 64}}}
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=None) as git:
+        with pytest.raises(ValueError, match="no committed version .* md5 and sha256"):
+            rs.run_source_manifest(both, prov)
+    assert git.call_args.kwargs == {"md5": hashlib.md5(SOURCE_MANIFEST).hexdigest(), "sha256": "0" * 64}
+    both["inputs"]["source_manifest"]["sha256"] = hashlib.sha256(SOURCE_MANIFEST).hexdigest()
+    with mock.patch.object(pv, "bundle_bytes_for") as git:
+        assert rs.run_source_manifest(both, prov)[1] == {"source": "manifest on disk", "path": str(sm)}
+    git.assert_not_called()
+    sm.write_bytes(SOURCE_MANIFEST + b"# edited since the run\n")
     with mock.patch.object(pv, "bundle_bytes_for", return_value=None):
         with pytest.raises(ValueError, match="no committed version .* md5"):
             rs.run_source_manifest(record, prov)
@@ -656,6 +676,10 @@ def test_at_run_commit_reads_tiers_from_the_manifest_the_run_recorded(tmp_path, 
     assert report["run"]["source_manifest_bytes"] == {"source": "manifest on disk", "path": str(recorded)}
     assert report["run"]["source_manifest_basis"]["same_bytes"] is True
     assert report["non_checks"][-1] == rs.NON_CHECK_AT_RUN_COMMIT and report["non_checks"] != default["non_checks"]
+    # the default non-check names what the flag reads: the recorded bytes, by
+    # hash, not the manifest at the run's commit (#3445)
+    assert "bytes the run recorded" in default["non_checks"][-1]
+    assert "recovered by hash rather than from the run's commit" in default["non_checks"][-1]
     text = CliRunner().invoke(cli, args + ["--at-run-commit"]).output
     assert f"tiers: {recorded} (manifest on disk) sha256" in text and "(the bytes the run recorded)" in text
     with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
@@ -777,6 +801,27 @@ def test_the_supersession_figures_the_module_states_on_the_24_fig19_records():
         outcomes.update(x["outcomes"])
     assert outcomes["replacement_match"] + outcomes["no_replacement_match"] + outcomes["below_floor"] == 74
     assert outcomes["no_replacement_chunk"] == 0
+    # 83 paths are cited only to superseded sources (#3441): the 74 screened
+    # above plus 9 exempt ones the screen passes through, and every one of
+    # the 83 has a chunk of some replacement down its chain in its bundle.
+    only_superseded, with_chunk = Counter(), 0
+    for _project, o in reports:
+        docs = o["documents"]
+        docs = docs if isinstance(docs, dict) else {d["document"]: d for d in docs}
+        for r in o["by_path"]:
+            if not r["documents"] or not all(docs[d].get("superseded_by") for d in r["documents"]):
+                continue
+            only_superseded[r["supersession_screen"]] += 1
+            chain, seen = [docs[d].get("superseded_by") for d in r["documents"]], set()
+            while chain:
+                d = chain.pop()
+                if d is not None and d not in seen:
+                    seen.add(d)
+                    chain.append(docs[d].get("superseded_by"))
+            with_chunk += any(docs[d]["chunks"] for d in seen - set(r["documents"]))
+    assert only_superseded == {"no_replacement_match": 50, "replacement_match": 12, "below_floor": 12,
+                               "exempt": 9}
+    assert sum(only_superseded.values()) == 83 and with_chunk == 83
     assert sum(x["screened"] for x in s) == 62 and sum(x["count"] for x in s) == 12
     assert sum(x["verbatim"] for x in s) == 1 and sum(x["also_higher_tier_match"] for x in s) == 0
     replaced = Counter()

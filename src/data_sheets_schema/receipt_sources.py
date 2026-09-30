@@ -74,10 +74,12 @@ replacement are both tier 1 — and `source_priority.decide` already ranks
 supersession above tier for disagreements (#600). It is a separate count:
 no tier outcome and no projection field changes, and a path can be flagged
 by both screens (`also_higher_tier_match` says how many were). On the 24
-fig19 records, 74 paths are cited only to superseded sources, every one with
-a replacement chunk in its bundle; 12 of the 62 screened are flagged (8 CM4AI
-against `june_2026_dataverse_release`, 4 VOICE against `physionet_3_1_0`),
-1 verbatim, and none of the 12 is also a tier-screen flag.
+fig19 records, 83 paths are cited only to superseded sources, every one with
+a replacement chunk in its bundle. 9 of them are exempt (they owe no bundle
+receipt) and keep the outcome `exempt` unscreened; of the other 74, 62 clear
+the floors and are screened, and 12 of those are flagged (8 CM4AI against
+`june_2026_dataverse_release`, 4 VOICE against `physionet_3_1_0`), 1
+verbatim, and none of the 12 is also a tier-screen flag.
 
 **Which manifest ranks**: the selected one by default, its sha256 stated
 beside whether it is the run's recorded `inputs.source_manifest`. With
@@ -152,7 +154,8 @@ NON_CHECKS = (
     "that a higher-tier chunk containing a value's tokens states that value — the screen is lexical; "
     "spot-check the listed paths",
     "which tiers the run itself saw — tiers are read from the selected source manifest's bytes, "
-    "whose sha256 is stated, not from the manifest at the run's commit (`--at-run-commit` reads those)",
+    "whose sha256 is stated, not from the bytes the run recorded in inputs.source_manifest "
+    "(`--at-run-commit` reads those, recovered by hash rather than from the run's commit)",
 )
 
 #: With `--at-run-commit` (#3050) the last non-check above no longer holds;
