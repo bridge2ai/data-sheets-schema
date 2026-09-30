@@ -260,7 +260,8 @@ class Lexicon:
     compile or bytes that are not YAML raise `lexicon.LexiconError` naming
     the file, so `check_registry` reports a malformed pinned lexicon rather
     than raising (#3901), as `lexicon.parse` does for the pattern lexicons.
-    The checks below that already raise a ValueError keep their messages."""
+    The checks below that raise a ValueError keep their messages, prefixed
+    with the file, as do bytes that are not UTF-8 (#3915)."""
 
     def __init__(self, raw: bytes, *, path: str | None = None):
         try:
@@ -270,6 +271,10 @@ class Lexicon:
             kind = "re.error" if isinstance(exc, re.error) else type(exc).__name__  # PatternError on 3.13
             raise lx.LexiconError(f"{path or 'the lexicon'} is not a well-formed self_disclaimed "
                                   f"lexicon ({kind}: {exc})") from exc
+        except ValueError as exc:   # the checks below, and bytes that are not UTF-8 (#3915)
+            if isinstance(exc, lx.LexiconError):
+                raise
+            raise lx.LexiconError(f"{path or 'the lexicon'}: {exc}") from exc
 
     def _compile(self, raw: bytes, path: str | None) -> None:
         data = yaml.safe_load(raw.decode("utf-8"))

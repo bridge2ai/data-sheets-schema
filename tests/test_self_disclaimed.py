@@ -1898,3 +1898,19 @@ def test_the_canary_fixtures_are_neutral_and_documented():
         if path.suffix == ".yaml":
             assert text.startswith("# Neutralised fixture (#3515)"), path
     assert len(set(re.findall(r"`([0-9a-f]{64})`", readme))) == len(files)
+
+
+def test_every_registry_problem_names_its_file(tmp_path):
+    """#3915: a plain ValueError from the reader, and bytes that are not
+    UTF-8, are reported naming the registered file they came from."""
+    data = yaml.safe_load(sd.lexicon_path(1).read_text(encoding="utf-8"))
+    (tmp_path / "self_disclaimed_v1.yaml").write_text(
+        yaml.safe_dump({**data, "instrument": "other"}, sort_keys=False), encoding="utf-8")
+    (tmp_path / "self_disclaimed_v2.yaml").write_bytes(b"\xff\xfe bad")
+    _registry(tmp_path, {1: "self_disclaimed_v1.yaml", 2: "self_disclaimed_v2.yaml"})
+    problems = sd.check_registry(tmp_path)
+    assert len(problems) == 2, problems
+    assert "self_disclaimed_v1.yaml" in problems[0] and "not a self_disclaimed lexicon" in problems[0]
+    assert "self_disclaimed_v2.yaml" in problems[1] and "codec can't decode" in problems[1]
+    with pytest.raises(lx.LexiconError, match="self_disclaimed_v2.yaml"):
+        sd.load_registered(2, directory=tmp_path)
