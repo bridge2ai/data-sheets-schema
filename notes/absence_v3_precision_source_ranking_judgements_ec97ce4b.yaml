@@ -1,0 +1,602 @@
+# Per-phrase judgements of the precision of the rsn.source-ranking matches
+# absence lexicon v3 keeps (#3793), behind the precision section of
+# notes/absence_v3_recall.md.
+#
+# The draw is `scripts/absence_v3_recall.py --kept-sample 50 --seed 2919`: 50 of
+# the 248 v3 matches of rsn.source-ranking over the 303 records
+# notes/absence_claims_baseline.md pins, in the order random.Random(2919).sample
+# puts them. Its sha256 is `draw_sha256` below, over each phrase's class,
+# record, pointer and span in the order drawn, as the precision judgements'
+# is; the script recomputes it from the entries here and refuses the note when
+# it differs or when the verdict tally is not its KEPT entry's counts. `start`
+# and `end` are the v3 match's offsets into the whitespace-collapsed leaf.
+#
+# `reading` and `verdict` are judged: each phrase was read on 2026-09-30 in its
+# sentence as written (to its full stop, a clause after `;` included) and the
+# sentences around it, against the record_self_narration definition, with the
+# readings the recall judgements use
+# (notes/absence_v3_recall_judgements_241e910e.yaml):
+#   construction  the sentence says what the record did (preferred, used,
+#                 recorded, left a slot empty) and the ranking term bears on
+#                 it                                         -> in_class
+#   referent      the sentence says which dataset or release this record
+#                 describes, justified by the ranking        -> in_class
+#   source        the sentence reports the sources (a conflict, a rank, what a
+#                 source or the manifest states) and says nothing of what the
+#                 record did                                 -> borderline
+#   absence       an absence asserted across the sources     -> not_in_class
+# One rater, the agent implementing #3793, the same kind of rater as the
+# recall judgements: not an independent review.
+# Written by a one-off script; never edited except to add a judgement's
+# correction with its reason.
+draw_sha256: ec97ce4b8e0f6d135c9b6ed1a7d55adbad1cdc3b9805c4c8b8dd14e6aaf8e61f
+lexicon_sha256: f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6
+record_set_sha256: cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711
+sample: 50
+seed: 2919
+recorded: '2026-09-30'
+rater: 'the agent implementing #3793; not an independent rater'
+judgements:
+  record_self_narration:
+  - n: 1
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /is_deidentified/source_caveats
+    start: 368
+    end: 398
+    patterns:
+    - rsn.source-ranking
+    text: preferred as the higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which source's statement the record prefers ('The FAIRhub statement is preferred as the higher-ranked source').
+  - n: 2
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1319
+    end: 1332
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which value the record uses for the release collection window ('the higher-ranked FAIRhub value is used').
+  - n: 3
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /creators/8/source_caveats
+    start: 172
+    end: 186
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says which spelling the record prefers and that the input manifest's ranking decided it.
+  - n: 4
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 1923
+    end: 1978
+    patterns:
+    - rsn.source-ranking
+    text: recorded as separate purposes because the higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says the record keeps the two figures as separate purposes because the ranked sources cannot be reconciled.
+  - n: 5
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 2120
+    end: 2133
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says whose attribution the record uses in creators ('the Dataverse releases are the higher-ranked source and their
+      attribution is used').
+  - n: 6
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /creators/5/source_caveats
+    start: 252
+    end: 265
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which value the record holds ('The higher-ranked Dataverse value is recorded here').
+  - n: 7
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 464
+    end: 478
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    reading: construction
+    verdict: in_class
+    reason: Says the ranking decided the form this record uses ('so this record uses "Exploratory"').
+  - n: 8
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 554
+    end: 567
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which release date the record uses ('the higher-ranked Dataverse value is used').
+  - n: 9
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1565
+    end: 1578
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which expansion the record uses in its description ('the higher-ranked "Exploratory" is used').
+  - n: 10
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 84
+    end: 98
+    patterns:
+    - rsn.source-ranking
+    text: source ranking
+    reading: construction
+    verdict: in_class
+    reason: Says the record resolved the disagreements by the source ranking ('are resolved here by the source ranking').
+  - n: 11
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 67
+    end: 81
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says the input manifest's ranking was used to decide the record's values.
+  - n: 12
+    record: claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 200
+    end: 213
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which value the record uses for the committee name ('The higher-ranked RO-Crate value is used').
+  - n: 13
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /creators/44/source_caveats
+    start: 259
+    end: 273
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says the higher-ranked value is the one recorded here, by the input manifest's ranking.
+  - n: 14
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1263
+    end: 1277
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    reading: construction
+    verdict: in_class
+    reason: Says both equally ranked readings are recorded in the record ('both readings are recorded').
+  - n: 15
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /creators/0/principal_investigator/source_caveats
+    start: 21
+    end: 56
+    patterns:
+    - rsn.source-ranking
+    text: recorded because two equally ranked
+    reading: construction
+    verdict: in_class
+    reason: Says the record carries two affiliations because equally ranked sources disagree.
+  - n: 16
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 2141
+    end: 2154
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    reading: construction
+    verdict: in_class
+    reason: Says what the record does where no tier-1 source corroborates a value ('that is noted on the slot concerned').
+  - n: 17
+    record: claudecode_agent_merged/2026-07-29_guarded-union/VOICE_d4d.yaml
+    pointer: /related_datasets/2/description
+    start: 195
+    end: 210
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    reading: source
+    verdict: borderline
+    reason: Reports what the source manifest records (a Synapse identifier for the pediatric audio); the sentence says nothing
+      of what the record did with it.
+  - n: 18
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 394
+    end: 407
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which figure the record uses and where the other is recorded ('the higher-ranked website figure is used here').
+  - n: 19
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /creators/15/source_caveats
+    start: 151
+    end: 164
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says whose affiliation the record follows ('The higher-ranked sources are followed here').
+  - n: 20
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 413
+    end: 442
+    patterns:
+    - rsn.source-ranking
+    text: used only where higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which sources the record used and when ('were used only where higher-ranked sources are silent').
+  - n: 21
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/source_caveats
+    start: 317
+    end: 330
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which wording the record prefers and that the window is therefore not asserted.
+  - n: 22
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CM4AI_d4d.yaml
+    pointer: /updates/source_caveats
+    start: 145
+    end: 175
+    patterns:
+    - rsn.source-ranking
+    text: preferred as the higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which source's date the record prefers and that the disagreement is recorded.
+  - n: 23
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /content_warnings/0/source_caveats
+    start: 336
+    end: 366
+    patterns:
+    - rsn.source-ranking
+    text: preferred as the higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which source's statement the record prefers ('preferred as the higher-ranked source').
+  - n: 24
+    record: claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/2/source_caveats
+    start: 177
+    end: 191
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    reading: construction
+    verdict: in_class
+    reason: Says the ranking cannot settle the conflict, so the record carries both statements ('both are recorded').
+  - n: 25
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 257
+    end: 271
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: source
+    verdict: borderline
+    reason: Reports what a source the input manifest ranks higher states (older files no longer available); the preference
+      is in the next sentence, not this one.
+  - n: 26
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/AI_READI_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 187
+    end: 202
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    reading: source
+    verdict: borderline
+    reason: Reports what the source manifest's curation note identifies (a distinct Mini Version); the sentence says nothing
+      of what the record did.
+  - n: 27
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 343
+    end: 356
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which sources the record preferred for its funding reference ('The higher-ranked sources were preferred').
+  - n: 28
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/source_caveats
+    start: 19
+    end: 33
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    reading: construction
+    verdict: in_class
+    reason: Says the record carries the equally ranked sources' tension rather than resolving it.
+  - n: 29
+    record: claudecode_api/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 314
+    end: 327
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which figure the record holds in instances ('The higher-ranked website figure is recorded in the instances
+      slot').
+  - n: 30
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 554
+    end: 567
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which form this record's description uses ('The higher-ranked "Exploratory" form is used').
+  - n: 31
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 543
+    end: 624
+    patterns:
+    - rsn.source-ranking
+    text: stated as support for the research rather than contradicted by the tier-1 sources
+    reading: construction
+    verdict: in_class
+    reason: Says which grants the record retains and why ('are retained here because they are stated as support ... rather
+      than contradicted by the tier-1 sources').
+  - n: 32
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 1992
+    end: 2007
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    reading: construction
+    verdict: in_class
+    reason: Says the record dates the values it takes from a capture the source manifest retains ('values taken from it are
+      dated accordingly').
+  - n: 33
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 258
+    end: 272
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says whose value the record prefers by the manifest's ranking and that no end date is recorded.
+  - n: 34
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 107
+    end: 130
+    patterns:
+    - rsn.source-ranking
+    text: declared source ranking
+    reading: referent
+    verdict: in_class
+    reason: Says which release this record describes, justified by the declared source ranking ('this record describes ...
+      which the declared source ranking treats as the current release').
+  - n: 35
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 71
+    end: 85
+    patterns:
+    - rsn.source-ranking
+    text: source ranking
+    reading: construction
+    verdict: in_class
+    reason: Says the record resolved six disagreements by the source ranking.
+  - n: 36
+    record: claudecode_agent_merged/2026-07-29_coverage-union/CM4AI_d4d.yaml
+    pointer: /resources/0/related_datasets/0/description
+    start: 116
+    end: 131
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    reading: source
+    verdict: borderline
+    reason: Reports what the source manifest records about the release (superseded upstream); the sentence says nothing of
+      what the record did.
+  - n: 37
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 115
+    end: 131
+    patterns:
+    - rsn.source-ranking
+    text: declared ranking
+    reading: construction
+    verdict: in_class
+    reason: Says the declared ranking decided which release is primary and which sources the record used only where higher-ranked
+      ones are silent.
+  - n: 38
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 105
+    end: 119
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says which source the record's version 2.0.0 figures come from, one the input manifest retains for them.
+  - n: 39
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 982
+    end: 996
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    reading: construction
+    verdict: in_class
+    reason: Says the ranking cannot decide, so the record carries both affiliations ('both affiliations are recorded on that
+      creator').
+  - n: 40
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /distribution_dates/4/source_caveats
+    start: 277
+    end: 291
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says the higher-ranked source's date is the one recorded here.
+  - n: 41
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /related_datasets/0/source_caveats
+    start: 167
+    end: 182
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    reading: construction
+    verdict: in_class
+    reason: Says the DOI recorded here is the one the source manifest declares ('the project-level DOI recorded here').
+  - n: 42
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /ethical_reviews/0/source_caveats
+    start: 467
+    end: 479
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says the record notes the lower-ranked reading and why ('The lower-ranked reading is noted here').
+  - n: 43
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 147
+    end: 176
+    patterns:
+    - rsn.source-ranking
+    text: recorded in the higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which value the record uses ('the FAIRhub value is used here', after the ranked sources' dates).
+  - n: 44
+    record: claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1278
+    end: 1291
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which affiliation the record states ('the higher-ranked FAIRhub value is stated').
+  - n: 45
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 345
+    end: 358
+    patterns:
+    - rsn.source-ranking
+    text: higher ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which value the record states ('The higher ranked project documentation value is stated in this record').
+  - n: 46
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /creators/6/source_caveats
+    start: 132
+    end: 162
+    patterns:
+    - rsn.source-ranking
+    text: used here as the higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which spelling the record uses ('used here as the higher-ranked source').
+  - n: 47
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /human_subject_research/source_caveats
+    start: 494
+    end: 507
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    reading: construction
+    verdict: in_class
+    reason: Says which source's name the record holds in ethics_review_board.
+  - n: 48
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 3710
+    end: 3742
+    patterns:
+    - rsn.source-ranking
+    text: use agreement, an equally ranked
+    reading: source
+    verdict: borderline
+    reason: 'A source conflict: the two statements concern different distributions and the ranking cannot settle them; the
+      sentence says nothing of what the record did, and the matched verb is the ''use'' of ''data transfer and use agreement''.'
+  - n: 49
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /creators/13/source_caveats
+    start: 208
+    end: 222
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says which spelling the record prefers and that the input manifest's ranking decided it.
+  - n: 50
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /creators/1/affiliations/0/source_caveats
+    start: 246
+    end: 260
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    reading: construction
+    verdict: in_class
+    reason: Says both equally ranked statements are reported in the record rather than one preferred.
