@@ -2770,6 +2770,9 @@ def name_grounding_cmd(record_file, bundle, label, project, method, which, as_js
     listed with its path. A whole-bundle token match is a lower bound: a
     given name found anywhere in the bundle, even in another person's
     entry, grounds the token (see `data_sheets_schema.name_grounding`).
+    Beside it, report-only, the v2 proximity reading (#2978) lists the
+    grounded tokens it would demote: those the bundle never writes near
+    another word of the same name, or beside that word's initial.
 
     With --label, the bytes are the ones each provenance record hashed: the
     bundle on disk only where it matches every recorded hash, otherwise the
@@ -2854,3 +2857,12 @@ def name_grounding_cmd(record_file, bundle, label, project, method, which, as_js
             click.echo(f"  {name:6} {rec['path']}: {leaves}; {tally}")
             for f in rec["findings"]:
                 click.echo(f"      {f['path']} {f['name']!r}: {f['token']} ({f['class']})")
+            # The v2 proximity reading (#2978), beside v1 and never a finding.
+            prox = rec.get("proximity")
+            if prox:
+                click.echo(f"         v2 proximity (report-only): {prox['judged']} grounded token(s) judged, "
+                           f"{prox['near']} near their name, {prox['demoted']} would be demoted "
+                           f"({prox['demoted_distinct']} distinct; {prox['demoted_in_clean_leaves']} "
+                           "in leaves v1 finds clean)")
+                for f in prox["demoted_tokens"]:
+                    click.echo(f"      v2 {f['path']} {f['name']!r}: {f['token']} (grounded → {f['class']})")
