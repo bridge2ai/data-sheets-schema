@@ -540,6 +540,7 @@
 </tr>
 </tbody>
 </table>
+<p>The two comprehensive tables also read <a href="https://github.com/bridge2ai/data-sheets-schema/blob/main/notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv"><code>notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv</code></a>, the URI suggestions for slots without a curated mapping. A suggestion withdrawn after review keeps its row with <code>suggested_uri</code> and <code>confidence</code> cleared and the reason in <code>review_note</code>, and is read as no suggestion; see <a href="https://github.com/bridge2ai/data-sheets-schema/blob/main/notes/D4D_URI_COVERAGE_REPORT.md"><code>notes/D4D_URI_COVERAGE_REPORT.md</code></a>. A slot with no mapping from any source is written in SSSOM's no-match form, <code>skos:exactMatch sssom:NoTermFound</code> under <code>semapv:UnspecifiedMatching</code>, with its status (<code>free_text</code>, <code>novel_d4d</code>, <code>unmapped</code>) in <code>mapping_status</code>.</p>
 <h3 id="datasemantic_exchange"><code>data/semantic_exchange/</code></h3>
 <p>sssom-py-compatible variants and analysis docs.</p>
 <table>
@@ -556,11 +557,11 @@
 </tr>
 <tr>
 <td><code>d4d_rocrate_structural_mapping_summary.md</code></td>
-<td>Human-readable structural mapping summary</td>
+<td>Human-readable summary of the rows the structural generator produces: each justification group's row count and its first 10 rows only (17 of 155), so not a listing of them — rendered from its regenerated rows, not from the committed structural TSV, which carries rows regeneration does not produce (see the folder's <code>README.md</code>)</td>
 </tr>
 <tr>
 <td><code>STRUCTURAL_MAPPING_ANALYSIS.md</code></td>
-<td>Type-compatibility analysis between LinkML ranges and RO-Crate value types</td>
+<td>How the structural mapping is produced (mapping strategies, type-compatibility rules) and checked (<code>make check-sssom-structural</code>); states no counts</td>
 </tr>
 <tr>
 <td><code>uri_mapping_recommendations.md</code></td>
