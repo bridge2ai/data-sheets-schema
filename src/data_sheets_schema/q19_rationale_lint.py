@@ -46,18 +46,22 @@ machine-readable form and lineage across fields. So:
   but no version history", "Held at 4 because …"). Before it, a clause
   saying something is absent ("…, structural derivation slots empty") is a
   reason too. A clause whose "not", absence word or withholding cue stands
-  inside it, or whose cue opens it, is read only where every concern it
-  names is of one kind (#3194). Where it names both kinds ("Typed
-  was_derived_from links and errata missing", "Machine-readable PROV graph
-  lacking errata", "Typed PROV graph falls short on errata", "Held at 4
-  because the typed PROV graph lacks errata"), its words do not say which
-  is absent and which is credit, so it is not read; a comma ("…links,
-  errata missing") makes the absent one a clause of its own, which is.
-  The label's other clauses are credit and are not read, and so is a
-  later part that turns back to credit with "but", "whereas" or "however",
-  with or without punctuation before it, and names no gap or cue ("No
-  PROV graph, but excellent version history", "No PROV graph whereas
-  excellent version history"; `_label_rest`, #3128, #3432). Two cases
+  inside it is read only where every concern it names is of one kind
+  (#3194). Where it names both kinds ("Typed was_derived_from links and
+  errata missing", "Machine-readable PROV graph lacking errata", "Typed
+  PROV graph falls short on errata"), its words do not say which is
+  absent and which is credit, so it is not read; a comma ("…links, errata
+  missing") makes the absent one a clause of its own, which is. A clause
+  that a cue opens gives the reason for all it names, as one opening with
+  "no" does: "Held at 4 because no PROV graph and no errata" states two
+  reasons (#3485). So "Held at 4 because the typed PROV graph lacks
+  errata" still reads its credit (disclosed). The label's other clauses
+  are credit and are not read, and so is a later part that turns back to
+  credit with "but", "whereas" or "however", with or without punctuation
+  before or after it, and names no gap or cue ("No PROV graph, but
+  excellent version history", "No PROV graph whereas excellent version
+  history", "No PROV graph, however, excellent version history";
+  `_label_rest`, #3128, #3432, #3486). Two cases
   are read with the reason: credit in the clause that carries the first
   contrast or cue, or in a later clause that does not open with a
   contrast; and the words before a contrast
@@ -855,23 +859,31 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
     evidenced", "full provenance graph asserted rather than exhibited".
 
     Before the reason, a clause saying something is absent is a reason of
-    its own ("Prose lineage; was_derived_from empty"). A clause whose "not"
-    or absence word stands inside it rather than opening it is read only
-    where every concern it names is of one kind. Where it names both kinds
+    its own ("Prose lineage; was_derived_from empty"). A clause whose "not",
+    absence word or withholding cue stands inside it rather than opening it
+    is read only where every concern it names is of one kind (#3146, #3194);
+    one that a cue opens is read whole, whatever it names ("Held at 4
+    because no PROV graph and no errata", #3485). Where it names both kinds
     ("Typed was_derived_from links and errata missing", "Machine-readable
     PROV graph lacking errata", "Typed PROV graph with errata not
-    recorded"), its words do not say which is absent and which is credit,
-    and the answer would decide the flag, so it is not read (#3146).
+    recorded", "Typed PROV graph falls short on errata"), its words do not
+    say which is absent and which is credit, and the answer would decide
+    the flag, so it is not read.
     """
     out = []
     for a, b in _spans(label):
         cuts = _label_parts(label, a, b)
         for i, (start, end) in enumerate(cuts):
             part = label[start:end].strip()
+            one_kind = len(_kinds(part)) < 2
+            cue = any(not accepts for accepts in _cue_clauses(label, start, end))
             if _read_in(label, start, end) and (
                     _LABEL_OPENS.search(part)
-                    or ((any(not accepts for accepts in _cue_clauses(label, start, end))
-                         or _LABEL_NOT.search(part)) and len(_kinds(part)) < 2)):
+                    # A cue that opens the part says why of all it names
+                    # ("Held at 4 because no PROV graph and no errata");
+                    # one inside it only of one kind (#3194, #3485).
+                    or (cue and (_WITHHOLDING.match(part) or one_kind))
+                    or (_LABEL_NOT.search(part) and one_kind)):
                 if i and not _reasons([("score_label", label, (start, b))]):
                     start = cuts[i - 1][0]
                 return [(lo, hi) for lo, hi in out + _label_rest(label, start)
@@ -895,13 +907,22 @@ def _label_rest(label: str, start: int) -> list[tuple[int, int]]:
     each later part that turns back to credit (#3128): one opening with
     "but", "whereas" or "however" that names no gap (`_GAP`) and carries no
     withholding cue. The parts are `_label_parts` cut again before an
-    unpunctuated "whereas" or "however" (`_contrast_pieces`, #3432). "No
+    unpunctuated "whereas" or "however" (`_contrast_pieces`, #3432), and a
+    contrast word set off by punctuation on both sides is joined to the
+    piece after it (#3486), so "No PROV graph, however, excellent version
+    history" turns back to credit as "…, but excellent …" does. "No
     PROV graph, but excellent version history" reads "No PROV graph";
     "graph claimed but not evidenced" and "prose lineage, but no errata"
     are read whole."""
     out, lo = [], start
-    for a, b in (piece for span in _spans(label) for part in _label_parts(label, *span)
-                 for piece in _contrast_pieces(label, *part)):
+    pieces = [piece for span in _spans(label) for part in _label_parts(label, *span)
+              for piece in _contrast_pieces(label, *part)]
+    # A contrast set off by punctuation of its own ("…, however, excellent
+    # version history") is one piece with what follows it (#3486).
+    for k in range(len(pieces) - 2, -1, -1):
+        if _BARE_CONTRAST.fullmatch(label[slice(*pieces[k])].strip()):
+            pieces[k:k + 2] = [(pieces[k][0], pieces[k + 1][1])]
+    for a, b in pieces:
         part = label[a:b].strip()
         if (a > start and _CONTRAST_OPENS.match(part) and not _GAP.search(part)
                 and not _WITHHOLDING.search(part)):
@@ -923,6 +944,8 @@ def _contrast_pieces(label: str, a: int, b: int) -> list[tuple[int, int]]:
 #: The contrasts that turn a label back to credit and that `_label_parts`
 #: does not cut before ("but" it does).
 _LABEL_TURN = re.compile(r"\b(?:whereas|however)\b", _I)
+#: A contrast word standing alone between punctuation ("…, however, …").
+_BARE_CONTRAST = re.compile(r"(?:but|whereas|however)", _I)
 
 
 def _gap_parts(sentence: str, *, cue: bool = False) -> list[tuple[int, int]]:

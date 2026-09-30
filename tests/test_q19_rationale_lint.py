@@ -1405,10 +1405,17 @@ def test_where_nothing_says_why_what_a_gap_part_still_reads(note, concerns):
     ("No PROV graph, whereas excellent version history", ["graph_form"]),
     ("No PROV graph whereas excellent version history", ["graph_form"]),
     ("No PROV graph however excellent version history", ["graph_form"]),
+    # So does a contrast set off by punctuation on both sides (#3486).
+    ("No PROV graph, however, excellent version history", ["graph_form"]),
+    ("No PROV graph; however, excellent version history", ["graph_form"]),
+    ("Held at 4 because no PROV graph, however, excellent version history", ["graph_form"]),
+    ("Short of a full graph, however, errata recorded in full", ["graph_form"]),
+    ("No PROV graph, but, excellent version history", ["graph_form"]),
     # A later contrast that names a gap is part of the reason.
     ("No PROV graph, but no errata either", ["graph_form", "version_history"]),
     ("Short of a full graph, but errata not recorded", ["graph_form", "version_history"]),
     ("No PROV graph whereas errata not recorded", ["graph_form", "version_history"]),
+    ("No PROV graph, however, errata not recorded", ["graph_form", "version_history"]),
     # So is one that carries a withholding cue and names no gap (#3433).
     ("No PROV graph, but falls short on errata too", ["graph_form", "version_history"]),
     ("No PROV graph, but held at 4 for errata", ["graph_form", "version_history"]),
@@ -1476,14 +1483,36 @@ def test_missing_data_documentation_does_not_say_a_slot_is_empty(note):
 
 @pytest.mark.parametrize("label", [
     "Typed PROV graph falls short on errata",
-    "Held at 4 because the typed PROV graph lacks errata",
+    "Typed PROV graph held at 4 for errata",
 ])
 def test_a_label_cue_clause_naming_both_kinds_is_not_read(label):
     """#3194: the one-kind rule covers a label clause whose withholding cue
-    stands inside it or opens it; its words do not say which concern is
-    credit. The committed ratings have no such label clause."""
+    stands inside it; its words do not say which concern is credit. The
+    committed ratings have no such label clause."""
     result = lint_q19(item(label=label, note=_NEUTRAL))
     assert (result.verdict, result.reasons) == (REASON_NOT_DETERMINED, ()), label
+
+
+@pytest.mark.parametrize("label, reasons", [
+    ("Held at 4 because was_derived_from is empty and no errata are recorded",
+     ["empty_slot", "version_history"]),
+    ("Held at 4 because no PROV graph and no errata", ["graph_form", "version_history"]),
+    ("Held at 4 because no PROV graph is given and no errata are recorded",
+     ["graph_form", "version_history"]),
+    ("Held at 4 because the PROV graph and the errata are both missing",
+     ["graph_form", "version_history"]),
+    ("Held at 4 because of no PROV graph and no checksums", ["graph_form", "integrity"]),
+    # Its credit is read with it, as on main (disclosed).
+    ("Held at 4 because the typed PROV graph lacks errata", ["graph_form", "version_history"]),
+])
+def test_a_label_clause_a_cue_opens_is_read_whatever_it_names(label, reasons):
+    """#3485: a cue that opens its clause says why of everything the clause
+    names, as a clause opening with "no" does. The one-kind rule applied
+    to it dropped labels stating two absences to UNSTATED with no reason,
+    and the representation flag with them."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.basis, result.verdict) == (STATED, REPRESENTATION_AND_SUBSTANTIVE), label
+    assert sorted(r.concern for r in result.reasons) == reasons, label
 
 
 @pytest.mark.parametrize("label, concern", [
