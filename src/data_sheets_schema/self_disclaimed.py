@@ -253,10 +253,12 @@ class Lexicon:
             raise ValueError("assignment_owner.after must capture its preposition as its one group")
         # Optional blocks a later version declares; absent, the code reads
         # the lexicon as v1 did.
-        self._statement = self._statement_topic = None
+        self._statement = self._statement_topic = self._statement_head = None
         statement = data.get("statement_subject")
         if statement is not None:
             self._statement = _word(statement["nouns"])
+            if statement.get("head") is not None:
+                self._statement_head = re.compile(statement["head"], re.I)
             self._statement_topic = re.compile(statement["topic"], re.I)
             if "topic" not in self._statement_topic.groupindex:
                 raise ValueError("statement_subject.topic must name its topic as a `topic` group")
@@ -693,18 +695,30 @@ def _member_presence_term(lexicon, container, member: dict, text: str) -> str | 
                  if not other), None)
 
 
+def _statement_head(lexicon, subject: str):
+    """The first statement noun in `subject` that heads it: the text before
+    it matches `statement_subject.head` (#3560), so "Both statements" and
+    "The references to ..." name one, and "The consent process described
+    in both statements" does not. With no `head` declared, any statement
+    noun in the subject counts."""
+    for noun in lexicon._statement.finditer(subject):
+        if lexicon._statement_head is None or lexicon._statement_head.fullmatch(subject[:noun.start()]):
+            return noun
+    return None
+
+
 def _subject_scope(lexicon, container, member, selves, sentence: str,
                    c0: int, c1: int, m) -> tuple[str, str | None]:
     """(`scope`, term) for a `subject` cue with no self-reference of its own
-    (#3131): its subject names a source statement ("Both statements are
-    prospective on that page"), with any topic ("statements about ...",
+    (#3131): its subject is headed by a source statement ("Both statements
+    are prospective on that page"; `_statement_head`), with any topic ("statements about ...",
     "descriptions of this split") holding a self-reference or a presence
     term, or it names the container's presence term; else (`out_of_scope`
     reason, term). The terms are read with the member's self-references
     blanked, a topic's self-reference on the sentence as written."""
     raw = _parts(sentence, c0, c1, m, sentence)["subject"]
     subject = _parts(_masked(sentence, selves), c0, c1, m, sentence)["subject"]
-    noun = lexicon._statement.search(subject)
+    noun = _statement_head(lexicon, subject)
     if noun is not None:
         # located on the unmasked subject (the same offsets): a blanked
         # self-reference would read as whitespace the topic pattern skips

@@ -165,8 +165,10 @@ other_item_subject:
 # The member's are those its `identity_fields` name, and the fragment (after
 # the last `#`, `/` or `:`) of its `identity_id_fields`. A phrase disagrees
 # only on an axis where both name an alternative and none is shared, so a
-# member whose identity names no qualifier ("Holdout set", or no name at
-# all) is never told apart and keeps v1's reading. A disagreeing phrase is
+# member whose identity names no qualifier (a name such as "Entry", or no
+# name at all) is never told apart and keeps v1's reading. A member named
+# "Holdout set" does name one (`test` on the second axis, which lists
+# `hold-?out`), so "the validation set" is another item in its prose. A disagreeing phrase is
 # read like an other-marker in the item a cue reports (the reason is
 # `other_qualified_item`), and it does not license a `presence` or
 # `subject` cue.
@@ -184,8 +186,13 @@ item_qualifiers:
 # the cue about the member as a `self` cue would; else where the cue's
 # subject names a source statement ("Both statements are prospective on
 # that page") or the container's presence term, not another item's
-# (`item_qualifiers`). A statement noun followed by `topic` ("statements
-# about the consent process") counts only when the topic holds such a
+# (`item_qualifiers`). A statement noun counts only as the subject's head:
+# the subject's text before it must match `head`, at most three words with
+# no preposition or participle among them (an optional "both of" and the
+# like before them), so "The consent process described in both statements"
+# is about the consent process, not the statements. A statement noun
+# followed by `topic` ("statements about the consent process", "references
+# to the consent process") counts only when the topic holds such a
 # self-reference or presence term; otherwise the reason is
 # `statement_about_other`. Any other subject ("The consent process is
 # prospective", "Enrollment of the pediatric arm remains prospective") is
@@ -194,7 +201,8 @@ item_qualifiers:
 # before its last comma left out).
 statement_subject:
   nouns: ['statements?', 'descriptions?', 'mentions?', 'references?']
-  topic: '\s+(?:about|of|on the subject of|regarding|concerning|describing)\s+(?P<topic>.+)'
+  head: '\s*(?:(?:both|all|each|either|neither|none|some|any|one|two|three) of\s+)?(?!(?:[\w''-]+\s+){0,2}?(?:in|on|of|to|by|for|from|at|with|within|across|about|under|described|mentioned|cited|listed|given|named|made|quoted)\s)(?:[\w''-]+\s+){0,3}'
+  topic: '\s+(?:about|of|on the subject of|regarding|concerning|describing|to)\s+(?P<topic>.+)'
 
 # How the diff resolves two original members that `receipts.remap_path`
 # follows to the same final entry. `identity_keys`: the one member whose

@@ -31,9 +31,12 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #:   d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c (9607a6416, review round 5)
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
-#: new file beside v1, whose bytes are unchanged.
+#: new file beside v1, whose bytes are unchanged. v2 was revised in review
+#: before it first merged, so this PR's commits carry one earlier byte
+#: version under `version: 2`:
+#:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
 LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a"}
+                2: "520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d"}
 
 
 def record(**containers):
@@ -705,6 +708,8 @@ V3_SPLIT = "Both statements are prospective on that page, and neither gives spli
     ("splits", "Mentions of the holdout set remain prospective.", "holdout set"),
     ("splits", "References to this split are prospective.", "this split"),
     ("splits", "Descriptions of this split are prospective.", "this split"),
+    ("splits", "Both of the two source statements are prospective.", "statements"),
+    ("splits", "The statements on the program page are prospective.", "statements"),
     ("splits", "This split remains prospective.", "This split"),
     ("instances", "It is prospective.", "It"),
     ("splits", "The holdout set is still prospective.", "holdout set"),
@@ -730,6 +735,11 @@ def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, te
     # a statement about something else
     ("splits", "Statements about the consent process are prospective.", "statement_about_other"),
     ("instances", "Descriptions of the consent materials are prospective.", "statement_about_other"),
+    ("splits", "The references to the consent process are prospective.", "statement_about_other"),
+    # a statement noun that does not head the subject (#3560)
+    ("splits", "The consent process described in both statements is prospective.", "no_member_subject"),
+    ("splits", "The consent process mentioned in the statements is prospective.", "no_member_subject"),
+    ("splits", "Consent in the statements is prospective.", "no_member_subject"),
 ])
 def test_a_subject_cue_about_something_else_is_out_of_scope(container, text, reason):
     assert outcomes(container, text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
@@ -763,6 +773,7 @@ EXTERNAL = "The external test set is described as planned rather than as a relea
     {"name": "Validation split"},
     {"name": "Entry", "id": "https://example.org/ds#internal_validation"},
     {"name": "Entry", "id": "doi:10.1234/x#training-split"},
+    {"variable_name": "internal_validation_split"},
 ])
 def test_a_presence_term_whose_qualifier_disagrees_with_the_member_is_another_item(leaves):
     """#3244: the member's name tokens or id fragment name a qualifier on an
@@ -779,6 +790,8 @@ def test_a_presence_term_whose_qualifier_disagrees_with_the_member_is_another_it
     {"name": "Holdout set"},          # names test/holdout: shared on that axis
     {"name": "Entry"},                # names no qualifier: v1's reading
     {"name": "Entry", "id": "https://example.org/ds"},
+    # only the id's fragment is its identity: the base's qualifiers are not (#3564)
+    {"name": "Entry", "id": "https://example.org/internal-validation#split-1"},
     {},
 ])
 def test_a_presence_term_that_agrees_or_cannot_be_told_apart_still_licenses(leaves):
@@ -840,6 +853,10 @@ def test_self_reference_in_is_validated():
             self_reference_in=["cue"]))
     with pytest.raises(ValueError, match="outside presence scope"):
         edited_lexicon(lambda d: pattern_row(d, "presence.none_reports_available").update(scope="self"))
+    # an `item` self-reference on a cue with no `item` group (#3563)
+    with pytest.raises(ValueError, match="in an `item` group its cue lacks"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.recorded_as_planned").update(
+            self_reference_in=["item"]))
 
 
 @pytest.mark.parametrize("container,text", [
@@ -1091,6 +1108,17 @@ def test_two_keyless_originals_on_one_final_entry_resolve_by_strictly_greater_ov
     tie = sd._resolve_all(record(splits=[{**one, "size": "20"}, {**one, "size": "30"}]),
                           record(splits=[dict(one)]), LEXICON)
     assert set(tie.values()) == {(None, "shared_final_entry")}
+
+
+def test_the_overlap_rule_does_not_apply_where_members_identity_keys_agree():
+    """#3273, #3562: `scalar_overlap` resolves only where no member's
+    identity keys agree. Two members whose keys both agree with the one
+    survivor stay unresolved even though one overlaps it strictly more."""
+    one = {"id": "ex:s1", "split_details": "This split is recorded as a planned provision.", "size": "10"}
+    two = {**one, "size": "20"}
+    both = sd._resolve_all(record(splits=[one, two]), record(splits=[dict(one)]), LEXICON)
+    assert both == {("splits", 0): (None, "shared_final_entry"),
+                    ("splits", 1): (None, "shared_final_entry")}
 
 
 def test_shared_final_entry_resolve_by_is_validated():
