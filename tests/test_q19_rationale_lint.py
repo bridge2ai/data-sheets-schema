@@ -829,6 +829,48 @@ def test_an_outer_list_needs_its_opening_clause_read():
     assert read.concerns(REPRESENTATION) == ["graph_form"]
 
 
+#: #3575: fragments that share only an article, or that may be coordinated
+#: with the acceptance's own objects, with origin/main's reading (checked
+#: against a git-archive copy of it): (field, text). Every row reads
+#: STATED substantive_only [version_history] on main; the round-5 branch
+#: read the accepted objects as empty_slot and graph_form reasons.
+_ACCEPTED_OBJECTS = [
+    # Codex's example, as a label and as a note: every object opens with "the".
+    ("label", "Held at 4: the errata are missing, although we accept the empty "
+     "was_derived_from, the empty parent_datasets and the absent PROV graph."),
+    ("note", "Held at 4: the errata are missing, although we accept the empty "
+     "was_derived_from, the empty parent_datasets and the absent PROV graph."),
+    # A shared article, the acceptance carrying none: only the absence-word
+    # guard keeps it out.
+    ("note", "Held at 4: the errata are missing, although prose lineage is accepted, "
+     "the empty was_derived_from."),
+    # A shared absence word the acceptance's own objects open with: only the
+    # "carries it nowhere" guard keeps it out.
+    ("note", "Held at 4: no errata, although we accept no was_derived_from, "
+     "no parent_datasets and no PROV graph."),
+]
+
+
+@pytest.mark.parametrize("field, text", _ACCEPTED_OBJECTS)
+def test_an_article_or_an_accepted_object_is_no_outer_list_evidence(field, text):
+    """#3575, #3260: a fragment is an outer list's item only where it
+    shares an absence word with the list and the acceptance carries that
+    word nowhere. These read exactly as on main."""
+    rating = item(label=text, note=_NEUTRAL) if field == "label" else item(note=text)
+    result = lint_q19(rating)
+    assert (result.basis, result.verdict, sorted({r.concern for r in result.reasons})) == (
+        STATED, SUBSTANTIVE_ONLY, ["version_history"]), text
+
+
+def test_an_absence_word_list_the_acceptance_does_not_share_is_still_recovered():
+    """#3260 as narrowed by #3575: "no …" items either side of an acceptance
+    that carries no "no" (main reads substantive_only here, dropping the
+    last item)."""
+    result = lint_q19(item(note=(
+        "Held at 4: no errata, although prose lineage is accepted, no was_derived_from.")))
+    assert result.concerns(REPRESENTATION) == ["empty_slot"]
+
+
 def test_strict_passes_a_disclaimed_list(tmp_path):
     """#3248: the Codex scenario exits 0 under --strict."""
     from data_sheets_schema.cli import cli
@@ -1446,6 +1488,44 @@ def test_every_review_regression_reads_as_on_main(issue, field, text, basis, ver
     result = lint_q19(rating)
     assert (result.basis, result.verdict, sorted({r.concern for r in result.reasons})) == (
         basis, verdict, concerns), (issue, text)
+
+
+#: #3576: texts where the #2982 gate filters the only empty-slot match
+#: ("incomplete" and "partly populated" are not `_EMPTINESS` words), with
+#: origin/main's basis and concerns (checked against a git-archive copy of
+#: it). The round-5 branch let the empty result steer what was read and
+#: gave the credit around it as the reason: the label reason range moved
+#: back over "Excellent version history", a cue sentence's neighbour was
+#: read, and a body part's preceding credit was joined to it.
+_FILTERED_ONLY_MATCH = [
+    ("label", "Excellent version history but held at 4 for incomplete was_derived_from",
+     STATED, ["empty_slot"]),
+    ("label only", "Excellent version history but held at 4 for incomplete was_derived_from",
+     STATED, ["empty_slot"]),
+    ("note", "Excellent version history. Held at 4 for incomplete was_derived_from.",
+     STATED, ["empty_slot"]),
+    ("unstated note", "Version history is excellent but was_derived_from is only partly "
+     "populated.", UNSTATED, ["empty_slot"]),
+    ("unstated note", "Errata are recorded in the changelog but was_derived_from is "
+     "incomplete.", UNSTATED, ["empty_slot"]),
+]
+
+
+@pytest.mark.parametrize("field, text, main_basis, main_concerns", _FILTERED_ONLY_MATCH)
+def test_a_filtered_empty_slot_match_never_sends_the_lint_to_credit(
+        field, text, main_basis, main_concerns):
+    """#3576: the emptiness gate filters reasons and chooses nothing that is
+    read (`_names_reason`). Against main the basis is unchanged and the
+    reasons are main's less the filtered empty-slot match, so no credit
+    becomes a reason."""
+    rating = {"label": item(label=text, note=_NEUTRAL), "label only": item(label=text),
+              "note": item(note=text),
+              "unstated note": item(label="Very good", note=text)}[field]
+    result = lint_q19(rating)
+    concerns = {r.concern for r in result.reasons}
+    assert result.basis == main_basis, text
+    assert concerns <= set(main_concerns) - {"empty_slot"}, (text, result.reasons)
+    assert result.verdict == REASON_NOT_DETERMINED, text
 
 
 @pytest.mark.parametrize("field, text, concerns", [
