@@ -224,7 +224,7 @@ class RemovalRows(unittest.TestCase):
         from data_sheets_schema.removals import classify
         rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": None})
         self.assertEqual(rows, {"unfoundedremovals": None, "unfoundedreconcile": None, "receipteddeleted": None,
-                                "unrecordedremovals": None})
+                                "unfoundedrewrites": None, "unrecordedremovals": None})
         self.assertEqual({self.m.fmt(rows, k) for k in rows}, {"–"})
         self.assertEqual(self.m.cell([rows] * 3, "unfoundedremovals", "reps"), "– [–,–,–]")
 
@@ -236,7 +236,7 @@ class RemovalRows(unittest.TestCase):
         block = classify(before, {"id": "doi:10.1/x", "license": "CC-BY"}, {"findings": []}, receipt=receipt)
         rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
         self.assertEqual(rows, {"unfoundedremovals": 1, "unfoundedreconcile": None, "receipteddeleted": 1,
-                                "unrecordedremovals": 0})
+                                "unfoundedrewrites": 0, "unrecordedremovals": 0})
 
     def test_an_unrecorded_count_the_block_did_not_measure_is_not_read(self):
         """`removals_unrecorded_count` is only a measurement where the report
@@ -248,17 +248,37 @@ class RemovalRows(unittest.TestCase):
     def test_the_deletion_rows_say_a_reworded_or_moved_value_counts_as_deleted(self):
         """#3207: the text test is the value's own text surviving, so the
         published definitions must not read as true deletions; and #3229:
-        coincidental flattening and in-place rewrites deflate them, so the
-        definitions must not call them upper bounds."""
+        coincidental flattening deflates them, so the definitions must not
+        call them upper bounds."""
         for key in ("unfoundedremovals", "receipteddeleted"):
             text = self.m.METRICS[key][3]
+            self.assertIn("removals v2", text)
             self.assertIn("reworded", text)
             self.assertNotIn("upper bound", text)        # #3229: the counts err both ways
             self.assertIn("#3207", text)
             self.assertIn("#3229", text)
+        definition = self.m.METRICS["unfoundedremovals"][3]
+        for phrase in ("a resolver URL and the CURIE it names read as one text, #3129",
+                       "a value of numbers only below five digits never survives that way, #3243",
+                       "counted on its own row below (#3243)"):
+            self.assertIn(phrase, definition)
+
+    def test_the_rewrite_row_counts_unfounded_in_place_rewrites_apart_from_removals(self):
+        """#3243: a carried scalar whose path now holds other text is on its
+        own row, sorted by the same finding paths, never in the removal rows."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "license": "CC-BY", "description": "old words", "title": "t"}
+        after = {"id": "doi:10.1/x", "license": "CC0", "description": "new words entirely", "title": "t"}
+        rows = self._rows(classify(before, after, {"findings": [{"slot": "license", "issue": "x"}]}),
+                          {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedrewrites"]), (0, 1))
+        keys = list(self.m.METRICS)
+        self.assertEqual(keys.index("unfoundedrewrites"), keys.index("receipteddeleted") + 1)
+        self.assertIn("#3243", self.m.METRICS["unfoundedrewrites"][3])
 
     def test_the_rows_are_in_the_table(self):
-        for key in ("unfoundedremovals", "unfoundedreconcile", "receipteddeleted", "unrecordedremovals"):
+        for key in ("unfoundedremovals", "unfoundedreconcile", "receipteddeleted", "unfoundedrewrites",
+                    "unrecordedremovals"):
             self.assertIn(key, self.m.METRICS)
         keys = list(self.m.METRICS)
         self.assertEqual(keys.index("unfoundedreconcile"), keys.index("unfoundedremovals") + 1)

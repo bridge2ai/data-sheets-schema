@@ -65,15 +65,36 @@ standing, not of content); VOICE 04f rep1
 reworded into `data_governance.notes`; CHORUS 04f rep3
 `acquisition_methods[0].notes` reworded into
 `labeling_strategies[0].data_annotation_protocol`. Those inflate the deleted,
-unfounded and receipted-deleted counts, but the counts are not upper bounds on
-content lost either (#3229): two routes deflate them. A lost value can be
-classed flattened by coincidental containment — in 2026-08-22c v5 rep1 CM4AI,
-reconcile_full dropped `file_collections[1]`, and its `file_count` 3 reads as
-flattened into `file_collections` because "3" is a token of "3.8 GB" in
-another entry — and a flattened value is in none of the three counts. And a
-scalar whose text is replaced in place is carried, not removed, since the
-join asks only that its path still resolve to a populated value. The counts
-err in both directions and bound nothing.
+unfounded and receipted-deleted counts.
+
+Two routes deflated them under v1 (#3229), and v2 closes the one and measures
+the other (#3243). A lost value was classed flattened by coincidental
+containment — in 2026-08-22c v5 rep1 CM4AI, reconcile_full dropped
+`file_collections[1]`, and its `file_count` 3 read as flattened into
+`file_collections` because "3" is a token of "3.8 GB" in another entry. A
+value whose every token is a number now needs `MIN_NUMERIC_DIGITS` digits
+before containment counts; below that it is deleted, which can only inflate.
+A word or a long number can still coincide with unrelated text, so the
+deflating route is narrowed, not gone. And a scalar whose text is replaced in
+place is carried, not removed, since the join asks only that its path still
+resolve to a populated value: v2 lists it in its own class,
+
+``rewritten``
+    carried at its path, and the value there no longer carries its text by
+    the containment test below — sorted founded or not by the same finding
+    paths, and never counted in `removed`. A rewrite reconcile_full made on
+    a finding is what it was told to do; a rewrite no finding covers is the
+    in-place analogue of an unfounded removal. A rewording that keeps the
+    content is counted here too.
+
+A resolver URL and the CURIE it names are one text in every containment test
+(#3129), as they already were for list membership and fold identity: v1
+counted the AI_READI v4 rep1 creator's eight ROR URLs and its PI's ORCID
+deleted where the final record carries them as CURIEs. Each containment test
+only widens, but the move from v1 to v2 is not one-way: the list-level fold
+(`_folded_into`) compares two counts that both widen, so a phase-1 sibling that
+carried the other form now raises the count the survivors must exceed, and a
+value v1 read as flattened into its list can read as deleted under v2 (#3383).
 Class declarations, `source_caveats` and minted ids are outside the
 classification (`exempt_value`).
 
@@ -96,6 +117,7 @@ from __future__ import annotations
 
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -104,16 +126,28 @@ import yaml
 from data_sheets_schema.receipts import (ENTRY_KEYS, _canonical_identifier, _populated, _resolve_value,
                                          dataset_identifier_forms, exempt, normalise, remap_path)
 
-INSTRUMENT = ("removals v1 (#2923): phase-1 snapshot against the final full record, joined by "
-              "receipts.remap_path; flattened by normalised containment under the nearest "
-              "surviving ancestor, a dropped list entry's only in its recognised continuation or "
-              "beyond what the list's other phase-1 entries account for; founded by a finding's "
-              "slot, review_paths or remove_relationship path covering the value or an ancestor, "
-              "an index one past the end read as the last entry, in a finding whose record is "
-              "not core only")
+INSTRUMENT = ("removals v2 (#3129, #3243): phase-1 snapshot against the final full record, joined "
+              "by receipts.remap_path; flattened by normalised containment under the nearest "
+              "surviving ancestor, a resolver URL and its CURIE one text, a value of numbers "
+              "only below five digits never, a dropped list entry's only in its recognised "
+              "continuation or beyond what the list's other phase-1 entries account for; a "
+              "carried scalar whose text its path no longer contains is rewritten, apart from "
+              "the removals; founded by a finding's slot, review_paths or remove_relationship "
+              "path covering the value or an ancestor, an index one past the end read as the "
+              "last entry, in a finding whose record is not core only")
 
 #: Paths kept in the block per class; the counts are never capped.
 PATH_LIMIT = 50
+
+#: A value whose every normalised token is a number is flattened by
+#: containment only with at least this many digits (#3243). A count, an index
+#: or a year recurs in sizes, versions and dates of unrelated text — the 22c
+#: CM4AI `file_count` 3 in "3.8 GB" — while the numbers the corpus flattens
+#: for real are longer: a date (8 digits; CM4AI v4 and v7 collection
+#: timeframes, a v3 AI_READI release date) and one 5-digit count, v4 VOICE
+#: rep1 `instances[1].counts` 29278 — the recording-features instance, a
+#: count of derived feature sets, not of participants (#3396).
+MIN_NUMERIC_DIGITS = 5
 
 #: The grammar `receipts.remap_path` reads. A key outside it cannot be joined.
 _ADDRESSABLE = re.compile(r"\w+(\[\d+\])*(\.\w+(\[\d+\])*)*")
@@ -124,20 +158,26 @@ NON_CHECKS = (
     "that a founded removal was right — a finding naming a slot is not evidence that its "
     "value was unsupported",
     "that a flattened value kept its meaning — normalised text containment under the nearest "
-    "surviving ancestor, not a semantic comparison: a short or numeric value can coincide with "
-    "unrelated text, and a value a dropped list entry shared with its siblings is not traced "
+    "surviving ancestor, not a semantic comparison: a word or a number of five digits or more "
+    "can coincide with unrelated text (a shorter number is never flattened, #3243), and a "
+    "value a dropped list entry shared with its siblings is not traced "
     "to the entry — it is flattened where the sibling recognised as the entry's continuation "
     "carries it, though that copy may be the sibling's own, and otherwise only where more "
     "final entries carry it than the entry's other phase-1 siblings did (#3151)",
     "that a deleted value's content is gone — the text test is exact normalised containment of "
     "the value's own text, so a value reworded, moved to another key (source_caveats included) or "
     "slot, or split across several list members reads as deleted, and as unfounded when no "
-    "finding covers it (#3207); and not that a value counted neither deleted nor removed kept "
-    "its content — a lost value can be flattened by coincidental containment (a file_count 3 "
-    "matching the '3' of '3.8 GB') and a scalar rewritten in place is carried, since only its "
-    "path is checked: rewording and moving inflate the deleted, unfounded and receipted-deleted "
-    "counts, coincidental flattening and in-place rewrites deflate them, so they bound nothing "
-    "(#3229)",
+    "finding covers it (#3207); and not that a flattened value's content survives — a word or "
+    "a long number can still be flattened by coincidental containment, though a number under "
+    "five digits no longer is (the file_count 3 that matched the '3' of '3.8 GB', #3243): "
+    "rewording and moving inflate the deleted, unfounded and receipted-deleted counts, "
+    "coincidental flattening still deflates them, so they bound nothing (#3229)",
+    "that a rewritten value lost its content, or that a carried one kept it — rewritten is a "
+    "carried scalar whose normalised text the value now at its path does not contain, so a "
+    "rewording that keeps the content is counted, and an edit that keeps the old text as a "
+    "substring (an extension, or a change inside a longer text that leaves the value's words "
+    "in order) is not; rewrites are reported beside the removals and never counted in them "
+    "(#3243)",
     "a finding that narrows its slot in prose ('maintainers (the Emory contact)') is read at "
     "the path it names, so founded is an upper bound where findings narrow by prose",
     "that a finding's index means the entry it gives — one past the end of its list is read "
@@ -194,6 +234,7 @@ def _text(value: Any) -> str:
     return normalise(value if isinstance(value, str) else str(value))
 
 
+@lru_cache(maxsize=1 << 16, typed=True)
 def _member(value: Any) -> str:
     """A list member's identity: its text, a resolver URL read as the CURIE
     it names (#974's normaliser rewrites one to the other at write time)."""
@@ -243,6 +284,15 @@ class _Presence:
             return ok and _populated(value)
         return int(path[path.rindex("[") + 1:-1]) in self._kept(list_path)
 
+    def retains(self, path: str, value: Any) -> bool:
+        """For a scalar under a key that `carried` finds: whether what its
+        path holds now still contains its text (#3243). A member of a list
+        of scalars is identified by its text, so it has no rewrite. A value
+        with no text once normalised (a path of "/") is kept only as written."""
+        rm = remap_path(path, self.original, self.target)
+        ok, node = _resolve_value(self.target, rm["path"]) if rm["path"] is not None else (False, None)
+        return ok and (node == value or _survives(value, node))
+
     def _kept(self, list_path: str) -> set[int]:
         if list_path not in self._members:
             kept: set[int] = set()
@@ -274,6 +324,31 @@ def _carries(hay: str, needle: str) -> bool:
 def _hay(node: Any, form=_text) -> str:
     """A node's scalars as one normalised text."""
     return " ".join(form(s) for s in _scalars(node))
+
+
+def _survives(value: Any, node: Any) -> bool:
+    """Does `node` carry `value`'s text? Containment on token boundaries,
+    with a resolver URL and the CURIE it names one text on either side
+    (#3129): the needle and each scalar of the hay are read as written and
+    as `_member` reads them, so a ROR URL the final record carries as
+    `ROR:…` survives, and a URL quoted inside prose still matches as
+    written."""
+    needles = {_text(value), _member(value)} - {""}
+    hays = (_hay(node), _hay(node, _member))
+    return any(_carries(h, n) for n in needles for h in hays)
+
+
+def _flattenable(value: Any) -> bool:
+    """Whether containment can count for this value at all: never a boolean
+    (its text is not the fact it states), and never a value of numbers only
+    with fewer than `MIN_NUMERIC_DIGITS` digits, which recurs in unrelated
+    text by chance (#3243)."""
+    if isinstance(value, bool):
+        return False
+    tokens = _text(value).split()
+    if not tokens:
+        return False
+    return not (all(t.isdigit() for t in tokens) and sum(map(len, tokens)) < MIN_NUMERIC_DIGITS)
 
 
 def _identity(entry: dict[str, Any]) -> list[str]:
@@ -344,14 +419,16 @@ def _folded_into(value: Any, entry_path: str, entry: dict[str, Any], snapshot_li
       standard, a shared affiliation, an enum) is counted, not attributed.
 
     The path returned is the sibling's in the first case and the list's in
-    the second."""
-    needle = _text(value)
+    the second. Texts are compared by `_survives`, a resolver URL and its
+    CURIE as one (#3129). That widens both counts of the second route, so it
+    can narrow: a sibling that carried the value's other form counts before,
+    where v1 did not count it, and a v1 surplus can vanish (#3383)."""
     j = _fold_target(entry_path, entry, survivors, record_id, carried)
-    if j is not None and _carries(_hay(survivors[j]), needle):
+    if j is not None and _survives(value, survivors[j]):
         return f"{final_path}[{j}]"
     k = int(entry_path[entry_path.rindex("[") + 1:-1])
-    after = sum(_carries(_hay(e), needle) for e in survivors)
-    before = sum(_carries(_hay(e), needle) for i, e in enumerate(snapshot_list) if i != k)
+    after = sum(_survives(value, e) for e in survivors)
+    before = sum(_survives(value, e) for i, e in enumerate(snapshot_list) if i != k)
     return final_path if after > before else None
 
 
@@ -367,11 +444,9 @@ def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict
     list of scalars is one value of that slot, and its text surviving
     anywhere in the list is still read as flattened (a string split into
     members). A boolean is never flattened — its text is not the fact it
-    states."""
-    if isinstance(value, bool):
-        return None
-    needle = _text(value)
-    if not needle:
+    states — nor a value of numbers only below `MIN_NUMERIC_DIGITS` digits
+    (#3243); a resolver URL and the CURIE it names are one text (#3129)."""
+    if not _flattenable(value):
         return None
     below = path
     for anc in _ancestors(path):
@@ -388,8 +463,7 @@ def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict
             _ok, snapshot_list = _resolve_value(original, anc)
             if isinstance(entry, dict) and isinstance(snapshot_list, list):
                 return _folded_into(value, below, entry, snapshot_list, rm["path"], node, record_id, carried)
-        hay = " ".join(_text(s) for s in _scalars(node))
-        return rm["path"] if _carries(hay, needle) else None
+        return rm["path"] if _survives(value, node) else None
     return None
 
 
@@ -626,8 +700,10 @@ def _unchecked(reason: str) -> dict[str, Any]:
             "founded": None, "unfounded": None, "founded_by": None, "founded_past_end": None,
             "unfounded_named_by_core_finding": None, "unfounded_mentioned_in_finding_text": None,
             "receipted": None, "phase": None, "unfounded_phase": None, "audit": None,
+            "rewritten": None, "rewritten_unfounded": None, "rewritten_receipted": None,
+            "rewritten_unfounded_phase": None,
             **{f"{cls}_paths{suffix}": ([] if not suffix else None)
-               for cls in ("flattened", "founded", "unfounded", "unsorted")
+               for cls in ("flattened", "founded", "unfounded", "unsorted", "rewritten")
                for suffix in ("", "_truncated")},
             "summary": f"not checked: {reason}", "non_checks": list(NON_CHECKS)}
 
@@ -676,8 +752,24 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     at_final = _Presence(original, final)
     at_stage = [(name, _Presence(original, doc)) for name, doc in (intermediates or [])] if attributed else []
 
+    def stage_after_last(keeps) -> str:
+        # The stage after the last one that still kept the value; the
+        # snapshot (index -1) kept it by construction.
+        last = max((i for i, (_n, p) in enumerate(at_stage) if keeps(p)), default=-1)
+        return at_stage[last + 1][0] if last + 1 < len(at_stage) else "write"
+
+    def finding_for(path: str) -> tuple[int, str, bool] | None:
+        hit = next(((n, via, False) for n, via, fp in named if covers(fp, path, original)), None)
+        if hit is None:
+            # An index one past the end of its list names no entry as
+            # written; read as the last entry, and said so on the row (#3077).
+            hit = next(((n, via, True) for n, via, fp in named
+                        if covers(fp, path, original, past_end=True)), None)
+        return hit
+
     total = exempted = unaddressable = 0
-    rows: dict[str, list[dict[str, Any]]] = {"flattened": [], "founded": [], "unfounded": [], "unsorted": []}
+    rows: dict[str, list[dict[str, Any]]] = {"flattened": [], "founded": [], "unfounded": [], "unsorted": [],
+                                             "rewritten": []}
     founded_by = {"slot": 0, "review_paths": 0, "remove_relationship": 0}
     receipted = {"removed": 0, "flattened": 0, "deleted": 0, "founded": 0, "unfounded": 0}
     by_phase: dict[str, int] = {}
@@ -690,13 +782,24 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
             unaddressable += 1
             continue
         if at_final.carried(path, list_path):
+            # Carried, but its path may hold other text now (#3243): reported
+            # as its own class, never a removal.
+            if list_path is None and not at_final.retains(path, value):
+                rw: dict[str, Any] = {"path": path, "at": remap_path(path, original, final)["path"]}
+                if attributed:
+                    rw["phase"] = stage_after_last(lambda p: p.carried(path, None) and p.retains(path, value))
+                if paths_receipted is not None:
+                    rw["receipted"] = _receipted(path, None, paths_receipted)
+                if named is not None:
+                    hit = finding_for(path)
+                    rw["founded"] = hit is not None
+                    if hit is not None:
+                        rw.update({"by": hit[1], "finding": hit[0], **({"index_past_end": True} if hit[2] else {})})
+                rows["rewritten"].append(rw)
             continue
         row: dict[str, Any] = {"path": path}
         if attributed:
-            # The stage after the last one that still carried the value; the
-            # snapshot (index -1) carried it by construction.
-            last = max((i for i, (_n, p) in enumerate(at_stage) if p.carried(path, list_path)), default=-1)
-            row["phase"] = at_stage[last + 1][0] if last + 1 < len(at_stage) else "write"
+            row["phase"] = stage_after_last(lambda p: p.carried(path, list_path))
             by_phase[row["phase"]] = by_phase.get(row["phase"], 0) + 1
         if paths_receipted is not None:
             row["receipted"] = _receipted(path, list_path, paths_receipted)
@@ -710,12 +813,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if named is None:
             rows["unsorted"].append(row)
             continue
-        hit = next(((n, via, False) for n, via, fp in named if covers(fp, path, original)), None)
-        if hit is None:
-            # An index one past the end of its list names no entry as
-            # written; read as the last entry, and said so on the row (#3077).
-            hit = next(((n, via, True) for n, via, fp in named
-                        if covers(fp, path, original, past_end=True)), None)
+        hit = finding_for(path)
         if hit is not None:
             founded_by[hit[1]] += 1
             rows["founded"].append({**row, "by": hit[1], "finding": hit[0],
@@ -766,8 +864,16 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                    "paths_past_end": ends.count(True) + ends.count(False),
                    "paths_one_past_end": ends.count(True)}
                   if findings is not None else None),
+        # Carried scalars whose path now holds other text (#3243): beside
+        # the removals, never in them. Unfounded and receipted as above.
+        "rewritten": len(rows["rewritten"]),
+        "rewritten_unfounded": (sum(1 for r in rows["rewritten"] if not r["founded"]) if sorted_ else None),
+        "rewritten_receipted": (sum(1 for r in rows["rewritten"] if r["receipted"])
+                                if paths_receipted is not None else None),
+        "rewritten_unfounded_phase": (_by_phase([r for r in rows["rewritten"] if not r["founded"]])
+                                      if attributed and sorted_ else None),
     }
-    for cls in ("flattened", "founded", "unfounded", "unsorted"):
+    for cls in ("flattened", "founded", "unfounded", "unsorted", "rewritten"):
         _cap(rows[cls], f"{cls}_paths", block)
     if findings is not None:
         unsorted_why = None
@@ -795,13 +901,15 @@ def _summary(block: dict[str, Any], unsorted_why: str | None = None) -> str:
     head = (f"{block['snapshot_values']} phase-1 values ({block['exempt']} exempt)"
             f" · {block['flattened']} flattened")
     if block["founded"] is None:
-        return head + f" · {block['deleted']} deleted · {unsorted_why or 'the deletions are not sorted'}"
+        return (head + f" · {block['deleted']} deleted · {unsorted_why or 'the deletions are not sorted'}"
+                f" · {block['rewritten']} rewritten in place")
     s = head + f" · {block['founded']} founded · {block['unfounded']} unfounded"
     if block.get("founded_past_end"):
         s += f" ({block['founded_past_end']} founded by an index one past the end)"
     if block["receipted"] is not None:
         s += (f" · receipted: {block['receipted']['deleted']} deleted, "
               f"{block['receipted']['flattened']} flattened")
+    s += f" · {block['rewritten']} rewritten in place ({block['rewritten_unfounded']} without a finding)"
     return s
 
 

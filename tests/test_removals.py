@@ -88,8 +88,9 @@ class Classes(unittest.TestCase):
         """#3207, the AI_READI 04g rep2 shape: `notes` dropped and its content
         restated, reworded, in the entry's new `source_caveats`. The text test
         is the value's own text, so this is a deletion — unfounded with no
-        finding — and the emitted non-checks say the counts err both ways
-        and bound nothing (#3229)."""
+        finding — and the emitted non-checks say the counts still err both
+        ways and bound nothing (#3229), with the numeric guard and the
+        rewritten class named (#3243)."""
         before = _record(sampling_strategies=[{"is_sample": True, "notes": "The healthsheet answers N/A on sampling."}])
         after = _record(sampling_strategies=[{"is_sample": True, "source_caveats":
                                               "The healthsheet answers \"N/A\" to the sampling question."}])
@@ -98,27 +99,11 @@ class Classes(unittest.TestCase):
         self.assertEqual(b["receipted"]["deleted"], 1)
         text = next(n for n in b["non_checks"] if n.startswith("that a deleted value's content is gone"))
         for phrase in ("reworded", "source_caveats", "split across several list members", "coincidental containment",
-                       "rewritten in place", "bound nothing"):
+                       "under five digits no longer is", "bound nothing"):
             self.assertIn(phrase, text)
         self.assertNotIn("upper bound", text)
-
-    def test_a_scalar_rewritten_in_place_is_carried_not_removed(self):
-        """#3229, the deflating route: the join asks only that the path still
-        resolve to a populated value, so replaced text is not a removal."""
-        b = rm.classify(_record(license="CC-BY 4.0", description="Voice recordings of adults."),
-                        _record(license="CC-BY 4.0", description="An unrelated sentence."), _audit())
-        self.assertEqual(b["removed"], 0)
-        self.assertEqual(b["unfounded"], 0)
-
-    def test_a_lost_numeric_value_can_be_flattened_by_coincidental_containment(self):
-        """#3229, the other deflating route (the 22c CM4AI `file_count` 3 shape):
-        a dropped key whose short value appears by chance in text under its
-        surviving parent is counted flattened, so it is in no deletion count."""
-        before = _record(file_collections=[{"name": "Images", "file_count": 3, "description": "A zip."}])
-        after = _record(file_collections=[{"name": "Images", "description": "A zip. Listed as 3.8 GB."}])
-        b = rm.classify(before, after, _audit(), receipt=_receipt("file_collections[0].file_count"))
-        self.assertEqual([r["path"] for r in b["flattened_paths"]], ["file_collections[0].file_count"])
-        self.assertEqual((b["unfounded"], b["receipted"]["deleted"]), (0, 0))
+        rewritten = next(n for n in b["non_checks"] if n.startswith("that a rewritten value lost its content"))
+        self.assertIn("never counted in them", rewritten)
 
     def test_a_single_scalar_and_a_one_item_list_of_it_are_the_same_value(self):
         b = rm.classify(_record(keywords=["speech"], license="CC-BY"), _record(keywords="speech", license=["CC-BY"]),
@@ -129,6 +114,161 @@ class Classes(unittest.TestCase):
         b = rm.classify(_record(license="CC-BY"), _record(license=None), _audit())
         self.assertEqual([r["path"] for r in b["unfounded_paths"]], ["license"])
 
+
+class Rewritten(unittest.TestCase):
+    """#3243: a carried scalar whose path now holds other text is its own
+    class, reported beside the removals and never counted in them."""
+
+    def test_a_scalar_rewritten_in_place_is_reported_rewritten_not_removed(self):
+        b = rm.classify(_record(license="CC-BY 4.0", description="Voice recordings of adults."),
+                        _record(license="CC-BY 4.0", description="An unrelated sentence."), _audit(),
+                        receipt=_receipt("description"))
+        self.assertEqual((b["removed"], b["unfounded"]), (0, 0))
+        self.assertEqual((b["rewritten"], b["rewritten_unfounded"], b["rewritten_receipted"]), (1, 1, 1))
+        self.assertEqual(b["rewritten_paths"], [{"path": "description", "at": "description", "receipted": True,
+                                                 "founded": False}])
+        self.assertIn("1 rewritten in place (1 without a finding)", b["summary"])
+
+    def test_the_22c_cm4ai_file_count_rewritten_from_2_to_1_is_rewritten(self):
+        """The 22c CM4AI rep1 `file_collections[0]` shape: the entry kept its
+        place, its file_count went from 2 to 1 when reconcile split it."""
+        before = _record(file_collections=[{"id": "x#apms", "name": "APMS", "file_count": "2"}])
+        after = _record(file_collections=[{"id": "x#apms", "name": "APMS", "file_count": "1"}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual([r["path"] for r in b["rewritten_paths"]], ["file_collections[0].file_count"])
+
+    def test_an_extension_a_normalised_form_or_a_curie_is_not_a_rewrite(self):
+        """The old text survives at the path: extended, reformatted to the
+        same normalised words, a resolver URL written as its CURIE, or a
+        value with no words (the AI_READI v4 `path: /`) left as it was."""
+        before = _record(description="Voice recordings.", title="Bridge2AI-Voice",
+                         funders=[{"name": "NIH", "id": "https://ror.org/01cwqze88"}], counts=12, path="/")
+        after = _record(description="Voice recordings. Collected at five sites.", title="Bridge2AI Voice",
+                        funders=[{"name": "NIH", "id": "ROR:01cwqze88"}], counts="12", path="/")
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["rewritten"], b["removed"]), (0, 0), b["rewritten_paths"])
+        moved = rm.classify(_record(path="/"), _record(path="-"), _audit())
+        self.assertEqual([r["path"] for r in moved["rewritten_paths"]], ["path"])
+
+    def test_a_rewrite_a_finding_covers_is_founded_and_its_phase_is_the_one_that_rewrote_it(self):
+        before = _record(license="CC-BY 4.0", description="Old text.", title="A dataset")
+        stages = [("reconcile_full", _record(license="CC0", description="Old text.")),
+                  ("repair_full_r1", _record(license="CC0", description="New text."))]
+        b = rm.classify(before, stages[-1][1], _audit({"slot": "license"}), intermediates=stages)
+        rows = {r["path"]: r for r in b["rewritten_paths"]}
+        self.assertEqual({p: (r["phase"], r["founded"]) for p, r in rows.items()},
+                         {"license": ("reconcile_full", True), "description": ("repair_full_r1", False)})
+        self.assertEqual((rows["license"]["by"], rows["license"]["finding"]), ("slot", 0))
+        self.assertEqual((b["rewritten"], b["rewritten_unfounded"]), (2, 1))
+        self.assertEqual(b["rewritten_unfounded_phase"], {"repair_full_r1": 1})
+
+    def test_with_no_audit_or_no_snapshot_the_rewrites_are_not_sorted(self):
+        b = rm.classify(_record(license="CC-BY"), _record(license="CC0"), None)
+        self.assertEqual((b["rewritten"], b["rewritten_unfounded"], b["rewritten_receipted"]), (1, None, None))
+        self.assertNotIn("founded", b["rewritten_paths"][0])
+        self.assertIn("1 rewritten in place", b["summary"])
+        none = rm.classify(None, _record(), _audit())
+        self.assertEqual((none["rewritten"], none["rewritten_unfounded"], none["rewritten_paths"]), (None, None, []))
+
+    def test_a_member_of_a_list_of_scalars_is_removed_not_rewritten(self):
+        b = rm.classify(_record(keywords=["speech", "voice"]), _record(keywords=["speech", "audio"]), _audit())
+        self.assertEqual((b["rewritten"], [r["path"] for r in b["unfounded_paths"]]), (0, ["keywords[1]"]))
+
+
+class Containment(unittest.TestCase):
+    """What the flattening test counts as the value's text surviving."""
+
+    def test_a_short_number_is_never_flattened_by_coincidental_containment(self):
+        """#3243, the 22c CM4AI `file_count` 3 shape: a dropped key whose
+        short value appears by chance in text under its surviving parent
+        ("3.8 GB") is deleted, not flattened."""
+        before = _record(file_collections=[{"name": "Images", "file_count": 3, "description": "A zip."}])
+        after = _record(file_collections=[{"name": "Images", "description": "A zip. Listed as 3.8 GB."}])
+        b = rm.classify(before, after, _audit(), receipt=_receipt("file_collections[0].file_count"))
+        self.assertEqual(b["flattened"], 0)
+        self.assertEqual([r["path"] for r in b["unfounded_paths"]], ["file_collections[0].file_count"])
+        self.assertEqual(b["receipted"]["deleted"], 1)
+
+    def test_a_short_number_of_a_dropped_entry_is_not_flattened_into_its_list(self):
+        """The same guard on the list route (#3076's `_folded_into`): the
+        22c entry was dropped and its '3' is a token of a sibling's size."""
+        keep = {"id": "x#a", "name": "Tables", "description": "3.8 GB of tables"}
+        before = _record(file_collections=[{"id": "x#b", "name": "Images", "file_count": 3}, keep])
+        b = rm.classify(before, _record(file_collections=[keep, {"id": "x#c", "name": "More", "notes": "3 files"}]),
+                        _audit())
+        self.assertNotIn("file_collections[0].file_count", [r["path"] for r in b["flattened_paths"]])
+        self.assertIn("file_collections[0].file_count", [r["path"] for r in b["unfounded_paths"]])
+
+    def test_a_long_number_or_a_date_or_a_word_still_flattens(self):
+        """The numbers the corpus flattens for real are long: a count of
+        recording-feature sets (v4 VOICE rep1 `instances[1].counts` 29278, not
+        a participant count; #3396) and a date (CM4AI v4 collection
+        timeframes)."""
+        before = _record(instances=[{"name": "Recording features", "counts": 29278}],
+                         collection_timeframes=[{"start_date": "2022-09-01", "notes": "enrolment"}])
+        after = _record(instances=[{"name": "Recording features", "notes": "29278 feature sets"}],
+                        collection_timeframes=[{"notes": "enrolment from 2022-09-01"}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual({r["path"] for r in b["flattened_paths"]},
+                         {"instances[0].counts", "collection_timeframes[0].start_date"})
+        self.assertEqual(b["deleted"], 0)
+        for value, want in ((3, False), ("1,024", False), ("2023", False), (12345, True), ("3 files", True),
+                            (True, False), ("", False)):
+            with self.subTest(value=value):
+                self.assertIs(rm._flattenable(value), want)
+
+    def test_a_resolver_url_whose_curie_survives_is_flattened_not_deleted(self):
+        """#3129, the AI_READI v4 rep1 shape: the single phase-1 creator
+        carried its affiliations' ROR URLs and its PI's ORCID URL; the
+        final record's consortium entry carries them as CURIEs."""
+        before = _record(creators=[{"name": "AI-READI Consortium",
+                                    "affiliations": [{"name": "UCSD", "id": "https://ror.org/0168r3w48"}],
+                                    "principal_investigator": {"name": "Pat Lee",
+                                                               "id": "https://orcid.org/0000-0002-1825-0097"}}])
+        after = _record(creators=[{"name": "AI-READI Consortium",
+                                   "affiliations": "UCSD (ROR:0168r3w48)",
+                                   "principal_investigator": "Pat Lee, ORCID:0000-0002-1825-0097"}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual({r["path"]: r["into"] for r in b["flattened_paths"]},
+                         {"creators[0].affiliations[0].name": "creators[0].affiliations",
+                          "creators[0].affiliations[0].id": "creators[0].affiliations",
+                          "creators[0].principal_investigator.name": "creators[0].principal_investigator",
+                          "creators[0].principal_investigator.id": "creators[0].principal_investigator"})
+        self.assertEqual(b["deleted"], 0)
+
+    def test_a_resolver_url_whose_curie_survives_in_a_dropped_entrys_continuation_is_flattened(self):
+        """#3129 on the list route: the dropped entry's continuation is found
+        by its ORCID, and the ROR URL survives there as a CURIE."""
+        pi = {"id": "https://orcid.org/0000-0002-1825-0097", "name": "Pat Lee",
+              "affiliations": [{"id": "https://ror.org/0168r3w48"}]}
+        before = _record(creators=[{"id": "x#c1", "principal_investigator": pi}, {"id": "x#c2", "name": "Sam"}])
+        after = _record(creators=[{"id": "ORCID:0000-0002-1825-0097", "name": "Pat Lee",
+                                   "affiliations": [{"id": "ROR:0168r3w48"}]}, {"id": "x#c2", "name": "Sam"}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual({r["path"]: r["into"] for r in b["flattened_paths"]}.get(
+            "creators[0].principal_investigator.affiliations[0].id"), "creators[0]")
+        self.assertNotIn("creators[0].principal_investigator.affiliations[0].id",
+                         [r["path"] for r in b["unfounded_paths"]])
+
+    def test_a_url_quoted_inside_prose_still_matches_as_written(self):
+        """Canonicalising adds a form; it never drops the written one."""
+        before = _record(ethical_reviews=[{"name": "IRB", "contact": {"page": "https://ror.org/0168r3w48"}}])
+        after = _record(ethical_reviews=[{"name": "IRB", "contact": "see https://ror.org/0168r3w48 for the board"}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual([r["path"] for r in b["flattened_paths"]], ["ethical_reviews[0].contact.page"])
+
+
+    def test_a_sibling_carrying_the_curie_counts_before_so_the_list_route_can_narrow(self):
+        """#3383: the list-level surplus compares two counts `_survives`
+        widens alike. A dropped sibling carried the ROR as a CURIE, so the
+        one surviving URL is no surplus: v1 read it flattened into
+        `creators`, v2 reads it deleted."""
+        before = _record(creators=[{"id": "x#a", "name": "Ann", "affiliations": [{"id": "https://ror.org/0168r3w48"}]},
+                                   {"id": "x#b", "name": "Bob", "affiliations": [{"id": "ROR:0168r3w48"}]}])
+        after = _record(creators=[{"id": "x#c", "name": "Cat", "affiliations": [{"id": "https://ror.org/0168r3w48"}]}])
+        b = rm.classify(before, after, _audit())
+        self.assertNotIn("creators[0].affiliations[0].id", [r["path"] for r in b["flattened_paths"]])
+        self.assertIn("creators[0].affiliations[0].id", [r["path"] for r in b["unfounded_paths"]])
 
 class Identity(unittest.TestCase):
     def test_a_reordered_list_is_not_a_removal(self):
@@ -199,7 +339,8 @@ class DroppedEntries(unittest.TestCase):
         """The CM4AI v4 rep3 creator: the minted id replaced by the PI's ORCID,
         the PI object flattened to its name. The shared affiliation and role
         survive in that entry, not in the list at large; with the person
-        gone they are deleted though the other creator still carries both."""
+        gone they are deleted though the other creator still carries both.
+        The PI's ORCID URL survives as the entry's CURIE id (#3129)."""
         krogan = {"id": "urn:x:creator:krogan",
                   "principal_investigator": {"id": "https://orcid.org/0000-0003-4902-337X", "name": "Nevan Krogan"},
                   "affiliations": [{"name": "University of California San Francisco"}], "credit_roles": ["investigation"]}
@@ -211,6 +352,7 @@ class DroppedEntries(unittest.TestCase):
         b = rm.classify(before, _record(creators=[rewritten, other]), _audit())
         self.assertEqual({r["path"]: r["into"] for r in b["flattened_paths"]},
                          {"creators[0].principal_investigator.name": "creators[0]",
+                          "creators[0].principal_investigator.id": "creators[0]",
                           "creators[0].affiliations[0].name": "creators[0]",
                           "creators[0].credit_roles[0]": "creators[0]"})
         gone = rm.classify(before, _record(creators=[other]), _audit())
@@ -666,6 +808,23 @@ class CliPastEnd(unittest.TestCase):
         self.assertIn("finding paths indexing past the end of their list: 2 (1 one past, read as the last entry;"
                       " 1 value(s) founded so)", r.output)
 
+    def test_the_cli_lists_the_rewritten_values_on_request(self):
+        """#3243: counted in the summary, listed under --rewritten."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        block = rm.classify(_record(license="CC-BY", description="old words"),
+                            _record(license="CC0", description="new text"), _audit({"slot": "license"}))
+        args = ["removals", "--method", "claudecode_api", "--label", "L", "--project", "VOICE"]
+        with mock.patch("data_sheets_schema.cli.review._provenance", lambda *_: Path(__file__)), \
+                mock.patch("data_sheets_schema.removals.for_record", return_value=block):
+            plain = click.testing.CliRunner().invoke(review_cli, args)
+            listed = click.testing.CliRunner().invoke(review_cli, args + ["--rewritten"])
+        self.assertEqual((plain.exit_code, listed.exit_code), (0, 0), plain.output + listed.output)
+        self.assertIn("2 rewritten in place (1 without a finding)", plain.output)
+        self.assertNotIn("≠", plain.output)
+        self.assertIn("≠ founded license → license (phase unattributed)", listed.output)
+        self.assertIn("≠ unfounded description → description (phase unattributed)", listed.output)
+
 
 # ------------------------------------------------------------ corpus replay
 CONCAT = Path(__file__).resolve().parents[1] / "data" / "d4d_concatenated"
@@ -837,3 +996,50 @@ def test_a_reworded_or_moved_value_is_counted_deleted_though_its_content_survive
     ok, new = rm._resolve_value(yaml.safe_load(final.read_text()), final_path)
     assert ok and phrase in squash(new)
     assert squash(old) not in squash(new)          # reworded: the old text does not survive verbatim
+
+
+@pytest.mark.corpus
+def test_the_v4_ai_readi_rep1_identifiers_that_survive_as_curies_are_flattened(monkeypatch):
+    """#3129: the single phase-1 creator's eight affiliation ROR URLs, its
+    own ROR URL and its PI's ORCID, and the two contact objects collapsed to
+    the ORCID CURIE, survive in the final record as CURIEs. v1 counted all
+    twelve deleted and 40 unfounded; v2 counts 29."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    b = _replay("2026-08-13_claude-opus-5-api-generic-v4_rep1", "AI_READI", method="claudecode_agent")
+    flat = {r["path"] for r in b["flattened_paths"]}
+    assert {f"creators[0].affiliations[{i}].id" for i in range(8)} <= flat
+    assert {"creators[0].id", "creators[0].principal_investigator.id", "data_governance.committee_contact.id",
+            "license_and_use_terms.contact_person.id"} <= flat
+    assert (b["unfounded"], b["flattened"]) == (29, 32)
+
+
+@pytest.mark.corpus
+def test_the_one_five_digit_count_the_corpus_flattens_is_v4_voice_rep1_recording_features(monkeypatch):
+    """#3396: the count MIN_NUMERIC_DIGITS is justified by. It is 29278 on the
+    recording-features instance of v4 VOICE rep1 — a count of derived feature
+    sets, not participants (the participant instance beside it holds 833) —
+    and it still flattens under the 5-digit guard."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    label = "2026-08-13_claude-opus-5-api-generic-v4_rep1"
+    b = _replay(label, "VOICE", method="claudecode_agent")
+    assert "instances[1].counts" in {r["path"] for r in b["flattened_paths"]}
+    snapshot = yaml.safe_load((CONCAT / "claudecode_agent_core" / label / "intermediate" / "VOICE_full.yaml")
+                              .read_text())
+    entry = snapshot["instances"][1]
+    assert entry["counts"] == 29278
+    assert entry["id"].endswith("/recording-features")
+    assert len(str(entry["counts"])) >= rm.MIN_NUMERIC_DIGITS
+
+
+@pytest.mark.corpus
+def test_the_22c_cm4ai_file_counts_are_deleted_and_rewritten_not_flattened_or_carried(monkeypatch):
+    """#3243 on the record the issue names: the dropped `file_collections[1]`
+    had file_count 3, which v1 read as flattened into the '3' of '3.8 GB';
+    `file_collections[0]` kept its place and its file_count went 2 -> 1."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    b = _replay("2026-08-22c_claude-opus-5-api-generic-v5_rep1", "CM4AI", method="claudecode_agent")
+    assert "file_collections[1].file_count" in {r["path"] for r in b["unfounded_paths"]}
+    assert "file_collections[1].file_count" not in {r["path"] for r in b["flattened_paths"]}
+    rewritten = {r["path"]: r for r in b["rewritten_paths"]}
+    assert rewritten["file_collections[0].file_count"]["at"] == "file_collections[0].file_count"
+    assert b["unfounded"] == 10
