@@ -321,6 +321,10 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         with (stale / SUMMARY.name).open("a", encoding="utf-8") as fh:
             fh.write("A line regeneration does not write.\n")
 
+        drifted_no_summary = base / "drifted_no_summary"
+        shutil.copytree(drifted, drifted_no_summary)
+        (drifted_no_summary / SUMMARY.name).unlink()
+
         no_summary = base / "no_summary"
         shutil.copytree(exact, no_summary)
         (no_summary / SUMMARY.name).unlink()
@@ -328,7 +332,8 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         # The check runs on these and on nothing else that exists, so no
         # directory it reads can be left out of the snapshot (#3142).
         read_from = {"exact": exact, "drifted": drifted,
-                     "stale summary": stale, "no summary": no_summary}
+                     "stale summary": stale, "no summary": no_summary,
+                     "drifted, no summary": drifted_no_summary}
         for path in read_from.values():
             for file in path.iterdir():
                 os.utime(file, ns=(cls.PAST_NS, cls.PAST_NS))
@@ -343,6 +348,7 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         cls.drifted_result = cls.results["drifted"]
         cls.stale_result = cls.results["stale summary"]
         cls.no_summary_result = cls.results["no summary"]
+        cls.drifted_no_summary_result = cls.results["drifted, no summary"]
         cls.after = {name: directory(name) for name in read_from}
         cls.absent = base / "absent"
         cls.absent_result = run("--check", "--output-dir", str(cls.absent))
@@ -423,6 +429,15 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
         self.assertIn("the summary beside it is missing", out)
         self.assertNotIn("stale", out)
         self.assertNotIn("committed mapping does not regenerate", out)
+
+    def test_a_missing_summary_beside_a_drifted_mapping_is_named_missing(self):
+        """Codex review of #3372: with the mapping drifted too, the closing
+        line still names the missing summary, not a stale one."""
+        code, out = self.drifted_no_summary_result
+        self.assertEqual(code, 1, out)
+        self.assertIn("✗ The committed mapping does not regenerate", out)
+        self.assertIn("There is no committed summary either, at", out)
+        self.assertNotIn("does not regenerate either", out)
 
     def test_a_drifted_mapping_is_what_the_headline_names(self):
         """The other side of #3125: with the summary fresh, the mapping."""

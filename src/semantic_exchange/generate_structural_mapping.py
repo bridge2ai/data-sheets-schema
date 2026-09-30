@@ -850,6 +850,8 @@ def main(argv=None):
             # Reached only with the summary stale: the pass returned above.
             print("\n  The summary does not regenerate. The mapping beside it "
                   "does, so only the summary is stale.")
+        elif summary_missing:
+            print(f"\n  There is no committed summary either, at {summary}.")
         elif summary_drifted:
             print("\n  The summary does not regenerate either.")
         else:
