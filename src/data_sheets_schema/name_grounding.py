@@ -164,16 +164,26 @@ bundle writes it near another word of its part — at most
 after a word, where a sentence ends: `Emma Lundberg. Clark J`, nor after
 a run of two or three capitals, which is as often a degree or an acronym:
 `Emma Lundberg MD. Clark J`, #3460; unless the leaf writes that word with
-a period too, `St. Louis`; so `Tim St John` against `Tim St. John`
-demotes `John`, and `Mark DA. Wilkinson` separates `Mark` from
-`Wilkinson`, costs), hyphens, apostrophes or digits inside a word
-(`Bridge2AI`) between tokens, and one comma only where the bundle
-inverts the record's order (`Clark, Tim`) or before a generational
-suffix (`John Smith, Jr.` keeps `Jr`, #3459) — or beside that word's
-initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon J-C` keep
-`Metallo` for `Christian Metallo`; a suffix or `The` has no initial
-there). A digit before a comma is an
-affiliation mark and ends the entry (`Levinson1, Charlotte`). A demoted
+a period too, `St. Louis`, but not the period ending the leaf, which
+abbreviates nothing: `Tim Clark.` reads like `Tim Clark`, #3483; so `Tim
+St John` against `Tim St. John` demotes `John`, and `Mark DA. Wilkinson`
+separates `Mark` from `Wilkinson`, costs), hyphens, apostrophes or
+digits inside a word (`Bridge2AI`) between tokens, and one comma only
+where the bundle inverts the record's order (`Clark, Tim`) or before a
+generational suffix (`John Smith, Jr.` keeps `Jr`, #3459) — or beside
+that word's initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon
+J-C` keep `Metallo` for `Christian Metallo`; a suffix or `The` has no
+initial there). A digit before a comma is an
+affiliation mark and ends the entry (`Levinson1, Charlotte`). Since any
+whitespace joins, a bundle listing one name per line reads the last word
+of one entry and the first of the next as one entry, and so does a
+spaced hyphen: `Emma Clark` against `Emma Lundberg\nClark T` (blank
+lines between them or not) or `Emma Lundberg - Clark T` is not demoted,
+nor, on the CM4AI bundle, `Emma Chan` through `Emma Lundberg\nChan
+Zuckerberg Biohub` — a cost, toward under-demotion (#3484). The
+layout cannot tell that line break from a name wrapped across one
+(`Charlotte\nMarquez`); a sentence end between them still separates
+them (`Emma Lundberg. Clark T`). A demoted
 token carries the class it would have were it absent (`initial_expanded`
 where the other word has its initial beside it: `Jing Gao` against
 `Jing Chen; Gao J`), and whether v1 found its leaf clean. On the
@@ -653,9 +663,13 @@ def abbreviations(name: str) -> frozenset[str]:
     """Exact keys of the tokens `name` writes with a period right after
     them (`St` in `St. Louis`): where the leaf abbreviates a word, a period
     after it in the bundle is the abbreviation's, not a sentence end
-    (#3427)."""
+    (#3427). Not a period that ends the leaf, with only whitespace after
+    it: that one ends the leaf's sentence and abbreviates nothing, so
+    `Tim Clark.` exempts no word and reads `Emma Clark. Tim Jones` as two
+    sentences, as `Tim Clark` does (#3483)."""
     text = _NOT_A_NAME.sub(" ", name)
-    return frozenset(exact_key(t.text) for t in _runs(text) if text[t.end:t.end + 1] == ".")
+    return frozenset(exact_key(t.text) for t in _runs(text)
+                     if text[t.end:t.end + 1] == "." and text[t.end + 1:].strip())
 
 
 def person_parts(name: str, words: frozenset[str] = frozenset()) -> list[list[str]]:

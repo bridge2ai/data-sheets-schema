@@ -395,6 +395,19 @@ class DocumentedCostTest(unittest.TestCase):
         self.assertEqual(demoted("Mark Wilkinson", "Mark DA. Wilkinson"),
                          {"Mark": "absent", "Wilkinson": "absent"})
 
+    def test_v2_joins_adjacent_lines_of_a_one_name_per_line_layout(self):
+        """#3484: any whitespace joins two tokens, so the last word of one
+        entry and the first of the next, one per line, read as one entry,
+        with blank lines between them or not; a spaced hyphen joins too.
+        A sentence end between them still separates them."""
+        for bundle in ("Emma Lundberg\nClark T", "Emma Lundberg\n\n\n\nClark T",
+                       "Emma Lundberg - Clark T"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(demoted("Emma Clark", bundle), {})
+        self.assertEqual(demoted("Emma Chan", "Emma Lundberg\nChan Zuckerberg Biohub"), {})
+        self.assertEqual(demoted("Emma Clark", "Emma Lundberg. Clark T"),
+                         {"Emma": "absent", "Clark": "absent"})
+
     def test_a_function_word_outside_the_list(self):
         """`_NOT_SURNAMES` is short (`An`, `To` are surnames): `In` stands in."""
         self.assertEqual(cls("In Data Trust", "Data", "In D, and"), "initial_expanded")
@@ -598,6 +611,13 @@ class ProximityTest(unittest.TestCase):
                          frozenset({"y", "st"}))
         self.assertEqual(ng.abbreviations("Olivier (ORCID:0000-0002-1825-0097) St. Clair"),
                          frozenset({"st"}))
+        # Nor the period that ends the leaf (#3483): it ends a sentence and
+        # abbreviates nothing, so `Tim Clark.` reads as `Tim Clark` does.
+        self.assertEqual(ng.abbreviations("Contact the PI, Tim Clark."), frozenset())
+        self.assertEqual(ng.abbreviations("Tim St. Clark.  \n"), frozenset({"st"}))
+        bundle = "Emma Clark. Tim Jones wrote."
+        self.assertEqual(demoted("Tim Clark.", bundle), demoted("Tim Clark", bundle))
+        self.assertEqual(demoted("Tim Clark.", bundle), {"Tim": "absent", "Clark": "absent"})
         # Nor inside an identifier span (#3463): `tim.clark@kth.se` abbreviates nothing.
         self.assertEqual(ng.abbreviations("Tim Clark (tim.clark@kth.se, https://kth.se/Tim.html)"),
                          frozenset())
