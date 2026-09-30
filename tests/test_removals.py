@@ -998,9 +998,43 @@ class Relocation(unittest.TestCase):
         self.assertNotIn("relocated_candidate", row)
         self.assertEqual(b["relocated_candidate"], 0)
         text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
-        self.assertIn("never as the prefix of a longer one", text)
+        self.assertIn("never as the prefix or the tail of a longer one", text)
         self.assertIn("those figures are over both routes", text)
         self.assertNotIn("not measured", text)
+
+    def test_an_identifier_is_not_found_as_the_tail_of_a_longer_identifier(self):
+        """#3618: the start mirrors `_IDENTIFIER_END`. A needle that begins
+        after a character continuing an identifier (`.`, `-`, `/`, `:`, `@`
+        and the rest) is the tail of a longer, different one — another
+        person's address, a path inside a deeper URL. Where it begins the
+        text, follows a space or bracket, or follows the `mailto:` scheme
+        set aside on both sides, it is still found."""
+        mail = "mailto:smith@lab.edu"
+        for hay in ("Write to j.smith@lab.edu for access", "Write to jo-smith@lab.edu.",
+                    "Write to mailto:j.smith@lab.edu.", "id=smith@lab.edu", "a/smith@lab.edu"):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail), (True, None), hay)
+        for hay in ("Write to smith@lab.edu for access", "smith@lab.edu", "(smith@lab.edu)",
+                    "Write to mailto:smith@lab.edu.", "Write to MAILTO:Smith@Lab.edu."):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail)[1]["to"], "contact", hay)
+        # A URL quoted as a query value or after a proxy prefix is a
+        # different identifier; a CURIE's scheme must not be the tail of a
+        # longer one either.
+        root = "https://chorus4ai.org/"
+        for hay in ("https://proxy.example.org/?u=https://chorus4ai.org/", "see x.https://chorus4ai.org/"):
+            self.assertEqual(rm._Relocation(_record(notes=hay)).candidate(root), (True, None), hay)
+        self.assertEqual(rm._Relocation(_record(notes="See lab.ror:00cvxb145 here.")).candidate("ROR:00cvxb145"),
+                         (True, None))
+        self.assertEqual(rm._Relocation(_record(notes="Washington (ROR 00cvxb145, itself listed)")).candidate(
+            "ROR:00cvxb145")[1]["to"], "notes")
+        # Through classify: a contact's address deleted where another
+        # person's address ends in the same letters.
+        before = _record(contacts=[{"name": "Sam Smith", "email": mail}], contact="Write to j.smith@lab.edu.")
+        after = _record(contacts=[{"name": "Sam Smith"}], contact="Write to j.smith@lab.edu.")
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "contacts[0].email")
+        self.assertNotIn("relocated_candidate", row)
+        text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
+        self.assertIn("starts and ends an identifier", text)
 
     def test_a_candidate_moves_no_class_count(self):
         before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])

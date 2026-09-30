@@ -252,8 +252,8 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                            "unattributed (#3152)"),
     "unfoundedrelocated": ("of those, with a relocation candidate", "live", True,
                            "removals v3 (#3223): the removals without a finding whose content "
-                           "words (three or more; an identifier by its own text, ending where "
-                           "an identifier ends, #3603) recur, 70% of "
+                           "words (three or more; an identifier by its own text, starting and "
+                           "ending where an identifier does, #3603, #3618) recur, 70% of "
                            "them or more, in one scalar of the final full record or one list of "
                            "scalars taken whole — a sign the value was reworded or moved rather "
                            "than lost. Reported only: no count above moves, a candidate is where "

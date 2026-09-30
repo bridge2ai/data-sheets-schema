@@ -132,7 +132,10 @@ direct arms, and adds annotations that move no class:
   end of the text, sentence punctuation or a character no identifier
   continues with, so a site root is not found inside a deeper page URL
   nor `#pi` inside `#pi-record`, while "(ROR 05gq02987)" in prose still
-  restates `ROR:05gq02987` (#3603). A
+  restates `ROR:05gq02987` (#3603); and it starts where the match does:
+  before it comes the start of the text, a `mailto:` scheme or a
+  character no identifier continues with, so `smith@lab.edu` is not
+  found as the tail of `j.smith@lab.edu` (#3618). A
   candidate under `source_caveats` is marked `change_of_standing`: the
   value is no longer a claim, only the run's commentary on one. Validated
   on a hand-labelled sample of deleted rows (`RELOCATED_VALIDATION`). No
@@ -264,7 +267,8 @@ NON_CHECKS = (
     "found about four relocations in five (RELOCATED_VALIDATION), a value with fewer than "
     "three content words (a number, a date, a short name) is not assessed unless it is "
     "identifier-shaped (a CURIE or a URL, matched by its own text whatever its word count, "
-    "and only where the match ends an identifier, never as the prefix of a longer one, #3603) — "
+    "and only where the match starts and ends an identifier, never as the prefix or the tail of "
+    "a longer one, #3603, #3618) — "
     "those figures are over both routes: 19 of the sample's 64 rows are identifier-shaped and "
     "were decided by their own text (5 found, none wrong, none missed), and on the 45 "
     "content-word rows alone the threshold's precision is 0.87 and its recall 0.77 (#3613) — "
@@ -621,7 +625,16 @@ def _words(value: Any) -> frozenset[str]:
 #: more text, and the rest of a URL's own characters, continue one — so a
 #: site root does not end inside a deeper page URL, nor `#pi` inside
 #: `#pi-record`.
-_IDENTIFIER_END = r"/?[.:]*(?:$|(?=[^\w\-#/?=&%~+@.:]))"
+#: The characters that continue an identifier on either side of a match.
+_IDENTIFIER_CONTINUES = r"\w\-#/?=&%~+@.:"
+_IDENTIFIER_END = r"/?[.:]*(?:$|(?=[^" + _IDENTIFIER_CONTINUES + r"]))"
+
+#: What may precede an identifier where it starts (#3618), `_IDENTIFIER_END`
+#: mirrored: the start of the text or a character no identifier continues
+#: with — so `smith@lab.edu` is not found as the tail of `j.smith@lab.edu`,
+#: nor a path inside a longer URL — with one exception, the `mailto:` scheme,
+#: which is set aside on the carrying side as on the deleted one.
+_IDENTIFIER_START = r"(?:(?<=mailto:)|(?<![" + _IDENTIFIER_CONTINUES + r"]))"
 
 
 def _folded(text: str) -> str:
@@ -633,9 +646,10 @@ def _folded(text: str) -> str:
 
 def _identifier_pattern(needle: str) -> re.Pattern[str]:
     """A normalised identifier as a pattern on folded raw text: its words
-    on word boundaries, any punctuation between them, and an identifier's
-    end after the last (#3603)."""
-    return re.compile(r"(?<!\w)" + r"\W+".join(map(re.escape, needle.split())) + _IDENTIFIER_END)
+    on word boundaries, any punctuation between them, an identifier's
+    start before the first (#3618) and an identifier's end after the last
+    (#3603)."""
+    return re.compile(_IDENTIFIER_START + r"\W+".join(map(re.escape, needle.split())) + _IDENTIFIER_END)
 
 
 class _Relocation:
@@ -663,12 +677,13 @@ class _Relocation:
         """(assessed, candidate or None). An identifier-shaped value is
         assessed by its own text (a `mailto:` scheme aside), as written or
         as `_member` reads it, against each scalar read both ways, as
-        `_survives` does (#3585), and only where the match ends an
-        identifier (`_IDENTIFIER_END`, #3603): a resolver URL quoted
+        `_survives` does (#3585), and only where the match starts and
+        ends an identifier (`_IDENTIFIER_START`, #3618;
+        `_IDENTIFIER_END`, #3603): a resolver URL quoted
         in prose is found, and so is a CURIE where a scalar is its URL
         (though not where prose quotes the URL, which `_survives` does not
-        find either), while a longer identifier that begins with it is not
-        it; any other by the share of its content words one candidate
+        find either), while a longer identifier that begins or ends with
+        it is not it; any other by the share of its content words one candidate
         carries, where it has `RELOCATED_MIN_WORDS` of them. The first
         path in record order wins a tie, a scalar before a list."""
         if isinstance(value, str) and _IDENTIFIER_SHAPED.fullmatch(value.strip()):
