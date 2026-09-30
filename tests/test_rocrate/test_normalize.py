@@ -22,10 +22,12 @@ from data_sheets_schema.rocrate_normalize import (
     build_person_index,
     document_corpus_exclusions,
     normalize_linkml,
+    normalize_project,
     reduce_metadata,
     validate_d4d,
     write_report,
 )
+from data_sheets_schema.rocrate_map import CrateEncodingError
 from data_sheets_schema.schema_cache import sha256_of
 
 PERSON_GRAPH = {
@@ -206,6 +208,47 @@ class TestWriteReport(unittest.TestCase):
         self.assertTrue(line.startswith("- `TEST_crate_d4d.yaml`: **PASS** — schema "), line)
         self.assertIn(f"sha256 {sha256_of(FULL_SCHEMA)}", line)
         self.assertRegex(line, r" / \d{4}-\d{2}-\d{2} ")
+
+
+def _write_crate(project_dir: Path, encoding: str) -> None:
+    """A crate JSON holding a copyright sign, which windows-1252 writes as
+    byte 0xa9 and UTF-8 does not (#2969)."""
+    graph = {"@graph": [*PERSON_GRAPH["@graph"],
+                        {"@id": "./", "@type": "Dataset",
+                         "copyrightNotice": "\u00a9 2025 Test"}]}
+    path = project_dir / "raw" / "ro-crate-metadata.json"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(json.dumps(graph, ensure_ascii=False).encode(encoding))
+
+
+class TestUndecodableCrate(unittest.TestCase):
+    """#2969. normalize_project read the crate as UTF-8 after creating
+    processed/, so a windows-1252 crate crashed the run and left an empty
+    processed/ behind."""
+
+    def test_it_is_refused_by_name_and_leaves_no_processed_dir(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _write_crate(Path(tmp) / "TEST", "cp1252")
+            with self.assertRaises(CrateEncodingError):
+                normalize_project("TEST", Path(tmp), sv=SchemaView(str(FULL_SCHEMA)))
+            self.assertFalse((Path(tmp) / "TEST" / "processed").exists())
+
+    def test_the_normalize_command_reports_it_and_goes_on(self):
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.rocrate import rocrate
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_crate(root / "AI_READI", "cp1252")
+            _write_crate(root / "CHORUS", "utf-8")
+            r = CliRunner().invoke(rocrate, [
+                "normalize", "--project", "AI_READI", "--project", "CHORUS",
+                "--packages-dir", str(root)])
+            self.assertIsInstance(r.exception, SystemExit, r.output)
+            self.assertEqual(r.exit_code, 1, r.output)
+            self.assertIn("AI_READI/raw/ro-crate-metadata.json is not UTF-8", r.output)
+            self.assertTrue((root / "CHORUS" / "processed"
+                             / "CHORUS_crate_metadata_reduced.json").exists(), r.output)
+            self.assertFalse((root / "AI_READI" / "processed").exists())
 
 
 class TestReduceMetadata(unittest.TestCase):
