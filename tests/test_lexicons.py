@@ -203,14 +203,23 @@ class TheRegistry(unittest.TestCase):
         self.assertEqual(match("The date is preferred as the higher-ranked source."),
                          "preferred as the higher-ranked")
         # The verb must be in the same sentence: `;` and `. ` end it, a `.` inside a token does not.
+        # The pattern has two branches — verb after the term (a lookahead) and verb before it (a
+        # consuming span) — and each boundary is shown on both (#3759).
         self.assertIsNone(match("Two tier-1 sources disagree; both dates are recorded."))
         self.assertIsNone(match("Two tier-1 sources disagree. Both dates are recorded."))
+        self.assertIsNone(match("Both dates are recorded; two tier-1 sources disagree."))
+        self.assertIsNone(match("Both dates are recorded. Two tier-1 sources disagree."))
         self.assertEqual(match("Counts are taken from the v3.1.0 record, the highest-ranked source."),
                          "taken from the v3.1.0 record, the highest-ranked")
-        # ... and within 80 characters.
+        self.assertEqual(match("The higher-ranked source, v3.1.0 of the record, is used."), "higher-ranked")
+        # ... and within 80 characters, on either side.
         near = "The higher-ranked source " + "x" * 50 + " is used."
         far = "The higher-ranked source " + "x" * 80 + " is used."
         self.assertEqual(match(near), "higher-ranked")
+        self.assertIsNone(match(far))
+        near = "The date is used " + "x" * 50 + " as the higher-ranked source."
+        far = "The date is used " + "x" * 80 + " as the higher-ranked source."
+        self.assertEqual(match(near), "used " + "x" * 50 + " as the higher-ranked")
         self.assertIsNone(match(far))
         # A verb the list does not name is no verb: the source's own statement.
         self.assertIsNone(match("The higher-ranked source gives a later date."))
