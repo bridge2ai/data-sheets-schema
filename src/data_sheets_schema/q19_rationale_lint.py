@@ -54,11 +54,13 @@ machine-readable form and lineage across fields. So:
   is absent and which is credit, so it is not read; a comma ("…links,
   errata missing") makes the absent one a clause of its own, which is.
   The label's other clauses are credit and are not read, and so is a
-  later part that turns back to credit with "but", "whereas" or "however"
-  and names no gap ("No PROV graph, but excellent version history";
-  `_label_rest`, #3128). Two cases are read with the reason: credit in the
-  clause that carries the first contrast or cue, or in a later clause
-  that does not open with a contrast; and the words before a contrast
+  later part that turns back to credit with "but", "whereas" or "however",
+  with or without punctuation before it, and names no gap or cue ("No
+  PROV graph, but excellent version history", "No PROV graph whereas
+  excellent version history"; `_label_rest`, #3128, #3432). Two cases
+  are read with the reason: credit in the clause that carries the first
+  contrast or cue, or in a later clause that does not open with a
+  contrast; and the words before a contrast
   that names nothing of its own ("graph claimed but not evidenced", "full
   provenance graph asserted rather than exhibited"), which is about them;
 - a sentence that says why is divided, as a body sentence is where
@@ -890,17 +892,35 @@ def _label_rest(label: str, start: int) -> list[tuple[int, int]]:
     """The label from `start`, where its reason begins, to its end, less
     each later part that turns back to credit (#3128): one opening with
     "but", "whereas" or "however" that names no gap (`_GAP`) and carries no
-    withholding cue. "No PROV graph, but excellent version history" reads
-    "No PROV graph"; "graph claimed but not evidenced" and "prose lineage,
-    but no errata" are read whole."""
+    withholding cue. The parts are `_label_parts` cut again before an
+    unpunctuated "whereas" or "however" (`_contrast_pieces`, #3432). "No
+    PROV graph, but excellent version history" reads "No PROV graph";
+    "graph claimed but not evidenced" and "prose lineage, but no errata"
+    are read whole."""
     out, lo = [], start
-    for a, b in (part for span in _spans(label) for part in _label_parts(label, *span)):
+    for a, b in (piece for span in _spans(label) for part in _label_parts(label, *span)
+                 for piece in _contrast_pieces(label, *part)):
         part = label[a:b].strip()
         if (a > start and _CONTRAST_OPENS.match(part) and not _GAP.search(part)
                 and not _WITHHOLDING.search(part)):
             out.append((lo, a))
             lo = b
     return out + [(lo, len(label))]
+
+
+def _contrast_pieces(label: str, a: int, b: int) -> list[tuple[int, int]]:
+    """The label part `label[a:b]` cut before each "whereas" or "however"
+    it carries after its first word (#3432). `_label_parts` cuts before
+    "but" only, so without this an unpunctuated "No PROV graph whereas
+    excellent version history" was one part and its credit was read."""
+    cuts = [a] + [m.start() for m in _LABEL_TURN.finditer(label, a, b)
+                  if label[a:m.start()].strip()]
+    return list(zip(cuts, cuts[1:] + [b]))
+
+
+#: The contrasts that turn a label back to credit and that `_label_parts`
+#: does not cut before ("but" it does).
+_LABEL_TURN = re.compile(r"\b(?:whereas|however)\b", _I)
 
 
 def _gap_parts(sentence: str, *, cue: bool = False) -> list[tuple[int, int]]:
@@ -983,7 +1003,9 @@ def withholding_sentences(item: dict) -> list[tuple[str, str]]:
     (`_says_why`), and a label's reason clauses (`_label_reasons`). A cue
     sentence that names no concern of its own ("Short of 5.", "One point is
     deducted for that gap.") gives its reason in a neighbour, so the
-    sentences either side of it in the same field are read with it."""
+    sentences either side of it in the same field are read with it: whole,
+    or, where the neighbour says why itself, as the parts it is read as
+    already, its credit still set apart (#3431)."""
     return [(name, text[lo:hi].strip()) for name, text, (lo, hi), _ in _withholding(item)]
 
 
@@ -1003,8 +1025,12 @@ def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int], frozenset]
                      for part in _gap_parts(sentence, cue=True)]
             keep.extend((i, part, credit) for part, credit in parts)
             if not _reasons([(name, sentence, part, credit) for part, credit in parts]):
+                # A neighbour that says why is kept as its own parts, with
+                # its own credit set apart; read whole as well, it would
+                # read that credit and its reason twice (#3431).
                 keep.extend((j, (0, len(sentences[j][1])), ()) for j in (i - 1, i + 1)
-                            if 0 <= j < len(sentences) and sentences[j][0] == name)
+                            if 0 <= j < len(sentences) and sentences[j][0] == name
+                            and not _says_why(sentences[j][1]))
     seen, out = set(), []
     for i, span, credit in sorted(keep, key=lambda k: k[0]):
         if (i, span) not in seen:

@@ -36,6 +36,7 @@ from data_sheets_schema.q19_rationale_lint import (
     REPRESENTATION_ONLY, STATED, SUBSTANTIVE, SUBSTANTIVE_ONLY, UNSTATED, inspection_statuses,
     lint_file, lint_q19, lint_report, q19_item, sha256_of, withholding_sentences,
 )
+from data_sheets_schema.q19_rationale_lint import _credit_clauses
 
 ROOT = Path(__file__).resolve().parents[1]
 ERRATA = ROOT / "notes/reference_rescore_2026-09-11/semantic_errata.md"
@@ -959,7 +960,9 @@ def test_a_label_clause_that_accepts_is_judged_whole_not_from_the_cut():
     result = lint_q19(rating)
     assert (result.basis, result.verdict, result.cue_unread) == (
         UNSTATED, SUBSTANTIVE_ONLY, True)
-    assert withholding_sentences(rating) == [("score_label", label)]
+    # "whereas complete" turns back to credit and names no gap, so it is
+    # not read with the reason (#3128, #3432).
+    assert withholding_sentences(rating) == [("score_label", "Prose accepted short of a graph")]
 
 
 def test_a_label_cue_in_an_accepting_clause_does_not_state_the_basis():
@@ -1392,15 +1395,78 @@ def test_where_nothing_says_why_what_a_gap_part_still_reads(note, concerns):
 @pytest.mark.parametrize("label, read", [
     ("No PROV graph, but excellent version history", ["graph_form"]),
     ("No PROV graph but excellent version history", ["graph_form"]),
-    # A later contrast that names a gap, or a cue, is part of the reason.
+    # "whereas" and "however" turn back to credit with or without a comma
+    # (#3432): the label parts cut only before "but".
+    ("No PROV graph, whereas excellent version history", ["graph_form"]),
+    ("No PROV graph whereas excellent version history", ["graph_form"]),
+    ("No PROV graph however excellent version history", ["graph_form"]),
+    # A later contrast that names a gap is part of the reason.
     ("No PROV graph, but no errata either", ["graph_form", "version_history"]),
     ("Short of a full graph, but errata not recorded", ["graph_form", "version_history"]),
+    ("No PROV graph whereas errata not recorded", ["graph_form", "version_history"]),
+    # So is one that carries a withholding cue and names no gap (#3433).
+    ("No PROV graph, but falls short on errata too", ["graph_form", "version_history"]),
+    ("No PROV graph, but held at 4 for errata", ["graph_form", "version_history"]),
 ])
 def test_label_credit_after_its_reason_turning_back_with_a_contrast_is_not_read(label, read):
     """#3128: a label's reason ran from its first cue to its end, so credit
     after it was read."""
     result = lint_q19(item(label=label, note=_NEUTRAL))
     assert sorted(result.concerns(REPRESENTATION) + result.concerns(SUBSTANTIVE)) == read, label
+
+
+@pytest.mark.parametrize("note, reasons", [
+    # #3128's CBORG CM4AI v8 rep2 form, with a sentence after it that
+    # points back and names no reason of its own.
+    ("Above the band - persistent identifiers and file-level fixity - but the top band "
+     "requires the links to be represented as a graph. One point is withheld for that.",
+     ["graph_form"]),
+    ("Short of 5. Checksums are recorded on every archive, but it falls short of 5 because "
+     "no PROV graph is given.", ["graph_form"]),
+])
+def test_a_neighbour_that_says_why_keeps_its_credit_apart(note, reasons):
+    """#3431: a cue sentence naming no reason reads the sentences either
+    side of it. One that itself says why was read whole as well as by its
+    parts, so its credit came back and its reason was counted twice."""
+    result = lint_q19(item(note=note))
+    assert result.basis == STATED
+    assert [r.concern for r in result.reasons] == reasons, note
+
+
+def test_a_clause_carrying_a_withholding_cue_is_never_credit():
+    """#3434 (a): `_credit_clauses` sets apart finite clauses naming no
+    gap, but not one carrying a cue. The lint never asks it about such a
+    clause today (a cue in a clause that is read always says why, so it
+    starts the cue clause `_credit_before_cue` stops at, and where nothing
+    says why no read clause carries one), so the rule is pinned on the
+    function itself."""
+    sentence = "It is held at 4 because errata are thin, and checksums are recorded."
+    assert _credit_clauses(sentence, 0, len(sentence)) == frozenset({(41, len(sentence))})
+
+
+def test_an_outer_list_needs_its_opening_clause_read():
+    """#3434 (b), #3260: a verbless fragment after a concession is read as
+    an item of the outer list only where the clause that list opens with
+    is read. Here that clause disclaims, so "and no PROV graph" may be the
+    disclaimer's own item, and it is not read."""
+    disclaimed = lint_q19(item(note=(
+        "No point is withheld for errata, despite the changelog confirming releases, "
+        "and no PROV graph.")))
+    assert (disclaimed.verdict, disclaimed.reasons) == (REASON_NOT_DETERMINED, ())
+    read = lint_q19(item(note=(
+        "No errata, despite the changelog confirming releases, and no PROV graph.")))
+    assert read.concerns(REPRESENTATION) == ["graph_form"]
+
+
+@pytest.mark.parametrize("note", [
+    "Held at 4 because the missing-data documentation sits beside was_derived_from.",
+    "Held at 4 because missing data documentation sits beside was_derived_from.",
+])
+def test_missing_data_documentation_does_not_say_a_slot_is_empty(note):
+    """#3434 (c), #2982: "missing-data documentation" names content, so it
+    does not make a slot named in the same sentence an empty-slot reason."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.concerns(REPRESENTATION)) == (STATED, []), note
 
 
 @pytest.mark.parametrize("label", [
