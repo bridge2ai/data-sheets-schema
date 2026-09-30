@@ -265,8 +265,9 @@ NON_CHECKS = (
     "three content words (a number, a date, a short name) is not assessed unless it is "
     "identifier-shaped (a CURIE or a URL, matched by its own text whatever its word count, "
     "and only where the match ends an identifier, never as the prefix of a longer one, #3603) — "
-    "the sample "
-    "drew content-word rows only, so the identifier route's accuracy was not measured — "
+    "those figures are over both routes: 19 of the sample's 64 rows are identifier-shaped and "
+    "were decided by their own text (5 found, none wrong, none missed), and on the 45 "
+    "content-word rows alone the threshold's precision is 0.87 and its recall 0.77 (#3613) — "
     "and a candidate moves no count (#3223, #3553)",
     "that a source review's judgment was right — a removed value reviewed supported and founded "
     "by no linked finding is unfounded on the review's word, and one reviewed revise is still "

@@ -19,6 +19,18 @@
 # 0.81 / 0.81; at 0.8: 0.91 / 0.65. Weighted back to the band populations the
 # 0.7 estimate is precision 0.88, recall 0.91. `candidate` is the path
 # removals v3 reports (null where it reports none).
+#
+# Those figures are over both routes (#3613). The sample was drawn by
+# content-word count, and a URL or CURIE has three or more, so 19 of the 64
+# rows are identifier-shaped: removals v3 decides them by their own text,
+# never by the threshold. By route at 0.7:
+# Identifier route: 19 rows, 5 candidates, 5 correct; 5 relocations labelled,
+# 5 found (0 false positives, 0 missed).
+# Content-word route: 45 rows, 23 candidates, 20 correct (precision 0.87);
+# 26 relocations labelled, 20 found (recall 0.77).
+# On the content-word route alone, at 0.6: 0.77 / 0.77; at 0.8: 0.88 / 0.58.
+# The band-weighted estimate above was not recomputed by route, so it too
+# includes the 19 rows the threshold cannot move.
 instrument: removals v3 (#3223)
 threshold: 0.7
 min_content_words: 3

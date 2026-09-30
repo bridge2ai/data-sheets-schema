@@ -260,8 +260,10 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                            "the words are, not proof the content survives, and on the labelled "
                            "sample the threshold was chosen on (notes/"
                            "removals_relocated_sample_2026-09-29.yaml) it was right about nine "
-                           "times in ten and found about four relocations in five (content-word "
-                           "rows only: the identifier route was not measured there). A candidate "
+                           "times in ten and found about four relocations in five (both routes: "
+                           "19 of its 64 rows are identifiers, decided by their own text, 5 found, "
+                           "none wrong, none missed; on the 45 content-word rows alone precision "
+                           "0.87, recall 0.77, #3613). A candidate "
                            "under source_caveats is a change of standing: the value is no longer a "
                            "claim. – wherever the removals row is –"),
     "receipteddeleted": ("receipted values deleted, not flattened", "live", True,

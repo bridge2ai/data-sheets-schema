@@ -999,7 +999,8 @@ class Relocation(unittest.TestCase):
         self.assertEqual(b["relocated_candidate"], 0)
         text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
         self.assertIn("never as the prefix of a longer one", text)
-        self.assertIn("the identifier route's accuracy was not measured", text)
+        self.assertIn("those figures are over both routes", text)
+        self.assertNotIn("not measured", text)
 
     def test_a_candidate_moves_no_class_count(self):
         before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])
@@ -1464,12 +1465,14 @@ def test_the_22c_ai_readi_member_respelled_licence_to_license_is_not_removed(mon
 _NUMBER_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
 
 
-def _stated_relocation_measurement() -> tuple[int, int, int]:
+def _stated_relocation_measurement() -> dict[str, tuple[int, int, int]]:
     """(tp, fp, fn) as the labelled sample's header states them at the
-    declared threshold, after checking that the header's precision and
-    recall follow from its counts and that the published definitions —
-    the removals non-check and the arm table's row — state the same
-    measurement in words (#3549)."""
+    declared threshold — over the whole sample, and split by the route
+    `_Relocation.candidate` decides a row on (#3613) — after checking that
+    the header's precision and recall follow from its counts, that the
+    routes add up to the whole, and that the published definitions — the
+    removals non-check and the arm table's row — state the same
+    measurement in words (#3549) and the content-word route's own figures."""
     root = Path(__file__).resolve().parents[1]
     header = " ".join(line.lstrip("# ").strip() for line in
                       (root / rm.RELOCATED_VALIDATION).read_text().splitlines() if line.startswith("#"))
@@ -1481,6 +1484,20 @@ def _stated_relocation_measurement() -> tuple[int, int, int]:
     tp, candidates, labelled = int(tp), int(candidates), int(labelled)
     assert int(found) == tp
     assert f"{tp / candidates:.2f}" == precision and f"{tp / labelled:.2f}" == recall
+    ident = re.search(r"Identifier route: (\d+) rows, (\d+) candidates, (\d+) correct; (\d+) relocations "
+                      r"labelled, (\d+) found \((\d+) false positives, (\d+) missed\)", header)
+    content = re.search(r"Content-word route: (\d+) rows, (\d+) candidates, (\d+) correct \(precision "
+                        r"([\d.]+)\); (\d+) relocations labelled, (\d+) found \(recall ([\d.]+)\)", header)
+    assert ident and content, "the sample header no longer states the split by route in the form this test reads"
+    i_rows, i_cand, i_tp, i_lab, i_found, i_fp, i_fn = map(int, ident.groups())
+    assert (i_found, i_fp, i_fn) == (i_tp, i_cand - i_tp, i_lab - i_tp)
+    c_rows, c_cand, c_tp, c_prec, c_lab, c_found, c_rec = content.groups()
+    c_rows, c_cand, c_tp, c_lab = int(c_rows), int(c_cand), int(c_tp), int(c_lab)
+    assert int(c_found) == c_tp
+    assert f"{c_tp / c_cand:.2f}" == c_prec and f"{c_tp / c_lab:.2f}" == c_rec
+    sample_rows = len(yaml.safe_load((root / rm.RELOCATED_VALIDATION).read_text())["rows"])
+    assert i_rows + c_rows == sample_rows
+    assert (i_tp + c_tp, i_cand + c_cand, i_lab + c_lab) == (tp, candidates, labelled)
     in_ten = f"about {_NUMBER_WORDS[round(10 * tp / candidates)]} times in ten"
     in_five = f"about {_NUMBER_WORDS[round(5 * tp / labelled)]} relocations in five"
     spec = importlib.util.spec_from_file_location("arm_comparison_3549", root / "scripts" / "arm_comparison.py")
@@ -1489,13 +1506,23 @@ def _stated_relocation_measurement() -> tuple[int, int, int]:
     for name, text in (("removals NON_CHECKS", " ".join(rm.NON_CHECKS)),
                        ("arm table unfoundedrelocated", " ".join(arm.METRICS["unfoundedrelocated"][3].split()))):
         assert in_ten in text and in_five in text, (name, in_ten, in_five)
-    return tp, candidates - tp, labelled - tp
+        # #3613: the published figures are over both routes, and each
+        # definition states the content-word route's own.
+        assert "not measured" not in text, name
+        for figure in (f"{i_rows} of", f"{sample_rows} rows", f"{c_rows} content-word rows",
+                       f"{i_tp} found", c_prec, c_rec):
+            assert figure in text, (name, figure)
+    return {"all": (tp, candidates - tp, labelled - tp),
+            "identifier": (i_tp, i_cand - i_tp, i_lab - i_tp),
+            "content": (c_tp, c_cand - c_tp, c_lab - c_tp)}
 
 
 def test_the_relocation_measurement_the_sample_states_is_the_one_the_definitions_publish():
     """#3549: the header's counts, its precision and recall, and the words
-    the non-check and the arm table use for them agree."""
-    assert _stated_relocation_measurement() == (25, 3, 6)
+    the non-check and the arm table use for them agree; #3613: so do the
+    counts by route."""
+    assert _stated_relocation_measurement() == {"all": (25, 3, 6), "identifier": (5, 0, 0),
+                                                "content": (20, 3, 6)}
 
 
 @pytest.mark.corpus
@@ -1503,12 +1530,14 @@ def test_the_relocation_threshold_measures_what_the_labelled_sample_says(monkeyp
     """#3223: precision and recall of the candidate at the declared
     threshold, recomputed on the hand-labelled sample and compared with
     what the sample file's header states (whose figures the published
-    definitions are checked against, #3549)."""
+    definitions are checked against, #3549) — over the whole sample and
+    by the route `_Relocation.candidate` takes, identifier-shaped or
+    content-word (#3613)."""
     monkeypatch.chdir(CONCAT.parents[1])
     sample = yaml.safe_load((CONCAT.parents[1] / rm.RELOCATED_VALIDATION).read_text())
     assert (sample["threshold"], sample["min_content_words"]) == (rm.RELOCATED_THRESHOLD, rm.RELOCATED_MIN_WORDS)
     records: dict = {}
-    tp = fp = fn = 0
+    counts = {route: [0, 0, 0] for route in ("all", "identifier", "content")}
     for row in sample["rows"]:
         key = (row["label"], row["project"])
         if key not in records:
@@ -1523,10 +1552,13 @@ def test_the_relocation_threshold_measures_what_the_labelled_sample_says(monkeyp
         assert ok, row
         where = relocation.candidate(value)[1]
         assert (where or {}).get("to") == row["candidate"], row
-        tp += bool(where) and row["relocated"]
-        fp += bool(where) and not row["relocated"]
-        fn += (not where) and row["relocated"]
-    assert (tp, fp, fn) == _stated_relocation_measurement()
+        route = ("identifier" if isinstance(value, str) and rm._IDENTIFIER_SHAPED.fullmatch(value.strip())
+                 else "content")
+        for tally in (counts["all"], counts[route]):
+            tally[0] += bool(where) and row["relocated"]
+            tally[1] += bool(where) and not row["relocated"]
+            tally[2] += (not where) and row["relocated"]
+    assert {route: tuple(c) for route, c in counts.items()} == _stated_relocation_measurement()
 
 
 @pytest.mark.corpus
