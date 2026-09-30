@@ -168,8 +168,12 @@ a period too, `St. Louis`, but not the period ending the leaf, which
 abbreviates nothing: `Tim Clark.` reads like `Tim Clark`, #3483, nor one
 followed by an identifier or anything else that is not a letter, `Tim
 Clark. (ORCID:…)`, #3498; so `Tim
-St John` against `Tim St. John` demotes `John`, and `Mark DA. Wilkinson`
-separates `Mark` from `Wilkinson`, costs), hyphens, apostrophes or
+St John` against `Tim St. John` demotes `John`, `Mark DA. Wilkinson`
+separates `Mark` from `Wilkinson`, and a sentence the leaf carries after
+the name reads its period as an abbreviation, since a word follows it:
+`Tim Clark. Director of data access` exempts `Clark`, which the leaf alone
+cannot tell from `St. Louis`, so `Emma Clark. Tim Jones` does not demote
+it, #3535, costs), hyphens, apostrophes or
 digits inside a word (`Bridge2AI`) between tokens, and one comma only
 where the bundle inverts the record's order (`Clark, Tim`) or before a
 generational suffix (`John Smith, Jr.` keeps `Jr`, #3459) — or beside
@@ -182,12 +186,12 @@ name's words. A digit before a comma is an
 affiliation mark and ends the entry (`Levinson1, Charlotte`). Since any
 whitespace joins, a bundle listing one name per line reads the last word
 of one entry and the first of the next as one entry, and so does a
-spaced hyphen: `Emma Clark` against `Emma Lundberg\nClark T` (blank
+spaced hyphen: `Emma Clark` against `Emma Lundberg\\nClark T` (blank
 lines between them or not) or `Emma Lundberg - Clark T` is not demoted,
-nor, on the CM4AI bundle, `Emma Chan` through `Emma Lundberg\nChan
+nor, on the CM4AI bundle, `Emma Chan` through `Emma Lundberg\\nChan
 Zuckerberg Biohub` — a cost, toward under-demotion (#3484). The
 layout cannot tell that line break from a name wrapped across one
-(`Charlotte\nMarquez`); a sentence end between them still separates
+(`Charlotte\\nMarquez`); a sentence end between them still separates
 them (`Emma Lundberg. Clark T`). A demoted
 token carries the class it would have were it absent (`initial_expanded`
 where the other word has its initial beside it: `Jing Gao` against
@@ -675,7 +679,10 @@ def abbreviations(name: str) -> frozenset[str]:
     character, past whitespace, is not a letter: an identifier after it,
     bracketed or bare (`Tim Clark. (ORCID:…)`, `Tim Clark. 0000-…`), a
     part break or a digit ends the name as the end of the leaf does
-    (#3498). An abbreviation is followed by the word it belongs to."""
+    (#3498). An abbreviation is followed by the word it belongs to, but so
+    is a sentence the leaf writes after the name: `Tim Clark. Director of
+    data access` exempts `Clark` as `St. Louis` exempts `St`, and the leaf
+    alone cannot tell them apart, a documented cost (#3535)."""
     text = _NOT_A_NAME.sub(" ", name)
     out = set()
     for t in _runs(text):

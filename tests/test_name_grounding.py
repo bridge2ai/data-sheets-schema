@@ -315,9 +315,26 @@ class DocumentedCostTest(unittest.TestCase):
     one fails here and takes it off the list."""
 
     def test_an_acronym_shaped_pair_before_a_word(self):
-        """Only `and`/`&` before a capitalised word is read as the next
-        entry (#3026); any other word after the pair makes it prose."""
+        """Only `and` before a capitalised word is read as the next entry
+        (#3026), and `&`, which is no word, keeps the pair whatever follows
+        it (#3462); any other word after the pair makes it prose."""
         self.assertEqual(BundleIndex("Levinson MA with Marquez C").initials_beside("Levinson"), set())
+
+    def test_a_sentence_in_the_leaf_after_the_name(self):
+        """#3535: a period the leaf writes after the name, followed by a
+        sentence of its own, reads as an abbreviation of the word before it,
+        as `St.` in `St. Louis` does, so that word crosses the bundle's
+        sentence end. Controls: the same name without the sentence, or
+        with only the period, demotes both words."""
+        bundle = "Emma Clark. Tim Jones wrote."
+        for leaf in ("Tim Clark. Director of data access", "Tim Clark. contact for access"):
+            with self.subTest(leaf=leaf):
+                self.assertEqual(ng.abbreviations(leaf), frozenset({"clark"}))
+                p = prox(leaf, bundle)
+                self.assertEqual((p["judged"], p["near"], p["demoted"]), (2, 2, 0))
+        for leaf in ("Tim Clark", "Tim Clark."):
+            with self.subTest(leaf=leaf):
+                self.assertEqual(demoted(leaf, bundle), {"Tim": "absent", "Clark": "absent"})
 
     def test_a_short_given_name_in_capitals_beside_mixed_case(self):
         """Only a name written wholly in capitals reads `TIM` as a word."""
@@ -407,6 +424,17 @@ class DocumentedCostTest(unittest.TestCase):
         self.assertEqual(demoted("Emma Chan", "Emma Lundberg\nChan Zuckerberg Biohub"), {})
         self.assertEqual(demoted("Emma Clark", "Emma Lundberg. Clark T"),
                          {"Emma": "absent", "Clark": "absent"})
+
+    def test_the_docstring_writes_these_layouts_as_escapes(self):
+        """#3536: the module docstring is not raw, so it writes `\\n` for the
+        escape; a single backslash would render a real line break inside the code
+        span and hide the layout the cost describes."""
+        for span in ("Emma Lundberg\\nClark T", "Emma Lundberg\\nChan",
+                     "Charlotte\\nMarquez"):
+            with self.subTest(span=span):
+                self.assertIn(span, ng.__doc__)
+        self.assertNotIn("Lundberg\nClark", ng.__doc__)
+        self.assertNotIn("Charlotte\nMarquez", ng.__doc__)
 
     def test_a_function_word_outside_the_list(self):
         """`_NOT_SURNAMES` is short (`An`, `To` are surnames): `In` stands in."""
