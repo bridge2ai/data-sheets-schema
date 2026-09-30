@@ -34,7 +34,17 @@ Tokens and classes
 A token is a run of letters (with any combining marks) of at least two
 letters, so hyphens, apostrophes, digits and punctuation separate tokens:
 `Jean-Christophe Bélisle-Pipon` is four tokens and the initials `U` and `C`
-are none. Identifier-shaped spans in a string leaf — a URL, an email
+are none. Chinese, Japanese, Thai, Lao, Myanmar and Khmer are written
+without spaces between words, so a run of their letters is a phrase, not a
+word (#3401). Such a run is split from letters of any other script beside
+it (`Tim王小明` is `Tim` and `王小明`), and it is in the bundle when the
+bundle writes it inside one of its own runs in those scripts: `王小明`
+against `本研究由王小明教授负责`. No segmenter is used, so this is
+substring membership, the fallback the issue allows, and it errs toward
+grounding: a name that is only part of another word grounds (`张三` in
+`张三丰`), and a one-character token (`王` of `王 小明`) is not checked, as a
+single Latin letter is not. It has no case, so no such token is
+`initial_expanded`, and v2 (below) does not judge it. Identifier-shaped spans in a string leaf — a URL, an email
 address, a CURIE such as `ORCID:0000-…` — are removed first. Tokens compare
 casefolded and NFKC-composed; the *folded* form used for
 `diacritic_dropped` also decomposes (NFKD) and drops the combining marks.
@@ -210,9 +220,6 @@ the rest prose in person slots (`Contact Principal Investigator`). A
 source's own
 typo is grounded as written (`Ballllosero`), and a record that corrects it
 is `absent`: the check measures agreement with the bytes, not correctness.
-A script written without spaces between words (Chinese, Japanese, Thai) is
-one run of letters per phrase, so a name inside such a phrase is not a
-token of the bundle and reads `absent`: there the check over-reports.
 
 The issue's criterion that `Belisle-Pipon` is `diacritic_dropped` does not
 hold on its own bundle: the CM4AI bundle writes `Belisle-Pipon` without the
@@ -252,8 +259,11 @@ from typing import Any, Iterator, NamedTuple
 import yaml
 
 #: Named so a result says which instrument produced it (#907). v1.1 moved
-#: classes only, never whether a token is a finding (#3026, #3126).
-INSTRUMENT = "name_grounding v1.1 (#2918, #3026, #3126)"
+#: classes only, never whether a token is a finding (#3026, #3126). v1.2
+#: reads scripts written without spaces (#3401), which moves findings on
+#: text in those scripts only: on the committed corpus, none (286
+#: provenance records, the same findings, classes and v2 readings as v1.1).
+INSTRUMENT = "name_grounding v1.2 (#2918, #3026, #3126, #3401)"
 
 #: The proximity reading beside it (#2978): report-only, never a finding.
 PROXIMITY_INSTRUMENT = "name_grounding v2 proximity (#2978), report-only"
@@ -294,25 +304,66 @@ class Token(NamedTuple):
     end: int
 
 
+#: Scripts written without spaces between words (#3401), as code point
+#: ranges: CJK ideographs (with the iteration marks `々` and `〆`), kana
+#: (half-width included), Thai, Lao, Myanmar and Khmer. Hangul is written
+#: with spaces and is not here.
+_UNSPACED_RANGES = (
+    (0x0E00, 0x0EFF),     # Thai, Lao
+    (0x1000, 0x109F),     # Myanmar
+    (0x1780, 0x17FF),     # Khmer
+    (0x3005, 0x3006),     # 々 〆
+    (0x3040, 0x30FF),     # Hiragana, Katakana
+    (0x31F0, 0x31FF),     # Katakana phonetic extensions
+    (0x3400, 0x4DBF),     # CJK extension A
+    (0x4E00, 0x9FFF),     # CJK unified ideographs
+    (0xF900, 0xFAFF),     # CJK compatibility ideographs
+    (0xFF66, 0xFF9F),     # half-width katakana
+    (0x20000, 0x323AF),   # CJK extensions B onwards
+)
+
+
+def _unspaced(ch: str) -> bool:
+    """`ch` is a letter of a script written without spaces (#3401)."""
+    cp = ord(ch)
+    return any(lo <= cp <= hi for lo, hi in _UNSPACED_RANGES)
+
+
 def _runs(text: str) -> list[Token]:
     """Every run of letters in `text`, with the combining marks inside it.
 
     A scan by Unicode category rather than `[^\\W\\d_]+`, which would split
-    a decomposed `e\\u0301` from its mark and cut `Bélisle` in two.
+    a decomposed `e\\u0301` from its mark and cut `Bélisle` in two. A letter
+    of a script written without spaces and one of any other script do not
+    share a run (`Tim王小明` is two, #3401); a mark stays in the run it
+    follows, whatever its script (Thai vowel and tone marks, a voicing mark).
     """
     out: list[Token] = []
     start = None
+    unspaced = False
     for i, ch in enumerate(text):
         cat = unicodedata.category(ch)
-        if cat[0] == "L" or (cat[0] == "M" and start is not None):
+        if cat[0] == "L":
+            if start is not None and _unspaced(ch) != unspaced:
+                out.append(Token(text[start:i], start, i))
+                start = None
             if start is None:
-                start = i
+                start, unspaced = i, _unspaced(ch)
+        elif cat[0] == "M" and start is not None:
+            continue
         elif start is not None:
             out.append(Token(text[start:i], start, i))
             start = None
     if start is not None:
         out.append(Token(text[start:], start, len(text)))
     return out
+
+
+def is_unspaced(token: str) -> bool:
+    """`token` is a run in a script written without spaces (#3401): a
+    phrase rather than a word, whose membership in the bundle is read as a
+    substring of one of the bundle's runs in such a script."""
+    return bool(token) and _unspaced(token[0])
 
 
 def _letters(token: str) -> int:
@@ -402,8 +453,24 @@ class BundleIndex:
             key = folded_key(t.text)
             self.folded.add(key)
             self.positions.setdefault(key, []).append(i)
+        # The runs in scripts written without spaces, one per line, so that
+        # a substring of this text is a substring of one run (#3401).
+        unspaced = [t.text for t in self.tokens if is_unspaced(t.text)]
+        self._unspaced_exact = "\n".join(exact_key(t) for t in unspaced)
+        self._unspaced_folded = "\n".join(folded_key(t) for t in unspaced)
         self._exact_positions: dict[str, list[int]] | None = None
         self._beside: dict[str, set[str]] = {}
+
+    def has(self, token: str) -> bool:
+        """`token` is in the bundle: a token of it, or, for a run in a
+        script written without spaces, part of one of its runs (#3401)."""
+        key = exact_key(token)
+        return key in self.exact or (is_unspaced(token) and key in self._unspaced_exact)
+
+    def has_folded(self, token: str) -> bool:
+        """`has`, compared on the folded form (`diacritic_dropped`)."""
+        key = folded_key(token)
+        return key in self.folded or (is_unspaced(token) and key in self._unspaced_folded)
 
     def _gap(self, i: int, j: int) -> str:
         return self.text[self.tokens[i].end:self.tokens[j].start]
@@ -661,9 +728,9 @@ def classify(token: str, name: list[str], index: BundleIndex,
              words: frozenset[str] = frozenset()) -> str:
     """The class of one token of a name, given the name's other tokens
     (and, from `words_in_capitals`, which of them are words)."""
-    if exact_key(token) in index.exact:
+    if index.has(token):
         return "grounded"
-    if folded_key(token) in index.folded:
+    if index.has_folded(token):
         return "diacritic_dropped"
     return expansion_class(token, name, index, words)
 

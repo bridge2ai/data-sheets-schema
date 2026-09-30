@@ -436,6 +436,17 @@ class DocumentedCostTest(unittest.TestCase):
         self.assertNotIn("Lundberg\nClark", ng.__doc__)
         self.assertNotIn("Charlotte\nMarquez", ng.__doc__)
 
+    def test_a_single_character_in_a_script_without_spaces(self):
+        """#3401: a token is still two or more letters, so a one-character
+        surname the leaf writes apart (`王 小明`) is not checked."""
+        self.assertEqual(name_tokens("王 小明"), ["小明"])
+
+    def test_a_name_inside_a_longer_word_of_such_a_script(self):
+        """#3401: with no segmenter, membership is a substring of one of the
+        bundle's runs, and a run is a phrase, so a name that is only part of
+        another word is grounded: `张三` in `张三丰`."""
+        self.assertEqual(cls("张三", "张三", "作者张三丰"), "grounded")
+
     def test_a_function_word_outside_the_list(self):
         """`_NOT_SURNAMES` is short (`An`, `To` are surnames): `In` stands in."""
         self.assertEqual(cls("In Data Trust", "Data", "In D, and"), "initial_expanded")
@@ -584,6 +595,75 @@ class LowerBoundTest(unittest.TestCase):
         fixed = check_record({"creators": [{"name": "Frida Ballesteros Navarro"}]}, bundle, SLOTS)
         self.assertEqual({(f["token"], f["class"]) for f in fixed["findings"]},
                          {("Ballesteros", "absent"), ("Frida", "initial_expanded")})
+
+
+class UnspacedScriptTest(unittest.TestCase):
+    """#3401: Chinese, Japanese and Thai write no space between words, so a
+    run of letters there is a phrase, and v1 read a name inside one as
+    `absent`. A run in such a script is now its own token, split from any
+    letters of another script beside it, and it is in the bundle when the
+    bundle writes it inside one of its own runs in that script."""
+
+    def test_a_run_in_such_a_script_is_split_from_the_letters_beside_it(self):
+        self.assertEqual(name_tokens("王小明"), ["王小明"])
+        self.assertEqual(name_tokens("Tim王小明"), ["Tim", "王小明"])
+        self.assertEqual(name_tokens("山田太郎 (Taro Yamada)"), ["山田太郎", "Taro", "Yamada"])
+        self.assertEqual(name_tokens("ヤマダ・タロウ"), ["ヤマダ", "タロウ"])
+        # Thai vowel and tone marks stay inside their run.
+        self.assertEqual(name_tokens("สมชาย ใจดี"), ["สมชาย", "ใจดี"])
+
+    def test_a_name_inside_a_phrase_is_in_the_bundle(self):
+        for name, bundle in (
+                ("王小明", "本研究由王小明教授负责。"),
+                ("山田太郎", "責任者は山田太郎です。"),
+                ("山田 太郎", "責任者は山田太郎です。"),
+                ("ヤマダ・タロウ", "連絡先：ヤマダタロウまで"),
+                ("สมชาย ใจดี", "ผู้วิจัยหลักคือสมชายใจดีจากมหาวิทยาลัย")):
+            with self.subTest(name=name):
+                out = check_record({"creators": [{"name": name}]}, bundle, SLOTS)
+                self.assertEqual(out["findings"], [])
+                self.assertEqual(out["counts"]["grounded"], len(name_tokens(name)))
+
+    def test_a_name_the_bundle_does_not_write_is_absent(self):
+        """The controls: nothing is grounded by its script alone."""
+        for name, token, bundle in (
+                ("李华", "李华", "本研究由王小明教授负责。"),
+                ("สมหญิง ใจดี", "สมหญิง", "ผู้วิจัยหลักคือสมชายใจดีจากมหาวิทยาลัย"),
+                ("山田花子", "山田花子", "責任者は山田太郎です。")):
+            with self.subTest(name=name):
+                self.assertEqual(cls(name, token, bundle), "absent")
+
+    def test_a_token_does_not_span_two_of_the_bundles_runs(self):
+        """Punctuation, a space or a line break between them, or letters of
+        another script, separate the bundle's runs as they separate tokens."""
+        for bundle in ("王小。明", "王小 明", "王小\n明", "王小A明"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(cls("王小明", "王小明", bundle), "absent")
+
+    def test_width_and_marks_compare_as_they_do_elsewhere(self):
+        """NFKC composes half-width katakana (`ﾔﾏﾀﾞ` is `ヤマダ`); folding
+        drops a voicing mark, so `ザトウ` against `サトウ` differ by a
+        diacritic, in either direction."""
+        self.assertEqual(cls("ヤマダ", "ヤマダ", "担当ﾔﾏﾀﾞ"), "grounded")
+        self.assertEqual(cls("ザトウ", "ザトウ", "担当サトウ"), "diacritic_dropped")
+        self.assertEqual(cls("サトウ", "サトウ", "担当ザトウ"), "diacritic_dropped")
+
+    def test_latin_letters_beside_such_a_script_are_a_token_of_their_own(self):
+        """In the bundle too: `研究员Tim Clark` writes `Tim`, which v1 read
+        as part of one run with `研究员`."""
+        out = check_record({"creators": [{"name": "Tim Clark"}]}, "研究员Tim Clark", SLOTS)
+        self.assertEqual((out["counts"]["grounded"], out["findings"]), (2, []))
+        self.assertEqual(cls("Christian Metallo", "Christian", "作者：Metallo C"),
+                         "initial_expanded")
+
+    def test_nothing_in_such_a_script_is_an_expanded_initial(self):
+        """It has no case, and an initial expands into a capitalised name."""
+        self.assertEqual(cls("王小明 Metallo", "王小明", "Metallo 王"), "absent")
+
+    def test_v2_does_not_judge_them(self):
+        """v2 reads capitalised words (#2978), which these scripts have none of."""
+        p = prox("王小明", "本研究由王小明教授负责。")
+        self.assertEqual((p["judged"], p["not_judged"], p["demoted"]), (0, 1, 0))
 
 
 def prox(name: str, bundle: str) -> dict:
