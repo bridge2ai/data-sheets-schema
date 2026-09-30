@@ -103,6 +103,7 @@ import bisect
 import hashlib
 import itertools
 import json
+import math
 import re
 import sys
 from dataclasses import dataclass
@@ -767,15 +768,29 @@ def document_for(bundle_path: str, md5: str, directory: Path = ATTAINABILITY_DIR
 # Scored although not stated in the source
 
 
-def _number(value: Any) -> float | None:
-    if isinstance(value, bool):
+def _score(item_id: str, value: Any) -> float | None:
+    """The score an evaluation gives `item_id`, as a finite number, or None
+    where it gives none (absent or null). Anything else is not a score that
+    can be compared with zero, and raises `UnreadableEvaluation` (#3577): a
+    list or a mapping, a boolean, a string that is not a number, NaN or an
+    infinity (NaN > 0 is false, so a NaN credit read as no credit), or an
+    integer too large for a float (`float` raises OverflowError, which no
+    per-row handler caught). The judge contract writes integers; the corpus
+    carries only integers, floats and nulls."""
+    if value is None:
         return None
-    if isinstance(value, (int, float)):
-        return float(value)
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise UnreadableEvaluation(f"item {item_id}'s score is a {type(value).__name__}, not a number")
     try:
-        return float(str(value))
-    except (TypeError, ValueError):
-        return None
+        number = float(value)
+    except OverflowError:
+        raise UnreadableEvaluation(f"item {item_id}'s score is an integer too large to read as a number") from None
+    except ValueError:
+        raise UnreadableEvaluation(f"item {item_id}'s score is the string {value[:40]!r}, not a number") from None
+    if not math.isfinite(number):
+        shown = repr(value[:40]) if isinstance(value, str) else repr(value)
+        raise UnreadableEvaluation(f"item {item_id}'s score is {shown}, not a finite number")
+    return number
 
 
 def evaluation_items(evaluation: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -835,7 +850,9 @@ def credited_despite_absence(evaluation: dict[str, Any], attainability: Attainab
     `unjoined`, never skipped. An empty list is a measured zero only where
     `absences_checked` is not empty: a file that pins no text of the
     evaluation's rubric, or marks none of its items absent, cannot yield a
-    finding (#3181). Reads `evaluation`; changes nothing."""
+    finding (#3181). A score this reads (on a joined, applicable item) that
+    is not a finite number raises `UnreadableEvaluation` (#3577). Reads
+    `evaluation`; changes nothing."""
     rubric = evaluation_rubric(evaluation)
     names = attainability.rubric_items.get(rubric)
     if names is None:
@@ -853,8 +870,8 @@ def credited_despite_absence(evaluation: dict[str, Any], attainability: Attainab
             continue
         excluded = (item.get("applicable") in (False, "false", "False")
                     or item.get("applicability_status") == "not_applicable")
-        score = _number(item.get("score"))
-        if not excluded and score is not None and score > 0:
+        score = None if excluded else _score(entry["item_id"], item.get("score"))
+        if score is not None and score > 0:
             if entry["route"] is None:
                 out.append({**base, "kind": "credited", "score": score})
             else:
@@ -869,21 +886,24 @@ class UnreadableEvaluation(ValueError):
     as one: `credited` reports its row with the reason and goes on (#3200)."""
 
 
-def evaluation_bundle(evaluation: dict[str, Any]) -> dict[str, Any] | None:
-    """The bundle path and md5 the evaluated record read, from its
-    provenance record — never from the project name, whose bundle has more
-    than one version. None when no record is found or it names no bundle;
-    raises `UnreadableEvaluation` naming the record when it is there and
-    cannot be read as one (#3200)."""
-    from data_sheets_schema.provenance import record_path_for
+def provenance_bundle(record: Path) -> dict[str, Any] | None:
+    """The bundle path and md5 the provenance record at `record` names, with
+    the record's path, or None when there is no file there or it names no
+    bundle. Raises `UnreadableEvaluation` naming the record when it is there
+    and cannot be read as one (#3200). Shared by `credited` and
+    `scripts/measure_unhyphenated_line_splits.py` so both read a record the
+    same way (#3579).
+
+    A path carrying a NUL byte is refused before it is looked up (#3578):
+    `Path.is_file` answers False for it rather than raise, and the record
+    would read as missing provenance — for `credited`, an unchecked row
+    that passes even `--strict`. A value the YAML loader cannot construct
+    (an unquoted date such as 2026-99-29 raises ValueError) is unreadable,
+    not an abort (#3579)."""
     from data_sheets_schema.schema_cache import load_yaml
-    parts = Path(str(evaluation.get("d4d_file", ""))).parts
-    if len(parts) < 3 or not parts[-1].endswith("_d4d.yaml"):
-        return None
-    project = evaluation.get("project") or parts[-1].removesuffix("_d4d.yaml")
-    if not isinstance(project, str):
-        raise UnreadableEvaluation(f"the evaluation's project is not a name: {project!r}")
-    record = record_path_for(project, parts[-3], parts[-2])
+    if "\0" in str(record):
+        raise UnreadableEvaluation(f"the provenance record path {str(record)!r} carries a NUL byte, "
+                                   "which no file name can")
     try:
         if not record.is_file():
             return None
@@ -894,8 +914,8 @@ def evaluation_bundle(evaluation: dict[str, Any]) -> dict[str, Any] | None:
         raise UnreadableEvaluation(f"the provenance record {record} cannot be read: {exc.strerror or exc}") from exc
     except (yaml.YAMLError, RecursionError) as exc:
         raise UnreadableEvaluation(f"the provenance record {record} is not YAML: {exc}") from exc
-    except ValueError as exc:                  # a path the readers refuse rather than answer
-        raise UnreadableEvaluation(f"the provenance record {record!r} cannot be read: {exc}") from exc
+    except ValueError as exc:                  # a scalar the loader cannot construct, or a path a reader refuses
+        raise UnreadableEvaluation(f"the provenance record {record} cannot be read: {exc}") from exc
     document = {} if document is None else document
     # Each type is tested on the value as written, before any emptiness test:
     # a falsy non-mapping `inputs` ([], '', false) or a falsy non-string
@@ -913,6 +933,23 @@ def evaluation_bundle(evaluation: dict[str, Any]) -> dict[str, Any] | None:
     if not inputs.get("bundle_path") or not inputs.get("bundle_md5"):
         return None
     return {"path": inputs["bundle_path"], "md5": inputs["bundle_md5"], "record": str(record)}
+
+
+def evaluation_bundle(evaluation: dict[str, Any]) -> dict[str, Any] | None:
+    """The bundle path and md5 the evaluated record read, from its
+    provenance record — never from the project name, whose bundle has more
+    than one version. None when no record is found or it names no bundle;
+    raises `UnreadableEvaluation` naming the record when it is there and
+    cannot be read as one (#3200), or when the path it is looked up at
+    carries a NUL byte (#3578; `provenance_bundle`)."""
+    from data_sheets_schema.provenance import record_path_for
+    parts = Path(str(evaluation.get("d4d_file", ""))).parts
+    if len(parts) < 3 or not parts[-1].endswith("_d4d.yaml"):
+        return None
+    project = evaluation.get("project") or parts[-1].removesuffix("_d4d.yaml")
+    if not isinstance(project, str):
+        raise UnreadableEvaluation(f"the evaluation's project is not a name: {project!r}")
+    return provenance_bundle(record_path_for(project, parts[-3], parts[-2]))
 
 
 def read_evaluation(path: Path) -> dict[str, Any]:
@@ -949,7 +986,9 @@ def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINAB
     the evaluation's rubric — and is None only on a row whose empty
     `findings` is a measured zero (#3181). A row whose evaluation or
     provenance record cannot be read is `unreadable`, its `unchecked` the
-    reason, and the evaluations after it are still reported (#3200)."""
+    reason, and the evaluations after it are still reported (#3200) — as
+    are those after one whose provenance path carries a NUL byte (#3578) or
+    whose consumed score is not a finite number (#3577)."""
     loaded: dict[Path, Attainability] = {}
     rows = []
     for path in evaluation_paths:
@@ -966,23 +1005,31 @@ def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINAB
                 raise UnreadableEvaluation(
                     f"the provenance record {bundle['record']} names a bundle version whose "
                     f"attainability file cannot be looked up: {getattr(exc, 'strerror', None) or exc}") from exc
+            got = None
+            if doc is not None:
+                if doc not in loaded:
+                    loaded[doc] = load(doc)
+                got = loaded[doc]
+                try:
+                    findings = credited_despite_absence(evaluation, got)
+                except UnreadableEvaluation as exc:
+                    # A score that is not a finite number (#3577), inside the
+                    # per-row handler so the evaluations after it are read.
+                    raise UnreadableEvaluation(f"the evaluation {path} has a score that cannot be read: "
+                                               f"{exc}") from exc
         except UnreadableEvaluation as exc:
             rows.append({"evaluation": str(path), "bundle": None, "rubric": None, "attainability": None,
                          "absences_checked": [], "findings": [], "unchecked": str(exc), "unreadable": True})
             continue
         row: dict[str, Any] = {"evaluation": str(path), "bundle": bundle, "rubric": evaluation_rubric(evaluation),
                                "unreadable": False}
-        if doc is None:
+        if got is None:
             row.update(attainability=None, absences_checked=[], findings=[],
                        unchecked="no attainability file for this bundle version" if bundle else
                        "no bundle version: the evaluated record's provenance was not found or names none")
         else:
-            if doc not in loaded:
-                loaded[doc] = load(doc)
-            got = loaded[doc]
             row.update(attainability=str(doc), absences_checked=absences_checked(evaluation, got),
-                       unchecked=unchecked_reason(evaluation, got),
-                       findings=credited_despite_absence(evaluation, got))
+                       unchecked=unchecked_reason(evaluation, got), findings=findings)
         rows.append(row)
     return rows
 

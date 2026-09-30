@@ -52,7 +52,9 @@ bound; the list's path and sha256 are printed with the table.
 
 The bundle bytes are resolved as the attainability validator resolves them
 (`attainability.resolve_bytes`: the file on disk, else the committed version
-whose md5 the record names). Nothing is written; records are only read.
+whose md5 the record names). Nothing is written; records are only read,
+as `credited` reads them (`attainability.provenance_bundle`); a record that
+cannot be read is listed under the table and the command exits 1 (#3579).
 
 Usage:
     poetry run python scripts/measure_unhyphenated_line_splits.py          # markdown table
@@ -70,8 +72,6 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable
 
-import yaml
-
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema import attainability as at  # noqa: E402
@@ -88,19 +88,23 @@ _TOKEN = re.compile(_LETTERS)
 
 def bundle_versions(corpus: Path) -> tuple[dict[tuple[str, str], int], list[str]]:
     """(bundle path, md5) -> the number of provenance records naming it, and
-    the records that could not be read (listed, not counted)."""
+    the records that could not be read (listed, not counted). A record is
+    read as `credited` reads it (`attainability.provenance_bundle`, #3579):
+    a falsy `inputs` that is not a mapping (`false`, `[]`, `''`), a bundle
+    path or md5 that is not a string, or a value the YAML loader cannot
+    construct (an unquoted date such as 2026-99-29) is unreadable and
+    listed, never dropped as naming no bundle and never an abort."""
     versions: dict[tuple[str, str], int] = {}
     unreadable = []
     for record in sorted(corpus.rglob("*_provenance.yaml")):
         try:
-            document = yaml.safe_load(record.read_text(encoding="utf-8"))
-            inputs = document.get("inputs") or {}
-            path, md5 = inputs.get("bundle_path"), inputs.get("bundle_md5")
-        except (OSError, UnicodeDecodeError, yaml.YAMLError, AttributeError) as exc:
-            unreadable.append(f"{record} ({type(exc).__name__})")
+            bundle = at.provenance_bundle(record)
+        except at.UnreadableEvaluation as exc:
+            unreadable.append(str(exc))
             continue
-        if isinstance(path, str) and isinstance(md5, str) and path and md5:
-            versions[(path, md5)] = versions.get((path, md5), 0) + 1
+        if bundle is not None:
+            key = (bundle["path"], bundle["md5"])
+            versions[key] = versions.get(key, 0) + 1
     return versions, unreadable
 
 
@@ -307,7 +311,9 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     result = report(args.corpus, words, args.compare_window)
     sys.stdout.write(json.dumps(result, indent=2) + "\n" if args.json else markdown(result))
-    return 0
+    # The table is printed either way, but a corpus with a record that could
+    # not be read is incomplete, and that is not a success (#3579).
+    return 1 if result["unreadable_records"] else 0
 
 
 if __name__ == "__main__":

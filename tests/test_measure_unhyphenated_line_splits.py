@@ -97,7 +97,42 @@ def test_bundle_versions_count_records_and_list_the_unreadable(m, tmp_path):
     (tmp_path / "d" / "P_provenance.yaml").write_text("inputs: [unclosed\n", encoding="utf-8")
     versions, unreadable = m.bundle_versions(tmp_path)
     assert versions == {("x.txt", "1" * 32): 2}
-    assert len(unreadable) == 1 and "d/P_provenance.yaml (ParserError)" in unreadable[0]
+    assert len(unreadable) == 1 and "d/P_provenance.yaml is not YAML" in unreadable[0]
+
+
+@pytest.mark.parametrize("body, why", [
+    ("inputs: false\n", "is not a mapping with an inputs mapping"),
+    ("inputs: []\n", "is not a mapping with an inputs mapping"),
+    ("inputs: {bundle_path: 5, bundle_md5: abc}\n", "names a bundle_path or bundle_md5 that is not a string"),
+    ("inputs: {bundle_path: [x.txt], bundle_md5: abc}\n", "names a bundle_path or bundle_md5 that is not a string"),
+    ("recorded: 2026-99-29\ninputs: {bundle_path: x.txt, bundle_md5: abc}\n", "cannot be read: month must be in"),
+    ("- inputs\n", "is not a mapping with an inputs mapping"),
+])
+def test_a_malformed_record_is_listed_and_the_records_after_it_still_counted(m, tmp_path, capsys, body, why):
+    """#3579: the script read `inputs` with `or {}` and skipped any value
+    that was not a string, so `inputs: false` and a non-string bundle path
+    vanished from both the versions and the unreadable list, and an
+    unquoted invalid date raised ValueError out of the run. It now reads a
+    record as `credited` does: the malformed one (between two good ones) is
+    listed with its reason, both good ones are counted, and the command
+    prints its table and exits 1."""
+    good = {"inputs": {"bundle_path": "x.txt", "bundle_md5": "1" * 32}}
+    for label, text in (("a", yaml.safe_dump(good)), ("b", body), ("c", yaml.safe_dump(good))):
+        (tmp_path / label).mkdir()
+        (tmp_path / label / "P_provenance.yaml").write_text(text, encoding="utf-8")
+    versions, unreadable = m.bundle_versions(tmp_path)
+    assert versions == {("x.txt", "1" * 32): 2}
+    assert len(unreadable) == 1 and "b/P_provenance.yaml" in unreadable[0] and why in unreadable[0], unreadable
+    assert m.main(["--no-word-list", "--corpus", str(tmp_path)]) == 1
+    out = capsys.readouterr().out
+    assert "| `x.txt` | `11111111` | 2 |" in out and "Provenance records that could not be read: " in out
+
+
+def test_a_readable_corpus_exits_zero(m, tmp_path, capsys):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "a" / "P_provenance.yaml").write_text("inputs: {bundle_path: x.txt, bundle_md5: null}\n",
+                                                      encoding="utf-8")
+    assert m.main(["--no-word-list", "--corpus", str(tmp_path)]) == 0
 
 
 def test_the_command_refuses_a_missing_word_list(m, tmp_path, capsys):

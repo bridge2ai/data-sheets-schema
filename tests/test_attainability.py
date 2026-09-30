@@ -871,6 +871,20 @@ def test_a_path_through_a_directory_that_cannot_be_searched_falls_back_to_git(tm
             at.load(CHORUS_FILE)
 
 
+# #3577: a score `credited` reads that is not a finite number, and the
+# reason its row gives. Before, [1], "NaN" and NaN read as no credit (a
+# passing row, --strict exit 0) and 10**400 raised OverflowError out of the
+# report.
+_BAD_SCORES = {"a score that is a list": ([1], "a list, not a number"),
+               "a score that is a mapping": ({"value": 1}, "a dict, not a number"),
+               "a score that is a boolean": (True, "a bool, not a number"),
+               "a score that is the string NaN": ("NaN", "'NaN', not a finite number"),
+               "a score that is NaN": (float("nan"), "nan, not a finite number"),
+               "a score that is an infinity": (float("inf"), "inf, not a finite number"),
+               "a score that is no number": ("high", "the string 'high', not a number"),
+               "a score too large for a float": (10 ** 400, "an integer too large to read as a number")}
+
+
 def _broken_evaluation(tmp_path, how):
     """A CHORUS rubric10 evaluation broken one way (#3200), and the reason
     its row must give. The evaluations named BROKEN read their own record."""
@@ -897,6 +911,15 @@ def _broken_evaluation(tmp_path, how):
         broken = copy.deepcopy(good)
         broken["elements"][0]["sub_elements"][0] = "E1.1: 1"
         body, why = json.dumps(broken), f"the evaluation {path} has items that cannot be keyed: AttributeError"
+    elif how in _BAD_SCORES:
+        broken = copy.deepcopy(good)
+        _item(broken, "E4.4")["score"] = _BAD_SCORES[how][0]
+        body = json.dumps(broken)
+        why = f"the evaluation {path} has a score that cannot be read: item E4.4's score is {_BAD_SCORES[how][1]}"
+    elif how == "a project with a NUL byte":
+        body = json.dumps({**good, "project": "BROKEN\0"})
+        why = (f"the provenance record path {str(tmp_path / 'BROKEN' ) + chr(0) + '_provenance.yaml'!r} "
+               "carries a NUL byte, which no file name can")
     else:
         body = json.dumps({**good, "project": "BROKEN"})
         too_long = (f"the provenance record {record} names a bundle version whose attainability file "
@@ -965,7 +988,7 @@ def test_a_record_that_names_no_bundle_is_not_unreadable(tmp_path, body):
                                  "a bundle md5 that is not a string", "a bundle md5 of zero",
                                  "a bundle path that is an empty list", "a bundle md5 too long for a file name",
                                  "a bundle path too long for a file name", "a bundle md5 with a NUL byte",
-                                 "a bundle path with a NUL byte"])
+                                 "a bundle path with a NUL byte", "a project with a NUL byte", *_BAD_SCORES])
 def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checked(tmp_path, capsys, how):
     """#3200: `credited_report` read each evaluation with a bare `json.loads`,
     keyed its elements by `element['id']` and read the record's provenance
@@ -995,3 +1018,46 @@ def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checke
     assert out.count(" — rubric10 checked against E1.1 route doi_rrid, E4.4, E10.2\n") == 2   # the one after it too
     assert out.rstrip().endswith("3 evaluation(s), 1 that could not be read, 2 on a bundle version with an "
                                  "attainability file, 2 checked against at least one absence, 0 finding(s)")
+
+
+def test_a_valid_score_is_still_read_as_one():
+    """#3577: the strict reading keeps every score the corpus carries — an
+    integer, a float, a numeric string and a null — and a score on an item
+    the evaluation marks not applicable is not read at all."""
+    assert [at._score("E4.4", v) for v in (1, 0, 2.5, "1", None)] == [1.0, 0.0, 2.5, 1.0, None]
+    loaded = at.load(CHORUS_FILE)
+    evaluation = _chorus_evaluation()
+    _item(evaluation, "E4.4").update(score=[1], applicable=False)
+    assert at.credited_despite_absence(evaluation, loaded) == []
+    _item(evaluation, "E4.4").update(applicable=True)
+    with pytest.raises(at.UnreadableEvaluation, match="item E4.4's score is a list"):
+        at.credited_despite_absence(evaluation, loaded)
+
+
+@pytest.mark.parametrize("where", ["project", "method", "label"])
+def test_a_nul_in_the_provenance_lookup_path_is_unreadable_not_missing(tmp_path, capsys, where):
+    """#3578: a NUL in the evaluation's project, or in the method or label
+    directory its d4d_file names, made `Path.is_file` answer False, so the
+    row read as missing provenance and passed even --strict. It is refused
+    before the lookup, with the real `record_path_for` (a mocked one would
+    never see the directory components), and the evaluation after it is
+    still read."""
+    good = REFERENCE["rubric10"] / "CHORUS_v7_rep2_r10_rating1_evaluation.json"
+    evaluation = _chorus_evaluation()
+    parts = evaluation["d4d_file"].split("/")
+    index = {"method": -3, "label": -2}.get(where)
+    if index is None:
+        evaluation["project"] += "\0"
+    else:
+        parts[index] += "\0"
+        evaluation["d4d_file"] = "/".join(parts)
+    broken = tmp_path / "nul_3419_evaluation.json"
+    broken.write_text(json.dumps(evaluation), encoding="utf-8")
+    with pytest.raises(at.UnreadableEvaluation, match="carries a NUL byte"):
+        at.evaluation_bundle(evaluation)
+    first, middle, last = at.credited_report([good, broken, good])
+    assert middle["unreadable"] is True and "carries a NUL byte" in middle["unchecked"], middle
+    assert first == last and first["unreadable"] is False and first["bundle"] is not None
+    assert at.main(["credited", "--strict", str(good), str(broken), str(good)]) == 1
+    out = capsys.readouterr().out
+    assert "\0" not in out and out.count(" — rubric10 checked against ") == 2
