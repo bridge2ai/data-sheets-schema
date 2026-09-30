@@ -604,6 +604,47 @@ def test_run_source_manifest_reads_the_bytes_the_run_recorded(tmp_path):
             rs.run_source_manifest(record, prov)
 
 
+def test_run_source_manifest_anchors_a_relative_path_on_the_records_tree(tmp_path, monkeypatch):
+    """The corpus records `inputs.source_manifest.path` relative
+    (`data/preprocessed/source_manifest.yaml`). It resolves against the tree
+    that holds the record's `data/d4d_concatenated`, never the caller's
+    working directory (#3505): a run inspected from elsewhere reads the file
+    beside its record, and a record outside a corpus tree does not borrow
+    whatever the working directory happens to hold."""
+    rel = "data/preprocessed/source_manifest.yaml"
+    tree = tmp_path / "tree"
+    sm = tree / rel
+    sm.parent.mkdir(parents=True)
+    sm.write_bytes(SOURCE_MANIFEST)
+    prov = tree / "data" / "d4d_concatenated" / "m_core" / "L" / "P_provenance.yaml"
+    prov.parent.mkdir(parents=True)
+    record = {"inputs": {"source_manifest": {"path": rel, "md5": hashlib.md5(SOURCE_MANIFEST).hexdigest()}}}
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    with mock.patch.object(pv, "bundle_bytes_for") as git:
+        assert rs.run_source_manifest(record, prov) == (SOURCE_MANIFEST, {"source": "manifest on disk",
+                                                                          "path": str(sm)})
+    git.assert_not_called()
+    # A working directory holding a same-named file with the same bytes is
+    # still not where the record's tree is.
+    decoy = elsewhere / rel
+    decoy.parent.mkdir(parents=True)
+    decoy.write_bytes(SOURCE_MANIFEST)
+    with mock.patch.object(pv, "bundle_bytes_for") as git:
+        assert rs.run_source_manifest(record, prov)[1] == {"source": "manifest on disk", "path": str(sm)}
+    git.assert_not_called()
+    # A record outside any corpus tree has no base for a relative path: the
+    # disk is not read (not even the working directory's matching file) and
+    # the bytes are looked for in git under the path as recorded.
+    loose = tmp_path / "loose" / "P_provenance.yaml"
+    loose.parent.mkdir()
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=None) as git:
+        with pytest.raises(ValueError, match="no committed version of data/preprocessed/source_manifest.yaml"):
+            rs.run_source_manifest(record, loose)
+    assert git.call_args.args == (rel,)
+
+
 def test_a_git_blob_basis_is_labelled_with_the_commit_it_was_found_at():
     """The basis keys the hash as `commit`; the text line must not present a
     commit hash as a blob's (#3476)."""
