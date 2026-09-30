@@ -1283,6 +1283,67 @@ def test_the_report_says_a_cue_was_not_read_rather_than_that_nothing_says_why(tm
     assert result.exit_code == 0, result.output
 
 
+@pytest.mark.parametrize("label", [
+    "Typed was_derived_from links and errata missing",
+    "Machine-readable PROV graph lacking errata",
+    "Typed PROV graph with errata not recorded",
+    "Good; typed PROV graph with errata not recorded",
+])
+def test_a_label_clause_left_unread_as_ambiguous_is_reported_as_such(tmp_path, label):
+    """#3404: a label clause whose "not" or absence word stands inside it,
+    naming both kinds of concern, is not read (#3146). Where nothing else
+    says why, the report said "nothing says why", as if the label named
+    nothing; it says the clause was left unread as ambiguous. The verdict
+    is unchanged, and --strict still exits 0."""
+    from data_sheets_schema.cli import cli
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.basis, result.verdict, result.reasons) == (UNSTATED, REASON_NOT_DETERMINED, ())
+    assert result.label_ambiguous and not result.cue_unread
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(label=label, note=_NEUTRAL)]}]}))
+    lines, flagged = lint_report([tmp_path])
+    assert flagged == 0 and lines[0].startswith(REASON_NOT_DETERMINED)
+    assert ("(a label clause names both kinds of concern and was left unread as ambiguous: "
+            "label reason clauses and body gaps read)") in lines[0]
+    assert "nothing says why" not in lines[0]
+    run = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--strict", str(tmp_path)])
+    assert run.exit_code == 0, run.output
+
+
+@pytest.mark.parametrize("label, note, basis", [
+    # A comma makes the absent one a clause of its own, which is read.
+    ("Typed was_derived_from links, errata missing", _NEUTRAL, UNSTATED),
+    # A clause of one kind is read.
+    ("Textual lineage; version history and missingness absent", _NEUTRAL, UNSTATED),
+    # The absence word stands in a concession, which is not read for its own
+    # reason, not for ambiguity.
+    ("Good despite typed PROV graph with errata not recorded", _NEUTRAL, UNSTATED),
+    # A body sentence says why: the report does not say "nothing says why".
+    ("Typed PROV graph with errata not recorded", "Held at 4 because no checksums are recorded.",
+     STATED),
+    # The issue's example: since review round 5 of PR #3417 reverted the
+    # #3194 cue rule, a label cue clause naming both kinds is read.
+    ("Held at 4 because the typed PROV graph lacks errata", _NEUTRAL, STATED),
+])
+def test_a_label_read_or_unread_for_another_reason_is_not_called_ambiguous(label, note, basis):
+    result = lint_q19(item(label=label, note=note))
+    assert (result.basis, result.label_ambiguous) == (basis, False), label
+
+
+def test_both_unread_notes_are_reported_together(tmp_path):
+    """A rating can leave a cue unread in an acceptance and a label clause
+    unread as ambiguous; the report names both."""
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(
+            label="Typed PROV graph with errata not recorded",
+            note="Held at 4 because was_derived_from is empty and the rubric accepts prose "
+                 "for lineage.")]}]}))
+    lines, _ = lint_report([tmp_path])
+    assert ("(a withholding cue stands in the scope of an acceptance or concession and was not "
+            "read; a label clause names both kinds of concern and was left unread as ambiguous: "
+            "label reason clauses and body gaps read)") in lines[0]
+
+
 def test_the_report_refuses_an_inspection_whose_evaluation_is_gone(tmp_path):
     doc = tmp_path / "semantic_review.md"
     doc.write_text(_section("A", "requires_adjudication", "gone_evaluation.json"))
@@ -1409,6 +1470,35 @@ def test_an_absence_stated_as_absence_omits_or_unset_is_an_empty_slot_reason(fie
     result = lint_q19(rating)
     assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
         basis, REPRESENTATION_ONLY, ["empty_slot"]), text
+
+
+@pytest.mark.parametrize("note", [
+    "Held at 4: two absences, was_derived_from and parent_datasets.",
+    "Held at 4 because parent_datasets is the sole absentee.",
+    "Held at 4 because was_derived_from and parent_datasets remain the gaps.",
+    "Held at 4: the one gap is parent_datasets.",
+    "Held at 4 because the dedicated provenance field is silent.",
+])
+def test_an_absence_named_as_a_noun_or_state_is_an_empty_slot_reason(note):
+    """#3544: committed evaluation text the vocabulary was not written
+    against says a slot is absent with these words; the gate reads them."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
+        STATED, REPRESENTATION_ONLY, ["empty_slot"]), note
+
+
+@pytest.mark.parametrize("note", [
+    # The issue's example, and the placements the #3544 measurement found:
+    # the list is closed and does not recognise them.
+    "Held at 4 because was_derived_from is left out.",
+    "Held at 4 because derivation is recorded in related_datasets rather than was_derived_from.",
+    "Held at 4 because related_datasets entries stand in for parent_datasets.",
+])
+def test_an_absence_phrased_otherwise_is_still_not_recognised(note):
+    """The documented limit (#3544): the words are a closed list, so an
+    absence stated otherwise gives no empty-slot reason."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, result.reasons) == (STATED, REASON_NOT_DETERMINED, ())
 
 
 #: Every example the review rounds of PR #3417 found regressed against main
@@ -1615,3 +1705,88 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     chorus = lint_file(base / "label_aware/CHORUS_2026-09-04fapi_rep1_evaluation.json")
     assert chorus.basis == UNSTATED
     assert [r for r in chorus.reasons if "explicit rather than implied" in r.sentence] == []
+
+
+#: The placements the #3544 measurement found by hand among the committed
+#: evaluation sentences that name a slot outside the Q19 fields and carry
+#: no absence word: each says a slot is unused by saying where its content
+#: is instead, and none is recognised. A fragment of each sentence.
+_UNRECOGNISED_PLACEMENTS = [
+    "placed in descriptive fields rather than structured fields",
+    "in narrative fields rather than structured fields",
+    "recorded under used_software rather than the dedicated slot",
+    "inside the citation rather than a dedicated slot",
+    "sit outside their dedicated slots",
+    "derivation in related_datasets rather than was_derived_from",
+    "only in prose or in adjacent slots rather than in their dedicated structured fields",
+    "carried in notes rather than structured slots",
+    "Substituted rather than named",
+    "Covered by semantic equivalents: parent_datasets",
+    "sit in prose rather than in the structured slots",
+    "derivation recorded outside the derivation slots",
+    "live in free-text notes rather than structured slots",
+    "stand in for parent_datasets",
+    "residing in prose rather than in the designated structured fields",
+    "parent_datasets is arguably satisfied semantically",
+]
+
+
+@pytest.mark.corpus
+def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
+    """The module docstring's #3544 measurement. In the Q19 fields of the
+    133 committed ratings, every sentence naming a slot carries an
+    `_EMPTINESS` word but two, which say the slot is populated. Outside
+    them, in text the vocabulary was not written against, the sentences
+    naming a slot with no `_EMPTINESS` word are the 13 `_ABSENCE_NAMED`
+    ones, 121 recommendations, and 143 read by hand, of which the 16
+    placements above state an absence the list does not recognise."""
+    from data_sheets_schema import q19_rationale_lint as lint
+    listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
+                            capture_output=True, text=True, check=True).stdout.split("\0")
+    documents = []
+    for f in listed:
+        if f.endswith(".json"):
+            try:
+                documents.append(json.loads((ROOT / f).read_text(encoding="utf-8")))
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+    slot = lint.REPRESENTATION_CONCERNS["empty_slot"]
+    ratings = [d for d in documents if isinstance(d, dict) and d.get("rubric") == "rubric20-semantic"]
+    assert len(ratings) == 133
+    q19 = [s for d in ratings for _, s in lint._sentences(q19_item(d)) if slot.search(s)]
+    unmarked = [s for s in q19 if not lint._EMPTINESS.search(s)]
+    assert (len(q19), len(unmarked)) == (121, 2)
+    assert all("was_derived_from" in s and ("explicit rather than implied" in s or "populated" in s)
+               for s in unmarked)
+
+    def strings(value):
+        if isinstance(value, str):
+            yield value
+        elif isinstance(value, dict):
+            for v in value.values():
+                yield from strings(v)
+        elif isinstance(value, list):
+            for v in value:
+                yield from strings(v)
+
+    inside = {s for d in ratings for _, s in lint._sentences(q19_item(d))}
+    outside = {s.strip() for d in documents for text in strings(d)
+               for s in lint._SENTENCE.split(text)
+               if s.strip() and slot.search(s) and s.strip() not in inside}
+    recommendation = re.compile(
+        r"^(?:populate|add|mirror|record|express|link|use|include|consider|document|fill|emit"
+        r"|expose|publish|wire|instantiate|promote|set|move|provide|state|replace|encode|model"
+        r"|capture|declare|convert|represent|reference|attach|list|map|split|clarify|name|keep"
+        r"|resolve|attribute)\b", re.I)
+    marked = [s for s in outside if lint._EMPTINESS.search(s)]
+    named = [s for s in outside if not lint._EMPTINESS.search(s) and lint._ABSENCE_NAMED.search(s)]
+    rest = [s for s in outside if not lint._says_empty(s)]
+    recommendations = [s for s in rest if recommendation.match(s)]
+    assert (len(outside), len(marked), len(named), len(recommendations)) == (1046, 769, 13, 121)
+    read = [s for s in rest if not recommendation.match(s)]
+    assert len(read) == 143
+    for fragment in _UNRECOGNISED_PLACEMENTS:
+        assert sum(fragment in s for s in read) == 1, fragment
+    # Every `_ABSENCE_NAMED` word has its evidence in the 13.
+    for word in ("absences", "absentee", "gap", "gaps", "silent"):
+        assert any(re.search(rf"\b{word}\b", s, re.I) for s in named), word
