@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import tempfile
 
 import pytest
 
@@ -23,21 +24,22 @@ PLAN = ROOT / f"notes/reference_rescore_{adapter.DATE}"
 
 
 @pytest.fixture(autouse=True)
-def condition_directory_gains_nothing():
-    """No test here may leave a file in the real condition directory (#3712).
+def canary_lock_stays_out_of_the_condition_directory():
+    """No test here may leave the runner's ``.canary.lock`` in the real
+    condition directory (#3712); the file is gitignored, so git cannot see it.
 
-    Ignored files count: the audit once left an empty ``.canary.lock`` there.
-    Bytecode caches written by importing its execution tools are excluded.
-    The guard sees an added path only, so it cannot fire in a checkout that
-    already carries a stale ``.canary.lock`` (#3774); the per-test assertion
-    that the lock was taken under ``tmp_path`` is the check that holds in
-    any tree.
+    Only that named leak is guarded (#3778). A guard over every added path
+    failed at random under pytest-xdist, because a sibling worker's
+    in-flight report staging is indistinguishable from a leak. The guard
+    sees a lock that appears during the test only, so it cannot fire in a
+    checkout that already carries a stale ``.canary.lock`` (#3774); the
+    per-test assertion that the lock was taken under ``tmp_path`` is the
+    check that holds in any tree.
     """
-    def listing():
-        return {p for p in PLAN.rglob("*") if "__pycache__" not in p.parts}
-    before = listing()
+    lock = PLAN / ".canary.lock"
+    existed = lock.exists()
     yield
-    assert sorted(map(str, listing() - before)) == []
+    assert existed or not lock.exists(), f"test left {lock} behind"
 
 
 @contextmanager
@@ -52,7 +54,30 @@ def exclusive_lock(path):
 
 
 @pytest.fixture
-def reports_in_memory(monkeypatch):
+def report_staging(monkeypatch, tmp_path):
+    """Stage reports under tmp_path, not the condition directory (#3780).
+
+    The report writer makes its staging directory inside the condition
+    directory, so a crashed test would leave it in a committed path.
+    Publication into the condition directory is intercepted by
+    ``reports_in_memory``, so where staging lives changes nothing checked.
+    Returns the staging directories made, in order.
+    """
+    mkdtemp = tempfile.mkdtemp
+    staged = []
+
+    def stage_outside_the_checkout(*args, dir=None, **kwargs):
+        if dir is not None and Path(dir).resolve() == PLAN.resolve():
+            staged.append(Path(mkdtemp(*args, dir=tmp_path, **kwargs)))
+            return str(staged[-1])
+        return mkdtemp(*args, dir=dir, **kwargs)
+
+    monkeypatch.setattr(tempfile, "mkdtemp", stage_outside_the_checkout)
+    return staged
+
+
+@pytest.fixture
+def reports_in_memory(monkeypatch, report_staging):
     paths = [PLAN / name for name in (
         "results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     read_bytes, read_text = Path.read_bytes, Path.read_text
@@ -119,9 +144,12 @@ def reports_in_memory(monkeypatch):
     assert {p: read_bytes(p) for p in paths} == before
 
 
-def test_public_report_keeps_every_qualification(reports_in_memory):
+def test_public_report_keeps_every_qualification(reports_in_memory, report_staging, tmp_path):
     files, _ = reports_in_memory
     assert adapter.main(["report"]) == 0
+    # Reports were staged under tmp_path and cleaned up there (#3780).
+    assert len(report_staging) == 1 and report_staging[0].parent == tmp_path
+    assert not report_staging[0].exists()
     result = json.loads(files[PLAN / "results.json"])
     assert result["completed"] == 56 and not result["pending"]
     assert len(result["semantic_qualification"]["affected_job_ids"]) == 9
