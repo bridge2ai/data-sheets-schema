@@ -187,15 +187,27 @@ Two more annotations move no class either (#3366, #3367):
   edit can drop members or empty the list as well as change one: each
   list it admits is rebuilt from the final list and the edit, and
   counted only where every member it says the edit removed is a deleted
-  member the amend can have removed (#3835). Where the edit is not
+  member the amend can have removed (#3835), an unpopulated member of the
+  snapshot's list, or a member the last phase output's list holds that
+  the snapshot's did not (#3848); a member dropped from a list Python
+  cannot read back (a date in it) is rebuilt by inserting it back
+  (#3849). Where the edit is not
   recorded, can be read as removing another deleted member instead
   (one sharing this member's text included), or cannot be read against
-  the final list (no list there, or several amends of which it attests
+  the final list (no list there, no list before the edit that can be
+  rebuilt, #3848/#3849, or several amends of which it attests
   only the last — an amend entry whose edit is not recorded counted
   among them, #3842), the row is `curator_amend_ambiguous`, counted under
   `deleted_curator_amend_ambiguous` and attributed to no one. Where phases
   are attributed, a member a model phase already removed is neither marked
-  ambiguous nor counted as a rival fit (#3818). The enum-alias
+  ambiguous nor counted as a rival fit (#3818). Where the join finds no
+  final address for the value's entry — an amend that emptied the value
+  identifying it, a creator's `name`, drops the entry (#3850) — the
+  amends at its path, an ancestor's or a sibling's in the entry (any
+  index) decide: `curator_amend` where one at its path is proven by
+  #903's check to have turned this value into what the path holds now,
+  unmarked where every such amend's edit turned another value, else
+  ambiguous. The enum-alias
   form is read against the tables of the merged schema the run recorded
   (`run_enum_aliases`: the file on disk where its bytes hash to the
   record's `schema.full_sha256` or `full_md5`, else the committed version
@@ -377,7 +389,9 @@ NON_CHECKS = (
     "compares the list's text and not its length (#3802, #3835) — that the edit's text "
     "fits is not proof the curator's amend, rather than a model, removed it — and it is never "
     "subtracted from deleted or unfounded (#3702, #3805); a list member an amend on its list "
-    "cannot be told apart for is marked ambiguous and attributed to no one "
+    "cannot be told apart for, or whose list before the edit cannot be rebuilt (#3848, #3849), "
+    "or whose entry the join cannot place after an amend emptied its identifying value (#3850), "
+    "is marked ambiguous and attributed to no one "
     "(where phases are attributed, only a member the write phase deleted; one a model phase "
     "removed is neither marked nor a rival fit, #3818)",
     "that a flattening marked low-confidence was a coincidence, or that one not marked was not — "
@@ -485,6 +499,11 @@ def _ancestors(path: str) -> list[str]:
     `a.b[2].c` -> `a.b[2]`, `a.b`, `a`."""
     cuts = [m.start() for m in re.finditer(r"\.|\[", path)]
     return [path[:c] for c in reversed(cuts)]
+
+
+def _any_index(path: str) -> str:
+    """A path with every list index read as any index: `a[2].b` -> `a[].b`."""
+    return re.sub(r"\[\d+\]", "[]", path)
 
 
 def _tokens(path: str) -> list[str | int]:
@@ -951,9 +970,10 @@ def run_enum_aliases(record: dict[str, Any] | None
     alias tables, and a release's final state (`release_history.yaml`) is
     not the version a run made earlier under the same label read, so the
     record's own hash is the key, not its declared version. None where the
-    record names no hash, no version matches or git cannot answer (a
-    shallow clone): `normaliser_form` then reads today's tables, and the
-    basis says so and why."""
+    record names no hash, no version matches, git cannot answer (a
+    shallow clone) or git cannot be started (an OSError launching it,
+    #3851): `normaliser_form` then reads today's tables, and the basis
+    says so and why."""
     today = "today's schema"
     schema = (record or {}).get("schema") if isinstance(record, dict) else None
     schema = schema if isinstance(schema, dict) else {}
@@ -977,6 +997,12 @@ def run_enum_aliases(record: dict[str, Any] | None
     except GitUnavailable as exc:
         return None, {"source": today, "path": path, **hashes,
                       "reason": f"the run's schema is not on disk and git cannot answer ({exc})"}
+    except OSError as exc:
+        # git could not be started at all (not installed, not on PATH, not
+        # executable): the same degraded fallback, not a failure (#3851).
+        return None, {"source": today, "path": path, **hashes,
+                      "reason": f"the run's schema is not on disk and git could not be run "
+                                f"({type(exc).__name__}: {exc})"}
     if found is None:
         return None, {"source": today, "path": path, **hashes,
                       "reason": "no committed version of the path hashes to what the record recorded"}
@@ -1508,7 +1534,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     def amended_at(at: str | None) -> bool:
         return at is not None and (at in amended or any(a in amended for a in _ancestors(at)))
 
-    def list_edit_reading(value: Any, amend_path: str, old: str, new: str, rivals: list[Any]) -> str | None:
+    def list_edit_reading(value: Any, amend_path: str, old: str, new: str, rivals: list[Any],
+                          co_removable: frozenset[str] = frozenset()) -> str | None:
         # An amend on a list of scalars is recorded at the list's path: #903
         # proves an edit by `populated_leaves`, which reads such a list as
         # one leaf, so `--path keywords[1]` is refused and only `keywords`
@@ -1521,16 +1548,26 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # (`'voice', 'clinic'` -> `'clinic'`) or empty the list (`[...]` ->
         # `[]`), as well as change one (#3835). So every list before the
         # edit it admits is rebuilt — the final list with one deleted
-        # member put back at an index (a list whose text Python cannot read
-        # back, a date among them, is rebuilt only this way), and the final
+        # member put back at an index, in place of a member or inserted
+        # before one (a list whose text Python cannot read back, a date
+        # among them, is rebuilt only these ways, #3849), and the final
         # list's text with one occurrence of the edit's `with` turned back
         # into its `replace` (with an empty `with`, at every place), read
-        # back as a list — and a rebuild counts only
-        # where every member it says the edit removed is a deleted member
-        # this amend can have removed (this one or a rival). "amend" where
-        # every rebuild removes this member (and, of the members sharing its
-        # text, all of them), None where none removes it ("the edit names
-        # another member"), "ambiguous" otherwise.
+        # back as a list — and a rebuild counts only where every member it
+        # says the edit removed is a deleted member this amend can have
+        # removed (this one or a rival), or one the phases attest the
+        # edit could have co-removed (`co_removable`, #3848): an unpopulated
+        # member of the snapshot's list, or a member the last phase output's
+        # list holds whose text no populated snapshot member has (a later
+        # phase introduced it). A member no evidence attests is not
+        # admitted: with an empty `with` a rebuild can put the edit's text
+        # inside another member and invent one. "amend" where every rebuild removes this
+        # member (and, of the members sharing its text, all of them), None
+        # where some rebuild counts and none removes it ("the edit names
+        # another member"), "ambiguous" otherwise — including where no
+        # rebuild counts: the list before the edit could not be
+        # reconstructed, which is no evidence the edit changed another
+        # member (#3848, #3849).
         found, now = _resolve_value(final, amend_path)
         if not found or not isinstance(now, list):
             return None
@@ -1539,6 +1576,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         mine = _ws(value)
         befores: list[list[Any]] = [[c if j == i else m for j, m in enumerate(now)]
                                     for c in (value, *rivals) for i in range(len(now))]
+        befores += [[*now[:i], c, *now[i:]] for c in (value, *rivals) for i in range(len(now) + 1)]
         k = after.find(n)
         while k != -1:
             try:
@@ -1555,16 +1593,58 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                 continue
             seen.add(text)
             removed = Counter(_ws(m) for m in before) - Counter(_ws(m) for m in now)
-            if all(pool[t] >= c for t, c in removed.items()):
+            if all(pool[t] >= c or t in co_removable for t, c in removed.items()):
                 readings.append(removed[mine])
-        if not readings or not any(readings):
+        if not readings:
+            return "ambiguous"                 # no list before the edit could be reconstructed
+        if not any(readings):
             return None
         return "amend" if all(r >= pool[mine] for r in readings) else "ambiguous"
+
+    def amend_at_lost_address(path: str, value: Any, list_path: str | None) -> str | None:
+        # The join finds no final address for the value's entry. An amend
+        # that emptied the value identifying its entry (a creator's `name`)
+        # is one way that happens: the entry is then `entry_dropped`, so
+        # neither the amend's path nor the value's reaches the other
+        # (#3850). The amends that may be the one: those at the value's
+        # path, an ancestor's or a sibling's in the same entry, compared
+        # with indices read as any index, since the entry's final index is
+        # what the join could not find. "amend" where one at the value's
+        # path, with one recorded edit, is proven by #903's own check to
+        # have turned this value into what its path holds now; None where
+        # every such amend is at a scalar path of this shape with one
+        # recorded edit and none is (the edits changed other values);
+        # "ambiguous" otherwise — which entry the amend changed cannot be
+        # established, and that is no evidence it was another.
+        target = list_path or path
+        shape = _any_index(target)
+        parent = shape[:max(shape.rfind("."), 0)]
+        related = [a for a in amended
+                   if (s := _any_index(a)) == shape or shape.startswith((s + ".", s + "["))
+                   or (parent and s.startswith(parent + ".") and "." not in s[len(parent) + 1:]
+                       and "[" not in s[len(parent) + 1:])]
+        if not related:
+            return None
+        against = True
+        for a in related:
+            edits = amended_edits.get(a) or []
+            found, now = _resolve_value(final, a)
+            if (list_path is not None or _any_index(a) != shape or len(edits) != 1 or edits[0] is None
+                    or not found or isinstance(now, (dict, list))):
+                against = False
+                continue
+            o, n = _ws(edits[0][0]), _ws(edits[0][1])
+            text = _ws(value)
+            if o in text and text.replace(o, n, 1) == _ws(now):
+                return "amend"
+        return None if against else "ambiguous"
 
     def amended_deletion(path: str, value: Any, list_path: str | None) -> str | None:
         # "amend", "ambiguous" or None. A scalar under a key: an amend at or
         # above where the join puts it in the final record, where the key an
-        # emptied value leaves is still found. A member of a list of scalars
+        # emptied value leaves is still found; where the join puts it
+        # nowhere, `amend_at_lost_address` reads the amends on its entry
+        # (#3850). A member of a list of scalars
         # has no final address of its own once gone, and #903 records an
         # amend on one member at the list's own path (#3828): its parse
         # check (`populated_leaves`) reads a list of scalars as one leaf and
@@ -1589,7 +1669,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if not amended:
             return None
         at = remap_path(list_path or path, original, final)["path"]
-        if list_path is None or at is None:
+        if at is None:
+            return amend_at_lost_address(path, value, list_path)
+        if list_path is None:
             return "amend" if amended_at(at) else None
         if any(a in amended for a in _ancestors(at)):
             return "amend"
@@ -1606,7 +1688,17 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                     and not at_final.carried(f"{list_path}[{j}]", list_path)
                     and (not attributed
                          or stage_after_last(lambda p, q=f"{list_path}[{j}]": p.carried(q, list_path)) == "write")]
-        reading = list_edit_reading(value, at, *edits[-1], siblings)
+        snap = members if found and isinstance(members, list) else []
+        populated = {_ws(m) for m in snap if _populated(m)}
+        co_removable = {_ws(m) for m in snap if not _populated(m)}
+        if attributed and at_stage:
+            # The last phase output's list: what the write phase was given.
+            last = intermediates[-1][1]
+            moved = remap_path(list_path, original, last)["path"]
+            ok, held = _resolve_value(last, moved) if moved is not None else (False, None)
+            if ok and isinstance(held, list):
+                co_removable |= {_ws(m) for m in held if _ws(m) not in populated}
+        reading = list_edit_reading(value, at, *edits[-1], siblings, frozenset(co_removable))
         if len(edits) > 1:
             # The final list attests only the last of several amends at its
             # path, recorded or not (#3842); the earlier edits changed a list
