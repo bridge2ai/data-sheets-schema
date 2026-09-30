@@ -811,6 +811,31 @@ def test_the_counts_say_which_haystack_form_located_each_snippet(doc, form):
         assert f"1 located (1 only through a joined or elided form: {form} 1)" in out["summary"]
 
 
+def test_the_summary_totals_snippets_not_forms_when_several_need_a_non_plain_form():
+    # #3738: every other fixture has one non-plain snippet in one form, where
+    # the snippet total and the number of distinct forms coincide. Here two
+    # snippets need the joined form and one the elided form, beside one plain
+    # snippet: the total is 3 (snippets), not 2 (forms), and each form keeps
+    # its own count.
+    doc = ("The consortium will release the imag-\ning waveforms to approved users. "
+           "Each site will de-\nidentify the retinal photographs before transfer. "
+           "The team will store the\n7.\ncalibration logs on a secure server. "
+           "Plain text locates this sentence directly.")
+    snippets = ["the imaging waveforms to approved users",
+                "will deidentify the retinal photographs",
+                "store the calibration logs on a secure server",
+                "Plain text locates this sentence directly"]
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    assert [view.located_form("c002", s) for s in snippets] == [
+        "linewrap-joined", "linewrap-joined", "artifact-line-elided", "plain"]
+    out = _run(doc, [("x", s) for s in snippets], {"x": "Released."})
+    assert out["counts"]["located_by_form"] == {
+        "plain": 1, "linewrap-joined": 2, "artifact-line-elided": 1, "joined-elided": 0}
+    assert ("4 located (3 only through a joined or elided form: "
+            "linewrap-joined 2, artifact-line-elided 1)") in out["summary"]
+
+
 def test_only_located_snippets_are_counted_by_form():
     # Unlocated, indeterminate and unverified snippets name no form: the
     # tally sums to `located`.
