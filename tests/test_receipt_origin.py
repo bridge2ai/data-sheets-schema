@@ -2332,7 +2332,8 @@ class UnseenDerive(Base):
                         # after a directory change runs from its own `bin`
                         # (#3699, #3700).
                         "printf '%s' -v; linkml-validate -s s.yaml F", "printf -- -v x; linkml-validate F",
-                        "cd hack && linkml-validate -s s.yaml F", "cd hack && d4d receipts check --receipt R"):
+                        "cd hack && linkml-validate -s s.yaml F", "cd hack && d4d receipts check --receipt R",
+                        "cd data && head -c 200 x.yaml"):
             with self.subTest(command=command):
                 _, block = self._run(command)
                 self.assertEqual(block["status"], "checked", block["reasons"])
@@ -2548,6 +2549,7 @@ class UnseenDerive(Base):
     def test_imports_from_cwd(self):
         cases = {"python -c 'pass'": True, "/venv/bin/python3.12 -m data_sheets_schema.cli": True,
                  "python script.py": False, "python -I -c 'pass'": False, "linkml-validate F": False,
+                 "head -c 10 x": False, "bash -c 'pass'": False,
                  "d4d receipts check": False, "": False}
         for command, imports in cases.items():
             with self.subTest(command=command):
