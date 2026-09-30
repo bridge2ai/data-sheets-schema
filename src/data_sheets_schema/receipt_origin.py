@@ -405,7 +405,7 @@ NON_CHECKS = (
 
 _ABSENT = object()
 _LABEL = {"receipt": "receipt", "full": "full record"}
-_OPERATORS = frozenset({"&&", "||", ";", "|", "&", "|&", "(", ")", ";;", ";&"})
+_OPERATORS = frozenset({"&&", "||", ";", "|", "&", "|&", "(", ")", ";;", ";&", ";;&"})
 _PUNCT = frozenset("();<>|&")
 _CLEAN_PATH = re.compile(r"[A-Za-z0-9_./+@-]+")
 _ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*")
@@ -898,12 +898,87 @@ def _newlines_as_joins(command: str) -> str:
     return "".join(out)
 
 
+#: bash's operators, longest first: its lexer takes the longest operator
+#: at each point, and `_tokens` splits a run of operator characters the
+#: same way (#3825). A function definition's `()` is kept as one word, as
+#: the lexer always returned it: it is not a join, and the body after it
+#: (`f() { cd x; }`) is defined, not run, so it heads no part of its own.
+_SHELL_OPERATORS = ("&>>", ";;&", "<<<", "&&", "||", ";;", ";&", "|&", "&>", ">&", "<&", ">>", ">|",
+                    "<>", "<<", "()", "(", ")", ";", "|", "&", "<", ">")
+
+
+def _split_operators(run: str) -> list[str]:
+    """A run of operator characters as the operators bash reads in it,
+    each taken longest first as bash's lexer takes it, so `>&`, `&>`, `;;`
+    and a definition's `()` stay whole while `);`, `)&&`, `))` and `)|`
+    come apart (#3825)."""
+    out: list[str] = []
+    i = 0
+    while i < len(run):
+        op = next((o for o in _SHELL_OPERATORS if run.startswith(o, i)), run[i])
+        out.append(op)
+        i += len(op)
+    return out
+
+
+def _spaced_operators(text: str) -> str:
+    """`text` with each unquoted, unescaped run of operator characters
+    written as the operators bash reads in it, a space between each
+    (#3825). shlex's `punctuation_chars` returns such a run as one token,
+    so the `)` closing an unquoted `$(...)` came back joined to the
+    operator after it (`$(pwd);cd data` gave `);`, and `$(pwd)&&cd` gave
+    `)&&`), which `_layout` does not read as a join: the command after it
+    stayed inside the substitution's part, and no rule that reads a part's
+    head (a directory change, `eval`, a brace or keyword prefix, a derive,
+    a validator, a reader) saw it. A quoted run (`grep '<(' f`, `echo
+    ');'`) is text and is left as written."""
+    out: list[str] = []
+    i, n = 0, len(text)
+    quote: str | None = None
+    while i < n:
+        ch = text[i]
+        if quote is not None:
+            if ch == "\\" and quote != "'" and i + 1 < n:
+                out.append(text[i:i + 2])
+                i += 2
+                continue
+            out.append(ch)
+            if ch == quote[-1]:
+                quote = None
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            out.append(text[i:i + 2])
+            i += 2
+            continue
+        if ch == "$" and text[i + 1:i + 2] == "'":
+            quote = "$'"
+            out.append("$'")
+            i += 2
+            continue
+        if ch in "'\"":
+            quote = ch
+        if ch in _PUNCT:
+            j = i
+            while j < n and text[j] in _PUNCT:
+                j += 1
+            out.append(" ".join(_split_operators(text[i:j])))
+            i = j
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def _tokens(command: str) -> list[str] | None:
     """The command's words and operators, or None when it does not tokenise.
     Comments are removed first, the way bash removes them, and the lexer's
     own comment rule is off: shlex ends a word at any `#`, which would drop
-    everything after `s/#//g` (#3184)."""
-    text = _newlines_as_joins(_strip_comments(command.replace("\\\n", " ")))
+    everything after `s/#//g` (#3184). Each unquoted run of operator
+    characters is split into bash's operators first (`_spaced_operators`,
+    #3825), so a `;`, `&&`, `||` or `|` after an unquoted substitution's
+    `)` is a join and the command after it heads its own part."""
+    text = _spaced_operators(_newlines_as_joins(_strip_comments(command.replace("\\\n", " "))))
     lexer = shlex.shlex(text, posix=True, punctuation_chars=True)
     lexer.whitespace_split = True
     lexer.commenters = ""
@@ -1493,10 +1568,12 @@ _NESTED_DETACHER = re.compile(
 
 def _lone_ampersand(token: str) -> bool:
     """An operator token that carries a `&` starting what precedes it in the
-    background: never `&&`, `|&` or a redirection's `>&`, `<&` or `&>` (the
-    lexer may join a lone `&` to a closing bracket: `&)`)."""
-    return set(token) <= _PUNCT and "&" in token.replace("&&", "").replace("|&", "").replace(
-        ">&", "").replace("<&", "").replace("&>", "")
+    background: never `&&`, `|&`, a case clause's `;;&` or a redirection's
+    `>&`, `<&` or `&>`. `_tokens` splits an unquoted run into single
+    operators (#3825), so a run such as `&)` reaches here only as a quoted
+    word, which is read as the operators in it, conservatively."""
+    return set(token) <= _PUNCT and "&" in token.replace(";;&", "").replace("&&", "").replace(
+        "|&", "").replace(">&", "").replace("<&", "").replace("&>", "")
 
 
 def _nested_detaches(word: str) -> bool:
@@ -1879,8 +1956,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
-    # A lone `&` (the lexer may join it to a closing bracket: `&)`), never
-    # `&&`, `|&` or a redirection's `>&`, `<&` or `&>`; the same `&` ending a
+    # A lone `&` (`_lone_ampersand`), never `&&`, `|&`, `;;&` or a
+    # redirection's `>&`, `<&` or `&>`; the same `&` ending a
     # command inside a word a nested shell may run (`bash -c './derive.sh &'`,
     # and `bash -c './derive.sh&echo started'` as that shell splits it, #3745);
     # or a part whose program detaches what it runs (`setsid`, `screen`,

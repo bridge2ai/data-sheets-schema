@@ -3297,6 +3297,107 @@ class EarlierDirectoryChange(Base):
                 self.assertEqual(ro._shell(command, "/w", [], moved=True)["runs_unread"], unread)
 
 
+    #: An unquoted command substitution, a nested one and a backquoted one,
+    #: each ending right before an operator with no space (#3825).
+    SUBSTITUTIONS = ("X=$(pwd)", "ls $(pwd)", "D=$(git rev-parse --show-toplevel)", "X=$(a $(b))", "X=`pwd`")
+
+    def test_tokens_split_an_operator_run_as_bash_does(self):
+        # shlex returned `);`, `)&&`, `))` as one token, which the layout
+        # does not read as a join (#3825).
+        for command, tokens in (("X=$(pwd);cd data", ["X=$", "(", "pwd", ")", ";", "cd", "data"]),
+                                ("X=$(pwd)&&cd data", ["X=$", "(", "pwd", ")", "&&", "cd", "data"]),
+                                ("X=$(pwd)||cd d", ["X=$", "(", "pwd", ")", "||", "cd", "d"]),
+                                ("echo $(pwd)|cd d", ["echo", "$", "(", "pwd", ")", "|", "cd", "d"]),
+                                ("X=$(a $(b));cd d", ["X=$", "(", "a", "$", "(", "b", ")", ")", ";", "cd", "d"]),
+                                ("(cd x)&&ls", ["(", "cd", "x", ")", "&&", "ls"]),
+                                ("case x in a);; esac", ["case", "x", "in", "a", ")", ";;", "esac"]),
+                                # Kept whole: bash's longest operators, and a
+                                # definition's `()`, which is not a join.
+                                ("ls 2>&1;x", ["ls", "2", ">&", "1", ";", "x"]),
+                                ("ls &>/dev/null;x", ["ls", "&>", "/dev/null", ";", "x"]),
+                                ("a|&b", ["a", "|&", "b"]), ("a;;&b", ["a", ";;&", "b"]),
+                                ("f() { cd x; }", ["f", "()", "{", "cd", "x", ";", "}"]),
+                                # A quoted run is text.
+                                ("grep -c '<(' f", ["grep", "-c", "<(", "f"]),
+                                ("echo ');' x", ["echo", ");", "x"]),
+                                ("echo \"a)\";cd x", ["echo", "a)", ";", "cd", "x"]),
+                                # (shlex keeps a `$'...'` string's `$`; the run inside is not split.)
+                                ("echo $'a);';cd x", ["echo", "$a);", ";", "cd", "x"]),
+                                ("echo a\\);cd x", ["echo", "a)", ";", "cd", "x"])):
+            with self.subTest(command=command):
+                self.assertEqual(ro._tokens(command), tokens)
+        # The scan follows bash's quoting: an escaped quote character opens
+        # nothing, and `\'` inside `$'...'` does not close it, so the run
+        # after each is split or kept as bash reads it.
+        self.assertEqual(ro._spaced_operators('echo \\" x);cd y'), 'echo \\" x) ;cd y')
+        self.assertEqual(ro._spaced_operators("echo $'it\\'s);' x);cd y"), "echo $'it\\'s);' x) ;cd y")
+        # `;;&` ends a case clause, a join; it starts nothing in the background.
+        self.assertEqual(ro._layout(ro._tokens("a;;&b"))[0], [["a"], ["b"]])
+        self.assertFalse(ro._shell("case x in a) ls;;& *) ls;; esac", "/w", [])["detaches"])
+        self.assertTrue(ro._shell("(sleep 1&)", "/w", [])["detaches"])
+
+    def test_every_part_head_rule_reads_the_command_after_an_unquoted_substitution(self):
+        # A `;`, `&&`, `||` or `|` straight after a substitution's closing
+        # `)` is a join, so the command after it heads its own part for
+        # every rule that reads a part's head (#3825).
+        target = [ro._Target("full", "/w/data/X_d4d.yaml")]
+        derive = "d4d derive core --full data/X_d4d.yaml --out o.yaml"
+        for sub in self.SUBSTITUTIONS:
+            for op in (";", "&&", "||", "|", "; ", " && "):
+                # A directory change: plain, behind a brace, keyword, `!`,
+                # `time`, `builtin` or `command`, or one `eval` runs.
+                for tail in ("cd data", "pushd data", "popd", "cd \"$D\"", "{ cd data; }", "if true; then cd data; fi",
+                             "! cd data", "time cd data", "builtin cd data", "command cd data",
+                             "eval 'cd data'", "eval \"$GO\"", "{ eval \"$GO\"; }"):
+                    with self.subTest(sub=sub, op=op, tail=tail):
+                        self.assertIs(ro._shell(f"{sub}{op}{tail}", "/w", [])["moves"], True)
+                for tail in ("ls", "echo cd data", "command -v cd", "f() { cd data; }", "eval ls"):
+                    with self.subTest(sub=sub, op=op, tail=tail):
+                        self.assertIs(ro._shell(f"{sub}{op}{tail}", "/w", [])["moves"], False)
+                # A derive heads its own part, and a change before it in the
+                # command leaves its relative `--full` unplaced.
+                with self.subTest(sub=sub, op=op, rule="derive"):
+                    [row] = ro._shell(f"{sub}{op}{derive}", "/w", target)["derives"]
+                    self.assertIs(row["targets_full"], True)
+                    self.assertNotEqual(row.get("basis"), "unparsed")
+                    for change in ("cd data", "{ cd data; }", "eval 'cd data'"):
+                        [row] = ro._shell(f"{sub}{op}{change} && {derive}", "/w", target)["derives"]
+                        self.assertIsNot(row["targets_full"], True, change)
+                # A detaching program at a part's head.
+                with self.subTest(sub=sub, op=op, rule="detacher"):
+                    self.assertTrue(ro._shell(f"{sub}{op}setsid ./derive.sh", "/w", [])["detaches"])
+
+    def test_a_change_after_an_unquoted_substitution_moves_the_next_call(self):
+        # End to end (#3825): after `X=$(pwd); cd data` the next call starts
+        # in `data`, so a `python -m` validator there is unread and a
+        # relative `--full` is not placed against the start.
+        for sub in self.SUBSTITUTIONS:
+            for op in (";", "&&", "; "):
+                earlier = f"{sub}{op}cd hack"
+                for command in self.READ_HERE:
+                    with self.subTest(earlier=earlier, command=command):
+                        identity, block = self._run(earlier, command)
+                        self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 8) runs a program "
+                                                  "this does not read")
+                with self.subTest(earlier=earlier, rule="derive"):
+                    r = self.new_run()
+                    r.write(r.receipt, PRE)
+                    r.bash(f"{sub}{op}cd data")
+                    r.write(r.full, "id: x\n")
+                    r.write(r.receipt, Boundaries.C003)
+                    identity = r.derive()
+                    r.write(r.receipt, Boundaries.C004)
+                    block = r.report()
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be "
+                                              "resolved")
+                    self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
+        # A substitution followed by no change leaves the next call as it was.
+        for earlier in ("X=$(pwd);ls", "X=$(a $(b))&&ls", "X=`pwd`;ls"):
+            with self.subTest(earlier=earlier):
+                _, block = self._run(earlier, UnseenDerive.VALIDATE)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+
+
 class RuntimeDenial(Base):
     """A Bash call the runtime refused in `dontAsk` mode never ran, but only
     where the transcript's terminal `result` lists it under
