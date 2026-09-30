@@ -20,13 +20,33 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests import running_interpreter
+
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_DIR = ROOT / "src" / "data_sheets_schema" / "schema"
 CORE = SCHEMA_DIR / "data_sheets_schema_core.yaml"
 
 
+# Every tool validate-core calls through `$(RUN)`.
+_RECIPE_TOOLS = ("python", "gen-python")
+
+
 def _make(*args):
-    return subprocess.run(["make", *args], cwd=ROOT, capture_output=True, text=True, timeout=300)
+    """`make` with the recipe's tools taken from the running interpreter.
+
+    The recipe's `$(RUN)` is `poetry run`, which from a worktree resolved a
+    virtualenv without linkml, so every case here failed on
+    ModuleNotFoundError (#2979, #3285). `RUN=` and this interpreter's
+    directory first on `PATH` run the same recipe lines in the environment
+    under test (the override the check-sssom-comprehensive recipe test
+    already uses); under CI's `poetry run pytest` that is the
+    environment `poetry run` names.
+    """
+    env, reason = running_interpreter.make_environment(*_RECIPE_TOOLS)
+    if reason:
+        raise unittest.SkipTest(reason)
+    return subprocess.run(["make", "RUN=", *args], cwd=ROOT, env=env,
+                          capture_output=True, text=True, timeout=300)
 
 
 def _broken_copy(tmp, edit):
