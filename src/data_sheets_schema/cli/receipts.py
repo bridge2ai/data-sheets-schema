@@ -345,7 +345,9 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     by `;`, or a failed `&&` chain cannot be placed, unless the native
     control denied the call, or the runtime did in `dontAsk` mode and its
     terminal `result` lists the call, which then never ran. `timeout`,
-    `env` and `nice` wrappers are read through. Three kinds of part carrying
+    `env` and `nice` wrappers are read through. A derive whose program is a
+    variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`)
+    cannot be placed, as that program may be a wrapper. Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a
@@ -377,17 +379,36 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     issued (one in flight with it, backgrounded by its `run_in_background` input or its result,
     or started with `&`, `coproc`, `setsid` and the like, or by a process substitution
     `<(...)` or `>(...)`, which bash does not wait for, counts, a `&` inside a nested shell's
-    word read as that shell splits a word with a space in it) and was issued before the derive, with a receipt change returning after both
+    word read as that shell splits a word with a space in it, and the word a shell nested in
+    it gives its `-c`, or `eval` or `ssh` runs, read so in turn) and was issued before the derive, with a receipt change returning after both
     it and the first full-record Write were issued,
     makes the status `unknown`; its cost is a false `unknown` for such a program that
     derived nothing. A command the tokenizer cannot split is such a call, open-ended where its
     text carries a `&`, `coproc`, `setsid` and the like, `<(` or `>(`. A script that detaches a child itself
     is not seen as open-ended, nor is an
-    environment set outside the command read, nor a package in the call's own starting
-    directory that a `python -c` or `-m` part imports first, nor the project there whose
-    virtualenv a `poetry run` part takes. A relative `--full`
+    environment set outside the command read, nor a package in the directory the session's
+    shell started in that a `python -c` or `-m` part imports first, nor the project there whose
+    virtualenv a `poetry run` part takes; after an earlier call whose `cd`, `pushd` or `popd`
+    may have left that directory (plain, or behind a brace, a compound keyword, `!`, `time`,
+    `builtin` or `command`, or one `eval` runs or may run; one in a subshell or an unquoted
+    `$(...)`, `<(...)` or `>(...)` counts, one in a backquoted or double-quoted substitution
+    is not read, and in a command the tokenizer cannot split any `cd`, `pushd`, `popd` or
+    `eval` word counts), such a part counts as after a
+    directory change, and a relative `--full` cannot be placed, even where the transcript
+    records a directory for the call; where the transcript records another directory and no
+    earlier change was seen, such a part counts as after a change too, and a relative `--full`
+    resolves against the recorded directory. A redirection before a program is read
+    past (`2>/dev/null cd /tmp`); a program supplied at run time (`$C /tmp`) counts as a
+    change; the command `eval` runs is its words joined and tokenised again (`eval
+    '"cd" /tmp'`), and one carrying a word supplied at run time or that cannot be split
+    counts as a change and as open-ended; every argument of a shell given `-c` (`bash
+    -ceo pipefail 'cmd'`), the command `eval` runs and each run of `ssh`'s arguments to
+    the end are read for a `&` and the like; and in a command the tokenizer cannot split
+    a change is read with quote and escape characters removed as well (`c\\d /tmp`) and any
+    word starting with `$` or a backquote counts. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
-    where every join from the change to the derive is `&&`. Where the
+    where every join from the change to the derive is `&&`, and after one `eval` runs
+    or may run it cannot be placed. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,
     and nothing is classified; that includes a receipt Write (or replayed
     Edit/MultiEdit) in flight together with another receipt change, the
