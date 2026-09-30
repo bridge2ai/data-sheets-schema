@@ -400,3 +400,72 @@ class RemovalRows(unittest.TestCase):
                        "for an entry dropped from a list"):
             self.assertIn(phrase, definition)
         self.assertNotIn("no finding named the value", definition)
+
+
+class ReleaseInventory(unittest.TestCase):
+    """The release-level corpus inventory (#2914, #3282): a cross-project
+    difference on doi, license, version or issued is labelled corpus-driven
+    where the corpus holds no release evidence, and each arm's pinned
+    manifest is inventoried rather than assumed to be today's."""
+
+    def setUp(self):
+        self.m = _module()
+        self.empty = {k: {p: [] for p in self.m.PROJECTS} for k, *_ in self.m.ARMS}
+
+    def _doc(self, e11, e102=None):
+        sub = lambda name, score: ({"name": name, "score": score} if score is not None
+                                   else {"name": name, "score": None, "applicable": False})
+        return {"elements": [
+            {"id": 1, "sub_elements": [sub("Persistent Identifier (DOI, RRID, or URI)", e11)]},
+            {"id": 3, "sub_elements": [sub("License Terms Allow Reuse", 0)]},
+            {"id": 6, "sub_elements": [sub("Renamed element", 1)]},
+            {"id": 10, "sub_elements": [sub("Dataset Published on a Recognized Platform", 1),
+                                        sub("Citation and DOI for Cross-referencing", e102)]}]}
+
+    def test_the_corpus_limited_project_is_named_with_its_inventory(self):
+        text = "\n".join(self.m.release_inventory_section(self.empty, {}))
+        self.assertIn("| CHORUS | 0 (0 current) | none | none | none | none | no | `exclude` |", text)
+        self.assertIn("AI_READI's document corpus carries its RO-Crate and its licence "
+                      "(`ro_crate_metadata`; `dataset_license`)", text)
+        self.assertIn("CHORUS's corpus has 0 tier-1 sources, no release record, no license/DUA/IRB "
+                      "source, and the crate manifest declares its crate `document_corpus: exclude`", text)
+        self.assertIn("`doi`, `license`, `version` and `issued` are **corpus-driven** for CHORUS, "
+                      "not a measure of generation quality", text)
+
+    def test_release_subelements_are_counted_per_project_and_evaluator_with_na_apart(self):
+        scores = {"rubric10": {"v7prod": {"CHORUS": [
+            {"file": "a.json", "evaluator": "ev", "doc": self._doc(0)},
+            {"file": "b.json", "evaluator": "ev", "doc": self._doc(1, 0)},
+            {"file": "b.json", "evaluator": "ev", "doc": self._doc(1, 0)},     # the same file once
+            {"file": "c.json", "evaluator": "other", "doc": self._doc(1, 1)}]}}}
+        rows = self.m._release_subelement_rows(scores)
+        # E6.1 is renamed in these docs, so it is read as absent, never as a score.
+        self.assertEqual(rows, ["| CHORUS | `ev` | 1/2 | 0/2 | – | 0/1, 1 N/A |",
+                                "| CHORUS | `other` | 1/1 | 0/1 | – | 1/1 |"])
+
+    def test_a_pinned_manifest_whose_corpus_differs_from_todays_is_named(self):
+        import tempfile
+        from unittest import mock
+        today = (self.m.ROOT / self.m.SOURCE_MANIFEST).read_bytes()
+        crate = (self.m.ROOT / self.m.CRATE_MANIFEST).read_bytes()
+        then = today.replace(b"source_type: license", b"source_type: documentation", 1)   # AI_READI's
+        with tempfile.TemporaryDirectory() as tmp:
+            concat = Path(tmp)
+            data = {k: {p: [] for p in self.m.PROJECTS} for k, *_ in self.m.ARMS}
+            for p, md5 in (("AI_READI", "a" * 32), ("CHORUS", "a" * 32), ("VOICE", "b" * 32)):
+                d = concat / "claudecode_api_core" / "L_rep1"
+                d.mkdir(parents=True, exist_ok=True)
+                (d / f"{p}_provenance.yaml").write_text(
+                    f"inputs:\n  source_manifest:\n    path: {self.m.SOURCE_MANIFEST}\n    md5: {md5}\n")
+                data["v8prod"][p] = [{"label": "L_rep1"}]
+            versions = {"a" * 32: (then, {"commit": "c" * 40, "date": "2026-09-01"})}
+            with mock.patch.object(self.m, "CONCAT", concat), \
+                    mock.patch.object(self.m, "_method_for", lambda label, project: "claudecode_api"), \
+                    mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                               lambda path, md5=None, sha256=None: versions.get(md5)):
+                rows = self.m._pinned_manifest_rows(data, today, crate)
+        self.assertEqual(rows, [
+            "| v8 API production (2026-09-04f/g) | `aaaaaaaaaaaa` (2 records), committed 2026-09-01 "
+            "(`cccccccccc`) | differs: AI_READI | as today | |",
+            "| v8 API production (2026-09-04f/g) | `bbbbbbbbbbbb` (1 records) | – | – | "
+            "no committed version of `data/preprocessed/source_manifest.yaml` hashes to it |"])

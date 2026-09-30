@@ -59,6 +59,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import statistics
@@ -755,6 +756,263 @@ def replicate_structure_section(data) -> list[str]:
             + (", ".join(f"`{k}`" for k in sorted(outside)) if outside else "none") + ".", ""]
 
 
+def _replicate_verified(label: str, project: str) -> dict[str, int] | None:
+    """`replicate_structure.verified_by_slot` of one record's coverage
+    receipt, or None where it wrote none or its chunk texts cannot be
+    recovered — no receipt is not a receipt of nothing."""
+    from data_sheets_schema.receipts import load_receipt
+    from data_sheets_schema.replicate_structure import record_chunk_texts, verified_by_slot
+    core_dir = CONCAT / f"{_method_for(label, project)}_core" / label
+    receipt = core_dir / f"{project}_coverage_receipt.yaml"
+    prov = core_dir / f"{project}_provenance.yaml"
+    if not (receipt.exists() and prov.exists()):
+        return None
+    try:
+        rec = load_receipt(receipt)
+    except (OSError, ValueError, yaml.YAMLError):
+        return None
+    texts, _basis = record_chunk_texts(load(prov).get("inputs") or {}, ROOT)
+    return verified_by_slot(rec, texts) if texts is not None else None
+
+
+def omission_candidate_section(data) -> list[str]:
+    """Receipt-backed omission candidates among each arm x project's
+    intermittent slots (#3335, #2932 1(c)), over the records the replicate
+    structure table compares."""
+    from data_sheets_schema.replicate_structure import (
+        CANDIDATE, compare_structure, dataset_slots, omission_candidates,
+    )
+    slots = dataset_slots()
+    rows, totals = [], {}
+    for key, disp, _pfx, _rt, _role in ARMS:
+        if key in NOT_REPLICATES:
+            continue
+        tot = {"some": 0, CANDIDATE: 0, "not_candidate": 0, "unmeasured": 0}
+        measured_any = False
+        for p in PROJECTS:
+            reps = data[key][p]
+            if len(reps) < 2:
+                continue
+            tags = {_rep_tag(r["label"]): r["label"] for r in reps}
+            recs = {t: load(CONCAT / _method_for(lab, p) / lab / f"{p}_d4d.yaml") for t, lab in tags.items()}
+            result = compare_structure(recs, slots)
+            oc = omission_candidates(result, {t: _replicate_verified(lab, p) for t, lab in tags.items()})
+            n = len(oc["slots"])
+            tot["some"] += n
+            if not oc["measured"]:
+                rows.append(f"| {disp} | {p} | {n} | – | – | – |")
+                continue
+            measured_any = True
+            for k, v in oc["counts"].items():
+                tot[k] += v
+            c = oc["counts"]
+            names = ", ".join(
+                f"`{name}` (filled {len(s['filled_by'])}/{len(recs)}, receipted in {', '.join(s['receipted_in'])})"
+                for name, s in oc["slots"].items() if s["status"] == CANDIDATE) or "none"
+            per = " · ".join(f"{t} {len(v)}" + (f" ({', '.join(f'`{x}`' for x in v)})" if v else "")
+                             for t, v in oc["per_replicate"].items())
+            rows.append(f"| {disp} | {p} | {n} | {c[CANDIDATE]} / {c['not_candidate']} / {c['unmeasured']} "
+                        f"| {names} | {per} |")
+        if measured_any:
+            totals[key] = tot
+            rows.append(f"| **{disp}** | **all projects** | {tot['some']} | {tot[CANDIDATE]} / "
+                        f"{tot['not_candidate']} / {tot['unmeasured']} | | |")
+    return ["### Receipt-backed omission candidates (#3335)", "",
+            "Per arm × project, the intermittent slots of the replicate-structure table above. A slot is a **candidate** "
+            "when at least one replicate that fills it carries a coverage-receipt snippet for it that "
+            "verifies in the chunk it cites — the verification `receipts.check` counts as `verified`, "
+            "after the receipt is inverted by slot (`receipts.claim_receipts`) and each receipt path "
+            "is read at its top-level slot; a path through `source_caveats` receipts commentary and "
+            "counts for nothing. Each receipt is checked against the bytes its record hashed: the "
+            "bundle on disk where it still hashes to the record's, else the committed version that "
+            "does (`provenance.committed_bytes_for`), chunked under the record's own rule "
+            "(`replicate_structure.record_chunk_texts`). **not**: every replicate that fills it has "
+            "a receipt and none verifies a snippet for it; **unmeasured**: none does and some "
+            "filling replicate has no readable receipt. **Omitted candidates per record**: the "
+            "candidate slots each replicate leaves empty. `–` where no replicate of the group has "
+            "a readable receipt — the arms whose procedure wrote none — and not 0. A candidate says "
+            "the bundle supports the slot in one replicate's reading, not that leaving it out was "
+            "wrong; only top-level slots are compared.", "",
+            "| arm | project | intermittent | candidates / not / unmeasured | candidate slots "
+            "(replicates filling it; receipted in) | omitted candidates per record |",
+            "|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – |"]), ""]
+
+
+SOURCE_MANIFEST = Path("data/preprocessed/source_manifest.yaml")
+CRATE_MANIFEST = Path("data/ro-crate_packages/crate_manifest.yaml")
+#: The rubric10 sub-elements a release-level slot answers: (label, element
+#: id, position within the element, the opening of its name). Matched by
+#: position and checked by name, so a renamed sub-element is read as absent
+#: rather than as another one.
+RELEASE_SUBELEMENTS = (("E1.1", 1, 1, "Persistent Identifier"), ("E3.1", 3, 1, "License Terms"),
+                       ("E6.1", 6, 1, "Dataset Version Number"), ("E10.2", 10, 2, "Citation and DOI"))
+
+
+def _release_facts(inv: dict[str, Any]) -> tuple:
+    """What a corpus holds on release evidence: its licence/DUA/IRB sources
+    and its release records, crate included. Tier 1 is apart — a ranking the
+    manifest declares, not a document the corpus holds."""
+    return (tuple((k, tuple(e["source_id"] for e in v)) for k, v in inv["governance"].items()),
+            tuple(e["source_id"] for e in inv["release_records"]), inv["crate_in_document_corpus"])
+
+
+def _pinned_manifest_rows(data, today: bytes, crate: bytes | None) -> list[str]:
+    """Per arm, the source-manifest version its records pinned
+    (`inputs.source_manifest`), recovered from git by that hash, and whether
+    the inventory under it equals today's."""
+    from data_sheets_schema import release_inventory as ri
+    from data_sheets_schema.provenance import GitUnavailable, committed_bytes_for
+    rows = []
+    for key, disp, _pfx, _rt, _role in ARMS:
+        pins: dict[tuple, list[str]] = {}
+        for p in PROJECTS:
+            for r in data[key][p]:
+                # Every collected record has one (`run_metrics` requires it);
+                # a metrics row with no record behind it pins nothing.
+                prov = (CONCAT / f"{_method_for(r['label'], p)}_core" / r["label"] / f"{p}_provenance.yaml"
+                        if r.get("label") else None)
+                if prov is None or not prov.exists():
+                    continue
+                sm = (load(prov).get("inputs") or {}).get("source_manifest") or {}
+                pins.setdefault((sm.get("path"), sm.get("md5"), sm.get("sha256")), []).append(p)
+        if not pins:
+            continue
+        for (path, md5, sha), projects in sorted(pins.items(), key=lambda kv: str(kv[0])):
+            named = f"`{(md5 or sha or '')[:12]}` ({len(projects)} records)" if (md5 or sha) else \
+                f"no hash recorded ({len(projects)} records)"
+            try:
+                got = committed_bytes_for(path, md5=md5, sha256=sha) if path and (md5 or sha) else None
+            except GitUnavailable as exc:
+                rows.append(f"| {disp} | {named} | – | – | git could not supply it: {exc} |")
+                continue
+            if got is None:
+                rows.append(f"| {disp} | {named} | – | – | no committed version of `{path}` hashes to it |")
+                continue
+            raw, entry = got
+            ps = sorted(set(projects), key=PROJECTS.index)
+            try:
+                then = {p: ri.inventory(raw, crate, p) for p in ps}
+            except ValueError as exc:
+                rows.append(f"| {disp} | {named} | – | – | the inventory cannot read it: {exc} |")
+                continue
+            now = {p: ri.inventory(today, crate, p) for p in ps}
+            corpus = [p for p in ps if _release_facts(then[p]) != _release_facts(now[p])]
+            tier = [p for p in ps if [e["source_id"] for e in then[p]["tier1"]]
+                    != [e["source_id"] for e in now[p]["tier1"]]]
+            rows.append(f"| {disp} | {named}, committed {entry['date']} (`{entry['commit'][:10]}`) | "
+                        + ("as today" if not corpus else "differs: " + ", ".join(corpus)) + " | "
+                        + ("as today" if not tier else "differs: " + ", ".join(
+                            f"{p} {then[p]['tier1_count']} (today {now[p]['tier1_count']})" for p in tier))
+                        + " | |")
+    return rows
+
+
+def _release_subelement_rows(scores) -> list[str]:
+    """Per project and evaluator, the release-level rubric10 sub-elements
+    scored 1, over every evaluation the rubric10 table shows (each once)."""
+    seen: dict[tuple[str, str], dict[str, list[int]]] = {}
+    files: set[str] = set()
+    for arm in (scores.get("rubric10") or {}).values():
+        for p, ss in arm.items():
+            for s in ss:
+                if s["file"] in files or not s.get("doc"):
+                    continue
+                files.add(s["file"])
+                cell = seen.setdefault((p, s.get("evaluator") or "unrecorded"),
+                                       {lab: [0, 0, 0] for lab, *_ in RELEASE_SUBELEMENTS})
+                elements = {e.get("id"): e for e in s["doc"].get("elements") or [] if isinstance(e, dict)}
+                for lab, eid, pos, name in RELEASE_SUBELEMENTS:
+                    subs = (elements.get(eid) or {}).get("sub_elements") or []
+                    sub = subs[pos - 1] if len(subs) >= pos else None
+                    if not (isinstance(sub, dict) and str(sub.get("name", "")).startswith(name)):
+                        continue
+                    if isinstance(sub.get("score"), (int, float)) and not isinstance(sub["score"], bool):
+                        cell[lab][0] += 1 if sub["score"] > 0 else 0
+                        cell[lab][1] += 1
+                    elif sub.get("applicable") is False:
+                        cell[lab][2] += 1               # N/A: evaluator output, out of the denominator
+    return [f"| {p} | `{ev}` | " + " | ".join(
+                (f"{k}/{n}" if n else "") + (", " if n and na else "") + (f"{na} N/A" if na else "")
+                or "–" for k, n, na in cell.values()) + " |"
+            for (p, ev), cell in sorted(seen.items(), key=lambda kv: (PROJECTS.index(kv[0][0]), kv[0][1]))]
+
+
+def release_inventory_section(data, scores) -> list[str]:
+    """The release-level corpus inventory (#2914, #3282): what release
+    evidence each project's document corpus holds, whether each arm read the
+    same, and the rubric10 sub-elements that evidence decides."""
+    from data_sheets_schema import release_inventory as ri
+    today = (ROOT / SOURCE_MANIFEST).read_bytes()
+    crate_path = ROOT / CRATE_MANIFEST
+    crate = crate_path.read_bytes() if crate_path.is_file() else None
+    invs = {p: ri.inventory(today, crate, p) for p in PROJECTS}
+
+    def ids(entries) -> str:
+        return ", ".join(f"`{e['source_id']}`" + (" (superseded)" if e["superseded"] else "")
+                         for e in entries) or "none"
+
+    def policy(inv) -> str:
+        cp = inv["crate_policy"]
+        return f"`{cp['document_corpus']}`" if cp["status"] == "declared" else cp["status"].replace("_", " ")
+
+    table = [f"| {p} | {inv['tier1_count']} ({inv['tier1_current_count']} current) | "
+             f"{ids(inv['governance']['license'])} | {ids(inv['governance']['DUA'])} | "
+             f"{ids(inv['governance']['IRB'])} | {ids(inv['release_records'])} | "
+             f"{'yes' if inv['crate_in_document_corpus'] else 'no'} | {policy(inv)} |"
+             for p, inv in invs.items()]
+    lacking = ri.lacking_release_evidence(list(invs.values()))
+    carrying = [p for p, inv in invs.items() if inv["crate_in_document_corpus"] and inv["governance"]["license"]]
+    facts = []
+    for p in carrying:
+        facts.append(f"{p}'s document corpus carries its RO-Crate and its licence "
+                     f"({ids([e for e in invs[p]['release_records'] if e['source_type'] == ri.CRATE_TYPE])}; "
+                     f"{ids(invs[p]['governance']['license'])})")
+    for p in lacking:
+        inv = invs[p]
+        none = [k for k in ri.GOVERNANCE_TYPES if not inv["governance"][k]]
+        facts.append(f"{p}'s corpus has {inv['tier1_count']} tier-1 sources, no release record"
+                     + (", no " + "/".join(none) + " source" if none else "")
+                     + (f", and the crate manifest declares its crate `document_corpus: "
+                        f"{inv['crate_policy']['document_corpus']}`"
+                        if inv["crate_policy"]["status"] == "declared"
+                        else f", and its crate is not in the corpus ({policy(inv)})"))
+    sub = _release_subelement_rows(scores)
+    crate_named = (f"`{CRATE_MANIFEST}` (`{hashlib.sha256(crate).hexdigest()[:12]}`)" if crate is not None
+                   else "none (absent)")
+    return ["## Release-level corpus inventory (#2914, #3282)", "",
+            f"What release evidence each project's document corpus holds (`{ri.INSTRUMENT}`, "
+            f"`d4d download release-inventory`), read from today's `{SOURCE_MANIFEST}` "
+            f"(`{invs[PROJECTS[0]]['source_manifest_sha256'][:12]}`) and crate manifest {crate_named}. "
+            "It counts what the manifests declare, not what the documents say: a source typed "
+            "`license` is a licence source whatever its text, and a related-but-distinct dataset's "
+            "declared `in_bundle` source is not this dataset's evidence.", "",
+            "| project | tier-1 sources | licence | DUA | IRB | release records | crate in corpus | "
+            "crate policy |", "|---|---|---|---|---|---|---|---|", *table, "",
+            "The source-manifest version each arm's records pinned (`inputs.source_manifest`), "
+            "recovered from git by that hash and inventoried against today's crate manifest — the "
+            "records pin no crate-manifest hash, so that column is today's declaration for every "
+            "arm. **Corpus** compares the licence/DUA/IRB sources and release records, crate "
+            "included; **tier 1** compares the priority ranking the manifest declares, which is a "
+            "ranking of the same documents and not a document:", "",
+            "| arm | source manifest pinned | corpus release evidence | tier 1 | note |",
+            "|---|---|---|---|---|", *_pinned_manifest_rows(data, today, crate), "",
+            ("; ".join(facts) + ". " if facts else "")
+            + (f"A record can state only the release facts its bundle carries, so differences between "
+               f"projects on `doi`, `license`, `version` and `issued` are **corpus-driven** for "
+               f"{', '.join(lacking)}, not a measure of generation quality, and so are the rubric10 "
+               "sub-elements those slots decide:" if lacking else
+               "Every project's corpus carries a release record or a licence/DUA source.")
+            , "",
+            "| project | evaluator | " + " | ".join(f"{lab} {name}" for lab, _e, _p, name in RELEASE_SUBELEMENTS)
+            + " |", "|---|---|" + "---|" * len(RELEASE_SUBELEMENTS), *(sub or ["| – | – |" + " – |" * len(RELEASE_SUBELEMENTS)]),
+            "",
+            "Cells are evaluations scoring the sub-element 1 over those scoring it at all, and "
+            "the evaluations that judged it not applicable (N/A is itself evaluator output), per "
+            "evaluator (never pooled, #1058), over every rubric10 evaluation in the rubric tables "
+            "below; `–` where none carries the sub-element under that name. A 0 where the corpus "
+            "holds no such evidence is the corpus's, not the generator's.", ""]
+
+
 def _structure_row(arm: str, project: str, v: dict[str, int], names: str) -> str:
     return (f"| {arm} | {project} | {v['records']} | {v['all']} / {v['some']} / {v['none']} | "
             f"{v['identical']} | {v['nested_in_all']}: {v['nested_counted']} / {v['differ']} / "
@@ -824,12 +1082,15 @@ def render_markdown(data, scores) -> str:
 
     lines += receipt_section(data)
     lines += replicate_structure_section(data)
+    lines += omission_candidate_section(data)
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
     for mk, (disp, src, _hiw, cav) in METRICS.items():
         basis = "record block" if src == "record" else "live recompute, current instrument"
         lines.append(f"- **{disp}** — {basis}." + (f" {cav}." if cav else ""))
     lines.append("")
+
+    lines += release_inventory_section(data, scores)
 
     cohorts = rubric_discrimination(scores)
     for rubric, rscores in scores.items():

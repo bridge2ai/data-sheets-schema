@@ -38,6 +38,12 @@ in, a report out, no file read. Per slot it gives
 merged schema, less `source_caveats` (commentary, not a claim about the
 dataset) — fig12's rows. A record key outside it is reported by
 `compare_structure` under `outside_universe` and not compared.
+
+`omission_candidates` (#3335, #2932 1(c)) marks an intermittent slot a
+receipt-backed omission candidate when a replicate that fills it carries a
+verified receipt snippet for it (`verified_by_slot`, the verification
+`receipts.check` applies). Both are pure; `record_chunk_texts` is the one
+reader, recovering the chunk texts a record's receipt cites.
 """
 from __future__ import annotations
 
@@ -249,3 +255,174 @@ def summarize(result: Mapping[str, Any]) -> dict[str, Any]:
         "joined_by_key": sum(by_key.values()), "joined_by_position": by_position,
         "unaligned": unaligned, "outside_universe": list(result["outside_universe"]),
     }
+
+
+# ------------------------------------------------ omission candidates (#3335)
+#: A receipt path through one of these keys receipts commentary about the
+#: slot, not a claim of it: `human_subject_research.source_caveats` quoting
+#: "the bundle names no IRB" is evidence the slot is unsupported. The slot
+#: universe drops `source_caveats` for the same reason.
+COMMENTARY_KEYS = ("source_caveats",)
+
+CANDIDATE = "candidate"
+NOT_CANDIDATE = "not_candidate"
+UNMEASURED = "unmeasured"
+
+
+def top_slot(path: Any) -> str | None:
+    """The top-level slot a receipt path names (`variables[3].name` ->
+    `variables`), or None for an empty path or one through a
+    `COMMENTARY_KEYS` key at any depth."""
+    parts = re.findall(r"[A-Za-z_]\w*", str(path or ""))
+    if not parts or any(p in COMMENTARY_KEYS for p in parts):
+        return None
+    return parts[0]
+
+
+def verified_by_slot(receipt: Mapping[str, Any], chunk_texts: Mapping[str, str]) -> dict[str, int]:
+    """Top-level slot -> the number of the receipt's snippets for it that
+    verify in the chunk they cite. Pure.
+
+    The receipt is inverted by slot with `receipts.claim_receipts` (after
+    `receipts._receipt_entries` sets aside the malformed entries `check`
+    sets aside), and a snippet counts exactly where `receipts.check` counts
+    it as `verified`: a non-empty string that `snippet_in` finds in its own
+    chunk, under the #720 floors. A snippet verbatim only in another chunk
+    (`adjacent`/`elsewhere`) or across a boundary is not counted: `check`
+    does not count it verified either. Summed over every path, commentary
+    included, these are `check`'s `snippets.verified`; `top_slot` then
+    drops the commentary paths."""
+    from data_sheets_schema.receipts import (
+        _receipt_entries, claim_receipts, elide_artifact_lines, normalise, normalise_joined, snippet_in,
+    )
+    entries, _findings = _receipt_entries(dict(receipt))
+    claims = claim_receipts({"chunks": entries})
+    hays: dict[str, tuple[str, str, str, str]] = {}
+    out: Counter[str] = Counter()
+    for path, item in claims["slots"].items():
+        slot = top_slot(path)
+        if slot is None:
+            continue
+        for r in item["receipts"]:
+            text, snippet = chunk_texts.get(r["chunk"]), r["snippet"]
+            if text is None or not isinstance(snippet, str) or not snippet.strip():
+                continue
+            if r["chunk"] not in hays:
+                hays[r["chunk"]] = (normalise(text), normalise_joined(text),
+                                    normalise(elide_artifact_lines(text)),
+                                    normalise_joined(elide_artifact_lines(text)))
+            if snippet_in(snippet, text, *hays[r["chunk"]])[0]:
+                out[slot] += 1
+    return dict(sorted(out.items()))
+
+
+def omission_candidates(result: Mapping[str, Any],
+                        verified: Mapping[str, Mapping[str, int] | None]) -> dict[str, Any]:
+    """Receipt-backed omission candidates among a comparison's intermittent
+    slots (#2932 1(c)). Pure.
+
+    `result` is `compare_structure`'s report and `verified` maps each of its
+    replicates to `verified_by_slot` of that replicate's receipt, or None
+    where the replicate has no receipt that could be read (the procedure
+    wrote none, or its bytes could not be recovered) — never an empty
+    mapping for that, which would read as "receipted nothing".
+
+    An intermittent slot is a **candidate** when at least one replicate that
+    fills it carries a verified snippet for it: the bundle supports the slot
+    and the replicates that leave it empty omitted it. It is **not a
+    candidate** when every filling replicate has a receipt and none verifies
+    a snippet for it, and **unmeasured** when none verifies one and some
+    filling replicate has no readable receipt. A candidate is evidence that
+    the bundle supports the slot in one replicate's reading; it is not a
+    judgement that the omitting replicate was wrong to leave it out.
+
+    Returns `slots` (name -> status, `filled_by`, `receipted_in`: the
+    filling replicates with a verified snippet, `unreceipted`: those with no
+    readable receipt) and `per_replicate` (replicate -> the candidate slots
+    it leaves empty, or None when no candidate status could be measured for
+    the group at all)."""
+    rows = result["slots"]
+    slots: dict[str, dict[str, Any]] = {}
+    for name, r in rows.items():
+        if r["state"] != "intermittent":
+            continue
+        filled = [rep for rep, held in r["present"].items() if held]
+        receipted = [rep for rep in filled if verified.get(rep) is not None and verified[rep].get(name, 0) > 0]
+        unreceipted = [rep for rep in filled if verified.get(rep) is None]
+        status = CANDIDATE if receipted else UNMEASURED if unreceipted else NOT_CANDIDATE
+        slots[name] = {"status": status, "filled_by": filled,
+                       "receipted_in": receipted, "unreceipted": unreceipted}
+    measured = any(s["status"] != UNMEASURED for s in slots.values()) or (
+        not slots and any(v is not None for v in verified.values()))
+    per_replicate = {rep: ([n for n, s in slots.items() if s["status"] == CANDIDATE and rep not in s["filled_by"]]
+                           if measured else None)
+                     for rep in result["replicates"]}
+    counts = Counter(s["status"] for s in slots.values())
+    return {"slots": slots, "per_replicate": per_replicate, "measured": measured,
+            "counts": {k: counts.get(k, 0) for k in (CANDIDATE, NOT_CANDIDATE, UNMEASURED)}}
+
+
+_TEXTS_CACHE: dict[tuple, tuple[dict[str, str] | None, str]] = {}
+
+
+def record_chunk_texts(inputs: Mapping[str, Any], root: Path | str = ".") -> tuple[dict[str, str] | None, str]:
+    """(chunk id -> text, basis) for the bundle a provenance record's
+    `inputs` says it read, or (None, why not). Reads files and asks git.
+
+    The bytes are the bundle on disk where they hash to the record's
+    `bundle_md5`/`bundle_sha256`, else the committed version of
+    `bundle_path` whose every recorded hash matches
+    (`provenance.committed_bytes_for`, #1140). They are chunked in memory
+    under the record's own `inputs.chunks.rule`, and refused where that
+    does not reproduce the recorded `chunk_count` or manifest sha256, since
+    chunk ids are positional. This is `receipts.block_for`'s recovery with
+    the on-disk manifest left out: a manifest that is the record's is the
+    one the recorded rule reproduces byte for byte. Memoised per inputs."""
+    import hashlib
+
+    from data_sheets_schema.chunking import chunk_texts, dump_manifest, manifest_from_bytes
+    from data_sheets_schema.provenance import GitUnavailable, committed_bytes_for
+    chunks = inputs.get("chunks") or {}
+    md5, sha = inputs.get("bundle_md5"), inputs.get("bundle_sha256")
+    path, rule = inputs.get("bundle_path"), chunks.get("rule")
+    key = (str(Path(root).resolve()), path, md5, sha, repr(chunks))
+    if key in _TEXTS_CACHE:
+        return _TEXTS_CACHE[key]
+    if not path or not (md5 or sha):
+        out: tuple[dict[str, str] | None, str] = (None, "the record names no bundle path and hash")
+    elif not isinstance(rule, dict):
+        out = (None, "the record carries no chunking rule")
+    else:
+        raw, basis = None, ""
+        disk = Path(root) / path
+        if disk.is_file():
+            b = disk.read_bytes()
+            if (not md5 or hashlib.md5(b).hexdigest() == md5) and (not sha or hashlib.sha256(b).hexdigest() == sha):
+                raw, basis = b, "bundle on disk"
+        if raw is None:
+            try:
+                got = committed_bytes_for(path, md5=md5, sha256=sha)
+            except GitUnavailable as exc:
+                got, basis = None, f"git could not supply the version the record hashed: {exc}"
+            if got is not None:
+                raw, basis = got[0], f"git blob {got[1]['commit'][:12]}"
+            elif not basis:
+                basis = "no committed version of the bundle hashes to the record's"
+        if raw is None:
+            out = (None, basis)
+        else:
+            try:
+                built = manifest_from_bytes(raw, chunks.get("bundle_name") or Path(path).name, rule)
+            except (KeyError, TypeError, ValueError, UnicodeDecodeError) as exc:
+                built, basis = None, f"the recorded rule cannot chunk the bytes ({exc})"
+            if built is not None and chunks.get("chunk_count") is not None \
+                    and built.get("chunk_count") != chunks["chunk_count"]:
+                built, basis = None, "the recorded rule does not reproduce the recorded chunk count"
+            if built is not None and chunks.get("sha256") and \
+                    hashlib.sha256(dump_manifest(built).encode("utf-8")).hexdigest() != chunks["sha256"]:
+                built, basis = None, "the recorded rule does not reproduce the recorded manifest sha256"
+            out = ((dict(zip([c["id"] for c in built["chunks"]],
+                             chunk_texts(raw.decode("utf-8"), built["chunks"]))), basis)
+                   if built is not None else (None, basis))
+    _TEXTS_CACHE[key] = out
+    return out
