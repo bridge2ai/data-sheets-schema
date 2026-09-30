@@ -1478,13 +1478,55 @@ def test_an_absence_stated_as_absence_omits_or_unset_is_an_empty_slot_reason(fie
     "Held at 4 because was_derived_from and parent_datasets remain the gaps.",
     "Held at 4: the one gap is parent_datasets.",
     "Held at 4 because the dedicated provenance field is silent.",
+    "Held at 4 because the dedicated provenance field is therefore silent.",
+    "Held at 4 because parent_datasets is the only gap.",
+    "Held at 4: the three gaps are resources, variables and parent_datasets.",
+    "Held at 4: the four genuine absences are doi, variables and parent_datasets.",
 ])
 def test_an_absence_named_as_a_noun_or_state_is_an_empty_slot_reason(note):
     """#3544: committed evaluation text the vocabulary was not written
-    against says a slot is absent with these words; the gate reads them."""
+    against says a slot is absent in these forms; the gate reads them."""
     result = lint_q19(item(note=note))
     assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
         STATED, REPRESENTATION_ONLY, ["empty_slot"]), note
+
+
+_CREDIT = "was_derived_from links every release to its parent."
+
+
+@pytest.mark.parametrize("note, verdict, concerns", [
+    # A slot named as credit beside a gap in something else: main's gate
+    # drops the slot, and the bare words "gap" and "silent" re-admitted it.
+    (f"Held at 4 because errata are thin, a gap; {_CREDIT}", SUBSTANTIVE_ONLY, ["version_history"]),
+    (f"Held at 4 because errata leave gaps in the history; {_CREDIT}", SUBSTANTIVE_ONLY,
+     ["version_history"]),
+    (f"Held at 4 because the errata are silent on the Snellen removal; {_CREDIT}",
+     SUBSTANTIVE_ONLY, ["version_history"]),
+    (f"Held at 4 because errata are thin, a documentation gap; {_CREDIT}", SUBSTANTIVE_ONLY,
+     ["version_history"]),
+    (f"Held at 4 because two integrity gaps remain; {_CREDIT}", REASON_NOT_DETERMINED, []),
+    # A slot said to fill the gap is not absent.
+    ("Held at 4 because was_derived_from fills the gap.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because was_derived_from fills the one gap.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because related_datasets covers the one gap.", REASON_NOT_DETERMINED, []),
+])
+def test_a_gap_or_silence_about_something_else_licenses_no_slot(note, verdict, concerns):
+    """#3668: "gap" and "silent" as often name a concern other than a slot,
+    or a slot filling one, and the gate is sentence-level; main's reading
+    of each of these stands."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
+        STATED, verdict, concerns), note
+
+
+def test_a_named_absence_about_something_else_still_licenses_a_slot_as_absent_does():
+    """The documented residue (#3668): a named form in a clause about
+    something other than a slot licenses a slot the sentence names as
+    credit, exactly as main's "absent" does, because the gate is
+    sentence-level."""
+    for word in ("the one gap", "absent"):
+        result = lint_q19(item(note=f"Held at 4 because errata are {word}; {_CREDIT}"))
+        assert sorted(r.concern for r in result.reasons) == ["empty_slot", "version_history"], word
 
 
 @pytest.mark.parametrize("note", [
@@ -1730,6 +1772,47 @@ _UNRECOGNISED_PLACEMENTS = [
     "parent_datasets is arguably satisfied semantically",
 ]
 
+#: The rest of the hand-read sentences that are not credit or a description
+#: of a populated slot (#3669), by class: a fragment of each.
+_HAND_READ_NOT_CREDIT = {
+    # An absence the list does not recognise that is not a placement.
+    "unrecognised_absence": [
+        "5 of 6 creators unnamed in structured fields",
+        "parent_datasets logged as a low-severity completeness gap",
+    ],
+    # How many designated fields are populated, naming no absent slot.
+    "count": [
+        "Four of the five designated fields are populated and the guidance",
+        "Four of the five designated fields are populated with genuinely",
+    ],
+    # A criticism of what a populated slot holds.
+    "criticism": [
+        "Institutional attribution is contested in the structured fields themselves",
+        "Responsible-institution conflict is recorded but left unresolved",
+        "the structured field understates the standards landscape",
+        "FAIRhub data-entry error propagated into two structured slots",
+        "was_derived_from is present but as prose",
+    ],
+    # What was_derived_from records, rather than a parent dataset.
+    "qualification": [
+        "was_derived_from carries source-system provenance rather than",
+        "was_derived_from describes source systems rather than a parent dataset",
+        "was_derived_from points to clinical source systems rather than to datasets",
+        "was_derived_from records derivation from source clinical systems",
+    ],
+    # A slot's bare name, as a list item.
+    "bare_name": ["parent_datasets", "was_derived_from"],
+    # The criterion's definition.
+    "criterion": [
+        "Proportion of mandatory schema fields populated (id, title, description, keywords, "
+        "license, doi, page, creators, purposes, instances, resources, parent_datasets, "
+        "variables, confidentiality level)",
+        "Proportion of mandatory schema fields populated (id, title, description, keywords, "
+        "license, doi, page, creators, purposes, instances, resources, parent_datasets, "
+        "variables, confidentiality_level)",
+    ],
+}
+
 
 @pytest.mark.corpus
 def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
@@ -1737,9 +1820,10 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     133 committed ratings, every sentence naming a slot carries an
     `_EMPTINESS` word but two, which say the slot is populated. Outside
     them, in text the vocabulary was not written against, the sentences
-    naming a slot with no `_EMPTINESS` word are the 13 `_ABSENCE_NAMED`
-    ones, 121 recommendations, and 143 read by hand, of which the 16
-    placements above state an absence the list does not recognise."""
+    naming a slot with no `_EMPTINESS` word are the 11 an `_ABSENCE_NAMED`
+    form matches, 122 recommendations, and 144 read by hand: the 16
+    placements above, and the classes of `_HAND_READ_NOT_CREDIT`, each
+    pinned by a fragment; the other 111 are credit (#3669)."""
     from data_sheets_schema import q19_rationale_lint as lint
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
@@ -1779,14 +1863,36 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
         r"|capture|declare|convert|represent|reference|attach|list|map|split|clarify|name|keep"
         r"|resolve|attribute)\b", re.I)
     marked = [s for s in outside if lint._EMPTINESS.search(s)]
-    named = [s for s in outside if not lint._EMPTINESS.search(s) and lint._ABSENCE_NAMED.search(s)]
+    named = [s for s in outside if not lint._EMPTINESS.search(s) and lint._names_absence(s)]
     rest = [s for s in outside if not lint._says_empty(s)]
     recommendations = [s for s in rest if recommendation.match(s)]
-    assert (len(outside), len(marked), len(named), len(recommendations)) == (1046, 769, 13, 121)
+    assert (len(outside), len(marked), len(named), len(recommendations)) == (1046, 769, 11, 122)
     read = [s for s in rest if not recommendation.match(s)]
-    assert len(read) == 143
+    assert len(read) == 144
+    classified = []
     for fragment in _UNRECOGNISED_PLACEMENTS:
-        assert sum(fragment in s for s in read) == 1, fragment
-    # Every `_ABSENCE_NAMED` word has its evidence in the 13.
-    for word in ("absences", "absentee", "gap", "gaps", "silent"):
-        assert any(re.search(rf"\b{word}\b", s, re.I) for s in named), word
+        hits = [s for s in read if fragment in s]
+        assert len(hits) == 1, fragment
+        classified += hits
+    for kind, fragments in _HAND_READ_NOT_CREDIT.items():
+        for fragment in fragments:
+            # A bare name is the whole sentence; the others are part of one.
+            hits = [s for s in read if (s == fragment if kind == "bare_name" else fragment in s)]
+            assert len(hits) == 1, (kind, fragment)
+            classified += hits
+    assert len(set(classified)) == len(classified) == 33
+    # The bare words the forms narrowed (#3668): in the slot-naming text
+    # outside the Q19 fields without an `_EMPTINESS` word they occur 13
+    # times, each saying a slot is absent; the forms match 11 of them and
+    # no other sentence, and the two they leave are a recommendation and
+    # one of the absences above.
+    bare = re.compile(r"\b(?:absences|absentees?|gaps?|silent)\b", re.I)
+    worded = [s for s in outside if not lint._EMPTINESS.search(s) and bare.search(s)]
+    assert len(worded) == 13 and set(named) <= set(worded)
+    left = sorted(set(worded) - set(named))
+    assert [s[:24] for s in left] == ["Fill the structural gaps", "parent_datasets logged a"]
+    # Every alternative of `_ABSENCE_NAMED` has its evidence in the 11.
+    for form in (r"absentee", r"\b(?:two|three|four) (?:genuine )?absences",
+                 r"\b(?:two|three) gaps", r"the (?:one|only|sole) gap",
+                 r"remain the gaps", r"is therefore silent"):
+        assert any(re.search(form, s, re.I) for s in named), form

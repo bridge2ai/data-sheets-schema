@@ -231,14 +231,24 @@ sentence or label range, carries one of the words `_EMPTINESS` lists
 (#2982): "empty", "absent", "absence", "unpopulated", "unfilled",
 "unused", "unset", "blank", "null", "missing" (not "missing-data"),
 "omits"/"omitted", "lacks"/"lacking", "without", and the negations "no",
-"not", "none", "nor", "neither", "never", "nothing" and "n't"; and an
-absence named as a noun or a state (`_ABSENCE_NAMED`: "absences",
-"absentee(s)", "gap(s)", "silent"). "Held at 4 because errata are thin;
-was_derived_from links every release to its parent" gives no empty-slot
-reason. An absence stated in other words ("was_derived_from is left out")
-is not recognised, and the slot is then not read as a reason: the list is
+"not", "none", "nor", "neither", "never", "nothing" and "n't"; or an
+absence named as a noun or a state in one of the `_ABSENCE_NAMED` forms:
+"absentee(s)", a counted "two absences" or "three gaps", "the one (only,
+sole) gap", "remain the gaps", "is silent" (not "silent on …"), and not a
+gap a slot is said to fill, close or cover. "Held at 4 because errata are
+thin; was_derived_from links every release to its parent" gives no
+empty-slot reason, and neither does it with "errata leave gaps in the
+history" or "errata are silent on the Snellen removal" in place of "errata
+are thin" (#3668): the bare words "gap" and "silent" name other concerns as
+often as an absent slot. A named form in a clause about something other
+than a slot still licenses a slot the sentence names as credit ("errata
+are the one gap; was_derived_from links …"), as "absent" does ("errata are
+absent; was_derived_from links …"): the gate is sentence-level (below).
+An absence stated in other words ("was_derived_from is left out") is not
+recognised, and the slot is then not read as a reason: the list is
 closed, as `_FINITE` is. Its recall was measured on 2026-09-30 at
-badb4eedd (#3544). In-sample it misses nothing: of the 121 sentences in
+badb4eedd (#3544), and the partition below restated after #3668 narrowed
+the named forms. In-sample it misses nothing: of the 121 sentences in
 the Q19 fields of the 133 committed ratings that name a slot, 119 carry
 an `_EMPTINESS` word, and the other two say the slot is populated
 (CHORUS 2026-09-04f API rep1's "was_derived_from is explicit rather than
@@ -248,27 +258,43 @@ vocabulary was written against those fields, so the measure is the text
 it was not written against: the 1,046 distinct sentences outside them
 that name a slot, anywhere in the committed evaluation outputs (other
 rubric20 questions, rubric10 semantic). Of those, 769 carry an
-`_EMPTINESS` word; 13 state an absence as a noun or a state, each naming
-a slot that is absent, and those words are the `_ABSENCE_NAMED` list;
-121 open with an imperative, recommendations ("Populate was_derived_from
-…", "Mirror … into parent_datasets") that state no absence; and of the
-other 143, read by hand, 16 say a slot is unused by saying where its
-content is instead ("derivation in related_datasets rather than
-was_derived_from", "four is_new_version_of related_datasets stand in for
-parent_datasets", "recorded outside the derivation slots", "covered by
-semantic equivalents: parent_datasets by …"). Those 16 are not
-recognised, and no word marks them: "rather than" and "instead" as often
-say a slot is used ("was_derived_from is explicit rather than implied",
-the credit the gate was written to drop). Two more say how many of the
-designated fields are populated ("Four of the five …") and name no absent
-slot; the rest are credit. So on text it was not written against the
-list misses 16 sentences, all of them placements; before the
-`_ABSENCE_NAMED` words, which were taken from the 13, it missed 29. That
-is no held-out figure for those four words. It bounds the
-misses, not a recall ratio: which of the 769 carry their word about the
-slot, rather than a negation about something else, was not read.
-Recognising a placement needs the gate to tell a slot named as
-unused from one named as credit, which a word list cannot. The
+`_EMPTINESS` word. 13 carry none but "absences", "absentee", "gap(s)" or
+"silent", and each of the 13 says a slot is absent; the `_ABSENCE_NAMED`
+forms were written against them and match 11 (so that is no held-out
+figure for them), and no other of the 1,046. The two they do not match
+are "Fill the structural gaps: … populate discouraged_uses,
+parent_datasets …", a recommendation, and "parent_datasets logged as a
+low-severity completeness gap", an absence they miss. 122 open with an
+imperative, recommendations ("Populate was_derived_from …", "Mirror …
+into parent_datasets") that state no absence. The other 144 were read by
+hand. 16 say a slot is unused by saying where its content is instead
+("derivation in related_datasets rather than was_derived_from", "four
+is_new_version_of related_datasets stand in for parent_datasets",
+"recorded outside the derivation slots", "covered by semantic
+equivalents: parent_datasets by …"). No word marks them: "rather than"
+and "instead" as often say a slot is used ("was_derived_from is explicit
+rather than implied", the credit the gate was written to drop). Two more
+state an absence the list does not recognise and are not placements: the
+completeness gap above, and "5 of 6 creators unnamed in structured
+fields". Two say how many of the designated fields are populated ("Four
+of the five …") and name no absent slot. Five criticise what a populated
+slot holds ("Institutional attribution is contested in the structured
+fields themselves", "left unresolved in the structured slots", "the
+structured field understates the standards landscape", "a FAIRhub
+data-entry error propagated into two structured slots", "was_derived_from
+is present but as prose … rather than an identifier"); four say what
+was_derived_from records rather than a parent dataset ("describes source
+systems rather than a parent dataset"); two are a slot's bare name, as a
+list item; two define the criterion ("Proportion of mandatory schema
+fields populated (…)"). The other 111 credit a slot or describe one that
+is populated. These classes are pinned by a fragment of each sentence in
+the test, apart from the 111. So on text it was not written against the
+list misses 18 sentences, 16 of them placements; before the
+`_ABSENCE_NAMED` forms it missed 29. It bounds the misses, not a recall
+ratio: which of the 769 carry their word about the slot, rather than a
+negation about something else, was not read. Recognising a placement
+needs the gate to tell a slot named as unused from one named as credit,
+which a word list cannot. The
 requirement is sentence-level, not clause-level, because 10 of the 88
 empty-slot reasons read from the 133 committed ratings name the slot in a
 list or parenthesis whose emptiness a neighbouring clause of the same
@@ -496,21 +522,48 @@ _EMPTINESS = re.compile(
     r"|neither|never|nothing|without|lacks?|lacking|lacked|omits?|omitted|omitting)\b"
     r"|\bmissing\b(?![-_ ]data)|n't\b", _I)
 #: Absence named as a noun or a state rather than by an `_EMPTINESS` word,
-#: each found saying a slot is absent in committed evaluation text the
-#: vocabulary was not written against (other rubric20 questions and the
-#: rubric10 semantic outputs; #3544): "two absences: resources, and
-#: parent_datasets", "parent_datasets is the sole absentee", "doi,
-#: variables, resources and parent_datasets remain the gaps", "The one
-#: gap, parent_datasets, …", "The dedicated provenance field is therefore
-#: silent". The gate reads them with `_EMPTINESS` (`_says_empty`); what text
-#: is read (`_outer_item`) does not, so they choose nothing read.
-_ABSENCE_NAMED = re.compile(r"\b(?:absences|absentees?|gaps?|silent)\b", _I)
+#: in the forms committed evaluation text the vocabulary was not written
+#: against (other rubric20 questions and the rubric10 semantic outputs;
+#: #3544) uses to say that listed slots are absent: "two absences:
+#: resources, and parent_datasets", "the four genuine absences (doi, …)",
+#: "parent_datasets is the sole absentee", "doi, variables, resources and
+#: parent_datasets remain the gaps", "The one gap, parent_datasets, …",
+#: "parent_datasets is the only gap", "The dedicated provenance field is
+#: therefore silent". Not the bare words: "gap" and "silent" as often name
+#: a concern other than a slot ("errata leave gaps in the history", "the
+#: errata are silent on the Snellen removal", "two integrity gaps", "a
+#: placement choice rather than a content gap") or a slot that fills one
+#: ("was_derived_from fills the gap"), and the gate is sentence-level, so
+#: such a sentence would read a slot it names as credit as a reason
+#: (#3668). A counted or sole gap is one about listed things; one a slot
+#: fills, closes, bridges, covers or addresses is not an absence
+#: (`_names_absence`). The gate reads them with `_EMPTINESS`
+#: (`_says_empty`); what text is read (`_outer_item`) does not, so they
+#: choose nothing read.
+_ABSENCE_NAMED = re.compile(
+    r"\babsentees?\b"
+    r"|\b(?:one|two|three|four|five|six|seven|eight|nine|ten|[1-9]\d*)"
+    r"\s+(?:(?:genuine|real|remaining)\s+)?(?:absences|gaps)\b"
+    r"|\bthe\s+(?:one|only|sole|single|remaining)\s+gap\b"
+    r"|\bremains?\s+the\s+gaps?\b"
+    r"|\b(?:is|are|remains?|stays?)\s+(?:\w+\s+)?silent\b"
+    r"(?!\s+(?:on|about|regarding|as\s+to|over)\b)", _I)
+#: A gap a slot closes rather than leaves: "was_derived_from fills the one
+#: gap".
+_GAP_CLOSED = re.compile(r"\b(?:fill|clos|bridg|cover|address|plug)\w*\s+$", _I)
+
+
+def _names_absence(text: str) -> bool:
+    """Whether `text` names an absence in an `_ABSENCE_NAMED` form that no
+    slot is said to close (`_GAP_CLOSED`)."""
+    return any(not _GAP_CLOSED.search(text[:m.start()])
+               for m in _ABSENCE_NAMED.finditer(text))
 
 
 def _says_empty(text: str) -> bool:
     """Whether `text` says something is empty or absent, for the #2982
-    empty-slot gate: an `_EMPTINESS` word or an `_ABSENCE_NAMED` one."""
-    return bool(_EMPTINESS.search(text) or _ABSENCE_NAMED.search(text))
+    empty-slot gate: an `_EMPTINESS` word or an `_ABSENCE_NAMED` form."""
+    return bool(_EMPTINESS.search(text)) or _names_absence(text)
 
 
 #: What divides a sentence's credit from its gap: "… is recoverable from
