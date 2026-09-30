@@ -251,7 +251,7 @@ measure is the text it was not written against: the 1,046 distinct
 sentences outside them that name a slot, anywhere in the committed
 evaluation outputs (other rubric20 questions, rubric10 semantic). Of
 those, 769 carry an `_EMPTINESS` word; 277 carry none, and all 277 were
-read by hand. 89 of them state an absence the list misses. 122 of the 277
+read by hand. 93 of them state an absence the list misses. 122 of the 277
 open with one of a list of imperative verbs ("Populate was_derived_from
 …", "Mirror … into parent_datasets") and are counted apart below (#3747).
 The other 155 hold 29 of the misses:
@@ -289,9 +289,9 @@ fields populated (…)"); the other 111 credit a slot or describe one that
 is populated. Every class but the 111 is pinned by a fragment of each
 sentence in the test.
 
-The 122 recommendations hold the other 60 misses. Each is classed by an
+The 122 recommendations hold the other 64 misses. Each is classed by an
 ordered test, and the first question it answers yes to decides its class
-(#3829). A recommendation's imperative is never itself the answer: a
+(#3829, #3836). A recommendation's imperative is never itself the answer: a
 sentence is read for what it says beside the imperative, and against its
 own rating.
 
@@ -299,14 +299,19 @@ own rating.
    (1): "Fill the structural gaps: … populate discouraged_uses,
    parent_datasets and compression".
 2. Does it say where a slot's content is instead: in another slot, a
-   relation, prose, notes or a file? A placement (59): "the ancestry that
+   relation, prose, notes or a file? A placement (63): "the ancestry that
    related_datasets currently holds alone", "Populate the dedicated slots
    that currently hold their content elsewhere: download_url …", "the
    negative findings currently buried in notes", "the predecessor release
    DOIs already present in related_datasets", "in addition to the
    related_datasets typed links", "rather than only related_datasets
    prose", "from the is_new_version_of relations", "the RO-Crate/FAIRscape
-   provenance shipped with the release".
+   provenance shipped with the release", "reference its sub-crate
+   derivation edges from was_derived_from, converting the prose lineage",
+   "the full five-release chain already listed in version_access", "rather
+   than inferring derivation from filenames". The step does not ask whether
+   the slot is empty, nor whether the sentence also objects to a value:
+   the last three object to one, and are placements all the same.
    These two are misses. They are asked first, so a sentence that states
    an absence is a miss whatever else it asks for.
 3. Does it name a populated value and object to it? Both parts must hold:
@@ -322,22 +327,21 @@ own rating.
       deduction, warning or quality note says the value is wrong or lacks
       what the sentence asks for. A fault found with another slot's
       absence does not count.
-   If so, a criticism (22): "keep the alternative reading in source_caveats
-   rather than in the structured slot"; "consider a value nearer the
-   sources' meaning" for a populated confidentiality_level; three name
-   was_derived_from, which their ratings quote as holding the study's name
+   If so, a criticism (18): "keep the alternative reading in source_caveats
+   rather than in the structured slot"; two ask which statement governs a
+   populated is_deidentified.method; "consider a value nearer the sources'
+   meaning" for a populated confidentiality_level; one names
+   was_derived_from, which its rating quotes as holding the study's name
    in prose; three ask for the name "FAIRhub" where publisher holds a URL;
    one asks the citation to say that the RRID it carries names the
-   repository; one asks for "the full five-release chain" in a
-   related_datasets faulted for naming one predecessor; "add at least one
-   more keyword" to 7; "an expanded variables list" where variables holds
-   four columns; versions for tools that preprocessing_strategies names
-   without them (two sentences); "a conflicts-of-interest statement under
-   ethical_reviews"; the processing pipeline that a one-entry
-   preprocessing_strategies leaves unnamed; character encoding on the
-   listed text formats; a was_generated_by on each listed file_collection;
-   which listed archive carries the RO-Crate that conforms_to claims; an
-   attribution for the byte residual that source_caveats discloses.
+   repository; "add at least one more keyword" to 7; "an expanded
+   variables list" where variables holds four columns; versions for tools
+   that preprocessing_strategies names without them (two sentences); "a
+   conflicts-of-interest statement under ethical_reviews"; character
+   encoding on the listed text formats; a was_generated_by on each listed
+   file_collection; which listed archive carries the RO-Crate that
+   conforms_to claims; an attribution for the byte residual that
+   source_caveats discloses.
 4. Otherwise it is a request (40): the imperative names a slot to fill
    ("Add was_derived_from field for provenance chain", "Mirror the
    predecessors into parent_datasets/was_derived_from …"). Requests are
@@ -346,7 +350,7 @@ own rating.
    Whether the gate should read a request as an absence is part of #3544.
 
 Every one of the 122 is pinned by a fragment to its class in the test.
-The 89 are a count, not a recall ratio: which of the 769 carry their word
+The 93 are a count, not a recall ratio: which of the 769 carry their word
 about the slot, rather than a negation about something else, was not
 read.
 

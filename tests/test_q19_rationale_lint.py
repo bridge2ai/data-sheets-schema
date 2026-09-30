@@ -1999,18 +1999,43 @@ _RECOMMENDATIONS_READ = {
         # in the RO-Crate/FAIRscape package shipped with the release, a file,
         # as the FAIRSCAPE sentence above does; their rating says a
         # machine-readable provenance representation exists in the release
-        # (#3808). "Rather than inferring derivation from filenames", in a
-        # criticism below, says how a reader infers derivation, not where the
-        # slot's content is held, so it is not a placement (step 2).
+        # (#3808).
         "provenance already packaged with the release",
         "provenance shipped with the release",
+        # Pinned as criticisms until review round 4 (#3836) re-asked step 2
+        # of every criticism and request before step 3. Each says where the
+        # content is, which step 2 asks first, so each is a placement
+        # whatever it also objects to:
+        # - the two FAIRSCAPE sentences of AI_READI v8 rep2 rating 1 put the
+        #   derivation edges in the RO-Crate's sub-crates, a file, which
+        #   was_derived_from is to reference; the second also calls the
+        #   lineage "the prose lineage", and its rating's issues_detected[7]
+        #   and weaknesses[4] say provenance is "distributed across prose
+        #   fields". That was_derived_from holds the study's name in prose,
+        #   the reason they were criticisms, is a step-3 reason;
+        # - "already listed in version_access" says where the four releases
+        #   related_datasets lacks are, the form of "already named in
+        #   related_datasets" above. Its rating's objection to the one
+        #   predecessor related_datasets holds (#3820) is a step-3 reason;
+        # - "rather than inferring derivation from filenames" says the
+        #   derivation is held as an inference from the archive names, the
+        #   form of "rather than inferable from prose" above; its rating says
+        #   preprocessing_strategies carries the atlas-from-raw derivation
+        #   "Inferred from the paired archive names" and "the linkage lives
+        #   in prose and in filename parallelism". Until this round it was
+        #   read as saying how a reader infers derivation rather than where
+        #   the content is (#3808), which the two pins above contradict.
+        "reference its per-sub-crate derivation edges from was_derived_from",
+        "reference its sub-crate derivation edges from was_derived_from, converting the prose lineage",
+        "extend related_datasets to the full five-release chain already listed in version_access",
+        "rather than inferring derivation from filenames",
     ],
     # A criticism: step 3 of the ordered test in the module docstring. The
     # sentence names a value the record holds and asks for it to be
     # different or for more of it, and its own rating objects to that value
     # in that respect (#3808, #3819, #3829). was_derived_from holds the
-    # study's name in prose in the two AI_READI ratings the first three come
-    # from, as their own evidence quotes; the next four are about a populated
+    # study's name in prose in the AI_READI rating the first comes from, as
+    # its own evidence quotes; the next four are about a populated
     # method, institution or confidentiality level, the last of them asking
     # for a different value of confidentiality_level, which its rating says
     # is 'restricted' where the sources give 'HL7:2N' (#3808). In the three
@@ -2020,11 +2045,21 @@ _RECOMMENDATIONS_READ = {
     # holds RRID:SCR_007345, which its rating says identifies PhysioNet and
     # not the dataset, and the sentence asks for the citation to say so;
     # "Keep the RRID in the citation as published", a placement above, keeps
-    # the value. related_datasets holds one is_new_version_of link, which its
-    # rating criticises as "only one predecessor rather than the five listed
-    # in version_access"; the sentence asks for the full chain (#3820).
+    # the value. The FAIRSCAPE, five-release-chain and filename sentences
+    # were criticisms here until review round 4 moved them to placement
+    # (#3836): step 2 is asked before step 3. The same round re-asked steps
+    # 1 and 2 of every criticism and request; these stayed, because each
+    # says where content is to go, not where a slot's content is now:
+    # "keeping the study-name prose in notes" (the value was_derived_from
+    # holds, moving to notes), "keep the alternative reading in
+    # source_caveats" and "keeping the divergent platform and RO-Crate
+    # values in the details prose" (alternatives to a populated slot's
+    # value, not its content held elsewhere), and "state whether the
+    # shipped RO-Crate provenance graphs carry per-modality processing
+    # parameters", which asks whether a file holds something, where "the
+    # sub-crate derivation edges" says it does.
     #
-    # The last ten were pinned as requests until the ordered test was
+    # The last nine were pinned as requests until the ordered test was
     # applied to every sentence that reaches it (#3829). In each, beside the
     # slots it asks to fill, the sentence asks for more of a value its rating
     # says is populated and faults in that respect:
@@ -2044,8 +2079,6 @@ _RECOMMENDATIONS_READ = {
     #   RO-Crate provenance graph, and the rating says no listed archive is
     #   stated to carry it;
     # - variables holds four columns ("enumerates only four columns");
-    # - preprocessing_strategies has one entry, and the rating says "No
-    #   alignment tool, guide-assignment method, QC threshold ... is named";
     # - the text formats are listed with no encoding, which the rating
     #   records as a warning;
     # - file_collections lists ten collections, and the rating says "no
@@ -2053,9 +2086,7 @@ _RECOMMENDATIONS_READ = {
     # A criticism is not a miss: it says what a populated slot holds, not
     # that a slot is empty.
     "criticism": [
-        "reference its per-sub-crate derivation edges from was_derived_from",
         "set was_derived_from to the same identifier, keeping the study-name prose in notes",
-        "reference its sub-crate derivation edges from was_derived_from, converting the prose lineage",
         "keep the alternative reading in source_caveats rather than in the structured slot",
         "keeping the divergent platform and RO-Crate values in the details prose",
         "rather than asserting a method in the structured slot that the platform metadata contradicts",
@@ -2064,7 +2095,6 @@ _RECOMMENDATIONS_READ = {
         "Populate confidentiality_level ('HL7:2N'), parent_datasets/was_derived_from",
         "Populate data_protection_impacts (truthful status)",
         "Clarify in the citation or a dedicated field",
-        "Add was_derived_from or parent_datasets links",
         "a conflicts-of-interest statement under ethical_reviews",
         "Add tool versions (b2aiprep, openSMILE, sparc, ppgs, Whisper)",
         "Add versions and URLs for sparc, openSMILE, Praat, Parselmouth, ppgs and Whisper",
@@ -2072,7 +2102,6 @@ _RECOMMENDATIONS_READ = {
         "add at least one more keyword",
         "name the archive carrying the RO-Crate descriptor and provenance graph",
         "alongside an expanded variables list covering the principal phenotype columns",
-        "document the actual processing pipeline (alignment, guide assignment, QC thresholds)",
         "State character encoding (presumably UTF-8) on the text formats",
         "give each file_collection a was_generated_by link",
     ],
@@ -2106,6 +2135,10 @@ _RECOMMENDATIONS_READ = {
     #   empty was_derived_from; "record the Snellen change as an erratum",
     #   whose ratings fault the empty errata, not the known_limitations
     #   entry that holds the change.
+    # Review round 4 re-asked steps 1 and 2 of all 40 (#3836). None names an
+    # absence, and none says where the content of a slot it asks to fill is
+    # now: "the RO-Crate lineage" is to become a graph of its own, as above,
+    # not what the parent_datasets/was_derived_from it asks for are to hold.
     "request": [
         "Add explicit deidentification method",
         "Add parent_datasets field linking to Bridge2AI",
@@ -2168,10 +2201,11 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     above, and the two of `_HAND_READ_NOT_CREDIT`), the other classes of
     `_HAND_READ_NOT_CREDIT`, each pinned by a fragment, and 111 that are
     credit (#3669); and 122 a leading-verb regex sorts as recommendations,
-    read by hand too (#3747): 60 more misses (a named absence and 59
-    placements), 22 criticisms and 40 requests, each pinned by a fragment
+    read by hand too (#3747): 64 more misses (a named absence and 63
+    placements), 18 criticisms and 40 requests, each pinned by a fragment
     in `_RECOMMENDATIONS_READ` to the class the module docstring's ordered
-    test gives it (#3829). 89 of the 277 state an absence the list misses.
+    test gives it (#3829, #3836). 93 of the 277 state an absence the list
+    misses.
     The list is main's; this measures it and changes nothing (#3544)."""
     from data_sheets_schema import q19_rationale_lint as lint
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
@@ -2227,9 +2261,9 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
             assert hits[0] not in sorted_, (kind, fragment)
             sorted_[hits[0]] = kind
     assert set(sorted_) == set(recommendations)
-    assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 59, "criticism": 22,
+    assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 63, "criticism": 18,
                                          "request": 40}
-    # The 60 misses are misses: in a Q19 note the gate reads none of them
+    # The 64 misses are misses: in a Q19 note the gate reads none of them
     # as an empty-slot reason, as on main.
     for sentence, kind in sorted_.items():
         if kind in ("named_absence", "placement"):
