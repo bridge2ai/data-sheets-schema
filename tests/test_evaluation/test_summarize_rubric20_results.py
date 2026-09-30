@@ -28,9 +28,9 @@ CATEGORY_SCORES = {"Structural Completeness": [5, 4, 3, 5, 1],
                    "FAIRness & Accessibility": [4, 2, 5, 5, 1]}
 
 
-def _categories():
+def _categories(category_scores=CATEGORY_SCORES):
     categories, qid = [], 1
-    for name, scores in CATEGORY_SCORES.items():
+    for name, scores in category_scores.items():
         questions = []
         for score in scores:
             maximum = 1 if qid % 5 == 0 else 5
@@ -44,8 +44,9 @@ def _categories():
     return categories
 
 
-def _evaluation(project, d4d_file, shape, kind="concatenated"):
-    categories = _categories()
+def _evaluation(project, d4d_file, shape, kind="concatenated",
+                category_scores=CATEGORY_SCORES):
+    categories = _categories(category_scores)
     total = sum(c["category_score"] for c in categories)
     doc = {"rubric": "rubric20", "version": "1.0", "project": project,
            "method": "claudecode_agent", "d4d_file": d4d_file, "evaluation_type": kind,
@@ -135,8 +136,37 @@ def test_a_category_the_summary_cannot_address_is_refused(damage, message):
         mod.categories_by_name(doc)
 
 
+def test_the_detailed_report_pools_the_list_shaped_categories(out_dir):
+    """The Category Performance averages count the list-shaped record (#3660).
+
+    The two records carry different scores, so dropping either one moves
+    every category's pooled average off the mean of the two.
+    """
+    other = {name: [max(s - 1, 0) for s in scores]
+             for name, scores in CATEGORY_SCORES.items()}
+    _run_all([_evaluation("AI_READI", "a/AI_READI_d4d.yaml", "mapping"),
+              _evaluation("VOICE", "a/VOICE_d4d.yaml", "list", category_scores=other)])
+    report = (out_dir / "summary_report.md").read_text()
+    for name, scores in CATEGORY_SCORES.items():
+        pooled = (sum(scores) + sum(other[name])) / 2
+        assert pooled not in (float(sum(scores)), float(sum(other[name])))
+        assert f"### {name}\n- Average score: {pooled:.1f}\n" in report
+
+
 def test_the_top_level_questions_win_where_both_are_listed():
     doc = _evaluation("P", "p.yaml", "mapping")
-    assert [q["id"] for q in mod.questions_of(doc)] == list(range(1, 21))
+    # Make the top-level copies differ from the category copies, so the
+    # choice between the two lists is visible, not only double counting.
+    doc["questions"] = [dict(q, score=0, name=f"top-level {q['id']}")
+                        for q in doc["questions"]]
+    questions = mod.questions_of(doc)
+    assert [q["id"] for q in questions] == list(range(1, 21))
+    assert [q["name"] for q in questions] == [f"top-level {i}" for i in range(1, 21)]
+    assert all(q["score"] == 0 for q in questions)
+    # A question listed only under a category is not read where a top-level
+    # list exists (the difference from item_scores() the docstring names).
+    doc["categories"]["Structural Completeness"]["questions"].append(
+        {"id": 21, "name": "category only", "score": 5, "max_score": 5})
+    assert 21 not in [q["id"] for q in mod.questions_of(doc)]
     listed = _evaluation("P", "p.yaml", "list")
     assert [q["id"] for q in mod.questions_of(listed)] == list(range(1, 21))

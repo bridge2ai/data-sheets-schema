@@ -86,8 +86,16 @@ def questions_of(result: Dict) -> List[Dict]:
 
     The hybrid evaluator lists them at the top level and again under their
     category; the list-shaped evaluations only under their category (#3524).
-    The top-level list wins where there is one, so no question is counted
-    twice, as `item_scores()` reads them.
+    Where there is a top-level list it is read alone, as this summary always
+    read the mapping-shaped evaluations, so their output is unchanged and no
+    question is counted twice; the category lists are read only where there
+    is no top-level list.
+
+    This is not how `semantic_comparison.item_scores()` resolves the two
+    copies: it reads the union keyed on question id, so where both copies
+    of a question exist the category copy wins, and a question listed only
+    under a category is kept. The two agree whenever the copies agree, as
+    they do in every mapping-shaped evaluation committed at #3524 (#3661).
     """
     if result.get('questions'):
         return list(result['questions'])
