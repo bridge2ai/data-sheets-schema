@@ -13,6 +13,7 @@ import importlib.util
 import io
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -777,6 +778,84 @@ class DigestMeasurement(CorpusFixture, unittest.TestCase):
         md = self._note(self._measure())
         self.assertIn(f"Renders that show `Software` or a key of it: `{self.commit[:10]}` (license, url, version).", md)
         self.assertNotIn("is named only", md)
+
+    def _recommit_digest(self, digest):
+        import subprocess
+        self.digest = digest
+        (self.repo / "src" / "data_sheets_schema" / "schema_digest.py").write_text(
+            f"def digest_text(class_name):\n    return {self.digest!r}\n", encoding="utf-8")
+        _git(self.repo, "commit", "-qam", "another digest")
+        self.commit = subprocess.run(["git", "-C", str(self.repo), "rev-parse", "HEAD"], check=True,
+                                     capture_output=True, text=True).stdout.strip()
+        self.md5 = hashlib.md5(self.digest.encode()).hexdigest()
+
+    def test_named_only_in_the_preamble_is_claimed_only_where_every_render_says_so(self):
+        # #3733: no Software entry, but `used_software` is named outside the
+        # preamble's range line, which this digest does not carry.
+        self._recommit_digest("# Target class `Dataset`\n\n"
+                              "- **Tooling** — required: none\n    - also accepts: `used_software`\n")
+        self._pin("claudecode_api", "M_rep1", "P", self.md5)
+        dig = self._measure()
+        self.assertEqual((dig["renders"][0]["in_universal_ranges"], dig["renders"][0]["used_software_mentions"]),
+                         (False, 1))
+        md = self._note(dig)
+        self.assertNotIn("is named only", md)
+        self.assertIn("In all 1 reproduced renders (1 distinct digests), `Software` has no entry and", md)
+        self.assertIn("no key of `Software` is shown (`used_software` is not named only in the object-ranges", md)
+        # Two mentions, one of them the preamble's and no heading: not "named only" either.
+        self._recommit_digest("# Target class `Dataset`\n\n" + PREAMBLE + TOOLS
+                              + "- **Tooling** — required: none\n    - also accepts: `used_software`\n")
+        self._pin("claudecode_api", "M_rep1", "P", self.md5)
+        dig = self._measure()
+        r = dig["renders"][0]
+        self.assertEqual((r["in_universal_ranges"], r["used_software_mentions"], r["own_slot_heading"],
+                          r["software_entry"]), (True, 2, False, False))
+        md = self._note(dig)
+        self.assertNotIn("is named only", md)
+        self.assertIn("no key of `Software` is shown (`used_software` is not named only in the object-ranges", md)
+
+    def test_a_prompt_whose_bytes_changed_at_the_commit_is_not_counted(self):
+        # #3734/#3736: the record hashed other bytes than the commit holds.
+        self._record("claudecode_api", "M_rep1", "P", {}, provenance={
+            "schema": {"digest_md5": self.md5}, "repo": {"commit": self.commit},
+            "model": {"agent_runtime": "Claude API (direct)"},
+            "prompts": {"files": [{"path": "src/download/prompts/arm.md", "sha256": "f" * 64},
+                                  {"path": "src/download/prompts/gone.md", "sha256": "e" * 64}]}})
+        dig = self._measure()
+        self.assertEqual([(p["path"], p["at_commit"], p["names_used_software"]) for p in dig["prompts"]],
+                         [("src/download/prompts/arm.md", False, True), ("src/download/prompts/gone.md", None, None)])
+        md = self._note(dig)
+        # The file names used_software, but not in the bytes the record read.
+        self.assertIn("| Arm two | Claude API (direct) | 1 | `" + self.md5[:8] + "` | 1 | 1 of 1 | 1 | no | no "
+                      "| none | – | 0 |", md)
+        self.assertIn("(`–`: no record in the arm hashed a prompt file whose bytes\n"
+                      "reproduce at its commit, either because it hashes none or because none it hashed does)", md)
+
+    def test_a_render_from_another_copy_of_the_package_is_refused(self):
+        # #3735: an interpreter that finds `data_sheets_schema` somewhere
+        # other than the archive (as an editable install would) must not
+        # answer for the commit's code.
+        import stat
+        import subprocess
+        shadow = self.dir / "shadow" / "data_sheets_schema"
+        shadow.mkdir(parents=True)
+        (shadow / "__init__.py").write_text("", encoding="utf-8")
+        (shadow / "schema_digest.py").write_text("def digest_text(c):\n    return 'the shadow copy'\n",
+                                                 encoding="utf-8")
+        wrapper = self.dir / "shadowed_python"
+        wrapper.write_text(f"#!/bin/sh\nPYTHONPATH={shadow.parent}:$PYTHONPATH exec {sys.executable} \"$@\"\n",
+                           encoding="utf-8")
+        wrapper.chmod(wrapper.stat().st_mode | stat.S_IXUSR)
+        with self.assertRaises(subprocess.CalledProcessError) as caught:
+            self.m.render_at(self.commit, self.repo, python=str(wrapper))
+        self.assertIn(b"AssertionError", caught.exception.stderr)
+        self.assertIn(str(shadow).encode(), caught.exception.stderr)
+        self._pin("claudecode_agent", "L_rep1", "P", self.md5)
+        [r] = self._measure(python=str(wrapper))["renders"]
+        self.assertFalse(r["reproduced"])
+        self.assertIn("AssertionError", r["error"])
+        # The unshadowed interpreter renders the commit's own digest.
+        self.assertEqual(self.m.render_at(self.commit, self.repo), self.digest)
 
     def test_a_malformed_measurement_is_refused(self):
         self._pin("claudecode_agent", "L_rep1", "P", self.md5)

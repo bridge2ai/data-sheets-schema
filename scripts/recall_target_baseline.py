@@ -1068,9 +1068,10 @@ def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
         "below: … used_software is Software[]`), whether it has its own slot heading, and whether",
         "`Software` has an object-ranges entry and which keys that entry names. **prompt names",
         "used_software** is over the prompt files the records hashed, read at their commit where the",
-        "bytes still hash to the record's (`–`: the record hashes no prompt file). The agentic arms",
-        "pin a digest too, but their playbook names the merged schema file as the structural source,",
-        "so the digest is not the only schema text they read.", "",
+        "bytes still hash to the record's (`–`: no record in the arm hashed a prompt file whose bytes",
+        "reproduce at its commit, either because it hashes none or because none it hashed does). The",
+        "agentic arms pin a digest too, but their playbook names the merged schema file as the",
+        "structural source, so the digest is not the only schema text they read.", "",
         "| arm | runtime | records | digest md5 | commits | reproduced | used_software mentions "
         "| own slot heading | Software entry | Software keys shown | prompt names used_software | used_software entries |",
         "|---|---|---:|---|---:|---|---|---|---|---|---|---:|",
@@ -1127,10 +1128,22 @@ def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
                  + ("; ".join(f"`{p}`" for p in unmeasured) if unmeasured else "none") + ".")
     distinct = sorted({m["digest_md5"] for m in ok})
     lines.append("")
-    if ok and not any(m["software_entry"] or m["own_slot_heading"] for m in ok):
+    shows = [m for m in ok if m["software_entry"] or m["software_keys"] or m["own_slot_heading"]]
+    if ok and not shows:
+        # "Named only in the preamble" is claimed only where every render says
+        # so: one mention, and that mention the preamble's range line (#3733).
+        if all(m["in_universal_ranges"] and m["used_software_mentions"] == 1 for m in ok):
+            lines += [
+                f"In all {len(ok)} reproduced renders ({len(distinct)} distinct digests), `used_software` is named only",
+                "in the object-ranges preamble, `Software` has no entry, and no key of `Software` is shown:",
+            ]
+        else:
+            lines += [
+                f"In all {len(ok)} reproduced renders ({len(distinct)} distinct digests), `Software` has no entry and",
+                "no key of `Software` is shown (`used_software` is not named only in the object-ranges",
+                "preamble in every one; the per-render table says where it is):",
+            ]
         lines += [
-            f"In all {len(ok)} reproduced renders ({len(distinct)} distinct digests), `used_software` is named only",
-            "in the object-ranges preamble, `Software` has no entry, and no key of `Software` is shown:",
             "no digest any arm pinned tells the model that a `Software` takes a `name` and a `version`.",
             "A recall rule that asks the API path for versioned software asks for a shape its digest",
             "does not show. Showing it is a digest change: `schema_digest.py` is pinned, and the change",
@@ -1142,7 +1155,7 @@ def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
     elif ok:
         lines.append(f"Renders that show `Software` or a key of it: "
                      + "; ".join(f"`{m['commit'][:10]}` ({', '.join(m['software_keys']) or 'entry, no keys'})"
-                                 for m in ok if m["software_entry"] or m["software_keys"] or m["own_slot_heading"]) + ".")
+                                 for m in shows) + ".")
     else:
         lines.append("No render reproduces its record's md5, so nothing here says what any arm was shown.")
     return lines

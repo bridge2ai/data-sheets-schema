@@ -328,9 +328,10 @@ evidence only where its md5 **reproduces** the pinned one. Read off each render:
 below: … used_software is Software[]`), whether it has its own slot heading, and whether
 `Software` has an object-ranges entry and which keys that entry names. **prompt names
 used_software** is over the prompt files the records hashed, read at their commit where the
-bytes still hash to the record's (`–`: the record hashes no prompt file). The agentic arms
-pin a digest too, but their playbook names the merged schema file as the structural source,
-so the digest is not the only schema text they read.
+bytes still hash to the record's (`–`: no record in the arm hashed a prompt file whose bytes
+reproduce at its commit, either because it hashes none or because none it hashed does). The
+agentic arms pin a digest too, but their playbook names the merged schema file as the
+structural source, so the digest is not the only schema text they read.
 
 | arm | runtime | records | digest md5 | commits | reproduced | used_software mentions | own slot heading | Software entry | Software keys shown | prompt names used_software | used_software entries |
 |---|---|---:|---|---:|---|---|---|---|---|---|---:|
