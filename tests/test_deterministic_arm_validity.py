@@ -152,6 +152,29 @@ class TestTheInstrument(unittest.TestCase):
         self.assertIsNone(failure)
         self.assertEqual(findings, expected)
 
+    def test_the_grammar_edge_moves_an_unverified_row_to_invalid(self):
+        """Review #3890: a tab inside a plain scalar is text libyaml scans and
+        the pure-Python scanner rejects. With a duplicate key and a validator
+        that could not run, the default reported nothing (UNVERIFIED); the
+        libyaml walk reports the duplicate, so the row is INVALID with its
+        failure kept — the stated consequence of the loader change."""
+        from data_sheets_schema import duplicate_keys
+        text = "id: x\ntitle: a\tb\ntitle: c\n"
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch("data_sheets_schema.api_runner._validator_lines",
+                           return_value=([], "linkml-validate did not run: boom")):
+            edge = Path(tmp) / "edge.yaml"
+            edge.write_text(text, encoding="utf-8")
+            self.assertEqual(duplicate_keys.duplicate_keys_in(edge), [])   # the default
+            findings, failure = _validate_deterministic(edge)
+            concat = _tree(Path(tmp), {"rocrate_mapped/det-v1/A_d4d.yaml": text})
+            rows = deterministic_validity(concat)
+        self.assertEqual(failure, "linkml-validate did not run: boom")
+        self.assertEqual(len(findings), 1)
+        self.assertIn("title", findings[0])
+        self.assertEqual([r["status"] for r in rows], [INVALID])
+        self.assertEqual(rows[0]["failure"], "linkml-validate did not run: boom")
+
     def test_a_duplicate_key_survives_a_validator_that_did_not_run(self):
         """#1032, review #3610: the duplicate is read off the text, which
         needs no validator, so a record known to be invalid is reported

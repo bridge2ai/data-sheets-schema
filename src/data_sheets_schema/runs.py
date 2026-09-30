@@ -494,10 +494,21 @@ def _validate_deterministic(path: Path) -> tuple[list[str] | None, str | None]:
     #3616), so the section stays reported and never fatal.
 
     The duplicates are composed by libyaml (`duplicate_keys.FAST_LOADER`,
-    #3786): the same findings as `duplicate_keys_in`'s pure-Python default,
-    which stays as it is for the callers that pin it, about nine times
-    faster. Not strict, as before: a text neither loader can scan claims
-    no duplicate, and the validator reports why it cannot be loaded.
+    #3786), about nine times faster than `duplicate_keys_in`'s pure-Python
+    default, which stays as it is for the callers that pin it. The findings
+    are the same wherever both scanners can read the text, but the two are
+    not the same grammar at the edges (`find_duplicate_keys`'s docstring):
+    libyaml accepts a tab inside a plain scalar (`title: a<TAB>b`) and a
+    byte-order mark after the start of the stream, which the pure-Python
+    scanner rejects. On such a text the default found no duplicate and
+    libyaml reports the ones it scans, so a record of that shape carrying a
+    duplicate key, whose validator could not run, now reads INVALID (with
+    `failure` set) where it read UNVERIFIED before (review #3890). That is
+    what `yaml.load(..., Loader=FAST_LOADER)` loads from the same text.
+    None of the 1,616 YAML files under `data/d4d_concatenated` hits the
+    edge: every one gives identical findings under both loaders (checked
+    2026-09-30). Not strict, as before: a text neither loader can scan
+    claims no duplicate, and the validator reports why it cannot be loaded.
     """
     from data_sheets_schema.api_runner import _validator_lines
     from data_sheets_schema.duplicate_keys import FAST_LOADER, describe, find_duplicate_keys
