@@ -203,10 +203,12 @@ Dataverse host's footer) is listed in the adjudication file's header. Per arm,
 over the records of the fact's project: **stated** is the records whose hashed bundle bytes
 contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a
 `used_software` entry naming the software with that `version`, or a `tools` string with
-both; **elsewhere** is any other string, or one mapping's own values, holding the name and
-the version (prose, a resource entry); **name only** is the name without the version;
-**absent** is neither. Lexical, like the cues: a match does not check that the value is
-right, and a `companion` or `cited` fact carried is not thereby in scope.
+both; **elsewhere** is any other string, or one mapping's own values (its scalars and the
+items of its lists other than `used_software` and `tools`), holding the name and the version
+(prose, a resource entry); **name only** is the name without the version; **absent** is
+neither. A version is a whole token: an attached suffix (`-rc1`, `.post1`, `+build`) is
+another version. Lexical, like the cues: a match does not check that the value is right, and
+a `companion` or `cited` fact carried is not thereby in scope.
 
 | fact | scope | stated in chunks | arm | records | stated | used_software/tools | elsewhere | name only | absent |
 |---|---|---|---|---:|---:|---:|---:|---:|---:|
@@ -217,7 +219,7 @@ right, and a `companion` or `cited` fact carried is not thereby in scope.
 | `voice-b2aiprep-3.0.0` | referent | c017, c019 | v7 API production (2026-09-01) | 3 | 3 | 0 | 2 | 1 | 0 |
 | `voice-b2aiprep-3.0.0` | referent | c017, c019 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 3 | 0 | 0 |
 | `voice-redcap-3.23.0` | cited | c017, c019 | v4 API (2026-08-13) | 3 | 3 | 0 | 3 | 0 | 0 |
-| `voice-redcap-3.23.0` | cited | c017, c019 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.23.0` | cited | c017, c019 | v5 API (2026-08-22c) | 3 | 3 | 0 | 1 | 2 | 0 |
 | `voice-redcap-3.23.0` | cited | c017, c019 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 1 | 1 | 1 |
 | `voice-redcap-3.23.0` | cited | c017, c019 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 3 | 0 |
 | `voice-redcap-3.23.0` | cited | c017, c019 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 3 | 0 |

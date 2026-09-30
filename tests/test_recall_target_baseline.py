@@ -348,6 +348,49 @@ class Carriage(unittest.TestCase):
         for s in ("b2aiprep v3.0.0", "b2aiprep (v.3.0.0)", "b2aiprep version 3.0.0", "b2aiprep 3.0.0."):
             self.assertEqual(self.carried({"description": s}), "elsewhere", s)
 
+    def test_an_attached_suffix_makes_another_version(self):
+        """Review of #3534 (#3583): a prerelease, post-release, development
+        or build suffix is another version on every carriage path, whatever
+        prefix the version carries; sentence punctuation still ends it."""
+        suffixed = ("3.0.0-rc1", "3.0.0.post1", "3.0.0.dev1", "3.0.0+build.1", "3.0.0a1", "3.0.0-1")
+        for suffix in suffixed:
+            for prefix in ("", "v", "v.", "version "):
+                v = prefix + suffix
+                for record in ({"used_software": [{"name": "b2aiprep", "version": v}]},
+                               {"tools": [f"b2aiprep {v}"]},
+                               {"description": f"Uses b2aiprep {v}."},
+                               {"external_resources": [{"name": "b2aiprep", "version": v}]}):
+                    self.assertEqual(self.carried(record), "name_only", record)
+        for tail in (".", ",", ";", ")", "-", " "):
+            for prefix in ("", "v", "v.", "version "):
+                v = prefix + "3.0.0"
+                self.assertEqual(self.carried({"tools": [f"(b2aiprep {v}{tail} "]}), "structured", (v, tail))
+                self.assertEqual(self.carried({"description": f"b2aiprep {v}{tail} then"}), "elsewhere",
+                                 (v, tail))
+        self.assertEqual(self.carried({"used_software": [{"name": "b2aiprep", "version": "v3.0.0."}]}),
+                         "structured")
+
+    def test_the_name_is_a_whole_token(self):
+        """Review of #3534 (#3601): the name, like the version, matches only
+        where no word character or hyphen is attached to it."""
+        for s in ("myb2aiprep 3.0.0", "b2aiprepx 3.0.0", "pre-b2aiprep 3.0.0", "b2aiprep-extra 3.0.0"):
+            self.assertEqual(self.carried({"description": s}), "absent", s)
+            self.assertEqual(self.carried({"tools": [s]}), "absent", s)
+        for s in ("(b2aiprep) 3.0.0", "b2aiprep, 3.0.0", "B2AIPREP 3.0.0"):
+            self.assertEqual(self.carried({"description": s}), "elsewhere", s)
+
+    def test_a_mapping_s_list_valued_slot_is_its_own_value(self):
+        """Review of #3534 (#3600): a resource entry naming the software in a
+        multivalued string slot, with the version in a scalar beside it,
+        carries both; a nested mapping's values are still not its own."""
+        entry = {"external_resources": ["https://github.com/eipm/b2aiprep"],
+                 "future_guarantees": "with version 3.0.0 deposited at Zenodo"}
+        self.assertEqual(self.carried({"external_resources": [entry]}), "elsewhere")
+        self.assertEqual(self.carried({"external_resources": [dict(entry, external_resources="https://github.com/eipm/b2aiprep")]}),
+                         "elsewhere")
+        nested = {"name": "b2aiprep", "details": {"note": "with version 3.0.0"}}
+        self.assertEqual(self.carried({"external_resources": [nested]}), "name_only")
+
 
 class Adjudication(CorpusFixture, unittest.TestCase):
     """#3289: the hand reading is checked for shape, its verdicts are
@@ -430,6 +473,18 @@ class Adjudication(CorpusFixture, unittest.TestCase):
         self.assertIsNone(c["rows"][0]["facts"]["p-toolkit-2.4.1"]["stated"])
         md = self.m.render_markdown(c, arms=self.arms)
         self.assertIn("| `p-toolkit-2.4.1` | referent | – | Arm one | 1 | – |", md)
+
+    def test_an_arm_partly_unrecovered_says_stated_n_of_m(self):
+        """Review of #3534 (#3602): where some of an arm's rows have their
+        bytes recovered and others do not, `stated` counts the known rows and
+        says how many; a bare N would read as N of all the arm's records."""
+        c = self._collect()
+        row = next(r for r in c["rows"] if r["arm"] == "a1" and "p-toolkit-2.4.1" in (r.get("facts") or {}))
+        unknown = dict(row, path=row["path"] + "#unrecovered",
+                       facts={"p-toolkit-2.4.1": {"stated": None, "chunks": None, "carried": "name_only"}})
+        c["rows"].append(unknown)
+        md = self.m.render_markdown(c, arms=self.arms)
+        self.assertIn("| `p-toolkit-2.4.1` | referent | c004 | Arm one | 2 | 1 of 1 | 0 | 0 | 1 | 1 |", md)
 
     def test_without_an_adjudication_the_note_has_no_section(self):
         c = self.m.collect(self.corpus, arms=self.arms, root=self.dir, projects=("P", "Q"))

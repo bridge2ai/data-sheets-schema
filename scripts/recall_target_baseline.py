@@ -361,10 +361,14 @@ def _collapse(text: str) -> str:
 
 def _fact_patterns(fact: dict[str, Any]) -> tuple[re.Pattern, re.Pattern]:
     """The fact's name (any of `names`) and its version, each as a whole
-    token; the version may carry a `v`, `v.` or `version` prefix."""
+    token; the version may carry a `v`, `v.` or `version` prefix. A version
+    token ends where no further component or suffix is attached: `3.0.0.1`,
+    `3.0.0-rc1`, `3.0.0.post1`, `3.0.0.dev1`, `3.0.0+build.1` and `3.0.0a1`
+    are other versions, while sentence punctuation (`3.0.0.`, `3.0.0,`,
+    `3.0.0)`, `3.0.0-` before a space) ends the token (#3583)."""
     names = re.compile(r"(?<![\w-])(?:" + "|".join(re.escape(str(n)) for n in fact["names"]) + r")(?![\w-])",
                        re.IGNORECASE)
-    version = re.compile(r"(?<![\w.])(?:v\.?\s?|version\s)?" + re.escape(str(fact["version"])) + r"(?!\w|\.\d)",
+    version = re.compile(r"(?<![\w.])(?:v\.?\s?|version\s)?" + re.escape(str(fact["version"])) + r"(?!\w|[.+-][^\W_])",
                          re.IGNORECASE)
     return names, version
 
@@ -391,11 +395,17 @@ def _mappings(node: Any):
             yield from _mappings(v)
 
 
+#: The slots `fact_carriage` reads as structured carriage, entry by entry.
+STRUCTURED_KEYS = ("used_software", "tools")
+
+
 def fact_carriage(record: Any, fact: dict[str, Any]) -> str:
     """How the record carries a versioned software fact (`CARRIAGE`):
     `structured` is a `used_software` entry naming it with that `version`,
     or a `tools` string holding both; `elsewhere` is any other string, or
-    one mapping's own values, holding both (prose, a resource entry);
+    one mapping's own values (its scalars and the scalar items of its
+    lists other than `STRUCTURED_KEYS`), holding both (prose, a resource
+    entry);
     `name_only` the name without the version; `absent` neither. Lexical,
     like the cues: a match does not check that the value is right."""
     names, version = _fact_patterns(fact)
@@ -414,7 +424,14 @@ def fact_carriage(record: Any, fact: dict[str, Any]) -> str:
     if any(names.search(s) and version.search(s) for s in strings):
         return "elsewhere"
     for m in _mappings(record):
-        own = [_collapse(str(v)) for v in m.values() if v not in (None, "") and not isinstance(v, (dict, list))]
+        # A mapping's own values are its scalars and the scalar items of its
+        # lists (a multivalued string slot, #3600), never a nested mapping.
+        # A `tools` or `used_software` list is not one of them: each of its
+        # entries is judged alone above, so a name in one entry and a
+        # version in another, or beside the list, is not carriage (#3573).
+        own = [_collapse(str(x)) for k, v in m.items() if not (isinstance(v, list) and k in STRUCTURED_KEYS)
+               for x in (v if isinstance(v, list) else [v])
+               if x not in (None, "") and not isinstance(x, (dict, list))]
         if any(names.search(s) for s in own) and any(version.search(s) for s in own):
             return "elsewhere"
     return "name_only" if any(names.search(s) for s in strings) else "absent"
@@ -749,10 +766,12 @@ def render_adjudication(collected: dict[str, Any], arms=None) -> list[str]:
         "over the records of the fact's project: **stated** is the records whose hashed bundle bytes",
         "contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a",
         "`used_software` entry naming the software with that `version`, or a `tools` string with",
-        "both; **elsewhere** is any other string, or one mapping's own values, holding the name and",
-        "the version (prose, a resource entry); **name only** is the name without the version;",
-        "**absent** is neither. Lexical, like the cues: a match does not check that the value is",
-        "right, and a `companion` or `cited` fact carried is not thereby in scope.", "",
+        "both; **elsewhere** is any other string, or one mapping's own values (its scalars and the",
+        "items of its lists other than `used_software` and `tools`), holding the name and the version",
+        "(prose, a resource entry); **name only** is the name without the version; **absent** is",
+        "neither. A version is a whole token: an attached suffix (`-rc1`, `.post1`, `+build`) is",
+        "another version. Lexical, like the cues: a match does not check that the value is right, and",
+        "a `companion` or `cited` fact carried is not thereby in scope.", "",
         "| fact | scope | stated in chunks | arm | records | stated | used_software/tools | elsewhere "
         "| name only | absent |",
         "|---|---|---|---|---:|---:|---:|---:|---:|---:|",
