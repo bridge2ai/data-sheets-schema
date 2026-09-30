@@ -1,0 +1,1295 @@
+# Per-phrase judgements behind notes/absence_v3_recall.md (#3705): the recall
+# absence lexicon v3 gives up on rsn.source-ranking.
+#
+# The draw is `scripts/absence_v3_recall.py --sample 88 --seed 2919`: every v2
+# match of rsn.source-ranking that no v3 match of the pattern ends at, over the
+# 303 records notes/absence_claims_baseline.md pins, in the order
+# random.Random(2919).sample puts them. Its sha256 is `draw_sha256` below, over
+# each phrase's class, record, pointer and span in the order drawn, as the
+# precision judgements' is; the script recomputes it from the entries here and
+# refuses the note when it differs or when the verdict tally is not its RECALL
+# entry's counts. `start` and `end` are the v2 match's offsets into the
+# whitespace-collapsed leaf.
+#
+# `cause` and `flagged` are computed by the script, not judged, and it refuses
+# a row whose values are not the ones it computes. `reading` and `verdict` are
+# judged: each phrase was read on 2026-09-30 in its sentence as written (to its
+# full stop, a clause after `;` included) and the sentences around it, against
+# the record_self_narration definition.
+#   construction  the sentence says what the record did (preferred, used,
+#                 recorded, left a slot empty) and the ranking term bears on
+#                 it                                         -> in_class
+#   referent      the sentence says which dataset or release this record
+#                 describes, justified by the ranking; judged in class as the
+#                 v1 and v3 precision samples judged such sentences
+#                                                            -> in_class
+#   source        the sentence reports the sources (a conflict, a rank, what a
+#                 source states) and says nothing of what the record did; any
+#                 resolution is in another sentence. Borderline, as v1's
+#                 precision sample judged its three source conflicts worded
+#                 with the ranking vocabulary                -> borderline
+#   absence       an absence asserted across the sources ("no tier-1 source
+#                 states them"), which bundle_wide_absence describes
+#                                                            -> not_in_class
+# One rater, the agent implementing #3705: not an independent review (a
+# second rating is #3197's open part).
+# Written by a one-off script; never edited except to add a judgement's
+# correction with its reason.
+draw_sha256: 241e910ec4781ea3467152b31e89aa6a302a2385370544d69ac5f427a47641aa
+from_lexicon_sha256: e5f35547ca9862c8dc7d5f8996e0e67712549591334b9f726003fd4b3c257708
+lexicon_sha256: f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6
+record_set_sha256: cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711
+sample: 88
+seed: 2919
+recorded: '2026-09-30'
+rater: 'the agent implementing #3705; not an independent rater'
+judgements:
+  record_self_narration:
+  - n: 1
+    record: claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /creators/1/source_caveats
+    start: 36
+    end: 50
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A source conflict ('differs between two tier-1 sources'); the sentence does not say how the record resolved
+      it.
+  - n: 2
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 19
+    end: 33
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''Two equally ranked tier-1 sources disagree'': a source conflict; the resolution is not in this sentence.'
+  - n: 3
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 226
+    end: 239
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: window
+    flagged:
+    - rsn.recorded-here
+    reading: construction
+    verdict: in_class
+    reason: 'Says the higher-ranked source''s start date is the value recorded here: the verb is past the 80-character
+      window.'
+  - n: 4
+    record: claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /creators/1/source_caveats
+    start: 33
+    end: 46
+    patterns:
+    - rsn.source-ranking
+    text: higher ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what the higher-ranked source gives; the next sentence ('The higher-ranked value is stated')
+      says what the record did.
+  - n: 5
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''Two tier-1 sources of equal rank disagree'': a source conflict; the resolution is not in this sentence.'
+  - n: 6
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 208
+    end: 221
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: semicolon
+    flagged:
+    - rsn.recorded-here
+    reading: construction
+    verdict: in_class
+    reason: Names the higher-ranked source's dates and, after the ';', that its values are used here.
+  - n: 7
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml
+    pointer: /creators/17/source_caveats
+    start: 114
+    end: 126
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: no_verb
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports two spellings and which one the manifest ranks higher; the leaf does not say which the record
+      uses.
+  - n: 8
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A source conflict; the next sentence says both are represented, this one does not.
+  - n: 9
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_d4d.yaml
+    pointer: /instances/4/source_caveats
+    start: 169
+    end: 180
+    patterns:
+    - rsn.source-ranking
+    text: ranks lower
+    cause: no_verb
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports three figures and which release the input manifest ranks lower; nothing on which the record
+      carries.
+  - n: 10
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 145
+    end: 158
+    patterns:
+    - rsn.source-ranking
+    text: tier 1 source
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which dataset this record describes: the highest-ranked tier 1 source, a scope choice.'
+  - n: 11
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 113
+    end: 126
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which release this record describes: the most recent tier-1 source not marked superseded.'
+  - n: 12
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1009
+    end: 1023
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: semicolon
+    flagged:
+    - rsn.recorded-here
+    - rsn.slot-word
+    reading: construction
+    verdict: in_class
+    reason: A publisher conflict between tier-1 sources and, after the ';', that the FAIRhub position is followed
+      in `publisher`.
+  - n: 13
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1034
+    end: 1048
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A source conflict ('internally inconsistent across tier-1 sources'); the sentence reports only what
+      each source records.
+  - n: 14
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /human_subject_research/source_caveats
+    start: 600
+    end: 612
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    cause: semicolon
+    flagged:
+    - rsn.recorded-under-slot
+    - rsn.source-ranking
+    reading: construction
+    verdict: in_class
+    reason: Says the higher-ranked source's name is recorded in ethics_review_board, the lower-ranked sources' reading
+      after the ';' being the one set aside.
+  - n: 15
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 272
+    end: 284
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: other_sentence
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports what the higher-ranked page states; the next sentence says the PhysioNet statement is preferred.
+  - n: 16
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 261
+    end: 275
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: window
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A caveat about the highest-ranked source's stability; nothing on how the record used it.
+  - n: 17
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 296
+    end: 308
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: no_verb
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what the higher-ranked release pages state about removed fields; nothing on how the record was
+      built.
+  - n: 18
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 188
+    end: 202
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: semicolon
+    flagged:
+    - rsn.rather-than
+    - rsn.source-ranking
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: Says which release this record describes (the highest-ranked source) and, after the ';', that earlier
+      releases are recorded as related datasets.
+  - n: 19
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /participant_compensation/0/source_caveats
+    start: 162
+    end: 175
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    cause: semicolon
+    flagged: []
+    reading: absence
+    verdict: not_in_class
+    reason: 'An absence asserted across the tier-1 sources (''no tier-1 source states them''): bundle_wide_absence
+      in shape, not narration of the record.'
+  - n: 20
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /creators/0/principal_investigator/source_caveats
+    start: 57
+    end: 71
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: consumed
+    flagged:
+    - rsn.source-ranking
+    reading: construction
+    verdict: in_class
+    reason: Says two affiliations are recorded because two equally ranked sources disagree (the verb is inside the
+      earlier v3 match).
+  - n: 21
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''Two equally ranked tier-1 sources disagree'': a source conflict; the resolution is not in this sentence.'
+  - n: 22
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 16
+    end: 29
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what a tier-1 source records; the next sentence says what the record uses.
+  - n: 23
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 446
+    end: 459
+    patterns:
+    - rsn.source-ranking
+    text: tier 1 source
+    cause: other_sentence
+    flagged: []
+    reading: absence
+    verdict: not_in_class
+    reason: An absence asserted across the tier-1 sources ('No tier 1 source states a collection period'), not narration
+      of the record.
+  - n: 24
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 717
+    end: 729
+    patterns:
+    - rsn.source-ranking
+    text: Lower-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports that the lower-ranked sources agree on one institution; the resolution is in the next sentence.
+  - n: 25
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1578
+    end: 1592
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    cause: semicolon
+    flagged:
+    - rsn.recorded-under-slot
+    reading: construction
+    verdict: in_class
+    reason: A conflict between equally ranked tier-1 sources and, after the ';', that both are represented under
+      sensitive_elements.
+  - n: 26
+    record: claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 929
+    end: 943
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    cause: window
+    flagged:
+    - rsn.left-empty
+    - rsn.recorded-here
+    - rsn.slot-word
+    reading: construction
+    verdict: in_class
+    reason: 'Says the publisher slot is left unpopulated and both statements recorded because the tier-1 sources
+      are equally ranked: the verbs are past the window.'
+  - n: 27
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 112
+    end: 126
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: semicolon
+    flagged:
+    - rsn.rather-than
+    - rsn.recorded-under-slot
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: Says which release this record describes (the highest-ranked source) and, after the ';', that earlier
+      releases are recorded under related_datasets.
+  - n: 28
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 41
+    end: 55
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A source conflict across tier-1 sources and lower tiers; the sentence reports only what each source
+      names.
+  - n: 29
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /intended_uses/3/source_caveats
+    start: 262
+    end: 275
+    patterns:
+    - rsn.source-ranking
+    text: tier 2 source
+    cause: semicolon
+    flagged:
+    - rsn.source-ranking
+    reading: construction
+    verdict: in_class
+    reason: 'Says both statements are recorded and why the source tiers do not decide between them: the license
+      and the access conditions are different instruments.'
+  - n: 30
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /is_deidentified/source_caveats
+    start: 149
+    end: 163
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: no_verb
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports two highest-ranked sources' values and reads them as reconcilable; nothing on what the record
+      carries.
+  - n: 31
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 2001
+    end: 2013
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    cause: consumed
+    flagged:
+    - rsn.source-ranking
+    reading: construction
+    verdict: in_class
+    reason: Says the two figures are recorded as separate purposes because the higher- and lower-ranked sources
+      cannot be reconciled (the verb is inside the earlier v3 match).
+  - n: 32
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 72
+    end: 86
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports the tier-1 and tier-3 expansions; the next sentence says which one this record uses.
+  - n: 33
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 151
+    end: 165
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which version this record describes: the one all three tier-1 sources describe.'
+  - n: 34
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 5
+    end: 19
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports that the tier-1 sources name the license differently; the next sentence says both names are
+      recorded.
+  - n: 35
+    record: claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 299
+    end: 313
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: semicolon
+    flagged:
+    - rsn.recorded-here
+    reading: construction
+    verdict: in_class
+    reason: Says the two sources are tier-1 of equal rank and, after the ';', that the FAIRhub affiliation is recorded
+      here and the conflict noted.
+  - n: 36
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /creators/8/source_caveats
+    start: 213
+    end: 225
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: other_sentence
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports the spellings and which the input manifest ranks higher; the next sentence says the higher-ranked
+      spelling is stated.
+  - n: 37
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 1542
+    end: 1555
+    patterns:
+    - rsn.source-ranking
+    text: lowest-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Says when a source was captured and that it is the lowest-ranked; nothing on how the record used it.
+  - n: 38
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml
+    pointer: /purposes/0/source_caveats
+    start: 252
+    end: 264
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports a lower-ranked source's figure; the next sentence says both figures are recorded.
+  - n: 39
+    record: claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /subpopulations/0/source_caveats
+    start: 16
+    end: 29
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A conflict inside one tier-1 source (a v3 counterexample's own words); the next sentence says what the
+      record represents.
+  - n: 40
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 114
+    end: 128
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which dataset this record describes: the highest-ranked and most recent tier 1 source.'
+  - n: 41
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /instances/1/source_caveats
+    start: 193
+    end: 205
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: other_sentence
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports what the higher-ranked release pages state about recording counts; the next sentence says no
+      total is asserted.
+  - n: 42
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1964
+    end: 1978
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports that the two tier-1 sources name different publishers; the next sentence says how the slot was
+      filled.
+  - n: 43
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/principal_investigator/source_caveats
+    start: 337
+    end: 351
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: semicolon
+    flagged: []
+    reading: construction
+    verdict: in_class
+    reason: Says the two sources are tier-1 of equal rank and, after the ';', that the FAIRhub identifier is recorded
+      and the conflict noted.
+  - n: 44
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml
+    pointer: /instances/0/source_caveats
+    start: 99
+    end: 112
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports the higher-ranked site's figure and the webinar's; the next sentence says the site's figure
+      is recorded here.
+  - n: 45
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 174
+    end: 188
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: semicolon
+    flagged:
+    - rsn.rather-than
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: Says which release this record describes (the highest-ranked in the manifest) and, after the ';', that
+      earlier releases are recorded as related datasets.
+  - n: 46
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 403
+    end: 416
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: window
+    flagged:
+    - rsn.recorded-here
+    - rsn.source-ranking
+    reading: construction
+    verdict: in_class
+    reason: 'Says the higher-ranked source''s expansion is preferred here: the verb is past the 80-character window,
+      after a parenthesis.'
+  - n: 47
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 33
+    end: 47
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what the highest-ranked source gives for the collection dates; nothing on what the record carries.
+  - n: 48
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /creators/9/source_caveats
+    start: 126
+    end: 138
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: other_sentence
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports the spelling the higher-ranked pages give; the next sentence says the higher-ranked spelling
+      is stated.
+  - n: 49
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /purposes/4/source_caveats
+    start: 222
+    end: 235
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: no_verb
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what a higher-ranked source gives (one of v1's borderline phrases, now a v3 counterexample).
+  - n: 50
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 66
+    end: 80
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A source conflict over the principal investigator's affiliation; the sentence reports only what each
+      source records.
+  - n: 51
+    record: claudecode_api/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 153
+    end: 167
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which release this record describes: the highest-ranked non-superseded source.'
+  - n: 52
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 126
+    end: 139
+    patterns:
+    - rsn.source-ranking
+    text: higher ranked
+    cause: semicolon
+    flagged:
+    - rsn.recorded-here
+    - rsn.source-ranking
+    reading: construction
+    verdict: in_class
+    reason: A conflict between the higher-ranked site and the webinar and, after the ';', that the higher-ranked
+      figure is used here.
+  - n: 53
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml
+    pointer: /external_resources/2/source_caveats
+    start: 116
+    end: 129
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: window
+    flagged:
+    - rsn.recorded-here
+    reading: construction
+    verdict: in_class
+    reason: 'Says the higher-ranked release''s statement is preferred here: the verb is past the 80-character window.'
+  - n: 54
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 1001
+    end: 1014
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: semicolon
+    flagged: []
+    reading: construction
+    verdict: in_class
+    reason: Reports two spellings, the higher-ranked author list's among them, and after the ';' that the PhysioNet
+      forms are used.
+  - n: 55
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 594
+    end: 606
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports three figures, one from a lower-ranked source; the next sentence says both figures are reported.
+  - n: 56
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 217
+    end: 231
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: no_verb
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''The two tier-1 sources are not reconciled'': either the record leaves them apart or the conflict
+      stands; the sentence does not say what the record carries.'
+  - n: 57
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 62
+    end: 76
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports that two highest-ranked sources label the license differently; a later sentence says which name
+      is used.
+  - n: 58
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 61
+    end: 75
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    cause: window
+    flagged:
+    - rsn.left-empty
+    - rsn.slot-word
+    reading: construction
+    verdict: in_class
+    reason: 'Says the hipaa_compliant slot is left unpopulated because the two equally ranked sources differ: the
+      ranking term is the reason for the omission.'
+  - n: 59
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1543
+    end: 1557
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A source conflict over the award identifier; the sentence reports only what each source gives.
+  - n: 60
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml
+    pointer: /creators/8/source_caveats
+    start: 173
+    end: 185
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: no_verb
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports that the sources the manifest ranks higher place the investigator elsewhere; the leaf does not
+      say what the record carries.
+  - n: 61
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 49
+    end: 63
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''Institutional attribution is inconsistent across tier-1 sources'': a source conflict.'
+  - n: 62
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 492
+    end: 503
+    patterns:
+    - rsn.source-ranking
+    text: ranks lower
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what the lower-ranked white paper states; the resolution is in an earlier sentence.
+  - n: 63
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1069
+    end: 1083
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: semicolon
+    flagged: []
+    reading: construction
+    verdict: in_class
+    reason: Says both institution names come from tier-1 sources and, after the ';', that both are recorded on the
+      Creator object.
+  - n: 64
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 463
+    end: 477
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A source conflict between tier-1 sources; the sentence reports only what each source records.
+  - n: 65
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1593
+    end: 1607
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: semicolon
+    flagged:
+    - rsn.recorded-under-slot
+    reading: construction
+    verdict: in_class
+    reason: A conflict between equally ranked tier-1 sources and, after the ';', that both are represented under
+      sensitive_elements.
+  - n: 66
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /maintainers/2/source_caveats
+    start: 200
+    end: 212
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: no_verb
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports what the higher-ranked release pages name as maintainer; the next sentence reads the statements
+      as about different platforms.
+  - n: 67
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 373
+    end: 387
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: no_verb
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''Both institutions appear in tier-1 sources'': a statement about the sources.'
+  - n: 68
+    record: claudecode_agent/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1947
+    end: 1960
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    cause: other_sentence
+    flagged: []
+    reading: absence
+    verdict: not_in_class
+    reason: An absence asserted across the tier-1 sources ('no tier-1 source contradicts this'), not narration of
+      the record.
+  - n: 69
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 101
+    end: 115
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which dataset this record describes: the highest-ranked and most recent source.'
+  - n: 70
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 428
+    end: 442
+    patterns:
+    - rsn.source-ranking
+    text: tier 2 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Says both sources are tier 2 and answer different questions; the next sentence says both are recorded.
+  - n: 71
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 33
+    end: 47
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: window
+    flagged:
+    - rsn.recorded-here
+    reading: construction
+    verdict: in_class
+    reason: 'Says the award URI recorded here is the one the highest-ranked source lists, as #3 says of its start
+      date; the verb is past the 80-character window.'
+    correction: 'Re-read in review (#3807): first judged source/borderline because the sentence makes no choice
+      between sources, a criterion the header does not state. The sentence says what the record carries (''recorded
+      here'') and the ranking term bears on it, the header''s construction reading, and the same structure as #3.'
+  - n: 72
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml
+    pointer: /ethical_reviews/0/source_caveats
+    start: 146
+    end: 160
+    patterns:
+    - rsn.source-ranking
+    text: tier-3 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what the tier-1, tier-2 and tier-3 sources name; the next sentence says both are recorded.
+  - n: 73
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 114
+    end: 128
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which release this record describes: the highest-ranked non-superseded source.'
+  - n: 74
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+    pointer: /creators/13/source_caveats
+    start: 62
+    end: 76
+    patterns:
+    - rsn.source-ranking
+    text: highest ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports the highest-ranked releases' affiliation and the publications'; the next sentence says the Dataverse
+      value is stated.
+  - n: 75
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 15
+    end: 29
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''Publisher: two tier-1 sources disagree'' (one of v1''s borderline phrases, now a v3 counterexample).'
+  - n: 76
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''Two tier-1 sources differ in framing'': a source conflict.'
+  - n: 77
+    record: claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 910
+    end: 924
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: window
+    flagged:
+    - rsn.left-empty
+    - rsn.recorded-here
+    - rsn.slot-word
+    reading: construction
+    verdict: in_class
+    reason: 'Says the publisher slot is left unpopulated and both statements recorded because these tier-1 sources
+      are equally ranked: the verbs are past the window.'
+  - n: 78
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 179
+    end: 193
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports what the highest-ranked sources name; the sentence reports only the sources.
+  - n: 79
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1198
+    end: 1212
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: semicolon
+    flagged: []
+    reading: construction
+    verdict: in_class
+    reason: Reports the highest-ranked source's project name and, after the ';', that the FAIRhub form is preferred.
+  - n: 80
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /content_warnings/0/source_caveats
+    start: 128
+    end: 140
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    cause: no_verb
+    flagged:
+    - rsn.source-ranking
+    reading: source
+    verdict: borderline
+    reason: Reports what the higher-ranked release pages state about free-speech transcripts; a statement about
+      the dataset.
+  - n: 81
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/source_caveats
+    start: 321
+    end: 334
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    cause: semicolon
+    flagged:
+    - rsn.recorded-here
+    reading: construction
+    verdict: in_class
+    reason: Says both readings are in the higher-ranked sources and, after the ';', that the wave-based description
+      is given here.
+  - n: 82
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 636
+    end: 649
+    patterns:
+    - rsn.source-ranking
+    text: tier 2 source
+    cause: window
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Says the tier 2 source's banner signals its content may change; nothing on how the record used it.
+  - n: 83
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 91
+    end: 105
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    cause: other_sentence
+    flagged:
+    - rsn.this-record
+    reading: referent
+    verdict: in_class
+    reason: 'Says which release this record describes: the highest-ranked source in the declared bundle.'
+  - n: 84
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 406
+    end: 418
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: Reports where the lower-ranked sources place the award; nothing on what the record carries.
+  - n: 85
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 433
+    end: 447
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    cause: absorbed
+    flagged:
+    - rsn.source-ranking
+    reading: construction
+    verdict: in_class
+    reason: '''Where the disagreement could be resolved by the input manifest''s ranking, the higher-ranked source
+      was preferred'': the name is inside the v3 match that starts at ''resolved''.'
+  - n: 86
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 654
+    end: 668
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: semicolon
+    flagged: []
+    reading: construction
+    verdict: in_class
+    reason: A license-name conflict between tier-1 sources and, after the ';', that the API value was used.
+  - n: 87
+    record: claudecode_agent/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 698
+    end: 712
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: '''The two tier-1 sources disagree and neither outranks the other'': a source conflict; nothing on what
+      the record carries.'
+  - n: 88
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 1764
+    end: 1777
+    patterns:
+    - rsn.source-ranking
+    text: tier 1 source
+    cause: other_sentence
+    flagged: []
+    reading: source
+    verdict: borderline
+    reason: A conflict inside one tier 1 source; the next sentence says both statements are represented.
