@@ -1136,6 +1136,14 @@ def test_the_gate_reads_the_breaks_the_entries_do_not():
         [reason] = at.line_split_gate(_lines(text), [consent])["consent_text"]
         assert reason.startswith("a match across up to 2 line break(s) read as nothing, on line(s) 1, 2"), reason
     assert at.line_split_gate(_lines("Participants gave co\nns\nen\nt to take part."), [consent]) == {}  # 3 joins
+    # #3672: one join, but over four lines, is outside the gate's three-line
+    # runs; the same statement over three lines is seen. The README, the note
+    # and the docstrings state this limit, and this pins it.
+    four, three = "a data\nprotection\nim\npact assessment was done", "a data\nprotection im\npact assessment was done"
+    assert at.matching_lines(ethics.pattern, _lines(four)) == []
+    assert at.line_split_gate(_lines(four), [ethics]) == {}
+    assert at.line_split_gate(_lines(three), [ethics]) == {"ethics_review": [
+        "a match across up to 2 line break(s) read as nothing, on line(s) 1, 2, 3"]}
     wide = "a data-\n-\n-\n-\n-\n-\nprotec-\ntion impact assessment"
     assert at.matching_lines(ethics.pattern, _lines(wide)) == []
     assert at.line_split_gate(_lines(wide), [ethics]) == {"ethics_review": [
@@ -1157,6 +1165,11 @@ def test_the_join_readings_search_up_to_k_breaks_at_once():
     assert at.join_matching_lines(pattern, _lines("we got con-\nsen\nt here"), 2) == {1, 2, 3}
     assert at.join_matching_lines(pattern, _lines("we got consent\nfrom all"), 2) == set()
     assert at.join_matching_lines(pattern, _lines("we got co\nns\nen\nt here"), 3) == {1, 2, 3, 4}
+    # #3672: no line outside the run is read, so one join in a match over
+    # four lines needs a run of three breaks, not two.
+    ethics, four = at.CHECKS_BY_NAME["ethics_review"].pattern, "a data\nprotection\nim\npact assessment"
+    assert at.join_matching_lines(ethics, _lines(four), 2) == set()
+    assert at.join_matching_lines(ethics, _lines(four), 3) == {1, 2, 3, 4}
     assert at.joinable_breaks(_lines("10.\n1234/x\n\ny\ncon-\nsent\nz")) == {1, 4, 6}
 
 

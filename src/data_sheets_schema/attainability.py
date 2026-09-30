@@ -89,7 +89,12 @@ other invalid file, not raised past them (#3180, #3217).
 its check a match on those bytes: a break with no hyphen read as nothing,
 up to `GATE_JOINS_PER_WINDOW` (two) consecutive breaks at once
 (`join_matching_lines`, #3481), or the hyphenated breaks read each on its
-own over `GATE_COMPARE_WINDOW` (ten) lines. No file is written; a curator
+own over `GATE_COMPARE_WINDOW` (ten) lines. The join search reads only the
+three lines around each run of two breaks, so it does not see a match that
+needs three joins, nor one that needs a single join but runs over four or
+more lines ('a data' / 'protection' / 'im' / 'pact assessment', #3672): an
+absence like that is certified without the gate seeing it. No file is
+written; a curator
 entry for the item, kept in place of the deterministic one, is the way
 past it once someone has read the lines. The gate reads no word list, so
 it runs wherever `derive` does. On the 22 versions the decisions in
@@ -460,7 +465,10 @@ JOIN = "join"
 #: this many consecutive breaks read as nothing, and none with the
 #: hyphenated breaks read each on its own within this many lines — the
 #: widths the measured versions were checked at
-#: (notes/attainability_line_splits_2026-09-29.md, #3246, #3481).
+#: (notes/attainability_line_splits_2026-09-29.md, #3246, #3481). The join
+#: search reads only the `GATE_JOINS_PER_WINDOW` + 1 lines around a run, so
+#: a match wider than that is not searched, even one needing a single join
+#: (#3672).
 GATE_JOINS_PER_WINDOW = 2
 GATE_COMPARE_WINDOW = 10
 
@@ -483,7 +491,9 @@ def _join_readings(lines: dict[int, tuple[str, str]], joins: int
     (`joinable_breaks`) as a space or as `JOIN`, a break after a hyphen
     under each of `HYPHEN_READINGS`, any other a space. Each reading comes
     with its lines' spans and the offsets of its joined breaks. At `joins` 1 that is each joinable break alone: the two
-    lines around it and no other."""
+    lines around it and no other. No line outside the run is read, so a
+    match that spans more than `joins` + 1 lines is never found here,
+    however few of its breaks join (#3672)."""
     numbers = sorted(lines)
     joinable, hyphenated = joinable_breaks(lines), _hyphenated(lines)
     for start in range(len(numbers) - 1):
@@ -524,7 +534,10 @@ def line_split_gate(lines: dict[int, tuple[str, str]], checks: Iterable[AbsenceC
     """Check name → what gives it a match the entry's reading does not, for
     each of `checks`: a match across up to `joins` consecutive breaks read
     as nothing (`join_matching_lines`), or one with the hyphenated breaks
-    read each on its own within `window_lines` lines. Meant for checks with
+    read each on its own within `window_lines` lines. The first reads only
+    the `joins` + 1 lines around each run, so a match that spans more lines
+    than that is not reported, even one needing a single join (#3672).
+    Meant for checks with
     no matching line, where either is a status the entry would not have
     (#3408). Reads no word list, so it runs wherever the validator does, and
     counts every join, the spurious ones included, for a curator to read."""

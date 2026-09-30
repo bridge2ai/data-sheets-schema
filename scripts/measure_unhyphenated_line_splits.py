@@ -42,7 +42,9 @@ are certified:
   each of the hyphen readings, any other break a space. That finds the
   three cases above at K=2; a match needing more than K joins at once, or a
   join and a hyphen's reading on breaks not both in one run of K, is still
-  not searched. K=1 is the every-break column, read by the module's search;
+  not searched, and nor is any match over more than the run's K+1 lines,
+  even one needing a single join ('a data' / 'protection' / 'im' / 'pact
+  assessment' at K=2, #3672). K=1 is the every-break column, read by the module's search;
 - the cost of those windows (#3246): hyphenated breaks, the windows of
   `MIXED_WINDOW_LINES` lines holding two or more, and the most in one
   (each such window is read 3^k - 3 ways for its k breaks); and, with

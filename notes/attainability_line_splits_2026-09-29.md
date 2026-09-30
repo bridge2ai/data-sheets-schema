@@ -60,7 +60,9 @@ The table's columns:
   of its three readings. It sees a word split over two unhyphenated breaks,
   a join beside a hyphen's reading, and a three-line statement whose one
   break is a space and the other the join, which the column before it does
-  not.
+  not. Like that column it reads no line outside the run: its three lines
+  are all it searches, so a match over four or more lines is not found even
+  when it needs only one join (#3672).
 
 Word list: `/usr/share/dict/words` (sha256 `be41ad97963bf8dabedd5871d5d691596175269d540956b0f9965a885c2bbab9`, 234456 entries), plus each bundle's own line-interior tokens.
 
@@ -135,8 +137,13 @@ those (#3481), and on the 22 versions it reads what the one-break column
 reads: no check's status moves, and `version_string` gains lines on the same
 versions only. A match that needs three or more joins at once ('co' / 'ns'
 / 'en' / 't'), or a join and a hyphen's reading on breaks not both in one
-run of two, is still not searched. So "moves no check's status" is a result about up to
-two joins in a run. The decision does not rest on it being exhaustive: it
+run of two, is still not searched. Nor is a match that runs over more than
+the three lines of one run, however few joins it needs: 'a data' /
+'protection' / 'im' / 'pact assessment' needs one join ('im' / 'pact') and
+is found by neither column, since the two-break search reads 'protection' /
+'im' / 'pact' and never 'data' with them (#3672). So "moves no check's
+status" is a result about matches whose joins lie in one run of up to two
+breaks and whose lines are that run's three at most. The decision does not rest on it being exhaustive: it
 rests on the cost of the reading, which a search over more breaks would only
 raise.
 
@@ -145,7 +152,8 @@ A version certified beyond these 22 is checked when it is written (#3408):
 the 10-line window below on every deterministic `not_stated_in_source` entry
 and refuses the file when either gives the check a match, naming the item and
 the lines. It reads no word list, so it runs where `/usr/share/dict/words` is
-missing. A refused entry needs a curator's reading (a curator entry is kept
+missing. It has the two-break search's limits: a match over four or more
+lines that needs a join, like the one above, passes it (#3672). A refused entry needs a curator's reading (a curator entry is kept
 in place of the deterministic one), or the reading or a "not certifiable"
 flag decided then. On these 22 versions it refuses nothing: the only
 `not_stated_in_source` entries are on the two CHORUS document versions, and

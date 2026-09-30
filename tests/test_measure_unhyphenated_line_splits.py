@@ -233,6 +233,10 @@ def test_joins_per_window_searches_up_to_k_breaks_at_once(m):
     assert m.measure(three, joins_per_window=2)["moved_if_up_to_k_breaks_join"] == {}
     assert m.measure(three, joins_per_window=3)["moved_if_up_to_k_breaks_join"] == {"consent_text": "status"}
     assert "moved_if_up_to_k_breaks_join" not in m.measure(three)
+    # #3672: one join, but a match over four lines, is outside K=2's runs.
+    four = "a data\nprotection\nim\npact assessment was done"
+    assert m.measure(four, joins_per_window=2)["moved_if_up_to_k_breaks_join"] == {}
+    assert m.measure(four, joins_per_window=3)["moved_if_up_to_k_breaks_join"] == {"ethics_review": "status"}
 
 
 @pytest.mark.parametrize("text", [TEXT, "This documentation is for v\n2.0.0 of the data.",
