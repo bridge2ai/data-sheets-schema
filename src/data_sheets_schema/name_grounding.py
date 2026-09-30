@@ -43,14 +43,22 @@ against `本研究由王小明教授负责`. No segmenter is used, so this is
 substring membership, the fallback the issue allows, and it errs toward
 grounding: a name that is only part of another word grounds (`张三` in
 `张三丰`), and a one-character token (`王` of `王 小明`) is not checked, as a
-single Latin letter is not. It has no case, so no such token is
-`initial_expanded`, and v2 (below) does not judge it. Identifier-shaped
+single Latin letter is not. The bundle's runs err the other way: they
+are kept apart, and there the check still over-reports. A line break or a
+space ends a run, so a name the bundle wraps across a
+line inside the name (`王小\\n明`, `สม\\nชาย`, as text extracted from a PDF
+often is) or writes with a space between surname and given name
+(`山田 太郎` against the record's `山田太郎`) reads `absent`. The reverse,
+a record that writes the space against a bundle that does not, grounds.
+It has no case, so no such token is `initial_expanded`, and v2 (below)
+does not judge it. Identifier-shaped
 spans in a string leaf — a URL, an email address, a CURIE such as
 `ORCID:0000-…` — are removed first. Tokens compare
 casefolded and NFKC-composed; the *folded* form used for
 `diacritic_dropped` also decomposes (NFKD) and drops the combining marks.
 The bundle is tokenised the same way, so a name the bundle wraps across a
-line (`Charlotte\\nMarquez`) is still two tokens of it. Each token of a
+line (`Charlotte\\nMarquez`) is still two tokens of it; in the scripts
+written without spaces a wrap inside the name is not (above). Each token of a
 name leaf is exactly one of:
 
 ``grounded``
@@ -221,6 +229,10 @@ the rest prose in person slots (`Contact Principal Investigator`). A
 source's own
 typo is grounded as written (`Ballllosero`), and a record that corrects it
 is `absent`: the check measures agreement with the bytes, not correctness.
+In a script written without spaces (Chinese, Japanese, Thai), a name the
+bundle wraps across a line inside the name, or spaces between its parts,
+reads `absent` although the bundle states it: there the check over-reports
+(#3401, see *Tokens and classes*).
 
 The issue's criterion that `Belisle-Pipon` is `diacritic_dropped` does not
 hold on its own bundle: the CM4AI bundle writes `Belisle-Pipon` without the

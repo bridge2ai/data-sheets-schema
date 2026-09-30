@@ -336,6 +336,27 @@ class DocumentedCostTest(unittest.TestCase):
             with self.subTest(leaf=leaf):
                 self.assertEqual(demoted(leaf, bundle), {"Tim": "absent", "Clark": "absent"})
 
+    def test_a_name_the_bundle_wraps_or_spaces_in_an_unspaced_script(self):
+        """#3696: in a script written without spaces a line break or a space
+        ends one of the bundle's runs, so a name it wraps inside the name
+        (PDF text) or spaces between surname and given name reads `absent`
+        although the bundle states it: an over-report. Controls: the same
+        name unbroken grounds, a spaced record against an unspaced bundle
+        grounds, and a Latin name wrapped across a line grounds."""
+        for name, bundle in (("王小明", "本研究由王小\n明教授负责"),
+                             ("สมชาย", "ผู้วิจัยหลักคือสม\nชายใจดี"),
+                             ("山田太郎", "責任者 山田 太郎")):
+            with self.subTest(name=name, bundle=bundle):
+                out = check_record({"creators": [{"name": name}]}, bundle, SLOTS)
+                self.assertEqual(out["counts"]["absent"], 1)
+        for name, bundle in (("王小明", "本研究由王小明教授负责"),
+                             ("山田 太郎", "責任者山田太郎"),
+                             ("Tim Clark", "led by Tim\nClark")):
+            with self.subTest(name=name, bundle=bundle):
+                out = check_record({"creators": [{"name": name}]}, bundle, SLOTS)
+                self.assertEqual(out["findings"], [])
+                self.assertEqual(out["counts"]["grounded"], len(name_tokens(name)))
+
     def test_a_short_given_name_in_capitals_beside_mixed_case(self):
         """Only a name written wholly in capitals reads `TIM` as a word."""
         self.assertEqual(cls("TIM Clark", "TIM", "Clark T"), "absent")
