@@ -122,10 +122,18 @@ _DEEP_CHILD = """
 import sys, yaml
 from data_sheets_schema.duplicate_keys import FAST_LOADER, find_duplicate_keys
 n = 50_000
+bom = "\\ufeff"
 texts = {
     "flow": "a: 1\\na: 2\\nb: " + "{x: " * n + "1" + "}" * n + "\\n",
     "block sequence": "- " * n + "x\\n",
     "key position": "? " * n + "x\\n",
+    # #3826: libyaml skips a byte-order mark; a column count did not.
+    "BOM, block sequence": bom + "- " * n + "x\\n",
+    "BOM, flow mappings": bom + "a: 1\\na: 2\\nb: " + "{x: " * n + "1" + "}" * n + "\\n",
+    "BOM, flow sequences": bom + "[" * n + "]" * n + "\\n",
+    "flow single-pair mappings": "[a: " * n + "1" + "]" * n + "\\n",
+    "mixed block and flow": "- " * (n // 2) + "[" * (n // 2) + "]" * (n // 2) + "\\n",
+    "BOM, mixed with properties": bom + "- &a !!seq\\n  " + "- " * n + "[{k: " * 10 + "x" + "}]" * 10 + "\\n",
 }
 for name, text in texts.items():
     assert find_duplicate_keys(text, loader=FAST_LOADER) == [], name
@@ -138,6 +146,15 @@ for name, text in texts.items():
 print("refused", len(texts))
 """
 
+
+#: The same texts where PyYAML has no libyaml (`yaml._yaml` cannot be
+#: imported): `FAST_LOADER` is then the pure-Python `SafeLoader`, the guard is
+#: not consulted, and the composer raises RecursionError itself.
+_NO_LIBYAML_CHILD = "import sys\nsys.modules['yaml._yaml'] = None\n" + _DEEP_CHILD.replace(
+    "import sys, yaml\n",
+    "import sys, yaml\nfrom data_sheets_schema import duplicate_keys\n"
+    "assert duplicate_keys.FAST_LOADER is yaml.SafeLoader and duplicate_keys._CParser is None\n", 1).replace(
+    "assert \"#3817\" in str(exc)", "assert \"#3817\" not in str(exc)", 1)
 
 def _event_depth(text: str) -> int:
     """The nesting depth, from the pure-Python parser's event stream."""
@@ -179,7 +196,20 @@ class TestTheLibyamlDepthGuard(unittest.TestCase):
         proc = subprocess.run([sys.executable, "-c", _DEEP_CHILD], capture_output=True, text=True,
                               env=env, timeout=300)
         self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
-        self.assertEqual(proc.stdout.strip(), "refused 3")
+        self.assertEqual(proc.stdout.strip(), "refused 9")
+
+    def test_without_libyaml_the_fallback_raises_cleanly_on_the_same_texts(self):
+        """The pure-Python fallback: no guard, and a RecursionError from the
+        composer rather than a crash, byte-order marks included (#3826)."""
+        import os
+        import subprocess
+        import sys
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join([str(ROOT / "src"), str(ROOT), env.get("PYTHONPATH", "")])
+        proc = subprocess.run([sys.executable, "-c", _NO_LIBYAML_CHILD], capture_output=True, text=True,
+                              env=env, timeout=600)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        self.assertEqual(proc.stdout.strip(), "refused 9")
 
     def test_the_guard_refuses_one_level_past_the_limit_and_scans_at_it(self):
         """With the limit lowered, the boundary is testable without deep text:
@@ -202,25 +232,49 @@ class TestTheLibyamlDepthGuard(unittest.TestCase):
             self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n")], ["a"])
             self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n", loader=yaml.SafeLoader)], ["a"])
 
-    def test_the_textual_bound_is_never_below_the_nesting(self):
-        from data_sheets_schema.duplicate_keys import depth_bound
-        unparseable = ("id: [unterminated\n", "a: \0", "a: 1\n---\nb: 2\n")
-        texts = [t for t in PARITY if t not in unparseable] + [
+    def test_the_guard_counts_the_depth_the_composer_reaches(self):
+        """#3826: the guard's depth is libyaml's own event stream, so no
+        spelling of the nesting (a byte-order mark, flow or block style,
+        properties, aliases) moves it off the depth the composer reaches. Each
+        text is refused exactly one level below its depth and passed at it."""
+        from data_sheets_schema.duplicate_keys import nesting_exceeds
+        bom = "\ufeff"
+        skipped = ("id: [unterminated\n", "a: \0", "a: 1\n---\nb: 2\n", "")   # unparseable, or no collection
+        texts = [t for t in PARITY if t not in skipped] + [
             _block(40), _flow(40), "- - - - - x\n", "? - - a\n: - - b\n", "- a:\n  - b:\n    - c: 1\n",
-            "a:\n- b:\n  - c\n", "[a: [b: [c: [d: 1]]]]\n", "{a: [{b: [x]}]}\n", "- &x !!map\n  k: [1, [2]]\n",
-            "k: |\n  [[[[\n", "a:\r\n  b:\r\n    - [c]\r\n", "a:\u2028  b: 1\n", "",
-            # A sequence at its key's column, and a mapping one column further
-            # in on the next line: two levels per column, 41 deep at column 20,
-            # which is why block nesting is bounded by twice the column + 1.
+            "a:\n- b:\n  - c\n", "[a: [b: [c: [d: 1]]]]\n", "{a: [{b: [x]}]}\n", "- &x !!map\n  k: [1, [2]]\n- *x\n",
+            "k: |\n  [[[[\n", "a:\r\n  b:\r\n    - [c]\r\n", "a:\u2028  b: 1\n",
             "".join(" " * i + "a:\n" + " " * i + "-\n" for i in range(20)) + " " * 20 + "x: 1\n",
+            bom + "- - - - - - x\n", bom + _flow(12), bom + "[" * 9 + "]" * 9 + "\n", bom + "? - - a\n: - - b\n",
+            bom + "- [a: [{b: [c]}]]\n", bom + _block(8), "- " * 5 + "[" * 5 + "{k: v}" + "]" * 5 + "\n",
         ]
         for text in texts:
-            with self.subTest(text=text[:60]):
-                self.assertGreaterEqual(depth_bound(text), _event_depth(text))
+            depth = _event_depth(text)
+            with self.subTest(text=text[:60], depth=depth):
+                self.assertGreater(depth, 0)
+                self.assertTrue(nesting_exceeds(text, yaml.CSafeLoader, depth - 1))
+                self.assertFalse(nesting_exceeds(text, yaml.CSafeLoader, depth))
+        self.assertFalse(nesting_exceeds("", yaml.CSafeLoader, 0))
+        # A stream the parser rejects is too deep only if it passed the limit
+        # first; otherwise the composer reports the error at the same place.
+        self.assertTrue(nesting_exceeds("id: [unterminated\n", yaml.CSafeLoader, 1))
+        self.assertFalse(nesting_exceeds("id: [unterminated\n", yaml.CSafeLoader, 2))
+        self.assertFalse(nesting_exceeds("a: \0", yaml.CSafeLoader, 0))
 
-    def test_the_event_pass_runs_only_where_the_bound_cannot_clear_the_text(self):
-        """A text whose bound is within the limit is parsed once, not twice."""
+    def test_a_leading_byte_order_mark_is_refused_at_the_limit_like_any_other_text(self):
+        """#3826: the case the column count missed, at a lowered limit."""
         from data_sheets_schema import duplicate_keys
+        bom = "\ufeff"
+        with unittest.mock.patch.object(duplicate_keys, "LIBYAML_MAX_DEPTH", 6):
+            for text in (bom + "- " * 7 + "x\n", bom + _flow(7), bom + "[" * 7 + "]" * 7 + "\n"):
+                with self.subTest(text=text[:30]):
+                    with self.assertRaisesRegex(RecursionError, "more than 6 deep.*#3817"):
+                        find_duplicate_keys(text, loader=yaml.CSafeLoader, strict=True)
+            self.assertEqual(len(find_duplicate_keys(bom + _flow(6), loader=yaml.CSafeLoader, strict=True)), 1)
+
+    def test_every_libyaml_scan_parses_its_text_for_depth_first(self):
+        """No text is cleared without the event pass: a libyaml scan opens the
+        loader twice, the pass and the composer."""
         opened = []
 
         class Counting(yaml.CSafeLoader):
@@ -229,11 +283,7 @@ class TestTheLibyamlDepthGuard(unittest.TestCase):
                 super().__init__(stream)
 
         self.assertEqual(len(find_duplicate_keys("a: 1\na: 2\nb: [[1]]\n", loader=Counting)), 1)
-        self.assertEqual(len(opened), 1)
-        with unittest.mock.patch.object(duplicate_keys, "LIBYAML_MAX_DEPTH", 3):
-            opened.clear()
-            self.assertEqual(len(find_duplicate_keys("a: 1\na: 2\nb: [[1]]\n", loader=Counting)), 1)
-            self.assertEqual(len(opened), 2)
+        self.assertEqual(len(opened), 2)
 
 
 GOOD = {"pair": {"ran": True, "errors": 0}, "report": {"checked": True, "findings": [], "claims_checked": 3},

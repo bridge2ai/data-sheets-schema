@@ -18,7 +18,6 @@ merge.
 
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -91,43 +90,24 @@ except ImportError:                                        # pragma: no cover
 
 _COLLECTION_START = (yaml.MappingStartEvent, yaml.SequenceStartEvent)
 _COLLECTION_END = (yaml.MappingEndEvent, yaml.SequenceEndEvent)
-#: The run of indentation, block indicators (`-`, `?`, `:`, `---`) and node
-#: properties at a line's start. A block collection starts within it, at its
-#: end at the latest. It admits forms libyaml rejects (tabs, `--- -`), which
-#: only raises the bound.
-_BLOCK_PREFIX = re.compile(r"[ ]*(?:(?:---|[-?:])(?:[ \t]+|$)|[&!][^ \t]*[ \t]+)*")
-
-
-def depth_bound(text: str) -> int:
-    """An upper bound on the collection nesting depth of `text`, from its
-    characters alone (#3817). Along a chain of nested block collections the
-    start column strictly increases, except that a sequence may sit at its
-    mapping key's column, so block nesting is at most twice (the largest
-    start column + 1). A flow collection opens with `{` or `[`, and a `[` may
-    also hold a single-pair mapping (`[a: b]`), so flow nesting is at most
-    `2 * count("[") + count("{")`. Flow content cannot hold a block
-    collection, so the two add. Brackets and prefixes inside scalars only
-    raise the bound."""
-    column = max((_BLOCK_PREFIX.match(line).end() for line in text.splitlines()), default=0)
-    return 2 * (column + 1) + 2 * text.count("[") + text.count("{")
 
 
 def nesting_exceeds(text: str, loader: type, limit: int) -> bool:
     """Whether `text` nests collections more than `limit` deep, decided
-    without composing it: `depth_bound` first, and only where that is over the
-    limit, the loader's event stream, which libyaml parses with explicit
-    stacks rather than recursion. A stream the parser rejects before passing
-    the limit is not too deep here; the composer then reports its error."""
-    if depth_bound(text) <= limit:
-        return False
-    try:
-        parser = loader(text)
-    except yaml.YAMLError:
-        return False
+    without composing it (#3817, #3826): the loader's own event stream
+    (`yaml.parse`), whose collection start and end events are counted. libyaml
+    parses with explicit stacks rather than recursion, and its composer
+    consumes exactly these events, so the count is the depth the composer
+    would reach, whatever the text spells it with: a leading byte-order
+    mark, flow or block style, indentation, anchors, tags or aliases (an
+    alias is one event and nests nothing). A stream the parser rejects before
+    passing the limit is not too deep here; the composer then reports its
+    error at the same place. There is no textual shortcut: two of them were
+    defeated in review (#3817, #3826), so every text is parsed once here and
+    once more by the composer."""
     depth = 0
     try:
-        while parser.check_event():
-            event = parser.get_event()
+        for event in yaml.parse(text, Loader=loader):
             if isinstance(event, _COLLECTION_START):
                 depth += 1
                 if depth > limit:
@@ -136,8 +116,6 @@ def nesting_exceeds(text: str, loader: type, limit: int) -> bool:
                 depth -= 1
     except yaml.YAMLError:
         return False
-    finally:
-        parser.dispose()
     return False
 
 
@@ -151,9 +129,10 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
     `loader` composes the node tree the rule walks; the rule is the same
     whichever composes it. The default is the pure-Python `SafeLoader`, as
     it always was; `FAST_LOADER` (libyaml's) gives the same findings about
-    twelve times faster (CPU time over the 1,616 YAML files under
+    nine times faster (CPU time over the 1,616 YAML files under
     `data/d4d_concatenated` on 2026-09-30, the depth guard below included:
-    58.4 s against 4.8 s; #3704, #3800, #3817).
+    58.4 s against 6.7 s, of which the guard's event pass is 2.3 s; #3704,
+    #3800, #3817, #3826).
 
     A text that cannot be scanned — the reader or composer rejects it, or it
     nests past the interpreter's recursion limit — gives `[]` by default:
@@ -171,9 +150,13 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
     thousands of levels its C recursion overflows the stack and the process
     dies with SIGSEGV, which no `except` can catch (#3817). Such a text is
     refused as one nested past the recursion limit — `[]`, or under `strict`
-    a `RecursionError` — before libyaml composes it. The walk could not have
-    reached its keys; a tree nested that deep only in key position, which the
-    walk does not enter, is refused too, as the pure-Python loader refuses it.
+    a `RecursionError` — before libyaml composes it. The depth is counted on
+    the loader's own event stream (`nesting_exceeds`), which libyaml builds
+    without recursing, so it is the depth the composer would reach however
+    the text spells it: a byte-order mark, flow or block style, properties.
+    The walk could not have reached its keys; a tree nested that deep only in
+    key position, which the walk does not enter, is refused too, as the
+    pure-Python loader refuses it.
     The pure-Python `SafeLoader` is not checked: it raises `RecursionError`
     itself, so the default path is unchanged."""
     out: list[dict[str, Any]] = []

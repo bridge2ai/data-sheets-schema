@@ -193,7 +193,18 @@ def test_a_record_too_deep_to_scan_is_refused_as_the_cli_refuses_it(head):
         m.load_record(text.encode())
 
 
-def test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing():
+#: The records the child builds, as expressions of `n`. The byte-order mark
+#: case is #3826's: `decode('utf-8')` keeps the mark and libyaml skips it, so
+#: a column count put this record's depth at 2 and handed it to the composer.
+_DEEP_RECORDS = {
+    "flow mappings": "'a: 1\\na: 2\\nb: ' + '{x: ' * n + '1' + '}' * n + '\\n'",
+    "byte-order mark, block sequence": "'\\ufeff' + '- ' * n + 'x\\n'",
+    "byte-order mark, flow mappings": "'\\ufeffa: 1\\na: 2\\nb: ' + '{x: ' * n + '1' + '}' * n + '\\n'",
+}
+
+
+@pytest.mark.parametrize("record", list(_DEEP_RECORDS.values()), ids=list(_DEEP_RECORDS))
+def test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing(record):
     """#3817: libyaml's composer recursed on the C stack and killed the
     process at this depth; `load_record` now refuses the record with
     ValueError. A subprocess, so a crash cannot take pytest down with it."""
@@ -207,7 +218,7 @@ def test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing():
         f"spec = importlib.util.spec_from_file_location('sdb', {str(SCRIPT)!r})\n"
         "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)\n"
         "n = 50_000\n"
-        "raw = ('a: 1\\na: 2\\nb: ' + '{x: ' * n + '1' + '}' * n + '\\n').encode()\n"
+        f"raw = ({record}).encode()\n"
         "try:\n"
         "    m.load_record(raw)\n"
         "except ValueError as exc:\n"
