@@ -39,6 +39,19 @@ def _tree(root: Path, records: dict[str, str]) -> Path:
     return concat
 
 
+def _assert_verdict_explained(case: unittest.TestCase, row: dict) -> None:
+    """A record is INVALID, with a finding at `/doi`, if its `doi` carries the
+    resolver URL #646 made invalid, and VALID if it does not — both
+    directions, so a bare-`doi` record invalid for any other reason fails
+    here rather than passing unexplained (#3597)."""
+    doi = (yaml.safe_load(Path(row["path"]).read_text(encoding="utf-8")) or {}).get("doi")
+    if isinstance(doi, str) and doi.startswith("https://doi.org/"):
+        case.assertEqual(row["status"], INVALID, row["findings"])
+        case.assertTrue(any("in /doi" in f for f in row["findings"]), row["findings"])
+    else:
+        case.assertEqual(row["status"], VALID, row["findings"])
+
+
 class TestSelection(unittest.TestCase):
     """Which records are judged, and how a verdict becomes a status — with the
     validator replaced, so these run in milliseconds."""
@@ -110,6 +123,26 @@ class TestTheInstrument(unittest.TestCase):
             self.assertIsNone(failure)
             self.assertEqual(len(findings), 1)
             self.assertIn("duplicate mapping key", findings[0])
+
+    def test_the_verdict_check_holds_in_both_directions(self):
+        """The helper the corpus test applies, on the real validator: it
+        accepts a resolver-URL `doi` judged invalid and a bare one judged
+        valid, and rejects a bare-`doi` record that is invalid for another
+        reason. Today's committed records all carry the resolver URL, so
+        only this test exercises the bare-`doi` direction (#3597)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            concat = _tree(Path(tmp), {
+                "rocrate_static_map/v1/BAD_d4d.yaml": RESOLVER_DOI,
+                "rocrate_static_map/v1/GOOD_d4d.yaml": VALID_RECORD,
+                "rocrate_static_map/v1/DUP_d4d.yaml": VALID_RECORD + "title: Another\n",
+            })
+            rows = {r["project"]: r for r in deterministic_validity(concat)}
+            self.assertEqual(set(rows), {"BAD", "GOOD", "DUP"})
+            _assert_verdict_explained(self, rows["BAD"])
+            _assert_verdict_explained(self, rows["GOOD"])
+            self.assertEqual(rows["DUP"]["status"], INVALID)
+            with self.assertRaises(AssertionError):
+                _assert_verdict_explained(self, rows["DUP"])
 
 
 class TestRunsCheckReportsIt(unittest.TestCase):
@@ -184,21 +217,19 @@ class TestTheCommittedArms(unittest.TestCase):
     def test_every_committed_record_gets_a_verdict_the_record_explains(self):
         """Each committed deterministic-arm record is judged (none left
         unchecked), and a record is invalid exactly where its `doi` still
-        carries the resolver URL #646 made invalid — the verdict follows the
-        bytes, not a count pinned here."""
+        carries the resolver URL #646 made invalid: invalid with a `/doi`
+        finding where it does, valid where it does not — the verdict follows
+        the bytes, not a count pinned here. All 8 records committed today
+        carry the resolver URL, so the valid direction does not run on this
+        corpus; `test_the_verdict_check_holds_in_both_directions` exercises it
+        on a fixture (#3597)."""
         concat = ROOT / CONCAT_DIR
         rows = deterministic_validity(concat)
         self.assertTrue(rows)
         self.assertEqual([], [r for r in rows if r["status"] == UNVERIFIED])
         for r in rows:
             with self.subTest(record=r["path"]):
-                doi = (yaml.safe_load(Path(r["path"]).read_text(encoding="utf-8")) or {}).get("doi")
-                resolver = isinstance(doi, str) and doi.startswith("https://doi.org/")
-                if resolver:
-                    self.assertEqual(r["status"], INVALID)
-                    self.assertTrue(any("in /doi" in f for f in r["findings"]), r["findings"])
-                else:
-                    self.assertFalse(any("in /doi" in f for f in r["findings"]), r["findings"])
+                _assert_verdict_explained(self, r)
 
     def test_an_unfiltered_check_reports_every_committed_record(self):
         """The first version passed `label` and `project` after the report
