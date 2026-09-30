@@ -419,16 +419,61 @@ class AmendedDeletions(unittest.TestCase):
         unattributed = rm.classify(before, after, _audit(), amended_paths={"description"})
         self.assertEqual(unattributed["deleted_curator_amend"], 1)
 
-    def test_a_member_of_a_list_is_marked_by_an_amend_on_its_list_or_any_member(self):
+    def test_a_member_of_a_list_is_marked_by_an_amend_on_its_list_or_the_member_its_edit_names(self):
         before = _record(keywords=["speech", "voice"], themes=["audio", "clinic"])
         after = _record(keywords=["speech", ""], themes=["audio"])
-        b = rm.classify(before, after, _audit(), amended_paths={"keywords[1]"})
+        edits = {"keywords[1]": [("voice", "")]}
+        b = rm.classify(before, after, _audit(), amended_paths={"keywords[1]"}, amended_edits=edits)
         self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
                          {"keywords[1]": True, "themes[1]": None})
-        for amended, want in (({"keywords"}, 1), ({"keywords[0]"}, 1), ({"keywords_other[1]"}, 0),
-                              ({"keywords[1].x"}, 0)):
+        for amended, want in (({"keywords"}, 1), ({"keywords_other[1]"}, 0), ({"keywords[1].x"}, 0)):
             self.assertEqual(rm.classify(before, after, _audit(), amended_paths=amended)["deleted_curator_amend"],
                              want, amended)
+        # A member amend whose edit is not recorded names no member (#3802).
+        bare = rm.classify(before, after, _audit(), amended_paths={"keywords[1]"})
+        self.assertEqual((bare["deleted_curator_amend"], bare["deleted_curator_amend_ambiguous"]), (0, 1))
+        self.assertTrue(next(r for r in bare["unfounded_paths"] if r["path"] == "keywords[1]")
+                        ["curator_amend_ambiguous"])
+        self.assertIn("1 deleted list member(s) an amend on their list may have emptied (ambiguous)",
+                      bare["summary"])
+
+    def test_an_amend_on_one_member_does_not_mark_a_sibling_a_model_deleted(self):
+        """#3802: reconcile_full drops 'clinic'; a curator later amends
+        keywords[0], emptying 'speech'. One leaf changed, and it was not
+        'clinic': 'clinic' is neither the curator's nor amended after its
+        removal, while 'speech', which the edit names, is the curator's."""
+        before = _record(keywords=["speech", "voice", "clinic"])
+        after = _record(keywords=["", "voice"])
+        kw = {"amended_paths": {"keywords[0]"}, "amended_edits": {"keywords[0]": [("speech", "")]}}
+        attributed = rm.classify(before, after, _audit(),
+                                 intermediates=[("reconcile_full", _record(keywords=["speech", "voice"]))], **kw)
+        rows = {r["path"]: r for r in attributed["unfounded_paths"]}
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "phase": "write", "curator_amend": True})
+        unattributed = rm.classify(before, after, _audit(), **kw)
+        rows = {r["path"]: r for r in unattributed["unfounded_paths"]}
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]"})
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "curator_amend": True})
+        self.assertEqual((unattributed["deleted_curator_amend"], unattributed["deleted_curator_amend_ambiguous"]),
+                         (1, 0))
+
+    def test_an_edit_that_fits_two_deleted_members_is_ambiguous(self):
+        before = _record(keywords=["voice", "a", "voice"])
+        after = _record(keywords=["", "a"])
+        b = rm.classify(before, after, _audit(), amended_paths={"keywords[0]"},
+                        amended_edits={"keywords[0]": [("voice", "")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+        self.assertTrue(all(r.get("curator_amend_ambiguous") for r in b["unfounded_paths"]))
+
+    def test_amend_edits_reads_the_recorded_replacement(self):
+        record = {"dispositions": [
+            {"disposition": "amend", "path": "keywords[0]", "replace": "speech", "with": "speech data"},
+            {"disposition": "amend", "path": "keywords[0]", "replace": "x", "with": ""},
+            {"disposition": "amend", "path": "title"},
+            {"disposition": "retain", "path": "description", "replace": "a", "with": "b"}]}
+        self.assertEqual(rm.amend_edits(record), {"keywords[0]": [("speech", "speech data"), ("x", "")],
+                                                  "title": []})
+        self.assertEqual(rm.amend_edits(None), {})
 
     def test_a_founded_amended_deletion_is_marked_and_not_counted_unfounded(self):
         before = _record(description="Old description words.")
@@ -501,6 +546,27 @@ class RunSchemaTables(unittest.TestCase):
                 self.assertEqual(tables, {"relationship_type": {"Foo": "bar", "foo": "bar", "bar": "bar",
                                                                 "baz": "baz"}})
                 self.assertEqual(basis["source"], "the run's schema, on disk")
+
+    def test_an_md5_pinned_record_whose_bytes_changed_on_disk_goes_to_git(self):
+        """#3803: an md5-only record is accepted from disk only where the md5
+        matches; changed bytes fall through to the committed version."""
+        from data_sheets_schema.provenance import GitUnavailable
+        with tempfile.TemporaryDirectory() as tmp:
+            path, _sha, md5 = self._schema_file(tmp)
+            data = path.read_bytes()
+            path.write_text(yaml.safe_dump({"enums": {}, "classes": {}}))     # not the run's bytes
+            record = {"schema": {"full_path": str(path), "full_md5": md5}}
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            return_value=(data, {"commit": "abc123", "matched_on": ["md5"]})) as got:
+                tables, basis = rm.run_enum_aliases(record)
+            got.assert_called_once_with(str(path), md5=md5, sha256=None)
+            self.assertEqual(basis["source"], "the run's schema, a git blob")
+            self.assertEqual(tables["relationship_type"]["Foo"], "bar")
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            side_effect=GitUnavailable("shallow clone")):
+                tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertEqual((basis["source"], basis["md5"]), ("today's schema", md5))
 
     def test_run_enum_aliases_recovers_a_committed_version_or_says_why_not(self):
         from data_sheets_schema.provenance import GitUnavailable
@@ -1325,6 +1391,36 @@ class OnDisk(unittest.TestCase):
         self.assertEqual(out["reconcile_full"][0], 0)
         self.assertIn("? deleted, unsorted description (reconcile_full, amended by a curator after the model "
                       "removed it)", out["reconcile_full"][1])
+
+    def test_for_record_reads_the_amends_recorded_edit_for_a_list_member(self):
+        """#3802 on disk: the disposition's `replace`/`with` names the member
+        an amend on keywords[0] emptied; without them the member is
+        ambiguous, and the CLI says so rather than naming the curator."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        out = {}
+        for recorded in (True, False):
+            with tempfile.TemporaryDirectory() as tmp:
+                prov = self._run(tmp, audit=False)
+                inter = prov.parent / "intermediate"
+                for f in (inter / "VOICE_reconcile_full.yaml", inter / "VOICE_repair_full_r1.yaml"):
+                    f.write_text(yaml.safe_dump(_record(description="d", keywords=["a1", "b2"])))
+                (prov.parent.parent.parent / "claudecode_api" / "L" / "VOICE_d4d.yaml").write_text(
+                    yaml.safe_dump(_record(description="d", keywords=["", "b2"])))
+                amend = {"item": "slot-001", "disposition": "amend", "path": "keywords[0]",
+                         **({"replace": "a1", "with": ""} if recorded else {})}
+                prov.write_text(yaml.safe_dump({"run": {"project": "VOICE", "label": "L"}, "dispositions": [amend]}))
+                b = rm.for_record(prov)
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_api",
+                                                                      "--label", "L", "--project", "VOICE"])
+            self.assertEqual(r.exit_code, 0, r.output)
+            out[recorded] = (b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"], r.output)
+        self.assertEqual(out[True][:2], (1, 0))
+        self.assertIn("? deleted, unsorted keywords[0] (write, a curator's amend)", out[True][2])
+        self.assertEqual(out[False][:2], (0, 1))
+        self.assertIn("? deleted, unsorted keywords[0] (write, an amend on its list may have emptied it "
+                      "(ambiguous))", out[False][2])
 
 class CliPastEnd(unittest.TestCase):
     def test_the_cli_reports_finding_paths_past_the_end(self):

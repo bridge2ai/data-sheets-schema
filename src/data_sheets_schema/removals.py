@@ -178,7 +178,13 @@ Two more annotations move no class either (#3366, #3367):
   would otherwise read as the model's deletion — and counted under
   `deleted_curator_amend`, never subtracted from `deleted` or `unfounded`;
   a member of a list of scalars, which has no address once gone, is marked
-  by an amend at or above its list or on any member of it. The enum-alias
+  by an amend at or above its list, or by an amend on one member whose
+  recorded edit (`replace` -> `with`) turns this member, and no other
+  deleted member of the list, into what that path now holds — a recorded
+  amend changes one leaf and is no evidence for a sibling (#3802). Where
+  the edit is not recorded or fits more than one deleted member, the row
+  is `curator_amend_ambiguous`, counted under
+  `deleted_curator_amend_ambiguous` and attributed to no one. The enum-alias
   form is read against the tables of the merged schema the run recorded
   (`run_enum_aliases`: the file on disk where its bytes hash to the
   record's `schema.full_sha256` or `full_md5`, else the committed version
@@ -253,7 +259,8 @@ INSTRUMENT = ("removals v3 (#3037, #3038, #3130, #3223; annotations #3366, #3367
               "value's relocation candidate reported at a content-word share of 0.7 or more; "
               "reported only, a flattening by a needle of at most two tokens or by the surplus "
               "route, a rewrite of the write-time normaliser's form (under the run's schema's "
-              "enum-alias tables) or at a curator's amend, and a deletion at a curator's amend")
+              "enum-alias tables) or at a curator's amend, and a deletion at a curator's amend "
+              "(a list member by the amend's recorded edit, else ambiguous)")
 
 #: Paths kept in the block per class; the counts are never capped.
 PATH_LIMIT = 50
@@ -350,8 +357,11 @@ NON_CHECKS = (
     "where they are not, the path alone decides, so a model rewrite a curator later amended "
     "reads as the amend (#3725). Both are counted in rewritten and rewritten_unfounded, never "
     "subtracted (#3366); a deletion marked a curator's amend is read by the same path test, a "
-    "member of a list of scalars by an amend on its list or any member of it, and is counted in "
-    "deleted and unfounded, never subtracted (#3702)",
+    "member of a list of scalars by an amend at or above its list or by an amend on one member "
+    "whose recorded edit fits this deleted member and no other (#3802) — that the edit's text "
+    "fits is not proof the curator's amend, rather than a model, removed it — and it is never "
+    "subtracted from deleted or unfounded (#3702, #3805); a list member an amend on its list "
+    "cannot be told apart for is marked ambiguous and attributed to no one",
     "that a flattening marked low-confidence was a coincidence, or that one not marked was not — "
     "a needle of one or two normalised tokens (an identifier-shaped value aside) or the "
     "dropped-entry surplus route is where a coincidence is likeliest, not proof of one; "
@@ -412,6 +422,12 @@ def values(record: Any) -> list[tuple[str, Any, str | None]]:
 
 def _text(value: Any) -> str:
     return normalise(value if isinstance(value, str) else str(value))
+
+
+def _ws(value: Any) -> str:
+    """Whitespace runs collapsed, as `d4d review disposition --amend`
+    compares a value before and after its edit (#903)."""
+    return " ".join(str(value).split())
 
 
 def _member_raw(value: str) -> str:
@@ -1353,6 +1369,7 @@ def _unchecked(reason: str) -> dict[str, Any]:
             "rewritten_normaliser": None, "rewritten_normaliser_unfounded": None, "rewritten_normaliser_by": None,
             "rewritten_curator_amend": None, "rewritten_curator_amend_unfounded": None,
             "deleted_curator_amend": None, "deleted_curator_amend_unfounded": None,
+            "deleted_curator_amend_ambiguous": None,
             "rewritten_unfounded_not_model": None,
             **{f"{cls}_paths{suffix}": ([] if not suffix else None)
                for cls in ("flattened", "founded", "unfounded", "unsorted", "rewritten")
@@ -1371,7 +1388,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
              intermediates: list[tuple[str, dict[str, Any] | None]] | None = None,
              audit_unread: str | None = None, snapshot_sha256: str | None = None,
              amended_paths: frozenset[str] | set[str] = frozenset(),
-             enum_aliases: dict[str, dict[str, str]] | None = None) -> dict[str, Any]:
+             enum_aliases: dict[str, dict[str, str]] | None = None,
+             amended_edits: dict[str, list[tuple[str, str]]] | None = None) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
     receipt, + the phase outputs in order) -> block.
 
@@ -1397,7 +1415,10 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     empties a value leaves nothing at its path, so without the mark it
     reads as the model's deletion. `enum_aliases` is the run's schema's
     enum-alias table for `normaliser_form` (`run_enum_aliases`, #3702);
-    None reads today's."""
+    None reads today's. `amended_edits` is each amended path's recorded
+    (`replace`, `with`) pairs (`amend_edits`): an amend on one member of a
+    list of scalars marks only the deleted member its edit identifies, and
+    without them such a member is `curator_amend_ambiguous` (#3802)."""
     if not isinstance(original, dict):
         return _unchecked("no phase-1 snapshot: the removals cannot be read against what phase 1 wrote (#899)")
     final = final if isinstance(final, dict) else {}
@@ -1406,6 +1427,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     record_id = original.get("id") if isinstance(original.get("id"), str) else None
     carried = dataset_identifier_forms(original)
     amended = frozenset(amended_paths)
+    amended_edits = {p: [(o, n) for o, n in (e or []) if isinstance(o, str) and isinstance(n, str)]
+                     for p, e in (amended_edits or {}).items()}
     own_ids = frozenset(i for i in (record_id, final.get("id")) if isinstance(i, str) and i)
     paths_receipted = receipt_paths(receipt)
     named = ([(n, via, fp) for n, f in enumerate(findings) if not _core_only(f)
@@ -1455,18 +1478,57 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     def amended_at(at: str | None) -> bool:
         return at is not None and (at in amended or any(a in amended for a in _ancestors(at)))
 
-    def amended_deletion(path: str, list_path: str | None) -> bool:
-        # A scalar under a key: an amend at or above where the join puts it
-        # in the final record, where the key an emptied value leaves is
-        # still found. A member of a list of scalars has no final address of
-        # its own once gone: an amend at or above the list, or on any member
-        # of it, marks it (#3702).
-        if not amended:
+    def edit_explains(value: Any, amend_path: str, old: str, new: str) -> bool:
+        # The amend's recorded edit, applied to this value as #903 proves it
+        # (whitespace runs collapsed, the first occurrence replaced), gives
+        # the value now at the amended path; nothing there reads as "".
+        v, o = _ws(value), _ws(old)
+        if not o or o not in v:
             return False
+        found, now = _resolve_value(final, amend_path)
+        return v.replace(o, _ws(new), 1) == (_ws(now) if found and now is not None else "")
+
+    def amended_deletion(path: str, value: Any, list_path: str | None) -> str | None:
+        # "amend", "ambiguous" or None. A scalar under a key: an amend at or
+        # above where the join puts it in the final record, where the key an
+        # emptied value leaves is still found. A member of a list of scalars
+        # has no final address of its own once gone: an amend at or above
+        # the list marks it, and an amend on one member marks only the
+        # member its recorded edit identifies — the one deleted member of
+        # that list whose value the edit turns into what the amended path
+        # now holds (#3802). A recorded amend changes one leaf, so it is no
+        # evidence for a sibling; where the edit is not recorded, or fits
+        # more than one deleted member, the member is "ambiguous" and not
+        # attributed to the curator (#3702).
+        if not amended:
+            return None
         at = remap_path(list_path or path, original, final)["path"]
         if list_path is None or at is None:
-            return amended_at(at)
-        return amended_at(at) or any(re.fullmatch(re.escape(at) + r"\[\d+\]", a) for a in amended)
+            return "amend" if amended_at(at) else None
+        if amended_at(at):
+            return "amend"
+        on_members = [a for a in amended if re.fullmatch(re.escape(at) + r"\[\d+\]", a)]
+        if not on_members:
+            return None
+        found, members = _resolve_value(original, list_path)
+        siblings = [(f"{list_path}[{j}]", m) for j, m in enumerate(members if found and isinstance(members, list)
+                                                                    else [])
+                    if f"{list_path}[{j}]" != path and not isinstance(m, (dict, list)) and _populated(m)
+                    and not at_final.carried(f"{list_path}[{j}]", list_path)]
+        verdict = None
+        for a in on_members:
+            edits = amended_edits.get(a) or []
+            if not edits:
+                verdict = "ambiguous"          # which member it changed is not recorded
+                continue
+            for old, new in edits:
+                if not edit_explains(value, a, old, new):
+                    continue
+                if any(edit_explains(m, a, old, new) for _p, m in siblings):
+                    verdict = "ambiguous"      # the edit fits another deleted member too
+                else:
+                    return "amend"
+        return verdict
 
     total = exempted = unaddressable = not_assessed = 0
     rows: dict[str, list[dict[str, Any]]] = {"flattened": [], "founded": [], "unfounded": [], "unsorted": [],
@@ -1542,7 +1604,12 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # A curator's recorded amend (#903) that emptied the value (#3702):
         # marked as a rewrite is, and only where the `write` phase deleted
         # it when phases are attributed. Reported, never subtracted.
-        if amended_deletion(path, list_path):
+        mark = amended_deletion(path, value, list_path)
+        if mark == "ambiguous":
+            # An amend on its list names no member it can be told apart as
+            # (#3802): reported, attributed to no one.
+            row["curator_amend_ambiguous"] = True
+        elif mark == "amend":
             if not attributed or row["phase"] == "write":
                 row["curator_amend"] = True
             else:
@@ -1593,6 +1660,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     norm = [r for r in rows["rewritten"] if r.get("normaliser")]
     amend = [r for r in rows["rewritten"] if r.get("curator_amend")]
     amend_deleted = [r for r in deleted_rows if r.get("curator_amend")]
+    amend_ambiguous = [r for r in deleted_rows if r.get("curator_amend_ambiguous")]
     block: dict[str, Any] = {
         "instrument": INSTRUMENT, "checked": True, "reason": None,
         "snapshot_values": total, "exempt": exempted, "unaddressable": unaddressable,
@@ -1659,6 +1727,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         "deleted_curator_amend": len(amend_deleted),
         "deleted_curator_amend_unfounded": (sum(1 for r in rows["unfounded"] if r.get("curator_amend"))
                                             if sorted_ else None),
+        # A list member an amend on another member of its list may or may
+        # not have emptied (#3802): attributed to no one, counted apart.
+        "deleted_curator_amend_ambiguous": len(amend_ambiguous),
         # Either mark, each rewrite once: the unfounded rewrites not the model's own.
         "rewritten_unfounded_not_model": (sum(1 for r in rows["rewritten"] if not r["founded"]
                                               and (r.get("normaliser") or r.get("curator_amend")))
@@ -1734,6 +1805,10 @@ def _v3_summary(block: dict[str, Any]) -> str:
     if block.get("deleted_curator_amend"):
         # #3702: deletions a curator's recorded amend made, not the model.
         s += f" · of the deletions, {block['deleted_curator_amend']} a curator's amend"
+    if block.get("deleted_curator_amend_ambiguous"):
+        # #3802: list members an amend on their list cannot be told apart for.
+        s += (f" · {block['deleted_curator_amend_ambiguous']} deleted list member(s) an amend on their list"
+              " may have emptied (ambiguous)")
     review = block.get("source_review")
     if review is not None and review.get("deleted") is not None:
         s += (f" · source review: {review['deleted']['supported']} deleted reviewed supported"
@@ -1836,6 +1911,21 @@ def amended_paths(record: dict[str, Any] | None) -> frozenset[str]:
                      if isinstance(d, dict) and d.get("disposition") == "amend" and isinstance(d.get("path"), str))
 
 
+def amend_edits(record: dict[str, Any] | None) -> dict[str, list[tuple[str, str]]]:
+    """amended path -> the (`replace`, `with`) pairs its `amend`
+    dispositions recorded (#903): what `classify` needs to tell which
+    member of a list of scalars an amend on one member changed (#3802).
+    An entry without both strings contributes no pair."""
+    rows = (record or {}).get("dispositions") if isinstance(record, dict) else None
+    out: dict[str, list[tuple[str, str]]] = {}
+    for d in (rows if isinstance(rows, list) else []):
+        if isinstance(d, dict) and d.get("disposition") == "amend" and isinstance(d.get("path"), str):
+            pairs = out.setdefault(d["path"], [])
+            if isinstance(d.get("replace"), str) and isinstance(d.get("with"), str):
+                pairs.append((d["replace"], d["with"]))
+    return out
+
+
 def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dict[str, Any]:
     """The block for one run on disk. Read-only: nothing under the run's
     directories is written, and the provenance record is not changed.
@@ -1899,7 +1989,7 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
                      receipt=receipt, intermediates=None if evidence else stages,
                      audit_unread=(a_why or "unreadable") if a_state == "unusable" else None,
                      snapshot_sha256=(pin or {}).get("sha256"), amended_paths=amended_paths(record),
-                     enum_aliases=tables)
+                     enum_aliases=tables, amended_edits=amend_edits(record))
     block["artifacts"] = {
         "phase1_snapshot": pin, "final": str(paths["full"]),
         "audit": {"state": a_state, "path": str(a_path) if a_path else None,
