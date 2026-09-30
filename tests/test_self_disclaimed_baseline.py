@@ -192,6 +192,26 @@ def test_a_receipt_beside_a_refused_final_is_not_counted_as_checked(corpus, refu
     assert "| method_a | 0 | 1 |" in md
 
 
+@pytest.mark.parametrize("final_refused", [False, True])
+@pytest.mark.parametrize("receipt_text", ["chunks: [\n", "chunks: {}\n"])
+def test_a_refused_receipt_is_neither_checked_nor_not_checked(corpus, receipt_text, final_refused):
+    """`not checked` is a *readable* receipt whose final or snapshot was
+    refused (#3730); a receipt that is itself refused (not YAML, or no
+    `chunks` list) is listed as unreadable and counted in neither column
+    (#3757), whether or not its final parses."""
+    m = _script()
+    receipt = dump(corpus / "method_a_core" / LABEL / "P_coverage_receipt.yaml", receipt_text)
+    if final_refused:
+        dump(corpus / "method_a" / LABEL / "P_d4d.yaml", "a: 1\na: 2\n")
+    collected = m.collect(corpus)
+    s = m.summarise(collected, m.LEXICON_VERSION)
+    a, t = s["methods"]["method_a"], s["total"]
+    assert (a["records"], a["unreadable"]) == (1, int(final_refused))
+    assert (a["receipts"], a["receipts_unchecked"], a["rp_members"]) == (0, 0, 0)
+    assert (t["receipts"], t["receipts_unchecked"]) == (0, 0)
+    assert any(line.startswith(receipt.relative_to(corpus).as_posix() + " (") for line in s["unreadable"])
+
+
 def test_check_is_read_only_and_fails_when_stale(corpus, tmp_path, monkeypatch):
     m = _script()
     out_md, pins = tmp_path / "note.md", tmp_path / "pins.yaml"
