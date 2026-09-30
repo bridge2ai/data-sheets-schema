@@ -512,11 +512,27 @@ class TestOneReaderOfTheManifestBytes(unittest.TestCase):
         self.assertEqual(problems, ["related_but_distinct[0]: entry is a str, not a mapping; skipped",
                                     "related_but_distinct[0]: entry is a NoneType, not a mapping; skipped"])
 
+    def test_check_manifest_reads_in_bundle_through_the_shared_helper(self):
+        """Structural, because the wiring is behaviour-preserving: an inline
+        copy of the `in_bundle` shape handling gives the same rows as the
+        helper, so no output-only test can tell them apart (#3662). Patching
+        the helper to answer a sentinel shows `check_manifest` asks it."""
+        from unittest import mock
+        m = self._manifest(yaml.safe_dump({"projects": {"P": [{"id": "s1"}]}, "scope": {"P": {
+            "referent_id": "x", "related_but_distinct": [{"id": "y", "in_bundle": ["s1"]}]}}}))
+        with mock.patch.object(scope, "_in_bundle_as_written", lambda entry: ["SENTINEL-3650"]):
+            problems = [p["problem"] for p in scope.check_manifest(m)]
+            self.assertEqual(scope.in_bundle_of({"in_bundle": ["s1"]}), ["SENTINEL-3650"])
+        self.assertEqual(problems, [
+            "related dataset claims source 'SENTINEL-3650' is in this bundle; "
+            "the manifest lists no such source for P"])
+
     def test_the_in_bundle_rows_keep_the_order_written(self):
-        """`check_manifest` reads `in_bundle` through the helper `in_bundle_of`
-        filters, so the identifiers it matches are the ones `in_bundle_of`
-        gives, and a value that is not an identifier is still reported in
-        its place."""
+        """A value that is not an identifier is reported in its place among
+        the identifiers, and the identifiers `check_manifest` matches are
+        the ones `in_bundle_of` gives. This checks output only; that the
+        checker reads `in_bundle` through the shared helper is the test
+        above (#3662)."""
         written = ["gone", {"k": 1}, "s1", True, 7]
         m = self._manifest(yaml.safe_dump({"projects": {"P": [{"id": "s1"}]}, "scope": {"P": {
             "referent_id": "x", "related_but_distinct": [{"id": "y", "in_bundle": written}]}}}))
