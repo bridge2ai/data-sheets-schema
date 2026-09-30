@@ -191,7 +191,8 @@ Two more annotations move no class either (#3366, #3367):
   recorded, can be read as removing another deleted member instead
   (one sharing this member's text included), or cannot be read against
   the final list (no list there, or several amends of which it attests
-  only the last), the row is `curator_amend_ambiguous`, counted under
+  only the last — an amend entry whose edit is not recorded counted
+  among them, #3842), the row is `curator_amend_ambiguous`, counted under
   `deleted_curator_amend_ambiguous` and attributed to no one. Where phases
   are attributed, a member a model phase already removed is neither marked
   ambiguous nor counted as a rival fit (#3818). The enum-alias
@@ -1406,7 +1407,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
              audit_unread: str | None = None, snapshot_sha256: str | None = None,
              amended_paths: frozenset[str] | set[str] = frozenset(),
              enum_aliases: dict[str, dict[str, str]] | None = None,
-             amended_edits: dict[str, list[tuple[str, str]]] | None = None) -> dict[str, Any]:
+             amended_edits: dict[str, list[tuple[str, str] | None]] | None = None) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
     receipt, + the phase outputs in order) -> block.
 
@@ -1433,7 +1434,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     reads as the model's deletion. `enum_aliases` is the run's schema's
     enum-alias table for `normaliser_form` (`run_enum_aliases`, #3702);
     None reads today's. `amended_edits` is each amended path's recorded
-    (`replace`, `with`) pairs (`amend_edits`): #903 records an amend on
+    (`replace`, `with`) pairs (`amend_edits`), one per amend in the order
+    recorded, None (or a pair without a nonblank `replace`) for an amend
+    whose edit is not recorded — still an amend on that path (#3842): #903 records an amend on
     one member of a list of scalars at the list's path (#3828), and it
     marks only the deleted member its edit, read against the final list,
     identifies; without them such a member is `curator_amend_ambiguous`
@@ -1448,8 +1451,14 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     record_id = original.get("id") if isinstance(original.get("id"), str) else None
     carried = dataset_identifier_forms(original)
     amended = frozenset(amended_paths)
-    amended_edits = {p: [(o, n) for o, n in (e or []) if isinstance(o, str) and _ws(o) and isinstance(n, str)]
-                     for p, e in (amended_edits or {}).items()}
+    # Every amend entry counts as an amend on its path; one whose edit is not
+    # a usable (`replace`, `with`) pair is kept as None, not dropped, so a
+    # list with one recorded and one unrecorded amend is not read as a list
+    # with one recorded amend (#3842).
+    amended_edits = {p: [(e[0], e[1]) if (isinstance(e, (tuple, list)) and len(e) == 2
+                                          and isinstance(e[0], str) and _ws(e[0]) and isinstance(e[1], str))
+                         else None for e in (es or [])]
+                     for p, es in (amended_edits or {}).items()}
     own_ids = frozenset(i for i in (record_id, final.get("id")) if isinstance(i, str) and i)
     paths_receipted = receipt_paths(receipt)
     named = ([(n, via, fp) for n, f in enumerate(findings) if not _core_only(f)
@@ -1565,10 +1574,12 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # against the list's value in the final record (`list_edit_reading`),
         # can, and the amend marks only the deleted members of the list it
         # removed in every reading (one changed member, or, on a flow list,
-        # the members it dropped, #3835). Where the edit is not recorded, can
+        # the members it dropped, #3835). Where the edit is not recorded (the
+        # last amend's edit, or any amend's where an earlier one's is not
+        # recorded: every amend entry counts, #3842), can
         # be read as removing another deleted member instead, the path holds
         # no list to read it against, or the
-        # list carries more than one recorded amend (the final list attests
+        # list carries more than one amend (the final list attests
         # only the last) and the last does not name this member alone, the
         # member is "ambiguous" and not attributed to the curator (#3702,
         # #3802). An amend above the list marks every member. Where phases
@@ -1585,7 +1596,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if at not in amended:
             return None
         edits = amended_edits.get(at) or []
-        if not edits:
+        if not edits or edits[-1] is None:
             return "ambiguous"                 # which member it changed is not recorded
         if not isinstance(_resolve_value(final, at)[1], list):
             return "ambiguous"                 # no list at the path to read the edit against
@@ -1598,7 +1609,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         reading = list_edit_reading(value, at, *edits[-1], siblings)
         if len(edits) > 1:
             # The final list attests only the last of several amends at its
-            # path; the earlier edits changed a list nothing records.
+            # path, recorded or not (#3842); the earlier edits changed a list
+            # nothing records.
             return "amend" if reading == "amend" else "ambiguous"
         # None: the edit names another member. "ambiguous": it can be read
         # as removing another deleted member instead of, or as well as, one
@@ -1990,13 +2002,16 @@ def amended_paths(record: dict[str, Any] | None) -> frozenset[str]:
                      if isinstance(d, dict) and d.get("disposition") == "amend" and isinstance(d.get("path"), str))
 
 
-def amend_edits(record: dict[str, Any] | None) -> dict[str, list[tuple[str, str]]]:
+def amend_edits(record: dict[str, Any] | None) -> dict[str, list[tuple[str, str] | None]]:
     """amended path -> the (`replace`, `with`) pairs its `amend`
     dispositions recorded (#903): what `classify` needs to tell which
     member of a list of scalars an amend changed, since #903 records such
     an amend at the list's path, never a member's (#3802, #3828).
-    An entry without both strings, or with an empty `replace` (which #903
-    refuses), contributes no pair."""
+    One item per amend entry, in the order recorded. An entry without both
+    strings, or with an empty `replace` (which #903 refuses), is None: it is
+    still an amend on its path, whose edit is not recorded, so `classify`
+    counts it among the path's amends rather than reading the path as
+    carrying only its recorded ones (#3842)."""
     rows = (record or {}).get("dispositions") if isinstance(record, dict) else None
     out: dict[str, list[tuple[str, str]]] = {}
     for d in (rows if isinstance(rows, list) else []):
@@ -2004,6 +2019,8 @@ def amend_edits(record: dict[str, Any] | None) -> dict[str, list[tuple[str, str]
             pairs = out.setdefault(d["path"], [])
             if isinstance(d.get("replace"), str) and _ws(d["replace"]) and isinstance(d.get("with"), str):
                 pairs.append((d["replace"], d["with"]))
+            else:
+                pairs.append(None)
     return out
 
 

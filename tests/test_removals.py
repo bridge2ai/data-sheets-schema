@@ -542,13 +542,49 @@ class AmendedDeletions(unittest.TestCase):
             {"disposition": "amend", "path": "title"},
             {"disposition": "amend", "path": "title", "replace": " ", "with": "x"},
             {"disposition": "retain", "path": "description", "replace": "a", "with": "b"}]}
+        # An entry whose edit is not recorded is still an amend on its path (#3842).
         self.assertEqual(rm.amend_edits(record), {"keywords": [("speech", "speech data"), ("x", "")],
-                                                  "title": []})
+                                                  "title": [None, None]})
         self.assertEqual(rm.amend_edits(None), {})
         # An empty edit fits nothing it could name, so the member stays ambiguous.
         b = rm.classify(_record(keywords=["x", "y"]), _record(keywords=["ax"]), _audit(),
                         amended_paths={"keywords"}, amended_edits={"keywords": [("", "a")]})
         self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+
+    def test_an_unrecorded_amend_on_the_list_counts_among_its_amends(self):
+        """#3842: a list carrying one recorded and one unrecorded amend is not
+        read as a list with one recorded amend. The member the recorded edit
+        names is the curator's only where that edit is the last; the member
+        it does not name is ambiguous, since the unrecorded amend could have
+        emptied it — whichever order they were recorded in."""
+        before = _record(keywords=["speech", "beta", "gamma"])
+        after = _record(keywords=["speech", "vocal"])
+        recorded = {"disposition": "amend", "path": "keywords", "replace": "beta", "with": "vocal"}
+        cases = (({"disposition": "amend", "path": "keywords"}, True),
+                 ({"disposition": "amend", "path": "keywords", "replace": "", "with": ""}, True),
+                 ({"disposition": "amend", "path": "keywords", "replace": " ", "with": "x"}, True),
+                 ({"disposition": "amend", "path": "keywords"}, False))
+        for unrecorded, recorded_last in cases:
+            with self.subTest(unrecorded=unrecorded, recorded_last=recorded_last):
+                rows = [unrecorded, recorded] if recorded_last else [recorded, unrecorded]
+                record = {"dispositions": rows}
+                b = rm.classify(before, after, None, amended_paths=rm.amended_paths(record),
+                                amended_edits=rm.amend_edits(record))
+                marks = {r["path"]: r for r in b["unsorted_paths"]}
+                self.assertNotIn("curator_amend", marks["keywords[2]"])
+                self.assertTrue(marks["keywords[2]"].get("curator_amend_ambiguous"))
+                if recorded_last:
+                    # The final list attests the recorded edit: beta is the curator's.
+                    self.assertTrue(marks["keywords[1]"].get("curator_amend"))
+                    self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 1))
+                else:
+                    # The last amend's edit is not recorded: nothing can be read.
+                    self.assertTrue(marks["keywords[1]"].get("curator_amend_ambiguous"))
+                    self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+        # A caller that passes an unusable pair directly gets the same reading.
+        b = rm.classify(before, after, None, amended_paths={"keywords"},
+                        amended_edits={"keywords": [("", ""), ("beta", "vocal")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 1))
 
     def test_a_founded_amended_deletion_is_marked_and_not_counted_unfounded(self):
         before = _record(description="Old description words.")
