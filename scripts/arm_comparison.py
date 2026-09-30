@@ -47,6 +47,14 @@ Bases, stated once and printed into the output:
   flattenings (#3367) and the rewrites not the model's (#3366), are
   recomputed live and read-only (`removals.for_record`); the
   unrecorded-removal count is the record's `report_claims` block.
+- **omission candidates** (#3335): an intermittent slot a filling replicate
+  receipts with a snippet verified in its own chunk, the record's bundle
+  bytes recovered from git where they drifted
+  (`replicate_structure.record_chunk_texts`); `–` for arms with no receipt.
+- **release inventory** (#3282): `release_inventory` on today's source and
+  crate manifests, and on the source-manifest version each arm's records
+  pinned; the doi/license/version/issued differences it explains are
+  labelled corpus-driven beside the rubric10 sub-elements they decide.
 - **spend is deliberately absent**: `api_usage` (billed input/output) and
   `run_observed` (cache-inclusive runner totals) are different quantities and
   must never sit in one column (#400).
