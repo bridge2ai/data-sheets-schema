@@ -1262,6 +1262,13 @@ def test_the_evidence_context_counts_cover_only_the_quotes_examined():
         {**bad, "chunk": "c002", "quote": "perform community focus groups"}]}]
     c = sc.review_status_expression(_review(("/x", examined)), view=view)["counts"]
     assert (c["quotes_examined_for_context"], c["quotes_chunk_not_in_bundle"], c["unlocated_quotes"]) == (3, 1, 1)
+    # A located quote that no planned marker governs raises no flag and is
+    # still counted by the form that located it (#3821).
+    calm = [{**_claim("The team collaborates.", "fact"), "evidence": [
+        {**bad, "chunk": "c002", "quote": "the team collaborates widely"}]}]
+    out = sc.review_status_expression(_review(("/x", calm)), view=view)
+    assert out["flags"] == []
+    assert out["counts"]["quotes_located_by_form"] == {f: int(f == "plain") for f in sc.HAYSTACK_FORMS}
 
 
 def test_a_review_naming_no_artifact_cannot_be_bound_to_a_record():
