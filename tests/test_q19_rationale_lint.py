@@ -798,9 +798,14 @@ def test_an_outer_list_item_after_a_concession_is_read_by_parallel_structure():
     # The concession's own list opens with the same word: whose item is it?
     "Held at 4 because no errata are recorded, no changelog despite no PROV graph, "
     "and no was_derived_from.",
-    # A disclaimer's list is never an outer list.
+    # A disclaimer's list is never an outer list: a pure disclaimer, which
+    # does not concede either ...
     "Held at 4 because no errata are recorded, no changelog, not because of the prose form, "
     "no was_derived_from.",
+    # ... and one that concedes as it disclaims, where only the disclaimer
+    # guard in `_outer_item` keeps the item out (#3465).
+    "Held at 4 because no errata are recorded, no changelog, although nothing is deducted "
+    "for the prose form, no was_derived_from.",
     # An acceptance whose item does not repeat the outer list's opening.
     "Held at 4 because no errata are recorded, no changelog, which the rubric accepts, "
     "and was_derived_from.",
@@ -1488,6 +1493,32 @@ def test_a_label_cue_clause_naming_both_kinds_is_not_read(label):
 def test_a_label_cue_clause_naming_one_kind_is_read(label, concern):
     result = lint_q19(item(label=label, note=_NEUTRAL))
     assert result.flagged and concern in result.concerns(REPRESENTATION), label
+
+
+@pytest.mark.parametrize("note, verdict, reasons", [
+    ("Derivation is described across four fields, but this keeps it from 5. "
+     "Version history is excellent.", REPRESENTATION_ONLY,
+     [("scattered", "Derivation is described across four fields")]),
+    ("Lineage is recorded as human-readable prose, but it is held at 4 for that reason.",
+     REPRESENTATION_ONLY, [("machine_form", "Lineage is recorded as human-readable prose")]),
+    ("The provenance is a human-readable narrative, however, which keeps it from 5.",
+     REPRESENTATION_ONLY, [("machine_form", "The provenance is a human-readable narrative")]),
+    ("Errata are recorded in the changelog, but that falls short of 5.",
+     SUBSTANTIVE_ONLY, [("version_history", "Errata are recorded in the changelog")]),
+    # The cue's part names a gap word ("not") and still nothing of its own.
+    ("The provenance is a human-readable narrative, but that is why it does not reach 5.",
+     REPRESENTATION_ONLY, [("machine_form", "The provenance is a human-readable narrative")]),
+])
+def test_a_cue_naming_nothing_after_a_contrast_points_back_across_it(note, verdict, reasons):
+    """#3464: a cue that names nothing points back at the words before it,
+    which are read, even across "but", "whereas" or "however". Cut at the
+    contrast, the reason was dropped and the sentence named none, so its
+    neighbour was read in its place: credit ("Version history is
+    excellent.") became the stated reason and the verdict flipped."""
+    result = lint_q19(item(note=note))
+    assert result.basis == STATED
+    assert (result.verdict, [(r.concern, r.clause) for r in result.reasons]) == (
+        verdict, reasons), note
 
 
 # -- the committed corpus -----------------------------------------------------

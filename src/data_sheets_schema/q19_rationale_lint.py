@@ -74,7 +74,9 @@ machine-readable form and lineage across fields. So:
   where the cue's clause names a concern of its own ("Checksums are
   recorded (md5 on every archive), and it is held at 4 because no PROV
   graph is given"). A cue that names nothing ("…, which keeps it from 5")
-  points back at what comes before it, which is read. Credit after the
+  points back at what comes before it, which is read, across a "but",
+  "whereas" or "however" too ("Derivation is described across four
+  fields, but this keeps it from 5", #3464). Credit after the
   cue is read: a clause rule there drops reasons the committed ratings
   give in clauses with no gap word ("the lineage is narrative rather than
   graph-structured or machine-readable", "so the graph must be
@@ -939,14 +941,24 @@ def _gap_parts(sentence: str, *, cue: bool = False) -> list[tuple[int, int]]:
     (`_credit_clauses`, `_credit_before_cue`), not here. As in a label, a part that names a gap
     and nothing of its own ("changelog mentioned but not detailed") is about
     the words before it in its punctuation clause, which are read with it.
+    With `cue`, a part whose cue names nothing of its own ("…, but this
+    keeps it from 5") points back past the contrast, and everything before
+    it is read with it (#3464): cut at the contrast, its reason was dropped
+    and a neighbouring sentence, credit or not, read in its place.
     Adjacent parts that are read are one range."""
     bounds = [0] + [m.start() for m in _BODY_CONTRAST.finditer(sentence)] + [len(sentence)]
     out = []
     for lo, hi in zip(bounds, bounds[1:]):
-        if lo == hi or not (_GAP.search(sentence[lo:hi]) or cue and any(
-                not accepts for accepts in _cue_clauses(sentence, lo, hi))):
+        says_why = cue and any(not accepts for accepts in _cue_clauses(sentence, lo, hi))
+        if lo == hi or not (_GAP.search(sentence[lo:hi]) or says_why):
             continue
-        if lo:
+        if lo and says_why and not _reasons([("", sentence, (lo, hi))]):
+            # A part whose cue names nothing ("…, but this keeps it from 5")
+            # points back across the contrast at everything before it, which
+            # is read; cut at the contrast, the reason was dropped and a
+            # neighbouring sentence read in its place (#3464).
+            lo = 0
+        elif lo:
             a, b = next((a, b) for a, b in _spans(sentence) if a <= lo <= b)
             if not _reasons([("", sentence, (lo, min(b, hi)))]):
                 lo = a
