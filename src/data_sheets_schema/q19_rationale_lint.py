@@ -35,9 +35,8 @@ machine-readable form and lineage across fields. So:
   are read (`withholding_sentences`): a sentence with a score-directed cue
   ("held at 4 because", "falls short of the 5-band", "what keeps it from
   5") that is not itself disclaimed, accepted or conceded (the last point
-  below), less its credit (the next point), its neighbours when it names
-  no reason itself ("Short of 5."), and the reason clauses of the score
-  label (`_label_reasons`). A label's
+  below), its neighbours when it names no reason itself ("Short of 5."),
+  and the reason clauses of the score label (`_label_reasons`). A label's
   clauses end at punctuation, a spaced dash, a parenthesis and before
   "but", "without", "rather than" and "short of", so a reason given after
   one of those four words is the same with or without a comma. The reason
@@ -45,53 +44,18 @@ machine-readable form and lineage across fields. So:
   short of a full provenance graph", "… - no typed derivation links", "…
   but no version history", "Held at 4 because …"). Before it, a clause
   saying something is absent ("…, structural derivation slots empty") is a
-  reason too. A clause whose "not", absence word or withholding cue stands
-  inside it is read only where every concern it names is of one kind
-  (#3194). Where it names both kinds ("Typed was_derived_from links and
+  reason too. A clause whose "not" or absence word stands inside it rather
+  than opening it is read only where every concern it names is of one
+  kind. Where it names both kinds ("Typed was_derived_from links and
   errata missing", "Machine-readable PROV graph lacking errata", "Typed
-  PROV graph falls short on errata"), its words do not say which is
+  PROV graph with errata not recorded"), its words do not say which is
   absent and which is credit, so it is not read; a comma ("…links, errata
-  missing") makes the absent one a clause of its own, which is. A clause
-  that a cue opens gives the reason for all it names, as one opening with
-  "no" does: "Held at 4 because no PROV graph and no errata" states two
-  reasons (#3485). So "Held at 4 because the typed PROV graph lacks
-  errata" still reads its credit (disclosed). The label's other clauses
-  are credit and are not read, and so is a later part that turns back to
-  credit with "but", "whereas" or "however", with or without punctuation
-  before or after it, and names no gap or cue ("No PROV graph, but
-  excellent version history", "No PROV graph whereas excellent version
-  history", "No PROV graph, however, excellent version history";
-  `_label_rest`, #3128, #3432, #3486), but only where the reason before
-  it names a concern: after a cue that names nothing ("Held at 4 whereas
-  a 5 requires a typed PROV graph") the part after the contrast is the
-  reason and is read (#3500). Two cases
-  are read with the reason: credit in the clause that carries the first
-  contrast or cue, or in a later clause that does not open with a
-  contrast; and the words before a contrast
-  that names nothing of its own ("graph claimed but not evidenced", "full
-  provenance graph asserted rather than exhibited"), which is about them;
-- a sentence that says why is divided, as a body sentence is where
-  nothing says why (below), before every "but", "whereas" and "however",
-  and a part that names no gap and carries no cue is credit and is not
-  read ("Above the version-history band … persistent identifiers …
-  file-level fixity …, but the top band requires the links to be
-  represented"). In the part that carries the first cue, a clause before
-  the cue's clause with a finite verb of its own and no gap, and its
-  aside in parentheses, is credit too (`_credit_before_cue`, #3128)
-  where the cue's clause names a concern of its own ("Checksums are
-  recorded (md5 on every archive), and it is held at 4 because no PROV
-  graph is given"). A cue that names nothing ("…, which keeps it from 5")
-  points back at what comes before it, which is read, across a "but",
-  "whereas" or "however" too ("Derivation is described across four
-  fields, but this keeps it from 5", #3464). Where the parts read name
-  no concern at all ("It is held at 4 whereas a 5 requires a typed PROV
-  graph": the cue's part names nothing, the part after the contrast no
-  gap word), the sentence is read whole, as before #3128, so its reason
-  is not dropped and a neighbour read in its place (#3499). Credit after
-  the cue is read: a clause rule there drops reasons the committed
-  ratings give in clauses with no gap word ("the lineage is narrative
-  rather than graph-structured or machine-readable", "so the graph must
-  be reconstructed by a reader");
+  missing") makes the absent one a clause of its own, which is. The
+  label's other clauses are credit and are not read. Two cases are read
+  with the reason: credit in the clause that carries the first contrast or
+  cue, or after it (#3128); and the words before a contrast that names
+  nothing of its own ("graph claimed but not evidenced", "full provenance
+  graph asserted rather than exhibited"), which is about them;
 - the basis is `STATED` when a quality-note or semantic-analysis sentence
   carries a cue, or the label carries a withholding cue and names a reason
   ("Held at 4 because was_derived_from is empty"). A label's contrast or
@@ -106,18 +70,11 @@ machine-readable form and lineage across fields. So:
   incomplete (`_gap_parts`). A part that names no gap is credit and is not
   read, whether it comes before a contrast or after it ("RO-Crate packages
   include provenance graphs"; "No errata are recorded, but
-  was_derived_from links every release to its parent dataset"). A part
-  that is read is read whole. The clause rule that sets apart credit
-  before a cue (below) is not applied here: it drops the same reasons
-  given with no gap word that it drops after a cue ("No errata are
-  recorded, and the lineage is narrative rather than graph-structured or
-  machine-readable" would lose its representation reasons, #3501). So
-  credit that shares a part with a gap is read ("…recoverable from prose,
-  giving a partial lineage, and missing data is documented per modality"
-  gives a missing-data reason, as on main; #3128 stays open for this
-  form). As in a label, a part that names a gap and nothing of its own
-  is about the words before it in its clause, which are read with it
-  ("changelog mentioned but not detailed");
+  was_derived_from links every release to its parent dataset"). A part is
+  read whole, so credit that shares a part with a gap is read (#3128). As
+  in a label, a part that names a gap and nothing of its own is about the
+  words before it in its clause, which are read with it ("changelog
+  mentioned but not detailed");
 - inside what is read, a clause that accepts, concedes or disclaims names
   no reason (`_clauses`). A withholding cue in a clause that accepts or
   concedes does not say why, nor does one after a disclaiming phrase or a
@@ -193,7 +150,8 @@ machine-readable form and lineage across fields. So:
   a disclaimer's list is never an outer list. `_FINITE` is a closed list
   of auxiliaries: widening it with lexical verbs ("links", "names",
   "records") would make plural nouns in a list ("no typed links") read as
-  clauses of their own, and moved nothing on the committed ratings. A withholding cue in such a scope
+  clauses of their own, and moved nothing on the committed ratings. A
+  withholding cue in such a scope
   does not say why either (#3264): in the scope of an acceptance or
   concession it is reported as `cue_unread`, and in a disclaimer's it is
   disclaimed, so it neither states the basis nor sends the lint to its
@@ -228,10 +186,8 @@ which one limited the score. Only `REPRESENTATION_ONLY` rests on
 representation alone.
 
 **Calibration, and its limit.** Against the two inspections' 48 recorded
-ratings (`inspection_statuses`): all 24 flagged ratings are flagged (10
-`REPRESENTATION_ONLY`, 14 with a substantive co-reason; CBORG CM4AI v8
-rep2 gave identifier and fixity co-reasons from the credit before its
-"but the top band requires …" until #3128), and all 18 Q19=5
+ratings (`inspection_statuses`): all 24 flagged ratings are flagged (9
+`REPRESENTATION_ONLY`, 15 with a substantive co-reason), and all 18 Q19=5
 ratings are `FULL_SCORE` with no withholding sentence. The six ratings
 below 5 that the inspections left unflagged are flagged too: five with a
 substantive co-reason, and 09-11 CM4AI v8 rep1 as `REPRESENTATION_ONLY`,
@@ -264,24 +220,35 @@ rubric20 semantic outputs, which no inspection labels (plural "graphs", a
 label's ", no …", a bare "Short of 5.", a passive "one point withheld" came
 from those). Its precision and recall on unseen ratings are unmeasured.
 An empty-slot match is the slot's name, not a check that the slot is
-empty. So it is a reason only where the words read with it, in the same
-sentence or label range, say something is empty, absent or negated
-(`_EMPTINESS`, #2982): "Held at 4 because errata are thin;
-was_derived_from links every release to its parent" gives no empty-slot
-reason. The requirement is sentence-level, not clause-level, because 10
-of the 88 empty-slot reasons read from the 133 committed ratings name the
-slot in a list or parenthesis whose emptiness a neighbouring clause of the
-same sentence states ("the dedicated derivation fields (was_derived_from,
+empty. So it is a reason only where a clause read with it, in the same
+sentence or label range, carries one of the words `_EMPTINESS` lists
+(#2982): "empty", "absent", "absence", "unpopulated", "unfilled",
+"unused", "unset", "blank", "null", "missing" (not "missing-data"),
+"omits"/"omitted", "lacks"/"lacking", "without", and the negations "no",
+"not", "none", "nor", "neither", "never", "nothing" and "n't". "Held at 4
+because errata are thin; was_derived_from links every release to its
+parent" gives no empty-slot reason. An absence stated in other words
+("was_derived_from is left out") is not recognised, and the slot is then
+not read as a reason: the list is closed, as `_FINITE` is. The
+requirement is sentence-level, not clause-level, because 10 of the 88
+empty-slot reasons read from the 133 committed ratings name the slot in a
+list or parenthesis whose emptiness a neighbouring clause of the same
+sentence states ("the dedicated derivation fields (was_derived_from,
 parent_datasets) are empty", "No version history, errata or structured
-derivation"); the other 78 name it in a clause saying something is empty,
-absent or negated. The requirement moved none of them. It does not tell
-which slot a negation is about, so credit naming a populated slot beside
-a gap in the same sentence is still read unless a rule above sets it
-apart as credit. Before the first such rule the committed CHORUS
-2026-09-04f API rep1 rating (UNSTATED) gave an empty-slot reason, and a
-missing-data one, from "was_derived_from is explicit rather than implied,
-and missing data is documented with reasons at instance level", which
-says the slot is populated.
+derivation"); the other 78 name it in a clause carrying one of those
+words. The requirement moved none of them. It does not tell which slot a
+negation is about, so credit naming a populated slot beside a gap in the
+same sentence is still read. Where nothing says why, a part of a sentence
+that names no gap is not read, so credit naming a populated slot is not
+read there unless it shares a part with a gap. Before that rule the
+committed CHORUS 2026-09-04f API rep1 rating (UNSTATED) gave an
+empty-slot reason, and a missing-data one, from "was_derived_from is
+explicit rather than implied, and missing data is documented with reasons
+at instance level", which says the slot is populated. A sentence that
+says why the score is below 5 is still read whole, less the clauses that
+accept, concede or disclaim. So a sentence that names a populated slot as
+credit beside its reason, and says something is absent, would be read as
+giving that reason (#3128).
 """
 from __future__ import annotations
 
@@ -479,9 +446,12 @@ _GAP = re.compile(
 #: or parenthesis and say it is empty in a neighbouring clause ("the
 #: dedicated derivation fields (was_derived_from, parent_datasets) are
 #: empty"). "missing-data documentation" names content, not an absence.
+#: "absence", "omits" and "unset" state an absence too (#3539). The list is
+#: closed: an absence phrased otherwise is not recognised.
 _EMPTINESS = re.compile(
-    r"\b(?:empty|absent|unpopulated|unfilled|unused|blank|null|no|not|none|nor|neither|never"
-    r"|nothing|without|lacks?|lacking|lacked)\b|\bmissing\b(?![-_ ]data)|n't\b", _I)
+    r"\b(?:empty|absent|absence|unpopulated|unfilled|unused|unset|blank|null|no|not|none|nor"
+    r"|neither|never|nothing|without|lacks?|lacking|lacked|omits?|omitted|omitting)\b"
+    r"|\bmissing\b(?![-_ ]data)|n't\b", _I)
 #: What divides a sentence's credit from its gap: "… is recoverable from
 #: prose, which exceeds the version-history-only anchor, but no PROV-O graph".
 _BODY_CONTRAST = re.compile(r"\b(?:but|whereas|however)\b", _I)
@@ -866,34 +836,27 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
     evidenced", "full provenance graph asserted rather than exhibited".
 
     Before the reason, a clause saying something is absent is a reason of
-    its own ("Prose lineage; was_derived_from empty"). A clause whose "not",
-    absence word or withholding cue stands inside it rather than opening it
-    is read only where every concern it names is of one kind (#3146, #3194);
-    one that a cue opens is read whole, whatever it names ("Held at 4
-    because no PROV graph and no errata", #3485). Where it names both kinds
+    its own ("Prose lineage; was_derived_from empty"). A clause whose "not"
+    or absence word stands inside it rather than opening it is read only
+    where every concern it names is of one kind. Where it names both kinds
     ("Typed was_derived_from links and errata missing", "Machine-readable
     PROV graph lacking errata", "Typed PROV graph with errata not
-    recorded", "Typed PROV graph falls short on errata"), its words do not
-    say which is absent and which is credit, and the answer would decide
-    the flag, so it is not read.
+    recorded"), its words do not say which is absent and which is credit,
+    and the answer would decide the flag, so it is not read (#3146).
     """
     out = []
     for a, b in _spans(label):
-        cuts = _label_parts(label, a, b)
-        for i, (start, end) in enumerate(cuts):
-            part = label[start:end].strip()
-            one_kind = len(_kinds(part)) < 2
-            cue = any(not accepts for accepts in _cue_clauses(label, start, end))
+        cuts = [a] + [m.end() for m in _LABEL_CONJUNCTION.finditer(label, a, b)]
+        for i, start in enumerate(cuts):
+            part = label[start:cuts[i + 1] if i + 1 < len(cuts) else b].strip()
+            end = cuts[i + 1] if i + 1 < len(cuts) else b
             if _read_in(label, start, end) and (
                     _LABEL_OPENS.search(part)
-                    # A cue that opens the part says why of all it names
-                    # ("Held at 4 because no PROV graph and no errata");
-                    # one inside it only of one kind (#3194, #3485).
-                    or (cue and (_WITHHOLDING.match(part) or one_kind))
-                    or (_LABEL_NOT.search(part) and one_kind)):
+                    or any(not accepts for accepts in _cue_clauses(label, start, end))
+                    or (_LABEL_NOT.search(part) and len(_kinds(part)) < 2)):
                 if i and not _reasons([("score_label", label, (start, b))]):
-                    start = cuts[i - 1][0]
-                return [(lo, hi) for lo, hi in out + _label_rest(label, start)
+                    start = cuts[i - 1]
+                return [(lo, hi) for lo, hi in out + [(start, len(label))]
                         if label[lo:hi].strip()]
         clause = label[a:b].strip()
         absent = _ABSENCE.search(clause)
@@ -902,72 +865,9 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
     return out
 
 
-def _label_parts(label: str, a: int, b: int) -> list[tuple[int, int]]:
-    """The (start, end) of each part of the label clause `label[a:b]`, cut
-    before each contrasting conjunction (`_LABEL_CONJUNCTION`)."""
-    cuts = [a] + [m.end() for m in _LABEL_CONJUNCTION.finditer(label, a, b)]
-    return list(zip(cuts, cuts[1:] + [b]))
-
-
-def _label_rest(label: str, start: int) -> list[tuple[int, int]]:
-    """The label from `start`, where its reason begins, to its end, less
-    each later part that turns back to credit (#3128): one opening with
-    "but", "whereas" or "however" that names no gap (`_GAP`) and carries no
-    withholding cue. The parts are `_label_parts` cut again before an
-    unpunctuated "whereas" or "however" (`_contrast_pieces`, #3432), and a
-    contrast word set off by punctuation on both sides is joined to the
-    piece after it (#3486), so "No PROV graph, however, excellent version
-    history" turns back to credit as "…, but excellent …" does. "No
-    PROV graph, but excellent version history" reads "No PROV graph";
-    "graph claimed but not evidenced" and "prose lineage, but no errata"
-    are read whole. A part is cut only where the range before it names a
-    concern (#3500): after a cue that names nothing ("Held at 4 whereas a
-    5 requires a typed PROV graph", "held at 4, however, for want of a
-    typed PROV graph") the part after the contrast is the reason, as on
-    main."""
-    out, lo = [], start
-    pieces = [piece for span in _spans(label) for part in _label_parts(label, *span)
-              for piece in _contrast_pieces(label, *part)]
-    # A contrast set off by punctuation of its own ("…, however, excellent
-    # version history") is one piece with what follows it (#3486).
-    for k in range(len(pieces) - 2, -1, -1):
-        if _BARE_CONTRAST.fullmatch(label[slice(*pieces[k])].strip()):
-            pieces[k:k + 2] = [(pieces[k][0], pieces[k + 1][1])]
-    for a, b in pieces:
-        part = label[a:b].strip()
-        if (a > start and _CONTRAST_OPENS.match(part) and not _GAP.search(part)
-                and not _WITHHOLDING.search(part)
-                # Only where the reason before it names something: after a
-                # cue naming nothing ("Held at 4 whereas a 5 requires a
-                # typed PROV graph") the contrast gives the reason (#3500).
-                and _reasons([("score_label", label, (lo, a))])):
-            out.append((lo, a))
-            lo = b
-    return out + [(lo, len(label))]
-
-
-def _contrast_pieces(label: str, a: int, b: int) -> list[tuple[int, int]]:
-    """The label part `label[a:b]` cut before each "whereas" or "however"
-    it carries after its first word (#3432). `_label_parts` cuts before
-    "but" only, so without this an unpunctuated "No PROV graph whereas
-    excellent version history" was one part and its credit was read."""
-    cuts = [a] + [m.start() for m in _LABEL_TURN.finditer(label, a, b)
-                  if label[a:m.start()].strip()]
-    return list(zip(cuts, cuts[1:] + [b]))
-
-
-#: The contrasts that turn a label back to credit and that `_label_parts`
-#: does not cut before ("but" it does).
-_LABEL_TURN = re.compile(r"\b(?:whereas|however)\b", _I)
-#: A contrast word standing alone between punctuation ("…, however, …").
-_BARE_CONTRAST = re.compile(r"(?:but|whereas|however)", _I)
-
-
-def _gap_parts(sentence: str, *, cue: bool = False) -> list[tuple[int, int]]:
+def _gap_parts(sentence: str) -> list[tuple[int, int]]:
     """Where nothing says why: the (start, end) of each part of a
-    quality-note or semantic-analysis sentence that is read. With `cue`, of
-    a sentence that says why: a part carrying a withholding cue that says
-    why (`_cue_clauses`) is read too, gap or not (#3128).
+    quality-note or semantic-analysis sentence that is read.
 
     The sentence is divided before each "but", "whereas" and "however"
     (`_BODY_CONTRAST`), and a part is read only where it names a gap
@@ -975,29 +875,17 @@ def _gap_parts(sentence: str, *, cue: bool = False) -> list[tuple[int, int]]:
     comes before a contrast ("…recoverable from prose, which exceeds the
     version-history-only anchor, but no PROV-O graph") or after one ("No
     errata are recorded, but was_derived_from links every release to its
-    parent dataset", #3146). With `cue`, credit before the cue is set
-    apart by clause (`_credit_before_cue`), not here; without it a read
-    part is read whole (#3501). As in a label, a part that names a gap
+    parent dataset", #3146). A part is read whole, so credit that shares a
+    part with a gap is read (#3128). As in a label, a part that names a gap
     and nothing of its own ("changelog mentioned but not detailed") is about
     the words before it in its punctuation clause, which are read with it.
-    With `cue`, a part whose cue names nothing of its own ("…, but this
-    keeps it from 5") points back past the contrast, and everything before
-    it is read with it (#3464): cut at the contrast, its reason was dropped
-    and a neighbouring sentence, credit or not, read in its place.
     Adjacent parts that are read are one range."""
     bounds = [0] + [m.start() for m in _BODY_CONTRAST.finditer(sentence)] + [len(sentence)]
     out = []
     for lo, hi in zip(bounds, bounds[1:]):
-        says_why = cue and any(not accepts for accepts in _cue_clauses(sentence, lo, hi))
-        if lo == hi or not (_GAP.search(sentence[lo:hi]) or says_why):
+        if lo == hi or not _GAP.search(sentence[lo:hi]):
             continue
-        if lo and says_why and not _reasons([("", sentence, (lo, hi))]):
-            # A part whose cue names nothing ("…, but this keeps it from 5")
-            # points back across the contrast at everything before it, which
-            # is read; cut at the contrast, the reason was dropped and a
-            # neighbouring sentence read in its place (#3464).
-            lo = 0
-        elif lo:
+        if lo:
             a, b = next((a, b) for a, b in _spans(sentence) if a <= lo <= b)
             if not _reasons([("", sentence, (lo, min(b, hi)))]):
                 lo = a
@@ -1007,97 +895,35 @@ def _gap_parts(sentence: str, *, cue: bool = False) -> list[tuple[int, int]]:
     return out
 
 
-def _credit_clauses(text: str, lo: int, hi: int) -> frozenset[tuple[int, int]]:
-    """The clauses of `text` (as `_clauses` splits it) within `lo`..`hi`
-    that are credit, not a reason (#3128): each clause that is read, has a
-    finite verb of its own (`_FINITE`), names no gap (`_GAP`) and carries no
-    withholding cue, and the aside in parentheses that follows one. Used
-    only before a cue that names its own reason (`_credit_before_cue`);
-    where nothing says why it is not applied, since it drops reasons given
-    with no gap word ("the lineage is narrative rather than
-    graph-structured", #3501). A verbless clause is not
-    credit on its own: it may be an item of a list whose gap a neighbour
-    states ("no version history, errata or structured derivation")."""
-    clauses, out, depth = _clauses(text), set(), 0
-    for k, (a, b, read) in enumerate(clauses):
-        clause = text[a:b]
-        if (read and max(a, lo) < min(b, hi) and not _GAP.search(clause)
-                and not _WITHHOLDING.search(clause) and (depth or _FINITE.search(clause))):
-            out.add((a, b))
-            sep = text[b:clauses[k + 1][0]] if k + 1 < len(clauses) else ""
-            depth = max(depth + sep.count("(") - sep.count(")"), 0)
-        else:
-            depth = 0
-    return frozenset(out)
-
-
-def _credit_before_cue(sentence: str, lo: int, hi: int) -> frozenset[tuple[int, int]]:
-    """In the part `lo`..`hi` of a sentence that says why the score is
-    below 5: the credit clauses (`_credit_clauses`) before the clause
-    carrying its first withholding cue that says why, where that clause and
-    what follows it name a concern of their own (#3128). "Checksums are
-    recorded (md5 on every archive), and it is held at 4 because no PROV
-    graph is given" reads no integrity reason. A cue that names nothing
-    ("…, which keeps it from 5", "so held at 4") points back at the words
-    before it, which are all read. Credit after the cue is read: a clause
-    rule there drops real reasons on the committed ratings ("the lineage is
-    narrative rather than graph-structured or machine-readable")."""
-    for a, b, _ in _clauses(sentence):
-        if max(a, lo) < min(b, hi) and any(not accepts for accepts in _cue_clauses(sentence, a, b)):
-            if not _reasons([("", sentence, (a, hi))]):
-                return frozenset()
-            return _credit_clauses(sentence, lo, a)
-    return frozenset()
-
-
 def withholding_sentences(item: dict) -> list[tuple[str, str]]:
     """(field, sentence) pairs that say why the score is below its maximum:
     body sentences carrying a withholding cue in a clause that is read
     (`_says_why`), and a label's reason clauses (`_label_reasons`). A cue
     sentence that names no concern of its own ("Short of 5.", "One point is
     deducted for that gap.") gives its reason in a neighbour, so the
-    sentences either side of it in the same field are read with it: whole,
-    or, where the neighbour says why itself, as the parts it is read as
-    already, its credit still set apart (#3431)."""
-    return [(name, text[lo:hi].strip()) for name, text, (lo, hi), _ in _withholding(item)]
+    sentences either side of it in the same field are read with it."""
+    return [(name, text[lo:hi].strip()) for name, text, (lo, hi) in _withholding(item)]
 
 
-def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int], frozenset]]:
-    """`withholding_sentences` as (field, sentence, (start, end), credit)
-    tuples, which `_reasons` reads with the sentence's clauses judged
-    whole: a label's reason is a range of the label, not a string cut from
-    it (#3264). A cue sentence gives one tuple per part `_gap_parts` reads,
-    with the credit clauses before its cue (`_credit_before_cue`), or,
-    where those parts name no concern, one tuple for the whole sentence,
-    as on main (#3499)."""
+def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int]]]:
+    """`withholding_sentences` as (field, sentence, (start, end)) triples,
+    which `_reasons` reads with the sentence's clauses judged whole: a
+    label's reason is a range of the label, not a string cut from it
+    (#3264)."""
     sentences = _sentences(item)
     keep = []
     for i, (name, sentence) in enumerate(sentences):
         if name == "score_label":
-            keep.extend((i, span, ()) for span in _label_reasons(sentence))
+            keep.extend((i, span) for span in _label_reasons(sentence))
         elif _says_why(sentence):
-            parts = [(part, _credit_before_cue(sentence, *part))
-                     for part in _gap_parts(sentence, cue=True)]
-            if not _reasons([(name, sentence, part, credit) for part, credit in parts]):
-                # Parts that name nothing ("It is held at 4 whereas a 5
-                # requires a typed PROV graph": the cue's part names nothing
-                # and the part after the contrast names no gap word) leave
-                # the sentence read whole, as before #3128; otherwise its
-                # reason is dropped and a neighbour, credit or not, read in
-                # its place (#3499).
-                parts = [((0, len(sentence)), frozenset())]
-            keep.extend((i, part, credit) for part, credit in parts)
-            if not _reasons([(name, sentence, part, credit) for part, credit in parts]):
-                # A neighbour that says why is kept as its own parts, with
-                # its own credit set apart; read whole as well, it would
-                # read that credit and its reason twice (#3431).
-                keep.extend((j, (0, len(sentences[j][1])), ()) for j in (i - 1, i + 1)
-                            if 0 <= j < len(sentences) and sentences[j][0] == name
-                            and not _says_why(sentences[j][1]))
+            keep.append((i, (0, len(sentence))))
+            if not _reasons([(name, sentence)]):
+                keep.extend((j, (0, len(sentences[j][1]))) for j in (i - 1, i + 1)
+                            if 0 <= j < len(sentences) and sentences[j][0] == name)
     seen, out = set(), []
-    for i, span, credit in sorted(keep, key=lambda k: k[0]):
+    for i, span in sorted(keep, key=lambda k: k[0]):
         if (i, span) not in seen:
-            seen.add((i, span)); out.append((sentences[i][0], sentences[i][1], span, credit))
+            seen.add((i, span)); out.append((sentences[i][0], sentences[i][1], span))
     return out
 
 
@@ -1106,17 +932,14 @@ def _reasons(pairs, *, accepting: bool = True) -> tuple[Reason, ...]:
     read (`_clauses`; every clause when not `accepting`). A (field, text,
     (start, end)) triple reads only that range of `text`, its clauses judged
     in the whole of it, so a range that stops before "but not penalised"
-    still does not read what that clause disclaims. A fourth element names
-    clauses of `text` (as `_clauses` splits it) that are credit and not
-    read (`_credit_clauses`). An empty-slot match counts only where a
-    clause read in the range says something is empty (`_EMPTINESS`,
-    #2982)."""
+    still does not read what that clause disclaims. An empty-slot match
+    counts only where a clause read in the range says something is empty
+    (`_EMPTINESS`, #2982)."""
     found = {}
     for name, text, *within in pairs:
         lo, hi = within[0] if within else (0, len(text))
-        credit = within[1] if len(within) > 1 else ()
         shown = text[lo:hi].strip()
-        clauses = [(max(a, lo), min(b, hi), read and (a, b) not in credit)
+        clauses = [(max(a, lo), min(b, hi), read)
                    for a, b, read in _clauses(text) if max(a, lo) < min(b, hi)]
         # An empty-slot match is a slot's name; it is a reason only where the
         # words read say something is empty or absent (#2982).
@@ -1146,7 +969,7 @@ def lint_q19(item: dict) -> Q19Lint:
     if score is None or maximum is None or score >= maximum:
         return Q19Lint(score, maximum, NOT_LINTED, (), mentions)
     stated = _withholding(item)
-    label = [(name, s, span) for name, s, span, _ in stated if name == "score_label"]
+    label = [(name, s, span) for name, s, span in stated if name == "score_label"]
     # A label says why the score is held when it carries a withholding cue
     # and names a reason ("Held at 4 because was_derived_from is empty").
     # A contrast or absence clause ("…, no formal provenance graph") names a
@@ -1158,11 +981,8 @@ def lint_q19(item: dict) -> Q19Lint:
         return Q19Lint(score, maximum, STATED, _reasons(stated), mentions)
     # Nothing says why: the label's reason clauses and the body's parts that
     # name a gap are read (`_gap_parts`); a part naming no gap is not.
-    # A read part is read whole: a clause rule here drops reasons given in
-    # clauses with no gap word ("the lineage is narrative rather than
-    # graph-structured", #3501), as it does after a cue.
-    body = [(name, s, part) for name, s in sentences
-            if name != "score_label" for part in _gap_parts(s)]
+    body = [(name, s, part) for name, s in sentences if name != "score_label"
+            for part in _gap_parts(s)]
     unread = any(accepts for _, s in sentences for accepts in _cue_clauses(s))
     return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions, unread)
 
