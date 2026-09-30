@@ -665,34 +665,51 @@ def _qualifiers(lexicon, text: str) -> tuple[frozenset, ...]:
     return tuple(frozenset(i for i, rx in enumerate(axis) if rx.search(text)) for axis in lexicon._axes)
 
 
-def _presence_phrases(lexicon, container, member: dict, text: str) -> Iterator[tuple[str, str, bool]]:
+def _presence_phrases(lexicon, container, member: dict, text: str) -> Iterator[tuple[str, str, bool, object]]:
     """Each presence noun phrase in `text` (the presence term with at most
-    `item_qualifiers.words` words before it), its presence term, and whether
-    it names another item than the member's: on some axis both it and the
-    member's identity name an alternative and none is shared (#3244). Never
-    another's when the lexicon declares no `item_qualifiers` or the member's
-    identity names no qualifier."""
+    `item_qualifiers.words` words before it), its presence term, whether
+    it names another item than the member's (on some axis both it and the
+    member's identity name an alternative and none is shared, #3244), and
+    the presence term's match in `text`. Never another's when the lexicon
+    declares no `item_qualifiers` or the member's identity names no
+    qualifier."""
     mine = _qualifiers(lexicon, _identity_text(lexicon, member)) if lexicon._axes else ()
     for found in container.presence_scope.finditer(text):
         lead = re.search(rf"(?:[\w-]+\s+){{0,{lexicon._qualifier_words}}}$", text[:found.start()])
         phrase = (lead.group(0) if lead else "") + found.group(0)
         other = any(p and q and not p & q for p, q in zip(_qualifiers(lexicon, phrase), mine))
-        yield phrase, found.group(0), other
+        yield phrase, found.group(0), other, found
 
 
 def _other_qualified_item(lexicon, container, member: dict, text: str) -> str | None:
     """The first presence noun phrase in `text` that names another item than
     the member's: "the external test set" in the prose of a member named
     "Internal validation set" (#3244)."""
-    return next((" ".join(phrase.split()) for phrase, _t, other
+    return next((" ".join(phrase.split()) for phrase, _t, other, _m
                  in _presence_phrases(lexicon, container, member, text) if other), None)
 
 
-def _member_presence_term(lexicon, container, member: dict, text: str) -> str | None:
+def _member_presence_term(lexicon, container, member: dict, text: str,
+                          heads: bool = False) -> str | None:
     """The first presence term in `text` that does not name another item,
-    for a `presence` or `subject` cue's licence."""
-    return next((term for _p, term, other in _presence_phrases(lexicon, container, member, text)
-                 if not other), None)
+    for a `presence` or `subject` cue's licence. With `heads`, only one that
+    heads `text` (`_heads`): a `subject` cue's subject or statement topic
+    (#3592)."""
+    return next((term for _p, term, other, found in _presence_phrases(lexicon, container, member, text)
+                 if not other and (not heads or _heads(lexicon, text, found))), None)
+
+
+def _heads(lexicon, text: str, found) -> bool:
+    """Whether the match `found` heads `text`: the text before it matches
+    `statement_subject.head` and nothing possessive follows it, so "The
+    holdout set" is headed by its presence term and "The consent process for
+    the splits", "Enrollment of the pediatric arm of the split" and "The
+    split's schedule" are not (#3592). With no `head` declared, any match
+    counts, as before."""
+    if lexicon._statement_head is None:
+        return True
+    return (lexicon._statement_head.fullmatch(text[:found.start()]) is not None
+            and _POSSESSIVE_AFTER.match(text, found.end()) is None)
 
 
 def _statement_head(lexicon, subject: str):
@@ -707,15 +724,42 @@ def _statement_head(lexicon, subject: str):
     return None
 
 
+def _self_heads_subject(lexicon, selves, subject: str) -> bool:
+    """False when the subject holds self-references and none heads it
+    (`_heads`): "The labels in this split are prospective" is about the
+    labels, as "The consent process for the splits" is about the consent
+    process (#3592). True when the subject holds none, so a self-reference
+    earlier in the sentence before an elided subject still counts."""
+    found = [f for rx in selves for f in rx.finditer(subject)]
+    return not found or any(_heads(lexicon, subject, f) for f in found)
+
+
+def _topic_self_reference(lexicon, selves, topic: str) -> str | None:
+    """The first self-reference that heads a statement's `topic` (`_heads`),
+    so it owns nothing there: no preposition before it ("statements about
+    the consent process for this split") and nothing possessive after it
+    ("statements about this split's consent process") (#3593). Read on the
+    topic alone, so the preposition that introduces the topic is not an
+    owner: "descriptions of this split" names the split."""
+    for rx in selves:
+        for found in rx.finditer(topic):
+            if _heads(lexicon, topic, found):
+                return found.group(0)
+    return None
+
+
 def _subject_scope(lexicon, container, member, selves, sentence: str,
                    c0: int, c1: int, m) -> tuple[str, str | None]:
     """(`scope`, term) for a `subject` cue with no self-reference of its own
     (#3131): its subject is headed by a source statement ("Both statements
     are prospective on that page"; `_statement_head`), with any topic ("statements about ...",
-    "descriptions of this split") holding a self-reference or a presence
-    term, or it names the container's presence term; else (`out_of_scope`
-    reason, term). The terms are read with the member's self-references
-    blanked, a topic's self-reference on the sentence as written."""
+    "descriptions of this split") headed by a self-reference that owns
+    nothing or by a presence term, or it is headed by the container's
+    presence term ("The holdout set is prospective", not "The consent
+    process for the splits", #3592); else (`out_of_scope` reason, term).
+    The presence terms are read with the member's self-references blanked,
+    a topic's self-reference on the topic as written (`_topic_self_reference`,
+    #3593)."""
     raw = _parts(sentence, c0, c1, m, sentence)["subject"]
     subject = _parts(_masked(sentence, selves), c0, c1, m, sentence)["subject"]
     noun = _statement_head(lexicon, subject)
@@ -726,12 +770,12 @@ def _subject_scope(lexicon, container, member, selves, sentence: str,
         if topic is None:
             return "scope", noun.group(0)
         t0, t1 = topic.span("topic")
-        term = (_search(selves, raw[t0:t1])
-                or _member_presence_term(lexicon, container, member, subject[t0:t1]))
+        term = (_topic_self_reference(lexicon, selves, raw[t0:t1])
+                or _member_presence_term(lexicon, container, member, subject[t0:t1], heads=True))
         if term:
             return "scope", term
         return "statement_about_other", " ".join(raw[noun.start():].split())
-    term = _member_presence_term(lexicon, container, member, subject)
+    term = _member_presence_term(lexicon, container, member, subject, heads=True)
     return ("scope", term) if term else ("no_member_subject", None)
 
 
@@ -792,9 +836,13 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     elif pattern.scope == "subject":
         # A self-reference that owns nothing, read as a `self` cue reads it:
         # "This split remains prospective", not "This split's schedule is
-        # prospective" (#3131).
+        # prospective" (#3131); where the subject holds one, it must head it:
+        # not "The labels in this split are prospective" (#3592).
         owners = _possessors_blanked(sentence, selves)
         term = _self_reference(selves, owners, c0, m.start())
+        subject = _parts(owners, c0, c1, m, sentence)["subject"]
+        if term is not None and not _self_heads_subject(lexicon, selves, subject):
+            term = None
         if term is None:
             verdict, term = _subject_scope(lexicon, container, member, selves, sentence, c0, c1, m)
             if verdict != "scope":

@@ -182,21 +182,28 @@ item_qualifiers:
 
 # The `subject` scope (#3131): what a cue with no object of its own says of
 # its subject. It counts where a self-reference that owns nothing (not
-# "this split's schedule", not "the consent process for this split") makes
-# the cue about the member as a `self` cue would; else where the cue's
+# "this split's schedule", not "the consent process for this split") and
+# heads the subject (not "the labels in this split", #3592) makes the cue
+# about the member as a `self` cue would; else where the cue's
 # subject names a source statement ("Both statements are prospective on
 # that page") or the container's presence term, not another item's
 # (`item_qualifiers`). A statement noun counts only as the subject's head:
 # the subject's text before it must match `head`, at most three words with
 # no preposition or participle among them (an optional "both of" and the
 # like before them), so "The consent process described in both statements"
-# is about the consent process, not the statements. A statement noun
-# followed by `topic` ("statements about the consent process", "references
-# to the consent process") counts only when the topic holds such a
-# self-reference or presence term; otherwise the reason is
-# `statement_about_other`. Any other subject ("The consent process is
-# prospective", "Enrollment of the pediatric arm remains prospective") is
-# out of scope with reason `no_member_subject`. The subject is a passive
+# is about the consent process, not the statements. A presence term counts
+# the same way, only as the subject's head and with nothing possessive after
+# it: "The holdout set is prospective" counts, "The consent process for the
+# splits", "Enrollment of the pediatric arm of the split" and "The split's
+# schedule" do not (#3592). A statement noun followed by `topic`
+# ("statements about the consent process", "references to the consent
+# process") counts only when the topic is headed by such a self-reference
+# (read on the topic alone, so "descriptions of this split" names the split
+# and "statements about the consent process for this split" or "about this
+# split's consent process" does not, #3593) or by such a presence term;
+# otherwise the reason is `statement_about_other`. Any other subject ("The
+# consent process is prospective", "Enrollment of the pediatric arm remains
+# prospective") is out of scope with reason `no_member_subject`. The subject is a passive
 # cue's (`_subject`: the clause before the cue, an appositive and anything
 # before its last comma left out).
 statement_subject:

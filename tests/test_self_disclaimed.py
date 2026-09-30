@@ -32,11 +32,12 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
 #: new file beside v1, whose bytes are unchanged. v2 was revised in review
-#: before it first merged, so this PR's commits carry one earlier byte
-#: version under `version: 2`:
+#: before it first merged, so this PR's commits carry two earlier byte
+#: versions under `version: 2`:
 #:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
+#:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
 LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d"}
+                2: "aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73"}
 
 
 def record(**containers):
@@ -740,6 +741,19 @@ def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, te
     ("splits", "The consent process described in both statements is prospective.", "no_member_subject"),
     ("splits", "The consent process mentioned in the statements is prospective.", "no_member_subject"),
     ("splits", "Consent in the statements is prospective.", "no_member_subject"),
+    # a presence term that does not head the subject, or owns it (#3592)
+    ("splits", "Enrollment of the pediatric arm of the split remains prospective.", "no_member_subject"),
+    ("splits", "The consent process for the splits is prospective.", "no_member_subject"),
+    ("splits", "The split's schedule is prospective.", "no_member_subject"),
+    # a topic whose self-reference or presence term owns something (#3593)
+    ("splits", "Statements about the consent process for this split are prospective.",
+     "statement_about_other"),
+    ("splits", "Statements about this split's consent process are prospective.", "statement_about_other"),
+    ("splits", "Descriptions of the consent process of this split are prospective.", "statement_about_other"),
+    ("splits", "Statements about the consent process for the splits are prospective.",
+     "statement_about_other"),
+    ("splits", "Statements about the labels in this split are prospective.", "statement_about_other"),
+    ("splits", "The labels in this split are prospective.", "no_member_subject"),
 ])
 def test_a_subject_cue_about_something_else_is_out_of_scope(container, text, reason):
     assert outcomes(container, text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
@@ -812,6 +826,32 @@ def test_another_qualified_item_reported_or_in_the_clause_does_not_license():
     # phrase is another spelling of it
     assert outcomes("splits", "The data are recorded as planned for the internal validation set.",
                     name="Internal validation split") == [("presence.recorded_as_planned", "flag", None)]
+
+
+def test_a_qualifier_counts_only_within_the_declared_words_before_the_presence_term():
+    """#3244, #3594: a presence noun phrase is its presence term with at
+    most `item_qualifiers.words` (2) words before it, so a qualifier
+    earlier in the sentence ("Internal reviewers ...") does not make "the
+    test set" another item than the external test set."""
+    text = "Internal reviewers note that the data are recorded as planned for the test set."
+    assert outcomes("splits", text, name="External test set") == [
+        ("presence.recorded_as_planned", "flag", None)]
+    # within the bound it does
+    assert outcomes("splits", "The data are recorded as planned for the internal test set.",
+                    name="External test set") == [
+        ("presence.recorded_as_planned", "out_of_scope", "no_self_or_presence_term")]
+
+
+@pytest.mark.parametrize("text,row", [
+    ("The data are recorded as planned for the test set.", ("presence.recorded_as_planned", "flag", None)),
+    ("No source reports the test set as available.", ("presence.none_reports_available", "flag", None)),
+])
+def test_a_phrase_sharing_one_of_the_members_alternatives_is_not_another_item(text, row):
+    """#3244, #3595: another item only where no alternative on an axis is
+    shared, not wherever the sets differ. The member names validation and
+    test; "the test set" names test, which is shared."""
+    assert outcomes("splits", text, name="Validation and test set") == [row]
+    assert outcomes("splits", text, id="https://example.org/ds#validation-test") == [row]
 
 
 def test_the_item_qualifiers_block_is_validated():
