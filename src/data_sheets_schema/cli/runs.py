@@ -1115,6 +1115,10 @@ def _report_deterministic_validity(method, label, project) -> None:
         first = re.sub(r"^\[ERROR\] \[[^\]]*\] ", "", r["findings"][0])
         more = f" (+{len(r['findings']) - 1} more)" if len(r["findings"]) > 1 else ""
         click.echo(f"     {r['project']:9} {where:44} {first[:160]}{more}")
+        if r.get("failure"):
+            # Invalid on a duplicate key read off the text; the schema
+            # itself was not checked, so this is not the full account (#3610).
+            click.echo(f"     {'':9} {'':44} schema not checked: {r['failure'][:160]}")
     click.echo("   Reported, never fatal: these records keep the verdicts they were "
                "published with (#426/#520); this is what today's schema says of them.")
 

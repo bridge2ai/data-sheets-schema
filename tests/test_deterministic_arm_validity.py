@@ -124,6 +124,31 @@ class TestTheInstrument(unittest.TestCase):
             self.assertEqual(len(findings), 1)
             self.assertIn("duplicate mapping key", findings[0])
 
+    def test_a_duplicate_key_survives_a_validator_that_did_not_run(self):
+        """#1032, review #3610: the duplicate is read off the text, which
+        needs no validator, so a record known to be invalid is reported
+        INVALID — with the failure kept, since the schema was not checked —
+        and not as "could not be checked". A record with no duplicate stays
+        UNVERIFIED (#613)."""
+        down = (None, "linkml-validate did not run: x")
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch("data_sheets_schema.api_runner._validator_lines",
+                           return_value=down):
+            concat = _tree(Path(tmp), {
+                "rocrate_static_map/v1/DUP_d4d.yaml": VALID_RECORD + "title: Another\n",
+                "rocrate_static_map/v1/OK_d4d.yaml": VALID_RECORD,
+            })
+            findings, failure = _validate_deterministic(
+                concat / "rocrate_static_map/v1/DUP_d4d.yaml")
+            self.assertEqual(failure, down[1])
+            self.assertEqual(len(findings), 1)
+            self.assertIn("duplicate mapping key", findings[0])
+            rows = {r["project"]: r for r in deterministic_validity(concat)}
+            self.assertEqual(rows["DUP"]["status"], INVALID)
+            self.assertEqual(rows["DUP"]["failure"], down[1])
+            self.assertEqual(rows["OK"]["status"], UNVERIFIED)
+            self.assertEqual(rows["OK"]["findings"], [])
+
     def test_the_verdict_check_holds_in_both_directions(self):
         """The helper the corpus test applies, on the real validator: it
         accepts a resolver-URL `doi` judged invalid and a bare one judged
@@ -175,6 +200,23 @@ class TestRunsCheckReportsIt(unittest.TestCase):
         # and the record is as it was
         self.assertEqual((self.root / "data/d4d_concatenated/rocrate_static_map/ourmap-v1/"
                           "CHORUS_d4d.yaml").read_text(encoding="utf-8"), RESOLVER_DOI)
+
+    def test_an_invalid_row_whose_schema_was_not_checked_says_so(self):
+        """A duplicate key found while the validator could not run is printed
+        as invalid, with a line saying the schema was not checked (#3610)."""
+        rows = [{"method": "rocrate_static_map", "label": "ourmap-v1",
+                 "project": "CHORUS", "path": "x", "status": INVALID,
+                 "findings": ["duplicate mapping key 'title'"],
+                 "failure": "linkml-validate did not run: x"}]
+        with mock.patch("data_sheets_schema.runs.deterministic_validity",
+                        return_value=rows):
+            result = CliRunner().invoke(cli, ["runs", "check"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("0 valid, 1 invalid, 0 could not be checked", result.output)
+        out = result.output.splitlines()
+        i = next(i for i, l in enumerate(out) if "duplicate mapping key" in l)
+        self.assertIn("CHORUS", out[i])
+        self.assertIn("schema not checked: linkml-validate did not run: x", out[i + 1])
 
     def test_the_filters_given_are_passed_through(self):
         """`--method/--label/--project` reach the section. This tree holds no

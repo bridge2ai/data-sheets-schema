@@ -482,16 +482,20 @@ def _validate_deterministic(path: Path) -> tuple[list[str] | None, str | None]:
     The instrument every recorded verdict uses (`api_runner._validator_lines`,
     as `recheck-validation` and `trap-inventory` call it), plus the
     duplicate-key reading the loader-based validator cannot see (#1029).
-    `findings` is None exactly when the validator could not run, which is
-    not a record that passed.
+    The duplicates are read off the text first, as `api_runner.
+    validate_outputs` does, so a validator that could not run still leaves
+    a known duplicate on record (#1032; review #3610): the record is then
+    invalid, with `failure` saying the schema itself was not checked.
+    `findings` is None exactly when the validator could not run and the
+    text shows no duplicate, which is not a record that passed.
     """
     from data_sheets_schema.api_runner import _validator_lines
     from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
+    dups = [describe(d) for d in [duplicate_keys_in(path)] if d]
     lines, failure = _validator_lines(path, DETERMINISTIC_SCHEMA, DETERMINISTIC_CLASS)
     if failure is not None:
-        return None, failure
-    dups = duplicate_keys_in(path)
-    return ([describe(dups)] if dups else []) + list(lines), None
+        return (dups or None), failure
+    return dups + list(lines), None
 
 
 def deterministic_validity(concat_dir: Path = CONCAT_DIR, *, method: str | None = None,
@@ -509,7 +513,10 @@ def deterministic_validity(concat_dir: Path = CONCAT_DIR, *, method: str | None 
     answer is a stated fact about those arms, never a rewrite and never a
     gate. Each row is ``{method, label, project, path, status, findings,
     failure}``; ``status`` is VALID, INVALID, or UNVERIFIED where the
-    validator could not run — never read as valid.
+    validator could not run and the text shows no duplicate key — never
+    read as valid. An INVALID row may carry a ``failure`` too: a duplicate
+    key read off the text when the validator could not run, so its
+    findings are not the schema's full account (#3610).
     """
     validate = validate or _validate_deterministic
     targets = []
