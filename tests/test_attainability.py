@@ -899,15 +899,24 @@ def _broken_evaluation(tmp_path, how):
         body, why = json.dumps(broken), f"the evaluation {path} has items that cannot be keyed: AttributeError"
     else:
         body = json.dumps({**good, "project": "BROKEN"})
+        too_long = (f"the provenance record {record} names a bundle version whose attainability file "
+                    "cannot be looked up: File name too long")
         record.write_text({"provenance not YAML": "inputs: [unclosed\n",
                            "provenance not a mapping": "- inputs\n",
                            "inputs not a mapping": "inputs: [a, b]\n",
                            "a bundle md5 that is not a string": yaml.safe_dump(
-                               {"inputs": {"bundle_path": CHORUS, "bundle_md5": [CHORUS_MD5]}})}[how],
+                               {"inputs": {"bundle_path": CHORUS, "bundle_md5": [CHORUS_MD5]}}),
+                           "a bundle md5 too long for a file name": yaml.safe_dump(
+                               {"inputs": {"bundle_path": CHORUS, "bundle_md5": "a" * 400}}),
+                           "a bundle path too long for a file name": yaml.safe_dump(
+                               {"inputs": {"bundle_path": "data/" + "b" * 400 + ".txt",
+                                           "bundle_md5": CHORUS_MD5}})}[how],
                           encoding="utf-8")
         why = {"provenance not YAML": f"the provenance record {record} is not YAML: while parsing",
                "a bundle md5 that is not a string": f"the provenance record {record} names a bundle_path "
-                                                    "or bundle_md5 that is not a string"}.get(
+                                                    "or bundle_md5 that is not a string",
+               "a bundle md5 too long for a file name": too_long,
+               "a bundle path too long for a file name": too_long}.get(
             how, f"the provenance record {record} is not a mapping with an inputs mapping")
     if body is not None:
         path.write_text(body, encoding="utf-8")
@@ -917,7 +926,8 @@ def _broken_evaluation(tmp_path, how):
 @pytest.mark.parametrize("how", ["not JSON", "not UTF-8", "not an object", "missing", "an element with no id",
                                  "a sub-element that is not an object", "provenance not YAML",
                                  "provenance not a mapping", "inputs not a mapping",
-                                 "a bundle md5 that is not a string"])
+                                 "a bundle md5 that is not a string", "a bundle md5 too long for a file name",
+                                 "a bundle path too long for a file name"])
 def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checked(tmp_path, capsys, how):
     """#3200: `credited_report` read each evaluation with a bare `json.loads`,
     keyed its elements by `element['id']` and read the record's provenance

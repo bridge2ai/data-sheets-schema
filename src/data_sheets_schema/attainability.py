@@ -748,7 +748,11 @@ def load(path: Path) -> Attainability:
 
 
 def document_for(bundle_path: str, md5: str, directory: Path = ATTAINABILITY_DIR) -> Path | None:
-    """The attainability file for one bundle version, if there is one."""
+    """The attainability file for one bundle version, if there is one.
+    Raises `OSError` when the name the version gives cannot be looked up —
+    a component longer than the file system allows, say, from a record
+    whose md5 or path is malformed; `credited_report` reports that row as
+    unreadable (#3469)."""
     from data_sheets_schema.corpus import anchored
     candidate = anchored(Path(directory)) / f"{Path(bundle_path).stem}_{md5}.yaml"
     return candidate if candidate.is_file() else None
@@ -940,13 +944,21 @@ def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINAB
         try:
             evaluation = read_evaluation(path)
             bundle = evaluation_bundle(evaluation)
+            try:
+                doc = document_for(bundle["path"], bundle["md5"], directory) if bundle else None
+            except (OSError, ValueError) as exc:
+                # A bundle_path or bundle_md5 that is a string but names no
+                # file the system can look up: too long a component, a NUL
+                # byte (#3469).
+                raise UnreadableEvaluation(
+                    f"the provenance record {bundle['record']} names a bundle version whose "
+                    f"attainability file cannot be looked up: {getattr(exc, 'strerror', None) or exc}") from exc
         except UnreadableEvaluation as exc:
             rows.append({"evaluation": str(path), "bundle": None, "rubric": None, "attainability": None,
                          "absences_checked": [], "findings": [], "unchecked": str(exc), "unreadable": True})
             continue
         row: dict[str, Any] = {"evaluation": str(path), "bundle": bundle, "rubric": evaluation_rubric(evaluation),
                                "unreadable": False}
-        doc = document_for(bundle["path"], bundle["md5"], directory) if bundle else None
         if doc is None:
             row.update(attainability=None, absences_checked=[], findings=[],
                        unchecked="no attainability file for this bundle version" if bundle else
