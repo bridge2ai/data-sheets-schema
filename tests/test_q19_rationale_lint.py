@@ -1565,7 +1565,10 @@ _CREDIT = "was_derived_from links every release to its parent."
     ("Held at 4 because the two gaps are now fully filled by was_derived_from.",
      REASON_NOT_DETERMINED, []),
     ("Held at 4 because was_derived_from fills two of the three gaps.", REASON_NOT_DETERMINED, []),
-    # "silent" only as "is/are … silent", never the bare word (#3684).
+    # "silent" modifying something other than a slot (#3684). The bare
+    # "silent" of this PR's first commit read both as empty-slot reasons; the
+    # later "is/are ... silent" form did not, and neither does main's list,
+    # which reads "silent" in no form. All those forms are withdrawn.
     (f"Held at 4 because errata are thin, with silent corrections; {_CREDIT}", SUBSTANTIVE_ONLY,
      ["version_history"]),
     (f"Held at 4 because of silent errata; {_CREDIT}", SUBSTANTIVE_ONLY, ["version_history"]),
@@ -1573,9 +1576,11 @@ _CREDIT = "was_derived_from links every release to its parent."
 def test_a_gap_or_silence_about_something_else_licenses_no_slot(note, verdict, concerns):
     """#3668, #3680, #3694: "gap" and "silent" as often name a concern other
     than a slot, or a slot filling one, and the gate is sentence-level;
-    main's reading of each of these stands. Each is a sentence on which a
-    form PR #3654 tried and withdrew (#3544) read the credited slot as an
-    empty-slot reason."""
+    main's reading of each of these stands. On all but one of them some
+    form PR #3654 tried and withdrew (#3544) read a slot as an empty-slot
+    reason: on the two #3684 cases only the bare "silent" of the first
+    commit did, and on "related_datasets covers the one gap" none did; it
+    pins that a slot filling a gap is not absent."""
     result = lint_q19(item(note=note))
     assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
         STATED, verdict, concerns), note
