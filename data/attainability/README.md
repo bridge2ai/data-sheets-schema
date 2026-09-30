@@ -19,7 +19,11 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
   six consecutive lines, so one statement can carry both kinds (`a data-`
   `protec-` `tion impact`). A word split with no hyphen is not read that way,
   nor a statement over more than six lines whose hyphens need different
-  readings; every entry's note says so.
+  readings; every entry's note says so. Both limits were measured over the
+  22 bundle versions provenance records name, and neither moves a check on
+  any of them (`notes/attainability_line_splits_2026-09-29.md`, #3199,
+  #3246). Measure a new version before certifying it:
+  `python scripts/measure_unhyphenated_line_splits.py --compare-window 10`.
 - **A valid file's deterministic entries are the generator's output**, type
   for type: `hit_count: false` or snippet lines `[45.0, 45]` are refused,
   although Python compares them equal to `0` and `[45, 45]`. Every entry
@@ -51,7 +55,11 @@ evaluation), or one that marks none of that rubric's items absent — and
 counts those rows apart from the ones checked, whose zero is a measurement.
 A credit on an item only a route entry marks absent (E1.1, whose persistent-URI
 route no pattern settles) is listed as `credited_on_other_route` for a curator
-to read, and is neither a finding nor a `--strict` failure.
+to read, and is neither a finding nor a `--strict` failure. An evaluation
+that cannot be read — not UTF-8, not JSON, an element with no `id` — or whose
+record's provenance cannot be read is reported on its own row as `unreadable`
+with the file and the error, counted apart, and fails the run with or without
+`--strict`; the evaluations after it are still reported.
 
 | File | Bundle | Entries |
 |---|---|---|

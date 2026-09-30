@@ -130,14 +130,39 @@ def test_chunk_ids_are_the_committed_manifests():
 
 # -- refusals ---------------------------------------------------------------
 
-@pytest.mark.parametrize("field", ["md5", "sha256"])
-def test_a_tampered_bundle_hash_is_refused(field):
+_NO_VERSION = "bundle: neither the file on disk nor any committed version"
+_NO_GIT = "bundle: the file on disk is not the pinned bytes and git could not supply a committed version"
+
+
+def _tampered_hash_problems(field):
     doc = yaml.safe_load(CHORUS_FILE.read_text(encoding="utf-8"))
     value = doc["bundle"][field]
     doc["bundle"][field] = ("0" if value[0] != "0" else "1") + value[1:]
     problems, loaded = at.validate_text(at.dump(doc))           # no name: the bytes alone refuse it
-    assert loaded is None
-    assert any(p.startswith("bundle: neither the file on disk nor any committed version") for p in problems), problems
+    assert loaded is None, "accepted"
+    return problems
+
+
+@pytest.mark.parametrize("field", ["md5", "sha256"])
+def test_a_tampered_bundle_hash_is_refused(field):
+    """The file on disk does not hash to the tampered value, so the refusal
+    holds with or without git. That no committed version does either needs
+    git to say: a shallow clone refuses on the first ground alone (#3135),
+    and the second is then not observable here."""
+    problems = _tampered_hash_problems(field)
+    if any(p.startswith(_NO_GIT) and "shallow" in p for p in problems):
+        pytest.skip("shallow clone: refused, but the committed versions are not here to search")
+    assert any(p.startswith(_NO_VERSION) for p in problems), problems
+
+
+@pytest.mark.parametrize("field", ["md5", "sha256"])
+def test_a_tampered_bundle_hash_is_refused_where_git_cannot_answer(field):
+    """#3135: the reproduction — git unavailable, as in a shallow clone. The
+    hash is still refused, and the problem says git could not answer rather
+    than that no committed version matches."""
+    with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
+        problems = _tampered_hash_problems(field)
+    assert problems == [f"{_NO_GIT}: shallow clone"]
 
 
 def test_tampered_entries_and_snippets_are_refused():
@@ -844,3 +869,80 @@ def test_a_path_through_a_directory_that_cannot_be_searched_falls_back_to_git(tm
     with mock.patch.object(at, "validate_text", side_effect=OSError(13, "Permission denied")):
         with pytest.raises(at.AttainabilityError, match="a file it names cannot be read"):
             at.load(CHORUS_FILE)
+
+
+def _broken_evaluation(tmp_path, how):
+    """A CHORUS rubric10 evaluation broken one way (#3200), and the reason
+    its row must give. The evaluations named BROKEN read their own record."""
+    good = _chorus_evaluation()
+    path = tmp_path / "broken_evaluation.json"
+    record = tmp_path / "BROKEN_provenance.yaml"
+    body = None
+    if how == "not JSON":
+        body, why = "{", f"the evaluation {path} is not JSON: Expecting property name"
+    elif how == "not UTF-8":
+        path.write_bytes(json.dumps(good).encode("utf-8")[:-1] + "\xe9}".encode("latin-1"))
+        why = f"the evaluation {path} is not UTF-8 text: 'utf-8' codec can't decode byte 0xe9"
+    elif how == "not an object":
+        body, why = "[]", f"the evaluation {path} is not a JSON object"
+    elif how == "missing":
+        why = f"the evaluation {path} cannot be read: No such file or directory"
+    elif how == "an element with no id":
+        broken = copy.deepcopy(good)
+        del broken["elements"][3]["id"]
+        for sub in broken["elements"][3]["sub_elements"]:
+            sub.pop("item_id", None)
+        body, why = json.dumps(broken), f"the evaluation {path} has items that cannot be keyed: KeyError: 'id'"
+    elif how == "a sub-element that is not an object":
+        broken = copy.deepcopy(good)
+        broken["elements"][0]["sub_elements"][0] = "E1.1: 1"
+        body, why = json.dumps(broken), f"the evaluation {path} has items that cannot be keyed: AttributeError"
+    else:
+        body = json.dumps({**good, "project": "BROKEN"})
+        record.write_text({"provenance not YAML": "inputs: [unclosed\n",
+                           "provenance not a mapping": "- inputs\n",
+                           "inputs not a mapping": "inputs: [a, b]\n",
+                           "a bundle md5 that is not a string": yaml.safe_dump(
+                               {"inputs": {"bundle_path": CHORUS, "bundle_md5": [CHORUS_MD5]}})}[how],
+                          encoding="utf-8")
+        why = {"provenance not YAML": f"the provenance record {record} is not YAML: while parsing",
+               "a bundle md5 that is not a string": f"the provenance record {record} names a bundle_path "
+                                                    "or bundle_md5 that is not a string"}.get(
+            how, f"the provenance record {record} is not a mapping with an inputs mapping")
+    if body is not None:
+        path.write_text(body, encoding="utf-8")
+    return path, why
+
+
+@pytest.mark.parametrize("how", ["not JSON", "not UTF-8", "not an object", "missing", "an element with no id",
+                                 "a sub-element that is not an object", "provenance not YAML",
+                                 "provenance not a mapping", "inputs not a mapping",
+                                 "a bundle md5 that is not a string"])
+def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checked(tmp_path, capsys, how):
+    """#3200: `credited_report` read each evaluation with a bare `json.loads`,
+    keyed its elements by `element['id']` and read the record's provenance
+    with no guard, so one broken input raised out of `credited` and the
+    evaluations after it went unreported. Its row now names the file and
+    why, counts apart, and fails the run with or without --strict."""
+    record = tmp_path / "CHORUS_provenance.yaml"
+    record.write_text(yaml.safe_dump({"inputs": {"bundle_path": CHORUS, "bundle_md5": CHORUS_MD5}}),
+                      encoding="utf-8")
+    good = REFERENCE["rubric10"] / "CHORUS_v7_rep2_r10_rating1_evaluation.json"
+    broken, why = _broken_evaluation(tmp_path, how)
+
+    def where(project, method, label):
+        return tmp_path / f"{project}_provenance.yaml"
+
+    with mock.patch.object(pv, "record_path_for", side_effect=where):
+        first, middle, last = at.credited_report([good, broken, good])
+        assert at.main(["credited", str(good), str(broken), str(good)]) == 1
+    assert first == last and first["unchecked"] is None and first["unreadable"] is False
+    assert first["absences_checked"] == ["E1.1 route doi_rrid", "E4.4", "E10.2"]
+    assert middle["unreadable"] is True and middle["unchecked"].startswith(why), middle["unchecked"]
+    assert (middle["bundle"], middle["attainability"], middle["absences_checked"], middle["findings"]) == (
+        None, None, [], [])
+    out = capsys.readouterr().out
+    assert f"{broken}: bundle unknown — unreadable: {why}" in out
+    assert out.count(" — rubric10 checked against E1.1 route doi_rrid, E4.4, E10.2\n") == 2   # the one after it too
+    assert out.rstrip().endswith("3 evaluation(s), 1 that could not be read, 2 on a bundle version with an "
+                                 "attainability file, 2 checked against at least one absence, 0 finding(s)")
